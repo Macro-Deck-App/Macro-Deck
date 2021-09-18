@@ -24,7 +24,7 @@ Der Standartport für Macro Deck ist 8191. Wenn andere Anwendungen diesen Port s
   <Rows>Zeilen</Rows>
   <Spacing>Abstand</Spacing>
   <CornerRadius>Eckradius</CornerRadius>
-  <ButtonBackGround>Tasten-Hintergrund</ButtonBackGround>
+  <ButtonBackGround>Tastenhintergrund</ButtonBackGround>
   <AreYouSure>Sicher?</AreYouSure>
   <Behaviour>Verhalten</Behaviour>
   <Plugins>Plugins</Plugins>
