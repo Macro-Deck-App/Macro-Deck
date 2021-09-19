@@ -3,7 +3,7 @@
   <__Language__>Italiano</__Language__>
   <__LanguageCode__>it</__LanguageCode__>
   <__Author__>PW.Dev</__Author__>
-  <__Version__>2b8</__Version__>
+  <__Version__>2b10</__Version__>
   <NetworkAdapter>Scheda di rete</NetworkAdapter>
   <IPAddress>Indirizzo IP</IPAddress>
   <Port>Porta</Port>
@@ -141,8 +141,9 @@ La porta predefinita per Macro Deck è 8191. Se qualche altra applicazione usa q
   <Trending>Trending</Trending>
   <Layers>Layers</Layers>
   <AddImage>Aggiungi immagine</AddImage>
-  <IconImportQualityInfo>Le icone di alta qualità possono portare a un aumento dell'uso della memoria e dei tempi di caricamento, specialmente quando si usano molte grandi gif animate. 
-Per le gif si consiglia di usare il preset basso o il più basso.</IconImportQualityInfo>
+  <IconImportQualityInfo>Le icone di alta qualità possono portare a un aumento dell'uso della memoria e dei tempi di caricamento, specialmente quando si usano molte grandi gif animate.
+
+Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualityInfo>
   <Original>Originale</Original>
   <High350px>Alta (350px)</High350px>
   <Normal200px>Normale (200px)</Normal200px>
@@ -178,4 +179,21 @@ Per le gif si consiglia di usare il preset basso o il più basso.</IconImportQua
   <LatestVersionInstalled>La versione più recente è già installata</LatestVersionInstalled>
   <WarningDevVersions>Le versioni Dev possono essere davvero instabili e possono causare crash o perdita di dati (pulsanti di azione configurati, cartelle e profili). Vuoi davvero passare al canale di aggiornamento Dev?</WarningDevVersions>
   <WarningBetaVersions>Le versioni Beta a volte possono essere instabili e possono causare crash. Vuoi davvero passare al canale di aggiornamento Beta?</WarningBetaVersions>
+  <VariableXGetsDeleted>La variabile {0} sarà cancellata</VariableXGetsDeleted>
+  <DeckTitle>Deck</DeckTitle>
+  <DeviceManagerTitle>Gestione dispositivi</DeviceManagerTitle>
+  <PackageManagerTitle>Gestore di pacchetti</PackageManagerTitle>
+  <SettingsTitle>Impostazioni</SettingsTitle>
+  <VariablesTitle>Variabili globali</VariablesTitle>
+  <Edit>Modifica</Edit>
+  <Delete>Cancella</Delete>
+  <Run>Esegui</Run>
+  <Copy>Copia</Copy>
+  <Paste>Incolla</Paste>
+  <WebSocketAPIVersion>Versione websocket API</WebSocketAPIVersion>
+  <PluginAPIVersion>Versione plugin API</PluginAPIVersion>
+  <InstalledPlugins>Plugins installati</InstalledPlugins>
+  <OperatingSystem>Sistema operativo</OperatingSystem>
+  <DevelopedByX>Sviluppato da {0} in Germania</DevelopedByX>
+  <XTranslationByX>traduzione {0} di {1}</XTranslationByX>
 </Strings>
