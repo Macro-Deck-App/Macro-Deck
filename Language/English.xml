@@ -3,7 +3,7 @@
   <__Language__>English</__Language__>
   <__LanguageCode__>eng</__LanguageCode__>
   <__Author__>Macro Deck</__Author__>
-  <__Version__>2b8</__Version__>
+  <__Version__>2b10</__Version__>
   <NetworkAdapter>Network adapter</NetworkAdapter>
   <IPAddress>IP address</IPAddress>
   <Port>Port</Port>
@@ -142,6 +142,7 @@ The default port for Macro Deck is 8191. If some other application uses this por
   <Layers>Layers</Layers>
   <AddImage>Add image</AddImage>
   <IconImportQualityInfo>High quality icons can lead to an increase of memory usage and loading times especially when using many big animated gifs. 
+
 For gifs it is recommended to use the low or the lowest preset.</IconImportQualityInfo>
   <Original>Original</Original>
   <High350px>High (350px)</High350px>
@@ -178,4 +179,21 @@ The default port for Macro Deck is 8191. If some other application uses this por
   <LatestVersionInstalled>The latest version is already installed</LatestVersionInstalled>
   <WarningDevVersions>Dev versions can be really instable and can cause crashes or data loss (configured action buttons, folders and profiles). You really want to change to the Dev update channel?</WarningDevVersions>
   <WarningBetaVersions>Beta versions can sometimes be instable and can cause crashes. You really want to change to the Beta update channel?</WarningBetaVersions>
+  <VariableXGetsDeleted>The variable {0} gets deleted</VariableXGetsDeleted>
+  <DeckTitle>Deck</DeckTitle>
+  <DeviceManagerTitle>Device manager</DeviceManagerTitle>
+  <PackageManagerTitle>Package manager</PackageManagerTitle>
+  <SettingsTitle>Settings</SettingsTitle>
+  <VariablesTitle>Global variables</VariablesTitle>
+  <Edit>Edit</Edit>
+  <Delete>Delete</Delete>
+  <Run>Run</Run>
+  <Copy>Copy</Copy>
+  <Paste>Paste</Paste>
+  <WebSocketAPIVersion>Websocket API version</WebSocketAPIVersion>
+  <PluginAPIVersion>Plugin API version</PluginAPIVersion>
+  <InstalledPlugins>Installed plugins</InstalledPlugins>
+  <OperatingSystem>Operating system</OperatingSystem>
+  <DevelopedByX>Developed by {0} in Germany</DevelopedByX>
+  <XTranslationByX>{0} translation by {1}</XTranslationByX>
 </Strings>
