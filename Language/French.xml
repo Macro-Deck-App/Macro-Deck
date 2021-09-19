@@ -3,8 +3,8 @@
   <__Language__>Français</__Language__>
   <__LanguageCode__>fr</__LanguageCode__>
   <__Author__>Benjiiben53</__Author__>
-  <__Version__>2b8</__Version__>
-  <NetworkAdapter>Adaptateur de réseau</NetworkAdapter>
+  <__Version__>2b10</__Version__>
+  <NetworkAdapter>Carte réseau</NetworkAdapter>
   <IPAddress>Adresse IP</IPAddress>
   <Port>Port</Port>
   <Info>Info</Info>
@@ -178,4 +178,21 @@ Pour les gifs, il est recommandé d'utiliser le préréglage bas ou le plus bas.
   <LatestVersionInstalled>La dernière version est déjà installée</LatestVersionInstalled>
   <WarningDevVersions>Les versions de développement peuvent être très instables et provoquer des plantages ou des pertes de données (boutons d'action configurés, dossiers et profils). Vous voulez vraiment passer au canal de mise à jour Dev?</WarningDevVersions>
   <WarningBetaVersions>Les versions bêta peuvent parfois être instables et provoquer des plantages. Vous voulez vraiment passer au canal de mise à jour bêta?</WarningBetaVersions>
+  <VariableXGetsDeleted>La variable {0} est supprimée</VariableXGetsDeleted>
+  <DeckTitle>Deck</DeckTitle>
+  <DeviceManagerTitle>Gestionnaire de périphériques</DeviceManagerTitle>
+  <PackageManagerTitle>Gestionnaire de paquets</PackageManagerTitle>
+  <SettingsTitle>Paramètres</SettingsTitle>
+  <VariablesTitle>Variables globales</VariablesTitle>
+  <Edit>Éditer</Edit>
+  <Delete>Supprimer</Delete>
+  <Run>Executer</Run>
+  <Copy>Copier</Copy>
+  <Paste>Coller</Paste>
+  <WebSocketAPIVersion>Version de l'API Websocket</WebSocketAPIVersion>
+  <PluginAPIVersion>Version de l'API du plug-in</PluginAPIVersion>
+  <InstalledPlugins>Plugins installés</InstalledPlugins>
+  <OperatingSystem>Système d'exploitation</OperatingSystem>
+  <DevelopedByX>Développé par {0} en Français</DevelopedByX>
+  <XTranslationByX>{0} traduit par {1}</XTranslationByX>
 </Strings>
