@@ -180,4 +180,21 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
   <LatestVersionInstalled>Die aktuellste Version ist bereits installiert</LatestVersionInstalled>
   <WarningDevVersions>Dev Versionen können sehr instabil sein und Datenverlust innerhalb von Macro Deck verursachen (Konfigurierte Tasten, Ordner und Profile). Zum Dev Updatekanal wechseln?</WarningDevVersions>
   <WarningBetaVersions>Beta Versionen können instabil sein. Zum Beta Updatekanal wechseln?</WarningBetaVersions>
+  <VariableXGetsDeleted>{0} wird gelöscht</VariableXGetsDeleted>
+  <DeckTitle>Deck</DeckTitle>
+  <DeviceManagerTitle>Gerätemanager</DeviceManagerTitle>
+  <PackageManagerTitle>Paketverwaltung</PackageManagerTitle>
+  <SettingsTitle>Einstellungen</SettingsTitle>
+  <VariablesTitle>Globale Variablen</VariablesTitle>
+  <Edit>Bearbeiten</Edit>
+  <Delete>Löschen</Delete>
+  <Run>Ausführen</Run>
+  <Copy>Kopieren</Copy>
+  <Paste>Einfügen</Paste>
+  <WebSocketAPIVersion>Websocket API Version</WebSocketAPIVersion>
+  <PluginAPIVersion>Plugin API Version</PluginAPIVersion>
+  <InstalledPlugins>Installierte Plugins</InstalledPlugins>
+  <OperatingSystem>Betriebssystem</OperatingSystem>
+  <DevelopedByX>Von {0} in Deutschland entwickelt</DevelopedByX>
+  <XTranslationByX>{0} Übersetzung von {1}</XTranslationByX>
 </Strings>
