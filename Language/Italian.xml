@@ -22,7 +22,7 @@ La porta predefinita per Macro Deck è 8191. Se qualche altra applicazione usa q
   <Columns>Colonne</Columns>
   <Rows>Righe</Rows>
   <Spacing>Distanziamento</Spacing>
-  <CornerRadius>Raggio di curvatura</CornerRadius>
+  <CornerRadius>Raggio</CornerRadius>
   <ButtonBackGround>Sfondo del bottone</ButtonBackGround>
   <AreYouSure>Sei sicuro?</AreYouSure>
   <Behaviour>Comportamento</Behaviour>
@@ -59,11 +59,11 @@ La porta predefinita per Macro Deck è 8191. Se qualche altra applicazione usa q
   <DownloadAndInstall>Scarica e installa</DownloadAndInstall>
   <Downloading>Scaricando...</Downloading>
   <Color>Colore</Color>
-  <IconPack>Pacchetto di icone</IconPack>
+  <IconPack>Icone</IconPack>
   <Size>Dimensione</Size>
   <CurrentProgress>Progresso attuale</CurrentProgress>
   <TotalProgress>Progresso totale</TotalProgress>
-  <XDownloads>{0} scaricamenti</XDownloads>
+  <XDownloads>Scaricato {0} volte</XDownloads>
   <Update>Aggiorna</Update>
   <Plugin>Plugin</Plugin>
   <MacroDeckNeedsARestart>Macro Deck deve essere riavviato</MacroDeckNeedsARestart>
@@ -195,5 +195,5 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <InstalledPlugins>Plugins installati</InstalledPlugins>
   <OperatingSystem>Sistema operativo</OperatingSystem>
   <DevelopedByX>Sviluppato da {0} in Germania</DevelopedByX>
-  <XTranslationByX>traduzione {0} di {1}</XTranslationByX>
+  <XTranslationByX>Traduzione in {0} di {1}</XTranslationByX>
 </Strings>
