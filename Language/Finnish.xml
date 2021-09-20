@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<Strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <__Language__>Suomi</__Language__>
+  <__LanguageCode__>fin</__LanguageCode__>
+  <__Author__>MrMcCrab</__Author__>
+  <__Version__>2b10</__Version__>
+  <NetworkAdapter>Verkkosovitin</NetworkAdapter>
+  <IPAddress>IP-osoite</IPAddress>
+  <Port>Portti</Port>
+  <Info>Info</Info>
+  <Error>Virhe</Error>
+  <Warning>Varoitus</Warning>
+  <ConfigureNetworkInfo>On tärkeää valita oikea verkkosovitin, muuten et voi yhdistää palvelimeen. Useimmiten sovitin on nimetty "Ethernet" tai "Wi-Fi" ja ip-osoite on "192.168.178.xxx".
+
+Oletusportti on 8191.Voit muuttaa portin jos joku muu ohjelma käyttää samaa porttia.</ConfigureNetworkInfo>
+  <AutomaticallyCheckUpdates>Tarkista päivitykset automaattisesti</AutomaticallyCheckUpdates>
+  <AutomaticallyStartWithWindows>Käynnistä Windowsin kanssa automaattisesti</AutomaticallyStartWithWindows>
+  <Show>Näytä</Show>
+  <Exit>Sulje</Exit>
+  <XUpdatesAvailable>{0} päivitys(tä) saatavilla</XUpdatesAvailable>
+  <Profile>Profiili</Profile>
+  <Columns>Sarakkeet</Columns>
+  <Rows>Rivit</Rows>
+  <Spacing>Painikkeiden väli</Spacing>
+  <CornerRadius>Kulman säde</CornerRadius>
+  <ButtonBackGround>Painikkeiden tausta</ButtonBackGround>
+  <AreYouSure>Oletko varma?</AreYouSure>
+  <Behaviour>Käytös</Behaviour>
+  <Plugins>Pluginit</Plugins>
+  <IconPacks>Kuvakepaketit</IconPacks>
+  <All>Kaikki</All>
+  <Updates>Päivitykset</Updates>
+  <Available>Saatavilla</Available>
+  <Installed>Asennettu</Installed>
+  <Install>Asenna</Install>
+  <Search>Etsi...</Search>
+  <Name>Nimi</Name>
+  <Type>Tyyppi</Type>
+  <Value>Arvo</Value>
+  <Creator>Tekijä</Creator>
+  <Ok>Ok</Ok>
+  <FolderName>Kansion nimi</FolderName>
+  <Never>Ei koskaan</Never>
+  <OnApplicationFocus>Sovelluksen ollessa aktiivinen</OnApplicationFocus>
+  <Application>Sovellus</Application>
+  <Devices>Laitteet</Devices>
+  <Create>Luo</Create>
+  <Save>Tallenna</Save>
+  <Appearance>Ulkonäkö</Appearance>
+  <ButtonState>Painikkeen tila</ButtonState>
+  <Label>Nimi</Label>
+  <Top>Ylhäällä</Top>
+  <Center>Keskellä</Center>
+  <Bottom>Alhaalla</Bottom>
+  <Path>Polku</Path>
+  <CurrentState>Nykyinen tila</CurrentState>
+  <Off>Pois</Off>
+  <On>Päällä</On>
+  <DownloadAndInstall>Lataa ja asenna</DownloadAndInstall>
+  <Downloading>Ladataan...</Downloading>
+  <Color>Väri</Color>
+  <IconPack>kuvakepaketti</IconPack>
+  <Size>Koko</Size>
+  <CurrentProgress>Tämänhetkinen edistyminen</CurrentProgress>
+  <TotalProgress>Kokonaisedistyminen</TotalProgress>
+  <XDownloads>{0} lataus(ta)</XDownloads>
+  <Update>Päivitä</Update>
+  <Plugin>Plugini</Plugin>
+  <MacroDeckNeedsARestart>Macro Deck on käynnistettävä uudestaan</MacroDeckNeedsARestart>
+  <MacroDeckMustBeRestartedForTheChanges>Macro Deck on käynnistettävä uudestaan muutosten ottamiseksi käyttöön. Haluatko käynnistää Macro Deckin uudelleen nyt?</MacroDeckMustBeRestartedForTheChanges>
+  <Configure>Konfiguroi</Configure>
+  <Uninstall>Poista asennus</Uninstall>
+  <NotLoaded>Ei ladattu</NotLoaded>
+  <Yes>Kyllä</Yes>
+  <No>Ei</No>
+  <Status>Tila</Status>
+  <BlockConnection>Estä yhteys</BlockConnection>
+  <Change>Muuta</Change>
+  <Id>ID</Id>
+  <Connected>Yhdistetty</Connected>
+  <Disconnected>Yhteys katkaistu</Disconnected>
+  <Trigger>Liipaisin</Trigger>
+  <Action>Toiminto</Action>
+  <Condition>Ehto</Condition>
+  <InstalledVersion>Asennettu versio</InstalledVersion>
+  <UpdateChannel>Päivityskanava</UpdateChannel>
+  <CheckForUpdatesNow>Tarkista päivitykset</CheckForUpdatesNow>
+  <Author>Tekijä</Author>
+  <Version>Versio</Version>
+  <TheFolderWillBeDeleted>Kansio {0} ja kaikki sen sisältämät painikkeet poistetaan.</TheFolderWillBeDeleted>
+  <TheProfileWillBeDeleted>Profiili {0} ja kaikki sen sisältämät kansiot ja painikkeet poistetaan.</TheProfileWillBeDeleted>
+  <ServerOffline>Palvelin pois päältä</ServerOffline>
+  <ServerRunning>Palvelin päällä</ServerRunning>
+  <XPluginsLoaded>{0} plugini(a) ladattu</XPluginsLoaded>
+  <XPluginsDisabled>{0} plugini(a) pois päältä</XPluginsDisabled>
+  <XClientsConnected>{0} asiakasta yhdistetty</XClientsConnected>
+  <IpAddressHostNamePort>IP-osoite/isäntänimi : Portti</IpAddressHostNamePort>
+  <InitialSetupButtonBack>&lt;- Takasin</InitialSetupButtonBack>
+  <InitialSetupButtonNext>Seuraava -&gt;</InitialSetupButtonNext>
+  <InitialSetupButtonFinish>Valmis</InitialSetupButtonFinish>
+  <InitialSetupSelectLanguage>Valitse kieli</InitialSetupSelectLanguage>
+  <InitialSetupPage>Sivu {0}/{1}</InitialSetupPage>
+  <InitialSetupWelcome>Tervetuloa Macro Deck 2:een!</InitialSetupWelcome>
+  <InitialSetupLetsConfigure>Configuroidaan Macro Deck kokemuksesi</InitialSetupLetsConfigure>
+  <InitialSetupConfigureNetworkSettings>Konfiguroidaan verkkoasetukset</InitialSetupConfigureNetworkSettings>
+  <InitialSetupConfigureGridPreferences>Asetetaan haluamasi ruudukon koko</InitialSetupConfigureGridPreferences>
+  <InitialSetupPickAllPluginsYouNeed>Valitse kaikki haluamasi pluginit</InitialSetupPickAllPluginsYouNeed>
+  <InitialSetupDontWorryInstallUninstallPlugins>Älä huoli, voit asentaa ja poistaa plugineja pakettimanagerista</InitialSetupDontWorryInstallUninstallPlugins>
+  <InitialSetupWantSomeIcons>Haluatko kuvakkeita?</InitialSetupWantSomeIcons>
+  <InitialSetupInstallIconPacksPackageManager>Voit asentaa myös kuvakepaketteja pakettimanagerista</InitialSetupInstallIconPacksPackageManager>
+  <InitialSetupAlmostDone>Olemme melkein valmiita!</InitialSetupAlmostDone>
+  <KnownDevices>Tunnetut laitteet</KnownDevices>
+  <AskOnNewConnections>Kysy uusista yhteyksistä</AskOnNewConnections>
+  <AllowAllNewConnections>Salli kaikki uudet yhteydet (ei suositella)</AllowAllNewConnections>
+  <BlockAllNewConnections>Estä kaikki uudet yhteydet</BlockAllNewConnections>
+  <InstallDLL>Asenna .dll (ei suositella)</InstallDLL>
+  <NeverInstallDLLFiles>Älä koskaan asenna .dll tiedostoja lähteistä joihin et luota! .dll tiedostot tuntemattomista lähteistä voivat vahingoittaa tietokonettasi, asenna vain kun tiedät mitä teet! Haluatko varmasti asenaa .dll pluginin?</NeverInstallDLLFiles>
+  <XWillBeUninstalled>{0} asennus poistetaan.</XWillBeUninstalled>
+  <XSuccessfullyUninstalled>{0} asennus poistetaan. Macro Deck on käynnistettävä uudestaan jotta muutokset tulevat voimaan. Käynnistä Macro Deck uudestaan nyt?</XSuccessfullyUninstalled>
+  <CreateVariable>Luo muuttuja</CreateVariable>
+  <DeleteVariable>Poista muuttuja</DeleteVariable>
+  <SelectAPluginAndActionToBegin>Valitse plugini ja toiminto aloittaaksesi</SelectAPluginAndActionToBegin>
+  <ActionNeedsNoConfiguration>Tämä toiminto ei tarvitse konfigurointia</ActionNeedsNoConfiguration>
+  <CantCreateFolder>Ei voitu luoda kansiota</CantCreateFolder>
+  <FolderCalledXAlreadyExists>Kansio {0} on jo olemassa</FolderCalledXAlreadyExists>
+  <OnPress>Painallus</OnPress>
+  <OnEvent>Tapahtuma</OnEvent>
+  <CantCreateIconPack>Ei voida luoda kuvakepakkausta</CantCreateIconPack>
+  <IconPackCalledXAlreadyExists>Kuvakepakkaus {0} on jo olemassa</IconPackCalledXAlreadyExists>
+  <CantCreateProfile>Ei voida luoda profiilia</CantCreateProfile>
+  <ProfileCalledXAlreadyExists>Profiili {0} on jo olemassa</ProfileCalledXAlreadyExists>
+  <TheresAnUpdateForYou>Sinulle on päivitys :)</TheresAnUpdateForYou>
+  <VersionXIsNowAvailable>Versio {0} ({1}) on saatavilla</VersionXIsNowAvailable>
+  <ReadyToDownloadUpdate>Valmis lataamaan päivityksen</ReadyToDownloadUpdate>
+  <DownloadingUpdate>Ladataan päivitystä... {0}% ({1}MB/{2}MB)</DownloadingUpdate>
+  <VerifyingUpdateFile>Varmistetaan ladattu tiedosto...</VerifyingUpdateFile>
+  <MD5NotValid>MD5 tarkistussumma on virheellinen</MD5NotValid>
+  <StartingInstaller>Käynnistetään asennusohjelma</StartingInstaller>
+  <FileNotFound>Tiedostoa ei löydetty</FileNotFound>
+  <TryAgainOrDownloadManually>Yritä uudestaan tai lataa päivitys manuaalisesti</TryAgainOrDownloadManually>
+  <Trending>Trendikäs</Trending>
+  <Layers>Tasot</Layers>
+  <AddImage>Lisää kuva</AddImage>
+  <IconImportQualityInfo>Korkealaatuiset kuvakkeet voivat johtaa suurempaan muistin käyttöön ja pidempiin latausaikoihin, erityisesti jos käytössä on useita animoituja giffejä.
+
+Giffeille suositellaan käytettäväksi matalaa tai matalinta asetusta.</IconImportQualityInfo>
+  <Original>Alkuperäinen</Original>
+  <High350px>Korka (350px)</High350px>
+  <Normal200px>Normaali (200px)</Normal200px>
+  <Low150px>Matala (150px)</Low150px>
+  <Lowest100px>Matalin (100px)</Lowest100px>
+  <ImportIconPack>Tuo kuvakepakkaus</ImportIconPack>
+  <ExportIconPack>Vie kuvakepakkaus</ExportIconPack>
+  <CreateIcon>Luo kuvake</CreateIcon>
+  <ImportIcon>Tuo kuvake</ImportIcon>
+  <DeleteIcon>Poista kuvake</DeleteIcon>
+  <IconSelectorManagedInfo>Tämä kuvakepakkaus on pakettimanagerin ylläpitämä</IconSelectorManagedInfo>
+  <DownloadingXPackages>Ladataan {0} pakkaus(ta)</DownloadingXPackages>
+  <PluginCouldNotBeLoaded>Pluginia ei voitu  ladata. Ehkä asennetun pluginin versio ei ole yhteensopiva tämä Macro Deck version kanssa.</PluginCouldNotBeLoaded>
+  <CantChangeName>Ei voida muuttaa nimeä</CantChangeName>
+  <DeviceCalledXAlreadyExists>Laite {0} on jo olemassa</DeviceCalledXAlreadyExists>
+  <NewConnection>Uusi yhteys</NewConnection>
+  <XIsAnUnknownDevice>{0} on tuntematon laite ja haluaa yhdistää Macro Deck:iin. Sallitaanko yhteys?</XIsAnUnknownDevice>
+  <ShouldMacroDeckBlockConnectionsFromX>Pitäisikö Macro Deckin automaattisesti estää {0} tulevat yhteydet?</ShouldMacroDeckBlockConnectionsFromX>
+  <FailedToStartServer>Palvelimen käynnistys epäonnistui. Valittu portti voi olla käytössä tai olet valinnut väärän verkkosovittimen. Varmista että olet asettanut oikean verkkosovittimen asetuksista ja yritä vaihtaa portti.</FailedToStartServer>
+  <ErrorWhileLoadingPlugins>Virhe ladattaessa plugineita</ErrorWhileLoadingPlugins>
+  <PluginXCouldNotBeLoaded>{0} versio {1} ei voitu ladata. Ehkä se ei ole yhteensopiva tämä Macro Deck version kanssa. Toiminnot jotka käyttävät tätä pluginia eivät toimmi ennen pluginin päivittämistä.</PluginXCouldNotBeLoaded>
+  <InstallationSuccessfull>Asennus onnistui</InstallationSuccessfull>
+  <PluginXInstalledSuccessfully>{0} asennettiin onnistuneesti</PluginXInstalledSuccessfully>
+  <ErrorWhileInstallingPlugin>Virhe asentaessa pluginia</ErrorWhileInstallingPlugin>
+  <PluginXCouldNotBeInstalled>{0} ei voitu asentaa. Ehkä se ei ole yhteensopiva tämän Macro Deck version kanssa</PluginXCouldNotBeInstalled>
+  <Settings>Asetukset</Settings>
+  <Language>Kieli</Language>
+  <General>Yleiset</General>
+  <Connection>Yhteys</Connection>
+  <Backup>Varmuuskopio</Backup>
+  <About>Tietoja</About>
+  <NoUpdatesAvailable>Ei päivityksiä saatavilla</NoUpdatesAvailable>
+  <LatestVersionInstalled>Viimeisin versio on jo asennettu</LatestVersionInstalled>
+  <WarningDevVersions>Kehitysversiot voivat olla erittäin epävakaita ja johtaa tietojen menetykseen (määritety painikkeet, kansiot ja profiilit). Haluatko varmasti siirtyä Dev päivityskanavalle?</WarningDevVersions>
+  <WarningBetaVersions>Beta versiot voivat olla epävakaita ja aiheuttaa kaatumisia. Haluatko varmasti siirtyä Beta päivityskanavalle?</WarningBetaVersions>
+  <VariableXGetsDeleted>Muuttuja {0} poistetaan</VariableXGetsDeleted>
+  <DeckTitle>Dekki</DeckTitle>
+  <DeviceManagerTitle>Laitemanageri</DeviceManagerTitle>
+  <PackageManagerTitle>Pakettimanageri</PackageManagerTitle>
+  <SettingsTitle>Asetukset</SettingsTitle>
+  <VariablesTitle>Globaalit muuttujat</VariablesTitle>
+  <Edit>Muokkaa</Edit>
+  <Delete>Poista</Delete>
+  <Run>Suorita</Run>
+  <Copy>Kopioi</Copy>
+  <Paste>Liitä</Paste>
+  <WebSocketAPIVersion>Websocket API versio</WebSocketAPIVersion>
+  <PluginAPIVersion>Plugin API versio</PluginAPIVersion>
+  <InstalledPlugins>Asennetut pluginit</InstalledPlugins>
+  <OperatingSystem>Käyttöjärjestelmä</OperatingSystem>
+  <DevelopedByX>{0} kehittänyt Saksassa </DevelopedByX>
+  <XTranslationByX>{0} kääntänyt {1}</XTranslationByX>
+</Strings>
