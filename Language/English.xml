@@ -3,7 +3,7 @@
   <__Language__>English</__Language__>
   <__LanguageCode__>eng</__LanguageCode__>
   <__Author__>Macro Deck</__Author__>
-  <__Version__>2b10</__Version__>
+  <__Version__>2b11</__Version__>
   <NetworkAdapter>Network adapter</NetworkAdapter>
   <IPAddress>IP address</IPAddress>
   <Port>Port</Port>
@@ -30,7 +30,6 @@ The default port for Macro Deck is 8191. If some other application uses this por
   <IconPacks>Icon packs</IconPacks>
   <All>All</All>
   <Updates>Updates</Updates>
-  <Available>Available</Available>
   <Installed>Installed</Installed>
   <Install>Install</Install>
   <Search>Search...</Search>
@@ -196,4 +195,6 @@ The default port for Macro Deck is 8191. If some other application uses this por
   <OperatingSystem>Operating system</OperatingSystem>
   <DevelopedByX>Developed by {0} in Germany</DevelopedByX>
   <XTranslationByX>{0} translation by {1}</XTranslationByX>
+  <PackageManagerTabAvailable>Available</PackageManagerTabAvailable>
+  <PackageManagerTabInstalled>Installed</PackageManagerTabInstalled>
 </Strings>

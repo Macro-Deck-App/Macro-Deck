@@ -31,7 +31,6 @@ Der Standartport für Macro Deck ist 8191. Wenn andere Anwendungen diesen Port s
   <IconPacks>Iconpakete</IconPacks>
   <All>Alle</All>
   <Updates>Updates</Updates>
-  <Available>Verfügbar</Available>
   <Installed>Installiert</Installed>
   <Install>Installieren</Install>
   <Search>Suche...</Search>
@@ -197,4 +196,6 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
   <OperatingSystem>Betriebssystem</OperatingSystem>
   <DevelopedByX>Von {0} in Deutschland entwickelt</DevelopedByX>
   <XTranslationByX>{0} Übersetzung von {1}</XTranslationByX>
+  <PackageManagerTabAvailable>Verfügbar</PackageManagerTabAvailable>
+  <PackageManagerTabInstalled>Installiert</PackageManagerTabInstalled>
 </Strings>
