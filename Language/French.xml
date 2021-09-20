@@ -7,7 +7,7 @@
   <NetworkAdapter>Carte réseau</NetworkAdapter>
   <IPAddress>Adresse IP</IPAddress>
   <Port>Port</Port>
-  <Info>Info</Info>
+  <Info>Infos</Info>
   <Error>Erreur</Error>
   <Warning>Attention</Warning>
   <ConfigureNetworkInfo>Il est vraiment important de sélectionner la bonne carte réseau, sinon le client ne pourras pas se connecter au serveur. Dans la plupart des cas, le nom de la carte réseau ressemble à "Ethernet" ou "Wi-Fi" et l'adresse IP dans la plupart des cas ressemble à "192.168.168.xxx".
@@ -193,6 +193,8 @@ Pour les gifs, il est recommandé d'utiliser le préréglage bas ou le plus bas.
   <PluginAPIVersion>Version de l'API du plug-in</PluginAPIVersion>
   <InstalledPlugins>Plugins installés</InstalledPlugins>
   <OperatingSystem>Système d'exploitation</OperatingSystem>
-  <DevelopedByX>Développé par {0} en Français</DevelopedByX>
-  <XTranslationByX>{0} traduit par {1}</XTranslationByX>
+  <DevelopedByX>Développé par {0} en Allemand</DevelopedByX>
+  <XTranslationByX>Traduction {0}e par {1}</XTranslationByX>
+  <PackageManagerTabAvailable>Disponible</PackageManagerTabAvailable>
+  <PackageManagerTabInstalled>Installer</PackageManagerTabInstalled>
 </Strings>
