@@ -3,7 +3,7 @@
   <__Language__>Italiano</__Language__>
   <__LanguageCode__>it</__LanguageCode__>
   <__Author__>PW.Dev</__Author__>
-  <__Version__>2b10</__Version__>
+  <__Version__>2b11</__Version__>
   <NetworkAdapter>Scheda di rete</NetworkAdapter>
   <IPAddress>Indirizzo IP</IPAddress>
   <Port>Porta</Port>
@@ -22,7 +22,7 @@ La porta predefinita per Macro Deck è 8191. Se qualche altra applicazione usa q
   <Columns>Colonne</Columns>
   <Rows>Righe</Rows>
   <Spacing>Distanziamento</Spacing>
-  <CornerRadius>Raggio di curvatura</CornerRadius>
+  <CornerRadius>Raggio</CornerRadius>
   <ButtonBackGround>Sfondo del bottone</ButtonBackGround>
   <AreYouSure>Sei sicuro?</AreYouSure>
   <Behaviour>Comportamento</Behaviour>
@@ -30,8 +30,7 @@ La porta predefinita per Macro Deck è 8191. Se qualche altra applicazione usa q
   <IconPacks>Pacchetti di icone</IconPacks>
   <All>Tutto</All>
   <Updates>Aggiornamenti</Updates>
-  <Available>Disponibili</Available>
-  <Installed>Installati</Installed>
+  <Installed>Installato</Installed>
   <Install>Installa</Install>
   <Search>Cerca...</Search>
   <Name>Nome</Name>
@@ -59,11 +58,11 @@ La porta predefinita per Macro Deck è 8191. Se qualche altra applicazione usa q
   <DownloadAndInstall>Scarica e installa</DownloadAndInstall>
   <Downloading>Scaricando...</Downloading>
   <Color>Colore</Color>
-  <IconPack>Pacchetto di icone</IconPack>
+  <IconPack>Icone</IconPack>
   <Size>Dimensione</Size>
   <CurrentProgress>Progresso attuale</CurrentProgress>
   <TotalProgress>Progresso totale</TotalProgress>
-  <XDownloads>{0} scaricamenti</XDownloads>
+  <XDownloads>Scaricato {0} volte</XDownloads>
   <Update>Aggiorna</Update>
   <Plugin>Plugin</Plugin>
   <MacroDeckNeedsARestart>Macro Deck deve essere riavviato</MacroDeckNeedsARestart>
@@ -195,5 +194,7 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <InstalledPlugins>Plugins installati</InstalledPlugins>
   <OperatingSystem>Sistema operativo</OperatingSystem>
   <DevelopedByX>Sviluppato da {0} in Germania</DevelopedByX>
-  <XTranslationByX>traduzione {0} di {1}</XTranslationByX>
+  <XTranslationByX>Traduzione in {0} di {1}</XTranslationByX>
+  <PackageManagerTabAvailable>Disponibili</PackageManagerTabAvailable>
+  <PackageManagerTabInstalled>Installati</PackageManagerTabInstalled>
 </Strings>
