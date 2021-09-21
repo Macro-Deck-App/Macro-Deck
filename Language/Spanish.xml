@@ -1,0 +1,200 @@
+﻿<?xml version="1.0"?>
+<Strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <__Language__>Español</__Language__>
+  <__LanguageCode__>Es</__LanguageCode__>
+  <__Author__>l69l_Anthony</__Author__>
+  <__Version__>2b11</__Version__>
+  <NetworkAdapter>Adaptador de red</NetworkAdapter>
+  <IPAddress>Dirección IP</IPAddress>
+  <Port>Puerto</Port>
+  <Info>Información</Info>
+  <Error>Error</Error>
+  <Warning>Advertencia</Warning>
+  <ConfigureNetworkInfo>Es muy importante que se establezca el adaptador de red correcto, de lo contrario no se puede establecer ninguna conexión con el servidor. En la mayoría de los casos, el adaptador de red se llama "Ethernet" o "WLAN" y la dirección IP suele ser "192.168.178.xxx".
+
+El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usando este puerto, debe cambiarse.</ConfigureNetworkInfo>
+  <AutomaticallyCheckUpdates>Revisar actualizaciones automaticamente</AutomaticallyCheckUpdates>
+  <AutomaticallyStartWithWindows>Iniciar automáticamente con Windows</AutomaticallyStartWithWindows>
+  <Show>Configurar Macro Deck</Show>
+  <Exit>Salir</Exit>
+  <XUpdatesAvailable>{0} Actualizaciones disponibles</XUpdatesAvailable>
+  <Profile>Perfil</Profile>
+  <Columns>Columnas</Columns>
+  <Rows>Filas</Rows>
+  <Spacing>Espaciado</Spacing>
+  <CornerRadius>Radio de esquina</CornerRadius>
+  <ButtonBackGround>Fondo del botón</ButtonBackGround>
+  <AreYouSure>¿Seguro?</AreYouSure>
+  <Behaviour>Comportamiento</Behaviour>
+  <Plugins>Plugins</Plugins>
+  <IconPacks>Paquete de iconos</IconPacks>
+  <All>Todos</All>
+  <Updates>Actualizaciones</Updates>
+  <Available>Disponible</Available>
+  <Installed>Instalado</Installed>
+  <Install>Instalar</Install>
+  <Search>Buscar...</Search>
+  <Name>Nombre</Name>
+  <Type>Tipo</Type>
+  <Value>Valor</Value>
+  <Creator>Creado por</Creator>
+  <Ok>Ok</Ok>
+  <FolderName>Nombre</FolderName>
+  <Never>Nunca</Never>
+  <OnApplicationFocus>Cuando la aplicación está enfocada</OnApplicationFocus>
+  <Application>Aplicación</Application>
+  <Devices>Dispositivos</Devices>
+  <Create>Crear</Create>
+  <Save>Guardar</Save>
+  <Appearance>Apariencia</Appearance>
+  <ButtonState>Estado del botón</ButtonState>
+  <Label>Etiquetado</Label>
+  <Top>Encima</Top>
+  <Center>Centrado</Center>
+  <Bottom>Debajo</Bottom>
+  <Path>Ruta</Path>
+  <CurrentState>Estado actual</CurrentState>
+  <Off>Off</Off>
+  <On>On</On>
+  <DownloadAndInstall>Descargar</DownloadAndInstall>
+  <Downloading>Descargar...</Downloading>
+  <Color>Color</Color>
+  <IconPack>Paquete de Iconos</IconPack>
+  <Size>Tamaño</Size>
+  <CurrentProgress>Progreso actual</CurrentProgress>
+  <TotalProgress>Progreso general</TotalProgress>
+  <XDownloads>{0} Descargas</XDownloads>
+  <Update>Actualizar</Update>
+  <Plugin>Plugin</Plugin>
+  <MacroDeckNeedsARestart>Es necesario reiniciar Macro Deck</MacroDeckNeedsARestart>
+  <MacroDeckMustBeRestartedForTheChanges>Es necesario reiniciar Macro Deck. ¿Quieres reiniciar Macro Deck ahora?</MacroDeckMustBeRestartedForTheChanges>
+  <Configure>Configurar</Configure>
+  <Uninstall>Desinstalar</Uninstall>
+  <NotLoaded>Sin cargar</NotLoaded>
+  <Yes>Sí</Yes>
+  <No>No</No>
+  <Status>Estado</Status>
+  <BlockConnection>Bloquear conexión</BlockConnection>
+  <Change>Cambio</Change>
+  <Id>ID</Id>
+  <Connected>Conectado</Connected>
+  <Disconnected>Desconectado</Disconnected>
+  <Trigger>Desencadenar</Trigger>
+  <Action>Acción</Action>
+  <Condition>Condición</Condition>
+  <InstalledVersion>Versión instalada</InstalledVersion>
+  <UpdateChannel>Canal de actualización</UpdateChannel>
+  <CheckForUpdatesNow>Buscar actualizaciones</CheckForUpdatesNow>
+  <Author>Autor</Author>
+  <Version>Versión</Version>
+  <TheFolderWillBeDeleted>Se elimina la carpeta {0} con todas las claves configuradas.</TheFolderWillBeDeleted>
+  <TheProfileWillBeDeleted>Se eliminará el perfil {0} con todas las carpetas y claves.</TheProfileWillBeDeleted>
+  <ServerOffline>Servidor fuera de linea</ServerOffline>
+  <ServerRunning>El servidor se está ejecutando</ServerRunning>
+  <XPluginsLoaded>{0} plugins activos</XPluginsLoaded>
+  <XPluginsDisabled>{0} plugins desactivados</XPluginsDisabled>
+  <XClientsConnected>{0} Dispositivos conectados</XClientsConnected>
+  <IpAddressHostNamePort>Dirección IP / nombre de host: Puerto</IpAddressHostNamePort>
+  <InitialSetupButtonBack>&lt;- Regreso</InitialSetupButtonBack>
+  <InitialSetupButtonNext>Más lejos -&gt;</InitialSetupButtonNext>
+  <InitialSetupButtonFinish>Completo</InitialSetupButtonFinish>
+  <InitialSetupSelectLanguage>Elige un idioma</InitialSetupSelectLanguage>
+  <InitialSetupPage>{0}/{1}</InitialSetupPage>
+  <InitialSetupWelcome>Bienvenido a Macro Deck!</InitialSetupWelcome>
+  <InitialSetupLetsConfigure>Configuremos algunas cosas</InitialSetupLetsConfigure>
+  <InitialSetupConfigureNetworkSettings>Configurar los ajustes de red</InitialSetupConfigureNetworkSettings>
+  <InitialSetupConfigureGridPreferences>Configurar la cuadrícula</InitialSetupConfigureGridPreferences>
+  <InitialSetupPickAllPluginsYouNeed>Seleccionar plugins</InitialSetupPickAllPluginsYouNeed>
+  <InitialSetupDontWorryInstallUninstallPlugins>Los plugins se pueden instalar / desinstalar más tarde en el Administrador de paquetes</InitialSetupDontWorryInstallUninstallPlugins>
+  <InitialSetupWantSomeIcons>Seleccionar paquetes de iconos</InitialSetupWantSomeIcons>
+  <InitialSetupInstallIconPacksPackageManager>Los paquetes de iconos se pueden instalar más tarde en el Administrador de paquetes</InitialSetupInstallIconPacksPackageManager>
+  <InitialSetupAlmostDone>Estamos a punto de empezar!</InitialSetupAlmostDone>
+  <KnownDevices>Dispositivos conocidos</KnownDevices>
+  <AskOnNewConnections>Preguntar sobre nuevas conexiones</AskOnNewConnections>
+  <AllowAllNewConnections>Permitir todas las conexiones (no recomendado) </AllowAllNewConnections>
+  <BlockAllNewConnections>Bloquear todas las conexiones nuevas</BlockAllNewConnections>
+  <InstallDLL>Instalar .dll (no recomendado) </InstallDLL>
+  <NeverInstallDLLFiles>Los complementos de .dll de fuentes desconocidas pueden dañar el sistema. Solo instale complementos cuya fuente sepa con certeza. ¿Instalar complemento?</NeverInstallDLLFiles>
+  <XWillBeUninstalled>{0} será desinstalado.</XWillBeUninstalled>
+  <XSuccessfullyUninstalled>{0} está desinstalado. Es necesario reiniciar Macro Deck. Reinicia Macro Deck ahora?</XSuccessfullyUninstalled>
+  <CreateVariable>Crear variable</CreateVariable>
+  <DeleteVariable>Eliminar variable</DeleteVariable>
+  <SelectAPluginAndActionToBegin>Seleccione el plugin y la acción para comenzar</SelectAPluginAndActionToBegin>
+  <ActionNeedsNoConfiguration>Esta acción no requiere ninguna configuración</ActionNeedsNoConfiguration>
+  <CantCreateFolder>No se puede crear la carpeta</CantCreateFolder>
+  <FolderCalledXAlreadyExists>Ya existe una carpeta llamada "{0}"</FolderCalledXAlreadyExists>
+  <OnPress>Con solo presionar un botón</OnPress>
+  <OnEvent>En caso de un evento</OnEvent>
+  <CantCreateIconPack>No se puede crear el paquete de iconos</CantCreateIconPack>
+  <IconPackCalledXAlreadyExists>Ya existe un paquete de iconos con el nombre {0}</IconPackCalledXAlreadyExists>
+  <CantCreateProfile>No se puede crear el perfil</CantCreateProfile>
+  <ProfileCalledXAlreadyExists>Ya existe un perfil con el nombre {0}</ProfileCalledXAlreadyExists>
+  <TheresAnUpdateForYou>Nueva actualización disponible:)</TheresAnUpdateForYou>
+  <VersionXIsNowAvailable>Se puede descargar la versión {0} ({1})</VersionXIsNowAvailable>
+  <ReadyToDownloadUpdate>Listo</ReadyToDownloadUpdate>
+  <DownloadingUpdate>Descargando ... {0}% ({1} MB / {2} MB) </DownloadingUpdate>
+  <VerifyingUpdateFile>El archivo está verificado...</VerifyingUpdateFile>
+  <MD5NotValid>La suma de comprobación MD5 no es válida</MD5NotValid>
+  <StartingInstaller>El instalador comenzará</StartingInstaller>
+  <FileNotFound>archivo no encontrado</FileNotFound>
+  <TryAgainOrDownloadManually>Vuelva a intentarlo o instálelo manualmente</TryAgainOrDownloadManually>
+  <Trending>Tendencias</Trending>
+  <Layers>Niveles</Layers>
+  <AddImage>Imagen</AddImage>
+  <IconImportQualityInfo>Muchos iconos de alta calidad pueden provocar problemas de rendimiento, especialmente con GIF animados..
+Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImportQualityInfo>
+  <Original>Original</Original>
+  <High350px>Alto (350px) </High350px>
+  <Normal200px>Normal (200px)</Normal200px>
+  <Low150px>Bajo (150px) </Low150px>
+  <Lowest100px>Más bajo (100px) </Lowest100px>
+  <ImportIconPack>Importar</ImportIconPack>
+  <ExportIconPack>Exportar</ExportIconPack>
+  <CreateIcon>Crear icono</CreateIcon>
+  <ImportIcon>Importar icono</ImportIcon>
+  <DeleteIcon>Eliminar icono</DeleteIcon>
+  <IconSelectorManagedInfo>Este paquete de iconos es administrado por el Administrador de paquetes.</IconSelectorManagedInfo>
+  <DownloadingXPackages>{0} Descarga de paquetes</DownloadingXPackages>
+  <PluginCouldNotBeLoaded>No se pudo cargar el plugin. Es posible que la versión del plugin no sea compatible con esta versión de Macro Deck.</PluginCouldNotBeLoaded>
+  <CantChangeName>No se pudo cambiar el nombre</CantChangeName>
+  <DeviceCalledXAlreadyExists>Ya existe un dispositivo con el nombre {0}</DeviceCalledXAlreadyExists>
+  <NewConnection>Nueva conexión</NewConnection>
+  <XIsAnUnknownDevice>{0} es un dispositivo desconocido. ¿Permitir la conexión? </XIsAnUnknownDevice>
+  <ShouldMacroDeckBlockConnectionsFromX>¿Deberían bloquearse siempre los intentos de conexión de {0}? </ShouldMacroDeckBlockConnectionsFromX>
+  <FailedToStartServer>No se pudo iniciar el servidor. Es posible que el puerto ya esté en uso o que se haya configurado el adaptador de red incorrecto.</FailedToStartServer>
+  <ErrorWhileLoadingPlugins>Error al cargar plugins</ErrorWhileLoadingPlugins>
+  <PluginXCouldNotBeLoaded>No se pudo cargar la {0} versión {1}. Es posible que la versión no sea compatible. Es posible que los botones que utilizan este complemento no funcionen.</PluginXCouldNotBeLoaded>
+  <InstallationSuccessfull>Instalación exitosa</InstallationSuccessfull>
+  <PluginXInstalledSuccessfully>{0} se ha instalado</PluginXInstalledSuccessfully>
+  <ErrorWhileInstallingPlugin>Instalación fallida</ErrorWhileInstallingPlugin>
+  <PluginXCouldNotBeInstalled>No se pudo instalar {0}. Es posible que la versión no sea compatible.</PluginXCouldNotBeInstalled>
+  <Settings>Ajustes</Settings>
+  <Language>Idioma</Language>
+  <General>General</General>
+  <Connection>Conexión</Connection>
+  <Backup>Respaldo</Backup>
+  <About>Sobre</About>
+  <NoUpdatesAvailable>No hay actualizaciones disponibles</NoUpdatesAvailable>
+  <LatestVersionInstalled>La última versión ya está instalada.</LatestVersionInstalled>
+  <WarningDevVersions>Las versiones para desarrolladores pueden ser muy inestables y causar pérdida de datos dentro de Macro Deck (botones, carpetas y perfiles configurados). ¿Cambiar al canal de actualización de desarrolladores? </WarningDevVersions>
+  <WarningBetaVersions>Las versiones beta pueden ser inestables. ¿Cambiar al canal de actualización beta? </WarningBetaVersions>
+  <VariableXGetsDeleted>Se elimina la variable {0}</VariableXGetsDeleted>
+  <DeckTitle>PLataforma</DeckTitle>
+  <DeviceManagerTitle>Administrador de dispositivos</DeviceManagerTitle>
+  <PackageManagerTitle>Administrador de paquetes</PackageManagerTitle>
+  <SettingsTitle>Ajustes</SettingsTitle>
+  <VariablesTitle>Variables globales</VariablesTitle>
+  <Edit>Editar</Edit>
+  <Delete>Eliminar</Delete>
+  <Run>Ejecutar</Run>
+  <Copy>Copiar</Copy>
+  <Paste>Pegar</Paste>
+  <WebSocketAPIVersion>Versión de API de Websocket</WebSocketAPIVersion>
+  <PluginAPIVersion>Versión de la API del plugin</PluginAPIVersion>
+  <InstalledPlugins>PLugins instalados</InstalledPlugins>
+  <OperatingSystem>Sistema operativo</OperatingSystem>
+  <DevelopedByX>Desarrollado por {0} en Alemania</DevelopedByX>
+  <XTranslationByX>Traduccido al {0} por {1}</XTranslationByX>
+  <PackageManagerTabAvailable>Disponible</PackageManagerTabAvailable>
+  <PackageManagerTabInstalled>Instalado</PackageManagerTabInstalled>
+</Strings>
