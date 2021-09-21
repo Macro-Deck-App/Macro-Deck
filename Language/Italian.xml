@@ -155,7 +155,7 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <DeleteIcon>Cancella icona</DeleteIcon>
   <IconSelectorManagedInfo>Questo pacchetto di icone è gestito dal gestore dei plugin</IconSelectorManagedInfo>
   <DownloadingXPackages>Scaricando {0} pacchetti</DownloadingXPackages>
-  <PluginCouldNotBeLoaded>Il plugin non può essere caricato. Forse la versione installata di questo plugin non è compatibile con questa versione di Macro Deck.</PluginCouldNotBeLoaded>
+  <PluginCouldNotBeLoaded>Il plugin non è stato caricato. Forse non è compatibile con questa versione di Macro Deck.</PluginCouldNotBeLoaded>
   <CantChangeName>Impossibile cambiare nome</CantChangeName>
   <DeviceCalledXAlreadyExists>Un dispositivo col nome {0} esiste già</DeviceCalledXAlreadyExists>
   <NewConnection>Nuova connessione</NewConnection>
@@ -167,7 +167,7 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <InstallationSuccessfull>Installazione riuscita</InstallationSuccessfull>
   <PluginXInstalledSuccessfully>{0} è stato installato con successo</PluginXInstalledSuccessfully>
   <ErrorWhileInstallingPlugin>Errore installando il plugin</ErrorWhileInstallingPlugin>
-  <PluginXCouldNotBeInstalled>{0} non può essere installato. Forse non è compatibile con questa versione di Macro Deck</PluginXCouldNotBeInstalled>
+  <PluginXCouldNotBeInstalled>{0} non può essere installato. Forse non è compatibile con questa versione di Macro Deck.</PluginXCouldNotBeInstalled>
   <Settings>Impostazioni</Settings>
   <Language>Lingua</Language>
   <General>Generale</General>
