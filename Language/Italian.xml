@@ -113,9 +113,9 @@ La porta predefinita per Macro Deck è 8191. Se qualche altra applicazione usa q
   <AllowAllNewConnections>Permetti tutte le nuove connessioni (non consigliato)</AllowAllNewConnections>
   <BlockAllNewConnections>Blocca tutte le nuove connessioni</BlockAllNewConnections>
   <InstallDLL>Installa .dll (non consigliato)</InstallDLL>
-  <NeverInstallDLLFiles>Non installare mai file .dll da fonti di cui non ti fidi! I file .dll da fonti sconosciute possono danneggiare il tuo sistema, installali solo quando sai cosa fare! Vuoi davvero installare un plugin .dll?</NeverInstallDLLFiles>
-  <XWillBeUninstalled>{0} verranno disinstallate.</XWillBeUninstalled>
-  <XSuccessfullyUninstalled>{0} verranno disinstallate. Macro Deck necessita il riavvio perché le modifiche abbiano effetto. Vuoi riavviare Macro Deck ora?</XSuccessfullyUninstalled>
+  <NeverInstallDLLFiles>Non installare mai file .dll da fonti di cui non ti fidi! I file .dll da fonti sconosciute possono danneggiare il tuo sistema. Installali solo quando sai cosa fare! Vuoi davvero installare un plugin .dll?</NeverInstallDLLFiles>
+  <XWillBeUninstalled>{0} verrà disinstallato.</XWillBeUninstalled>
+  <XSuccessfullyUninstalled>{0} è stato disinstallato. Macro Deck necessita il riavvio perché le modifiche abbiano effetto. Vuoi riavviare Macro Deck ora?</XSuccessfullyUninstalled>
   <CreateVariable>Crea variabile</CreateVariable>
   <DeleteVariable>Cancella variabile</DeleteVariable>
   <SelectAPluginAndActionToBegin>Seleziona un plugin e un'azione per cominciare</SelectAPluginAndActionToBegin>
@@ -155,7 +155,7 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <DeleteIcon>Cancella icona</DeleteIcon>
   <IconSelectorManagedInfo>Questo pacchetto di icone è gestito dal gestore dei plugin</IconSelectorManagedInfo>
   <DownloadingXPackages>Scaricando {0} pacchetti</DownloadingXPackages>
-  <PluginCouldNotBeLoaded>Il plugin non può essere caricato. Forse la versione installata di questo plugin non è compatibile con questa versione di Macro Deck.</PluginCouldNotBeLoaded>
+  <PluginCouldNotBeLoaded>Il plugin non è stato caricato. Forse non è compatibile con questa versione di Macro Deck.</PluginCouldNotBeLoaded>
   <CantChangeName>Impossibile cambiare nome</CantChangeName>
   <DeviceCalledXAlreadyExists>Un dispositivo col nome {0} esiste già</DeviceCalledXAlreadyExists>
   <NewConnection>Nuova connessione</NewConnection>
@@ -167,7 +167,7 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <InstallationSuccessfull>Installazione riuscita</InstallationSuccessfull>
   <PluginXInstalledSuccessfully>{0} è stato installato con successo</PluginXInstalledSuccessfully>
   <ErrorWhileInstallingPlugin>Errore installando il plugin</ErrorWhileInstallingPlugin>
-  <PluginXCouldNotBeInstalled>{0} non può essere installato. Forse non è compatibile con questa versione di Macro Deck</PluginXCouldNotBeInstalled>
+  <PluginXCouldNotBeInstalled>{0} non può essere installato. Forse non è compatibile con questa versione di Macro Deck.</PluginXCouldNotBeInstalled>
   <Settings>Impostazioni</Settings>
   <Language>Lingua</Language>
   <General>Generale</General>
@@ -197,4 +197,6 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <XTranslationByX>Traduzione in {0} di {1}</XTranslationByX>
   <PackageManagerTabAvailable>Disponibili</PackageManagerTabAvailable>
   <PackageManagerTabInstalled>Installati</PackageManagerTabInstalled>
+  <Event>Evento</Event>
+  <AutomaticallySwitchToFolder>Cambia cartella automaticamente</AutomaticallySwitchToFolder>
 </Strings>
