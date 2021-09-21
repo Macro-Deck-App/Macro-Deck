@@ -198,4 +198,6 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
   <XTranslationByX>{0} Übersetzung von {1}</XTranslationByX>
   <PackageManagerTabAvailable>Verfügbar</PackageManagerTabAvailable>
   <PackageManagerTabInstalled>Installiert</PackageManagerTabInstalled>
+  <Event>Ereignis</Event>
+  <AutomaticallySwitchToFolder>Automatisch zu Ordner wechseln</Text>
 </Strings>
