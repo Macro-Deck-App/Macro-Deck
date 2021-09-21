@@ -199,5 +199,5 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
   <PackageManagerTabAvailable>Verfügbar</PackageManagerTabAvailable>
   <PackageManagerTabInstalled>Installiert</PackageManagerTabInstalled>
   <Event>Ereignis</Event>
-  <AutomaticallySwitchToFolder>Automatisch zu Ordner wechseln</Text>
+  <AutomaticallySwitchToFolder>Automatisch zu Ordner wechseln</AutomaticallySwitchToFolder>
 </Strings>
