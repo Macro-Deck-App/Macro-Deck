@@ -197,4 +197,6 @@ The default port for Macro Deck is 8191. If some other application uses this por
   <XTranslationByX>{0} translation by {1}</XTranslationByX>
   <PackageManagerTabAvailable>Available</PackageManagerTabAvailable>
   <PackageManagerTabInstalled>Installed</PackageManagerTabInstalled>
+  <Event>Event</Event>
+  <AutomaticallySwitchToFolder>Automatically switch to folder</AutomaticallySwitchToFolder>
 </Strings>
