@@ -113,9 +113,9 @@ La porta predefinita per Macro Deck è 8191. Se qualche altra applicazione usa q
   <AllowAllNewConnections>Permetti tutte le nuove connessioni (non consigliato)</AllowAllNewConnections>
   <BlockAllNewConnections>Blocca tutte le nuove connessioni</BlockAllNewConnections>
   <InstallDLL>Installa .dll (non consigliato)</InstallDLL>
-  <NeverInstallDLLFiles>Non installare mai file .dll da fonti di cui non ti fidi! I file .dll da fonti sconosciute possono danneggiare il tuo sistema, installali solo quando sai cosa fare! Vuoi davvero installare un plugin .dll?</NeverInstallDLLFiles>
-  <XWillBeUninstalled>{0} verranno disinstallate.</XWillBeUninstalled>
-  <XSuccessfullyUninstalled>{0} verranno disinstallate. Macro Deck necessita il riavvio perché le modifiche abbiano effetto. Vuoi riavviare Macro Deck ora?</XSuccessfullyUninstalled>
+  <NeverInstallDLLFiles>Non installare mai file .dll da fonti di cui non ti fidi! I file .dll da fonti sconosciute possono danneggiare il tuo sistema. Installali solo quando sai cosa fare! Vuoi davvero installare un plugin .dll?</NeverInstallDLLFiles>
+  <XWillBeUninstalled>{0} verrà disinstallato.</XWillBeUninstalled>
+  <XSuccessfullyUninstalled>{0} è stato disinstallato. Macro Deck necessita il riavvio perché le modifiche abbiano effetto. Vuoi riavviare Macro Deck ora?</XSuccessfullyUninstalled>
   <CreateVariable>Crea variabile</CreateVariable>
   <DeleteVariable>Cancella variabile</DeleteVariable>
   <SelectAPluginAndActionToBegin>Seleziona un plugin e un'azione per cominciare</SelectAPluginAndActionToBegin>
@@ -197,4 +197,6 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <XTranslationByX>Traduzione in {0} di {1}</XTranslationByX>
   <PackageManagerTabAvailable>Disponibili</PackageManagerTabAvailable>
   <PackageManagerTabInstalled>Installati</PackageManagerTabInstalled>
+  <Event>Evento</Event>
+  <AutomaticallySwitchToFolder>Cambia cartella automaticamente</AutomaticallySwitchToFolder>
 </Strings>
