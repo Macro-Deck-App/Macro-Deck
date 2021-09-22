@@ -74,3 +74,8 @@ private void OnActionSave(object sender, EventArgs e)
   } catch { }
 }
 ```
+## Setting variables
+Maybe your plugin gets data you want to store in a variable like temperatures, states, etc. If the variable don't exists, Macro Deck automatically creates it. You just need to set the value.
+```c#
+SuchByte.MacroDeck.Variables.VariableManager.SetValue(string name, object value, VariableType type, IMacroDeckPlugin plugin, bool save = true); // if your variable changes often, set save to false
+```
