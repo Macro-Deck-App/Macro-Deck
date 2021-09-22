@@ -9,7 +9,7 @@ Macro Deck converts your phone, tablet or any other device with an up-to-date in
 4. Make sure you add `<UseWindowsForms>true</UseWindowsForms>` to `<PropertyGroup>` in your project's configuration.
 5. Now you can start with the main class :)
 
-## Import the needed references
+## Import the required references
 ```c#
 using SuchByte.MacroDeck.Plugins;
 using System.Collections.Generic;
