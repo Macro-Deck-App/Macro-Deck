@@ -18,6 +18,7 @@ using System.Reflection;
 ```
 ---
 ## Creating the main class
+You may have to install the latest version of System.Drawing.Common from NuGet
 ```c#
 public class Main : IMacroDeckPlugin
 {
