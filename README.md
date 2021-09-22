@@ -2,6 +2,12 @@
 Macro Deck converts your phone, tablet or any other device with an up-to-date internet browser into an powerful remote macro pad to perform single actions or even multiple actions with just one tap.
 
 # Using the plugin API
+## Creating the project
+1. Start by creating a new class library. Important: you need to use .NET Core 3.1 for this, not .NET Framework!
+2. Import "Macro Deck 2.dll", which can be found in the installation directory, as a reference to the project.
+3. Go into the properties of your project and set the name and the version of the plugin in the package category.
+4. Now you can start with the main class :)
+
 ## Import the SuchByte.MacroDeck.Plugins namespace
 ```c#
 using SuchByte.MacroDeck.Plugins;
