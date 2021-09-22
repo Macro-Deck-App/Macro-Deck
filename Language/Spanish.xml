@@ -197,4 +197,6 @@ Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImpor
   <XTranslationByX>Traduccido al {0} por {1}</XTranslationByX>
   <PackageManagerTabAvailable>Disponible</PackageManagerTabAvailable>
   <PackageManagerTabInstalled>Instalado</PackageManagerTabInstalled>
+  <Event>Evento</Event>
+  <AutomaticallySwitchToFolder>Cambiar automáticamente a la carpeta</AutomaticallySwitchToFolder>
 </Strings>
