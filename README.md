@@ -6,7 +6,8 @@ Macro Deck converts your phone, tablet or any other device with an up-to-date in
 1. Start by creating a new class library. Important: you need to use .NET Core 3.1 for this, not .NET Framework!
 2. Import "Macro Deck 2.dll", which can be found in the installation directory, as a reference to the project.
 3. Go into the properties of your project and set the name and the version of the plugin in the package category.
-4. Now you can start with the main class :)
+4. Make sure you add `<UseWindowsForms>true</UseWindowsForms>` to `<PropertyGroup>` in your project's configuration.
+5. Now you can start with the main class :)
 
 ## Import the SuchByte.MacroDeck.Plugins namespace
 ```c#
@@ -14,7 +15,6 @@ using SuchByte.MacroDeck.Plugins;
 ```
 ---
 ## Creating the main class
-You might need to install "System.Drawing.Common" from NuGet
 ```c#
 public class Main : IMacroDeckPlugin
 {
