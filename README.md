@@ -151,3 +151,8 @@ Maybe your plugin gets data you want to store in a variable like temperatures, s
 ```c#
 SuchByte.MacroDeck.Variables.VariableManager.SetValue(string name, object value, VariableType type, IMacroDeckPlugin plugin, bool save = true); // if your variable changes often, set save to false
 ```
+## Publish the plugin in the package manager
+If you want your plugin to be published in the Macro Deck package manager, you have to follow these steps:
+1. Upload the source code to GitHub. Plugins in the package manager must be open source because of safety reasons.
+2. Add the proper license to your repository
+3. Get in contact with me and send me a link to your repository. After I inspected it and it doesn't contains something strange, I'll download and compile it. After this I will upload it to the package manager
