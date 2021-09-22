@@ -14,6 +14,7 @@ using SuchByte.MacroDeck.Plugins;
 ```
 ---
 ## Creating the main class
+You might need to install "System.Drawing.Common" from NuGet
 ```c#
 public class Main : IMacroDeckPlugin
 {
