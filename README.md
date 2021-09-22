@@ -130,7 +130,6 @@ or get a string with
 ```c#
 var configuration = SuchByte.MacroDeck.Plugins.PluginConfiguration.GetValue(IMacroDeckPlugin plugin, string key);
 ```
-If the key is not set, this will return ""
 ---
 ## Saving login credentials
 Never save login credentials like passwords, tokens, etc. unencrypted! Macro Deck provides simple functions to store credentials encrypted.
