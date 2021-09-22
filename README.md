@@ -93,7 +93,7 @@ public partial class ExampleActionConfigurator : ActionConfigControl
 {
   private IMacroDeckAction _macroDeckAction; // Add a variable for the instance of your action to get access to the Configuration etc.
 
-  public ExampleActionConfigurator(IMacroDeckAction macroDeckAction)
+  public ExampleActionConfigurator(IMacroDeckAction macroDeckAction, ActionConfigurator actionConfigurator)
   {
     this._macroDeckAction = macroDeckAction;
     InitializeComponent();
