@@ -1,0 +1,227 @@
+﻿
+using SuchByte.MacroDeck.GUI.CustomControls;
+
+namespace SuchByte.MacroDeck.GUI.Dialogs
+{
+    partial class GiphySelector
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.imagesPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.searchBox = new SuchByte.MacroDeck.GUI.CustomControls.PlaceHolderTextBox();
+            this.btnSearch = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
+            this.btnTrending = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
+            this.btnOk = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
+            this.btnPreview = new SuchByte.MacroDeck.GUI.CustomControls.RoundedButton();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.progressBarDownload = new System.Windows.Forms.ProgressBar();
+            this.lblDownloading = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.btnPreview)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // imagesPanel
+            // 
+            this.imagesPanel.AutoScroll = true;
+            this.imagesPanel.Location = new System.Drawing.Point(13, 41);
+            this.imagesPanel.Name = "imagesPanel";
+            this.imagesPanel.Size = new System.Drawing.Size(760, 396);
+            this.imagesPanel.TabIndex = 3;
+            // 
+            // searchBox
+            // 
+            this.searchBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.searchBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.searchBox.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            this.searchBox.ForeColor = System.Drawing.Color.Gray;
+            this.searchBox.Location = new System.Drawing.Point(397, 8);
+            this.searchBox.Name = "searchBox";
+            this.searchBox.PlaceHolderText = "Search GIPHY";
+            this.searchBox.Size = new System.Drawing.Size(271, 27);
+            this.searchBox.TabIndex = 5;
+            this.searchBox.Text = "Search GIPHY";
+            // 
+            // btnSearch
+            // 
+            this.btnSearch.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
+            this.btnSearch.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.magnifying_glass;
+            this.btnSearch.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnSearch.BorderRadius = 8;
+            this.btnSearch.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSearch.FlatAppearance.BorderSize = 0;
+            this.btnSearch.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSearch.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnSearch.ForeColor = System.Drawing.Color.White;
+            this.btnSearch.Location = new System.Drawing.Point(669, 8);
+            this.btnSearch.Name = "btnSearch";
+            this.btnSearch.Size = new System.Drawing.Size(27, 27);
+            this.btnSearch.TabIndex = 6;
+            this.btnSearch.UseVisualStyleBackColor = false;
+            this.btnSearch.Click += new System.EventHandler(this.BtnSearch_Click);
+            // 
+            // btnTrending
+            // 
+            this.btnTrending.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
+            this.btnTrending.BorderRadius = 8;
+            this.btnTrending.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnTrending.FlatAppearance.BorderSize = 0;
+            this.btnTrending.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnTrending.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnTrending.ForeColor = System.Drawing.Color.White;
+            this.btnTrending.Location = new System.Drawing.Point(40, 8);
+            this.btnTrending.Name = "btnTrending";
+            this.btnTrending.Size = new System.Drawing.Size(87, 27);
+            this.btnTrending.TabIndex = 8;
+            this.btnTrending.Text = "Trending";
+            this.btnTrending.UseVisualStyleBackColor = false;
+            this.btnTrending.Click += new System.EventHandler(this.BtnTrending_Click);
+            // 
+            // btnOk
+            // 
+            this.btnOk.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
+            this.btnOk.BorderRadius = 8;
+            this.btnOk.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnOk.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnOk.ForeColor = System.Drawing.Color.White;
+            this.btnOk.Location = new System.Drawing.Point(698, 568);
+            this.btnOk.Name = "btnOk";
+            this.btnOk.Size = new System.Drawing.Size(75, 25);
+            this.btnOk.TabIndex = 10;
+            this.btnOk.Text = "Ok";
+            this.btnOk.UseVisualStyleBackColor = true;
+            this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
+            // 
+            // btnPreview
+            // 
+            this.btnPreview.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(108)))), ((int)(((byte)(117)))), ((int)(((byte)(125)))));
+            this.btnPreview.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnPreview.Column = 0;
+            this.btnPreview.ForegroundImage = null;
+            this.btnPreview.Location = new System.Drawing.Point(13, 443);
+            this.btnPreview.Name = "btnPreview";
+            this.btnPreview.Radius = 40;
+            this.btnPreview.Row = 0;
+            this.btnPreview.ShowGIFIndicator = false;
+            this.btnPreview.Size = new System.Drawing.Size(150, 150);
+            this.btnPreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.btnPreview.TabIndex = 9;
+            this.btnPreview.TabStop = false;
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.PoweredBy_200px_Black_HorizLogo;
+            this.pictureBox2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.pictureBox2.Location = new System.Drawing.Point(573, 443);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(200, 26);
+            this.pictureBox2.TabIndex = 11;
+            this.pictureBox2.TabStop = false;
+            // 
+            // pictureBox3
+            // 
+            this.pictureBox3.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.giphy_icon;
+            this.pictureBox3.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.pictureBox3.Location = new System.Drawing.Point(13, 8);
+            this.pictureBox3.Name = "pictureBox3";
+            this.pictureBox3.Size = new System.Drawing.Size(21, 27);
+            this.pictureBox3.TabIndex = 12;
+            this.pictureBox3.TabStop = false;
+            // 
+            // progressBarDownload
+            // 
+            this.progressBarDownload.Location = new System.Drawing.Point(285, 519);
+            this.progressBarDownload.Name = "progressBarDownload";
+            this.progressBarDownload.Size = new System.Drawing.Size(218, 25);
+            this.progressBarDownload.TabIndex = 13;
+            this.progressBarDownload.Visible = false;
+            // 
+            // lblDownloading
+            // 
+            this.lblDownloading.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblDownloading.Location = new System.Drawing.Point(285, 491);
+            this.lblDownloading.Name = "lblDownloading";
+            this.lblDownloading.Size = new System.Drawing.Size(218, 23);
+            this.lblDownloading.TabIndex = 14;
+            this.lblDownloading.Text = "Downloading...";
+            this.lblDownloading.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblDownloading.Visible = false;
+            // 
+            // GiphySelector
+            // 
+            this.AcceptButton = this.btnSearch;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(787, 607);
+            this.Controls.Add(this.lblDownloading);
+            this.Controls.Add(this.progressBarDownload);
+            this.Controls.Add(this.pictureBox3);
+            this.Controls.Add(this.pictureBox2);
+            this.Controls.Add(this.btnOk);
+            this.Controls.Add(this.btnPreview);
+            this.Controls.Add(this.btnTrending);
+            this.Controls.Add(this.btnSearch);
+            this.Controls.Add(this.searchBox);
+            this.Controls.Add(this.imagesPanel);
+            this.Name = "GiphySelector";
+            this.Text = "GiphySelector";
+            this.Load += new System.EventHandler(this.GiphySelector_Load);
+            this.Controls.SetChildIndex(this.imagesPanel, 0);
+            this.Controls.SetChildIndex(this.searchBox, 0);
+            this.Controls.SetChildIndex(this.btnSearch, 0);
+            this.Controls.SetChildIndex(this.btnTrending, 0);
+            this.Controls.SetChildIndex(this.btnPreview, 0);
+            this.Controls.SetChildIndex(this.btnOk, 0);
+            this.Controls.SetChildIndex(this.pictureBox2, 0);
+            this.Controls.SetChildIndex(this.pictureBox3, 0);
+            this.Controls.SetChildIndex(this.progressBarDownload, 0);
+            this.Controls.SetChildIndex(this.lblDownloading, 0);
+            ((System.ComponentModel.ISupportInitialize)(this.btnPreview)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.FlowLayoutPanel imagesPanel;
+        private PlaceHolderTextBox searchBox;
+        private CustomControls.ButtonPrimary btnSearch;
+        private CustomControls.ButtonPrimary btnTrending;
+        private CustomControls.ButtonPrimary btnOk;
+        private CustomControls.RoundedButton btnPreview;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.PictureBox pictureBox3;
+        private System.Windows.Forms.ProgressBar progressBarDownload;
+        private System.Windows.Forms.Label lblDownloading;
+    }
+}
