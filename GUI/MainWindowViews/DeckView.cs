@@ -109,31 +109,28 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     }
                     this.Invoke(new Action(() => this.buttonPanel.Controls.Clear()));
                 }
+
+
+                // Button size algorithm from @PhoenixWyllow
+
                 int buttonSize = 100;
+                int rows = MacroDeck.ProfileManager.CurrentProfile.Rows, columns = MacroDeck.ProfileManager.CurrentProfile.Columns, spacing = MacroDeck.ProfileManager.CurrentProfile.ButtonSpacing; // from settings
+                int width = buttonPanel.Width, height = buttonPanel.Height; // from panel
+                int buttonSizeX, buttonSizeY; // for convenience
 
-                if (MacroDeck.ProfileManager.CurrentProfile.Rows > MacroDeck.ProfileManager.CurrentProfile.Columns)
+                if (rows > columns) //if NOT "normal case" (ie, user attempting vertical layout), force horizontal
                 {
-                    buttonSize = (buttonPanel.Width / MacroDeck.ProfileManager.CurrentProfile.Columns) - MacroDeck.ProfileManager.CurrentProfile.ButtonSpacing;
-                    if ((buttonSize * MacroDeck.ProfileManager.CurrentProfile.Rows) + MacroDeck.ProfileManager.CurrentProfile.ButtonSpacing > buttonPanel.Height)
-                    {
-                        buttonSize = (buttonPanel.Height / (MacroDeck.ProfileManager.CurrentProfile.Rows)) - MacroDeck.ProfileManager.CurrentProfile.ButtonSpacing;
-                    }
-                }
-                else
-                {
-                    buttonSize = (buttonPanel.Height / MacroDeck.ProfileManager.CurrentProfile.Rows);
-                    if ((buttonSize * MacroDeck.ProfileManager.CurrentProfile.Columns) + MacroDeck.ProfileManager.CurrentProfile.ButtonSpacing > buttonPanel.Width)
-                    {
-                        buttonSize = (buttonPanel.Width / (MacroDeck.ProfileManager.CurrentProfile.Columns)) - (MacroDeck.ProfileManager.CurrentProfile.ButtonSpacing - 2);
-                    } else if ((buttonSize * MacroDeck.ProfileManager.CurrentProfile.Columns) + MacroDeck.ProfileManager.CurrentProfile.ButtonSpacing > buttonPanel.Height)
-                    {
-                        buttonSize = (buttonPanel.Height / (MacroDeck.ProfileManager.CurrentProfile.Rows)) - (MacroDeck.ProfileManager.CurrentProfile.ButtonSpacing - 2);
-                    }
-                }
+                    rows = MacroDeck.ProfileManager.CurrentProfile.Columns;
+                    columns = MacroDeck.ProfileManager.CurrentProfile.Rows;
 
-                for (int row = 0; row < MacroDeck.ProfileManager.CurrentProfile.Rows; row++)
+                }
+                buttonSizeX = width / columns; //calc with spacing, remove it after
+                buttonSizeY = height / rows;
+                buttonSize = Math.Min(buttonSizeX, buttonSizeY) - spacing;
+
+                for (int row = 0; row < rows; row++)
                 {
-                    for (int column = 0; column < MacroDeck.ProfileManager.CurrentProfile.Columns; column++)
+                    for (int column = 0; column < columns; column++)
                     {
                         this.Invoke(new Action(() => this.LoadButton(row, column, buttonSize)));
                     }
