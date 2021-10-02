@@ -3,7 +3,7 @@
   <__Language__>English</__Language__>
   <__LanguageCode__>eng</__LanguageCode__>
   <__Author__>Macro Deck</__Author__>
-  <__Version__>2b11</__Version__>
+  <__Version__>2b13</__Version__>
   <NetworkAdapter>Network adapter</NetworkAdapter>
   <IPAddress>IP address</IPAddress>
   <Port>Port</Port>
@@ -15,8 +15,8 @@
 The default port for Macro Deck is 8191. If some other application uses this port, you can change it.</ConfigureNetworkInfo>
   <AutomaticallyCheckUpdates>Automatically check for updates</AutomaticallyCheckUpdates>
   <AutomaticallyStartWithWindows>Automatically start with Windows</AutomaticallyStartWithWindows>
-  <Show>Show</Show>
-  <Exit>Exit</Exit>
+  <Show>Configure Macro Deck</Show>
+  <Exit>Exit Macro Deck</Exit>
   <XUpdatesAvailable>{0} updates available</XUpdatesAvailable>
   <Profile>Profile</Profile>
   <Columns>Columns</Columns>
@@ -199,4 +199,8 @@ The default port for Macro Deck is 8191. If some other application uses this por
   <PackageManagerTabInstalled>Installed</PackageManagerTabInstalled>
   <Event>Event</Event>
   <AutomaticallySwitchToFolder>Automatically switch to folder</AutomaticallySwitchToFolder>
+  <Restart>Restart Macro Deck</Restart>
+  <Delay>Delay</Delay>
+  <If>If</If>
+  <Else>Else</Else>
 </Strings>
