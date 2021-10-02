@@ -3,7 +3,7 @@
 
 - Plugins
 - Icon packs
-- Web client
+- [Web client](http://web.macrodeck.org)
 - Built in package manager (to download plugins and icon packs)
 - Logic and global variables
 - Multiple profiles
