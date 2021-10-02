@@ -3,14 +3,14 @@
   <__Language__>Français</__Language__>
   <__LanguageCode__>fr</__LanguageCode__>
   <__Author__>Benjiiben53</__Author__>
-  <__Version__>2b10</__Version__>
+  <__Version__>2b12</__Version__>
   <NetworkAdapter>Carte réseau</NetworkAdapter>
   <IPAddress>Adresse IP</IPAddress>
   <Port>Port</Port>
   <Info>Infos</Info>
   <Error>Erreur</Error>
   <Warning>Attention</Warning>
-  <ConfigureNetworkInfo>Il est vraiment important de sélectionner la bonne carte réseau, sinon le client ne pourras pas se connecter au serveur. Dans la plupart des cas, le nom de la carte réseau ressemble à "Ethernet" ou "Wi-Fi" et l'adresse IP dans la plupart des cas ressemble à "192.168.168.xxx".
+  <ConfigureNetworkInfo>Il est vraiment important de sélectionner la bonne carte réseau, sinon le client ne pourras pas se connecter au serveur. Dans la plupart des cas, le nom de la carte réseau ressemble à "Ethernet" ou "Wi-Fi" et l'adresse IP ressemble dans la plupart des cas à "192.168.1.xxx".
 
 Le port par défaut pour Macro Deck est 8191. Si une autre application utilise ce port, vous pouvez le modifier.</ConfigureNetworkInfo>
   <AutomaticallyCheckUpdates>Rechercher automatiquement les mises à jour</AutomaticallyCheckUpdates>
@@ -31,7 +31,7 @@ Le port par défaut pour Macro Deck est 8191. Si une autre application utilise c
   <All>Tout</All>
   <Updates>Mises à jour</Updates>
   <Available>Disponible</Available>
-  <Installed>Installer</Installed>
+  <Installed>Déjà Installer</Installed>
   <Install>Installer</Install>
   <Search>Chercher...</Search>
   <Name>Nom</Name>
@@ -197,4 +197,6 @@ Pour les gifs, il est recommandé d'utiliser le préréglage bas ou le plus bas.
   <XTranslationByX>Traduction {0}e par {1}</XTranslationByX>
   <PackageManagerTabAvailable>Disponible</PackageManagerTabAvailable>
   <PackageManagerTabInstalled>Installer</PackageManagerTabInstalled>
+  <Event>Événement</Event>
+  <AutomaticallySwitchToFolder>Basculer automatiquement vers le dossier</AutomaticallySwitchToFolder>
 </Strings>
