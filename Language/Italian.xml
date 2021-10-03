@@ -2,8 +2,8 @@
 <Strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <__Language__>Italiano</__Language__>
   <__LanguageCode__>it</__LanguageCode__>
-  <__Author__>PW.Dev</__Author__>
-  <__Version__>2b11</__Version__>
+  <__Author__>PhoenixWyllow aka PW.Dev</__Author__>
+  <__Version__>2b13</__Version__>
   <NetworkAdapter>Scheda di rete</NetworkAdapter>
   <IPAddress>Indirizzo IP</IPAddress>
   <Port>Porta</Port>
@@ -15,8 +15,8 @@
 La porta predefinita per Macro Deck è 8191. Se qualche altra applicazione usa questa porta, puoi cambiarla.</ConfigureNetworkInfo>
   <AutomaticallyCheckUpdates>Ricerca autotomatica degli aggiornamenti</AutomaticallyCheckUpdates>
   <AutomaticallyStartWithWindows>Avvia con Windows</AutomaticallyStartWithWindows>
-  <Show>Visualizza</Show>
-  <Exit>Esci</Exit>
+  <Show>Configura Macro Deck</Show>
+  <Exit>Chiudi Macro Deck</Exit>
   <XUpdatesAvailable>{0} aggiornamenti disponibili</XUpdatesAvailable>
   <Profile>Profilo</Profile>
   <Columns>Colonne</Columns>
@@ -199,4 +199,8 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <PackageManagerTabInstalled>Installati</PackageManagerTabInstalled>
   <Event>Evento</Event>
   <AutomaticallySwitchToFolder>Cambia cartella automaticamente</AutomaticallySwitchToFolder>
+  <Restart>Riavvia Macro Deck</Restart>
+  <Delay>Attesa</Delay>
+  <If>Se</If>
+  <Else>Altrimenti</Else>
 </Strings>
