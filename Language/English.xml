@@ -203,4 +203,8 @@ The default port for Macro Deck is 8191. If some other application uses this por
   <Delay>Delay</Delay>
   <If>If</If>
   <Else>Else</Else>
+  <Online>Online</Online>
+  <By>By</By>
+  <StateBinding>Bind state to</StateBinding>
+  <ErrorWhileLoadingPackageManager>Error while loading package manager. Perhaps you are not connected to the internet or Macro Deck is blocked by your firewall.</ErrorWhileLoadingPackageManager>
 </Strings>
