@@ -206,5 +206,5 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <Online>Online</Online>
   <By>Di</By>
   <StateBinding>Collega stato a</StateBinding>
-  <ErrorWhileLoadingPackageManager>Errore durenate il caricamento del gestore di pacchetti. Forse non la connessione Internet è assente o Macro Deck è bloccato dal firewall.</ErrorWhileLoadingPackageManager>
+  <ErrorWhileLoadingPackageManager>Errore durante il caricamento del gestore di pacchetti. Forse non la connessione Internet è assente o Macro Deck è bloccato dal firewall.</ErrorWhileLoadingPackageManager>
 </Strings>
