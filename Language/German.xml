@@ -3,7 +3,7 @@
   <__Language__>German</__Language__>
   <__LanguageCode__>de</__LanguageCode__>
   <__Author__>Macro Deck</__Author__>
-  <__Version__>2b12</__Version__>
+  <__Version__>2b13</__Version__>
   <NetworkAdapter>Netzwerkadapter</NetworkAdapter>
   <IPAddress>IP Adresse</IPAddress>
   <Port>Port</Port>
@@ -53,7 +53,7 @@ Der Standartport für Macro Deck ist 8191. Wenn andere Anwendungen diesen Port s
   <Center>Mittig</Center>
   <Bottom>Unten</Bottom>
   <Path>Pfad</Path>
-  <CurrentState>Aktueller Status</CurrentState>
+  <CurrentState>Aktueller Zustand</CurrentState>
   <Off>Aus</Off>
   <On>Ein</On>
   <DownloadAndInstall>Herunterladen</DownloadAndInstall>
@@ -204,4 +204,9 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
   <Delay>Verzögerung</Delay>
   <If>Wenn</If>
   <Else>Sonst</Else>
+  <Online>Online</Online>
+  <By>Von</By>
+  <StateBinding>Zustand binden an</StateBinding>
+  <ErrorWhileLoadingPackageManager>Fehler beim Laden der Paketverwaltung. 
+  Möglicherweise besteht Internetverbindung oder Macro Deck wird von der Firewall blockiert.</ErrorWhileLoadingPackageManager>
 </Strings>
