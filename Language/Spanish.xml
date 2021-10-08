@@ -203,4 +203,8 @@ Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImpor
   <Delay>Delay</Delay>
   <If>Cuando</If>
   <Else>Además</Else>
+  <Online>En línea</Online>
+  <By>By</By>
+  <StateBinding>Vincular estado a</StateBinding>
+  <ErrorWhileLoadingPackageManager>Error al cargar el administrador de paquetes. Quizás no esté conectado a Internet o su firewall bloquee Macro Deck.</ErrorWhileLoadingPackageManager>
 </Strings>
