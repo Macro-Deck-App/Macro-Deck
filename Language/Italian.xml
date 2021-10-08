@@ -203,4 +203,8 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <Delay>Attesa</Delay>
   <If>Se</If>
   <Else>Altrimenti</Else>
+  <Online>Online</Online>
+  <By>Di</By>
+  <StateBinding>Collega stato a</StateBinding>
+  <ErrorWhileLoadingPackageManager>Errore durante il caricamento del gestore di pacchetti. Forse non la connessione Internet è assente o Macro Deck è bloccato dal firewall.</ErrorWhileLoadingPackageManager>
 </Strings>
