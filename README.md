@@ -14,6 +14,15 @@
 # Download
 https://beta.macrodeck.org/download
 
+# Helping with the translation
+All translation files are located under https://github.com/SuchByte/Macro-Deck/tree/master/Language
+## Adding/editing a translation file
+1. Fork this GitHub repository
+2. Add/edit the translation files
+3. Create a pull request of the forked repository
+### Note
+Please use the ISO names for the file name and for the __Language__ node in the file. For __LanguageCode__ use the ISO-639-1 code. You can find more information here: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+
 
 # Using the plugin API
 ## Creating the project
