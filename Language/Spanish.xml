@@ -10,7 +10,7 @@
   <Info>Información</Info>
   <Error>Error</Error>
   <Warning>Advertencia</Warning>
-  <ConfigureNetworkInfo>Es muy importante que se establezca el adaptador de red correcto, de lo contrario no se puede establecer ninguna conexión con el servidor. En la mayoría de los casos, el adaptador de red se llama "Ethernet" o "WLAN" y la dirección IP suele ser "192.168.178.xxx".
+  <ConfigureNetworkInfo>Es muy importante que se establezca el adaptador de red correcto, de lo contrario no se puede establecer ninguna conexión con el servidor. En la mayoría de los casos, el adaptador de red se llama "Ethernet" o "WLAN" y la dirección IP suele ser "192.168.1.xxx".
 
 El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usando este puerto, debe cambiarse.</ConfigureNetworkInfo>
   <AutomaticallyCheckUpdates>Revisar actualizaciones automaticamente</AutomaticallyCheckUpdates>
