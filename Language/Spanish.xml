@@ -199,6 +199,7 @@ Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImpor
   <PackageManagerTabInstalled>Instalado</PackageManagerTabInstalled>
   <Event>Evento</Event>
   <AutomaticallySwitchToFolder>Cambiar automáticamente a la carpeta</AutomaticallySwitchToFolder>
+  <Restart>Reiniciar Macro Deck</Restart>
   <Delay>Delay</Delay>
   <If>Cuando</If>
   <Else>Además</Else>
