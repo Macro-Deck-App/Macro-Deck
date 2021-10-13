@@ -67,7 +67,7 @@ El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usa
   <Update>Actualizar</Update>
   <Plugin>Plugin</Plugin>
   <MacroDeckNeedsARestart>Es necesario reiniciar Macro Deck</MacroDeckNeedsARestart>
-  <MacroDeckMustBeRestartedForTheChanges>Es necesario reiniciar Macro Deck. ¿Quieres reiniciar Macro Deck ahora?</MacroDeckMustBeRestartedForTheChanges>
+  <MacroDeckMustBeRestartedForTheChanges>Es necesario reiniciar Macro Deck.¿Quieres reiniciar Macro Deck ahora?</MacroDeckMustBeRestartedForTheChanges>
   <Configure>Configurar</Configure>
   <Uninstall>Desinstalar</Uninstall>
   <NotLoaded>Sin cargar</NotLoaded>
@@ -105,7 +105,7 @@ El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usa
   <InitialSetupConfigureNetworkSettings>Configurar los ajustes de red</InitialSetupConfigureNetworkSettings>
   <InitialSetupConfigureGridPreferences>Configurar la cuadrícula</InitialSetupConfigureGridPreferences>
   <InitialSetupPickAllPluginsYouNeed>Seleccionar plugins</InitialSetupPickAllPluginsYouNeed>
-  <InitialSetupDontWorryInstallUninstallPlugins>Los plugins se pueden instalar / desinstalar más tarde en el Administrador de paquetes</InitialSetupDontWorryInstallUninstallPlugins>
+  <InitialSetupDontWorryInstallUninstallPlugins>Los plugins se pueden instalar/desinstalar más tarde en el Administrador de paquetes</InitialSetupDontWorryInstallUninstallPlugins>
   <InitialSetupWantSomeIcons>Seleccionar paquetes de iconos</InitialSetupWantSomeIcons>
   <InitialSetupInstallIconPacksPackageManager>Los paquetes de iconos se pueden instalar más tarde en el Administrador de paquetes</InitialSetupInstallIconPacksPackageManager>
   <InitialSetupAlmostDone>Estamos a punto de empezar!</InitialSetupAlmostDone>
@@ -132,7 +132,7 @@ El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usa
   <TheresAnUpdateForYou>Nueva actualización disponible:)</TheresAnUpdateForYou>
   <VersionXIsNowAvailable>Se puede descargar la versión {0} ({1})</VersionXIsNowAvailable>
   <ReadyToDownloadUpdate>Listo</ReadyToDownloadUpdate>
-  <DownloadingUpdate>Descargando ... {0}% ({1} MB / {2} MB) </DownloadingUpdate>
+  <DownloadingUpdate>Descargando ... {0}% ({1} MB/{2} MB) </DownloadingUpdate>
   <VerifyingUpdateFile>El archivo está verificado...</VerifyingUpdateFile>
   <MD5NotValid>La suma de comprobación MD5 no es válida</MD5NotValid>
   <StartingInstaller>El instalador comenzará</StartingInstaller>
