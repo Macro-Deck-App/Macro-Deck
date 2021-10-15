@@ -94,7 +94,7 @@ El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usa
   <XPluginsLoaded>{0} plugins activos</XPluginsLoaded>
   <XPluginsDisabled>{0} plugins desactivados</XPluginsDisabled>
   <XClientsConnected>{0} Dispositivos conectados</XClientsConnected>
-  <IpAddressHostNamePort>Dirección IP / nombre de host: Puerto</IpAddressHostNamePort>
+  <IpAddressHostNamePort>Dirección IP/nombre de host: Puerto</IpAddressHostNamePort>
   <InitialSetupButtonBack>&lt;- Regreso</InitialSetupButtonBack>
   <InitialSetupButtonNext>Más lejos -&gt;</InitialSetupButtonNext>
   <InitialSetupButtonFinish>Completo</InitialSetupButtonFinish>
