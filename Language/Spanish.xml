@@ -95,12 +95,12 @@ El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usa
   <XPluginsDisabled>{0} plugins desactivados</XPluginsDisabled>
   <XClientsConnected>{0} Dispositivos conectados</XClientsConnected>
   <IpAddressHostNamePort>Dirección IP/nombre de host: Puerto</IpAddressHostNamePort>
-  <InitialSetupButtonBack>&lt;- Regreso</InitialSetupButtonBack>
-  <InitialSetupButtonNext>Más lejos -&gt;</InitialSetupButtonNext>
-  <InitialSetupButtonFinish>Completo</InitialSetupButtonFinish>
+  <InitialSetupButtonBack>&lt;- Anterior</InitialSetupButtonBack>
+  <InitialSetupButtonNext>Siguiente -&gt;</InitialSetupButtonNext>
+  <InitialSetupButtonFinish>Finalizar</InitialSetupButtonFinish>
   <InitialSetupSelectLanguage>Elige un idioma</InitialSetupSelectLanguage>
   <InitialSetupPage>{0}/{1}</InitialSetupPage>
-  <InitialSetupWelcome>Bienvenido a Macro Deck!</InitialSetupWelcome>
+  <InitialSetupWelcome>¡Bienvenido a Macro Deck!</InitialSetupWelcome>
   <InitialSetupLetsConfigure>Configuremos algunas cosas</InitialSetupLetsConfigure>
   <InitialSetupConfigureNetworkSettings>Configurar los ajustes de red</InitialSetupConfigureNetworkSettings>
   <InitialSetupConfigureGridPreferences>Configurar la cuadrícula</InitialSetupConfigureGridPreferences>
@@ -108,7 +108,7 @@ El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usa
   <InitialSetupDontWorryInstallUninstallPlugins>Los plugins se pueden instalar/desinstalar más tarde en el Administrador de paquetes</InitialSetupDontWorryInstallUninstallPlugins>
   <InitialSetupWantSomeIcons>Seleccionar paquetes de iconos</InitialSetupWantSomeIcons>
   <InitialSetupInstallIconPacksPackageManager>Los paquetes de iconos se pueden instalar más tarde en el Administrador de paquetes</InitialSetupInstallIconPacksPackageManager>
-  <InitialSetupAlmostDone>Estamos a punto de empezar!</InitialSetupAlmostDone>
+  <InitialSetupAlmostDone>¡Estamos a punto de empezar!</InitialSetupAlmostDone>
   <KnownDevices>Dispositivos conocidos</KnownDevices>
   <AskOnNewConnections>Preguntar sobre nuevas conexiones</AskOnNewConnections>
   <AllowAllNewConnections>Permitir todas las conexiones (no recomendado) </AllowAllNewConnections>
