@@ -98,7 +98,7 @@ El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usa
   <InitialSetupButtonBack>&lt;- Anterior</InitialSetupButtonBack>
   <InitialSetupButtonNext>Siguiente -&gt;</InitialSetupButtonNext>
   <InitialSetupButtonFinish>Finalizar</InitialSetupButtonFinish>
-  <InitialSetupSelectLanguage>Elige un idioma</InitialSetupSelectLanguage>
+  <InitialSetupSelectLanguage>Seleccione un idioma</InitialSetupSelectLanguage>
   <InitialSetupPage>{0}/{1}</InitialSetupPage>
   <InitialSetupWelcome>¡Bienvenido a Macro Deck!</InitialSetupWelcome>
   <InitialSetupLetsConfigure>Configuremos algunas cosas</InitialSetupLetsConfigure>
