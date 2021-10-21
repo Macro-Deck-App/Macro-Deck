@@ -5,24 +5,14 @@ using System.Text;
 
 namespace SuchByte.MacroDeck.Plugins
 {
-    public class DisabledPlugin : IMacroDeckPlugin
+    public class DisabledPlugin : MacroDeckPlugin
     {
-        public string Name { get; set; }
+        public override string Name { get; set; }
+        public override string Version { get; set; }
+        public override string Author { get; set; }
+        public override void Enable() {}
+        public override string Description => Language.LanguageManager.Strings.PluginCouldNotBeLoaded;
+        public override Image Icon => Properties.Resources.Macro_Deck_error;
 
-        public string Version { get; set; }
-
-        public string Author => "?";
-
-        public string Description => Language.LanguageManager.Strings.PluginCouldNotBeLoaded;
-
-        public List<IMacroDeckAction> Actions => null;
-
-        public Image Icon => Properties.Resources.Macro_Deck_error;
-
-        public bool CanConfigure => false;
-
-        public void Enable() {}
-
-        public void OpenConfigurator() {}
     }
 }

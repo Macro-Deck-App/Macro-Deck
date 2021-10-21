@@ -9,7 +9,7 @@ namespace SuchByte.MacroDeck.Plugins
     public class PluginCredentials
     {
 
-        public static void AddCredentials(IMacroDeckPlugin plugin, Dictionary<string, string> keyValuePairs)
+        public static void AddCredentials(MacroDeckPlugin plugin, Dictionary<string, string> keyValuePairs)
         {
             Dictionary<string, string> keyValuePairsEncrypted = new Dictionary<string, string>();
 
@@ -54,7 +54,7 @@ namespace SuchByte.MacroDeck.Plugins
 
         }
 
-        public static void SetCredentials(IMacroDeckPlugin plugin, Dictionary<string, string> keyValuePairs)
+        public static void SetCredentials(MacroDeckPlugin plugin, Dictionary<string, string> keyValuePairs)
         {
             Dictionary<string, string> keyValuePairsEncrypted = new Dictionary<string, string>();
 
@@ -88,12 +88,12 @@ namespace SuchByte.MacroDeck.Plugins
             }
         }
 
-        public static void DeletePluginCredentials(IMacroDeckPlugin plugin)
+        public static void DeletePluginCredentials(MacroDeckPlugin plugin)
         {
             File.Delete(MacroDeck.PluginCredentialsPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower());
         }
 
-        public static List<Dictionary<string, string>> GetPluginCredentials(IMacroDeckPlugin plugin)
+        public static List<Dictionary<string, string>> GetPluginCredentials(MacroDeckPlugin plugin)
         {
             List<Dictionary<string, string>> pluginCredentialsEncrypted;
             if (!File.Exists(MacroDeck.PluginCredentialsPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower()))

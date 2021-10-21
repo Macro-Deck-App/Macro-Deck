@@ -12,7 +12,7 @@ namespace SuchByte.MacroDeck.Plugins
     {
         private static Dictionary<string, Dictionary<string, string>> _pluginConfigs = new Dictionary<string, Dictionary<string, string>>();
 
-        public static void SetValue(IMacroDeckPlugin plugin, string key, string value)
+        public static void SetValue(MacroDeckPlugin plugin, string key, string value)
         {
             Dictionary<string, string> pluginConfig;
 
@@ -53,7 +53,7 @@ namespace SuchByte.MacroDeck.Plugins
         }
 
 
-        public static string GetValue(IMacroDeckPlugin plugin = null, string key = "")
+        public static string GetValue(MacroDeckPlugin plugin = null, string key = "")
         {
             string value = "";
             try
@@ -73,7 +73,7 @@ namespace SuchByte.MacroDeck.Plugins
             return value;
         }
 
-        private static Dictionary<string, string> LoadPluginConfig(IMacroDeckPlugin plugin)
+        private static Dictionary<string, string> LoadPluginConfig(MacroDeckPlugin plugin)
         {
             Dictionary<string, string> pluginConfig;
             if (!File.Exists(MacroDeck.PluginConfigPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json"))
@@ -91,7 +91,7 @@ namespace SuchByte.MacroDeck.Plugins
         }
 
 
-        public static void DeletePluginConfig(IMacroDeckPlugin plugin)
+        public static void DeletePluginConfig(MacroDeckPlugin plugin)
         {
             if (_pluginConfigs.ContainsKey(plugin.Author + "." + plugin.Name))
             {
