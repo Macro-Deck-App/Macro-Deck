@@ -183,7 +183,7 @@ After that you have to create a plugin manifest. Create a .xml file and call it 
 <?xml version="1.0"?>
 <PluginManifest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Author>YOUR_NAME</Author>
-	<MainFile>YOUR_PLUGIN.dll</MainFile>
+  <MainFile>YOUR_PLUGIN.dll</MainFile>
 </PluginManifest>
 ```
 
