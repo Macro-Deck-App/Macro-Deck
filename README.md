@@ -43,25 +43,16 @@ using System.Reflection;
 ## Creating the main class
 You may have to install the latest version of System.Drawing.Common from NuGet
 ```c#
-public class Main : IMacroDeckPlugin
+public class Main : MacroDeckPlugin
 {
+  public override string Description => "Example plugin";
   
-  public string Name => Assembly.GetExecutingAssembly().GetName().Name; // Important! Don't change
+  public override Image Icon => Properties.Resources.ExampleIcon; // You can add a image from your resources here
 
-  public string Version => Assembly.GetExecutingAssembly().GetName().Version.ToString(); // Important! Don't change
-  
-  public string Author => "Your name here";
-  
-  public string Description => "Example plugin";
-
-  public List<IMacroDeckAction> Actions { get; set; } // Important! Don't change
-
-  public Image Icon => null; // You can add a image from your resources here
-
-  public bool CanConfigure => false; // If your plugin can be configured, set to "true". It'll make the "Configure" button appear in the package manager
+  public override bool CanConfigure => true; // Optional; If your plugin can be configured, set to "true". It'll make the "Configure" button appear in the package manager.
 
   // Gets called when the plugin is loaded
-  public void Enable()
+  public override void Enable()
   {
     this.Actions = new List<IMacroDeckAction>{
       // add the instances of your actions here
@@ -69,8 +60,8 @@ public class Main : IMacroDeckPlugin
     };
   }
   
-  // Gets called when the user clicks on the "Configure" button in the package manager
-  public void OpenConfigurator()
+  // Optional; Gets called when the user clicks on the "Configure" button in the package manager; If CanConfigure is not set to true, you don't need to add this
+  public override void OpenConfigurator()
   {
     // Open your configuration form here
     using (var configurator = new Configurator()) {
@@ -83,26 +74,24 @@ public class Main : IMacroDeckPlugin
 ## Creating a action class
 You find more information here: https://github.com/SuchByte/Macro-Deck-Example-CSharp-Plugin/blob/main/ExampleAction.cs
 ```c#
-public class ExampleAction : IMacroDeckAction
+public class ExampleAction : PluginAction
 {
-  public string Name => "Example action"; // The name of the action
+  public override string Name => "Example action"; // The name of the action
   
-  public string Description => "Action description"; // eg. what does this action do?
+  public override string Description => "Action description"; // eg. what does this action do?
   
-  public string DisplayName { get; set; } = "Example action"; // The display name of the action. Can be changed later based on configuration
+  public override string DisplayName { get; set; } = "Example action"; // The display name of the action. Can be changed later based on configuration
   
-  public string Configuration { get; set; } = ""; // Just leave it
+  public override bool CanConfigure => true; // Optional; Add if this action can be configured. This will make the ActionConfigurator calling GetActionConfigurator();
   
-  public bool CanConfigure => false; // Set "true" if this action can be configured. This will make the ActionConfigurator calling GetActionConfigurator();
-  
-  // Gets called when the action can be configured and the action got selected in the ActionSelector. You need to return a user control with the "ActionConfigControl" class as base class
-  public ActionConfigControl GetActionConfigurator(ActionConfigurator actionConfigurator)
+  // Optional; Add if you added CanConfigure; Gets called when the action can be configured and the action got selected in the ActionSelector. You need to return a user control with the "ActionConfigControl" class as base class
+  public override ActionConfigControl GetActionConfigControl(ActionConfigurator actionConfigurator)
   {
     return new ExampleActionConfigurator(this, actionConfigurator);
   }
   
   // Gets called when the action is triggered by a button press or an event
-  public void Trigger(string clientId, ActionButton actionButton)
+  public override void Trigger(string clientId, ActionButton actionButton)
   {
     
   }
@@ -114,9 +103,9 @@ If your action needs to be configured, your plugin needs a ActionConfigControl. 
 ```c#
 public partial class ExampleActionConfigurator : ActionConfigControl
 {
-  private IMacroDeckAction _macroDeckAction; // Add a variable for the instance of your action to get access to the Configuration etc.
+  private PluginAction _macroDeckAction; // Add a variable for the instance of your action to get access to the Configuration etc.
 
-  public ExampleActionConfigurator(IMacroDeckAction macroDeckAction, ActionConfigurator actionConfigurator)
+  public ExampleActionConfigurator(PluginAction macroDeckAction, ActionConfigurator actionConfigurator)
   {
     this._macroDeckAction = macroDeckAction;
     InitializeComponent();
@@ -128,7 +117,7 @@ public partial class ExampleActionConfigurator : ActionConfigControl
 ## Saving the config of an action
 If your action can be configured, you need to store the configuration as a string (can be json formatted) in the Configuration variable of your IMacroDeckAction. Macro Deck provides a event when the user closes the action configurator. You need to add the ActionSave event in your ActionConfigControl class.
 ```c#
-public ExampleActionConfigurator(IMacroDeckAction macroDeckAction, ActionConfigurator actionConfigurator)
+public ExampleActionConfigurator(PluginAction macroDeckAction, ActionConfigurator actionConfigurator)
 {
   this._macroDeckAction = macroDeckAction;
   InitializeComponent();
