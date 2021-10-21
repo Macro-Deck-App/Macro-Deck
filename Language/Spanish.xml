@@ -207,4 +207,6 @@ Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImpor
   <By>By</By>
   <StateBinding>Vincular estado a</StateBinding>
   <ErrorWhileLoadingPackageManager>Error al cargar el administrador de paquetes. Quizás no esté conectado a Internet o su firewall bloquee Macro Deck.</ErrorWhileLoadingPackageManager>
+  <UpdatesAvailable>Actualizaciones disponibles</UpdatesAvailable>
+  <EnableIconCache>Habilitar la caché de iconos (más rápido; mayor uso de memoria)</EnableIconCache>
 </Strings>
