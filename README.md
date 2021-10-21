@@ -75,7 +75,6 @@ public class Main : MacroDeckPlugin
 ```
 
 ## Creating a action class
-You find more information here: https://github.com/SuchByte/Macro-Deck-Example-CSharp-Plugin/blob/main/ExampleAction.cs
 ```c#
 public class ExampleAction : PluginAction
 {
