@@ -209,4 +209,6 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
   <StateBinding>Zustand binden an</StateBinding>
   <ErrorWhileLoadingPackageManager>Fehler beim Laden der Paketverwaltung. 
   Möglicherweise besteht Internetverbindung oder Macro Deck wird von der Firewall blockiert.</ErrorWhileLoadingPackageManager>
+  <UpdatesAvailable>Updates verfügbar</UpdatesAvailable>
+  <EnableIconCache>Icon Cache aktivieren (schneller; höhere Arbeitsspeicherauslastung)</EnableIconCache>
 </Strings>
