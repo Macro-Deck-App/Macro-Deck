@@ -3,7 +3,7 @@
   <__Language__>English</__Language__>
   <__LanguageCode__>eng</__LanguageCode__>
   <__Author__>Macro Deck</__Author__>
-  <__Version__>2b13</__Version__>
+  <__Version__>2.0.14-dev</__Version__>
   <NetworkAdapter>Network adapter</NetworkAdapter>
   <IPAddress>IP address</IPAddress>
   <Port>Port</Port>
@@ -207,4 +207,6 @@ The default port for Macro Deck is 8191. If some other application uses this por
   <By>By</By>
   <StateBinding>Bind state to</StateBinding>
   <ErrorWhileLoadingPackageManager>Error while loading package manager. Perhaps you are not connected to the internet or Macro Deck is blocked by your firewall.</ErrorWhileLoadingPackageManager>
+  <UpdatesAvailable>Updates available</UpdatesAvailable>
+  <EnableIconCache>Enable icon cache (faster; higher memory usage)</EnableIconCache>
 </Strings>
