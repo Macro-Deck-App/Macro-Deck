@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0"?>
 <Strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <__Language__>Spanish</__Language__>
+  <__Language__>Español</__Language__>
   <__LanguageCode__>Es</__LanguageCode__>
   <__Author__>l69l_Anthony</__Author__>
   <__Version__>2b11</__Version__>
@@ -10,7 +10,7 @@
   <Info>Información</Info>
   <Error>Error</Error>
   <Warning>Advertencia</Warning>
-  <ConfigureNetworkInfo>Es muy importante que se establezca el adaptador de red correcto, de lo contrario no se puede establecer ninguna conexión con el servidor. En la mayoría de los casos, el adaptador de red se llama "Ethernet" o "WLAN" y la dirección IP suele ser "192.168.178.xxx".
+  <ConfigureNetworkInfo>Es muy importante que se establezca el adaptador de red correcto, de lo contrario no se puede establecer ninguna conexión con el servidor. En la mayoría de los casos, el adaptador de red se llama "Ethernet" o "WLAN" y la dirección IP suele ser "192.168.1.xxx".
 
 El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usando este puerto, debe cambiarse.</ConfigureNetworkInfo>
   <AutomaticallyCheckUpdates>Revisar actualizaciones automaticamente</AutomaticallyCheckUpdates>
@@ -54,8 +54,8 @@ El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usa
   <Bottom>Debajo</Bottom>
   <Path>Ruta</Path>
   <CurrentState>Estado actual</CurrentState>
-  <Off>Off</Off>
-  <On>On</On>
+  <Off>Apagado</Off>
+  <On>Encendido</On>
   <DownloadAndInstall>Descargar</DownloadAndInstall>
   <Downloading>Descargar...</Downloading>
   <Color>Color</Color>
@@ -67,7 +67,7 @@ El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usa
   <Update>Actualizar</Update>
   <Plugin>Plugin</Plugin>
   <MacroDeckNeedsARestart>Es necesario reiniciar Macro Deck</MacroDeckNeedsARestart>
-  <MacroDeckMustBeRestartedForTheChanges>Es necesario reiniciar Macro Deck. ¿Quieres reiniciar Macro Deck ahora?</MacroDeckMustBeRestartedForTheChanges>
+  <MacroDeckMustBeRestartedForTheChanges>Es necesario reiniciar Macro Deck.¿Quieres reiniciar Macro Deck ahora?</MacroDeckMustBeRestartedForTheChanges>
   <Configure>Configurar</Configure>
   <Uninstall>Desinstalar</Uninstall>
   <NotLoaded>Sin cargar</NotLoaded>
@@ -94,21 +94,21 @@ El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usa
   <XPluginsLoaded>{0} plugins activos</XPluginsLoaded>
   <XPluginsDisabled>{0} plugins desactivados</XPluginsDisabled>
   <XClientsConnected>{0} Dispositivos conectados</XClientsConnected>
-  <IpAddressHostNamePort>Dirección IP / nombre de host: Puerto</IpAddressHostNamePort>
-  <InitialSetupButtonBack>&lt;- Regreso</InitialSetupButtonBack>
-  <InitialSetupButtonNext>Más lejos -&gt;</InitialSetupButtonNext>
-  <InitialSetupButtonFinish>Completo</InitialSetupButtonFinish>
-  <InitialSetupSelectLanguage>Elige un idioma</InitialSetupSelectLanguage>
+  <IpAddressHostNamePort>Dirección IP/nombre de host: Puerto</IpAddressHostNamePort>
+  <InitialSetupButtonBack>&lt;- Anterior</InitialSetupButtonBack>
+  <InitialSetupButtonNext>Siguiente -&gt;</InitialSetupButtonNext>
+  <InitialSetupButtonFinish>Finalizar</InitialSetupButtonFinish>
+  <InitialSetupSelectLanguage>Seleccione un idioma</InitialSetupSelectLanguage>
   <InitialSetupPage>{0}/{1}</InitialSetupPage>
-  <InitialSetupWelcome>Bienvenido a Macro Deck!</InitialSetupWelcome>
+  <InitialSetupWelcome>¡Bienvenido a Macro Deck!</InitialSetupWelcome>
   <InitialSetupLetsConfigure>Configuremos algunas cosas</InitialSetupLetsConfigure>
   <InitialSetupConfigureNetworkSettings>Configurar los ajustes de red</InitialSetupConfigureNetworkSettings>
   <InitialSetupConfigureGridPreferences>Configurar la cuadrícula</InitialSetupConfigureGridPreferences>
   <InitialSetupPickAllPluginsYouNeed>Seleccionar plugins</InitialSetupPickAllPluginsYouNeed>
-  <InitialSetupDontWorryInstallUninstallPlugins>Los plugins se pueden instalar / desinstalar más tarde en el Administrador de paquetes</InitialSetupDontWorryInstallUninstallPlugins>
+  <InitialSetupDontWorryInstallUninstallPlugins>Los plugins se pueden instalar/desinstalar más tarde en el Administrador de paquetes</InitialSetupDontWorryInstallUninstallPlugins>
   <InitialSetupWantSomeIcons>Seleccionar paquetes de iconos</InitialSetupWantSomeIcons>
   <InitialSetupInstallIconPacksPackageManager>Los paquetes de iconos se pueden instalar más tarde en el Administrador de paquetes</InitialSetupInstallIconPacksPackageManager>
-  <InitialSetupAlmostDone>Estamos a punto de empezar!</InitialSetupAlmostDone>
+  <InitialSetupAlmostDone>¡Estamos a punto de empezar!</InitialSetupAlmostDone>
   <KnownDevices>Dispositivos conocidos</KnownDevices>
   <AskOnNewConnections>Preguntar sobre nuevas conexiones</AskOnNewConnections>
   <AllowAllNewConnections>Permitir todas las conexiones (no recomendado) </AllowAllNewConnections>
@@ -132,7 +132,7 @@ El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usa
   <TheresAnUpdateForYou>Nueva actualización disponible:)</TheresAnUpdateForYou>
   <VersionXIsNowAvailable>Se puede descargar la versión {0} ({1})</VersionXIsNowAvailable>
   <ReadyToDownloadUpdate>Listo</ReadyToDownloadUpdate>
-  <DownloadingUpdate>Descargando ... {0}% ({1} MB / {2} MB) </DownloadingUpdate>
+  <DownloadingUpdate>Descargando ... {0}% ({1} MB/{2} MB) </DownloadingUpdate>
   <VerifyingUpdateFile>El archivo está verificado...</VerifyingUpdateFile>
   <MD5NotValid>La suma de comprobación MD5 no es válida</MD5NotValid>
   <StartingInstaller>El instalador comenzará</StartingInstaller>
@@ -144,10 +144,10 @@ El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usa
   <IconImportQualityInfo>Muchos iconos de alta calidad pueden provocar problemas de rendimiento, especialmente con GIF animados..
 Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImportQualityInfo>
   <Original>Original</Original>
-  <High350px>Alto (350px) </High350px>
+  <High350px>Alto (350px)</High350px>
   <Normal200px>Normal (200px)</Normal200px>
-  <Low150px>Bajo (150px) </Low150px>
-  <Lowest100px>Más bajo (100px) </Lowest100px>
+  <Low150px>Bajo (150px)</Low150px>
+  <Lowest100px>Más bajo (100px)</Lowest100px>
   <ImportIconPack>Importar</ImportIconPack>
   <ExportIconPack>Exportar</ExportIconPack>
   <CreateIcon>Crear icono</CreateIcon>
@@ -199,5 +199,12 @@ Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImpor
   <PackageManagerTabInstalled>Instalado</PackageManagerTabInstalled>
   <Event>Evento</Event>
   <AutomaticallySwitchToFolder>Cambiar automáticamente a la carpeta</AutomaticallySwitchToFolder>
+  <Restart>Reiniciar</Restart>
+  <Delay>Delay</Delay>
+  <If>Cuando</If>
+  <Else>Además</Else>
+  <Online>En línea</Online>
+  <By>By</By>
+  <StateBinding>Vincular estado a</StateBinding>
+  <ErrorWhileLoadingPackageManager>Error al cargar el administrador de paquetes. Quizás no esté conectado a Internet o su firewall bloquee Macro Deck.</ErrorWhileLoadingPackageManager>
 </Strings>
-
