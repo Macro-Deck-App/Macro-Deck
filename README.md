@@ -168,6 +168,19 @@ Maybe your plugin gets data you want to store in a variable like temperatures, s
 ```c#
 SuchByte.MacroDeck.Variables.VariableManager.SetValue(string name, object value, VariableType type, IMacroDeckPlugin plugin, bool save = true); // if your variable changes often, set save to false
 ```
+
+## Compiling and adding the manifest
+Compile your plugin and copy the output .dll file into "%Appdata%\Macro Deck\plugins\YOUR_NAME.YOUR_PLUGINNAME\"
+After that you have to create a plugin manifest. Create a .xml file and call it "Plugin.xml" and place it in the same directory.
+```xml
+<?xml version="1.0"?>
+<PluginManifest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Author>YOUR_NAME</Author>
+	<MainFile>YOUR_PLUGIN.dll</MainFile>
+</PluginManifest>
+```
+
+
 ## Publish the plugin in the package manager
 If you want your plugin to be published in the Macro Deck package manager, you have to follow these steps:
 1. Upload the source code to GitHub. Plugins in the package manager must be open source because of safety reasons.
