@@ -45,11 +45,14 @@ You may have to install the latest version of System.Drawing.Common from NuGet
 ```c#
 public class Main : MacroDeckPlugin
 {
+  // A short description what the plugin can do
   public override string Description => "Example plugin";
   
-  public override Image Icon => Properties.Resources.ExampleIcon; // You can add a image from your resources here
-
-  public override bool CanConfigure => true; // Optional; If your plugin can be configured, set to "true". It'll make the "Configure" button appear in the package manager.
+  // You can add a image from your resources here
+  public override Image Icon => Properties.Resources.ExampleIcon; 
+  
+  // Optional; If your plugin can be configured, set to "true". It'll make the "Configure" button appear in the package manager.
+  public override bool CanConfigure => true; 
 
   // Gets called when the plugin is loaded
   public override void Enable()
@@ -76,13 +79,17 @@ You find more information here: https://github.com/SuchByte/Macro-Deck-Example-C
 ```c#
 public class ExampleAction : PluginAction
 {
-  public override string Name => "Example action"; // The name of the action
+  // The name of the action
+  public override string Name => "Example action"; 
   
-  public override string Description => "Action description"; // eg. what does this action do?
+  // A short description what the action can do
+  public override string Description => "Action description"; 
   
-  public override string DisplayName { get; set; } = "Example action"; // The display name of the action. Can be changed later based on configuration
+  // The display name of the action. Can be changed later based on configuration
+  public override string DisplayName { get; set; } = "Example action"; 
   
-  public override bool CanConfigure => true; // Optional; Add if this action can be configured. This will make the ActionConfigurator calling GetActionConfigurator();
+  // Optional; Add if this action can be configured. This will make the ActionConfigurator calling GetActionConfigurator();
+  public override bool CanConfigure => true; 
   
   // Optional; Add if you added CanConfigure; Gets called when the action can be configured and the action got selected in the ActionSelector. You need to return a user control with the "ActionConfigControl" class as base class
   public override ActionConfigControl GetActionConfigControl(ActionConfigurator actionConfigurator)
@@ -103,7 +110,8 @@ If your action needs to be configured, your plugin needs a ActionConfigControl. 
 ```c#
 public partial class ExampleActionConfigurator : ActionConfigControl
 {
-  private PluginAction _macroDeckAction; // Add a variable for the instance of your action to get access to the Configuration etc.
+  // Add a variable for the instance of your action to get access to the Configuration etc.
+  private PluginAction _macroDeckAction; 
 
   public ExampleActionConfigurator(PluginAction macroDeckAction, ActionConfigurator actionConfigurator)
   {
