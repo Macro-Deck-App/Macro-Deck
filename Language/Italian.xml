@@ -3,7 +3,7 @@
   <__Language__>Italian</__Language__>
   <__LanguageCode__>it</__LanguageCode__>
   <__Author__>PhoenixWyllow aka PW.Dev</__Author__>
-  <__Version__>2b13</__Version__>
+  <__Version__>2b14-dev</__Version__>
   <NetworkAdapter>Scheda di rete</NetworkAdapter>
   <IPAddress>Indirizzo IP</IPAddress>
   <Port>Porta</Port>
@@ -207,4 +207,6 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <By>Di</By>
   <StateBinding>Collega stato a</StateBinding>
   <ErrorWhileLoadingPackageManager>Errore durante il caricamento del gestore di pacchetti. Forse non la connessione Internet è assente o Macro Deck è bloccato dal firewall.</ErrorWhileLoadingPackageManager>
+  <UpdatesAvailable>Aggiornamenti disponibili</UpdatesAvailable>
+  <EnableIconCache>Abilita cache icone (più veloce; utilizzo RAM maggiore)</EnableIconCache>
 </Strings>
