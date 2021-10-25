@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+<Strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <__Language__>Türkçe</__Language__>
+  <__LanguageCode__>tr</__LanguageCode__>
+  <__Author__>Tuna Karakaşoğlu | twitch.tv/DunyaninEnKotuOyuncusu</__Author__>
+  <__Version__>2b11-dev</__Version__>
+  <NetworkAdapter>Ağ adaptörü</NetworkAdapter>
+  <IPAddress>IP adresi</IPAddress>
+  <Port>Port</Port>
+  <Info>Bilgi</Info>
+  <Error>Hata</Error>
+  <Warning>Uyarı</Warning>
+  <ConfigureNetworkInfo>Doğru ağ adaptörünü seçmeniz çok önemlidir. Seçmemeniz durumunda client ve serverı birbirine bağlayamayabilirsiniz. Çoğu durumda Ağ adaptörünün ismi "Ethernet" veya "Wi-Fi" olmaktadır. Genellikle IP adresi "192.168.178.xxx" türevidir.
+
+Macro Deck'in varsayılan portu: 8191. Eğer başka bir uygulama bu portu kullanıyorsa, bu port tanımını değiştirebilirsiniz.</ConfigureNetworkInfo>
+  <AutomaticallyCheckUpdates>Güncellemeleri otomatik denetle</AutomaticallyCheckUpdates>
+  <AutomaticallyStartWithWindows>Windows başlangıcında otomatik başlat</AutomaticallyStartWithWindows>
+  <Show>Macro Deck'i ayarla</Show>
+  <Exit>Macro Deck'ten çık</Exit>
+  <XUpdatesAvailable>{0} güncelleştirme mevcut</XUpdatesAvailable>
+  <Profile>Profil</Profile>
+  <Columns>Kolonlar</Columns>
+  <Rows>Satırlar</Rows>
+  <Spacing>Aralık</Spacing>
+  <CornerRadius>Köşe yuvarlatma</CornerRadius>
+  <ButtonBackGround>Buton arkaplanı</ButtonBackGround>
+  <AreYouSure>Emin misiniz?</AreYouSure>
+  <Behaviour>Davranış</Behaviour>
+  <Plugins>Pluginler</Plugins>
+  <IconPacks>Ikon paketleri</IconPacks>
+  <All>Hepsi</All>
+  <Updates>Güncelleştirmeler</Updates>
+  <Installed>Yüklendi</Installed>
+  <Install>Yükle</Install>
+  <Search>Ara...</Search>
+  <Name>İsim</Name>
+  <Type>Tip</Type>
+  <Value>Değer</Value>
+  <Creator>Sahip</Creator>
+  <Ok>Tamam</Ok>
+  <FolderName>Klasör ismi</FolderName>
+  <Never>Asla</Never>
+  <OnApplicationFocus>Uygulamaya odaklanıldığında</OnApplicationFocus>
+  <Application>Uygulama</Application>
+  <Devices>Cihazlar</Devices>
+  <Create>Oluştur</Create>
+  <Save>Kaydet</Save>
+  <Appearance>Arayüz</Appearance>
+  <ButtonState>Buton durumu</ButtonState>
+  <Label>Etiket</Label>
+  <Top>Üst</Top>
+  <Center>Orta</Center>
+  <Bottom>Alt</Bottom>
+  <Path>Yol</Path>
+  <CurrentState>Şu anki durum</CurrentState>
+  <Off>Kapalı</Off>
+  <On>Açık</On>
+  <DownloadAndInstall>İndir ve yükle</DownloadAndInstall>
+  <Downloading>İndiriliyor...</Downloading>
+  <Color>Renk</Color>
+  <IconPack>Ikon paketi</IconPack>
+  <Size>Boyut</Size>
+  <CurrentProgress>Şu anki ilerleme</CurrentProgress>
+  <TotalProgress>Toplam ilerleme</TotalProgress>
+  <XDownloads>{0} indirme</XDownloads>
+  <Update>Güncelleştirme</Update>
+  <Plugin>Plugin</Plugin>
+  <MacroDeckNeedsARestart>Macro Deck yeniden başlatılmalı</MacroDeckNeedsARestart>
+  <MacroDeckMustBeRestartedForTheChanges>Değişiklerin uygulanabilmesi için Macro Deck yeniden başlatılmalı. Macro Deck'i şimdi yeniden başlatmak istiyor musunuz?</MacroDeckMustBeRestartedForTheChanges>
+  <Configure>Ayarla</Configure>
+  <Uninstall>Kurulumu kaldır</Uninstall>
+  <NotLoaded>Yüklenmemiş</NotLoaded>
+  <Yes>Evet</Yes>
+  <No>Hayır</No>
+  <Status>Durum</Status>
+  <BlockConnection>Blok bağlantı</BlockConnection>
+  <Change>Değiştir</Change>
+  <Id>ID</Id>
+  <Connected>Bağlandı</Connected>
+  <Disconnected>Bağlantı kesildi</Disconnected>
+  <Trigger>Tetik</Trigger>
+  <Action>Aksiyon</Action>
+  <Condition>Durum</Condition>
+  <InstalledVersion>Yüklü versiyon</InstalledVersion>
+  <UpdateChannel>Kanalı güncelle</UpdateChannel>
+  <CheckForUpdatesNow>Güncelleştirmeleri şimdi kontrol et</CheckForUpdatesNow>
+  <Author>Eser Sahibi</Author>
+  <Version>Versiyon</Version>
+  <TheFolderWillBeDeleted>{0} klasörü, içerisindeki tüm aksiyon butonlarıyla beraber silinecektir.</TheFolderWillBeDeleted>
+  <TheProfileWillBeDeleted>{0} profili, içerisindeki tüm klasörler ve aksiyon butonlarıyla beraber silinecektir.</TheProfileWillBeDeleted>
+  <ServerOffline>Sunucu çevrimdışı</ServerOffline>
+  <ServerRunning>Sunucu çalışıyor</ServerRunning>
+  <XPluginsLoaded>{0} plugin yüklendi</XPluginsLoaded>
+  <XPluginsDisabled>{0} plugin devredışı</XPluginsDisabled>
+  <XClientsConnected>{0} client bağlandı</XClientsConnected>
+  <IpAddressHostNamePort>IP adresi/hostname : Port</IpAddressHostNamePort>
+  <InitialSetupButtonBack>&lt;- Önceki</InitialSetupButtonBack>
+  <InitialSetupButtonNext>Sonraki -&gt;</InitialSetupButtonNext>
+  <InitialSetupButtonFinish>Bitir</InitialSetupButtonFinish>
+  <InitialSetupSelectLanguage>Dil seçimi yapınız</InitialSetupSelectLanguage>
+  <InitialSetupPage>Sayfa {0}/{1}</InitialSetupPage>
+  <InitialSetupWelcome>Macro Deck 2'ye Hoşgeldiniz!</InitialSetupWelcome>
+  <InitialSetupLetsConfigure>Şimdi Macro Deck ayarlarınızı yapalım</InitialSetupLetsConfigure>
+  <InitialSetupConfigureNetworkSettings>Ağ ayarlarınızı düzenleyin</InitialSetupConfigureNetworkSettings>
+  <InitialSetupConfigureGridPreferences>Şimdi ızgarayı isteklerinize göre düzenleyin</InitialSetupConfigureGridPreferences>
+  <InitialSetupPickAllPluginsYouNeed>İhtiyacınız olan pluginleri seçin</InitialSetupPickAllPluginsYouNeed>
+  <InitialSetupDontWorryInstallUninstallPlugins>Endişelenmeyin, dilediğiniz zaman istediğiniz plugini paket yöneticisinden yükleyip/kaldırabilirsiniz</InitialSetupDontWorryInstallUninstallPlugins>
+  <InitialSetupWantSomeIcons>İkon eklemek ister misiniz?</InitialSetupWantSomeIcons>
+  <InitialSetupInstallIconPacksPackageManager>Dilerseniz daha sonra da ikon paketlerini paket yöneticisinden yükleyebilirsiniz</InitialSetupInstallIconPacksPackageManager>
+  <InitialSetupAlmostDone>Neredeyse tamamlandı!</InitialSetupAlmostDone>
+  <KnownDevices>Tanınan cihazlar</KnownDevices>
+  <AskOnNewConnections>Yeni bağlantı olduğunda sor</AskOnNewConnections>
+  <AllowAllNewConnections>Tüm yeni bağlantılara izin ver (önerilmez)</AllowAllNewConnections>
+  <BlockAllNewConnections>Tüm yeni bağlantıları engelle</BlockAllNewConnections>
+  <InstallDLL>.dll'i yükle (önerilmez)</InstallDLL>
+  <NeverInstallDLLFiles>Güvenmediğiniz kaynaklardan gelen .dll dosyalarını asla yüklemeyin! Bilinmeyen kaynaklar üzerinden yüklenen .dll dosyaları sisteminize zarar verebilir. Yüklemeleri ne yaptığınızı biliyorsanız yapınız! .dll pluginini gerçekten yüklemek istiyor musunuz?</NeverInstallDLLFiles>
+  <XWillBeUninstalled>{0} yüklemesi kaldırılacaktır.</XWillBeUninstalled>
+  <XSuccessfullyUninstalled>{0} yüklemesi kaldırılacaktır. Değişikliklerin uygulanabilmesi için Macro Deck yeniden başlatılmadı. Macro Deck'i şimdi yeniden başlat?</XSuccessfullyUninstalled>
+  <CreateVariable>Değişken oluştur</CreateVariable>
+  <DeleteVariable>Değişkeni sil</DeleteVariable>
+  <SelectAPluginAndActionToBegin>Başlamak için bir plugin ve aksiyon seçin</SelectAPluginAndActionToBegin>
+  <ActionNeedsNoConfiguration>Bu aksiyon ayar gerektirmemekte</ActionNeedsNoConfiguration>
+  <CantCreateFolder>Klasör oluşturulamadı</CantCreateFolder>
+  <FolderCalledXAlreadyExists>{0} isimli klasör zaten var</FolderCalledXAlreadyExists>
+  <OnPress>Basıldığında</OnPress>
+  <OnEvent>Olay gerçekleştiğinde</OnEvent>
+  <CantCreateIconPack>İkon paketi oluşturulamadı</CantCreateIconPack>
+  <IconPackCalledXAlreadyExists>{0} isimli ikon paketi zaten var</IconPackCalledXAlreadyExists>
+  <CantCreateProfile>Profil oluşturulamadı</CantCreateProfile>
+  <ProfileCalledXAlreadyExists>{0} isimli profil zaten var</ProfileCalledXAlreadyExists>
+  <TheresAnUpdateForYou>Bir güncelleştirmeniz var :)</TheresAnUpdateForYou>
+  <VersionXIsNowAvailable>Versiyon {0} ({1}) hazır</VersionXIsNowAvailable>
+  <ReadyToDownloadUpdate>Güncelleştirme indirilmeye hazır</ReadyToDownloadUpdate>
+  <DownloadingUpdate>Güncelleştirme indiriliyor... {0}% ({1}MB/{2}MB)</DownloadingUpdate>
+  <VerifyingUpdateFile>Güncelleştirme dosyası doğrulanıyor...</VerifyingUpdateFile>
+  <MD5NotValid>MD5 checksum doğrulanamadı</MD5NotValid>
+  <StartingInstaller>Yükleyici başlatılıyor</StartingInstaller>
+  <FileNotFound>Dosya bulunamadı</FileNotFound>
+  <TryAgainOrDownloadManually>Tekrar deneyin ya da güncelleştirmeyi manuel olarak indirin</TryAgainOrDownloadManually>
+  <Trending>Revaşta</Trending>
+  <Layers>Katmanlar</Layers>
+  <AddImage>Imaj ekle</AddImage>
+  <IconImportQualityInfo>Yüksek kaliteli ikonlar (özellikle fazlaca kullanılan büyük hareketli gifler) RAM kullanımını artırabilir ve/veya uzun yükleme zamanlarına mal olabilir.
+
+Gifleri kullanacaksanız daha veya en düşük kalitede kullanmanızı öneririz.</IconImportQualityInfo>
+  <Original>Orjinal</Original>
+  <High350px>Yüksek (350px)</High350px>
+  <Normal200px>Normal (200px)</Normal200px>
+  <Low150px>Düşük (150px)</Low150px>
+  <Lowest100px>En düşük (100px)</Lowest100px>
+  <ImportIconPack>İkon paketini içe aktar</ImportIconPack>
+  <ExportIconPack>İkon paketini dışa aktar</ExportIconPack>
+  <CreateIcon>İkon oluştur</CreateIcon>
+  <ImportIcon>İkon içe aktar</ImportIcon>
+  <DeleteIcon>İkonu sil</DeleteIcon>
+  <IconSelectorManagedInfo>Bu ikon paketi plugin yöneticisi tarafından yönetilmektedir</IconSelectorManagedInfo>
+  <DownloadingXPackages>{0} paket indiriliyor</DownloadingXPackages>
+  <PluginCouldNotBeLoaded>Plugin yüklenemedi. Pluginin yüklü olan versiyonu Macro Deck'in bu versiyonuyla uyumlu olmayabilir.</PluginCouldNotBeLoaded>
+  <CantChangeName>İsim değiştirilemiyor</CantChangeName>
+  <DeviceCalledXAlreadyExists>{0} isimli bir cihaz zaten mevcut</DeviceCalledXAlreadyExists>
+  <NewConnection>Yeni bağlantı</NewConnection>
+  <XIsAnUnknownDevice>{0} isimli bilinmeyen cihaz Macro Deck'e bağlanmak istiyor. Bağlantıya izin verilsin mi?</XIsAnUnknownDevice>
+  <ShouldMacroDeckBlockConnectionsFromX>Macro Deck {0} isimli cihazdan ileride gelecek bağlantıları engellesin mi?</ShouldMacroDeckBlockConnectionsFromX>
+  <FailedToStartServer>Sunucu başlatılamadı. Tanımlı port kullanılıyor olabilir ya da hatalı ağ adaptörü seçmiş olabilirsiniz. Ayarlar sayfasından doğru ağ adaptörünü seçtiğinizden emin olun ve portu değiştirmeyi deneyin.</FailedToStartServer>
+  <ErrorWhileLoadingPlugins>Pluginleri yüklerken hata oluştu</ErrorWhileLoadingPlugins>
+  <PluginXCouldNotBeLoaded>{0} versiyon {1} yüklenemedi. Macro Deck'in bu versiyonuyla uyumlu olmayabilir. Bu plugini kullanan aksiyonlar, plugin update edilene kadar çalışmayacaktır.</PluginXCouldNotBeLoaded>
+  <InstallationSuccessfull>Kurulum başarılı</InstallationSuccessfull>
+  <PluginXInstalledSuccessfully>{0} kurulumu başarılı</PluginXInstalledSuccessfully>
+  <ErrorWhileInstallingPlugin>Plugin kurulurken hata oluştu</ErrorWhileInstallingPlugin>
+  <PluginXCouldNotBeInstalled>{0} kurulamadı. Macro Deck'in bu versiyonuyla uyumlu olmayabilir</PluginXCouldNotBeInstalled>
+  <Settings>Ayarlar</Settings>
+  <Language>Dil</Language>
+  <General>Genel</General>
+  <Connection>Bağlantı</Connection>
+  <Backup>Yedekleme</Backup>
+  <About>Hakkında</About>
+  <NoUpdatesAvailable>Güncelleştirme mevcut değil</NoUpdatesAvailable>
+  <LatestVersionInstalled>En son versiyon zaten kurulu</LatestVersionInstalled>
+  <WarningDevVersions>Geliştirilmekte olan(dev) versiyonlar büyük oranla stabil çalışmayacaktır, uygulamada patlamalara ve veri kaybına (ayarladığınız aksiyon butonları, klasörler and profiller) sebep olabilir . Geliştirici güncelleştirmeleri kanalına geçiş yapmayı gerçekten istiyor musunuz?</WarningDevVersions>
+  <WarningBetaVersions>Beta versiyonlar bazı durumlarda stabil çalışmaz ve patlamalara sebebiyet verebilir. Beta güncelleştirmeleri kanalına geçiş yapmayı gerçekten istiyor musunuz?</WarningBetaVersions>
+  <VariableXGetsDeleted>Değişken {0} silinecektir</VariableXGetsDeleted>
+  <DeckTitle>Deck</DeckTitle>
+  <DeviceManagerTitle>Cihaz yönericisi</DeviceManagerTitle>
+  <PackageManagerTitle>Paket yöneticisi</PackageManagerTitle>
+  <SettingsTitle>Ayarlar</SettingsTitle>
+  <VariablesTitle>Global değişkenler</VariablesTitle>
+  <Edit>Düzenle</Edit>
+  <Delete>Sil</Delete>
+  <Run>Çalıştır</Run>
+  <Copy>Kopyala</Copy>
+  <Paste>Yapıştıe</Paste>
+  <WebSocketAPIVersion>Websocket API versiyon</WebSocketAPIVersion>
+  <PluginAPIVersion>Plugin API versiyon</PluginAPIVersion>
+  <InstalledPlugins>Yüklü pluginler</InstalledPlugins>
+  <OperatingSystem>İşletim sistemi</OperatingSystem>
+  <DevelopedByX>{0} tarafından Almanya'da geliştirildi</DevelopedByX>
+  <XTranslationByX>{0} çevirisi {1} tarafından yapıldı</XTranslationByX>
+  <PackageManagerTabAvailable>Mevcut</PackageManagerTabAvailable>
+  <PackageManagerTabInstalled>Yüklendi</PackageManagerTabInstalled>
+  <Event>Olay</Event>
+  <AutomaticallySwitchToFolder>Otomatik olarak klasöre dönüştür</AutomaticallySwitchToFolder>
+  <Restart>Macro Deck'i yeniden başlat</Restart>
+  <Delay>Gecikme(delay)</Delay>
+  <If>Eğer</If>
+  <Else>Yoksa</Else>
+  <Online>Çevrimiçi</Online>
+  <By>Tarafından</By>
+  <StateBinding>Durumu şuna bağla</StateBinding>
+  <ErrorWhileLoadingPackageManager>Paket yöneticisi yüklenemedi. İnternete bağlı olmayabilirsiniz ya da Macro Deck güvenlik duvarı tarafından engelleniyor olabilir.</ErrorWhileLoadingPackageManager>
+  <UpdatesAvailable>Güncelleştirmeler mevcut</UpdatesAvailable>
+  <EnableIconCache>İkon önbelleğini aktif et (daha hızlı; yüksek RAM kullanımı)</EnableIconCache>
+</Strings>
