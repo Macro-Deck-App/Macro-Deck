@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Macro Deck 2": {
+      "commandName": "Project",
+      "commandLineArgs": "--show ",
+      "nativeDebugging": false
+    }
+  }
+}

@@ -1,0 +1,202 @@
+<?xml version="1.0"?>
+<Strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <__Language__>Russian</__Language__>
+  <__LanguageCode__>ru</__LanguageCode__>
+  <__Author__>LeetPanda1337</__Author__>
+  <__Version__>2b11</__Version__>
+  <NetworkAdapter>Сетевой адаптер</NetworkAdapter>
+  <IPAddress>IP-адрес</IPAddress>
+  <Port>Порт</Port>
+  <Info>Информация</Info>
+  <Error>Ошибка</Error>
+  <Warning>Предупреждение</Warning>
+  <ConfigureNetworkInfo>Очень важно выбрать правильный сетевой адаптер, в противном случае клиент не сможет подключиться к серверу. В большинстве случаев название сетевого адаптера выглядит как "Ethernet" или "WLAN", а его IP-адрес выглядит как "192.168.178.xxx".
+
+8191 cтандартный порт Macro Deck. Если другие программы используют этот порт, вы можете сменить его.</ConfigureNetworkInfo>
+  <AutomaticallyCheckUpdates>Автоматически проверять обновления</AutomaticallyCheckUpdates>
+  <AutomaticallyStartWithWindows>Автозапуск вместе с Windows</AutomaticallyStartWithWindows>
+  <Show>Показать</Show>
+  <Exit>Выход</Exit>
+  <XUpdatesAvailable>{0} обновлений доступно</XUpdatesAvailable>
+  <Profile>Профиль</Profile>
+  <Columns>Столбцы</Columns>
+  <Rows>Строки</Rows>
+  <Spacing>Промежуток</Spacing>
+  <CornerRadius>Радиус углов</CornerRadius>
+  <ButtonBackGround>Фон кнопок</ButtonBackGround>
+  <AreYouSure>Вы уверены?</AreYouSure>
+  <Behaviour>Действия</Behaviour>
+  <Plugins>Плагины</Plugins>
+  <IconPacks>Пакеты иконок</IconPacks>
+  <All>Все</All>
+  <Updates>Обновления</Updates>
+  <Available>Доступные</Available>
+  <Installed>Установленные</Installed>
+  <Install>Установить</Install>
+  <Search>Поиск...</Search>
+  <Name>Имя</Name>
+  <Type>Тип</Type>
+  <Value>Значение</Value>
+  <Creator>Создатель</Creator>
+  <Ok>Ок</Ok>
+  <FolderName>Имя папки</FolderName>
+  <Never>Никогда</Never>
+  <OnApplicationFocus>При запущенной программе</OnApplicationFocus>
+  <Application>Программа</Application>
+  <Devices>Устройства</Devices>
+  <Create>Создать</Create>
+  <Save>Сохранить</Save>
+  <Appearance>Оформление</Appearance>
+  <ButtonState>Статус кнопки</ButtonState>
+  <Label>Текст</Label>
+  <Top>Сверху</Top>
+  <Center>По центру</Center>
+  <Bottom>Внизу</Bottom>
+  <Path>Путь</Path>
+  <CurrentState>Текущее состояние</CurrentState>
+  <Off>Выкл.</Off>
+  <On>Вкл.</On>
+  <DownloadAndInstall>Загрузить и установить</DownloadAndInstall>
+  <Downloading>Загрузка...</Downloading>
+  <Color>Цвет</Color>
+  <IconPack>Пакет иконок</IconPack>
+  <Size>Размер</Size>
+  <CurrentProgress>Текущий прогресс</CurrentProgress>
+  <TotalProgress>Общий прогресс</TotalProgress>
+  <XDownloads>{0} загрузок</XDownloads>
+  <Update>Обновление</Update>
+  <Plugin>Плагин</Plugin>
+  <MacroDeckNeedsARestart>Macro Deck требуется перезагрузка</MacroDeckNeedsARestart>
+  <MacroDeckMustBeRestartedForTheChanges>Macro Deck требуется перезагрузка для применения изменений. Перезагрузить сейчас?</MacroDeckMustBeRestartedForTheChanges>
+  <Configure>Настроить</Configure>
+  <Uninstall>Удалить</Uninstall>
+  <NotLoaded>Не загружено</NotLoaded>
+  <Yes>Да</Yes>
+  <No>Нет</No>
+  <Status>Статус</Status>
+  <BlockConnection>Блокировать соединение</BlockConnection>
+  <Change>Изменить</Change>
+  <Id>ID</Id>
+  <Connected>Подключено</Connected>
+  <Disconnected>Отключено</Disconnected>
+  <Trigger>Триггер</Trigger>
+  <Action>Действие</Action>
+  <Condition>Состояние</Condition>
+  <InstalledVersion>Установленная версия</InstalledVersion>
+  <UpdateChannel>Канал обновлений</UpdateChannel>
+  <CheckForUpdatesNow>Проверить обновления</CheckForUpdatesNow>
+  <Author>Автор</Author>
+  <Version>Версия</Version>
+  <TheFolderWillBeDeleted>Папка {0} и все её кнопки будут удалены.</TheFolderWillBeDeleted>
+  <TheProfileWillBeDeleted>Профиль {0} и все его папки и кнопки будут удалены.</TheProfileWillBeDeleted>
+  <ServerOffline>Сервер не запущен</ServerOffline>
+  <ServerRunning>Сервер запущен</ServerRunning>
+  <XPluginsLoaded>{0} плагинов запущено</XPluginsLoaded>
+  <XPluginsDisabled>{0} плагинов отключено</XPluginsDisabled>
+  <XClientsConnected>{0} клиентов подключено</XClientsConnected>
+  <IpAddressHostNamePort>IP-адрес/имя хоста : порт</IpAddressHostNamePort>
+  <InitialSetupButtonBack>&lt;- Назад</InitialSetupButtonBack>
+  <InitialSetupButtonNext>Далее -&gt;</InitialSetupButtonNext>
+  <InitialSetupButtonFinish>Готово</InitialSetupButtonFinish>
+  <InitialSetupSelectLanguage>Выберите язык</InitialSetupSelectLanguage>
+  <InitialSetupPage>Страница {0}/{1}</InitialSetupPage>
+  <InitialSetupWelcome>Добро пожаловать в Macro Deck 2!</InitialSetupWelcome>
+  <InitialSetupLetsConfigure>Давайте настроим Macro Deck 2</InitialSetupLetsConfigure>
+  <InitialSetupConfigureNetworkSettings>Настройте параметры сети</InitialSetupConfigureNetworkSettings>
+  <InitialSetupConfigureGridPreferences>Настройте размер сетки</InitialSetupConfigureGridPreferences>
+  <InitialSetupPickAllPluginsYouNeed>Выберите необходимые плагины</InitialSetupPickAllPluginsYouNeed>
+  <InitialSetupDontWorryInstallUninstallPlugins>Не волнуйтесь, вы можете устанавливать и удалять плагины в менеджере пакетов</InitialSetupDontWorryInstallUninstallPlugins>
+  <InitialSetupWantSomeIcons>Хотите установить пакеты иконок?</InitialSetupWantSomeIcons>
+  <InitialSetupInstallIconPacksPackageManager>Вы также сможете устанавливать пакеты иконок в менеджере пакетов</InitialSetupInstallIconPacksPackageManager>
+  <InitialSetupAlmostDone>Настройка почти завершена!</InitialSetupAlmostDone>
+  <KnownDevices>Доступные устройства</KnownDevices>
+  <AskOnNewConnections>Запрашивать подтверждение при новом подключении</AskOnNewConnections>
+  <AllowAllNewConnections>Разрешить все новые подключения (не рекомендуется)</AllowAllNewConnections>
+  <BlockAllNewConnections>Блокировать все новые подключения</BlockAllNewConnections>
+  <InstallDLL>Установка .dll(не рекомендуется)</InstallDLL>
+  <NeverInstallDLLFiles>Не устанавливайте .dll файлы из источников, которым вы не доверяете! .dll файлы из неизвестных источников могут нанести вред вашему компьютеру! Устанавливайте их только тогда, когда осознаете, что делаете! Вы уверены, что хотите установить .dll плагин?</NeverInstallDLLFiles>
+  <XWillBeUninstalled>{0} будет удалено.</XWillBeUninstalled>
+  <XSuccessfullyUninstalled>{0} успешно удалено. Macro Deck требуется перезагрузка для применения изменений. Перезагрузить сейчас?</XSuccessfullyUninstalled>
+  <CreateVariable>Создать переменную</CreateVariable>
+  <DeleteVariable>Удалить переменную</DeleteVariable>
+  <SelectAPluginAndActionToBegin>Выберите плагин и действие для начала</SelectAPluginAndActionToBegin>
+  <SelectAPluginAndActionToBegin>Выберите плагин и действие для начала</SelectAPluginAndActionToBegin>
+  <ActionNeedsNoConfiguration>Это действие не требует настройки</ActionNeedsNoConfiguration>
+  <CantCreateFolder>Не удалось создать папку</CantCreateFolder>
+  <FolderCalledXAlreadyExists>Папка {0} уже существует</FolderCalledXAlreadyExists>
+  <OnPress>При нажатии</OnPress>
+  <OnEvent>При событии</OnEvent>
+  <CantCreateIconPack>Не удалось создать пакет иконок</CantCreateIconPack>
+  <IconPackCalledXAlreadyExists>Пакет иконок {0} уже существует</IconPackCalledXAlreadyExists>
+  <CantCreateProfile>Не удалось создать профиль</CantCreateProfile>
+  <ProfileCalledXAlreadyExists>Профиль {0} уже существует</ProfileCalledXAlreadyExists>
+  <TheresAnUpdateForYou>Новое обновление :)</TheresAnUpdateForYou>
+  <VersionXIsNowAvailable>Версия {0} ({1}) доступна</VersionXIsNowAvailable>
+  <ReadyToDownloadUpdate>Подготовка загрузки обновления</ReadyToDownloadUpdate>
+  <DownloadingUpdate>Загрузка обновления... {0}% ({1}MB/{2}MB)</DownloadingUpdate>
+  <VerifyingUpdateFile>Проверка загруженного файла...</VerifyingUpdateFile>
+  <MD5NotValid>Контрольная сумма MD5 неверна</MD5NotValid>
+  <StartingInstaller>Запуск установки</StartingInstaller>
+  <FileNotFound>Файл не найден</FileNotFound>
+  <TryAgainOrDownloadManually>Повторите попытку или загрузите обновление вручную</TryAgainOrDownloadManually>
+  <Trending>Популярные</Trending>
+  <Layers>Слои</Layers>
+  <AddImage>Добавить изображение</AddImage>
+  <IconImportQualityInfo>Высокое качество изображеений может увеличить потребление памяти и время загрузки, особенно при большом количестве анимированных изображений.
+
+Для анимированных изображений рекомендуется использовать низкое или самое низкое качество.</IconImportQualityInfo>
+  <Original>Оригинальное</Original>
+  <High350px>Высокое (350px)</High350px>
+  <Normal200px>Нормальное (200px)</Normal200px>
+  <Low150px>Низкое (150px)</Low150px>
+  <Lowest100px>Самое низкое (100px)</Lowest100px>
+  <ImportIconPack>Импорт пакета иконок</ImportIconPack>
+  <ExportIconPack>Экспорт пакета иконок</ExportIconPack>
+  <CreateIcon>Создать иконку</CreateIcon>
+  <ImportIcon>Импортировать иконку</ImportIcon>
+  <DeleteIcon>Удалить иконку</DeleteIcon>
+  <IconSelectorManagedInfo>Этот пакет иконок поддерживается менеджером пакетов</IconSelectorManagedInfo>
+  <DownloadingXPackages>Загрузка {0} пакетов</DownloadingXPackages>
+  <PluginCouldNotBeLoaded>Плагин не может быть запущен. Версия установленного плагина несовместима с этой версией Macro Deck.</PluginCouldNotBeLoaded>
+  <CantChangeName>Не удалось изменить имя</CantChangeName>
+  <DeviceCalledXAlreadyExists>Устройство {0} уже существует</DeviceCalledXAlreadyExists>
+  <NewConnection>Новое соединение</NewConnection>
+  <XIsAnUnknownDevice>{0} является неизвестным устройством. Разрешить подключение?</XIsAnUnknownDevice>
+  <ShouldMacroDeckBlockConnectionsFromX>Автоматически блокировать подключения от устройства {0} ?</ShouldMacroDeckBlockConnectionsFromX>
+  <FailedToStartServer>Не удается запустить сервер. Возможно, выбранный порт используется или вы выбрали не тот сетевой адаптер. Убедитесь, что установлен правильный сетевой адаптер в настройках или попробуйте изменить порт.</FailedToStartServer>
+  <ErrorWhileLoadingPlugins>Ошибка загрузки плагинов</ErrorWhileLoadingPlugins>
+  <PluginXCouldNotBeLoaded>{0} версия {1} не может быть загружена. Возможно, она несовместима с этой версией Macro Deck. Плагин не будет работать, пока не будет обновлен.</PluginXCouldNotBeLoaded>
+  <InstallationSuccessfull>Установка прошла успешно</InstallationSuccessfull>
+  <PluginXInstalledSuccessfully>{0} успешно установлен</PluginXInstalledSuccessfully>
+  <ErrorWhileInstallingPlugin>Ошибка при установке плагина</ErrorWhileInstallingPlugin>
+  <PluginXCouldNotBeInstalled>{0} не может быть установлен. Возможно, он несовместим с этой версией Macro Deck</PluginXCouldNotBeInstalled>
+  <Settings>Настройки</Settings>
+  <Language>Язык</Language>
+  <General>Общие</General>
+  <Connection>Подключение</Connection>
+  <Backup>Резервная копия</Backup>
+  <About>О программе</About>
+  <NoUpdatesAvailable>Нет доступных обновлений</NoUpdatesAvailable>
+  <LatestVersionInstalled>Последняя версия уже установлена</LatestVersionInstalled>
+  <WarningDevVersions>Ипользование Dev версий может быть нестабильным и привести к потере данных(настроек кнопок, папок и профилей). Вы уверены, что хотите переключиться на Dev канал обновлений?</WarningDevVersions>
+  <WarningBetaVersions>Ипользование Beta версий может быть нестабильным. Вы уверены, что хотите переключиться на Beta канал обновлений?</WarningBetaVersions>
+  <VariableXGetsDeleted>Переменная {0} удалена</VariableXGetsDeleted>
+  <DeckTitle>Главная</DeckTitle>
+  <DeviceManagerTitle>Менеджер устройств</DeviceManagerTitle>
+  <PackageManagerTitle>Менеджер пакетов</PackageManagerTitle>
+  <SettingsTitle>Настройки</SettingsTitle>
+  <VariablesTitle>Общие переменные</VariablesTitle>
+  <Edit>Изменить</Edit>
+  <Delete>Удалить</Delete>
+  <Run>Запустить</Run>
+  <Copy>Копировать</Copy>
+  <Paste>Вставить</Paste>
+  <WebSocketAPIVersion>Версия Websocket API</WebSocketAPIVersion>
+  <PluginAPIVersion>Версия API плагинов</PluginAPIVersion>
+  <InstalledPlugins>Установлено плагинов</InstalledPlugins>
+  <OperatingSystem>Операционная система</OperatingSystem>
+  <DevelopedByX>Разработано {0} </DevelopedByX>
+  <XTranslationByX>{0} перевод {1}</XTranslationByX>
+  <PackageManagerTabAvailable>Доступные</PackageManagerTabAvailable>
+  <PackageManagerTabInstalled>Установленные</PackageManagerTabInstalled>
+</Strings>

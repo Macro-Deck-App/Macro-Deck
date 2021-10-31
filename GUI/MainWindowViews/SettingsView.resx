@@ -1,0 +1,125 @@
+﻿<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="lblConnectionInfo.Text" xml:space="preserve">
+    <value>It's really important to select the correct network adapter or otherwise you will not be able to connect with the client to the server. In most cases the name of the Network adapter looks like "Ethernet" or "Wi-Fi" and the ip address in most cases looks like "192.168.178.xxx".
+
+The default port for Macro Deck is 8191. If some other application uses this port, you can change it.</value>
+  </data>
+  <metadata name="tabIcons.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
+  <data name="tabIcons.ImageStream" mimetype="application/x-microsoft.net.object.binary.base64">
+    <value>
+        AAEAAAD/////AQAAAAAAAAAMAgAAAEZTeXN0ZW0uV2luZG93cy5Gb3JtcywgQ3VsdHVyZT1uZXV0cmFs
+        LCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5BQEAAAAmU3lzdGVtLldpbmRvd3MuRm9ybXMu
+        SW1hZ2VMaXN0U3RyZWFtZXIBAAAABERhdGEHAgIAAAAJAwAAAA8DAAAAuAsAAAJNU0Z0AUkBTAIBAQQB
+        AAEQAQABEAEAARgBAAEYAQAE/wEJAQAI/wFCAU0BNgEEBgABNgEEAgABKAMAAWADAAEwAwABAQEAAQgG
+        AAESGAABgAIAAYADAAKAAQABgAMAAYABAAGAAQACgAIAA8ABAAHAAdwBwAEAAfABygGmAQABMwUAATMB
+        AAEzAQABMwEAAjMCAAMWAQADHAEAAyIBAAMpAQADVQEAA00BAANCAQADOQEAAYABfAH/AQACUAH/AQAB
+        kwEAAdYBAAH/AewBzAEAAcYB1gHvAQAB1gLnAQABkAGpAa0CAAH/ATMDAAFmAwABmQMAAcwCAAEzAwAC
+        MwIAATMBZgIAATMBmQIAATMBzAIAATMB/wIAAWYDAAFmATMCAAJmAgABZgGZAgABZgHMAgABZgH/AgAB
+        mQMAAZkBMwIAAZkBZgIAApkCAAGZAcwCAAGZAf8CAAHMAwABzAEzAgABzAFmAgABzAGZAgACzAIAAcwB
+        /wIAAf8BZgIAAf8BmQIAAf8BzAEAATMB/wIAAf8BAAEzAQABMwEAAWYBAAEzAQABmQEAATMBAAHMAQAB
+        MwEAAf8BAAH/ATMCAAMzAQACMwFmAQACMwGZAQACMwHMAQACMwH/AQABMwFmAgABMwFmATMBAAEzAmYB
+        AAEzAWYBmQEAATMBZgHMAQABMwFmAf8BAAEzAZkCAAEzAZkBMwEAATMBmQFmAQABMwKZAQABMwGZAcwB
+        AAEzAZkB/wEAATMBzAIAATMBzAEzAQABMwHMAWYBAAEzAcwBmQEAATMCzAEAATMBzAH/AQABMwH/ATMB
+        AAEzAf8BZgEAATMB/wGZAQABMwH/AcwBAAEzAv8BAAFmAwABZgEAATMBAAFmAQABZgEAAWYBAAGZAQAB
+        ZgEAAcwBAAFmAQAB/wEAAWYBMwIAAWYCMwEAAWYBMwFmAQABZgEzAZkBAAFmATMBzAEAAWYBMwH/AQAC
+        ZgIAAmYBMwEAA2YBAAJmAZkBAAJmAcwBAAFmAZkCAAFmAZkBMwEAAWYBmQFmAQABZgKZAQABZgGZAcwB
+        AAFmAZkB/wEAAWYBzAIAAWYBzAEzAQABZgHMAZkBAAFmAswBAAFmAcwB/wEAAWYB/wIAAWYB/wEzAQAB
+        ZgH/AZkBAAFmAf8BzAEAAcwBAAH/AQAB/wEAAcwBAAKZAgABmQEzAZkBAAGZAQABmQEAAZkBAAHMAQAB
+        mQMAAZkCMwEAAZkBAAFmAQABmQEzAcwBAAGZAQAB/wEAAZkBZgIAAZkBZgEzAQABmQEzAWYBAAGZAWYB
+        mQEAAZkBZgHMAQABmQEzAf8BAAKZATMBAAKZAWYBAAOZAQACmQHMAQACmQH/AQABmQHMAgABmQHMATMB
+        AAFmAcwBZgEAAZkBzAGZAQABmQLMAQABmQHMAf8BAAGZAf8CAAGZAf8BMwEAAZkBzAFmAQABmQH/AZkB
+        AAGZAf8BzAEAAZkC/wEAAcwDAAGZAQABMwEAAcwBAAFmAQABzAEAAZkBAAHMAQABzAEAAZkBMwIAAcwC
+        MwEAAcwBMwFmAQABzAEzAZkBAAHMATMBzAEAAcwBMwH/AQABzAFmAgABzAFmATMBAAGZAmYBAAHMAWYB
+        mQEAAcwBZgHMAQABmQFmAf8BAAHMAZkCAAHMAZkBMwEAAcwBmQFmAQABzAKZAQABzAGZAcwBAAHMAZkB
+        /wEAAswCAALMATMBAALMAWYBAALMAZkBAAPMAQACzAH/AQABzAH/AgABzAH/ATMBAAGZAf8BZgEAAcwB
+        /wGZAQABzAH/AcwBAAHMAv8BAAHMAQABMwEAAf8BAAFmAQAB/wEAAZkBAAHMATMCAAH/AjMBAAH/ATMB
+        ZgEAAf8BMwGZAQAB/wEzAcwBAAH/ATMB/wEAAf8BZgIAAf8BZgEzAQABzAJmAQAB/wFmAZkBAAH/AWYB
+        zAEAAcwBZgH/AQAB/wGZAgAB/wGZATMBAAH/AZkBZgEAAf8CmQEAAf8BmQHMAQAB/wGZAf8BAAH/AcwC
+        AAH/AcwBMwEAAf8BzAFmAQAB/wHMAZkBAAH/AswBAAH/AcwB/wEAAv8BMwEAAcwB/wFmAQAC/wGZAQAC
+        /wHMAQACZgH/AQABZgH/AWYBAAFmAv8BAAH/AmYBAAH/AWYB/wEAAv8BZgEAASEBAAGlAQADXwEAA3cB
+        AAOGAQADlgEAA8sBAAOyAQAD1wEAA90BAAPjAQAD6gEAA/EBAAP4AQAB8AH7Af8BAAGkAqABAAOAAwAB
+        /wIAAf8DAAL/AQAB/wMAAf8BAAH/AQAC/wIAA///AP8A/wD/AP8A/wD/AP8A/wD/ABoAAf8C9AT/AvQB
+        /yoAAvQTAAL0BP8C9A4AAfQK/wH0KAAE/xAAAf8B9Aj/AfQB/woAAf8B9AP/AfQE/wH0A/8B9AH/JQAG
+        /w4AAfQD/wH0BP8B9AP/AfQJAAH0Av8B9AH/BgAB/wH0Av8B9AwAAv8B9BYAAfQE/wH0DQAD/wH0Af8G
+        AAH/AfQD/wcAAfQC/wH0CgAB9AL/AfQKAAL/AfQC/xQAAfQG/wH0DAAB9AH/AfQB/wkAAfQB/wH0BgAD
+        /wH0BQAC/wUAAfQD/wgAAv8B9AIAB/8OAAH/AfQE/wH0Af8LAAH0A/8HAAH/AfQBAAP/AfQFAAH0A/8F
+        AAL/BQAD/wH0CAAB/wH0Af8BAAj/IQAB9AH/AfQGAAH/AfQB/wH0AgAB9AH/AfQFAAH0Af8B9AYAAv8G
+        AAH0Af8B9AoAA/8B9BIAAvQIAAL0CQAD/wUAAfQC/wH0Af8CAAP/BQAD/wYAAv8GAAP/HwAB9AL/AvQE
+        /wL0Av8B9AgAA/8FAAP/BAAD/wUAA/8GAAL/BgAD/w8AAf8C9AwAEP8HAAP/BQAB/wH0DQAD/wYAAv8G
+        AAP/DgAC/wH0Av8MAAH/AfQK/wH0Af8IAAL/AfQFAAH/AfQBAAf/BQAD/w4AA/8IAAf/AfQCAAL/DQAB
+        /wL0BP8C9AH/CgAB9AH/AfQFAAH/AfQBAAH0Bv8FAAH0Af8B9A4AAfQB/wH0CAAH9AH/AQAB9AH/AfQI
+        AAL0Af8OAAH/AvQFAAT/BAAB/wH0AgAB9AX/BQAB9AP/BQAC/wUAA/8B9A8AA/8B9AgABP8B9AH/CgAB
+        /wH0BP8FAAH0A/8IAAH0BP8FAAP/AfQFAAL/BQAB9AP/GwAB9AX/A/QE/wP0Bf8B9AUABf8GAAb/BgAB
+        9AL/AfQKAAH0Av8B9B0AAfQS/wH0BwAE/wb0A/8B9AL/BwAB9AL/AfQB/wYAAf8B9AL/AfQfAAH/AvQM
+        /wL0Af8JAAH/AfQI/wH0Af8BAAH0Af8HAAH/AfQD/wH0BP8B9AP/AfQB/yIAAf8C9Ab/AvQB/w4AAf8G
+        9AH/BAAB9AkAAfQK/wH0VQAB/wL0BP8C9AH/xwABQgFNAT4HAAE+AwABKAMAAWADAAEwAwABAQEAAQEF
+        AAFAAQIWAAP//wAiACH/Af4BAAF/BP8B5wL/AQAB/wH8AQABPwT/AcMB/wH8AQABPwHwAQABDwT/AYEB
+        /wH4AQABHwHwAX4BDwH/AR8C/wGBAf8B8AF+AQ8B4QH/AYcB/gEPAv8BAAH/AfAB/wGPAcMB5wHDAfwB
+        YAE/Af8BAAH/AeEB/AGHAcMB5wHDAfwBQAE/A/8B4wHwAscB5wHjAf8BDwH/AfwB/wE/AeMB4ALHAecB
+        4wP/AfgBAAEfAuMCxwHnAeMB/wH4Af8B8AEAAQ8B4wHnAf8BxwHnAeMB/wHwAX8B+AEAAR8B4wHkAQcB
+        xwH/AeMB/AEDAT8B/gEAAX8B4wHkAQcBxwH/AeMB/AECAT8BxwH/AeMB4QHmAQcBwwHnAcMB/wH4AX8B
+        gQH/AYEB8AH/AQcBwwHnAcMD/wGAAQABAQHwAX4BBwHhAf8BhwP/AcABAAEDAfgBAAEHAfABfgEPA/8B
+        4AEAAQcB/AEAAScB8AEAAQ8D/wH8AQABPwH/AQAB9wH8AQABPwn/Af4BAAF/GP8L
+</value>
+  </data>
+</root>
