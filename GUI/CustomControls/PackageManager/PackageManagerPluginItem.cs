@@ -177,24 +177,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         }
 
 
-        private void MouseClickEvent(object sender, EventArgs e)
-        {
-        }
-
-        private void MouseEnterEvent(object sender, EventArgs e)
-        {
-            //this.BackColor = Color.FromArgb(65,65,65);
-        }
-
-        private void MouseLeaveEvent(object sender, EventArgs e)
-        {
-            /*if (!this.ClientRectangle.Contains(this.PointToClient(Cursor.Position)))
-            {
-                this.BackColor = Color.FromArgb(45, 45, 45);
-            }*/
-            
-        }
-
         public void SilentInstall()
         {
             this._silentInstall = true;

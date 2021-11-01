@@ -41,7 +41,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
 
             this._jsonObject = jsonObject;
-            //this._iconPack = IconManager.IconPacks.Find(iP => iP.Name.Equals(_jsonObject["name"]) && iP.PackageManagerManaged);
+
             this.UpdateItem();
         }
 
@@ -143,24 +143,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 this.lblVersion.ForeColor = Color.White;
                 this._update = false;
             }
-        }
-
-        private void MouseClickEvent(object sender, EventArgs e)
-        {
-        }
-
-        private void MouseEnterEvent(object sender, EventArgs e)
-        {
-            //this.BackColor = Color.FromArgb(65, 65, 65);
-        }
-
-        private void MouseLeaveEvent(object sender, EventArgs e)
-        {
-            /*if (!this.ClientRectangle.Contains(this.PointToClient(Cursor.Position)))
-            {
-                this.BackColor = Color.FromArgb(45, 45, 45);
-            }*/
-
         }
 
         private void BtnInstall_Click(object sender, EventArgs e)
