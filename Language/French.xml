@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <Strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <__Language__>French</__Language__>
+  <__Language__>Français</__Language__>
   <__LanguageCode__>fr</__LanguageCode__>
   <__Author__>Benjiiben53</__Author__>
-  <__Version__>2b12</__Version__>
+  <__Version__>2.0.16.2-dev</__Version__>
   <NetworkAdapter>Carte réseau</NetworkAdapter>
   <IPAddress>Adresse IP</IPAddress>
   <Port>Port</Port>
@@ -24,7 +24,7 @@ Le port par défaut pour Macro Deck est 8191. Si une autre application utilise c
   <Spacing>Espacement</Spacing>
   <CornerRadius>Rayon d'angle</CornerRadius>
   <ButtonBackGround>Fond du bouton</ButtonBackGround>
-  <AreYouSure>Êtes-vous sûr?</AreYouSure>
+  <AreYouSure>Êtes-vous sûr ?</AreYouSure>
   <Behaviour>Comportement</Behaviour>
   <Plugins>Plugins</Plugins>
   <IconPacks>Packs d'icônes</IconPacks>
@@ -67,7 +67,7 @@ Le port par défaut pour Macro Deck est 8191. Si une autre application utilise c
   <Update>Mettre à jour</Update>
   <Plugin>Plugin</Plugin>
   <MacroDeckNeedsARestart>Macro Deck a besoin d'un redémarrage</MacroDeckNeedsARestart>
-  <MacroDeckMustBeRestartedForTheChanges>Macro Deck doit être redémarré pour que les modifications prennent effet. Souhaitez-vous redémarrer Macro Deck maintenant?</MacroDeckMustBeRestartedForTheChanges>
+  <MacroDeckMustBeRestartedForTheChanges>Macro Deck doit être redémarré pour que les modifications prennent effet. Souhaitez-vous redémarrer Macro Deck maintenant ?</MacroDeckMustBeRestartedForTheChanges>
   <Configure>Configurer</Configure>
   <Uninstall>Désinstaller</Uninstall>
   <NotLoaded>Pas chargé</NotLoaded>
@@ -106,7 +106,7 @@ Le port par défaut pour Macro Deck est 8191. Si une autre application utilise c
   <InitialSetupConfigureGridPreferences>Configurons maintenant la grille selon vos préférences</InitialSetupConfigureGridPreferences>
   <InitialSetupPickAllPluginsYouNeed>Choisissez tous les plugins dont vous avez besoin</InitialSetupPickAllPluginsYouNeed>
   <InitialSetupDontWorryInstallUninstallPlugins>Ne vous inquiétez pas, vous pouvez toujours installer/désinstaller des plugins plus tard dans le gestionnaire de paquets</InitialSetupDontWorryInstallUninstallPlugins>
-  <InitialSetupWantSomeIcons>Voulez-vous des icônes?</InitialSetupWantSomeIcons>
+  <InitialSetupWantSomeIcons>Voulez-vous des icônes ?</InitialSetupWantSomeIcons>
   <InitialSetupInstallIconPacksPackageManager>Vous pouvez également installer des packs d'icônes plus tard dans le gestionnaire de paquets</InitialSetupInstallIconPacksPackageManager>
   <InitialSetupAlmostDone>Nous avons presque fini!</InitialSetupAlmostDone>
   <KnownDevices>Appareils connus</KnownDevices>
@@ -114,9 +114,9 @@ Le port par défaut pour Macro Deck est 8191. Si une autre application utilise c
   <AllowAllNewConnections>Autoriser toutes les nouvelles connexions (non recommandé)</AllowAllNewConnections>
   <BlockAllNewConnections>Bloquer toutes les nouvelles connexions</BlockAllNewConnections>
   <InstallDLL>Installer .dll (non recommandé)</InstallDLL>
-  <NeverInstallDLLFiles>N'installez jamais de fichiers .dll à partir de sources en lesquelles vous n'avez pas confiance! Les fichiers .dll provenant de sources inconnues peuvent endommager votre système, installez-le uniquement lorsque vous savez ce que vous faites! Voulez-vous vraiment installer un plugin .dll?</NeverInstallDLLFiles>
+  <NeverInstallDLLFiles>N'installez jamais de fichiers .dll à partir de sources en lesquelles vous n'avez pas confiance! Les fichiers .dll provenant de sources inconnues peuvent endommager votre système, installez-le uniquement lorsque vous savez ce que vous faites! Voulez-vous vraiment installer un plugin .dll ?</NeverInstallDLLFiles>
   <XWillBeUninstalled>{0} sera désinstallé.</XWillBeUninstalled>
-  <XSuccessfullyUninstalled>{0} est désinstallé. Macro Deck doit être redémarré pour que les modifications prennent effet. Redémarrage Macro Deck maintenant?</XSuccessfullyUninstalled>
+  <XSuccessfullyUninstalled>{0} est désinstallé. Macro Deck doit être redémarré pour que les modifications prennent effet. Redémarrage Macro Deck maintenant ?</XSuccessfullyUninstalled>
   <CreateVariable>Créer une variable</CreateVariable>
   <DeleteVariable>Supprimé une variable</DeleteVariable>
   <SelectAPluginAndActionToBegin>Sélectionnez un plugin et une action pour commencer</SelectAPluginAndActionToBegin>
@@ -159,8 +159,8 @@ Pour les gifs, il est recommandé d'utiliser le préréglage bas ou le plus bas.
   <CantChangeName>Impossible de changer le nom</CantChangeName>
   <DeviceCalledXAlreadyExists>Un appareil appelé {0} existe déjà</DeviceCalledXAlreadyExists>
   <NewConnection>Nouvelle connexion</NewConnection>
-  <XIsAnUnknownDevice>{0} est un appareil inconnu et veut se connecter à Macro Deck. Autoriser la connexion?</XIsAnUnknownDevice>
-  <ShouldMacroDeckBlockConnectionsFromX>Voulez-vous que Macro Deck bloque automatiquement les futures connexions de {0}?</ShouldMacroDeckBlockConnectionsFromX>
+  <XIsAnUnknownDevice>{0} est un appareil inconnu et veut se connecter à Macro Deck. Autoriser la connexion ?</XIsAnUnknownDevice>
+  <ShouldMacroDeckBlockConnectionsFromX>Voulez-vous que Macro Deck bloque automatiquement les futures connexions de {0} ?</ShouldMacroDeckBlockConnectionsFromX>
   <FailedToStartServer>Échec du démarrage du serveur. Peut-être que le port configuré est déjà utilisé ou que vous avez défini la mauvaise carte réseau. Vérifiez que vous avez défini la bonne carte réseau dans les paramètres et essayez de changer le port.</FailedToStartServer>
   <ErrorWhileLoadingPlugins>Erreur lors du chargement des plugins</ErrorWhileLoadingPlugins>
   <PluginXCouldNotBeLoaded>{0} version {1} n'a pas pu être chargé. Peut-être n'est-il pas compatible avec cette version de Macro Deck. Les actions qui utilisent ce plugin ne fonctionneront pas tant que le plugin ne sera pas mis à jour.</PluginXCouldNotBeLoaded>
@@ -176,8 +176,8 @@ Pour les gifs, il est recommandé d'utiliser le préréglage bas ou le plus bas.
   <About>À propos de</About>
   <NoUpdatesAvailable>Aucune mise à jour disponible</NoUpdatesAvailable>
   <LatestVersionInstalled>La dernière version est déjà installée</LatestVersionInstalled>
-  <WarningDevVersions>Les versions de développement peuvent être très instables et provoquer des plantages ou des pertes de données (boutons d'action configurés, dossiers et profils). Vous voulez vraiment passer au canal de mise à jour Dev?</WarningDevVersions>
-  <WarningBetaVersions>Les versions bêta peuvent parfois être instables et provoquer des plantages. Vous voulez vraiment passer au canal de mise à jour bêta?</WarningBetaVersions>
+  <WarningDevVersions>Les versions de développement peuvent être très instables et provoquer des plantages ou des pertes de données (boutons d'action configurés, dossiers et profils). Vous voulez vraiment passer au canal de mise à jour Dev ?</WarningDevVersions>
+  <WarningBetaVersions>Les versions bêta peuvent parfois être instables et provoquer des plantages. Vous voulez vraiment passer au canal de mise à jour bêta ?</WarningBetaVersions>
   <VariableXGetsDeleted>La variable {0} est supprimée</VariableXGetsDeleted>
   <DeckTitle>Deck</DeckTitle>
   <DeviceManagerTitle>Gestionnaire de périphériques</DeviceManagerTitle>
@@ -199,4 +199,18 @@ Pour les gifs, il est recommandé d'utiliser le préréglage bas ou le plus bas.
   <PackageManagerTabInstalled>Installer</PackageManagerTabInstalled>
   <Event>Événement</Event>
   <AutomaticallySwitchToFolder>Basculer automatiquement vers le dossier</AutomaticallySwitchToFolder>
+  <Restart>Redémarrer Macro Deck</Restart>
+  <Delay>Délai</Delay>
+  <If>Si</If>
+  <Else>Sinon</Else>
+  <Online>En ligne</Online>
+  <By>Par</By>
+  <StateBinding>État de liaison</StateBinding>
+  <ErrorWhileLoadingPackageManager>Erreur de chargement du gestionnaire de paquets.
+  Vérifier votre connexion Internet ou Macro Deck est peut être bloqué par le pare-feu.</ErrorWhileLoadingPackageManager>
+  <UpdatesAvailable>Mises à jour disponibles</UpdatesAvailable>
+  <EnableIconCache>Activer le cache d'icônes (plus rapide ; mais utilise un peut plus de mémoire)</EnableIconCache>
+  <WebClient>Client Web</WebClient>
+  <AndroidApp>Application Android</AndroidApp>
+  <IOSApp>Application iOS</IOSApp>
 </Strings>
