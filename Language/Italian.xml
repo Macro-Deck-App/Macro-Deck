@@ -209,4 +209,7 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <ErrorWhileLoadingPackageManager>Errore durante il caricamento del gestore di pacchetti. Forse non la connessione Internet è assente o Macro Deck è bloccato dal firewall.</ErrorWhileLoadingPackageManager>
   <UpdatesAvailable>Aggiornamenti disponibili</UpdatesAvailable>
   <EnableIconCache>Abilita cache icone (più veloce; utilizzo RAM maggiore)</EnableIconCache>
+  <WebClient>Web Client</WebClient>
+  <AndroidApp>App Android</AndroidApp>
+  <IOSApp>App iOS</IOSApp>
 </Strings>
