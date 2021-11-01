@@ -73,7 +73,7 @@ Le port par défaut pour Macro Deck est 8191. Si une autre application utilise c
   <NotLoaded>Pas chargé</NotLoaded>
   <Yes>Oui</Yes>
   <No>Non</No>
-  <Status>t</Status>
+  <Status>Statut</Status>
   <BlockConnection>Bloquer la connexion</BlockConnection>
   <Change>Changer</Change>
   <Id>ID</Id>
