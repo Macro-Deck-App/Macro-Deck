@@ -14,9 +14,15 @@ Please use the ISO names for the file name and for the __Language__ node in the 
 
 Here is an example of the first few lines of the file:
 ```xml
-<__Language__>German</__Language__> <!-- The ISO name of the translation -->
-<__LanguageCode__>de</__LanguageCode__> <!-- The ISO639-1 code of the translation -->
-<__Author__>Macro Deck</__Author__> <!-- Your name -->
-<__Version__>2.0.15</__Version__> <!-- The Macro Deck version, this file is based of -->
+<?xml version="1.0"?>
+<Strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <__Language__>German</__Language__> <!-- The ISO name of the translation -->
+  <__LanguageCode__>de</__LanguageCode__> <!-- The ISO639-1 code of the translation -->
+  <__Author__>Macro Deck</__Author__> <!-- Your name -->
+  <__Version__>2.0.15</__Version__> <!-- The Macro Deck version, this file is based of -->
+  .
+  .
+  .
+</Strings>
 ```
 
