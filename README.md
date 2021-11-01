@@ -1,6 +1,7 @@
 # Macro Deck 2
 ## More then just a macro pad!
 
+- Open source
 - Plugins
 - Icon packs
 - [Web client](http://web.macrodeck.org)
