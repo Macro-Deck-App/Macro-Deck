@@ -10,14 +10,14 @@
   <Info>Infos</Info>
   <Error>Erreur</Error>
   <Warning>Attention</Warning>
-  <ConfigureNetworkInfo>Il est vraiment important de sélectionner la bonne carte réseau, sinon le client ne pourras pas se connecter au serveur. Dans la plupart des cas, le nom de la carte réseau ressemble à "Ethernet" ou "Wi-Fi" et l'adresse IP ressemble dans la plupart des cas à "192.168.1.xxx".
+  <ConfigureNetworkInfo>Il est vraiment important de sélectionner la bonne carte réseau, sinon le client ne pourra pas se connecter au serveur. Dans la plupart des cas, le nom de la carte réseau ressemble à "Ethernet" ou "Wi-Fi" et l'adresse IP ressemble dans la plupart des cas à "192.168.1.xxx".
 
 Le port par défaut pour Macro Deck est 8191. Si une autre application utilise ce port, vous pouvez le modifier.</ConfigureNetworkInfo>
   <AutomaticallyCheckUpdates>Rechercher automatiquement les mises à jour</AutomaticallyCheckUpdates>
   <AutomaticallyStartWithWindows>Démarrer automatiquement avec Windows</AutomaticallyStartWithWindows>
   <Show>Montrer</Show>
   <Exit>Fermer</Exit>
-  <XUpdatesAvailable>{0} updates available</XUpdatesAvailable>
+  <XUpdatesAvailable>{0} mises à jour disponibles</XUpdatesAvailable>
   <Profile>Profiles</Profile>
   <Columns>Colonnes</Columns>
   <Rows>Lignes</Rows>
@@ -31,9 +31,9 @@ Le port par défaut pour Macro Deck est 8191. Si une autre application utilise c
   <All>Tout</All>
   <Updates>Mises à jour</Updates>
   <Available>Disponible</Available>
-  <Installed>Déjà Installer</Installed>
+  <Installed>Déjà installé</Installed>
   <Install>Installer</Install>
-  <Search>Chercher...</Search>
+  <Search>Rechercher...</Search>
   <Name>Nom</Name>
   <Type>Type</Type>
   <Value>Valeur</Value>
@@ -41,7 +41,7 @@ Le port par défaut pour Macro Deck est 8191. Si une autre application utilise c
   <Ok>Ok</Ok>
   <FolderName>Nom du dossier</FolderName>
   <Never>Jamais</Never>
-  <OnApplicationFocus>Quand l'application est séléctionner</OnApplicationFocus>
+  <OnApplicationFocus>Quand l'application est séléctionnée</OnApplicationFocus>
   <Application>Application</Application>
   <Devices>Appareils</Devices>
   <Create>Créer</Create>
@@ -66,16 +66,16 @@ Le port par défaut pour Macro Deck est 8191. Si une autre application utilise c
   <XDownloads>{0} téléchargements</XDownloads>
   <Update>Mettre à jour</Update>
   <Plugin>Plugin</Plugin>
-  <MacroDeckNeedsARestart>Macro Deck a besoin d'un redémarrage</MacroDeckNeedsARestart>
+  <MacroDeckNeedsARestart>Macro Deck a besoin de redémarrer</MacroDeckNeedsARestart>
   <MacroDeckMustBeRestartedForTheChanges>Macro Deck doit être redémarré pour que les modifications prennent effet. Souhaitez-vous redémarrer Macro Deck maintenant ?</MacroDeckMustBeRestartedForTheChanges>
   <Configure>Configurer</Configure>
   <Uninstall>Désinstaller</Uninstall>
-  <NotLoaded>Pas chargé</NotLoaded>
+  <NotLoaded>Non chargé</NotLoaded>
   <Yes>Oui</Yes>
   <No>Non</No>
   <Status>Statut</Status>
   <BlockConnection>Bloquer la connexion</BlockConnection>
-  <Change>Changer</Change>
+  <Change>Modifier</Change>
   <Id>ID</Id>
   <Connected>Connecté</Connected>
   <Disconnected>Déconnecté</Disconnected>
@@ -87,8 +87,8 @@ Le port par défaut pour Macro Deck est 8191. Si une autre application utilise c
   <CheckForUpdatesNow>Vérifiez les mises à jour maintenant</CheckForUpdatesNow>
   <Author>Auteur</Author>
   <Version>Version</Version>
-  <TheFolderWillBeDeleted>Le dossier {0} avec tous ses boutons d'action sera supprimé.</TheFolderWillBeDeleted>
-  <TheProfileWillBeDeleted>Le profil {0} avec tous ses dossiers et boutons d'action seront supprimés.</TheProfileWillBeDeleted>
+  <TheFolderWillBeDeleted>Le dossier {0}, avec tous ses boutons d'action, sera supprimé.</TheFolderWillBeDeleted>
+  <TheProfileWillBeDeleted>Le profil {0}, avec tous ses dossiers et boutons d'action, sera supprimé.</TheProfileWillBeDeleted>
   <ServerOffline>Serveur hors ligne</ServerOffline>
   <ServerRunning>Serveur en cours d'exécution</ServerRunning>
   <XPluginsLoaded>{0} plugins chargés</XPluginsLoaded>
@@ -100,7 +100,7 @@ Le port par défaut pour Macro Deck est 8191. Si une autre application utilise c
   <InitialSetupButtonFinish>Terminé</InitialSetupButtonFinish>
   <InitialSetupSelectLanguage>Choisissez votre langue</InitialSetupSelectLanguage>
   <InitialSetupPage>Page(s) {0}/{1}</InitialSetupPage>
-  <InitialSetupWelcome>Bienvenue dans Macro Deck 2!</InitialSetupWelcome>
+  <InitialSetupWelcome>Bienvenue dans Macro Deck 2 !</InitialSetupWelcome>
   <InitialSetupLetsConfigure>Configurons votre expérience Macro Deck</InitialSetupLetsConfigure>
   <InitialSetupConfigureNetworkSettings>Configurez vos paramètres réseau</InitialSetupConfigureNetworkSettings>
   <InitialSetupConfigureGridPreferences>Configurons maintenant la grille selon vos préférences</InitialSetupConfigureGridPreferences>
@@ -108,15 +108,15 @@ Le port par défaut pour Macro Deck est 8191. Si une autre application utilise c
   <InitialSetupDontWorryInstallUninstallPlugins>Ne vous inquiétez pas, vous pouvez toujours installer/désinstaller des plugins plus tard dans le gestionnaire de paquets</InitialSetupDontWorryInstallUninstallPlugins>
   <InitialSetupWantSomeIcons>Voulez-vous des icônes ?</InitialSetupWantSomeIcons>
   <InitialSetupInstallIconPacksPackageManager>Vous pouvez également installer des packs d'icônes plus tard dans le gestionnaire de paquets</InitialSetupInstallIconPacksPackageManager>
-  <InitialSetupAlmostDone>Nous avons presque fini!</InitialSetupAlmostDone>
+  <InitialSetupAlmostDone>Nous avons presque fini !</InitialSetupAlmostDone>
   <KnownDevices>Appareils connus</KnownDevices>
   <AskOnNewConnections>Demander de nouvelles connexions</AskOnNewConnections>
   <AllowAllNewConnections>Autoriser toutes les nouvelles connexions (non recommandé)</AllowAllNewConnections>
   <BlockAllNewConnections>Bloquer toutes les nouvelles connexions</BlockAllNewConnections>
   <InstallDLL>Installer .dll (non recommandé)</InstallDLL>
-  <NeverInstallDLLFiles>N'installez jamais de fichiers .dll à partir de sources en lesquelles vous n'avez pas confiance! Les fichiers .dll provenant de sources inconnues peuvent endommager votre système, installez-le uniquement lorsque vous savez ce que vous faites! Voulez-vous vraiment installer un plugin .dll ?</NeverInstallDLLFiles>
+  <NeverInstallDLLFiles>N'installez jamais de fichiers .dll à partir de sources en lesquelles vous n'avez pas confiance ! Les fichiers .dll provenant de sources inconnues peuvent endommager votre système, installez-le uniquement lorsque vous savez ce que vous faites! Voulez-vous vraiment installer un plugin .dll ?</NeverInstallDLLFiles>
   <XWillBeUninstalled>{0} sera désinstallé.</XWillBeUninstalled>
-  <XSuccessfullyUninstalled>{0} est désinstallé. Macro Deck doit être redémarré pour que les modifications prennent effet. Redémarrage Macro Deck maintenant ?</XSuccessfullyUninstalled>
+  <XSuccessfullyUninstalled>{0} est désinstallé. Macro Deck doit être redémarré pour que les modifications prennent effet. Redémarrer Macro Deck maintenant ?</XSuccessfullyUninstalled>
   <CreateVariable>Créer une variable</CreateVariable>
   <DeleteVariable>Supprimé une variable</DeleteVariable>
   <SelectAPluginAndActionToBegin>Sélectionnez un plugin et une action pour commencer</SelectAPluginAndActionToBegin>
@@ -141,7 +141,7 @@ Le port par défaut pour Macro Deck est 8191. Si une autre application utilise c
   <Trending>Tendance</Trending>
   <Layers>Couches</Layers>
   <AddImage>Ajouter une image</AddImage>
-  <IconImportQualityInfo>Hdes icônes de haute qualité peuvent entraîner une augmentation de l'utilisation de la mémoire et des temps de chargement, en particulier lors de l'utilisation de nombreux gros gifs animés. 
+  <IconImportQualityInfo>Des icônes de haute qualité peuvent entraîner une augmentation de l'utilisation de la mémoire et des temps de chargement, en particulier lors de l'utilisation de nombreux gros gifs animés. 
 Pour les gifs, il est recommandé d'utiliser le préréglage bas ou le plus bas.</IconImportQualityInfo>
   <Original>Originale</Original>
   <High350px>Haut (350px)</High350px>
@@ -152,7 +152,7 @@ Pour les gifs, il est recommandé d'utiliser le préréglage bas ou le plus bas.
   <ExportIconPack>Exporter le pack d'icônes</ExportIconPack>
   <CreateIcon>Créer une icône</CreateIcon>
   <ImportIcon>Importer un icône</ImportIcon>
-  <DeleteIcon>supprimer un icône</DeleteIcon>
+  <DeleteIcon>Supprimer un icône</DeleteIcon>
   <IconSelectorManagedInfo>Ce pack d'icônes est géré par le gestionnaire de plugins</IconSelectorManagedInfo>
   <DownloadingXPackages>Téléchargement de {0} paquets</DownloadingXPackages>
   <PluginCouldNotBeLoaded>Le plug-in n'a pas pu être chargé. Peut-être que la version installée de ce plugin n'est pas compatible avec cette version de Macro Deck.</PluginCouldNotBeLoaded>
@@ -164,7 +164,7 @@ Pour les gifs, il est recommandé d'utiliser le préréglage bas ou le plus bas.
   <FailedToStartServer>Échec du démarrage du serveur. Peut-être que le port configuré est déjà utilisé ou que vous avez défini la mauvaise carte réseau. Vérifiez que vous avez défini la bonne carte réseau dans les paramètres et essayez de changer le port.</FailedToStartServer>
   <ErrorWhileLoadingPlugins>Erreur lors du chargement des plugins</ErrorWhileLoadingPlugins>
   <PluginXCouldNotBeLoaded>{0} version {1} n'a pas pu être chargé. Peut-être n'est-il pas compatible avec cette version de Macro Deck. Les actions qui utilisent ce plugin ne fonctionneront pas tant que le plugin ne sera pas mis à jour.</PluginXCouldNotBeLoaded>
-  <InstallationSuccessfull>installation réussie</InstallationSuccessfull>
+  <InstallationSuccessfull>Installation réussie</InstallationSuccessfull>
   <PluginXInstalledSuccessfully>{0} a été installé avec succès</PluginXInstalledSuccessfully>
   <ErrorWhileInstallingPlugin>Erreur lors de l'installation du plugin</ErrorWhileInstallingPlugin>
   <PluginXCouldNotBeInstalled>{0} n'a pas pu être installé. Peut-être n'est-il pas compatible avec cette version de Macro Deck</PluginXCouldNotBeInstalled>
