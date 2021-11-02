@@ -15,7 +15,7 @@ namespace SuchByte.MacroDeck.Language
     {
 
         public string __Language__  = "English";
-        public string __LanguageCode__  = "eng";
+        public string __LanguageCode__  = "en";
         public string __Author__  = "Macro Deck";
         public string __Version__  = MacroDeck.VersionString;
 
