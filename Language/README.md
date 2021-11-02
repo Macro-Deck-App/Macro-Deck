@@ -1,7 +1,5 @@
 # Contributing Languages 
 
-Macro Deck 2 uses XML files for translation.
-
 ### If your language is missing or incomplete, please consider helping me out by creating a pull request with the translated file!
 
 ## Adding/editing a translation file
