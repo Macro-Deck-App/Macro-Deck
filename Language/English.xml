@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <Strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <__Language__>English</__Language__>
-  <__LanguageCode__>eng</__LanguageCode__>
+  <__LanguageCode__>en</__LanguageCode__>
   <__Author__>Macro Deck</__Author__>
   <__Version__>2.1.0-beta</__Version__>
   <NetworkAdapter>Network adapter</NetworkAdapter>
@@ -142,7 +142,8 @@ The default port for Macro Deck is 8191. If some other application uses this por
   <AddImage>Add image</AddImage>
   <IconImportQualityInfo>High quality icons can lead to an increase of memory usage and loading times especially when using many big animated gifs. 
 
-For gifs it is recommended to use the low or the lowest preset.</IconImportQualityInfo>
+
+For gifs it is recommended to use the low or the lowest preset.</IconImportQualityInfo>
   <Original>Original</Original>
   <High350px>High (350px)</High350px>
   <Normal200px>Normal (200px)</Normal200px>
