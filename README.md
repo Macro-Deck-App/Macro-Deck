@@ -15,7 +15,7 @@
 [Repository](https://github.com/SuchByte/Macro-Deck-Client)
 
 # Download
-https://beta.macrodeck.org/download
+https://macrodeck.org/download
 
 # Helping with the translation
 All translation files are located under https://github.com/SuchByte/Macro-Deck/tree/master/Language
