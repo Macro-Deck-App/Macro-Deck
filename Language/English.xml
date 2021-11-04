@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <Strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <__Language__>English</__Language__>
-  <__LanguageCode__>eng</__LanguageCode__>
+  <__LanguageCode__>en</__LanguageCode__>
   <__Author__>Macro Deck</__Author__>
   <__Version__>2.1.1-dev</__Version__>
   <NetworkAdapter>Network adapter</NetworkAdapter>
