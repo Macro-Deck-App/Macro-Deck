@@ -390,6 +390,35 @@ namespace SuchByte.MacroDeck.Plugins
             }
         }
 
+        public static MacroDeckPlugin GetPluginByAction(PluginAction pluginAction)
+        {
+            foreach (MacroDeckPlugin macroDeckPlugin in Plugins.Values)
+            {
+                if (macroDeckPlugin.Actions.Find(mdp => mdp.GetType().FullName.Equals(pluginAction.GetType().FullName)) != null)
+                {
+                    return macroDeckPlugin;
+                }
+            }
+            return  new DisabledPlugin()
+            {
+                Name = "Plugin not available",
+            };
+        }
+
+        public static MacroDeckPlugin GetPluginByName(string name)
+        {
+            foreach (MacroDeckPlugin macroDeckPlugin in Plugins.Values)
+            {
+                if (macroDeckPlugin.Name.Equals(name))
+                {
+                    return macroDeckPlugin;
+                }
+            }
+            return new DisabledPlugin()
+            {
+                Name = "Plugin not available",
+            };
+        }
 
     }
 }

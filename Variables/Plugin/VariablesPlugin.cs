@@ -3,6 +3,7 @@ using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Variables.Plugin.GUI;
@@ -18,9 +19,8 @@ namespace SuchByte.MacroDeck.Variables.Plugin
 {
     public class VariablesPlugin : MacroDeckPlugin
     {
-        public override string Name => "Variables";
+        public override string Name => LanguageManager.Strings.PluginMacroDeckVariables;
         public override string Author => "Macro Deck";
-        public override string Description => "Increment, decrement, set variable values";
 
         private VariableChangedEvent variableChangedEvent = new VariableChangedEvent();
 
@@ -86,11 +86,10 @@ namespace SuchByte.MacroDeck.Variables.Plugin
 
     public class ChangeVariableValueAction : PluginAction
     {
-        public override string Name => "Change variable value";
+        public override string Name => LanguageManager.Strings.ActionChangeVariableValue;
 
-        public override string Description => "Increment, decrement, set a variable value";
+        public override string Description => LanguageManager.Strings.ActionChangeVariableValue;
 
-        public override string DisplayName { get; set; } = "Change variable value";
         public override bool CanConfigure => true;
 
         public override ActionConfigControl GetActionConfigControl(ActionConfigurator actionConfigurator)
@@ -108,10 +107,10 @@ namespace SuchByte.MacroDeck.Variables.Plugin
                 if (variable == null) return;
                 switch (jsonObject["method"].ToString())
                 {
-                    case "increment":
+                    case "countUp": case "increase":
                         VariableManager.SetValue(variable.Name, float.Parse(variable.Value) + 1, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
                         break;
-                    case "decrement":
+                    case "countDown": case "decrease":
                         VariableManager.SetValue(variable.Name, float.Parse(variable.Value) - 1, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
                         break;
                     case "set":

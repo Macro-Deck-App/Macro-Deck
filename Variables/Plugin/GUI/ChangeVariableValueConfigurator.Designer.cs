@@ -1,4 +1,6 @@
 ﻿
+using SuchByte.MacroDeck.GUI.CustomControls;
+
 namespace SuchByte.MacroDeck.Variables.Plugin.GUI
 {
     partial class ChangeVariableValueConfigurator
@@ -32,12 +34,11 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.panel1 = new System.Windows.Forms.Panel();
             this.radioToggle = new System.Windows.Forms.RadioButton();
             this.radioSet = new System.Windows.Forms.RadioButton();
-            this.radioDecrement = new System.Windows.Forms.RadioButton();
-            this.radioIncrement = new System.Windows.Forms.RadioButton();
-            this.variables = new System.Windows.Forms.ComboBox();
-            this.value = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
+            this.radioCountDown = new System.Windows.Forms.RadioButton();
+            this.radioCountUp = new System.Windows.Forms.RadioButton();
+            this.variables = new SuchByte.MacroDeck.GUI.CustomControls.RoundedComboBox();
+            this.value = new SuchByte.MacroDeck.GUI.CustomControls.RoundedTextBox();
+            this.lblVariable = new System.Windows.Forms.Label();
             this.lblValue = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -46,11 +47,11 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             // 
             this.panel1.Controls.Add(this.radioToggle);
             this.panel1.Controls.Add(this.radioSet);
-            this.panel1.Controls.Add(this.radioDecrement);
-            this.panel1.Controls.Add(this.radioIncrement);
+            this.panel1.Controls.Add(this.radioCountDown);
+            this.panel1.Controls.Add(this.radioCountUp);
             this.panel1.Location = new System.Drawing.Point(3, 62);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(141, 146);
+            this.panel1.Size = new System.Drawing.Size(174, 146);
             this.panel1.TabIndex = 0;
             // 
             // radioToggle
@@ -77,83 +78,84 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.radioSet.UseVisualStyleBackColor = true;
             this.radioSet.CheckedChanged += new System.EventHandler(this.MethodChanged);
             // 
-            // radioDecrement
+            // radioCountDown
             // 
-            this.radioDecrement.AutoSize = true;
-            this.radioDecrement.Location = new System.Drawing.Point(3, 36);
-            this.radioDecrement.Name = "radioDecrement";
-            this.radioDecrement.Size = new System.Drawing.Size(120, 27);
-            this.radioDecrement.TabIndex = 1;
-            this.radioDecrement.TabStop = true;
-            this.radioDecrement.Text = "Decrement";
-            this.radioDecrement.UseVisualStyleBackColor = true;
-            this.radioDecrement.CheckedChanged += new System.EventHandler(this.MethodChanged);
+            this.radioCountDown.AutoSize = true;
+            this.radioCountDown.Location = new System.Drawing.Point(3, 36);
+            this.radioCountDown.Name = "radioCountDown";
+            this.radioCountDown.Size = new System.Drawing.Size(129, 27);
+            this.radioCountDown.TabIndex = 1;
+            this.radioCountDown.TabStop = true;
+            this.radioCountDown.Text = "Count down";
+            this.radioCountDown.UseVisualStyleBackColor = true;
+            this.radioCountDown.CheckedChanged += new System.EventHandler(this.MethodChanged);
             // 
-            // radioIncrement
+            // radioCountUp
             // 
-            this.radioIncrement.AutoSize = true;
-            this.radioIncrement.Location = new System.Drawing.Point(3, 3);
-            this.radioIncrement.Name = "radioIncrement";
-            this.radioIncrement.Size = new System.Drawing.Size(115, 27);
-            this.radioIncrement.TabIndex = 0;
-            this.radioIncrement.TabStop = true;
-            this.radioIncrement.Text = "Increment";
-            this.radioIncrement.UseVisualStyleBackColor = true;
-            this.radioIncrement.CheckedChanged += new System.EventHandler(this.MethodChanged);
+            this.radioCountUp.AutoSize = true;
+            this.radioCountUp.Location = new System.Drawing.Point(3, 3);
+            this.radioCountUp.Name = "radioCountUp";
+            this.radioCountUp.Size = new System.Drawing.Size(105, 27);
+            this.radioCountUp.TabIndex = 0;
+            this.radioCountUp.TabStop = true;
+            this.radioCountUp.Text = "Count up";
+            this.radioCountUp.UseVisualStyleBackColor = true;
+            this.radioCountUp.CheckedChanged += new System.EventHandler(this.MethodChanged);
             // 
             // variables
             // 
-            this.variables.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
-            this.variables.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
-            this.variables.FormattingEnabled = true;
+            this.variables.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.variables.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.variables.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.variables.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.variables.Icon = null;
             this.variables.Location = new System.Drawing.Point(183, 120);
             this.variables.Name = "variables";
-            this.variables.Size = new System.Drawing.Size(348, 31);
+            this.variables.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
+            this.variables.SelectedIndex = -1;
+            this.variables.SelectedItem = null;
+            this.variables.Size = new System.Drawing.Size(348, 26);
             this.variables.TabIndex = 1;
-            this.variables.SelectedIndexChanged += new System.EventHandler(this.variables_SelectedIndexChanged);
             // 
             // value
             // 
-            this.value.AutoCompleteCustomSource.AddRange(new string[] {
-            "True",
-            "False",
-            "On",
-            "Off"});
-            this.value.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
-            this.value.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
+            this.value.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.value.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.value.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.value.Icon = null;
             this.value.Location = new System.Drawing.Point(573, 120);
+            this.value.Multiline = false;
             this.value.Name = "value";
-            this.value.Size = new System.Drawing.Size(139, 30);
+            this.value.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
+            this.value.PasswordChar = false;
+            this.value.PlaceHolderColor = System.Drawing.Color.Gray;
+            this.value.PlaceHolderText = "";
+            this.value.ReadOnly = false;
+            this.value.SelectionStart = 0;
+            this.value.Size = new System.Drawing.Size(139, 25);
             this.value.TabIndex = 2;
+            this.value.TextAlignment = System.Windows.Forms.HorizontalAlignment.Left;
             this.value.Visible = false;
-            this.value.TextChanged += new System.EventHandler(this.value_TextChanged);
             // 
-            // label1
+            // lblVariable
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(33, 36);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(73, 23);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "Method";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(319, 36);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(77, 23);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "Variable";
+            this.lblVariable.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblVariable.Location = new System.Drawing.Point(183, 94);
+            this.lblVariable.Name = "lblVariable";
+            this.lblVariable.Size = new System.Drawing.Size(348, 23);
+            this.lblVariable.TabIndex = 4;
+            this.lblVariable.Text = "Variable";
+            this.lblVariable.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lblValue
             // 
-            this.lblValue.AutoSize = true;
-            this.lblValue.Location = new System.Drawing.Point(614, 36);
+            this.lblValue.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblValue.Location = new System.Drawing.Point(573, 94);
             this.lblValue.Name = "lblValue";
-            this.lblValue.Size = new System.Drawing.Size(56, 23);
+            this.lblValue.Size = new System.Drawing.Size(139, 23);
             this.lblValue.TabIndex = 5;
             this.lblValue.Text = "Value";
+            this.lblValue.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblValue.Visible = false;
             // 
             // ChangeVariableValueConfigurator
@@ -161,8 +163,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 23F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.lblValue);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.lblVariable);
             this.Controls.Add(this.value);
             this.Controls.Add(this.variables);
             this.Controls.Add(this.panel1);
@@ -171,7 +172,6 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -180,12 +180,11 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.RadioButton radioToggle;
         private System.Windows.Forms.RadioButton radioSet;
-        private System.Windows.Forms.RadioButton radioDecrement;
-        private System.Windows.Forms.RadioButton radioIncrement;
-        private System.Windows.Forms.ComboBox variables;
-        private System.Windows.Forms.TextBox value;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.RadioButton radioCountDown;
+        private System.Windows.Forms.RadioButton radioCountUp;
+        private RoundedComboBox variables;
+        private RoundedTextBox value;
+        private System.Windows.Forms.Label lblVariable;
         private System.Windows.Forms.Label lblValue;
     }
 }

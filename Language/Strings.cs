@@ -233,5 +233,28 @@ namespace SuchByte.MacroDeck.Language
         public string WebClient = "Web client";
         public string AndroidApp = "Android client";
         public string IOSApp = "iOS client";
+        public string PluginMacroDeckFolder = "Macro Deck folder";
+        public string ActionChangeFolder = "Change folder";
+        public string ActionChangeFolderDescription = "Change the current folder on the current device to the configured folder";
+        public string ActionGoToParentFolder = "Go to parent folder";
+        public string ActionGoToParentFolderDescription = "Change the current folder on the current device to the folders parent folder";
+        public string ActionGoToRootFolder = "Go to root folder";
+        public string ActionGoToRootFolderDescription = "Change the current folder on the current device to the root folder";
+        public string PluginMacroDeckVariables = "Macro Deck variables";
+        public string ActionChangeVariableValue = "Change variable value";
+        public string ActionChangeVariableValueDescription = "Count up, count down, set a variable value and toggle variable value";
+        public string CountUp = "Count up";
+        public string CountDown = "Count down";
+        public string Set = "Set";
+        public string Toggle = "Toggle";
+        public string Variable = "Variable";
+        public string PluginActionButton = "This action button";
+        public string ActionToggleActionButtonState = "Toggle button state";
+        public string ActionToggleActionButtonStateDescription = "Toggles the state of this button";
+        public string ActionSetActionButtonStateOff = "Set button state to off";
+        public string ActionSetActionButtonStateOffDescription = "Sets the state of this button to \"off\"";
+        public string ActionSetActionButtonStateOn = "Set button state to on";
+        public string ActionSetActionButtonStateOnDescription = "Sets the state of this button to \"on\"";
+
     }
 }

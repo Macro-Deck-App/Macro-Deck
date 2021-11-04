@@ -19,7 +19,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             this.Action = macroDeckAction;
             InitializeComponent();
-            this.lblAction.Text = macroDeckAction.DisplayName;
+            this.lblPlugin.Text = PluginManager.GetPluginByAction(this.Action).Name;
+            this.lblAction.Text = this.Action.Name;
+            this.lblConfigurationSummary.Text = this.Action.ConfigurationSummary;
         }
 
 

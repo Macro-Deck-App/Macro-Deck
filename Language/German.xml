@@ -207,11 +207,33 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
   <Online>Online</Online>
   <By>Von</By>
   <StateBinding>Zustand binden an</StateBinding>
-  <ErrorWhileLoadingPackageManager>Fehler beim Laden der Paketverwaltung. 
+	<ErrorWhileLoadingPackageManager>Fehler beim Laden der Paketverwaltung. 
   Möglicherweise besteht Internetverbindung oder Macro Deck wird von der Firewall blockiert.</ErrorWhileLoadingPackageManager>
-  <UpdatesAvailable>Updates verfügbar</UpdatesAvailable>
-  <EnableIconCache>Icon Cache aktivieren (schneller; höhere Arbeitsspeicherauslastung)</EnableIconCache>
-  <WebClient>Webclient</WebClient>
-  <AndroidApp>Android App</AndroidApp>
-  <IOSApp>iOS App</IOSApp>
+	<UpdatesAvailable>Updates verfügbar</UpdatesAvailable>
+	<EnableIconCache>Icon Cache aktivieren (schneller; höhere Arbeitsspeicherauslastung)</EnableIconCache>
+	<WebClient>Webclient</WebClient>
+	<AndroidApp>Android App</AndroidApp>
+	<IOSApp>iOS App</IOSApp>
+	<PluginMacroDeckFolder>Macro Deck Ordner</PluginMacroDeckFolder>
+	<ActionChangeFolder>Ordner ändern</ActionChangeFolder>
+	<ActionChangeFolderDescription>Ändert den Ordner auf dem Gerät, das die Aktion ausgeführt hat, zu dem eingestellten Ordner</ActionChangeFolderDescription>
+	<ActionGoToParentFolder>Gehe zu übergeordnetem Ordner</ActionGoToParentFolder>
+	<ActionGoToParentFolderDescription>Ändert den Ordner auf dem Gerät, das die Aktion ausgeführt hat, zu dem übergeordnetem Ordner</ActionGoToParentFolderDescription>
+	<ActionGoToRootFolder>Gehe zum Hauptverzeichnis</ActionGoToRootFolder>
+	<ActionGoToRootFolderDescription>Ändert den Ordner auf dem Gerät, das die Aktion ausgeführt hat, zum Hauptverzeichnis</ActionGoToRootFolderDescription>
+	<PluginMacroDeckVariables>Macro Deck Variablen</PluginMacroDeckVariables>
+	<ActionChangeVariableValue>Variablenwert ändern</ActionChangeVariableValue>
+	<ActionChangeVariableValueDescription>Variablenwert hoch-, runterzählen, umschalten und setzen</ActionChangeVariableValueDescription>
+	<CountUp>Hochzählen</CountUp>
+	<CountDown>Runterzählen</CountDown>
+	<Set>Setzen</Set>
+	<Toggle>Umschalten</Toggle>
+	<Variable>Variable</Variable>
+	<PluginActionButton>Diese Taste</PluginActionButton>
+	<ActionToggleActionButtonState>Tastenstatus umschalten</ActionToggleActionButtonState>
+	<ActionToggleActionButtonStateDescription>Schaltet den Status der gedrückten Taste um</ActionToggleActionButtonStateDescription>
+	<ActionSetActionButtonStateOff>Tastenstatus zu "Off" ändern</ActionSetActionButtonStateOff>
+	<ActionSetActionButtonStateOffDescription>Ändert den Tastenstatus der gedrückten Taste zu "Off"</ActionSetActionButtonStateOffDescription>
+	<ActionSetActionButtonStateOn>Tastenstatus zu "On" ändern</ActionSetActionButtonStateOn>
+	<ActionSetActionButtonStateOnDescription>Ändert den Tastenstatus der gedrückten Taste zu "On"</ActionSetActionButtonStateOnDescription>
 </Strings>

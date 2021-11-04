@@ -12,7 +12,6 @@ namespace SuchByte.MacroDeck.ActionButton.Plugin
     {
         public override string Name => "Delay";
         public override string Description => "";
-        public override string DisplayName { get; set; } = "";
         public override void Trigger(string clientId, ActionButton actionButton)
         {
             try

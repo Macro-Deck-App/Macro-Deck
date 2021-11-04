@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace SuchByte.MacroDeck.Plugins
 {
@@ -101,9 +102,10 @@ namespace SuchByte.MacroDeck.Plugins
         /// </summary>
         public abstract string Name { get; }
         /// <summary>
-        /// Display name of the action; can be changed after configuration
+        /// Use ConfigurationSummary instead
         /// </summary>
-        public abstract string DisplayName { get; set; }
+        [Obsolete("Use ConfigurationSummary instead")]
+        public virtual string DisplayName { get; set; }
         /// <summary>
         /// Description what the action does
         /// </summary>
@@ -118,6 +120,11 @@ namespace SuchByte.MacroDeck.Plugins
         /// Configuration of the action
         /// </summary>
         public string Configuration { get; set; }
+        /// <summary>
+        /// Can be used when this action is configurable to show a short summary of the configuration in the item in the ButtonEditor
+        /// e.G. "Example -> example value"
+        /// </summary>
+        public string ConfigurationSummary { get; set; }
         /// <summary>
         /// true = the action can be configured. The ActionConfigControl needs to be implemented!
         /// </summary>

@@ -8,9 +8,11 @@ using System.Windows.Forms;
 using SuchByte.MacroDeck;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Folders.Plugin.GUI
 {
+
     public partial class FolderSwitcherConfigurator : ActionConfigControl
     {
         public MacroDeckFolder SelectedFolder;
@@ -52,15 +54,15 @@ namespace SuchByte.MacroDeck.Folders.Plugin.GUI
             foldersView.SelectedNode = foldersView.Nodes[0];
         }
 
-
-        private void FoldersView_AfterSelect(object sender, TreeViewEventArgs e)
+        public override bool OnActionSave()
         {
-            if (foldersView.SelectedNode == null) return;
+            if (foldersView.SelectedNode == null) return false;
             MacroDeckFolder folder = MacroDeck.ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, MacroDeck.ProfileManager.CurrentProfile);
             this.SelectedFolder = folder;
             long folderId = this.SelectedFolder.FolderId;
             this._macroDeckAction.Configuration = folderId.ToString();
-            this._macroDeckAction.DisplayName = this._macroDeckAction.Name + " -> " + folder.DisplayName;
+            this._macroDeckAction.ConfigurationSummary = folder.DisplayName;
+            return true;
         }
     }
 }

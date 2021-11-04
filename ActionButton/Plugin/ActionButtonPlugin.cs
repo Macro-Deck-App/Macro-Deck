@@ -1,5 +1,6 @@
 ﻿using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
 using System;
@@ -14,9 +15,8 @@ namespace SuchByte.MacroDeck.ActionButton
 {
     public class ActionButtonPlugin : MacroDeckPlugin
     {
-        public override string Name => "ActionButton";
+        public override string Name => LanguageManager.Strings.PluginActionButton;
         public override string Author => "Macro Deck";
-        public override string Description => "";
         public override void Enable()
         {
             this.Actions = new List<PluginAction>()
@@ -31,9 +31,8 @@ namespace SuchByte.MacroDeck.ActionButton
 
     public class ActionButtonToggleStateAction : PluginAction
     {
-        public override string Name => "Toggle state";
-        public override string Description => "Toggles the state of this button";
-        public override string DisplayName { get; set; } = "Toggle state";
+        public override string Name => LanguageManager.Strings.ActionToggleActionButtonState;
+        public override string Description => LanguageManager.Strings.ActionToggleActionButtonStateDescription;
         public override void Trigger(string clientId, ActionButton actionButton)
         {
             MacroDeckServer.SetState(actionButton, !actionButton.State);
@@ -42,9 +41,8 @@ namespace SuchByte.MacroDeck.ActionButton
 
     public class ActionButtonSetStateOffAction : PluginAction
     {
-        public override string Name => "Set button state off";
-        public override string Description => "Set the state of the button to off";
-        public override string DisplayName { get; set; } = "Set button state off";
+        public override string Name => LanguageManager.Strings.ActionSetActionButtonStateOff;
+        public override string Description => LanguageManager.Strings.ActionSetActionButtonStateOffDescription;
         public override void Trigger(string clientId, ActionButton actionButton)
         {
             MacroDeckServer.SetState(actionButton, false);
@@ -53,9 +51,8 @@ namespace SuchByte.MacroDeck.ActionButton
 
     public class ActionButtonSetStateOnAction : PluginAction
     {
-        public override string Name => "Set button state on";
-        public override string Description => "Set the state of the button to on";
-        public override string DisplayName { get; set; } = "Set button state on";
+        public override string Name => LanguageManager.Strings.ActionSetActionButtonStateOn;
+        public override string Description => LanguageManager.Strings.ActionSetActionButtonStateOnDescription;
         public override bool CanConfigure => false;
         public override void Trigger(string clientId, ActionButton actionButton)
         {

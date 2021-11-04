@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
@@ -18,7 +19,9 @@ namespace SuchByte.MacroDeck.GUI
 
         private PluginAction _action = null;
 
+        [Obsolete("Replaced with the OnActionSave boolean of the PluginAction class; Will be removed soon")]
         public event EventHandler ActionSave;
+
         public ActionConfigurator()
         {
             InitializeComponent();
@@ -46,7 +49,6 @@ namespace SuchByte.MacroDeck.GUI
                     {
                         this.pluginList.FindItemWithText(plugin.Name).Selected = true;
                         this.pluginList.Select();
-                        //this.pluginList.SetSelected(this.pluginList.Items.IndexOf(plugin.Name), true);
                         this.actionList.SetSelected(this.actionList.Items.IndexOf(macroDeckAction.Name), true);
                     }
                 }
@@ -94,6 +96,14 @@ namespace SuchByte.MacroDeck.GUI
                 {
                     this.ActionSave(this._action, EventArgs.Empty);
                 }
+                ActionConfigControl actionConfigControl = this.configurationPanel.Controls[0] as ActionConfigControl;
+                if (this._action.CanConfigure && actionConfigControl != null)
+                {
+                    if (!actionConfigControl.OnActionSave())
+                    {
+                        return;
+                    }
+                }
                 if (this._action.CanConfigure && this._action.Configuration == null && String.IsNullOrWhiteSpace(this._action.Configuration)) return;
                 this.DialogResult = DialogResult.OK;
             }
@@ -103,13 +113,17 @@ namespace SuchByte.MacroDeck.GUI
         private void ActionList_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (actionList.SelectedItem == null) return;
-            PluginAction newAction = PluginManager.GetActionByName(PluginManager.Plugins[pluginList.SelectedItems[0].Text.ToString()], this.actionList.SelectedItem.ToString());
+            PluginAction newAction = PluginManager.GetActionByName(PluginManager.GetPluginByName(pluginList.SelectedItems[0].Text.ToString()), this.actionList.SelectedItem.ToString());
             if (this._action == null || this._action.GetType() != newAction.GetType())
             {
                 this._action = newAction;
             }
             if (this._action == null) return;
             this.labelDescription.Text = this._action.Description;
+            foreach (Control control in this.configurationPanel.Controls)
+            {
+                control.Dispose();
+            }
             this.configurationPanel.Controls.Clear();
             if (this._action.CanConfigure)
             {
@@ -139,7 +153,9 @@ namespace SuchByte.MacroDeck.GUI
         {
             if (this.pluginList.SelectedItems == null || pluginList.SelectedItems.Count == 0 || pluginList.SelectedItems[0] == null) return;
             actionList.Items.Clear();
-            foreach (PluginAction action in PluginManager.Plugins[pluginList.SelectedItems[0].Text.ToString()].Actions)
+
+
+            foreach (PluginAction action in PluginManager.GetPluginByName(pluginList.SelectedItems[0].Text.ToString()).Actions)
             {
                 this.actionList.Items.Add(action.Name);
             }

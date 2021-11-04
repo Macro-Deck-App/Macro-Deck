@@ -44,7 +44,6 @@
             this.foldersView.PathSeparator = "/";
             this.foldersView.Size = new System.Drawing.Size(707, 262);
             this.foldersView.TabIndex = 0;
-            this.foldersView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.FoldersView_AfterSelect);
             // 
             // FolderSwitcherConfigurator
             // 
