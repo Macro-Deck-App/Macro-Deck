@@ -1,9 +1,9 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <Strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <__Language__>Español</__Language__>
   <__LanguageCode__>Es</__LanguageCode__>
   <__Author__>l69l_Anthony</__Author__>
-  <__Version__>2b11</__Version__>
+  <__Version__>2.1.1-dev</__Version__>
   <NetworkAdapter>Adaptador de red</NetworkAdapter>
   <IPAddress>Dirección IP</IPAddress>
   <Port>Puerto</Port>
