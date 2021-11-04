@@ -213,4 +213,26 @@ Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImpor
   <WebClient>Cliente Web</WebClient>
   <AndroidApp>Android App</AndroidApp>
   <IOSApp>iOS App</IOSApp>
+  <PluginMacroDeckFolder>Carpeta Macro Deck</PluginMacroDeckFolder>
+  <ActionChangeFolder>Ir a la carpeta seleccionada</ActionChangeFolder>
+  <ActionChangeFolderDescription>Cambiar la carpeta actual en el dispositivo actual a la carpeta configurada</ActionChangeFolderDescription>
+  <ActionGoToParentFolder>Ir a la carpeta principal</ActionGoToParentFolder>
+  <ActionGoToParentFolderDescription>Cambie la carpeta actual en el dispositivo actual a la carpeta principal de carpetas</ActionGoToParentFolderDescription>
+  <ActionGoToRootFolder>Ir a la carpeta raíz</ActionGoToRootFolder>
+  <ActionGoToRootFolderDescription>Cambie la carpeta actual en el dispositivo actual a la carpeta raíz</ActionGoToRootFolderDescription>
+  <PluginMacroDeckVariables>Variables de Macro Deck</PluginMacroDeckVariables>
+  <ActionChangeVariableValue>Cambiar el valor de la variable</ActionChangeVariableValue>
+  <ActionChangeVariableValueDescription>Cuente hacia arriba, cuente hacia atrás, establezca un valor de variable y cambie el valor de la variable</ActionChangeVariableValueDescription>
+  <CountUp>Contar hasta</CountUp>
+  <CountDown>Cuenta atrás</CountDown>
+  <Set>Colocar</Set>
+  <Toggle>Interruptor</Toggle>
+  <Variable>Variable</Variable>
+  <PluginActionButton>Acción de botón</PluginActionButton>
+  <ActionToggleActionButtonState>Establecer botón como interruptor</ActionToggleActionButtonState>
+  <ActionToggleActionButtonStateDescription>Cambia el estado de este botón a "interruptor"</ActionToggleActionButtonStateDescription>
+  <ActionSetActionButtonStateOff>Desactivar el estado del botón</ActionSetActionButtonStateOff>
+  <ActionSetActionButtonStateOffDescription>Establece el estado de este botón en "desactivado".</ActionSetActionButtonStateOffDescription>
+  <ActionSetActionButtonStateOn>Activar el estado del botón</ActionSetActionButtonStateOn>
+  <ActionSetActionButtonStateOnDescription>Establece el estado de este botón en "activado"</ActionSetActionButtonStateOnDescription>
 </Strings>
