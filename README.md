@@ -19,12 +19,6 @@ https://macrodeck.org/download
 
 # Helping with the translation
 All translation files are located under https://github.com/SuchByte/Macro-Deck/tree/master/Language
-## Adding/editing a translation file
-1. Fork this GitHub repository
-2. Add/edit the translation files
-3. Create a pull request of the forked repository
-### Note
-Please use the ISO names for the file name and for the __Language__ node in the file. For __LanguageCode__ use the ISO-639-1 code. You can find more information here: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 
 
 # Using the plugin API
@@ -87,9 +81,6 @@ public class ExampleAction : PluginAction
   // A short description what the action can do
   public override string Description => "Action description"; 
   
-  // The display name of the action. Can be changed later based on configuration
-  public override string DisplayName { get; set; } = "Example action"; 
-  
   // Optional; Add if this action can be configured. This will make the ActionConfigurator calling GetActionConfigurator();
   public override bool CanConfigure => true; 
   
@@ -125,25 +116,29 @@ public partial class ExampleActionConfigurator : ActionConfigControl
 ```
 
 ## Saving the config of an action
-If your action can be configured, you need to store the configuration as a string (can be json formatted) in the Configuration variable of your IMacroDeckAction. Macro Deck provides a event when the user closes the action configurator. You need to add the ActionSave event in your ActionConfigControl class.
+If your action can be configured, you need to store the configuration as a string (can be json formatted) in the Configuration variable of your IMacroDeckAction. Macro Deck provides a boolean in the ActionConfigControl class which you can override. This gets called when the user closes the action configurator. You can force the user to configure the action by returning false if e.g a text box is not filled out.
 ```c#
 public ExampleActionConfigurator(PluginAction macroDeckAction, ActionConfigurator actionConfigurator)
 {
   this._macroDeckAction = macroDeckAction;
   InitializeComponent();
-  actionConfigurator.ActionSave += OnActionSave;
 }
 
-private void OnActionSave(object sender, EventArgs e)
+public override bool OnActionSave()
 {
+  if (String.IsNullOrWhiteSpace(this.exampleTextBox.Text)) {
+    return false; // Return false if the user has not filled out the text box
+  }
   try
   {
     JObject configuration = new JObject();
-    configuration["key"] = "value";
-    this._macroDeckAction.DisplayName = this._macroDeckAction.Name + " -> " + configuration["key"].toString();
+    configuration["example"] = this.exampleTextBox.Text;
+    this._macroDeckAction.ConfigurationSummary = configuration["example"].toString(); // Set a summary of the configuration that gets displayed in the ButtonConfigurator item
     this._macroDeckAction.Configuration = configuration.ToString();
   } catch { }
+  return true; // Return true if the action was configured successfully; This closes the ActionConfigurator
 }
+
 ```
 
 ## Saving plugin settings
