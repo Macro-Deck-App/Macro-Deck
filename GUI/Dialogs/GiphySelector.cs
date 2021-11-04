@@ -183,7 +183,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         {
             this.Invoke(new Action(() =>
             {
-                this.progressBarDownload.Value = e.ProgressPercentage;
+                this.btnOk.Progress = e.ProgressPercentage;
             }));
         }
 
@@ -208,11 +208,9 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         {
             Cursor.Current = Cursors.WaitCursor;
             this.lblDownloading.Visible = true;
-            this.progressBarDownload.Visible = true;
             this.btnOk.Enabled = false;
             if (this.btnPreview.Tag != null)
             {
-                this.btnOk.Text = "...";
                 try
                 {
                     WebClient client = new WebClient();

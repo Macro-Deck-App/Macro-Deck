@@ -39,7 +39,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnPreview = new SuchByte.MacroDeck.GUI.CustomControls.RoundedButton();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
-            this.progressBarDownload = new System.Windows.Forms.ProgressBar();
             this.lblDownloading = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.btnPreview)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -57,14 +56,17 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // searchBox
             // 
             this.searchBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.searchBox.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.searchBox.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.searchBox.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
             this.searchBox.Icon = null;
-            this.searchBox.Location = new System.Drawing.Point(473, 8);
+            this.searchBox.Location = new System.Drawing.Point(414, 8);
             this.searchBox.Multiline = false;
             this.searchBox.Name = "searchBox";
             this.searchBox.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
             this.searchBox.PasswordChar = false;
+            this.searchBox.PlaceHolderColor = System.Drawing.Color.Gray;
             this.searchBox.PlaceHolderText = "Search GIPHY";
+            this.searchBox.ReadOnly = false;
             this.searchBox.SelectionStart = 0;
             this.searchBox.Size = new System.Drawing.Size(271, 27);
             this.searchBox.TabIndex = 5;
@@ -83,7 +85,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnSearch.ForeColor = System.Drawing.Color.White;
             this.btnSearch.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
             this.btnSearch.Icon = global::SuchByte.MacroDeck.Properties.Resources.magnifying_glass;
-            this.btnSearch.Location = new System.Drawing.Point(746, 8);
+            this.btnSearch.Location = new System.Drawing.Point(687, 8);
             this.btnSearch.Name = "btnSearch";
             this.btnSearch.Progress = 0;
             this.btnSearch.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
@@ -169,14 +171,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.pictureBox3.TabIndex = 12;
             this.pictureBox3.TabStop = false;
             // 
-            // progressBarDownload
-            // 
-            this.progressBarDownload.Location = new System.Drawing.Point(285, 519);
-            this.progressBarDownload.Name = "progressBarDownload";
-            this.progressBarDownload.Size = new System.Drawing.Size(218, 25);
-            this.progressBarDownload.TabIndex = 13;
-            this.progressBarDownload.Visible = false;
-            // 
             // lblDownloading
             // 
             this.lblDownloading.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -195,7 +189,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(787, 607);
             this.Controls.Add(this.lblDownloading);
-            this.Controls.Add(this.progressBarDownload);
             this.Controls.Add(this.pictureBox3);
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.btnOk);
@@ -215,7 +208,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.Controls.SetChildIndex(this.btnOk, 0);
             this.Controls.SetChildIndex(this.pictureBox2, 0);
             this.Controls.SetChildIndex(this.pictureBox3, 0);
-            this.Controls.SetChildIndex(this.progressBarDownload, 0);
             this.Controls.SetChildIndex(this.lblDownloading, 0);
             ((System.ComponentModel.ISupportInitialize)(this.btnPreview)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
@@ -234,7 +226,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         private CustomControls.RoundedButton btnPreview;
         private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.PictureBox pictureBox3;
-        private System.Windows.Forms.ProgressBar progressBarDownload;
         private System.Windows.Forms.Label lblDownloading;
     }
 }

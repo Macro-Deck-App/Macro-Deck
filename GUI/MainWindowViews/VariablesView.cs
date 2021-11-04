@@ -14,10 +14,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 {
     public partial class VariablesView : UserControl
     {
+
         public VariablesView()
         {
             InitializeComponent();
             this.UpdateTranslation();
+            this.LoadCreators();
         }
 
         public void UpdateTranslation()
@@ -28,6 +30,48 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblValue.Text = Language.LanguageManager.Strings.Value;
             this.lblCreator.Text = Language.LanguageManager.Strings.Creator;
             this.btnCreateVariable.Text = Language.LanguageManager.Strings.CreateVariable;
+        }
+
+        private void LoadCreators()
+        {
+            foreach (CheckBox checkBox in this.creatorFilter.Controls)
+            {
+                checkBox.CheckedChanged -= CreatorCheckBox_CheckedChanged;
+            }
+            this.creatorFilter.Controls.Clear();
+            List<string> variableCreators = new List<string>();
+            foreach (Variable variable in VariableManager.Variables)
+            {
+                if (!variableCreators.Contains(variable.Creator)) {
+                    variableCreators.Add(variable.Creator);
+                }
+            }
+            foreach (string creator in variableCreators)
+            {
+                CheckBox creatorCheckBox = new CheckBox
+                {
+                    Checked = true,
+                    Text = creator,
+                    Name = creator,
+                    AutoSize = true,
+                    Padding = new Padding(10, 0, 10, 0),
+                };
+                this.creatorFilter.Controls.Add(creatorCheckBox);
+                creatorCheckBox.CheckedChanged += CreatorCheckBox_CheckedChanged;
+            }
+        }
+
+        private void CreatorCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox checkBox = sender as CheckBox;
+
+            foreach (VariableItem variableItem in this.variablesPanel.Controls)
+            {
+                if (variableItem.Variable.Creator.Equals(checkBox.Name))
+                {
+                    variableItem.Visible = checkBox.Checked;
+                }
+            }
         }
 
         private void VariablesPage_Load(object sender, EventArgs e)
