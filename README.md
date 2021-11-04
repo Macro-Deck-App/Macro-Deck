@@ -116,7 +116,7 @@ public partial class ExampleActionConfigurator : ActionConfigControl
 ```
 
 ## Saving the config of an action
-If your action can be configured, you need to store the configuration as a string (can be json formatted) in the Configuration variable of your IMacroDeckAction. Macro Deck provides a boolean in the ActionConfigControl class which you can override. This gets called when the user closes the action configurator. You can force the user to configure the action by returning false if e.g a text box is not filled out.
+If your action can be configured, you need to store the configuration as a string (can be json formatted) in the Configuration variable of your PluginAction. Macro Deck provides a boolean in the ActionConfigControl class which you can override. This gets called when the user closes the action configurator. You can force the user to configure the action by returning false if e.g a text box is not filled out.
 ```c#
 public ExampleActionConfigurator(PluginAction macroDeckAction, ActionConfigurator actionConfigurator)
 {
