@@ -165,6 +165,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             this.searchBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.searchBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.searchBox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.searchBox.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
             this.searchBox.ForeColor = System.Drawing.Color.Gray;
             this.searchBox.Icon = global::SuchByte.MacroDeck.Properties.Resources.magnifying_glass;
@@ -177,9 +178,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.searchBox.PlaceHolderText = "";
             this.searchBox.ReadOnly = false;
             this.searchBox.SelectionStart = 0;
-            this.searchBox.Size = new System.Drawing.Size(272, 30);
+            this.searchBox.Size = new System.Drawing.Size(272, 33);
             this.searchBox.TabIndex = 17;
             this.searchBox.TextAlignment = System.Windows.Forms.HorizontalAlignment.Left;
+            this.searchBox.Load += new System.EventHandler(this.searchBox_Load);
             this.searchBox.TextChanged += new System.EventHandler(this.SearchBox_TextChanged);
             // 
             // panelAvailablePlugins

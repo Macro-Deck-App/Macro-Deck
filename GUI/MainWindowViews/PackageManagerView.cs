@@ -275,5 +275,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             });
         }
 
+        private void searchBox_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

@@ -27,20 +27,13 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.radioSet.Text = LanguageManager.Strings.Set;
             this.radioToggle.Text = LanguageManager.Strings.Toggle;
             this.lblVariable.Text = LanguageManager.Strings.Variable;
-            this.lblValue.Text = LanguageManager.Strings.Value;
 
             this.variables.SelectedIndexChanged += Variables_SelectedIndexChanged;
-            this.variables.TextChanged += Variables_TextChanged;
         }
 
-        private void Variables_TextChanged(object sender, EventArgs e)
-        {
-            Debug.WriteLine(this.variables.Text);
-        }
 
         private void Variables_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Debug.WriteLine(this.variables.Text);
             try
             {
                 Variable variable = VariableManager.Variables.Find(v => v.Name.Equals(this.variables.Text));
@@ -59,7 +52,6 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
         private void MethodChanged(object sender, EventArgs e)
         {
             this.value.Visible = this.radioSet.Checked;
-            this.lblValue.Visible = this.value.Visible;
             this.LoadVariables();
         }
 
@@ -110,7 +102,6 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
 
         private void LoadVariables()
         {
-            Debug.WriteLine("Load variables");
             this.variables.Items.Clear();
             if (this.radioCountUp.Checked || this.radioCountDown.Checked)
             {
@@ -182,7 +173,6 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.variables.Text = jObject["variable"].ToString();
             this.value.Text = jObject["value"].ToString();
             this.value.Visible = this.radioSet.Checked;
-            this.lblValue.Visible = this.value.Visible;
 
         }
     }
