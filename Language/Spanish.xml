@@ -100,7 +100,7 @@ El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usa
   <InitialSetupButtonFinish>Finalizar</InitialSetupButtonFinish>
   <InitialSetupSelectLanguage>Seleccione un idioma</InitialSetupSelectLanguage>
   <InitialSetupPage>{0}/{1}</InitialSetupPage>
-  <InitialSetupWelcome>¡Bienvenido a Macro Deck!</InitialSetupWelcome>
+  <InitialSetupWelcome>¡Bienvenido a Macro Deck 2!</InitialSetupWelcome>
   <InitialSetupLetsConfigure>Configuremos algunas cosas</InitialSetupLetsConfigure>
   <InitialSetupConfigureNetworkSettings>Configurar los ajustes de red</InitialSetupConfigureNetworkSettings>
   <InitialSetupConfigureGridPreferences>Configurar la cuadrícula</InitialSetupConfigureGridPreferences>
@@ -209,4 +209,8 @@ Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImpor
   <ErrorWhileLoadingPackageManager>Error al cargar el administrador de paquetes. Quizás no esté conectado a Internet o su firewall bloquee Macro Deck.</ErrorWhileLoadingPackageManager>
   <UpdatesAvailable>Actualizaciones disponibles</UpdatesAvailable>
   <EnableIconCache>Habilitar la caché de iconos (más rápido; mayor uso de memoria)</EnableIconCache>
+  <ErrorWhileImportingIconPack>Error al importar el paquete de iconos</ErrorWhileImportingIconPack>
+  <WebClient>Cliente Web</WebClient>
+  <AndroidApp>Android App</AndroidApp>
+  <IOSApp>iOS App</IOSApp>
 </Strings>
