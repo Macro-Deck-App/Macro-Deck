@@ -8,14 +8,14 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>appicon.ico</ApplicationIcon>
     <StartupObject>SuchByte.MacroDeck.MacroDeck</StartupObject>
-    <Version>2.1.1-dev</Version>
+    <Version>2.1.2-beta</Version>
     <Company>Macro Deck</Company>
     <Authors>Manuel Mayer</Authors>
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>SuchByte.pfx</AssemblyOriginatorKeyFile>
     <Product>Macro Deck</Product>
     <AssemblyVersion>2.21.3110.100</AssemblyVersion>
-    <FileVersion>2.1.1.0</FileVersion>
+    <FileVersion>2.1.2.0</FileVersion>
     <AssemblyName>Macro Deck 2</AssemblyName>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/SuchByte/Macro-Deck</PackageProjectUrl>
@@ -31,12 +31,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Language\Finnish.xml" />
-    <None Remove="Language\French.xml" />
-    <None Remove="Language\Italian.xml" />
-    <None Remove="Language\Russian.xml" />
-    <None Remove="Language\Spanish.xml" />
     <None Remove="Licenses.xml" />
+    <None Remove="Resources\Languages\English.xml" />
+    <None Remove="Resources\Languages\Finnish.xml" />
+    <None Remove="Resources\Languages\French.xml" />
+    <None Remove="Resources\Languages\German.xml" />
+    <None Remove="Resources\Languages\Italian.xml" />
+    <None Remove="Resources\Languages\Russian.xml" />
+    <None Remove="Resources\Languages\Spanish.xml" />
+    <None Remove="Resources\Languages\Turkish.xml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -52,24 +55,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Language\Finnish.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Language\French.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Language\Italian.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Language\Russian.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Language\Spanish.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
     <EmbeddedResource Include="Licenses.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Languages\English.xml" />
+    <EmbeddedResource Include="Resources\Languages\Finnish.xml" />
+    <EmbeddedResource Include="Resources\Languages\French.xml" />
+    <EmbeddedResource Include="Resources\Languages\German.xml" />
+    <EmbeddedResource Include="Resources\Languages\Italian.xml" />
+    <EmbeddedResource Include="Resources\Languages\Russian.xml" />
+    <EmbeddedResource Include="Resources\Languages\Spanish.xml" />
+    <EmbeddedResource Include="Resources\Languages\Turkish.xml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -83,12 +79,6 @@
     <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="106.12.0" />
     <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
     <PackageReference Include="SQLiteNetExtensions" Version="2.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Language\German.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

@@ -19,17 +19,20 @@ namespace SuchByte.MacroDeck.Configuration
             set
             {
                 this._autoStart = value;
-                if (value)
+                try
                 {
-                    Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-                    key.SetValue("Macro Deck", System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
+                    if (value)
+                    {
+                        Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                        key.SetValue("Macro Deck", System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
+                    }
+                    else
+                    {
+                        Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                        key.DeleteValue("Macro Deck", false);
+                    }
                 }
-                else
-                {
-                    Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-                    key.DeleteValue("Macro Deck", false);
-                }
-
+                catch { }
             }
         }
         [JsonProperty("Icons.Cache")]
