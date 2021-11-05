@@ -50,7 +50,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // 
             this.pictureBox2.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.Macro_Deck_error;
             this.pictureBox2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.pictureBox2.Location = new System.Drawing.Point(12, 32);
+            this.pictureBox2.Location = new System.Drawing.Point(12, 15);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(100, 100);
             this.pictureBox2.TabIndex = 3;
@@ -58,12 +58,12 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // 
             // label1
             // 
-            this.label1.Font = new System.Drawing.Font("Tahoma", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(118, 32);
+            this.label1.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label1.Location = new System.Drawing.Point(118, 15);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(677, 60);
+            this.label1.Size = new System.Drawing.Size(423, 60);
             this.label1.TabIndex = 4;
-            this.label1.Text = "Oops, was a problem :-(";
+            this.label1.Text = "Oops, there was a problem :-(";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // crashReport
@@ -71,19 +71,19 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.crashReport.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
             this.crashReport.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.crashReport.ForeColor = System.Drawing.Color.White;
-            this.crashReport.Location = new System.Drawing.Point(12, 167);
+            this.crashReport.Location = new System.Drawing.Point(12, 141);
             this.crashReport.Multiline = true;
             this.crashReport.Name = "crashReport";
             this.crashReport.ReadOnly = true;
             this.crashReport.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.crashReport.Size = new System.Drawing.Size(776, 190);
+            this.crashReport.Size = new System.Drawing.Size(563, 148);
             this.crashReport.TabIndex = 7;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label4.Location = new System.Drawing.Point(12, 147);
+            this.label4.Location = new System.Drawing.Point(12, 121);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(51, 16);
             this.label4.TabIndex = 8;
@@ -94,18 +94,18 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.comment.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
             this.comment.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.comment.ForeColor = System.Drawing.Color.White;
-            this.comment.Location = new System.Drawing.Point(12, 528);
+            this.comment.Location = new System.Drawing.Point(12, 462);
             this.comment.Multiline = true;
             this.comment.Name = "comment";
             this.comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.comment.Size = new System.Drawing.Size(776, 66);
+            this.comment.Size = new System.Drawing.Size(563, 49);
             this.comment.TabIndex = 9;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label5.Location = new System.Drawing.Point(12, 509);
+            this.label5.Location = new System.Drawing.Point(12, 443);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(421, 16);
             this.label5.TabIndex = 10;
@@ -113,9 +113,9 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // 
             // label6
             // 
-            this.label6.Location = new System.Drawing.Point(12, 384);
+            this.label6.Location = new System.Drawing.Point(12, 318);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(776, 114);
+            this.label6.Size = new System.Drawing.Size(563, 114);
             this.label6.TabIndex = 11;
             this.label6.Text = resources.GetString("label6.Text");
             // 
@@ -123,7 +123,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label7.Location = new System.Drawing.Point(12, 365);
+            this.label7.Location = new System.Drawing.Point(12, 299);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(217, 16);
             this.label7.TabIndex = 12;
@@ -138,9 +138,13 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnSendCrashReport.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSendCrashReport.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnSendCrashReport.ForeColor = System.Drawing.Color.White;
-            this.btnSendCrashReport.Location = new System.Drawing.Point(12, 611);
+            this.btnSendCrashReport.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnSendCrashReport.Icon = null;
+            this.btnSendCrashReport.Location = new System.Drawing.Point(12, 517);
             this.btnSendCrashReport.Name = "btnSendCrashReport";
-            this.btnSendCrashReport.Size = new System.Drawing.Size(334, 37);
+            this.btnSendCrashReport.Progress = 0;
+            this.btnSendCrashReport.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
+            this.btnSendCrashReport.Size = new System.Drawing.Size(217, 37);
             this.btnSendCrashReport.TabIndex = 14;
             this.btnSendCrashReport.Text = "Send report and continue";
             this.btnSendCrashReport.UseVisualStyleBackColor = false;
@@ -155,8 +159,12 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnContinue.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnContinue.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnContinue.ForeColor = System.Drawing.Color.White;
-            this.btnContinue.Location = new System.Drawing.Point(454, 611);
+            this.btnContinue.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnContinue.Icon = null;
+            this.btnContinue.Location = new System.Drawing.Point(241, 517);
             this.btnContinue.Name = "btnContinue";
+            this.btnContinue.Progress = 0;
+            this.btnContinue.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
             this.btnContinue.Size = new System.Drawing.Size(334, 37);
             this.btnContinue.TabIndex = 15;
             this.btnContinue.Text = "Just continue";
@@ -165,12 +173,12 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // 
             // label3
             // 
-            this.label3.Font = new System.Drawing.Font("Tahoma", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label3.Location = new System.Drawing.Point(130, 92);
+            this.label3.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label3.Location = new System.Drawing.Point(118, 75);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(667, 40);
+            this.label3.Size = new System.Drawing.Size(457, 25);
             this.label3.TabIndex = 16;
-            this.label3.Text = "But don\'t worry, Macro Deck is still running.";
+            this.label3.Text = "Macro Deck will try to continue...";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // autoContinueTimer
@@ -182,7 +190,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 659);
+            this.ClientSize = new System.Drawing.Size(591, 568);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.btnContinue);
             this.Controls.Add(this.btnSendCrashReport);
