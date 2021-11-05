@@ -18,7 +18,7 @@
 https://macrodeck.org/download
 
 # Helping with the translation
-All translation files are located under https://github.com/SuchByte/Macro-Deck/tree/master/Language
+All translation files are located under https://github.com/SuchByte/Macro-Deck/tree/master/Resources/Languages
 
 
 # Using the plugin API

@@ -27,6 +27,7 @@ namespace SuchByte.MacroDeck
 
         internal static bool ForceUpdate = false;
         internal static bool TestUpdateChannel = false;
+        internal static bool ExportDefaultStrings = false;
 
         internal static bool SafeMode = false;
 
@@ -38,7 +39,7 @@ namespace SuchByte.MacroDeck
         public static readonly string IconPackDirectoryPath = UserDirectoryPath + "iconpacks\\";
         public static readonly string PluginCredentialsPath = UserDirectoryPath + "credentials\\";
         public static readonly string PluginConfigPath = UserDirectoryPath + "configs\\";
-        public static readonly string LanguagesPath = UserDirectoryPath + "languages\\";
+        //public static readonly string LanguagesPath = UserDirectoryPath + "languages\\";
 
         public static readonly string ConfigFilePath = UserDirectoryPath + "config.json";
         public static readonly string DevicesFilePath = UserDirectoryPath + "devices.json";
@@ -148,7 +149,7 @@ namespace SuchByte.MacroDeck
                 }
             }
 
-            if (!Directory.Exists(LanguagesPath))
+            /*if (!Directory.Exists(LanguagesPath))
             {
                 try
                 {
@@ -157,7 +158,7 @@ namespace SuchByte.MacroDeck
                 }
                 catch (Exception ex)
                 { Console.WriteLine(ex.Message); }
-            }
+            }*/
 
             // Check for start arguments
             int port = -1;
@@ -167,7 +168,8 @@ namespace SuchByte.MacroDeck
                 if (args[i].ToLower().Equals("--port"))
                 {
                     port = Int32.Parse(args[i + 1]);
-                } else if (args[i].ToLower().Equals("--show"))
+                }
+                else if (args[i].ToLower().Equals("--show"))
                 {
                     show = true;
                 }
@@ -179,9 +181,13 @@ namespace SuchByte.MacroDeck
                 {
                     TestUpdateChannel = true;
                 }
+                else if (args[i].ToLower().Equals("--export-default-string"))
+                {
+                    ExportDefaultStrings = true;
+                }
             }
 
-            Language.LanguageManager.Load();
+            Language.LanguageManager.Load(ExportDefaultStrings);
 
             // Check if config exists
             if (!File.Exists(ConfigFilePath))

@@ -22,17 +22,17 @@ namespace SuchByte.MacroDeck.Language
         public static Strings Strings { get { return _strings; } }
 
 
-        public static void Load()
+        public static void Load(bool exportDefaultStrings = false)
         {
             _languages.Clear();
             _languages.Add(_strings);
-            if (Debugger.IsAttached)
+            if (exportDefaultStrings)
             {
                 SaveDefault();
             }
 
             // Load language files
-            foreach (var file in Directory.GetFiles(MacroDeck.MainDirectoryPath + "Language", "*.xml"))
+            /*foreach (var file in Directory.GetFiles(MacroDeck.MainDirectoryPath + "Language", "*.xml"))
             {
                 try
                 {
@@ -61,8 +61,29 @@ namespace SuchByte.MacroDeck.Language
                     }
                 }
                 catch { }
-            }
+            }*/
 
+
+
+            // Loading languages from resources
+            var assembly = typeof(Strings).Assembly;
+            foreach (var manifestResource in assembly.GetManifestResourceNames())
+            {
+                try
+                {
+                    if (!manifestResource.StartsWith("SuchByte.MacroDeck.Resources.Languages.") ||! manifestResource.EndsWith(".xml")) continue;
+
+                    using var resourceStream = assembly.GetManifestResourceStream(manifestResource);
+                    using var streamReader = new StreamReader(resourceStream);
+
+                    using (TextReader reader = new StringReader(streamReader.ReadToEnd()))
+                    {
+                        Strings language = (Strings)new XmlSerializer(typeof(Strings)).Deserialize(reader);
+                        if (_languages.FindAll(l => l.__Language__.Equals(language.__Language__) && l.__LanguageCode__.Equals(language.__LanguageCode__) && l.__Author__.Equals(language.__Author__)).Count > 0) continue;
+                        _languages.Add(language);
+                    }
+                } catch { }
+            }
 
             _languages = _languages.OrderBy(x => x.__Language__).ToList();
           
@@ -94,12 +115,17 @@ namespace SuchByte.MacroDeck.Language
             Strings strings = _languages.Find(l => l.__Language__.Equals(languageName));
             if (strings != null)
             {
-                Debug.WriteLine("Set language to " + languageName);
-                _strings = strings;
-                if (LanguageChanged != null)
-                {
-                    LanguageChanged(strings, EventArgs.Empty);
-                }
+                SetLanguage(strings);
+            }
+        }
+
+        public static void SetLanguage(Strings language)
+        {
+            Debug.WriteLine("Set language to " + language.__Language__);
+            _strings = language;
+            if (LanguageChanged != null)
+            {
+                LanguageChanged(language, EventArgs.Empty);
             }
         }
 
@@ -112,6 +138,8 @@ namespace SuchByte.MacroDeck.Language
         {
             return _strings.__LanguageCode__;
         }
+
+
 
     }
 }
