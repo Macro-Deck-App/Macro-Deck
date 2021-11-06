@@ -1,7 +1,7 @@
 ---
 name: Plugin submission
 about: Submit a new plugin here
-title: 'Plugin submission: *Plugin name*'
+title: ''
 labels: new plugin
 assignees: ''
 
@@ -9,6 +9,9 @@ assignees: ''
 
 ** Name of the plugin **
 Must match the name in the project properties
+
+** Author of the plugin **
+The author name that will appear in the package manager
 
 ** Description of the plugin **
 What can your plugin do? A short description 20-30 words
