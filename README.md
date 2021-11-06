@@ -20,9 +20,6 @@ https://macrodeck.org/download
 # Helping with the translation
 All translation files are located under https://github.com/SuchByte/Macro-Deck/tree/master/Resources/Languages
 
-# Submit a new plugin or a plugin update
-Create a issue with the accordingly template here: https://github.com/SuchByte/Macro-Deck/issues/new/choose
-
 # Using the plugin API
 ## Creating the project
 1. Start by creating a new class library. Important: you need to use .NET Core 3.1 for this, not .NET Framework!
@@ -187,13 +184,11 @@ After that you have to create a plugin manifest. Create a .xml file and call it 
 </PluginManifest>
 ```
 
-
 ## Publish the plugin in the package manager
 If you want your plugin to be published in the Macro Deck package manager, you have to follow these steps:
 1. Upload the source code to GitHub. Plugins in the package manager must be open source because of safety reasons.
 2. Add the proper license to your repository
-3. Get in contact with me and send me a link to your repository. After I inspected it and it doesn't contains something strange, I'll download and compile it. After this I will upload it to the package manager
-
+3. Create a issue with the accordingly template here: https://github.com/SuchByte/Macro-Deck/issues/new/choose
 
 # Third party licenses
 Macro Deck uses some awesome 3rd party libraries:
