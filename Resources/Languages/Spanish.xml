@@ -87,7 +87,7 @@ El puerto estándar para Macro Deck es 8191. Si otras aplicaciones ya están usa
   <CheckForUpdatesNow>Buscar actualizaciones</CheckForUpdatesNow>
   <Author>Autor</Author>
   <Version>Versión</Version>
-  <TheFolderWillBeDeleted>Se elimina la carpeta {0} con todas las claves configuradas.</TheFolderWillBeDeleted>
+  <TheFolderWillBeDeleted>Se eliminará la carpeta {0} con todas las claves configuradas.</TheFolderWillBeDeleted>
   <TheProfileWillBeDeleted>Se eliminará el perfil {0} con todas las carpetas y claves.</TheProfileWillBeDeleted>
   <ServerOffline>Servidor fuera de linea</ServerOffline>
   <ServerRunning>El servidor se está ejecutando</ServerRunning>
@@ -222,17 +222,17 @@ Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImpor
   <ActionGoToRootFolderDescription>Cambie la carpeta actual en el dispositivo actual a la carpeta raíz</ActionGoToRootFolderDescription>
   <PluginMacroDeckVariables>Variables de Macro Deck</PluginMacroDeckVariables>
   <ActionChangeVariableValue>Cambiar el valor de la variable</ActionChangeVariableValue>
-  <ActionChangeVariableValueDescription>Cuente hacia arriba, cuente hacia atrás, establezca un valor de variable y cambie el valor de la variable</ActionChangeVariableValueDescription>
+  <ActionChangeVariableValueDescription>Cuente hasta, cuente hacia atrás, establezca un valor de variable y cambie el valor de la variable</ActionChangeVariableValueDescription>
   <CountUp>Contar hasta</CountUp>
   <CountDown>Cuenta atrás</CountDown>
   <Set>Colocar</Set>
   <Toggle>Interruptor</Toggle>
   <Variable>Variable</Variable>
   <PluginActionButton>Acción de botón</PluginActionButton>
-  <ActionToggleActionButtonState>Establecer botón como interruptor</ActionToggleActionButtonState>
+  <ActionToggleActionButtonState>Establecer como interruptor</ActionToggleActionButtonState>
   <ActionToggleActionButtonStateDescription>Cambia el estado de este botón a "interruptor"</ActionToggleActionButtonStateDescription>
-  <ActionSetActionButtonStateOff>Desactivar el estado del botón</ActionSetActionButtonStateOff>
-  <ActionSetActionButtonStateOffDescription>Establece el estado de este botón en "desactivado".</ActionSetActionButtonStateOffDescription>
-  <ActionSetActionButtonStateOn>Activar el estado del botón</ActionSetActionButtonStateOn>
-  <ActionSetActionButtonStateOnDescription>Establece el estado de este botón en "activado"</ActionSetActionButtonStateOnDescription>
+  <ActionSetActionButtonStateOff>Establecer en "apagado"</ActionSetActionButtonStateOff>
+  <ActionSetActionButtonStateOffDescription>Establece el estado de este botón como "apagado"</ActionSetActionButtonStateOffDescription>
+  <ActionSetActionButtonStateOn>Establecer en "encendido"</ActionSetActionButtonStateOn>
+  <ActionSetActionButtonStateOnDescription>Establece el estado de este botón como "encendido"</ActionSetActionButtonStateOnDescription>
 </Strings>
