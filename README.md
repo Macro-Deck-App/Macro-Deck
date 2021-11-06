@@ -20,6 +20,8 @@ https://macrodeck.org/download
 # Helping with the translation
 All translation files are located under https://github.com/SuchByte/Macro-Deck/tree/master/Resources/Languages
 
+# Submit a new plugin or a plugin update
+Create a issue with the accordingly template here: https://github.com/SuchByte/Macro-Deck/issues/new/choose
 
 # Using the plugin API
 ## Creating the project
