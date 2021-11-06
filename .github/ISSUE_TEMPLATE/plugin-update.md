@@ -1,7 +1,7 @@
 ---
 name: Plugin update
 about: Submit a update of a plugin here
-title: ''
+title: 'Plugin update: *Plugin name*'
 labels: plugin update
 assignees: ''
 

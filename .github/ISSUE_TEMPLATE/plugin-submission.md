@@ -1,7 +1,7 @@
 ---
 name: Plugin submission
 about: Submit a new plugin here
-title: ''
+title: 'Plugin submission: *Plugin name*'
 labels: new plugin
 assignees: ''
 
