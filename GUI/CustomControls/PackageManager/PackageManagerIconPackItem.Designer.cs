@@ -73,7 +73,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             // preview
             // 
-            this.preview.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.preview.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.preview.Location = new System.Drawing.Point(3, 20);
             this.preview.Name = "preview";
             this.preview.Size = new System.Drawing.Size(60, 60);

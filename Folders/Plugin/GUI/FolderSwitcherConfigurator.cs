@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using SuchByte.MacroDeck;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Folders.Plugin.GUI
@@ -21,7 +22,7 @@ namespace SuchByte.MacroDeck.Folders.Plugin.GUI
 
         public FolderSwitcherConfigurator(PluginAction macroDeckAction)
         {
-            if (MacroDeck.ProfileManager == null || MacroDeck.ProfileManager.CurrentProfile.Folders == null) return;
+            if (ProfileManager.CurrentProfile.Folders == null) return;
 
             this._macroDeckAction = macroDeckAction;
             InitializeComponent();
@@ -30,7 +31,7 @@ namespace SuchByte.MacroDeck.Folders.Plugin.GUI
             foldersView.Nodes.Clear();
 
             var stack = new Stack<TreeNode>();
-            var rootDirectory = MacroDeck.ProfileManager.CurrentProfile.Folders[0];
+            var rootDirectory = ProfileManager.CurrentProfile.Folders[0];
             var node = new TreeNode(rootDirectory.DisplayName) { Tag = rootDirectory };
             stack.Push(node);
 
@@ -40,7 +41,7 @@ namespace SuchByte.MacroDeck.Folders.Plugin.GUI
                 var directoryInfo = (MacroDeckFolder)currentNode.Tag;
                 foreach (var directoryId in directoryInfo.Childs)
                 {
-                    var directory = MacroDeck.ProfileManager.FindFolderById(directoryId, MacroDeck.ProfileManager.CurrentProfile);
+                    var directory = ProfileManager.FindFolderById(directoryId, ProfileManager.CurrentProfile);
                     var childDirectoryNode = new TreeNode(directory.DisplayName) { Tag = directory };
                     currentNode.Nodes.Add(childDirectoryNode);
                     stack.Push(childDirectoryNode);
@@ -57,7 +58,7 @@ namespace SuchByte.MacroDeck.Folders.Plugin.GUI
         public override bool OnActionSave()
         {
             if (foldersView.SelectedNode == null) return false;
-            MacroDeckFolder folder = MacroDeck.ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, MacroDeck.ProfileManager.CurrentProfile);
+            MacroDeckFolder folder = ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, ProfileManager.CurrentProfile);
             this.SelectedFolder = folder;
             long folderId = this.SelectedFolder.FolderId;
             this._macroDeckAction.Configuration = folderId.ToString();

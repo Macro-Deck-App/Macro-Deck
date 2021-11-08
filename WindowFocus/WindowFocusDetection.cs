@@ -32,11 +32,6 @@ namespace SuchByte.MacroDeck.WindowsFocus
                     AutomationElement focusedElement = sender as AutomationElement;
                     if (focusedElement != null)
                     {
-                        if (Process.GetCurrentProcess().Id.Equals(focusedElement.Current.ProcessId))
-                        {
-                            return;
-                        }
-
                         int processId = focusedElement.Current.ProcessId;
                         using (Process process = Process.GetProcessById(processId))
                         {

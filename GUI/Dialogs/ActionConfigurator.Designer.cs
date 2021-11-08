@@ -51,7 +51,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnApply.ForeColor = System.Drawing.Color.White;
             this.btnApply.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
             this.btnApply.Icon = null;
-            this.btnApply.Location = new System.Drawing.Point(649, 609);
+            this.btnApply.Location = new System.Drawing.Point(648, 594);
             this.btnApply.Name = "btnApply";
             this.btnApply.Progress = 0;
             this.btnApply.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
@@ -64,14 +64,14 @@ namespace SuchByte.MacroDeck.GUI
             // actionList
             // 
             this.actionList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.actionList.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.actionList.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.actionList.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.actionList.ForeColor = System.Drawing.Color.White;
             this.actionList.FormattingEnabled = true;
             this.actionList.ItemHeight = 19;
-            this.actionList.Location = new System.Drawing.Point(270, 53);
+            this.actionList.Location = new System.Drawing.Point(271, 53);
             this.actionList.Name = "actionList";
-            this.actionList.Size = new System.Drawing.Size(252, 268);
+            this.actionList.Size = new System.Drawing.Size(252, 247);
             this.actionList.TabIndex = 0;
             this.actionList.SelectedIndexChanged += new System.EventHandler(this.ActionList_SelectedIndexChanged);
             // 
@@ -88,27 +88,28 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // labelDescription
             // 
-            this.labelDescription.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.labelDescription.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.labelDescription.ForeColor = System.Drawing.Color.White;
-            this.labelDescription.Location = new System.Drawing.Point(528, 53);
+            this.labelDescription.Location = new System.Drawing.Point(529, 53);
             this.labelDescription.Name = "labelDescription";
-            this.labelDescription.Size = new System.Drawing.Size(199, 277);
+            this.labelDescription.Size = new System.Drawing.Size(191, 247);
             this.labelDescription.TabIndex = 3;
             // 
             // configurationPanel
             // 
             this.configurationPanel.Controls.Add(this.lblSelectToBegin);
             this.configurationPanel.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.configurationPanel.Location = new System.Drawing.Point(12, 333);
+            this.configurationPanel.Location = new System.Drawing.Point(8, 318);
             this.configurationPanel.Name = "configurationPanel";
             this.configurationPanel.Size = new System.Drawing.Size(715, 270);
             this.configurationPanel.TabIndex = 9;
             // 
             // lblSelectToBegin
             // 
-            this.lblSelectToBegin.Location = new System.Drawing.Point(3, 0);
+            this.lblSelectToBegin.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblSelectToBegin.Location = new System.Drawing.Point(0, 0);
             this.lblSelectToBegin.Name = "lblSelectToBegin";
-            this.lblSelectToBegin.Size = new System.Drawing.Size(709, 270);
+            this.lblSelectToBegin.Size = new System.Drawing.Size(715, 270);
             this.lblSelectToBegin.TabIndex = 0;
             this.lblSelectToBegin.Text = "Select a plugin and a action to begin";
             this.lblSelectToBegin.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -116,30 +117,36 @@ namespace SuchByte.MacroDeck.GUI
             // pluginSearch
             // 
             this.pluginSearch.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.pluginSearch.Cursor = System.Windows.Forms.Cursors.Hand;
             this.pluginSearch.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.pluginSearch.ForeColor = System.Drawing.Color.White;
             this.pluginSearch.Icon = global::SuchByte.MacroDeck.Properties.Resources.magnifying_glass;
-            this.pluginSearch.Location = new System.Drawing.Point(12, 10);
+            this.pluginSearch.Location = new System.Drawing.Point(13, 10);
             this.pluginSearch.Multiline = false;
             this.pluginSearch.Name = "pluginSearch";
             this.pluginSearch.Padding = new System.Windows.Forms.Padding(30, 5, 5, 8);
             this.pluginSearch.PasswordChar = false;
+            this.pluginSearch.PlaceHolderColor = System.Drawing.Color.Gray;
+            this.pluginSearch.PlaceHolderText = "";
+            this.pluginSearch.ReadOnly = false;
+            this.pluginSearch.SelectionStart = 0;
             this.pluginSearch.Size = new System.Drawing.Size(252, 33);
             this.pluginSearch.TabIndex = 10;
+            this.pluginSearch.TextAlignment = System.Windows.Forms.HorizontalAlignment.Left;
             this.pluginSearch.TextChanged += new System.EventHandler(this.PluginSearch_TextChanged);
             // 
             // pluginList
             // 
             this.pluginList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.pluginList.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pluginList.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.pluginList.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.pluginList.ForeColor = System.Drawing.Color.White;
             this.pluginList.FullRowSelect = true;
             this.pluginList.HideSelection = false;
-            this.pluginList.Location = new System.Drawing.Point(12, 53);
+            this.pluginList.Location = new System.Drawing.Point(13, 53);
             this.pluginList.MultiSelect = false;
             this.pluginList.Name = "pluginList";
-            this.pluginList.Size = new System.Drawing.Size(252, 268);
+            this.pluginList.Size = new System.Drawing.Size(252, 249);
             this.pluginList.TabIndex = 12;
             this.pluginList.UseCompatibleStateImageBehavior = false;
             this.pluginList.View = System.Windows.Forms.View.SmallIcon;
@@ -150,7 +157,7 @@ namespace SuchByte.MacroDeck.GUI
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.ClientSize = new System.Drawing.Size(740, 647);
+            this.ClientSize = new System.Drawing.Size(731, 629);
             this.Controls.Add(this.pluginList);
             this.Controls.Add(this.pluginSearch);
             this.Controls.Add(this.configurationPanel);

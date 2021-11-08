@@ -32,7 +32,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin
             {
                 new ChangeVariableValueAction(),
             };
-            MacroDeck.EventManager.RegisterEvent(this.variableChangedEvent);
+            EventManager.RegisterEvent(this.variableChangedEvent);
             VariableManager.OnVariableChanged += VariableChanged;
 
             this.timeDateTimer = new Timer(1000)
@@ -66,7 +66,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin
         {
             if (this.OnEvent != null)
             {
-                foreach (MacroDeckProfile macroDeckProfile in MacroDeck.ProfileManager.Profiles)
+                foreach (MacroDeckProfile macroDeckProfile in ProfileManager.Profiles)
                 {
                     foreach (MacroDeckFolder folder in macroDeckProfile.Folders)
                     {

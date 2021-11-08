@@ -1,6 +1,7 @@
 ﻿using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Profiles;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -48,7 +49,7 @@ namespace SuchByte.MacroDeck.GUI
             if (folderName.Text.Length < 1) return;
             
             if (this.Folder == null) {
-                foreach (Folders.MacroDeckFolder folder in MacroDeck.ProfileManager.CurrentProfile.Folders)
+                foreach (Folders.MacroDeckFolder folder in ProfileManager.CurrentProfile.Folders)
                 {
                     if (folder.DisplayName.Equals(folderName.Text))
                     {
@@ -61,10 +62,10 @@ namespace SuchByte.MacroDeck.GUI
                     }
                 }
 
-                if (ParentFolder == null || !MacroDeck.ProfileManager.CurrentProfile.Folders.Contains(ParentFolder))
-                    ParentFolder = MacroDeck.ProfileManager.CurrentProfile.Folders[0];
+                if (ParentFolder == null || !ProfileManager.CurrentProfile.Folders.Contains(ParentFolder))
+                    ParentFolder = ProfileManager.CurrentProfile.Folders[0];
 
-                MacroDeckFolder newFolder = MacroDeck.ProfileManager.CreateFolder(folderName.Text, ParentFolder, MacroDeck.ProfileManager.CurrentProfile);
+                MacroDeckFolder newFolder = ProfileManager.CreateFolder(folderName.Text, ParentFolder, ProfileManager.CurrentProfile);
                 if (radioOnFocus.Checked && this.applicationList.Text.Length > 0 && this.devicesList.CheckedItems.Count > 0)
                 {
                     newFolder.ApplicationToTrigger = this.applicationList.Text;
@@ -78,12 +79,12 @@ namespace SuchByte.MacroDeck.GUI
                     newFolder.ApplicationToTrigger = "";
                     newFolder.ApplicationsFocusDevices = new List<string>();
                 }
-                MacroDeck.ProfileManager.Save();
+                ProfileManager.Save();
             } else
             {
                 MacroDeckFolder newFolder = this.Folder;
-                int index = MacroDeck.ProfileManager.CurrentProfile.Folders.IndexOf(this.Folder);
-                MacroDeck.ProfileManager.CurrentProfile.Folders.Remove(this.Folder);
+                int index = ProfileManager.CurrentProfile.Folders.IndexOf(this.Folder);
+                ProfileManager.CurrentProfile.Folders.Remove(this.Folder);
                 newFolder.DisplayName = this.folderName.Text;
                 newFolder.ApplicationToTrigger = this.applicationList.Text;
                 
@@ -101,8 +102,8 @@ namespace SuchByte.MacroDeck.GUI
                     newFolder.ApplicationToTrigger = "";
                     newFolder.ApplicationsFocusDevices = new List<string>();
                 }
-                MacroDeck.ProfileManager.CurrentProfile.Folders.Insert(index, newFolder);
-                MacroDeck.ProfileManager.Save();
+                ProfileManager.CurrentProfile.Folders.Insert(index, newFolder);
+                ProfileManager.Save();
             }
 
             this.DialogResult = DialogResult.OK;

@@ -58,10 +58,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.actionsOnPress.AutoSize = true;
             this.actionsOnPress.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.actionsOnPress.Location = new System.Drawing.Point(3, 3);
-            this.actionsOnPress.MaximumSize = new System.Drawing.Size(925, 380);
-            this.actionsOnPress.MinimumSize = new System.Drawing.Size(925, 1);
+            this.actionsOnPress.Margin = new System.Windows.Forms.Padding(0);
+            this.actionsOnPress.MaximumSize = new System.Drawing.Size(869, 490);
+            this.actionsOnPress.MinimumSize = new System.Drawing.Size(869, 1);
             this.actionsOnPress.Name = "actionsOnPress";
-            this.actionsOnPress.Size = new System.Drawing.Size(925, 1);
+            this.actionsOnPress.Size = new System.Drawing.Size(869, 1);
             this.actionsOnPress.TabIndex = 2;
             // 
             // addItemContextMenu
@@ -75,13 +76,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.addItemContextMenu.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Table;
             this.addItemContextMenu.Name = "addItemContextMenu";
             this.addItemContextMenu.ShowImageMargin = false;
-            this.addItemContextMenu.Size = new System.Drawing.Size(156, 110);
+            this.addItemContextMenu.Size = new System.Drawing.Size(134, 88);
             // 
             // menuItemAction
             // 
             this.menuItemAction.ForeColor = System.Drawing.Color.White;
             this.menuItemAction.Name = "menuItemAction";
-            this.menuItemAction.Size = new System.Drawing.Size(155, 28);
+            this.menuItemAction.Size = new System.Drawing.Size(133, 28);
             this.menuItemAction.Text = "Action";
             this.menuItemAction.Click += new System.EventHandler(this.MenuItemAction_Click);
             // 
@@ -89,7 +90,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             // 
             this.menuItemCondition.ForeColor = System.Drawing.Color.White;
             this.menuItemCondition.Name = "menuItemCondition";
-            this.menuItemCondition.Size = new System.Drawing.Size(155, 28);
+            this.menuItemCondition.Size = new System.Drawing.Size(133, 28);
             this.menuItemCondition.Text = "Condition";
             this.menuItemCondition.Click += new System.EventHandler(this.MenuItemCondition_Click);
             // 
@@ -97,7 +98,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             // 
             this.menuItemDelay.ForeColor = System.Drawing.Color.White;
             this.menuItemDelay.Name = "menuItemDelay";
-            this.menuItemDelay.Size = new System.Drawing.Size(155, 28);
+            this.menuItemDelay.Size = new System.Drawing.Size(133, 28);
             this.menuItemDelay.Text = "Delay";
             this.menuItemDelay.Click += new System.EventHandler(this.DelayToolStripMenuItem_Click);
             // 
@@ -110,8 +111,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.btnAdd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnAdd.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnAdd.ForeColor = System.Drawing.Color.White;
-            this.btnAdd.Location = new System.Drawing.Point(3, 10);
+            this.btnAdd.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnAdd.Icon = null;
+            this.btnAdd.Location = new System.Drawing.Point(6, 7);
             this.btnAdd.Name = "btnAdd";
+            this.btnAdd.Progress = 0;
+            this.btnAdd.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
             this.btnAdd.Size = new System.Drawing.Size(165, 30);
             this.btnAdd.TabIndex = 7;
             this.btnAdd.Text = "+";
@@ -120,23 +125,26 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             // 
             // flowLayoutPanel1
             // 
+            this.flowLayoutPanel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.flowLayoutPanel1.Controls.Add(this.actionsOnPress);
             this.flowLayoutPanel1.Controls.Add(this.btnAdd);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(5, 5);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(931, 427);
+            this.flowLayoutPanel1.Padding = new System.Windows.Forms.Padding(3);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(869, 531);
             this.flowLayoutPanel1.TabIndex = 8;
             // 
             // ActionSelectorOnPress
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.Controls.Add(this.flowLayoutPanel1);
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.Name = "ActionSelectorOnPress";
-            this.Size = new System.Drawing.Size(931, 427);
+            this.Padding = new System.Windows.Forms.Padding(5);
+            this.Size = new System.Drawing.Size(879, 541);
             this.Load += new System.EventHandler(this.ActionSelectorOnPress_Load);
             this.addItemContextMenu.ResumeLayout(false);
             this.flowLayoutPanel1.ResumeLayout(false);

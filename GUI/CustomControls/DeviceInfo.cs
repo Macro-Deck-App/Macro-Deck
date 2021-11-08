@@ -38,14 +38,14 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             this.profiles.SelectedIndexChanged -= this.Profiles_SelectedIndexChanged;
             this.profiles.Items.Clear();
-            foreach (MacroDeckProfile macroDeckProfile in MacroDeck.ProfileManager.Profiles)
+            foreach (MacroDeckProfile macroDeckProfile in ProfileManager.Profiles)
             {
                 this.profiles.Items.Add(macroDeckProfile.DisplayName);
             }
 
             if (this._macroDeckDevice.ProfileId != null && this._macroDeckDevice.ProfileId.Length > 0)
             {
-                MacroDeckProfile macroDeckProfile = MacroDeck.ProfileManager.FindProfileById(this._macroDeckDevice.ProfileId);
+                MacroDeckProfile macroDeckProfile = ProfileManager.FindProfileById(this._macroDeckDevice.ProfileId);
                 if (macroDeckProfile != null)
                 {
                     this.profiles.Text = macroDeckProfile.DisplayName;
@@ -116,7 +116,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void Profiles_SelectedIndexChanged(object sender, EventArgs e)
         {
-            MacroDeckProfile macroDeckProfile = MacroDeck.ProfileManager.FindProfileByDisplayName(this.profiles.Text);
+            MacroDeckProfile macroDeckProfile = ProfileManager.FindProfileByDisplayName(this.profiles.Text);
             if (macroDeckProfile != null)
             {
                 DeviceManager.SetProfile(this._macroDeckDevice, macroDeckProfile);

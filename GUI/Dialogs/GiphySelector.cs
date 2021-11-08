@@ -2,6 +2,7 @@
 using GiphyDotNet.Model.Parameters;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Profiles;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -31,7 +32,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnTrending.Text = Language.LanguageManager.Strings.Trending;
             this.lblDownloading.Text = Language.LanguageManager.Strings.Downloading;
             this.btnOk.Text = Language.LanguageManager.Strings.Ok;
-            btnPreview.Radius = MacroDeck.ProfileManager.CurrentProfile.ButtonRadius;
+            btnPreview.Radius = ProfileManager.CurrentProfile.ButtonRadius;
             giphy = new Giphy(Credentials.Credentials.GiphyToken);
         }
 
@@ -139,18 +140,20 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             WebClient client = sender as WebClient;   
             Stream stream = e.Result;
 
-            RoundedButton roundedButton = new RoundedButton();
-            roundedButton.Size = new Size(100, 100);
-            roundedButton.BackColor = Color.FromArgb(35,35,35);
-            roundedButton.BackgroundImage = Image.FromStream(stream);
-            roundedButton.BackgroundImageLayout = ImageLayout.Stretch;
+            RoundedButton roundedButton = new RoundedButton
+            {
+                Size = new Size(100, 100),
+                BackColor = Color.FromArgb(35, 35, 35),
+                BackgroundImage = Image.FromStream(stream),
+                BackgroundImageLayout = ImageLayout.Stretch
+            };
             if (roundedButton.BackgroundImage.RawFormat.ToString().ToLower() == "gif")
             {
                 roundedButton.ShowGIFIndicator = true;
             }
             roundedButton.Click += ButtonClicked;
             roundedButton.Cursor = Cursors.Hand;
-            roundedButton.Radius = MacroDeck.ProfileManager.CurrentProfile.ButtonRadius;
+            roundedButton.Radius = ProfileManager.CurrentProfile.ButtonRadius;
             roundedButton.Tag = _webClients[client];
            
             stream.Flush();

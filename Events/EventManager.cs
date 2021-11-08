@@ -10,16 +10,16 @@ using System.Xml.Serialization;
 
 namespace SuchByte.MacroDeck.Events
 {
-    public class EventManager
+    public static class EventManager
     {
 
-        private List<IMacroDeckEvent> _registeredEvents = new List<IMacroDeckEvent>();
+        private static List<IMacroDeckEvent> _registeredEvents = new List<IMacroDeckEvent>();
 
-        public List<IMacroDeckEvent> RegisteredEvents { get { return this._registeredEvents; } }
+        public static List<IMacroDeckEvent> RegisteredEvents { get { return _registeredEvents; } }
 
-        public void RegisterEvent(IMacroDeckEvent macroDeckEvent)
+        public static void RegisterEvent(IMacroDeckEvent macroDeckEvent)
         {
-            if (!this._registeredEvents.Contains(macroDeckEvent))
+            if (!_registeredEvents.Contains(macroDeckEvent))
             {
                 _registeredEvents.Add(macroDeckEvent);
             }
@@ -27,9 +27,9 @@ namespace SuchByte.MacroDeck.Events
 
 
 
-        public IMacroDeckEvent GetEventByName(string name)
+        public static IMacroDeckEvent GetEventByName(string name)
         {
-            IMacroDeckEvent macroDeckEvent = this._registeredEvents.Find(macroDeckEvent => macroDeckEvent.Name.Equals(name));
+            IMacroDeckEvent macroDeckEvent = _registeredEvents.Find(macroDeckEvent => macroDeckEvent.Name.Equals(name));
             return macroDeckEvent;
         }
 

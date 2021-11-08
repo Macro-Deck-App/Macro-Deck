@@ -41,10 +41,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.eventsList.AutoSize = true;
             this.eventsList.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.eventsList.Location = new System.Drawing.Point(3, 3);
-            this.eventsList.MaximumSize = new System.Drawing.Size(925, 380);
-            this.eventsList.MinimumSize = new System.Drawing.Size(925, 1);
+            this.eventsList.Margin = new System.Windows.Forms.Padding(0);
+            this.eventsList.MaximumSize = new System.Drawing.Size(869, 490);
+            this.eventsList.MinimumSize = new System.Drawing.Size(869, 1);
             this.eventsList.Name = "eventsList";
-            this.eventsList.Size = new System.Drawing.Size(925, 1);
+            this.eventsList.Size = new System.Drawing.Size(869, 1);
             this.eventsList.TabIndex = 4;
             // 
             // btnAddEvent
@@ -56,8 +57,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.btnAddEvent.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnAddEvent.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnAddEvent.ForeColor = System.Drawing.Color.White;
-            this.btnAddEvent.Location = new System.Drawing.Point(3, 10);
+            this.btnAddEvent.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnAddEvent.Icon = null;
+            this.btnAddEvent.Location = new System.Drawing.Point(6, 7);
             this.btnAddEvent.Name = "btnAddEvent";
+            this.btnAddEvent.Progress = 0;
+            this.btnAddEvent.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
             this.btnAddEvent.Size = new System.Drawing.Size(165, 30);
             this.btnAddEvent.TabIndex = 6;
             this.btnAddEvent.Text = "+ Event";
@@ -66,24 +71,27 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             // 
             // flowLayoutPanel1
             // 
+            this.flowLayoutPanel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.flowLayoutPanel1.Controls.Add(this.eventsList);
             this.flowLayoutPanel1.Controls.Add(this.btnAddEvent);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(5, 5);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(931, 427);
+            this.flowLayoutPanel1.Padding = new System.Windows.Forms.Padding(3);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(869, 531);
             this.flowLayoutPanel1.TabIndex = 7;
             // 
             // EventSelector
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.Controls.Add(this.flowLayoutPanel1);
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ForeColor = System.Drawing.Color.White;
             this.Name = "EventSelector";
-            this.Size = new System.Drawing.Size(931, 427);
+            this.Padding = new System.Windows.Forms.Padding(5);
+            this.Size = new System.Drawing.Size(879, 541);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);

@@ -105,7 +105,7 @@ namespace SuchByte.MacroDeck.Server
                 }*/
                 return;
             } 
-            if (MacroDeck.ProfileManager.CurrentProfile.Folders == null || MacroDeck.ProfileManager.CurrentProfile.Folders.Count < 1)
+            if (ProfileManager.CurrentProfile.Folders == null || ProfileManager.CurrentProfile.Folders.Count < 1)
             {
                 macroDeckClient.SocketConnection.Close();
                 return;
@@ -224,7 +224,7 @@ namespace SuchByte.MacroDeck.Server
                                 macroDeckDevice.ClientId = macroDeckClient.ClientId;
                                 if (macroDeckDevice.ProfileId == "")
                                 {
-                                    macroDeckDevice.ProfileId = MacroDeck.ProfileManager.Profiles[0].ProfileId;
+                                    macroDeckDevice.ProfileId = ProfileManager.Profiles[0].ProfileId;
                                 }
                             }
                         }
@@ -252,7 +252,7 @@ namespace SuchByte.MacroDeck.Server
                                             {
                                                 ClientId = macroDeckClient.ClientId,
                                                 DisplayName = "Client " + macroDeckClient.ClientId,
-                                                ProfileId = MacroDeck.ProfileManager.Profiles[0].ProfileId
+                                                ProfileId = ProfileManager.Profiles[0].ProfileId
                                             };
                                             DeviceManager.AddKnownDevice(macroDeckDevice);
                                         }
@@ -289,7 +289,7 @@ namespace SuchByte.MacroDeck.Server
                                         {
                                             ClientId = macroDeckClient.ClientId,
                                             DisplayName = "Client " + macroDeckClient.ClientId,
-                                            ProfileId = MacroDeck.ProfileManager.Profiles[0].ProfileId
+                                            ProfileId = ProfileManager.Profiles[0].ProfileId
                                         };
                                         DeviceManager.AddKnownDevice(macroDeckDevice);
                                     }
@@ -321,7 +321,7 @@ namespace SuchByte.MacroDeck.Server
                                 ClientId = macroDeckClient.ClientId,
                                 DisplayName = "Client " + macroDeckClient.ClientId,
                                 //Available = true,
-                                ProfileId = MacroDeck.ProfileManager.Profiles[0].ProfileId
+                                ProfileId = ProfileManager.Profiles[0].ProfileId
                             };
                             DeviceManager.AddKnownDevice(macroDeckDevice);
                         }
@@ -334,17 +334,17 @@ namespace SuchByte.MacroDeck.Server
 
                     if (DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).ProfileId == "")
                     {
-                        DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).ProfileId = MacroDeck.ProfileManager.Profiles[0].ProfileId;
+                        DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).ProfileId = ProfileManager.Profiles[0].ProfileId;
                     }
 
                     DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).DeviceType = macroDeckClient.DeviceType;
 
                     DeviceManager.SaveKnownDevices();
 
-                    macroDeckClient.Profile = MacroDeck.ProfileManager.FindProfileById(DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).ProfileId);
+                    macroDeckClient.Profile = ProfileManager.FindProfileById(DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).ProfileId);
                     if (macroDeckClient.Profile == null)
                     {
-                        macroDeckClient.Profile = MacroDeck.ProfileManager.Profiles[0];
+                        macroDeckClient.Profile = ProfileManager.Profiles[0];
                     }
                     macroDeckClient.Folder = macroDeckClient.Profile.Folders[0];
 

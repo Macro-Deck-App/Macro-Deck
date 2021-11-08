@@ -55,7 +55,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.panelEdit.Controls.Add(this.btnDown);
             this.panelEdit.Controls.Add(this.btnUp);
             this.panelEdit.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.panelEdit.Location = new System.Drawing.Point(784, 8);
+            this.panelEdit.Location = new System.Drawing.Point(743, 2);
             this.panelEdit.Name = "panelEdit";
             this.panelEdit.Size = new System.Drawing.Size(94, 26);
             this.panelEdit.TabIndex = 7;
@@ -116,10 +116,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             // 
             // lblWait
             // 
-            this.lblWait.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblWait.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblWait.Location = new System.Drawing.Point(8, 0);
             this.lblWait.Name = "lblWait";
-            this.lblWait.Size = new System.Drawing.Size(134, 43);
+            this.lblWait.Size = new System.Drawing.Size(134, 42);
             this.lblWait.TabIndex = 8;
             this.lblWait.Text = "Wait";
             this.lblWait.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -226,7 +226,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.ForeColor = System.Drawing.Color.White;
             this.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.Name = "DelayItem";
-            this.Size = new System.Drawing.Size(891, 41);
+            this.Size = new System.Drawing.Size(840, 41);
             this.panelEdit.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.btnRemove)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnDown)).EndInit();

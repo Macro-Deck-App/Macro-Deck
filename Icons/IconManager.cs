@@ -23,6 +23,8 @@ namespace SuchByte.MacroDeck.Icons
 
         public static event EventHandler OnUpdateCheckFinished;
 
+        public static event EventHandler IconPacksLoaded;
+
         /*public IconManager()
         {
             LoadIconPacks();
@@ -55,9 +57,12 @@ namespace SuchByte.MacroDeck.Icons
                     });
 
                     IconPacks.Add(iconPack);
-                    Task.Run(() =>
-                        SearchUpdate(iconPack)
-                    );
+                    if (iconPack.PackageManagerManaged && !iconPack.Hidden)
+                    {
+                        Task.Run(() =>
+                            SearchUpdate(iconPack)
+                        );
+                    }
                 }
 
                 db.Close();
@@ -72,6 +77,11 @@ namespace SuchByte.MacroDeck.Icons
                 newIconPack.Icons = new List<Icon>();
                 IconPacks.Add(newIconPack);
                 AddIconImage(newIconPack, Resources.Icon);
+            }
+
+            if (IconPacksLoaded != null)
+            {
+                IconPacksLoaded(IconPacks, EventArgs.Empty);
             }
         }
 
@@ -111,7 +121,7 @@ namespace SuchByte.MacroDeck.Icons
             IconPacksUpdateAvailable.Clear();
             Task.Run(() =>
             {
-                foreach (IconPack iconPack in IconPacks)
+                foreach (IconPack iconPack in IconPacks.FindAll(iP => iP.PackageManagerManaged && !iP.Hidden))
                 {
                     SearchUpdate(iconPack);
                 }
@@ -236,10 +246,12 @@ namespace SuchByte.MacroDeck.Icons
             try
             {
                 String base64 = Utils.Base64.GetBase64FromImage(image);
-                Icon icon = new Icon();
-                icon.IconBase64 = base64;
-                icon.IconId = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                icon.IconPack = iconPack.Name;
+                Icon icon = new Icon
+                {
+                    IconBase64 = base64,
+                    IconId = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                    IconPack = iconPack.Name
+                };
                 iconPack.Icons.Add(icon);
                 SaveIconPack(iconPack);
                 MacroDeckServer.SendAllIcons();

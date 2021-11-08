@@ -28,7 +28,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         {
             InitializeComponent();
             this.UpdateTranslation();
-            this._currentFolder = MacroDeck.ProfileManager.CurrentProfile.Folders[0];
+            this._currentFolder = ProfileManager.CurrentProfile.Folders[0];
         }
 
         public void UpdateTranslation()
@@ -55,7 +55,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.foldersView.Nodes.Clear();
 
                 var stack = new Stack<TreeNode>();
-                var rootDirectory = MacroDeck.ProfileManager.CurrentProfile.Folders[0];
+                var rootDirectory = ProfileManager.CurrentProfile.Folders[0];
                 var node = new TreeNode(rootDirectory.DisplayName) { Tag = rootDirectory };
                 stack.Push(node);
 
@@ -65,7 +65,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     var directoryInfo = (Folders.MacroDeckFolder)currentNode.Tag;
                     foreach (var directoryId in directoryInfo.Childs.ToList())
                     {
-                        var directory = MacroDeck.ProfileManager.FindFolderById(directoryId, MacroDeck.ProfileManager.CurrentProfile);
+                        var directory = ProfileManager.FindFolderById(directoryId, ProfileManager.CurrentProfile);
                         var childDirectoryNode = new TreeNode(directory.DisplayName) { Tag = directory };
                         this.Invoke(new Action(() => currentNode.Nodes.Add(childDirectoryNode)));
                         stack.Push(childDirectoryNode);
@@ -89,6 +89,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         {
             Task.Run(() =>
             {
+                this.Invoke(new Action(() => this.SuspendLayout()));
                 if (clear)
                 {
                     foreach (RoundedButton roundedButton in this.buttonPanel.Controls)
@@ -114,14 +115,14 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 // Button size algorithm from @PhoenixWyllow
 
                 int buttonSize = 100;
-                int rows = MacroDeck.ProfileManager.CurrentProfile.Rows, columns = MacroDeck.ProfileManager.CurrentProfile.Columns, spacing = MacroDeck.ProfileManager.CurrentProfile.ButtonSpacing; // from settings
+                int rows = ProfileManager.CurrentProfile.Rows, columns = ProfileManager.CurrentProfile.Columns, spacing = ProfileManager.CurrentProfile.ButtonSpacing; // from settings
                 int width = buttonPanel.Width, height = buttonPanel.Height; // from panel
                 int buttonSizeX, buttonSizeY; // for convenience
 
                 if (rows > columns) //if NOT "normal case" (ie, user attempting vertical layout), force horizontal
                 {
-                    rows = MacroDeck.ProfileManager.CurrentProfile.Columns;
-                    columns = MacroDeck.ProfileManager.CurrentProfile.Rows;
+                    rows = ProfileManager.CurrentProfile.Columns;
+                    columns = ProfileManager.CurrentProfile.Rows;
 
                 }
                 buttonSizeX = width / columns; //calc with spacing, remove it after
@@ -135,6 +136,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                         this.Invoke(new Action(() => this.LoadButton(row, column, buttonSize)));
                     }
                 }
+                this.Invoke(new Action(() => this.ResumeLayout()));
             });
 
             GC.Collect();
@@ -264,9 +266,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
             button.Width = buttonSize;
             button.Height = buttonSize;
-            button.Radius = MacroDeck.ProfileManager.CurrentProfile.ButtonRadius;
-            button.Location = new Point((column * buttonSize) + (column * MacroDeck.ProfileManager.CurrentProfile.ButtonSpacing), (row * buttonSize) + (row * MacroDeck.ProfileManager.CurrentProfile.ButtonSpacing));
-            button.BackColor = MacroDeck.ProfileManager.CurrentProfile.ButtonBackground ? Color.FromArgb(35, 35, 35) : Color.Transparent;
+            button.Radius = ProfileManager.CurrentProfile.ButtonRadius;
+            button.Location = new Point((column * buttonSize) + (column * ProfileManager.CurrentProfile.ButtonSpacing), (row * buttonSize) + (row * ProfileManager.CurrentProfile.ButtonSpacing));
+            button.BackColor = ProfileManager.CurrentProfile.ButtonBackground ? Color.FromArgb(35, 35, 35) : Color.Transparent;
 
             if (button == null) return;
             if (button.BackgroundImage != null)
@@ -321,8 +323,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 RoundedButton draggedButton = (RoundedButton)e.Data.GetData(typeof(RoundedButton));
                 RoundedButton targetButton = (RoundedButton)sender;
 
-                ActionButton.ActionButton targetActionButton = MacroDeck.ProfileManager.FindActionButton(this._currentFolder, targetButton.Row, targetButton.Column);
-                ActionButton.ActionButton draggedActionButton = MacroDeck.ProfileManager.FindActionButton(this._currentFolder, draggedButton.Row, draggedButton.Column);
+                ActionButton.ActionButton targetActionButton = ProfileManager.FindActionButton(this._currentFolder, targetButton.Row, targetButton.Column);
+                ActionButton.ActionButton draggedActionButton = ProfileManager.FindActionButton(this._currentFolder, draggedButton.Row, draggedButton.Column);
 
                 if (draggedActionButton == null) return;
 
@@ -341,7 +343,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     this._currentFolder.ActionButtons.Remove(targetActionButton);
                     this._currentFolder.ActionButtons.Add(newTargetButton);
                 }
-                MacroDeck.ProfileManager.Save();
+                ProfileManager.Save();
                 this.UpdateButtons();
                 MacroDeckServer.UpdateFolder(this._currentFolder);
             }
@@ -424,7 +426,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             if (actionButton != null)
             {
                 this._currentFolder.ActionButtons.Remove(actionButton);
-                MacroDeck.ProfileManager.Save();
+                ProfileManager.Save();
                 this.UpdateButtons();
                 MacroDeckServer.UpdateFolder(this._currentFolder);
             }
@@ -456,7 +458,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             using (var buttonEditor = new ButtonEditor(actionButton, this._currentFolder))
             {
                 buttonEditor.ShowDialog();
-                MacroDeck.ProfileManager.Save();
+                ProfileManager.Save();
                 this.UpdateButtons();
             }
 
@@ -464,7 +466,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void FoldersView_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            this._currentFolder = MacroDeck.ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, MacroDeck.ProfileManager.CurrentProfile);
+            this._currentFolder = ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, ProfileManager.CurrentProfile);
             this.UpdateButtons();
         }
 
@@ -491,11 +493,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private void LoadProfiles()
         {
             this.boxProfiles.Items.Clear();
-            foreach (MacroDeckProfile macroDeckProfile in MacroDeck.ProfileManager.Profiles)
+            foreach (MacroDeckProfile macroDeckProfile in ProfileManager.Profiles)
             {
                 this.boxProfiles.Items.Add(macroDeckProfile.DisplayName);
             }
-            this.boxProfiles.Text = MacroDeck.ProfileManager.CurrentProfile.DisplayName;
+            this.boxProfiles.Text = ProfileManager.CurrentProfile.DisplayName;
         }
 
         private void BtnGoToRoot_Click(object sender, EventArgs e)
@@ -505,9 +507,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void BtnCreateFolder_Click(object sender, EventArgs e)
         {
-            Folders.MacroDeckFolder selectedFolder = MacroDeck.ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, MacroDeck.ProfileManager.CurrentProfile);
+            Folders.MacroDeckFolder selectedFolder = ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, ProfileManager.CurrentProfile);
             if (selectedFolder == null)
-                selectedFolder = MacroDeck.ProfileManager.CurrentProfile.Folders[0];
+                selectedFolder = ProfileManager.CurrentProfile.Folders[0];
 
             using (var addFolder = new AddFolder(selectedFolder))
             {
@@ -520,9 +522,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void BtnRenameFolder_Click(object sender, EventArgs e)
         {
-            Folders.MacroDeckFolder selectedFolder = MacroDeck.ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, MacroDeck.ProfileManager.CurrentProfile);
+            Folders.MacroDeckFolder selectedFolder = ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, ProfileManager.CurrentProfile);
             if (selectedFolder == null)
-                selectedFolder = MacroDeck.ProfileManager.CurrentProfile.Folders[0];
+                selectedFolder = ProfileManager.CurrentProfile.Folders[0];
 
             using (var addFolder = new AddFolder(selectedFolder, true))
             {
@@ -535,19 +537,19 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void BtnDeleteFolder_Click(object sender, EventArgs e)
         {
-            Folders.MacroDeckFolder selectedFolder = MacroDeck.ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, MacroDeck.ProfileManager.CurrentProfile);
-            if (selectedFolder.Equals(MacroDeck.ProfileManager.CurrentProfile.Folders[0])) return;
+            Folders.MacroDeckFolder selectedFolder = ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, ProfileManager.CurrentProfile);
+            if (selectedFolder.Equals(ProfileManager.CurrentProfile.Folders[0])) return;
             using (var msgBox = new CustomControls.MessageBox())
             {
                 if (msgBox.ShowDialog(Language.LanguageManager.Strings.AreYouSure, String.Format(Language.LanguageManager.Strings.TheFolderWillBeDeleted, selectedFolder.DisplayName), MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     if (this._currentFolder == selectedFolder)
                     {
-                        this._currentFolder = MacroDeck.ProfileManager.CurrentProfile.Folders[0];
+                        this._currentFolder = ProfileManager.CurrentProfile.Folders[0];
                         UpdateButtons();
                     }
 
-                    MacroDeck.ProfileManager.DeleteFolder(selectedFolder, MacroDeck.ProfileManager.CurrentProfile);
+                    ProfileManager.DeleteFolder(selectedFolder, ProfileManager.CurrentProfile);
                     this.UpdateFolders();
                 }
             }
@@ -599,7 +601,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
             this._currentFolder.ActionButtons.Add(actionButtonNew);
 
-            MacroDeck.ProfileManager.Save();
+            ProfileManager.Save();
             this.UpdateButtons();
             MacroDeckServer.UpdateFolder(this._currentFolder);
 
@@ -610,12 +612,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void BoxProfiles_SelectedIndexChanged(object sender, EventArgs e)
         {
-            MacroDeckProfile profile = MacroDeck.ProfileManager.FindProfileByDisplayName(this.boxProfiles.Text);
+            MacroDeckProfile profile = ProfileManager.FindProfileByDisplayName(this.boxProfiles.Text);
             if (profile == null)
             {
-                profile = MacroDeck.ProfileManager.Profiles[0];
+                profile = ProfileManager.Profiles[0];
             }
-            MacroDeck.ProfileManager.CurrentProfile = profile;
+            ProfileManager.CurrentProfile = profile;
             this._currentFolder = profile.Folders[0];
             this.UpdateButtons(true);
             this.LoadProfileSettings();
@@ -634,11 +636,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.cornerRadius.ValueChanged -= this.ButtonSettingsChanged;
             this.checkButtonBackground.CheckedChanged -= this.ButtonSettingsChanged;
 
-            this.buttonRows.Value = MacroDeck.ProfileManager.CurrentProfile.Rows;
-            this.buttonColumns.Value = MacroDeck.ProfileManager.CurrentProfile.Columns;
-            this.buttonSpacing.Value = MacroDeck.ProfileManager.CurrentProfile.ButtonSpacing;
-            this.cornerRadius.Value = MacroDeck.ProfileManager.CurrentProfile.ButtonRadius;
-            this.checkButtonBackground.Checked = MacroDeck.ProfileManager.CurrentProfile.ButtonBackground;
+            this.buttonRows.Value = ProfileManager.CurrentProfile.Rows;
+            this.buttonColumns.Value = ProfileManager.CurrentProfile.Columns;
+            this.buttonSpacing.Value = ProfileManager.CurrentProfile.ButtonSpacing;
+            this.cornerRadius.Value = ProfileManager.CurrentProfile.ButtonRadius;
+            this.checkButtonBackground.Checked = ProfileManager.CurrentProfile.ButtonBackground;
             this.buttonRows.ValueChanged += this.ButtonSettingsChanged;
             this.buttonColumns.ValueChanged += this.ButtonSettingsChanged;
             this.buttonSpacing.ValueChanged += this.ButtonSettingsChanged;
@@ -657,9 +659,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             {
                 if (createProfileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    MacroDeck.ProfileManager.CurrentProfile = createProfileDialog.Profile;
+                    ProfileManager.CurrentProfile = createProfileDialog.Profile;
                     this.LoadProfiles();
-                    this._currentFolder = MacroDeck.ProfileManager.CurrentProfile.Folders[0];
+                    this._currentFolder = ProfileManager.CurrentProfile.Folders[0];
                     this.UpdateButtons(true);
                     this.LoadProfileSettings();
                     this.UpdateFolders();
@@ -673,7 +675,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void BtnEditProfile_Click(object sender, EventArgs e)
         {
-            using (var createProfileDialog = new CreateProfileDialog(MacroDeck.ProfileManager.CurrentProfile))
+            using (var createProfileDialog = new CreateProfileDialog(ProfileManager.CurrentProfile))
             {
                 if (createProfileDialog.ShowDialog() == DialogResult.OK)
                 {
@@ -684,15 +686,15 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void BtnDeleteProfile_Click(object sender, EventArgs e)
         {
-            if (MacroDeck.ProfileManager.Profiles.Count < 2) return;
+            if (ProfileManager.Profiles.Count < 2) return;
             using (var msgBox = new CustomControls.MessageBox())
             {
-                if (msgBox.ShowDialog(Language.LanguageManager.Strings.AreYouSure, String.Format(Language.LanguageManager.Strings.TheProfileWillBeDeleted, MacroDeck.ProfileManager.CurrentProfile.DisplayName), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                if (msgBox.ShowDialog(Language.LanguageManager.Strings.AreYouSure, String.Format(Language.LanguageManager.Strings.TheProfileWillBeDeleted, ProfileManager.CurrentProfile.DisplayName), MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    MacroDeck.ProfileManager.DeleteProfile(MacroDeck.ProfileManager.CurrentProfile);
-                    MacroDeck.ProfileManager.CurrentProfile = MacroDeck.ProfileManager.Profiles[0];
+                    ProfileManager.DeleteProfile(ProfileManager.CurrentProfile);
+                    ProfileManager.CurrentProfile = ProfileManager.Profiles[0];
                     this.LoadProfiles();
-                    this._currentFolder = MacroDeck.ProfileManager.CurrentProfile.Folders[0];
+                    this._currentFolder = ProfileManager.CurrentProfile.Folders[0];
                     this.UpdateButtons(true);
                     this.LoadProfileSettings();
                     this.UpdateFolders();
@@ -705,16 +707,16 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void ButtonSettingsChanged(object sender, EventArgs e)
         {
-            MacroDeck.ProfileManager.CurrentProfile.Rows = (int)buttonRows.Value;
-            MacroDeck.ProfileManager.CurrentProfile.Columns = (int)buttonColumns.Value;
-            MacroDeck.ProfileManager.CurrentProfile.ButtonSpacing = (int)buttonSpacing.Value;
-            MacroDeck.ProfileManager.CurrentProfile.ButtonRadius = (int)cornerRadius.Value;
-            MacroDeck.ProfileManager.CurrentProfile.ButtonBackground = checkButtonBackground.Checked;
-            MacroDeck.ProfileManager.Save();
+            ProfileManager.CurrentProfile.Rows = (int)buttonRows.Value;
+            ProfileManager.CurrentProfile.Columns = (int)buttonColumns.Value;
+            ProfileManager.CurrentProfile.ButtonSpacing = (int)buttonSpacing.Value;
+            ProfileManager.CurrentProfile.ButtonRadius = (int)cornerRadius.Value;
+            ProfileManager.CurrentProfile.ButtonBackground = checkButtonBackground.Checked;
+            ProfileManager.Save();
             this.UpdateButtons(true);
-            foreach (MacroDeckClient macroDeckClient in MacroDeckServer.Clients.FindAll(macroDeckClient => macroDeckClient.Profile.ProfileId.Equals(MacroDeck.ProfileManager.CurrentProfile.ProfileId)))
+            foreach (MacroDeckClient macroDeckClient in MacroDeckServer.Clients.FindAll(macroDeckClient => macroDeckClient.Profile.ProfileId.Equals(ProfileManager.CurrentProfile.ProfileId)))
             {
-                MacroDeckServer.SetProfile(macroDeckClient, MacroDeck.ProfileManager.CurrentProfile);
+                MacroDeckServer.SetProfile(macroDeckClient, ProfileManager.CurrentProfile);
             }
             GC.Collect();
             GC.WaitForPendingFinalizers();

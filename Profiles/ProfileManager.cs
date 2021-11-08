@@ -15,36 +15,37 @@ using System.Threading.Tasks;
 
 namespace SuchByte.MacroDeck.Profiles
 {
-    public class ProfileManager
+    public static class ProfileManager
     {
+        public static event EventHandler ProfilesSaved;
 
-        public MacroDeckProfile CurrentProfile;
+        public static MacroDeckProfile CurrentProfile;
 
-        public List<MacroDeckProfile> Profiles { get { return this._profiles; } }
+        public static List<MacroDeckProfile> Profiles { get { return _profiles; } }
 
-        private List<MacroDeckProfile> _profiles = new List<MacroDeckProfile>();
+        private static List<MacroDeckProfile> _profiles = new List<MacroDeckProfile>();
 
-        public ProfileManager()
+        public static void Initialize()
         {
-            this.Load();
+            Load();
         }
 
-        public void AddVariableChangedListener()
+        public static void AddVariableChangedListener()
         {
-            Variables.VariableManager.OnVariableChanged += this.VariableChanged;
+            Variables.VariableManager.OnVariableChanged += VariableChanged;
         }
 
-        public void AddWindowFocusChangedListener()
+        public static void AddWindowFocusChangedListener()
         {
             WindowsFocus.WindowFocusDetection windowsFocusDetection = new WindowsFocus.WindowFocusDetection();
-            windowsFocusDetection.OnWindowFocusChanged += new EventHandler(this.OnWindowFocusChanged);
+            windowsFocusDetection.OnWindowFocusChanged += new EventHandler(OnWindowFocusChanged);
         }
 
-        private void OnWindowFocusChanged(object sender, EventArgs e)
+        private static void OnWindowFocusChanged(object sender, EventArgs e)
         {
             string process = (string)sender;
 
-            List<MacroDeckProfile> affectedMacroDeckProfiles = this._profiles.FindAll(delegate (MacroDeckProfile macroDeckProfile)
+            List<MacroDeckProfile> affectedMacroDeckProfiles = _profiles.FindAll(delegate (MacroDeckProfile macroDeckProfile)
             {
                 return macroDeckProfile.Folders.FindAll(macroDeckFolder => macroDeckFolder.ApplicationToTrigger.Equals(process)).Count > 0;
             });
@@ -56,7 +57,7 @@ namespace SuchByte.MacroDeck.Profiles
                     foreach (string macroDeckDevice in macroDeckFolder.ApplicationsFocusDevices.FindAll(delegate (string macroDeckDeviceClientId)
                     {
                         if (DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId) == null) return false;
-                        return DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId).Available && DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId).ClientId.Length > 0;
+                        return DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId).Available && !String.IsNullOrWhiteSpace(DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId).ClientId);
                     }))
                     {
                         MacroDeckClient macrodeckClient = MacroDeckServer.GetMacroDeckClient(DeviceManager.GetMacroDeckDevice(macroDeckDevice).ClientId);
@@ -72,16 +73,16 @@ namespace SuchByte.MacroDeck.Profiles
             GC.Collect();
         }
 
-        private void VariableChanged(object sender, EventArgs e)
+        private static void VariableChanged(object sender, EventArgs e)
         {
-            this.UpdateAllVariableLabels();
+            UpdateAllVariableLabels();
         }
 
-        public void UpdateAllVariableLabels()
+        public static void UpdateAllVariableLabels()
         {
             Task.Run(() =>
             {
-                foreach (MacroDeckProfile macroDeckProfile in this._profiles)
+                foreach (MacroDeckProfile macroDeckProfile in _profiles)
                 {
                     foreach (MacroDeckFolder macroDeckFolder in macroDeckProfile.Folders)
                     {
@@ -94,7 +95,7 @@ namespace SuchByte.MacroDeck.Profiles
             });
         }
 
-        public void UpdateVariableLabels(ActionButton.ActionButton actionButton)
+        public static void UpdateVariableLabels(ActionButton.ActionButton actionButton)
         {
             if (actionButton.LabelOff == null || actionButton.LabelOn == null) return;
             Task.Run(() =>
@@ -125,9 +126,9 @@ namespace SuchByte.MacroDeck.Profiles
             });
         }
 
-        private void Load(int rows = -1, int columns = -1)
+        private static void Load()
         {
-            this._profiles = new List<MacroDeckProfile>();
+            _profiles = new List<MacroDeckProfile>();
             var databasePath = MacroDeck.ProfilesFilePath;
 
             var db = new SQLiteConnection(databasePath);
@@ -147,31 +148,31 @@ namespace SuchByte.MacroDeck.Profiles
                 });
                 if (profile.ProfileId == "")
                 {
-                    profile.ProfileId = this._profiles.Count.ToString();
+                    profile.ProfileId = _profiles.Count.ToString();
                 }
-                this._profiles.Add(profile);
+                _profiles.Add(profile);
             }
 
             db.Close();
 
-            if (this._profiles.Count == 0)
+            if (_profiles.Count == 0)
             {
                 MacroDeckProfile defaultProfile = new MacroDeckProfile
                 {
                     DisplayName = Language.LanguageManager.Strings.Profile + " 1",
-                    Columns = (columns > -1 ? columns : 5),
-                    Rows = (rows > -1 ? rows : 3),
+                    Columns = 5,
+                    Rows = 3,
                     Folders = new List<MacroDeckFolder>()
                 };
 
-                this._profiles.Add(defaultProfile);
+                _profiles.Add(defaultProfile);
 
-                this.Save();
+                Save();
             }
 
-            this.CurrentProfile = _profiles[0];
+            CurrentProfile = _profiles[0];
             
-            if (this.CurrentProfile.Folders.Count < 1)
+            if (CurrentProfile.Folders.Count < 1)
             {
                 MacroDeckFolder root = new MacroDeckFolder
                 {
@@ -181,13 +182,13 @@ namespace SuchByte.MacroDeck.Profiles
                     ActionButtons = new List<ActionButton.ActionButton>()
                 };
 
-                this.CurrentProfile.Folders.Add(root);
+                CurrentProfile.Folders.Add(root);
 
-                this.Save();
+                Save();
             }
         }
 
-        public void Save()
+        public static void Save()
         {
             if (MacroDeck.SafeMode)
             {
@@ -199,7 +200,7 @@ namespace SuchByte.MacroDeck.Profiles
             db.CreateTable<ProfileJson>();
             db.DeleteAll<ProfileJson>();
 
-            foreach (MacroDeckProfile profile in this._profiles)
+            foreach (MacroDeckProfile profile in _profiles)
             {
                 string jsonString = JsonConvert.SerializeObject(profile, new JsonSerializerSettings
                 {
@@ -215,8 +216,12 @@ namespace SuchByte.MacroDeck.Profiles
             }
 
             db.Close();
+            if (ProfilesSaved != null)
+            {
+                ProfilesSaved(Profiles, EventArgs.Empty);
+            }
         }
-        public MacroDeckFolder CreateFolder(String displayName, MacroDeckFolder parent, MacroDeckProfile macroDeckProfile)
+        public static MacroDeckFolder CreateFolder(String displayName, MacroDeckFolder parent, MacroDeckProfile macroDeckProfile)
         {
             if (macroDeckProfile.Folders.FindAll(macroDeckFolder => macroDeckFolder.DisplayName.Equals(displayName)).Count > 0)
             {
@@ -235,21 +240,21 @@ namespace SuchByte.MacroDeck.Profiles
 
             macroDeckProfile.Folders.Add(newFolder);
 
-            this.Save();
+            Save();
 
             return newFolder;
         }
 
 
 
-        public MacroDeckFolder FindParentFolder(MacroDeckFolder macroDeckFolder, MacroDeckProfile macroDeckProfile)
+        public static MacroDeckFolder FindParentFolder(MacroDeckFolder macroDeckFolder, MacroDeckProfile macroDeckProfile)
         {
             MacroDeckFolder parentFolder = null;
             parentFolder = macroDeckProfile.Folders.Find(folder => folder.Childs.Contains(macroDeckFolder.FolderId));
             return parentFolder;
         }
 
-        public void DeleteFolder(MacroDeckFolder folder, MacroDeckProfile macroDeckProfile)
+        public static void DeleteFolder(MacroDeckFolder folder, MacroDeckProfile macroDeckProfile)
         {
             if (!macroDeckProfile.Folders.Contains(folder)) return;
             if (macroDeckProfile.Folders[0].Equals(folder)) return;
@@ -258,9 +263,9 @@ namespace SuchByte.MacroDeck.Profiles
             {
                 foreach (string macroDeckEventString in actionButton.EventActions.Keys)
                 {
-                    IMacroDeckEvent macroDeckEvent = MacroDeck.EventManager.GetEventByName(macroDeckEventString);
+                    IMacroDeckEvent macroDeckEvent = EventManager.GetEventByName(macroDeckEventString);
                     if (macroDeckEvent == null) continue;
-                    macroDeckEvent.OnEvent -= this.OnActionButtonEventTrigger;
+                    macroDeckEvent.OnEvent -= OnActionButtonEventTrigger;
                 }
             }
 
@@ -282,13 +287,13 @@ namespace SuchByte.MacroDeck.Profiles
 
             folder.Dispose();
             macroDeckProfile.Folders.Remove(folder);
-            this.Save();
+            Save();
         }
 
 
-        public MacroDeckProfile CreateProfile(string displayName)
+        public static MacroDeckProfile CreateProfile(string displayName)
         {
-            if (this._profiles.FindAll(macroDeckProfile => macroDeckProfile.DisplayName.Equals(displayName)).Count > 0)
+            if (_profiles.FindAll(macroDeckProfile => macroDeckProfile.DisplayName.Equals(displayName)).Count > 0)
             {
                 return null;
             }
@@ -302,7 +307,7 @@ namespace SuchByte.MacroDeck.Profiles
                 ButtonSpacing = 15,
                 ButtonBackground = true,
                 Folders = new List<MacroDeckFolder>(),
-                ProfileId = this._profiles.Count.ToString(),
+                ProfileId = _profiles.Count.ToString(),
             };
 
             MacroDeckFolder rootFolder = new MacroDeckFolder
@@ -315,19 +320,19 @@ namespace SuchByte.MacroDeck.Profiles
 
             newProfile.Folders.Add(rootFolder);
 
-            this._profiles.Add(newProfile);
+            _profiles.Add(newProfile);
 
-            this.Save();
+            Save();
 
             return newProfile;
         }
 
-        public void DeleteProfile(MacroDeckProfile macroDeckProfile)
+        public static void DeleteProfile(MacroDeckProfile macroDeckProfile)
         {
-            if (!this._profiles.Contains(macroDeckProfile)) return;
-            if (this._profiles.Count < 2) return;
+            if (!_profiles.Contains(macroDeckProfile)) return;
+            if (_profiles.Count < 2) return;
 
-            this.RemoveEventHandlers(macroDeckProfile);
+            RemoveEventHandlers(macroDeckProfile);
 
             foreach (MacroDeckFolder macroDeckFolder in macroDeckProfile.Folders)
             {
@@ -336,68 +341,68 @@ namespace SuchByte.MacroDeck.Profiles
 
             foreach (MacroDeckDevice macroDeckDevice in DeviceManager.GetKnownDevices().FindAll(macroDeckDevice => macroDeckDevice.ProfileId.Equals(macroDeckProfile.ProfileId)))
             {
-                DeviceManager.SetProfile(macroDeckDevice, this._profiles[0]);
+                DeviceManager.SetProfile(macroDeckDevice, _profiles[0]);
             }
 
             macroDeckProfile.Dispose();
 
-            this._profiles.Remove(macroDeckProfile);
+            _profiles.Remove(macroDeckProfile);
 
-            this.Save();
+            Save();
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
         }
 
-        public void AddAllEventHandlers()
+        public static void AddAllEventHandlers()
         {
-            foreach (MacroDeckProfile macroDeckProfile in this._profiles)
+            foreach (MacroDeckProfile macroDeckProfile in _profiles)
             {
                 foreach (MacroDeckFolder folder in macroDeckProfile.Folders)
                 {
                     foreach (ActionButton.ActionButton actionButton in folder.ActionButtons.FindAll(actionButton => actionButton.EventActions != null))
                     {
-                        this.AddEventHandler(actionButton);
+                        AddEventHandler(actionButton);
                     }
                 }
             }
         }
 
-        public void RemoveEventHandlers(MacroDeckProfile macroDeckProfile)
+        public static void RemoveEventHandlers(MacroDeckProfile macroDeckProfile)
         {
             foreach (MacroDeckFolder folder in macroDeckProfile.Folders)
             {
                 foreach (ActionButton.ActionButton actionButton in folder.ActionButtons.FindAll(actionButton => actionButton.EventActions != null))
                 {
-                    this.RemoveEventHandler(actionButton);
+                    RemoveEventHandler(actionButton);
                 }
             }
         }
 
-        public void AddEventHandler(ActionButton.ActionButton actionButton)
+        public static void AddEventHandler(ActionButton.ActionButton actionButton)
         {
             if (actionButton.EventActions == null) return;
             foreach (string macroDeckEventString in actionButton.EventActions.Keys)
             {
-                IMacroDeckEvent macroDeckEvent = MacroDeck.EventManager.GetEventByName(macroDeckEventString);
+                IMacroDeckEvent macroDeckEvent = EventManager.GetEventByName(macroDeckEventString);
                 if (macroDeckEvent == null) continue;
-                macroDeckEvent.OnEvent += new EventHandler<MacroDeckEventArgs>(this.OnActionButtonEventTrigger);
+                macroDeckEvent.OnEvent += new EventHandler<MacroDeckEventArgs>(OnActionButtonEventTrigger);
             }
         }
 
-        public void RemoveEventHandler(ActionButton.ActionButton actionButton)
+        public static void RemoveEventHandler(ActionButton.ActionButton actionButton)
         {
             if (actionButton.EventActions == null) return;
             foreach (string macroDeckEventString in actionButton.EventActions.Keys)
             {
-                IMacroDeckEvent macroDeckEvent = MacroDeck.EventManager.GetEventByName(macroDeckEventString);
+                IMacroDeckEvent macroDeckEvent = EventManager.GetEventByName(macroDeckEventString);
                 if (macroDeckEvent == null) continue;
-                macroDeckEvent.OnEvent -= this.OnActionButtonEventTrigger;
+                macroDeckEvent.OnEvent -= OnActionButtonEventTrigger;
             }
         }
 
-        private void OnActionButtonEventTrigger(object sender, MacroDeckEventArgs e)
+        private static void OnActionButtonEventTrigger(object sender, MacroDeckEventArgs e)
         {
             Task.Run(() =>
             {
@@ -410,29 +415,29 @@ namespace SuchByte.MacroDeck.Profiles
             });
         }
 
-        public MacroDeckFolder FindFolderById(long Id, MacroDeckProfile macroDeckProfile)
+        public static MacroDeckFolder FindFolderById(long Id, MacroDeckProfile macroDeckProfile)
         {
             return macroDeckProfile.Folders.Find(macroDeckFolder => macroDeckFolder.FolderId.Equals(Id));
         }
 
-        public MacroDeckFolder FindFolderByDisplayName(String displayName, MacroDeckProfile macroDeckProfile)
+        public static MacroDeckFolder FindFolderByDisplayName(String displayName, MacroDeckProfile macroDeckProfile)
         {
             return macroDeckProfile.Folders.Find(macroDeckFolder => macroDeckFolder.DisplayName.Equals(displayName));
         }
 
-        public ActionButton.ActionButton FindActionButton(MacroDeckFolder folder, int row, int col)
+        public static ActionButton.ActionButton FindActionButton(MacroDeckFolder folder, int row, int col)
         {
             return folder.ActionButtons.Find(actionButton => actionButton.Position_X == col && actionButton.Position_Y == row);
         }
 
-        public MacroDeckProfile FindProfileById(string id)
+        public static MacroDeckProfile FindProfileById(string id)
         {
-            return this._profiles.Find(macroDeckProfile => macroDeckProfile.ProfileId.Equals(id));
+            return _profiles.Find(macroDeckProfile => macroDeckProfile.ProfileId.Equals(id));
         }
 
-        public MacroDeckProfile FindProfileByDisplayName(string displayName)
+        public static MacroDeckProfile FindProfileByDisplayName(string displayName)
         {
-            return this._profiles.Find(macroDeckProfile => macroDeckProfile.DisplayName.Equals(displayName));
+            return _profiles.Find(macroDeckProfile => macroDeckProfile.DisplayName.Equals(displayName));
         }
 
     }

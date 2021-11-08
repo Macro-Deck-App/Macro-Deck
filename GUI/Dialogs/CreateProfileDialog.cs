@@ -28,7 +28,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
             if (this.Profile == null)
             {
-                foreach (MacroDeckProfile profile in MacroDeck.ProfileManager.Profiles)
+                foreach (MacroDeckProfile profile in ProfileManager.Profiles)
                 {
                     if (profile.DisplayName.Equals(profileName.Text))
                     {
@@ -41,11 +41,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                 }
 
 
-                this.Profile = MacroDeck.ProfileManager.CreateProfile(profileName.Text);
+                this.Profile = ProfileManager.CreateProfile(profileName.Text);
             } else
             {
                 this.Profile.DisplayName = profileName.Text;
-                MacroDeck.ProfileManager.Save();
+                ProfileManager.Save();
             }
 
             this.DialogResult = DialogResult.OK;

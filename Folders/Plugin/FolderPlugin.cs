@@ -3,6 +3,7 @@ using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
 using System;
 using System.Collections.Generic;
@@ -34,7 +35,7 @@ namespace SuchByte.MacroDeck.Folders.Plugin
 
         public override void Trigger(string clientId, ActionButton.ActionButton actionButton)
         {
-            MacroDeckServer.SetFolder(MacroDeckServer.GetMacroDeckClient(clientId), MacroDeck.ProfileManager.FindFolderById(long.Parse(this.Configuration), MacroDeckServer.GetMacroDeckClient(clientId).Profile));
+            MacroDeckServer.SetFolder(MacroDeckServer.GetMacroDeckClient(clientId), ProfileManager.FindFolderById(long.Parse(this.Configuration), MacroDeckServer.GetMacroDeckClient(clientId).Profile));
         }
         public override ActionConfigControl GetActionConfigControl(ActionConfigurator actionConfigurator)
         {
@@ -51,7 +52,7 @@ namespace SuchByte.MacroDeck.Folders.Plugin
             try
             {
                 MacroDeckClient macroDeckClient = MacroDeckServer.GetMacroDeckClient(clientId);
-                MacroDeckFolder parentFolder = MacroDeck.ProfileManager.FindParentFolder(macroDeckClient.Folder, macroDeckClient.Profile);
+                MacroDeckFolder parentFolder = ProfileManager.FindParentFolder(macroDeckClient.Folder, macroDeckClient.Profile);
                 MacroDeckServer.SetFolder(macroDeckClient, parentFolder);
             } catch { }
         }

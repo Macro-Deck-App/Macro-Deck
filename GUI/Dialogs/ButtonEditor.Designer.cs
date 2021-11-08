@@ -74,6 +74,7 @@ namespace SuchByte.MacroDeck.GUI
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.radioOnPress = new SuchByte.MacroDeck.GUI.CustomControls.TabRadioButton();
             this.radioOnEvent = new SuchByte.MacroDeck.GUI.CustomControls.TabRadioButton();
+            this.groupButtonState = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.btnPreview)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.fontSize)).BeginInit();
             this.panel1.SuspendLayout();
@@ -85,12 +86,13 @@ namespace SuchByte.MacroDeck.GUI
             ((System.ComponentModel.ISupportInitialize)(this.btnAddVariable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnDeleteStateBinding)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
+            this.groupButtonState.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblPath
             // 
             this.lblPath.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblPath.Location = new System.Drawing.Point(460, 29);
+            this.lblPath.Location = new System.Drawing.Point(4, 608);
             this.lblPath.Name = "lblPath";
             this.lblPath.Size = new System.Drawing.Size(150, 19);
             this.lblPath.TabIndex = 0;
@@ -99,9 +101,9 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // buttonPath
             // 
-            this.buttonPath.Location = new System.Drawing.Point(616, 31);
+            this.buttonPath.Location = new System.Drawing.Point(168, 610);
             this.buttonPath.Name = "buttonPath";
-            this.buttonPath.Size = new System.Drawing.Size(330, 16);
+            this.buttonPath.Size = new System.Drawing.Size(447, 16);
             this.buttonPath.TabIndex = 0;
             this.buttonPath.Text = ".";
             // 
@@ -115,7 +117,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnApply.ForeColor = System.Drawing.Color.White;
             this.btnApply.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
             this.btnApply.Icon = null;
-            this.btnApply.Location = new System.Drawing.Point(864, 708);
+            this.btnApply.Location = new System.Drawing.Point(1117, 601);
             this.btnApply.Name = "btnApply";
             this.btnApply.Progress = 0;
             this.btnApply.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
@@ -134,7 +136,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnPreview.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnPreview.ForeColor = System.Drawing.Color.White;
             this.btnPreview.ForegroundImage = null;
-            this.btnPreview.Location = new System.Drawing.Point(5, 51);
+            this.btnPreview.Location = new System.Drawing.Point(94, 62);
             this.btnPreview.Name = "btnPreview";
             this.btnPreview.Radius = 40;
             this.btnPreview.Row = 0;
@@ -151,7 +153,7 @@ namespace SuchByte.MacroDeck.GUI
             this.labelText.Cursor = System.Windows.Forms.Cursors.Hand;
             this.labelText.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.labelText.Icon = null;
-            this.labelText.Location = new System.Drawing.Point(155, 51);
+            this.labelText.Location = new System.Drawing.Point(13, 217);
             this.labelText.Multiline = true;
             this.labelText.Name = "labelText";
             this.labelText.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
@@ -171,7 +173,7 @@ namespace SuchByte.MacroDeck.GUI
             this.fontSize.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
             this.fontSize.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.fontSize.ForeColor = System.Drawing.Color.White;
-            this.fontSize.Location = new System.Drawing.Point(337, 173);
+            this.fontSize.Location = new System.Drawing.Point(195, 339);
             this.fontSize.Maximum = new decimal(new int[] {
             18,
             0,
@@ -232,7 +234,7 @@ namespace SuchByte.MacroDeck.GUI
             this.panel1.Controls.Add(this.lblButtonState);
             this.panel1.Controls.Add(this.radioButtonOn);
             this.panel1.Controls.Add(this.radioButtonOff);
-            this.panel1.Location = new System.Drawing.Point(76, 16);
+            this.panel1.Location = new System.Drawing.Point(8, 23);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(291, 28);
             this.panel1.TabIndex = 15;
@@ -242,7 +244,7 @@ namespace SuchByte.MacroDeck.GUI
             this.panel2.Controls.Add(this.labelAlignBottom);
             this.panel2.Controls.Add(this.labelAlignCenter);
             this.panel2.Controls.Add(this.labelAlignTop);
-            this.panel2.Location = new System.Drawing.Point(155, 141);
+            this.panel2.Location = new System.Drawing.Point(13, 307);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(280, 28);
             this.panel2.TabIndex = 16;
@@ -297,7 +299,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnEditIcon.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnEditIcon.ForeColor = System.Drawing.Color.White;
             this.btnEditIcon.HoverImage = global::SuchByte.MacroDeck.Properties.Resources.Edit_Hover;
-            this.btnEditIcon.Location = new System.Drawing.Point(37, 173);
+            this.btnEditIcon.Location = new System.Drawing.Point(126, 184);
             this.btnEditIcon.Name = "btnEditIcon";
             this.btnEditIcon.Size = new System.Drawing.Size(25, 25);
             this.btnEditIcon.TabIndex = 17;
@@ -313,7 +315,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnRemoveIcon.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnRemoveIcon.ForeColor = System.Drawing.Color.White;
             this.btnRemoveIcon.HoverImage = global::SuchByte.MacroDeck.Properties.Resources.Delete_Hover;
-            this.btnRemoveIcon.Location = new System.Drawing.Point(67, 173);
+            this.btnRemoveIcon.Location = new System.Drawing.Point(156, 184);
             this.btnRemoveIcon.Name = "btnRemoveIcon";
             this.btnRemoveIcon.Size = new System.Drawing.Size(25, 25);
             this.btnRemoveIcon.TabIndex = 18;
@@ -329,7 +331,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnClearLabelText.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnClearLabelText.ForeColor = System.Drawing.Color.White;
             this.btnClearLabelText.HoverImage = global::SuchByte.MacroDeck.Properties.Resources.Delete_Hover;
-            this.btnClearLabelText.Location = new System.Drawing.Point(397, 51);
+            this.btnClearLabelText.Location = new System.Drawing.Point(255, 217);
             this.btnClearLabelText.Name = "btnClearLabelText";
             this.btnClearLabelText.Size = new System.Drawing.Size(27, 27);
             this.btnClearLabelText.TabIndex = 19;
@@ -351,9 +353,9 @@ namespace SuchByte.MacroDeck.GUI
             this.groupAppearance.Controls.Add(this.btnPreview);
             this.groupAppearance.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.groupAppearance.ForeColor = System.Drawing.Color.White;
-            this.groupAppearance.Location = new System.Drawing.Point(12, 7);
+            this.groupAppearance.Location = new System.Drawing.Point(4, 17);
             this.groupAppearance.Name = "groupAppearance";
-            this.groupAppearance.Size = new System.Drawing.Size(442, 207);
+            this.groupAppearance.Size = new System.Drawing.Size(307, 382);
             this.groupAppearance.TabIndex = 20;
             this.groupAppearance.TabStop = false;
             this.groupAppearance.Text = "Appearance";
@@ -367,7 +369,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnAddVariable.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnAddVariable.ForeColor = System.Drawing.Color.White;
             this.btnAddVariable.HoverImage = global::SuchByte.MacroDeck.Properties.Resources.Variable_Hover;
-            this.btnAddVariable.Location = new System.Drawing.Point(397, 84);
+            this.btnAddVariable.Location = new System.Drawing.Point(255, 250);
             this.btnAddVariable.Name = "btnAddVariable";
             this.btnAddVariable.Size = new System.Drawing.Size(27, 27);
             this.btnAddVariable.TabIndex = 22;
@@ -387,7 +389,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnForeColor.ForeColor = System.Drawing.Color.White;
             this.btnForeColor.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
             this.btnForeColor.Icon = null;
-            this.btnForeColor.Location = new System.Drawing.Point(405, 173);
+            this.btnForeColor.Location = new System.Drawing.Point(263, 339);
             this.btnForeColor.Name = "btnForeColor";
             this.btnForeColor.Progress = 0;
             this.btnForeColor.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
@@ -404,7 +406,7 @@ namespace SuchByte.MacroDeck.GUI
             this.fonts.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.fonts.ForeColor = System.Drawing.Color.White;
             this.fonts.Icon = null;
-            this.fonts.Location = new System.Drawing.Point(155, 172);
+            this.fonts.Location = new System.Drawing.Point(13, 338);
             this.fonts.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.fonts.Name = "fonts";
             this.fonts.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
@@ -416,16 +418,17 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // lblCurrentState
             // 
-            this.lblCurrentState.Location = new System.Drawing.Point(616, 63);
+            this.lblCurrentState.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblCurrentState.Location = new System.Drawing.Point(162, 26);
             this.lblCurrentState.Name = "lblCurrentState";
-            this.lblCurrentState.Size = new System.Drawing.Size(29, 16);
+            this.lblCurrentState.Size = new System.Drawing.Size(66, 16);
             this.lblCurrentState.TabIndex = 22;
             this.lblCurrentState.Text = "Off";
             // 
             // lblCurrentStateLabel
             // 
             this.lblCurrentStateLabel.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblCurrentStateLabel.Location = new System.Drawing.Point(460, 60);
+            this.lblCurrentStateLabel.Location = new System.Drawing.Point(6, 23);
             this.lblCurrentStateLabel.Name = "lblCurrentStateLabel";
             this.lblCurrentStateLabel.Size = new System.Drawing.Size(150, 19);
             this.lblCurrentStateLabel.TabIndex = 23;
@@ -442,7 +445,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnOk.ForeColor = System.Drawing.Color.White;
             this.btnOk.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
             this.btnOk.Icon = null;
-            this.btnOk.Location = new System.Drawing.Point(783, 708);
+            this.btnOk.Location = new System.Drawing.Point(1036, 601);
             this.btnOk.Name = "btnOk";
             this.btnOk.Progress = 0;
             this.btnOk.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
@@ -464,9 +467,9 @@ namespace SuchByte.MacroDeck.GUI
             // lblStateBinding
             // 
             this.lblStateBinding.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblStateBinding.Location = new System.Drawing.Point(460, 91);
+            this.lblStateBinding.Location = new System.Drawing.Point(6, 51);
             this.lblStateBinding.Name = "lblStateBinding";
-            this.lblStateBinding.Size = new System.Drawing.Size(150, 19);
+            this.lblStateBinding.Size = new System.Drawing.Size(272, 19);
             this.lblStateBinding.TabIndex = 26;
             this.lblStateBinding.Text = "State binding:";
             this.lblStateBinding.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -479,12 +482,12 @@ namespace SuchByte.MacroDeck.GUI
             this.listStateBinding.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.listStateBinding.ForeColor = System.Drawing.Color.White;
             this.listStateBinding.Icon = null;
-            this.listStateBinding.Location = new System.Drawing.Point(616, 91);
+            this.listStateBinding.Location = new System.Drawing.Point(6, 73);
             this.listStateBinding.Name = "listStateBinding";
             this.listStateBinding.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
             this.listStateBinding.SelectedIndex = -1;
             this.listStateBinding.SelectedItem = null;
-            this.listStateBinding.Size = new System.Drawing.Size(290, 26);
+            this.listStateBinding.Size = new System.Drawing.Size(262, 26);
             this.listStateBinding.TabIndex = 27;
             this.listStateBinding.SelectedIndexChanged += new System.EventHandler(this.ListStateBinding_SelectedIndexChanged);
             // 
@@ -497,7 +500,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnDeleteStateBinding.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnDeleteStateBinding.ForeColor = System.Drawing.Color.White;
             this.btnDeleteStateBinding.HoverImage = global::SuchByte.MacroDeck.Properties.Resources.Delete_Hover;
-            this.btnDeleteStateBinding.Location = new System.Drawing.Point(912, 91);
+            this.btnDeleteStateBinding.Location = new System.Drawing.Point(274, 73);
             this.btnDeleteStateBinding.Name = "btnDeleteStateBinding";
             this.btnDeleteStateBinding.Size = new System.Drawing.Size(27, 27);
             this.btnDeleteStateBinding.TabIndex = 28;
@@ -506,9 +509,9 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // selectorPanel
             // 
-            this.selectorPanel.Location = new System.Drawing.Point(10, 257);
+            this.selectorPanel.Location = new System.Drawing.Point(317, 54);
             this.selectorPanel.Name = "selectorPanel";
-            this.selectorPanel.Size = new System.Drawing.Size(931, 445);
+            this.selectorPanel.Size = new System.Drawing.Size(879, 541);
             this.selectorPanel.TabIndex = 29;
             // 
             // flowLayoutPanel1
@@ -516,9 +519,9 @@ namespace SuchByte.MacroDeck.GUI
             this.flowLayoutPanel1.Controls.Add(this.radioOnPress);
             this.flowLayoutPanel1.Controls.Add(this.radioOnEvent);
             this.flowLayoutPanel1.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(10, 220);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(317, 17);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(931, 31);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(790, 31);
             this.flowLayoutPanel1.TabIndex = 30;
             // 
             // radioOnPress
@@ -547,20 +550,32 @@ namespace SuchByte.MacroDeck.GUI
             this.radioOnEvent.UseVisualStyleBackColor = true;
             this.radioOnEvent.CheckedChanged += new System.EventHandler(this.RadioOnEvent_CheckedChanged);
             // 
+            // groupButtonState
+            // 
+            this.groupButtonState.Controls.Add(this.lblStateBinding);
+            this.groupButtonState.Controls.Add(this.listStateBinding);
+            this.groupButtonState.Controls.Add(this.btnDeleteStateBinding);
+            this.groupButtonState.Controls.Add(this.lblCurrentState);
+            this.groupButtonState.Controls.Add(this.lblCurrentStateLabel);
+            this.groupButtonState.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.groupButtonState.ForeColor = System.Drawing.Color.White;
+            this.groupButtonState.Location = new System.Drawing.Point(4, 405);
+            this.groupButtonState.Name = "groupButtonState";
+            this.groupButtonState.Size = new System.Drawing.Size(307, 110);
+            this.groupButtonState.TabIndex = 31;
+            this.groupButtonState.TabStop = false;
+            this.groupButtonState.Text = "Button state";
+            // 
             // ButtonEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.ClientSize = new System.Drawing.Size(951, 744);
+            this.ClientSize = new System.Drawing.Size(1200, 635);
+            this.Controls.Add(this.groupButtonState);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.selectorPanel);
-            this.Controls.Add(this.btnDeleteStateBinding);
-            this.Controls.Add(this.listStateBinding);
-            this.Controls.Add(this.lblStateBinding);
             this.Controls.Add(this.btnOk);
-            this.Controls.Add(this.lblCurrentState);
-            this.Controls.Add(this.lblCurrentStateLabel);
             this.Controls.Add(this.btnApply);
             this.Controls.Add(this.buttonPath);
             this.Controls.Add(this.lblPath);
@@ -574,14 +589,10 @@ namespace SuchByte.MacroDeck.GUI
             this.Controls.SetChildIndex(this.lblPath, 0);
             this.Controls.SetChildIndex(this.buttonPath, 0);
             this.Controls.SetChildIndex(this.btnApply, 0);
-            this.Controls.SetChildIndex(this.lblCurrentStateLabel, 0);
-            this.Controls.SetChildIndex(this.lblCurrentState, 0);
             this.Controls.SetChildIndex(this.btnOk, 0);
-            this.Controls.SetChildIndex(this.lblStateBinding, 0);
-            this.Controls.SetChildIndex(this.listStateBinding, 0);
-            this.Controls.SetChildIndex(this.btnDeleteStateBinding, 0);
             this.Controls.SetChildIndex(this.selectorPanel, 0);
             this.Controls.SetChildIndex(this.flowLayoutPanel1, 0);
+            this.Controls.SetChildIndex(this.groupButtonState, 0);
             ((System.ComponentModel.ISupportInitialize)(this.btnPreview)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.fontSize)).EndInit();
             this.panel1.ResumeLayout(false);
@@ -595,6 +606,7 @@ namespace SuchByte.MacroDeck.GUI
             ((System.ComponentModel.ISupportInitialize)(this.btnDeleteStateBinding)).EndInit();
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
+            this.groupButtonState.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -633,5 +645,6 @@ namespace SuchByte.MacroDeck.GUI
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private TabRadioButton radioOnPress;
         private TabRadioButton radioOnEvent;
+        private System.Windows.Forms.GroupBox groupButtonState;
     }
 }

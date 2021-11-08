@@ -84,6 +84,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private void VariableRemoved(object sender, EventArgs e) {
             Task.Run(() =>
             {
+                this.Invoke(new Action(() => this.SuspendLayout()));
                 foreach (VariableItem variableItem in this.variablesPanel.Controls)
                 {
                     if (sender.Equals(variableItem.Variable.Name))
@@ -95,6 +96,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                         return;
                     }
                 }
+
+                this.Invoke(new Action(() => this.ResumeLayout()));
             });
         }
 
@@ -103,6 +106,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             Variable variable = sender as Variable;
             Task.Run(() =>
             {
+                this.Invoke(new Action(() => this.SuspendLayout()));
                 foreach (VariableItem variableItem in this.variablesPanel.Controls)
                 {
                     if (variable.Name.Equals(variableItem.Variable.Name))
@@ -123,7 +127,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 this.Invoke(new Action(() =>
                 {
                     this.variablesPanel.Controls.Add(newVariableItem);
+                    this.ResumeLayout();
                 }));
+
             });
         }
 

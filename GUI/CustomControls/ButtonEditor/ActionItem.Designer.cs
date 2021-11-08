@@ -134,12 +134,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             // panelEdit
             // 
+            this.panelEdit.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.panelEdit.Controls.Add(this.btnRemove);
             this.panelEdit.Controls.Add(this.btnEdit);
             this.panelEdit.Controls.Add(this.btnDown);
             this.panelEdit.Controls.Add(this.btnUp);
             this.panelEdit.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.panelEdit.Location = new System.Drawing.Point(757, 8);
+            this.panelEdit.Location = new System.Drawing.Point(716, 2);
             this.panelEdit.Name = "panelEdit";
             this.panelEdit.Size = new System.Drawing.Size(121, 26);
             this.panelEdit.TabIndex = 6;
@@ -176,14 +177,14 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(751, 43);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(713, 43);
             this.flowLayoutPanel1.TabIndex = 9;
             // 
             // lblConfigurationSummary
             // 
             this.lblConfigurationSummary.Location = new System.Drawing.Point(229, 0);
             this.lblConfigurationSummary.Name = "lblConfigurationSummary";
-            this.lblConfigurationSummary.Size = new System.Drawing.Size(479, 43);
+            this.lblConfigurationSummary.Size = new System.Drawing.Size(481, 43);
             this.lblConfigurationSummary.TabIndex = 9;
             this.lblConfigurationSummary.Text = "ConfigurationSummary";
             this.lblConfigurationSummary.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -200,7 +201,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.ForeColor = System.Drawing.Color.White;
             this.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.Name = "ActionItem";
-            this.Size = new System.Drawing.Size(893, 43);
+            this.Size = new System.Drawing.Size(840, 43);
             ((System.ComponentModel.ISupportInitialize)(this.btnRemove)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnEdit)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnDown)).EndInit();

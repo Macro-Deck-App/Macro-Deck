@@ -6,6 +6,7 @@ using SuchByte.MacroDeck.GUI.MainWindowContents;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Interfaces;
 using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
 using System;
 using System.Collections.Generic;
@@ -38,6 +39,7 @@ namespace SuchByte.MacroDeck.GUI
         {
             InitializeComponent();
             this.groupAppearance.Text = Language.LanguageManager.Strings.Appearance;
+            this.groupButtonState.Text = Language.LanguageManager.Strings.ButtonState;
             this.lblButtonState.Text = Language.LanguageManager.Strings.ButtonState;
             this.radioButtonOff.Text = Language.LanguageManager.Strings.Off;
             this.radioButtonOn.Text = Language.LanguageManager.Strings.On;
@@ -73,7 +75,7 @@ namespace SuchByte.MacroDeck.GUI
 
         private void ButtonEditor_Load(object sender, EventArgs e)
         {
-            this.btnPreview.Radius = MacroDeck.ProfileManager.CurrentProfile.ButtonRadius;
+            this.btnPreview.Radius = ProfileManager.CurrentProfile.ButtonRadius;
 
         }
 
@@ -329,14 +331,14 @@ namespace SuchByte.MacroDeck.GUI
             this.actionButton = this.actionButtonEdited;
             foreach (ActionButton.ActionButton actionButton in this.folder.ActionButtons.FindAll(actionButton => actionButton.Position_Y == this.actionButton.Position_Y && actionButton.Position_X == this.actionButton.Position_X).ToArray())
             {
-                MacroDeck.ProfileManager.RemoveEventHandler(actionButton);
+                ProfileManager.RemoveEventHandler(actionButton);
                 this.folder.ActionButtons.Remove(actionButton);
             }
             this.folder.ActionButtons.Add(this.actionButton);
-            MacroDeck.ProfileManager.AddEventHandler(this.actionButton);
-            MacroDeck.ProfileManager.Save();
+            ProfileManager.AddEventHandler(this.actionButton);
+            ProfileManager.Save();
             MacroDeckServer.UpdateFolder(this.folder);
-            MacroDeck.ProfileManager.UpdateVariableLabels(this.actionButton);
+            ProfileManager.UpdateVariableLabels(this.actionButton);
             this.actionButton.UpdateBindingState();
             GC.Collect();
             GC.WaitForPendingFinalizers();

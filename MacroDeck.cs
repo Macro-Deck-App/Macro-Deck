@@ -1,9 +1,11 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowContents;
 using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
 using SuchByte.MacroDeck.Variables;
 using System;
@@ -23,7 +25,7 @@ namespace SuchByte.MacroDeck
     {
         internal static readonly string VersionString = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
         public static readonly int ApiVersion = 20;
-        public static readonly int PluginApiVersion = 26;
+        public static readonly int PluginApiVersion = 27;
 
         internal static bool ForceUpdate = false;
         internal static bool TestUpdateChannel = false;
@@ -48,13 +50,9 @@ namespace SuchByte.MacroDeck
 
         public static event EventHandler OnMainWindowLoad;
 
-        private static Events.EventManager _eventManager;
         private static Configuration.Configuration _configuration;
-        private static Profiles.ProfileManager _profileManager;
 
-        public static Events.EventManager EventManager { get { return _eventManager; } }
         public static Configuration.Configuration Configuration { get { return _configuration; } }
-        public static Profiles.ProfileManager ProfileManager { get { return _profileManager; } }
 
         private static ContextMenuStrip _trayIconContextMenu = new ContextMenuStrip();
 
@@ -238,13 +236,12 @@ namespace SuchByte.MacroDeck
             Language.LanguageManager.SetLanguage(_configuration.Language);
             CreateTrayIcon();
             VariableManager.Load();
-            _eventManager = new Events.EventManager();
             PluginManager.Load();
             PluginManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
             PluginManager.EnablePlugins();
             Icons.IconManager.LoadIconPacks();
             Icons.IconManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
-            _profileManager = new Profiles.ProfileManager();
+            ProfileManager.Initialize();
 
             MacroDeckServer.Start(_configuration.Host_Address, port == -1 ? _configuration.Host_Port : port);
 
@@ -253,9 +250,9 @@ namespace SuchByte.MacroDeck
 
 
             // Register MacroDeckEvent event handlers and other listeners
-            _profileManager.AddAllEventHandlers();
-            _profileManager.AddVariableChangedListener();
-            _profileManager.AddWindowFocusChangedListener();
+            ProfileManager.AddAllEventHandlers();
+            ProfileManager.AddVariableChangedListener();
+            ProfileManager.AddWindowFocusChangedListener();
 
             if (show || SafeMode)
             {

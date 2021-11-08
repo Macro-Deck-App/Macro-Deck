@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
 {
-    public partial class EventSelector : UserControl
+    public partial class EventSelector : RoundedUserControl
     {
         private ActionButton.ActionButton actionButton;
         public EventSelector(ActionButton.ActionButton actionButton)
@@ -63,7 +63,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.eventsList.Controls.Clear();
             foreach (string macroDeckEvent in this.actionButton.EventActions.Keys)
             {
-                EventItem eventItem = new EventItem(this.actionButton, MacroDeck.EventManager.GetEventByName(macroDeckEvent), this.actionButton.EventActions[macroDeckEvent]);
+                EventItem eventItem = new EventItem(this.actionButton, EventManager.GetEventByName(macroDeckEvent), this.actionButton.EventActions[macroDeckEvent]);
                 AddEventItem(eventItem);
             }
         }

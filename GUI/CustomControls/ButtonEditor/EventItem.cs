@@ -55,7 +55,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
         {
             this.eventBox.SelectedIndexChanged -= this.EventBox_SelectedIndexChanged;
             this.eventBox.Items.Clear();
-            foreach (IMacroDeckEvent macroDeckEvent in MacroDeck.EventManager.RegisteredEvents)
+            foreach (IMacroDeckEvent macroDeckEvent in EventManager.RegisteredEvents)
             {
                 if (this._actionButton.EventActions.ContainsKey(macroDeckEvent.Name)) continue;
                 this.eventBox.Items.Add(macroDeckEvent.Name);
@@ -74,7 +74,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
 
         private void EventBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            this._macroDeckEvent = MacroDeck.EventManager.GetEventByName(this.eventBox.Text);
+            this._macroDeckEvent = EventManager.GetEventByName(this.eventBox.Text);
             if (this._macroDeckEvent != null)
             {
                 if (this.EventChanged != null)
@@ -84,10 +84,37 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             }
         }
 
+        private void AddActionItem(PluginAction action)
+        {
+            if (action.GetType() == typeof(ConditionAction))
+            {
+                ConditionItem conditionItem = new ConditionItem(action);
+                this.actionsList.Controls.Add(conditionItem);
+                conditionItem.OnRemoveClick += this.RemoveClicked;
+            }
+            else if (action.GetType() == typeof(DelayAction))
+            {
+                DelayItem delayItem = new DelayItem(action);
+                this.actionsList.Controls.Add(delayItem);
+                delayItem.OnRemoveClick += this.RemoveClicked;
+                delayItem.OnMoveUpClick += this.MoveUpClicked;
+                delayItem.OnMoveDownClick += this.MoveDownClicked;
+            }
+            else
+            {
+                ActionItem actionItem = new ActionItem(action);
+                this.actionsList.Controls.Add(actionItem);
+                actionItem.OnRemoveClick += this.RemoveClicked;
+                actionItem.OnEditClick += this.EditClicked;
+                actionItem.OnMoveUpClick += this.MoveUpClicked;
+                actionItem.OnMoveDownClick += this.MoveDownClicked;
+            }
+        }
        
 
         private void RefreshActions()
         {
+            this.SuspendLayout();
             foreach (IActionConditionItem actionItem in this.actionsList.Controls)
             {
                 actionItem.OnRemoveClick -= this.RemoveClicked;
@@ -98,70 +125,52 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.actionsList.Controls.Clear();
             foreach (PluginAction action in this._macroDeckActions)
             {
-                if (action.GetType() == typeof(ConditionAction))
-                {
-                    ConditionItem conditionItem = new ConditionItem(action);
-                    this.actionsList.Controls.Add(conditionItem);
-                    conditionItem.OnRemoveClick += this.RemoveClicked;
-                } 
-                else if (action.GetType() == typeof(DelayAction))
-                {
-                    DelayItem delayItem = new DelayItem(action);
-                    this.actionsList.Controls.Add(delayItem);
-                    delayItem.OnRemoveClick += this.RemoveClicked;
-                    delayItem.OnMoveUpClick += this.MoveUpClicked;
-                    delayItem.OnMoveDownClick += this.MoveDownClicked;
-                }
-                else
-                {
-                    ActionItem actionItem = new ActionItem(action);
-                    this.actionsList.Controls.Add(actionItem);
-                    actionItem.OnRemoveClick += this.RemoveClicked;
-                    actionItem.OnEditClick += this.EditClicked;
-                    actionItem.OnMoveUpClick += this.MoveUpClicked;
-                    actionItem.OnMoveDownClick += this.MoveDownClicked;
-                }
+                this.AddActionItem(action);
             }
+            this.ResumeLayout();
         }
 
         private void MoveUpClicked(object sender, EventArgs e)
         {
-            PluginAction action = ((IActionConditionItem)sender).Action;
+            IActionConditionItem actionItem = sender as IActionConditionItem;
+            PluginAction action = actionItem.Action;
             if (this._macroDeckActions.Contains(action))
             {
                 int currentIndex = this._macroDeckActions.IndexOf(action);
                 if (currentIndex == 0) return;
                 this._macroDeckActions.RemoveAt(currentIndex);
                 this._macroDeckActions.Insert(currentIndex - 1, action);
+                this.actionsList.Controls.SetChildIndex((Control)actionItem, currentIndex - 1);
             }
-
-            this.RefreshActions();
         }
 
         private void MoveDownClicked(object sender, EventArgs e)
         {
+            IActionConditionItem actionItem = sender as IActionConditionItem;
             PluginAction action = ((IActionConditionItem)sender).Action;
             if (this._macroDeckActions.Contains(action))
             {
                 int currentIndex = this._macroDeckActions.IndexOf(action);
-                if (currentIndex >= this._macroDeckActions.Count - 1) return;
+                if (currentIndex + 1 >= this._macroDeckActions.Count) return;
                 this._macroDeckActions.RemoveAt(currentIndex);
                 this._macroDeckActions.Insert(currentIndex + 1, action);
+                this.actionsList.Controls.SetChildIndex((Control)actionItem, currentIndex + 1);
             }
-            this.RefreshActions();
         }
 
 
         private void RemoveClicked(object sender, EventArgs e)
         {
+            this.SuspendLayout();
             IActionConditionItem actionItem = sender as IActionConditionItem;
             if (this._macroDeckActions.Contains(actionItem.Action))
             {
                 this._macroDeckActions.Remove(actionItem.Action);
+                this.actionsList.Controls.Remove((Control)actionItem);
             }
             actionItem.OnRemoveClick -= this.RemoveClicked;
-
-            RefreshActions();
+            ((Control)actionItem).Dispose();
+            this.ResumeLayout();
         }
 
         private void EditClicked(object sender, EventArgs e)
@@ -192,14 +201,14 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.addItemContextMenu.Show(this.btnAdd, new Point(0, 0 + this.btnAdd.Height));
         }
 
-        private void menuItemAction_Click(object sender, EventArgs e)
+        private void MenuItemAction_Click(object sender, EventArgs e)
         {
             using (var actionConfigurator = new ActionConfigurator())
             {
                 if (actionConfigurator.ShowDialog() == DialogResult.OK)
                 {
                     this._macroDeckActions.Add(actionConfigurator.Action);
-                    this.RefreshActions();
+                    this.AddActionItem(actionConfigurator.Action);
                 }
             }
         }
@@ -208,7 +217,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
         {
             ConditionItem conditionItem = new ConditionItem();
             this._macroDeckActions.Add(conditionItem.Action);
-            this.RefreshActions();
+            this.AddActionItem(conditionItem.Action);
         }
 
         private void BtnRemove_Click(object sender, EventArgs e)
@@ -223,7 +232,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
         {
             DelayItem delayItem = new DelayItem();
             this._macroDeckActions.Add(delayItem.Action);
-            this.RefreshActions();
+            this.AddActionItem(delayItem.Action);
         }
     }
 }

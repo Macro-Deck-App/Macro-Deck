@@ -77,7 +77,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblIf.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lblIf.Location = new System.Drawing.Point(9, 2);
             this.lblIf.Name = "lblIf";
-            this.lblIf.Size = new System.Drawing.Size(91, 28);
+            this.lblIf.Size = new System.Drawing.Size(77, 28);
             this.lblIf.TabIndex = 4;
             this.lblIf.Text = "If";
             this.lblIf.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -85,16 +85,17 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // typeBox
             // 
             this.typeBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.typeBox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.typeBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.typeBox.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.typeBox.Icon = null;
-            this.typeBox.Location = new System.Drawing.Point(110, 2);
+            this.typeBox.Location = new System.Drawing.Point(93, 2);
             this.typeBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.typeBox.Name = "typeBox";
             this.typeBox.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
             this.typeBox.SelectedIndex = -1;
             this.typeBox.SelectedItem = null;
-            this.typeBox.Size = new System.Drawing.Size(147, 28);
+            this.typeBox.Size = new System.Drawing.Size(115, 28);
             this.typeBox.TabIndex = 5;
             this.typeBox.SelectedIndexChanged += new System.EventHandler(this.TypeBox_SelectedIndexChanged);
             this.typeBox.Load += new System.EventHandler(this.typeBox_Load);
@@ -102,6 +103,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // methodBox
             // 
             this.methodBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.methodBox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.methodBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.methodBox.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.methodBox.Icon = null;
@@ -141,10 +143,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.actionsList.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.actionsList.Location = new System.Drawing.Point(0, 0);
             this.actionsList.Margin = new System.Windows.Forms.Padding(0);
-            this.actionsList.MaximumSize = new System.Drawing.Size(883, 0);
-            this.actionsList.MinimumSize = new System.Drawing.Size(883, 0);
+            this.actionsList.MaximumSize = new System.Drawing.Size(840, 0);
+            this.actionsList.MinimumSize = new System.Drawing.Size(840, 0);
             this.actionsList.Name = "actionsList";
-            this.actionsList.Size = new System.Drawing.Size(883, 0);
+            this.actionsList.Size = new System.Drawing.Size(840, 0);
             this.actionsList.TabIndex = 8;
             // 
             // btnAddAction
@@ -167,6 +169,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // source
             // 
             this.source.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.source.Cursor = System.Windows.Forms.Cursors.Hand;
             this.source.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.source.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.source.Icon = null;
@@ -187,7 +190,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.panelEdit.Controls.Add(this.btnDown);
             this.panelEdit.Controls.Add(this.btnUp);
             this.panelEdit.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.panelEdit.Location = new System.Drawing.Point(795, 2);
+            this.panelEdit.Location = new System.Drawing.Point(758, 2);
             this.panelEdit.Name = "panelEdit";
             this.panelEdit.Size = new System.Drawing.Size(89, 26);
             this.panelEdit.TabIndex = 11;
@@ -265,10 +268,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.elseActionsList.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.elseActionsList.Location = new System.Drawing.Point(0, 66);
             this.elseActionsList.Margin = new System.Windows.Forms.Padding(0);
-            this.elseActionsList.MaximumSize = new System.Drawing.Size(883, 0);
-            this.elseActionsList.MinimumSize = new System.Drawing.Size(883, 0);
+            this.elseActionsList.MaximumSize = new System.Drawing.Size(840, 0);
+            this.elseActionsList.MinimumSize = new System.Drawing.Size(840, 0);
             this.elseActionsList.Name = "elseActionsList";
-            this.elseActionsList.Size = new System.Drawing.Size(883, 0);
+            this.elseActionsList.Size = new System.Drawing.Size(840, 0);
             this.elseActionsList.TabIndex = 9;
             // 
             // btnAddActionElse
@@ -303,11 +306,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(9, 37);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
-            this.flowLayoutPanel1.MaximumSize = new System.Drawing.Size(883, 0);
-            this.flowLayoutPanel1.MinimumSize = new System.Drawing.Size(883, 0);
+            this.flowLayoutPanel1.MaximumSize = new System.Drawing.Size(840, 0);
+            this.flowLayoutPanel1.MinimumSize = new System.Drawing.Size(840, 0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Padding = new System.Windows.Forms.Padding(0, 0, 0, 10);
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(883, 109);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(840, 109);
             this.flowLayoutPanel1.TabIndex = 14;
             // 
             // flowLayoutPanel2
@@ -315,7 +318,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.flowLayoutPanel2.Controls.Add(this.source);
             this.flowLayoutPanel2.Controls.Add(this.methodBox);
             this.flowLayoutPanel2.Controls.Add(this.valueToCompare);
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(261, 2);
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(215, 2);
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
             this.flowLayoutPanel2.Size = new System.Drawing.Size(522, 28);
             this.flowLayoutPanel2.TabIndex = 15;
@@ -365,7 +368,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.ForeColor = System.Drawing.Color.White;
             this.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.Name = "ConditionItem";
-            this.Size = new System.Drawing.Size(893, 146);
+            this.Size = new System.Drawing.Size(850, 146);
             this.Load += new System.EventHandler(this.ConditionItem_Load);
             ((System.ComponentModel.ISupportInitialize)(this.btnAddAction)).EndInit();
             this.panelEdit.ResumeLayout(false);

@@ -3,6 +3,7 @@ using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Profiles;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -34,7 +35,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblManaged.Text = Language.LanguageManager.Strings.IconSelectorManagedInfo;
             this.lblSizeLabel.Text = Language.LanguageManager.Strings.Size;
             this.lblTypeLabel.Text = Language.LanguageManager.Strings.Type;
-            btnPreview.Radius = MacroDeck.ProfileManager.CurrentProfile.ButtonRadius;
+            this.btnPreview.Radius = ProfileManager.CurrentProfile.ButtonRadius;
         }
 
         private void LoadIcons(Icons.IconPack iconPack)
@@ -48,7 +49,7 @@ namespace SuchByte.MacroDeck.GUI
                     Width = 100,
                     Height = 100,
                     BackColor = Color.FromArgb(35,35,35),
-                    Radius = MacroDeck.ProfileManager.CurrentProfile.ButtonRadius,
+                    Radius = ProfileManager.CurrentProfile.ButtonRadius,
                     BackgroundImageLayout = ImageLayout.Stretch,
                     BackgroundImage = icon.IconImage
                 };

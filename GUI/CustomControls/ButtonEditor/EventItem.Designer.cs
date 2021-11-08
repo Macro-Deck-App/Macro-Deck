@@ -61,6 +61,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             // eventBox
             // 
             this.eventBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.eventBox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.eventBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.eventBox.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.eventBox.Icon = null;
@@ -88,7 +89,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             // 
             this.panelEdit.Controls.Add(this.btnRemove);
             this.panelEdit.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.panelEdit.Location = new System.Drawing.Point(848, 2);
+            this.panelEdit.Location = new System.Drawing.Point(815, 2);
             this.panelEdit.Name = "panelEdit";
             this.panelEdit.Size = new System.Drawing.Size(30, 26);
             this.panelEdit.TabIndex = 12;
@@ -130,7 +131,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.menuItemAction.Name = "menuItemAction";
             this.menuItemAction.Size = new System.Drawing.Size(133, 28);
             this.menuItemAction.Text = "Action";
-            this.menuItemAction.Click += new System.EventHandler(this.menuItemAction_Click);
+            this.menuItemAction.Click += new System.EventHandler(this.MenuItemAction_Click);
             // 
             // menuItemCondition
             // 
@@ -171,11 +172,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.actionsList.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.actionsList.Location = new System.Drawing.Point(0, 0);
             this.actionsList.Margin = new System.Windows.Forms.Padding(0);
-            this.actionsList.MaximumSize = new System.Drawing.Size(885, 0);
-            this.actionsList.MinimumSize = new System.Drawing.Size(893, 1);
+            this.actionsList.MaximumSize = new System.Drawing.Size(840, 0);
+            this.actionsList.MinimumSize = new System.Drawing.Size(840, 1);
             this.actionsList.Name = "actionsList";
             this.actionsList.Padding = new System.Windows.Forms.Padding(0, 0, 0, 10);
-            this.actionsList.Size = new System.Drawing.Size(893, 10);
+            this.actionsList.Size = new System.Drawing.Size(840, 10);
             this.actionsList.TabIndex = 8;
             // 
             // flowLayoutPanel1
@@ -188,7 +189,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.flowLayoutPanel1.Location = new System.Drawing.Point(10, 37);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(893, 43);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(840, 43);
             this.flowLayoutPanel1.TabIndex = 13;
             // 
             // EventItem
@@ -206,9 +207,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ForeColor = System.Drawing.Color.White;
             this.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
-            this.MinimumSize = new System.Drawing.Size(903, 84);
+            this.MaximumSize = new System.Drawing.Size(850, 0);
+            this.MinimumSize = new System.Drawing.Size(850, 84);
             this.Name = "EventItem";
-            this.Size = new System.Drawing.Size(903, 82);
+            this.Size = new System.Drawing.Size(848, 82);
             this.Load += new System.EventHandler(this.EventItem_Load);
             this.panelEdit.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.btnRemove)).EndInit();
