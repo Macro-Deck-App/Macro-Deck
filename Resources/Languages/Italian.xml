@@ -3,7 +3,7 @@
   <__Language__>Italian</__Language__>
   <__LanguageCode__>it</__LanguageCode__>
   <__Author__>PhoenixWyllow aka PW.Dev</__Author__>
-  <__Version__>2.0.16.2-dev</__Version__>
+  <__Version__>2.1.2-beta</__Version__>
   <NetworkAdapter>Scheda di rete</NetworkAdapter>
   <IPAddress>Indirizzo IP</IPAddress>
   <Port>Porta</Port>
@@ -212,4 +212,26 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <WebClient>Web Client</WebClient>
   <AndroidApp>App Android</AndroidApp>
   <IOSApp>App iOS</IOSApp>
+  <PluginMacroDeckFolder>Cartella Macro Deck</PluginMacroDeckFolder>
+  <ActionChangeFolder>Change folder</ActionChangeFolder>
+  <ActionChangeFolderDescription>Passa alla cartella configurata sul dispositivo attuale</ActionChangeFolderDescription>.
+  <ActionGoToParentFolder>Passa alla cartella superiore</ActionGoToParentFolder>.
+  <ActionGoToParentFolderDescription>Passa alla cartella superiore sul dispositivo corrente</ActionGoToParentFolderDescription>.
+  <ActionGoToRootFolder>Passa alla cartella principale</ActionGoToRootFolder>.
+  <ActionGoToRootFolderDescription>Passa alla cartella principale sul dispositivo corrente</ActionGoToRootFolderDescription>.
+  <PluginMacroDeckVariables>Variabili Macro Deck</PluginMacroDeckVariables>
+  <ActionChangeVariableValue>Cambia il valore della variabile</ActionChangeVariableValue>
+  <ActionChangeVariableValueDescription>Incrementa, diminuisci, imposta un valore variabile e altera il valore della variabile</ActionChangeVariableValueDescription>.
+  <CountUp>Incrementa</CountUp>
+  <CountDown>Diminuisci</CountDown>.
+  <Set>Imposta</Set>
+  <Toggle>Commutazione</Toggle>
+  <Variabile>Variabile</Variabile>
+  <PluginActionButton>Questo pulsante d'azione</PluginActionButton>
+  <ActionToggleActionButtonState>Stato del pulsante di azione</ActionToggleActionButtonState>
+  <ActionToggleActionButtonStateDescription>Cambia lo stato di questo pulsante</ActionToggleActionButtonStateDescription>.
+  <ActionSetActionButtonStateOff>Imposta lo stato del pulsante come inattivo</ActionSetActionButtonStateOff>
+  <ActionSetActionButtonStateOffDescription>Imposta lo stato di questo pulsante come "inattivo"</ActionSetActionButtonStateOffDescription>.
+  <ActionSetActionButtonStateOn>Imposta lo stato del pulsante come attivo</ActionSetActionButtonStateOn>.
+  <ActionSetActionButtonStateOnDescription>Imposta lo stato di questo pulsante come "attivo"</ActionSetActionButtonStateOnDescription>
 </Strings>
