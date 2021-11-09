@@ -188,7 +188,7 @@ Gifleri kullanacaksanız daha veya en düşük kalitede kullanmanızı öneririz
   <Delete>Sil</Delete>
   <Run>Çalıştır</Run>
   <Copy>Kopyala</Copy>
-  <Paste>Yapıştıe</Paste>
+  <Paste>Yapıştır</Paste>
   <WebSocketAPIVersion>Websocket API versiyon</WebSocketAPIVersion>
   <PluginAPIVersion>Plugin API versiyon</PluginAPIVersion>
   <InstalledPlugins>Yüklü pluginler</InstalledPlugins>
@@ -209,4 +209,29 @@ Gifleri kullanacaksanız daha veya en düşük kalitede kullanmanızı öneririz
   <ErrorWhileLoadingPackageManager>Paket yöneticisi yüklenemedi. İnternete bağlı olmayabilirsiniz ya da Macro Deck güvenlik duvarı tarafından engelleniyor olabilir.</ErrorWhileLoadingPackageManager>
   <UpdatesAvailable>Güncelleştirmeler mevcut</UpdatesAvailable>
   <EnableIconCache>İkon önbelleğini aktif et (daha hızlı; yüksek RAM kullanımı)</EnableIconCache>
+  <WebClient>Web client</WebClient>
+  <AndroidApp>Android client</AndroidApp>
+  <IOSApp>iOS client</IOSApp>
+  <PluginMacroDeckFolder>Macro Deck klasörü</PluginMacroDeckFolder>
+  <ActionChangeFolder>Klasörü değiştir</ActionChangeFolder>
+  <ActionChangeFolderDescription>Cihaz üzerindeki mevcut klasörü ayarlanmış klasör ile değiştir</ActionChangeFolderDescription>
+  <ActionGoToParentFolder>Bir üst klasöre git</ActionGoToParentFolder>
+  <ActionGoToParentFolderDescription>Cihaz üzerindeki mevcut klasörü, klasörün üst klasörü ile değiştir</ActionGoToParentFolderDescription>
+  <ActionGoToRootFolder>Kök klasöre git</ActionGoToRootFolder>
+  <ActionGoToRootFolderDescription>Cihaz üzerindeki mevcut klasörü, kök klasör ile değiştir</ActionGoToRootFolderDescription>
+  <PluginMacroDeckVariables>Macro Deck değişkenleri</PluginMacroDeckVariables>
+  <ActionChangeVariableValue>Değişken değerini değiştir</ActionChangeVariableValue>
+  <ActionChangeVariableValueDescription>Artır, azalt, değişken bir değer ayarla ve değişken değeri değiştir</ActionChangeVariableValueDescription>
+  <CountUp>Artır</CountUp>
+  <CountDown>Azalt</CountDown>
+  <Set>Ayarla</Set>
+  <Toggle>Değiştir (Toggle)</Toggle>
+  <Variable>Değişken</Variable>
+  <PluginActionButton>Bu aksiyon butonu</PluginActionButton>
+  <ActionToggleActionButtonState>Buton durumunu değiştir</ActionToggleActionButtonState>
+  <ActionToggleActionButtonStateDescription>Bu butonun durumunu değiştirir</ActionToggleActionButtonStateDescription>
+  <ActionSetActionButtonStateOff>Buton durumunu kapalı konumuna getir</ActionSetActionButtonStateOff>
+  <ActionSetActionButtonStateOffDescription>Bu buton durumunu "kapalı" konumuna getirir</ActionSetActionButtonStateOffDescription>
+  <ActionSetActionButtonStateOn>Buton durumunu açık konumuna getir</ActionSetActionButtonStateOn>
+  <ActionSetActionButtonStateOnDescription>Bu buton durumunu "açık" konumuna getirir</ActionSetActionButtonStateOnDescription>
 </Strings>
