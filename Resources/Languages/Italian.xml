@@ -213,7 +213,7 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <AndroidApp>App Android</AndroidApp>
   <IOSApp>App iOS</IOSApp>
   <PluginMacroDeckFolder>Cartella Macro Deck</PluginMacroDeckFolder>
-  <ActionChangeFolder>Change folder</ActionChangeFolder>
+  <ActionChangeFolder>Cambia cartella</ActionChangeFolder>
   <ActionChangeFolderDescription>Passa alla cartella configurata sul dispositivo attuale</ActionChangeFolderDescription>.
   <ActionGoToParentFolder>Passa alla cartella superiore</ActionGoToParentFolder>.
   <ActionGoToParentFolderDescription>Passa alla cartella superiore sul dispositivo corrente</ActionGoToParentFolderDescription>.
