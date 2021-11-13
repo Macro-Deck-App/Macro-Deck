@@ -25,7 +25,7 @@ namespace SuchByte.MacroDeck
     {
         internal static readonly string VersionString = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
         public static readonly int ApiVersion = 20;
-        public static readonly int PluginApiVersion = 27;
+        public static readonly int PluginApiVersion = 26;
 
         internal static bool ForceUpdate = false;
         internal static bool TestUpdateChannel = false;
@@ -41,7 +41,6 @@ namespace SuchByte.MacroDeck
         public static readonly string IconPackDirectoryPath = UserDirectoryPath + "iconpacks\\";
         public static readonly string PluginCredentialsPath = UserDirectoryPath + "credentials\\";
         public static readonly string PluginConfigPath = UserDirectoryPath + "configs\\";
-        //public static readonly string LanguagesPath = UserDirectoryPath + "languages\\";
 
         public static readonly string ConfigFilePath = UserDirectoryPath + "config.json";
         public static readonly string DevicesFilePath = UserDirectoryPath + "devices.json";
@@ -64,7 +63,7 @@ namespace SuchByte.MacroDeck
             ContextMenuStrip = _trayIconContextMenu
         };
 
-        private static Task _mainWindowTask;
+        private static Form mainWindow;
 
 
         [STAThread]
@@ -147,16 +146,6 @@ namespace SuchByte.MacroDeck
                 }
             }
 
-            /*if (!Directory.Exists(LanguagesPath))
-            {
-                try
-                {
-                    Directory.CreateDirectory(LanguagesPath);
-                    File.Create(MacroDeck.LanguagesPath + "Place_custom_translations_here");
-                }
-                catch (Exception ex)
-                { Console.WriteLine(ex.Message); }
-            }*/
 
             // Check for start arguments
             int port = -1;
@@ -309,7 +298,7 @@ namespace SuchByte.MacroDeck
 
         private static void RestartItemClick(object sender, EventArgs e)
         {
-            Process.Start(MacroDeck.MainDirectoryPath + AppDomain.CurrentDomain.FriendlyName, (_mainWindowTask != null && !_mainWindowTask.IsCompleted ? "--show" : ""));
+            Process.Start(MacroDeck.MainDirectoryPath + AppDomain.CurrentDomain.FriendlyName, (mainWindow != null && !mainWindow.IsDisposed ? "--show" : ""));
             Environment.Exit(0);
         }
 
@@ -328,20 +317,22 @@ namespace SuchByte.MacroDeck
 
         public static void ShowMainWindow()
         {
-            try
+            if (Application.OpenForms.OfType<MainWindow>().Count() > 0)
             {
-                if (_mainWindowTask != null && !_mainWindowTask.IsCompleted) return;
-                _mainWindowTask = new Task(delegate ()
-                {
-                    using (var mainWindow = new MainWindow())
-                    {
-                        mainWindow.Load += MainWindowLoadEvent;
-                        mainWindow.ShowDialog();
-                        mainWindow.Load -= MainWindowLoadEvent;
-                    }
-                });
-                _mainWindowTask.RunSynchronously();
-            } catch { }
+                mainWindow.Close();
+            }
+            mainWindow = new MainWindow();
+            mainWindow.Load += MainWindowLoadEvent;
+            mainWindow.FormClosed += MainWindow_FormClosed;
+            mainWindow.Show();
+        }
+
+        private static void MainWindow_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Debug.WriteLine("Disposing main window...");
+            mainWindow.Load -= MainWindowLoadEvent;
+            mainWindow.FormClosed -= MainWindow_FormClosed;
+            mainWindow.Dispose();
         }
 
         private static void MainWindowLoadEvent(object sender, EventArgs e)

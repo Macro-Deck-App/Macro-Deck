@@ -235,4 +235,13 @@ For gifs it is recommended to use the low or the lowest preset.</IconImportQuali
   <ActionSetActionButtonStateOffDescription>Sets the state of this button to "off"</ActionSetActionButtonStateOffDescription>
   <ActionSetActionButtonStateOn>Set button state to on</ActionSetActionButtonStateOn>
   <ActionSetActionButtonStateOnDescription>Sets the state of this button to "on"</ActionSetActionButtonStateOnDescription>
+	<Description>Description</Description>
+	<License>License</License>
+	<AnimatedGifImported>Animated gif imported</AnimatedGifImported>
+	<GenerateStaticIcon>Also generate a static icon of the GIFs first frame?</GenerateStaticIcon>
+	<XSuccessfullyExportedToX>{0} was successfully exported to {1}</XSuccessfullyExportedToX>
+	<SelectedIconWillBeDeleted>The selected icon will be deleted from the icon pack {0}</SelectedIconWillBeDeleted>
+	<SuccessfullyImportedIconPack>Successfully imported the icon pack {0}</SuccessfullyImportedIconPack>
+	<SelectedIconPackWillBeDeleted>The selected icon pack {0} with all its icons will be deleted.</SelectedIconPackWillBeDeleted>
+	
 </Strings>

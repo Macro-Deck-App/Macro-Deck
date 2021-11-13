@@ -313,22 +313,33 @@ namespace SuchByte.MacroDeck.GUI
 
         private void Apply()
         {
-            this.actionButtonEdited.EventActions = new Dictionary<string, List<PluginAction>>();
+            this.actionButton = this.actionButtonEdited;
+            this.actionButton.EventActions = new Dictionary<string, List<PluginAction>>();
+
+            foreach (PluginAction pluginAction in this.actionButton.Actions)
+            {
+                pluginAction.SetActionButton(this.actionButton);
+            }
+
             foreach (EventItem eventItem in this.eventSelector.EventItems())
             {
                 if (eventItem == null) continue;
-                if (this.actionButtonEdited.EventActions.ContainsKey(eventItem.MacroDeckEvent.Name))
+                foreach (PluginAction pluginAction in eventItem.Actions)
                 {
-                    this.actionButtonEdited.EventActions[eventItem.MacroDeckEvent.Name].AddRange(eventItem.Actions);
+                    pluginAction.SetActionButton(this.actionButton);
+                }
+                if (this.actionButton.EventActions.ContainsKey(eventItem.MacroDeckEvent.Name))
+                {
+                    this.actionButton.EventActions[eventItem.MacroDeckEvent.Name].AddRange(eventItem.Actions);
                 }
                 else
                 {
-                    this.actionButtonEdited.EventActions[eventItem.MacroDeckEvent.Name] = eventItem.Actions;
+                    this.actionButton.EventActions[eventItem.MacroDeckEvent.Name] = eventItem.Actions;
                 }
             }
 
+            
 
-            this.actionButton = this.actionButtonEdited;
             foreach (ActionButton.ActionButton actionButton in this.folder.ActionButtons.FindAll(actionButton => actionButton.Position_Y == this.actionButton.Position_Y && actionButton.Position_X == this.actionButton.Position_X).ToArray())
             {
                 ProfileManager.RemoveEventHandler(actionButton);
@@ -361,8 +372,6 @@ namespace SuchByte.MacroDeck.GUI
         {
             this.OpenIconSelector();
         }
-
-
 
         private void OpenIconSelector()
         {

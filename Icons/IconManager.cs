@@ -25,12 +25,6 @@ namespace SuchByte.MacroDeck.Icons
 
         public static event EventHandler IconPacksLoaded;
 
-        /*public IconManager()
-        {
-            LoadIconPacks();
-        }*/
-
-
         public static void LoadIconPacks()
         {
             IconPacks.Clear();
@@ -40,41 +34,67 @@ namespace SuchByte.MacroDeck.Icons
             {
                 Directory.CreateDirectory(MacroDeck.IconPackDirectoryPath);
             }
-
-            foreach (var databasePath in Directory.GetFiles(MacroDeck.IconPackDirectoryPath, "*.db"))
+            else
             {
-                var db = new SQLiteConnection(databasePath);
-                var query = db.Table<IconPackJson>();
-
-                foreach (var iconPackJson in query)
+                // Change the file extension from icon packs of older versions
+                foreach (var databasePath in Directory.GetFiles(MacroDeck.IconPackDirectoryPath, "*.db"))
                 {
-                    string jsonString = iconPackJson.JsonString;
-                    IconPack iconPack = JsonConvert.DeserializeObject<IconPack>(jsonString, new JsonSerializerSettings
+                    try
                     {
-                        TypeNameHandling = TypeNameHandling.Auto,
-                        NullValueHandling = NullValueHandling.Ignore,
-                        Error = (sender, args) => { args.ErrorContext.Handled = true; }
-                    });
+                        var newFileName = Path.Combine(MacroDeck.IconPackDirectoryPath, Path.GetFileNameWithoutExtension(databasePath) + ".iconpack");
 
-                    IconPacks.Add(iconPack);
-                    if (iconPack.PackageManagerManaged && !iconPack.Hidden)
-                    {
-                        Task.Run(() =>
-                            SearchUpdate(iconPack)
-                        );
+                        Debug.WriteLine(databasePath + "->" + newFileName);
+                        // Delete the existing file if exists
+                        if (File.Exists(newFileName))
+                        {
+                            File.Delete(newFileName); 
+                        }
+                        File.Move(databasePath, newFileName);
+                    } catch (Exception ex) {
+                        Debug.WriteLine(ex.StackTrace);                    
                     }
                 }
+            }
 
-                db.Close();
+            foreach (var databasePath in Directory.GetFiles(MacroDeck.IconPackDirectoryPath, "*.iconpack"))
+            {
+                try
+                {
+                    var db = new SQLiteConnection(databasePath);
+                    var query = db.Table<IconPackJson>();
+
+                    foreach (var iconPackJson in query)
+                    {
+                        string jsonString = iconPackJson.JsonString;
+                        IconPack iconPack = JsonConvert.DeserializeObject<IconPack>(jsonString, new JsonSerializerSettings
+                        {
+                            TypeNameHandling = TypeNameHandling.Auto,
+                            NullValueHandling = NullValueHandling.Ignore,
+                            Error = (sender, args) => { args.ErrorContext.Handled = true; }
+                        });
+
+                        IconPacks.Add(iconPack);
+                        if (iconPack.PackageManagerManaged && !iconPack.Hidden)
+                        {
+                            Task.Run(() =>
+                                SearchUpdate(iconPack)
+                            );
+                        }
+                    }
+
+                    db.Close();
+                } catch { }
             }
 
             if (IconPacks.Count == 0)
             {
-                IconPack newIconPack = new IconPack();
-                newIconPack.Author = Environment.UserName;
-                newIconPack.Name = "New icon pack";
-                newIconPack.Version = "1.0.0";
-                newIconPack.Icons = new List<Icon>();
+                IconPack newIconPack = new IconPack
+                {
+                    Author = Environment.UserName,
+                    Name = "New icon pack",
+                    Version = "1.0.0",
+                    Icons = new List<Icon>()
+                };
                 IconPacks.Add(newIconPack);
                 AddIconImage(newIconPack, Resources.Icon);
             }
@@ -161,10 +181,11 @@ namespace SuchByte.MacroDeck.Icons
             SQLiteConnection db;
             if (directory == null)
             {
-               db = new SQLiteConnection(MacroDeck.IconPackDirectoryPath + "\\" + iconPack.Name + ".db");
+               db = new SQLiteConnection(Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.Name + ".iconpack"));
             } else
             {
-                db = new SQLiteConnection(directory + "\\" + iconPack.Name + ".db");
+                // Export
+                db = new SQLiteConnection(Path.Combine(directory, iconPack.Name.ToLower().Replace(' ', '-') + "-" + iconPack.Version + ".iconpack"));
             }
             db.CreateTable<IconPackJson>();
             db.DeleteAll<IconPackJson>();
@@ -212,7 +233,7 @@ namespace SuchByte.MacroDeck.Icons
             
             try
             {
-                File.Delete(Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.Name, ".db"));
+                File.Delete(Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.Name + ".iconpack"));
             }
             catch { }
             if (IconPacks.Count == 0)
@@ -245,7 +266,8 @@ namespace SuchByte.MacroDeck.Icons
         {
             try
             {
-                String base64 = Utils.Base64.GetBase64FromImage(image);
+                Debug.WriteLine("Add icon to " + iconPack.Name);
+                var base64 = Utils.Base64.GetBase64FromImage(image);
                 Icon icon = new Icon
                 {
                     IconBase64 = base64,
@@ -257,7 +279,9 @@ namespace SuchByte.MacroDeck.Icons
                 MacroDeckServer.SendAllIcons();
                 return icon;
             }
-            catch { }
+            catch (Exception e) {
+                Debug.WriteLine(e.StackTrace);
+            }
             return null;
         }
 

@@ -199,7 +199,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(32)))), ((int)(((byte)(32)))));
-            this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.panelEdit);
             this.Controls.Add(this.eventBox);
@@ -207,10 +206,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ForeColor = System.Drawing.Color.White;
             this.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
-            this.MaximumSize = new System.Drawing.Size(850, 0);
+            this.MaximumSize = new System.Drawing.Size(850, 2);
             this.MinimumSize = new System.Drawing.Size(850, 84);
             this.Name = "EventItem";
-            this.Size = new System.Drawing.Size(848, 82);
+            this.Size = new System.Drawing.Size(850, 84);
             this.Load += new System.EventHandler(this.EventItem_Load);
             this.panelEdit.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.btnRemove)).EndInit();

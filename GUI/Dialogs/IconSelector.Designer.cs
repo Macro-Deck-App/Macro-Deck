@@ -38,7 +38,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnImport = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.btnPreview = new SuchByte.MacroDeck.GUI.CustomControls.RoundedButton();
             this.btnOk = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
-            this.iconPacksBox = new SuchByte.MacroDeck.GUI.CustomControls.ComboBox();
+            this.iconPacksBox = new SuchByte.MacroDeck.GUI.CustomControls.RoundedComboBox();
             this.btnCreateIconPack = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.btnDeleteIconPack = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.btnImportIconPack = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
@@ -75,6 +75,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnImport.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnImport.ForeColor = System.Drawing.Color.White;
             this.btnImport.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnImport.Icon = null;
             this.btnImport.Location = new System.Drawing.Point(124, 3);
             this.btnImport.Name = "btnImport";
             this.btnImport.Progress = 0;
@@ -87,7 +88,7 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // btnPreview
             // 
-            this.btnPreview.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(108)))), ((int)(((byte)(117)))), ((int)(((byte)(125)))));
+            this.btnPreview.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
             this.btnPreview.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.btnPreview.Column = 0;
             this.btnPreview.ForegroundImage = null;
@@ -110,6 +111,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnOk.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnOk.ForeColor = System.Drawing.Color.White;
             this.btnOk.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnOk.Icon = null;
             this.btnOk.Location = new System.Drawing.Point(700, 570);
             this.btnOk.Name = "btnOk";
             this.btnOk.Progress = 0;
@@ -122,15 +124,17 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // iconPacksBox
             // 
-            this.iconPacksBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
-            this.iconPacksBox.BorderRadius = 8;
             this.iconPacksBox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.iconPacksBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.iconPacksBox.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.iconPacksBox.ForeColor = System.Drawing.Color.White;
-            this.iconPacksBox.FormattingEnabled = true;
+            this.iconPacksBox.Icon = null;
             this.iconPacksBox.Location = new System.Drawing.Point(12, 9);
             this.iconPacksBox.Name = "iconPacksBox";
-            this.iconPacksBox.Size = new System.Drawing.Size(320, 24);
+            this.iconPacksBox.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
+            this.iconPacksBox.SelectedIndex = -1;
+            this.iconPacksBox.SelectedItem = null;
+            this.iconPacksBox.Size = new System.Drawing.Size(320, 26);
             this.iconPacksBox.TabIndex = 7;
             this.iconPacksBox.SelectedIndexChanged += new System.EventHandler(this.IconPacksBox_SelectedIndexChanged);
             // 
@@ -176,6 +180,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnImportIconPack.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnImportIconPack.ForeColor = System.Drawing.Color.White;
             this.btnImportIconPack.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnImportIconPack.Icon = null;
             this.btnImportIconPack.Location = new System.Drawing.Point(417, 10);
             this.btnImportIconPack.Name = "btnImportIconPack";
             this.btnImportIconPack.Progress = 0;
@@ -196,6 +201,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnExportIconPack.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnExportIconPack.ForeColor = System.Drawing.Color.White;
             this.btnExportIconPack.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnExportIconPack.Icon = null;
             this.btnExportIconPack.Location = new System.Drawing.Point(553, 11);
             this.btnExportIconPack.Name = "btnExportIconPack";
             this.btnExportIconPack.Progress = 0;
@@ -216,6 +222,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnDeleteIcon.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnDeleteIcon.ForeColor = System.Drawing.Color.White;
             this.btnDeleteIcon.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(130)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.btnDeleteIcon.Icon = null;
             this.btnDeleteIcon.Location = new System.Drawing.Point(667, 443);
             this.btnDeleteIcon.Name = "btnDeleteIcon";
             this.btnDeleteIcon.Progress = 0;
@@ -269,6 +276,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnCreateIcon.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnCreateIcon.ForeColor = System.Drawing.Color.White;
             this.btnCreateIcon.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnCreateIcon.Icon = null;
             this.btnCreateIcon.Location = new System.Drawing.Point(3, 3);
             this.btnCreateIcon.Name = "btnCreateIcon";
             this.btnCreateIcon.Progress = 0;
@@ -289,13 +297,13 @@ namespace SuchByte.MacroDeck.GUI
             this.btnGiphy.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnGiphy.ForeColor = System.Drawing.Color.White;
             this.btnGiphy.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnGiphy.Icon = global::SuchByte.MacroDeck.Properties.Resources.giphy1;
             this.btnGiphy.Location = new System.Drawing.Point(245, 3);
             this.btnGiphy.Name = "btnGiphy";
             this.btnGiphy.Progress = 0;
             this.btnGiphy.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
             this.btnGiphy.Size = new System.Drawing.Size(78, 25);
             this.btnGiphy.TabIndex = 20;
-            this.btnGiphy.Text = "GIPHY";
             this.btnGiphy.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.btnGiphy.UseVisualStyleBackColor = true;
             this.btnGiphy.Visible = false;
@@ -377,7 +385,7 @@ namespace SuchByte.MacroDeck.GUI
         private CustomControls.ButtonPrimary btnImport;
         private RoundedButton btnPreview;
         private CustomControls.ButtonPrimary btnOk;
-        private ComboBox iconPacksBox;
+        private RoundedComboBox iconPacksBox;
         private PictureButton btnCreateIconPack;
         private PictureButton btnDeleteIconPack;
 

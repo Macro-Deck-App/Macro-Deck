@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace SuchByte.MacroDeck.Icons
 {
@@ -35,5 +37,20 @@ namespace SuchByte.MacroDeck.Icons
         /// True = the icon pack is hidden in the icon selector
         /// </summary>
         public bool Hidden = false;
+
+        /// <summary>
+        /// Description of the icon pack when exported
+        /// </summary>
+        public string Description;
+
+        /// <summary>
+        /// Link to the used license
+        /// </summary>
+        public string License = String.Empty;
+
+        /// <summary>
+        /// Icon preview
+        /// </summary>
+        public string IconPreviewBase64 { get; set; }
     }
 }

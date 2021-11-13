@@ -7,6 +7,7 @@ namespace SuchByte.MacroDeck.Device
     public enum DeviceType
     {
         Unknown,
+        WebPackageManager,
         Web,
         Android,
         iOS,

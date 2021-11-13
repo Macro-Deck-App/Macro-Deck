@@ -62,7 +62,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblPluginAPILabel.Text = Language.LanguageManager.Strings.PluginAPIVersion;
             this.lblInstalledPluginsLabel.Text = Language.LanguageManager.Strings.InstalledPlugins;
             this.lblOSLabel.Text = Language.LanguageManager.Strings.OperatingSystem;
-            this.lblDeveloped.Text = String.Format(Language.LanguageManager.Strings.DevelopedByX, "Manuel Mayer (SuchByte)");
             this.lblTranslationBy.Text = String.Format(Language.LanguageManager.Strings.XTranslationByX, Language.LanguageManager.Strings.__Language__, Language.LanguageManager.Strings.__Author__);
         }
 

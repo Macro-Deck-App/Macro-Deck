@@ -90,7 +90,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // icon
             // 
             this.icon.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.icon.Location = new System.Drawing.Point(3, 20);
+            this.icon.Location = new System.Drawing.Point(3, 23);
             this.icon.Name = "icon";
             this.icon.Size = new System.Drawing.Size(60, 60);
             this.icon.TabIndex = 3;
@@ -108,7 +108,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // lblDownloads
             // 
             this.lblDownloads.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblDownloads.Location = new System.Drawing.Point(22, 83);
+            this.lblDownloads.Location = new System.Drawing.Point(22, 86);
             this.lblDownloads.Name = "lblDownloads";
             this.lblDownloads.Size = new System.Drawing.Size(41, 17);
             this.lblDownloads.TabIndex = 6;
@@ -127,7 +127,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // lblType
             // 
             this.lblType.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(95)))), ((int)(((byte)(173)))));
-            this.lblType.Location = new System.Drawing.Point(205, 0);
+            this.lblType.Location = new System.Drawing.Point(201, 5);
             this.lblType.Name = "lblType";
             this.lblType.Size = new System.Drawing.Size(60, 17);
             this.lblType.TabIndex = 8;
@@ -138,7 +138,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             this.iconDownloads.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.download_box;
             this.iconDownloads.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.iconDownloads.Location = new System.Drawing.Point(4, 83);
+            this.iconDownloads.Location = new System.Drawing.Point(4, 86);
             this.iconDownloads.Name = "iconDownloads";
             this.iconDownloads.Size = new System.Drawing.Size(17, 17);
             this.iconDownloads.TabIndex = 9;
@@ -169,7 +169,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             this.lblCategory.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblCategory.ForeColor = System.Drawing.Color.Silver;
-            this.lblCategory.Location = new System.Drawing.Point(4, 0);
+            this.lblCategory.Location = new System.Drawing.Point(5, 5);
             this.lblCategory.Name = "lblCategory";
             this.lblCategory.Size = new System.Drawing.Size(191, 16);
             this.lblCategory.TabIndex = 11;

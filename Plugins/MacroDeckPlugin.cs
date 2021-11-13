@@ -97,6 +97,22 @@ namespace SuchByte.MacroDeck.Plugins
 
     public abstract class PluginAction
     {
+        ActionButton.ActionButton actionButton;
+        internal void SetActionButton(ActionButton.ActionButton actionButton)
+        {
+            this.actionButton = actionButton;
+        }
+
+        /// <summary>
+        /// Gets the ActionButton which contains this action
+        /// </summary>
+        public ActionButton.ActionButton ActionButton
+        {
+            get
+            {
+                return this.actionButton;
+            }
+        }
         /// <summary>
         /// Name of the action
         /// </summary>

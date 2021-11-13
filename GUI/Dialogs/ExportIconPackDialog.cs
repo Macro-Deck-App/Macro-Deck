@@ -21,6 +21,8 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             InitializeComponent();
             this.lblAuthor.Text = Language.LanguageManager.Strings.Author;
             this.lblVersion.Text = Language.LanguageManager.Strings.Version;
+            this.lblDescription.Text = Language.LanguageManager.Strings.Description;
+            this.lblLicense.Text = Language.LanguageManager.Strings.License;
             this.btnOk.Text = Language.LanguageManager.Strings.Ok;
             this.IconPack = iconPack;
         }
@@ -29,6 +31,8 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         {
             this.author.Text = this.IconPack.Author;
             this.version.Text = this.IconPack.Version;
+            this.description.Text = this.IconPack.Description;
+            this.license.Text = this.IconPack.License;
 
         }
 
@@ -39,6 +43,13 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
             this.IconPack.Author = this.author.Text;
             this.IconPack.Version = this.version.Text;
+            this.IconPack.Description = this.description.Text;
+            this.IconPack.License = this.license.Text;
+
+            try
+            {
+                this.IconPack.IconPreviewBase64 = Utils.Base64.GetBase64FromImage(Utils.IconPackPreview.GeneratePreviewImage(this.IconPack));
+            } catch { }
 
             this.DialogResult = DialogResult.OK;
         }

@@ -16,7 +16,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 ControlStyles.AllPaintingInWmPaint | ControlStyles.ResizeRedraw | ControlStyles.UserPaint |
                 ControlStyles.DoubleBuffer, true);
             SizeMode = TabSizeMode.Fixed;
-            ItemSize = new Size(136, 44);
+            ItemSize = new Size(200, 44);
             Alignment = TabAlignment.Left;
             SelectedIndex = 0;
         }

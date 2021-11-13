@@ -16,7 +16,7 @@ using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
-    public partial class PackageManagerIconPackItem : UserControl
+    public partial class PackageManagerIconPackItem : RoundedUserControl
     {
         public event EventHandler OnInstallationFinished;
 
@@ -58,7 +58,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 ["name"] = iconPack.Name,
                 ["author"] = iconPack.Author,
                 ["version"] = iconPack.Version,
-                ["description"] = "",
+                ["description"] = iconPack.Description,
+                ["license"] = iconPack.License,
+                ["preview"] = iconPack.IconPreviewBase64,
             };
             this.UpdateItem();
         }
@@ -97,14 +99,21 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             {
                 this.lblCategory.Text = "";
             }
-            if (this._jsonObject["preview"] != null)
+            if (this._jsonObject["license"] != null && !String.IsNullOrWhiteSpace(this._jsonObject["license"].ToString()))
+            {
+                this.lblLicense.Visible = true;
+            } else
+            {
+                this.lblLicense.Visible = false;
+            }
+            if (this._jsonObject["preview"] != null && !String.IsNullOrWhiteSpace(this._jsonObject["preview"].ToString()))
             {
                 this.preview.BackgroundImage = Utils.Base64.GetImageFromBase64(this._jsonObject["preview"].ToString());
             } else
             {
                 try
                 {
-                    this.preview.BackgroundImage = Utils.Base64.GetImageFromBase64(this._iconPack.Icons[0].IconBase64);
+                    this.preview.BackgroundImage = Utils.IconPackPreview.GeneratePreviewImage(this._iconPack);
                 } catch { }
             }
             this.lblVersion.Text = this._jsonObject["version"].ToString();
@@ -245,7 +254,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                                 
                 try
                 {
-                    File.Copy(MacroDeck.TempDirectoryPath + this._jsonObject["filename"], MacroDeck.IconPackDirectoryPath + this._jsonObject["name"] + ".db", true);
+                    File.Copy(MacroDeck.TempDirectoryPath + this._jsonObject["filename"], MacroDeck.IconPackDirectoryPath + this._jsonObject["name"] + ".iconpack", true);
                     File.Delete(MacroDeck.TempDirectoryPath + this._jsonObject["name"]);
                 }
                 catch
@@ -284,5 +293,16 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnInstall.Progress = e.ProgressPercentage;
         }
 
+        private void lblLicense_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (this._jsonObject["license"] != null)
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = this._jsonObject["license"].ToString(),
+                    UseShellExecute = true
+                });
+            }
+        }
     }
 }

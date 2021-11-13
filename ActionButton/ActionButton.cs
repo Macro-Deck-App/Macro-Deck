@@ -23,6 +23,9 @@ namespace SuchByte.MacroDeck.ActionButton
         private int BUFFER_SIZE = 1024 * 1024; // 1 MB
         private bool _disposed = false;
 
+        private List<PluginAction> _actions = new List<PluginAction>();
+        private Dictionary<string, List<PluginAction>> _eventActions = new Dictionary<string, List<PluginAction>>();
+
 
         public ActionButton()
         {
@@ -113,8 +116,39 @@ namespace SuchByte.MacroDeck.ActionButton
         public int Position_X { get; set; }
         public int Position_Y { get; set; }
         public string StateBindingVariable { get; set; } = "";
-        public List<PluginAction> Actions { get; set; }
-        public Dictionary<string, List<PluginAction>> EventActions { get; set; }
+        public List<PluginAction> Actions
+        { 
+            get {
+                return this._actions;
+            }
+            set
+            {
+                this._actions = value;
+                foreach (PluginAction pluginAction in this._actions)
+                {
+                    pluginAction.SetActionButton(this);
+                }
+            }
+        }
+        public Dictionary<string, List<PluginAction>> EventActions 
+        { 
+            get
+            {
+                return this._eventActions;
+            }
+            set
+            {
+                this._eventActions = value;
+                foreach (var eventActionList in this._eventActions.Values)
+                {
+                    foreach (PluginAction pluginAction in eventActionList)
+                    {
+                        pluginAction.SetActionButton(this);
+                    }
+                }
+                
+            }        
+        }
 
 
        

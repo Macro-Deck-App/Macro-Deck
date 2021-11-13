@@ -73,11 +73,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 }
                 this.foldersView.Nodes.Add(node);
                 this.foldersView.ExpandAll();
-                    /*if (this.foldersView.SelectedNode == null)
-                    {
-                        this.foldersView.SelectedNode = this.foldersView.Nodes[0];
-                    }*/
-
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -342,6 +337,18 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     newTargetButton.Position_X = draggedButton.Column;
                     this._currentFolder.ActionButtons.Remove(targetActionButton);
                     this._currentFolder.ActionButtons.Add(newTargetButton);
+
+                    foreach (PluginAction pluginAction in newTargetButton.Actions)
+                    {
+                        pluginAction.SetActionButton(newTargetButton);
+                    }
+                    foreach (var eventActionList in newTargetButton.EventActions.Values)
+                    {
+                        foreach (PluginAction pluginAction in eventActionList)
+                        {
+                            pluginAction.SetActionButton(newTargetButton);
+                        }
+                    }
                 }
                 ProfileManager.Save();
                 this.UpdateButtons();
@@ -594,6 +601,17 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             if (Utils.Clipboard.GetActionButtonCopy() == null) return;
 
             ActionButton.ActionButton actionButtonNew = Utils.Clipboard.GetActionButtonCopy();
+            foreach (PluginAction pluginAction in actionButtonNew.Actions)
+            {
+                pluginAction.SetActionButton(actionButtonNew);
+            }
+            foreach (var eventActionList in actionButtonNew.EventActions.Values)
+            {
+                foreach (PluginAction pluginAction in eventActionList)
+                {
+                    pluginAction.SetActionButton(actionButtonNew);
+                }
+            }
             actionButtonNew.ButtonId = this._currentFolder.ActionButtons.Count;
             actionButtonNew.Position_X = col;
             actionButtonNew.Position_Y = row;

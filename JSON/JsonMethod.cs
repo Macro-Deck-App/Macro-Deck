@@ -17,5 +17,7 @@ namespace SuchByte.MacroDeck.JSON
         ICON_BASE64,
         GET_CONFIG,
         BUTTON_DONE,
+        GET_INSTALLED_PLUGINS,
+        GET_INSTALLED_ICON_PACKS,
     }
 }

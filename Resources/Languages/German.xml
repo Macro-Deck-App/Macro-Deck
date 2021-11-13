@@ -236,4 +236,12 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
 	<ActionSetActionButtonStateOffDescription>Ändert den Tastenstatus der gedrückten Taste zu "Off"</ActionSetActionButtonStateOffDescription>
 	<ActionSetActionButtonStateOn>Tastenstatus zu "On" ändern</ActionSetActionButtonStateOn>
 	<ActionSetActionButtonStateOnDescription>Ändert den Tastenstatus der gedrückten Taste zu "On"</ActionSetActionButtonStateOnDescription>
+	<Description>Beschreibung</Description>
+	<License>Lizenz</License>
+	<AnimatedGifImported>Animiertes GIF importiert</AnimatedGifImported>
+	<GenerateStaticIcon>Soll eine statische version des ersten Frames erstellt werden?</GenerateStaticIcon>
+	<XSuccessfullyExportedToX>{0} wurde erfolgreich zu {1} exportiert</XSuccessfullyExportedToX>
+	<SelectedIconWillBeDeleted>Das gewählte Icon wird aus {0} gelöscht</SelectedIconWillBeDeleted>
+	<SuccessfullyImportedIconPack>{0} erfolgreich importiert</SuccessfullyImportedIconPack>
+	<SelectedIconPackWillBeDeleted>{0} mit allen Icons wird gelöscht</SelectedIconPackWillBeDeleted>
 </Strings>

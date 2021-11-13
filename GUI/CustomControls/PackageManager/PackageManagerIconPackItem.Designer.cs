@@ -39,6 +39,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblType = new System.Windows.Forms.Label();
             this.iconDownloads = new System.Windows.Forms.PictureBox();
             this.lblCategory = new System.Windows.Forms.Label();
+            this.lblLicense = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)(this.preview)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.iconDownloads)).BeginInit();
             this.SuspendLayout();
@@ -55,7 +56,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // lblDownloads
             // 
             this.lblDownloads.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblDownloads.Location = new System.Drawing.Point(22, 83);
+            this.lblDownloads.Location = new System.Drawing.Point(22, 86);
             this.lblDownloads.Name = "lblDownloads";
             this.lblDownloads.Size = new System.Drawing.Size(41, 17);
             this.lblDownloads.TabIndex = 14;
@@ -74,7 +75,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // preview
             // 
             this.preview.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.preview.Location = new System.Drawing.Point(3, 20);
+            this.preview.Location = new System.Drawing.Point(3, 23);
             this.preview.Name = "preview";
             this.preview.Size = new System.Drawing.Size(60, 60);
             this.preview.TabIndex = 11;
@@ -123,7 +124,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // lblType
             // 
             this.lblType.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(173)))), ((int)(((byte)(14)))));
-            this.lblType.Location = new System.Drawing.Point(171, 0);
+            this.lblType.Location = new System.Drawing.Point(167, 5);
             this.lblType.Name = "lblType";
             this.lblType.Size = new System.Drawing.Size(94, 17);
             this.lblType.TabIndex = 16;
@@ -144,18 +145,34 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             this.lblCategory.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblCategory.ForeColor = System.Drawing.Color.Silver;
-            this.lblCategory.Location = new System.Drawing.Point(4, 0);
+            this.lblCategory.Location = new System.Drawing.Point(5, 5);
             this.lblCategory.Name = "lblCategory";
-            this.lblCategory.Size = new System.Drawing.Size(165, 16);
+            this.lblCategory.Size = new System.Drawing.Size(156, 16);
             this.lblCategory.TabIndex = 18;
             this.lblCategory.Text = "Category";
             this.lblCategory.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lblLicense
+            // 
+            this.lblLicense.ActiveLinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.lblLicense.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblLicense.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
+            this.lblLicense.Location = new System.Drawing.Point(69, 70);
+            this.lblLicense.Name = "lblLicense";
+            this.lblLicense.Size = new System.Drawing.Size(190, 18);
+            this.lblLicense.TabIndex = 19;
+            this.lblLicense.TabStop = true;
+            this.lblLicense.Text = "License";
+            this.lblLicense.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblLicense.VisitedLinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
+            this.lblLicense.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblLicense_LinkClicked);
             // 
             // PackageManagerIconPackItem
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
+            this.Controls.Add(this.lblLicense);
             this.Controls.Add(this.lblCategory);
             this.Controls.Add(this.iconDownloads);
             this.Controls.Add(this.lblType);
@@ -188,5 +205,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         private System.Windows.Forms.Label lblType;
         private System.Windows.Forms.PictureBox iconDownloads;
         private System.Windows.Forms.Label lblCategory;
+        private System.Windows.Forms.LinkLabel lblLicense;
     }
 }

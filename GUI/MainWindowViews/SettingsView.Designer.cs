@@ -76,6 +76,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblMacroDeck = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tabIcons = new System.Windows.Forms.ImageList(this.components);
+            this.label1 = new System.Windows.Forms.Label();
             this.verticalTabControl.SuspendLayout();
             this.tabGeneral.SuspendLayout();
             this.tabConnection.SuspendLayout();
@@ -98,7 +99,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.verticalTabControl.Controls.Add(this.tabAbout);
             this.verticalTabControl.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.verticalTabControl.ImageList = this.tabIcons;
-            this.verticalTabControl.ItemSize = new System.Drawing.Size(44, 136);
+            this.verticalTabControl.ItemSize = new System.Drawing.Size(44, 200);
             this.verticalTabControl.Location = new System.Drawing.Point(3, 3);
             this.verticalTabControl.Multiline = true;
             this.verticalTabControl.Name = "verticalTabControl";
@@ -119,10 +120,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabGeneral.Controls.Add(this.lblGeneral);
             this.tabGeneral.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.tabGeneral.ForeColor = System.Drawing.Color.White;
-            this.tabGeneral.Location = new System.Drawing.Point(140, 4);
+            this.tabGeneral.Location = new System.Drawing.Point(204, 4);
             this.tabGeneral.Name = "tabGeneral";
             this.tabGeneral.Padding = new System.Windows.Forms.Padding(3);
-            this.tabGeneral.Size = new System.Drawing.Size(987, 526);
+            this.tabGeneral.Size = new System.Drawing.Size(923, 526);
             this.tabGeneral.TabIndex = 0;
             this.tabGeneral.Text = "General";
             // 
@@ -222,9 +223,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabConnection.Controls.Add(this.lblConnection);
             this.tabConnection.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.tabConnection.ForeColor = System.Drawing.Color.White;
-            this.tabConnection.Location = new System.Drawing.Point(140, 4);
+            this.tabConnection.Location = new System.Drawing.Point(204, 4);
             this.tabConnection.Name = "tabConnection";
-            this.tabConnection.Size = new System.Drawing.Size(987, 526);
+            this.tabConnection.Size = new System.Drawing.Size(923, 526);
             this.tabConnection.TabIndex = 3;
             this.tabConnection.Text = "Connection";
             // 
@@ -372,9 +373,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabUpdater.Controls.Add(this.lblUpdates);
             this.tabUpdater.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.tabUpdater.ForeColor = System.Drawing.Color.White;
-            this.tabUpdater.Location = new System.Drawing.Point(140, 4);
+            this.tabUpdater.Location = new System.Drawing.Point(204, 4);
             this.tabUpdater.Name = "tabUpdater";
-            this.tabUpdater.Size = new System.Drawing.Size(987, 526);
+            this.tabUpdater.Size = new System.Drawing.Size(923, 526);
             this.tabUpdater.TabIndex = 1;
             this.tabUpdater.Text = "Updates";
             // 
@@ -382,7 +383,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             this.updaterPanel.Location = new System.Drawing.Point(3, 105);
             this.updaterPanel.Name = "updaterPanel";
-            this.updaterPanel.Size = new System.Drawing.Size(981, 418);
+            this.updaterPanel.Size = new System.Drawing.Size(920, 418);
             this.updaterPanel.TabIndex = 14;
             // 
             // updateChannel
@@ -464,6 +465,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // tabAbout
             // 
             this.tabAbout.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.tabAbout.Controls.Add(this.label1);
             this.tabAbout.Controls.Add(this.lblTranslationBy);
             this.tabAbout.Controls.Add(this.btnLicenses);
             this.tabAbout.Controls.Add(this.lblPluginAPIVersion);
@@ -479,18 +481,18 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabAbout.Controls.Add(this.pictureBox1);
             this.tabAbout.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.tabAbout.ForeColor = System.Drawing.Color.White;
-            this.tabAbout.Location = new System.Drawing.Point(140, 4);
+            this.tabAbout.Location = new System.Drawing.Point(204, 4);
             this.tabAbout.Name = "tabAbout";
-            this.tabAbout.Size = new System.Drawing.Size(987, 526);
+            this.tabAbout.Size = new System.Drawing.Size(923, 526);
             this.tabAbout.TabIndex = 2;
             this.tabAbout.Text = "About";
             // 
             // lblTranslationBy
             // 
             this.lblTranslationBy.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblTranslationBy.Location = new System.Drawing.Point(192, 284);
+            this.lblTranslationBy.Location = new System.Drawing.Point(219, 111);
             this.lblTranslationBy.Name = "lblTranslationBy";
-            this.lblTranslationBy.Size = new System.Drawing.Size(602, 18);
+            this.lblTranslationBy.Size = new System.Drawing.Size(485, 18);
             this.lblTranslationBy.TabIndex = 14;
             this.lblTranslationBy.Text = "English translation by Macro Deck";
             this.lblTranslationBy.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -506,7 +508,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.btnLicenses.ForeColor = System.Drawing.Color.White;
             this.btnLicenses.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
             this.btnLicenses.Icon = null;
-            this.btnLicenses.Location = new System.Drawing.Point(393, 331);
+            this.btnLicenses.Location = new System.Drawing.Point(361, 244);
             this.btnLicenses.Name = "btnLicenses";
             this.btnLicenses.Progress = 0;
             this.btnLicenses.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
@@ -519,7 +521,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblPluginAPIVersion
             // 
             this.lblPluginAPIVersion.AutoSize = true;
-            this.lblPluginAPIVersion.Location = new System.Drawing.Point(599, 437);
+            this.lblPluginAPIVersion.Location = new System.Drawing.Point(567, 437);
             this.lblPluginAPIVersion.Name = "lblPluginAPIVersion";
             this.lblPluginAPIVersion.Size = new System.Drawing.Size(27, 19);
             this.lblPluginAPIVersion.TabIndex = 12;
@@ -528,7 +530,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblWebsocketAPIVersion
             // 
             this.lblWebsocketAPIVersion.AutoSize = true;
-            this.lblWebsocketAPIVersion.Location = new System.Drawing.Point(599, 412);
+            this.lblWebsocketAPIVersion.Location = new System.Drawing.Point(567, 412);
             this.lblWebsocketAPIVersion.Name = "lblWebsocketAPIVersion";
             this.lblWebsocketAPIVersion.Size = new System.Drawing.Size(27, 19);
             this.lblWebsocketAPIVersion.TabIndex = 11;
@@ -537,7 +539,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblPluginAPILabel
             // 
             this.lblPluginAPILabel.AutoSize = true;
-            this.lblPluginAPILabel.Location = new System.Drawing.Point(361, 437);
+            this.lblPluginAPILabel.Location = new System.Drawing.Point(329, 437);
             this.lblPluginAPILabel.Name = "lblPluginAPILabel";
             this.lblPluginAPILabel.Size = new System.Drawing.Size(146, 19);
             this.lblPluginAPILabel.TabIndex = 10;
@@ -546,7 +548,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblWebSocketAPILabel
             // 
             this.lblWebSocketAPILabel.AutoSize = true;
-            this.lblWebSocketAPILabel.Location = new System.Drawing.Point(361, 412);
+            this.lblWebSocketAPILabel.Location = new System.Drawing.Point(329, 412);
             this.lblWebSocketAPILabel.Name = "lblWebSocketAPILabel";
             this.lblWebSocketAPILabel.Size = new System.Drawing.Size(177, 19);
             this.lblWebSocketAPILabel.TabIndex = 9;
@@ -555,7 +557,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblOS
             // 
             this.lblOS.AutoSize = true;
-            this.lblOS.Location = new System.Drawing.Point(599, 488);
+            this.lblOS.Location = new System.Drawing.Point(567, 488);
             this.lblOS.Name = "lblOS";
             this.lblOS.Size = new System.Drawing.Size(25, 19);
             this.lblOS.TabIndex = 8;
@@ -564,7 +566,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblInstalledPlugins
             // 
             this.lblInstalledPlugins.AutoSize = true;
-            this.lblInstalledPlugins.Location = new System.Drawing.Point(599, 463);
+            this.lblInstalledPlugins.Location = new System.Drawing.Point(567, 463);
             this.lblInstalledPlugins.Name = "lblInstalledPlugins";
             this.lblInstalledPlugins.Size = new System.Drawing.Size(18, 19);
             this.lblInstalledPlugins.TabIndex = 7;
@@ -573,7 +575,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblOSLabel
             // 
             this.lblOSLabel.AutoSize = true;
-            this.lblOSLabel.Location = new System.Drawing.Point(361, 488);
+            this.lblOSLabel.Location = new System.Drawing.Point(329, 488);
             this.lblOSLabel.Name = "lblOSLabel";
             this.lblOSLabel.Size = new System.Drawing.Size(36, 19);
             this.lblOSLabel.TabIndex = 5;
@@ -582,7 +584,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblInstalledPluginsLabel
             // 
             this.lblInstalledPluginsLabel.AutoSize = true;
-            this.lblInstalledPluginsLabel.Location = new System.Drawing.Point(361, 463);
+            this.lblInstalledPluginsLabel.Location = new System.Drawing.Point(329, 463);
             this.lblInstalledPluginsLabel.Name = "lblInstalledPluginsLabel";
             this.lblInstalledPluginsLabel.Size = new System.Drawing.Size(131, 19);
             this.lblInstalledPluginsLabel.TabIndex = 4;
@@ -591,9 +593,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblDeveloped
             // 
             this.lblDeveloped.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblDeveloped.Location = new System.Drawing.Point(192, 255);
+            this.lblDeveloped.Location = new System.Drawing.Point(219, 153);
             this.lblDeveloped.Name = "lblDeveloped";
-            this.lblDeveloped.Size = new System.Drawing.Size(602, 18);
+            this.lblDeveloped.Size = new System.Drawing.Size(485, 18);
             this.lblDeveloped.TabIndex = 2;
             this.lblDeveloped.Text = "Developed by Manuel Mayer (SuchByte) in Germany";
             this.lblDeveloped.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -602,9 +604,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             this.lblMacroDeck.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblMacroDeck.ForeColor = System.Drawing.Color.LightGray;
-            this.lblMacroDeck.Location = new System.Drawing.Point(330, 193);
+            this.lblMacroDeck.Location = new System.Drawing.Point(3, 3);
             this.lblMacroDeck.Name = "lblMacroDeck";
-            this.lblMacroDeck.Size = new System.Drawing.Size(327, 41);
+            this.lblMacroDeck.Size = new System.Drawing.Size(917, 41);
             this.lblMacroDeck.TabIndex = 1;
             this.lblMacroDeck.Text = "Macro Deck";
             this.lblMacroDeck.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -613,7 +615,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             this.pictureBox1.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.Icon;
             this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.pictureBox1.Location = new System.Drawing.Point(393, 3);
+            this.pictureBox1.Location = new System.Drawing.Point(3, 47);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(200, 187);
             this.pictureBox1.TabIndex = 0;
@@ -628,6 +630,16 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabIcons.Images.SetKeyName(1, "Wifi.png");
             this.tabIcons.Images.SetKeyName(2, "Update.png");
             this.tabIcons.Images.SetKeyName(3, "Information.png");
+            // 
+            // label1
+            // 
+            this.label1.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label1.Location = new System.Drawing.Point(219, 173);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(485, 18);
+            this.label1.TabIndex = 15;
+            this.label1.Text = "Licensed under Apache-2.0";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // SettingsView
             // 
@@ -699,5 +711,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private System.Windows.Forms.CheckBox checkAutoUpdate;
         private System.Windows.Forms.CheckBox checkIconCache;
         private System.Windows.Forms.ImageList tabIcons;
+        private System.Windows.Forms.Label label1;
     }
 }

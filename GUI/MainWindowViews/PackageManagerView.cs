@@ -71,7 +71,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.Invoke(new Action(() => {
                 progressBar.Visible = true;
                 this.radioOnlyUpdates.Text = String.Format(Language.LanguageManager.Strings.Updates + " ({0})", PluginManager.PluginsUpdateAvailable.Count + IconManager.IconPacksUpdateAvailable.Count);
-                this.radioInstalled.Text = String.Format(Language.LanguageManager.Strings.PackageManagerTabInstalled + " ({0})", PluginManager.PluginsNotLoaded.Count + PluginManager.Plugins.Count - PluginManager.ProtectedPlugins.Count + IconManager.IconPacks.FindAll(iP => iP.PackageManagerManaged).Count);
+                this.radioInstalled.Text = String.Format(Language.LanguageManager.Strings.PackageManagerTabInstalled + " ({0})", PluginManager.PluginsNotLoaded.Count + PluginManager.Plugins.Count - PluginManager.ProtectedPlugins.Count + IconManager.IconPacks.FindAll(iP => iP.PackageManagerManaged && !iP.Hidden).Count);
             }
             ));
 
@@ -178,7 +178,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                         }
                     } else
                     {
-                        foreach (IconPack iconPack in IconManager.IconPacks.FindAll(iP => iP.PackageManagerManaged))
+                        foreach (IconPack iconPack in IconManager.IconPacks.FindAll(iP => iP.PackageManagerManaged && !iP.Hidden))
                         {
                             PackageManagerIconPackItem packageManagerIconPackItem = new PackageManagerIconPackItem(iconPack);
                             this.Invoke(new Action(() =>

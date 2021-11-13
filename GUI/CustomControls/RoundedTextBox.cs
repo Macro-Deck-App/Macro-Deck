@@ -57,6 +57,15 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             }
         }
 
+        public int MaxCharacters
+        {
+            get { return this.textBox1.MaxLength; }
+            set
+            {
+                this.textBox1.MaxLength = value;
+            }
+        }
+
         public void SetAutoCompleteCustomSource(AutoCompleteStringCollection autoCompleteStringCollection)
         {
             textBox1.AutoCompleteCustomSource = autoCompleteStringCollection;
@@ -122,11 +131,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             get { return (isPlaceHolder || textBox1.Text == this.placeHolderText) ? string.Empty : textBox1.Text; }
             set
             {
-                if (value != this.placeHolderText && value.Length > 0 && value != "")
+                if (value != null && value != this.placeHolderText && value.Length > 0 && value != "")
                 {
                     RemovePlaceholder();
                 }
-                else if (value.Length == 0 || value != "")
+                else if (value != null && value.Length == 0 || value != "")
                 {
                     SetPlaceholder();
                     textBox1.Text = placeHolderText;

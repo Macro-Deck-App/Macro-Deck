@@ -140,7 +140,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.panelEdit.Controls.Add(this.btnDown);
             this.panelEdit.Controls.Add(this.btnUp);
             this.panelEdit.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.panelEdit.Location = new System.Drawing.Point(716, 2);
+            this.panelEdit.Location = new System.Drawing.Point(717, 6);
             this.panelEdit.Name = "panelEdit";
             this.panelEdit.Size = new System.Drawing.Size(121, 26);
             this.panelEdit.TabIndex = 6;
@@ -174,10 +174,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.flowLayoutPanel1.Controls.Add(this.panel1);
             this.flowLayoutPanel1.Controls.Add(this.lblConfigurationSummary);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Left;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(2, 2);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(713, 43);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(713, 46);
             this.flowLayoutPanel1.TabIndex = 9;
             // 
             // lblConfigurationSummary
@@ -194,14 +194,14 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(8)))), ((int)(((byte)(107)))), ((int)(((byte)(138)))));
-            this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.panelEdit);
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ForeColor = System.Drawing.Color.White;
             this.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.Name = "ActionItem";
-            this.Size = new System.Drawing.Size(840, 43);
+            this.Padding = new System.Windows.Forms.Padding(2);
+            this.Size = new System.Drawing.Size(842, 50);
             ((System.ComponentModel.ISupportInitialize)(this.btnRemove)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnEdit)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnDown)).EndInit();

@@ -90,7 +90,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void RefreshActions()
         {
-            this.SuspendLayout();
             this.typeBox.SelectedIndexChanged -= TypeBox_SelectedIndexChanged;
             this.source.SelectedIndexChanged -= Source_SelectedIndexChanged;
             this.methodBox.SelectedIndexChanged -= MethodBox_SelectedIndexChanged;
@@ -151,7 +150,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             }
 
             this.Source_SelectedIndexChanged(null, EventArgs.Empty);
-            this.ResumeLayout();
         }
 
         private void MoveUpClicked(object sender, EventArgs e)

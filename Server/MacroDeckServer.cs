@@ -380,6 +380,36 @@ namespace SuchByte.MacroDeck.Server
                         SendAllIcons(macroDeckClient);
                     });
                     break;
+                case JsonMethod.GET_INSTALLED_PLUGINS:
+                    Task.Run(() =>
+                    {
+                        JObject pluginsObject = new JObject
+                        {
+                            ["method"] = JsonMethod.GET_INSTALLED_PLUGINS.ToString()
+                        };
+                        List<string> installedPlugins = new List<string>();
+                        foreach (MacroDeckPlugin plugin in PluginManager.Plugins.Values)
+                        {
+                            installedPlugins.Add(plugin.Author + "." + plugin.Name);
+                        }
+                        pluginsObject["plugins"] = JToken.FromObject(installedPlugins);
+                    });
+                    break;
+                case JsonMethod.GET_INSTALLED_ICON_PACKS:
+                    Task.Run(() =>
+                    {
+                        JObject pluginsObject = new JObject
+                        {
+                            ["method"] = JsonMethod.GET_INSTALLED_ICON_PACKS.ToString()
+                        };
+                        List<string> installedPlugins = new List<string>();
+                        foreach (IconPack iconPack in IconManager.IconPacks)
+                        {
+                            installedPlugins.Add(iconPack.Author + "." + iconPack.Name);
+                        }
+                        pluginsObject["iconpacks"] = JToken.FromObject(installedPlugins);
+                    });
+                    break;
                 default:
                     Console.WriteLine("Unknown method");
                     break;

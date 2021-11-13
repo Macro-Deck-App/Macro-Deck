@@ -117,7 +117,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             // lblWait
             // 
             this.lblWait.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblWait.Location = new System.Drawing.Point(8, 0);
+            this.lblWait.Location = new System.Drawing.Point(8, 5);
             this.lblWait.Name = "lblWait";
             this.lblWait.Size = new System.Drawing.Size(134, 42);
             this.lblWait.TabIndex = 8;
@@ -129,7 +129,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.minutes.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
             this.minutes.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.minutes.ForeColor = System.Drawing.Color.White;
-            this.minutes.Location = new System.Drawing.Point(148, 5);
+            this.minutes.Location = new System.Drawing.Point(148, 10);
             this.minutes.Maximum = new decimal(new int[] {
             59,
             0,
@@ -143,7 +143,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             // label1
             // 
             this.label1.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(238, -1);
+            this.label1.Location = new System.Drawing.Point(238, 4);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(10, 43);
             this.label1.TabIndex = 10;
@@ -155,7 +155,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.seconds.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
             this.seconds.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.seconds.ForeColor = System.Drawing.Color.White;
-            this.seconds.Location = new System.Drawing.Point(254, 5);
+            this.seconds.Location = new System.Drawing.Point(254, 10);
             this.seconds.Maximum = new decimal(new int[] {
             59,
             0,
@@ -174,7 +174,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             // label2
             // 
             this.label2.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label2.Location = new System.Drawing.Point(344, -1);
+            this.label2.Location = new System.Drawing.Point(344, 4);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(10, 43);
             this.label2.TabIndex = 12;
@@ -186,7 +186,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.millis.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
             this.millis.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.millis.ForeColor = System.Drawing.Color.White;
-            this.millis.Location = new System.Drawing.Point(360, 5);
+            this.millis.Location = new System.Drawing.Point(360, 10);
             this.millis.Maximum = new decimal(new int[] {
             999,
             0,
@@ -201,7 +201,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             // 
             this.label3.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.label3.ForeColor = System.Drawing.Color.Silver;
-            this.label3.Location = new System.Drawing.Point(450, -1);
+            this.label3.Location = new System.Drawing.Point(450, 4);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(239, 43);
             this.label3.TabIndex = 14;
@@ -213,7 +213,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(8)))), ((int)(((byte)(107)))), ((int)(((byte)(138)))));
-            this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Controls.Add(this.label3);
             this.Controls.Add(this.millis);
             this.Controls.Add(this.label2);
@@ -226,7 +225,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.ForeColor = System.Drawing.Color.White;
             this.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.Name = "DelayItem";
-            this.Size = new System.Drawing.Size(840, 41);
+            this.Size = new System.Drawing.Size(842, 50);
             this.panelEdit.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.btnRemove)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnDown)).EndInit();

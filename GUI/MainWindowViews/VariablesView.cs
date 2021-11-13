@@ -24,12 +24,14 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         public void UpdateTranslation()
         {
+            this.SuspendLayout();
             this.Name = Language.LanguageManager.Strings.VariablesTitle;
             this.lblName.Text = Language.LanguageManager.Strings.Name;
             this.lblType.Text = Language.LanguageManager.Strings.Type;
             this.lblValue.Text = Language.LanguageManager.Strings.Value;
             this.lblCreator.Text = Language.LanguageManager.Strings.Creator;
             this.btnCreateVariable.Text = Language.LanguageManager.Strings.CreateVariable;
+            this.ResumeLayout();
         }
 
         private void LoadCreators()
@@ -63,6 +65,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void CreatorCheckBox_CheckedChanged(object sender, EventArgs e)
         {
+            this.SuspendLayout();
             CheckBox checkBox = sender as CheckBox;
 
             foreach (VariableItem variableItem in this.variablesPanel.Controls)
@@ -72,6 +75,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     variableItem.Visible = checkBox.Checked;
                 }
             }
+            this.ResumeLayout();
         }
 
         private void VariablesPage_Load(object sender, EventArgs e)

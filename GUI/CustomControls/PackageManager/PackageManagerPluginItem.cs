@@ -17,7 +17,7 @@ using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
-    public partial class PackageManagerPluginItem : UserControl
+    public partial class PackageManagerPluginItem : RoundedUserControl
     {
 
         public event EventHandler OnInstallationFinished;

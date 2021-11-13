@@ -255,6 +255,13 @@ namespace SuchByte.MacroDeck.Language
         public string ActionSetActionButtonStateOffDescription = "Sets the state of this button to \"off\"";
         public string ActionSetActionButtonStateOn = "Set button state to on";
         public string ActionSetActionButtonStateOnDescription = "Sets the state of this button to \"on\"";
-
+        public string Description = "Description";
+        public string License = "License";
+        public string AnimatedGifImported = "Animated gif imported";
+        public string GenerateStaticIcon = "Also generate a static icon of the GIFs first frame?";
+        public string XSuccessfullyExportedToX = "{0} was successfully exported to {1}";
+        public string SelectedIconWillBeDeleted = "The selected icon will be deleted from the icon pack {0}";
+        public string SuccessfullyImportedIconPack = "Successfully imported the icon pack {0}";
+        public string SelectedIconPackWillBeDeleted = "The selected icon pack {0} with all its icons will be deleted";
     }
 }

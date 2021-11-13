@@ -358,7 +358,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(32)))), ((int)(((byte)(32)))));
-            this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Controls.Add(this.panelEdit);
             this.Controls.Add(this.typeBox);
             this.Controls.Add(this.lblIf);
@@ -367,8 +366,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ForeColor = System.Drawing.Color.White;
             this.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
+            this.MaximumSize = new System.Drawing.Size(850, 0);
+            this.MinimumSize = new System.Drawing.Size(850, 0);
             this.Name = "ConditionItem";
-            this.Size = new System.Drawing.Size(850, 146);
+            this.Size = new System.Drawing.Size(850, 151);
             this.Load += new System.EventHandler(this.ConditionItem_Load);
             ((System.ComponentModel.ISupportInitialize)(this.btnAddAction)).EndInit();
             this.panelEdit.ResumeLayout(false);
