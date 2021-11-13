@@ -186,6 +186,21 @@ namespace SuchByte.MacroDeck.Profiles
 
                 Save();
             }
+
+            // Set the action button instances to the plugin actions
+            foreach (MacroDeckProfile macroDeckProfile in _profiles)
+            {
+                foreach (MacroDeckFolder macroDeckFolder in macroDeckProfile.Folders)
+                {
+                    foreach (ActionButton.ActionButton actionButton in macroDeckFolder.ActionButtons)
+                    {
+                        foreach (PluginAction pluginAction in actionButton.Actions)
+                        {
+                            pluginAction.SetActionButton(actionButton);
+                        }
+                    }
+                }
+            }
         }
 
         public static void Save()

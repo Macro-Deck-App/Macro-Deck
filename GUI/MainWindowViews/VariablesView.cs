@@ -18,6 +18,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         public VariablesView()
         {
             InitializeComponent();
+            this.Dock = DockStyle.Fill;
             this.UpdateTranslation();
             this.LoadCreators();
         }

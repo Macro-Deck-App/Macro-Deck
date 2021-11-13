@@ -17,7 +17,6 @@ namespace SuchByte.MacroDeck.Plugins
 
         private string _name = "", _version = "", _description = "";
 
-
         public MacroDeckPlugin()
         {
             this.versionInfo = FileVersionInfo.GetVersionInfo(executingAssembly.Location);
@@ -100,12 +99,22 @@ namespace SuchByte.MacroDeck.Plugins
         ActionButton.ActionButton actionButton;
         internal void SetActionButton(ActionButton.ActionButton actionButton)
         {
+            if (actionButton == null) return;
+            if (this.actionButton != null && this.actionButton.Equals(actionButton))
+            {
+                this.OnActionButtonDelete();
+            }
             this.actionButton = actionButton;
+            if (actionButton != null)
+            {
+                this.OnActionButtonLoaded();
+            }
         }
 
         /// <summary>
         /// Gets the ActionButton which contains this action
         /// </summary>
+        [JsonIgnore]
         public ActionButton.ActionButton ActionButton
         {
             get
@@ -113,6 +122,15 @@ namespace SuchByte.MacroDeck.Plugins
                 return this.actionButton;
             }
         }
+
+        /// <summary>
+        /// Gets called when the action button gets deleted
+        /// </summary>
+        public virtual void OnActionButtonDelete(){ }
+        /// <summary>
+        /// Gets called when the action button is loaded
+        /// </summary>
+        public virtual void OnActionButtonLoaded() { }
         /// <summary>
         /// Name of the action
         /// </summary>

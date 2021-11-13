@@ -27,6 +27,7 @@ namespace SuchByte.MacroDeck.ActionButton
         private Dictionary<string, List<PluginAction>> _eventActions = new Dictionary<string, List<PluginAction>>();
 
 
+
         public ActionButton()
         {
             _bufferPtr = Marshal.AllocHGlobal(BUFFER_SIZE);
@@ -57,6 +58,17 @@ namespace SuchByte.MacroDeck.ActionButton
             }
 
             Variables.VariableManager.OnVariableChanged -= VariableChanged;
+            foreach (PluginAction pluginAction in this.Actions)
+            {
+                pluginAction.OnActionButtonDelete();
+            }
+            foreach (var eventActionList in this._eventActions.Values)
+            {
+                foreach (PluginAction pluginAction in eventActionList)
+                {
+                    pluginAction.OnActionButtonDelete();
+                }
+            }
             // Free any unmanaged objects here.
             Marshal.FreeHGlobal(_bufferPtr);
             _disposed = true;
@@ -93,6 +105,7 @@ namespace SuchByte.MacroDeck.ActionButton
 
 
         public event EventHandler StateChanged;
+        public event EventHandler IconChanged;
         public long ButtonId { get; set; }
         private bool _state = false;
         public bool State
@@ -109,46 +122,44 @@ namespace SuchByte.MacroDeck.ActionButton
             }
         }
 
-        public string IconOff { get; set; }
-        public string IconOn { get; set; }
+        private string _iconOff = "";
+        public string IconOff { 
+            get
+            {
+                return this._iconOff;
+            }
+            set
+            {
+                this._iconOff = value;
+                if (IconChanged != null)
+                {
+                    IconChanged(this, EventArgs.Empty);
+                }
+            }
+        }
+        private string _iconOn = "";
+        public string IconOn
+        {
+            get
+            {
+                return this._iconOn;
+            }
+            set
+            {
+                this._iconOn = value;
+                if (IconChanged != null)
+                {
+                    IconChanged(this, EventArgs.Empty);
+                }
+            }
+        }
         public ButtonLabel LabelOff { get; set; }
         public ButtonLabel LabelOn { get; set; }
         public int Position_X { get; set; }
         public int Position_Y { get; set; }
         public string StateBindingVariable { get; set; } = "";
-        public List<PluginAction> Actions
-        { 
-            get {
-                return this._actions;
-            }
-            set
-            {
-                this._actions = value;
-                foreach (PluginAction pluginAction in this._actions)
-                {
-                    pluginAction.SetActionButton(this);
-                }
-            }
-        }
-        public Dictionary<string, List<PluginAction>> EventActions 
-        { 
-            get
-            {
-                return this._eventActions;
-            }
-            set
-            {
-                this._eventActions = value;
-                foreach (var eventActionList in this._eventActions.Values)
-                {
-                    foreach (PluginAction pluginAction in eventActionList)
-                    {
-                        pluginAction.SetActionButton(this);
-                    }
-                }
-                
-            }        
-        }
+        public List<PluginAction> Actions { get; set; }
+        public Dictionary<string, List<PluginAction>> EventActions { get; set; }
 
 
        

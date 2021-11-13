@@ -22,9 +22,14 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         [DllImportAttribute("user32.dll")]
         public static extern bool ReleaseCapture();
 
+        private const int cGrip = 16;      // Grip size
+
         public Form()
         {
             InitializeComponent();
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.DoubleBuffered = true;
+            this.SetStyle(ControlStyles.ResizeRedraw, true);
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -32,6 +37,21 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             Pen pen = new Pen(Color.FromArgb(0, 123, 255), 1);
             Rectangle rect = new Rectangle(0, 0, this.Width - 2, this.Height - 2);
             e.Graphics.DrawRectangle(pen, rect);
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == 0x84)
+            {  // Trap WM_NCHITTEST
+                Point pos = new Point(m.LParam.ToInt32());
+                pos = this.PointToClient(pos);
+                if (pos.X >= this.ClientSize.Width - cGrip && pos.Y >= this.ClientSize.Height - cGrip)
+                {
+                    m.Result = (IntPtr)17; // HTBOTTOMRIGHT
+                    return;
+                }
+            }
+            base.WndProc(ref m);
         }
 
         private void BtnClose_Click(object sender, EventArgs e)

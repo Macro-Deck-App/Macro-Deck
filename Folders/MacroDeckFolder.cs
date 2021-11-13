@@ -27,6 +27,11 @@ namespace SuchByte.MacroDeck.Folders
                 // Free any other managed objects here.
             }
 
+            foreach (ActionButton.ActionButton actionButton in this.ActionButtons)
+            {
+                actionButton.Dispose();
+            }
+
             // Free any unmanaged objects here.
             Marshal.FreeHGlobal(_bufferPtr);
             _disposed = true;

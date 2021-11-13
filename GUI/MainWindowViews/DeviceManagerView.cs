@@ -19,6 +19,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         public DeviceManagerView()
         {
             InitializeComponent();
+            this.Dock = DockStyle.Fill;
             this.Name = Language.LanguageManager.Strings.DeviceManagerTitle;
             this.lblKnownDevices.Text = Language.LanguageManager.Strings.KnownDevices;
             this.lblBehaviour.Text = Language.LanguageManager.Strings.Behaviour;
@@ -64,7 +65,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             }
             //this.devicesList.Controls.Clear();
 
-            foreach (MacroDeckDevice macroDeckDevice in DeviceManager.GetKnownDevices())
+            foreach (MacroDeckDevice macroDeckDevice in DeviceManager.GetKnownDevices().ToArray())
             {
                 if (this.devicesList.Controls.OfType<DeviceInfo>().Where(x => x.MacroDeckDevice.Equals(macroDeckDevice)).FirstOrDefault() != null)
                 {

@@ -13,6 +13,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         public LoadingView()
         {
             InitializeComponent();
+            this.Dock = DockStyle.Fill;
         }
     }
 }

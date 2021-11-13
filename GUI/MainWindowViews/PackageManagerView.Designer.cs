@@ -92,6 +92,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // progressBar
             // 
+            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.progressBar.Location = new System.Drawing.Point(4, 532);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(251, 5);
@@ -170,6 +171,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.searchBox.ForeColor = System.Drawing.Color.Gray;
             this.searchBox.Icon = global::SuchByte.MacroDeck.Properties.Resources.magnifying_glass;
             this.searchBox.Location = new System.Drawing.Point(861, 3);
+            this.searchBox.MaxCharacters = 32767;
             this.searchBox.Multiline = false;
             this.searchBox.Name = "searchBox";
             this.searchBox.Padding = new System.Windows.Forms.Padding(31, 5, 5, 8);
@@ -186,7 +188,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // panelAvailablePlugins
             // 
-            this.panelAvailablePlugins.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.panelAvailablePlugins.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelAvailablePlugins.AutoScroll = true;
             this.panelAvailablePlugins.Location = new System.Drawing.Point(4, 52);

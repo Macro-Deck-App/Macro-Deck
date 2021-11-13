@@ -608,7 +608,6 @@ namespace SuchByte.MacroDeck.GUI
             this.flowLayoutPanel1.PerformLayout();
             this.groupButtonState.ResumeLayout(false);
             this.ResumeLayout(false);
-
         }
 
         #endregion

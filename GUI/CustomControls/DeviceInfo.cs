@@ -12,7 +12,7 @@ using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
-    public partial class DeviceInfo : UserControl
+    public partial class DeviceInfo : RoundedUserControl
     {
         MacroDeckDevice _macroDeckDevice;
         public MacroDeckDevice MacroDeckDevice { get { return this._macroDeckDevice; } }

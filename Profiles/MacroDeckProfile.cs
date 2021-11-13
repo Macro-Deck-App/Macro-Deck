@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SuchByte.MacroDeck.Folders;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -24,6 +25,11 @@ namespace SuchByte.MacroDeck.Profiles
             if (disposing)
             {
                 // Free any other managed objects here.
+            }
+
+            foreach (MacroDeckFolder folder in this.Folders)
+            {
+                folder.Dispose();
             }
 
             // Free any unmanaged objects here.

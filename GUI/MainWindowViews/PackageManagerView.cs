@@ -25,6 +25,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         public PackageManagerView()
         {
             InitializeComponent();
+            this.Dock = DockStyle.Fill;
             this.UpdateTranslation();
         }
 

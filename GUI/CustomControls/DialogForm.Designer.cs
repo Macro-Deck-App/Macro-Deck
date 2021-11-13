@@ -56,11 +56,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnClose.TabStop = false;
             this.btnClose.Click += new System.EventHandler(this.Btn_close_Click);
             // 
-            // open_animation_timer
-            // 
-            this.open_animation_timer.Interval = 1;
-            this.open_animation_timer.Tick += new System.EventHandler(this.open_animation_timer_Tick);
-            // 
             // DialogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
@@ -81,10 +76,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.Text = "DialogForm";
             this.Load += new System.EventHandler(this.DialogForm_Load);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.DialogForm_Paint);
+            this.MouseDown += DialogForm_MouseDown;
             ((System.ComponentModel.ISupportInitialize)(this.btnClose)).EndInit();
             this.ResumeLayout(false);
 
         }
+
 
         #endregion
         private PictureButton btnClose;

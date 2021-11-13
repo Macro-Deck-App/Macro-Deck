@@ -233,6 +233,7 @@ namespace SuchByte.MacroDeck.GUI
         private void BtnDeck_Click(object sender, EventArgs e)
         {
             this.SetView(this.DeckView);
+            this.DeckView.UpdateButtons();
         }
 
         private void BtnPackageManager_Click(object sender, EventArgs e)

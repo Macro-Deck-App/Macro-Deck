@@ -37,13 +37,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             this.btnClose.Visible = visible;
         }
-
-
-        private void TitleBar_MouseDown(object sender, MouseEventArgs e)
-        {
-            ReleaseCapture();
-            SendMessage(this.Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
-        }
+        
 
         private void Btn_close_Click(object sender, EventArgs e)
         {
@@ -53,24 +47,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void DialogForm_Load(object sender, EventArgs e)
         {
-            /*this.Opacity = 0;
-            open_animation_timer.Start();*/
             this.btnClose.Location = new Point(this.Width - this.btnClose.Width - 2, 2);
         }
 
-        private void open_animation_timer_Tick(object sender, EventArgs e)
-        {
-            if (this.Opacity < 1)
-            {
-                this.Opacity += 0.1;
-            }
-            if (this.Opacity >= 1)
-            {
-                open_animation_timer.Stop();
-            }
-        }
-
-        
         private void DialogForm_Paint(object sender, PaintEventArgs e)
         {
             Pen pen = new Pen(Color.FromArgb(0, 123, 255), 1);
@@ -78,11 +57,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             e.Graphics.DrawRectangle(pen, rect);
         }
 
-        private void BtnFeedback_Click(object sender, EventArgs e)
+
+        private void DialogForm_MouseDown(object sender, MouseEventArgs e)
         {
-            using (var feedbackDialog = new FeedbackDialog())
+            if (this.PointToClient(Cursor.Position).Y <= 25)
             {
-                feedbackDialog.ShowDialog();
+                ReleaseCapture();
+                SendMessage(this.Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
             }
         }
 

@@ -24,7 +24,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         public SettingsView()
         {
             InitializeComponent();
-
+            this.Dock = DockStyle.Fill;
             this.UpdateTranslation();
             Updater.Updater.OnUpdateAvailable += UpdateAvailable;
         }

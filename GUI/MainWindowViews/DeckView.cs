@@ -27,8 +27,15 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         public DeckView()
         {
             InitializeComponent();
+            this.Dock = DockStyle.Fill;
             this.UpdateTranslation();
             this._currentFolder = ProfileManager.CurrentProfile.Folders[0];
+
+        }
+
+        private void MainWindow_ResizeEnd(object sender, EventArgs e)
+        {
+            this.UpdateButtons();
         }
 
         public void UpdateTranslation()
@@ -93,6 +100,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                         if (actionButton != null)
                         {
                             actionButton.StateChanged -= this.ButtonStateChanged;
+                            actionButton.IconChanged -= ActionButton_IconChanged;
                             actionButton.LabelOff.LabelBase64Changed -= this.LabelChanged;
                             actionButton.LabelOn.LabelBase64Changed -= this.LabelChanged;
                         }
@@ -286,10 +294,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 actionButton.StateChanged -= this.ButtonStateChanged;
                 actionButton.LabelOff.LabelBase64Changed -= this.LabelChanged;
                 actionButton.LabelOn.LabelBase64Changed -= this.LabelChanged;
+                actionButton.IconChanged -= ActionButton_IconChanged;
                 // Add event handlers
                 actionButton.StateChanged += this.ButtonStateChanged;
                 actionButton.LabelOff.LabelBase64Changed += this.LabelChanged;
                 actionButton.LabelOn.LabelBase64Changed += this.LabelChanged;
+                actionButton.IconChanged += ActionButton_IconChanged;
 
                 this.UpdateButtonIcon(actionButton, button);
             }
@@ -306,6 +316,17 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             GC.Collect();
         }
 
+        private void ActionButton_IconChanged(object sender, EventArgs e)
+        {
+            ActionButton.ActionButton actionButton = sender as ActionButton.ActionButton;
+            if (actionButton != null)
+            {
+                if (this._currentFolder.ActionButtons.Contains(actionButton))
+                {
+                    this.UpdateButtonIcon(actionButton);
+                }
+            }
+        }
 
         private void Button_DragDrop(object sender, DragEventArgs e)
         {
@@ -397,16 +418,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             }
         }
 
-        public void MainWindowClosing(object sender, EventArgs e)
-        {
-
-        }
-
-        public void MainWindowResize(object sender, EventArgs e)
-        {
-            this.UpdateButtons();
-        }
-
         private void RunToolStripMenuItem_Click(object sender, EventArgs e)
         {
             int row = ((RoundedButton)this._buttonClicked).Row;
@@ -432,6 +443,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             ActionButton.ActionButton actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == col && aB.Position_Y == row);
             if (actionButton != null)
             {
+                actionButton.Dispose();
                 this._currentFolder.ActionButtons.Remove(actionButton);
                 ProfileManager.Save();
                 this.UpdateButtons();
@@ -495,6 +507,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.LoadProfiles();
             this.LoadProfileSettings();
             this.UpdateButtons();
+            CustomControls.Form mainWindow = (CustomControls.Form)this.Parent.Parent;
+            mainWindow.ResizeEnd += MainWindow_ResizeEnd;
         }
 
         private void LoadProfiles()

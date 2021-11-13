@@ -25,7 +25,7 @@ namespace SuchByte.MacroDeck
     {
         internal static readonly string VersionString = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
         public static readonly int ApiVersion = 20;
-        public static readonly int PluginApiVersion = 26;
+        public static readonly int PluginApiVersion = 28;
 
         internal static bool ForceUpdate = false;
         internal static bool TestUpdateChannel = false;
@@ -233,6 +233,7 @@ namespace SuchByte.MacroDeck
             ProfileManager.Initialize();
 
             MacroDeckServer.Start(_configuration.Host_Address, port == -1 ? _configuration.Host_Port : port);
+            BroadcastServer.Start();
 
             Updater.Updater.Initialize(ForceUpdate, TestUpdateChannel);
             Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
@@ -285,8 +286,6 @@ namespace SuchByte.MacroDeck
             _trayIconContextMenu.Items.Add(showItem);
             _trayIconContextMenu.Items.Add(restartItem);
             _trayIconContextMenu.Items.Add(exitItem);
-
-            
 
             _trayIcon.MouseDown += OnTrayIconMouseDown;
         }
@@ -374,9 +373,10 @@ namespace SuchByte.MacroDeck
 
         private static void OnPackageManagerUpdateCheckFinished(object sender, EventArgs e)
         {
-            PluginManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
             if (PluginManager.PluginsUpdateAvailable.Count > 0)
             {
+                PluginManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
+                Icons.IconManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
                 _trayIcon.ShowBalloonTip(5000, "Macro Deck Package Manager", Language.LanguageManager.Strings.UpdatesAvailable, ToolTipIcon.Info);
             }
         }
