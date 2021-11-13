@@ -206,7 +206,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ForeColor = System.Drawing.Color.White;
             this.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
-            this.MaximumSize = new System.Drawing.Size(850, 2);
+            this.MaximumSize = new System.Drawing.Size(850, 0);
             this.MinimumSize = new System.Drawing.Size(850, 84);
             this.Name = "EventItem";
             this.Size = new System.Drawing.Size(850, 84);

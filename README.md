@@ -94,6 +94,18 @@ public class ExampleAction : PluginAction
   {
     
   }
+
+  // Optional; Gets called when the action button gets deleted
+  public override void OnActionButtonDelete()
+  {
+    
+  }
+
+  // Optional; Gets called when the action button is loaded
+  public override void OnActionButtonLoaded()
+  { 
+  
+  }
 }
 ```
 
