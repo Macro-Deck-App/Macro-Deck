@@ -235,4 +235,12 @@ Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImpor
   <ActionSetActionButtonStateOffDescription>Establece el estado de este botón como "apagado"</ActionSetActionButtonStateOffDescription>
   <ActionSetActionButtonStateOn>Establecer en "encendido"</ActionSetActionButtonStateOn>
   <ActionSetActionButtonStateOnDescription>Establece el estado de este botón como "encendido"</ActionSetActionButtonStateOnDescription>
+  <Description>Descripción</Description>
+	<License>Licencia</License>
+	<AnimatedGifImported>GIF animado importado</AnimatedGifImported>
+	<GenerateStaticIcon>¿Generar también un icono estático del primer fotograma de los GIF?</GenerateStaticIcon>
+	<XSuccessfullyExportedToX>{0} se exportó con éxito a {1}</XSuccessfullyExportedToX>
+	<SelectedIconWillBeDeleted>El icono seleccionado se eliminará del paquete de iconos {0}</SelectedIconWillBeDeleted>
+	<SuccessfullyImportedIconPack>Se importó con éxito el paquete de iconos {0}</SuccessfullyImportedIconPack>
+	<SelectedIconPackWillBeDeleted>Se eliminará el paquete de iconos {0} con todos sus iconos.</SelectedIconPackWillBeDeleted>
 </Strings>
