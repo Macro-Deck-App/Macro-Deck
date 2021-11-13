@@ -3,7 +3,7 @@
   <__Language__>Italian</__Language__>
   <__LanguageCode__>it</__LanguageCode__>
   <__Author__>PhoenixWyllow aka PW.Dev</__Author__>
-  <__Version__>2.1.2-beta</__Version__>
+  <__Version__>2.2.1-dev</__Version__>
   <NetworkAdapter>Scheda di rete</NetworkAdapter>
   <IPAddress>Indirizzo IP</IPAddress>
   <Port>Porta</Port>
@@ -131,7 +131,7 @@ La porta predefinita per Macro Deck è 8191. Se qualche altra applicazione usa q
   <TheresAnUpdateForYou>C'è un aggionrnamento per te :)</TheresAnUpdateForYou>
   <VersionXIsNowAvailable>Versione {0} ({1}) è ora disponibile</VersionXIsNowAvailable>
   <ReadyToDownloadUpdate>Pronto per scaricare l'aggiornamento</ReadyToDownloadUpdate>
-  <DownloadingUpdate>Sto scaricando l'aggiornamento... {0}% ({1}MB/{2}MB)</DownloadingUpdate>
+  <DownloadingUpdate>Scarico l'aggiornamento... {0}% ({1}MB/{2}MB)</DownloadingUpdate>
   <VerifyingUpdateFile>Verifica file di aggiornamento...</VerifyingUpdateFile>
   <MD5NotValid>Il checksum MD5 non è valido</MD5NotValid>
   <StartingInstaller>Avvio installer</StartingInstaller>
@@ -206,7 +206,7 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <Online>Online</Online>
   <By>Di</By>
   <StateBinding>Collega stato a</StateBinding>
-  <ErrorWhileLoadingPackageManager>Errore durante il caricamento del gestore di pacchetti. Forse non la connessione Internet è assente o Macro Deck è bloccato dal firewall.</ErrorWhileLoadingPackageManager>
+  <ErrorWhileLoadingPackageManager>Errore durante il caricamento del gestore di pacchetti. Forse la connessione Internet è assente o Macro Deck è bloccato dal firewall.</ErrorWhileLoadingPackageManager>
   <UpdatesAvailable>Aggiornamenti disponibili</UpdatesAvailable>
   <EnableIconCache>Abilita cache icone (più veloce; utilizzo RAM maggiore)</EnableIconCache>
   <WebClient>Web Client</WebClient>
@@ -226,7 +226,7 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <CountDown>Diminuisci</CountDown>.
   <Set>Imposta</Set>
   <Toggle>Commutazione</Toggle>
-  <Variabile>Variabile</Variabile>
+  <Variable>Variabile</Variable>
   <PluginActionButton>Questo pulsante d'azione</PluginActionButton>
   <ActionToggleActionButtonState>Stato del pulsante di azione</ActionToggleActionButtonState>
   <ActionToggleActionButtonStateDescription>Cambia lo stato di questo pulsante</ActionToggleActionButtonStateDescription>.
@@ -234,4 +234,13 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <ActionSetActionButtonStateOffDescription>Imposta lo stato di questo pulsante come "inattivo"</ActionSetActionButtonStateOffDescription>.
   <ActionSetActionButtonStateOn>Imposta lo stato del pulsante come attivo</ActionSetActionButtonStateOn>.
   <ActionSetActionButtonStateOnDescription>Imposta lo stato di questo pulsante come "attivo"</ActionSetActionButtonStateOnDescription>
+  <Description>Descrizione</Description>
+  <License>Licensa</License>
+  <AnimatedGifImported>GIF animata importata</AnimatedGifImported>
+  <GenerateStaticIcon>Vuoi creare un'icona statica della GIF?</GenerateStaticIcon>
+  <XSuccessfullyExportedToX>{0} è stato esportato con successo in {1}</XSuccessfullyExportedToX>
+  <SelectedIconWillBeDeleted>L'icona selezionata verrà cancellata dal pacchetto d'icone {0}</SelectedIconWillBeDeleted>
+  <SuccessfullyImportedIconPack>Pacchetto d'icone {0} importato con successo</SuccessfullyImportedIconPack>
+  <SelectedIconPackWillBeDeleted>Il pacchetto d'icone {0} e tutte le sue icone verranno cancellati.</SelectedIconPackWillBeDeleted>
+	
 </Strings>
