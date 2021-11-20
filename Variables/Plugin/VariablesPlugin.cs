@@ -52,7 +52,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin
         }
         private void VariableChanged(object sender, EventArgs e)
         {
-            this.variableChangedEvent.Trigger();
+            this.variableChangedEvent.Trigger(sender);
         }
     }
 
@@ -61,8 +61,19 @@ namespace SuchByte.MacroDeck.Variables.Plugin
         public string Name => "Variable changed";
 
         public EventHandler<MacroDeckEventArgs> OnEvent { get; set; }
+        public List<string> ParameterSuggestions { 
+            get 
+            {
+                List<string> variables = new List<string>();
+                foreach (Variable variable in VariableManager.Variables)
+                {
+                    variables.Add(variable.Name);
+                }
+                return variables;
+            } set { }
+        }
 
-        public void Trigger()
+        public void Trigger(object sender)
         {
             if (this.OnEvent != null)
             {
@@ -74,7 +85,8 @@ namespace SuchByte.MacroDeck.Variables.Plugin
                         {
                             MacroDeckEventArgs macroDeckEventArgs = new MacroDeckEventArgs
                             {
-                                ActionButton = actionButton
+                                ActionButton = actionButton,
+                                Parameter = sender,
                             };
                             this.OnEvent(this, macroDeckEventArgs);
                         }

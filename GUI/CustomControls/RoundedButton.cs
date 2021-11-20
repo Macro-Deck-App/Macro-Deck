@@ -86,29 +86,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 {
                     using (Pen penBorder = new Pen(borderColor, borderSize))
                     {
-                        penBorder.Alignment = PenAlignment.Inset;
-                        pe.Graphics.DrawRectangle(penBorder, 0, 0, this.Width - 1, this.Height - 1);
+                        pe.Graphics.DrawRectangle(penBorder, 0, 0, this.Width, this.Height);
                     }
                 }
             }
 
-            /*if (radius > 1)
-            {
-                using (var graphicsPath = GetRoundPath(rect, radius))
-                {
-                    DoubleBuffered = true;
-                    e.Graphics.DrawPath(new Pen(borderColor, 3), graphicsPath);
-                    this.Region = new Region(graphicsPath);
-                    graphicsPath.CloseFigure();
-                }
-            } else
-            {
-                e.Graphics.DrawRectangle(new Pen(Color.Black, 3), rect);
-            }*/
-
-
-
-            Rectangle rect = new Rectangle(0, 0, this.Width - 1, this.Height - 1);
+            Rectangle rect = new Rectangle(0, 0, this.Width, this.Height);
 
             if (this._foregroundImage != null)
             {

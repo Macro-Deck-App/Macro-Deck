@@ -95,7 +95,7 @@ namespace SuchByte.MacroDeck.GUI
             {
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    bool gif = Path.GetExtension(openFileDialog.FileNames[0]) == "gif";
+                    bool gif = (Path.GetExtension(openFileDialog.FileNames[0]) == "gif");
                     using (var iconImportQuality = new IconImportQuality(gif))
                     {
                         if (iconImportQuality.ShowDialog() == DialogResult.OK)
@@ -133,6 +133,7 @@ namespace SuchByte.MacroDeck.GUI
                                             using (var ms = new MemoryStream(imageBytes))
                                             {
                                                 icons.Add(Image.FromStream(ms));
+
                                             }
                                         }
                                     }
@@ -144,11 +145,11 @@ namespace SuchByte.MacroDeck.GUI
                             foreach (Image icon in icons)
                             {
                                 IconManager.AddIconImage(iconPack, icon);
-                                using (var msgBox = new CustomControls.MessageBox())
+                                if (icon.RawFormat.ToString().ToLower() == "gif")
                                 {
-                                    if (msgBox.ShowDialog(Language.LanguageManager.Strings.AnimatedGifImported, Language.LanguageManager.Strings.GenerateStaticIcon, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                                    using (var msgBox = new CustomControls.MessageBox())
                                     {
-                                        if (icon.RawFormat.ToString().ToLower() == "gif")
+                                        if (msgBox.ShowDialog(Language.LanguageManager.Strings.AnimatedGifImported, Language.LanguageManager.Strings.GenerateStaticIcon, MessageBoxButtons.YesNo) == DialogResult.Yes)
                                         {
                                             Debug.WriteLine("Converting gif to static image");
                                             MemoryStream ms = new MemoryStream();
@@ -158,7 +159,6 @@ namespace SuchByte.MacroDeck.GUI
                                             Image iconStatic = Image.FromStream(ms);
                                             icon.Dispose();
                                             ms.Close();
-
                                             Debug.WriteLine("Adding converted image to " + iconPack.Name);
                                             IconManager.AddIconImage(iconPack, iconStatic);
                                         }
@@ -166,7 +166,7 @@ namespace SuchByte.MacroDeck.GUI
                                 }
                                 icon.Dispose();
                             }
-                            
+
                             this.LoadIcons(iconPack);
                             Cursor.Current = Cursors.Default;
                         }

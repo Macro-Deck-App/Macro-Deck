@@ -277,7 +277,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 this.valueToCompare.SetAutoCompleteSource(AutoCompleteSource.CustomSource);
                 this.valueToCompare.Items.AddRange(this.stateSuggestions);
             }
-            
         }
 
         private void MethodBox_SelectedIndexChanged(object sender, EventArgs e)

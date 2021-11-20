@@ -66,7 +66,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblValue
             // 
             this.lblValue.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblValue.Location = new System.Drawing.Point(1, 37);
+            this.lblValue.Location = new System.Drawing.Point(542, 38);
             this.lblValue.Name = "lblValue";
             this.lblValue.Size = new System.Drawing.Size(258, 50);
             this.lblValue.TabIndex = 14;
