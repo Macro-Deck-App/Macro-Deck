@@ -51,6 +51,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.btnAdd = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.actionsList = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.eventParameter = new SuchByte.MacroDeck.GUI.CustomControls.RoundedComboBox();
             this.panelEdit.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.btnRemove)).BeginInit();
             this.addItemContextMenu.SuspendLayout();
@@ -71,7 +72,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.eventBox.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
             this.eventBox.SelectedIndex = -1;
             this.eventBox.SelectedItem = null;
-            this.eventBox.Size = new System.Drawing.Size(444, 28);
+            this.eventBox.Size = new System.Drawing.Size(309, 28);
             this.eventBox.TabIndex = 7;
             this.eventBox.SelectedIndexChanged += new System.EventHandler(this.EventBox_SelectedIndexChanged);
             // 
@@ -192,6 +193,22 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.flowLayoutPanel1.Size = new System.Drawing.Size(840, 43);
             this.flowLayoutPanel1.TabIndex = 13;
             // 
+            // eventParameter
+            // 
+            this.eventParameter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.eventParameter.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.eventParameter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.eventParameter.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.eventParameter.Icon = null;
+            this.eventParameter.Location = new System.Drawing.Point(427, 2);
+            this.eventParameter.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.eventParameter.Name = "eventParameter";
+            this.eventParameter.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
+            this.eventParameter.SelectedIndex = -1;
+            this.eventParameter.SelectedItem = null;
+            this.eventParameter.Size = new System.Drawing.Size(309, 28);
+            this.eventParameter.TabIndex = 14;
+            // 
             // EventItem
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
@@ -199,6 +216,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(32)))), ((int)(((byte)(32)))));
+            this.Controls.Add(this.eventParameter);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.panelEdit);
             this.Controls.Add(this.eventBox);
@@ -231,9 +249,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
         private System.Windows.Forms.ContextMenuStrip addItemContextMenu;
         private System.Windows.Forms.ToolStripMenuItem menuItemAction;
         private System.Windows.Forms.ToolStripMenuItem menuItemCondition;
+        private System.Windows.Forms.ToolStripMenuItem menuItemDelay;
         private PictureButton btnAdd;
         private System.Windows.Forms.FlowLayoutPanel actionsList;
-        private System.Windows.Forms.ToolStripMenuItem menuItemDelay;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private RoundedComboBox eventParameter;
     }
 }

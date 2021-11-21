@@ -300,10 +300,7 @@ namespace SuchByte.MacroDeck.GUI
                         this.btnPreview.ForegroundImage = null;
                     }
                 }
-                if (this.btnPreview.BackgroundImage != null && this.btnPreview.BackgroundImage.RawFormat.ToString().ToLower() == "gif")
-                {
-                    this.btnPreview.ShowGIFIndicator = true;
-                }
+                this.btnPreview.ShowGIFIndicator = this.btnPreview.BackgroundImage != null && this.btnPreview.BackgroundImage.RawFormat.ToString().ToLower() == "gif";
             }
             catch (Exception ex) { Debug.WriteLine(ex.Message); }
             GC.Collect();
@@ -314,7 +311,7 @@ namespace SuchByte.MacroDeck.GUI
         private void Apply()
         {
             this.actionButton = this.actionButtonEdited;
-            this.actionButton.EventActions = new Dictionary<string, List<PluginAction>>();
+            this.actionButton.EventListeners = new List<EventListener>();
 
             foreach (PluginAction pluginAction in this.actionButton.Actions)
             {
@@ -324,29 +321,20 @@ namespace SuchByte.MacroDeck.GUI
             foreach (EventItem eventItem in this.eventSelector.EventItems())
             {
                 if (eventItem == null) continue;
-                foreach (PluginAction pluginAction in eventItem.Actions)
+                foreach (PluginAction pluginAction in eventItem.EventListener.Actions)
                 {
                     pluginAction.SetActionButton(this.actionButton);
                 }
-                if (this.actionButton.EventActions.ContainsKey(eventItem.MacroDeckEvent.Name))
-                {
-                    this.actionButton.EventActions[eventItem.MacroDeckEvent.Name].AddRange(eventItem.Actions);
-                }
-                else
-                {
-                    this.actionButton.EventActions[eventItem.MacroDeckEvent.Name] = eventItem.Actions;
-                }
+                this.actionButton.EventListeners.Add(eventItem.EventListener);
             }
-
-            
 
             foreach (ActionButton.ActionButton actionButton in this.folder.ActionButtons.FindAll(actionButton => actionButton.Position_Y == this.actionButton.Position_Y && actionButton.Position_X == this.actionButton.Position_X).ToArray())
             {
-                ProfileManager.RemoveEventHandler(actionButton);
+                //ProfileManager.RemoveEventHandler(actionButton);
                 this.folder.ActionButtons.Remove(actionButton);
             }
             this.folder.ActionButtons.Add(this.actionButton);
-            ProfileManager.AddEventHandler(this.actionButton);
+            //ProfileManager.AddEventHandler(this.actionButton);
             ProfileManager.Save();
             MacroDeckServer.UpdateFolder(this.folder);
             ProfileManager.UpdateVariableLabels(this.actionButton);
@@ -401,7 +389,7 @@ namespace SuchByte.MacroDeck.GUI
             {
                 Actions = this.actionButton.Actions,
                 ButtonId = this.actionButton.ButtonId,
-                EventActions = this.actionButton.EventActions,
+                EventListeners = this.actionButton.EventListeners,
                 IconOff = this.actionButton.IconOff,
                 IconOn = this.actionButton.IconOn,
                 LabelOff = this.actionButton.LabelOff,
@@ -541,5 +529,9 @@ namespace SuchByte.MacroDeck.GUI
             this.selectorPanel.Controls.Add(control);
         }
 
+        private void labelText_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

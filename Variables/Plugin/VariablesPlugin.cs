@@ -61,7 +61,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin
         public string Name => "Variable changed";
 
         public EventHandler<MacroDeckEventArgs> OnEvent { get; set; }
-        public List<string> ParameterSuggestions { 
+        public List<string> ParameterSuggestions {
             get 
             {
                 List<string> variables = new List<string>();
@@ -81,12 +81,12 @@ namespace SuchByte.MacroDeck.Variables.Plugin
                 {
                     foreach (MacroDeckFolder folder in macroDeckProfile.Folders)
                     {
-                        foreach (ActionButton.ActionButton actionButton in folder.ActionButtons.FindAll(actionButton => actionButton.EventActions != null && actionButton.EventActions.ContainsKey(this.Name)))
+                        foreach (ActionButton.ActionButton actionButton in folder.ActionButtons.FindAll(actionButton => actionButton.EventListeners != null && actionButton.EventListeners.Find(x => x.EventToListen.Equals(this.Name)) != null))
                         {
                             MacroDeckEventArgs macroDeckEventArgs = new MacroDeckEventArgs
                             {
                                 ActionButton = actionButton,
-                                Parameter = sender,
+                                Parameter = ((Variable)sender).Name,
                             };
                             this.OnEvent(this, macroDeckEventArgs);
                         }

@@ -154,6 +154,7 @@ namespace SuchByte.MacroDeck.GUI
             this.labelText.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.labelText.Icon = null;
             this.labelText.Location = new System.Drawing.Point(13, 217);
+            this.labelText.MaxCharacters = 32767;
             this.labelText.Multiline = true;
             this.labelText.Name = "labelText";
             this.labelText.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
@@ -166,6 +167,7 @@ namespace SuchByte.MacroDeck.GUI
             this.labelText.TabIndex = 23;
             this.labelText.TabStop = false;
             this.labelText.TextAlignment = System.Windows.Forms.HorizontalAlignment.Center;
+            this.labelText.Load += new System.EventHandler(this.labelText_Load);
             this.labelText.TextChanged += new System.EventHandler(this.LabelChanged);
             // 
             // fontSize
@@ -608,6 +610,7 @@ namespace SuchByte.MacroDeck.GUI
             this.flowLayoutPanel1.PerformLayout();
             this.groupButtonState.ResumeLayout(false);
             this.ResumeLayout(false);
+
         }
 
         #endregion

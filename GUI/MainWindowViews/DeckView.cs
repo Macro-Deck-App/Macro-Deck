@@ -1,4 +1,5 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
+﻿using SuchByte.MacroDeck.Events;
+using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Plugins;
@@ -363,9 +364,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     {
                         pluginAction.SetActionButton(newTargetButton);
                     }
-                    foreach (var eventActionList in newTargetButton.EventActions.Values)
+                    foreach (var eventListener in newTargetButton.EventListeners)
                     {
-                        foreach (PluginAction pluginAction in eventActionList)
+                        foreach (PluginAction pluginAction in eventListener.Actions)
                         {
                             pluginAction.SetActionButton(newTargetButton);
                         }
@@ -462,7 +463,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 actionButton = new ActionButton.ActionButton
                 {
                     Actions = new List<PluginAction>(),
-                    EventActions = new Dictionary<string, List<PluginAction>>(),
+                    EventListeners = new List<EventListener>(),
                     ButtonId = this._currentFolder.ActionButtons.Count,
                     Position_Y = row,
                     Position_X = column,
@@ -619,9 +620,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             {
                 pluginAction.SetActionButton(actionButtonNew);
             }
-            foreach (var eventActionList in actionButtonNew.EventActions.Values)
+            foreach (var eventListener in actionButtonNew.EventListeners)
             {
-                foreach (PluginAction pluginAction in eventActionList)
+                foreach (PluginAction pluginAction in eventListener.Actions)
                 {
                     pluginAction.SetActionButton(actionButtonNew);
                 }

@@ -23,8 +23,6 @@ namespace SuchByte.MacroDeck.ActionButton
         private int BUFFER_SIZE = 1024 * 1024; // 1 MB
         private bool _disposed = false;
 
-        private List<PluginAction> _actions = new List<PluginAction>();
-        private Dictionary<string, List<PluginAction>> _eventActions = new Dictionary<string, List<PluginAction>>();
 
 
 
@@ -36,7 +34,7 @@ namespace SuchByte.MacroDeck.ActionButton
 
         public void UpdateBindingState()
         {
-            if (!this.StateBindingVariable.Equals(""))
+            if (!String.IsNullOrWhiteSpace(this.StateBindingVariable))
             {
                 Variables.Variable variable = Variables.VariableManager.Variables.Find(v => v.Name.Equals(this.StateBindingVariable));
                 if (variable != null)
@@ -62,9 +60,9 @@ namespace SuchByte.MacroDeck.ActionButton
             {
                 pluginAction.OnActionButtonDelete();
             }
-            foreach (var eventActionList in this._eventActions.Values)
+            foreach (var eventListeners in this.EventListeners)
             {
-                foreach (PluginAction pluginAction in eventActionList)
+                foreach (PluginAction pluginAction in eventListeners.Actions)
                 {
                     pluginAction.OnActionButtonDelete();
                 }
@@ -113,6 +111,7 @@ namespace SuchByte.MacroDeck.ActionButton
             get { return _state; }
             set
             {
+                if (_state == value) return;
                 _state = value;
                 MacroDeckServer.UpdateState(this);
                 if (StateChanged != null)
@@ -159,9 +158,7 @@ namespace SuchByte.MacroDeck.ActionButton
         public int Position_Y { get; set; }
         public string StateBindingVariable { get; set; } = "";
         public List<PluginAction> Actions { get; set; }
-        public Dictionary<string, List<PluginAction>> EventActions { get; set; }
-
-
+        public List<EventListener> EventListeners { get; set; }
        
     }
 }

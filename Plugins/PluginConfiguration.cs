@@ -62,7 +62,7 @@ namespace SuchByte.MacroDeck.Plugins
                 if (!_pluginConfigs.ContainsKey(plugin.Author + "." + plugin.Name))
                 {
                     Dictionary<string, string> pluginConfig = LoadPluginConfig(plugin);
-                    if (pluginConfig == null) return value;
+                    if (pluginConfig == null || pluginConfig.Count == 0) return value;
                     _pluginConfigs.Add(plugin.Author + "." + plugin.Name, pluginConfig);
                     value = pluginConfig[key];
                 } else

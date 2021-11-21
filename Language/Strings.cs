@@ -263,5 +263,6 @@ namespace SuchByte.MacroDeck.Language
         public string SelectedIconWillBeDeleted = "The selected icon will be deleted from the icon pack {0}";
         public string SuccessfullyImportedIconPack = "Successfully imported the icon pack {0}";
         public string SelectedIconPackWillBeDeleted = "The selected icon pack {0} with all its icons will be deleted";
+        public string GenerateStatic = "Generate static";
     }
 }

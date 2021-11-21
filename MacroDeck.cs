@@ -318,7 +318,10 @@ namespace SuchByte.MacroDeck
         {
             if (Application.OpenForms.OfType<MainWindow>().Count() > 0)
             {
-                mainWindow.Close();
+                mainWindow.WindowState = FormWindowState.Minimized;
+                mainWindow.Show();
+                mainWindow.WindowState = FormWindowState.Normal;
+                return;
             }
             mainWindow = new MainWindow();
             mainWindow.Load += MainWindowLoadEvent;

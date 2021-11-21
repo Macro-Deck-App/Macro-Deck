@@ -35,6 +35,8 @@ namespace SuchByte.MacroDeck.Profiles
             Variables.VariableManager.OnVariableChanged += VariableChanged;
         }
 
+        
+
         public static void AddWindowFocusChangedListener()
         {
             WindowsFocus.WindowFocusDetection windowsFocusDetection = new WindowsFocus.WindowFocusDetection();
@@ -276,11 +278,11 @@ namespace SuchByte.MacroDeck.Profiles
 
             foreach (ActionButton.ActionButton actionButton in folder.ActionButtons)
             {
-                foreach (string macroDeckEventString in actionButton.EventActions.Keys)
+                foreach (var eventListener in actionButton.EventListeners)
                 {
-                    IMacroDeckEvent macroDeckEvent = EventManager.GetEventByName(macroDeckEventString);
-                    if (macroDeckEvent == null) continue;
-                    macroDeckEvent.OnEvent -= OnActionButtonEventTrigger;
+                    IMacroDeckEvent macroDeckEvent = EventManager.GetEventByName(eventListener.EventToListen);
+                   /* if (macroDeckEvent == null) continue;
+                    macroDeckEvent.OnEvent -= OnActionButtonEventTrigger;*/
                 }
             }
 
@@ -372,35 +374,36 @@ namespace SuchByte.MacroDeck.Profiles
 
         public static void AddAllEventHandlers()
         {
-            foreach (MacroDeckProfile macroDeckProfile in _profiles)
+            /*foreach (MacroDeckProfile macroDeckProfile in _profiles)
             {
                 foreach (MacroDeckFolder folder in macroDeckProfile.Folders)
                 {
-                    foreach (ActionButton.ActionButton actionButton in folder.ActionButtons.FindAll(actionButton => actionButton.EventActions != null))
+                    foreach (ActionButton.ActionButton actionButton in folder.ActionButtons.FindAll(actionButton => actionButton.EventListeners != null))
                     {
                         AddEventHandler(actionButton);
                     }
                 }
-            }
+            }*/
+            
         }
 
         public static void RemoveEventHandlers(MacroDeckProfile macroDeckProfile)
         {
-            foreach (MacroDeckFolder folder in macroDeckProfile.Folders)
+            /*foreach (MacroDeckFolder folder in macroDeckProfile.Folders)
             {
-                foreach (ActionButton.ActionButton actionButton in folder.ActionButtons.FindAll(actionButton => actionButton.EventActions != null))
+                foreach (ActionButton.ActionButton actionButton in folder.ActionButtons.FindAll(actionButton => actionButton.EventListeners != null))
                 {
                     RemoveEventHandler(actionButton);
                 }
-            }
+            }*/
         }
 
-        public static void AddEventHandler(ActionButton.ActionButton actionButton)
+    /*    public static void AddEventHandler(ActionButton.ActionButton actionButton)
         {
-            if (actionButton.EventActions == null) return;
-            foreach (string macroDeckEventString in actionButton.EventActions.Keys)
+            if (actionButton.EventListeners == null) return;
+            foreach (var eventListener in actionButton.EventListeners)
             {
-                IMacroDeckEvent macroDeckEvent = EventManager.GetEventByName(macroDeckEventString);
+                IMacroDeckEvent macroDeckEvent = EventManager.GetEventByName(eventListener.EventToListen);
                 if (macroDeckEvent == null) continue;
                 macroDeckEvent.OnEvent += new EventHandler<MacroDeckEventArgs>(OnActionButtonEventTrigger);
             }
@@ -408,10 +411,10 @@ namespace SuchByte.MacroDeck.Profiles
 
         public static void RemoveEventHandler(ActionButton.ActionButton actionButton)
         {
-            if (actionButton.EventActions == null) return;
-            foreach (string macroDeckEventString in actionButton.EventActions.Keys)
+            if (actionButton.EventListeners == null) return;
+            foreach (var eventListener in actionButton.EventListeners)
             {
-                IMacroDeckEvent macroDeckEvent = EventManager.GetEventByName(macroDeckEventString);
+                IMacroDeckEvent macroDeckEvent = EventManager.GetEventByName(eventListener.EventToListen);
                 if (macroDeckEvent == null) continue;
                 macroDeckEvent.OnEvent -= OnActionButtonEventTrigger;
             }
@@ -422,13 +425,20 @@ namespace SuchByte.MacroDeck.Profiles
             Task.Run(() =>
             {
                 IMacroDeckEvent macroDeckEvent = (IMacroDeckEvent)sender;
-                if (!e.ActionButton.EventActions.ContainsKey(macroDeckEvent.Name)) return;
-                foreach (PluginAction action in e.ActionButton.EventActions[macroDeckEvent.Name])
+                ActionButton.ActionButton actionButton = e.ActionButton;
+                Debug.WriteLine(sender.ToString());
+                Debug.WriteLine(e.Parameter);
+                
+                foreach (EventListener eventListener in actionButton.EventListeners.FindAll(x => x.EventToListen.Equals(macroDeckEvent.Name) && x.Parameter.ToLower().Equals(e.Parameter.ToString().ToLower())))
                 {
-                    action.Trigger("-1", e.ActionButton);
+                    foreach (PluginAction action in eventListener.Actions)
+                    {
+                        action.Trigger("-1", e.ActionButton);
+                    }
                 }
             });
         }
+    */
 
         public static MacroDeckFolder FindFolderById(long Id, MacroDeckProfile macroDeckProfile)
         {

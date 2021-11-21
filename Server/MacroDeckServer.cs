@@ -435,24 +435,6 @@ namespace SuchByte.MacroDeck.Server
             });
         }
 
-        private static void ButtonDone(MacroDeckClient macroDeckClient, int row, int column)
-        {
-            JObject actionButtonObject = JObject.FromObject(new
-            {
-                Position_Y = row,
-                Position_X = column,
-            });
-            JObject updateObject = JObject.FromObject(new
-            {
-                Method = JsonMethod.BUTTON_DONE.ToString(),
-                Buttons = new List<JObject>
-                {
-                    actionButtonObject
-                },
-            });
-            Send(macroDeckClient.SocketConnection, updateObject);
-        }
-
         /// <summary>
         /// Send icon base 64 to an action button
         /// </summary>
@@ -538,22 +520,6 @@ namespace SuchByte.MacroDeck.Server
                 OnLabelChanged(actionButton, EventArgs.Empty);
             }
         }
-
-        private static void OverrideLabelText(MacroDeckClient macroDeckClient, ActionButton.ActionButton actionButton, string text)
-        {
-            Task.Run(() => {
-                ButtonLabel buttonLabel = actionButton.LabelOff;
-                buttonLabel.LabelText = text;
-                buttonLabel.LabelBase64 = Utils.Base64.GetBase64FromBitmap(Utils.LabelGenerator.GetLabel(new Bitmap(250, 250), text, ButtonLabelPosition.CENTER, new Font(buttonLabel.FontFamily, buttonLabel.Size), buttonLabel.LabelColor, Color.Black, new SizeF(2.0f, 2.0f)));
-                actionButton.LabelOn = actionButton.LabelOff;
-                SendButton(macroDeckClient, actionButton);
-                if (OnLabelChanged != null)
-                {
-                    OnLabelChanged(actionButton, EventArgs.Empty);
-                }
-            });
-        }
-
 
 
         public static void SendAllIcons(MacroDeckClient macroDeckClient = null)
@@ -685,7 +651,6 @@ namespace SuchByte.MacroDeck.Server
         public static void SetState(ActionButton.ActionButton actionButton, bool state)
         {
             actionButton.State = state;
-            UpdateState(actionButton);
         }
 
         public static void UpdateState(ActionButton.ActionButton actionButton)

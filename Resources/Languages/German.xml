@@ -244,4 +244,5 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
 	<SelectedIconWillBeDeleted>Das gewählte Icon wird aus {0} gelöscht</SelectedIconWillBeDeleted>
 	<SuccessfullyImportedIconPack>{0} erfolgreich importiert</SuccessfullyImportedIconPack>
 	<SelectedIconPackWillBeDeleted>{0} mit allen Icons wird gelöscht</SelectedIconPackWillBeDeleted>
+	<GenerateStatic>Statisches generieren</GenerateStatic>
 </Strings>

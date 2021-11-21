@@ -8,14 +8,14 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>appicon.ico</ApplicationIcon>
     <StartupObject>SuchByte.MacroDeck.MacroDeck</StartupObject>
-    <Version>2.3.3-beta</Version>
+    <Version>2.4.0-dev</Version>
     <Company>Macro Deck</Company>
     <Authors>Manuel Mayer</Authors>
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>SuchByte.pfx</AssemblyOriginatorKeyFile>
     <Product>Macro Deck</Product>
     <AssemblyVersion>2.21.3110.100</AssemblyVersion>
-    <FileVersion>2.3.3.0</FileVersion>
+    <FileVersion>2.4.0.0</FileVersion>
     <AssemblyName>Macro Deck 2</AssemblyName>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/SuchByte/Macro-Deck</PackageProjectUrl>

@@ -52,6 +52,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnGiphy = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.panelCreateIcon = new System.Windows.Forms.FlowLayoutPanel();
             this.lblManaged = new System.Windows.Forms.Label();
+            this.btnGenerateStatic = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             ((System.ComponentModel.ISupportInitialize)(this.btnPreview)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnCreateIconPack)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnDeleteIconPack)).BeginInit();
@@ -76,7 +77,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnImport.ForeColor = System.Drawing.Color.White;
             this.btnImport.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
             this.btnImport.Icon = null;
-            this.btnImport.Location = new System.Drawing.Point(124, 3);
+            this.btnImport.Location = new System.Drawing.Point(3, 3);
             this.btnImport.Name = "btnImport";
             this.btnImport.Progress = 0;
             this.btnImport.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
@@ -124,6 +125,7 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // iconPacksBox
             // 
+            this.iconPacksBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.iconPacksBox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.iconPacksBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.iconPacksBox.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -254,7 +256,7 @@ namespace SuchByte.MacroDeck.GUI
             // 
             this.lblType.Location = new System.Drawing.Point(214, 504);
             this.lblType.Name = "lblType";
-            this.lblType.Size = new System.Drawing.Size(235, 15);
+            this.lblType.Size = new System.Drawing.Size(46, 16);
             this.lblType.TabIndex = 17;
             this.lblType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -277,7 +279,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnCreateIcon.ForeColor = System.Drawing.Color.White;
             this.btnCreateIcon.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
             this.btnCreateIcon.Icon = null;
-            this.btnCreateIcon.Location = new System.Drawing.Point(3, 3);
+            this.btnCreateIcon.Location = new System.Drawing.Point(124, 3);
             this.btnCreateIcon.Name = "btnCreateIcon";
             this.btnCreateIcon.Progress = 0;
             this.btnCreateIcon.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
@@ -311,8 +313,8 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // panelCreateIcon
             // 
-            this.panelCreateIcon.Controls.Add(this.btnCreateIcon);
             this.panelCreateIcon.Controls.Add(this.btnImport);
+            this.panelCreateIcon.Controls.Add(this.btnCreateIcon);
             this.panelCreateIcon.Controls.Add(this.btnGiphy);
             this.panelCreateIcon.Controls.Add(this.lblManaged);
             this.panelCreateIcon.Location = new System.Drawing.Point(168, 443);
@@ -330,6 +332,27 @@ namespace SuchByte.MacroDeck.GUI
             this.lblManaged.Text = "This icon pack is managed by the plugin manager";
             this.lblManaged.Visible = false;
             // 
+            // btnGenerateStatic
+            // 
+            this.btnGenerateStatic.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
+            this.btnGenerateStatic.BorderRadius = 8;
+            this.btnGenerateStatic.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnGenerateStatic.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnGenerateStatic.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnGenerateStatic.ForeColor = System.Drawing.Color.White;
+            this.btnGenerateStatic.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnGenerateStatic.Icon = null;
+            this.btnGenerateStatic.Location = new System.Drawing.Point(266, 500);
+            this.btnGenerateStatic.Name = "btnGenerateStatic";
+            this.btnGenerateStatic.Progress = 0;
+            this.btnGenerateStatic.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
+            this.btnGenerateStatic.Size = new System.Drawing.Size(145, 25);
+            this.btnGenerateStatic.TabIndex = 22;
+            this.btnGenerateStatic.Text = "Generate static";
+            this.btnGenerateStatic.UseVisualStyleBackColor = true;
+            this.btnGenerateStatic.Visible = false;
+            this.btnGenerateStatic.Click += new System.EventHandler(this.BtnGenerateStatic_Click);
+            // 
             // IconSelector
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
@@ -339,6 +362,7 @@ namespace SuchByte.MacroDeck.GUI
             this.Controls.Add(this.panelCreateIcon);
             this.Controls.Add(this.lblType);
             this.Controls.Add(this.lblTypeLabel);
+            this.Controls.Add(this.btnGenerateStatic);
             this.Controls.Add(this.lblSize);
             this.Controls.Add(this.lblSizeLabel);
             this.Controls.Add(this.btnDeleteIcon);
@@ -366,6 +390,7 @@ namespace SuchByte.MacroDeck.GUI
             this.Controls.SetChildIndex(this.btnDeleteIcon, 0);
             this.Controls.SetChildIndex(this.lblSizeLabel, 0);
             this.Controls.SetChildIndex(this.lblSize, 0);
+            this.Controls.SetChildIndex(this.btnGenerateStatic, 0);
             this.Controls.SetChildIndex(this.lblTypeLabel, 0);
             this.Controls.SetChildIndex(this.lblType, 0);
             this.Controls.SetChildIndex(this.panelCreateIcon, 0);
@@ -400,5 +425,6 @@ namespace SuchByte.MacroDeck.GUI
         private ButtonPrimary btnGiphy;
         private System.Windows.Forms.FlowLayoutPanel panelCreateIcon;
         private System.Windows.Forms.Label lblManaged;
+        private ButtonPrimary btnGenerateStatic;
     }
 }
