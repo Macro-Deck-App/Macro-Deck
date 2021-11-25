@@ -53,7 +53,7 @@ public class Main : MacroDeckPlugin
   // Gets called when the plugin is loaded
   public override void Enable()
   {
-    this.Actions = new List<IMacroDeckAction>{
+    this.Actions = new List<PluginAction>{
       // add the instances of your actions here
       new ExampleAction(),
     };
