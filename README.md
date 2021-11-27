@@ -217,7 +217,7 @@ Macro Deck uses some awesome 3rd party libraries:
 - [RestSharp (Apache-2.0)](https://restsharp.dev/)
 - [SQLiteNetExtensions (MIT license)](https://bitbucket.org/twincoders/sqlite-net-extensions/src/master/)
 - [sqlite-net-pcl (MIT license)](https://github.com/praeclarum/sqlite-net)
-- [Cottle] (MIT license)](https://github.com/r3c/cottle)
+- [Cottle (MIT license)](https://github.com/r3c/cottle)
 
 Macro Deck also uses free icons from:
 - [Material Design Icons](https://materialdesignicons.com/)
