@@ -141,7 +141,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private void LoadVariables()
         {
             this.variablesPanel.Controls.Clear();
-            foreach (Variable variable in VariableManager.Variables)
+            foreach (Variable variable in VariableManager.Variables.ToArray())
             {
                 VariableItem variableItem = new VariableItem(variable);
                 this.variablesPanel.Controls.Add(variableItem);

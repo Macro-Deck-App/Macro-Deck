@@ -25,7 +25,7 @@ namespace SuchByte.MacroDeck
     {
         internal static readonly string VersionString = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
         public static readonly int ApiVersion = 20;
-        public static readonly int PluginApiVersion = 28;
+        public static readonly int PluginApiVersion = 29;
 
         internal static bool ForceUpdate = false;
         internal static bool TestUpdateChannel = false;

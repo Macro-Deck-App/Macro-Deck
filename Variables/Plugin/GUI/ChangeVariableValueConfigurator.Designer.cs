@@ -38,13 +38,14 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.variables = new SuchByte.MacroDeck.GUI.CustomControls.RoundedComboBox();
             this.value = new SuchByte.MacroDeck.GUI.CustomControls.RoundedTextBox();
             this.lblVariable = new System.Windows.Forms.Label();
+            this.lblOnlyUserCreatedVariablesVisible = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // radioToggle
             // 
             this.radioToggle.Cursor = System.Windows.Forms.Cursors.Hand;
             this.radioToggle.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.radioToggle.Location = new System.Drawing.Point(247, 209);
+            this.radioToggle.Location = new System.Drawing.Point(247, 210);
             this.radioToggle.Name = "radioToggle";
             this.radioToggle.Size = new System.Drawing.Size(220, 27);
             this.radioToggle.TabIndex = 3;
@@ -58,7 +59,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             // 
             this.radioSet.Cursor = System.Windows.Forms.Cursors.Hand;
             this.radioSet.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.radioSet.Location = new System.Drawing.Point(247, 176);
+            this.radioSet.Location = new System.Drawing.Point(247, 177);
             this.radioSet.Name = "radioSet";
             this.radioSet.Size = new System.Drawing.Size(220, 27);
             this.radioSet.TabIndex = 2;
@@ -72,7 +73,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             // 
             this.radioCountDown.Cursor = System.Windows.Forms.Cursors.Hand;
             this.radioCountDown.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.radioCountDown.Location = new System.Drawing.Point(247, 143);
+            this.radioCountDown.Location = new System.Drawing.Point(247, 144);
             this.radioCountDown.Name = "radioCountDown";
             this.radioCountDown.Size = new System.Drawing.Size(220, 27);
             this.radioCountDown.TabIndex = 1;
@@ -86,7 +87,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             // 
             this.radioCountUp.Cursor = System.Windows.Forms.Cursors.Hand;
             this.radioCountUp.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.radioCountUp.Location = new System.Drawing.Point(247, 110);
+            this.radioCountUp.Location = new System.Drawing.Point(247, 111);
             this.radioCountUp.Name = "radioCountUp";
             this.radioCountUp.Size = new System.Drawing.Size(220, 27);
             this.radioCountUp.TabIndex = 0;
@@ -103,7 +104,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.variables.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.variables.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.variables.Icon = null;
-            this.variables.Location = new System.Drawing.Point(183, 61);
+            this.variables.Location = new System.Drawing.Point(183, 48);
             this.variables.Name = "variables";
             this.variables.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
             this.variables.SelectedIndex = -1;
@@ -117,7 +118,8 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.value.Cursor = System.Windows.Forms.Cursors.Hand;
             this.value.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.value.Icon = null;
-            this.value.Location = new System.Drawing.Point(473, 178);
+            this.value.Location = new System.Drawing.Point(473, 179);
+            this.value.MaxCharacters = 32767;
             this.value.Multiline = false;
             this.value.Name = "value";
             this.value.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
@@ -129,22 +131,32 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.value.Size = new System.Drawing.Size(139, 25);
             this.value.TabIndex = 2;
             this.value.TextAlignment = System.Windows.Forms.HorizontalAlignment.Left;
-            this.value.Visible = false;
             // 
             // lblVariable
             // 
             this.lblVariable.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblVariable.Location = new System.Drawing.Point(183, 35);
+            this.lblVariable.Location = new System.Drawing.Point(11, 48);
             this.lblVariable.Name = "lblVariable";
-            this.lblVariable.Size = new System.Drawing.Size(348, 23);
+            this.lblVariable.Size = new System.Drawing.Size(166, 23);
             this.lblVariable.TabIndex = 4;
             this.lblVariable.Text = "Variable";
-            this.lblVariable.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblVariable.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // lblOnlyUserCreatedVariablesVisible
+            // 
+            this.lblOnlyUserCreatedVariablesVisible.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblOnlyUserCreatedVariablesVisible.Location = new System.Drawing.Point(183, 77);
+            this.lblOnlyUserCreatedVariablesVisible.Name = "lblOnlyUserCreatedVariablesVisible";
+            this.lblOnlyUserCreatedVariablesVisible.Size = new System.Drawing.Size(348, 31);
+            this.lblOnlyUserCreatedVariablesVisible.TabIndex = 5;
+            this.lblOnlyUserCreatedVariablesVisible.Text = "Only user-created variables are visible";
+            this.lblOnlyUserCreatedVariablesVisible.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // ChangeVariableValueConfigurator
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 23F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.lblOnlyUserCreatedVariablesVisible);
             this.Controls.Add(this.radioToggle);
             this.Controls.Add(this.radioSet);
             this.Controls.Add(this.lblVariable);
@@ -166,5 +178,6 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
         private RoundedComboBox variables;
         private RoundedTextBox value;
         private System.Windows.Forms.Label lblVariable;
+        private System.Windows.Forms.Label lblOnlyUserCreatedVariablesVisible;
     }
 }

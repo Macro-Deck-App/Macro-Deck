@@ -122,8 +122,7 @@ namespace SuchByte.MacroDeck.GUI
             else if (view.GetType().Equals(typeof(VariablesView)))
             {
                 SelectContentButton(btnVariables);
-            }
-
+            } 
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
@@ -275,5 +274,6 @@ namespace SuchByte.MacroDeck.GUI
             }
             this.SetView(this.VariablesView);
         }
+
     }
 }

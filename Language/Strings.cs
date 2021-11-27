@@ -264,5 +264,8 @@ namespace SuchByte.MacroDeck.Language
         public string SuccessfullyImportedIconPack = "Successfully imported the icon pack {0}";
         public string SelectedIconPackWillBeDeleted = "The selected icon pack {0} with all its icons will be deleted";
         public string GenerateStatic = "Generate static";
+        public string OnlyUserCreatedVariablesVisible = "Only user-created variables are visible";
+        public string MacroDeckUsesCottleTemplateEngine = "Macro Deck uses the Cottle template engine. Click here for more information.";
+        public string Result = "Result";
     }
 }

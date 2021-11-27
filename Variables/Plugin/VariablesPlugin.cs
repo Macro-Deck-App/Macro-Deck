@@ -46,8 +46,8 @@ namespace SuchByte.MacroDeck.Variables.Plugin
         {
             Task.Run(() =>
             {
-                VariableManager.SetValue("Time", DateTime.Now.ToString("t"), VariableType.String, "Macro Deck", false);
-                VariableManager.SetValue("Date", DateTime.Now.ToString("d"), VariableType.String, "Macro Deck", false);
+                VariableManager.SetValue("time", DateTime.Now.ToString("t"), VariableType.String, "Macro Deck", false);
+                VariableManager.SetValue("date", DateTime.Now.ToString("d"), VariableType.String, "Macro Deck", false);
             });
         }
         private void VariableChanged(object sender, EventArgs e)

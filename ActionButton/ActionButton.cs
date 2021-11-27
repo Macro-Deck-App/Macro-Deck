@@ -19,11 +19,10 @@ namespace SuchByte.MacroDeck.ActionButton
 {
     public class ActionButton : IDisposable
     {
+
         private IntPtr _bufferPtr;
-        private int BUFFER_SIZE = 1024 * 1024; // 1 MB
+        private int BUFFER_SIZE = 1024 * 1024;
         private bool _disposed = false;
-
-
 
 
         public ActionButton()
@@ -56,18 +55,24 @@ namespace SuchByte.MacroDeck.ActionButton
             }
 
             Variables.VariableManager.OnVariableChanged -= VariableChanged;
-            foreach (PluginAction pluginAction in this.Actions)
+            if (this.Actions != null)
             {
-                pluginAction.OnActionButtonDelete();
-            }
-            foreach (var eventListeners in this.EventListeners)
-            {
-                foreach (PluginAction pluginAction in eventListeners.Actions)
+                foreach (PluginAction pluginAction in this.Actions)
                 {
                     pluginAction.OnActionButtonDelete();
                 }
             }
-            // Free any unmanaged objects here.
+            if (this.EventListeners != null)
+            {
+                foreach (var eventListeners in this.EventListeners)
+                {
+                    foreach (PluginAction pluginAction in eventListeners.Actions)
+                    {
+                        pluginAction.OnActionButtonDelete();
+                    }
+                }
+            }
+
             Marshal.FreeHGlobal(_bufferPtr);
             _disposed = true;
         }

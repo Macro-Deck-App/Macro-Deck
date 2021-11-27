@@ -30,8 +30,12 @@ namespace SuchByte.MacroDeck.Plugins
         static string _manifestFileName = "Plugin.xml";
         static string _deleteMarkerFileName = ".delete";
 
+        static bool _loaded = false;
+
         public static void Load()
         {
+            if (_loaded) return;
+            _loaded = true;
             Plugins.Clear();
             PluginsUpdateAvailable.Clear();
             PluginsNotLoaded.Clear();

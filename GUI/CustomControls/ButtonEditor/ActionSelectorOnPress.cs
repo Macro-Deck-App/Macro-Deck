@@ -33,6 +33,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
                 ConditionItem conditionItem = new ConditionItem(action);
                 this.actionsOnPress.Controls.Add(conditionItem);
                 conditionItem.OnRemoveClick += this.RemoveClicked;
+                conditionItem.OnMoveUpClick += this.MoveUpClicked;
+                conditionItem.OnMoveDownClick += this.MoveDownClicked;
             }
             else if (action.GetType() == typeof(DelayAction))
             {

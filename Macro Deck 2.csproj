@@ -8,14 +8,14 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>appicon.ico</ApplicationIcon>
     <StartupObject>SuchByte.MacroDeck.MacroDeck</StartupObject>
-    <Version>2.4.0-dev</Version>
+    <Version>2.5.0-dev</Version>
     <Company>Macro Deck</Company>
     <Authors>Manuel Mayer</Authors>
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>SuchByte.pfx</AssemblyOriginatorKeyFile>
     <Product>Macro Deck</Product>
     <AssemblyVersion>2.21.3110.100</AssemblyVersion>
-    <FileVersion>2.4.0.0</FileVersion>
+    <FileVersion>2.5.0.0</FileVersion>
     <AssemblyName>Macro Deck 2</AssemblyName>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/SuchByte/Macro-Deck</PackageProjectUrl>
@@ -55,8 +55,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Licenses.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <EmbeddedResource Include="Resources\Licenses.xml">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Languages\English.xml" />
     <EmbeddedResource Include="Resources\Languages\Finnish.xml" />
@@ -69,6 +69,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Cottle" Version="2.0.4" />
     <PackageReference Include="Fleck" Version="1.2.0" />
     <PackageReference Include="GiphyDotNet" Version="2.0.0" />
     <PackageReference Include="Magick.NET-Q16-x64" Version="8.3.1" />

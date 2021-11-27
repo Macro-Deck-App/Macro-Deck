@@ -67,7 +67,7 @@ namespace SuchByte.MacroDeck.WindowsFocus
                             {
                                 this.OnWindowFocusChanged(this._focusedApplication, EventArgs.Empty);
                             }
-                            Variables.VariableManager.SetValue("Focused application", process.ProcessName, Variables.VariableType.String, "Macro Deck", false);
+                            Variables.VariableManager.SetValue("focused_application", process.ProcessName, Variables.VariableType.String, "Macro Deck", false);
                         }
                     }
                 }

@@ -245,4 +245,7 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
 	<SuccessfullyImportedIconPack>{0} erfolgreich importiert</SuccessfullyImportedIconPack>
 	<SelectedIconPackWillBeDeleted>{0} mit allen Icons wird gelöscht</SelectedIconPackWillBeDeleted>
 	<GenerateStatic>Statisches generieren</GenerateStatic>
+	<OnlyUserCreatedVariablesVisible>Nur vom Nutzer erstellte Variablen sind sichtbar</OnlyUserCreatedVariablesVisible>
+	<MacroDeckUsesCottleTemplateEngine>Macro Deck nutzt die Cottle Template Engine. Hier klicken für mehr Informationen.</MacroDeckUsesCottleTemplateEngine>
+	<Result>Ergebnis</Result>
 </Strings>

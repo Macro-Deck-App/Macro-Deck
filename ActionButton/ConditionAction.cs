@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Variables;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -93,28 +94,38 @@ namespace SuchByte.MacroDeck.ActionButton
 
         public override void Trigger(string clientId, ActionButton actionButton) {
             bool result = false;
+            string conditionValue2 = this.ConditionValue2.ToString();
             Variables.Variable variable = Variables.VariableManager.Variables.Find(v => v.Name.Equals(this._conditionValue1Source));
+
+            foreach (Variables.Variable v in Variables.VariableManager.Variables)
+            {
+                if (conditionValue2.ToLower().Contains("{" + v.Name.ToLower() + "}"))
+                {
+                    conditionValue2 = conditionValue2.Replace("{" + v.Name + "}", v.Value.ToString(), StringComparison.OrdinalIgnoreCase);
+                }
+            }
+
             switch (this._conditionType)
             {
                 case ConditionType.Variable:
                     switch (this._conditionMethod)
                     {
                         case ConditionMethod.Equals:
-                            result = !(variable == null || !variable.Value.ToLower().Equals(this.ConditionValue2.ToLower()));
+                            result = !(variable == null || !variable.Value.ToLower().Equals(conditionValue2.ToLower()));
                             break;
                         case ConditionMethod.Not:
-                            result = (variable == null || !variable.Value.ToLower().Equals(this.ConditionValue2.ToLower()));
+                            result = (variable == null || !variable.Value.ToLower().Equals(conditionValue2.ToLower()));
                             break;
                         case ConditionMethod.Bigger:
                             if (variable != null && !((Variables.VariableType)Enum.Parse(typeof(Variables.VariableType), variable.Type) != Variables.VariableType.Integer && (Variables.VariableType)Enum.Parse(typeof(Variables.VariableType), variable.Type) != Variables.VariableType.Float))
                             {
-                                result = (float.Parse(variable.Value) > float.Parse(this._conditionValue2));
+                                result = (float.Parse(variable.Value) > float.Parse(conditionValue2));
                             }
                             break;
                         case ConditionMethod.Smaller:
                             if (variable != null && !((Variables.VariableType)Enum.Parse(typeof(Variables.VariableType), variable.Type) != Variables.VariableType.Integer && (Variables.VariableType)Enum.Parse(typeof(Variables.VariableType), variable.Type) != Variables.VariableType.Float))
                             {
-                                result = (float.Parse(variable.Value) < float.Parse(this._conditionValue2));
+                                result = (float.Parse(variable.Value) < float.Parse(conditionValue2));
                             }
                             break;
                     }
@@ -124,19 +135,25 @@ namespace SuchByte.MacroDeck.ActionButton
                     switch (this._conditionMethod)
                     {
                         case ConditionMethod.Equals:
-                            if (this.ConditionValue2.ToLower().Equals("on") || this.ConditionValue2.ToLower().Equals("true"))
+                            if (conditionValue2.ToLower().Equals("on") || conditionValue2.ToLower().Equals("true"))
                             {
                                 value2 = true;
                             }
                             result = value2.Equals(actionButton.State);
                             break;
                         case ConditionMethod.Not:
-                            if (this.ConditionValue2.ToLower().Equals("on") || this.ConditionValue2.ToLower().Equals("true"))
+                            if (conditionValue2.ToLower().Equals("on") || conditionValue2.ToLower().Equals("true"))
                             {
                                 value2 = true;
                             }
                             result = !value2.Equals(actionButton.State);
                             break;
+                    }
+                    break;
+                case ConditionType.Template:
+                    if (bool.TryParse(VariableManager.RenderTemplate(_conditionValue1Source), out bool boolResult))
+                    {
+                        result = boolResult;
                     }
                     break;
             }
@@ -160,6 +177,7 @@ namespace SuchByte.MacroDeck.ActionButton
     {
         Variable,
         Button_State,
+        Template,
     }
 
     public enum ConditionMethod

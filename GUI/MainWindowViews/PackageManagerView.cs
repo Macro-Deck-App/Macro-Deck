@@ -52,7 +52,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             if (PluginManager.PluginsUpdateAvailable.Count + IconManager.IconPacksUpdateAvailable.Count > 0)
             {
                 this.radioOnlyUpdates.Checked = true;
-            } else
+            }
+            else
             {
                 Task.Run(() =>
                 {
@@ -88,7 +89,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     this.Invoke(new Action(() =>
                         packageManagerItem.Dispose()
                     ));
-                } else if (control.GetType() == typeof(PackageManagerIconPackItem))
+                }
+                else if (control.GetType() == typeof(PackageManagerIconPackItem))
                 {
                     PackageManagerIconPackItem packageManagerItem = control as PackageManagerIconPackItem;
                     this.Invoke(new Action(() =>
@@ -116,7 +118,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                             var jsonString = wc.DownloadString("https://macrodeck.org/files/packagemanager/plugins.php?target-api=" + MacroDeck.PluginApiVersion);
 
                             JArray jsonArray = JArray.Parse(jsonString);
-                            
+
                             foreach (JObject jsonObject in jsonArray)
                             {
                                 PackageManagerPluginItem packageManagerItem = new PackageManagerPluginItem(jsonObject);
@@ -129,7 +131,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                                 }
                             }
                         }
-                    } else
+                    }
+                    else
                     {
                         foreach (MacroDeckPlugin macroDeckPlugin in PluginManager.Plugins.Values)
                         {
@@ -177,7 +180,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                                 }
                             }
                         }
-                    } else
+                    }
+                    else
                     {
                         foreach (IconPack iconPack in IconManager.IconPacks.FindAll(iP => iP.PackageManagerManaged && !iP.Hidden))
                         {
@@ -230,7 +234,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 {
                     this.LoadAvailablePlugins();
                 });
-            } catch { }
+            }
+            catch { }
         }
 
         private void SearchBox_TextChanged(object sender, EventArgs e)
@@ -243,14 +248,16 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     {
                         PackageManagerPluginItem plugin = control as PackageManagerPluginItem;
                         plugin.Visible = StringSearch.StringContains(plugin.JsonObject["category"].ToString() + plugin.JsonObject["name"].ToString() + plugin.JsonObject["description"].ToString(), searchBox.Text);
-                    } else if (control.GetType() == typeof(PackageManagerIconPackItem))
+                    }
+                    else if (control.GetType() == typeof(PackageManagerIconPackItem))
                     {
                         PackageManagerIconPackItem iconPack = control as PackageManagerIconPackItem;
                         iconPack.Visible = StringSearch.StringContains(iconPack.JsonObject["name"].ToString() + iconPack.JsonObject["description"].ToString(), searchBox.Text);
                     }
 
                 }
-            } else
+            }
+            else
             {
                 foreach (Control control in panelAvailablePlugins.Controls)
                 {

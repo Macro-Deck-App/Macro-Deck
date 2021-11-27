@@ -244,4 +244,7 @@ For gifs it is recommended to use the low or the lowest preset.</IconImportQuali
 	<SuccessfullyImportedIconPack>Successfully imported the icon pack {0}</SuccessfullyImportedIconPack>
 	<SelectedIconPackWillBeDeleted>The selected icon pack {0} with all its icons will be deleted.</SelectedIconPackWillBeDeleted>
 	<GenerateStatic>Generate static</GenerateStatic>
+	<OnlyUserCreatedVariablesVisible>Only user-created variables are visible</OnlyUserCreatedVariablesVisible>
+	<MacroDeckUsesCottleTemplateEngine>Macro Deck uses the Cottle template engine. Click here for more information.</MacroDeckUsesCottleTemplateEngine>
+	<Result>Result</Result>
 </Strings>

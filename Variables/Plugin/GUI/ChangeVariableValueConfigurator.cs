@@ -27,6 +27,13 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.radioSet.Text = LanguageManager.Strings.Set;
             this.radioToggle.Text = LanguageManager.Strings.Toggle;
             this.lblVariable.Text = LanguageManager.Strings.Variable;
+            this.lblOnlyUserCreatedVariablesVisible.Text = LanguageManager.Strings.OnlyUserCreatedVariablesVisible;
+
+            this.radioCountUp.Visible = false;
+            this.radioCountDown.Visible = false;
+            this.radioSet.Visible = false;
+            this.radioToggle.Visible = false;
+            this.value.Visible = false;
 
             this.variables.SelectedIndexChanged += Variables_SelectedIndexChanged;
         }
@@ -39,11 +46,41 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
                 Variable variable = VariableManager.Variables.Find(v => v.Name.Equals(this.variables.Text));
                 if (variable != null)
                 {
-                    this.value.SetAutoCompleteMode(AutoCompleteMode.Suggest);
-                    this.value.SetAutoCompleteSource(AutoCompleteSource.CustomSource);
-                    AutoCompleteStringCollection suggestions = new AutoCompleteStringCollection();
-                    suggestions.AddRange(variable.Suggestions);
-                    this.value.SetAutoCompleteCustomSource(suggestions);
+                    switch (variable.Type)
+                    {
+                        case nameof(VariableType.String):
+                            this.radioCountUp.Visible = false;
+                            this.radioCountDown.Visible = false;
+                            this.radioSet.Visible = true;
+                            this.radioToggle.Visible = false;
+                            this.radioSet.Checked = true;
+                            break;
+                        case nameof(VariableType.Bool):
+                            this.radioCountUp.Visible = false;
+                            this.radioCountDown.Visible = false;
+                            this.radioSet.Visible = true;
+                            this.radioToggle.Visible = true;
+                            this.radioSet.Checked = true;
+                            break;
+                        case nameof(VariableType.Integer):
+                        case nameof(VariableType.Float):
+                            this.radioCountUp.Visible = true;
+                            this.radioCountDown.Visible = true;
+                            this.radioSet.Visible = true;
+                            this.radioToggle.Visible = false;
+                            break;
+                    }
+
+                    if (this.value != null)
+                    {
+                        this.value.SetAutoCompleteMode(AutoCompleteMode.Suggest);
+                        this.value.SetAutoCompleteSource(AutoCompleteSource.CustomSource);
+                        AutoCompleteStringCollection suggestions = new AutoCompleteStringCollection();
+                        suggestions.AddRange(variable.Suggestions);
+                        this.value.SetAutoCompleteCustomSource(suggestions);
+                    }
+                   
+
                 }
             }
             catch { }
@@ -52,7 +89,6 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
         private void MethodChanged(object sender, EventArgs e)
         {
             this.value.Visible = this.radioSet.Checked;
-            this.LoadVariables();
         }
 
         public override bool OnActionSave()
@@ -103,7 +139,13 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
         private void LoadVariables()
         {
             this.variables.Items.Clear();
-            if (this.radioCountUp.Checked || this.radioCountDown.Checked)
+            foreach (Variable variable in VariableManager.Variables.FindAll(v => v.Creator.Equals("User")))
+            {
+                this.variables.Items.Add(variable.Name);
+            }
+
+
+            /*if (this.radioCountUp.Checked || this.radioCountDown.Checked)
             {
                 foreach (Variable variable in VariableManager.Variables.FindAll(v => v.Creator.Equals("User") && (v.Type.Equals(VariableType.Integer.ToString()) || v.Type.Equals(VariableType.Float.ToString()))))
                 {
@@ -118,11 +160,8 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             }
             else if (this.radioSet.Checked)
             {
-                foreach (Variable variable in VariableManager.Variables.FindAll(v => v.Creator.Equals("User")))
-                {
-                    this.variables.Items.Add(variable.Name);
-                }
-            }
+                
+            }*/
         }
 
         private string GetMethodName(string method)

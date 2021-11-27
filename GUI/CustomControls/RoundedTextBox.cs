@@ -29,6 +29,15 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             }
         }
 
+        public ScrollBars ScrollBars
+        {
+            get { return this.textBox1.ScrollBars; }
+            set
+            {
+                this.textBox1.ScrollBars = value;
+            }
+        }
+
         public bool ReadOnly
         {
             get { return textBox1.ReadOnly; }

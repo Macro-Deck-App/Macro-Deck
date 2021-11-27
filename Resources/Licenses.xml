@@ -35,4 +35,9 @@
     <Author>SQLite-net</Author>
     <Repository>https://github.com/praeclarum/sqlite-net</Repository>
   </sqlite-net-pcl>
+	<Cottle>
+		<License>https://github.com/r3c/cottle/blob/master/license.md</License>
+		<Author>r3c</Author>
+		<Repository>http://r3c.github.io/cottle/</Repository>
+	</Cottle>
 </Licenses>

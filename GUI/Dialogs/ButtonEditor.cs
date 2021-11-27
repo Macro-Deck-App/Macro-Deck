@@ -1,13 +1,16 @@
-﻿using SuchByte.MacroDeck.ActionButton;
+﻿using Newtonsoft.Json;
+using SuchByte.MacroDeck.ActionButton;
 using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor;
+using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowContents;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Interfaces;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Variables;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -121,14 +124,15 @@ namespace SuchByte.MacroDeck.GUI
                     Task.Run(() =>
                     {
                         Bitmap labelBitmap = new Bitmap(250, 250);
-                        string labelOffText = actionButtonEdited.LabelOff.LabelText;
-                        foreach (Variables.Variable variable in Variables.VariableManager.Variables)
+                        string labelOffText = actionButtonEdited.LabelOff.LabelText.ToString();
+                        labelOffText = VariableManager.RenderTemplate(labelOffText);
+                        /*foreach (Variables.Variable variable in Variables.VariableManager.Variables)
                         {
                             if (labelOffText.ToLower().Contains("{" + variable.Name.ToLower() + "}"))
                             {
                                 labelOffText = labelOffText.Replace("{" + variable.Name + "}", variable.Value.ToString(), StringComparison.OrdinalIgnoreCase);
                             }
-                        }
+                        }*/
                         labelBitmap = Utils.LabelGenerator.GetLabel(labelBitmap, labelOffText, this.actionButtonEdited.LabelOff.LabelPosition, new Font(this.actionButtonEdited.LabelOff.FontFamily, this.actionButtonEdited.LabelOff.Size), this.actionButtonEdited.LabelOff.LabelColor, Color.Black, new SizeF(2.0F, 2.0F));
                         this.actionButtonEdited.LabelOff.LabelBase64 = Utils.Base64.GetBase64FromBitmap(labelBitmap);
                         this.Invoke(new Action(() => {
@@ -160,14 +164,16 @@ namespace SuchByte.MacroDeck.GUI
                     Task.Run(() =>
                     {
                         Bitmap labelBitmap = new Bitmap(250, 250);
-                        string labelOnText = actionButtonEdited.LabelOn.LabelText;
-                        foreach (Variables.Variable variable in Variables.VariableManager.Variables)
+                        string labelOnText = actionButtonEdited.LabelOn.LabelText.ToString();
+                        labelOnText = VariableManager.RenderTemplate(labelOnText);
+
+                        /*foreach (Variables.Variable variable in Variables.VariableManager.Variables)
                         {
                             if (labelOnText.ToLower().Contains("{" + variable.Name.ToLower() + "}"))
                             {
                                 labelOnText = labelOnText.Replace("{" + variable.Name + "}", variable.Value.ToString(), StringComparison.OrdinalIgnoreCase);
                             }
-                        }
+                        }*/
                         labelBitmap = Utils.LabelGenerator.GetLabel(labelBitmap, labelOnText, this.actionButtonEdited.LabelOn.LabelPosition, new Font(this.actionButtonEdited.LabelOn.FontFamily, this.actionButtonEdited.LabelOn.Size), this.actionButtonEdited.LabelOn.LabelColor, Color.Black, new SizeF(2.0F, 2.0F));
                         this.actionButtonEdited.LabelOn.LabelBase64 = Utils.Base64.GetBase64FromBitmap(labelBitmap);
                         this.Invoke(new Action(() => {
@@ -310,6 +316,7 @@ namespace SuchByte.MacroDeck.GUI
 
         private void Apply()
         {
+            Debug.WriteLine("Apply");
             this.actionButton = this.actionButtonEdited;
             this.actionButton.EventListeners = new List<EventListener>();
 
@@ -385,33 +392,28 @@ namespace SuchByte.MacroDeck.GUI
 
         public void LoadButton()
         {
-            this.actionButtonEdited = new ActionButton.ActionButton
+            JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
             {
-                Actions = this.actionButton.Actions,
-                ButtonId = this.actionButton.ButtonId,
-                EventListeners = this.actionButton.EventListeners,
-                IconOff = this.actionButton.IconOff,
-                IconOn = this.actionButton.IconOn,
-                LabelOff = this.actionButton.LabelOff,
-                LabelOn = this.actionButton.LabelOn,
-                Position_X = this.actionButton.Position_X,
-                Position_Y = this.actionButton.Position_Y,
-                State = this.actionButton.State
+                TypeNameHandling = TypeNameHandling.Auto,
+                NullValueHandling = NullValueHandling.Ignore,
+                Error = (sender, args) => { args.ErrorContext.Handled = true; }
             };
+
+            this.actionButtonEdited = JsonConvert.DeserializeObject<ActionButton.ActionButton>(JsonConvert.SerializeObject(this.actionButton, jsonSerializerSettings), jsonSerializerSettings); // Make a copy of the current action button
 
             this.buttonPath.Text = this.folder.DisplayName + "\\" + (this.actionButton.Position_Y + 1) + "." + (this.actionButton.Position_X + 1);
             this.btnPreview.BackgroundImageLayout = ImageLayout.Stretch;
 
             bool currentState = this.actionButton.State;
             this.lblCurrentState.Text = currentState ? "On" : "Off";
-            this.listStateBinding.Text = this.actionButton.StateBindingVariable;
+            this.listStateBinding.Text = this.actionButtonEdited.StateBindingVariable;
 
             this.RefreshLabel();
             this.RefreshIcon();
-            actionSelectorOnPress = new ActionSelectorOnPress(this.actionButtonEdited);
+            this.actionSelectorOnPress = new ActionSelectorOnPress(this.actionButtonEdited);
             this.eventSelector = new EventSelector(this.actionButtonEdited);
-            actionSelectorOnPress.RefreshActions();
-            eventSelector.RefreshEventsList();
+            this.actionSelectorOnPress.RefreshActions();
+            this.eventSelector.RefreshEventsList();
             this.SetSelector(actionSelectorOnPress);
         }
 
@@ -532,6 +534,17 @@ namespace SuchByte.MacroDeck.GUI
         private void labelText_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void BtnOpenTemplateEditor_Click(object sender, EventArgs e)
+        {
+            using (var templateEditor = new TemplateEditor(this.labelText.Text))
+            {
+                if (templateEditor.ShowDialog() == DialogResult.OK)
+                {
+                    this.labelText.Text = templateEditor.Template;
+                }
+            }
         }
     }
 }

@@ -14,42 +14,46 @@ namespace SuchByte.MacroDeck.Plugins
 
         public static void SetValue(MacroDeckPlugin plugin, string key, string value)
         {
-            Dictionary<string, string> pluginConfig;
-
-            if (!File.Exists(MacroDeck.PluginConfigPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower()))
-            {
-                pluginConfig = new Dictionary<string, string>();
-            }
-            else
-            {
-                pluginConfig = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(MacroDeck.PluginConfigPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json"), new JsonSerializerSettings
-                {
-                    TypeNameHandling = TypeNameHandling.Auto,
-                });
-            }
-
-            pluginConfig[key] = value;
-
-            _pluginConfigs[plugin.Author + "." + plugin.Name] = pluginConfig;
-
-            JsonSerializer serializer = new JsonSerializer
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-                NullValueHandling = NullValueHandling.Ignore,
-            };
-
             try
             {
-                using (StreamWriter sw = new StreamWriter(MacroDeck.PluginConfigPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json"))
-                using (JsonWriter writer = new JsonTextWriter(sw))
+                Dictionary<string, string> pluginConfig;
+
+                if (!File.Exists(MacroDeck.PluginConfigPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower()))
                 {
-                    serializer.Serialize(writer, pluginConfig);
+                    pluginConfig = new Dictionary<string, string>();
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+                else
+                {
+                    pluginConfig = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(MacroDeck.PluginConfigPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json"), new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.Auto,
+                    });
+                }
+
+                pluginConfig[key] = value;
+
+                _pluginConfigs[plugin.Author + "." + plugin.Name] = pluginConfig;
+
+                JsonSerializer serializer = new JsonSerializer
+                {
+                    TypeNameHandling = TypeNameHandling.Auto,
+                    NullValueHandling = NullValueHandling.Ignore,
+                };
+
+                try
+                {
+                    using (StreamWriter sw = new StreamWriter(MacroDeck.PluginConfigPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json"))
+                    using (JsonWriter writer = new JsonTextWriter(sw))
+                    {
+                        serializer.Serialize(writer, pluginConfig);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            } catch { }
+            
         }
 
 

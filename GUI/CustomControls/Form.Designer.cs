@@ -31,7 +31,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form));
             this.header = new SuchByte.MacroDeck.GUI.CustomControls.BufferedPanel();
-            this.lblFeedback = new System.Windows.Forms.LinkLabel();
             this.lblSafeMode = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.btnClose = new System.Windows.Forms.Button();
@@ -43,7 +42,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // header
             // 
             this.header.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(32)))), ((int)(((byte)(32)))));
-            this.header.Controls.Add(this.lblFeedback);
             this.header.Controls.Add(this.lblSafeMode);
             this.header.Controls.Add(this.pictureBox1);
             this.header.Controls.Add(this.btnClose);
@@ -54,20 +52,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.header.Size = new System.Drawing.Size(1200, 32);
             this.header.TabIndex = 0;
             this.header.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TitleBar_MouseDown);
-            // 
-            // lblFeedback
-            // 
-            this.lblFeedback.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblFeedback.AutoSize = true;
-            this.lblFeedback.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblFeedback.LinkColor = System.Drawing.Color.White;
-            this.lblFeedback.Location = new System.Drawing.Point(971, 5);
-            this.lblFeedback.Name = "lblFeedback";
-            this.lblFeedback.Size = new System.Drawing.Size(74, 19);
-            this.lblFeedback.TabIndex = 9;
-            this.lblFeedback.TabStop = true;
-            this.lblFeedback.Text = "Feedback";
-            this.lblFeedback.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LblFeedback_LinkClicked);
             // 
             // lblSafeMode
             // 
@@ -135,7 +119,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form";
             this.header.ResumeLayout(false);
-            this.header.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
@@ -148,6 +131,5 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         private System.Windows.Forms.Button btnClose;
         private System.Windows.Forms.PictureBox pictureBox1;
         public System.Windows.Forms.Label lblSafeMode;
-        private System.Windows.Forms.LinkLabel lblFeedback;
     }
 }

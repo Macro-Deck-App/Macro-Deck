@@ -45,7 +45,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             {
                 this.Action = new DelayAction
                 {
-                    Configuration = (millis.Value + seconds.Value * 1000 + minutes.Value * 1000 * 60).ToString(),
+                    Configuration = (1000).ToString(),
                 };
             }
         }

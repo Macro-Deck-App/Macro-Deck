@@ -6,6 +6,7 @@ using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.JSON;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Variables;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -77,10 +78,14 @@ namespace SuchByte.MacroDeck.Profiles
 
         private static void VariableChanged(object sender, EventArgs e)
         {
-            UpdateAllVariableLabels();
+            Variable variable = sender as Variable;
+            if (variable != null)
+            {
+                UpdateAllVariableLabels(variable);
+            }
         }
 
-        public static void UpdateAllVariableLabels()
+        public static void UpdateAllVariableLabels(Variable variable)
         {
             Task.Run(() =>
             {
@@ -88,7 +93,8 @@ namespace SuchByte.MacroDeck.Profiles
                 {
                     foreach (MacroDeckFolder macroDeckFolder in macroDeckProfile.Folders)
                     {
-                        foreach (ActionButton.ActionButton actionButton in macroDeckFolder.ActionButtons.ToArray())
+                        foreach (ActionButton.ActionButton actionButton in macroDeckFolder.ActionButtons.FindAll(x => (x.LabelOff != null && !String.IsNullOrWhiteSpace(x.LabelOff.LabelText) && x.LabelOff.LabelText.Contains(variable.Name.ToLower(), StringComparison.OrdinalIgnoreCase)) ||
+                                                                                                                    (x.LabelOn != null && !String.IsNullOrWhiteSpace(x.LabelOn.LabelText) && x.LabelOn.LabelText.Contains(variable.Name.ToLower(), StringComparison.OrdinalIgnoreCase))).ToArray())
                         {
                             UpdateVariableLabels(actionButton);
                         }
@@ -104,10 +110,14 @@ namespace SuchByte.MacroDeck.Profiles
             {
                 try
                 {
-                    string labelOffText = actionButton.LabelOff.LabelText;
-                    string labelOnText = actionButton.LabelOn.LabelText;
-                    int variablesCount = 0;
-                    foreach (Variables.Variable variable in Variables.VariableManager.Variables)
+                    string labelOffText = actionButton.LabelOff.LabelText.ToString();
+                    string labelOnText = actionButton.LabelOn.LabelText.ToString();
+                    //int variablesCount = 0;
+
+                    labelOffText = VariableManager.RenderTemplate(labelOffText);
+                    labelOnText = VariableManager.RenderTemplate(labelOnText);
+
+                    /*foreach (Variables.Variable variable in Variables.VariableManager.Variables)
                     {
                         if (labelOffText.ToLower().Contains("{" + variable.Name.ToLower() + "}") || labelOffText.ToLower().Contains("{" + variable.Name.ToLower() + "}"))
                         {
@@ -116,7 +126,8 @@ namespace SuchByte.MacroDeck.Profiles
                             labelOnText = labelOnText.Replace("{" + variable.Name + "}", variable.Value.ToString(), StringComparison.OrdinalIgnoreCase);
                         }
                     }
-                    if (variablesCount == 0) return;
+                    if (variablesCount == 0) return;*/
+
                     actionButton.LabelOff.LabelBase64 = Utils.Base64.GetBase64FromBitmap(Utils.LabelGenerator.GetLabel(new Bitmap(250, 250), labelOffText, actionButton.LabelOff.LabelPosition, new Font(actionButton.LabelOff.FontFamily, actionButton.LabelOff.Size), actionButton.LabelOff.LabelColor, Color.Black, new SizeF(2.0f, 2.0f)));
                     actionButton.LabelOn.LabelBase64 = Utils.Base64.GetBase64FromBitmap(Utils.LabelGenerator.GetLabel(new Bitmap(250, 250), labelOnText, actionButton.LabelOn.LabelPosition, new Font(actionButton.LabelOn.FontFamily, actionButton.LabelOn.Size), actionButton.LabelOn.LabelColor, Color.Black, new SizeF(2.0f, 2.0f)));
                     foreach (MacroDeckClient macroDeckClient in MacroDeckServer.Clients)

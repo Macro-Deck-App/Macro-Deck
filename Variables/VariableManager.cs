@@ -1,8 +1,13 @@
-﻿using SQLite;
+﻿using Cottle;
+using SQLite;
 using SuchByte.MacroDeck.Plugins;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -16,8 +21,12 @@ namespace SuchByte.MacroDeck.Variables
 
         public static List<Variable> Variables;
 
+        private static DocumentConfiguration templateConfiguration = new DocumentConfiguration
+        {
+            Trimmer = DocumentConfiguration.TrimNothing,
+        };
 
-        
+
         private static bool _saving = false; // To prevent multiple save processes
 
 
@@ -33,28 +42,73 @@ namespace SuchByte.MacroDeck.Variables
         internal static Variable SetValue(string name, object value, VariableType type, string creator = "User", bool save = true)
         {
             if (Variables == null) return null;
-            Variable variable = Variables.Find(v => v.Name.Equals(name));
+            name = ConvertNameString(name);
+
+            Variable variable = Variables.Find(v => v.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
             if (variable == null)
             {
-                variable = new Variable
-                {
-                    Name = name,
-                };
+                variable = new Variable();
                 Variables.Add(variable);
             }
+            variable.Name = name;
             variable.Type = type.ToString();
             variable.Creator = creator;
+
             if (!variable.Value.Equals(value))
             {
-                if ((type == VariableType.Integer || type == VariableType.Float) && !float.TryParse(value.ToString(), out float result))
+                switch (type)
+                {
+                    case VariableType.Bool:
+                        if (Boolean.TryParse(value.ToString(), out bool boolResult))
+                        {
+                            value = boolResult;
+                        }
+                        else
+                        {
+                            value = false;
+                        }
+                        variable.Value = value.ToString();
+                        break;
+                    case VariableType.Float:
+                        if (float.TryParse(value.ToString().Replace(".", Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator), out float floatResult))
+                        {
+                            value = floatResult;
+                        }
+                        else
+                        {
+                            value = 0.0f;
+                        }
+                        variable.Value = ((float)value).ToString();
+                        break;
+                    case VariableType.Integer:
+                        if (Int32.TryParse(value.ToString(), out int intResult))
+                        {
+                            value = intResult;
+                        }
+                        else
+                        {
+                            value = 0;
+                        }
+                        variable.Value = value.ToString();
+                        break;
+                    case VariableType.String:
+                    default:
+                        variable.Value = value.ToString();
+                        break;
+                }
+
+
+
+                /*if ((type == VariableType.Integer || type == VariableType.Float) && !float.TryParse(value.ToString(), out float result))
                 {
                     value = 0;
                 }
                 else if (type == VariableType.Bool && !bool.TryParse(value.ToString(), out bool resultBool))
                 {
                     value = false;
-                }
-                variable.Value = value.ToString();
+                }*/
+
+
                 if (OnVariableChanged != null)
                 {
                     OnVariableChanged(variable, EventArgs.Empty);
@@ -125,27 +179,52 @@ namespace SuchByte.MacroDeck.Variables
             Save();
         }
 
-        
 
-        internal static object ParseValue(string name)
+        public static string RenderTemplate(string template)
         {
-            if (Variables == null) return null;
-            object value = null;
-            Variable variable = Variables.Find(v => v.Name.Equals(name));
-            if (variable.Value.Equals(VariableType.Bool.ToString()))
+            string result = "";
+            try 
             {
-                value = Boolean.Parse(variable.Value);
-            } else if (variable.Value.Equals(VariableType.Float.ToString()))
+                var document = Document.CreateDefault(template, templateConfiguration).DocumentOrThrow;
+
+                Dictionary<Value, Value> vars = new Dictionary<Value, Value>();
+
+                foreach (Variable v in VariableManager.Variables)
+                {
+                    if (vars.ContainsKey(v.Name)) continue;
+                    Value value = "";
+
+                    switch (v.Type)
+                    {
+                        case nameof(VariableType.Bool):
+                            bool resultBool = false;
+                            Boolean.TryParse(v.Value.Replace("On", "True", StringComparison.CurrentCultureIgnoreCase).Replace("Off", "False", StringComparison.OrdinalIgnoreCase), out resultBool);
+                            value = Value.FromBoolean(resultBool);
+                            break;
+                        case nameof(VariableType.Float):
+                            float resultFloat = 0.0f;
+                            float.TryParse(v.Value, out resultFloat);
+                            value = Value.FromNumber(resultFloat);
+                            break;
+                        case nameof(VariableType.Integer):
+                            int resultInteger = 0;
+                            Int32.TryParse(v.Value, out resultInteger);
+                            value = Value.FromNumber(resultInteger);
+                            break;
+                        case nameof(VariableType.String):
+                            value = Value.FromString(v.Value);
+                            break;
+                    }
+
+                    vars.Add(v.Name, value);
+                }
+                result = document.Render(Context.CreateBuiltin(vars));
+            } catch (Exception e)
             {
-                value = float.Parse(variable.Value);
-            } else if (variable.Value.Equals(VariableType.Integer.ToString()))
-            {
-                value = Int32.Parse(variable.Value);
-            } else if (variable.Value.Equals(VariableType.String.ToString()))
-            {
-                value = variable.Value as string;
+                result = "Error: " + e.Message;
             }
-            return value;
+
+            return result;
         }
 
         internal static void Load()
@@ -155,8 +234,16 @@ namespace SuchByte.MacroDeck.Variables
 
             var query = db.Table<Variable>();
 
-            Variables = new List<Variable>();
-            Variables.AddRange(query);
+            List<Variable> variablesLoaded = new List<Variable>();
+            variablesLoaded.AddRange(query);
+
+            // Convert older variables to the new format
+            foreach (Variable variable in variablesLoaded)
+            {
+                variable.Name = ConvertNameString(variable.Name);
+            }
+
+            Variables = variablesLoaded;
 
             db.Close();
         }
@@ -192,8 +279,11 @@ namespace SuchByte.MacroDeck.Variables
 
                 db.Close();
             }
-            catch { }
-            _saving = false;
+            catch { } 
+            finally
+            {
+                _saving = false;
+            }
         }
 
         internal static void SaveAsync()
@@ -205,6 +295,17 @@ namespace SuchByte.MacroDeck.Variables
         }
 
 
+        private static string ConvertNameString(string str)
+        {
+            return str.ToString().ToLower()
+                .Replace(" ", "_", StringComparison.OrdinalIgnoreCase)
+                .Replace(".", "_", StringComparison.OrdinalIgnoreCase)
+                .Replace("-", "_", StringComparison.OrdinalIgnoreCase)
+                .Replace("ä", "ae", StringComparison.OrdinalIgnoreCase)
+                .Replace("ö", "oe", StringComparison.OrdinalIgnoreCase)
+                .Replace("ü", "ue", StringComparison.OrdinalIgnoreCase)
+                .Replace("ß", "ss", StringComparison.OrdinalIgnoreCase);
+        }
     }
 
     public enum VariableType
