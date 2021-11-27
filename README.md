@@ -181,6 +181,11 @@ List<Dictionary<string, string>> credentialsList = SuchByte.MacroDeck.Plugins.Pl
 
 ## Setting variables
 Maybe your plugin gets data you want to store in a variable like temperatures, states, etc. If the variable don't exists, Macro Deck automatically creates it. You just need to set the value.
+
+Please note: please only use lower case variable names without white spaces and any special character
+Example:
+```my_awesome_variable```
+
 ```c#
 SuchByte.MacroDeck.Variables.VariableManager.SetValue(string name, object value, VariableType type, IMacroDeckPlugin plugin, bool save = true); // if your variable changes often, set save to false
 ```
