@@ -243,4 +243,8 @@ Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImpor
 	<SelectedIconWillBeDeleted>El icono seleccionado se eliminará del paquete de iconos {0}</SelectedIconWillBeDeleted>
 	<SuccessfullyImportedIconPack>Se importó con éxito el paquete de iconos {0}</SuccessfullyImportedIconPack>
 	<SelectedIconPackWillBeDeleted>Se eliminará el paquete de iconos {0} con todos sus iconos.</SelectedIconPackWillBeDeleted>
+	<GenerateStatic>Generar estática</GenerateStatic>
+	<OnlyUserCreatedVariablesVisible>Solo las variables creadas por el usuario son visibles</OnlyUserCreatedVariablesVisible>
+	<MacroDeckUsesCottleTemplateEngine>Macro Deck utiliza el motor de plantillas Cottle. Haga clic aquí para más información.</MacroDeckUsesCottleTemplateEngine>
+	<Result>Resultado</Result>
 </Strings>
