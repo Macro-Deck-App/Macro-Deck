@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using System;
@@ -34,6 +35,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.radioSet.Visible = false;
             this.radioToggle.Visible = false;
             this.value.Visible = false;
+            this.btnTemplateEditor.Visible = false;
 
             this.variables.SelectedIndexChanged += Variables_SelectedIndexChanged;
         }
@@ -54,6 +56,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
                             this.radioSet.Visible = true;
                             this.radioToggle.Visible = false;
                             this.radioSet.Checked = true;
+                            this.btnTemplateEditor.Visible = true;
                             break;
                         case nameof(VariableType.Bool):
                             this.radioCountUp.Visible = false;
@@ -61,12 +64,14 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
                             this.radioSet.Visible = true;
                             this.radioToggle.Visible = true;
                             this.radioSet.Checked = true;
+                            this.btnTemplateEditor.Visible = true;
                             break;
                         case nameof(VariableType.Integer):
                         case nameof(VariableType.Float):
                             this.radioCountUp.Visible = true;
                             this.radioCountDown.Visible = true;
                             this.radioSet.Visible = true;
+                            this.btnTemplateEditor.Visible = true;
                             this.radioToggle.Visible = false;
                             break;
                     }
@@ -213,6 +218,17 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.value.Text = jObject["value"].ToString();
             this.value.Visible = this.radioSet.Checked;
 
+        }
+
+        private void btnTemplateEditor_Click(object sender, EventArgs e)
+        {
+            using (var templateEditor = new TemplateEditor(this.value.Text))
+            {
+                if (templateEditor.ShowDialog() == DialogResult.OK)
+                {
+                    this.value.Text = templateEditor.Template;
+                }
+            }
         }
     }
 }

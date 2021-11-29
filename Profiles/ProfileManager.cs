@@ -71,6 +71,7 @@ namespace SuchByte.MacroDeck.Profiles
                     }
                 }
             }
+
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();

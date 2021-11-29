@@ -43,6 +43,13 @@ namespace SuchByte.MacroDeck.ActionButton
             }
         }
 
+        public bool IsDisposed
+        {
+            get
+            {
+                return this._disposed;
+            }
+        }
 
 
         protected virtual void Dispose(bool disposing)

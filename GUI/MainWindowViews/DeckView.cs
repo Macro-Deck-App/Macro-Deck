@@ -608,7 +608,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             int col = button.Column;
             ActionButton.ActionButton actionButtonOld = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == col && aB.Position_Y == row);
 
-            if (actionButtonOld != null)
+            if (this._currentFolder != null && this._currentFolder.ActionButtons != null && actionButtonOld != null)
             {
                 this._currentFolder.ActionButtons.Remove(actionButtonOld);
             }
@@ -620,6 +620,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             {
                 pluginAction.SetActionButton(actionButtonNew);
             }
+
             foreach (var eventListener in actionButtonNew.EventListeners)
             {
                 foreach (PluginAction pluginAction in eventListener.Actions)
@@ -627,10 +628,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     pluginAction.SetActionButton(actionButtonNew);
                 }
             }
+
             actionButtonNew.ButtonId = this._currentFolder.ActionButtons.Count;
             actionButtonNew.Position_X = col;
             actionButtonNew.Position_Y = row;
-
 
             this._currentFolder.ActionButtons.Add(actionButtonNew);
 

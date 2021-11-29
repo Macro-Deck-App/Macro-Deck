@@ -10,8 +10,6 @@ namespace SuchByte.MacroDeck.Plugins
 {
     public class PluginConfiguration
     {
-        private static Dictionary<string, Dictionary<string, string>> _pluginConfigs = new Dictionary<string, Dictionary<string, string>>();
-
         public static void SetValue(MacroDeckPlugin plugin, string key, string value)
         {
             try
@@ -32,28 +30,18 @@ namespace SuchByte.MacroDeck.Plugins
 
                 pluginConfig[key] = value;
 
-                _pluginConfigs[plugin.Author + "." + plugin.Name] = pluginConfig;
-
                 JsonSerializer serializer = new JsonSerializer
                 {
                     TypeNameHandling = TypeNameHandling.Auto,
                     NullValueHandling = NullValueHandling.Ignore,
                 };
 
-                try
+                using (StreamWriter sw = new StreamWriter(MacroDeck.PluginConfigPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json"))
+                using (JsonWriter writer = new JsonTextWriter(sw))
                 {
-                    using (StreamWriter sw = new StreamWriter(MacroDeck.PluginConfigPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json"))
-                    using (JsonWriter writer = new JsonTextWriter(sw))
-                    {
-                        serializer.Serialize(writer, pluginConfig);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
+                    serializer.Serialize(writer, pluginConfig);
                 }
             } catch { }
-            
         }
 
 
@@ -62,18 +50,13 @@ namespace SuchByte.MacroDeck.Plugins
             string value = "";
             try
             {
-                if (plugin == null || key == null || _pluginConfigs == null) return value;
-                if (!_pluginConfigs.ContainsKey(plugin.Author + "." + plugin.Name))
+                if (plugin == null || key == null) return value;
+                Dictionary<string, string> pluginConfig = LoadPluginConfig(plugin);
+                if (pluginConfig != null && !String.IsNullOrWhiteSpace(pluginConfig[key]))
                 {
-                    Dictionary<string, string> pluginConfig = LoadPluginConfig(plugin);
-                    if (pluginConfig == null || pluginConfig.Count == 0) return value;
-                    _pluginConfigs.Add(plugin.Author + "." + plugin.Name, pluginConfig);
                     value = pluginConfig[key];
-                } else
-                {
-                    value = _pluginConfigs[plugin.Author + "." + plugin.Name][key];
                 }
-            } catch { }
+            } catch {}
 
             return value;
         }
@@ -98,10 +81,6 @@ namespace SuchByte.MacroDeck.Plugins
 
         public static void DeletePluginConfig(MacroDeckPlugin plugin)
         {
-            if (_pluginConfigs.ContainsKey(plugin.Author + "." + plugin.Name))
-            {
-                _pluginConfigs.Remove(plugin.Author + "." + plugin.Name);
-            }
             try
             {
                 File.Delete(MacroDeck.PluginConfigPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json");

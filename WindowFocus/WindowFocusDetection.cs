@@ -29,10 +29,6 @@ namespace SuchByte.MacroDeck.WindowsFocus
 
         public WindowFocusDetection()
         {
-            /*try
-            {
-                Automation.AddAutomationFocusChangedEventHandler(OnFocusChanged);
-            } catch { }*/
             dele = new WinEventDelegate(WinEventProc);
             IntPtr m_hhook = SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, dele, 0, 0, WINEVENT_OUTOFCONTEXT);
 
@@ -53,55 +49,23 @@ namespace SuchByte.MacroDeck.WindowsFocus
 
         public void WinEventProc(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
         {
-            Task.Run(() =>
+            try
             {
-                try
+                uint processId = GetActiveWindowProcessId(hwnd);
+                using (Process process = Process.GetProcessById((int)processId))
                 {
-                    uint processId = GetActiveWindowProcessId(hwnd);
-                    using (Process process = Process.GetProcessById((int)processId))
+                    if (process.ProcessName != this._focusedApplication)
                     {
-                        if (process.ProcessName != this._focusedApplication)
+                        this._focusedApplication = process.ProcessName;
+                        if (this.OnWindowFocusChanged != null)
                         {
-                            this._focusedApplication = process.ProcessName;
-                            if (this.OnWindowFocusChanged != null)
-                            {
-                                this.OnWindowFocusChanged(this._focusedApplication, EventArgs.Empty);
-                            }
-                            Variables.VariableManager.SetValue("focused_application", process.ProcessName, Variables.VariableType.String, "Macro Deck", false);
+                            this.OnWindowFocusChanged(this._focusedApplication, EventArgs.Empty);
                         }
+                        Variables.VariableManager.SetValue("focused_application", process.ProcessName, Variables.VariableType.String, "Macro Deck", false);
                     }
                 }
-                catch { }
-            });
+            }
+            catch { }
         }
-
-        /*private void OnFocusChanged(object sender, AutomationFocusChangedEventArgs e)
-        {
-            Task.Run(() =>
-            {
-                try
-                {
-                    if (sender == null) return;
-                    AutomationElement focusedElement = sender as AutomationElement;
-                    if (focusedElement != null)
-                    {
-                        int processId = focusedElement.Current.ProcessId;
-                        using (Process process = Process.GetProcessById(processId))
-                        {
-                            if (process.ProcessName != this._focusedApplication)
-                            {
-                                this._focusedApplication = process.ProcessName;
-                                if (this.OnWindowFocusChanged != null)
-                                {
-                                    this.OnWindowFocusChanged(this._focusedApplication, EventArgs.Empty);
-                                }
-                                Variables.VariableManager.SetValue("Focused application", process.ProcessName, Variables.VariableType.String, "Macro Deck", false);
-                            }
-                        }
-
-                    }
-                } catch { }
-            });
-        }*/
     }
 }

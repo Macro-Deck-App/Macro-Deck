@@ -39,6 +39,8 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.value = new SuchByte.MacroDeck.GUI.CustomControls.RoundedTextBox();
             this.lblVariable = new System.Windows.Forms.Label();
             this.lblOnlyUserCreatedVariablesVisible = new System.Windows.Forms.Label();
+            this.btnTemplateEditor = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
+            ((System.ComponentModel.ISupportInitialize)(this.btnTemplateEditor)).BeginInit();
             this.SuspendLayout();
             // 
             // radioToggle
@@ -127,8 +129,9 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.value.PlaceHolderColor = System.Drawing.Color.Gray;
             this.value.PlaceHolderText = "";
             this.value.ReadOnly = false;
+            this.value.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.value.SelectionStart = 0;
-            this.value.Size = new System.Drawing.Size(139, 25);
+            this.value.Size = new System.Drawing.Size(171, 25);
             this.value.TabIndex = 2;
             this.value.TextAlignment = System.Windows.Forms.HorizontalAlignment.Left;
             // 
@@ -152,10 +155,25 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.lblOnlyUserCreatedVariablesVisible.Text = "Only user-created variables are visible";
             this.lblOnlyUserCreatedVariablesVisible.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
+            // btnTemplateEditor
+            // 
+            this.btnTemplateEditor.BackColor = System.Drawing.Color.Transparent;
+            this.btnTemplateEditor.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.Arrow_Top_Right_Normal;
+            this.btnTemplateEditor.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnTemplateEditor.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnTemplateEditor.HoverImage = global::SuchByte.MacroDeck.Properties.Resources.Arrow_Top_Right_Hover;
+            this.btnTemplateEditor.Location = new System.Drawing.Point(645, 179);
+            this.btnTemplateEditor.Name = "btnTemplateEditor";
+            this.btnTemplateEditor.Size = new System.Drawing.Size(25, 25);
+            this.btnTemplateEditor.TabIndex = 6;
+            this.btnTemplateEditor.TabStop = false;
+            this.btnTemplateEditor.Click += new System.EventHandler(this.btnTemplateEditor_Click);
+            // 
             // ChangeVariableValueConfigurator
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 23F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.btnTemplateEditor);
             this.Controls.Add(this.lblOnlyUserCreatedVariablesVisible);
             this.Controls.Add(this.radioToggle);
             this.Controls.Add(this.radioSet);
@@ -166,6 +184,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.Controls.Add(this.variables);
             this.Name = "ChangeVariableValueConfigurator";
             this.Load += new System.EventHandler(this.ChangeVariableValueConfigurator_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.btnTemplateEditor)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -179,5 +198,6 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
         private RoundedTextBox value;
         private System.Windows.Forms.Label lblVariable;
         private System.Windows.Forms.Label lblOnlyUserCreatedVariablesVisible;
+        private PictureButton btnTemplateEditor;
     }
 }

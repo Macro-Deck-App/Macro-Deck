@@ -301,6 +301,7 @@ namespace SuchByte.MacroDeck.Variables
                 .Replace(" ", "_", StringComparison.OrdinalIgnoreCase)
                 .Replace(".", "_", StringComparison.OrdinalIgnoreCase)
                 .Replace("-", "_", StringComparison.OrdinalIgnoreCase)
+                .Replace("/", "_", StringComparison.OrdinalIgnoreCase)
                 .Replace("ä", "ae", StringComparison.OrdinalIgnoreCase)
                 .Replace("ö", "oe", StringComparison.OrdinalIgnoreCase)
                 .Replace("ü", "ue", StringComparison.OrdinalIgnoreCase)

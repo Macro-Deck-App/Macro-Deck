@@ -102,25 +102,34 @@ namespace SuchByte.MacroDeck.Updater
 
                     var jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest&channel=" + channel);
                     _jsonObject = JObject.Parse(jsonString);
-                    if (_jsonObject["version"].ToString() != MacroDeck.VersionString || _forceUpdate)
+                    if (_jsonObject["build"] != null)
                     {
-                        try
+                        if (Int32.TryParse(_jsonObject["build"].ToString(), out int build))
                         {
-                            _updateSizeMb = GetFileSizeMb(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]));
-                        } catch { }
-                        if (OnUpdateAvailable != null)
-                        {
-                            UpdateAvailable = true;
-                            OnUpdateAvailable(_jsonObject, EventArgs.Empty);
-                        }
-                    } else
-                    {
-                        if (OnLatestVersionInstalled != null)
-                        {
-                            UpdateAvailable = false;
-                            OnLatestVersionInstalled(_jsonObject, EventArgs.Empty);
+                            if (build > MacroDeck.BuildVersion || _forceUpdate)
+                            {
+                                try
+                                {
+                                    _updateSizeMb = GetFileSizeMb(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]));
+                                }
+                                catch { }
+                                if (OnUpdateAvailable != null)
+                                {
+                                    UpdateAvailable = true;
+                                    OnUpdateAvailable(_jsonObject, EventArgs.Empty);
+                                }
+                            }
+                            else
+                            {
+                                if (OnLatestVersionInstalled != null)
+                                {
+                                    UpdateAvailable = false;
+                                    OnLatestVersionInstalled(_jsonObject, EventArgs.Empty);
+                                }
+                            }
                         }
                     }
+                    
                 }
             } catch (Exception ex)
             {

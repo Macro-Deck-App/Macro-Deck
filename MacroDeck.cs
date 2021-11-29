@@ -23,7 +23,10 @@ namespace SuchByte.MacroDeck
 {
     public static class MacroDeck
     {
-        internal static readonly string VersionString = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
+        static Assembly assembly = Assembly.GetExecutingAssembly();
+        internal static readonly int BuildVersion = FileVersionInfo.GetVersionInfo(assembly.Location).FilePrivatePart;
+        internal static readonly string VersionString = FileVersionInfo.GetVersionInfo(assembly.Location).ProductVersion + " build " + BuildVersion;
+
         public static readonly int ApiVersion = 20;
         public static readonly int PluginApiVersion = 29;
 
@@ -71,10 +74,10 @@ namespace SuchByte.MacroDeck
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-          //  Application.ApplicationExit += OnApplicationExit;
+            //  Application.ApplicationExit += OnApplicationExit;
 
             // Check if Macro Deck is already running
-            if (Process.GetProcessesByName(Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetEntryAssembly().Location)).Count() > 1)
+            if (Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location)).Count() > 1)
             {
                 using (var messageBox = new GUI.CustomControls.MessageBox())
                 {
@@ -187,11 +190,9 @@ namespace SuchByte.MacroDeck
                     {
                         _configuration = initialSetup.configuration;
                         SaveConfiguration();
-                        Start(true, port);
-                    } else
-                    {
-                        Environment.Exit(0);
+                        Process.Start(Path.Combine(MacroDeck.MainDirectoryPath, AppDomain.CurrentDomain.FriendlyName), "--show");
                     }
+                    Environment.Exit(0);
                 }
             }
             else
@@ -257,7 +258,10 @@ namespace SuchByte.MacroDeck
             Debug.WriteLine("Update available");
             Updater.Updater.OnUpdateAvailable -= OnUpdateAvailable;
             JObject versionObject = sender as JObject;
-            _trayIcon.ShowBalloonTip(5000, "Macro Deck Updater", String.Format(Language.LanguageManager.Strings.VersionXIsNowAvailable, versionObject["version"].ToString(), versionObject["channel"].ToString()), ToolTipIcon.Info);
+            try
+            {
+                _trayIcon.ShowBalloonTip(5000, "Macro Deck Updater", String.Format(Language.LanguageManager.Strings.VersionXIsNowAvailable, versionObject["version"].ToString(), versionObject["channel"].ToString()), ToolTipIcon.Info);
+            } catch { }
         }
 
         private static void CreateTrayIcon()

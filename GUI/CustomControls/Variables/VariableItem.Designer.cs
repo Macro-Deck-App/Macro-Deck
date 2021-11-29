@@ -29,7 +29,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// </summary>
         private void InitializeComponent()
         {
-            this.lblName = new System.Windows.Forms.Label();
+            this.lblName = new System.Windows.Forms.TextBox();
             this.lblType = new System.Windows.Forms.Label();
             this.lblValue = new System.Windows.Forms.Label();
             this.lblCreator = new System.Windows.Forms.Label();
@@ -38,13 +38,17 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             // lblName
             // 
+            this.lblName.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
+            this.lblName.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.lblName.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblName.Location = new System.Drawing.Point(8, 5);
+            this.lblName.ForeColor = System.Drawing.Color.White;
+            this.lblName.Location = new System.Drawing.Point(11, 15);
+            this.lblName.Margin = new System.Windows.Forms.Padding(0);
             this.lblName.Name = "lblName";
-            this.lblName.Size = new System.Drawing.Size(349, 40);
+            this.lblName.Size = new System.Drawing.Size(349, 20);
             this.lblName.TabIndex = 0;
             this.lblName.Text = "Name";
-            this.lblName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblName.ReadOnly = true;
             // 
             // lblType
             // 
@@ -114,12 +118,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.Name = "VariableItem";
             this.Size = new System.Drawing.Size(1100, 50);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Label lblName;
+        private System.Windows.Forms.TextBox lblName;
         private System.Windows.Forms.Label lblType;
         private System.Windows.Forms.Label lblValue;
         private System.Windows.Forms.Label lblCreator;

@@ -4,6 +4,10 @@
       "commandName": "Project",
       "commandLineArgs": "--show --export-default-string",
       "nativeDebugging": false
+    },
+    "Macro Deck exe": {
+      "commandName": "Executable",
+      "executablePath": "D:\\Macro-Deck\\Macro Deck 2\\bin\\Debug\\netcoreapp3.1\\Macro Deck 2.exe"
     }
   }
 }

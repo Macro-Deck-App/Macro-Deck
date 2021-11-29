@@ -9,27 +9,26 @@ namespace SuchByte.MacroDeck.Utils
 {
     public class Clipboard
     {
-        static ActionButton.ActionButton _actionButtonCopy = null;
+        static ActionButton.ActionButton _actionButtonSource = null;
 
+        static JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Auto,
+            NullValueHandling = NullValueHandling.Ignore,
+            Error = (sender, args) => { args.ErrorContext.Handled = true; }
+        };
 
         public static void CopyActionButton(ActionButton.ActionButton actionButton)
         {
-            _actionButtonCopy = JsonConvert.DeserializeObject<ActionButton.ActionButton>(JsonConvert.SerializeObject(actionButton, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-                NullValueHandling = NullValueHandling.Ignore,
-                Error = (sender, args) => { args.ErrorContext.Handled = true; }
-            }), new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-                NullValueHandling = NullValueHandling.Ignore,
-                Error = (sender, args) => { args.ErrorContext.Handled = true; }
-            });
+            _actionButtonSource = actionButton;
         }
-
         public static ActionButton.ActionButton GetActionButtonCopy()
         {
-            return _actionButtonCopy;
+            if (_actionButtonSource == null) return null;
+            if (_actionButtonSource.IsDisposed) return null;
+
+            // Create a copy of the action button instance
+            return JsonConvert.DeserializeObject<ActionButton.ActionButton>(JsonConvert.SerializeObject(_actionButtonSource, jsonSerializerSettings), jsonSerializerSettings);
         }
 
 

@@ -126,7 +126,11 @@ namespace SuchByte.MacroDeck.Variables.Plugin
                         VariableManager.SetValue(variable.Name, float.Parse(variable.Value) - 1, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
                         break;
                     case "set":
-                        VariableManager.SetValue(variable.Name, jsonObject["value"].ToString(), (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
+                        if (jsonObject["value"] != null && !String.IsNullOrWhiteSpace(jsonObject["value"].ToString()))
+                        {
+                            var value = VariableManager.RenderTemplate(jsonObject["value"].ToString());
+                            VariableManager.SetValue(variable.Name, value, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
+                        }
                         break;
                     case "toggle":
                         VariableManager.SetValue(variable.Name, !Boolean.Parse(variable.Value.Replace("on", "true")), (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
