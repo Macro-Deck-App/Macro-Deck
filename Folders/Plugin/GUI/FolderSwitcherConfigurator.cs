@@ -60,8 +60,7 @@ namespace SuchByte.MacroDeck.Folders.Plugin.GUI
             if (foldersView.SelectedNode == null) return false;
             MacroDeckFolder folder = ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, ProfileManager.CurrentProfile);
             this.SelectedFolder = folder;
-            long folderId = this.SelectedFolder.FolderId;
-            this._macroDeckAction.Configuration = folderId.ToString();
+            this._macroDeckAction.Configuration = this.SelectedFolder.FolderId;
             this._macroDeckAction.ConfigurationSummary = folder.DisplayName;
             return true;
         }

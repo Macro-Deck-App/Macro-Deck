@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace SuchByte.MacroDeck.Profiles
@@ -190,9 +191,9 @@ namespace SuchByte.MacroDeck.Profiles
             {
                 MacroDeckFolder root = new MacroDeckFolder
                 {
-                    FolderId = 0,
+                    FolderId = GenerateFolderId("*Root*"),
                     DisplayName = "*Root*",
-                    Childs = new List<long>(),
+                    Childs = new List<string>(),
                     ActionButtons = new List<ActionButton.ActionButton>()
                 };
 
@@ -250,7 +251,7 @@ namespace SuchByte.MacroDeck.Profiles
                 ProfilesSaved(Profiles, EventArgs.Empty);
             }
         }
-        public static MacroDeckFolder CreateFolder(String displayName, MacroDeckFolder parent, MacroDeckProfile macroDeckProfile)
+        public static MacroDeckFolder CreateFolder(string displayName, MacroDeckFolder parent, MacroDeckProfile macroDeckProfile)
         {
             if (macroDeckProfile.Folders.FindAll(macroDeckFolder => macroDeckFolder.DisplayName.Equals(displayName)).Count > 0)
             {
@@ -260,9 +261,9 @@ namespace SuchByte.MacroDeck.Profiles
             MacroDeckFolder newFolder = new MacroDeckFolder
             {
                 DisplayName = displayName,
-                Childs = new List<long>(),
+                Childs = new List<string>(),
                 ActionButtons = new List<ActionButton.ActionButton>(),
-                FolderId = macroDeckProfile.Folders.Count
+                FolderId = GenerateFolderId(displayName)
             };
 
             parent.Childs.Add(newFolder.FolderId);
@@ -308,7 +309,7 @@ namespace SuchByte.MacroDeck.Profiles
                 folders.Childs.Remove(folder.FolderId);
             }
 
-            foreach (int childId in folder.Childs)
+            foreach (var childId in folder.Childs)
             {
                 MacroDeckFolder child = FindFolderById(childId, macroDeckProfile);
                 macroDeckProfile.Folders.Remove(child);
@@ -341,9 +342,9 @@ namespace SuchByte.MacroDeck.Profiles
 
             MacroDeckFolder rootFolder = new MacroDeckFolder
             {
-                FolderId = 0,
                 DisplayName = "*Root*",
-                Childs = new List<long>(),
+                FolderId = GenerateFolderId("*Root*"),
+                Childs = new List<string>(),
                 ActionButtons = new List<ActionButton.ActionButton>()
             };
 
@@ -360,8 +361,6 @@ namespace SuchByte.MacroDeck.Profiles
         {
             if (!_profiles.Contains(macroDeckProfile)) return;
             if (_profiles.Count < 2) return;
-
-            RemoveEventHandlers(macroDeckProfile);
 
             foreach (MacroDeckFolder macroDeckFolder in macroDeckProfile.Folders)
             {
@@ -384,78 +383,18 @@ namespace SuchByte.MacroDeck.Profiles
             GC.Collect();
         }
 
-        public static void AddAllEventHandlers()
+        private static string GenerateFolderId(string folderName)
         {
-            /*foreach (MacroDeckProfile macroDeckProfile in _profiles)
-            {
-                foreach (MacroDeckFolder folder in macroDeckProfile.Folders)
-                {
-                    foreach (ActionButton.ActionButton actionButton in folder.ActionButtons.FindAll(actionButton => actionButton.EventListeners != null))
-                    {
-                        AddEventHandler(actionButton);
-                    }
-                }
-            }*/
-            
+            Regex rgx = new Regex("[^a-zA-Z0-9 -]");
+            return DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString() + rgx.Replace(folderName.ToLower(), "");
         }
 
-        public static void RemoveEventHandlers(MacroDeckProfile macroDeckProfile)
-        {
-            /*foreach (MacroDeckFolder folder in macroDeckProfile.Folders)
-            {
-                foreach (ActionButton.ActionButton actionButton in folder.ActionButtons.FindAll(actionButton => actionButton.EventListeners != null))
-                {
-                    RemoveEventHandler(actionButton);
-                }
-            }*/
-        }
-
-    /*    public static void AddEventHandler(ActionButton.ActionButton actionButton)
-        {
-            if (actionButton.EventListeners == null) return;
-            foreach (var eventListener in actionButton.EventListeners)
-            {
-                IMacroDeckEvent macroDeckEvent = EventManager.GetEventByName(eventListener.EventToListen);
-                if (macroDeckEvent == null) continue;
-                macroDeckEvent.OnEvent += new EventHandler<MacroDeckEventArgs>(OnActionButtonEventTrigger);
-            }
-        }
-
-        public static void RemoveEventHandler(ActionButton.ActionButton actionButton)
-        {
-            if (actionButton.EventListeners == null) return;
-            foreach (var eventListener in actionButton.EventListeners)
-            {
-                IMacroDeckEvent macroDeckEvent = EventManager.GetEventByName(eventListener.EventToListen);
-                if (macroDeckEvent == null) continue;
-                macroDeckEvent.OnEvent -= OnActionButtonEventTrigger;
-            }
-        }
-
-        private static void OnActionButtonEventTrigger(object sender, MacroDeckEventArgs e)
-        {
-            Task.Run(() =>
-            {
-                IMacroDeckEvent macroDeckEvent = (IMacroDeckEvent)sender;
-                ActionButton.ActionButton actionButton = e.ActionButton;
-                Debug.WriteLine(sender.ToString());
-                Debug.WriteLine(e.Parameter);
-                
-                foreach (EventListener eventListener in actionButton.EventListeners.FindAll(x => x.EventToListen.Equals(macroDeckEvent.Name) && x.Parameter.ToLower().Equals(e.Parameter.ToString().ToLower())))
-                {
-                    foreach (PluginAction action in eventListener.Actions)
-                    {
-                        action.Trigger("-1", e.ActionButton);
-                    }
-                }
-            });
-        }
-    */
-
-        public static MacroDeckFolder FindFolderById(long Id, MacroDeckProfile macroDeckProfile)
+        public static MacroDeckFolder FindFolderById(string Id, MacroDeckProfile macroDeckProfile)
         {
             return macroDeckProfile.Folders.Find(macroDeckFolder => macroDeckFolder.FolderId.Equals(Id));
         }
+
+
 
         public static MacroDeckFolder FindFolderByDisplayName(String displayName, MacroDeckProfile macroDeckProfile)
         {

@@ -73,10 +73,13 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     var directoryInfo = (Folders.MacroDeckFolder)currentNode.Tag;
                     foreach (var directoryId in directoryInfo.Childs.ToList())
                     {
-                        var directory = ProfileManager.FindFolderById(directoryId, ProfileManager.CurrentProfile);
-                        var childDirectoryNode = new TreeNode(directory.DisplayName) { Tag = directory };
-                        this.Invoke(new Action(() => currentNode.Nodes.Add(childDirectoryNode)));
-                        stack.Push(childDirectoryNode);
+                        try
+                        {
+                            var directory = ProfileManager.FindFolderById(directoryId, ProfileManager.CurrentProfile);
+                            var childDirectoryNode = new TreeNode(directory.DisplayName) { Tag = directory };
+                            this.Invoke(new Action(() => currentNode.Nodes.Add(childDirectoryNode)));
+                            stack.Push(childDirectoryNode);
+                        } catch { }
                     }
                 }
                 this.foldersView.Nodes.Add(node);

@@ -24,8 +24,8 @@ namespace SuchByte.MacroDeck
     public static class MacroDeck
     {
         static Assembly assembly = Assembly.GetExecutingAssembly();
-        internal static readonly int BuildVersion = FileVersionInfo.GetVersionInfo(assembly.Location).FilePrivatePart;
-        internal static readonly string VersionString = FileVersionInfo.GetVersionInfo(assembly.Location).ProductVersion + " build " + BuildVersion;
+        internal static readonly string VersionString = FileVersionInfo.GetVersionInfo(assembly.Location).ProductVersion;
+        internal static readonly int BuildVersion = Int32.Parse(VersionString.Split(".")[3].ToString());
 
         public static readonly int ApiVersion = 20;
         public static readonly int PluginApiVersion = 29;
@@ -74,6 +74,7 @@ namespace SuchByte.MacroDeck
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
             //  Application.ApplicationExit += OnApplicationExit;
 
             // Check if Macro Deck is already running
@@ -239,9 +240,6 @@ namespace SuchByte.MacroDeck
             Updater.Updater.Initialize(ForceUpdate, TestUpdateChannel);
             Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
 
-
-            // Register MacroDeckEvent event handlers and other listeners
-            ProfileManager.AddAllEventHandlers();
             ProfileManager.AddVariableChangedListener();
             ProfileManager.AddWindowFocusChangedListener();
 

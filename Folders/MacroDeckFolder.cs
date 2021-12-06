@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace SuchByte.MacroDeck.Folders
 {
@@ -48,9 +49,19 @@ namespace SuchByte.MacroDeck.Folders
             Dispose(false);
         }
 
-        public long FolderId { get; set; }
-        public String DisplayName { get; set; }
-        public List<long> Childs { get; set; } = new List<long>();
+        [JsonIgnore]
+        public bool IsRootFolder
+        {
+            get
+            {
+                return this.DisplayName.Equals("*Root*");
+            }
+        }
+
+        public string FolderId { get; set; }
+        public string DisplayName { get; set; }
+        public List<string> Childs { get; set; } = new List<string>();
+
         public List<ActionButton.ActionButton> ActionButtons { get; set; }
         public List<string> ApplicationsFocusDevices { get; set; } = new List<string>();
         public string ApplicationToTrigger { get; set; } = "";

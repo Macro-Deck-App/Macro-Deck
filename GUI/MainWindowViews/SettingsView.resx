@@ -57,6 +57,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="lblConnectionInfo.Text" xml:space="preserve">
+    <value>It's really important to select the correct network adapter or otherwise you will not be able to connect with the client to the server. In most cases the name of the Network adapter looks like "Ethernet" or "Wi-Fi" and the ip address in most cases looks like "192.168.178.xxx".
+
+The default port for Macro Deck is 8191. If some other application uses this port, you can change it.</value>
+  </data>
   <metadata name="tabIcons.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
@@ -65,7 +70,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAEZTeXN0ZW0uV2luZG93cy5Gb3JtcywgQ3VsdHVyZT1uZXV0cmFs
         LCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5BQEAAAAmU3lzdGVtLldpbmRvd3MuRm9ybXMu
         SW1hZ2VMaXN0U3RyZWFtZXIBAAAABERhdGEHAgIAAAAJAwAAAA8DAAAAuAsAAAJNU0Z0AUkBTAIBAQQB
-        AAEYAQABGAEAARgBAAEYAQAE/wEJAQAI/wFCAU0BNgEEBgABNgEEAgABKAMAAWADAAEwAwABAQEAAQgG
+        AAEgAQABIAEAARgBAAEYAQAE/wEJAQAI/wFCAU0BNgEEBgABNgEEAgABKAMAAWADAAEwAwABAQEAAQgG
         AAESGAABgAIAAYADAAKAAQABgAMAAYABAAGAAQACgAIAA8ABAAHAAdwBwAEAAfABygGmAQABMwUAATMB
         AAEzAQABMwEAAjMCAAMWAQADHAEAAyIBAAMpAQADVQEAA00BAANCAQADOQEAAYABfAH/AQACUAH/AQAB
         kwEAAdYBAAH/AewBzAEAAcYB1gHvAQAB1gLnAQABkAGpAa0CAAH/ATMDAAFmAwABmQMAAcwCAAEzAwAC
@@ -116,10 +121,5 @@
         gQH/AYEB8AH/AQcBwwHnAcMD/wGAAQABAQHwAX4BBwHhAf8BhwP/AcABAAEDAfgBAAEHAfABfgEPA/8B
         4AEAAQcB/AEAAScB8AEAAQ8D/wH8AQABPwH/AQAB9wH8AQABPwn/Af4BAAF/GP8L
 </value>
-  </data>
-  <data name="lblConnectionInfo.Text" xml:space="preserve">
-    <value>It's really important to select the correct network adapter or otherwise you will not be able to connect with the client to the server. In most cases the name of the Network adapter looks like "Ethernet" or "Wi-Fi" and the ip address in most cases looks like "192.168.178.xxx".
-
-The default port for Macro Deck is 8191. If some other application uses this port, you can change it.</value>
   </data>
 </root>

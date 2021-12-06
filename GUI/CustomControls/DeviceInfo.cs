@@ -120,6 +120,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             if (macroDeckProfile != null)
             {
                 DeviceManager.SetProfile(this._macroDeckDevice, macroDeckProfile);
+                DeviceManager.SaveKnownDevices();
             }
         }
 

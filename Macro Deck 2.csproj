@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
-    <VersionMinor>5</VersionMinor>
-    <VersionPatch>1</VersionPatch>
+    <VersionMinor>6</VersionMinor>
+    <VersionPatch>0</VersionPatch>
     <VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString())$([System.DateTime]::UtcNow.ToString("Hmm"))</VersionRevision>
   </PropertyGroup>
   
@@ -14,7 +14,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>appicon.ico</ApplicationIcon>
     <StartupObject>SuchByte.MacroDeck.MacroDeck</StartupObject>
-    <Version>$(VersionMajor).$(VersionMinor).$(VersionPatch)</Version>
+    <Version>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(VersionRevision)</Version>
     <Company>Macro Deck</Company>
     <Authors>Manuel Mayer</Authors>
     <SignAssembly>false</SignAssembly>

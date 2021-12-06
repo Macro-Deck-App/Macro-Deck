@@ -62,6 +62,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblInstalledVersionLabel = new System.Windows.Forms.Label();
             this.lblUpdates = new System.Windows.Forms.Label();
             this.tabAbout = new System.Windows.Forms.TabPage();
+            this.label1 = new System.Windows.Forms.Label();
             this.lblTranslationBy = new System.Windows.Forms.Label();
             this.btnLicenses = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.lblPluginAPIVersion = new System.Windows.Forms.Label();
@@ -76,7 +77,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblMacroDeck = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tabIcons = new System.Windows.Forms.ImageList(this.components);
-            this.label1 = new System.Windows.Forms.Label();
             this.verticalTabControl.SuspendLayout();
             this.tabGeneral.SuspendLayout();
             this.tabConnection.SuspendLayout();
@@ -487,6 +487,16 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabAbout.TabIndex = 2;
             this.tabAbout.Text = "About";
             // 
+            // label1
+            // 
+            this.label1.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label1.Location = new System.Drawing.Point(219, 173);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(485, 18);
+            this.label1.TabIndex = 15;
+            this.label1.Text = "Licensed under Apache-2.0";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // lblTranslationBy
             // 
             this.lblTranslationBy.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -630,16 +640,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabIcons.Images.SetKeyName(1, "Wifi.png");
             this.tabIcons.Images.SetKeyName(2, "Update.png");
             this.tabIcons.Images.SetKeyName(3, "Information.png");
-            // 
-            // label1
-            // 
-            this.label1.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(219, 173);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(485, 18);
-            this.label1.TabIndex = 15;
-            this.label1.Text = "Licensed under Apache-2.0";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // SettingsView
             // 
