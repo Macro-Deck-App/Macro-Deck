@@ -197,8 +197,8 @@ namespace SuchByte.MacroDeck.Language
         public string About = "About";
         public string NoUpdatesAvailable = "No updates available";
         public string LatestVersionInstalled = "The latest version is already installed";
-        public string WarningDevVersions = "Dev versions can be really instable and can cause crashes or data loss (configured action buttons, folders and profiles). You really want to change to the Dev update channel?";
-        public string WarningBetaVersions = "Beta versions can sometimes be instable and can cause crashes. You really want to change to the Beta update channel?";
+        public string WarningDevVersions = "Dev versions can be really instable and can cause crashes or data loss (configured action buttons, folders and profiles). You really want to enable the Dev update channel?";
+        public string WarningBetaVersions = "Beta versions can sometimes be instable and can cause crashes. You really want to enable the Beta update channel?";
         public string VariableXGetsDeleted = "The variable {0} gets deleted";
         public string DeckTitle = "Deck";
         public string DeviceManagerTitle = "Device manager";
@@ -267,5 +267,7 @@ namespace SuchByte.MacroDeck.Language
         public string OnlyUserCreatedVariablesVisible = "Only user-created variables are visible";
         public string MacroDeckUsesCottleTemplateEngine = "Macro Deck uses the Cottle template engine. Click here for more information.";
         public string Result = "Result";
+        public string InstallDevVersions = "Install Dev versions";
+        public string InstallBetaVersions = "Install Beta versions";
     }
 }

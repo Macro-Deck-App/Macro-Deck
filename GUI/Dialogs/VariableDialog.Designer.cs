@@ -118,6 +118,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.variableName.Size = new System.Drawing.Size(279, 30);
             this.variableName.TabIndex = 7;
             this.variableName.TextAlignment = System.Windows.Forms.HorizontalAlignment.Left;
+            this.variableName.TextChanged += VariableName_TextChanged;
             // 
             // lblValue
             // 
@@ -190,6 +191,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.PerformLayout();
 
         }
+
 
         #endregion
 

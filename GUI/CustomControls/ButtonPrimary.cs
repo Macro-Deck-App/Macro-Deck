@@ -21,6 +21,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         private Color hoverColor = Color.FromArgb(0, 89, 184);
         private string text = "";
         private Image _icon;
+        private bool currentlyAnimating = false;
+        private Bitmap spinnerBitmap = Properties.Resources.Spinner;
 
         public Image Icon
         {
@@ -30,6 +32,26 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 this._icon = value;
                 this.Invalidate();
             }
+        }
+
+        public bool Spinner = false;
+
+
+        //This method begins the animation.
+        public void AnimateImage()
+        {
+            if (!currentlyAnimating)
+            {
+
+                //Begin the animation only once.
+                ImageAnimator.Animate(spinnerBitmap, new EventHandler(this.OnFrameChanged));
+                currentlyAnimating = true;
+            }
+        }
+
+        private void OnFrameChanged(object o, EventArgs e)
+        {
+            this.Invalidate();
         }
 
         public Color HoverColor
@@ -179,7 +201,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                     {
                         TextRenderer.DrawText(pe.Graphics, text, Font, ClientRectangle, ForeColor, flags);
                     }
-                    
+                    if (Spinner)
+                    {
+                        AnimateImage();
+                        ImageAnimator.UpdateFrames();
+                        float spinnerSize = this.Height - 8;
+                        pe.Graphics.DrawImage(spinnerBitmap, 5, 4, spinnerSize, spinnerSize);
+                    }
                 }
             }
 

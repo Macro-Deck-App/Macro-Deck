@@ -36,7 +36,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.verticalTabControl = new SuchByte.MacroDeck.GUI.CustomControls.VerticalTabControl();
             this.tabGeneral = new System.Windows.Forms.TabPage();
             this.checkIconCache = new System.Windows.Forms.CheckBox();
-            this.checkAutoUpdate = new System.Windows.Forms.CheckBox();
             this.language = new SuchByte.MacroDeck.GUI.CustomControls.RoundedComboBox();
             this.lblLanguage = new System.Windows.Forms.Label();
             this.checkStartWindows = new System.Windows.Forms.CheckBox();
@@ -54,9 +53,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblNetworkAdapter = new System.Windows.Forms.Label();
             this.lblConnection = new System.Windows.Forms.Label();
             this.tabUpdater = new System.Windows.Forms.TabPage();
+            this.checkAutoUpdate = new System.Windows.Forms.CheckBox();
+            this.checkInstallBetaVersions = new System.Windows.Forms.CheckBox();
+            this.checkInstallDevVersions = new System.Windows.Forms.CheckBox();
             this.updaterPanel = new System.Windows.Forms.Panel();
-            this.updateChannel = new SuchByte.MacroDeck.GUI.CustomControls.RoundedComboBox();
-            this.lblUpdateChannelLabel = new System.Windows.Forms.Label();
             this.btnCheckUpdates = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.lblInstalledVersion = new System.Windows.Forms.Label();
             this.lblInstalledVersionLabel = new System.Windows.Forms.Label();
@@ -112,7 +112,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             this.tabGeneral.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.tabGeneral.Controls.Add(this.checkIconCache);
-            this.tabGeneral.Controls.Add(this.checkAutoUpdate);
             this.tabGeneral.Controls.Add(this.language);
             this.tabGeneral.Controls.Add(this.lblLanguage);
             this.tabGeneral.Controls.Add(this.checkStartWindows);
@@ -130,24 +129,13 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // checkIconCache
             // 
             this.checkIconCache.AutoSize = true;
-            this.checkIconCache.Location = new System.Drawing.Point(12, 145);
+            this.checkIconCache.Location = new System.Drawing.Point(13, 112);
             this.checkIconCache.Name = "checkIconCache";
             this.checkIconCache.Size = new System.Drawing.Size(375, 23);
             this.checkIconCache.TabIndex = 14;
             this.checkIconCache.Text = "Enable icon cache (faster; higher memory usage)";
             this.checkIconCache.UseVisualStyleBackColor = true;
             this.checkIconCache.CheckedChanged += new System.EventHandler(this.CheckIconCache_CheckedChanged);
-            // 
-            // checkAutoUpdate
-            // 
-            this.checkAutoUpdate.AutoSize = true;
-            this.checkAutoUpdate.Location = new System.Drawing.Point(12, 116);
-            this.checkAutoUpdate.Name = "checkAutoUpdate";
-            this.checkAutoUpdate.Size = new System.Drawing.Size(253, 23);
-            this.checkAutoUpdate.TabIndex = 13;
-            this.checkAutoUpdate.Text = "Automatically check for updates";
-            this.checkAutoUpdate.UseVisualStyleBackColor = true;
-            this.checkAutoUpdate.CheckedChanged += new System.EventHandler(this.CheckAutoUpdate_CheckedChanged);
             // 
             // language
             // 
@@ -180,7 +168,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // checkStartWindows
             // 
             this.checkStartWindows.AutoSize = true;
-            this.checkStartWindows.Location = new System.Drawing.Point(12, 87);
+            this.checkStartWindows.Location = new System.Drawing.Point(13, 89);
             this.checkStartWindows.Name = "checkStartWindows";
             this.checkStartWindows.Size = new System.Drawing.Size(165, 23);
             this.checkStartWindows.TabIndex = 2;
@@ -364,9 +352,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // tabUpdater
             // 
             this.tabUpdater.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.tabUpdater.Controls.Add(this.checkAutoUpdate);
+            this.tabUpdater.Controls.Add(this.checkInstallBetaVersions);
+            this.tabUpdater.Controls.Add(this.checkInstallDevVersions);
             this.tabUpdater.Controls.Add(this.updaterPanel);
-            this.tabUpdater.Controls.Add(this.updateChannel);
-            this.tabUpdater.Controls.Add(this.lblUpdateChannelLabel);
             this.tabUpdater.Controls.Add(this.btnCheckUpdates);
             this.tabUpdater.Controls.Add(this.lblInstalledVersion);
             this.tabUpdater.Controls.Add(this.lblInstalledVersionLabel);
@@ -378,40 +367,44 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabUpdater.Size = new System.Drawing.Size(923, 526);
             this.tabUpdater.TabIndex = 1;
             this.tabUpdater.Text = "Updates";
+            this.tabUpdater.Click += new System.EventHandler(this.tabUpdater_Click);
+            // 
+            // checkAutoUpdate
+            // 
+            this.checkAutoUpdate.AutoSize = true;
+            this.checkAutoUpdate.Location = new System.Drawing.Point(13, 28);
+            this.checkAutoUpdate.Name = "checkAutoUpdate";
+            this.checkAutoUpdate.Size = new System.Drawing.Size(253, 23);
+            this.checkAutoUpdate.TabIndex = 17;
+            this.checkAutoUpdate.Text = "Automatically check for updates";
+            this.checkAutoUpdate.UseVisualStyleBackColor = true;
+            // 
+            // checkInstallBetaVersions
+            // 
+            this.checkInstallBetaVersions.AutoSize = true;
+            this.checkInstallBetaVersions.Location = new System.Drawing.Point(13, 74);
+            this.checkInstallBetaVersions.Name = "checkInstallBetaVersions";
+            this.checkInstallBetaVersions.Size = new System.Drawing.Size(169, 23);
+            this.checkInstallBetaVersions.TabIndex = 16;
+            this.checkInstallBetaVersions.Text = "Install Beta versions";
+            this.checkInstallBetaVersions.UseVisualStyleBackColor = true;
+            // 
+            // checkInstallDevVersions
+            // 
+            this.checkInstallDevVersions.AutoSize = true;
+            this.checkInstallDevVersions.Location = new System.Drawing.Point(13, 51);
+            this.checkInstallDevVersions.Name = "checkInstallDevVersions";
+            this.checkInstallDevVersions.Size = new System.Drawing.Size(166, 23);
+            this.checkInstallDevVersions.TabIndex = 15;
+            this.checkInstallDevVersions.Text = "Install Dev versions";
+            this.checkInstallDevVersions.UseVisualStyleBackColor = true;
             // 
             // updaterPanel
             // 
-            this.updaterPanel.Location = new System.Drawing.Point(3, 105);
+            this.updaterPanel.Location = new System.Drawing.Point(3, 103);
             this.updaterPanel.Name = "updaterPanel";
-            this.updaterPanel.Size = new System.Drawing.Size(920, 418);
+            this.updaterPanel.Size = new System.Drawing.Size(920, 420);
             this.updaterPanel.TabIndex = 14;
-            // 
-            // updateChannel
-            // 
-            this.updateChannel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.updateChannel.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.updateChannel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.updateChannel.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.updateChannel.ForeColor = System.Drawing.Color.White;
-            this.updateChannel.Icon = null;
-            this.updateChannel.Location = new System.Drawing.Point(167, 70);
-            this.updateChannel.Margin = new System.Windows.Forms.Padding(4);
-            this.updateChannel.Name = "updateChannel";
-            this.updateChannel.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
-            this.updateChannel.SelectedIndex = -1;
-            this.updateChannel.SelectedItem = null;
-            this.updateChannel.Size = new System.Drawing.Size(119, 31);
-            this.updateChannel.TabIndex = 11;
-            this.updateChannel.SelectedIndexChanged += new System.EventHandler(this.UpdateChannel_SelectedIndexChanged);
-            // 
-            // lblUpdateChannelLabel
-            // 
-            this.lblUpdateChannelLabel.AutoSize = true;
-            this.lblUpdateChannelLabel.Location = new System.Drawing.Point(3, 77);
-            this.lblUpdateChannelLabel.Name = "lblUpdateChannelLabel";
-            this.lblUpdateChannelLabel.Size = new System.Drawing.Size(124, 19);
-            this.lblUpdateChannelLabel.TabIndex = 10;
-            this.lblUpdateChannelLabel.Text = "Update channel:";
             // 
             // btnCheckUpdates
             // 
@@ -424,11 +417,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.btnCheckUpdates.ForeColor = System.Drawing.Color.White;
             this.btnCheckUpdates.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
             this.btnCheckUpdates.Icon = null;
-            this.btnCheckUpdates.Location = new System.Drawing.Point(312, 41);
+            this.btnCheckUpdates.Location = new System.Drawing.Point(354, 65);
             this.btnCheckUpdates.Name = "btnCheckUpdates";
             this.btnCheckUpdates.Progress = 0;
             this.btnCheckUpdates.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
-            this.btnCheckUpdates.Size = new System.Drawing.Size(180, 25);
+            this.btnCheckUpdates.Size = new System.Drawing.Size(215, 32);
             this.btnCheckUpdates.TabIndex = 9;
             this.btnCheckUpdates.Text = "Check for updates now";
             this.btnCheckUpdates.UseVisualStyleBackColor = false;
@@ -436,21 +429,21 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // lblInstalledVersion
             // 
-            this.lblInstalledVersion.AutoSize = true;
-            this.lblInstalledVersion.Location = new System.Drawing.Point(167, 42);
+            this.lblInstalledVersion.Location = new System.Drawing.Point(769, 29);
             this.lblInstalledVersion.Name = "lblInstalledVersion";
-            this.lblInstalledVersion.Size = new System.Drawing.Size(46, 19);
+            this.lblInstalledVersion.Size = new System.Drawing.Size(151, 19);
             this.lblInstalledVersion.TabIndex = 8;
             this.lblInstalledVersion.Text = "2.0.0";
+            this.lblInstalledVersion.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lblInstalledVersionLabel
             // 
-            this.lblInstalledVersionLabel.AutoSize = true;
-            this.lblInstalledVersionLabel.Location = new System.Drawing.Point(3, 42);
+            this.lblInstalledVersionLabel.Location = new System.Drawing.Point(534, 29);
             this.lblInstalledVersionLabel.Name = "lblInstalledVersionLabel";
-            this.lblInstalledVersionLabel.Size = new System.Drawing.Size(133, 19);
+            this.lblInstalledVersionLabel.Size = new System.Drawing.Size(229, 19);
             this.lblInstalledVersionLabel.TabIndex = 7;
             this.lblInstalledVersionLabel.Text = "Installed Version:";
+            this.lblInstalledVersionLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lblUpdates
             // 
@@ -699,8 +692,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private CustomControls.ButtonPrimary btnCheckUpdates;
         private System.Windows.Forms.Label lblInstalledVersion;
         private System.Windows.Forms.Label lblInstalledVersionLabel;
-        private RoundedComboBox updateChannel;
-        private System.Windows.Forms.Label lblUpdateChannelLabel;
         private System.Windows.Forms.Label lblPluginAPIVersion;
         private System.Windows.Forms.Label lblWebsocketAPIVersion;
         private System.Windows.Forms.Label lblPluginAPILabel;
@@ -708,9 +699,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private CustomControls.ButtonPrimary btnLicenses;
         private System.Windows.Forms.Label lblTranslationBy;
         private System.Windows.Forms.Panel updaterPanel;
-        private System.Windows.Forms.CheckBox checkAutoUpdate;
         private System.Windows.Forms.CheckBox checkIconCache;
         private System.Windows.Forms.ImageList tabIcons;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.CheckBox checkInstallBetaVersions;
+        private System.Windows.Forms.CheckBox checkInstallDevVersions;
+        private System.Windows.Forms.CheckBox checkAutoUpdate;
     }
 }

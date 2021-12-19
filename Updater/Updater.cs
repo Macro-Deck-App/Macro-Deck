@@ -78,29 +78,15 @@ namespace SuchByte.MacroDeck.Updater
             {
                 using (WebClient wc = new WebClient())
                 {
-                    string channel = "stable";
-                    switch (MacroDeck.Configuration.UpdateChannel)
-                    {
-                        case 0:
-                            channel = "dev";
-                            break;
-                        case 1:
-                            channel = "beta";
-                            break;
-                        /*case 2:
-                            channel = "stable";
-                            break;*/
-                        default:
-                            channel = "dev";
-                            break;
-                    }
+                    string jsonString = "";
 
                     if (_testChannel)
                     {
-                        channel = "test";
+                        jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest&channel=test");
                     }
 
-                    var jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest&channel=" + channel);
+                    jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest" + (MacroDeck.Configuration.UpdateDevVersions ? "&dev" : "") + (MacroDeck.Configuration.UpdateBetaVersions ? "&beta" : ""));
+
                     _jsonObject = JObject.Parse(jsonString);
                     if (_jsonObject["build"] != null)
                     {

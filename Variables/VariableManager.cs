@@ -295,10 +295,11 @@ namespace SuchByte.MacroDeck.Variables
         }
 
 
-        private static string ConvertNameString(string str)
+        public static string ConvertNameString(string str)
         {
             return str.ToString().ToLower()
                 .Replace(" ", "_", StringComparison.OrdinalIgnoreCase)
+                .Replace("|", "_", StringComparison.OrdinalIgnoreCase)
                 .Replace(".", "_", StringComparison.OrdinalIgnoreCase)
                 .Replace("-", "_", StringComparison.OrdinalIgnoreCase)
                 .Replace("/", "_", StringComparison.OrdinalIgnoreCase)

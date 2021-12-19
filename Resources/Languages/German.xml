@@ -177,8 +177,8 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
   <About>Über</About>
   <NoUpdatesAvailable>Keine Updates verfügbar</NoUpdatesAvailable>
   <LatestVersionInstalled>Die aktuellste Version ist bereits installiert</LatestVersionInstalled>
-  <WarningDevVersions>Dev Versionen können sehr instabil sein und Datenverlust innerhalb von Macro Deck verursachen (Konfigurierte Tasten, Ordner und Profile). Zum Dev Updatekanal wechseln?</WarningDevVersions>
-  <WarningBetaVersions>Beta Versionen können instabil sein. Zum Beta Updatekanal wechseln?</WarningBetaVersions>
+  <WarningDevVersions>Dev Versionen können sehr instabil sein und Datenverlust innerhalb von Macro Deck verursachen (Konfigurierte Tasten, Ordner und Profile). Dev Updatekanal aktivieren?</WarningDevVersions>
+  <WarningBetaVersions>Beta Versionen können instabil sein. Beta Updatekanal aktivieren?</WarningBetaVersions>
   <VariableXGetsDeleted>{0} wird gelöscht</VariableXGetsDeleted>
   <DeckTitle>Deck</DeckTitle>
   <DeviceManagerTitle>Gerätemanager</DeviceManagerTitle>
@@ -248,4 +248,6 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
 	<OnlyUserCreatedVariablesVisible>Nur vom Nutzer erstellte Variablen sind sichtbar</OnlyUserCreatedVariablesVisible>
 	<MacroDeckUsesCottleTemplateEngine>Macro Deck nutzt die Cottle Template Engine. Hier klicken für mehr Informationen.</MacroDeckUsesCottleTemplateEngine>
 	<Result>Ergebnis</Result>
+	<InstallDevVersions>Dev Versionen installieren</InstallDevVersions>
+	<InstallBetaVersions>Beta Versionen installieren</InstallBetaVersions>
 </Strings>

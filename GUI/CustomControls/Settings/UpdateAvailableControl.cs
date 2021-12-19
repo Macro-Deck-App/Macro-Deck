@@ -28,47 +28,57 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             Updater.Updater.OnProgressChanged += ProgressChanged;
             Updater.Updater.OnError += Error;
 
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(Updater.Updater.UpdateObject["changelog"].ToString());
-            foreach (XmlNode node in doc.DocumentElement.ChildNodes)
+            string changelogXml = Updater.Updater.UpdateObject["changelog"].ToString();
+
+            if (!string.IsNullOrWhiteSpace(changelogXml))
             {
-                if (node.HasChildNodes == true)
+                try
                 {
-                    Label title = new Label
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml(changelogXml);
+                    foreach (XmlNode node in doc.DocumentElement.ChildNodes)
                     {
-                        AutoSize = true,
-                        MinimumSize = new Size(950, 0),
-                        MaximumSize = new Size(950, 0),
-                        Font = new Font("Tahoma", 14F, FontStyle.Bold, GraphicsUnit.Point),
-                        ForeColor = Color.White,
-                        Text = node.Name.ToString()
-                    };
-                    this.changelogPanel.Controls.Add(title);
-                    foreach (XmlNode childNode in node.ChildNodes)
-                    {
-                        if (childNode.Name.ToString() == "Text")
+                        if (node.HasChildNodes == true)
                         {
-                            Label text = new Label
+                            Label title = new Label
                             {
                                 AutoSize = true,
-                                MinimumSize = new Size(645, 0),
-                                MaximumSize = new Size(645, 0),
-                                Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point),
+                                MinimumSize = new Size(880, 0),
+                                MaximumSize = new Size(880, 0),
+                                Font = new Font("Tahoma", 14F, FontStyle.Bold, GraphicsUnit.Point),
                                 ForeColor = Color.White,
-                                Text = "● " + childNode.InnerText.ToString()
+                                Text = node.Name.ToString()
                             };
-                            this.changelogPanel.Controls.Add(text);
+                            this.changelogPanel.Controls.Add(title);
+                            foreach (XmlNode childNode in node.ChildNodes)
+                            {
+                                if (childNode.Name.ToString() == "Text")
+                                {
+                                    Label text = new Label
+                                    {
+                                        AutoSize = true,
+                                        MinimumSize = new Size(880, 0),
+                                        MaximumSize = new Size(880, 0),
+                                        Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point),
+                                        ForeColor = Color.White,
+                                        Text = "● " + childNode.InnerText.ToString()
+                                    };
+                                    this.changelogPanel.Controls.Add(text);
+                                }
+                            }
+                            Panel spacer = new Panel
+                            {
+                                AutoSize = true,
+                                MinimumSize = new Size(880, 15),
+                                MaximumSize = new Size(880, 15)
+                            };
+                            this.changelogPanel.Controls.Add(spacer);
                         }
                     }
-                    Panel spacer = new Panel
-                    {
-                        AutoSize = true,
-                        MinimumSize = new Size(950, 15),
-                        MaximumSize = new Size(950, 15)
-                    };
-                    this.changelogPanel.Controls.Add(spacer);
-                }
+                } catch { }
             }
+
+            
 
             if (Updater.Updater.Downloading)
             {

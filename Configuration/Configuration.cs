@@ -37,11 +37,15 @@ namespace SuchByte.MacroDeck.Configuration
         }
         [JsonProperty("Icons.Cache")]
         public bool CacheIcons { get; set; } = true;
+
         [JsonProperty("Update.Auto")]
         public bool AutoUpdates { get; set; } = true;
 
-        [JsonProperty("Update.Channel")]
-        public int UpdateChannel { get; set; } = 0; // 0 = dev, 1 = beta, 2 = release
+        [JsonProperty("Update.Channel.Dev")]
+        public bool UpdateDevVersions { get; set; } = true;
+
+        [JsonProperty("Update.Channel.Beta")]
+        public bool UpdateBetaVersions { get; set; } = true;
 
         [JsonProperty("Connection.Host.Address")]
         public string Host_Address { get; set; }

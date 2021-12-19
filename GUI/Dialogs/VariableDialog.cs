@@ -43,6 +43,12 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.variableValue.Enabled = !this._protected;
         }
 
+
+        private void VariableName_TextChanged(object sender, System.EventArgs e)
+        {
+            
+        }
+
         private void BtnOk_Click(object sender, EventArgs e)
         {
             if (this._protected)
@@ -56,14 +62,14 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             {
                 if (this.variableName.Text.Length == 0)
                 {
-                    this.variableName.Text = "New variable";
+                    this.variableName.Text = "new_variable";
                 }
                 int variableCount = VariableManager.Variables.FindAll(v => v.Name.Equals(this.variableName.Text)).Count;
                 if (variableCount > 0)
                 {
                     variableName.Text = String.Format(variableName.Text + " ({0})", variableCount);
                 }
-                this.Variable.Name = this.variableName.Text;
+                this.Variable.Name = VariableManager.ConvertNameString(this.variableName.Text);
             }
 
             this.Variable.Type = this.variableType.Text;

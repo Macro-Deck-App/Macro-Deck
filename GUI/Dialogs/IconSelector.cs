@@ -4,6 +4,7 @@ using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
+using SuchByte.MacroDeck.Server;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -306,6 +307,15 @@ namespace SuchByte.MacroDeck.GUI
                         {
                             this.LoadIconPacks();
                         });
+
+                        Task.Run(() =>
+                        {
+                            foreach (MacroDeckClient macroDeckClient in MacroDeckServer.Clients)
+                            {
+                                MacroDeckServer.SendAllIcons(macroDeckClient);
+                            }
+                        });
+
                         using (var messageBox = new GUI.CustomControls.MessageBox())
                         {
                             messageBox.ShowDialog(Language.LanguageManager.Strings.ImportIconPack, String.Format(Language.LanguageManager.Strings.SuccessfullyImportedIconPack, openFileDialog.SafeFileName), MessageBoxButtons.OK);

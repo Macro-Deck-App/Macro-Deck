@@ -56,13 +56,16 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblUpdates.Text = Language.LanguageManager.Strings.Updates;
             this.checkAutoUpdate.Text = Language.LanguageManager.Strings.AutomaticallyCheckUpdates;
             this.lblInstalledVersionLabel.Text = Language.LanguageManager.Strings.InstalledVersion;
-            this.lblUpdateChannelLabel.Text = Language.LanguageManager.Strings.UpdateChannel;
+            //this.lblUpdateChannelLabel.Text = Language.LanguageManager.Strings.UpdateChannel;
+            this.checkInstallDevVersions.Text = Language.LanguageManager.Strings.InstallDevVersions;
+            this.checkInstallBetaVersions.Text = Language.LanguageManager.Strings.InstallBetaVersions;
             this.btnCheckUpdates.Text = Language.LanguageManager.Strings.CheckForUpdatesNow;
             this.lblWebSocketAPILabel.Text = Language.LanguageManager.Strings.WebSocketAPIVersion;
             this.lblPluginAPILabel.Text = Language.LanguageManager.Strings.PluginAPIVersion;
             this.lblInstalledPluginsLabel.Text = Language.LanguageManager.Strings.InstalledPlugins;
             this.lblOSLabel.Text = Language.LanguageManager.Strings.OperatingSystem;
             this.lblTranslationBy.Text = String.Format(Language.LanguageManager.Strings.XTranslationByX, Language.LanguageManager.Strings.__Language__, Language.LanguageManager.Strings.__Author__);
+            Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
         }
 
         private void Settings_Load(object sender, EventArgs e)
@@ -87,6 +90,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             {
                 this.AddUpdateAvailableControl();
             }
+
         }
 
         private void LoadLanguage()
@@ -125,26 +129,70 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void LoadUpdateChannel()
         {
-            this.updateChannel.Items.Clear();
-            this.updateChannel.Items.Add("Dev");
-            this.updateChannel.Items.Add("Beta");
-
-            this.updateChannel.SelectedIndexChanged -= this.UpdateChannel_SelectedIndexChanged;
-            switch (MacroDeck.Configuration.UpdateChannel)
-            {
-                case 0:
-                    this.updateChannel.Text = "Dev";
-                    break;
-                case 1:
-                    this.updateChannel.Text = "Beta";
-                    break;
-                case 2:
-                    this.updateChannel.Text = "Stable";
-                    break;
-            }
-            this.updateChannel.SelectedIndexChanged += this.UpdateChannel_SelectedIndexChanged;
+            this.checkInstallDevVersions.CheckedChanged -= CheckInstallDevVersions_CheckedChanged;
+            this.checkInstallBetaVersions.CheckedChanged -= CheckInstallBetaVersions_CheckedChanged;
+            this.checkInstallDevVersions.Checked = MacroDeck.Configuration.UpdateDevVersions;
+            this.checkInstallBetaVersions.Checked = MacroDeck.Configuration.UpdateBetaVersions;
+            this.checkInstallDevVersions.CheckedChanged += CheckInstallDevVersions_CheckedChanged;
+            this.checkInstallBetaVersions.CheckedChanged += CheckInstallBetaVersions_CheckedChanged;
         }
-        
+
+        private void CheckInstallDevVersions_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.checkInstallDevVersions.Checked)
+            {
+                using (var msgBox = new CustomControls.MessageBox())
+                {
+                    if (msgBox.ShowDialog(Language.LanguageManager.Strings.Warning, Language.LanguageManager.Strings.WarningDevVersions, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    {
+                        this.updaterPanel.Controls.Clear();
+                        MacroDeck.Configuration.UpdateDevVersions = true;
+                        MacroDeck.SaveConfiguration();
+                        Updater.Updater.CheckForUpdatesAsync();
+                    }
+                    else
+                    {
+                        this.LoadUpdateChannel();
+                    }
+                }
+            } 
+            else
+            {
+                this.updaterPanel.Controls.Clear();
+                MacroDeck.Configuration.UpdateDevVersions = false;
+                MacroDeck.SaveConfiguration();
+                Updater.Updater.CheckForUpdatesAsync();
+            }
+        }
+
+        private void CheckInstallBetaVersions_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.checkInstallBetaVersions.Checked)
+            {
+                using (var msgBox = new CustomControls.MessageBox())
+                {
+                    if (msgBox.ShowDialog(Language.LanguageManager.Strings.Warning, Language.LanguageManager.Strings.WarningBetaVersions, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    {
+                        this.updaterPanel.Controls.Clear();
+                        MacroDeck.Configuration.UpdateBetaVersions = true;
+                        MacroDeck.SaveConfiguration();
+                        Updater.Updater.CheckForUpdatesAsync();
+                    }
+                    else
+                    {
+                        this.LoadUpdateChannel();
+                    }
+                }
+            }
+            else
+            {
+                this.updaterPanel.Controls.Clear();
+                MacroDeck.Configuration.UpdateBetaVersions = false;
+                MacroDeck.SaveConfiguration();
+                Updater.Updater.CheckForUpdatesAsync();
+            }
+        }
+
         private void LoadNetworkAdapters()
         {
             this.networkAdapter.SelectedIndexChanged -= this.NetworkAdapter_SelectedIndexChanged;
@@ -247,8 +295,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void BtnCheckUpdates_Click(object sender, EventArgs e)
         {
-            this.Invoke(new Action(() =>
-                this.btnCheckUpdates.Enabled = false
+            this.Invoke(new Action(() => {
+                this.btnCheckUpdates.Enabled = false;
+                this.btnCheckUpdates.Spinner = true;
+                }
             ));
             Updater.Updater.OnLatestVersionInstalled += OnLatestVersion;
             Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
@@ -261,6 +311,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.Invoke(new Action(() =>
             {
                 this.btnCheckUpdates.Enabled = true;
+                this.btnCheckUpdates.Spinner = false;
                 using (var msgBox = new CustomControls.MessageBox())
                 {
                     msgBox.ShowDialog(Language.LanguageManager.Strings.NoUpdatesAvailable, Language.LanguageManager.Strings.LatestVersionInstalled, MessageBoxButtons.OK);
@@ -282,59 +333,13 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private void AddUpdateAvailableControl()
         {
             this.btnCheckUpdates.Enabled = true;
+            this.btnCheckUpdates.Spinner = false;
             if (this.updaterPanel.Controls.Count != 0)
             {
                 this.updaterPanel.Controls.Clear();
             }
 
             this.updaterPanel.Controls.Add(new UpdateAvailableControl());
-        }
-
-        private void UpdateChannel_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            Updater.Updater.OnUpdateAvailable -= OnUpdateAvailable;
-            switch (this.updateChannel.SelectedItem)
-            {
-                case "Dev":
-                    using (var msgBox = new CustomControls.MessageBox())
-                    {
-                        if (msgBox.ShowDialog(Language.LanguageManager.Strings.Warning, Language.LanguageManager.Strings.WarningDevVersions, MessageBoxButtons.YesNo) == DialogResult.Yes)
-                        {
-                            MacroDeck.Configuration.UpdateChannel = 0;
-                            MacroDeck.SaveConfiguration();
-                            Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
-                            Updater.Updater.CheckForUpdatesAsync();
-                        } else
-                        {
-                            this.LoadUpdateChannel();
-                        }
-                    }
-                    
-                    break;
-                case "Beta":
-                    using (var msgBox = new CustomControls.MessageBox())
-                    {
-                        if (msgBox.ShowDialog(Language.LanguageManager.Strings.Warning, Language.LanguageManager.Strings.WarningBetaVersions, MessageBoxButtons.YesNo) == DialogResult.Yes)
-                        {
-                            MacroDeck.Configuration.UpdateChannel = 1;
-                            MacroDeck.SaveConfiguration();
-                            Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
-                            Updater.Updater.CheckForUpdatesAsync();
-                        }
-                        else
-                        {
-                            this.LoadUpdateChannel();
-                        }
-                    }
-                    break;
-                case "Stable":
-                    MacroDeck.Configuration.UpdateChannel = 2;
-                    MacroDeck.SaveConfiguration();
-                    Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
-                    Updater.Updater.CheckForUpdatesAsync();
-                    break;
-            }
-            this.updaterPanel.Controls.Clear();
         }
 
         private void BtnLicenses_Click(object sender, EventArgs e)
@@ -357,6 +362,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         {
             MacroDeck.Configuration.CacheIcons = this.checkIconCache.Checked;
             MacroDeck.SaveConfiguration();
+        }
+
+        private void tabUpdater_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

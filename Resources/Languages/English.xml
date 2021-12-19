@@ -177,8 +177,8 @@ For gifs it is recommended to use the low or the lowest preset.</IconImportQuali
   <About>About</About>
   <NoUpdatesAvailable>No updates available</NoUpdatesAvailable>
   <LatestVersionInstalled>The latest version is already installed</LatestVersionInstalled>
-  <WarningDevVersions>Dev versions can be really instable and can cause crashes or data loss (configured action buttons, folders and profiles). You really want to change to the Dev update channel?</WarningDevVersions>
-  <WarningBetaVersions>Beta versions can sometimes be instable and can cause crashes. You really want to change to the Beta update channel?</WarningBetaVersions>
+  <WarningDevVersions>Dev versions can be really instable and can cause crashes or data loss (configured action buttons, folders and profiles). You really want to enable the Dev update channel?</WarningDevVersions>
+  <WarningBetaVersions>Beta versions can sometimes be instable and can cause crashes. You really want to enable the Beta update channel?</WarningBetaVersions>
   <VariableXGetsDeleted>The variable {0} gets deleted</VariableXGetsDeleted>
   <DeckTitle>Deck</DeckTitle>
   <DeviceManagerTitle>Device manager</DeviceManagerTitle>
@@ -247,4 +247,6 @@ For gifs it is recommended to use the low or the lowest preset.</IconImportQuali
 	<OnlyUserCreatedVariablesVisible>Only user-created variables are visible</OnlyUserCreatedVariablesVisible>
 	<MacroDeckUsesCottleTemplateEngine>Macro Deck uses the Cottle template engine. Click here for more information.</MacroDeckUsesCottleTemplateEngine>
 	<Result>Result</Result>
+	<InstallDevVersions>Install Dev versions</InstallDevVersions>
+	<InstallBetaVersions>Install Beta versions</InstallBetaVersions>
 </Strings>
