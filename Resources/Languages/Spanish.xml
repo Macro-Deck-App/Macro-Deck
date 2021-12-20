@@ -247,4 +247,6 @@ Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImpor
 	<OnlyUserCreatedVariablesVisible>Solo las variables creadas por el usuario son visibles</OnlyUserCreatedVariablesVisible>
 	<MacroDeckUsesCottleTemplateEngine>Macro Deck utiliza el motor de plantillas Cottle. Haga clic aquí para más información.</MacroDeckUsesCottleTemplateEngine>
 	<Result>Resultado</Result>
+	<InstallDevVersions>Instalar versiones Dev</InstallDevVersions>
+	<InstallBetaVersions>Instalar versiones Beta</InstallBetaVersions>
 </Strings>
