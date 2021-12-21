@@ -14,6 +14,8 @@
 # Companion App
 [Repository](https://github.com/SuchByte/Macro-Deck-Client)
 
+[Google Play](https://play.google.com/store/apps/details?id=com.suchbyte.macrodeck)
+
 # Download
 https://macrodeck.org/download
 
