@@ -77,21 +77,26 @@ namespace SuchByte.MacroDeck.Variables.Plugin
         {
             if (this.OnEvent != null)
             {
-                foreach (MacroDeckProfile macroDeckProfile in ProfileManager.Profiles)
+                try
                 {
-                    foreach (MacroDeckFolder folder in macroDeckProfile.Folders)
+                    foreach (MacroDeckProfile macroDeckProfile in ProfileManager.Profiles)
                     {
-                        foreach (ActionButton.ActionButton actionButton in folder.ActionButtons.FindAll(actionButton => actionButton.EventListeners != null && actionButton.EventListeners.Find(x => x.EventToListen.Equals(this.Name)) != null))
+                        foreach (MacroDeckFolder folder in macroDeckProfile.Folders)
                         {
-                            MacroDeckEventArgs macroDeckEventArgs = new MacroDeckEventArgs
+                            if (folder.ActionButtons == null) continue;
+                            foreach (ActionButton.ActionButton actionButton in folder.ActionButtons.FindAll(actionButton => actionButton.EventListeners != null && actionButton.EventListeners.Find(x => x.EventToListen != null && x.EventToListen.Equals(this.Name)) != null))
                             {
-                                ActionButton = actionButton,
-                                Parameter = ((Variable)sender).Name,
-                            };
-                            this.OnEvent(this, macroDeckEventArgs);
+                                MacroDeckEventArgs macroDeckEventArgs = new MacroDeckEventArgs
+                                {
+                                    ActionButton = actionButton,
+                                    Parameter = ((Variable)sender).Name,
+                                };
+                                this.OnEvent(this, macroDeckEventArgs);
+                            }
                         }
                     }
                 }
+                catch { }
             }
         }
     }

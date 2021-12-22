@@ -31,40 +31,6 @@ namespace SuchByte.MacroDeck.Language
                 SaveDefault();
             }
 
-            // Load language files
-            /*foreach (var file in Directory.GetFiles(MacroDeck.MainDirectoryPath + "Language", "*.xml"))
-            {
-                try
-                {
-                    using (Stream stream = new FileStream(file, FileMode.Open, FileAccess.Read))
-                    {
-                    
-                        Strings strings = (Strings)new XmlSerializer(typeof(Strings)).Deserialize(stream);
-                        if (_languages.FindAll(l => l.__Language__.Equals(strings.__Language__) && l.__LanguageCode__.Equals(strings.__LanguageCode__) && l.__Author__.Equals(strings.__Author__)).Count > 0) continue;
-                        _languages.Add(strings);
-                    }
-                }
-                catch { }
-            }
-
-            // Load user language files
-            foreach (var file in Directory.GetFiles(MacroDeck.LanguagesPath, "*.xml"))
-            {
-                try
-                {
-                    using (Stream stream = new FileStream(file, FileMode.Open, FileAccess.Read))
-                    {
-                    
-                        Strings strings = (Strings)new XmlSerializer(typeof(Strings)).Deserialize(stream);
-                        if (_languages.FindAll(l => l.__Language__.Equals(strings.__Language__) && l.__LanguageCode__.Equals(strings.__LanguageCode__) && l.__Author__.Equals(strings.__Author__)).Count > 0) continue;
-                        _languages.Add(strings);
-                    }
-                }
-                catch { }
-            }*/
-
-
-
             // Loading languages from resources
             var assembly = typeof(Strings).Assembly;
             foreach (var manifestResource in assembly.GetManifestResourceNames())
@@ -100,7 +66,8 @@ namespace SuchByte.MacroDeck.Language
             {
                 XmlSerializer writer = new XmlSerializer(typeof(Strings));
 
-                var path = MacroDeck.MainDirectoryPath + "Language" + "//" + _strings.__Language__ + ".xml";
+                var path = Path.Combine(MacroDeck.MainDirectoryPath, "Language", _strings.__Language__ + ".xml");
+                Directory.CreateDirectory(Path.Combine(MacroDeck.MainDirectoryPath, "Language"));
                 using (FileStream fileStream = File.Create(path))
                 {
                     writer.Serialize(fileStream, _strings);

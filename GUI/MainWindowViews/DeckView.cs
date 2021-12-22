@@ -367,6 +367,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     {
                         pluginAction.SetActionButton(newTargetButton);
                     }
+                    if (newTargetButton.EventListeners == null)
+                    {
+                        newTargetButton.EventListeners = new List<EventListener>();
+                    }
                     foreach (var eventListener in newTargetButton.EventListeners)
                     {
                         foreach (PluginAction pluginAction in eventListener.Actions)

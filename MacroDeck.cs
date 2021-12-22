@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SuchByte.MacroDeck.Backups;
 using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.Dialogs;
@@ -36,19 +37,20 @@ namespace SuchByte.MacroDeck
 
         internal static bool SafeMode = false;
 
-        internal static readonly string MainDirectoryPath = AppDomain.CurrentDomain.BaseDirectory + "\\";
-        public static readonly string UserDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Macro Deck\\";
-        public static readonly string PluginsDirectoryPath = UserDirectoryPath + "plugins\\";
-        public static readonly string UpdatePluginsDirectoryPath = PluginsDirectoryPath + ".updates\\";
-        public static readonly string TempDirectoryPath = UserDirectoryPath + ".temp\\";
-        public static readonly string IconPackDirectoryPath = UserDirectoryPath + "iconpacks\\";
-        public static readonly string PluginCredentialsPath = UserDirectoryPath + "credentials\\";
-        public static readonly string PluginConfigPath = UserDirectoryPath + "configs\\";
+        internal static readonly string MainDirectoryPath = AppDomain.CurrentDomain.BaseDirectory;
+        public static readonly string UserDirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Macro Deck");
+        public static readonly string PluginsDirectoryPath = Path.Combine(UserDirectoryPath, "plugins");
+        public static readonly string UpdatePluginsDirectoryPath = Path.Combine(PluginsDirectoryPath, ".updates");
+        public static readonly string TempDirectoryPath = Path.Combine(UserDirectoryPath, ".temp");
+        public static readonly string IconPackDirectoryPath = Path.Combine(UserDirectoryPath, "iconpacks");
+        public static readonly string PluginCredentialsPath = Path.Combine(UserDirectoryPath, "credentials");
+        public static readonly string PluginConfigPath = Path.Combine(UserDirectoryPath, "configs");
+        public static readonly string BackupsDirectoryPath = Path.Combine(UserDirectoryPath, "backups");
 
-        public static readonly string ConfigFilePath = UserDirectoryPath + "config.json";
-        public static readonly string DevicesFilePath = UserDirectoryPath + "devices.json";
-        public static readonly string VariablesFilePath = UserDirectoryPath + "variables.db";
-        public static readonly string ProfilesFilePath = UserDirectoryPath + "profiles.db";
+        public static readonly string ConfigFilePath = Path.Combine(UserDirectoryPath, "config.json");
+        public static readonly string DevicesFilePath = Path.Combine(UserDirectoryPath, "devices.json");
+        public static readonly string VariablesFilePath = Path.Combine(UserDirectoryPath, "variables.db");
+        public static readonly string ProfilesFilePath = Path.Combine(UserDirectoryPath, "profiles.db");
 
         public static event EventHandler OnMainWindowLoad;
 
@@ -127,6 +129,19 @@ namespace SuchByte.MacroDeck
                 { Console.WriteLine(ex.Message); }
             }
 
+            if (!Directory.Exists(BackupsDirectoryPath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(BackupsDirectoryPath);
+                }
+                catch (Exception ex)
+                { Console.WriteLine(ex.Message); }
+            }
+
+            BackupManager.CheckRestoreDirectory();
+
+
             if (!Directory.Exists(TempDirectoryPath))
             {
                 try
@@ -142,11 +157,18 @@ namespace SuchByte.MacroDeck
 
                 foreach (FileInfo file in di.GetFiles())
                 {
-                    file.Delete();
+                    try
+                    {
+                        file.Delete();
+                    } catch { }
                 }
                 foreach (DirectoryInfo dir in di.GetDirectories())
                 {
-                    dir.Delete(true);
+                    try
+                    {
+                        dir.Delete(true);
+                    }
+                    catch { }
                 }
             }
 
@@ -184,7 +206,7 @@ namespace SuchByte.MacroDeck
             if (!File.Exists(ConfigFilePath))
             {
                 // Start initial setup
-                using (var initialSetup = new GUI.InitialSetup())
+                using (var initialSetup = new InitialSetup())
                 {
                     Application.Run(initialSetup);
                     if (initialSetup.DialogResult == DialogResult.OK)

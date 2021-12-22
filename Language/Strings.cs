@@ -269,5 +269,24 @@ namespace SuchByte.MacroDeck.Language
         public string Result = "Result";
         public string InstallDevVersions = "Install Dev versions";
         public string InstallBetaVersions = "Install Beta versions";
+        public string WhatDoYouWantToRestore = "What do you want to restore from the backup?";
+        public string Configuration = "Configuration";
+        public string Profiles = "Profiles";
+        public string Variables = "Variables";
+        public string PluginConfigurations = "Plugin configurations";
+        public string PluginCredentials = "Plugin credentials";
+        public string InstalledIconPacks = "Installed icon packs";
+        public string Restore = "Restore";
+        public string ActionCannotBeReversed = "This action can not be reversed";
+        public string ThisWillDeleteBackupPermanently = "This will delete the backup permanently";
+        public string Created = "Created";
+        public string PleaseWait = "Please wait...";
+        public string Backups = "Backups";
+        public string CreateBackup = "Create backup";
+        public string BackupFailed = "Backup failed";
+        public string BackupSuccessfullyCreated = "Backup successfully created";
+        public string CreateBackupBeforeUpdate = "Do you want to create a backup before the update?";
+        public string CreatingBackup = "Creating backup...";
+
     }
 }

@@ -1,7 +1,10 @@
 ﻿using ImageMagick;
+using Newtonsoft.Json;
+using SQLite;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.JSON;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
@@ -142,8 +145,8 @@ namespace SuchByte.MacroDeck.GUI
                                                 image.Quality = 50;
                                                 image.Crop(iconImportQuality.Pixels, iconImportQuality.Pixels);
                                             }
-                                            collection.Write(MacroDeck.TempDirectoryPath + new FileInfo(file).Name + ".resized");
-                                            byte[] imageBytes = File.ReadAllBytes(MacroDeck.TempDirectoryPath + new FileInfo(file).Name + ".resized");
+                                            collection.Write(Path.Combine(MacroDeck.TempDirectoryPath, new FileInfo(file).Name + ".resized"));
+                                            byte[] imageBytes = File.ReadAllBytes(Path.Combine(MacroDeck.TempDirectoryPath, new FileInfo(file).Name + ".resized"));
                                             using (var ms = new MemoryStream(imageBytes))
                                             {
                                                 icons.Add(Image.FromStream(ms));
@@ -301,7 +304,20 @@ namespace SuchByte.MacroDeck.GUI
                 {
                     try
                     {
-                        File.Copy(Path.GetFullPath(openFileDialog.FileName), Path.Combine(MacroDeck.IconPackDirectoryPath, openFileDialog.SafeFileName));
+                        var db = new SQLiteConnection(Path.GetFullPath(openFileDialog.FileName));
+                        var query = db.Table<IconPackJson>();
+
+                        string jsonString = query.First().JsonString;
+                        IconPack iconPack = JsonConvert.DeserializeObject<IconPack>(jsonString, new JsonSerializerSettings
+                        {
+                            TypeNameHandling = TypeNameHandling.Auto,
+                            NullValueHandling = NullValueHandling.Ignore,
+                            Error = (sender, args) => { args.ErrorContext.Handled = true; }
+                        });
+
+                        db.Close();
+
+                        File.Copy(Path.GetFullPath(openFileDialog.FileName), Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.Name + ".iconpack"));
                         IconManager.LoadIconPacks();
                         Task.Run(() =>
                         {
@@ -396,9 +412,9 @@ namespace SuchByte.MacroDeck.GUI
                             }
                             else
                             {
-                                iconCreator.Image.Save(MacroDeck.TempDirectoryPath + "iconcreator");
+                                iconCreator.Image.Save(Path.Combine(MacroDeck.TempDirectoryPath, "iconcreator"));
 
-                                using (var collection = new MagickImageCollection(new FileInfo(Path.GetFullPath(MacroDeck.TempDirectoryPath + "iconcreator"))))
+                                using (var collection = new MagickImageCollection(new FileInfo(Path.GetFullPath(Path.Combine(MacroDeck.TempDirectoryPath, "iconcreator")))))
                                 {
                                     Cursor.Current = Cursors.WaitCursor;
                                     collection.Coalesce();
@@ -410,8 +426,8 @@ namespace SuchByte.MacroDeck.GUI
                                     }
                                     try
                                     {
-                                        collection.Write(new FileInfo(Path.GetFullPath(MacroDeck.TempDirectoryPath + "iconcreator.resized")));
-                                        byte[] imageBytes = File.ReadAllBytes(MacroDeck.TempDirectoryPath + "iconcreator.resized");
+                                        collection.Write(new FileInfo(Path.GetFullPath(Path.Combine(MacroDeck.TempDirectoryPath, "iconcreator.resized"))));
+                                        byte[] imageBytes = File.ReadAllBytes(Path.Combine(MacroDeck.TempDirectoryPath, "iconcreator.resized"));
                                         using (var ms = new MemoryStream(imageBytes))
                                         {
                                             icon = Image.FromStream(ms);
@@ -442,11 +458,11 @@ namespace SuchByte.MacroDeck.GUI
                             Image icon = null;
                             if (iconImportQuality.Pixels == -1)
                             {
-                                icon = Image.FromFile(Path.GetFullPath(MacroDeck.TempDirectoryPath + "giphy"));
+                                icon = Image.FromFile(Path.GetFullPath(Path.Combine(MacroDeck.TempDirectoryPath, "giphy")));
                             }
                             else
                             {
-                                using (var collection = new MagickImageCollection(new FileInfo(Path.GetFullPath(MacroDeck.TempDirectoryPath + "giphy"))))
+                                using (var collection = new MagickImageCollection(new FileInfo(Path.GetFullPath(Path.Combine(MacroDeck.TempDirectoryPath, "giphy")))))
                                 {
                                     Cursor.Current = Cursors.WaitCursor;
                                     collection.Coalesce();
@@ -458,8 +474,8 @@ namespace SuchByte.MacroDeck.GUI
                                     }
                                     try
                                     {
-                                        collection.Write(new FileInfo(Path.GetFullPath(MacroDeck.TempDirectoryPath + "giphy.resized")));
-                                        byte[] imageBytes = File.ReadAllBytes(MacroDeck.TempDirectoryPath + "giphy.resized");
+                                        collection.Write(new FileInfo(Path.GetFullPath(Path.Combine(MacroDeck.TempDirectoryPath, "giphy.resized"))));
+                                        byte[] imageBytes = File.ReadAllBytes(Path.Combine(MacroDeck.TempDirectoryPath, "giphy.resized"));
                                         using (var ms = new MemoryStream(imageBytes))
                                         {
                                             icon = Image.FromStream(ms);

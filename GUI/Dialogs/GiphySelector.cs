@@ -195,7 +195,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             Cursor.Current = Cursors.Default;
             try
             {
-                using (FileStream fs = File.Create(MacroDeck.TempDirectoryPath + "giphy"))
+                using (FileStream fs = File.Create(Path.Combine(MacroDeck.TempDirectoryPath, "giphy")))
                 {
                     e.Result.CopyTo(fs);
                 }

@@ -61,6 +61,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblInstalledVersion = new System.Windows.Forms.Label();
             this.lblInstalledVersionLabel = new System.Windows.Forms.Label();
             this.lblUpdates = new System.Windows.Forms.Label();
+            this.tabBackups = new System.Windows.Forms.TabPage();
+            this.btnCreateBackup = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
+            this.backupsPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.lblBackups = new System.Windows.Forms.Label();
             this.tabAbout = new System.Windows.Forms.TabPage();
             this.label1 = new System.Windows.Forms.Label();
             this.lblTranslationBy = new System.Windows.Forms.Label();
@@ -83,6 +87,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.groupConnectionInfo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.port)).BeginInit();
             this.tabUpdater.SuspendLayout();
+            this.tabBackups.SuspendLayout();
             this.tabAbout.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -96,6 +101,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.verticalTabControl.Controls.Add(this.tabGeneral);
             this.verticalTabControl.Controls.Add(this.tabConnection);
             this.verticalTabControl.Controls.Add(this.tabUpdater);
+            this.verticalTabControl.Controls.Add(this.tabBackups);
             this.verticalTabControl.Controls.Add(this.tabAbout);
             this.verticalTabControl.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.verticalTabControl.ImageList = this.tabIcons;
@@ -367,7 +373,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabUpdater.Size = new System.Drawing.Size(923, 526);
             this.tabUpdater.TabIndex = 1;
             this.tabUpdater.Text = "Updates";
-            this.tabUpdater.Click += new System.EventHandler(this.tabUpdater_Click);
             // 
             // checkAutoUpdate
             // 
@@ -454,6 +459,58 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblUpdates.Size = new System.Drawing.Size(88, 25);
             this.lblUpdates.TabIndex = 2;
             this.lblUpdates.Text = "Updates";
+            // 
+            // tabBackups
+            // 
+            this.tabBackups.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.tabBackups.Controls.Add(this.btnCreateBackup);
+            this.tabBackups.Controls.Add(this.backupsPanel);
+            this.tabBackups.Controls.Add(this.lblBackups);
+            this.tabBackups.ForeColor = System.Drawing.Color.White;
+            this.tabBackups.Location = new System.Drawing.Point(204, 4);
+            this.tabBackups.Name = "tabBackups";
+            this.tabBackups.Size = new System.Drawing.Size(923, 526);
+            this.tabBackups.TabIndex = 4;
+            this.tabBackups.Text = "Backups";
+            // 
+            // btnCreateBackup
+            // 
+            this.btnCreateBackup.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
+            this.btnCreateBackup.BorderRadius = 8;
+            this.btnCreateBackup.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnCreateBackup.FlatAppearance.BorderSize = 0;
+            this.btnCreateBackup.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCreateBackup.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnCreateBackup.ForeColor = System.Drawing.Color.White;
+            this.btnCreateBackup.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnCreateBackup.Icon = null;
+            this.btnCreateBackup.Location = new System.Drawing.Point(770, 493);
+            this.btnCreateBackup.Name = "btnCreateBackup";
+            this.btnCreateBackup.Progress = 0;
+            this.btnCreateBackup.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
+            this.btnCreateBackup.Size = new System.Drawing.Size(150, 30);
+            this.btnCreateBackup.TabIndex = 5;
+            this.btnCreateBackup.Text = "Create backup";
+            this.btnCreateBackup.UseVisualStyleBackColor = false;
+            this.btnCreateBackup.Click += new System.EventHandler(this.BtnCreateBackup_Click);
+            // 
+            // backupsPanel
+            // 
+            this.backupsPanel.AutoScroll = true;
+            this.backupsPanel.Location = new System.Drawing.Point(3, 28);
+            this.backupsPanel.Name = "backupsPanel";
+            this.backupsPanel.Size = new System.Drawing.Size(917, 459);
+            this.backupsPanel.TabIndex = 4;
+            // 
+            // lblBackups
+            // 
+            this.lblBackups.AutoSize = true;
+            this.lblBackups.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblBackups.Location = new System.Drawing.Point(3, 0);
+            this.lblBackups.Name = "lblBackups";
+            this.lblBackups.Size = new System.Drawing.Size(89, 25);
+            this.lblBackups.TabIndex = 3;
+            this.lblBackups.Text = "Backups";
             // 
             // tabAbout
             // 
@@ -632,7 +689,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabIcons.Images.SetKeyName(0, "settings.png");
             this.tabIcons.Images.SetKeyName(1, "Wifi.png");
             this.tabIcons.Images.SetKeyName(2, "Update.png");
-            this.tabIcons.Images.SetKeyName(3, "Information.png");
+            this.tabIcons.Images.SetKeyName(3, "Backup-Restore.png");
+            this.tabIcons.Images.SetKeyName(4, "Information.png");
             // 
             // SettingsView
             // 
@@ -653,6 +711,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             ((System.ComponentModel.ISupportInitialize)(this.port)).EndInit();
             this.tabUpdater.ResumeLayout(false);
             this.tabUpdater.PerformLayout();
+            this.tabBackups.ResumeLayout(false);
+            this.tabBackups.PerformLayout();
             this.tabAbout.ResumeLayout(false);
             this.tabAbout.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -705,5 +765,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private System.Windows.Forms.CheckBox checkInstallBetaVersions;
         private System.Windows.Forms.CheckBox checkInstallDevVersions;
         private System.Windows.Forms.CheckBox checkAutoUpdate;
+        private System.Windows.Forms.TabPage tabBackups;
+        private System.Windows.Forms.Label lblBackups;
+        private System.Windows.Forms.FlowLayoutPanel backupsPanel;
+        private ButtonPrimary btnCreateBackup;
     }
 }

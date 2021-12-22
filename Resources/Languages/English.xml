@@ -3,7 +3,7 @@
   <__Language__>English</__Language__>
   <__LanguageCode__>en</__LanguageCode__>
   <__Author__>Macro Deck</__Author__>
-  <__Version__>2.1.2-beta</__Version__>
+  <__Version__>2.6.2.213560122</__Version__>
   <NetworkAdapter>Network adapter</NetworkAdapter>
   <IPAddress>IP address</IPAddress>
   <Port>Port</Port>
@@ -235,18 +235,36 @@ For gifs it is recommended to use the low or the lowest preset.</IconImportQuali
   <ActionSetActionButtonStateOffDescription>Sets the state of this button to "off"</ActionSetActionButtonStateOffDescription>
   <ActionSetActionButtonStateOn>Set button state to on</ActionSetActionButtonStateOn>
   <ActionSetActionButtonStateOnDescription>Sets the state of this button to "on"</ActionSetActionButtonStateOnDescription>
-	<Description>Description</Description>
-	<License>License</License>
-	<AnimatedGifImported>Animated gif imported</AnimatedGifImported>
-	<GenerateStaticIcon>Also generate a static icon of the GIFs first frame?</GenerateStaticIcon>
-	<XSuccessfullyExportedToX>{0} was successfully exported to {1}</XSuccessfullyExportedToX>
-	<SelectedIconWillBeDeleted>The selected icon will be deleted from the icon pack {0}</SelectedIconWillBeDeleted>
-	<SuccessfullyImportedIconPack>Successfully imported the icon pack {0}</SuccessfullyImportedIconPack>
-	<SelectedIconPackWillBeDeleted>The selected icon pack {0} with all its icons will be deleted.</SelectedIconPackWillBeDeleted>
-	<GenerateStatic>Generate static</GenerateStatic>
-	<OnlyUserCreatedVariablesVisible>Only user-created variables are visible</OnlyUserCreatedVariablesVisible>
-	<MacroDeckUsesCottleTemplateEngine>Macro Deck uses the Cottle template engine. Click here for more information.</MacroDeckUsesCottleTemplateEngine>
-	<Result>Result</Result>
-	<InstallDevVersions>Install Dev versions</InstallDevVersions>
-	<InstallBetaVersions>Install Beta versions</InstallBetaVersions>
+  <Description>Description</Description>
+  <License>License</License>
+  <AnimatedGifImported>Animated gif imported</AnimatedGifImported>
+  <GenerateStaticIcon>Also generate a static icon of the GIFs first frame?</GenerateStaticIcon>
+  <XSuccessfullyExportedToX>{0} was successfully exported to {1}</XSuccessfullyExportedToX>
+  <SelectedIconWillBeDeleted>The selected icon will be deleted from the icon pack {0}</SelectedIconWillBeDeleted>
+  <SuccessfullyImportedIconPack>Successfully imported the icon pack {0}</SuccessfullyImportedIconPack>
+  <SelectedIconPackWillBeDeleted>The selected icon pack {0} with all its icons will be deleted</SelectedIconPackWillBeDeleted>
+  <GenerateStatic>Generate static</GenerateStatic>
+  <OnlyUserCreatedVariablesVisible>Only user-created variables are visible</OnlyUserCreatedVariablesVisible>
+  <MacroDeckUsesCottleTemplateEngine>Macro Deck uses the Cottle template engine. Click here for more information.</MacroDeckUsesCottleTemplateEngine>
+  <Result>Result</Result>
+  <InstallDevVersions>Install Dev versions</InstallDevVersions>
+  <InstallBetaVersions>Install Beta versions</InstallBetaVersions>
+  <WhatDoYouWantToRestore>What do you want to restore from the backup?</WhatDoYouWantToRestore>
+  <Configuration>Configuration</Configuration>
+  <Profiles>Profiles</Profiles>
+  <Variables>Variables</Variables>
+  <PluginConfigurations>Plugin configurations</PluginConfigurations>
+  <PluginCredentials>Plugin credentials</PluginCredentials>
+  <InstalledIconPacks>Installed icon packs</InstalledIconPacks>
+  <Restore>Restore</Restore>
+  <ActionCannotBeReversed>This action can not be reversed</ActionCannotBeReversed>
+  <ThisWillDeleteBackupPermanently>This will delete the backup permanently</ThisWillDeleteBackupPermanently>
+  <Created>Created</Created>
+  <PleaseWait>Please wait...</PleaseWait>
+  <Backups>Backups</Backups>
+  <CreateBackup>Create backup</CreateBackup>
+  <BackupFailed>Backup failed</BackupFailed>
+  <BackupSuccessfullyCreated>Backup successfully created</BackupSuccessfullyCreated>
+  <CreateBackupBeforeUpdate>Do you want to create a backup before the update?</CreateBackupBeforeUpdate>
+  <CreatingBackup>Creating backup...</CreatingBackup>
 </Strings>

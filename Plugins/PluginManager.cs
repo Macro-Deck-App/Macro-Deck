@@ -79,16 +79,16 @@ namespace SuchByte.MacroDeck.Plugins
                 foreach (var directory in Directory.GetDirectories(MacroDeck.PluginsDirectoryPath))
                 {
                     // Delete plugin if file ".delete" exists
-                    if (File.Exists(directory + "\\" + _deleteMarkerFileName))
+                    if (File.Exists(Path.Combine(directory, _deleteMarkerFileName)))
                     {
                         try
                         {
-                            File.Delete(directory + "\\" + _deleteMarkerFileName);
+                            File.Delete(Path.Combine(directory, _deleteMarkerFileName));
                             Directory.Delete(directory, true);
                         } catch { }
                         continue;
                     }
-                    var manifestFile = directory + "\\" + _manifestFileName;
+                    var manifestFile = Path.Combine(directory, _manifestFileName);
                     if (!File.Exists(manifestFile)) continue;
                     try
                     {
@@ -245,7 +245,7 @@ namespace SuchByte.MacroDeck.Plugins
                         Plugins.Remove(name);
                     }
                     //File.Delete(PluginsPaths[name]);
-                    var deleteMarkerFile = PluginDirectories[plugin] + "\\" + _deleteMarkerFileName;
+                    var deleteMarkerFile = Path.Combine(PluginDirectories[plugin], _deleteMarkerFileName);
                     Debug.WriteLine(deleteMarkerFile);
                     File.Create(deleteMarkerFile);
                 }
@@ -272,17 +272,12 @@ namespace SuchByte.MacroDeck.Plugins
             PluginManifest pluginManifest = new PluginManifest();
             try
             {
-                //File.Copy(filePath, MacroDeck.PluginsDirectoryPath + Path.GetFileName(filePath), true);
-                //var pluginFile = MacroDeck.LoadedPluginsDirectoryPath + Path.GetFileName(filePath);
-                //File.Copy(MacroDeck.PluginsDirectoryPath + Path.GetFileName(filePath), pluginFile, true);
-
-                var installationDirectory = MacroDeck.PluginsDirectoryPath + packageName;
+                var installationDirectory = Path.Combine(MacroDeck.PluginsDirectoryPath, packageName);
                 if (update)
                 {
-                    installationDirectory = MacroDeck.UpdatePluginsDirectoryPath + packageName;
+                    installationDirectory = Path.Combine(MacroDeck.UpdatePluginsDirectoryPath, packageName);
                 }
 
-                Debug.WriteLine("Copy " + directory + " -> " + installationDirectory);
                 DirectoryCopy.Copy(directory, installationDirectory, true);
 
                 if (!update)
