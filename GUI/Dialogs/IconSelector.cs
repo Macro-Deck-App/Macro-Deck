@@ -1,7 +1,10 @@
 ﻿using ImageMagick;
+using Newtonsoft.Json;
+using SQLite;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.JSON;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
@@ -301,7 +304,20 @@ namespace SuchByte.MacroDeck.GUI
                 {
                     try
                     {
-                        File.Copy(Path.GetFullPath(openFileDialog.FileName), Path.Combine(MacroDeck.IconPackDirectoryPath, openFileDialog.SafeFileName));
+                        var db = new SQLiteConnection(Path.GetFullPath(openFileDialog.FileName));
+                        var query = db.Table<IconPackJson>();
+
+                        string jsonString = query.First().JsonString;
+                        IconPack iconPack = JsonConvert.DeserializeObject<IconPack>(jsonString, new JsonSerializerSettings
+                        {
+                            TypeNameHandling = TypeNameHandling.Auto,
+                            NullValueHandling = NullValueHandling.Ignore,
+                            Error = (sender, args) => { args.ErrorContext.Handled = true; }
+                        });
+
+                        db.Close();
+
+                        File.Copy(Path.GetFullPath(openFileDialog.FileName), Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.Name + ".iconpack"));
                         IconManager.LoadIconPacks();
                         Task.Run(() =>
                         {

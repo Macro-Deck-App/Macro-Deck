@@ -250,4 +250,22 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
 	<Result>Ergebnis</Result>
 	<InstallDevVersions>Dev Versionen installieren</InstallDevVersions>
 	<InstallBetaVersions>Beta Versionen installieren</InstallBetaVersions>
+	<WhatDoYouWantToRestore>Was soll wiederhergestellt werden?</WhatDoYouWantToRestore>
+	<Configuration>Konfiguration</Configuration>
+	<Profiles>Profile</Profiles>
+	<Variables>Variablen</Variables>
+	<PluginConfigurations>Plugin-Konfigurationen</PluginConfigurations>
+	<PluginCredentials>Plugin-Anmeldedaten</PluginCredentials>
+	<InstalledIconPacks>Installierte Iconpakete</InstalledIconPacks>
+	<Restore>Wiederherstellen</Restore>
+	<ActionCannotBeReversed>Diese Aktion kann nicht rückgängig gemacht werden</ActionCannotBeReversed>
+	<ThisWillDeleteBackupPermanently>Dies wird das Backup permanent löschen</ThisWillDeleteBackupPermanently>
+	<Created>Erstellt</Created>
+	<PleaseWait>Bitte warten...</PleaseWait>
+	<Backups>Backups</Backups>
+	<CreateBackup>Backup erstellen</CreateBackup>
+	<BackupFailed>Backup fehlgeschlagen</BackupFailed>
+	<BackupSuccessfullyCreated>Backup erfolgreich erstellt</BackupSuccessfullyCreated>
+	<CreateBackupBeforeUpdate>Soll vor dem Update ein Backup erstellt werden?</CreateBackupBeforeUpdate>
+	<CreatingBackup>Erstelle Backup...</CreatingBackup>
 </Strings>

@@ -186,7 +186,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             {
                 webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(this.WebClient_DownloadProgressChanged);
                 webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(this.WebClient_DownloadComplete);
-                webClient.DownloadFileAsync(new Uri("https://macrodeck.org/files/packagemanager/iconpacks/" + this._jsonObject["uuid"] + "/" + this._jsonObject["filename"]), MacroDeck.TempDirectoryPath + this._jsonObject["filename"]);
+                webClient.DownloadFileAsync(new Uri("https://macrodeck.org/files/packagemanager/iconpacks/" + this._jsonObject["uuid"] + "/" + this._jsonObject["filename"]), Path.Combine(MacroDeck.TempDirectoryPath, this._jsonObject["filename"].ToString()));
             }
         }
 
@@ -210,7 +210,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             try
             {
-                if (!File.Exists(MacroDeck.TempDirectoryPath + this._jsonObject["filename"]))
+                if (!File.Exists(Path.Combine(MacroDeck.TempDirectoryPath, this._jsonObject["filename"].ToString())))
                 {
                     if (!this._silentInstall)
                     {
@@ -227,7 +227,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                     return;
                 }
 
-                using (var stream = File.OpenRead(MacroDeck.TempDirectoryPath + this._jsonObject["filename"]))
+                using (var stream = File.OpenRead(Path.Combine(MacroDeck.TempDirectoryPath, this._jsonObject["filename"].ToString())))
                 {
                     using (var md5 = MD5.Create())
                     {
@@ -254,8 +254,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                                 
                 try
                 {
-                    File.Copy(MacroDeck.TempDirectoryPath + this._jsonObject["filename"], MacroDeck.IconPackDirectoryPath + this._jsonObject["name"] + ".iconpack", true);
-                    File.Delete(MacroDeck.TempDirectoryPath + this._jsonObject["name"]);
+                    File.Copy(Path.Combine(MacroDeck.TempDirectoryPath, this._jsonObject["filename"].ToString()), Path.Combine(MacroDeck.IconPackDirectoryPath, this._jsonObject["name"].ToString() + ".iconpack"), true);
+                    File.Delete(Path.Combine(MacroDeck.TempDirectoryPath, this._jsonObject["name"].ToString()));
                 }
                 catch
                 {

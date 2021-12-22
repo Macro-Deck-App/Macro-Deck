@@ -1,7 +1,9 @@
 ﻿using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
+using SuchByte.MacroDeck.Backups;
 using SuchByte.MacroDeck.GUI.CustomControls.Settings;
 using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
 using System;
@@ -15,6 +17,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.MainWindowContents
@@ -27,6 +30,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.Dock = DockStyle.Fill;
             this.UpdateTranslation();
             Updater.Updater.OnUpdateAvailable += UpdateAvailable;
+            BackupManager.BackupSaved += BackupManager_BackupSaved;
+            BackupManager.BackupFailed += BackupManager_BackupFailed;
+            BackupManager.DeleteSuccess += BackupManager_DeleteSuccess;
         }
 
         private void UpdateAvailable(object sender, EventArgs e)
@@ -36,35 +42,38 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void UpdateTranslation()
         {
-            this.Name = Language.LanguageManager.Strings.SettingsTitle;
-            this.tabGeneral.Text = Language.LanguageManager.Strings.General;
-            this.tabConnection.Text = Language.LanguageManager.Strings.Connection;
-            this.tabUpdater.Text = Language.LanguageManager.Strings.Updates;
-            this.tabAbout.Text = Language.LanguageManager.Strings.About;
-            this.lblGeneral.Text = Language.LanguageManager.Strings.General;
-            this.lblBehaviour.Text = Language.LanguageManager.Strings.Behaviour;
-            this.checkStartWindows.Text = Language.LanguageManager.Strings.AutomaticallyStartWithWindows;
-            this.checkIconCache.Text = Language.LanguageManager.Strings.EnableIconCache;
-            this.lblLanguage.Text = Language.LanguageManager.Strings.Language;
-            this.lblConnection.Text = Language.LanguageManager.Strings.Connection;
-            this.lblNetworkAdapter.Text = Language.LanguageManager.Strings.NetworkAdapter;
-            this.lblIpAddessLabel.Text = Language.LanguageManager.Strings.IPAddress;
-            this.lblPort.Text = Language.LanguageManager.Strings.Port;
-            this.btnChangePort.Text = Language.LanguageManager.Strings.Ok;
-            this.groupConnectionInfo.Text = Language.LanguageManager.Strings.Info;
-            this.lblConnectionInfo.Text = Language.LanguageManager.Strings.ConfigureNetworkInfo;
-            this.lblUpdates.Text = Language.LanguageManager.Strings.Updates;
-            this.checkAutoUpdate.Text = Language.LanguageManager.Strings.AutomaticallyCheckUpdates;
-            this.lblInstalledVersionLabel.Text = Language.LanguageManager.Strings.InstalledVersion;
-            //this.lblUpdateChannelLabel.Text = Language.LanguageManager.Strings.UpdateChannel;
-            this.checkInstallDevVersions.Text = Language.LanguageManager.Strings.InstallDevVersions;
-            this.checkInstallBetaVersions.Text = Language.LanguageManager.Strings.InstallBetaVersions;
-            this.btnCheckUpdates.Text = Language.LanguageManager.Strings.CheckForUpdatesNow;
-            this.lblWebSocketAPILabel.Text = Language.LanguageManager.Strings.WebSocketAPIVersion;
-            this.lblPluginAPILabel.Text = Language.LanguageManager.Strings.PluginAPIVersion;
-            this.lblInstalledPluginsLabel.Text = Language.LanguageManager.Strings.InstalledPlugins;
-            this.lblOSLabel.Text = Language.LanguageManager.Strings.OperatingSystem;
-            this.lblTranslationBy.Text = String.Format(Language.LanguageManager.Strings.XTranslationByX, Language.LanguageManager.Strings.__Language__, Language.LanguageManager.Strings.__Author__);
+            this.Name = LanguageManager.Strings.SettingsTitle;
+            this.tabGeneral.Text = LanguageManager.Strings.General;
+            this.tabConnection.Text = LanguageManager.Strings.Connection;
+            this.tabUpdater.Text = LanguageManager.Strings.Updates;
+            this.tabAbout.Text = LanguageManager.Strings.About;
+            this.lblGeneral.Text = LanguageManager.Strings.General;
+            this.lblBehaviour.Text = LanguageManager.Strings.Behaviour;
+            this.checkStartWindows.Text = LanguageManager.Strings.AutomaticallyStartWithWindows;
+            this.checkIconCache.Text = LanguageManager.Strings.EnableIconCache;
+            this.lblLanguage.Text = LanguageManager.Strings.Language;
+            this.lblConnection.Text = LanguageManager.Strings.Connection;
+            this.lblNetworkAdapter.Text = LanguageManager.Strings.NetworkAdapter;
+            this.lblIpAddessLabel.Text = LanguageManager.Strings.IPAddress;
+            this.lblPort.Text = LanguageManager.Strings.Port;
+            this.btnChangePort.Text = LanguageManager.Strings.Ok;
+            this.groupConnectionInfo.Text = LanguageManager.Strings.Info;
+            this.lblConnectionInfo.Text = LanguageManager.Strings.ConfigureNetworkInfo;
+            this.lblUpdates.Text = LanguageManager.Strings.Updates;
+            this.checkAutoUpdate.Text = LanguageManager.Strings.AutomaticallyCheckUpdates;
+            this.lblInstalledVersionLabel.Text = LanguageManager.Strings.InstalledVersion;
+            this.tabBackups.Text = LanguageManager.Strings.Backups;
+            this.lblBackups.Text = LanguageManager.Strings.Backups;
+            this.btnCreateBackup.Text = LanguageManager.Strings.CreateBackup;
+            //this.lblUpdateChannelLabel.Text = LanguageManager.Strings.UpdateChannel;
+            this.checkInstallDevVersions.Text = LanguageManager.Strings.InstallDevVersions;
+            this.checkInstallBetaVersions.Text = LanguageManager.Strings.InstallBetaVersions;
+            this.btnCheckUpdates.Text = LanguageManager.Strings.CheckForUpdatesNow;
+            this.lblWebSocketAPILabel.Text = LanguageManager.Strings.WebSocketAPIVersion;
+            this.lblPluginAPILabel.Text = LanguageManager.Strings.PluginAPIVersion;
+            this.lblInstalledPluginsLabel.Text = LanguageManager.Strings.InstalledPlugins;
+            this.lblOSLabel.Text = LanguageManager.Strings.OperatingSystem;
+            this.lblTranslationBy.Text = String.Format(LanguageManager.Strings.XTranslationByX, LanguageManager.Strings.__Language__, LanguageManager.Strings.__Author__);
             Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
         }
 
@@ -76,6 +85,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.LoadUpdateChannel();
             this.LoadAutoUpdate();
             this.LoadIconCache();
+            this.LoadBackups();
 
             this.lblInstalledVersion.Text = MacroDeck.VersionString;
             this.lblWebsocketAPIVersion.Text = MacroDeck.ApiVersion.ToString();
@@ -97,7 +107,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         {
             this.language.SelectedIndexChanged -= Language_SelectedIndexChanged;
             this.language.Items.Clear();
-            foreach (Language.Strings strings in Language.LanguageManager.Languages)
+            foreach (Strings strings in LanguageManager.Languages)
             {
                 this.language.Items.Add(strings.__Language__);
             }
@@ -137,13 +147,23 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.checkInstallBetaVersions.CheckedChanged += CheckInstallBetaVersions_CheckedChanged;
         }
 
+        private void LoadBackups()
+        {
+            this.backupsPanel.Controls.Clear();
+            foreach (MacroDeckBackupInfo macroDeckBackupInfo in BackupManager.GetBackups().ToArray())
+            {
+                BackupItem backupItem = new BackupItem(macroDeckBackupInfo);
+                this.backupsPanel.Controls.Add(backupItem);
+            }
+        }
+
         private void CheckInstallDevVersions_CheckedChanged(object sender, EventArgs e)
         {
             if (this.checkInstallDevVersions.Checked)
             {
                 using (var msgBox = new CustomControls.MessageBox())
                 {
-                    if (msgBox.ShowDialog(Language.LanguageManager.Strings.Warning, Language.LanguageManager.Strings.WarningDevVersions, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    if (msgBox.ShowDialog(LanguageManager.Strings.Warning, LanguageManager.Strings.WarningDevVersions, MessageBoxButtons.YesNo) == DialogResult.Yes)
                     {
                         this.updaterPanel.Controls.Clear();
                         MacroDeck.Configuration.UpdateDevVersions = true;
@@ -171,7 +191,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             {
                 using (var msgBox = new CustomControls.MessageBox())
                 {
-                    if (msgBox.ShowDialog(Language.LanguageManager.Strings.Warning, Language.LanguageManager.Strings.WarningBetaVersions, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    if (msgBox.ShowDialog(LanguageManager.Strings.Warning, LanguageManager.Strings.WarningBetaVersions, MessageBoxButtons.YesNo) == DialogResult.Yes)
                     {
                         this.updaterPanel.Controls.Clear();
                         MacroDeck.Configuration.UpdateBetaVersions = true;
@@ -314,7 +334,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 this.btnCheckUpdates.Spinner = false;
                 using (var msgBox = new CustomControls.MessageBox())
                 {
-                    msgBox.ShowDialog(Language.LanguageManager.Strings.NoUpdatesAvailable, Language.LanguageManager.Strings.LatestVersionInstalled, MessageBoxButtons.OK);
+                    msgBox.ShowDialog(LanguageManager.Strings.NoUpdatesAvailable, LanguageManager.Strings.LatestVersionInstalled, MessageBoxButtons.OK);
                 }
             }));
 
@@ -354,7 +374,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         {
             MacroDeck.Configuration.Language = this.language.Text;
             MacroDeck.SaveConfiguration();
-            Language.LanguageManager.SetLanguage(MacroDeck.Configuration.Language);
+            LanguageManager.SetLanguage(MacroDeck.Configuration.Language);
             this.UpdateTranslation();
         }
 
@@ -364,9 +384,43 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             MacroDeck.SaveConfiguration();
         }
 
-        private void tabUpdater_Click(object sender, EventArgs e)
+        private void BackupManager_BackupFailed(object sender, BackupFailedEventArgs e)
         {
+            this.Invoke(new Action(() =>
+            {
+                this.btnCreateBackup.Spinner = false;
+                using (var msgBox = new CustomControls.MessageBox())
+                {
+                    msgBox.ShowDialog(LanguageManager.Strings.Backup, LanguageManager.Strings.BackupFailed + ": " + Environment.NewLine + e.Message, MessageBoxButtons.OK);
+                }
+            }));
+        }
 
+        private void BackupManager_BackupSaved(object sender, EventArgs e)
+        {
+            this.Invoke(new Action(() =>
+            {
+                this.btnCreateBackup.Spinner = false;
+                using (var msgBox = new CustomControls.MessageBox())
+                {
+                    msgBox.ShowDialog(LanguageManager.Strings.Backup, LanguageManager.Strings.BackupSuccessfullyCreated, MessageBoxButtons.OK);
+                }
+                this.LoadBackups();
+            }));
+        }
+
+        private void BtnCreateBackup_Click(object sender, EventArgs e)
+        {
+            this.btnCreateBackup.Spinner = true;
+            Task.Run(() =>
+            {
+                BackupManager.CreateBackup();
+            });
+        }
+
+        private void BackupManager_DeleteSuccess(object sender, EventArgs e)
+        {
+            this.LoadBackups();
         }
     }
 }

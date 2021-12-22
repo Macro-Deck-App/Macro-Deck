@@ -63,23 +63,20 @@ namespace SuchByte.MacroDeck.Icons
                     var db = new SQLiteConnection(databasePath);
                     var query = db.Table<IconPackJson>();
 
-                    foreach (var iconPackJson in query)
+                    string jsonString = query.First().JsonString;
+                    IconPack iconPack = JsonConvert.DeserializeObject<IconPack>(jsonString, new JsonSerializerSettings
                     {
-                        string jsonString = iconPackJson.JsonString;
-                        IconPack iconPack = JsonConvert.DeserializeObject<IconPack>(jsonString, new JsonSerializerSettings
-                        {
-                            TypeNameHandling = TypeNameHandling.Auto,
-                            NullValueHandling = NullValueHandling.Ignore,
-                            Error = (sender, args) => { args.ErrorContext.Handled = true; }
-                        });
+                        TypeNameHandling = TypeNameHandling.Auto,
+                        NullValueHandling = NullValueHandling.Ignore,
+                        Error = (sender, args) => { args.ErrorContext.Handled = true; }
+                    });
 
-                        IconPacks.Add(iconPack);
-                        if (iconPack.PackageManagerManaged && !iconPack.Hidden)
-                        {
-                            Task.Run(() =>
-                                SearchUpdate(iconPack)
-                            );
-                        }
+                    IconPacks.Add(iconPack);
+                    if (iconPack.PackageManagerManaged && !iconPack.Hidden)
+                    {
+                        Task.Run(() =>
+                            SearchUpdate(iconPack)
+                        );
                     }
 
                     db.Close();

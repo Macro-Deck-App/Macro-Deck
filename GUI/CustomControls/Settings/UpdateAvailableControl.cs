@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
+using SuchByte.MacroDeck.Backups;
+using SuchByte.MacroDeck.Language;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,8 +22,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
         {
             InitializeComponent();
 
-            this.lblVersion.Text = String.Format(Language.LanguageManager.Strings.VersionXIsNowAvailable, Updater.Updater.UpdateObject["version"], Updater.Updater.UpdateObject["channel"]);
-            this.btnInstall.Text = Language.LanguageManager.Strings.DownloadAndInstall;
+            this.lblVersion.Text = String.Format(LanguageManager.Strings.VersionXIsNowAvailable, Updater.Updater.UpdateObject["version"], Updater.Updater.UpdateObject["channel"]);
+            this.btnInstall.Text = LanguageManager.Strings.DownloadAndInstall;
             this.lblSize.Text = Updater.Updater.UpdateSizeMb.ToString("0.##") + "MB";
             //this.lblStatus.Text = Language.LanguageManager.Strings.ReadyToDownloadUpdate;
 
@@ -93,6 +95,20 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
         private void BtnInstall_Click(object sender, EventArgs e)
         {
             this.btnInstall.Enabled = false;
+            this.btnInstall.Spinner = true;
+            bool createBackup = false;
+            using (var msgBox = new MessageBox())
+            {
+                if (msgBox.ShowDialog(LanguageManager.Strings.Backup, LanguageManager.Strings.CreateBackupBeforeUpdate, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    createBackup = true;
+                }
+            }
+            if (createBackup)
+            {
+                this.btnInstall.Text = LanguageManager.Strings.CreatingBackup;
+                BackupManager.CreateBackup();
+            }
             Updater.Updater.DownloadUpdate();
            
         }
@@ -100,6 +116,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
         private void ProgressChanged(object sender, Updater.ProgressChangedEventArgs e)
         {
             this.btnInstall.Enabled = false;
+            this.btnInstall.Spinner = true;
             this.btnInstall.Progress = e.ProgressPercentage;
         }
 
@@ -107,6 +124,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
         {
             this.btnInstall.Progress = 0;
             this.btnInstall.Enabled = true;
+            this.btnInstall.Spinner = false;
         }
         
 

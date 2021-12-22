@@ -16,13 +16,13 @@ namespace SuchByte.MacroDeck.Plugins
             {
                 Dictionary<string, string> pluginConfig;
 
-                if (!File.Exists(MacroDeck.PluginConfigPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower()))
+                if (!File.Exists(Path.Combine(MacroDeck.PluginConfigPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
                 {
                     pluginConfig = new Dictionary<string, string>();
                 }
                 else
                 {
-                    pluginConfig = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(MacroDeck.PluginConfigPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json"), new JsonSerializerSettings
+                    pluginConfig = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(MacroDeck.PluginConfigPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json")), new JsonSerializerSettings
                     {
                         TypeNameHandling = TypeNameHandling.Auto,
                     });
@@ -36,7 +36,7 @@ namespace SuchByte.MacroDeck.Plugins
                     NullValueHandling = NullValueHandling.Ignore,
                 };
 
-                using (StreamWriter sw = new StreamWriter(MacroDeck.PluginConfigPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json"))
+                using (StreamWriter sw = new StreamWriter(Path.Combine(MacroDeck.PluginConfigPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json")))
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {
                     serializer.Serialize(writer, pluginConfig);
@@ -51,7 +51,22 @@ namespace SuchByte.MacroDeck.Plugins
             try
             {
                 if (plugin == null || key == null) return value;
-                Dictionary<string, string> pluginConfig = LoadPluginConfig(plugin);
+
+                Dictionary<string, string> pluginConfig;
+                if (!File.Exists(Path.Combine(MacroDeck.PluginConfigPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json")))
+                {
+                    pluginConfig = new Dictionary<string, string>();
+                }
+                else
+                {
+                    pluginConfig = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(MacroDeck.PluginConfigPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json")), new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.Auto,
+                        NullValueHandling = NullValueHandling.Ignore,
+                        Error = (sender, args) => { args.ErrorContext.Handled = true; }
+                    });
+                }
+
                 if (pluginConfig != null && !String.IsNullOrWhiteSpace(pluginConfig[key]))
                 {
                     value = pluginConfig[key];
@@ -61,29 +76,11 @@ namespace SuchByte.MacroDeck.Plugins
             return value;
         }
 
-        private static Dictionary<string, string> LoadPluginConfig(MacroDeckPlugin plugin)
-        {
-            Dictionary<string, string> pluginConfig;
-            if (!File.Exists(MacroDeck.PluginConfigPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json"))
-            {
-                pluginConfig = new Dictionary<string, string>();
-            }
-            else
-            {
-                pluginConfig = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(MacroDeck.PluginConfigPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json"), new JsonSerializerSettings
-                {
-                    TypeNameHandling = TypeNameHandling.Auto,
-                });
-            }
-            return pluginConfig;
-        }
-
-
         public static void DeletePluginConfig(MacroDeckPlugin plugin)
         {
             try
             {
-                File.Delete(MacroDeck.PluginConfigPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json");
+                File.Delete(Path.Combine(MacroDeck.PluginConfigPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json"));
             }catch { }
         }
 
