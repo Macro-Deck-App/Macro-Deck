@@ -3,7 +3,7 @@
   <__Language__>Russian</__Language__>
   <__LanguageCode__>ru</__LanguageCode__>
   <__Author__>LeetPanda1337, zedalert</__Author__>
-  <__Version__>2.1.2-beta</__Version__>
+  <__Version__>2.6.2.213560122</__Version__>
   <NetworkAdapter>Сетевой адаптер</NetworkAdapter>
   <IPAddress>IP-адрес</IPAddress>
   <Port>Порт</Port>
@@ -30,7 +30,7 @@
   <IconPacks>Пакеты иконок</IconPacks>
   <All>Все</All>
   <Updates>Обновления</Updates>
-  <Installed>Установленные</Installed>
+  <Installed>Установлены</Installed>
   <Install>Установить</Install>
   <Search>Поиск...</Search>
   <Name>Имя</Name>
@@ -76,8 +76,8 @@
   <BlockConnection>Блокировать соединение</BlockConnection>
   <Change>Изменить</Change>
   <Id>ID</Id>
-  <Connected>Подключено</Connected>
-  <Disconnected>Отключено</Disconnected>
+  <Connected>Подключен</Connected>
+  <Disconnected>Отключен</Disconnected>
   <Trigger>Событие</Trigger>
   <Action>Действие</Action>
   <Condition>Состояние</Condition>
@@ -90,9 +90,9 @@
   <TheProfileWillBeDeleted>Профиль {0} и все его папки и кнопки будут удалены.</TheProfileWillBeDeleted>
   <ServerOffline>Сервер не запущен</ServerOffline>
   <ServerRunning>Сервер запущен</ServerRunning>
-  <XPluginsLoaded>{0} плагинов запущено</XPluginsLoaded>
+  <XPluginsLoaded>Плагинов запущено: {0}</XPluginsLoaded>
   <XPluginsDisabled>{0} плагинов отключено</XPluginsDisabled>
-  <XClientsConnected>{0} клиентов подключено</XClientsConnected>
+  <XClientsConnected>Клиентов подключено: {0}</XClientsConnected>
   <IpAddressHostNamePort>IP-адрес/имя хоста : порт</IpAddressHostNamePort>
   <InitialSetupButtonBack>&lt;- Назад</InitialSetupButtonBack>
   <InitialSetupButtonNext>Далее -&gt;</InitialSetupButtonNext>
@@ -108,15 +108,15 @@
   <InitialSetupWantSomeIcons>Хотите установить пакеты иконок?</InitialSetupWantSomeIcons>
   <InitialSetupInstallIconPacksPackageManager>Вы также сможете устанавливать пакеты иконок в менеджере пакетов</InitialSetupInstallIconPacksPackageManager>
   <InitialSetupAlmostDone>Настройка почти завершена!</InitialSetupAlmostDone>
-  <KnownDevices>Доступные устройства</KnownDevices>
+  <KnownDevices>Устройства управления</KnownDevices>
   <AskOnNewConnections>Запрашивать подтверждение при новом подключении</AskOnNewConnections>
   <AllowAllNewConnections>Разрешить все новые подключения (не рекомендуется)</AllowAllNewConnections>
   <BlockAllNewConnections>Блокировать все новые подключения</BlockAllNewConnections>
   <InstallDLL>Установка .dll(не рекомендуется)</InstallDLL>
   <NeverInstallDLLFiles>Не устанавливайте .dll файлы из источников, которым вы не доверяете! .dll файлы из неизвестных источников могут нанести вред вашему компьютеру! Устанавливайте их только тогда, когда осознаете, что делаете! Вы уверены, что хотите установить .dll плагин?</NeverInstallDLLFiles>
-  <XWillBeUninstalled>{0} будет удален.</XWillBeUninstalled>
+  <XWillBeUninstalled>{0} будет удалён.</XWillBeUninstalled>
   <XSuccessfullyUninstalled>{0} успешно удален. Macro Deck требуется перезагрузка для применения изменений. Перезагрузить сейчас?</XSuccessfullyUninstalled>
-  <CreateVariable>Создать переменную</CreateVariable>
+  <CreateVariable>Новая переменная</CreateVariable>
   <DeleteVariable>Удалить переменную</DeleteVariable>
   <SelectAPluginAndActionToBegin>Выберите плагин и действие для начала</SelectAPluginAndActionToBegin>
   <ActionNeedsNoConfiguration>Это действие не требует настройки</ActionNeedsNoConfiguration>
@@ -192,12 +192,12 @@
   <Paste>Вставить</Paste>
   <WebSocketAPIVersion>Версия Websocket API</WebSocketAPIVersion>
   <PluginAPIVersion>Версия API плагинов</PluginAPIVersion>
-  <InstalledPlugins>Установлено плагинов</InstalledPlugins>
+  <InstalledPlugins>Установленные плагины</InstalledPlugins>
   <OperatingSystem>Операционная система</OperatingSystem>
   <DevelopedByX>Разработано {0} </DevelopedByX>
   <XTranslationByX>{0} перевод {1}</XTranslationByX>
-  <PackageManagerTabAvailable>Доступные</PackageManagerTabAvailable>
-  <PackageManagerTabInstalled>Установленные</PackageManagerTabInstalled>
+  <PackageManagerTabAvailable>Доступны</PackageManagerTabAvailable>
+  <PackageManagerTabInstalled>Установлены</PackageManagerTabInstalled>
   <Event>Событие</Event>
   <AutomaticallySwitchToFolder>Automatically switch to folder</AutomaticallySwitchToFolder>
   <Restart>Перезапустить Macro Deck</Restart>
@@ -206,7 +206,7 @@
   <Else>Иначе</Else>
   <Online>Доступные</Online>
   <By>Автор</By>
-  <StateBinding>Привязать статус к</StateBinding>
+  <StateBinding>Привязать статус к переменной</StateBinding>
   <ErrorWhileLoadingPackageManager>Произошла ошибка во время загрузки менеджера пакетов. Возможно вы не подключены к сети интернет или Macro Deck заблокирован вашим брандмауэром.</ErrorWhileLoadingPackageManager>
   <UpdatesAvailable>Доступны обновления</UpdatesAvailable>
   <EnableIconCache>Включить кэширование иконок (быстрее; больше потребление памяти)</EnableIconCache>
@@ -218,7 +218,7 @@
   <ActionChangeFolderDescription>Сменить текущую папку для текущего устройства на указанную папку</ActionChangeFolderDescription>
   <ActionGoToParentFolder>Перейти в родительскую папку</ActionGoToParentFolder>
   <ActionGoToParentFolderDescription>Сменить текущую папку для текущего устройства на родительскую папку</ActionGoToParentFolderDescription>
-  <ActionGoToRootFolder>К корневой папке</ActionGoToRootFolder>
+  <ActionGoToRootFolder>Перейти в корневую папку</ActionGoToRootFolder>
   <ActionGoToRootFolderDescription>Сменить текущую папку для текущего устройства на корневую папку</ActionGoToRootFolderDescription>
   <PluginMacroDeckVariables>Переменные Macro Deck</PluginMacroDeckVariables>
   <ActionChangeVariableValue>Изменить значение переменной</ActionChangeVariableValue>
@@ -235,13 +235,36 @@
   <ActionSetActionButtonStateOffDescription>Изменить статус этой кнопки на "выключена"</ActionSetActionButtonStateOffDescription>
   <ActionSetActionButtonStateOn>Изменить статус на вкл.</ActionSetActionButtonStateOn>
   <ActionSetActionButtonStateOnDescription>Изменить статус этой кнопки на "включена"</ActionSetActionButtonStateOnDescription>
-	<Description>Описание</Description>
-	<License>Лицензия</License>
-	<AnimatedGifImported>Анимированный GIF импортирован</AnimatedGifImported>
-	<GenerateStaticIcon>Сгенерировать дополнительную статичную иконку на основе первого кадра GIF?</GenerateStaticIcon>
-	<XSuccessfullyExportedToX>{0} успешно экспортирована в {1}</XSuccessfullyExportedToX>
-	<SelectedIconWillBeDeleted>Выбранная иконка будет удалена из пакета иконок {0}</SelectedIconWillBeDeleted>
-	<SuccessfullyImportedIconPack>Пакет иконок {0} успешно импортирован</SuccessfullyImportedIconPack>
-	<SelectedIconPackWillBeDeleted>Пакет иконок {0} со всем его содержимым будет удалён.</SelectedIconPackWillBeDeleted>
-	
+  <Description>Описание</Description>
+  <License>Лицензия</License>
+  <AnimatedGifImported>Анимированный GIF импортирован</AnimatedGifImported>
+  <GenerateStaticIcon>Сгенерировать дополнительную статичную иконку на основе первого кадра GIF?</GenerateStaticIcon>
+  <XSuccessfullyExportedToX>{0} успешно экспортирована в {1}</XSuccessfullyExportedToX>
+  <SelectedIconWillBeDeleted>Выбранная иконка будет удалена из пакета иконок {0}</SelectedIconWillBeDeleted>
+  <SuccessfullyImportedIconPack>Пакет иконок {0} успешно импортирован</SuccessfullyImportedIconPack>
+  <SelectedIconPackWillBeDeleted>Пакет иконок {0} со всем его содержимым будет удалён.</SelectedIconPackWillBeDeleted>
+  <GenerateStatic>Статичная иконка</GenerateStatic>
+  <OnlyUserCreatedVariablesVisible>Видны только переменные, созданные пользователем</OnlyUserCreatedVariablesVisible>
+  <MacroDeckUsesCottleTemplateEngine>Macro Deck использует .NET шаблонизатор Cottle. Нажмите здесь для получения дополнительной информации.</MacroDeckUsesCottleTemplateEngine>
+  <Result>Результат</Result>
+  <InstallDevVersions>Устанавливать Dev версии</InstallDevVersions>
+  <InstallBetaVersions>Устанавливать Beta версии</InstallBetaVersions>
+  <WhatDoYouWantToRestore>Что необходимо восстановить из резервной копии?</WhatDoYouWantToRestore>
+  <Configuration>Настройки</Configuration>
+  <Profiles>Профили</Profiles>
+  <Variables>Переменные</Variables>
+  <PluginConfigurations>Настройки плагинов</PluginConfigurations>
+  <PluginCredentials>Учётные данные плагинов</PluginCredentials>
+  <InstalledIconPacks>Установленные пакеты иконок</InstalledIconPacks>
+  <Restore>Восстановить</Restore>
+  <ActionCannotBeReversed>Это действие не может быть отменено</ActionCannotBeReversed>
+  <ThisWillDeleteBackupPermanently>Это действие приведёт к удалению резервной копии</ThisWillDeleteBackupPermanently>
+  <Created>Created</Created>
+  <PleaseWait>Пожалуйста, подождите...</PleaseWait>
+  <Backups>Резервные копии</Backups>
+  <CreateBackup>Создать резервную копию</CreateBackup>
+  <BackupFailed>Не удалось создать резервную копию</BackupFailed>
+  <BackupSuccessfullyCreated>Резервная копия создана успешно</BackupSuccessfullyCreated>
+  <CreateBackupBeforeUpdate>Создать резервную копию перед обновлением?</CreateBackupBeforeUpdate>
+  <CreatingBackup>Создание копии...</CreatingBackup>
 </Strings>
