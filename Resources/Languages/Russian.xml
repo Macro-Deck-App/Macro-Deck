@@ -199,7 +199,7 @@
   <PackageManagerTabAvailable>Доступны</PackageManagerTabAvailable>
   <PackageManagerTabInstalled>Установлены</PackageManagerTabInstalled>
   <Event>Событие</Event>
-  <AutomaticallySwitchToFolder>Automatically switch to folder</AutomaticallySwitchToFolder>
+  <AutomaticallySwitchToFolder>Переключаться на эту папку</AutomaticallySwitchToFolder>
   <Restart>Перезапустить Macro Deck</Restart>
   <Delay>Задержка</Delay>
   <If>Если</If>
@@ -259,7 +259,7 @@
   <Restore>Восстановить</Restore>
   <ActionCannotBeReversed>Это действие не может быть отменено</ActionCannotBeReversed>
   <ThisWillDeleteBackupPermanently>Это действие приведёт к удалению резервной копии</ThisWillDeleteBackupPermanently>
-  <Created>Created</Created>
+  <Created>Создан</Created>
   <PleaseWait>Пожалуйста, подождите...</PleaseWait>
   <Backups>Резервные копии</Backups>
   <CreateBackup>Создать резервную копию</CreateBackup>
