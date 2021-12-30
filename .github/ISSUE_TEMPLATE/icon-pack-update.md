@@ -12,5 +12,5 @@ assignees: ''
 ** Version **
 The latest version of the icon pack
 
-** GitHub repository **
-A link to the GitHub repository of the plugin
+** GitHub repository **(Optional)
+A link to the GitHub repository of the icon pack
