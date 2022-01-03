@@ -10,6 +10,9 @@ assignees: ''
 ** Name of the plugin **
 Must match the name in the project properties
 
+** Version **
+Must match the version in the project properties
+
 ** Author of the plugin **
 The author name that will appear in the package manager
 

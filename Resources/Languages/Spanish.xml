@@ -249,4 +249,22 @@ Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImpor
 	<Result>Resultado</Result>
 	<InstallDevVersions>Instalar versiones Dev</InstallDevVersions>
 	<InstallBetaVersions>Instalar versiones Beta</InstallBetaVersions>
+	<WhatDoYouWantToRestore>¿Qué desea restaurar desde la copia de seguridad?</WhatDoYouWantToRestore>
+  <Configuration>Configuración</Configuration>
+  <Profiles>Perfiles</Profiles>
+  <Variables>Variables</Variables>
+  <PluginConfigurations>Configuraciones de los Plugin</PluginConfigurations>
+  <PluginCredentials>Credenciales de los Plugin</PluginCredentials>
+  <InstalledIconPacks>Paquetes de iconos instalados</InstalledIconPacks>
+  <Restore>Restaurar</Restore>
+  <ActionCannotBeReversed>Esta acción no se puede revertir</ActionCannotBeReversed>
+  <ThisWillDeleteBackupPermanently>Esto eliminará la copia de seguridad de forma permanente</ThisWillDeleteBackupPermanently>
+  <Created>Creado</Created>
+  <PleaseWait>Espere por favor...</PleaseWait>
+  <Backups>Copias de seguridad</Backups>
+  <CreateBackup>Crear copia de seguridad</CreateBackup>
+  <BackupFailed>Error de copia de seguridad</BackupFailed>
+  <BackupSuccessfullyCreated>Copia de seguridad creada con éxito</BackupSuccessfullyCreated>
+  <CreateBackupBeforeUpdate>¿Quieres crear una copia de seguridad antes de la actualización?</CreateBackupBeforeUpdate>
+  <CreatingBackup>Creando copia de seguridad ...</CreatingBackup>
 </Strings>
