@@ -4,13 +4,9 @@ using System.Text;
 
 namespace SuchByte.MacroDeck.Device
 {
-    public enum DeviceType
+    public enum DeviceClass
     {
-        Unknown,
+        SoftwareClient,
         Macro_Deck_DIY_OLED_6_V1,
-        WebPackageManager,
-        Web,
-        Android,
-        iOS,
     }
 }

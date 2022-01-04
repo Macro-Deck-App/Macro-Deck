@@ -17,7 +17,6 @@ namespace SuchByte.MacroDeck.Language
         public string __Language__  = "English";
         public string __LanguageCode__  = "en";
         public string __Author__  = "Macro Deck";
-        public string __Version__  = MacroDeck.VersionString;
 
         public string NetworkAdapter  = "Network adapter";
         public string IPAddress  = "IP address";
@@ -287,6 +286,9 @@ namespace SuchByte.MacroDeck.Language
         public string BackupSuccessfullyCreated = "Backup successfully created";
         public string CreateBackupBeforeUpdate = "Do you want to create a backup before the update?";
         public string CreatingBackup = "Creating backup...";
-
+        public string PluginNeedsConfiguration = "This plugin needs to be configured";
+        public string ConfigureNow = "Do you want to configure {0} now?";
+        public string Hotkey = "Hotkey";
+        public string PressTheKeysNow = "Press the keys you want to assign now";
     }
 }

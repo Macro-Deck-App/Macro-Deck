@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -51,9 +52,11 @@ namespace SuchByte.MacroDeck.Updater
             {
                 CheckForUpdatesAsync();
             }
-            Timer updateCheckTimer = new Timer();
-            updateCheckTimer.Enabled = true;
-            updateCheckTimer.Interval = 1000 * 60 * 10; // Check every 10 minutes
+            Timer updateCheckTimer = new Timer
+            {
+                Enabled = true,
+                Interval = 1000 * 60 * 10 // Check every 10 minutes
+            };
         }
 
         private static void UpdateCheckTimerTick(object sender, EventArgs e)
@@ -94,6 +97,7 @@ namespace SuchByte.MacroDeck.Updater
                         {
                             if (build > MacroDeck.BuildVersion || _forceUpdate)
                             {
+                                MacroDeckLogger.Info("Macro Deck version " + _jsonObject["version"] + " available");
                                 try
                                 {
                                     _updateSizeMb = GetFileSizeMb(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]));
@@ -141,6 +145,18 @@ namespace SuchByte.MacroDeck.Updater
 
         public static void DownloadUpdate()
         {
+            if (MacroDeck.PortableMode)
+            {
+                var p = new Process
+                {
+                    StartInfo = new ProcessStartInfo("https://macrodeck.org/files/portable/" + _jsonObject["filename"])
+                    {
+                        UseShellExecute = true
+                    }
+                };
+                p.Start();
+                return;
+            }
             _downloading = true;
             using (var webClient = new WebClient())
             {

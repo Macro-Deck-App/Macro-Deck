@@ -67,16 +67,25 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                     this.lblDeviceType.Text = Language.LanguageManager.Strings.WebClient;
                     this.iconDeviceType.Image = Properties.Resources.Web;
                     this.btnConfigure.Visible = false;
+                    this.profiles.Enabled = true;
                     break;
                 case DeviceType.Android:
                     this.lblDeviceType.Text = Language.LanguageManager.Strings.AndroidApp;
                     this.iconDeviceType.Image = Properties.Resources.Android;
                     this.btnConfigure.Visible = false; //TODO
+                    this.profiles.Enabled = true;
                     break;
                 case DeviceType.iOS:
                     this.lblDeviceType.Text = Language.LanguageManager.Strings.IOSApp;
                     this.iconDeviceType.Image = Properties.Resources.iOS;
                     this.btnConfigure.Visible = false; //TODO
+                    this.profiles.Enabled = true;
+                    break;
+                case DeviceType.Macro_Deck_DIY_OLED_6_V1:
+                    this.lblDeviceType.Text = "Macro Deck DIY OLED 6 v1";
+                    this.iconDeviceType.Image = null;
+                    this.btnConfigure.Visible = false; //TODO
+                    this.profiles.Enabled = false;
                     break;
                 default:
                     this.lblDeviceType.Text = Language.LanguageManager.Strings.WebClient;

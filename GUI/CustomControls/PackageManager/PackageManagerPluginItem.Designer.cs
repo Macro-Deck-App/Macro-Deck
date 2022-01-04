@@ -189,7 +189,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblRepository.Text = "Repository";
             this.lblRepository.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lblRepository.VisitedLinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
-            this.lblRepository.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblRepository_LinkClicked);
+            this.lblRepository.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LblRepository_LinkClicked);
             // 
             // PackageManagerPluginItem
             // 

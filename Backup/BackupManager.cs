@@ -2,6 +2,7 @@
 using SuchByte.MacroDeck.Backup;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Utils;
 using System;
 using System.Collections.Generic;
@@ -66,7 +67,10 @@ namespace SuchByte.MacroDeck.Backups
                 {
                     File.Copy(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.ConfigFilePath)), MacroDeck.ConfigFilePath, true);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    MacroDeckLogger.Error("Backup (config) restore failed: " + ex.Message);
+                }
             }
             if (restoreBackupInfo.RestoreProfiles && File.Exists(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.ProfilesFilePath))))
             {
@@ -74,7 +78,10 @@ namespace SuchByte.MacroDeck.Backups
                 {
                     File.Copy(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.ProfilesFilePath)), MacroDeck.ProfilesFilePath, true);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    MacroDeckLogger.Error("Backup (profiles) restore failed: " + ex.Message);
+                }
             }
             if (restoreBackupInfo.RestoreDevices && File.Exists(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.DevicesFilePath))))
             {
@@ -82,7 +89,10 @@ namespace SuchByte.MacroDeck.Backups
                 {
                     File.Copy(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.DevicesFilePath)), MacroDeck.DevicesFilePath, true);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    MacroDeckLogger.Error("Backup (devices) restore failed: " + ex.Message);
+                }
             }
             if (restoreBackupInfo.RestoreVariables && File.Exists(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.VariablesFilePath))))
             {
@@ -90,7 +100,10 @@ namespace SuchByte.MacroDeck.Backups
                 {
                     File.Copy(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.VariablesFilePath)), MacroDeck.VariablesFilePath, true);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    MacroDeckLogger.Error("Backup (variables) restore failed: " + ex.Message);
+                }
             }
             if (restoreBackupInfo.RestorePlugins && Directory.Exists(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.PluginsDirectoryPath).Name)))
             {
@@ -102,8 +115,9 @@ namespace SuchByte.MacroDeck.Backups
                     }
                     DirectoryCopy.Copy(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.PluginsDirectoryPath).Name), MacroDeck.PluginsDirectoryPath, true);
                 }
-                catch (Exception ex) {
-                    Debug.WriteLine(ex.Message);
+                catch (Exception ex)
+                {
+                    MacroDeckLogger.Error("Backup (plugins) restore failed: " + ex.Message);
                 }
             }
             if (restoreBackupInfo.RestorePluginConfigs && Directory.Exists(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.PluginConfigPath).Name)))
@@ -116,7 +130,10 @@ namespace SuchByte.MacroDeck.Backups
                     }
                     DirectoryCopy.Copy(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.PluginConfigPath).Name), MacroDeck.PluginConfigPath, true);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    MacroDeckLogger.Error("Backup (plugin configs) restore failed: " + ex.Message);
+                }
             }
             if (restoreBackupInfo.RestorePluginCredentials && Directory.Exists(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.PluginCredentialsPath).Name)))
             {
@@ -128,7 +145,10 @@ namespace SuchByte.MacroDeck.Backups
                     }
                     DirectoryCopy.Copy(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.PluginCredentialsPath).Name), MacroDeck.PluginCredentialsPath, true);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    MacroDeckLogger.Error("Backup (plugin credentials) restore failed: " + ex.Message);
+                }
             }
             if (restoreBackupInfo.RestoreIconPacks && Directory.Exists(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.IconPackDirectoryPath).Name)))
             {
@@ -140,8 +160,12 @@ namespace SuchByte.MacroDeck.Backups
                     }
                     DirectoryCopy.Copy(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.IconPackDirectoryPath).Name), MacroDeck.IconPackDirectoryPath, true);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    MacroDeckLogger.Error("Backup (icon packs) restore failed: " + ex.Message);
+                }
             }
+            MacroDeckLogger.Info("Backup successfully restored");
             using (var msgBox = new MessageBox())
             {
                 msgBox.ShowDialog("Backup restored", "Backup successfully restored", System.Windows.Forms.MessageBoxButtons.OK);

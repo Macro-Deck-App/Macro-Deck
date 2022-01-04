@@ -11,6 +11,7 @@ namespace SuchByte.MacroDeck.Icons
     {
         private Image _cachedIconImage;
         private string _iconBase64 = "";
+        private string _iconHex128_64Base64 = "";
 
         public long IconId { get; set; }
         public string IconBase64 { 
@@ -25,6 +26,7 @@ namespace SuchByte.MacroDeck.Icons
                     try
                     {
                         this._cachedIconImage = Utils.Base64.GetImageFromBase64(value);
+                        this._iconHex128_64Base64 = Utils.Base64.GetBase64ByteArray((Bitmap)this.IconImage, new Size(128, 64));
                     } catch { }
                 }
             }
@@ -42,6 +44,19 @@ namespace SuchByte.MacroDeck.Icons
                 {
                     return Utils.Base64.GetImageFromBase64(this._iconBase64);
                 }
+            }
+        }
+
+        [JsonIgnore]
+        public string IconHex128_64Base64
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(this._iconHex128_64Base64))
+                {
+                    this._iconHex128_64Base64 = Utils.Base64.GetBase64ByteArray((Bitmap)this.IconImage, new Size(128, 64));
+                }
+                return this._iconHex128_64Base64;
             }
         }
 

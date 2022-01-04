@@ -4,6 +4,7 @@ using SQLite;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.JSON;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using System;
 using System.Collections.Generic;
@@ -91,7 +92,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             {
                 if (e.Error != null)
                 {
-                    Debug.WriteLine(e.Error);
+                    MacroDeckLogger.Error("Plugin download failed: " + e.Error.Message);
                 }
 
                 

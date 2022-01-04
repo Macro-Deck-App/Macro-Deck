@@ -5,8 +5,10 @@ using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowContents;
+using SuchByte.MacroDeck.Hotkeys;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Interfaces;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
@@ -41,21 +43,22 @@ namespace SuchByte.MacroDeck.GUI
         public ButtonEditor(ActionButton.ActionButton actionButton, Folders.MacroDeckFolder folder)
         {
             InitializeComponent();
-            this.groupAppearance.Text = Language.LanguageManager.Strings.Appearance;
-            this.groupButtonState.Text = Language.LanguageManager.Strings.ButtonState;
-            this.lblButtonState.Text = Language.LanguageManager.Strings.ButtonState;
-            this.radioButtonOff.Text = Language.LanguageManager.Strings.Off;
-            this.radioButtonOn.Text = Language.LanguageManager.Strings.On;
-            this.labelAlignTop.Text = Language.LanguageManager.Strings.Top;
-            this.labelAlignCenter.Text = Language.LanguageManager.Strings.Center;
-            this.labelAlignBottom.Text = Language.LanguageManager.Strings.Bottom;
-            this.lblPath.Text = Language.LanguageManager.Strings.Path;
-            this.lblCurrentStateLabel.Text = Language.LanguageManager.Strings.CurrentState;
-            this.lblStateBinding.Text = Language.LanguageManager.Strings.StateBinding;
-            this.radioOnPress.Text = Language.LanguageManager.Strings.OnPress;
-            this.radioOnEvent.Text = Language.LanguageManager.Strings.OnEvent;
-            this.btnApply.Text = Language.LanguageManager.Strings.Save;
-            this.btnOk.Text = Language.LanguageManager.Strings.Ok;
+            this.groupAppearance.Text = LanguageManager.Strings.Appearance;
+            this.groupButtonState.Text = LanguageManager.Strings.ButtonState;
+            this.lblButtonState.Text = LanguageManager.Strings.ButtonState;
+            this.radioButtonOff.Text = LanguageManager.Strings.Off;
+            this.radioButtonOn.Text = LanguageManager.Strings.On;
+            this.labelAlignTop.Text = LanguageManager.Strings.Top;
+            this.labelAlignCenter.Text = LanguageManager.Strings.Center;
+            this.labelAlignBottom.Text = LanguageManager.Strings.Bottom;
+            this.lblPath.Text = LanguageManager.Strings.Path;
+            this.lblCurrentStateLabel.Text = LanguageManager.Strings.CurrentState;
+            this.lblStateBinding.Text = LanguageManager.Strings.StateBinding;
+            this.radioOnPress.Text = LanguageManager.Strings.OnPress;
+            this.radioOnEvent.Text = LanguageManager.Strings.OnEvent;
+            this.btnApply.Text = LanguageManager.Strings.Save;
+            this.btnOk.Text = LanguageManager.Strings.Ok;
+            this.groupHotkey.Text = LanguageManager.Strings.Hotkey;
 
             this.folder = folder;
             this.actionButton = actionButton;
@@ -68,18 +71,19 @@ namespace SuchByte.MacroDeck.GUI
                 }
             }
             this.listStateBinding.Items.Add("");
-            foreach (Variables.Variable variable in Variables.VariableManager.Variables)
+            foreach (Variable variable in VariableManager.Variables)
             {
                 this.listStateBinding.Items.Add(variable.Name);
             }
             this.actionButton.StateChanged += this.OnStateChanged;
+            this.hotkey.Click += Hotkey_Click;
             this.LoadButton();
         }
 
         private void ButtonEditor_Load(object sender, EventArgs e)
         {
             this.btnPreview.Radius = ProfileManager.CurrentProfile.ButtonRadius;
-
+            this.UpdateLabel();
         }
 
         private void OnStateChanged(object sender, EventArgs e)
@@ -126,13 +130,7 @@ namespace SuchByte.MacroDeck.GUI
                         Bitmap labelBitmap = new Bitmap(250, 250);
                         string labelOffText = actionButtonEdited.LabelOff.LabelText.ToString();
                         labelOffText = VariableManager.RenderTemplate(labelOffText);
-                        /*foreach (Variables.Variable variable in Variables.VariableManager.Variables)
-                        {
-                            if (labelOffText.ToLower().Contains("{" + variable.Name.ToLower() + "}"))
-                            {
-                                labelOffText = labelOffText.Replace("{" + variable.Name + "}", variable.Value.ToString(), StringComparison.OrdinalIgnoreCase);
-                            }
-                        }*/
+
                         labelBitmap = Utils.LabelGenerator.GetLabel(labelBitmap, labelOffText, this.actionButtonEdited.LabelOff.LabelPosition, new Font(this.actionButtonEdited.LabelOff.FontFamily, this.actionButtonEdited.LabelOff.Size), this.actionButtonEdited.LabelOff.LabelColor, Color.Black, new SizeF(2.0F, 2.0F));
                         this.actionButtonEdited.LabelOff.LabelBase64 = Utils.Base64.GetBase64FromBitmap(labelBitmap);
                         this.Invoke(new Action(() => {
@@ -317,6 +315,7 @@ namespace SuchByte.MacroDeck.GUI
         private void Apply()
         {
             Debug.WriteLine("Apply");
+            HotkeyManager.RemoveHotkey(this.actionButton);
             this.actionButton = this.actionButtonEdited;
             this.actionButton.EventListeners = new List<EventListener>();
 
@@ -346,6 +345,7 @@ namespace SuchByte.MacroDeck.GUI
             MacroDeckServer.UpdateFolder(this.folder);
             ProfileManager.UpdateVariableLabels(this.actionButton);
             this.actionButton.UpdateBindingState();
+            this.actionButton.UpdateHotkey();
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
@@ -407,6 +407,11 @@ namespace SuchByte.MacroDeck.GUI
             bool currentState = this.actionButton.State;
             this.lblCurrentState.Text = currentState ? "On" : "Off";
             this.listStateBinding.Text = this.actionButtonEdited.StateBindingVariable;
+
+            if (this.actionButton.KeyCode != Keys.None)
+            {
+                this.hotkey.Text = this.actionButton.ModifierKeyCodes.ToString() + ", " + this.actionButton.KeyCode.ToString();
+            }
 
             this.RefreshLabel();
             this.RefreshIcon();
@@ -543,6 +548,25 @@ namespace SuchByte.MacroDeck.GUI
                 if (templateEditor.ShowDialog() == DialogResult.OK)
                 {
                     this.labelText.Text = templateEditor.Template;
+                }
+            }
+        }
+
+        private void BtnRemoveHotkey_Click(object sender, EventArgs e)
+        {
+            HotkeyManager.RemoveHotkey(this.actionButtonEdited);
+            this.hotkey.Text = string.Empty;
+        }
+
+        private void Hotkey_Click(object sender, EventArgs e)
+        {
+            using (var hotkeySelector = new HotkeySelector())
+            {
+                if (hotkeySelector.ShowDialog() == DialogResult.OK)
+                {
+                    this.hotkey.Text = hotkeySelector.ModifierKeys.ToString() + ", " + hotkeySelector.Key.ToString();
+                    this.actionButtonEdited.ModifierKeyCodes = hotkeySelector.ModifierKeys;
+                    this.actionButtonEdited.KeyCode = hotkeySelector.Key;
                 }
             }
         }

@@ -3,7 +3,6 @@
   <__Language__>English</__Language__>
   <__LanguageCode__>en</__LanguageCode__>
   <__Author__>Macro Deck</__Author__>
-  <__Version__>2.6.2.213560122</__Version__>
   <NetworkAdapter>Network adapter</NetworkAdapter>
   <IPAddress>IP address</IPAddress>
   <Port>Port</Port>
@@ -267,4 +266,8 @@ For gifs it is recommended to use the low or the lowest preset.</IconImportQuali
   <BackupSuccessfullyCreated>Backup successfully created</BackupSuccessfullyCreated>
   <CreateBackupBeforeUpdate>Do you want to create a backup before the update?</CreateBackupBeforeUpdate>
   <CreatingBackup>Creating backup...</CreatingBackup>
+  <PluginNeedsConfiguration>This plugin needs to be configured</PluginNeedsConfiguration>
+  <ConfigureNow>Do you want to configure {0} now?</ConfigureNow>
+  <Hotkey>Hotkey</Hotkey>
+  <PressTheKeysNow>Press the keys you want to assign now</PressTheKeysNow>
 </Strings>

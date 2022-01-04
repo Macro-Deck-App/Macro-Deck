@@ -3,7 +3,6 @@
   <__Language__>German</__Language__>
   <__LanguageCode__>de</__LanguageCode__>
   <__Author__>Macro Deck</__Author__>
-  <__Version__>2.1.1</__Version__>
   <NetworkAdapter>Netzwerkadapter</NetworkAdapter>
   <IPAddress>IP Adresse</IPAddress>
   <Port>Port</Port>
@@ -268,4 +267,8 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
 	<BackupSuccessfullyCreated>Backup erfolgreich erstellt</BackupSuccessfullyCreated>
 	<CreateBackupBeforeUpdate>Soll vor dem Update ein Backup erstellt werden?</CreateBackupBeforeUpdate>
 	<CreatingBackup>Erstelle Backup...</CreatingBackup>
+	<PluginNeedsConfiguration>Dieses Plugin erfordert Konfiguration</PluginNeedsConfiguration>
+	<ConfigureNow>{0} jetzt konfigurieren?</ConfigureNow>
+	<Hotkey>Tastenkombination</Hotkey>
+	<PressTheKeysNow>Tasten jetzt drücken...</PressTheKeysNow>
 </Strings>

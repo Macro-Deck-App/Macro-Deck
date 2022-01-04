@@ -14,6 +14,10 @@ using System.Runtime.InteropServices;
 using SuchByte.MacroDeck.Server;
 using System.Diagnostics;
 using System.Drawing;
+using SuchByte.MacroDeck.Profiles;
+using SuchByte.MacroDeck.Hotkeys;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.Dialogs;
 
 namespace SuchByte.MacroDeck.ActionButton
 {
@@ -29,6 +33,14 @@ namespace SuchByte.MacroDeck.ActionButton
         {
             _bufferPtr = Marshal.AllocHGlobal(BUFFER_SIZE);
             Variables.VariableManager.OnVariableChanged += VariableChanged;
+        }
+
+        public void UpdateHotkey()
+        {
+            if (this.KeyCode != Keys.None)
+            {
+                HotkeyManager.AddHotkey(this, this.ModifierKeyCodes, this.KeyCode);
+            }
         }
 
         public void UpdateBindingState()
@@ -61,6 +73,7 @@ namespace SuchByte.MacroDeck.ActionButton
             {
             }
 
+            HotkeyManager.RemoveHotkey(this);
             Variables.VariableManager.OnVariableChanged -= VariableChanged;
             if (this.Actions != null)
             {
@@ -171,6 +184,10 @@ namespace SuchByte.MacroDeck.ActionButton
         public string StateBindingVariable { get; set; } = "";
         public List<PluginAction> Actions { get; set; }
         public List<EventListener> EventListeners { get; set; }
-       
+
+        public Keys ModifierKeyCodes { get; set; } = Keys.None;
+
+        public Keys KeyCode { get; set; } = Keys.None;
+        
     }
 }

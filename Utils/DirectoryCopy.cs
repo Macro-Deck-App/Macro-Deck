@@ -10,7 +10,6 @@ namespace SuchByte.MacroDeck.Utils
     {
         public static void Copy(string sourceDirName, string destDirName, bool copySubDirs)
         {
-            Debug.WriteLine("Copy " + sourceDirName + " to " + destDirName);
             // Get the subdirectories for the specified directory.
             DirectoryInfo dir = new DirectoryInfo(sourceDirName);
 
@@ -43,7 +42,6 @@ namespace SuchByte.MacroDeck.Utils
                     Copy(subdir.FullName, tempPath, copySubDirs);
                 }
             }
-            Debug.WriteLine("Copy " + sourceDirName + " to " + destDirName + " success");
         }
     }
 }

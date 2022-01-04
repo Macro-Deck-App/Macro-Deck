@@ -38,8 +38,6 @@ namespace SuchByte.MacroDeck.Events
             {
                 IMacroDeckEvent macroDeckEvent = (IMacroDeckEvent)sender;
                 ActionButton.ActionButton actionButton = e.ActionButton;
-                Debug.WriteLine(sender.ToString());
-                Debug.WriteLine(e.Parameter);
 
                 foreach (EventListener eventListener in actionButton.EventListeners.FindAll(x => x.EventToListen.Equals(macroDeckEvent.Name) && x.Parameter.ToLower().Equals(e.Parameter.ToString().ToLower())))
                 {

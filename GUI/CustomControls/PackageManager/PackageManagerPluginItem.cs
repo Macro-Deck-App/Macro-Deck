@@ -315,13 +315,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                                 Process.Start(Path.Combine(MacroDeck.MainDirectoryPath, AppDomain.CurrentDomain.FriendlyName), "--show");
                                 Environment.Exit(0);
                             }
-
-                            msgBox.Dispose();
                         }
                     }
-                }
-                
-                
+                }                 
             }
             catch
             {
@@ -347,7 +343,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             } catch { }
         }
 
-        private void lblRepository_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LblRepository_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (this._jsonObject["repository"] != null)
             {

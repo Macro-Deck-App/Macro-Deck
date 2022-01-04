@@ -1,4 +1,5 @@
-﻿using SuchByte.MacroDeck.Folders;
+﻿using SuchByte.MacroDeck.Device;
+using SuchByte.MacroDeck.Folders;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -50,13 +51,28 @@ namespace SuchByte.MacroDeck.Profiles
 
         public string ProfileId { get; set; } = "";
         public string DisplayName { get; set; } = "";
-        public List<Folders.MacroDeckFolder> Folders { get; set; } = new List<Folders.MacroDeckFolder>();
+        public List<MacroDeckFolder> Folders { get; set; } = new List<MacroDeckFolder>();
         public int Rows { get; set; } = 3;
         public int Columns { get; set; } = 5;
         public int ButtonSpacing { get; set; } = 10;
         public int ButtonRadius { get; set; } = 40;
         public bool ButtonBackground { get; set; } = true;
+        public DeviceClass ProfileTarget { get; set; } = DeviceClass.SoftwareClient;
 
+        public bool ButtonsCustomizable
+        {
+            get
+            {
+                switch (this.ProfileTarget)
+                {
+                    case DeviceClass.SoftwareClient:
+                        return true;
+                    case DeviceClass.Macro_Deck_DIY_OLED_6_V1:
+                        return false;
+                }
+                return false;
+            }
+        }
 
     }
 }

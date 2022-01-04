@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SuchByte.MacroDeck.Logging;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -24,6 +25,7 @@ namespace SuchByte.MacroDeck.Language
 
         public static void Load(bool exportDefaultStrings = false)
         {
+            MacroDeckLogger.Info("Loading language files...");
             _languages.Clear();
             _languages.Add(_strings);
             if (exportDefaultStrings)
@@ -48,15 +50,13 @@ namespace SuchByte.MacroDeck.Language
                         if (_languages.FindAll(l => l.__Language__.Equals(language.__Language__) && l.__LanguageCode__.Equals(language.__LanguageCode__) && l.__Author__.Equals(language.__Author__)).Count > 0) continue;
                         _languages.Add(language);
                     }
-                } catch { }
+                } catch (Exception ex) {
+
+                    MacroDeckLogger.Warning("Failed to load language resource: " + ex.Message);
+                }
             }
 
             _languages = _languages.OrderBy(x => x.__Language__).ToList();
-          
-            foreach (Strings languageString in _languages)
-            {
-                Debug.WriteLine(languageString.__Language__);
-            }
         }
 
 
@@ -73,7 +73,7 @@ namespace SuchByte.MacroDeck.Language
                     writer.Serialize(fileStream, _strings);
                     fileStream.Close();
                 }
-                Debug.WriteLine("Default language file saved");
+                MacroDeckLogger.Info("Successfully exported default language strings");
             } catch { }
         }
 
@@ -88,7 +88,7 @@ namespace SuchByte.MacroDeck.Language
 
         public static void SetLanguage(Strings language)
         {
-            Debug.WriteLine("Set language to " + language.__Language__);
+            MacroDeckLogger.Info("Set language to " + language.__Language__);
             _strings = language;
             if (LanguageChanged != null)
             {

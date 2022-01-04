@@ -14,6 +14,8 @@ using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.Profiles;
 using System.Diagnostics;
 using SuchByte.MacroDeck.Icons;
+using System.Linq;
+using SuchByte.MacroDeck.Logging;
 
 namespace SuchByte.MacroDeck.Server
 {
@@ -21,8 +23,6 @@ namespace SuchByte.MacroDeck.Server
     {
         public static event EventHandler OnDeviceConnectionStateChanged;
         public static event EventHandler OnServerStateChanged;
-        public static event EventHandler OnIconChanged;
-        public static event EventHandler OnLabelChanged;
         public static event EventHandler OnFolderChanged;
 
         private static WebSocketServer _webSocketServer;
@@ -33,14 +33,18 @@ namespace SuchByte.MacroDeck.Server
         private static readonly List<MacroDeckClient> _clients = new List<MacroDeckClient>();
         public static List<MacroDeckClient> Clients { get { return _clients; } }
 
-
+        /// <summary>
+        /// Starts the websocket server
+        /// </summary>
+        /// <param name="ipAddress"></param>
+        /// <param name="port"></param>
         public static void Start(string ipAddress, int port)
         {
             DeviceManager.LoadKnownDevices();
             Thread.Sleep(100);
             if (_webSocketServer != null)
             {
-                Debug.WriteLine("Stopping websocket server...");
+                MacroDeckLogger.Info("Stopping websocket server...");
                 foreach (MacroDeckClient macroDeckClient in _clients)
                 {
                     if (macroDeckClient.SocketConnection != null && macroDeckClient.SocketConnection.IsAvailable)
@@ -56,7 +60,7 @@ namespace SuchByte.MacroDeck.Server
                 }
                 
             }
-            Debug.WriteLine(String.Format("Starting websocket server @ {0}:{1}", ipAddress, port));
+            MacroDeckLogger.Info(String.Format("Starting websocket server @ {0}:{1}", ipAddress, port));
             _webSocketServer = new WebSocketServer("ws://" + ipAddress + ":" + port);
             _webSocketServer.ListenerSocket.NoDelay = true;
             try
@@ -80,38 +84,29 @@ namespace SuchByte.MacroDeck.Server
                 {
                     OnServerStateChanged(_webSocketServer, EventArgs.Empty);
                 }
-                Debug.WriteLine(ex.Message);
+
+                MacroDeckLogger.Error("Failed to start server: " + ex.Message);
+
                 using (var msgBox = new GUI.CustomControls.MessageBox())
                 {
-                    msgBox.ShowDialog(Language.LanguageManager.Strings.Error, Language.LanguageManager.Strings.FailedToStartServer, MessageBoxButtons.OK);
+                    msgBox.ShowDialog(Language.LanguageManager.Strings.Error, Language.LanguageManager.Strings.FailedToStartServer + Environment.NewLine + ex.Message, MessageBoxButtons.OK);
                 }
             }
         }
 
         private static void OnOpen(MacroDeckClient macroDeckClient)
         {
-            if (MacroDeck.Configuration.BlockNewConnections)
+            if (MacroDeck.Configuration.BlockNewConnections ||
+                Clients.Count >= 10 ||
+                ProfileManager.CurrentProfile.Folders == null || 
+                ProfileManager.CurrentProfile.Folders.Count < 1)
             {
-                macroDeckClient.SocketConnection.Close();
-                return;
-            }
-            if (Clients.Count >= 5)
-            {
-                macroDeckClient.SocketConnection.Close();
-               /* using (GUI.CustomControls.MessageBox messageBox = new GUI.CustomControls.MessageBox())
-                {
-                    messageBox.ShowDialog("Connection limit reached", "With Macro Deck free you can connect up to 2 devices at the same time. If you want to connect more devices at the same time, upgrade to Macro Deck pro.", MessageBoxButtons.OK);
-                    messageBox.Dispose();
-                }*/
-                return;
-            } 
-            if (ProfileManager.CurrentProfile.Folders == null || ProfileManager.CurrentProfile.Folders.Count < 1)
-            {
-                macroDeckClient.SocketConnection.Close();
+                CloseClient(macroDeckClient);
                 return;
             }
 
             _clients.Add(macroDeckClient);
+
             if (OnDeviceConnectionStateChanged != null)
             {
                 OnDeviceConnectionStateChanged(macroDeckClient, EventArgs.Empty);
@@ -120,6 +115,7 @@ namespace SuchByte.MacroDeck.Server
 
         private static void OnClose(MacroDeckClient macroDeckClient)
         {
+            MacroDeckLogger.Info(macroDeckClient.ClientId + " connection closed");
             macroDeckClient.Dispose();
             _clients.Remove(macroDeckClient);
             if (OnDeviceConnectionStateChanged != null)
@@ -131,229 +127,76 @@ namespace SuchByte.MacroDeck.Server
             GC.Collect();
         }
 
-        public static void SetProfile(MacroDeckClient macroDeckClient, MacroDeckProfile macroDeckProfile)
+        /// <summary>
+        /// Closes the connection
+        /// </summary>
+        /// <param name="macroDeckClient"></param>
+        public static void CloseClient(MacroDeckClient macroDeckClient)
         {
-            if (macroDeckProfile == null) return;
-            macroDeckClient.Profile = macroDeckProfile;
-            SendConfiguration(macroDeckClient);
-            SetFolder(macroDeckClient, macroDeckProfile.Folders[0]);
-        }
-
-        public static void SetFolder(MacroDeckClient macroDeckClient, MacroDeckFolder folder)
-        {
-            if (macroDeckClient == null) return;
-            if (folder == null) return;
-            macroDeckClient.Folder = folder;
-            SendAllButtons(macroDeckClient);
-            if (OnFolderChanged != null)
+            if (macroDeckClient != null && macroDeckClient.SocketConnection != null && macroDeckClient.SocketConnection.IsAvailable)
             {
-                OnFolderChanged(macroDeckClient, EventArgs.Empty);
+                MacroDeckLogger.Info("Close connection to " + macroDeckClient.ClientId);
+                macroDeckClient.SocketConnection.Close();
             }
         }
-
-        public static void UpdateFolder(MacroDeckFolder folder)
-        {
-            foreach (MacroDeckClient macroDeckClient in _clients.FindAll(delegate (MacroDeckClient macroDeckClient)
-            {
-                return macroDeckClient.Folder.Equals(folder);
-            }))
-            {
-                SendAllButtons(macroDeckClient);
-            }
-        }
-
-        public static void SendConfiguration(MacroDeckClient macroDeckClient)
-        {
-            if (macroDeckClient == null || macroDeckClient.SocketConnection == null || !macroDeckClient.SocketConnection.IsAvailable) return;
-            JObject configurationObject = JObject.FromObject(new
-            {
-                Method = JsonMethod.GET_CONFIG.ToString(),
-                Rows = macroDeckClient.Profile.Rows,
-                Columns = macroDeckClient.Profile.Columns,
-                ButtonSpacing = macroDeckClient.Profile.ButtonSpacing,
-                ButtonRadius = macroDeckClient.Profile.ButtonRadius,
-                ButtonBackground = macroDeckClient.Profile.ButtonBackground,
-                Brightness = DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).Configuration.Brightness,
-            });
-            Send(macroDeckClient.SocketConnection, configurationObject);
-            GC.Collect();
-        }
+        
 
         private static void OnMessage(MacroDeckClient macroDeckClient, string jsonMessageString)
         {
+            MacroDeckLogger.Trace("Receiving " + jsonMessageString);
             JObject responseObject = JObject.Parse(jsonMessageString);
-
-            Debug.WriteLine("in: " + jsonMessageString);
 
             switch (Enum.Parse(typeof(JsonMethod), responseObject["Method"].ToString()))
             {
                 case JsonMethod.CONNECTED:
-                    if (Int32.Parse(responseObject["API"].ToString()) != MacroDeck.ApiVersion)
+                    if (responseObject["API"] == null || responseObject["Client-Id"] == null || responseObject["Device-Type"] == null || responseObject["API"].ToObject<int>() < MacroDeck.ApiVersion)
                     {
-                        macroDeckClient.SocketConnection.Close();
+                        CloseClient(macroDeckClient);
                         return;
                     }
 
                     macroDeckClient.SetClientId(responseObject["Client-Id"].ToString());
 
-                    if (responseObject["Device-Type"] != null)
-                    {
-                        try
-                        {
-                            DeviceType deviceType = DeviceType.Unknown;
-                            Enum.TryParse(responseObject["Device-Type"].ToString(), out deviceType);
-                            macroDeckClient.DeviceType = deviceType;
-                        }
-                        catch { }
-                    }
+                    MacroDeckLogger.Info("Connection request from " + macroDeckClient.ClientId);
 
+                    DeviceType deviceType = DeviceType.Unknown;
+                    Enum.TryParse(responseObject["Device-Type"].ToString(), out deviceType);
+                    macroDeckClient.DeviceType = deviceType;
+
+                    if (!DeviceManager.RequestConnection(macroDeckClient))
+                    {
+                        CloseClient(macroDeckClient);
+                        return;
+                    }
                     
-                    if (MacroDeck.Configuration.AskOnNewConnections)
-                    {
-                        if (DeviceManager.IsKnownDevice(macroDeckClient.ClientId))
-                        {
-                            MacroDeckDevice macroDeckDevice = DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId);
-                            if (macroDeckDevice.Blocked)
-                            {
-                                macroDeckClient.SocketConnection.Close();
-                                return;
-                            }
-                            else
-                            {
-                                //macroDeckDevice.Available = true;
-                                macroDeckDevice.ClientId = macroDeckClient.ClientId;
-                                if (macroDeckDevice.ProfileId == "")
-                                {
-                                    macroDeckDevice.ProfileId = ProfileManager.Profiles[0].ProfileId;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            Form mainForm = null;
-                            foreach (Form form in Application.OpenForms)
-                            {
-                                if (form.Name.Equals("MainWindow"))
-                                {
-                                    mainForm = form;
-                                }
-                            }
-                            if (mainForm != null)
-                            {
-                                Debug.WriteLine("Invoking");
-                                mainForm.Invoke(new Action(() =>
-                                {
-                                    using (var msgBox = new GUI.CustomControls.MessageBox())
-                                    {
-                                        System.Media.SystemSounds.Exclamation.Play();
-                                        if (msgBox.ShowDialog(Language.LanguageManager.Strings.NewConnection, String.Format(Language.LanguageManager.Strings.XIsAnUnknownDevice, macroDeckClient.ClientId), MessageBoxButtons.YesNo) == DialogResult.Yes)
-                                        {
-                                            MacroDeckDevice macroDeckDevice = new MacroDeckDevice
-                                            {
-                                                ClientId = macroDeckClient.ClientId,
-                                                DisplayName = "Client " + macroDeckClient.ClientId,
-                                                ProfileId = ProfileManager.Profiles[0].ProfileId
-                                            };
-                                            DeviceManager.AddKnownDevice(macroDeckDevice);
-                                        }
-                                        else
-                                        {
-                                            macroDeckClient.SocketConnection.Close();
-                                            if (msgBox.ShowDialog(Language.LanguageManager.Strings.BlockConnection, String.Format(Language.LanguageManager.Strings.ShouldMacroDeckBlockConnectionsFromX, macroDeckClient.ClientId), MessageBoxButtons.YesNo) == DialogResult.Yes)
-                                            {
-                                                MacroDeckDevice macroDeckDevice = new MacroDeckDevice
-                                                {
-                                                    ClientId = macroDeckClient.ClientId,
-                                                    DisplayName = "Client " + macroDeckClient.ClientId,
-                                                    Blocked = true
-                                                };
-                                                DeviceManager.AddKnownDevice(macroDeckDevice);
-                                            }
-                                            return;
-                                        }
-                                    }
-                                }));
-                            } else
-                            {
-                                using (var msgBox = new GUI.CustomControls.MessageBox())
-                                {
-                                    System.Media.SystemSounds.Exclamation.Play();
-                                    msgBox.TopMost = true;
-                                    msgBox.Focus();
-                                    msgBox.BringToFront();
-                                    msgBox.TopMost = false;
-                                    msgBox.ShowInTaskbar = true;
-                                    if (msgBox.ShowDialog(Language.LanguageManager.Strings.NewConnection, String.Format(Language.LanguageManager.Strings.XIsAnUnknownDevice, macroDeckClient.ClientId), MessageBoxButtons.YesNo) == DialogResult.Yes)
-                                    {
-                                        MacroDeckDevice macroDeckDevice = new MacroDeckDevice
-                                        {
-                                            ClientId = macroDeckClient.ClientId,
-                                            DisplayName = "Client " + macroDeckClient.ClientId,
-                                            ProfileId = ProfileManager.Profiles[0].ProfileId
-                                        };
-                                        DeviceManager.AddKnownDevice(macroDeckDevice);
-                                    }
-                                    else
-                                    {
-                                        macroDeckClient.SocketConnection.Close();
-                                        if (msgBox.ShowDialog(Language.LanguageManager.Strings.BlockConnection, String.Format(Language.LanguageManager.Strings.ShouldMacroDeckBlockConnectionsFromX, macroDeckClient.ClientId), MessageBoxButtons.YesNo) == DialogResult.Yes)
-                                        {
-                                            MacroDeckDevice macroDeckDevice = new MacroDeckDevice
-                                            {
-                                                ClientId = macroDeckClient.ClientId,
-                                                DisplayName = "Client " + macroDeckClient.ClientId,
-                                                Blocked = true
-                                            };
-                                            DeviceManager.AddKnownDevice(macroDeckDevice);
-                                        }
-                                        return;
-                                    }
-                                }
-                            }
-                            
-                        }
-                    } else
-                    {
-                        if (!DeviceManager.IsKnownDevice(macroDeckClient.ClientId))
-                        {
-                            MacroDeckDevice macroDeckDevice = new MacroDeckDevice
-                            {
-                                ClientId = macroDeckClient.ClientId,
-                                DisplayName = "Client " + macroDeckClient.ClientId,
-                                //Available = true,
-                                ProfileId = ProfileManager.Profiles[0].ProfileId
-                            };
-                            DeviceManager.AddKnownDevice(macroDeckDevice);
-                        }
-                    }
-
                     if (!macroDeckClient.SocketConnection.IsAvailable || DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId) == null)
                     {
                         return;
                     }
 
-                    if (DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).ProfileId == "")
+                    if (string.IsNullOrWhiteSpace(DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).ProfileId))
                     {
-                        DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).ProfileId = ProfileManager.Profiles[0].ProfileId;
+                        DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).ProfileId = ProfileManager.Profiles.FirstOrDefault().ProfileId;
                     }
-
-                    DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).DeviceType = macroDeckClient.DeviceType;
 
                     DeviceManager.SaveKnownDevices();
 
                     macroDeckClient.Profile = ProfileManager.FindProfileById(DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).ProfileId);
+
                     if (macroDeckClient.Profile == null)
                     {
-                        macroDeckClient.Profile = ProfileManager.Profiles[0];
+                        macroDeckClient.Profile = ProfileManager.Profiles.FirstOrDefault();
                     }
-                    macroDeckClient.Folder = macroDeckClient.Profile.Folders[0];
 
-                    SendConfiguration(macroDeckClient);
-                    SendAllIcons(macroDeckClient);
+                    macroDeckClient.Folder = macroDeckClient.Profile.Folders.FirstOrDefault();
+
+                    macroDeckClient.DeviceMessage.Connected(macroDeckClient);
+                    MacroDeckLogger.Info(macroDeckClient.ClientId + " connected");
                     break;
                 case JsonMethod.BUTTON_PRESS:
                     try
                     {
+                        if (macroDeckClient.Folder == null || macroDeckClient.Folder.ActionButtons == null) return;
                         int row = Int32.Parse(responseObject["Message"].ToString().Split('_')[0]);
                         int column = Int32.Parse(responseObject["Message"].ToString().Split('_')[1]);
 
@@ -365,7 +208,7 @@ namespace SuchByte.MacroDeck.Server
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex.Message);
+                        MacroDeckLogger.Warning("Action button press caused an exception: " + ex.Message);
                     }
                     break;
                 case JsonMethod.GET_BUTTONS:
@@ -379,39 +222,6 @@ namespace SuchByte.MacroDeck.Server
                     {
                         SendAllIcons(macroDeckClient);
                     });
-                    break;
-                case JsonMethod.GET_INSTALLED_PLUGINS:
-                    Task.Run(() =>
-                    {
-                        JObject pluginsObject = new JObject
-                        {
-                            ["method"] = JsonMethod.GET_INSTALLED_PLUGINS.ToString()
-                        };
-                        List<string> installedPlugins = new List<string>();
-                        foreach (MacroDeckPlugin plugin in PluginManager.Plugins.Values)
-                        {
-                            installedPlugins.Add(plugin.Author + "." + plugin.Name);
-                        }
-                        pluginsObject["plugins"] = JToken.FromObject(installedPlugins);
-                    });
-                    break;
-                case JsonMethod.GET_INSTALLED_ICON_PACKS:
-                    Task.Run(() =>
-                    {
-                        JObject pluginsObject = new JObject
-                        {
-                            ["method"] = JsonMethod.GET_INSTALLED_ICON_PACKS.ToString()
-                        };
-                        List<string> installedPlugins = new List<string>();
-                        foreach (IconPack iconPack in IconManager.IconPacks)
-                        {
-                            installedPlugins.Add(iconPack.Author + "." + iconPack.Name);
-                        }
-                        pluginsObject["iconpacks"] = JToken.FromObject(installedPlugins);
-                    });
-                    break;
-                default:
-                    Console.WriteLine("Unknown method");
                     break;
             }
         }
@@ -427,8 +237,6 @@ namespace SuchByte.MacroDeck.Server
                         action.Trigger(clientId, actionButton);
                     } catch { }
                 }
-                //ButtonDone(clientId, row, column);
-
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
@@ -436,211 +244,86 @@ namespace SuchByte.MacroDeck.Server
         }
 
         /// <summary>
-        /// Send icon base 64 to an action button
+        /// Sets the current profile of a client
         /// </summary>
-        /// <param name="clientId"></param>
-        /// <param name="actionButton"></param>
-        /// <param name="base64"></param>
-        public static void SendIconBase64(string clientId, ActionButton.ActionButton actionButton, string base64)
+        /// <param name="macroDeckClient"></param>
+        /// <param name="macroDeckProfile"></param>
+        public static void SetProfile(MacroDeckClient macroDeckClient, MacroDeckProfile macroDeckProfile)
         {
-            SendIconBase64(GetMacroDeckClient(clientId), actionButton, base64);
-        }
-
-        public static void SendIconBase64(MacroDeckClient macroDeckClient, ActionButton.ActionButton actionButton, string base64)
-        {
-            JObject actionButtonObject = JObject.FromObject(new
-            {
-                Position_X = actionButton.Position_X,
-                Position_Y = actionButton.Position_Y,
-                Icon = base64
-            });
-
-            JObject updateObject = JObject.FromObject(new
-            {
-                Method = JsonMethod.ICON_BASE64.ToString(),
-                Buttons = new List<JObject>
-                {
-                    actionButtonObject
-                },
-            });
-
-            Send(macroDeckClient.SocketConnection, updateObject);
-
-            if (OnIconChanged != null)
-            {
-                OnIconChanged(actionButton, EventArgs.Empty);
-            }
-
+            if (macroDeckProfile == null) return;
+            macroDeckClient.Profile = macroDeckProfile;
+            macroDeckClient.DeviceMessage.SendConfiguration(macroDeckClient);
+            SetFolder(macroDeckClient, macroDeckProfile.Folders[0]);
         }
 
         /// <summary>
-        /// Display text on an action button
+        /// Sets the current folder of a client
         /// </summary>
-        /// <param name="clientId">Client-ID</param>
-        /// <param name="actionButton">Actionbutton</param>
-        /// <param name="text">Text</param>
-        /// <param name="size">Text-Size</param>
-        public static void DisplayText(string clientId, ActionButton.ActionButton actionButton, string text, float size, bool overrideLabel = false)
+        /// <param name="macroDeckClient"></param>
+        /// <param name="folder"></param>
+        public static void SetFolder(MacroDeckClient macroDeckClient, MacroDeckFolder folder)
         {
-            DisplayText(GetMacroDeckClient(clientId), actionButton, text, size);
+            if (macroDeckClient == null) return;
+            if (folder == null) return;
+            macroDeckClient.Folder = folder;
+            SendAllButtons(macroDeckClient);
+            if (OnFolderChanged != null)
+            {
+                OnFolderChanged(macroDeckClient, EventArgs.Empty);
+            }
         }
 
-        public static void DisplayText(MacroDeckClient macroDeckClient, ActionButton.ActionButton actionButton, string text, float textSize)
+        /// <summary>
+        /// Updates the folder on all clients with this folder as the current folder
+        /// </summary>
+        /// <param name="folder"></param>
+        public static void UpdateFolder(MacroDeckFolder folder)
         {
-            Bitmap labelBmp = new Bitmap(250, 250);
-            labelBmp = Utils.LabelGenerator.GetLabel(labelBmp, text, ButtonLabelPosition.CENTER, new Font("Impact", textSize), Color.White, Color.Black, new SizeF(2.0f, 2.0f));
-            string labelBase64 = Utils.Base64.GetBase64FromBitmap(labelBmp);
-            labelBmp.Dispose();
-
-            ButtonLabel label = new ButtonLabel
+            foreach (MacroDeckClient macroDeckClient in _clients.FindAll(delegate (MacroDeckClient macroDeckClient)
             {
-                LabelBase64 = labelBase64
-            };
-
-            JObject actionButtonObject = JObject.FromObject(new
+                return macroDeckClient.Folder.Equals(folder);
+            }))
             {
-                Position_X = actionButton.Position_X,
-                Position_Y = actionButton.Position_Y,
-                Label = label
-            });
-
-            JObject updateObject = JObject.FromObject(new
-            {
-                Method = JsonMethod.UPDATE_LABEL.ToString(),
-                Buttons = new List<JObject>
-                {
-                    actionButtonObject
-                },
-            });
-
-            Send(macroDeckClient.SocketConnection, updateObject);
-
-            if (OnLabelChanged != null)
-            {
-                OnLabelChanged(actionButton, EventArgs.Empty);
+                SendAllButtons(macroDeckClient);
             }
         }
 
 
+        /// <summary>
+        /// Sends all icon packs to the client
+        /// </summary>
+        /// <param name="macroDeckClient"></param>
         public static void SendAllIcons(MacroDeckClient macroDeckClient = null)
         {
-            JObject iconsObject = JObject.FromObject(new
-            {
-                Method = JsonMethod.GET_ICONS.ToString(),
-                IconPacks = IconManager.IconPacks
-            });
-
             if (macroDeckClient == null)
             {
-                foreach (MacroDeckClient mdc in _clients)
+                foreach (MacroDeckClient client in MacroDeckServer.Clients)
                 {
-                    Send(mdc.SocketConnection, iconsObject);
+                    client.DeviceMessage.SendIconPacks(client);
                 }
-            } else {
-                Send(macroDeckClient.SocketConnection, iconsObject);
+            } else
+            {
+                macroDeckClient.DeviceMessage.SendIconPacks(macroDeckClient);
             }
         }
 
+        /// <summary>
+        /// Sends all buttons of the current folder to the client
+        /// </summary>
+        /// <param name="macroDeckClient"></param>
         private static void SendAllButtons(MacroDeckClient macroDeckClient)
         {
-            if (macroDeckClient.Folder == null || macroDeckClient.Folder.ActionButtons == null) return;
-
-            List<JObject> buttons = new List<JObject>();
-            foreach (ActionButton.ActionButton actionButton in macroDeckClient.Folder.ActionButtons)
-            {
-                string Icon = "";
-                ButtonLabel Label = null;
-                switch (actionButton.State)
-                {
-                    case false:
-                        if (actionButton.IconOff != null)
-                        {
-                            if (actionButton.IconOff.Length > 0)
-                            {
-                                Icon = actionButton.IconOff;
-                            }
-                        }
-                        Label = actionButton.LabelOff;
-                        break;
-                    case true:
-                        if (actionButton.IconOn != null)
-                        {
-                            if (actionButton.IconOn.Length > 0)
-                            {
-                                Icon = actionButton.IconOn;
-                            }
-                        }
-                        Label = actionButton.LabelOn;
-                        break;
-                }
-
-                JObject actionButtonObject = JObject.FromObject(new
-                {
-                    actionButton.ButtonId,
-                    Icon,
-                    actionButton.Position_X,
-                    actionButton.Position_Y,
-                    Label,
-                });
-                buttons.Add(actionButtonObject);
-            }
-
-            JObject buttonsObject = JObject.FromObject(new
-            {
-                Method = JsonMethod.GET_BUTTONS.ToString(),
-                Buttons = buttons
-            });
-
-            Send(macroDeckClient.SocketConnection, buttonsObject);
+            macroDeckClient.DeviceMessage.SendAllButtons(macroDeckClient);
         }
 
+        /// <summary>
+        /// Sends a single button to the client
+        /// </summary>
+        /// <param name="macroDeckClient"></param>
+        /// <param name="actionButton"></param>
         public static void SendButton(MacroDeckClient macroDeckClient, ActionButton.ActionButton actionButton)
         {
-            if (macroDeckClient.Folder == null) return;
-            if (!macroDeckClient.Folder.ActionButtons.Contains(actionButton)) return;
-            string Icon = "";
-            ButtonLabel Label;
-            if (actionButton.State == false)
-            {
-                if (actionButton.IconOff.Length > 0)
-                {
-                    if (actionButton.IconOff.Length > 0)
-                    {
-                        Icon = actionButton.IconOff;
-                    }
-                }
-                Label = actionButton.LabelOff;
-            }
-            else
-            {
-                if (actionButton.IconOn.Length > 0)
-                {
-                    if (actionButton.IconOn.Length > 0)
-                    {
-                        Icon = actionButton.IconOn;
-                    }
-                }
-                Label = actionButton.LabelOn;
-            }
-            JObject actionButtonObject = JObject.FromObject(new
-            {
-                actionButton.ButtonId,
-                Icon,
-                actionButton.Position_X,
-                actionButton.Position_Y,
-                Label,
-            });
-
-            JObject updateObject = JObject.FromObject(new
-            {
-                Method = JsonMethod.UPDATE_BUTTON.ToString(),
-                Buttons = new List<JObject>
-                {
-                    actionButtonObject
-                },
-            });
-
-            Send(macroDeckClient.SocketConnection, updateObject);
+            macroDeckClient.DeviceMessage.UpdateButton(macroDeckClient, actionButton);
         }
 
         /// <summary>
@@ -653,7 +336,7 @@ namespace SuchByte.MacroDeck.Server
             actionButton.State = state;
         }
 
-        public static void UpdateState(ActionButton.ActionButton actionButton)
+        internal static void UpdateState(ActionButton.ActionButton actionButton)
         {
             foreach (MacroDeckClient macroDeckClient in _clients.FindAll(delegate (MacroDeckClient macroDeckClient)
             {
@@ -664,13 +347,6 @@ namespace SuchByte.MacroDeck.Server
             }
         }
 
-
-        private static void Send(IWebSocketConnection socketConnection, JObject jObject)
-        {
-            socketConnection.Send(jObject.ToString());
-        }
-
-
         /// <summary>
         /// Get the MacroDeckClient from the client id
         /// </summary>
@@ -678,9 +354,19 @@ namespace SuchByte.MacroDeck.Server
         /// <returns></returns>
         public static MacroDeckClient GetMacroDeckClient(string macroDeckClientId)
         {
-            if (macroDeckClientId.Equals("")) return null;
+            if (string.IsNullOrWhiteSpace(macroDeckClientId)) return null;
             return _clients.Find(macroDeckClient => macroDeckClient.ClientId == macroDeckClientId);
         }
 
+        /// <summary>
+        /// Raw send function
+        /// </summary>
+        /// <param name="socketConnection"></param>
+        /// <param name="jObject"></param>
+        internal static void Send(IWebSocketConnection socketConnection, JObject jObject)
+        {
+            MacroDeckLogger.Trace("Sending " + jObject.ToString());
+            socketConnection.Send(jObject.ToString());
+        }
     }
 }

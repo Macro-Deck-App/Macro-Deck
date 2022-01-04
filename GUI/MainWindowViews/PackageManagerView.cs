@@ -228,6 +228,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void OnPluginsChanged(object sender, EventArgs e)
         {
+            this.Invoke(new Action(() => {
+                this.radioOnlyUpdates.Text = String.Format(Language.LanguageManager.Strings.Updates + " ({0})", PluginManager.PluginsUpdateAvailable.Count + IconManager.IconPacksUpdateAvailable.Count);
+                this.radioInstalled.Text = String.Format(Language.LanguageManager.Strings.PackageManagerTabInstalled + " ({0})", PluginManager.PluginsNotLoaded.Count + PluginManager.Plugins.Count - PluginManager.ProtectedPlugins.Count + IconManager.IconPacks.FindAll(iP => iP.PackageManagerManaged && !iP.Hidden).Count);
+            }));
+            if (!this.radioInstalled.Checked) return;
             try
             {
                 Task.Run(() =>

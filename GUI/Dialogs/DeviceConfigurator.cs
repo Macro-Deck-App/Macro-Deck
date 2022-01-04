@@ -32,7 +32,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         {
             this._macroDeckDevice.Configuration.Brightness = this.brightness.Value / 10.0f;
             DeviceManager.SaveKnownDevices();
-            MacroDeckServer.SendConfiguration(MacroDeckServer.GetMacroDeckClient(this._macroDeckDevice.ClientId));
+            //this._macroDeckDevice.ClientId.SendConfiguration(MacroDeckServer.GetMacroDeckClient(this._macroDeckDevice.ClientId));
         }
     }
 }

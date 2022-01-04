@@ -13,6 +13,7 @@ using System.Net;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using SuchByte.MacroDeck.Logging;
 
 namespace SuchByte.MacroDeck.Icons
 {
@@ -43,16 +44,13 @@ namespace SuchByte.MacroDeck.Icons
                     {
                         var newFileName = Path.Combine(MacroDeck.IconPackDirectoryPath, Path.GetFileNameWithoutExtension(databasePath) + ".iconpack");
 
-                        Debug.WriteLine(databasePath + "->" + newFileName);
                         // Delete the existing file if exists
                         if (File.Exists(newFileName))
                         {
                             File.Delete(newFileName); 
                         }
                         File.Move(databasePath, newFileName);
-                    } catch (Exception ex) {
-                        Debug.WriteLine(ex.StackTrace);                    
-                    }
+                    } catch {}
                 }
             }
 
@@ -154,9 +152,9 @@ namespace SuchByte.MacroDeck.Icons
                     var jsonString = wc.DownloadString("https://macrodeck.org/files/packagemanager/iconpacks.php?action=check-version&name=" + iconPack.Name + "&version=" + iconPack.Version + "&target-api=" + MacroDeck.PluginApiVersion);
                     JObject jsonObject = JObject.Parse(jsonString);
                     bool update = (bool)jsonObject["newer-version-available"];
-                    Debug.WriteLine(iconPack.Name + " update: " + update.ToString());
                     if (update)
                     {
+                        MacroDeckLogger.Info("Update available for " + iconPack.Name);
                         IconPacksUpdateAvailable.Add(iconPack);
                     }
                 }
@@ -263,7 +261,6 @@ namespace SuchByte.MacroDeck.Icons
         {
             try
             {
-                Debug.WriteLine("Add icon to " + iconPack.Name);
                 var base64 = Utils.Base64.GetBase64FromImage(image);
                 Icon icon = new Icon
                 {
@@ -276,8 +273,9 @@ namespace SuchByte.MacroDeck.Icons
                 MacroDeckServer.SendAllIcons();
                 return icon;
             }
-            catch (Exception e) {
-                Debug.WriteLine(e.StackTrace);
+            catch (Exception ex)
+            {
+                MacroDeckLogger.Error("Failed to add icon to icon pack: " + ex.Message);
             }
             return null;
         }

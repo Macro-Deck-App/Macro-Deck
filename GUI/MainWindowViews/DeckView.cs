@@ -656,10 +656,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             MacroDeckProfile profile = ProfileManager.FindProfileByDisplayName(this.boxProfiles.Text);
             if (profile == null)
             {
-                profile = ProfileManager.Profiles[0];
+                profile = ProfileManager.Profiles.FirstOrDefault();
             }
             ProfileManager.CurrentProfile = profile;
-            this._currentFolder = profile.Folders[0];
+            this._currentFolder = profile.Folders.FirstOrDefault();
             this.UpdateButtons(true);
             this.LoadProfileSettings();
             this.UpdateFolders();
@@ -687,6 +687,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.buttonSpacing.ValueChanged += this.ButtonSettingsChanged;
             this.cornerRadius.ValueChanged += this.ButtonSettingsChanged;
             this.checkButtonBackground.CheckedChanged += this.ButtonSettingsChanged;
+
+            this.buttonRows.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
+            this.buttonColumns.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
+            this.buttonSpacing.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
+            this.cornerRadius.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
+            this.checkButtonBackground.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
 
             GC.Collect();
             GC.WaitForPendingFinalizers();

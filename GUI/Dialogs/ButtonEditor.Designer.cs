@@ -76,6 +76,9 @@ namespace SuchByte.MacroDeck.GUI
             this.radioOnPress = new SuchByte.MacroDeck.GUI.CustomControls.TabRadioButton();
             this.radioOnEvent = new SuchByte.MacroDeck.GUI.CustomControls.TabRadioButton();
             this.groupButtonState = new System.Windows.Forms.GroupBox();
+            this.groupHotkey = new System.Windows.Forms.GroupBox();
+            this.btnRemoveHotkey = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
+            this.hotkey = new SuchByte.MacroDeck.GUI.CustomControls.RoundedTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.btnPreview)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.fontSize)).BeginInit();
             this.panel1.SuspendLayout();
@@ -89,6 +92,8 @@ namespace SuchByte.MacroDeck.GUI
             ((System.ComponentModel.ISupportInitialize)(this.btnDeleteStateBinding)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
             this.groupButtonState.SuspendLayout();
+            this.groupHotkey.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.btnRemoveHotkey)).BeginInit();
             this.SuspendLayout();
             // 
             // lblPath
@@ -250,9 +255,9 @@ namespace SuchByte.MacroDeck.GUI
             this.panel2.Controls.Add(this.labelAlignBottom);
             this.panel2.Controls.Add(this.labelAlignCenter);
             this.panel2.Controls.Add(this.labelAlignTop);
-            this.panel2.Location = new System.Drawing.Point(13, 338);
+            this.panel2.Location = new System.Drawing.Point(8, 338);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(280, 28);
+            this.panel2.Size = new System.Drawing.Size(285, 28);
             this.panel2.TabIndex = 16;
             // 
             // labelAlignBottom
@@ -360,7 +365,7 @@ namespace SuchByte.MacroDeck.GUI
             this.groupAppearance.Controls.Add(this.btnPreview);
             this.groupAppearance.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.groupAppearance.ForeColor = System.Drawing.Color.White;
-            this.groupAppearance.Location = new System.Drawing.Point(4, 17);
+            this.groupAppearance.Location = new System.Drawing.Point(4, 4);
             this.groupAppearance.Name = "groupAppearance";
             this.groupAppearance.Size = new System.Drawing.Size(307, 407);
             this.groupAppearance.TabIndex = 20;
@@ -429,13 +434,13 @@ namespace SuchByte.MacroDeck.GUI
             this.fonts.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.fonts.ForeColor = System.Drawing.Color.White;
             this.fonts.Icon = null;
-            this.fonts.Location = new System.Drawing.Point(13, 369);
+            this.fonts.Location = new System.Drawing.Point(8, 369);
             this.fonts.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.fonts.Name = "fonts";
             this.fonts.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
             this.fonts.SelectedIndex = -1;
             this.fonts.SelectedItem = null;
-            this.fonts.Size = new System.Drawing.Size(187, 28);
+            this.fonts.Size = new System.Drawing.Size(192, 28);
             this.fonts.TabIndex = 20;
             this.fonts.SelectedIndexChanged += new System.EventHandler(this.LabelChanged);
             // 
@@ -523,7 +528,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnDeleteStateBinding.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnDeleteStateBinding.ForeColor = System.Drawing.Color.White;
             this.btnDeleteStateBinding.HoverImage = global::SuchByte.MacroDeck.Properties.Resources.Delete_Hover;
-            this.btnDeleteStateBinding.Location = new System.Drawing.Point(274, 73);
+            this.btnDeleteStateBinding.Location = new System.Drawing.Point(271, 73);
             this.btnDeleteStateBinding.Name = "btnDeleteStateBinding";
             this.btnDeleteStateBinding.Size = new System.Drawing.Size(27, 27);
             this.btnDeleteStateBinding.TabIndex = 28;
@@ -582,12 +587,62 @@ namespace SuchByte.MacroDeck.GUI
             this.groupButtonState.Controls.Add(this.lblCurrentStateLabel);
             this.groupButtonState.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.groupButtonState.ForeColor = System.Drawing.Color.White;
-            this.groupButtonState.Location = new System.Drawing.Point(4, 430);
+            this.groupButtonState.Location = new System.Drawing.Point(4, 417);
             this.groupButtonState.Name = "groupButtonState";
             this.groupButtonState.Size = new System.Drawing.Size(307, 110);
             this.groupButtonState.TabIndex = 31;
             this.groupButtonState.TabStop = false;
             this.groupButtonState.Text = "Button state";
+            // 
+            // groupHotkey
+            // 
+            this.groupHotkey.Controls.Add(this.btnRemoveHotkey);
+            this.groupHotkey.Controls.Add(this.hotkey);
+            this.groupHotkey.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.groupHotkey.ForeColor = System.Drawing.Color.White;
+            this.groupHotkey.Location = new System.Drawing.Point(4, 533);
+            this.groupHotkey.Name = "groupHotkey";
+            this.groupHotkey.Size = new System.Drawing.Size(307, 72);
+            this.groupHotkey.TabIndex = 32;
+            this.groupHotkey.TabStop = false;
+            this.groupHotkey.Text = "Hotkey";
+            // 
+            // btnRemoveHotkey
+            // 
+            this.btnRemoveHotkey.BackColor = System.Drawing.Color.Transparent;
+            this.btnRemoveHotkey.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.Delete_Normal;
+            this.btnRemoveHotkey.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnRemoveHotkey.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnRemoveHotkey.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnRemoveHotkey.ForeColor = System.Drawing.Color.White;
+            this.btnRemoveHotkey.HoverImage = global::SuchByte.MacroDeck.Properties.Resources.Delete_Hover;
+            this.btnRemoveHotkey.Location = new System.Drawing.Point(271, 35);
+            this.btnRemoveHotkey.Name = "btnRemoveHotkey";
+            this.btnRemoveHotkey.Size = new System.Drawing.Size(27, 27);
+            this.btnRemoveHotkey.TabIndex = 20;
+            this.btnRemoveHotkey.TabStop = false;
+            this.btnRemoveHotkey.Click += new System.EventHandler(this.BtnRemoveHotkey_Click);
+            // 
+            // hotkey
+            // 
+            this.hotkey.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.hotkey.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.hotkey.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.hotkey.Icon = null;
+            this.hotkey.Location = new System.Drawing.Point(8, 37);
+            this.hotkey.MaxCharacters = 32767;
+            this.hotkey.Multiline = false;
+            this.hotkey.Name = "hotkey";
+            this.hotkey.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
+            this.hotkey.PasswordChar = false;
+            this.hotkey.PlaceHolderColor = System.Drawing.Color.Gray;
+            this.hotkey.PlaceHolderText = "";
+            this.hotkey.ReadOnly = false;
+            this.hotkey.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.hotkey.SelectionStart = 0;
+            this.hotkey.Size = new System.Drawing.Size(260, 25);
+            this.hotkey.TabIndex = 0;
+            this.hotkey.TextAlignment = System.Windows.Forms.HorizontalAlignment.Left;
             // 
             // ButtonEditor
             // 
@@ -595,6 +650,7 @@ namespace SuchByte.MacroDeck.GUI
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.ClientSize = new System.Drawing.Size(1200, 635);
+            this.Controls.Add(this.groupHotkey);
             this.Controls.Add(this.groupButtonState);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.selectorPanel);
@@ -616,6 +672,7 @@ namespace SuchByte.MacroDeck.GUI
             this.Controls.SetChildIndex(this.selectorPanel, 0);
             this.Controls.SetChildIndex(this.flowLayoutPanel1, 0);
             this.Controls.SetChildIndex(this.groupButtonState, 0);
+            this.Controls.SetChildIndex(this.groupHotkey, 0);
             ((System.ComponentModel.ISupportInitialize)(this.btnPreview)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.fontSize)).EndInit();
             this.panel1.ResumeLayout(false);
@@ -631,9 +688,12 @@ namespace SuchByte.MacroDeck.GUI
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
             this.groupButtonState.ResumeLayout(false);
+            this.groupHotkey.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.btnRemoveHotkey)).EndInit();
             this.ResumeLayout(false);
 
         }
+
 
         #endregion
 
@@ -671,5 +731,8 @@ namespace SuchByte.MacroDeck.GUI
         private TabRadioButton radioOnEvent;
         private System.Windows.Forms.GroupBox groupButtonState;
         private PictureButton btnOpenTemplateEditor;
+        private System.Windows.Forms.GroupBox groupHotkey;
+        private PictureButton btnRemoveHotkey;
+        private RoundedTextBox hotkey;
     }
 }

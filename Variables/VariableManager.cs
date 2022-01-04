@@ -1,5 +1,6 @@
 ﻿using Cottle;
 using SQLite;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using System;
 using System.Collections.Generic;
@@ -97,18 +98,6 @@ namespace SuchByte.MacroDeck.Variables
                         break;
                 }
 
-
-
-                /*if ((type == VariableType.Integer || type == VariableType.Float) && !float.TryParse(value.ToString(), out float result))
-                {
-                    value = 0;
-                }
-                else if (type == VariableType.Bool && !bool.TryParse(value.ToString(), out bool resultBool))
-                {
-                    value = false;
-                }*/
-
-
                 if (OnVariableChanged != null)
                 {
                     OnVariableChanged(variable, EventArgs.Empty);
@@ -164,7 +153,7 @@ namespace SuchByte.MacroDeck.Variables
 
 
 
-        internal static void DeleteVariable(string name)
+        public static void DeleteVariable(string name)
         {
             if (Variables == null) return;
             Variable variable = Variables.Find(v => v.Name.Equals(name));
@@ -246,6 +235,8 @@ namespace SuchByte.MacroDeck.Variables
             Variables = variablesLoaded;
 
             db.Close();
+
+            MacroDeckLogger.Info(Variables.Count + " variables loaded");
         }
 
         internal static void LoadAsync()

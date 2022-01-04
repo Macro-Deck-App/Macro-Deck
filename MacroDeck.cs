@@ -5,6 +5,9 @@ using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowContents;
+using SuchByte.MacroDeck.Hotkeys;
+using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
@@ -16,6 +19,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -29,28 +33,55 @@ namespace SuchByte.MacroDeck
         internal static readonly int BuildVersion = Int32.Parse(VersionString.Split(".")[3].ToString());
 
         public static readonly int ApiVersion = 20;
-        public static readonly int PluginApiVersion = 29;
+        public static readonly int PluginApiVersion = 30;
 
+        // Start parameters
         internal static bool ForceUpdate = false;
         internal static bool TestUpdateChannel = false;
         internal static bool ExportDefaultStrings = false;
-
         internal static bool SafeMode = false;
+        internal static bool PortableMode = false;
+        // Start parameters end
 
         internal static readonly string MainDirectoryPath = AppDomain.CurrentDomain.BaseDirectory;
-        public static readonly string UserDirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Macro Deck");
-        public static readonly string PluginsDirectoryPath = Path.Combine(UserDirectoryPath, "plugins");
-        public static readonly string UpdatePluginsDirectoryPath = Path.Combine(PluginsDirectoryPath, ".updates");
-        public static readonly string TempDirectoryPath = Path.Combine(UserDirectoryPath, ".temp");
-        public static readonly string IconPackDirectoryPath = Path.Combine(UserDirectoryPath, "iconpacks");
-        public static readonly string PluginCredentialsPath = Path.Combine(UserDirectoryPath, "credentials");
-        public static readonly string PluginConfigPath = Path.Combine(UserDirectoryPath, "configs");
-        public static readonly string BackupsDirectoryPath = Path.Combine(UserDirectoryPath, "backups");
+        public static string UserDirectoryPath;
+        public static string PluginsDirectoryPath;
+        public static string UpdatePluginsDirectoryPath;
+        public static string TempDirectoryPath;
+        public static string IconPackDirectoryPath;
+        public static string PluginCredentialsPath;
+        public static string PluginConfigPath;
+        public static string BackupsDirectoryPath;
+        public static string LogsDirectoryPath;
 
-        public static readonly string ConfigFilePath = Path.Combine(UserDirectoryPath, "config.json");
-        public static readonly string DevicesFilePath = Path.Combine(UserDirectoryPath, "devices.json");
-        public static readonly string VariablesFilePath = Path.Combine(UserDirectoryPath, "variables.db");
-        public static readonly string ProfilesFilePath = Path.Combine(UserDirectoryPath, "profiles.db");
+        public static string ConfigFilePath;
+        public static string DevicesFilePath;
+        public static string VariablesFilePath;
+        public static string ProfilesFilePath;
+
+        private static void InitializePaths(bool portable)
+        {
+            if (portable)
+            {
+                UserDirectoryPath = Path.Combine(MainDirectoryPath, "Data");
+            } else
+            {
+                UserDirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Macro Deck");
+            }
+            PluginsDirectoryPath = Path.Combine(UserDirectoryPath, "plugins");
+            UpdatePluginsDirectoryPath = Path.Combine(PluginsDirectoryPath, ".updates");
+            TempDirectoryPath = Path.Combine(UserDirectoryPath, ".temp");
+            IconPackDirectoryPath = Path.Combine(UserDirectoryPath, "iconpacks");
+            PluginCredentialsPath = Path.Combine(UserDirectoryPath, "credentials");
+            PluginConfigPath = Path.Combine(UserDirectoryPath, "configs");
+            BackupsDirectoryPath = Path.Combine(UserDirectoryPath, "backups");
+            LogsDirectoryPath = Path.Combine(UserDirectoryPath, "logs");
+
+            ConfigFilePath = Path.Combine(UserDirectoryPath, "config.json");
+            DevicesFilePath = Path.Combine(UserDirectoryPath, "devices.json");
+            VariablesFilePath = Path.Combine(UserDirectoryPath, "variables.db");
+            ProfilesFilePath = Path.Combine(UserDirectoryPath, "profiles.db");
+        }
 
         public static event EventHandler OnMainWindowLoad;
 
@@ -77,7 +108,55 @@ namespace SuchByte.MacroDeck
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            // Register exception event handlers
+            if (!Debugger.IsAttached)
+            {
+                Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+                Application.ThreadException += ApplicationThreadException;
+                AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
+            }
+
             //  Application.ApplicationExit += OnApplicationExit;
+            // Check for start arguments
+
+            int port = -1;
+            bool show = false;
+            for (int i = 0; i < args.Length; i++)
+            {
+                switch (args[i].ToLower())
+                {
+                    case "--port":
+                        if (args[i + 1] == null) break;
+                        port = Int32.Parse(args[i + 1]);
+                        break;
+                    case "--show":
+                        show = true;
+                        break;
+                    case "--force-update":
+                        ForceUpdate = true;
+                        break;
+                    case "--test-channel":
+                        TestUpdateChannel = true;
+                        break;
+                    case "--export-default-strings":
+                        ExportDefaultStrings = true;
+                        break;
+                    case "--portable":
+                        PortableMode = true;
+                        break;
+                    case "--disable-file-logging":
+                        MacroDeckLogger.FileLogging = false;
+                        break;
+                    case "--loglevel":
+                        if (args[i + 1] != null && Enum.TryParse(typeof(LogLevel), args[i + 1], true, out object logLevel))
+                        {
+                            MacroDeckLogger.LogLevel = (LogLevel)logLevel;
+                        }
+                        break;
+                }
+            }
+
+            InitializePaths(PortableMode);
 
             // Check if Macro Deck is already running
             if (Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location)).Count() > 1)
@@ -90,13 +169,6 @@ namespace SuchByte.MacroDeck
                 return;
             }
 
-            // Register exception event handlers
-            if (!Debugger.IsAttached)
-            {
-                Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-                Application.ThreadException += ApplicationThreadException;
-                AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
-            }
 
             // Check if directories exist
             if (!Directory.Exists(UserDirectoryPath))
@@ -104,19 +176,39 @@ namespace SuchByte.MacroDeck
                 try
                 {
                     Directory.CreateDirectory(UserDirectoryPath);
+                    MacroDeckLogger.Info("Successfully created " + UserDirectoryPath);
                 }
                 catch (Exception ex)
-                { Console.WriteLine(ex.Message); }
+                {
+                    MacroDeckLogger.Error("Failed to create user directory: " + ex.Message);
+                }
             }
+
+            if (!Directory.Exists(LogsDirectoryPath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(LogsDirectoryPath);
+                    MacroDeckLogger.Info("Successfully created " + LogsDirectoryPath);
+                }
+                catch (Exception ex)
+                {
+                    MacroDeckLogger.Error("Failed to create logs directory: " + ex.Message);
+                }
+            }
+
 
             if (!Directory.Exists(PluginCredentialsPath))
             {
                 try
                 {
                     Directory.CreateDirectory(PluginCredentialsPath);
+                    MacroDeckLogger.Info("Successfully created " + PluginCredentialsPath);
                 }
                 catch (Exception ex)
-                { Console.WriteLine(ex.Message); }
+                {
+                    MacroDeckLogger.Error("Failed to create plugin credentials directory: " + ex.Message);
+                }
             }
 
             if (!Directory.Exists(PluginConfigPath))
@@ -124,9 +216,12 @@ namespace SuchByte.MacroDeck
                 try
                 {
                     Directory.CreateDirectory(PluginConfigPath);
+                    MacroDeckLogger.Info("Successfully created " + PluginConfigPath);
                 }
                 catch (Exception ex)
-                { Console.WriteLine(ex.Message); }
+                {
+                    MacroDeckLogger.Error("Failed to create plugin config directory: " + ex.Message);
+                }
             }
 
             if (!Directory.Exists(BackupsDirectoryPath))
@@ -134,9 +229,12 @@ namespace SuchByte.MacroDeck
                 try
                 {
                     Directory.CreateDirectory(BackupsDirectoryPath);
+                    MacroDeckLogger.Info("Successfully created " + BackupsDirectoryPath);
                 }
                 catch (Exception ex)
-                { Console.WriteLine(ex.Message); }
+                {
+                    MacroDeckLogger.Error("Failed to create backups directory: " + ex.Message);
+                }
             }
 
             BackupManager.CheckRestoreDirectory();
@@ -147,9 +245,12 @@ namespace SuchByte.MacroDeck
                 try
                 {
                     Directory.CreateDirectory(TempDirectoryPath);
+                    MacroDeckLogger.Info("Successfully created " + TempDirectoryPath);
                 }
                 catch (Exception ex)
-                { Console.WriteLine(ex.Message); }
+                {
+                    MacroDeckLogger.Error("Failed to create temp directory: " + ex.Message);
+                }
             } else
             {
                 // Clean up temp directory
@@ -160,7 +261,10 @@ namespace SuchByte.MacroDeck
                     try
                     {
                         file.Delete();
-                    } catch { }
+                    } catch (Exception ex)
+                    {
+                        MacroDeckLogger.Warning("Failed to clean up files in the temp directory: " + ex.Message);
+                    }
                 }
                 foreach (DirectoryInfo dir in di.GetDirectories())
                 {
@@ -168,43 +272,27 @@ namespace SuchByte.MacroDeck
                     {
                         dir.Delete(true);
                     }
-                    catch { }
-                }
-            }
-
-
-            // Check for start arguments
-            int port = -1;
-            bool show = false;
-            for (int i = 0; i < args.Length; i++)
-            {
-                if (args[i].ToLower().Equals("--port"))
-                {
-                    port = Int32.Parse(args[i + 1]);
-                }
-                else if (args[i].ToLower().Equals("--show"))
-                {
-                    show = true;
-                }
-                else if (args[i].ToLower().Equals("--force-update"))
-                {
-                    ForceUpdate = true;
-                }
-                else if (args[i].ToLower().Equals("--test-channel"))
-                {
-                    TestUpdateChannel = true;
-                }
-                else if (args[i].ToLower().Equals("--export-default-string"))
-                {
-                    ExportDefaultStrings = true;
+                    catch (Exception ex)
+                    {
+                        MacroDeckLogger.Warning("Failed to clean up folders in the temp directory: " + ex.Message);
+                    }
                 }
             }
 
             Language.LanguageManager.Load(ExportDefaultStrings);
 
+            if (IsAdministrator())
+            {
+                using (var msgBox = new GUI.CustomControls.MessageBox())
+                {
+                    msgBox.ShowDialog("Macro Deck started with administrator privileges", "It's not recommended to start Macro Deck with administrator privileges.", MessageBoxButtons.OK);
+                }
+            }
+
             // Check if config exists
             if (!File.Exists(ConfigFilePath))
             {
+                MacroDeckLogger.Info("Config file not found. Entering initial setup wizard...");
                 // Start initial setup
                 using (var initialSetup = new InitialSetup())
                 {
@@ -213,6 +301,7 @@ namespace SuchByte.MacroDeck
                     {
                         _configuration = initialSetup.configuration;
                         SaveConfiguration();
+                        MacroDeckLogger.Info("Configuration saved. Restarting Macro Deck...");
                         Process.Start(Path.Combine(MacroDeck.MainDirectoryPath, AppDomain.CurrentDomain.FriendlyName), "--show");
                     }
                     Environment.Exit(0);
@@ -222,6 +311,7 @@ namespace SuchByte.MacroDeck
             {
                 // Read config
                 _configuration = JsonConvert.DeserializeObject<Configuration.Configuration>(File.ReadAllText(ConfigFilePath));
+                MacroDeckLogger.Info("Successfully read configuration file.");
                 Start(show, port);
             }
             
@@ -237,24 +327,28 @@ namespace SuchByte.MacroDeck
                 using StreamWriter sw = new StreamWriter(ConfigFilePath);
                 using JsonWriter writer = new JsonTextWriter(sw);
                 serializer.Serialize(writer, _configuration);
+
+                MacroDeckLogger.Info("Configuration saved");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MacroDeckLogger.Error("Failed to save configuration: " + ex.Message);
             }
         }
 
         private static void Start(bool show = false, int port = -1)
         {
+            MacroDeckLogger.Info("Starting Macro Deck version " + VersionString);
             Language.LanguageManager.SetLanguage(_configuration.Language);
             CreateTrayIcon();
+            _ = new HotkeyManager();
             VariableManager.Load();
             PluginManager.Load();
             PluginManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
             PluginManager.EnablePlugins();
-            Icons.IconManager.LoadIconPacks();
-            Icons.IconManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
-            ProfileManager.Initialize();
+            IconManager.LoadIconPacks();
+            IconManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
+            ProfileManager.Load();
 
             MacroDeckServer.Start(_configuration.Host_Address, port == -1 ? _configuration.Host_Port : port);
             BroadcastServer.Start();
@@ -264,6 +358,7 @@ namespace SuchByte.MacroDeck
 
             ProfileManager.AddVariableChangedListener();
             ProfileManager.AddWindowFocusChangedListener();
+
 
             if (show || SafeMode)
             {
@@ -275,7 +370,6 @@ namespace SuchByte.MacroDeck
 
         private static void OnUpdateAvailable(object sender, EventArgs e)
         {
-            Debug.WriteLine("Update available");
             Updater.Updater.OnUpdateAvailable -= OnUpdateAvailable;
             JObject versionObject = sender as JObject;
             try
@@ -355,7 +449,6 @@ namespace SuchByte.MacroDeck
 
         private static void MainWindow_FormClosed(object sender, FormClosedEventArgs e)
         {
-            Debug.WriteLine("Disposing main window...");
             mainWindow.Load -= MainWindowLoadEvent;
             mainWindow.FormClosed -= MainWindow_FormClosed;
             mainWindow.Dispose();
@@ -372,7 +465,6 @@ namespace SuchByte.MacroDeck
 
         private static void OnApplicationExit(object sender, EventArgs e)
         {
-            Debug.WriteLine("Application exit");
             VariableManager.Save();
             if (_trayIcon != null)
             {
@@ -436,6 +528,12 @@ namespace SuchByte.MacroDeck
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
+        }
+
+        public static bool IsAdministrator()
+        {
+            return (new WindowsPrincipal(WindowsIdentity.GetCurrent()))
+                      .IsInRole(WindowsBuiltInRole.Administrator);
         }
     }
 }

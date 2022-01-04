@@ -2,8 +2,8 @@
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
     <VersionMinor>6</VersionMinor>
-    <VersionPatch>3</VersionPatch>
-    <VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString())$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
+    <VersionPatch>4</VersionPatch>
+    <VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
   </PropertyGroup>
   
   <PropertyGroup>
@@ -26,6 +26,7 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/SuchByte/Macro-Deck</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SuchByte/Macro-Deck</RepositoryUrl>
+	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

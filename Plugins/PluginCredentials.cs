@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SuchByte.MacroDeck.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -49,7 +50,7 @@ namespace SuchByte.MacroDeck.Plugins
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                MacroDeckLogger.Error("Error while adding plugin credential: " + ex.Message);
             }
 
         }
@@ -84,7 +85,7 @@ namespace SuchByte.MacroDeck.Plugins
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                MacroDeckLogger.Error("Error while setting plugin credential: " + ex.Message);
             }
         }
 
