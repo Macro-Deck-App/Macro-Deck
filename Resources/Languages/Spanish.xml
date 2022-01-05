@@ -267,4 +267,8 @@ Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImpor
   <BackupSuccessfullyCreated>Copia de seguridad creada con éxito</BackupSuccessfullyCreated>
   <CreateBackupBeforeUpdate>¿Quieres crear una copia de seguridad antes de la actualización?</CreateBackupBeforeUpdate>
   <CreatingBackup>Creando copia de seguridad ...</CreatingBackup>
+  <PluginNeedsConfiguration>Este plugin debe configurarse</PluginNeedsConfiguration>
+  <ConfigureNow>¿Quieres configurar {0} ahora?</ConfigureNow>
+  <Hotkey>Tecla de acceso rápido</Hotkey>
+  <PressTheKeysNow>Presione las teclas que desea asignar ahora</PressTheKeysNow>
 </Strings>
