@@ -245,5 +245,29 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <GenerateStatic>Genera statico</GenerateStatic>
   <OnlyUserCreatedVariablesVisible>Solo le variabili create dall'utente sono visibili</OnlyUserCreatedVariablesVisible>
   <MacroDeckUsesCottleTemplateEngine>Macro Deck usa il motore di template Cottle. Clicca qui per maggiori informazioni.</MacroDeckUsesCottleTemplateEngine>
-  <Result>Result</Result>
+  <Result>Risultato</Result>
+  <InstallDevVersions>Installa versioni Dev</InstallDevVersions>
+  <InstallBetaVersions>Installa versioni Beta</InstallBetaVersions>
+  <WhatDoYouWantToRestore>Cosa vuoi recuperarre dal backup?</WhatDoYouWantToRestore>
+  <Configuration>Configurazione</Configuration>
+  <Profiles>Profili</Profiles>
+  <Variables>Variabili</Variables>
+  <PluginConfigurations>Configrazioni dei plugin</PluginConfigurations>
+  <PluginCredentials>Credeziali dei plugin</PluginCredentials>
+  <InstalledIconPacks>Pacchetti d'icone installati</InstalledIconPacks>
+  <Restore>Recupera</Restore>
+  <ActionCannotBeReversed>Questa azione non potrà essere annullata</ActionCannotBeReversed>
+  <ThisWillDeleteBackupPermanently>Il backup verrà cancellato permanentemente</ThisWillDeleteBackupPermanently>
+  <Created>Creato</Created>
+  <PleaseWait>Attendi...</PleaseWait>
+  <Backups>Backups</Backups>
+  <CreateBackup>Crea backup</CreateBackup>
+  <BackupFailed>Backup fallito</BackupFailed>
+  <BackupSuccessfullyCreated>Backup creato con successo</BackupSuccessfullyCreated>
+  <CreateBackupBeforeUpdate>Vuoi creare un backup prima di aggiornare?</CreateBackupBeforeUpdate>
+  <CreatingBackup>Creazione del backup...</CreatingBackup>
+  <PluginNeedsConfiguration>Questo plugin deve essere configurato</PluginNeedsConfiguration>
+  <ConfigureNow>Vuoi configurare {0} adesso?</ConfigureNow>
+  <Hotkey>Hotkey</Hotkey>
+  <PressTheKeysNow>Adesso premi i tasti che vuoi assegnare</PressTheKeysNow>
 </Strings>
