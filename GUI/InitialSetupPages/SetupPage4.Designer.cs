@@ -63,14 +63,14 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             // plugins
             // 
             this.plugins.AutoScroll = true;
-            this.plugins.Location = new System.Drawing.Point(2, 99);
+            this.plugins.Location = new System.Drawing.Point(120, 99);
             this.plugins.Name = "plugins";
-            this.plugins.Size = new System.Drawing.Size(688, 442);
+            this.plugins.Size = new System.Drawing.Size(450, 442);
             this.plugins.TabIndex = 7;
             // 
             // progressBar
             // 
-            this.progressBar.Location = new System.Drawing.Point(3, 547);
+            this.progressBar.Location = new System.Drawing.Point(208, 547);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(275, 18);
             this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;

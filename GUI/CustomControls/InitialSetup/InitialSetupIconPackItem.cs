@@ -30,9 +30,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this._jsonObject = jsonObject;
 
             this.lblName.Text = jsonObject["name"].ToString();
-            this.lblAuthor.Text = jsonObject["author"].ToString();
             this.lblDescription.Text = jsonObject["description"].ToString();
-            this.lblDownloads.Text = String.Format("{0} downloads", jsonObject["downloads"].ToString());
             this.preview.BackgroundImage = Utils.Base64.GetImageFromBase64(jsonObject["preview"].ToString());
         }
     }

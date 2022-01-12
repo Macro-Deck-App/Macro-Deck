@@ -271,6 +271,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 button.Cursor = Cursors.Hand;
             }
 
+            button.ShowKeyboardHotkeyIndicator = false;
+            button.KeyboardHotkeyIndicatorText = string.Empty;
             button.Width = buttonSize;
             button.Height = buttonSize;
             button.Radius = ProfileManager.CurrentProfile.ButtonRadius;
@@ -304,6 +306,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 actionButton.LabelOff.LabelBase64Changed += this.LabelChanged;
                 actionButton.LabelOn.LabelBase64Changed += this.LabelChanged;
                 actionButton.IconChanged += ActionButton_IconChanged;
+
+                button.ShowKeyboardHotkeyIndicator = actionButton.KeyCode != Keys.None;
+                if (button.ShowKeyboardHotkeyIndicator)
+                {
+                    button.KeyboardHotkeyIndicatorText = actionButton.ModifierKeyCodes.ToString().Replace("Control", "CTRL").Replace("None", string.Empty).Replace(", ", "  + ") + (!actionButton.ModifierKeyCodes.ToString().Equals("None") ? " + " : string.Empty) + actionButton.KeyCode.ToString();
+                }
 
                 this.UpdateButtonIcon(actionButton, button);
             }

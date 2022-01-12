@@ -32,8 +32,7 @@ namespace SuchByte.MacroDeck.Utils
                 LineJoin = LineJoin.Round
             };
 
-            Rectangle fr = new Rectangle(0, img.Height - font.Height, img.Width, font.Height);
-            LinearGradientBrush b = new LinearGradientBrush(fr, textColor, textColor, 90);
+            SolidBrush b = new SolidBrush(textColor);
 
             Rectangle r = new Rectangle(2, 2, img.Width - 2, img.Height - 2);
 

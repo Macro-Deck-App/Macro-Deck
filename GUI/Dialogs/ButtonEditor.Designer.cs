@@ -628,12 +628,12 @@ namespace SuchByte.MacroDeck.GUI
             this.hotkey.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.hotkey.Cursor = System.Windows.Forms.Cursors.Hand;
             this.hotkey.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.hotkey.Icon = null;
+            this.hotkey.Icon = global::SuchByte.MacroDeck.Properties.Resources.Keyboard;
             this.hotkey.Location = new System.Drawing.Point(8, 37);
             this.hotkey.MaxCharacters = 32767;
             this.hotkey.Multiline = false;
             this.hotkey.Name = "hotkey";
-            this.hotkey.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
+            this.hotkey.Padding = new System.Windows.Forms.Padding(26, 5, 8, 5);
             this.hotkey.PasswordChar = false;
             this.hotkey.PlaceHolderColor = System.Drawing.Color.Gray;
             this.hotkey.PlaceHolderText = "";

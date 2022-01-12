@@ -20,6 +20,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         public bool ShowGIFIndicator { get { return this._gifIndicator; } set { this._gifIndicator = value; this.Invalidate(); } }
         private bool _gifIndicator = false;
 
+        public bool ShowKeyboardHotkeyIndicator { get { return this._keyboardHotkeyIndicator; } set { this._keyboardHotkeyIndicator = value; this.Invalidate(); } }
+        private bool _keyboardHotkeyIndicator = false;
+
+        public string KeyboardHotkeyIndicatorText = "";
+
+
 
         public RoundedButton()
         {
@@ -102,6 +108,33 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             {
                 Rectangle gifRect = new Rectangle(this.Width - radius / 2 - 27, 2, 25, 14);
                 pe.Graphics.DrawImage(Properties.Resources.gif, gifRect);
+            }
+
+            if (this._keyboardHotkeyIndicator)
+            {
+                Rectangle hotkeyIndicatorBackground = new Rectangle(0, this.Height / 2 - 12, this.Width, 24);
+                SolidBrush hotkeyIndicatorBackgroundBrush = new SolidBrush(Color.FromArgb(128, 0, 89, 184));
+                pe.Graphics.FillRectangle(hotkeyIndicatorBackgroundBrush, hotkeyIndicatorBackground);
+                Rectangle keyboardRect = new Rectangle(5, this.Height / 2 - 10, 20, 20);
+                pe.Graphics.DrawImage(Properties.Resources.Keyboard, keyboardRect);
+                using (var gp = new GraphicsPath())
+                using (var sf = new StringFormat
+                {
+
+                    Alignment = StringAlignment.Near,
+                    LineAlignment = StringAlignment.Center,
+                })
+                using (var font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point))
+                {
+                    Rectangle r = new Rectangle(30, this.Height / 2 - 12, this.Width - 35, 24);
+                    Pen p = new Pen(Color.Black, 1)
+                    {
+                        LineJoin = LineJoin.Round
+                    };
+                    gp.AddString(this.KeyboardHotkeyIndicatorText, font.FontFamily, (int)font.Style, font.Size, r, sf);
+                    pe.Graphics.DrawPath(p, gp);
+                    pe.Graphics.FillPath(Brushes.White, gp);
+                }
             }
         }
 

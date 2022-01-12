@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.Backups;
 using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.GUI;
+using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowContents;
 using SuchByte.MacroDeck.Hotkeys;
@@ -99,7 +100,7 @@ namespace SuchByte.MacroDeck
             ContextMenuStrip = _trayIconContextMenu
         };
 
-        private static Form mainWindow;
+        private static GUI.CustomControls.Form mainWindow;
 
 
         [STAThread]
@@ -116,7 +117,8 @@ namespace SuchByte.MacroDeck
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
             }
 
-            //  Application.ApplicationExit += OnApplicationExit;
+
+            AppDomain.CurrentDomain.ProcessExit += OnApplicationExit;
             // Check for start arguments
 
             int port = -1;
@@ -156,11 +158,17 @@ namespace SuchByte.MacroDeck
                 }
             }
 
+
             InitializePaths(PortableMode);
+
+            MacroDeckLogger.Info(Environment.NewLine + "==========================================");
+            MacroDeckLogger.Info("Starting Macro Deck version " + VersionString + (args.Length > 0 ? " with parameters: " + string.Join(" ", args) : ""));
+            MacroDeckLogger.Info("OS: " + Utils.OperatingSystemInformation.GetWindowsVersionName());
 
             // Check if Macro Deck is already running
             if (Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location)).Count() > 1)
             {
+                MacroDeckLogger.Warning("Macro Deck is already running");
                 using (var messageBox = new GUI.CustomControls.MessageBox())
                 {
                     messageBox.ShowDialog("Macro Deck is already running", "You can't start more than one instance of Macro Deck.", MessageBoxButtons.OK);
@@ -338,7 +346,6 @@ namespace SuchByte.MacroDeck
 
         private static void Start(bool show = false, int port = -1)
         {
-            MacroDeckLogger.Info("Starting Macro Deck version " + VersionString);
             Language.LanguageManager.SetLanguage(_configuration.Language);
             CreateTrayIcon();
             _ = new HotkeyManager();
@@ -359,6 +366,9 @@ namespace SuchByte.MacroDeck
             ProfileManager.AddVariableChangedListener();
             ProfileManager.AddWindowFocusChangedListener();
 
+
+
+            MacroDeckLogger.Info("Macro Deck started successfully");
 
             if (show || SafeMode)
             {
@@ -472,22 +482,7 @@ namespace SuchByte.MacroDeck
                 _trayIcon.Icon.Dispose();
                 _trayIcon.Dispose();
             }
-            // Clean up temp dir
-             foreach (var file in Directory.GetFiles(TempDirectoryPath))
-             {
-                try
-                {
-                    File.Delete(file);
-                } catch { }
-             }
-             foreach (var dir in Directory.GetDirectories(TempDirectoryPath))
-             {
-                try
-                {
-                    Directory.Delete(dir, true);
-                }
-                catch { }
-             }
+            MacroDeckLogger.Info("Exiting Macro Deck...");
         }
 
         private static void OnPackageManagerUpdateCheckFinished(object sender, EventArgs e)
@@ -495,24 +490,26 @@ namespace SuchByte.MacroDeck
             if (PluginManager.PluginsUpdateAvailable.Count > 0)
             {
                 PluginManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
-                Icons.IconManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
+                IconManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
                 _trayIcon.ShowBalloonTip(5000, "Macro Deck Package Manager", Language.LanguageManager.Strings.UpdatesAvailable, ToolTipIcon.Info);
             }
         }
 
         private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
+            MacroDeckLogger.Error("CurrentDomainOnUnhandledException: " + e.ExceptionObject.ToString());
             ShowCrashReport(e.ExceptionObject.ToString());
         }
 
         private static void ApplicationThreadException(object sender, ThreadExceptionEventArgs e)
         {
+            MacroDeckLogger.Error("ApplicationThreadException: " + e.Exception.Message + Environment.NewLine + e.Exception.StackTrace);
             ShowCrashReport(e.Exception.Message + Environment.NewLine + Environment.NewLine + e.Exception.StackTrace);
         }
 
         private static void ShowCrashReport(string crashReport)
         {
-            foreach (Form form in Application.OpenForms)
+            foreach (GUI.CustomControls.Form form in Application.OpenForms)
             {
                 if (form.Name.Equals("CrashReportDialog"))
                 {

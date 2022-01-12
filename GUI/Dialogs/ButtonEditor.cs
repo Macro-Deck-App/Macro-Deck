@@ -410,7 +410,7 @@ namespace SuchByte.MacroDeck.GUI
 
             if (this.actionButton.KeyCode != Keys.None)
             {
-                this.hotkey.Text = this.actionButton.ModifierKeyCodes.ToString() + ", " + this.actionButton.KeyCode.ToString();
+                this.hotkey.Text = this.actionButton.ModifierKeyCodes.ToString().Replace("Control", "CTRL").Replace("None", string.Empty).Replace(", ", " + ") + (!actionButton.ModifierKeyCodes.ToString().Equals("None") ? " + " : string.Empty) + this.actionButton.KeyCode.ToString();
             }
 
             this.RefreshLabel();
@@ -564,7 +564,7 @@ namespace SuchByte.MacroDeck.GUI
             {
                 if (hotkeySelector.ShowDialog() == DialogResult.OK)
                 {
-                    this.hotkey.Text = hotkeySelector.ModifierKeys.ToString() + ", " + hotkeySelector.Key.ToString();
+                    this.hotkey.Text = hotkeySelector.ModifierKeys.ToString().Replace("Control", "CTRL").Replace("None", string.Empty).Replace(", ", " + ") + (!hotkeySelector.ModifierKeys.ToString().Equals("None") ? " + " : string.Empty) + hotkeySelector.Key.ToString();
                     this.actionButtonEdited.ModifierKeyCodes = hotkeySelector.ModifierKeys;
                     this.actionButtonEdited.KeyCode = hotkeySelector.Key;
                 }

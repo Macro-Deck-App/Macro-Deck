@@ -164,22 +164,13 @@ namespace SuchByte.MacroDeck.GUI
                 this.Invoke(new Action(() =>
                 {
                     this.navigation.Visible = true;
-                    this.btnSettings.SetNotification(Updater.Updater.UpdateAvailable);
-                    /*if (Updater.Updater.UpdateAvailable)
-                    {
-                        using (var downloadUpdateDialog = new DownloadUpdateDialog(Updater.Updater.UpdateObject))
-                        {
-                            downloadUpdateDialog.ShowDialog();
-                        }
-                    }*/
-            
+                    this.btnSettings.SetNotification(Updater.Updater.UpdateAvailable);           
                 }));
                 
             });
 
             PluginManager.ScanUpdatesAsync();
             IconManager.ScanUpdatesAsync();
-            
         }
 
         private void OnPackageManagerUpdateCheckFinished(object sender, EventArgs e)

@@ -270,4 +270,6 @@ For gifs it is recommended to use the low or the lowest preset.</IconImportQuali
   <ConfigureNow>Do you want to configure {0} now?</ConfigureNow>
   <Hotkey>Hotkey</Hotkey>
   <PressTheKeysNow>Press the keys you want to assign now</PressTheKeysNow>
+  <XAction>{0} action</XAction>
+  <XActions>{0} actions</XActions>
 </Strings>

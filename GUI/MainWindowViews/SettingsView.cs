@@ -92,7 +92,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblPluginAPIVersion.Text = MacroDeck.PluginApiVersion.ToString();
             this.lblMacroDeck.Text = "Macro Deck " + MacroDeck.VersionString;
             this.lblInstalledPlugins.Text = PluginManager.Plugins.Count.ToString();
-            this.lblOS.Text = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", "ProductName", "").ToString() + " " + (Environment.Is64BitOperatingSystem == true ? "64 bit" : "32 bit");
+            this.lblOS.Text = Utils.OperatingSystemInformation.GetWindowsVersionName();
 
             this.verticalTabControl.SetNotification(2, Updater.Updater.UpdateAvailable);
 

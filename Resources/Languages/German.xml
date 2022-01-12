@@ -271,4 +271,6 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
 	<ConfigureNow>{0} jetzt konfigurieren?</ConfigureNow>
 	<Hotkey>Tastenkombination</Hotkey>
 	<PressTheKeysNow>Tasten jetzt drücken...</PressTheKeysNow>
+	<XAction>{0} Aktion</XAction>
+	<XActions>{0} Aktionen</XActions>
 </Strings>

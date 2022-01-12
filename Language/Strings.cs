@@ -290,5 +290,7 @@ namespace SuchByte.MacroDeck.Language
         public string ConfigureNow = "Do you want to configure {0} now?";
         public string Hotkey = "Hotkey";
         public string PressTheKeysNow = "Press the keys you want to assign now";
+        public string XAction = "{0} action";
+        public string XActions = "{0} actions";
     }
 }

@@ -1,4 +1,5 @@
-﻿using SuchByte.MacroDeck.Server;
+﻿using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Server;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -55,6 +56,7 @@ namespace SuchByte.MacroDeck.Hotkeys
             }
 
             RegisterHotKey(formHandle, hotkeyId, (int)modifierKeyCode, (int)key);
+            MacroDeckLogger.Info(String.Format("Registered hotkey #{0} ({1}) with modifier(s): {2}", hotkeyId, key.ToString(), modifierKeys.ToString()));
         }
 
         public static void Pause()
@@ -73,6 +75,7 @@ namespace SuchByte.MacroDeck.Hotkeys
             int hotkeyId = Hotkeys[actionButton];
             UnregisterHotKey(formHandle, hotkeyId);
             Hotkeys.Remove(actionButton);
+            MacroDeckLogger.Info(String.Format("Unregistered hotkey #{0}", hotkeyId));
         }
 
 

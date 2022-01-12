@@ -61,7 +61,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             // 
             // progressBar
             // 
-            this.progressBar.Location = new System.Drawing.Point(3, 547);
+            this.progressBar.Location = new System.Drawing.Point(208, 547);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(275, 18);
             this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
@@ -71,9 +71,9 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             // iconPacks
             // 
             this.iconPacks.AutoScroll = true;
-            this.iconPacks.Location = new System.Drawing.Point(2, 99);
+            this.iconPacks.Location = new System.Drawing.Point(120, 99);
             this.iconPacks.Name = "iconPacks";
-            this.iconPacks.Size = new System.Drawing.Size(688, 442);
+            this.iconPacks.Size = new System.Drawing.Size(450, 442);
             this.iconPacks.TabIndex = 9;
             // 
             // SetupPage5

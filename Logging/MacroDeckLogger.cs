@@ -137,7 +137,7 @@ namespace SuchByte.MacroDeck.Logging
         {
             get
             {
-                return Path.Combine(MacroDeck.LogsDirectoryPath, DateTime.Now.ToString("d") + ".log");
+                return Path.Combine(MacroDeck.LogsDirectoryPath, DateTime.Now.ToString("yyyy-MM-dd") + ".log");
             }
         }
     }

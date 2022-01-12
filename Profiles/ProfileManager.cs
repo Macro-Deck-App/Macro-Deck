@@ -64,10 +64,10 @@ namespace SuchByte.MacroDeck.Profiles
                         return DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId).Available && !String.IsNullOrWhiteSpace(DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId).ClientId);
                     }))
                     {
-                        MacroDeckClient macrodeckClient = MacroDeckServer.GetMacroDeckClient(DeviceManager.GetMacroDeckDevice(macroDeckDevice).ClientId);
-                        if (!macrodeckClient.Folder.Equals(macroDeckFolder))
+                        MacroDeckClient macroDeckClient = MacroDeckServer.GetMacroDeckClient(DeviceManager.GetMacroDeckDevice(macroDeckDevice).ClientId);
+                        if (macroDeckClient.Profile.Equals(macroDeckProfile) && !macroDeckClient.Folder.Equals(macroDeckFolder))
                         {
-                            MacroDeckServer.SetFolder(macrodeckClient, macroDeckFolder);
+                            MacroDeckServer.SetFolder(macroDeckClient, macroDeckFolder);
                         }
                     }
                 }

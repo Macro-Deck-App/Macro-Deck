@@ -160,6 +160,7 @@ namespace SuchByte.MacroDeck.Variables
             if (variable != null)
             {
                 Variables.Remove(variable);
+                MacroDeckLogger.Info("Deleted variable " + name);
                 if (OnVariableRemoved != null)
                 {
                     OnVariableRemoved(name, EventArgs.Empty);
@@ -270,7 +271,10 @@ namespace SuchByte.MacroDeck.Variables
 
                 db.Close();
             }
-            catch { } 
+            catch (Exception ex) 
+            {
+                MacroDeckLogger.Error("Error while saving variables: " + ex.Message);
+            } 
             finally
             {
                 _saving = false;
