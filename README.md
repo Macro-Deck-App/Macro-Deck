@@ -1,4 +1,4 @@
-# Macro Deck 2
+# Macro Deck
 ![Screenshot_2](https://user-images.githubusercontent.com/45011179/149414436-60e0ab75-e9ef-4ab8-a62e-b61ac9ae3f49.png)
 
 ## More than just a macro pad!
