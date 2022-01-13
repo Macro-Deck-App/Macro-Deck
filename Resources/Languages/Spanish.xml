@@ -209,7 +209,6 @@ Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImpor
   <ErrorWhileLoadingPackageManager>Error al cargar el administrador de paquetes. Quizás no esté conectado a Internet o su firewall bloquee Macro Deck.</ErrorWhileLoadingPackageManager>
   <UpdatesAvailable>Actualizaciones disponibles</UpdatesAvailable>
   <EnableIconCache>Habilitar la caché de iconos (más rápido; mayor uso de memoria)</EnableIconCache>
-  <ErrorWhileImportingIconPack>Error al importar el paquete de iconos</ErrorWhileImportingIconPack>
   <WebClient>Cliente Web</WebClient>
   <AndroidApp>Android App</AndroidApp>
   <IOSApp>iOS App</IOSApp>
@@ -271,4 +270,6 @@ Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImpor
   <ConfigureNow>¿Quieres configurar {0} ahora?</ConfigureNow>
   <Hotkey>Tecla de acceso rápido</Hotkey>
   <PressTheKeysNow>Presione las teclas que desea asignar ahora</PressTheKeysNow>
+  <XAction>{0} acción</XAction>
+  <XActions>{0} acciones</XActions>
 </Strings>
