@@ -3,7 +3,7 @@
   <__Language__>Russian</__Language__>
   <__LanguageCode__>ru</__LanguageCode__>
   <__Author__>LeetPanda1337, zedalert</__Author__>
-  <__Version__>2.6.2.213560122</__Version__>
+  <__Version__>2.6.5</__Version__>
   <NetworkAdapter>Сетевой адаптер</NetworkAdapter>
   <IPAddress>IP-адрес</IPAddress>
   <Port>Порт</Port>
@@ -267,4 +267,10 @@
   <BackupSuccessfullyCreated>Резервная копия создана успешно</BackupSuccessfullyCreated>
   <CreateBackupBeforeUpdate>Создать резервную копию перед обновлением?</CreateBackupBeforeUpdate>
   <CreatingBackup>Создание копии...</CreatingBackup>
+  <PluginNeedsConfiguration>Этот плагин необходимо настроить</PluginNeedsConfiguration>
+  <ConfigureNow>Настроить плагин {0} прямо сейчас?</ConfigureNow>
+  <Hotkey>Горячая клавиша</Hotkey>
+  <PressTheKeysNow>Нажмите желаемые клавиши для привязки</PressTheKeysNow>
+  <XAction>Действий: {0}</XAction>
+  <XActions>Действий: {0}</XActions>
 </Strings>
