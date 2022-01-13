@@ -3,7 +3,7 @@
   <__Language__>Russian</__Language__>
   <__LanguageCode__>ru</__LanguageCode__>
   <__Author__>LeetPanda1337, zedalert</__Author__>
-  <__Version__>2.6.5</__Version__>
+  <__Version__>2.6.7</__Version__>
   <NetworkAdapter>Сетевой адаптер</NetworkAdapter>
   <IPAddress>IP-адрес</IPAddress>
   <Port>Порт</Port>
@@ -273,4 +273,12 @@
   <PressTheKeysNow>Нажмите желаемые клавиши для привязки</PressTheKeysNow>
   <XAction>Действий: {0}</XAction>
   <XActions>Действий: {0}</XActions>
+  <OnRelease>После нажатия</OnRelease>
+  <OnLongPress>При длительном нажатии</OnLongPress>
+  <OnLongPressRelease>После длительного нажатия</OnLongPressRelease>
+  <SimulateOnPress>Симулировать "При нажатии"</SimulateOnPress>
+  <SimulateOnRelease>Симулировать "После нажатия"</SimulateOnRelease>
+  <SimulateOnLongPress>Симулировать "Длительное нажатие"</SimulateOnLongPress>
+  <SimulateOnLongPressRelease>Симулировать "После длительного нажатия"</SimulateOnLongPressRelease>
+  <HotkeyExecutesOnPress>Горячая клавиша активирует действие "При нажатии"</HotkeyExecutesOnPress>
 </Strings>
