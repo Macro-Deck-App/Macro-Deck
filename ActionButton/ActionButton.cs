@@ -55,6 +55,7 @@ namespace SuchByte.MacroDeck.ActionButton
             }
         }
 
+        [JsonIgnore]
         public bool IsDisposed
         {
             get
@@ -110,7 +111,7 @@ namespace SuchByte.MacroDeck.ActionButton
 
         private void VariableChanged(object sender, EventArgs e)
         {
-            if (this.StateBindingVariable.Equals("")) return;
+            if (string.IsNullOrWhiteSpace(this.StateBindingVariable)) return;
             Variables.Variable variable = sender as Variables.Variable;
             this.UpdateBindingState(variable);
         }
@@ -119,8 +120,7 @@ namespace SuchByte.MacroDeck.ActionButton
         {
             if (variable != null && variable.Name.Equals(this.StateBindingVariable))
             {
-                bool newState = false;
-                Boolean.TryParse(variable.Value, out newState);
+                Boolean.TryParse(variable.Value, out bool newState);
                 if (variable.Value.ToString().ToLower().Equals("on")) newState = true;
                 this.State = newState;
             }
@@ -130,6 +130,7 @@ namespace SuchByte.MacroDeck.ActionButton
         public event EventHandler StateChanged;
         public event EventHandler IconChanged;
         public long ButtonId { get; set; }
+
         private bool _state = false;
         public bool State
         {
@@ -146,7 +147,7 @@ namespace SuchByte.MacroDeck.ActionButton
             }
         }
 
-        private string _iconOff = "";
+        private string _iconOff = string.Empty;
         public string IconOff { 
             get
             {
@@ -161,7 +162,7 @@ namespace SuchByte.MacroDeck.ActionButton
                 }
             }
         }
-        private string _iconOn = "";
+        private string _iconOn = string.Empty;
         public string IconOn
         {
             get
@@ -177,16 +178,18 @@ namespace SuchByte.MacroDeck.ActionButton
                 }
             }
         }
-        public ButtonLabel LabelOff { get; set; }
-        public ButtonLabel LabelOn { get; set; }
-        public int Position_X { get; set; }
-        public int Position_Y { get; set; }
-        public string StateBindingVariable { get; set; } = "";
-        public List<PluginAction> Actions { get; set; }
-        public List<EventListener> EventListeners { get; set; }
 
+        public ButtonLabel LabelOff { get; set; } = new ButtonLabel();
+        public ButtonLabel LabelOn { get; set; } = new ButtonLabel();
+        public int Position_X { get; set; } = -1;
+        public int Position_Y { get; set; } = -1;
+        public string StateBindingVariable { get; set; } = string.Empty;
+        public List<PluginAction> Actions { get; set; } = new List<PluginAction>();
+        public List<PluginAction> ActionsRelease { get; set; } = new List<PluginAction>();
+        public List<PluginAction> ActionsLongPress { get; set; } = new List<PluginAction>();
+        public List<PluginAction> ActionsLongPressRelease { get; set; } = new List<PluginAction>();
+        public List<EventListener> EventListeners { get; set; } = new List<EventListener>();
         public Keys ModifierKeyCodes { get; set; } = Keys.None;
-
         public Keys KeyCode { get; set; } = Keys.None;
         
     }

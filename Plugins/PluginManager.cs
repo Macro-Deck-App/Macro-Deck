@@ -401,6 +401,18 @@ namespace SuchByte.MacroDeck.Plugins
             }
         }
 
+        public static PluginAction GetNewActionInstance(PluginAction action)
+        {
+            if (action == null) return null;
+            using (var ms = new MemoryStream())
+            {
+                XmlSerializer serializer = new XmlSerializer(action.GetType());
+                serializer.Serialize(ms, action);
+                ms.Seek(0, SeekOrigin.Begin);
+                return (PluginAction)serializer.Deserialize(ms);
+            }
+        }
+        
         public static MacroDeckPlugin GetPluginByAction(PluginAction pluginAction)
         {
             foreach (MacroDeckPlugin macroDeckPlugin in Plugins.Values)

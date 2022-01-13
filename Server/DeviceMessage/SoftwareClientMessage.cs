@@ -88,6 +88,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                 ButtonRadius = macroDeckClient.Profile.ButtonRadius,
                 ButtonBackground = macroDeckClient.Profile.ButtonBackground,
                 Brightness = DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).Configuration.Brightness,
+                SupportButtonReleaseLongPress = true,
             });
             MacroDeckServer.Send(macroDeckClient.SocketConnection, configurationObject);
         }

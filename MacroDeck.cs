@@ -118,7 +118,7 @@ namespace SuchByte.MacroDeck
             }
 
 
-            AppDomain.CurrentDomain.ProcessExit += OnApplicationExit;
+            //AppDomain.CurrentDomain.ProcessExit += OnApplicationExit;
             // Check for start arguments
 
             int port = -1;
@@ -476,12 +476,6 @@ namespace SuchByte.MacroDeck
         private static void OnApplicationExit(object sender, EventArgs e)
         {
             VariableManager.Save();
-            if (_trayIcon != null)
-            {
-                _trayIcon.Visible = false;
-                _trayIcon.Icon.Dispose();
-                _trayIcon.Dispose();
-            }
             MacroDeckLogger.Info("Exiting Macro Deck...");
         }
 

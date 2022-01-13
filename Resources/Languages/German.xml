@@ -122,7 +122,7 @@ Der Standartport für Macro Deck ist 8191. Wenn andere Anwendungen diesen Port s
   <ActionNeedsNoConfiguration>Diese Aktion erfordert keine Konfiguration</ActionNeedsNoConfiguration>
   <CantCreateFolder>Ordner kann nicht erstellt werden</CantCreateFolder>
   <FolderCalledXAlreadyExists>Ein Ordner mit dem Namen "{0}" existiert bereits</FolderCalledXAlreadyExists>
-  <OnPress>Bei Tastendruck</OnPress>
+  <OnPress>Bei drücken</OnPress>
   <OnEvent>Bei Ereignis</OnEvent>
   <CantCreateIconPack>Iconpaket kann nicht erstellt werden</CantCreateIconPack>
   <IconPackCalledXAlreadyExists>Ein Iconpaket mit dem Namen {0} existiert bereits</IconPackCalledXAlreadyExists>
@@ -273,4 +273,12 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
 	<PressTheKeysNow>Tasten jetzt drücken...</PressTheKeysNow>
 	<XAction>{0} Aktion</XAction>
 	<XActions>{0} Aktionen</XActions>
+	<OnRelease>Bei loslassen</OnRelease>
+	<OnLongPress>Bei halten</OnLongPress>
+	<OnLongPressRelease>Bei halten loslassen</OnLongPressRelease>
+	<SimulateOnPress>"Bei drücken" simulieren</SimulateOnPress>
+	<SimulateOnRelease>"Bei loslassen" simulieren</SimulateOnRelease>
+	<SimulateOnLongPress>"Bei halten" simulieren</SimulateOnLongPress>
+	<SimulateOnLongPressRelease>"Bei halten loslassen" simulieren</SimulateOnLongPressRelease>
+	<HotkeyExecutesOnPress>Beim Drücken der Tastenkombination werden die Aktionen in "Bei drücken" ausgeführt</HotkeyExecutesOnPress>
 </Strings>

@@ -292,5 +292,13 @@ namespace SuchByte.MacroDeck.Language
         public string PressTheKeysNow = "Press the keys you want to assign now";
         public string XAction = "{0} action";
         public string XActions = "{0} actions";
+        public string OnRelease = "On release";
+        public string OnLongPress = "On long press";
+        public string OnLongPressRelease = "On long press release";
+        public string SimulateOnPress = "Simulate \"On press\"";
+        public string SimulateOnRelease = "Simulate \"On release\"";
+        public string SimulateOnLongPress = "Simulate \"On long press\"";
+        public string SimulateOnLongPressRelease = "Simulate \"On long press release\"";
+        public string HotkeyExecutesOnPress = "The hotkey executes the \"On press\" actions when pressed";
     }
 }

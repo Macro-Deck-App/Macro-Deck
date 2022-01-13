@@ -143,10 +143,15 @@ namespace SuchByte.MacroDeck.Server
 
         private static void OnMessage(MacroDeckClient macroDeckClient, string jsonMessageString)
         {
-            MacroDeckLogger.Trace("Receiving " + jsonMessageString);
             JObject responseObject = JObject.Parse(jsonMessageString);
 
-            switch (Enum.Parse(typeof(JsonMethod), responseObject["Method"].ToString()))
+            if (responseObject["Method"] == null) return;
+
+            if (!Enum.TryParse(typeof(JsonMethod), responseObject["Method"].ToString(), out object method)) return;
+
+            MacroDeckLogger.Trace("Received method: " + method.ToString());
+
+            switch (method)
             {
                 case JsonMethod.CONNECTED:
                     if (responseObject["API"] == null || responseObject["Client-Id"] == null || responseObject["Device-Type"] == null || responseObject["API"].ToObject<int>() < MacroDeck.ApiVersion)
@@ -196,14 +201,68 @@ namespace SuchByte.MacroDeck.Server
                 case JsonMethod.BUTTON_PRESS:
                     try
                     {
-                        if (macroDeckClient.Folder == null || macroDeckClient.Folder.ActionButtons == null) return;
+                        if (macroDeckClient == null ||macroDeckClient.Folder == null || macroDeckClient.Folder.ActionButtons == null) return;
                         int row = Int32.Parse(responseObject["Message"].ToString().Split('_')[0]);
                         int column = Int32.Parse(responseObject["Message"].ToString().Split('_')[1]);
 
                         ActionButton.ActionButton actionButton = macroDeckClient.Folder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
                         if (actionButton != null)
                         {
-                            Trigger(actionButton, macroDeckClient.ClientId);
+                            ExecutePress(actionButton, macroDeckClient.ClientId);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MacroDeckLogger.Warning("Action button press caused an exception: " + ex.Message);
+                    }
+                    break;
+                case JsonMethod.BUTTON_RELEASE:
+                    try
+                    {
+                        if (macroDeckClient == null || macroDeckClient.Folder == null || macroDeckClient.Folder.ActionButtons == null) return;
+                        int row = Int32.Parse(responseObject["Message"].ToString().Split('_')[0]);
+                        int column = Int32.Parse(responseObject["Message"].ToString().Split('_')[1]);
+
+                        ActionButton.ActionButton actionButton = macroDeckClient.Folder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
+                        if (actionButton != null)
+                        {
+                            ExecuteRelease(actionButton, macroDeckClient.ClientId);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MacroDeckLogger.Warning("Action button press caused an exception: " + ex.Message);
+                    }
+                    break;
+                case JsonMethod.BUTTON_LONG_PRESS:
+                    try
+                    {
+                        if (macroDeckClient == null || macroDeckClient.Folder == null || macroDeckClient.Folder.ActionButtons == null) return;
+                        int row = Int32.Parse(responseObject["Message"].ToString().Split('_')[0]);
+                        int column = Int32.Parse(responseObject["Message"].ToString().Split('_')[1]);
+
+                        ActionButton.ActionButton actionButton = macroDeckClient.Folder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
+                        if (actionButton != null)
+                        {
+                            ExecuteLongPress(actionButton, macroDeckClient.ClientId);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MacroDeckLogger.Warning("Action button press caused an exception: " + ex.Message);
+                    }
+                    break;
+                case JsonMethod.BUTTON_LONG_PRESS_RELEASE:
+                    try
+                    {
+                        if (macroDeckClient == null || macroDeckClient.Folder == null || macroDeckClient.Folder.ActionButtons == null) return;
+                        int row = Int32.Parse(responseObject["Message"].ToString().Split('_')[0]);
+                        int column = Int32.Parse(responseObject["Message"].ToString().Split('_')[1]);
+
+                        ActionButton.ActionButton actionButton = macroDeckClient.Folder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
+                        if (actionButton != null)
+                        {
+                            ExecuteLongPressRelease(actionButton, macroDeckClient.ClientId);
                         }
                     }
                     catch (Exception ex)
@@ -226,7 +285,7 @@ namespace SuchByte.MacroDeck.Server
             }
         }
 
-        public static void Trigger(ActionButton.ActionButton actionButton, string clientId)
+        public static void ExecutePress(ActionButton.ActionButton actionButton, string clientId)
         {
             Task.Run(() =>
             {
@@ -236,6 +295,59 @@ namespace SuchByte.MacroDeck.Server
                     {
                         action.Trigger(clientId, actionButton);
                     } catch { }
+                }
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+            });
+        }
+
+        public static void ExecuteRelease(ActionButton.ActionButton actionButton, string clientId)
+        {
+            Task.Run(() =>
+            {
+                foreach (PluginAction action in actionButton.ActionsRelease)
+                {
+                    try
+                    {
+                        action.Trigger(clientId, actionButton);
+                    }
+                    catch { }
+                }
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+            });
+        }
+        public static void ExecuteLongPress(ActionButton.ActionButton actionButton, string clientId)
+        {
+            Task.Run(() =>
+            {
+                foreach (PluginAction action in actionButton.ActionsLongPress)
+                {
+                    try
+                    {
+                        action.Trigger(clientId, actionButton);
+                    }
+                    catch { }
+                }
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+            });
+        }
+
+        public static void ExecuteLongPressRelease(ActionButton.ActionButton actionButton, string clientId)
+        {
+            Task.Run(() =>
+            {
+                foreach (PluginAction action in actionButton.ActionsLongPressRelease)
+                {
+                    try
+                    {
+                        action.Trigger(clientId, actionButton);
+                    }
+                    catch { }
                 }
                 GC.Collect();
                 GC.WaitForPendingFinalizers();

@@ -14,12 +14,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
 {
     public partial class ActionSelectorOnPress : RoundedUserControl
     {
+        private List<PluginAction> _pluginActions;
 
-        private ActionButton.ActionButton actionButton;
-
-        public ActionSelectorOnPress(ActionButton.ActionButton actionButton)
+        public ActionSelectorOnPress(List<PluginAction> pluginActions)
         {
-            this.actionButton = actionButton;
+            this._pluginActions = pluginActions;
             InitializeComponent();
             this.menuItemAction.Text = Language.LanguageManager.Strings.Action;
             this.menuItemCondition.Text = Language.LanguageManager.Strings.Condition;
@@ -67,7 +66,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
 
             }
             this.actionsOnPress.Controls.Clear();
-            foreach (PluginAction action in actionButton.Actions)
+            foreach (PluginAction action in this._pluginActions)
             {
                 AddActionItem(action);
             }
@@ -78,10 +77,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
         {
             IActionConditionItem actionItem = sender as IActionConditionItem;
             PluginAction action = actionItem.Action;
-            int currentIndex = this.actionButton.Actions.IndexOf(action);
+            int currentIndex = this._pluginActions.IndexOf(action);
             if (currentIndex == 0) return;
-            this.actionButton.Actions.RemoveAt(currentIndex);
-            this.actionButton.Actions.Insert(currentIndex - 1, action);
+            this._pluginActions.RemoveAt(currentIndex);
+            this._pluginActions.Insert(currentIndex - 1, action);
             this.actionsOnPress.Controls.SetChildIndex((Control)actionItem, currentIndex - 1);
         }
 
@@ -89,10 +88,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
         {
             IActionConditionItem actionItem = sender as IActionConditionItem;
             PluginAction action = actionItem.Action;
-            int currentIndex = this.actionButton.Actions.IndexOf(action);
-            if (currentIndex + 1 >= this.actionButton.Actions.Count) return;
-            this.actionButton.Actions.RemoveAt(currentIndex);
-            this.actionButton.Actions.Insert(currentIndex + 1, action);
+            int currentIndex = this._pluginActions.IndexOf(action);
+            if (currentIndex + 1 >= this._pluginActions.Count) return;
+            this._pluginActions.RemoveAt(currentIndex);
+            this._pluginActions.Insert(currentIndex + 1, action);
             this.actionsOnPress.Controls.SetChildIndex((Control)actionItem, currentIndex + 1);
         }
 
@@ -100,7 +99,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
         {
             this.SuspendLayout();
             IActionConditionItem actionItem = sender as IActionConditionItem;
-            this.actionButton.Actions.Remove(actionItem.Action);
+            this._pluginActions.Remove(actionItem.Action);
             actionItem.OnRemoveClick -= this.RemoveClicked;
             this.actionsOnPress.Controls.Remove((Control)actionItem);
             ((Control)actionItem).Dispose();
@@ -116,9 +115,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
                 {
                     this.SuspendLayout();
                     if (configurator.Action.CanConfigure && configurator.Action.Configuration.Length == 0) return;
-                    int index = this.actionButton.Actions.IndexOf(actionItem.Action);
-                    this.actionButton.Actions.RemoveAt(index);
-                    this.actionButton.Actions.Insert(index, configurator.Action);
+                    int index = this._pluginActions.IndexOf(actionItem.Action);
+                    this._pluginActions.RemoveAt(index);
+                    this._pluginActions.Insert(index, configurator.Action);
                     this.RefreshActions();
                     this.ResumeLayout();
                 }
@@ -136,7 +135,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             {
                 if (actionConfigurator.ShowDialog() == DialogResult.OK)
                 {
-                    this.actionButton.Actions.Add(actionConfigurator.Action);
+                    this._pluginActions.Add(actionConfigurator.Action);
                     this.AddActionItem(actionConfigurator.Action);
                 }
             }
@@ -145,7 +144,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
         private void MenuItemCondition_Click(object sender, EventArgs e)
         {
             ConditionItem conditionItem = new ConditionItem();
-            this.actionButton.Actions.Add(conditionItem.Action);
+            this._pluginActions.Add(conditionItem.Action);
             this.AddActionItem(conditionItem.Action);
         }
 
@@ -157,7 +156,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
         private void DelayToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DelayItem delayItem = new DelayItem();
-            this.actionButton.Actions.Add(delayItem.Action);
+            this._pluginActions.Add(delayItem.Action);
             this.AddActionItem(delayItem.Action);
         }
     }

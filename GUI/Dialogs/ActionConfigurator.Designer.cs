@@ -109,7 +109,7 @@ namespace SuchByte.MacroDeck.GUI
             this.pluginSearch.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.pluginSearch.ForeColor = System.Drawing.Color.White;
             this.pluginSearch.Icon = global::SuchByte.MacroDeck.Properties.Resources.magnifying_glass;
-            this.pluginSearch.Location = new System.Drawing.Point(11, 4);
+            this.pluginSearch.Location = new System.Drawing.Point(11, 16);
             this.pluginSearch.MaxCharacters = 32767;
             this.pluginSearch.Multiline = false;
             this.pluginSearch.Name = "pluginSearch";
@@ -130,9 +130,9 @@ namespace SuchByte.MacroDeck.GUI
             // 
             this.pluginsList.AutoScroll = true;
             this.pluginsList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.pluginsList.Location = new System.Drawing.Point(11, 43);
+            this.pluginsList.Location = new System.Drawing.Point(11, 55);
             this.pluginsList.Name = "pluginsList";
-            this.pluginsList.Size = new System.Drawing.Size(310, 578);
+            this.pluginsList.Size = new System.Drawing.Size(310, 566);
             this.pluginsList.TabIndex = 11;
             // 
             // selectedPluginIcon

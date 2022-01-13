@@ -91,7 +91,7 @@ namespace SuchByte.MacroDeck.Hotkeys
                     {
                         try
                         {
-                            MacroDeckServer.Trigger(actionButton, "");
+                            MacroDeckServer.ExecutePress(actionButton, "");
                         }
                         catch { }
                     }

@@ -1,4 +1,5 @@
-﻿using SuchByte.MacroDeck.GUI;
+﻿using Newtonsoft.Json;
+using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using System;
 using System.Collections.Generic;
@@ -114,7 +115,7 @@ namespace SuchByte.MacroDeck.Plugins
         /// <summary>
         /// Gets the ActionButton which contains this action
         /// </summary>
-        [JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public ActionButton.ActionButton ActionButton
         {
             get
@@ -169,5 +170,24 @@ namespace SuchByte.MacroDeck.Plugins
         /// <param name="actionConfigurator"></param>
         /// <returns></returns>
         public virtual ActionConfigControl GetActionConfigControl(ActionConfigurator actionConfigurator) { return null; }
+
+
+        /// <summary>
+        /// Returns a new instance of a plugin action using serilization
+        /// </summary>
+        /// <param name="pluginAction"></param>
+        /// <returns></returns>
+        public static PluginAction GetNewInstance(PluginAction pluginAction)
+        {
+            JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                NullValueHandling = NullValueHandling.Ignore,
+                Error = (sender, args) => { args.ErrorContext.Handled = true; }
+            };
+
+            // Create a copy of the action button instance
+            return JsonConvert.DeserializeObject<PluginAction>(JsonConvert.SerializeObject(pluginAction, jsonSerializerSettings), jsonSerializerSettings);
+        }
     } 
 }

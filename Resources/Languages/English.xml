@@ -272,4 +272,12 @@ For gifs it is recommended to use the low or the lowest preset.</IconImportQuali
   <PressTheKeysNow>Press the keys you want to assign now</PressTheKeysNow>
   <XAction>{0} action</XAction>
   <XActions>{0} actions</XActions>
+  <OnRelease>On release</OnRelease>
+  <OnLongPress>On long press</OnLongPress>
+  <OnLongPressRelease>On long press release</OnLongPressRelease>
+  <SimulateOnPress>Simulate "On press"</SimulateOnPress>
+  <SimulateOnRelease>Simulate "On release"</SimulateOnRelease>
+  <SimulateOnLongPress>Simulate "On long press"</SimulateOnLongPress>
+  <SimulateOnLongPressRelease>Simulate "On long press release"</SimulateOnLongPressRelease>
+  <HotkeyExecutesOnPress>The hotkey executes the "On press" actions when pressed</HotkeyExecutesOnPress>
 </Strings>

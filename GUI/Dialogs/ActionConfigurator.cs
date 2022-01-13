@@ -1,4 +1,5 @@
 ﻿using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Utils;
 using System;
@@ -112,8 +113,10 @@ namespace SuchByte.MacroDeck.GUI
                     this.pluginsList.Controls.Add(actionConfiguratorPluginItem);
                     foreach (var action in plugin.Actions)
                     {
-                        ActionConfiguratorActionItem actionConfiguratorActionItem = new ActionConfiguratorActionItem(plugin, action);
-                        actionConfiguratorActionItem.Visible = false;
+                        ActionConfiguratorActionItem actionConfiguratorActionItem = new ActionConfiguratorActionItem(plugin, PluginManager.GetNewActionInstance(action))
+                        {
+                            Visible = false
+                        };
                         actionConfiguratorActionItem.MouseClick += ActionConfiguratorActionItem_MouseClick;
                         this.pluginsList.Controls.Add(actionConfiguratorActionItem);
                     }
@@ -125,9 +128,13 @@ namespace SuchByte.MacroDeck.GUI
         private void ActionConfiguratorActionItem_MouseClick(object sender, MouseEventArgs e)
         {
             ActionConfiguratorActionItem actionConfiguratorActionItem = sender as ActionConfiguratorActionItem;
-            if (actionConfiguratorActionItem.PluginAction == null || (this._action != null && this._action.GetType() == actionConfiguratorActionItem.PluginAction.GetType())) return;
 
-            this._action = actionConfiguratorActionItem.PluginAction;
+            if (actionConfiguratorActionItem.PluginAction == null) return;
+            if (this._action == null || this._action.GetType() != actionConfiguratorActionItem.PluginAction.GetType())
+            {
+                this._action = actionConfiguratorActionItem.PluginAction;
+            }
+
             this.selectedPluginIcon.BackgroundImage = actionConfiguratorActionItem.Plugin.Icon ?? Properties.Resources.Icon;
             this.lblSelectedActionName.Text = this._action.Name;
             this.labelDescription.Text = this._action.Description;

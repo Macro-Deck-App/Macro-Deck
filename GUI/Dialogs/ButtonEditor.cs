@@ -37,6 +37,9 @@ namespace SuchByte.MacroDeck.GUI
         private readonly Folders.MacroDeckFolder folder;
         private EventSelector eventSelector;
         private ActionSelectorOnPress actionSelectorOnPress;
+        private ActionSelectorOnPress actionSelectorOnRelease;
+        private ActionSelectorOnPress actionSelectorOnLongPress;
+        private ActionSelectorOnPress actionSelectorOnLongPressRelease;
 
         public ActionButton.ActionButton ActionButton { get { return this.actionButton; } }
 
@@ -51,14 +54,17 @@ namespace SuchByte.MacroDeck.GUI
             this.labelAlignTop.Text = LanguageManager.Strings.Top;
             this.labelAlignCenter.Text = LanguageManager.Strings.Center;
             this.labelAlignBottom.Text = LanguageManager.Strings.Bottom;
-            this.lblPath.Text = LanguageManager.Strings.Path;
             this.lblCurrentStateLabel.Text = LanguageManager.Strings.CurrentState;
             this.lblStateBinding.Text = LanguageManager.Strings.StateBinding;
             this.radioOnPress.Text = LanguageManager.Strings.OnPress;
+            this.radioOnRelease.Text = LanguageManager.Strings.OnRelease;
+            this.radioOnLongPress.Text = LanguageManager.Strings.OnLongPress;
+            this.radioOnLongPressRelease.Text = LanguageManager.Strings.OnLongPressRelease;
             this.radioOnEvent.Text = LanguageManager.Strings.OnEvent;
             this.btnApply.Text = LanguageManager.Strings.Save;
             this.btnOk.Text = LanguageManager.Strings.Ok;
             this.groupHotkey.Text = LanguageManager.Strings.Hotkey;
+            this.lblHotkeyInfo.Text = LanguageManager.Strings.HotkeyExecutesOnPress;
 
             this.folder = folder;
             this.actionButton = actionButton;
@@ -323,6 +329,18 @@ namespace SuchByte.MacroDeck.GUI
             {
                 pluginAction.SetActionButton(this.actionButton);
             }
+            foreach (PluginAction pluginAction in this.actionButton.ActionsRelease)
+            {
+                pluginAction.SetActionButton(this.actionButton);
+            }
+            foreach (PluginAction pluginAction in this.actionButton.ActionsLongPress)
+            {
+                pluginAction.SetActionButton(this.actionButton);
+            }
+            foreach (PluginAction pluginAction in this.actionButton.ActionsLongPressRelease)
+            {
+                pluginAction.SetActionButton(this.actionButton);
+            }
 
             foreach (EventItem eventItem in this.eventSelector.EventItems())
             {
@@ -401,9 +419,6 @@ namespace SuchByte.MacroDeck.GUI
 
             this.actionButtonEdited = JsonConvert.DeserializeObject<ActionButton.ActionButton>(JsonConvert.SerializeObject(this.actionButton, jsonSerializerSettings), jsonSerializerSettings); // Make a copy of the current action button
 
-            this.buttonPath.Text = this.folder.DisplayName + "\\" + (this.actionButton.Position_Y + 1) + "." + (this.actionButton.Position_X + 1);
-            this.btnPreview.BackgroundImageLayout = ImageLayout.Stretch;
-
             bool currentState = this.actionButton.State;
             this.lblCurrentState.Text = currentState ? "On" : "Off";
             this.listStateBinding.Text = this.actionButtonEdited.StateBindingVariable;
@@ -415,9 +430,15 @@ namespace SuchByte.MacroDeck.GUI
 
             this.RefreshLabel();
             this.RefreshIcon();
-            this.actionSelectorOnPress = new ActionSelectorOnPress(this.actionButtonEdited);
-            this.eventSelector = new EventSelector(this.actionButtonEdited);
+            this.actionSelectorOnPress = new ActionSelectorOnPress(this.actionButtonEdited.Actions);
+            this.actionSelectorOnRelease = new ActionSelectorOnPress(this.actionButtonEdited.ActionsRelease);
+            this.actionSelectorOnLongPress = new ActionSelectorOnPress(this.actionButtonEdited.ActionsLongPress);
+            this.actionSelectorOnLongPressRelease = new ActionSelectorOnPress(this.actionButtonEdited.ActionsLongPressRelease);
             this.actionSelectorOnPress.RefreshActions();
+            this.actionSelectorOnRelease.RefreshActions();
+            this.actionSelectorOnLongPress.RefreshActions();
+            this.actionSelectorOnLongPressRelease.RefreshActions();
+            this.eventSelector = new EventSelector(this.actionButtonEdited);
             this.eventSelector.RefreshEventsList();
             this.SetSelector(actionSelectorOnPress);
         }
@@ -483,7 +504,7 @@ namespace SuchByte.MacroDeck.GUI
         private void BtnAddVariable_Click(object sender, EventArgs e)
         {
             this.variablesContextMenu.Items.Clear();
-            foreach (Variables.Variable variable in Variables.VariableManager.Variables)
+            foreach (Variable variable in VariableManager.Variables)
             {
                 ToolStripMenuItem item = new ToolStripMenuItem
                 {
@@ -522,6 +543,30 @@ namespace SuchByte.MacroDeck.GUI
             }
         }
 
+        private void RadioOnRelease_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioOnRelease.Checked)
+            {
+                this.SetSelector(actionSelectorOnRelease);
+            }
+        }
+
+        private void RadioOnLongPress_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioOnLongPress.Checked)
+            {
+                this.SetSelector(actionSelectorOnLongPress);
+            }
+        }
+
+        private void RadioOnLongPressRelease_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioOnLongPressRelease.Checked)
+            {
+                this.SetSelector(actionSelectorOnLongPressRelease);
+            }
+        }
+
         private void RadioOnEvent_CheckedChanged(object sender, EventArgs e)
         {
             if (radioOnEvent.Checked)
@@ -534,11 +579,6 @@ namespace SuchByte.MacroDeck.GUI
         {
             this.selectorPanel.Controls.Clear();
             this.selectorPanel.Controls.Add(control);
-        }
-
-        private void labelText_Load(object sender, EventArgs e)
-        {
-
         }
 
         private void BtnOpenTemplateEditor_Click(object sender, EventArgs e)
@@ -554,6 +594,8 @@ namespace SuchByte.MacroDeck.GUI
 
         private void BtnRemoveHotkey_Click(object sender, EventArgs e)
         {
+            this.actionButtonEdited.ModifierKeyCodes = Keys.None;
+            this.actionButtonEdited.KeyCode = Keys.None;
             HotkeyManager.RemoveHotkey(this.actionButtonEdited);
             this.hotkey.Text = string.Empty;
         }
@@ -570,5 +612,6 @@ namespace SuchByte.MacroDeck.GUI
                 }
             }
         }
+
     }
 }

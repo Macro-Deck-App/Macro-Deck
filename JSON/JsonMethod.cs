@@ -10,6 +10,9 @@ namespace SuchByte.MacroDeck.JSON
     {
         CONNECTED,
         BUTTON_PRESS,
+        BUTTON_RELEASE,
+        BUTTON_LONG_PRESS,
+        BUTTON_LONG_PRESS_RELEASE,
         GET_BUTTONS,
         GET_ICONS,
         UPDATE_BUTTON,

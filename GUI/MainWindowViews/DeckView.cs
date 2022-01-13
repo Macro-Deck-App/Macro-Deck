@@ -2,6 +2,8 @@
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Properties;
@@ -30,7 +32,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             InitializeComponent();
             this.Dock = DockStyle.Fill;
             this.UpdateTranslation();
-            this._currentFolder = ProfileManager.CurrentProfile.Folders[0];
+            this._currentFolder = ProfileManager.CurrentProfile.Folders.FirstOrDefault();
 
         }
 
@@ -41,20 +43,25 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         public void UpdateTranslation()
         {
-            this.Name = Language.LanguageManager.Strings.DeckTitle;
-            this.lblColumns.Text = Language.LanguageManager.Strings.Columns;
-            this.lblRows.Text = Language.LanguageManager.Strings.Rows;
-            this.lblSpacing.Text = Language.LanguageManager.Strings.Spacing;
-            this.lblCornerRadius.Text = Language.LanguageManager.Strings.CornerRadius;
-            this.checkButtonBackground.Text = Language.LanguageManager.Strings.ButtonBackGround;
-            this.foldersContextMenuNew.Text = Language.LanguageManager.Strings.Create;
-            this.foldersContextMenuEdit.Text = Language.LanguageManager.Strings.Edit;
-            this.foldersContextMenuDelete.Text = Language.LanguageManager.Strings.Delete;
-            this.actionButtonContextMenuItemRun.Text = Language.LanguageManager.Strings.Run;
-            this.actionButtonContextMenuItemEdit.Text = Language.LanguageManager.Strings.Edit;
-            this.actionButtonContextMenuItemCopy.Text = Language.LanguageManager.Strings.Copy;
-            this.actionButtonContextMenuItemPaste.Text = Language.LanguageManager.Strings.Paste;
-            this.actionButtonContextMenuItemDelete.Text = Language.LanguageManager.Strings.Delete;
+            MacroDeckLogger.Trace("Update translation for DeckView");
+            this.Name = LanguageManager.Strings.DeckTitle;
+            this.lblColumns.Text = LanguageManager.Strings.Columns;
+            this.lblRows.Text = LanguageManager.Strings.Rows;
+            this.lblSpacing.Text = LanguageManager.Strings.Spacing;
+            this.lblCornerRadius.Text = LanguageManager.Strings.CornerRadius;
+            this.checkButtonBackground.Text = LanguageManager.Strings.ButtonBackGround;
+            this.foldersContextMenuNew.Text = LanguageManager.Strings.Create;
+            this.foldersContextMenuEdit.Text = LanguageManager.Strings.Edit;
+            this.foldersContextMenuDelete.Text = LanguageManager.Strings.Delete;
+            this.actionButtonContextMenuItemEdit.Text = LanguageManager.Strings.Edit;
+            this.actionButtonContextMenuItemCopy.Text = LanguageManager.Strings.Copy;
+            this.actionButtonContextMenuItemPaste.Text = LanguageManager.Strings.Paste;
+            this.actionButtonContextMenuItemDelete.Text = LanguageManager.Strings.Delete;
+            this.actionButtonContextMenuItemSimulatePress.Text = LanguageManager.Strings.SimulateOnPress;
+            this.actionButtonContextMenuItemSimulateRelease.Text = LanguageManager.Strings.SimulateOnRelease;
+            this.actionButtonContextMenuItemSimulateLongPress.Text = LanguageManager.Strings.SimulateOnLongPress;
+            this.actionButtonContextMenuItemSimulateLongPressRelease.Text = LanguageManager.Strings.SimulateOnLongPressRelease;
+
         }
 
 
@@ -63,7 +70,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.foldersView.Nodes.Clear();
 
                 var stack = new Stack<TreeNode>();
-                var rootDirectory = ProfileManager.CurrentProfile.Folders[0];
+                var rootDirectory = ProfileManager.CurrentProfile.Folders.FirstOrDefault();
                 var node = new TreeNode(rootDirectory.DisplayName) { Tag = rootDirectory };
                 stack.Push(node);
 
@@ -415,7 +422,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             RoundedButton button = (RoundedButton)sender;
             
             this._buttonClicked = button;
-
             switch (e.Button)
             {
                 case MouseButtons.Left:
@@ -431,20 +437,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 case MouseButtons.Right:
                     this.actionButtonContextMenu.Show(button, button.PointToClient(Control.MousePosition));
                     break;
-            }
-        }
-
-        private void RunToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            int row = ((RoundedButton)this._buttonClicked).Row;
-            int col = ((RoundedButton)this._buttonClicked).Column;
-            ActionButton.ActionButton actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == col && aB.Position_Y == row);
-            if (actionButton != null)
-            {
-                try
-                {
-                    MacroDeckServer.Trigger(actionButton, "");
-                } catch { }
             }
         }
 
@@ -610,7 +602,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             int row = button.Row;
             int col = button.Column;
             ActionButton.ActionButton actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == col && aB.Position_Y == row);
-            this.actionButtonContextMenuItemRun.Enabled = !(actionButton == null);
+            this.actionButtonContextMenuItemSimulatePress.Enabled = !(actionButton == null);
+            this.actionButtonContextMenuItemSimulateRelease.Enabled = !(actionButton == null);
+            this.actionButtonContextMenuItemSimulateLongPress.Enabled = !(actionButton == null);
+            this.actionButtonContextMenuItemSimulateLongPressRelease.Enabled = !(actionButton == null);
             this.actionButtonContextMenuItemCopy.Enabled = !(actionButton == null);
             this.actionButtonContextMenuItemPaste.Enabled = !(Utils.Clipboard.GetActionButtonCopy() == null);
             this.actionButtonContextMenuItemDelete.Enabled = !(actionButton == null);
@@ -778,6 +773,64 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             GC.Collect();
         }
 
-        
+        private void ActionButtonContextMenuItemSimulatePress_Click(object sender, EventArgs e)
+        {
+            int row = ((RoundedButton)this._buttonClicked).Row;
+            int col = ((RoundedButton)this._buttonClicked).Column;
+            ActionButton.ActionButton actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == col && aB.Position_Y == row);
+            if (actionButton != null)
+            {
+                try
+                {
+                    MacroDeckServer.ExecutePress(actionButton, "");
+                }
+                catch { }
+            }
+        }
+
+        private void ActionButtonContextMenuItemSimulateRelease_Click(object sender, EventArgs e)
+        {
+            int row = ((RoundedButton)this._buttonClicked).Row;
+            int col = ((RoundedButton)this._buttonClicked).Column;
+            ActionButton.ActionButton actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == col && aB.Position_Y == row);
+            if (actionButton != null)
+            {
+                try
+                {
+                    MacroDeckServer.ExecuteRelease(actionButton, "");
+                }
+                catch { }
+            }
+        }
+
+        private void ActionButtonContextMenuItemSimulateLongPress_Click(object sender, EventArgs e)
+        {
+            int row = ((RoundedButton)this._buttonClicked).Row;
+            int col = ((RoundedButton)this._buttonClicked).Column;
+            ActionButton.ActionButton actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == col && aB.Position_Y == row);
+            if (actionButton != null)
+            {
+                try
+                {
+                    MacroDeckServer.ExecuteLongPress(actionButton, "");
+                }
+                catch { }
+            }
+        }
+
+        private void ActionButtonContextMenuItemSimulateLongPressRelease_Click(object sender, EventArgs e)
+        {
+            int row = ((RoundedButton)this._buttonClicked).Row;
+            int col = ((RoundedButton)this._buttonClicked).Column;
+            ActionButton.ActionButton actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == col && aB.Position_Y == row);
+            if (actionButton != null)
+            {
+                try
+                {
+                    MacroDeckServer.ExecuteLongPressRelease(actionButton, "");
+                }
+                catch { }
+            }
+        }
     }
 }

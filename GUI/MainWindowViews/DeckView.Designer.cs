@@ -60,7 +60,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.foldersContextMenuDelete = new System.Windows.Forms.ToolStripMenuItem();
             this.foldersContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.actionButtonContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.actionButtonContextMenuItemRun = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.actionButtonContextMenuItemCopy = new System.Windows.Forms.ToolStripMenuItem();
             this.actionButtonContextMenuItemPaste = new System.Windows.Forms.ToolStripMenuItem();
@@ -79,6 +78,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.checkButtonBackground = new System.Windows.Forms.CheckBox();
             this.btnEditProfile = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.actionButtonContextMenuItemSimulatePress = new System.Windows.Forms.ToolStripMenuItem();
+            this.actionButtonContextMenuItemSimulateRelease = new System.Windows.Forms.ToolStripMenuItem();
+            this.actionButtonContextMenuItemSimulateLongPress = new System.Windows.Forms.ToolStripMenuItem();
+            this.actionButtonContextMenuItemSimulateLongPressRelease = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.foldersContextMenu.SuspendLayout();
             this.actionButtonContextMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.btnAddProfile)).BeginInit();
@@ -124,7 +128,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             this.actionButtonContextMenuItemEdit.ForeColor = System.Drawing.Color.White;
             this.actionButtonContextMenuItemEdit.Name = "actionButtonContextMenuItemEdit";
-            this.actionButtonContextMenuItemEdit.Size = new System.Drawing.Size(108, 28);
+            this.actionButtonContextMenuItemEdit.Size = new System.Drawing.Size(330, 28);
             this.actionButtonContextMenuItemEdit.Text = "Edit";
             this.actionButtonContextMenuItemEdit.Click += new System.EventHandler(this.ContextMenuEditItemClick);
             // 
@@ -132,7 +136,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             this.actionButtonContextMenuItemDelete.ForeColor = System.Drawing.Color.White;
             this.actionButtonContextMenuItemDelete.Name = "actionButtonContextMenuItemDelete";
-            this.actionButtonContextMenuItemDelete.Size = new System.Drawing.Size(108, 28);
+            this.actionButtonContextMenuItemDelete.Size = new System.Drawing.Size(330, 28);
             this.actionButtonContextMenuItemDelete.Text = "Delete";
             this.actionButtonContextMenuItemDelete.Click += new System.EventHandler(this.ContextMenuDeleteItemClick);
             // 
@@ -177,36 +181,32 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.actionButtonContextMenu.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
             this.actionButtonContextMenu.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.actionButtonContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.actionButtonContextMenuItemRun,
             this.actionButtonContextMenuItemEdit,
             this.toolStripSeparator2,
+            this.actionButtonContextMenuItemSimulatePress,
+            this.actionButtonContextMenuItemSimulateRelease,
+            this.actionButtonContextMenuItemSimulateLongPress,
+            this.actionButtonContextMenuItemSimulateLongPressRelease,
+            this.toolStripSeparator3,
             this.actionButtonContextMenuItemCopy,
             this.actionButtonContextMenuItemPaste,
             this.toolStripSeparator1,
             this.actionButtonContextMenuItemDelete});
             this.actionButtonContextMenu.Name = "actionButtonContextMenu";
             this.actionButtonContextMenu.ShowImageMargin = false;
-            this.actionButtonContextMenu.Size = new System.Drawing.Size(109, 156);
+            this.actionButtonContextMenu.Size = new System.Drawing.Size(331, 268);
             this.actionButtonContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.ActionButtonContextMenuOpened);
-            // 
-            // actionButtonContextMenuItemRun
-            // 
-            this.actionButtonContextMenuItemRun.ForeColor = System.Drawing.Color.White;
-            this.actionButtonContextMenuItemRun.Name = "actionButtonContextMenuItemRun";
-            this.actionButtonContextMenuItemRun.Size = new System.Drawing.Size(108, 28);
-            this.actionButtonContextMenuItemRun.Text = "Run";
-            this.actionButtonContextMenuItemRun.Click += new System.EventHandler(this.RunToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(105, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(327, 6);
             // 
             // actionButtonContextMenuItemCopy
             // 
             this.actionButtonContextMenuItemCopy.ForeColor = System.Drawing.Color.White;
             this.actionButtonContextMenuItemCopy.Name = "actionButtonContextMenuItemCopy";
-            this.actionButtonContextMenuItemCopy.Size = new System.Drawing.Size(108, 28);
+            this.actionButtonContextMenuItemCopy.Size = new System.Drawing.Size(330, 28);
             this.actionButtonContextMenuItemCopy.Text = "Copy";
             this.actionButtonContextMenuItemCopy.Click += new System.EventHandler(this.ActionButtonContextMenuItemCopy_Click);
             // 
@@ -215,18 +215,19 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.actionButtonContextMenuItemPaste.Enabled = false;
             this.actionButtonContextMenuItemPaste.ForeColor = System.Drawing.Color.White;
             this.actionButtonContextMenuItemPaste.Name = "actionButtonContextMenuItemPaste";
-            this.actionButtonContextMenuItemPaste.Size = new System.Drawing.Size(108, 28);
+            this.actionButtonContextMenuItemPaste.Size = new System.Drawing.Size(330, 28);
             this.actionButtonContextMenuItemPaste.Text = "Paste";
             this.actionButtonContextMenuItemPaste.Click += new System.EventHandler(this.ActionButtonContextMenuItemPaste_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(105, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(327, 6);
             // 
             // boxProfiles
             // 
             this.boxProfiles.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.boxProfiles.Cursor = System.Windows.Forms.Cursors.Hand;
             this.boxProfiles.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.boxProfiles.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.boxProfiles.ForeColor = System.Drawing.Color.White;
@@ -459,6 +460,43 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.panel1.Size = new System.Drawing.Size(852, 36);
             this.panel1.TabIndex = 24;
             // 
+            // actionButtonContextMenuItemSimulatePress
+            // 
+            this.actionButtonContextMenuItemSimulatePress.ForeColor = System.Drawing.Color.White;
+            this.actionButtonContextMenuItemSimulatePress.Name = "actionButtonContextMenuItemSimulatePress";
+            this.actionButtonContextMenuItemSimulatePress.Size = new System.Drawing.Size(330, 28);
+            this.actionButtonContextMenuItemSimulatePress.Text = "Simulate \"On press\"";
+            this.actionButtonContextMenuItemSimulatePress.Click += new System.EventHandler(this.ActionButtonContextMenuItemSimulatePress_Click);
+            // 
+            // actionButtonContextMenuItemSimulateRelease
+            // 
+            this.actionButtonContextMenuItemSimulateRelease.ForeColor = System.Drawing.Color.White;
+            this.actionButtonContextMenuItemSimulateRelease.Name = "actionButtonContextMenuItemSimulateRelease";
+            this.actionButtonContextMenuItemSimulateRelease.Size = new System.Drawing.Size(330, 28);
+            this.actionButtonContextMenuItemSimulateRelease.Text = "Simulate \"On release\"";
+            this.actionButtonContextMenuItemSimulateRelease.Click += new System.EventHandler(this.ActionButtonContextMenuItemSimulateRelease_Click);
+            // 
+            // actionButtonContextMenuItemSimulateLongPress
+            // 
+            this.actionButtonContextMenuItemSimulateLongPress.ForeColor = System.Drawing.Color.White;
+            this.actionButtonContextMenuItemSimulateLongPress.Name = "actionButtonContextMenuItemSimulateLongPress";
+            this.actionButtonContextMenuItemSimulateLongPress.Size = new System.Drawing.Size(330, 28);
+            this.actionButtonContextMenuItemSimulateLongPress.Text = "Simulate \"On long press\"";
+            this.actionButtonContextMenuItemSimulateLongPress.Click += new System.EventHandler(this.ActionButtonContextMenuItemSimulateLongPress_Click);
+            // 
+            // actionButtonContextMenuItemSimulateLongPressRelease
+            // 
+            this.actionButtonContextMenuItemSimulateLongPressRelease.ForeColor = System.Drawing.Color.White;
+            this.actionButtonContextMenuItemSimulateLongPressRelease.Name = "actionButtonContextMenuItemSimulateLongPressRelease";
+            this.actionButtonContextMenuItemSimulateLongPressRelease.Size = new System.Drawing.Size(330, 28);
+            this.actionButtonContextMenuItemSimulateLongPressRelease.Text = "Simulate \"On long press release\"";
+            this.actionButtonContextMenuItemSimulateLongPressRelease.Click += new System.EventHandler(this.ActionButtonContextMenuItemSimulateLongPressRelease_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(327, 6);
+            // 
             // DeckView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
@@ -521,8 +559,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private System.Windows.Forms.Label lblCornerRadius;
         private System.Windows.Forms.NumericUpDown cornerRadius;
         private System.Windows.Forms.CheckBox checkButtonBackground;
-        private System.Windows.Forms.ToolStripMenuItem actionButtonContextMenuItemRun;
         private PictureButton btnEditProfile;
         private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.ToolStripMenuItem actionButtonContextMenuItemSimulatePress;
+        private System.Windows.Forms.ToolStripMenuItem actionButtonContextMenuItemSimulateRelease;
+        private System.Windows.Forms.ToolStripMenuItem actionButtonContextMenuItemSimulateLongPress;
+        private System.Windows.Forms.ToolStripMenuItem actionButtonContextMenuItemSimulateLongPressRelease;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
     }
 }

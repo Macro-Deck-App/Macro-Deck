@@ -42,8 +42,6 @@ namespace SuchByte.MacroDeck.GUI
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.lblPath = new System.Windows.Forms.Label();
-            this.buttonPath = new System.Windows.Forms.Label();
             this.btnApply = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.btnPreview = new SuchByte.MacroDeck.GUI.CustomControls.RoundedButton();
             this.labelText = new SuchByte.MacroDeck.GUI.CustomControls.RoundedTextBox();
@@ -74,9 +72,13 @@ namespace SuchByte.MacroDeck.GUI
             this.selectorPanel = new System.Windows.Forms.Panel();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.radioOnPress = new SuchByte.MacroDeck.GUI.CustomControls.TabRadioButton();
+            this.radioOnRelease = new SuchByte.MacroDeck.GUI.CustomControls.TabRadioButton();
+            this.radioOnLongPress = new SuchByte.MacroDeck.GUI.CustomControls.TabRadioButton();
+            this.radioOnLongPressRelease = new SuchByte.MacroDeck.GUI.CustomControls.TabRadioButton();
             this.radioOnEvent = new SuchByte.MacroDeck.GUI.CustomControls.TabRadioButton();
             this.groupButtonState = new System.Windows.Forms.GroupBox();
             this.groupHotkey = new System.Windows.Forms.GroupBox();
+            this.lblHotkeyInfo = new System.Windows.Forms.Label();
             this.btnRemoveHotkey = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.hotkey = new SuchByte.MacroDeck.GUI.CustomControls.RoundedTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.btnPreview)).BeginInit();
@@ -95,24 +97,6 @@ namespace SuchByte.MacroDeck.GUI
             this.groupHotkey.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.btnRemoveHotkey)).BeginInit();
             this.SuspendLayout();
-            // 
-            // lblPath
-            // 
-            this.lblPath.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblPath.Location = new System.Drawing.Point(4, 608);
-            this.lblPath.Name = "lblPath";
-            this.lblPath.Size = new System.Drawing.Size(150, 19);
-            this.lblPath.TabIndex = 0;
-            this.lblPath.Text = "Path:";
-            this.lblPath.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // buttonPath
-            // 
-            this.buttonPath.Location = new System.Drawing.Point(168, 610);
-            this.buttonPath.Name = "buttonPath";
-            this.buttonPath.Size = new System.Drawing.Size(447, 16);
-            this.buttonPath.TabIndex = 0;
-            this.buttonPath.Text = ".";
             // 
             // btnApply
             // 
@@ -148,6 +132,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnPreview.Radius = 40;
             this.btnPreview.Row = 0;
             this.btnPreview.ShowGIFIndicator = false;
+            this.btnPreview.ShowKeyboardHotkeyIndicator = false;
             this.btnPreview.Size = new System.Drawing.Size(118, 118);
             this.btnPreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.btnPreview.TabIndex = 3;
@@ -176,7 +161,6 @@ namespace SuchByte.MacroDeck.GUI
             this.labelText.TabIndex = 23;
             this.labelText.TabStop = false;
             this.labelText.TextAlignment = System.Windows.Forms.HorizontalAlignment.Center;
-            this.labelText.Load += new System.EventHandler(this.labelText_Load);
             this.labelText.TextChanged += new System.EventHandler(this.LabelChanged);
             // 
             // fontSize
@@ -218,7 +202,7 @@ namespace SuchByte.MacroDeck.GUI
             // 
             this.radioButtonOff.Checked = true;
             this.radioButtonOff.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioButtonOff.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.radioButtonOff.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.radioButtonOff.Location = new System.Drawing.Point(139, 3);
             this.radioButtonOff.Name = "radioButtonOff";
             this.radioButtonOff.Size = new System.Drawing.Size(70, 23);
@@ -231,7 +215,7 @@ namespace SuchByte.MacroDeck.GUI
             // radioButtonOn
             // 
             this.radioButtonOn.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioButtonOn.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.radioButtonOn.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.radioButtonOn.Location = new System.Drawing.Point(215, 3);
             this.radioButtonOn.Name = "radioButtonOn";
             this.radioButtonOn.Size = new System.Drawing.Size(70, 23);
@@ -545,11 +529,14 @@ namespace SuchByte.MacroDeck.GUI
             // flowLayoutPanel1
             // 
             this.flowLayoutPanel1.Controls.Add(this.radioOnPress);
+            this.flowLayoutPanel1.Controls.Add(this.radioOnRelease);
+            this.flowLayoutPanel1.Controls.Add(this.radioOnLongPress);
+            this.flowLayoutPanel1.Controls.Add(this.radioOnLongPressRelease);
             this.flowLayoutPanel1.Controls.Add(this.radioOnEvent);
             this.flowLayoutPanel1.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(317, 17);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(790, 31);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(838, 31);
             this.flowLayoutPanel1.TabIndex = 30;
             // 
             // radioOnPress
@@ -557,22 +544,63 @@ namespace SuchByte.MacroDeck.GUI
             this.radioOnPress.AutoSize = true;
             this.radioOnPress.Checked = true;
             this.radioOnPress.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.radioOnPress.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.radioOnPress.Location = new System.Drawing.Point(3, 3);
             this.radioOnPress.Name = "radioOnPress";
-            this.radioOnPress.Size = new System.Drawing.Size(90, 23);
+            this.radioOnPress.Size = new System.Drawing.Size(85, 22);
             this.radioOnPress.TabIndex = 0;
             this.radioOnPress.TabStop = true;
             this.radioOnPress.Text = "On press";
             this.radioOnPress.UseVisualStyleBackColor = true;
             this.radioOnPress.CheckedChanged += new System.EventHandler(this.RadioOnPress_CheckedChanged);
             // 
+            // radioOnRelease
+            // 
+            this.radioOnRelease.AutoSize = true;
+            this.radioOnRelease.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.radioOnRelease.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.radioOnRelease.Location = new System.Drawing.Point(94, 3);
+            this.radioOnRelease.Name = "radioOnRelease";
+            this.radioOnRelease.Size = new System.Drawing.Size(96, 22);
+            this.radioOnRelease.TabIndex = 2;
+            this.radioOnRelease.Text = "On release";
+            this.radioOnRelease.UseVisualStyleBackColor = true;
+            this.radioOnRelease.CheckedChanged += new System.EventHandler(this.RadioOnRelease_CheckedChanged);
+            // 
+            // radioOnLongPress
+            // 
+            this.radioOnLongPress.AutoSize = true;
+            this.radioOnLongPress.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.radioOnLongPress.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.radioOnLongPress.Location = new System.Drawing.Point(196, 3);
+            this.radioOnLongPress.Name = "radioOnLongPress";
+            this.radioOnLongPress.Size = new System.Drawing.Size(116, 22);
+            this.radioOnLongPress.TabIndex = 3;
+            this.radioOnLongPress.Text = "On long press";
+            this.radioOnLongPress.UseVisualStyleBackColor = true;
+            this.radioOnLongPress.CheckedChanged += new System.EventHandler(this.RadioOnLongPress_CheckedChanged);
+            // 
+            // radioOnLongPressRelease
+            // 
+            this.radioOnLongPressRelease.AutoSize = true;
+            this.radioOnLongPressRelease.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.radioOnLongPressRelease.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.radioOnLongPressRelease.Location = new System.Drawing.Point(318, 3);
+            this.radioOnLongPressRelease.Name = "radioOnLongPressRelease";
+            this.radioOnLongPressRelease.Size = new System.Drawing.Size(167, 22);
+            this.radioOnLongPressRelease.TabIndex = 4;
+            this.radioOnLongPressRelease.Text = "On long press release";
+            this.radioOnLongPressRelease.UseVisualStyleBackColor = true;
+            this.radioOnLongPressRelease.CheckedChanged += new System.EventHandler(this.RadioOnLongPressRelease_CheckedChanged);
+            // 
             // radioOnEvent
             // 
             this.radioOnEvent.AutoSize = true;
             this.radioOnEvent.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioOnEvent.Location = new System.Drawing.Point(99, 3);
+            this.radioOnEvent.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.radioOnEvent.Location = new System.Drawing.Point(491, 3);
             this.radioOnEvent.Name = "radioOnEvent";
-            this.radioOnEvent.Size = new System.Drawing.Size(91, 23);
+            this.radioOnEvent.Size = new System.Drawing.Size(87, 22);
             this.radioOnEvent.TabIndex = 1;
             this.radioOnEvent.Text = "On event";
             this.radioOnEvent.UseVisualStyleBackColor = true;
@@ -587,7 +615,7 @@ namespace SuchByte.MacroDeck.GUI
             this.groupButtonState.Controls.Add(this.lblCurrentStateLabel);
             this.groupButtonState.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.groupButtonState.ForeColor = System.Drawing.Color.White;
-            this.groupButtonState.Location = new System.Drawing.Point(4, 417);
+            this.groupButtonState.Location = new System.Drawing.Point(4, 414);
             this.groupButtonState.Name = "groupButtonState";
             this.groupButtonState.Size = new System.Drawing.Size(307, 110);
             this.groupButtonState.TabIndex = 31;
@@ -596,16 +624,27 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // groupHotkey
             // 
+            this.groupHotkey.Controls.Add(this.lblHotkeyInfo);
             this.groupHotkey.Controls.Add(this.btnRemoveHotkey);
             this.groupHotkey.Controls.Add(this.hotkey);
             this.groupHotkey.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.groupHotkey.ForeColor = System.Drawing.Color.White;
-            this.groupHotkey.Location = new System.Drawing.Point(4, 533);
+            this.groupHotkey.Location = new System.Drawing.Point(4, 527);
             this.groupHotkey.Name = "groupHotkey";
-            this.groupHotkey.Size = new System.Drawing.Size(307, 72);
+            this.groupHotkey.Size = new System.Drawing.Size(307, 87);
             this.groupHotkey.TabIndex = 32;
             this.groupHotkey.TabStop = false;
             this.groupHotkey.Text = "Hotkey";
+            // 
+            // lblHotkeyInfo
+            // 
+            this.lblHotkeyInfo.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblHotkeyInfo.Location = new System.Drawing.Point(6, 53);
+            this.lblHotkeyInfo.Name = "lblHotkeyInfo";
+            this.lblHotkeyInfo.Size = new System.Drawing.Size(295, 29);
+            this.lblHotkeyInfo.TabIndex = 21;
+            this.lblHotkeyInfo.Text = "The hotkey executes the \"On press\" actions when pressed";
+            this.lblHotkeyInfo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // btnRemoveHotkey
             // 
@@ -616,7 +655,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnRemoveHotkey.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnRemoveHotkey.ForeColor = System.Drawing.Color.White;
             this.btnRemoveHotkey.HoverImage = global::SuchByte.MacroDeck.Properties.Resources.Delete_Hover;
-            this.btnRemoveHotkey.Location = new System.Drawing.Point(271, 35);
+            this.btnRemoveHotkey.Location = new System.Drawing.Point(271, 23);
             this.btnRemoveHotkey.Name = "btnRemoveHotkey";
             this.btnRemoveHotkey.Size = new System.Drawing.Size(27, 27);
             this.btnRemoveHotkey.TabIndex = 20;
@@ -629,7 +668,7 @@ namespace SuchByte.MacroDeck.GUI
             this.hotkey.Cursor = System.Windows.Forms.Cursors.Hand;
             this.hotkey.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.hotkey.Icon = global::SuchByte.MacroDeck.Properties.Resources.Keyboard;
-            this.hotkey.Location = new System.Drawing.Point(8, 37);
+            this.hotkey.Location = new System.Drawing.Point(8, 25);
             this.hotkey.MaxCharacters = 32767;
             this.hotkey.Multiline = false;
             this.hotkey.Name = "hotkey";
@@ -656,8 +695,6 @@ namespace SuchByte.MacroDeck.GUI
             this.Controls.Add(this.selectorPanel);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.btnApply);
-            this.Controls.Add(this.buttonPath);
-            this.Controls.Add(this.lblPath);
             this.Controls.Add(this.groupAppearance);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -665,8 +702,6 @@ namespace SuchByte.MacroDeck.GUI
             this.Text = "Macro Deck :: Edit button";
             this.Load += new System.EventHandler(this.ButtonEditor_Load);
             this.Controls.SetChildIndex(this.groupAppearance, 0);
-            this.Controls.SetChildIndex(this.lblPath, 0);
-            this.Controls.SetChildIndex(this.buttonPath, 0);
             this.Controls.SetChildIndex(this.btnApply, 0);
             this.Controls.SetChildIndex(this.btnOk, 0);
             this.Controls.SetChildIndex(this.selectorPanel, 0);
@@ -696,9 +731,6 @@ namespace SuchByte.MacroDeck.GUI
 
 
         #endregion
-
-        private System.Windows.Forms.Label lblPath;
-        private System.Windows.Forms.Label buttonPath;
         private CustomControls.ButtonPrimary btnApply;
         private CustomControls.RoundedButton btnPreview;
         private RoundedTextBox labelText;
@@ -734,5 +766,9 @@ namespace SuchByte.MacroDeck.GUI
         private System.Windows.Forms.GroupBox groupHotkey;
         private PictureButton btnRemoveHotkey;
         private RoundedTextBox hotkey;
+        private System.Windows.Forms.Label lblHotkeyInfo;
+        private TabRadioButton radioOnRelease;
+        private TabRadioButton radioOnLongPress;
+        private TabRadioButton radioOnLongPressRelease;
     }
 }
