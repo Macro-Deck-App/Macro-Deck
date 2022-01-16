@@ -281,4 +281,12 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
 	<SimulateOnLongPress>"Bei halten" simulieren</SimulateOnLongPress>
 	<SimulateOnLongPressRelease>"Bei halten loslassen" simulieren</SimulateOnLongPressRelease>
 	<HotkeyExecutesOnPress>Beim Drücken der Tastenkombination werden die Aktionen in "Bei drücken" ausgeführt</HotkeyExecutesOnPress>
+	<Important>Wichtig!</Important>
+	<FirewallAlertInfo>
+		Nach dem Start von Macro Deck, wird ein Dialog von der Windows Defender Firewall erscheinen.
+		Bitte alle Haken setzen (Private Netzwerke, Öffentliche Netzwerke und Domänennetzwerke, falls dies existiert).
+		
+		Wenn dieser Dialog nicht erscheint und es Probleme bei der Verbindung gibt, bekommst du Hilfe im Wiki und im Discord Server.
+	</FirewallAlertInfo>
+	<GotIt>Verstanden!</GotIt>
 </Strings>

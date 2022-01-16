@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
-    <VersionMinor>6</VersionMinor>
-    <VersionPatch>7</VersionPatch>
+    <VersionMinor>7</VersionMinor>
+    <VersionPatch>0</VersionPatch>
     <VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
   </PropertyGroup>
   
@@ -48,6 +48,18 @@
     <None Remove="Resources\Languages\Russian.xml" />
     <None Remove="Resources\Languages\Spanish.xml" />
     <None Remove="Resources\Languages\Turkish.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <COMReference Include="NetFwTypeLib">
+      <VersionMinor>0</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <Guid>58fbcf7c-e7a9-467c-80b3-fc65e8fcca08</Guid>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>false</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
 
   <ItemGroup>

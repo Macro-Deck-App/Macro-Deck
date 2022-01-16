@@ -5,6 +5,7 @@ using SuchByte.MacroDeck.GUI.MainWindowContents;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,10 +23,22 @@ namespace SuchByte.MacroDeck.GUI
 
     public partial class MainWindow : CustomControls.Form
     {
-        private DeckView DeckView { get; set; }
-        private PackageManagerView PackageManagerView { get; set; }
-        private VariablesView VariablesView { get; set; }
-        private SettingsView SettingsView { get; set; }
+        private DeckView _deckView { get; set; }
+        
+        public DeckView DeckView
+        {
+            get
+            {
+                if (this._deckView == null || this._deckView.IsDisposed)
+                {
+                    this._deckView = new DeckView();
+                }
+                return this._deckView;
+            }
+        }
+        public PackageManagerView PackageManagerView { get; set; }
+        public VariablesView VariablesView { get; set; }
+        public SettingsView SettingsView { get; set; }
 
         public MainWindow()
         {
@@ -147,7 +160,7 @@ namespace SuchByte.MacroDeck.GUI
             {
                 this.BackColor = Color.FromArgb(99, 0, 0);
                 this.lblSafeMode.Visible = true;
-                using (var msgBox = new GUI.CustomControls.MessageBox())
+                using (var msgBox = new CustomControls.MessageBox())
                 {
                     msgBox.ShowDialog("Safe mode", "Macro Deck was started in safe mode! This means no changes on the action buttons will be saved to prevent damage.", MessageBoxButtons.OK);
 
@@ -158,7 +171,7 @@ namespace SuchByte.MacroDeck.GUI
 
             Task.Run(() =>
             {
-                this.DeckView = new DeckView();
+                this._deckView ??= new DeckView();
                 Thread.Sleep(500);
                 this.SetView(this.DeckView);
                 this.Invoke(new Action(() =>
@@ -266,5 +279,9 @@ namespace SuchByte.MacroDeck.GUI
             this.SetView(this.VariablesView);
         }
 
+        private void lblTitle_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

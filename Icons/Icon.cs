@@ -21,7 +21,7 @@ namespace SuchByte.MacroDeck.Icons
             }
             set {
                 this._iconBase64 = value;
-                if (MacroDeck.Configuration.CacheIcons)
+                if (MacroDeck.Configuration != null && MacroDeck.Configuration.CacheIcons)
                 {
                     try
                     {

@@ -280,4 +280,10 @@ For gifs it is recommended to use the low or the lowest preset.</IconImportQuali
   <SimulateOnLongPress>Simulate "On long press"</SimulateOnLongPress>
   <SimulateOnLongPressRelease>Simulate "On long press release"</SimulateOnLongPressRelease>
   <HotkeyExecutesOnPress>The hotkey executes the "On press" actions when pressed</HotkeyExecutesOnPress>
+  <Important>Important</Important>
+  <FirewallAlertInfo>After starting Macro Deck, a dialog from Windows Defender Firewall will appear.
+Please check all boxes (Private networks, Public networks and if it exists, Domain networks).
+
+If this dialog does not appear and you still experience connection problems, please visit the wiki or the discord server for help. </FirewallAlertInfo>
+  <GotIt>Got it!</GotIt>
 </Strings>

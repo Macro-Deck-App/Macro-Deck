@@ -54,6 +54,7 @@ namespace SuchByte.MacroDeck.Server
                 }
                 _webSocketServer.Dispose();
                 _clients.Clear();
+                MacroDeckLogger.Info("Websocket server stopped");
                 if (OnServerStateChanged != null)
                 {
                     OnServerStateChanged(_webSocketServer, EventArgs.Empty);
@@ -85,7 +86,7 @@ namespace SuchByte.MacroDeck.Server
                     OnServerStateChanged(_webSocketServer, EventArgs.Empty);
                 }
 
-                MacroDeckLogger.Error("Failed to start server: " + ex.Message);
+                MacroDeckLogger.Error("Failed to start server: " + ex.Message + Environment.NewLine + ex.StackTrace);
 
                 using (var msgBox = new GUI.CustomControls.MessageBox())
                 {
@@ -115,9 +116,9 @@ namespace SuchByte.MacroDeck.Server
 
         private static void OnClose(MacroDeckClient macroDeckClient)
         {
-            MacroDeckLogger.Info(macroDeckClient.ClientId + " connection closed");
             macroDeckClient.Dispose();
             _clients.Remove(macroDeckClient);
+            MacroDeckLogger.Info(macroDeckClient.ClientId + " connection closed");
             if (OnDeviceConnectionStateChanged != null)
             {
                 OnDeviceConnectionStateChanged(macroDeckClient, EventArgs.Empty);
@@ -231,7 +232,7 @@ namespace SuchByte.MacroDeck.Server
                     }
                     catch (Exception ex)
                     {
-                        MacroDeckLogger.Warning("Action button press caused an exception: " + ex.Message);
+                        MacroDeckLogger.Warning("Action button release caused an exception: " + ex.Message);
                     }
                     break;
                 case JsonMethod.BUTTON_LONG_PRESS:
@@ -249,7 +250,7 @@ namespace SuchByte.MacroDeck.Server
                     }
                     catch (Exception ex)
                     {
-                        MacroDeckLogger.Warning("Action button press caused an exception: " + ex.Message);
+                        MacroDeckLogger.Warning("Action button long press caused an exception: " + ex.Message);
                     }
                     break;
                 case JsonMethod.BUTTON_LONG_PRESS_RELEASE:
@@ -267,7 +268,7 @@ namespace SuchByte.MacroDeck.Server
                     }
                     catch (Exception ex)
                     {
-                        MacroDeckLogger.Warning("Action button press caused an exception: " + ex.Message);
+                        MacroDeckLogger.Warning("Action button long press release caused an exception: " + ex.Message);
                     }
                     break;
                 case JsonMethod.GET_BUTTONS:
@@ -477,7 +478,6 @@ namespace SuchByte.MacroDeck.Server
         /// <param name="jObject"></param>
         internal static void Send(IWebSocketConnection socketConnection, JObject jObject)
         {
-            MacroDeckLogger.Trace("Sending " + jObject.ToString());
             socketConnection.Send(jObject.ToString());
         }
     }

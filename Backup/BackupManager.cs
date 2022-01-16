@@ -205,9 +205,11 @@ namespace SuchByte.MacroDeck.Backups
                     serializer.Serialize(writer, restoreBackupInfo);
                 }
 
-                Process.Start(Path.Combine(MacroDeck.MainDirectoryPath, AppDomain.CurrentDomain.FriendlyName), "--show");
-                Environment.Exit(0);
-            } catch { }
+                MacroDeck.RestartMacroDeck("--show");
+            } catch (Exception ex) {
+
+                MacroDeckLogger.Error("Backup restoration failed: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            }
         }
 
 
@@ -215,7 +217,8 @@ namespace SuchByte.MacroDeck.Backups
         {
             if (BackupInProgress) return;
             BackupInProgress = true;
-            string backupFileName = "backup_" + DateTime.Now.ToString("ddmmyyhhmmss") + ".zip";
+            string backupFileName = string.Format("backup_{0}.zip", DateTime.Now.ToString("yy-MM-dd_HH-mm-ss"));
+            MacroDeckLogger.Info("Sarting creation of backup: " + backupFileName);
 
             try
             {
@@ -230,37 +233,42 @@ namespace SuchByte.MacroDeck.Backups
                         DirectoryInfo pluginDirectoryInfo = new DirectoryInfo(directory);
                         foreach (FileInfo file in pluginDirectoryInfo.GetFiles("*"))
                         {
-                            archive.CreateEntryFromFile(Path.Combine(MacroDeck.PluginsDirectoryPath, pluginDirectoryInfo.Name, file.Name), new DirectoryInfo(MacroDeck.PluginsDirectoryPath).Name + "/" + pluginDirectoryInfo.Name + "/" + file.Name);
+                            archive.CreateEntryFromFile(Path.Combine(MacroDeck.PluginsDirectoryPath, pluginDirectoryInfo.Name, file.Name), Path.Combine(new DirectoryInfo(MacroDeck.PluginsDirectoryPath).Name, pluginDirectoryInfo.Name, file.Name));
                         }
                     }
                     DirectoryInfo pluginConfigDirectoryInfo = new DirectoryInfo(MacroDeck.PluginConfigPath);
                     foreach (FileInfo file in pluginConfigDirectoryInfo.GetFiles("*"))
                     {
-                        archive.CreateEntryFromFile(Path.Combine(MacroDeck.PluginConfigPath, file.Name), pluginConfigDirectoryInfo.Name + "/" + file.Name);
+                        archive.CreateEntryFromFile(Path.Combine(MacroDeck.PluginConfigPath, file.Name), Path.Combine(pluginConfigDirectoryInfo.Name, file.Name));
                     }
                     DirectoryInfo pluginCredentialsDirectoryInfo = new DirectoryInfo(MacroDeck.PluginCredentialsPath);
                     foreach (FileInfo file in pluginCredentialsDirectoryInfo.GetFiles("*"))
                     {
-                        archive.CreateEntryFromFile(Path.Combine(MacroDeck.PluginCredentialsPath, file.Name), pluginCredentialsDirectoryInfo.Name + "/" + file.Name);
+                        archive.CreateEntryFromFile(Path.Combine(MacroDeck.PluginCredentialsPath, file.Name), Path.Combine(pluginCredentialsDirectoryInfo.Name, file.Name));
                     }
                     DirectoryInfo iconPackDirectoryInfo = new DirectoryInfo(MacroDeck.IconPackDirectoryPath);
                     foreach (FileInfo file in iconPackDirectoryInfo.GetFiles("*"))
                     {
-                        archive.CreateEntryFromFile(Path.Combine(MacroDeck.IconPackDirectoryPath, file.Name), iconPackDirectoryInfo.Name + "/" + file.Name);
+                        archive.CreateEntryFromFile(Path.Combine(MacroDeck.IconPackDirectoryPath, file.Name), Path.Combine(iconPackDirectoryInfo.Name, file.Name));
                     }
 
+                    MacroDeckLogger.Info("Backup successfully created: " + backupFileName);
                     if (BackupSaved != null)
                     {
                         BackupSaved(null, EventArgs.Empty);
                     }
                 }
-            } catch (Exception ex) {
+            } catch (Exception ex)
+            {
+                MacroDeckLogger.Error("Backup creation failed: " + ex.Message + Environment.NewLine + ex.StackTrace);
                 if (BackupFailed != null)
                 {
                     BackupFailed(null, new BackupFailedEventArgs() { Message = ex.Message });
                 }
+            } finally
+            {
+                BackupInProgress = false;
             }
-            BackupInProgress = false;
         }
 
         public static void DeleteBackup(string fileName)
@@ -270,11 +278,15 @@ namespace SuchByte.MacroDeck.Backups
                 try
                 {
                     File.Delete(fileName);
+                    MacroDeckLogger.Info("Backup successfully deleted: " + fileName);
                     if (DeleteSuccess != null)
                     {
                         DeleteSuccess(null, EventArgs.Empty);
                     }
-                } catch { }
+                } catch (Exception ex)
+                {
+                    MacroDeckLogger.Error("Backup deletion failed: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                }
             }
         }
 

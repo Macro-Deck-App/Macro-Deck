@@ -300,5 +300,8 @@ namespace SuchByte.MacroDeck.Language
         public string SimulateOnLongPress = "Simulate \"On long press\"";
         public string SimulateOnLongPressRelease = "Simulate \"On long press release\"";
         public string HotkeyExecutesOnPress = "The hotkey executes the \"On press\" actions when pressed";
+        public string Important = "Important";
+        public string FirewallAlertInfo = "After starting Macro Deck, a dialog from Windows Defender Firewall will appear.\r\nPlease check all boxes (Private networks, Public networks and if it exists, Domain networks).\r\n\r\nIf this dialog does not appear and you still experience connection problems, please visit the wiki or the discord server for help. ";
+        public string GotIt = "Got it!";
     }
 }

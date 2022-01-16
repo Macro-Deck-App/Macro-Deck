@@ -14,7 +14,7 @@ using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
-    public partial class InitialSetupPluginItem : UserControl
+    public partial class InitialSetupPluginItem : RoundedUserControl
     {
         private JObject _jsonObject;
 

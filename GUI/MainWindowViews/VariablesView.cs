@@ -111,6 +111,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             Variable variable = sender as Variable;
             Task.Run(() =>
             {
+                if (this.IsDisposed) return;
                 this.Invoke(new Action(() => this.SuspendLayout()));
                 foreach (VariableItem variableItem in this.variablesPanel.Controls)
                 {

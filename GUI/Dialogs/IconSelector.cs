@@ -5,6 +5,7 @@ using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.JSON;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
@@ -15,6 +16,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -112,86 +114,198 @@ namespace SuchByte.MacroDeck.GUI
             {
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    bool gif = (Path.GetExtension(openFileDialog.FileNames[0]).ToLower() == "gif");
+                    bool gif = (Path.GetExtension(openFileDialog.FileNames.FirstOrDefault()).ToLower() == "gif");
                     using (var iconImportQuality = new IconImportQuality(gif))
                     {
                         if (iconImportQuality.ShowDialog() == DialogResult.OK)
                         {
+                            Task.Run(() => SpinnerDialog.SetVisisble(true, this));
                             List<Image> icons = new List<Image>();
 
-                            Cursor.Current = Cursors.WaitCursor;
-                            
-                            if (iconImportQuality.Pixels == -1)
+                            Task.Run(() =>
                             {
-                                foreach (var file in openFileDialog.FileNames)
+                                MacroDeckLogger.Info(String.Format("Starting importing {0} icon(s)", openFileDialog.FileNames.Length));
+                                if (iconImportQuality.Pixels == -1)
                                 {
-                                    try
+                                    foreach (var file in openFileDialog.FileNames)
                                     {
-                                        icons.Add(Image.FromFile(file));
-                                    } catch { }
-                                }
-                            } else
-                            {
-                                foreach (var file in openFileDialog.FileNames)
-                                {
-                                    try
-                                    {
-                                        using (var collection = new MagickImageCollection(new FileInfo(file)))
+                                        try
                                         {
-                                            collection.Coalesce();
-                                            foreach (var image in collection)
-                                            {
-                                                image.Resize(iconImportQuality.Pixels, iconImportQuality.Pixels);
-                                                image.Quality = 50;
-                                                image.Crop(iconImportQuality.Pixels, iconImportQuality.Pixels);
-                                            }
-                                            collection.Write(Path.Combine(MacroDeck.TempDirectoryPath, new FileInfo(file).Name + ".resized"));
-                                            byte[] imageBytes = File.ReadAllBytes(Path.Combine(MacroDeck.TempDirectoryPath, new FileInfo(file).Name + ".resized"));
-                                            using (var ms = new MemoryStream(imageBytes))
-                                            {
-                                                icons.Add(Image.FromStream(ms));
-
-                                            }
+                                            icons.Add(Image.FromFile(file));
+                                            MacroDeckLogger.Trace("Original image loaded");
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            MacroDeckLogger.Error("Error while loading original image: " + ex.Message + Environment.NewLine + ex.StackTrace);
                                         }
                                     }
-                                    catch { }
                                 }
-                                
-                            }
-                            IconPack iconPack = IconManager.GetIconPackByName(this.iconPacksBox.Text);
-                            List<Image> gifIcons = new List<Image>();
-                            gifIcons.AddRange(icons.FindAll(x => x.RawFormat.ToString().ToLower() == "gif").ToArray());
-                            bool convertGifToStatic = false;
-                            if (gifIcons.Count > 0)
-                            {
-                                using (var msgBox = new CustomControls.MessageBox())
+                                else
                                 {
-                                    convertGifToStatic = msgBox.ShowDialog(Language.LanguageManager.Strings.AnimatedGifImported, Language.LanguageManager.Strings.GenerateStaticIcon, MessageBoxButtons.YesNo) == DialogResult.Yes;
-                                }
-                            }
+                                    foreach (var file in openFileDialog.FileNames)
+                                    {
+                                        try
+                                        {
+                                            MacroDeckLogger.Trace("Using Magick to resize image");
+                                            using (var collection = new MagickImageCollection(new FileInfo(file)))
+                                            {
+                                                collection.Coalesce();
+                                                foreach (var image in collection)
+                                                {
+                                                    image.Resize(iconImportQuality.Pixels, iconImportQuality.Pixels);
+                                                    image.Crop(iconImportQuality.Pixels, iconImportQuality.Pixels);
+                                                }
+                                                
+                                                using (var ms = new MemoryStream())
+                                                {
+                                                    collection.Write(ms);
+                                                    icons.Add(Image.FromStream(ms));
+                                                }
 
-                            foreach (Image icon in icons)
-                            {
-                                IconManager.AddIconImage(iconPack, icon);
-                                if (convertGifToStatic)
+                                                /*collection.Write(Path.Combine(MacroDeck.TempDirectoryPath, new FileInfo(file).Name + ".resized"));
+                                                byte[] imageBytes = File.ReadAllBytes(Path.Combine(MacroDeck.TempDirectoryPath, new FileInfo(file).Name + ".resized"));
+                                                using (var ms = new MemoryStream(imageBytes))
+                                                {
+                                                    MacroDeckLogger.Trace("Loading resized image");
+                                                    MacroDeckLogger.Trace("Resized image loaded");
+                                                }*/
+                                            }
+                                            MacroDeckLogger.Trace("Image successfully resized");
+                                        }
+                                        catch (Exception ex) 
+                                        {
+                                            MacroDeckLogger.Error("Failed to resize image: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                                        }
+                                    }
+                                }
+                                IconPack iconPack = null;
+                                this.Invoke(new Action(() =>
                                 {
-                                    MemoryStream ms = new MemoryStream();
-                                    icon.Save(ms, ImageFormat.Png);
-                                    byte[] bmpBytes = ms.GetBuffer();
-                                    ms = new MemoryStream(bmpBytes);
-                                    Image iconStatic = Image.FromStream(ms);
+                                    iconPack = IconManager.GetIconPackByName(this.iconPacksBox.Text);
+                                }));
+                               
+                                if (iconPack == null)
+                                {
+                                    MacroDeckLogger.Error("Icon pack was null");
+                                    SpinnerDialog.SetVisisble(false, this);
+                                    return;
+                                }
+                                MacroDeckLogger.Info(String.Format("Adding {0} icons to {1}", icons.Count, iconPack.Name));
+                                List<Image> gifIcons = new List<Image>();
+                                gifIcons.AddRange(icons.FindAll(x => x.RawFormat.ToString().ToLower() == "gif").ToArray());
+                                bool convertGifToStatic = false;
+                                if (gifIcons.Count > 0)
+                                {
+                                    this.Invoke(new Action(() =>
+                                    {
+                                        using (var msgBox = new CustomControls.MessageBox())
+                                        {
+                                            convertGifToStatic = msgBox.ShowDialog(Language.LanguageManager.Strings.AnimatedGifImported, Language.LanguageManager.Strings.GenerateStaticIcon, MessageBoxButtons.YesNo) == DialogResult.Yes;
+                                        }
+                                    }));
+                                    MacroDeckLogger.Info("Convert gif to static? " + convertGifToStatic);
+                                }
+
+
+                                foreach (Image icon in icons)
+                                {
+                                    IconManager.AddIconImage(iconPack, icon, false);
+                                    if (convertGifToStatic)
+                                    {
+                                        using (var ms = new MemoryStream())
+                                        {
+                                            icon.Save(ms, ImageFormat.Png);
+                                            Image iconStatic = Image.FromStream(ms);
+                                            IconManager.AddIconImage(iconPack, iconStatic, false);
+                                        }
+                                    }
                                     icon.Dispose();
-                                    ms.Close();
-                                    ms.Dispose();
-                                    IconManager.AddIconImage(iconPack, iconStatic);
+                                    GC.Collect();
+                                    GC.WaitForPendingFinalizers();
+                                    GC.Collect();
                                 }
-                                icon.Dispose();
-                            }
 
-                            this.LoadIcons(iconPack, true);
-                            Cursor.Current = Cursors.Default;
+                                this.Invoke(new Action(() => this.LoadIcons(iconPack, true)));
+                                MacroDeckLogger.Info("Icons successfully imported");
+                                SpinnerDialog.SetVisisble(false, this);
+                                MacroDeckServer.SendAllIcons();
+                            });
                         }
                         
+                    }
+                }
+            }
+        }
+
+        private void BtnGiphy_Click(object sender, EventArgs e)
+        {
+            using (var giphySelector = new GiphySelector())
+            {
+                if (giphySelector.ShowDialog() == DialogResult.OK)
+                {
+                    using (var iconImportQuality = new IconImportQuality(true))
+                    {
+                        if (iconImportQuality.ShowDialog() == DialogResult.OK)
+                        {
+                            Image icon = null;
+                            if (giphySelector.DownloadedGifStream == null) return;
+                            if (iconImportQuality.Pixels == -1)
+                            {
+                                icon = Image.FromStream(giphySelector.DownloadedGifStream);
+                                MacroDeckLogger.Trace("Original GIPHY image loaded");
+                            }
+                            else
+                            {
+                                MacroDeckLogger.Trace("Using Magick to resize GIPHY image");
+                                giphySelector.DownloadedGifStream.Seek(0, SeekOrigin.Begin);
+                                using (var collection = new MagickImageCollection(giphySelector.DownloadedGifStream))
+                                {
+                                    collection.Coalesce();
+                                    foreach (var image in collection)
+                                    {
+                                        image.Resize(iconImportQuality.Pixels, iconImportQuality.Pixels);
+                                        image.Crop(iconImportQuality.Pixels, iconImportQuality.Pixels);
+                                    }
+                                    try
+                                    {
+                                        using (var ms = new MemoryStream())
+                                        {
+                                            collection.Write(ms);
+                                            icon = Image.FromStream(ms);
+                                        }
+                                        MacroDeckLogger.Trace("GIPHY Image successfully resized");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        MacroDeckLogger.Error("Failed to resize GIPHY image: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                                    }
+                                }
+                            }
+                            IconPack iconPack = IconManager.GetIconPackByName(this.iconPacksBox.Text);
+                            IconManager.AddIconImage(iconPack, icon, false);
+                            using (var msgBox = new CustomControls.MessageBox())
+                            {
+                                if (msgBox.ShowDialog(Language.LanguageManager.Strings.AnimatedGifImported, Language.LanguageManager.Strings.GenerateStaticIcon, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                                {
+                                    if (icon.RawFormat.ToString().ToLower() == "gif")
+                                    {
+                                        using (var ms = new MemoryStream())
+                                        {
+                                            icon.Save(ms, ImageFormat.Png);
+                                            Image iconStatic = Image.FromStream(ms);
+                                            IconManager.AddIconImage(iconPack, iconStatic, false);
+                                        }
+                                    }
+                                }
+                            }
+                            icon.Dispose();
+                            giphySelector.DownloadedGifStream.Close();
+                            giphySelector.DownloadedGifStream.Dispose();
+
+                            this.Invoke(new Action(() => this.LoadIcons(iconPack, true)));
+                            MacroDeckLogger.Info("GIPHY icon successfully imported");
+                            MacroDeckServer.SendAllIcons();
+                        }
                     }
                 }
             }
@@ -445,73 +559,7 @@ namespace SuchByte.MacroDeck.GUI
             }
         }
 
-        private void BtnGiphy_Click(object sender, EventArgs e)
-        {
-            using (var giphySelector = new GiphySelector())
-            {
-                if (giphySelector.ShowDialog() == DialogResult.OK)
-                {
-                    using (var iconImportQuality = new IconImportQuality(true))
-                    {
-                        if (iconImportQuality.ShowDialog() == DialogResult.OK)
-                        {
-                            Image icon = null;
-                            if (iconImportQuality.Pixels == -1)
-                            {
-                                icon = Image.FromFile(Path.GetFullPath(Path.Combine(MacroDeck.TempDirectoryPath, "giphy")));
-                            }
-                            else
-                            {
-                                using (var collection = new MagickImageCollection(new FileInfo(Path.GetFullPath(Path.Combine(MacroDeck.TempDirectoryPath, "giphy")))))
-                                {
-                                    Cursor.Current = Cursors.WaitCursor;
-                                    collection.Coalesce();
-                                    foreach (var image in collection)
-                                    {
-                                        image.Resize(iconImportQuality.Pixels, iconImportQuality.Pixels);
-                                        image.Quality = 50;
-                                        image.Crop(iconImportQuality.Pixels, iconImportQuality.Pixels);
-                                    }
-                                    try
-                                    {
-                                        collection.Write(new FileInfo(Path.GetFullPath(Path.Combine(MacroDeck.TempDirectoryPath, "giphy.resized"))));
-                                        byte[] imageBytes = File.ReadAllBytes(Path.Combine(MacroDeck.TempDirectoryPath, "giphy.resized"));
-                                        using (var ms = new MemoryStream(imageBytes))
-                                        {
-                                            icon = Image.FromStream(ms);
-                                        }
-                                    } catch { }
-                                    Cursor.Current = Cursors.Default;
-                                }
-                            }
-                            IconPack iconPack = IconManager.GetIconPackByName(this.iconPacksBox.Text);
-                            IconManager.AddIconImage(iconPack, icon);
-                            using (var msgBox = new CustomControls.MessageBox())
-                            {
-                                if (msgBox.ShowDialog(Language.LanguageManager.Strings.AnimatedGifImported, Language.LanguageManager.Strings.GenerateStaticIcon, MessageBoxButtons.YesNo) == DialogResult.Yes)
-                                {
-                                    if (icon.RawFormat.ToString().ToLower() == "gif")
-                                    {
-                                        MemoryStream ms = new MemoryStream();
-                                        icon.Save(ms, ImageFormat.Png);
-                                        byte[] bmpBytes = ms.GetBuffer();
-                                        ms = new MemoryStream(bmpBytes);
-                                        Image iconStatic = Image.FromStream(ms);
-                                        icon.Dispose();
-                                        ms.Close();
-                                        ms.Dispose();
-                                        IconManager.AddIconImage(iconPack, iconStatic);
-                                    }
-                                }
-                            }
-                            icon.Dispose();
-
-                            this.LoadIcons(iconPack, true);
-                        }
-                    }
-                }
-            }
-        }
+        
 
         private void btnDownloadIcon_Click(object sender, EventArgs e)
         {

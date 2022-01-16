@@ -2,6 +2,7 @@
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.InitialSetupPages;
 using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,7 +16,7 @@ using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI
 {
-    public partial class InitialSetup : GUI.CustomControls.DialogForm
+    public partial class InitialSetup : CustomControls.DialogForm
     {
 
         public Configuration.Configuration configuration;
@@ -41,7 +42,7 @@ namespace SuchByte.MacroDeck.GUI
                 Host_Port = 8191,
             };
 
-            Language.LanguageManager.LanguageChanged += OnLanguageChanged;
+            LanguageManager.LanguageChanged += OnLanguageChanged;
             this.SetSystemLanguage();
         }
 
@@ -171,7 +172,10 @@ namespace SuchByte.MacroDeck.GUI
                 }
 
             }
-            catch { }
+            catch (Exception ex)
+            {
+                MacroDeckLogger.Warning("Not able to set system language: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            }
         }
         private void InitialSetup_Load(object sender, EventArgs e)
         {

@@ -213,8 +213,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
                     if (msgBox.ShowDialog("", String.Format(Language.LanguageManager.Strings.XSuccessfullyUninstalled, this._jsonObject["name"].ToString()), MessageBoxButtons.YesNo) == DialogResult.Yes)
                     {
-                        Process.Start(MacroDeck.MainDirectoryPath + AppDomain.CurrentDomain.FriendlyName, "--show");
-                        Environment.Exit(0);
+                        MacroDeck.RestartMacroDeck("--show");
                     }
                 }
             }

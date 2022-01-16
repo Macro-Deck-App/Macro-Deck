@@ -33,6 +33,7 @@ namespace SuchByte.MacroDeck.GUI
             InitializeComponent();
             this.UpdateTranslation();
             this.btnCreateFolder.Text = Language.LanguageManager.Strings.Save;
+            this.folderName.Enabled = !folder.IsRootFolder;
         }
 
         private void UpdateTranslation()

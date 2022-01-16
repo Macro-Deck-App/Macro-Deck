@@ -1,4 +1,5 @@
 ﻿using SuchByte.MacroDeck.Events;
+using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Icons;
@@ -27,6 +28,14 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private Control _buttonClicked;
 
+        public MacroDeckFolder CurrentFolder
+        {
+            get
+            {
+                return this._currentFolder;
+            }
+        }
+
         public DeckView()
         {
             InitializeComponent();
@@ -43,7 +52,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         public void UpdateTranslation()
         {
-            MacroDeckLogger.Trace("Update translation for DeckView");
             this.Name = LanguageManager.Strings.DeckTitle;
             this.lblColumns.Text = LanguageManager.Strings.Columns;
             this.lblRows.Text = LanguageManager.Strings.Rows;
@@ -61,7 +69,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.actionButtonContextMenuItemSimulateRelease.Text = LanguageManager.Strings.SimulateOnRelease;
             this.actionButtonContextMenuItemSimulateLongPress.Text = LanguageManager.Strings.SimulateOnLongPress;
             this.actionButtonContextMenuItemSimulateLongPressRelease.Text = LanguageManager.Strings.SimulateOnLongPressRelease;
-
         }
 
 
@@ -382,6 +389,19 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     {
                         pluginAction.SetActionButton(newTargetButton);
                     }
+                    foreach (PluginAction pluginAction in newTargetButton.ActionsRelease)
+                    {
+                        pluginAction.SetActionButton(newTargetButton);
+                    }
+                    foreach (PluginAction pluginAction in newTargetButton.ActionsLongPress)
+                    {
+                        pluginAction.SetActionButton(newTargetButton);
+                    }
+                    foreach (PluginAction pluginAction in newTargetButton.ActionsLongPressRelease)
+                    {
+                        pluginAction.SetActionButton(newTargetButton);
+                    }
+
                     if (newTargetButton.EventListeners == null)
                     {
                         newTargetButton.EventListeners = new List<EventListener>();
@@ -491,10 +511,16 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         }
 
+        public void SetFolder(Folders.MacroDeckFolder macroDeckFolder)
+        {
+            if (macroDeckFolder == null || !ProfileManager.CurrentProfile.Folders.Contains(macroDeckFolder)) return;
+            this._currentFolder = macroDeckFolder;
+            this.UpdateButtons();
+        }
+
         private void FoldersView_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            this._currentFolder = ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, ProfileManager.CurrentProfile);
-            this.UpdateButtons();
+            this.SetFolder(ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, ProfileManager.CurrentProfile));
         }
 
         private void FoldersView_MouseDown(object sender, MouseEventArgs e)
@@ -630,6 +656,18 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             {
                 pluginAction.SetActionButton(actionButtonNew);
             }
+            foreach (PluginAction pluginAction in actionButtonNew.ActionsRelease)
+            {
+                pluginAction.SetActionButton(actionButtonNew);
+            }
+            foreach (PluginAction pluginAction in actionButtonNew.ActionsLongPress)
+            {
+                pluginAction.SetActionButton(actionButtonNew);
+            }
+            foreach (PluginAction pluginAction in actionButtonNew.ActionsLongPressRelease)
+            {
+                pluginAction.SetActionButton(actionButtonNew);
+            }
 
             foreach (var eventListener in actionButtonNew.EventListeners)
             {
@@ -647,6 +685,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
             ProfileManager.Save();
             this.UpdateButtons();
+            this.UpdateButtonIcon(actionButtonNew);
             MacroDeckServer.UpdateFolder(this._currentFolder);
 
             GC.Collect();

@@ -12,6 +12,7 @@ using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Utils;
 using SuchByte.MacroDeck.Variables;
 using System;
 using System.Collections.Generic;
@@ -44,6 +45,7 @@ namespace SuchByte.MacroDeck
         internal static bool PortableMode = false;
         // Start parameters end
 
+        public static readonly string ExecutablePath = Process.GetCurrentProcess().MainModule.FileName;
         internal static readonly string MainDirectoryPath = AppDomain.CurrentDomain.BaseDirectory;
         public static string UserDirectoryPath;
         public static string PluginsDirectoryPath;
@@ -86,7 +88,7 @@ namespace SuchByte.MacroDeck
 
         public static event EventHandler OnMainWindowLoad;
 
-        private static Configuration.Configuration _configuration;
+        private static Configuration.Configuration _configuration = new Configuration.Configuration();
 
         public static Configuration.Configuration Configuration { get { return _configuration; } }
 
@@ -100,7 +102,21 @@ namespace SuchByte.MacroDeck
             ContextMenuStrip = _trayIconContextMenu
         };
 
-        private static GUI.CustomControls.Form mainWindow;
+        private static MainWindow mainWindow;
+
+        public static MainWindow MainWindow
+        {
+            get
+            {
+                if (mainWindow != null && !mainWindow.IsDisposed && mainWindow.Visible)
+                {
+                    return mainWindow;
+                }
+                return null;
+            }
+        }
+
+        public static string[] StartParameters;
 
 
         [STAThread]
@@ -123,6 +139,7 @@ namespace SuchByte.MacroDeck
 
             int port = -1;
             bool show = false;
+            StartParameters = args;
             for (int i = 0; i < args.Length; i++)
             {
                 switch (args[i].ToLower())
@@ -155,6 +172,9 @@ namespace SuchByte.MacroDeck
                             MacroDeckLogger.LogLevel = (LogLevel)logLevel;
                         }
                         break;
+                    case "--debug-console":
+                        MacroDeckLogger.StartDebugConsole();
+                        break;
                 }
             }
 
@@ -163,6 +183,7 @@ namespace SuchByte.MacroDeck
 
             MacroDeckLogger.Info(Environment.NewLine + "==========================================");
             MacroDeckLogger.Info("Starting Macro Deck version " + VersionString + (args.Length > 0 ? " with parameters: " + string.Join(" ", args) : ""));
+            MacroDeckLogger.Info("Executable: " + ExecutablePath);
             MacroDeckLogger.Info("OS: " + Utils.OperatingSystemInformation.GetWindowsVersionName());
 
             // Check if Macro Deck is already running
@@ -310,16 +331,22 @@ namespace SuchByte.MacroDeck
                         _configuration = initialSetup.configuration;
                         SaveConfiguration();
                         MacroDeckLogger.Info("Configuration saved. Restarting Macro Deck...");
-                        Process.Start(Path.Combine(MacroDeck.MainDirectoryPath, AppDomain.CurrentDomain.FriendlyName), "--show");
+                        using (var defenderFirewallAlertInfo = new DefenderFirewallAlert())
+                        {
+                            defenderFirewallAlertInfo.ShowDialog();
+                        }
+                        RestartMacroDeck("--show");
+                    } else
+                    {
+                        Environment.Exit(0);
                     }
-                    Environment.Exit(0);
                 }
             }
             else
             {
                 // Read config
                 _configuration = JsonConvert.DeserializeObject<Configuration.Configuration>(File.ReadAllText(ConfigFilePath));
-                MacroDeckLogger.Info("Successfully read configuration file.");
+                MacroDeckLogger.Info("Successfully read configuration file");
                 Start(show, port);
             }
             
@@ -365,8 +392,6 @@ namespace SuchByte.MacroDeck
 
             ProfileManager.AddVariableChangedListener();
             ProfileManager.AddWindowFocusChangedListener();
-
-
 
             MacroDeckLogger.Info("Macro Deck started successfully");
 
@@ -425,7 +450,20 @@ namespace SuchByte.MacroDeck
 
         private static void RestartItemClick(object sender, EventArgs e)
         {
-            Process.Start(MacroDeck.MainDirectoryPath + AppDomain.CurrentDomain.FriendlyName, (mainWindow != null && !mainWindow.IsDisposed ? "--show" : ""));
+            RestartMacroDeck();
+        }
+
+        public static void RestartMacroDeck(string parameters = "")
+        {
+            var p = new Process
+            {
+                StartInfo = new ProcessStartInfo(ExecutablePath)
+                {
+                    UseShellExecute = true,
+                    Arguments = (mainWindow != null && !mainWindow.IsDisposed ? "--show " : "") + parameters
+                }
+            };
+            p.Start();
             Environment.Exit(0);
         }
 
@@ -455,6 +493,7 @@ namespace SuchByte.MacroDeck
             mainWindow.Load += MainWindowLoadEvent;
             mainWindow.FormClosed += MainWindow_FormClosed;
             mainWindow.Show();
+            MacroDeckLogger.Trace("MainWindow created");
         }
 
         private static void MainWindow_FormClosed(object sender, FormClosedEventArgs e)
@@ -462,6 +501,7 @@ namespace SuchByte.MacroDeck
             mainWindow.Load -= MainWindowLoadEvent;
             mainWindow.FormClosed -= MainWindow_FormClosed;
             mainWindow.Dispose();
+            MacroDeckLogger.Trace("MainWindow disposed");
         }
 
         private static void MainWindowLoadEvent(object sender, EventArgs e)

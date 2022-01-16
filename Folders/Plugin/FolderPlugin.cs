@@ -2,6 +2,7 @@
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
@@ -35,7 +36,22 @@ namespace SuchByte.MacroDeck.Folders.Plugin
 
         public override void Trigger(string clientId, ActionButton.ActionButton actionButton)
         {
-            MacroDeckServer.SetFolder(MacroDeckServer.GetMacroDeckClient(clientId), ProfileManager.FindFolderById(this.Configuration, MacroDeckServer.GetMacroDeckClient(clientId).Profile));
+            MacroDeckLogger.Trace("Switch folder triggered by " + clientId);
+            switch (clientId)
+            {
+                // ClientID -1 or "" = Macro Deck software itself
+                case "":
+                case "-1":
+                    if (MacroDeck.MainWindow != null && MacroDeck.MainWindow.DeckView != null)
+                    {
+                        MacroDeck.MainWindow.DeckView.SetFolder(ProfileManager.FindFolderById(this.Configuration, ProfileManager.CurrentProfile));
+                    }
+                    break;
+                // ClientId != -1 = Connected device
+                default:
+                    MacroDeckServer.SetFolder(MacroDeckServer.GetMacroDeckClient(clientId), ProfileManager.FindFolderById(this.Configuration, MacroDeckServer.GetMacroDeckClient(clientId).Profile));
+                    break;
+            }
         }
         public override ActionConfigControl GetActionConfigControl(ActionConfigurator actionConfigurator)
         {
@@ -51,9 +67,24 @@ namespace SuchByte.MacroDeck.Folders.Plugin
         {
             try
             {
-                MacroDeckClient macroDeckClient = MacroDeckServer.GetMacroDeckClient(clientId);
-                MacroDeckFolder parentFolder = ProfileManager.FindParentFolder(macroDeckClient.Folder, macroDeckClient.Profile);
-                MacroDeckServer.SetFolder(macroDeckClient, parentFolder);
+                MacroDeckLogger.Trace("Go to parent folder triggered by " + clientId);
+                switch (clientId)
+                {
+                    // ClientID -1 or "" = Macro Deck software itself
+                    case "":
+                    case "-1":
+                        if (MacroDeck.MainWindow != null && MacroDeck.MainWindow.DeckView != null)
+                        {
+                            MacroDeck.MainWindow.DeckView.SetFolder(ProfileManager.FindParentFolder(MacroDeck.MainWindow.DeckView.CurrentFolder, ProfileManager.CurrentProfile));
+                        }
+                        break;
+                    // ClientId != -1 = Connected device
+                    default:
+                        MacroDeckClient macroDeckClient = MacroDeckServer.GetMacroDeckClient(clientId);
+                        MacroDeckFolder parentFolder = ProfileManager.FindParentFolder(macroDeckClient.Folder, macroDeckClient.Profile);
+                        MacroDeckServer.SetFolder(macroDeckClient, parentFolder);
+                        break;
+                }
             } catch { }
         }
         public override ActionConfigControl GetActionConfigControl(ActionConfigurator actionConfigurator)
@@ -70,9 +101,25 @@ namespace SuchByte.MacroDeck.Folders.Plugin
         {
             try
             {
-                MacroDeckClient macroDeckClient = MacroDeckServer.GetMacroDeckClient(clientId);
-                MacroDeckFolder rootFolder = macroDeckClient.Profile.Folders.Find(folder => folder.IsRootFolder);
-                MacroDeckServer.SetFolder(macroDeckClient, rootFolder);
+                MacroDeckLogger.Trace("Go to root folder triggered by " + clientId);
+                switch (clientId)
+                {
+                    // ClientID -1 or "" = Macro Deck software itself
+                    case "":
+                    case "-1":
+                        if (MacroDeck.MainWindow != null && MacroDeck.MainWindow.DeckView != null)
+                        {
+                            MacroDeck.MainWindow.DeckView.SetFolder(ProfileManager.CurrentProfile.Folders.Find(folder => folder.IsRootFolder));
+                        }
+                        break;
+                    // ClientId != -1 = Connected device
+                    default:
+                        MacroDeckClient macroDeckClient = MacroDeckServer.GetMacroDeckClient(clientId);
+                        MacroDeckFolder rootFolder = macroDeckClient.Profile.Folders.Find(folder => folder.IsRootFolder);
+                        MacroDeckServer.SetFolder(macroDeckClient, rootFolder);
+                        break;
+                }
+                
             }
             catch { }
         }

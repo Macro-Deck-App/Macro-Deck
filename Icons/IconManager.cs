@@ -28,6 +28,7 @@ namespace SuchByte.MacroDeck.Icons
 
         public static void LoadIconPacks()
         {
+            MacroDeckLogger.Info("Loading icon packs...");
             IconPacks.Clear();
             IconPacksUpdateAvailable.Clear();
 
@@ -78,11 +79,15 @@ namespace SuchByte.MacroDeck.Icons
                     }
 
                     db.Close();
-                } catch { }
+                } catch (Exception ex) 
+                {
+                    MacroDeckLogger.Error(String.Format("Failed to load icon pack {0}: ", databasePath) + ex.Message + Environment.NewLine + ex.StackTrace);
+                }
             }
 
-            if (IconPacks.Count == 0)
+            if (IconPacks.FindAll(x => x.PackageManagerManaged == false && x.Hidden == false).Count == 0)
             {
+                MacroDeckLogger.Info("No icon packs found. Creating a new one");
                 IconPack newIconPack = new IconPack
                 {
                     Author = Environment.UserName,
@@ -94,12 +99,15 @@ namespace SuchByte.MacroDeck.Icons
                 AddIconImage(newIconPack, Resources.Icon);
             }
 
+            MacroDeckLogger.Info(String.Format("Loaded {0} icon pack(s)", IconPacks.Count));
+
             if (IconPacksLoaded != null)
             {
                 IconPacksLoaded(IconPacks, EventArgs.Empty);
             }
         }
 
+        [Obsolete]
         public static IconPack AddFromFile(string path)
         {
             IconPack iconPack = null;
@@ -192,8 +200,10 @@ namespace SuchByte.MacroDeck.Icons
                 Error = (sender, args) => { args.ErrorContext.Handled = true; }
             });
 
-            IconPackJson iconPackJson = new IconPackJson();
-            iconPackJson.JsonString = jsonString;
+            IconPackJson iconPackJson = new IconPackJson
+            {
+                JsonString = jsonString
+            };
 
             db.InsertOrReplace(iconPackJson);
             db.Close();
@@ -202,8 +212,11 @@ namespace SuchByte.MacroDeck.Icons
 
         public static void CreateIconPack(string name, string author, string version)
         {
-            IconPack iconPack = new IconPack();
-            iconPack.Name = name.Replace(".", ""); ;
+            IconPack iconPack = new IconPack
+            {
+                Name = name.Replace(".", "")
+            };
+            ;
             iconPack.Author = author;
             iconPack.Version = version;
             iconPack.Icons = new List<Icon>();
@@ -224,15 +237,20 @@ namespace SuchByte.MacroDeck.Icons
 
         public static void DeleteIconPack(IconPack iconPack)
         {
+            MacroDeckLogger.Info("Deleting icon pack " + iconPack.Name);
             IconPacks.Remove(iconPack);
             
             try
             {
                 File.Delete(Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.Name + ".iconpack"));
             }
-            catch { }
-            if (IconPacks.Count == 0)
+            catch (Exception ex)
             {
+                MacroDeckLogger.Error(String.Format("Failed to delete icon pack {0}: ", iconPack.Name) + ex.Message + Environment.NewLine + ex.StackTrace);
+            }
+            if (IconPacks.FindAll(x => x.PackageManagerManaged == false && x.Hidden == false).Count == 0)
+            {
+                MacroDeckLogger.Info("No icon packs found. Creating a new one");
                 IconPack newIconPack = new IconPack
                 {
                     Author = Environment.UserName,
@@ -243,6 +261,7 @@ namespace SuchByte.MacroDeck.Icons
                 IconPacks.Add(newIconPack);
                 AddIconImage(newIconPack, Resources.Icon);
             }
+            MacroDeckLogger.Info("Icon pack successfully deleted");
             MacroDeckServer.SendAllIcons();
         }
 
@@ -257,7 +276,7 @@ namespace SuchByte.MacroDeck.Icons
             return iconPack.Icons.Find(icon => icon.IconId.Equals(iconId));
         }
 
-        public static Icon AddIconImage(IconPack iconPack, Image image)
+        public static Icon AddIconImage(IconPack iconPack, Image image, bool sendIconsToClients = true)
         {
             try
             {
@@ -270,12 +289,15 @@ namespace SuchByte.MacroDeck.Icons
                 };
                 iconPack.Icons.Add(icon);
                 SaveIconPack(iconPack);
-                MacroDeckServer.SendAllIcons();
+                if (sendIconsToClients)
+                {
+                    MacroDeckServer.SendAllIcons();
+                }
                 return icon;
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error("Failed to add icon to icon pack: " + ex.Message);
+                MacroDeckLogger.Error("Failed to add icon to icon pack: " + ex.Message + Environment.NewLine + ex.StackTrace);
             }
             return null;
         }
@@ -284,7 +306,9 @@ namespace SuchByte.MacroDeck.Icons
         {
             if (!iconPack.Icons.Contains(icon)) return;
             IconPacks[IconPacks.IndexOf(iconPack)].Icons.Remove(icon);
-            
+
+            MacroDeckLogger.Info("Deleted icon from " + iconPack.Name);
+
             SaveIconPack(iconPack);
             MacroDeckServer.SendAllIcons();
         }

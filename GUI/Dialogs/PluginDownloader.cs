@@ -45,6 +45,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             foreach (JObject pluginObject in plugins)
             {
                 this.statusBox.Text += "Downloading " + pluginObject["name"] + " version " + pluginObject["version"] + Environment.NewLine;
+                MacroDeckLogger.Info("Downloading " + pluginObject["name"] + " version " + pluginObject["version"]);
 
                 try
                 {
@@ -63,8 +64,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                         
                     }
 
-                }
-                catch { }
+                } catch {}
                 
                 using (var webClient = new WebClient())
                 {
@@ -81,7 +81,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                             break;
                     }
 
-                    webClient.DownloadFileAsync(new Uri(url), MacroDeck.TempDirectoryPath + pluginObject["filename"]);
+                    webClient.DownloadFileAsync(new Uri(url), Path.Combine(MacroDeck.TempDirectoryPath, pluginObject["filename"].ToString()));
                 }
             }
         }
@@ -90,66 +90,63 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         {
             Action<object, AsyncCompletedEventArgs> action = (sender, e) =>
             {
+                MacroDeckLogger.Info("Initial setup packages download completed");
                 if (e.Error != null)
                 {
                     MacroDeckLogger.Error("Plugin download failed: " + e.Error.Message);
                 }
 
-                
-
                 this.statusBox.Text += "Finished download of " + jsonObject["name"] + Environment.NewLine;
 
-                try
+                if (!File.Exists(Path.Combine(MacroDeck.TempDirectoryPath, jsonObject["filename"].ToString())))
                 {
-                    if (!File.Exists(MacroDeck.TempDirectoryPath + jsonObject["filename"]))
-                    {
-                        this.statusBox.Text += "Download of " + jsonObject["name"] + " failed" + Environment.NewLine;
+                    this.statusBox.Text += "Download of " + jsonObject["name"] + " failed" + Environment.NewLine;
+                    MacroDeckLogger.Error("Initial setup downloaded package not found");
+                    return;
+                }
 
-                        return;
-                    }
-
-                    using (var stream = File.OpenRead(MacroDeck.TempDirectoryPath + jsonObject["filename"]))
+                using (var stream = File.OpenRead(Path.Combine(MacroDeck.TempDirectoryPath, jsonObject["filename"].ToString())))
+                {
+                    using (var md5 = MD5.Create())
                     {
-                        using (var md5 = MD5.Create())
+                        var hash = md5.ComputeHash(stream);
+                        var checksumString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                        if (!checksumString.Equals(jsonObject["md5"].ToString()))
                         {
-                            var hash = md5.ComputeHash(stream);
-                            var checksumString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                            if (!checksumString.Equals(jsonObject["md5"].ToString()))
-                            {
-                                this.statusBox.Text += "The md5 checksum of the downloaded file of " + jsonObject["name"] + " does not match the md5 checksum on the server. Installation aborted!" + Environment.NewLine;
-                                return;
-                            }
+                            this.statusBox.Text += "The md5 checksum of the downloaded file of " + jsonObject["name"] + " does not match the md5 checksum on the server. Installation aborted!" + Environment.NewLine;
+                            MacroDeckLogger.Error("md5 checksum of initial setup downloaded package not matching!" + Environment.NewLine +
+                                                    "md5 checksum on server: " + jsonObject["md5"].ToString() + Environment.NewLine +
+                                                    "md5 checksum of downloaded file: " + checksumString);
+                            return;
                         }
                     }
+                }
 
-                    this.statusBox.Text += "Start installation of " + jsonObject["name"] + " version " + jsonObject["version"] + Environment.NewLine;
-                    if (jsonObject["type"].ToString() == "plugin")
-                    {
+                this.statusBox.Text += "Start installation of " + jsonObject["name"] + " version " + jsonObject["version"] + Environment.NewLine;
+                MacroDeckLogger.Info("Start installation of " + jsonObject["name"] + " version " + jsonObject["version"]);
+                switch (jsonObject["type"].ToString())
+                {
+                    case "plugin":
                         try
                         {
-                            /*if (!Directory.Exists(MacroDeck.PluginsDirectoryPath))
-                            {
-                                Directory.CreateDirectory(MacroDeck.PluginsDirectoryPath);
-                            }*/
-                            var extractedDirectory = MacroDeck.TempDirectoryPath + jsonObject["uuid"];
-                            ZipFile.ExtractToDirectory(MacroDeck.TempDirectoryPath + jsonObject["filename"], extractedDirectory, true);
+                            var extractedDirectory = Path.Combine(MacroDeck.TempDirectoryPath, jsonObject["uuid"].ToString());
+                            ZipFile.ExtractToDirectory(Path.Combine(MacroDeck.TempDirectoryPath, jsonObject["filename"].ToString()), extractedDirectory, true);
 
                             PluginManager.InstallPlugin(extractedDirectory, jsonObject["uuid"].ToString(), false);
-
-                            /*foreach (var dll in Directory.GetFiles(MacroDeck.TempDirectoryPath + jsonObject["name"]))
-                            {
-                                PluginManager.InstallPlugin(Path.GetFullPath(dll), true);
-                            }*/
-                        } catch { }
-                    } else if (jsonObject["type"].ToString() == "icon-pack")
-                    {                       
+                        }
+                        catch (Exception ex)
+                        {
+                            MacroDeckLogger.Error("Error while installing plugin after initial setup: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                        }
+                        break;
+                    case "icon-pack":
                         try
                         {
                             if (!Directory.Exists(MacroDeck.IconPackDirectoryPath))
                             {
                                 Directory.CreateDirectory(MacroDeck.IconPackDirectoryPath);
                             }
-                            File.Copy(MacroDeck.TempDirectoryPath + jsonObject["filename"], MacroDeck.IconPackDirectoryPath + jsonObject["name"] + ".db", true);
+                            File.Copy(Path.Combine(MacroDeck.TempDirectoryPath, jsonObject["filename"].ToString()), Path.Combine(MacroDeck.IconPackDirectoryPath, jsonObject["name"].ToString() + ".db"), true);
                             IconManager.LoadIconPacks();
                             if (IconManager.GetIconPackByName(jsonObject["name"].ToString()) != null)
                             {
@@ -158,33 +155,35 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                                 IconManager.SaveIconPack(iconPack);
                             }
 
-                        } catch { }
-                    }
-
-                    try
-                    {
-                        if (Directory.Exists(MacroDeck.TempDirectoryPath + jsonObject["name"]))
-                        {
-                            Directory.Delete(MacroDeck.TempDirectoryPath + jsonObject["name"], true);
                         }
-                        if (File.Exists(MacroDeck.TempDirectoryPath + jsonObject["filename"]))
+                        catch (Exception ex)
                         {
-                            File.Delete(MacroDeck.TempDirectoryPath + jsonObject["filename"]);
+                            MacroDeckLogger.Error("Error while installing icon pack after initial setup: " + ex.Message + Environment.NewLine + ex.StackTrace);
                         }
-                    }
-                    catch { }
-                    this.statusBox.Text += "Installation of " + jsonObject["name"] + " version " + jsonObject["version"] + " completed" + Environment.NewLine;
+                        break;
                 }
-                catch
+
+                try
                 {
-
+                    if (Directory.Exists(Path.Combine(MacroDeck.TempDirectoryPath, jsonObject["name"].ToString())))
+                    {
+                        Directory.Delete(Path.Combine(MacroDeck.TempDirectoryPath, jsonObject["name"].ToString()), true);
+                    }
+                    if (File.Exists(Path.Combine(MacroDeck.TempDirectoryPath, jsonObject["filename"].ToString())))
+                    {
+                        File.Delete(Path.Combine(MacroDeck.TempDirectoryPath, jsonObject["filename"].ToString()));
+                    }
                 }
+                catch { }
+                this.statusBox.Text += "Installation of " + jsonObject["name"] + " version " + jsonObject["version"] + " completed" + Environment.NewLine;
+                MacroDeckLogger.Info("Installation of " + jsonObject["name"] + " version " + jsonObject["version"] + " completed");
 
                 this._pluginsInstalled++;
                 this.totalProgress.Value = this._pluginsInstalled;
                 if (this._pluginsInstalled == this._pluginsToInstall)
                 {
                     this.statusBox.Text += Environment.NewLine + "*** Installation of " + _pluginsToInstall + " packages done ***" + Environment.NewLine;
+                    MacroDeckLogger.Info("*** Installation of " + _pluginsToInstall + " packages done ***");
                     GC.Collect();
                     GC.WaitForPendingFinalizers();
                     GC.Collect();

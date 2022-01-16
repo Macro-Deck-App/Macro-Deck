@@ -13,7 +13,6 @@ namespace SuchByte.MacroDeck.ActionButton
         private string _labelBase64 = "";
         private string _labelHex128_64Base64 = "";
 
-        [JsonIgnore]
         public string LabelBase64
         {
             get { return _labelBase64; }

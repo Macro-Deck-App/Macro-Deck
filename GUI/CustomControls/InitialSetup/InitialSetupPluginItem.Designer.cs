@@ -66,9 +66,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             this.checkInstall.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.checkInstall.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.checkInstall.Location = new System.Drawing.Point(3, 0);
+            this.checkInstall.Location = new System.Drawing.Point(3, 4);
             this.checkInstall.Name = "checkInstall";
-            this.checkInstall.Size = new System.Drawing.Size(25, 50);
+            this.checkInstall.Size = new System.Drawing.Size(25, 42);
             this.checkInstall.TabIndex = 5;
             this.checkInstall.UseVisualStyleBackColor = true;
             // 
@@ -76,8 +76,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
             this.Controls.Add(this.checkInstall);
             this.Controls.Add(this.lblDescription);
             this.Controls.Add(this.icon);
@@ -85,7 +84,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ForeColor = System.Drawing.Color.White;
             this.Name = "InitialSetupPluginItem";
-            this.Size = new System.Drawing.Size(409, 50);
+            this.Size = new System.Drawing.Size(411, 52);
             ((System.ComponentModel.ISupportInitialize)(this.icon)).EndInit();
             this.ResumeLayout(false);
 

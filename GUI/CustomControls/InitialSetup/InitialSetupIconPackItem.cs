@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
-    public partial class InitialSetupIconPackItem : UserControl
+    public partial class InitialSetupIconPackItem : RoundedUserControl
     {
         private JObject _jsonObject;
 

@@ -15,6 +15,7 @@ namespace SuchByte.MacroDeck.Utils
         {
             TypeNameHandling = TypeNameHandling.Auto,
             NullValueHandling = NullValueHandling.Ignore,
+            
             Error = (sender, args) => { args.ErrorContext.Handled = true; }
         };
 

@@ -340,6 +340,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblTitle.Size = new System.Drawing.Size(305, 27);
             this.lblTitle.TabIndex = 14;
             this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblTitle.Click += new System.EventHandler(this.lblTitle_Click);
             // 
             // navigation
             // 

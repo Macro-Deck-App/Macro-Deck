@@ -1,15 +1,33 @@
-﻿using SuchByte.MacroDeck.Plugins;
+﻿using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.Plugins;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SuchByte.MacroDeck.Logging
 {
     public static class MacroDeckLogger
     {
         private static LogLevel _logLevel = LogLevel.Info;
+
+        private static DebugConsole _debugConsole;
+
+
+        public static void StartDebugConsole()
+        {
+            if (_debugConsole != null && !_debugConsole.IsDisposed)
+            {
+                _debugConsole.Dispose();
+                _debugConsole.Close();
+            }
+
+            _debugConsole = new DebugConsole();
+            _debugConsole.Show();
+        }
 
         /// <summary>
         /// Level of what should be logged.
@@ -113,16 +131,34 @@ namespace SuchByte.MacroDeck.Logging
         private static void Log(string sender, LogLevel logLevel, string message)
         {
             if ((!Debugger.IsAttached && !FileLogging) || logLevel < LogLevel) return;
+
             var formattedLog = string.Format("{0} [{1}] [{2}] >> {3}", DateTime.Now.ToString("T"), sender, logLevel.ToString(), message);
             if (Debugger.IsAttached)
             {
                 Debug.WriteLine(formattedLog);
             }
+            if (_debugConsole != null && !_debugConsole.IsDisposed && _debugConsole.Visible)
+            {
+                Color logColor = Color.White;
+                switch (logLevel)
+                {
+                    case LogLevel.Info:
+                        logColor = Color.Aqua;
+                        break;
+                    case LogLevel.Warning:
+                        logColor = Color.Orange;
+                        break;
+                    case LogLevel.Error:
+                        logColor = Color.Red;
+                        break;
+                }
+                _debugConsole.AppendText(formattedLog + Environment.NewLine, sender, logColor);
+            }
             if (FileLogging)
             {
                 try
                 {
-                    File.AppendAllText(CurrentFilename, "\r\n" + formattedLog);
+                    File.AppendAllText(CurrentFilename, Environment.NewLine + formattedLog);
                 }
                 catch (Exception ex)
                 {
