@@ -2,6 +2,7 @@
 using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.JSON;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using System;
 using System.Collections.Concurrent;
@@ -88,8 +89,11 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                 ButtonRadius = macroDeckClient.Profile.ButtonRadius,
                 ButtonBackground = macroDeckClient.Profile.ButtonBackground,
                 Brightness = DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).Configuration.Brightness,
+                AutoConnect = DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).Configuration.AutoConnect,
+                WakeLock = Enum.GetName(typeof(WakeLockMethod), DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).Configuration.WakeLockMethod),
                 SupportButtonReleaseLongPress = true,
             });
+            MacroDeckLogger.Trace(GetType(), configurationObject.ToString());
             MacroDeckServer.Send(macroDeckClient.SocketConnection, configurationObject);
         }
 

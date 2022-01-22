@@ -63,7 +63,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // btnClear
             // 
             this.btnClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnClear.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnClear.BorderRadius = 8;
             this.btnClear.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnClear.FlatAppearance.BorderSize = 0;
@@ -80,12 +79,12 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnClear.TabIndex = 2;
             this.btnClear.Text = "Clear";
             this.btnClear.UseVisualStyleBackColor = false;
+            this.btnClear.UseWindowsAccentColor = true;
             this.btnClear.Click += new System.EventHandler(this.BtnClear_Click);
             // 
             // btnRestartMacroDeck
             // 
             this.btnRestartMacroDeck.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnRestartMacroDeck.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnRestartMacroDeck.BorderRadius = 8;
             this.btnRestartMacroDeck.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnRestartMacroDeck.FlatAppearance.BorderSize = 0;
@@ -102,12 +101,12 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnRestartMacroDeck.TabIndex = 3;
             this.btnRestartMacroDeck.Text = "Restart Macro Deck";
             this.btnRestartMacroDeck.UseVisualStyleBackColor = false;
+            this.btnRestartMacroDeck.UseWindowsAccentColor = true;
             this.btnRestartMacroDeck.Click += new System.EventHandler(this.BtnRestartMacroDeck_Click);
             // 
             // btnExit
             // 
             this.btnExit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnExit.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnExit.BorderRadius = 8;
             this.btnExit.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnExit.FlatAppearance.BorderSize = 0;
@@ -124,12 +123,12 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnExit.TabIndex = 4;
             this.btnExit.Text = "Exit Macro Deck";
             this.btnExit.UseVisualStyleBackColor = false;
+            this.btnExit.UseWindowsAccentColor = true;
             this.btnExit.Click += new System.EventHandler(this.BtnExit_Click);
             // 
             // btnOpenUser
             // 
             this.btnOpenUser.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnOpenUser.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnOpenUser.BorderRadius = 8;
             this.btnOpenUser.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnOpenUser.FlatAppearance.BorderSize = 0;
@@ -146,6 +145,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOpenUser.TabIndex = 5;
             this.btnOpenUser.Text = "Open user directory";
             this.btnOpenUser.UseVisualStyleBackColor = false;
+            this.btnOpenUser.UseWindowsAccentColor = true;
             this.btnOpenUser.Click += new System.EventHandler(this.BtnOpenUser_Click);
             // 
             // label1
@@ -177,7 +177,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // btnExportOutput
             // 
             this.btnExportOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnExportOutput.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnExportOutput.BorderRadius = 8;
             this.btnExportOutput.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnExportOutput.FlatAppearance.BorderSize = 0;
@@ -194,6 +193,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnExportOutput.TabIndex = 8;
             this.btnExportOutput.Text = "Export output";
             this.btnExportOutput.UseVisualStyleBackColor = false;
+            this.btnExportOutput.UseWindowsAccentColor = true;
             this.btnExportOutput.Click += new System.EventHandler(this.BtnExportOutput_Click);
             // 
             // label3
@@ -232,7 +232,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // btnAddFilter
             // 
             this.btnAddFilter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAddFilter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnAddFilter.BorderRadius = 8;
             this.btnAddFilter.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnAddFilter.FlatAppearance.BorderSize = 0;
@@ -248,6 +247,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnAddFilter.Size = new System.Drawing.Size(25, 25);
             this.btnAddFilter.TabIndex = 11;
             this.btnAddFilter.UseVisualStyleBackColor = false;
+            this.btnAddFilter.UseWindowsAccentColor = true;
             this.btnAddFilter.Click += new System.EventHandler(this.BtnAddFilter_Click);
             // 
             // filtersList
@@ -261,7 +261,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // btnRemoveFilters
             // 
             this.btnRemoveFilters.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnRemoveFilters.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnRemoveFilters.BorderRadius = 8;
             this.btnRemoveFilters.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnRemoveFilters.FlatAppearance.BorderSize = 0;
@@ -277,6 +276,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnRemoveFilters.Size = new System.Drawing.Size(25, 25);
             this.btnRemoveFilters.TabIndex = 12;
             this.btnRemoveFilters.UseVisualStyleBackColor = false;
+            this.btnRemoveFilters.UseWindowsAccentColor = false;
             this.btnRemoveFilters.Click += new System.EventHandler(this.btnRemoveFilters_Click);
             // 
             // DebugConsole
@@ -296,10 +296,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.Controls.Add(this.btnRestartMacroDeck);
             this.Controls.Add(this.btnClear);
             this.Controls.Add(this.logOutput);
+            this.Location = new System.Drawing.Point(0, 0);
             this.MinimumSize = new System.Drawing.Size(800, 450);
             this.Name = "DebugConsole";
             this.Padding = new System.Windows.Forms.Padding(2);
-            this.Text = "Macro Deck debug console";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.WindowsDefaultLocation;
             this.Load += new System.EventHandler(this.DebugConsole_Load);
             this.Controls.SetChildIndex(this.logOutput, 0);
             this.Controls.SetChildIndex(this.btnClear, 0);

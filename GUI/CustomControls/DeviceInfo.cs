@@ -1,5 +1,6 @@
 ﻿using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
 using System;
@@ -21,11 +22,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             this._macroDeckDevice = macroDeckDevice;
             InitializeComponent();
-            this.lblIdLabel.Text = Language.LanguageManager.Strings.Id;
-            this.lblStatusLabel.Text = Language.LanguageManager.Strings.Status;
-            this.lblDisplayName.Text = Language.LanguageManager.Strings.Name;
-            this.lblProfile.Text = Language.LanguageManager.Strings.Profile;
-            this.checkBlockConnection.Text = Language.LanguageManager.Strings.BlockConnection;
+            this.btnConfigure.Text = LanguageManager.Strings.DeviceSettings;
+            this.lblIdLabel.Text = LanguageManager.Strings.Id;
+            this.lblStatusLabel.Text = LanguageManager.Strings.Status;
+            this.lblDisplayName.Text = LanguageManager.Strings.Name;
+            this.lblProfile.Text = LanguageManager.Strings.Profile;
+            this.checkBlockConnection.Text = LanguageManager.Strings.BlockConnection;
         }
 
         private void DeviceInfo_Load(object sender, EventArgs e)
@@ -58,25 +60,25 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.checkBlockConnection.Checked = this._macroDeckDevice.Blocked;
             this.checkBlockConnection.CheckedChanged += this.CheckBlockConnection_CheckedChanged;
             this.displayName.Text = this._macroDeckDevice.DisplayName;
-            this.lblStatus.Text = this._macroDeckDevice.Available ? Language.LanguageManager.Strings.Connected : Language.LanguageManager.Strings.Disconnected;
+            this.lblStatus.Text = this._macroDeckDevice.Available ? LanguageManager.Strings.Connected : LanguageManager.Strings.Disconnected;
             this.lblStatus.ForeColor = this._macroDeckDevice.Available ? Color.Green : Color.Red;
 
             switch (this._macroDeckDevice.DeviceType)
             {
                 case DeviceType.Web:
-                    this.lblDeviceType.Text = Language.LanguageManager.Strings.WebClient;
+                    this.lblDeviceType.Text = LanguageManager.Strings.WebClient;
                     this.iconDeviceType.Image = Properties.Resources.Web;
                     this.btnConfigure.Visible = false;
                     this.profiles.Enabled = true;
                     break;
                 case DeviceType.Android:
-                    this.lblDeviceType.Text = Language.LanguageManager.Strings.AndroidApp;
+                    this.lblDeviceType.Text = LanguageManager.Strings.AndroidApp;
                     this.iconDeviceType.Image = Properties.Resources.Android;
-                    this.btnConfigure.Visible = false; //TODO
+                    this.btnConfigure.Visible = this._macroDeckDevice.Available;
                     this.profiles.Enabled = true;
                     break;
                 case DeviceType.iOS:
-                    this.lblDeviceType.Text = Language.LanguageManager.Strings.IOSApp;
+                    this.lblDeviceType.Text = LanguageManager.Strings.IOSApp;
                     this.iconDeviceType.Image = Properties.Resources.iOS;
                     this.btnConfigure.Visible = false; //TODO
                     this.profiles.Enabled = true;
@@ -88,9 +90,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                     this.profiles.Enabled = false;
                     break;
                 default:
-                    this.lblDeviceType.Text = Language.LanguageManager.Strings.WebClient;
+                    this.lblDeviceType.Text = LanguageManager.Strings.WebClient;
                     this.iconDeviceType.Image = Properties.Resources.Web;
                     this.btnConfigure.Visible = false;
+                    this.profiles.Enabled = true;
                     break;
             }
         }
@@ -113,7 +116,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             {
                 using (MessageBox msgBox = new MessageBox())
                 {
-                    msgBox.ShowDialog(Language.LanguageManager.Strings.CantChangeName, String.Format(Language.LanguageManager.Strings.DeviceCalledXAlreadyExists, this.displayName.Text), MessageBoxButtons.OK);
+                    msgBox.ShowDialog(LanguageManager.Strings.CantChangeName, string.Format(LanguageManager.Strings.DeviceCalledXAlreadyExists, this.displayName.Text), MessageBoxButtons.OK);
                 }
             }
         }

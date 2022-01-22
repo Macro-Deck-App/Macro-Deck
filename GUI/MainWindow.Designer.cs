@@ -1,4 +1,5 @@
 ﻿using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
 using System;
@@ -27,7 +28,8 @@ namespace SuchByte.MacroDeck.GUI
                 PluginManager.OnPluginsChange -= this.OnPluginsChanged;
                 PluginManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
                 IconManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
-            
+                MacroDeckLogger.OnWarningOrError -= MacroDeckLogger_OnWarningOrError;
+
                 if (this.DeckView != null)
                 {
                     this.DeckView.Dispose();
@@ -69,7 +71,6 @@ namespace SuchByte.MacroDeck.GUI
             this.btnVariables = new SuchByte.MacroDeck.GUI.CustomControls.ContentSelectorButton();
             this.panel2 = new System.Windows.Forms.Panel();
             this.btnSettings = new SuchByte.MacroDeck.GUI.CustomControls.ContentSelectorButton();
-            this.lblPluginsNotLoaded = new System.Windows.Forms.Label();
             this.lblNumClientsConnected = new System.Windows.Forms.Label();
             this.lblIPAddress = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -78,6 +79,9 @@ namespace SuchByte.MacroDeck.GUI
             this.lblIpAddressHostname = new System.Windows.Forms.Label();
             this.lblTitle = new System.Windows.Forms.Label();
             this.navigation = new System.Windows.Forms.Panel();
+            this.warningsErrorPanel = new System.Windows.Forms.Panel();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.lblErrorsWarnings = new System.Windows.Forms.LinkLabel();
             this.contentButtonPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.btnDeck)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnPackageManager)).BeginInit();
@@ -85,6 +89,8 @@ namespace SuchByte.MacroDeck.GUI
             ((System.ComponentModel.ISupportInitialize)(this.btnVariables)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnSettings)).BeginInit();
             this.navigation.SuspendLayout();
+            this.warningsErrorPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
             // 
             // lblSafeMode
@@ -109,7 +115,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblVersion.ForeColor = System.Drawing.Color.White;
             this.lblVersion.Location = new System.Drawing.Point(67, 611);
             this.lblVersion.Name = "lblVersion";
-            this.lblVersion.Size = new System.Drawing.Size(208, 21);
+            this.lblVersion.Size = new System.Drawing.Size(194, 21);
             this.lblVersion.TabIndex = 3;
             this.lblVersion.Text = "2.0.0";
             this.lblVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -244,24 +250,12 @@ namespace SuchByte.MacroDeck.GUI
             this.btnSettings.TabStop = false;
             this.btnSettings.Click += new System.EventHandler(this.BtnSettings_Click);
             // 
-            // lblPluginsNotLoaded
-            // 
-            this.lblPluginsNotLoaded.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblPluginsNotLoaded.ForeColor = System.Drawing.Color.Red;
-            this.lblPluginsNotLoaded.Location = new System.Drawing.Point(854, 612);
-            this.lblPluginsNotLoaded.Name = "lblPluginsNotLoaded";
-            this.lblPluginsNotLoaded.Size = new System.Drawing.Size(189, 21);
-            this.lblPluginsNotLoaded.TabIndex = 7;
-            this.lblPluginsNotLoaded.Text = "0 plugins not loaded.";
-            this.lblPluginsNotLoaded.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.lblPluginsNotLoaded.Visible = false;
-            // 
             // lblNumClientsConnected
             // 
             this.lblNumClientsConnected.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblNumClientsConnected.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblNumClientsConnected.ForeColor = System.Drawing.Color.White;
-            this.lblNumClientsConnected.Location = new System.Drawing.Point(603, 612);
+            this.lblNumClientsConnected.Location = new System.Drawing.Point(830, 613);
             this.lblNumClientsConnected.Name = "lblNumClientsConnected";
             this.lblNumClientsConnected.Size = new System.Drawing.Size(225, 19);
             this.lblNumClientsConnected.TabIndex = 8;
@@ -312,7 +306,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblServerStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblServerStatus.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblServerStatus.ForeColor = System.Drawing.Color.White;
-            this.lblServerStatus.Location = new System.Drawing.Point(372, 613);
+            this.lblServerStatus.Location = new System.Drawing.Point(599, 613);
             this.lblServerStatus.Name = "lblServerStatus";
             this.lblServerStatus.Size = new System.Drawing.Size(225, 19);
             this.lblServerStatus.TabIndex = 12;
@@ -340,7 +334,6 @@ namespace SuchByte.MacroDeck.GUI
             this.lblTitle.Size = new System.Drawing.Size(305, 27);
             this.lblTitle.TabIndex = 14;
             this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.lblTitle.Click += new System.EventHandler(this.lblTitle_Click);
             // 
             // navigation
             // 
@@ -354,12 +347,48 @@ namespace SuchByte.MacroDeck.GUI
             this.navigation.TabIndex = 15;
             this.navigation.Visible = false;
             // 
+            // warningsErrorPanel
+            // 
+            this.warningsErrorPanel.Controls.Add(this.pictureBox2);
+            this.warningsErrorPanel.Controls.Add(this.lblErrorsWarnings);
+            this.warningsErrorPanel.Location = new System.Drawing.Point(267, 611);
+            this.warningsErrorPanel.Margin = new System.Windows.Forms.Padding(0);
+            this.warningsErrorPanel.Name = "warningsErrorPanel";
+            this.warningsErrorPanel.Size = new System.Drawing.Size(326, 21);
+            this.warningsErrorPanel.TabIndex = 16;
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Image = global::SuchByte.MacroDeck.Properties.Resources.Alert;
+            this.pictureBox2.Location = new System.Drawing.Point(3, 0);
+            this.pictureBox2.Margin = new System.Windows.Forms.Padding(0);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(21, 21);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox2.TabIndex = 1;
+            this.pictureBox2.TabStop = false;
+            // 
+            // lblErrorsWarnings
+            // 
+            this.lblErrorsWarnings.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblErrorsWarnings.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.lblErrorsWarnings.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
+            this.lblErrorsWarnings.Location = new System.Drawing.Point(27, 3);
+            this.lblErrorsWarnings.Name = "lblErrorsWarnings";
+            this.lblErrorsWarnings.Size = new System.Drawing.Size(280, 15);
+            this.lblErrorsWarnings.TabIndex = 0;
+            this.lblErrorsWarnings.TabStop = true;
+            this.lblErrorsWarnings.Text = "0 warning(s), 0 error(s)";
+            this.lblErrorsWarnings.VisitedLinkColor = System.Drawing.Color.Red;
+            this.lblErrorsWarnings.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LblErrorsWarnings_LinkClicked);
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.ClientSize = new System.Drawing.Size(1200, 635);
+            this.Controls.Add(this.warningsErrorPanel);
             this.Controls.Add(this.navigation);
             this.Controls.Add(this.lblTitle);
             this.Controls.Add(this.lblIpAddressHostname);
@@ -368,22 +397,20 @@ namespace SuchByte.MacroDeck.GUI
             this.Controls.Add(this.label1);
             this.Controls.Add(this.lblIPAddress);
             this.Controls.Add(this.lblNumClientsConnected);
-            this.Controls.Add(this.lblPluginsNotLoaded);
             this.Controls.Add(this.contentPanel);
             this.Controls.Add(this.lblVersion);
             this.Controls.Add(this.lblPluginsLoaded);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Location = new System.Drawing.Point(0, 0);
             this.MinimumSize = new System.Drawing.Size(1200, 635);
             this.Name = "MainWindow";
             this.Padding = new System.Windows.Forms.Padding(2);
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Macro Deck 2";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
             this.Load += new System.EventHandler(this.MainWindow_Load);
             this.Controls.SetChildIndex(this.lblPluginsLoaded, 0);
             this.Controls.SetChildIndex(this.lblVersion, 0);
             this.Controls.SetChildIndex(this.contentPanel, 0);
-            this.Controls.SetChildIndex(this.lblPluginsNotLoaded, 0);
             this.Controls.SetChildIndex(this.lblNumClientsConnected, 0);
             this.Controls.SetChildIndex(this.lblIPAddress, 0);
             this.Controls.SetChildIndex(this.label1, 0);
@@ -392,6 +419,7 @@ namespace SuchByte.MacroDeck.GUI
             this.Controls.SetChildIndex(this.lblIpAddressHostname, 0);
             this.Controls.SetChildIndex(this.lblTitle, 0);
             this.Controls.SetChildIndex(this.navigation, 0);
+            this.Controls.SetChildIndex(this.warningsErrorPanel, 0);
             this.contentButtonPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.btnDeck)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnPackageManager)).EndInit();
@@ -399,6 +427,8 @@ namespace SuchByte.MacroDeck.GUI
             ((System.ComponentModel.ISupportInitialize)(this.btnVariables)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnSettings)).EndInit();
             this.navigation.ResumeLayout(false);
+            this.warningsErrorPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -412,7 +442,6 @@ namespace SuchByte.MacroDeck.GUI
         private CustomControls.ContentSelectorButton btnSettings;
         public System.Windows.Forms.FlowLayoutPanel contentButtonPanel;
         private CustomControls.ContentSelectorButton btnPackageManager;
-        private System.Windows.Forms.Label lblPluginsNotLoaded;
         private CustomControls.ContentSelectorButton btnDeviceManager;
         private System.Windows.Forms.Label lblNumClientsConnected;
         private System.Windows.Forms.Label lblIPAddress;
@@ -425,5 +454,8 @@ namespace SuchByte.MacroDeck.GUI
         private System.Windows.Forms.Label lblTitle;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Panel navigation;
+        private System.Windows.Forms.Panel warningsErrorPanel;
+        private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.LinkLabel lblErrorsWarnings;
     }
 }

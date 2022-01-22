@@ -25,6 +25,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         public DialogForm()
         {
             InitializeComponent();
+            (new DropShadow()).ApplyShadows(this);
             this.ResizeEnd += OnResizeEnd;
         }
 
@@ -48,15 +49,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         private void DialogForm_Load(object sender, EventArgs e)
         {
             this.btnClose.Location = new Point(this.Width - this.btnClose.Width - 2, 2);
+            CenterToScreen();
+            CenterToParent();
         }
-
-        private void DialogForm_Paint(object sender, PaintEventArgs e)
-        {
-            Pen pen = new Pen(Color.FromArgb(0, 123, 255), 1);
-            Rectangle rect = new Rectangle(0, 0, this.Width - 2, this.Height - 2);
-            e.Graphics.DrawRectangle(pen, rect);
-        }
-
 
         private void DialogForm_MouseDown(object sender, MouseEventArgs e)
         {

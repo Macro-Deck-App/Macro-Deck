@@ -9,7 +9,7 @@ namespace SuchByte.MacroDeck.Utils
 {
     public class LabelGenerator
     {
-        public static Bitmap GetLabel(Bitmap img, String text, ButtonLabelPosition buttonLabelPosition, Font font, Color textColor, Color shadowColor, SizeF shadowOffset)
+        public static Image GetLabel(Image img, String text, ButtonLabelPosition buttonLabelPosition, Font font, Color textColor, Color shadowColor, SizeF shadowOffset)
         {
             if (img == null) return img;
 

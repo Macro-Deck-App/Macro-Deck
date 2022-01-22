@@ -75,7 +75,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "DialogForm";
             this.Load += new System.EventHandler(this.DialogForm_Load);
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.DialogForm_Paint);
             this.MouseDown += DialogForm_MouseDown;
             ((System.ComponentModel.ISupportInitialize)(this.btnClose)).EndInit();
             this.ResumeLayout(false);

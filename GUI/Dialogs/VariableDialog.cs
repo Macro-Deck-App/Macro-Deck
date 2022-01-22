@@ -106,6 +106,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.variableType.Text = this.Variable.Type;
             this.variableName.Text = this.Variable.Name;
             this.variableValue.Text = this.Variable.Value;
+            CenterToScreen();
         }
 
         private void BtnDelete_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

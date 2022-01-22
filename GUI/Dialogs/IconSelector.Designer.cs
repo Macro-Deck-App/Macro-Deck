@@ -69,7 +69,6 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // btnImport
             // 
-            this.btnImport.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnImport.BorderRadius = 8;
             this.btnImport.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnImport.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -85,6 +84,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnImport.TabIndex = 1;
             this.btnImport.Text = "Import icon";
             this.btnImport.UseVisualStyleBackColor = true;
+            this.btnImport.UseWindowsAccentColor = true;
             this.btnImport.Click += new System.EventHandler(this.BtnImport_Click);
             // 
             // btnPreview
@@ -98,6 +98,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnPreview.Radius = 40;
             this.btnPreview.Row = 0;
             this.btnPreview.ShowGIFIndicator = false;
+            this.btnPreview.ShowKeyboardHotkeyIndicator = false;
             this.btnPreview.Size = new System.Drawing.Size(150, 150);
             this.btnPreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.btnPreview.TabIndex = 5;
@@ -105,7 +106,6 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // btnOk
             // 
-            this.btnOk.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnOk.BorderRadius = 8;
             this.btnOk.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -121,6 +121,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnOk.TabIndex = 6;
             this.btnOk.Text = "Ok";
             this.btnOk.UseVisualStyleBackColor = true;
+            this.btnOk.UseWindowsAccentColor = true;
             this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
             // 
             // iconPacksBox
@@ -174,7 +175,6 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // btnImportIconPack
             // 
-            this.btnImportIconPack.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnImportIconPack.BorderRadius = 8;
             this.btnImportIconPack.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnImportIconPack.FlatAppearance.BorderSize = 0;
@@ -191,11 +191,11 @@ namespace SuchByte.MacroDeck.GUI
             this.btnImportIconPack.TabIndex = 11;
             this.btnImportIconPack.Text = "Import icon pack...";
             this.btnImportIconPack.UseVisualStyleBackColor = false;
+            this.btnImportIconPack.UseWindowsAccentColor = true;
             this.btnImportIconPack.Click += new System.EventHandler(this.BtnImportIconPack_Click);
             // 
             // btnExportIconPack
             // 
-            this.btnExportIconPack.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
             this.btnExportIconPack.BorderRadius = 8;
             this.btnExportIconPack.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnExportIconPack.FlatAppearance.BorderSize = 0;
@@ -212,12 +212,12 @@ namespace SuchByte.MacroDeck.GUI
             this.btnExportIconPack.TabIndex = 12;
             this.btnExportIconPack.Text = "Export icon pack...";
             this.btnExportIconPack.UseVisualStyleBackColor = false;
+            this.btnExportIconPack.UseWindowsAccentColor = true;
             this.btnExportIconPack.Visible = false;
             this.btnExportIconPack.Click += new System.EventHandler(this.BtnExportIconPack_Click);
             // 
             // btnDeleteIcon
             // 
-            this.btnDeleteIcon.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnDeleteIcon.BorderRadius = 8;
             this.btnDeleteIcon.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnDeleteIcon.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -233,6 +233,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnDeleteIcon.TabIndex = 13;
             this.btnDeleteIcon.Text = "Delete icon";
             this.btnDeleteIcon.UseVisualStyleBackColor = false;
+            this.btnDeleteIcon.UseWindowsAccentColor = false;
             this.btnDeleteIcon.Click += new System.EventHandler(this.BtnDeleteIcon_Click);
             // 
             // lblSizeLabel
@@ -271,7 +272,6 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // btnCreateIcon
             // 
-            this.btnCreateIcon.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnCreateIcon.BorderRadius = 8;
             this.btnCreateIcon.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnCreateIcon.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -287,11 +287,11 @@ namespace SuchByte.MacroDeck.GUI
             this.btnCreateIcon.TabIndex = 18;
             this.btnCreateIcon.Text = "Create icon";
             this.btnCreateIcon.UseVisualStyleBackColor = true;
+            this.btnCreateIcon.UseWindowsAccentColor = true;
             this.btnCreateIcon.Click += new System.EventHandler(this.BtnCreateIcon_Click);
             // 
             // btnGiphy
             // 
-            this.btnGiphy.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnGiphy.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.btnGiphy.BorderRadius = 8;
             this.btnGiphy.Cursor = System.Windows.Forms.Cursors.Hand;
@@ -308,6 +308,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnGiphy.TabIndex = 20;
             this.btnGiphy.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.btnGiphy.UseVisualStyleBackColor = true;
+            this.btnGiphy.UseWindowsAccentColor = true;
             this.btnGiphy.Visible = false;
             this.btnGiphy.Click += new System.EventHandler(this.BtnGiphy_Click);
             // 
@@ -334,7 +335,6 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // btnGenerateStatic
             // 
-            this.btnGenerateStatic.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnGenerateStatic.BorderRadius = 8;
             this.btnGenerateStatic.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnGenerateStatic.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -350,6 +350,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnGenerateStatic.TabIndex = 22;
             this.btnGenerateStatic.Text = "Generate static";
             this.btnGenerateStatic.UseVisualStyleBackColor = true;
+            this.btnGenerateStatic.UseWindowsAccentColor = true;
             this.btnGenerateStatic.Visible = false;
             this.btnGenerateStatic.Click += new System.EventHandler(this.BtnGenerateStatic_Click);
             // 
@@ -374,6 +375,7 @@ namespace SuchByte.MacroDeck.GUI
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.btnPreview);
             this.Controls.Add(this.iconList);
+            this.Location = new System.Drawing.Point(0, 0);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "IconSelector";

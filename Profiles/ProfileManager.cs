@@ -6,12 +6,14 @@ using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.JSON;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.Server;
 using SuchByte.MacroDeck.Variables;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -118,8 +120,8 @@ namespace SuchByte.MacroDeck.Profiles
                     labelOffText = VariableManager.RenderTemplate(labelOffText);
                     labelOnText = VariableManager.RenderTemplate(labelOnText);
 
-                    actionButton.LabelOff.LabelBase64 = Utils.Base64.GetBase64FromBitmap(Utils.LabelGenerator.GetLabel(new Bitmap(250, 250), labelOffText, actionButton.LabelOff.LabelPosition, new Font(actionButton.LabelOff.FontFamily, actionButton.LabelOff.Size), actionButton.LabelOff.LabelColor, Color.Black, new SizeF(2.0f, 2.0f)));
-                    actionButton.LabelOn.LabelBase64 = Utils.Base64.GetBase64FromBitmap(Utils.LabelGenerator.GetLabel(new Bitmap(250, 250), labelOnText, actionButton.LabelOn.LabelPosition, new Font(actionButton.LabelOn.FontFamily, actionButton.LabelOn.Size), actionButton.LabelOn.LabelColor, Color.Black, new SizeF(2.0f, 2.0f)));
+                    actionButton.LabelOff.LabelBase64 = Utils.Base64.GetBase64FromImage(Utils.LabelGenerator.GetLabel(new Bitmap(250, 250), labelOffText, actionButton.LabelOff.LabelPosition, new Font(actionButton.LabelOff.FontFamily, actionButton.LabelOff.Size), actionButton.LabelOff.LabelColor, Color.Black, new SizeF(2.0f, 2.0f)));
+                    actionButton.LabelOn.LabelBase64 = Utils.Base64.GetBase64FromImage(Utils.LabelGenerator.GetLabel(new Bitmap(250, 250), labelOnText, actionButton.LabelOn.LabelPosition, new Font(actionButton.LabelOn.FontFamily, actionButton.LabelOn.Size), actionButton.LabelOn.LabelColor, Color.Black, new SizeF(2.0f, 2.0f)));
                     foreach (MacroDeckClient macroDeckClient in MacroDeckServer.Clients)
                     {
                         MacroDeckServer.SendButton(macroDeckClient, actionButton);
@@ -177,8 +179,19 @@ namespace SuchByte.MacroDeck.Profiles
                 Save();
             }
 
-            CurrentProfile = _profiles[0];
-            
+            if (!string.IsNullOrWhiteSpace(Settings.Default.SelectedProfile))
+            {
+                CurrentProfile = FindProfileById(Settings.Default.SelectedProfile);
+            }
+
+            if (CurrentProfile == null)
+            {
+                CurrentProfile = _profiles.FirstOrDefault();
+                Settings.Default.SelectedProfile = CurrentProfile.ProfileId;
+                Settings.Default.Save();
+            }
+
+
             if (CurrentProfile.Folders.Count < 1)
             {
                 MacroDeckFolder root = new MacroDeckFolder

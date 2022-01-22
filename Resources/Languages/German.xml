@@ -289,4 +289,13 @@ Für animierte GIFs sollte die Voreinstellung "Niedrig" oder "Niedrigste" verwen
 		Wenn dieser Dialog nicht erscheint und es Probleme bei der Verbindung gibt, bekommst du Hilfe im Wiki und im Discord Server.
 	</FirewallAlertInfo>
 	<GotIt>Verstanden!</GotIt>
+	<DeviceSettings>Geräteeinstellungen</DeviceSettings>
+	<Brightness>Helligkeit</Brightness>
+	<AutoConnect>Automatisch verbinden</AutoConnect>
+	<DiscordSupport>Discord Support</DiscordSupport>
+	<Wiki>Wiki</Wiki>
+	<ExportLatestLog>Aktuelle Log-Datei exportieren</ExportLatestLog>
+	<LogSuccessfullyExportedToX>Log-Datei erfolgreich nach {0} exportiert</LogSuccessfullyExportedToX>
+	<Help>Hilfe</Help>
+	<XWarningsXErrors>{0} Warnung(en), {1} Fehler</XWarningsXErrors>
 </Strings>

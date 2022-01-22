@@ -9,6 +9,7 @@ using SuchByte.MacroDeck.Hotkeys;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Interfaces;
 using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
@@ -114,81 +115,43 @@ namespace SuchByte.MacroDeck.GUI
         {
             try
             {
-                if (radioButtonOff.Checked && !radioButtonOn.Checked)
+                ButtonLabel buttonLabel = radioButtonOff.Checked && !radioButtonOn.Checked ? this.actionButtonEdited.LabelOff : this.actionButtonEdited.LabelOn;
+                buttonLabel.LabelText = this.labelText.Text;
+                buttonLabel.Size = (float)this.fontSize.Value;
+                buttonLabel.FontFamily = this.fonts.Text;
+                if (this.labelAlignTop.Checked)
                 {
-                    this.actionButtonEdited.LabelOff.LabelText = this.labelText.Text;
-                    this.actionButtonEdited.LabelOff.Size = (float)this.fontSize.Value;
-                    this.actionButtonEdited.LabelOff.FontFamily = this.fonts.Text;
-                    if (this.labelAlignTop.Checked)
-                    {
-                        this.actionButtonEdited.LabelOff.LabelPosition = ButtonLabelPosition.TOP;
-                    }
-                    else if (this.labelAlignCenter.Checked)
-                    {
-                        this.actionButtonEdited.LabelOff.LabelPosition = ButtonLabelPosition.CENTER;
-                    }
-                    else if (this.labelAlignBottom.Checked)
-                    {
-                        this.actionButtonEdited.LabelOff.LabelPosition = ButtonLabelPosition.BOTTOM;
-                    }
-                    Task.Run(() =>
-                    {
-                        Bitmap labelBitmap = new Bitmap(250, 250);
-                        string labelOffText = actionButtonEdited.LabelOff.LabelText.ToString();
-                        labelOffText = VariableManager.RenderTemplate(labelOffText);
-
-                        labelBitmap = Utils.LabelGenerator.GetLabel(labelBitmap, labelOffText, this.actionButtonEdited.LabelOff.LabelPosition, new Font(this.actionButtonEdited.LabelOff.FontFamily, this.actionButtonEdited.LabelOff.Size), this.actionButtonEdited.LabelOff.LabelColor, Color.Black, new SizeF(2.0F, 2.0F));
-                        this.actionButtonEdited.LabelOff.LabelBase64 = Utils.Base64.GetBase64FromBitmap(labelBitmap);
-                        this.Invoke(new Action(() => {
-                            if (this != null && this.Disposing == false && this.IsDisposed == false)
-                            {
-                                this.btnPreview.ForegroundImage = labelBitmap;
-                            }
-                            }));
-                        });
-
+                    buttonLabel.LabelPosition = ButtonLabelPosition.TOP;
                 }
-                else if(!radioButtonOff.Checked && radioButtonOn.Checked)
+                else if (this.labelAlignCenter.Checked)
                 {
-                    this.actionButtonEdited.LabelOn.LabelText = this.labelText.Text;
-                    this.actionButtonEdited.LabelOn.Size = (float)this.fontSize.Value;
-                    this.actionButtonEdited.LabelOn.FontFamily = this.fonts.Text;
-                    if (this.labelAlignTop.Checked)
-                    {
-                        this.actionButtonEdited.LabelOn.LabelPosition = ButtonLabelPosition.TOP;
-                    }
-                    else if (this.labelAlignCenter.Checked)
-                    {
-                        this.actionButtonEdited.LabelOn.LabelPosition = ButtonLabelPosition.CENTER;
-                    }
-                    else if (this.labelAlignBottom.Checked)
-                    {
-                        this.actionButtonEdited.LabelOn.LabelPosition = ButtonLabelPosition.BOTTOM;
-                    }
-                    Task.Run(() =>
-                    {
-                        Bitmap labelBitmap = new Bitmap(250, 250);
-                        string labelOnText = actionButtonEdited.LabelOn.LabelText.ToString();
-                        labelOnText = VariableManager.RenderTemplate(labelOnText);
+                    buttonLabel.LabelPosition = ButtonLabelPosition.CENTER;
+                }
+                else if (this.labelAlignBottom.Checked)
+                {
+                    buttonLabel.LabelPosition = ButtonLabelPosition.BOTTOM;
+                }
+                Task.Run(() =>
+                {
+                    this.btnForeColor.BackColor = buttonLabel.LabelColor;
+                    this.btnForeColor.HoverColor = buttonLabel.LabelColor;
+                    Bitmap labelBitmap = new Bitmap(250, 250);
+                    string labelText = buttonLabel.LabelText.ToString();
+                    labelText = VariableManager.RenderTemplate(labelText);
 
-                        /*foreach (Variables.Variable variable in Variables.VariableManager.Variables)
+                    labelBitmap = (Bitmap)Utils.LabelGenerator.GetLabel(labelBitmap, labelText, buttonLabel.LabelPosition, new Font(buttonLabel.FontFamily, buttonLabel.Size), buttonLabel.LabelColor, Color.Black, new SizeF(2.0F, 2.0F));
+                    buttonLabel.LabelBase64 = Utils.Base64.GetBase64FromImage(labelBitmap);
+                    this.Invoke(new Action(() => {
+                        if (this != null && this.Disposing == false && this.IsDisposed == false)
                         {
-                            if (labelOnText.ToLower().Contains("{" + variable.Name.ToLower() + "}"))
-                            {
-                                labelOnText = labelOnText.Replace("{" + variable.Name + "}", variable.Value.ToString(), StringComparison.OrdinalIgnoreCase);
-                            }
-                        }*/
-                        labelBitmap = Utils.LabelGenerator.GetLabel(labelBitmap, labelOnText, this.actionButtonEdited.LabelOn.LabelPosition, new Font(this.actionButtonEdited.LabelOn.FontFamily, this.actionButtonEdited.LabelOn.Size), this.actionButtonEdited.LabelOn.LabelColor, Color.Black, new SizeF(2.0F, 2.0F));
-                        this.actionButtonEdited.LabelOn.LabelBase64 = Utils.Base64.GetBase64FromBitmap(labelBitmap);
-                        this.Invoke(new Action(() => {
-                            if (this != null && this.Disposing == false && this.IsDisposed == false)
-                            {
-                                this.btnPreview.ForegroundImage = labelBitmap;
-                            }
-                        }));
+                            this.btnPreview.ForegroundImage = labelBitmap;
+                        }
+                    }));
                 });
-                }
-            } catch { }
+            } catch (Exception ex)
+            {
+                MacroDeckLogger.Error(GetType(), "Error while updating label: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            }
         }
 
         private void RefreshLabel()
@@ -202,120 +165,78 @@ namespace SuchByte.MacroDeck.GUI
             
             try
             {
-                if (radioButtonOff.Checked && !radioButtonOn.Checked)
-                {
-                    this.labelText.Text = this.actionButtonEdited.LabelOff.LabelText;
-                    this.fontSize.Value = (int)this.actionButtonEdited.LabelOff.Size;
-                    this.fonts.Text = this.actionButtonEdited.LabelOff.FontFamily;
-                    
-                    if (this.actionButtonEdited.LabelOff.LabelPosition == SuchByte.MacroDeck.ActionButton.ButtonLabelPosition.TOP)
-                    {
-                        this.labelAlignTop.Checked = true;
-                    }
-                    else if (this.actionButtonEdited.LabelOff.LabelPosition == SuchByte.MacroDeck.ActionButton.ButtonLabelPosition.CENTER)
-                    {
-                        this.labelAlignCenter.Checked = true;
-                    }
-                    else
-                    {
-                        this.labelAlignBottom.Checked = true;
-                    }
-                }
-                else
-                {
-                    this.labelText.Text = this.actionButtonEdited.LabelOn.LabelText;
-                    this.fontSize.Value = (int)this.actionButtonEdited.LabelOn.Size;
-                    this.fonts.Text = this.actionButtonEdited.LabelOn.FontFamily;
+                ButtonLabel buttonLabel = radioButtonOff.Checked && !radioButtonOn.Checked ? this.actionButtonEdited.LabelOff : this.actionButtonEdited.LabelOn;
 
-                    if (this.actionButtonEdited.LabelOn.LabelPosition == SuchByte.MacroDeck.ActionButton.ButtonLabelPosition.TOP)
-                    {
-                        this.labelAlignTop.Checked = true;
-                    }
-                    else if (this.actionButtonEdited.LabelOn.LabelPosition == SuchByte.MacroDeck.ActionButton.ButtonLabelPosition.CENTER)
-                    {
-                        this.labelAlignCenter.Checked = true;
-                    }
-                    else
-                    {
-                        this.labelAlignBottom.Checked = true;
-                    }
-                }
-                if (this.labelText.Text.Length == 0)
+                this.labelText.Text = buttonLabel.LabelText;
+                this.fontSize.Value = (int)buttonLabel.Size;
+                this.fonts.Text = buttonLabel.FontFamily;
+
+                switch (buttonLabel.LabelPosition)
                 {
-                    this.labelText.PlaceHolderText = Language.LanguageManager.Strings.Label;
+                    case ButtonLabelPosition.TOP:
+                        this.labelAlignTop.Checked = true;
+                        break;
+                    case ButtonLabelPosition.CENTER:
+                        this.labelAlignCenter.Checked = true;
+                        break;
+                    case ButtonLabelPosition.BOTTOM:
+                        this.labelAlignBottom.Checked = true;
+                        break;
                 }
+
+                if (string.IsNullOrWhiteSpace(this.labelText.Text))
+                {
+                    this.labelText.PlaceHolderText = LanguageManager.Strings.Label;
+                }
+            } catch (Exception ex) 
+            {
+                MacroDeckLogger.Error(GetType(), "Error while refreshing label: " + ex.Message + Environment.NewLine + ex.StackTrace);
             }
-            catch (Exception ex) { Debug.WriteLine(ex.Message); }
             this.labelText.TextChanged += this.LabelChanged;
             this.fontSize.ValueChanged += this.LabelChanged;
             this.labelAlignTop.CheckedChanged += this.LabelChanged;
             this.labelAlignCenter.CheckedChanged += this.LabelChanged;
             this.labelAlignBottom.CheckedChanged += this.LabelChanged;
             this.fonts.SelectedIndexChanged += this.LabelChanged;
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
         }
 
         public void RefreshIcon()
         {
             try
             {
-                if (radioButtonOff.Checked && !radioButtonOn.Checked)
-                {
-                    if (this.actionButtonEdited.IconOff != null && this.actionButtonEdited.IconOff.Split(".").Length > 1)
-                    {
-                        Icons.IconPack iconPack = IconManager.GetIconPackByName(this.actionButtonEdited.IconOff.Split(".")[0]);
-                        Icons.Icon icon = IconManager.GetIcon(iconPack, long.Parse(this.actionButtonEdited.IconOff.Split(".")[1]));
-                        if (icon != null)
-                            this.btnPreview.BackgroundImage = Utils.Base64.GetImageFromBase64(icon.IconBase64);
-                    } else
-                    {
-                        this.btnPreview.BackgroundImage = null;
-                    }
+                string iconString = radioButtonOff.Checked && !radioButtonOn.Checked ? this.actionButtonEdited.IconOff : this.actionButtonEdited.IconOn;
 
-                    if (this.actionButtonEdited.LabelOff != null && this.actionButtonEdited.LabelOff.LabelBase64.Length > 0)
-                    {
-                        Image label = Utils.Base64.GetImageFromBase64(this.actionButtonEdited.LabelOff.LabelBase64);
-                        if (label != null)
-                            this.btnPreview.ForegroundImage = label;
-                    }
-                    else
-                    {
-                        this.btnPreview.ForegroundImage = null;
-                    }
-                }
-                else if(!radioButtonOff.Checked && radioButtonOn.Checked)
+                if (!string.IsNullOrWhiteSpace(iconString) && iconString.Split(".").Length > 1)
                 {
-                    if (this.actionButtonEdited.IconOn != null && this.actionButtonEdited.IconOn.Split(".").Length > 1)
-                    {
-                        Icons.IconPack iconPack = IconManager.GetIconPackByName(this.actionButtonEdited.IconOn.Split(".")[0]);
-                        Icons.Icon icon = IconManager.GetIcon(iconPack, long.Parse(this.actionButtonEdited.IconOn.Split(".")[1]));
-                        if (icon != null)
-                            this.btnPreview.BackgroundImage = Utils.Base64.GetImageFromBase64(icon.IconBase64);
-                    }
-                    else
-                    {
-                        this.btnPreview.BackgroundImage = null;
-                    }
-
-                    if (this.actionButtonEdited.LabelOn != null && this.actionButtonEdited.LabelOn.LabelBase64.Length > 0)
-                    {
-                        Image label = Utils.Base64.GetImageFromBase64(this.actionButtonEdited.LabelOn.LabelBase64);
-                        if (label != null)
-                            this.btnPreview.ForegroundImage = label;
-                    }
-                    else
-                    {
-                        this.btnPreview.ForegroundImage = null;
-                    }
+                    IconPack iconPack = IconManager.GetIconPackByName(iconString.Split(".")[0]);
+                    Icons.Icon icon = IconManager.GetIcon(iconPack, long.Parse(iconString.Split(".")[1]));
+                    if (icon != null)
+                        this.btnPreview.BackgroundImage = Utils.Base64.GetImageFromBase64(icon.IconBase64);
                 }
+                else
+                {
+                    this.btnPreview.BackgroundImage = null;
+                }
+
+                ButtonLabel buttonLabel = radioButtonOff.Checked && !radioButtonOn.Checked ? this.actionButtonEdited.LabelOff : this.actionButtonEdited.LabelOn;
+
+                if (buttonLabel != null && !string.IsNullOrWhiteSpace(buttonLabel.LabelBase64)) 
+                {
+                    Image label = Utils.Base64.GetImageFromBase64(buttonLabel.LabelBase64);
+                    if (label != null)
+                        this.btnPreview.ForegroundImage = label;
+                }
+                else
+                {
+                    this.btnPreview.ForegroundImage = null;
+                }
+
+                
                 this.btnPreview.ShowGIFIndicator = this.btnPreview.BackgroundImage != null && this.btnPreview.BackgroundImage.RawFormat.ToString().ToLower() == "gif";
+            } catch (Exception ex) 
+            {
+                MacroDeckLogger.Error(GetType(), "Error while refreshing icon: " + ex.Message + Environment.NewLine + ex.StackTrace);
             }
-            catch (Exception ex) { Debug.WriteLine(ex.Message); }
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
         }
 
         private void Apply()
@@ -354,11 +275,9 @@ namespace SuchByte.MacroDeck.GUI
 
             foreach (ActionButton.ActionButton actionButton in this.folder.ActionButtons.FindAll(actionButton => actionButton.Position_Y == this.actionButton.Position_Y && actionButton.Position_X == this.actionButton.Position_X).ToArray())
             {
-                //ProfileManager.RemoveEventHandler(actionButton);
                 this.folder.ActionButtons.Remove(actionButton);
             }
             this.folder.ActionButtons.Add(this.actionButton);
-            //ProfileManager.AddEventHandler(this.actionButton);
             ProfileManager.Save();
             MacroDeckServer.UpdateFolder(this.folder);
             ProfileManager.UpdateVariableLabels(this.actionButton);

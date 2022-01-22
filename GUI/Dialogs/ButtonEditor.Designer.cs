@@ -100,7 +100,6 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // btnApply
             // 
-            this.btnApply.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnApply.BorderRadius = 8;
             this.btnApply.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnApply.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -116,6 +115,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnApply.TabIndex = 1;
             this.btnApply.Text = "Apply";
             this.btnApply.UseVisualStyleBackColor = true;
+            this.btnApply.UseWindowsAccentColor = true;
             this.btnApply.Click += new System.EventHandler(this.BtnSave_Click);
             // 
             // btnPreview
@@ -390,8 +390,6 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // btnForeColor
             // 
-            this.btnForeColor.BackColor = System.Drawing.Color.Transparent;
-            this.btnForeColor.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.icon_color_picker;
             this.btnForeColor.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.btnForeColor.BorderRadius = 8;
             this.btnForeColor.Cursor = System.Windows.Forms.Cursors.Hand;
@@ -399,8 +397,8 @@ namespace SuchByte.MacroDeck.GUI
             this.btnForeColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnForeColor.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnForeColor.ForeColor = System.Drawing.Color.White;
-            this.btnForeColor.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
-            this.btnForeColor.Icon = null;
+            this.btnForeColor.HoverColor = System.Drawing.Color.Transparent;
+            this.btnForeColor.Icon = global::SuchByte.MacroDeck.Properties.Resources.Palette;
             this.btnForeColor.Location = new System.Drawing.Point(266, 370);
             this.btnForeColor.Name = "btnForeColor";
             this.btnForeColor.Progress = 0;
@@ -408,6 +406,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnForeColor.Size = new System.Drawing.Size(27, 27);
             this.btnForeColor.TabIndex = 21;
             this.btnForeColor.UseVisualStyleBackColor = false;
+            this.btnForeColor.UseWindowsAccentColor = false;
             this.btnForeColor.Click += new System.EventHandler(this.BtnForeColor_Click);
             // 
             // fonts
@@ -449,7 +448,6 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // btnOk
             // 
-            this.btnOk.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnOk.BorderRadius = 8;
             this.btnOk.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -465,6 +463,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnOk.TabIndex = 25;
             this.btnOk.Text = "Ok";
             this.btnOk.UseVisualStyleBackColor = true;
+            this.btnOk.UseWindowsAccentColor = true;
             this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
             // 
             // variablesContextMenu
@@ -696,6 +695,7 @@ namespace SuchByte.MacroDeck.GUI
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.btnApply);
             this.Controls.Add(this.groupAppearance);
+            this.Location = new System.Drawing.Point(0, 0);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ButtonEditor";

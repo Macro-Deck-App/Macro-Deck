@@ -55,7 +55,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblDisplayName.AutoSize = true;
             this.lblDisplayName.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblDisplayName.ForeColor = System.Drawing.Color.White;
-            this.lblDisplayName.Location = new System.Drawing.Point(3, 98);
+            this.lblDisplayName.Location = new System.Drawing.Point(3, 132);
             this.lblDisplayName.Name = "lblDisplayName";
             this.lblDisplayName.Size = new System.Drawing.Size(110, 19);
             this.lblDisplayName.TabIndex = 0;
@@ -68,7 +68,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.displayName.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.displayName.ForeColor = System.Drawing.Color.White;
             this.displayName.Icon = null;
-            this.displayName.Location = new System.Drawing.Point(119, 94);
+            this.displayName.Location = new System.Drawing.Point(119, 128);
+            this.displayName.MaxCharacters = 32767;
             this.displayName.Multiline = false;
             this.displayName.Name = "displayName";
             this.displayName.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
@@ -76,6 +77,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.displayName.PlaceHolderColor = System.Drawing.Color.Gray;
             this.displayName.PlaceHolderText = "";
             this.displayName.ReadOnly = false;
+            this.displayName.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.displayName.SelectionStart = 0;
             this.displayName.Size = new System.Drawing.Size(299, 27);
             this.displayName.TabIndex = 1;
@@ -102,7 +104,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblIdLabel.AutoSize = true;
             this.lblIdLabel.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblIdLabel.ForeColor = System.Drawing.Color.White;
-            this.lblIdLabel.Location = new System.Drawing.Point(5, 36);
+            this.lblIdLabel.Location = new System.Drawing.Point(5, 70);
             this.lblIdLabel.Name = "lblIdLabel";
             this.lblIdLabel.Size = new System.Drawing.Size(77, 19);
             this.lblIdLabel.TabIndex = 3;
@@ -112,7 +114,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             this.lblId.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblId.ForeColor = System.Drawing.Color.White;
-            this.lblId.Location = new System.Drawing.Point(119, 33);
+            this.lblId.Location = new System.Drawing.Point(119, 67);
             this.lblId.Name = "lblId";
             this.lblId.Size = new System.Drawing.Size(194, 23);
             this.lblId.TabIndex = 4;
@@ -122,7 +124,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.checkBlockConnection.CheckAlign = System.Drawing.ContentAlignment.TopLeft;
             this.checkBlockConnection.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.checkBlockConnection.ForeColor = System.Drawing.Color.White;
-            this.checkBlockConnection.Location = new System.Drawing.Point(319, 4);
+            this.checkBlockConnection.Location = new System.Drawing.Point(334, 5);
             this.checkBlockConnection.Name = "checkBlockConnection";
             this.checkBlockConnection.Size = new System.Drawing.Size(167, 49);
             this.checkBlockConnection.TabIndex = 5;
@@ -136,7 +138,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblStatusLabel.AutoSize = true;
             this.lblStatusLabel.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblStatusLabel.ForeColor = System.Drawing.Color.White;
-            this.lblStatusLabel.Location = new System.Drawing.Point(5, 67);
+            this.lblStatusLabel.Location = new System.Drawing.Point(5, 101);
             this.lblStatusLabel.Name = "lblStatusLabel";
             this.lblStatusLabel.Size = new System.Drawing.Size(58, 19);
             this.lblStatusLabel.TabIndex = 6;
@@ -146,7 +148,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             this.lblStatus.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblStatus.ForeColor = System.Drawing.Color.White;
-            this.lblStatus.Location = new System.Drawing.Point(119, 67);
+            this.lblStatus.Location = new System.Drawing.Point(119, 101);
             this.lblStatus.Name = "lblStatus";
             this.lblStatus.Size = new System.Drawing.Size(226, 23);
             this.lblStatus.TabIndex = 7;
@@ -161,7 +163,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnChangeDisplayName.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnChangeDisplayName.ForeColor = System.Drawing.Color.White;
             this.btnChangeDisplayName.HoverImage = global::SuchByte.MacroDeck.Properties.Resources.Edit_Hover;
-            this.btnChangeDisplayName.Location = new System.Drawing.Point(424, 94);
+            this.btnChangeDisplayName.Location = new System.Drawing.Point(424, 122);
             this.btnChangeDisplayName.Name = "btnChangeDisplayName";
             this.btnChangeDisplayName.Size = new System.Drawing.Size(27, 27);
             this.btnChangeDisplayName.TabIndex = 8;
@@ -176,7 +178,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.profiles.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.profiles.ForeColor = System.Drawing.Color.White;
             this.profiles.Icon = null;
-            this.profiles.Location = new System.Drawing.Point(119, 125);
+            this.profiles.Location = new System.Drawing.Point(119, 159);
             this.profiles.Name = "profiles";
             this.profiles.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
             this.profiles.SelectedIndex = -1;
@@ -190,7 +192,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblProfile.AutoSize = true;
             this.lblProfile.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblProfile.ForeColor = System.Drawing.Color.White;
-            this.lblProfile.Location = new System.Drawing.Point(5, 129);
+            this.lblProfile.Location = new System.Drawing.Point(5, 163);
             this.lblProfile.Name = "lblProfile";
             this.lblProfile.Size = new System.Drawing.Size(60, 19);
             this.lblProfile.TabIndex = 10;
@@ -226,15 +228,14 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnConfigure.ForeColor = System.Drawing.Color.White;
             this.btnConfigure.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
             this.btnConfigure.Icon = null;
-            this.btnConfigure.Location = new System.Drawing.Point(194, 4);
+            this.btnConfigure.Location = new System.Drawing.Point(5, 33);
             this.btnConfigure.Name = "btnConfigure";
             this.btnConfigure.Progress = 0;
             this.btnConfigure.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
-            this.btnConfigure.Size = new System.Drawing.Size(32, 23);
+            this.btnConfigure.Size = new System.Drawing.Size(183, 27);
             this.btnConfigure.TabIndex = 13;
-            this.btnConfigure.Text = "...";
+            this.btnConfigure.Text = "Device settings";
             this.btnConfigure.UseVisualStyleBackColor = false;
-            this.btnConfigure.Visible = false;
             this.btnConfigure.Click += new System.EventHandler(this.BtnConfigure_Click);
             // 
             // DeviceInfo
@@ -258,7 +259,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.Controls.Add(this.lblDisplayName);
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.Name = "DeviceInfo";
-            this.Size = new System.Drawing.Size(534, 164);
+            this.Size = new System.Drawing.Size(534, 194);
             this.Load += new System.EventHandler(this.DeviceInfo_Load);
             ((System.ComponentModel.ISupportInitialize)(this.btnRemove)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnChangeDisplayName)).EndInit();

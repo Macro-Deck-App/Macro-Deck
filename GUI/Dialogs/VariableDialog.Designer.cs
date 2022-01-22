@@ -44,6 +44,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // variableType
             // 
             this.variableType.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.variableType.Cursor = System.Windows.Forms.Cursors.Hand;
             this.variableType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.variableType.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.variableType.Icon = null;
@@ -70,7 +71,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // btnOk
             // 
             this.btnOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnOk.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnOk.BorderRadius = 8;
             this.btnOk.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnOk.FlatAppearance.BorderSize = 0;
@@ -87,6 +87,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOk.TabIndex = 5;
             this.btnOk.Text = "Ok";
             this.btnOk.UseVisualStyleBackColor = false;
+            this.btnOk.UseWindowsAccentColor = true;
             this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
             // 
             // lblName
@@ -107,6 +108,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.variableName.ForeColor = System.Drawing.Color.White;
             this.variableName.Icon = null;
             this.variableName.Location = new System.Drawing.Point(72, 44);
+            this.variableName.MaxCharacters = 32767;
             this.variableName.Multiline = false;
             this.variableName.Name = "variableName";
             this.variableName.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
@@ -114,11 +116,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.variableName.PlaceHolderColor = System.Drawing.Color.Gray;
             this.variableName.PlaceHolderText = "";
             this.variableName.ReadOnly = false;
+            this.variableName.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.variableName.SelectionStart = 0;
             this.variableName.Size = new System.Drawing.Size(279, 30);
             this.variableName.TabIndex = 7;
             this.variableName.TextAlignment = System.Windows.Forms.HorizontalAlignment.Left;
-            this.variableName.TextChanged += VariableName_TextChanged;
             // 
             // lblValue
             // 
@@ -138,6 +140,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.variableValue.ForeColor = System.Drawing.Color.White;
             this.variableValue.Icon = null;
             this.variableValue.Location = new System.Drawing.Point(72, 77);
+            this.variableValue.MaxCharacters = 32767;
             this.variableValue.Multiline = false;
             this.variableValue.Name = "variableValue";
             this.variableValue.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
@@ -145,6 +148,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.variableValue.PlaceHolderColor = System.Drawing.Color.Gray;
             this.variableValue.PlaceHolderText = "";
             this.variableValue.ReadOnly = false;
+            this.variableValue.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.variableValue.SelectionStart = 0;
             this.variableValue.Size = new System.Drawing.Size(279, 30);
             this.variableValue.TabIndex = 9;
@@ -175,8 +179,10 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.lblType);
             this.Controls.Add(this.variableType);
+            this.Location = new System.Drawing.Point(0, 0);
             this.MinimumSize = new System.Drawing.Size(363, 136);
             this.Name = "VariableDialog";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "VariableDialog";
             this.Load += new System.EventHandler(this.VariableDialog_Load);
             this.Controls.SetChildIndex(this.variableType, 0);

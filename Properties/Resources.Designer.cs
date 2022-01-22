@@ -63,6 +63,16 @@ namespace SuchByte.MacroDeck.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        public static System.Drawing.Bitmap Alert {
+            get {
+                object obj = ResourceManager.GetObject("Alert", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         public static System.Drawing.Bitmap Android {
             get {
                 object obj = ResourceManager.GetObject("Android", resourceCulture);
@@ -343,16 +353,6 @@ namespace SuchByte.MacroDeck.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
-        public static System.Drawing.Bitmap icon_color_picker {
-            get {
-                object obj = ResourceManager.GetObject("icon_color_picker", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
-        /// </summary>
         public static System.Drawing.Bitmap iOS {
             get {
                 object obj = ResourceManager.GetObject("iOS", resourceCulture);
@@ -416,6 +416,16 @@ namespace SuchByte.MacroDeck.Properties {
         public static System.Drawing.Bitmap Package_Manager_icon {
             get {
                 object obj = ResourceManager.GetObject("Package Manager icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap Palette {
+            get {
+                object obj = ResourceManager.GetObject("Palette", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

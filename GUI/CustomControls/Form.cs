@@ -7,14 +7,15 @@ using System.Text;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.Language;
+using System.Diagnostics;
+using System.IO;
+using SuchByte.MacroDeck.Logging;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
     public partial class Form : System.Windows.Forms.Form
     {
-
-
-
         public const int WM_NCLBUTTONDOWN = 0xA1;
         public const int HT_CAPTION = 0x2;
         [DllImportAttribute("user32.dll")]
@@ -27,17 +28,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         public Form()
         {
             InitializeComponent();
-            this.FormBorderStyle = FormBorderStyle.None;
-            this.DoubleBuffered = true;
-            this.SetStyle(ControlStyles.ResizeRedraw, true);
+            (new DropShadow()).ApplyShadows(this);
+            this.btnHelp.Text = LanguageManager.Strings.Help;
+            this.helpMenuDiscordSupport.Text = LanguageManager.Strings.DiscordSupport;
+            this.helpMenuWiki.Text = LanguageManager.Strings.Wiki;
+            this.helpMenuExportLog.Text = LanguageManager.Strings.ExportLatestLog;
         }
 
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            Pen pen = new Pen(Color.FromArgb(0, 123, 255), 1);
-            Rectangle rect = new Rectangle(0, 0, this.Width - 2, this.Height - 2);
-            e.Graphics.DrawRectangle(pen, rect);
-        }
 
         protected override void WndProc(ref Message m)
         {
@@ -65,11 +62,60 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             SendMessage(this.Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
         }
 
-        private void LblFeedback_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void BtnHelp_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            using (var feedbackDialog = new FeedbackDialog())
+            this.helpMenu.Show(Cursor.Position);
+        }
+
+        private void HelpMenuDiscordSupport_Click(object sender, EventArgs e)
+        {
+            var p = new Process
             {
-                feedbackDialog.ShowDialog();
+                StartInfo = new ProcessStartInfo("https://discord.gg/yr7TRaXum8")
+                {
+                    UseShellExecute = true,
+                }
+            };
+            p.Start();
+        }
+
+        private void HelpMenuWiki_Click(object sender, EventArgs e)
+        {
+            var p = new Process
+            {
+                StartInfo = new ProcessStartInfo("https://github.com/SuchByte/Macro-Deck/wiki")
+                {
+                    UseShellExecute = true,
+                }
+            };
+            p.Start();
+        }
+
+        private void HelpMenuExportLog_Click(object sender, EventArgs e)
+        {
+            using (var saveFileDialog = new SaveFileDialog
+            {
+                AddExtension = true,
+                Filter = "*.log|*.log",
+                DefaultExt = ".log",
+                FileName = new FileInfo(MacroDeckLogger.CurrentFilename).Name,
+            })
+            {
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        File.Copy(MacroDeckLogger.CurrentFilename, saveFileDialog.FileName, true);
+                        MacroDeckLogger.Info(GetType(), $"Exported latest log to { saveFileDialog.FileName }");
+                        using (var msgBox = new MessageBox())
+                        {
+                            msgBox.ShowDialog(LanguageManager.Strings.ExportLatestLog, string.Format(LanguageManager.Strings.LogSuccessfullyExportedToX, saveFileDialog.FileName), MessageBoxButtons.OK);
+                        }
+                    } catch (Exception ex)
+                    {
+                        MacroDeckLogger.Error(GetType(), "Error while exporting latest log: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                    }
+                }
             }
         }
     }

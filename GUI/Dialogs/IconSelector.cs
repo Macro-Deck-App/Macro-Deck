@@ -124,7 +124,7 @@ namespace SuchByte.MacroDeck.GUI
 
                             Task.Run(() =>
                             {
-                                MacroDeckLogger.Info(String.Format("Starting importing {0} icon(s)", openFileDialog.FileNames.Length));
+                                MacroDeckLogger.Info(GetType(), string.Format("Starting importing {0} icon(s)", openFileDialog.FileNames.Length));
                                 if (iconImportQuality.Pixels == -1)
                                 {
                                     foreach (var file in openFileDialog.FileNames)
@@ -132,11 +132,11 @@ namespace SuchByte.MacroDeck.GUI
                                         try
                                         {
                                             icons.Add(Image.FromFile(file));
-                                            MacroDeckLogger.Trace("Original image loaded");
+                                            MacroDeckLogger.Trace(GetType(), "Original image loaded");
                                         }
                                         catch (Exception ex)
                                         {
-                                            MacroDeckLogger.Error("Error while loading original image: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                                            MacroDeckLogger.Error(GetType(), "Error while loading original image: " + ex.Message + Environment.NewLine + ex.StackTrace);
                                         }
                                     }
                                 }
@@ -146,7 +146,7 @@ namespace SuchByte.MacroDeck.GUI
                                     {
                                         try
                                         {
-                                            MacroDeckLogger.Trace("Using Magick to resize image");
+                                            MacroDeckLogger.Trace(GetType(), "Using Magick to resize image");
                                             using (var collection = new MagickImageCollection(new FileInfo(file)))
                                             {
                                                 collection.Coalesce();
@@ -170,11 +170,11 @@ namespace SuchByte.MacroDeck.GUI
                                                     MacroDeckLogger.Trace("Resized image loaded");
                                                 }*/
                                             }
-                                            MacroDeckLogger.Trace("Image successfully resized");
+                                            MacroDeckLogger.Trace(GetType(), "Image successfully resized");
                                         }
                                         catch (Exception ex) 
                                         {
-                                            MacroDeckLogger.Error("Failed to resize image: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                                            MacroDeckLogger.Error(GetType(), "Failed to resize image: " + ex.Message + Environment.NewLine + ex.StackTrace);
                                         }
                                     }
                                 }
@@ -186,11 +186,11 @@ namespace SuchByte.MacroDeck.GUI
                                
                                 if (iconPack == null)
                                 {
-                                    MacroDeckLogger.Error("Icon pack was null");
+                                    MacroDeckLogger.Error(GetType(), "Icon pack was null");
                                     SpinnerDialog.SetVisisble(false, this);
                                     return;
                                 }
-                                MacroDeckLogger.Info(String.Format("Adding {0} icons to {1}", icons.Count, iconPack.Name));
+                                MacroDeckLogger.Info(GetType(), string.Format("Adding {0} icons to {1}", icons.Count, iconPack.Name));
                                 List<Image> gifIcons = new List<Image>();
                                 gifIcons.AddRange(icons.FindAll(x => x.RawFormat.ToString().ToLower() == "gif").ToArray());
                                 bool convertGifToStatic = false;
@@ -203,7 +203,7 @@ namespace SuchByte.MacroDeck.GUI
                                             convertGifToStatic = msgBox.ShowDialog(Language.LanguageManager.Strings.AnimatedGifImported, Language.LanguageManager.Strings.GenerateStaticIcon, MessageBoxButtons.YesNo) == DialogResult.Yes;
                                         }
                                     }));
-                                    MacroDeckLogger.Info("Convert gif to static? " + convertGifToStatic);
+                                    MacroDeckLogger.Info(GetType(), "Convert gif to static? " + convertGifToStatic);
                                 }
 
 
@@ -226,7 +226,7 @@ namespace SuchByte.MacroDeck.GUI
                                 }
 
                                 this.Invoke(new Action(() => this.LoadIcons(iconPack, true)));
-                                MacroDeckLogger.Info("Icons successfully imported");
+                                MacroDeckLogger.Info(GetType(), "Icons successfully imported");
                                 SpinnerDialog.SetVisisble(false, this);
                                 MacroDeckServer.SendAllIcons();
                             });

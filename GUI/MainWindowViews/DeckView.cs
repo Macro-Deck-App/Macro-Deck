@@ -24,7 +24,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 {
     public partial class DeckView : UserControl
     {
-        private Folders.MacroDeckFolder _currentFolder;
+        private MacroDeckFolder _currentFolder;
 
         private Control _buttonClicked;
 
@@ -109,7 +109,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         {
             Task.Run(() =>
             {
-                this.Invoke(new Action(() => this.SuspendLayout()));
                 if (clear)
                 {
                     foreach (RoundedButton roundedButton in this.buttonPanel.Controls)
@@ -138,14 +137,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 int buttonSize = 100;
                 int rows = ProfileManager.CurrentProfile.Rows, columns = ProfileManager.CurrentProfile.Columns, spacing = ProfileManager.CurrentProfile.ButtonSpacing; // from settings
                 int width = buttonPanel.Width, height = buttonPanel.Height; // from panel
-                int buttonSizeX, buttonSizeY; // for convenience
+                int buttonSizeX, buttonSizeY;
 
-                if (rows > columns) //if NOT "normal case" (ie, user attempting vertical layout), force horizontal
-                {
-                    rows = ProfileManager.CurrentProfile.Columns;
-                    columns = ProfileManager.CurrentProfile.Rows;
-
-                }
                 buttonSizeX = width / columns; //calc with spacing, remove it after
                 buttonSizeY = height / rows;
                 buttonSize = Math.Min(buttonSizeX, buttonSizeY) - spacing;
@@ -157,7 +150,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                         this.Invoke(new Action(() => this.LoadButton(row, column, buttonSize)));
                     }
                 }
-                this.Invoke(new Action(() => this.ResumeLayout()));
             });
 
             GC.Collect();
@@ -202,22 +194,15 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         {
             if (button == null)
             {
-                foreach (RoundedButton roundedButton in this.buttonPanel.Controls)
-                {
-                    if (roundedButton.Row.Equals(actionButton.Position_Y) && roundedButton.Column.Equals(actionButton.Position_X))
-                    {
-                        button = roundedButton;
-                    }
-                }
+                button = this.buttonPanel.Controls.Cast<RoundedButton>().Where(x => x.Row.Equals(actionButton.Position_Y) && x.Column.Equals(actionButton.Position_X)).FirstOrDefault();
             }
 
-            if (button == null) return;
+            if (button == null || actionButton == null) return;
 
-            if (actionButton != null)
+            switch (actionButton.State)
             {
-                if (actionButton.State == false)
-                {
-                    if (actionButton.LabelOff != null && actionButton.LabelOff.LabelBase64.Length > 0)
+                case false:
+                    if (actionButton.LabelOff != null && !string.IsNullOrWhiteSpace(actionButton.LabelOff.LabelBase64))
                     {
                         Image labelImage = Utils.Base64.GetImageFromBase64(actionButton.LabelOff.LabelBase64);
                         button.ForegroundImage = labelImage;
@@ -232,10 +217,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                             button.BackgroundImage = icon.IconImage;
                         }
                     }
-                }
-                else
-                {
-                    if (actionButton.LabelOn != null && actionButton.LabelOn.LabelBase64.Length > 0)
+                    break;
+                case true:
+                    if (actionButton.LabelOn != null && !string.IsNullOrWhiteSpace(actionButton.LabelOn.LabelBase64))
                     {
                         Image labelImage = Utils.Base64.GetImageFromBase64(actionButton.LabelOn.LabelBase64);
                         button.ForegroundImage = labelImage;
@@ -250,8 +234,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                             button.BackgroundImage = icon.IconImage;
                         }
                     }
-                }
-
+                    break;
             }
 
         }
@@ -259,14 +242,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void LoadButton(int row, int column, int buttonSize)
         {
-            RoundedButton button = null;
-            foreach (RoundedButton roundedButton in this.buttonPanel.Controls)
-            {
-                if (roundedButton.Row.Equals(row) && roundedButton.Column.Equals(column))
-                {
-                    button = roundedButton;
-                }
-            }
+            RoundedButton button = this.buttonPanel.Controls.Cast<RoundedButton>().Where(x => x.Row.Equals(row) && x.Column.Equals(column)).FirstOrDefault();
 
             if (button == null)
             {
@@ -329,8 +305,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
                 this.UpdateButtonIcon(actionButton, button);
             }
-
-           
 
             if (!this.buttonPanel.Controls.Contains(button))
             {
@@ -700,6 +674,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             {
                 profile = ProfileManager.Profiles.FirstOrDefault();
             }
+            Settings.Default.SelectedProfile = profile.ProfileId;
+            Settings.Default.Save();
             ProfileManager.CurrentProfile = profile;
             this._currentFolder = profile.Folders.FirstOrDefault();
             this.UpdateButtons(true);
@@ -802,6 +778,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             ProfileManager.CurrentProfile.ButtonRadius = (int)cornerRadius.Value;
             ProfileManager.CurrentProfile.ButtonBackground = checkButtonBackground.Checked;
             ProfileManager.Save();
+            MacroDeckLogger.Info(GetType(), string.Format("Updated profile settings of {0}:", ProfileManager.CurrentProfile.DisplayName) + Environment.NewLine +
+                                            string.Format("Rows: {0}", ProfileManager.CurrentProfile.Rows) + Environment.NewLine +
+                                            string.Format("Columns: {0}", ProfileManager.CurrentProfile.Columns) + Environment.NewLine +
+                                            string.Format("ButtonSpacing: {0}", ProfileManager.CurrentProfile.ButtonSpacing) + Environment.NewLine +
+                                            string.Format("ButtonRadius: {0}", ProfileManager.CurrentProfile.ButtonRadius) + Environment.NewLine +
+                                            string.Format("ButtonBackground: {0}", ProfileManager.CurrentProfile.ButtonBackground));
             this.UpdateButtons(true);
             foreach (MacroDeckClient macroDeckClient in MacroDeckServer.Clients.FindAll(macroDeckClient => macroDeckClient.Profile.ProfileId.Equals(ProfileManager.CurrentProfile.ProfileId)))
             {

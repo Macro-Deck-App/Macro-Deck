@@ -286,4 +286,13 @@ Please check all boxes (Private networks, Public networks and if it exists, Doma
 
 If this dialog does not appear and you still experience connection problems, please visit the wiki or the discord server for help. </FirewallAlertInfo>
   <GotIt>Got it!</GotIt>
+  <DeviceSettings>Device settings</DeviceSettings>
+  <Brightness>Brightness</Brightness>
+  <AutoConnect>Connect automatically</AutoConnect>
+  <DiscordSupport>Discord support</DiscordSupport>
+  <Wiki>Wiki</Wiki>
+  <ExportLatestLog>Export latest log</ExportLatestLog>
+  <LogSuccessfullyExportedToX>Log successfully exported to {0}</LogSuccessfullyExportedToX>
+  <Help>Help</Help>
+  <XWarningsXErrors>{0} warning(s), {1} error(s)</XWarningsXErrors>
 </Strings>

@@ -46,5 +46,17 @@ namespace SuchByte.MacroDeck.Properties {
                 this["DebugConsoleFilters"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SelectedProfile {
+            get {
+                return ((string)(this["SelectedProfile"]));
+            }
+            set {
+                this["SelectedProfile"] = value;
+            }
+        }
     }
 }

@@ -59,7 +59,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             // btnInstall
             // 
-            this.btnInstall.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnInstall.BorderRadius = 8;
             this.btnInstall.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnInstall.FlatAppearance.BorderSize = 0;
@@ -76,6 +75,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnInstall.TabIndex = 1;
             this.btnInstall.Text = "Install";
             this.btnInstall.UseVisualStyleBackColor = false;
+            this.btnInstall.UseWindowsAccentColor = true;
             this.btnInstall.Click += new System.EventHandler(this.BtnInstall_Click);
             // 
             // lblAuthor
@@ -146,7 +146,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             // btnConfigure
             // 
-            this.btnConfigure.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnConfigure.BorderRadius = 8;
             this.btnConfigure.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnConfigure.FlatAppearance.BorderSize = 0;
@@ -163,6 +162,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnConfigure.TabIndex = 10;
             this.btnConfigure.Text = "Configure";
             this.btnConfigure.UseVisualStyleBackColor = false;
+            this.btnConfigure.UseWindowsAccentColor = false;
             this.btnConfigure.Click += new System.EventHandler(this.BtnConfigure_Click);
             // 
             // lblCategory

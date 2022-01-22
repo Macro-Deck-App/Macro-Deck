@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SuchByte.MacroDeck.Logging;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -104,60 +105,41 @@ namespace SuchByte.MacroDeck.Utils
 
         public static Image GetImageFromBase64(string base64)
         {
-            if (base64 == null || base64.Length < 1) return null;
+            if (string.IsNullOrWhiteSpace(base64)) return null;
 
             HashSet<char> whiteSpace = new HashSet<char> { '\t', '\n', '\r', ' ' };
             int length = base64.Count(c => !whiteSpace.Contains(c));
             if (length % 4 != 0)
                 base64 += new string('=', 4 - length % 4);
             byte[] imageBytes = Convert.FromBase64String(base64);
-            
-            MemoryStream ms = new MemoryStream(imageBytes);
-            Image image = Image.FromStream(ms, true);
+
+            var ms = new MemoryStream(imageBytes);
+            Image image = image = Image.FromStream(ms, true);      
 
             return image;
         }
-
-        //public static Bitmap GetBitmapFromBase64(string base64)
-        //{
-        //    using (MemoryStream ms = new MemoryStream(Convert.FromBase64String(base64)))
-        //    {
-        //        Bitmap bitmap = new Bitmap(ms);
-        //        ms.Close();
-        //        ms.Dispose();
-        //        return bitmap;
-        //    }
-        //}
-
 
         public static string GetBase64FromImage(Image image)
         {
             if (image == null) return "";
             using (MemoryStream ms= new MemoryStream())
             {
-                image.Save(ms, image.RawFormat);
-                byte[] imageBytes = ms.ToArray();
-                string base64String = Convert.ToBase64String(imageBytes);
+                var format = image.RawFormat;
+                switch (format.ToString())
+                {
+                    case "Gif":
+                        break;
+                    default:
+                        image = new Bitmap(image); // Generating a new bitmap if the file format is not a gif because otherwise it causes a GDI+ error in some cases
+                        format = ImageFormat.Png;
+                        break;
+                }
+                image.Save(ms, format);
+                image.Dispose();
 
-                ms.Dispose();
-
-                return base64String;
+                return Convert.ToBase64String(ms.ToArray());
             }
         }
 
-        public static string GetBase64FromBitmap(Bitmap bitmap)
-        {
-            if (bitmap == null) return "";
-            using (MemoryStream ms = new MemoryStream())
-            {
-                bitmap.Save(ms, ImageFormat.Png);
-                byte[] imageBytes = ms.ToArray();
-                string base64String = Convert.ToBase64String(imageBytes);
-
-                ms.Dispose();
-
-                return base64String;
-            }
-        }
     }
 }

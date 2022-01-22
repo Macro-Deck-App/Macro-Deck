@@ -66,7 +66,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             }
             if (this._selected)
             {
-                pe.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(0, 123, 255)), this.Width - 3, 4, 3, this.Height - 8);
+                pe.Graphics.FillRectangle(new SolidBrush(Colors.WindowsAccentColor), this.Width - 3, 4, 3, this.Height - 8);
             }
         }
     }

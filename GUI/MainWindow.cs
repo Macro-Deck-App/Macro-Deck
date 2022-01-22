@@ -3,6 +3,8 @@ using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowContents;
 using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
 using SuchByte.MacroDeck.Utils;
@@ -44,8 +46,15 @@ namespace SuchByte.MacroDeck.GUI
         {
             this.InitializeComponent();
             this.UpdateTranslation();
-            Language.LanguageManager.LanguageChanged += LanguageChanged;
+            this.UpdateWarningsErrors();
+            LanguageManager.LanguageChanged += LanguageChanged;
             Updater.Updater.OnUpdateAvailable += UpdateAvailable;
+            MacroDeckLogger.OnWarningOrError += MacroDeckLogger_OnWarningOrError;
+        }
+
+        private void MacroDeckLogger_OnWarningOrError(object sender, EventArgs e)
+        {
+            UpdateWarningsErrors();
         }
 
         private void UpdateTranslation()
@@ -68,6 +77,15 @@ namespace SuchByte.MacroDeck.GUI
             {
                 this.VariablesView.UpdateTranslation();
             }
+        }
+
+        private void UpdateWarningsErrors()
+        {
+            this.Invoke(new Action(() =>
+            {
+                this.warningsErrorPanel.Visible = MacroDeckLogger.Errors > 0 || MacroDeckLogger.Warnings > 0;
+                this.lblErrorsWarnings.Text = string.Format(LanguageManager.Strings.XWarningsXErrors, MacroDeckLogger.Warnings, MacroDeckLogger.Errors);
+            }));
         }
 
         private void UpdateAvailable(object sender, EventArgs e)
@@ -184,6 +202,7 @@ namespace SuchByte.MacroDeck.GUI
 
             PluginManager.ScanUpdatesAsync();
             IconManager.ScanUpdatesAsync();
+            CenterToScreen();
         }
 
         private void OnPackageManagerUpdateCheckFinished(object sender, EventArgs e)
@@ -201,9 +220,7 @@ namespace SuchByte.MacroDeck.GUI
         {
             this.Invoke(new Action(() =>
             {
-                this.lblPluginsLoaded.Text = String.Format(Language.LanguageManager.Strings.XPluginsLoaded, PluginManager.Plugins.Values.Count);
-                this.lblPluginsNotLoaded.Text = String.Format(Language.LanguageManager.Strings.XPluginsDisabled, PluginManager.PluginsNotLoaded.Values.Count);
-                this.lblPluginsNotLoaded.Visible = PluginManager.PluginsNotLoaded.Values.Count > 0;
+                this.lblPluginsLoaded.Text = string.Format(Language.LanguageManager.Strings.XPluginsLoaded, $"{ PluginManager.Plugins.Values.Count } / { PluginManager.Plugins.Values.Count + PluginManager.PluginsNotLoaded.Values.Count } ");
                 this.btnPackageManager.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);
             }));
             
@@ -279,9 +296,16 @@ namespace SuchByte.MacroDeck.GUI
             this.SetView(this.VariablesView);
         }
 
-        private void lblTitle_Click(object sender, EventArgs e)
+        private void LblErrorsWarnings_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-
+            var p = new Process
+            {
+                StartInfo = new ProcessStartInfo(MacroDeckLogger.CurrentFilename)
+                {
+                    UseShellExecute = true,
+                }
+            };
+            p.Start();
         }
     }
 }

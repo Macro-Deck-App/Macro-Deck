@@ -107,11 +107,6 @@ namespace SuchByte.MacroDeck.Server
             }
 
             _clients.Add(macroDeckClient);
-
-            if (OnDeviceConnectionStateChanged != null)
-            {
-                OnDeviceConnectionStateChanged(macroDeckClient, EventArgs.Empty);
-            }
         }
 
         private static void OnClose(MacroDeckClient macroDeckClient)
@@ -197,6 +192,12 @@ namespace SuchByte.MacroDeck.Server
                     macroDeckClient.Folder = macroDeckClient.Profile.Folders.FirstOrDefault();
 
                     macroDeckClient.DeviceMessage.Connected(macroDeckClient);
+
+
+                    if (OnDeviceConnectionStateChanged != null)
+                    {
+                        OnDeviceConnectionStateChanged(macroDeckClient, EventArgs.Empty);
+                    }
                     MacroDeckLogger.Info(macroDeckClient.ClientId + " connected");
                     break;
                 case JsonMethod.BUTTON_PRESS:

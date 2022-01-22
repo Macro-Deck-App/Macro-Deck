@@ -66,7 +66,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             // 
             // btnDelete
             // 
-            this.btnDelete.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnDelete.BorderRadius = 8;
             this.btnDelete.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnDelete.FlatAppearance.BorderSize = 0;
@@ -82,11 +81,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             this.btnDelete.Size = new System.Drawing.Size(35, 35);
             this.btnDelete.TabIndex = 3;
             this.btnDelete.UseVisualStyleBackColor = false;
+            this.btnDelete.UseWindowsAccentColor = false;
             this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
             // 
             // btnRestore
             // 
-            this.btnRestore.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.btnRestore.BorderRadius = 8;
             this.btnRestore.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnRestore.FlatAppearance.BorderSize = 0;
@@ -102,6 +101,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             this.btnRestore.Size = new System.Drawing.Size(35, 35);
             this.btnRestore.TabIndex = 4;
             this.btnRestore.UseVisualStyleBackColor = false;
+            this.btnRestore.UseWindowsAccentColor = true;
             this.btnRestore.Click += new System.EventHandler(this.BtnRestore_Click);
             // 
             // BackupItem

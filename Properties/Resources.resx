@@ -136,8 +136,8 @@
   <data name="Android" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Android.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Package Manager icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Package Manager icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Palette" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Palette.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Backup-Restore" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Backup-Restore.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -148,11 +148,11 @@
   <data name="settings" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\settings.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="device manager" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\device manager.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="Arrow_Up_Normal" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Arrow_Up_Normal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="WindowsDefenderSecurityAlert" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\WindowsDefenderSecurityAlert.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="download-box" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\download-box.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -175,9 +175,6 @@
   <data name="Variable_Hover" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Variable_Hover.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Arrow_Top_Right_Hover" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Arrow_Top_Right_Hover.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="Chevron_Right" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Chevron-Right.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -190,14 +187,17 @@
   <data name="Keyboard" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Keyboard.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Edit_Normal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Edit_Normal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="reload" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\reload.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Close_Hover" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Close_Hover.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Edit_Normal" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Edit_Normal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Arrow_Top_Right_Hover" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Arrow_Top_Right_Hover.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Arrow_Up_Hover" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Arrow_Up_Hover.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -217,8 +217,8 @@
   <data name="Edit_Hover" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Edit_Hover.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="magnifying glass" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\magnifying glass.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Delete_Normal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Delete_Normal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Spinner" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Spinner.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -232,25 +232,28 @@
   <data name="appicon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\appicon.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="magnifying glass" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\magnifying glass.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="iOS" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\iOS.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Close_Normal" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Close_Normal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="icon_color_picker" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\icon_color_picker.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="device manager" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\device manager.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Macro Deck 2021 update" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Macro Deck 2021 update.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Delete_Normal" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Delete_Normal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Package Manager icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Package Manager icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Delete_Hover" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Delete_Hover.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="WindowsDefenderSecurityAlert" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\WindowsDefenderSecurityAlert.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Alert" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Alert.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

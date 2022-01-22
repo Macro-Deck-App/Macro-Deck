@@ -126,18 +126,15 @@ namespace SuchByte.MacroDeck
             Application.SetCompatibleTextRenderingDefault(false);
 
             // Register exception event handlers
-            if (!Debugger.IsAttached)
-            {
-                Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-                Application.ThreadException += ApplicationThreadException;
-                AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
-            }
-
+            
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            Application.ThreadException += ApplicationThreadException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
 
             //AppDomain.CurrentDomain.ProcessExit += OnApplicationExit;
             // Check for start arguments
 
-            int port = -1;
+                int port = -1;
             bool show = false;
             StartParameters = args;
             for (int i = 0; i < args.Length; i++)
@@ -184,7 +181,7 @@ namespace SuchByte.MacroDeck
             MacroDeckLogger.Info(Environment.NewLine + "==========================================");
             MacroDeckLogger.Info("Starting Macro Deck version " + VersionString + (args.Length > 0 ? " with parameters: " + string.Join(" ", args) : ""));
             MacroDeckLogger.Info("Executable: " + ExecutablePath);
-            MacroDeckLogger.Info("OS: " + Utils.OperatingSystemInformation.GetWindowsVersionName());
+            MacroDeckLogger.Info("OS: " + OperatingSystemInformation.GetWindowsVersionName());
 
             // Check if Macro Deck is already running
             if (Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location)).Count() > 1)
@@ -531,17 +528,17 @@ namespace SuchByte.MacroDeck
 
         private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            MacroDeckLogger.Error("CurrentDomainOnUnhandledException: " + e.ExceptionObject.ToString());
-            ShowCrashReport(e.ExceptionObject.ToString());
+            MacroDeckLogger.Error(typeof(MacroDeck), "CurrentDomainOnUnhandledException: " + e.ExceptionObject.ToString());
+            //ShowCrashReport(e.ExceptionObject.ToString());
         }
 
         private static void ApplicationThreadException(object sender, ThreadExceptionEventArgs e)
         {
-            MacroDeckLogger.Error("ApplicationThreadException: " + e.Exception.Message + Environment.NewLine + e.Exception.StackTrace);
-            ShowCrashReport(e.Exception.Message + Environment.NewLine + Environment.NewLine + e.Exception.StackTrace);
+            MacroDeckLogger.Error(typeof(MacroDeck), "ApplicationThreadException: " + e.Exception.Message + Environment.NewLine + e.Exception.StackTrace);
+            //ShowCrashReport(e.Exception.Message + Environment.NewLine + Environment.NewLine + e.Exception.StackTrace);
         }
 
-        private static void ShowCrashReport(string crashReport)
+        /*private static void ShowCrashReport(string crashReport)
         {
             foreach (GUI.CustomControls.Form form in Application.OpenForms)
             {
@@ -559,12 +556,11 @@ namespace SuchByte.MacroDeck
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
-        }
+        }*/
 
         public static bool IsAdministrator()
         {
-            return (new WindowsPrincipal(WindowsIdentity.GetCurrent()))
-                      .IsInRole(WindowsBuiltInRole.Administrator);
+            return (new WindowsPrincipal(WindowsIdentity.GetCurrent())).IsInRole(WindowsBuiltInRole.Administrator);
         }
     }
 }

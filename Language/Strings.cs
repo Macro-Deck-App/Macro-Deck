@@ -303,5 +303,14 @@ namespace SuchByte.MacroDeck.Language
         public string Important = "Important";
         public string FirewallAlertInfo = "After starting Macro Deck, a dialog from Windows Defender Firewall will appear.\r\nPlease check all boxes (Private networks, Public networks and if it exists, Domain networks).\r\n\r\nIf this dialog does not appear and you still experience connection problems, please visit the wiki or the discord server for help. ";
         public string GotIt = "Got it!";
+        public string DeviceSettings = "Device settings";
+        public string Brightness = "Brightness";
+        public string AutoConnect = "Connect automatically";
+        public string DiscordSupport = "Discord support";
+        public string Wiki = "Wiki";
+        public string ExportLatestLog = "Export latest log";
+        public string LogSuccessfullyExportedToX = "Log successfully exported to {0}";
+        public string Help = "Help";
+        public string XWarningsXErrors = "{0} warning(s), {1} error(s)";
     }
 }

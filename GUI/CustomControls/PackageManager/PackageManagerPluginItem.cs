@@ -130,6 +130,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 {
                     this.btnInstall.Enabled = true;
                     this.btnInstall.Text = Language.LanguageManager.Strings.Update;
+                    this.btnInstall.UseWindowsAccentColor = false;
                     this.btnInstall.BackColor = Color.FromArgb(20, 153, 0);
                     this.lblVersion.ForeColor = Color.Red;
                     this.lblVersion.Text = String.Format("↑ {0}", this._jsonObject["version"].ToString());
@@ -140,6 +141,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                     this.lblVersion.ForeColor = Color.Green;
                     this.btnInstall.Enabled = true;
                     this.btnInstall.Text = Language.LanguageManager.Strings.Uninstall;
+                    this.btnInstall.UseWindowsAccentColor = false;
                     this.btnInstall.BackColor = Color.FromArgb(65,65,65);
                     this._update = false;
                 }
@@ -155,6 +157,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 this.Installed = false;
                 this.btnInstall.Enabled = true;
                 this.btnInstall.Text = Language.LanguageManager.Strings.Install;
+                this.btnInstall.UseWindowsAccentColor = true;
                 this.btnInstall.BackColor = Color.FromArgb(0, 123, 255);
                 this.lblVersion.ForeColor = Color.White;
                 this._update = false;
