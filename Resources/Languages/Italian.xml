@@ -3,7 +3,6 @@
   <__Language__>Italian</__Language__>
   <__LanguageCode__>it</__LanguageCode__>
   <__Author__>PhoenixWyllow aka PW.Dev</__Author__>
-  <__Version__>2.2.1-dev</__Version__>
   <NetworkAdapter>Scheda di rete</NetworkAdapter>
   <IPAddress>Indirizzo IP</IPAddress>
   <Port>Porta</Port>
@@ -252,8 +251,8 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <Configuration>Configurazione</Configuration>
   <Profiles>Profili</Profiles>
   <Variables>Variabili</Variables>
-  <PluginConfigurations>Configrazioni dei plugin</PluginConfigurations>
-  <PluginCredentials>Credeziali dei plugin</PluginCredentials>
+  <PluginConfigurations>Configurazioni dei plugin</PluginConfigurations>
+  <PluginCredentials>Credenziali dei plugin</PluginCredentials>
   <InstalledIconPacks>Pacchetti d'icone installati</InstalledIconPacks>
   <Restore>Recupera</Restore>
   <ActionCannotBeReversed>Questa azione non potrà essere annullata</ActionCannotBeReversed>
@@ -270,4 +269,29 @@ Per le gif si consiglia di usare il preset Basso o Più basso.</IconImportQualit
   <ConfigureNow>Vuoi configurare {0} adesso?</ConfigureNow>
   <Hotkey>Hotkey</Hotkey>
   <PressTheKeysNow>Adesso premi i tasti che vuoi assegnare</PressTheKeysNow>
+  <XAction>{0} azione</XAction>
+  <XActions>{0} azioni</XActions>
+  <OnRelease>Al rilascio</OnRelease>
+  <OnLongPress>Quando premi a lungo</OnLongPress>
+  <OnLongPressRelease>Al rilascio con premi a lungo</OnLongPressRelease>
+  <SimulateOnPress>Simula "Quando premi"</SimulateOnPress>
+  <SimulateOnRelease>Simula "Al rilascio"</SimulateOnRelease>
+  <SimulateOnLongPress>Simula "Quando premi a lungo"</SimulateOnLongPress>
+  <SimulateOnLongPressRelease>Simula "Al rilascio con premi a lungo"</SimulateOnLongPressRelease>
+  <HotkeyExecutesOnPress>Il tasto di scelta rapida esegue le azioni "Quando premi" quando viene premuto</HotkeyExecutesOnPress>
+  <Important>Importante</Important>
+  <FirewallAlertInfo>Dopo aver avviato Macro Deck, apparirà una finestra di dialogo di Windows Defender Firewall.
+Seleziona tutte le caselle (reti private, reti pubbliche e, se esiste, reti di dominio).
+
+Se questa finestra di dialogo non appare e hai ancora problemi di connessione, per favore visita la wiki o il server discord per aiuto.</FirewallAlertInfo>
+  <GotIt>Tutto chiaro!</GotIt>
+  <DeviceSettings>Impostazioni del dispositivo</DeviceSettings>
+  <Brightness>Luminosità</Brightness>
+  <AutoConnect>Connetti automaticamente</AutoConnect>
+  <DiscordSupport>Supporto Discord</DiscordSupport>
+  <Wiki>Wiki</Wiki>
+  <ExportLatestLog>Esporta l'ultimo log</ExportLatestLog>
+  <LogSuccessfullyExportedToX>Log esportato con successo in {0}</LogSuccessfullyExportedToX>
+  <Help>Aiuto</Help>
+  <XWarningsXErrors>{0} avviso/i, {1} errore/i</XWarningsXErrors>
 </Strings>
