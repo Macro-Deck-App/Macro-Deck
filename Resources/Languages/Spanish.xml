@@ -272,4 +272,18 @@ Use el ajuste preestablecido más bajo o más bajo para GIF animados.</IconImpor
   <PressTheKeysNow>Presione las teclas que desea asignar ahora</PressTheKeysNow>
   <XAction>{0} acción</XAction>
   <XActions>{0} acciones</XActions>
+  <OnRelease>Lanzamineto</OnRelease>
+  <OnLongPress>Pulsación larga</OnLongPress>
+  <OnLongPressRelease>Lanzamiento con pulsación larga</OnLongPressRelease>
+  <SimulateOnPress>Simular "pulsación"</SimulateOnPress>
+  <SimulateOnRelease>Simular "Lanzamiento"</SimulateOnRelease>
+  <SimulateOnLongPress>Simular "pulsación larga"</SimulateOnLongPress>
+  <SimulateOnLongPressRelease>Simular "Lanzamiento con pulsación larga"</SimulateOnLongPressRelease>
+  <HotkeyExecutesOnPress>La tecla de acceso rápido ejecuta las acciones "pulsación" cuando se presiona</HotkeyExecutesOnPress>
+  <Important>Importante</Important>
+  <FirewallAlertInfo>Después de iniciar Macro Deck, aparecerá un cuadro de diálogo del Firewall de Windows Defender.
+Marque todas las casillas (Redes privadas, Redes públicas y, si existe, Redes de dominio).
+
+Si este cuadro de diálogo no aparece y aún experimenta problemas de conexión, visite la wiki o el servidor de discord para obtener ayuda. </FirewallAlertInfo>
+  <GotIt>¡Entendido!</GotIt>
 </Strings>
