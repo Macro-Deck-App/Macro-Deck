@@ -21,7 +21,6 @@ English.xml
 <Strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <__Language__>English</__Language__> <!-- The ISO name of the translation -->
   <__LanguageCode__>en</__LanguageCode__> <!-- The ISO-639-1 code of the translation -->
-  <__Author__>Macro Deck</__Author__> <!-- Your name -->
   .
   .
   .
