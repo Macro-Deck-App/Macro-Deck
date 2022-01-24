@@ -22,7 +22,6 @@ English.xml
   <__Language__>English</__Language__> <!-- The ISO name of the translation -->
   <__LanguageCode__>en</__LanguageCode__> <!-- The ISO-639-1 code of the translation -->
   <__Author__>Macro Deck</__Author__> <!-- Your name -->
-  <__Version__>2.1.0-beta</__Version> <!-- Macro Deck version, this file is based of -->
   .
   .
   .
