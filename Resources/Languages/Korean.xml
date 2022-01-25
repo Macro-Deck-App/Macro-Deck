@@ -1,0 +1,297 @@
+<?xml version="1.0"?>
+<Strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <__Language__>Korean</__Language__>
+  <__LanguageCode__>ko</__LanguageCode__>
+  <__Author__>Macro Deck</__Author__>
+  <NetworkAdapter>네트워크 어댑터</NetworkAdapter>
+  <IPAddress>IP주소</IPAddress>
+  <Port>포트</Port>
+  <Info>정보</Info>
+  <Error>오류</Error>
+  <Warning>경고</Warning>
+  <ConfigureNetworkInfo>올바른 네트워크 어댑터를 선택하는 것은 정말 중요해요. 올바른 어댑터를 선택하지 않으면 클라이언트를 컴퓨터에 연결할 수 없어요. 대부분의 경우 네트워크 어댑터의 이름은 "이더넷" 또는 "WI-FI" 처럼 보이고 IP주소는 "192.168.0.xxx" 처럼 보입니다.
+  
+  Macro Deck의 기본 포트는 8191 입니다. 다른 프로그램에서 이 포트를 사용한다면 변경할 수 있어요.</ConfigureNetworkInfo>
+  <AutomaticallyCheckUpdates>자동으로 업데이트 확인</AutomaticallyCheckUpdates>
+  <AutomaticallyStartWithWindows>Windows 시작시 자동 실행</AutomaticallyStartWithWindows>
+  <Show>Configure Macro Deck</Show>
+  <Exit>Exit Macro Deck</Exit>
+  <XUpdatesAvailable>{0} updates available</XUpdatesAvailable>
+  <Profile>프로필</Profile>
+  <Columns>가로</Columns>
+  <Rows>세로</Rows>
+  <Spacing>간격</Spacing>
+  <CornerRadius>부드러운 테두리</CornerRadius>
+  <ButtonBackGround>버튼 배경</ButtonBackGround>
+  <AreYouSure>확실해요?</AreYouSure>
+  <Behaviour>Behaviour</Behaviour>
+  <Plugins>플러그인</Plugins>
+  <IconPacks>아이콘 팩</IconPacks>
+  <All>All</All>
+  <Updates>업데이트</Updates>
+  <Installed>설치됨</Installed>
+  <Install>설치</Install>
+  <Search>검색...</Search>
+  <Name>이름</Name>
+  <Type>형식</Type>
+  <Value>값</Value>
+  <Creator>생성자</Creator>
+  <Ok>확인</Ok>
+  <FolderName>Folder name</FolderName>
+  <Never>Never</Never>
+  <OnApplicationFocus>On application focus</OnApplicationFocus>
+  <Application>Application</Application>
+  <Devices>Devices</Devices>
+  <Create>Create</Create>
+  <Save>Save</Save>
+  <Appearance>Appearance</Appearance>
+  <ButtonState>Button state</ButtonState>
+  <Label>Label</Label>
+  <Top>Top</Top>
+  <Center>Center</Center>
+  <Bottom>Bottom</Bottom>
+  <Path>Path</Path>
+  <CurrentState>Current state</CurrentState>
+  <Off>Off</Off>
+  <On>On</On>
+  <DownloadAndInstall>다운로드 및 설치</DownloadAndInstall>
+  <Downloading>다운로드 중...</Downloading>
+  <Color>Color</Color>
+  <IconPack>아이콘 팩</IconPack>
+  <Size>Size</Size>
+  <CurrentProgress>Current progress</CurrentProgress>
+  <TotalProgress>Total progress</TotalProgress>
+  <XDownloads>{0} downloads</XDownloads>
+  <Update>업데이트</Update>
+  <Plugin>플러그인</Plugin>
+  <MacroDeckNeedsARestart>Macro Deck 은 재시작이 필요해요.</MacroDeckNeedsARestart>
+  <MacroDeckMustBeRestartedForTheChanges>Macro Deck must be restarted for the changes to take effect. Would you like to restart Macro Deck now?</MacroDeckMustBeRestartedForTheChanges>
+  <Configure>환경설정</Configure>
+  <Uninstall>제거</Uninstall>
+  <NotLoaded>Not loaded</NotLoaded>
+  <Yes>Yes</Yes>
+  <No>No</No>
+  <Status>상태</Status>
+  <BlockConnection>연결 차단</BlockConnection>
+  <Change>Change</Change>
+  <Id>ID</Id>
+  <Connected>연결됨</Connected>
+  <Disconnected>연결 끊김</Disconnected>
+  <Trigger>Trigger</Trigger>
+  <Action>Action</Action>
+  <Condition>Condition</Condition>
+  <InstalledVersion>Installed version</InstalledVersion>
+  <UpdateChannel>Update channel</UpdateChannel>
+  <CheckForUpdatesNow>지금 업데이트 확인</CheckForUpdatesNow>
+  <Author>Author</Author>
+  <Version>Version</Version>
+  <TheFolderWillBeDeleted>The folder {0} with all its action buttons will be deleted.</TheFolderWillBeDeleted>
+  <TheProfileWillBeDeleted>The profile {0} with all its folders and action buttons will be deleted.</TheProfileWillBeDeleted>
+  <ServerOffline>서버 오프라인</ServerOffline>
+  <ServerRunning>서버 작동중</ServerRunning>
+  <XPluginsLoaded>{0}개 플러그인 불러옴</XPluginsLoaded>
+  <XPluginsDisabled>{0}개 플러그인 비활성</XPluginsDisabled>
+  <XClientsConnected>{0}개 클라이언트 접속중</XClientsConnected>
+  <IpAddressHostNamePort>IP주소/호스트이름 : 포트</IpAddressHostNamePort>
+  <InitialSetupButtonBack>&lt;- 이전</InitialSetupButtonBack>
+  <InitialSetupButtonNext>다음 -&gt;</InitialSetupButtonNext>
+  <InitialSetupButtonFinish>Finish</InitialSetupButtonFinish>
+  <InitialSetupSelectLanguage>언어를 선택하세요</InitialSetupSelectLanguage>
+  <InitialSetupPage>페이지 {0}/{1}</InitialSetupPage>
+  <InitialSetupWelcome>Macro Deck 2를 사용해주셔서 감사합니다!</InitialSetupWelcome>
+  <InitialSetupLetsConfigure>Macro Deck 설정을 시작할게요.</InitialSetupLetsConfigure>
+  <InitialSetupConfigureNetworkSettings>인터넷 설정</InitialSetupConfigureNetworkSettings>
+  <InitialSetupConfigureGridPreferences>Now let's configure the grid to your preferences</InitialSetupConfigureGridPreferences>
+  <InitialSetupPickAllPluginsYouNeed>필요한 플러그인 선택</InitialSetupPickAllPluginsYouNeed>
+  <InitialSetupDontWorryInstallUninstallPlugins>언제든지 패키지 관리자에서 설치 및 삭제할 수 있어요.</InitialSetupDontWorryInstallUninstallPlugins>
+  <InitialSetupWantSomeIcons>원하는 아이콘 선택</InitialSetupWantSomeIcons>
+  <InitialSetupInstallIconPacksPackageManager>언제든지 패키지 관리자에서 아이콘 팩을 설치할 수 있어요.</InitialSetupInstallIconPacksPackageManager>
+  <InitialSetupAlmostDone>거의 다 했어요!</InitialSetupAlmostDone>
+  <KnownDevices>연결된 장치 목록</KnownDevices>
+  <AskOnNewConnections>새로운 연결을 물어보기</AskOnNewConnections>
+  <AllowAllNewConnections>모든 새로운 연결을 허용하기 (추천하지 않아요)</AllowAllNewConnections>
+  <BlockAllNewConnections>모든 새로운 연결을 차단하기</BlockAllNewConnections>
+  <InstallDLL>Install .dll (not recommended)</InstallDLL>
+  <NeverInstallDLLFiles>Never install .dll files from sources you don't trust! .dll files from unknown sources may harm your system, only install it when you know what you do! Do you really like to install a .dll plugin?</NeverInstallDLLFiles>
+  <XWillBeUninstalled>{0} will be uninstalled.</XWillBeUninstalled>
+  <XSuccessfullyUninstalled>{0} will be uninstalled. Macro Deck must be restarted to take the changes effect. Restart Macro Deck now?</XSuccessfullyUninstalled>
+  <CreateVariable>변수 생성</CreateVariable>
+  <DeleteVariable>변수 삭제</DeleteVariable>
+  <SelectAPluginAndActionToBegin>Select a plugin and a action to begin</SelectAPluginAndActionToBegin>
+  <ActionNeedsNoConfiguration>This action needs no configuration</ActionNeedsNoConfiguration>
+  <CantCreateFolder>Can't create folder</CantCreateFolder>
+  <FolderCalledXAlreadyExists>A folder called {0} already exists</FolderCalledXAlreadyExists>
+  <OnPress>On press</OnPress>
+  <OnEvent>On event</OnEvent>
+  <CantCreateIconPack>Can't create icon pack</CantCreateIconPack>
+  <IconPackCalledXAlreadyExists>A icon pack called {0} already exists</IconPackCalledXAlreadyExists>
+  <CantCreateProfile>Can't create profile</CantCreateProfile>
+  <ProfileCalledXAlreadyExists>A profile called {0} already exists</ProfileCalledXAlreadyExists>
+  <TheresAnUpdateForYou>There's an update for you :)</TheresAnUpdateForYou>
+  <VersionXIsNowAvailable>버전 {0} ({1}) 이 준비됐어요</VersionXIsNowAvailable>
+  <ReadyToDownloadUpdate>Ready to download update</ReadyToDownloadUpdate>
+  <DownloadingUpdate>업데이트 다운로드 중... {0}% ({1}MB/{2}MB)</DownloadingUpdate>
+  <VerifyingUpdateFile>업데이트 파일 확인 중...</VerifyingUpdateFile>
+  <MD5NotValid>MD5 checksum is not valid</MD5NotValid>
+  <StartingInstaller>Starting installer</StartingInstaller>
+  <FileNotFound>File not found</FileNotFound>
+  <TryAgainOrDownloadManually>Try again or download the update manually</TryAgainOrDownloadManually>
+  <Trending>Trending</Trending>
+  <Layers>Layers</Layers>
+  <AddImage>Add image</AddImage>
+  <IconImportQualityInfo>고화질 아이콘은 큰 애니메이션 GIF를 사용할 때 메모리 사용과 로딩 시간을 증가시킬 수 있어요.
+
+
+GIF를 사용할 땐 낮음 또는 최저 프리셋을 권장해요.</IconImportQualityInfo>
+  <Original>원본</Original>
+  <High350px>높음 (350px)</High350px>
+  <Normal200px>보통 (200px)</Normal200px>
+  <Low150px>낮음 (150px)</Low150px>
+  <Lowest100px>최저 (100px)</Lowest100px>
+  <ImportIconPack>아이콘 팩 가져오기</ImportIconPack>
+  <ExportIconPack>아이콘 팩 내보내기</ExportIconPack>
+  <CreateIcon>아이콘 생성</CreateIcon>
+  <ImportIcon>아이콘 가져오기</ImportIcon>
+  <DeleteIcon>아이콘 삭제</DeleteIcon>
+  <IconSelectorManagedInfo>이 아이콘 팩은 플러그인 관리자에 의해 관리돼요.</IconSelectorManagedInfo>
+  <DownloadingXPackages>{0}개의 패키지 다운로드 중</DownloadingXPackages>
+  <PluginCouldNotBeLoaded>플러그인을 불러올 수 없어요. 설치된 버전의 플러그인은 이 버전의 Macro Deck와 호환되지 않을 수 있어요.</PluginCouldNotBeLoaded>
+  <CantChangeName>이름을 바꿀 수 없어요</CantChangeName>
+  <DeviceCalledXAlreadyExists>{0}는 이미 그 이름으로 불리고 있는걸요.</DeviceCalledXAlreadyExists>
+  <NewConnection>새로운 연결</NewConnection>
+  <XIsAnUnknownDevice>알 수 없는 장치({0})가 Macro Deck에 연결하려고 해요. 연결을 허용할까요?</XIsAnUnknownDevice>
+  <ShouldMacroDeckBlockConnectionsFromX>Should Macro Deck automatically block future connections from {0}?</ShouldMacroDeckBlockConnectionsFromX>
+  <FailedToStartServer>서버를 시작하지 못했어요. 포트가 이미 사용 중이거나 잘못된 네트워크 어댑터를 설정했을 수 있어요. 설정에서 올바른 네트워크 어댑터를 설정했는지 확인하고 포트를 변경해보세요.</FailedToStartServer>
+  <ErrorWhileLoadingPlugins>Error while loading plugins</ErrorWhileLoadingPlugins>
+  <PluginXCouldNotBeLoaded>{0} version {1} could not be loaded.Perhaps it is not compatible with this version of Macro Deck. Actions that uses this plugin, will not work until the plugin is updated.</PluginXCouldNotBeLoaded>
+  <InstallationSuccessfull>설치 성공</InstallationSuccessfull>
+  <PluginXInstalledSuccessfully>{0} was installed successfully</PluginXInstalledSuccessfully>
+  <ErrorWhileInstallingPlugin>Error while installing plugin</ErrorWhileInstallingPlugin>
+  <PluginXCouldNotBeInstalled>{0} could not be installed. Perhaps it is not compatible with this version of Macro Deck</PluginXCouldNotBeInstalled>
+  <Settings>설정</Settings>
+  <Language>언어</Language>
+  <General>일반</General>
+  <Connection>연결</Connection>
+  <Backup>백업</Backup>
+  <About>프로그램 정보</About>
+  <NoUpdatesAvailable>사용 가능한 업데이트가 없어요.</NoUpdatesAvailable>
+  <LatestVersionInstalled>최신 버전이 이미 설치되어 있어요.</LatestVersionInstalled>
+  <WarningDevVersions>개발(Dev) 버전은 매우 불안정할 수 있으며 충돌이나 데이터 손실(설정된 버튼, 폴더 및 프로필)을 일으킬 수 있어요. 개발 채널을 사용할까요?</WarningDevVersions>
+  <WarningBetaVersions>베타(Beta) 버전은 불안정할 수 있으며 충돌을 일으킬 수 있어요. 베타 채널을 사용할까요?</WarningBetaVersions>
+  <VariableXGetsDeleted>The variable {0} gets deleted</VariableXGetsDeleted>
+  <DeckTitle>Deck</DeckTitle>
+  <DeviceManagerTitle>장치 관리자</DeviceManagerTitle>
+  <PackageManagerTitle>패키지 관리자</PackageManagerTitle>
+  <SettingsTitle>설정</SettingsTitle>
+  <VariablesTitle>글로벌 변수</VariablesTitle>
+  <Edit>수정</Edit>
+  <Delete>삭제</Delete>
+  <Run>Run</Run>
+  <Copy>복사</Copy>
+  <Paste>붙여넣기</Paste>
+  <WebSocketAPIVersion>웹소켓 API 버전</WebSocketAPIVersion>
+  <PluginAPIVersion>플러그인 API 버전</PluginAPIVersion>
+  <InstalledPlugins>설치된 플러그인</InstalledPlugins>
+  <OperatingSystem>OS 정보</OperatingSystem>
+  <DevelopedByX>독일에 사는 {0} 가 만들었어요.</DevelopedByX>
+  <XTranslationByX>{0} 번역은 {1} 가 했어요.</XTranslationByX>
+  <PackageManagerTabAvailable>Available</PackageManagerTabAvailable>
+  <PackageManagerTabInstalled>Installed</PackageManagerTabInstalled>
+  <Event>Event</Event>
+  <AutomaticallySwitchToFolder>Automatically switch to folder</AutomaticallySwitchToFolder>
+  <Restart>Macro Deck 재시작</Restart>
+  <Delay>Delay</Delay>
+  <If>If</If>
+  <Else>Else</Else>
+  <Online>온라인</Online>
+  <By>By</By>
+  <StateBinding>Bind state to</StateBinding>
+  <ErrorWhileLoadingPackageManager>Error while loading package manager. Perhaps you are not connected to the internet or Macro Deck is blocked by your firewall.</ErrorWhileLoadingPackageManager>
+  <UpdatesAvailable>Updates available</UpdatesAvailable>
+  <EnableIconCache>Enable icon cache (faster; higher memory usage)</EnableIconCache>
+  <WebClient>웹 클라이언트</WebClient>
+  <AndroidApp>안드로이드 클라이언트</AndroidApp>
+  <IOSApp>iOS 클라이언트</IOSApp>
+  <PluginMacroDeckFolder>Macro Deck folder</PluginMacroDeckFolder>
+  <ActionChangeFolder>Change folder</ActionChangeFolder>
+  <ActionChangeFolderDescription>Change the current folder on the current device to the configured folder</ActionChangeFolderDescription>
+  <ActionGoToParentFolder>Go to parent folder</ActionGoToParentFolder>
+  <ActionGoToParentFolderDescription>Change the current folder on the current device to the folders parent folder</ActionGoToParentFolderDescription>
+  <ActionGoToRootFolder>Go to root folder</ActionGoToRootFolder>
+  <ActionGoToRootFolderDescription>Change the current folder on the current device to the root folder</ActionGoToRootFolderDescription>
+  <PluginMacroDeckVariables>Macro Deck variables</PluginMacroDeckVariables>
+  <ActionChangeVariableValue>Change variable value</ActionChangeVariableValue>
+  <ActionChangeVariableValueDescription>Count up, count down, set a variable value and toggle variable value</ActionChangeVariableValueDescription>
+  <CountUp>Count up</CountUp>
+  <CountDown>Count down</CountDown>
+  <Set>Set</Set>
+  <Toggle>Toggle</Toggle>
+  <Variable>Variable</Variable>
+  <PluginActionButton>This action button</PluginActionButton>
+  <ActionToggleActionButtonState>Toggle button state</ActionToggleActionButtonState>
+  <ActionToggleActionButtonStateDescription>Toggles the state of this button</ActionToggleActionButtonStateDescription>
+  <ActionSetActionButtonStateOff>Set button state to off</ActionSetActionButtonStateOff>
+  <ActionSetActionButtonStateOffDescription>Sets the state of this button to "off"</ActionSetActionButtonStateOffDescription>
+  <ActionSetActionButtonStateOn>Set button state to on</ActionSetActionButtonStateOn>
+  <ActionSetActionButtonStateOnDescription>Sets the state of this button to "on"</ActionSetActionButtonStateOnDescription>
+  <Description>Description</Description>
+  <License>라이선스</License>
+  <AnimatedGifImported>Animated gif imported</AnimatedGifImported>
+  <GenerateStaticIcon>Also generate a static icon of the GIFs first frame?</GenerateStaticIcon>
+  <XSuccessfullyExportedToX>{0} was successfully exported to {1}</XSuccessfullyExportedToX>
+  <SelectedIconWillBeDeleted>The selected icon will be deleted from the icon pack {0}</SelectedIconWillBeDeleted>
+  <SuccessfullyImportedIconPack>Successfully imported the icon pack {0}</SuccessfullyImportedIconPack>
+  <SelectedIconPackWillBeDeleted>The selected icon pack {0} with all its icons will be deleted</SelectedIconPackWillBeDeleted>
+  <GenerateStatic>Generate static</GenerateStatic>
+  <OnlyUserCreatedVariablesVisible>Only user-created variables are visible</OnlyUserCreatedVariablesVisible>
+  <MacroDeckUsesCottleTemplateEngine>Macro Deck uses the Cottle template engine. Click here for more information.</MacroDeckUsesCottleTemplateEngine>
+  <Result>Result</Result>
+  <InstallDevVersions>개발(Dev) 버전 설치</InstallDevVersions>
+  <InstallBetaVersions>베타(Beta) 버전 설치</InstallBetaVersions>
+  <WhatDoYouWantToRestore>이 백업에서 어떤 항목을 복원할까요?</WhatDoYouWantToRestore>
+  <Configuration>환경설정</Configuration>
+  <Profiles>프로필</Profiles>
+  <Variables>변수</Variables>
+  <PluginConfigurations>Plugin configurations</PluginConfigurations>
+  <PluginCredentials>Plugin credentials</PluginCredentials>
+  <InstalledIconPacks>Installed icon packs</InstalledIconPacks>
+  <Restore>복원</Restore>
+  <ActionCannotBeReversed>This action can not be reversed</ActionCannotBeReversed>
+  <ThisWillDeleteBackupPermanently>This will delete the backup permanently</ThisWillDeleteBackupPermanently>
+  <Created>생성됨</Created>
+  <PleaseWait>잠시만 기다려주세요...</PleaseWait>
+  <Backups>백업</Backups>
+  <CreateBackup>백업 생성</CreateBackup>
+  <BackupFailed>백업 실패</BackupFailed>
+  <BackupSuccessfullyCreated>백업 생성을 성공했어요.</BackupSuccessfullyCreated>
+  <CreateBackupBeforeUpdate>Do you want to create a backup before the update?</CreateBackupBeforeUpdate>
+  <CreatingBackup>백업 생성 중...</CreatingBackup>
+  <PluginNeedsConfiguration>This plugin needs to be configured</PluginNeedsConfiguration>
+  <ConfigureNow>Do you want to configure {0} now?</ConfigureNow>
+  <Hotkey>단축키</Hotkey>
+  <PressTheKeysNow>Press the keys you want to assign now</PressTheKeysNow>
+  <XAction>{0} action</XAction>
+  <XActions>{0} actions</XActions>
+  <OnRelease>On release</OnRelease>
+  <OnLongPress>On long press</OnLongPress>
+  <OnLongPressRelease>On long press release</OnLongPressRelease>
+  <SimulateOnPress>Simulate "On press"</SimulateOnPress>
+  <SimulateOnRelease>Simulate "On release"</SimulateOnRelease>
+  <SimulateOnLongPress>Simulate "On long press"</SimulateOnLongPress>
+  <SimulateOnLongPressRelease>Simulate "On long press release"</SimulateOnLongPressRelease>
+  <HotkeyExecutesOnPress>The hotkey executes the "On press" actions when pressed</HotkeyExecutesOnPress>
+  <Important>중요</Important>
+  <FirewallAlertInfo>Macro Deck을 시작하면 Windows 방화벽 대화상자가 나타나요. 모든 체크박스에 체크 후 액세스 허용을 눌러주세요.
+  
+  이 대화상자가 나타나지 않고 연결 문제가 발생하면 위키 또는 디스코드 서버를 방문해서 도움을 받아보세요.</FirewallAlertInfo>
+  <GotIt>알았어요!</GotIt>
+  <DeviceSettings>장치 설정</DeviceSettings>
+  <Brightness>밝기</Brightness>
+  <AutoConnect>자동 연결</AutoConnect>
+  <DiscordSupport>디스코드 지원</DiscordSupport>
+  <Wiki>위키</Wiki>
+  <ExportLatestLog>마지막 로그 내보내기</ExportLatestLog>
+  <LogSuccessfullyExportedToX>다음 로그를 내보내는데 성공했어요: {0}</LogSuccessfullyExportedToX>
+  <Help>도움</Help>
+  <XWarningsXErrors>{0} warning(s), {1} error(s)</XWarningsXErrors>
+</Strings>
