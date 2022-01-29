@@ -65,6 +65,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             base.OnPaint(pe);
 
+            pe.Graphics.InterpolationMode = InterpolationMode.High;
+
             int radius = (int)(((float)this.Radius / 100.0f) * (float)this.Height);
 
             Color borderColor = Color.FromArgb(35, 35, 35);

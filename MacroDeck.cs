@@ -20,6 +20,8 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Principal;
 using System.Threading;
@@ -35,7 +37,7 @@ namespace SuchByte.MacroDeck
         internal static readonly int BuildVersion = Int32.Parse(VersionString.Split(".")[3].ToString());
 
         public static readonly int ApiVersion = 20;
-        public static readonly int PluginApiVersion = 30;
+        public static readonly int PluginApiVersion = 31;
 
         // Start parameters
         internal static bool ForceUpdate = false;
@@ -134,7 +136,7 @@ namespace SuchByte.MacroDeck
             //AppDomain.CurrentDomain.ProcessExit += OnApplicationExit;
             // Check for start arguments
 
-                int port = -1;
+            int port = -1;
             bool show = false;
             StartParameters = args;
             for (int i = 0; i < args.Length; i++)
@@ -182,6 +184,17 @@ namespace SuchByte.MacroDeck
             MacroDeckLogger.Info("Starting Macro Deck version " + VersionString + (args.Length > 0 ? " with parameters: " + string.Join(" ", args) : ""));
             MacroDeckLogger.Info("Executable: " + ExecutablePath);
             MacroDeckLogger.Info("OS: " + OperatingSystemInformation.GetWindowsVersionName());
+            string networkInterfaces = "";
+            try
+            {
+                NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
+                foreach (NetworkInterface adapter in adapters)
+                {
+                    networkInterfaces += Environment.NewLine + $"{adapter.Name} - {adapter.GetIPProperties().UnicastAddresses.Where(x => x.Address.AddressFamily == AddressFamily.InterNetwork).FirstOrDefault().Address.ToString()}";
+                }
+            }
+            catch { }
+            MacroDeckLogger.Info($"Network interfaces: {networkInterfaces}");
 
             // Check if Macro Deck is already running
             if (Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location)).Count() > 1)

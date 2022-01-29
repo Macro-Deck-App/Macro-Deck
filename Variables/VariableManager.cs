@@ -227,10 +227,15 @@ namespace SuchByte.MacroDeck.Variables
             List<Variable> variablesLoaded = new List<Variable>();
             variablesLoaded.AddRange(query);
 
-            // Convert older variables to the new format
-            foreach (Variable variable in variablesLoaded)
+            // Convert older variables to the new format and remove duplicate entries
+            foreach (Variable variable in variablesLoaded.ToArray())
             {
                 variable.Name = ConvertNameString(variable.Name);
+                while (variablesLoaded.FindAll(x => x.Name.Equals(variable.Name)).Count > 1)
+                {
+                    MacroDeckLogger.Trace(typeof(VariableManager), $"Found {variable.Name} more then once");
+                    variablesLoaded.Remove(variable);
+                } 
             }
 
             Variables = variablesLoaded;

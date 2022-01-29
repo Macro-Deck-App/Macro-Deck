@@ -67,6 +67,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnDeck = new SuchByte.MacroDeck.GUI.CustomControls.ContentSelectorButton();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnPackageManager = new SuchByte.MacroDeck.GUI.CustomControls.ContentSelectorButton();
+            this.btnExtensionStore = new SuchByte.MacroDeck.GUI.CustomControls.ContentSelectorButton();
             this.btnDeviceManager = new SuchByte.MacroDeck.GUI.CustomControls.ContentSelectorButton();
             this.btnVariables = new SuchByte.MacroDeck.GUI.CustomControls.ContentSelectorButton();
             this.panel2 = new System.Windows.Forms.Panel();
@@ -85,6 +86,7 @@ namespace SuchByte.MacroDeck.GUI
             this.contentButtonPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.btnDeck)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnPackageManager)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.btnExtensionStore)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnDeviceManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnVariables)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnSettings)).BeginInit();
@@ -136,6 +138,7 @@ namespace SuchByte.MacroDeck.GUI
             this.contentButtonPanel.Controls.Add(this.btnDeck);
             this.contentButtonPanel.Controls.Add(this.panel1);
             this.contentButtonPanel.Controls.Add(this.btnPackageManager);
+            this.contentButtonPanel.Controls.Add(this.btnExtensionStore);
             this.contentButtonPanel.Controls.Add(this.btnDeviceManager);
             this.contentButtonPanel.Controls.Add(this.btnVariables);
             this.contentButtonPanel.Controls.Add(this.panel2);
@@ -188,6 +191,23 @@ namespace SuchByte.MacroDeck.GUI
             this.btnPackageManager.TabStop = false;
             this.btnPackageManager.Click += new System.EventHandler(this.BtnPackageManager_Click);
             // 
+            // btnExtensionStore
+            // 
+            this.btnExtensionStore.BackColor = System.Drawing.Color.Red;
+            this.btnExtensionStore.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnExtensionStore.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnExtensionStore.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnExtensionStore.ForeColor = System.Drawing.Color.White;
+            this.btnExtensionStore.Location = new System.Drawing.Point(5, 119);
+            this.btnExtensionStore.Margin = new System.Windows.Forms.Padding(5);
+            this.btnExtensionStore.Name = "btnExtensionStore";
+            this.btnExtensionStore.Selected = false;
+            this.btnExtensionStore.Size = new System.Drawing.Size(43, 43);
+            this.btnExtensionStore.TabIndex = 6;
+            this.btnExtensionStore.TabStop = false;
+            this.btnExtensionStore.Visible = false;
+            this.btnExtensionStore.Click += new System.EventHandler(this.btnExtensionStore_Click);
+            // 
             // btnDeviceManager
             // 
             this.btnDeviceManager.BackColor = System.Drawing.Color.Transparent;
@@ -196,7 +216,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnDeviceManager.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnDeviceManager.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnDeviceManager.ForeColor = System.Drawing.Color.White;
-            this.btnDeviceManager.Location = new System.Drawing.Point(5, 119);
+            this.btnDeviceManager.Location = new System.Drawing.Point(5, 172);
             this.btnDeviceManager.Margin = new System.Windows.Forms.Padding(5);
             this.btnDeviceManager.Name = "btnDeviceManager";
             this.btnDeviceManager.Selected = false;
@@ -213,7 +233,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnVariables.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnVariables.Font = new System.Drawing.Font("Tahoma", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnVariables.ForeColor = System.Drawing.Color.White;
-            this.btnVariables.Location = new System.Drawing.Point(5, 172);
+            this.btnVariables.Location = new System.Drawing.Point(5, 225);
             this.btnVariables.Margin = new System.Windows.Forms.Padding(5);
             this.btnVariables.Name = "btnVariables";
             this.btnVariables.Selected = false;
@@ -226,7 +246,7 @@ namespace SuchByte.MacroDeck.GUI
             // panel2
             // 
             this.panel2.BackColor = System.Drawing.Color.Silver;
-            this.panel2.Location = new System.Drawing.Point(5, 223);
+            this.panel2.Location = new System.Drawing.Point(5, 276);
             this.panel2.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(43, 2);
@@ -423,6 +443,7 @@ namespace SuchByte.MacroDeck.GUI
             this.contentButtonPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.btnDeck)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnPackageManager)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.btnExtensionStore)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnDeviceManager)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnVariables)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnSettings)).EndInit();
@@ -457,5 +478,6 @@ namespace SuchByte.MacroDeck.GUI
         private System.Windows.Forms.Panel warningsErrorPanel;
         private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.LinkLabel lblErrorsWarnings;
+        private CustomControls.ContentSelectorButton btnExtensionStore;
     }
 }

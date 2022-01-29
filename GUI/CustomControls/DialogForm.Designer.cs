@@ -31,10 +31,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogForm));
             this.btnClose = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
-            this.open_animation_timer = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.btnClose)).BeginInit();
             this.SuspendLayout();
             // 
@@ -48,7 +46,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnClose.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnClose.ForeColor = System.Drawing.Color.White;
             this.btnClose.HoverImage = global::SuchByte.MacroDeck.Properties.Resources.Close_Hover;
-            this.btnClose.Location = new System.Drawing.Point(1019, 1);
+            this.btnClose.Location = new System.Drawing.Point(1017, 3);
             this.btnClose.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(25, 25);
@@ -75,7 +73,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "DialogForm";
             this.Load += new System.EventHandler(this.DialogForm_Load);
-            this.MouseDown += DialogForm_MouseDown;
             ((System.ComponentModel.ISupportInitialize)(this.btnClose)).EndInit();
             this.ResumeLayout(false);
 
@@ -84,6 +81,5 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         #endregion
         private PictureButton btnClose;
-        private System.Windows.Forms.Timer open_animation_timer;
     }
 }

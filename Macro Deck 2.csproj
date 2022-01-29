@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
-    <VersionMinor>7</VersionMinor>
-    <VersionPatch>2</VersionPatch>
+    <VersionMinor>8</VersionMinor>
+    <VersionPatch>0</VersionPatch>
     <VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
   </PropertyGroup>
   
@@ -45,6 +45,8 @@
     <None Remove="Resources\Languages\French.xml" />
     <None Remove="Resources\Languages\German.xml" />
     <None Remove="Resources\Languages\Italian.xml" />
+    <None Remove="Resources\Languages\Korean.xml" />
+    <None Remove="Resources\Languages\Portuguese.xml" />
     <None Remove="Resources\Languages\Russian.xml" />
     <None Remove="Resources\Languages\Spanish.xml" />
     <None Remove="Resources\Languages\Turkish.xml" />
@@ -63,6 +65,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\Languages\Portuguese.xml" />
     <EmbeddedResource Include="Resources\Licenses.xml">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
@@ -89,6 +92,10 @@
     <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="106.12.0" />
     <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
     <PackageReference Include="SQLiteNetExtensions" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Languages\Korean.xml" />
   </ItemGroup>
 
   <ItemGroup>

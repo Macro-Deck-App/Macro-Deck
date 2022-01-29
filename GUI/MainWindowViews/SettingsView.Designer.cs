@@ -110,6 +110,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.verticalTabControl.Multiline = true;
             this.verticalTabControl.Name = "verticalTabControl";
             this.verticalTabControl.SelectedIndex = 0;
+            this.verticalTabControl.SelectedTabColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(225)))));
             this.verticalTabControl.Size = new System.Drawing.Size(1131, 534);
             this.verticalTabControl.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
             this.verticalTabControl.TabIndex = 12;
@@ -225,7 +226,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // btnChangePort
             // 
-            this.btnChangePort.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnChangePort.BorderRadius = 8;
             this.btnChangePort.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnChangePort.FlatAppearance.BorderSize = 0;
@@ -242,6 +242,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.btnChangePort.TabIndex = 12;
             this.btnChangePort.Text = "Ok";
             this.btnChangePort.UseVisualStyleBackColor = false;
+            this.btnChangePort.UseWindowsAccentColor = true;
             this.btnChangePort.Click += new System.EventHandler(this.BtnChangePort_Click);
             // 
             // groupConnectionInfo
@@ -413,7 +414,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // btnCheckUpdates
             // 
-            this.btnCheckUpdates.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnCheckUpdates.BorderRadius = 8;
             this.btnCheckUpdates.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnCheckUpdates.FlatAppearance.BorderSize = 0;
@@ -430,6 +430,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.btnCheckUpdates.TabIndex = 9;
             this.btnCheckUpdates.Text = "Check for updates now";
             this.btnCheckUpdates.UseVisualStyleBackColor = false;
+            this.btnCheckUpdates.UseWindowsAccentColor = true;
             this.btnCheckUpdates.Click += new System.EventHandler(this.BtnCheckUpdates_Click);
             // 
             // lblInstalledVersion
@@ -475,7 +476,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // btnCreateBackup
             // 
-            this.btnCreateBackup.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnCreateBackup.BorderRadius = 8;
             this.btnCreateBackup.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnCreateBackup.FlatAppearance.BorderSize = 0;
@@ -492,6 +492,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.btnCreateBackup.TabIndex = 5;
             this.btnCreateBackup.Text = "Create backup";
             this.btnCreateBackup.UseVisualStyleBackColor = false;
+            this.btnCreateBackup.UseWindowsAccentColor = true;
             this.btnCreateBackup.Click += new System.EventHandler(this.BtnCreateBackup_Click);
             // 
             // backupsPanel
@@ -559,7 +560,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // btnLicenses
             // 
-            this.btnLicenses.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnLicenses.BorderRadius = 8;
             this.btnLicenses.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnLicenses.FlatAppearance.BorderSize = 0;
@@ -576,6 +576,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.btnLicenses.TabIndex = 13;
             this.btnLicenses.Text = "3rd party licenses";
             this.btnLicenses.UseVisualStyleBackColor = false;
+            this.btnLicenses.UseWindowsAccentColor = true;
             this.btnLicenses.Click += new System.EventHandler(this.BtnLicenses_Click);
             // 
             // lblPluginAPIVersion
@@ -683,14 +684,14 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // tabIcons
             // 
-            this.tabIcons.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
+            this.tabIcons.ColorDepth = System.Windows.Forms.ColorDepth.Depth4Bit;
             this.tabIcons.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("tabIcons.ImageStream")));
             this.tabIcons.TransparentColor = System.Drawing.Color.Transparent;
-            this.tabIcons.Images.SetKeyName(0, "settings.png");
-            this.tabIcons.Images.SetKeyName(1, "Wifi.png");
+            this.tabIcons.Images.SetKeyName(0, "Cog.png");
+            this.tabIcons.Images.SetKeyName(1, "Ethernet.png");
             this.tabIcons.Images.SetKeyName(2, "Update.png");
             this.tabIcons.Images.SetKeyName(3, "Backup-Restore.png");
-            this.tabIcons.Images.SetKeyName(4, "Information.png");
+            this.tabIcons.Images.SetKeyName(4, "Informationpng.png");
             // 
             // SettingsView
             // 

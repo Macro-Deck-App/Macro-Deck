@@ -118,5 +118,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 }
             }
         }
+
     }
 }

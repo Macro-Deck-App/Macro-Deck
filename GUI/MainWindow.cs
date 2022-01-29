@@ -2,6 +2,7 @@
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowContents;
+using SuchByte.MacroDeck.GUI.MainWindowViews;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
@@ -38,6 +39,8 @@ namespace SuchByte.MacroDeck.GUI
                 return this._deckView;
             }
         }
+
+        public ExtensionStoreView ExtensionStoreView { get; set; }
         public PackageManagerView PackageManagerView { get; set; }
         public VariablesView VariablesView { get; set; }
         public SettingsView SettingsView { get; set; }
@@ -145,6 +148,10 @@ namespace SuchByte.MacroDeck.GUI
             } else if (view.GetType().Equals(typeof(PackageManagerView)))
             {
                 SelectContentButton(btnPackageManager);
+            }
+            else if (view.GetType().Equals(typeof(ExtensionStoreView)))
+            {
+                SelectContentButton(btnExtensionStore);
             }
             else if (view.GetType().Equals(typeof(SettingsView)))
             {
@@ -306,6 +313,15 @@ namespace SuchByte.MacroDeck.GUI
                 }
             };
             p.Start();
+        }
+
+        private void btnExtensionStore_Click(object sender, EventArgs e)
+        {
+            if (this.ExtensionStoreView == null)
+            {
+                this.ExtensionStoreView = new ExtensionStoreView();
+            }
+            this.SetView(this.ExtensionStoreView);
         }
     }
 }

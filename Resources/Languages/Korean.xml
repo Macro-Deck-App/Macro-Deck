@@ -2,7 +2,7 @@
 <Strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <__Language__>Korean</__Language__>
   <__LanguageCode__>ko</__LanguageCode__>
-  <__Author__>Macro Deck</__Author__>
+  <__Author__>skyeon15</__Author__>
   <NetworkAdapter>네트워크 어댑터</NetworkAdapter>
   <IPAddress>IP주소</IPAddress>
   <Port>포트</Port>

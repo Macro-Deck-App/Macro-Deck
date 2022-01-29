@@ -27,6 +27,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             InitializeComponent();
             (new DropShadow()).ApplyShadows(this);
             this.ResizeEnd += OnResizeEnd;
+            this.MouseDown += DialogForm_MouseDown;
         }
 
         private void OnResizeEnd(object sender, EventArgs e)

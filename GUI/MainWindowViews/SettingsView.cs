@@ -27,6 +27,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         public SettingsView()
         {
             InitializeComponent();
+            if (!DesignMode)
+            {
+                this.verticalTabControl.SelectedTabColor = Colors.WindowsAccentColor;
+            }
             this.Dock = DockStyle.Fill;
             this.UpdateTranslation();
             Updater.Updater.OnUpdateAvailable += UpdateAvailable;

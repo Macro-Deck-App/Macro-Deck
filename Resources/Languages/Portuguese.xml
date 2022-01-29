@@ -235,7 +235,7 @@ Para GIFs animados deves selecionar a defenição "baixa" ou "muito baixa".
 	<ActionSetActionButtonStateOffDescription>Define o estado do botão pressionado como "desligado"</ActionSetActionButtonStateOffDescription>
 	<ActionSetActionButtonStateOn>Definir o estado do botão como "ligado"</ActionSetActionButtonStateOn>
 	<ActionSetActionButtonStateOnDescription>Define o estado do botão pressionado como "ligado"</ActionSetActionButtonStateOnDescription>
-	<Description>Descrição/Description>
+	<Description>Descrição</Description>
 	<License>Licença</License>
 	<AnimatedGifImported>GIF animado foi importado</AnimatedGifImported>
 	<GenerateStaticIcon>Criar versão sem animação do Icon?</GenerateStaticIcon>

@@ -38,30 +38,17 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             {
                 Rectangle buttonSurface = new Rectangle(new Point(GetTabRect(i).Location.X + 6, GetTabRect(i).Location.Y - 2), new Size(GetTabRect(i).Width - 5, GetTabRect(i).Height - 1));
                 
-                Rectangle rectSelected = new Rectangle
-                {
-                    Height = 3,
-                    Width = buttonSurface.Width - 8,
-                    X = buttonSurface.X + 4,
-                    Y = buttonSurface.Y + buttonSurface.Height - 3,
-                };
-                Rectangle rectHover = new Rectangle
-                {
-                    Height = 3,
-                    Width = buttonSurface.Width - 16,
-                    X = buttonSurface.X + 8,
-                    Y = buttonSurface.Y + buttonSurface.Height - 3,
-                };
-
-                
-
                 using (SolidBrush backgroundBrush = new SolidBrush(this.Parent.BackColor))
-                using (SolidBrush selectedBrush = new SolidBrush(Color.FromArgb(0, 123, 255)))
+                using (SolidBrush selectedBrush = new SolidBrush(Colors.WindowsAccentColorDark))
                 {
-                    g.FillRectangle(backgroundBrush, buttonSurface);
-                    if (i == SelectedIndex)
+                    switch (i == SelectedIndex)
                     {
-                        g.FillRectangle(selectedBrush, rectSelected);
+                        case true:
+                            g.FillRectangle(selectedBrush, buttonSurface);
+                            break;
+                        case false:
+                            g.FillRectangle(backgroundBrush, buttonSurface);
+                            break;
                     }
                 }
 
@@ -70,8 +57,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 {
                     try
                     {
-                        g.DrawImage(ImageList.Images[TabPages[i].ImageIndex],
-                            new Point(buttonSurface.Location.X + 8, buttonSurface.Location.Y + 6));
+                        g.DrawImage(ImageList.Images[TabPages[i].ImageIndex], new Point(buttonSurface.Location.X + 8, buttonSurface.Location.Y + 6));
                         g.DrawString("  " + TabPages[i].Text, Font, Brushes.White, buttonSurface, new StringFormat
                         {
                             LineAlignment = StringAlignment.Center,
