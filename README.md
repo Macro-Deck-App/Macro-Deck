@@ -8,7 +8,8 @@
 - Icon packs
 - [Web client](http://web.macrodeck.org)
 - Built in package manager (to download plugins and icon packs)
-- Logic and global variables
+- [Variables](https://github.com/SuchByte/Macro-Deck/wiki/Variables)
+- [Cottle templates](https://cottle.readthedocs.io/en/stable/page/03-builtin.html)
 - Multiple profiles
 - Unlimited folders
 - [Discord community](https://discord.gg/yr7TRaXum8)
