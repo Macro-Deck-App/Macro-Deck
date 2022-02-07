@@ -3,7 +3,7 @@
   <__Language__>Russian</__Language__>
   <__LanguageCode__>ru</__LanguageCode__>
   <__Author__>LeetPanda1337, zedalert</__Author__>
-  <__Version__>2.6.7</__Version__>
+  <__Version__>2.7.1</__Version__>
   <NetworkAdapter>Сетевой адаптер</NetworkAdapter>
   <IPAddress>IP-адрес</IPAddress>
   <Port>Порт</Port>
@@ -281,4 +281,19 @@
   <SimulateOnLongPress>Симулировать "Длительное нажатие"</SimulateOnLongPress>
   <SimulateOnLongPressRelease>Симулировать "После длительного нажатия"</SimulateOnLongPressRelease>
   <HotkeyExecutesOnPress>Горячая клавиша активирует действие "При нажатии"</HotkeyExecutesOnPress>
+  <Important>Внимание</Important>
+  <FirewallAlertInfo>После запуска Macro Deck должно появиться окно предупреждения брандмауэра Windows Defender.
+Пожалуйста, установите соответствующие флажки (Частные сети, Общедоступные сети, или сеть Домена).
+
+Если это диалоговое окно не появилось, и вы не можете подключиться с других устройств, обратитесь к базе знаний.</FirewallAlertInfo>
+  <GotIt>Понятно</GotIt>
+  <DeviceSettings>Настройки устройства</DeviceSettings>
+  <Brightness>Яркость</Brightness>
+  <AutoConnect>Подключаться автоматически</AutoConnect>
+  <DiscordSupport>Discord канал</DiscordSupport>
+  <Wiki>База знаний</Wiki>
+  <ExportLatestLog>Экспортировать текущий журнал</ExportLatestLog>
+  <LogSuccessfullyExportedToX>Журнал экспортирован в {0}</LogSuccessfullyExportedToX>
+  <Help>Помощь</Help>
+  <XWarningsXErrors>Предупреждений: {0}, ошибок: {1}</XWarningsXErrors>
 </Strings>
