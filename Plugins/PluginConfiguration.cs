@@ -16,7 +16,7 @@ namespace SuchByte.MacroDeck.Plugins
             {
                 Dictionary<string, string> pluginConfig;
 
-                if (!File.Exists(Path.Combine(MacroDeck.PluginConfigPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
+                if (!File.Exists(Path.Combine(MacroDeck.PluginConfigPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json")))
                 {
                     pluginConfig = new Dictionary<string, string>();
                 }

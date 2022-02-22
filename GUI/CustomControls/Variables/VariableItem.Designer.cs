@@ -69,6 +69,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblValue.TabIndex = 2;
             this.lblValue.Text = "Value";
             this.lblValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblValue.UseMnemonic = false;
             // 
             // lblCreator
             // 
