@@ -116,7 +116,13 @@ namespace SuchByte.MacroDeck.Plugins
                 Dictionary<string, string> pluginCredentialDecrypted = new Dictionary<string, string>();
                 foreach (KeyValuePair<string, string> entry in pluginCredentialEncrypted)
                 {
-                    pluginCredentialDecrypted[entry.Key] = Utils.StringCipher.Decrypt(entry.Value, Utils.StringCipher.GetMachineGuid());
+                    try
+                    {
+                        pluginCredentialDecrypted[entry.Key] = Utils.StringCipher.Decrypt(entry.Value, Utils.StringCipher.GetMachineGuid());
+                    } catch
+                    {
+                        MacroDeckLogger.Warning(typeof(PluginCredentials), $"Unable to decrypt credentials for {plugin.Name}. Perhaps the machine GUID changed?");
+                    }
                 }
                 pluginCredentialsDecrypted.Add(pluginCredentialDecrypted);
             }

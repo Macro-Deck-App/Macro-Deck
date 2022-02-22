@@ -32,6 +32,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form));
             this.header = new SuchByte.MacroDeck.GUI.CustomControls.BufferedPanel();
+            this.btnClose = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.btnHelp = new System.Windows.Forms.LinkLabel();
             this.lblSafeMode = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -41,11 +42,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.helpMenuWiki = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.helpMenuExportLog = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnClose = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.header.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.btnClose)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.helpMenu.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.btnClose)).BeginInit();
             this.SuspendLayout();
             // 
             // header
@@ -62,6 +62,24 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.header.Size = new System.Drawing.Size(1200, 32);
             this.header.TabIndex = 0;
             this.header.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TitleBar_MouseDown);
+            // 
+            // btnClose
+            // 
+            this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnClose.BackColor = System.Drawing.Color.Transparent;
+            this.btnClose.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.Close_Normal;
+            this.btnClose.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnClose.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnClose.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnClose.ForeColor = System.Drawing.Color.White;
+            this.btnClose.HoverImage = global::SuchByte.MacroDeck.Properties.Resources.Close_Hover;
+            this.btnClose.Location = new System.Drawing.Point(1172, 3);
+            this.btnClose.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.btnClose.Name = "btnClose";
+            this.btnClose.Size = new System.Drawing.Size(25, 25);
+            this.btnClose.TabIndex = 2;
+            this.btnClose.TabStop = false;
+            this.btnClose.Click += new System.EventHandler(this.BtnClose_Click);
             // 
             // btnHelp
             // 
@@ -104,11 +122,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             // label2
             // 
-            this.label2.Font = new System.Drawing.Font("Tahoma", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label2.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label2.ForeColor = System.Drawing.Color.Silver;
-            this.label2.Location = new System.Drawing.Point(34, 0);
+            this.label2.Location = new System.Drawing.Point(34, 5);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(140, 32);
+            this.label2.Size = new System.Drawing.Size(140, 23);
             this.label2.TabIndex = 4;
             this.label2.Text = "Macro Deck";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -156,24 +174,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.helpMenuExportLog.Text = "Export latest log";
             this.helpMenuExportLog.Click += new System.EventHandler(this.HelpMenuExportLog_Click);
             // 
-            // btnClose
-            // 
-            this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnClose.BackColor = System.Drawing.Color.Transparent;
-            this.btnClose.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.Close_Normal;
-            this.btnClose.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnClose.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnClose.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnClose.ForeColor = System.Drawing.Color.White;
-            this.btnClose.HoverImage = global::SuchByte.MacroDeck.Properties.Resources.Close_Hover;
-            this.btnClose.Location = new System.Drawing.Point(1172, 3);
-            this.btnClose.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.btnClose.Name = "btnClose";
-            this.btnClose.Size = new System.Drawing.Size(25, 25);
-            this.btnClose.TabIndex = 2;
-            this.btnClose.TabStop = false;
-            this.btnClose.Click += new System.EventHandler(this.BtnClose_Click);
-            // 
             // Form
             // 
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
@@ -190,9 +190,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.header.ResumeLayout(false);
             this.header.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.btnClose)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.helpMenu.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.btnClose)).EndInit();
             this.ResumeLayout(false);
 
         }

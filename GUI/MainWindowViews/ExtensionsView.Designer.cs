@@ -1,7 +1,7 @@
 ﻿
-namespace SuchByte.MacroDeck.GUI.ExtensionStore
+namespace SuchByte.MacroDeck.GUI.MainWindowViews
 {
-    partial class ExtensionStorePluginItemView
+    partial class ExtensionsView
     {
         /// <summary> 
         /// Erforderliche Designervariable.
@@ -29,8 +29,19 @@ namespace SuchByte.MacroDeck.GUI.ExtensionStore
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
+            this.SuspendLayout();
+            // 
+            // ExtensionsView
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.Name = "ExtensionsView";
+            this.Size = new System.Drawing.Size(1137, 540);
+            this.Load += new System.EventHandler(this.ExtensionStoreView_Load);
+            this.ResumeLayout(false);
+
         }
 
         #endregion

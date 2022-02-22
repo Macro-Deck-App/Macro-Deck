@@ -465,7 +465,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 {
                     Actions = new List<PluginAction>(),
                     EventListeners = new List<EventListener>(),
-                    ButtonId = this._currentFolder.ActionButtons.Count,
                     Position_Y = row,
                     Position_X = column,
                     IconOff = "",
@@ -651,7 +650,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 }
             }
 
-            actionButtonNew.ButtonId = this._currentFolder.ActionButtons.Count;
             actionButtonNew.Position_X = col;
             actionButtonNew.Position_Y = row;
 

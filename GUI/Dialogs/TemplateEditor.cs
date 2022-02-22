@@ -1,4 +1,5 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
+﻿using FastColoredTextBoxNS;
+using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Variables;
 using System;
@@ -8,12 +9,17 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
     public partial class TemplateEditor : DialogForm
     {
+
+        TextStyle lightYellowStyle = new TextStyle(Brushes.LightYellow, null, FontStyle.Regular);
+        TextStyle commentStyle = new TextStyle(Brushes.Green, null, FontStyle.Regular);
+        TextStyle royaleBlueStyle = new TextStyle(Brushes.RoyalBlue, null, FontStyle.Regular);
 
         public string Template 
         { 
@@ -33,16 +39,39 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblTemplateEngineInfo.Text = LanguageManager.Strings.MacroDeckUsesCottleTemplateEngine;
             this.lblResultLabel.Text = LanguageManager.Strings.Result;
             this.btnVariables.Text = LanguageManager.Strings.Variable;
-            
+
+
             this.template.TextChanged += Template_TextChanged;
             this.Template = template;
         }
 
-        private void Template_TextChanged(object sender, EventArgs e)
+        private void Template_TextChanged(object sender, TextChangedEventArgs e)
         {
             this.lblResult.Text = VariableManager.RenderTemplate(this.template.Text);
-        }
+            FastColoredTextBoxNS.Range range = (sender as FastColoredTextBox).VisibleRange;
 
+            //clear style of changed range
+            range.ClearStyle(lightYellowStyle);
+            range.ClearStyle(commentStyle);
+            range.ClearStyle(royaleBlueStyle);
+            //comment highlighting
+            range.SetStyle(commentStyle, @"{\s*_\}", RegexOptions.Multiline);
+            //built in functions
+
+            range.SetStyle(lightYellowStyle, @"(?x: and | cmp | default | defined| eq | ge | gt | has | le | lt | ne | not | or | xor | when)", RegexOptions.Singleline);
+
+            range.SetStyle(lightYellowStyle, @"(?x:
+                                      abs | add | call | cast | cat | ceil | char | cmp | cos | cross | default
+                                    | defined | div | eq | except | filter | find | flip | floor | format | ge
+                                    | gt | has | join | lcase | le | len | lt | map | match | max | min | mod
+                                    | mul | ne | ord | pow | rand | range | round | sin | slice | sort | split
+                                    | sub | token | type | ucase | union | when | xor | zip
+                                    )", RegexOptions.Singleline);
+            //expressions
+            range.SetStyle(royaleBlueStyle, @"(?x: if | elif | else | for | while | declare | as | dump | echo | empty | set | to | return | true | false | void)", RegexOptions.Singleline);
+
+        }
+        
         private void Insert(string str)
         {
             var selectionIndex = this.template.SelectionStart;
@@ -52,6 +81,8 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         private void BtnIf_Click(object sender, EventArgs e)
         {
+            var dummyVariable = VariableManager.Variables.Find(x => x.Type == VariableType.Bool.ToString());
+            string dummyVariableName = dummyVariable != null ? dummyVariable.Name : "VARIABLE";            
             this.Insert("{if VARIABLE: " + Environment.NewLine + "true" + Environment.NewLine + " |else: " + Environment.NewLine + "false" + Environment.NewLine + "}");
         }
 
@@ -106,6 +137,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         {
             this.DialogResult = DialogResult.OK;
             this.Close();
+        }
+
+        private void template_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

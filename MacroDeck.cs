@@ -104,6 +104,8 @@ namespace SuchByte.MacroDeck
             ContextMenuStrip = _trayIconContextMenu
         };
 
+        private static long _macroDeckStarted = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
         private static MainWindow mainWindow;
 
         public static MainWindow MainWindow
@@ -403,7 +405,9 @@ namespace SuchByte.MacroDeck
             ProfileManager.AddVariableChangedListener();
             ProfileManager.AddWindowFocusChangedListener();
 
-            MacroDeckLogger.Info("Macro Deck started successfully");
+
+            long startTook = DateTimeOffset.Now.ToUnixTimeMilliseconds() - _macroDeckStarted;
+            MacroDeckLogger.Info($"Macro Deck startup finished (took {startTook}ms)");
 
             if (show || SafeMode)
             {

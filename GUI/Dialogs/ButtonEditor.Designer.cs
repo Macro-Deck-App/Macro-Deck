@@ -81,6 +81,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblHotkeyInfo = new System.Windows.Forms.Label();
             this.btnRemoveHotkey = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.hotkey = new SuchByte.MacroDeck.GUI.CustomControls.RoundedTextBox();
+            this.btnEditJson = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             ((System.ComponentModel.ISupportInitialize)(this.btnPreview)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.fontSize)).BeginInit();
             this.panel1.SuspendLayout();
@@ -682,12 +683,34 @@ namespace SuchByte.MacroDeck.GUI
             this.hotkey.TabIndex = 0;
             this.hotkey.TextAlignment = System.Windows.Forms.HorizontalAlignment.Left;
             // 
+            // btnEditJson
+            // 
+            this.btnEditJson.BorderRadius = 8;
+            this.btnEditJson.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnEditJson.FlatAppearance.BorderSize = 0;
+            this.btnEditJson.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnEditJson.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnEditJson.ForeColor = System.Drawing.Color.White;
+            this.btnEditJson.HoverColor = System.Drawing.Color.Empty;
+            this.btnEditJson.Icon = null;
+            this.btnEditJson.Location = new System.Drawing.Point(320, 601);
+            this.btnEditJson.Name = "btnEditJson";
+            this.btnEditJson.Progress = 0;
+            this.btnEditJson.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(225)))));
+            this.btnEditJson.Size = new System.Drawing.Size(150, 25);
+            this.btnEditJson.TabIndex = 33;
+            this.btnEditJson.Text = "Edit JSON";
+            this.btnEditJson.UseVisualStyleBackColor = true;
+            this.btnEditJson.UseWindowsAccentColor = true;
+            this.btnEditJson.Click += new System.EventHandler(this.BtnEditJson_Click);
+            // 
             // ButtonEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.ClientSize = new System.Drawing.Size(1200, 635);
+            this.Controls.Add(this.btnEditJson);
             this.Controls.Add(this.groupHotkey);
             this.Controls.Add(this.groupButtonState);
             this.Controls.Add(this.flowLayoutPanel1);
@@ -708,6 +731,7 @@ namespace SuchByte.MacroDeck.GUI
             this.Controls.SetChildIndex(this.flowLayoutPanel1, 0);
             this.Controls.SetChildIndex(this.groupButtonState, 0);
             this.Controls.SetChildIndex(this.groupHotkey, 0);
+            this.Controls.SetChildIndex(this.btnEditJson, 0);
             ((System.ComponentModel.ISupportInitialize)(this.btnPreview)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.fontSize)).EndInit();
             this.panel1.ResumeLayout(false);
@@ -770,5 +794,6 @@ namespace SuchByte.MacroDeck.GUI
         private TabRadioButton radioOnRelease;
         private TabRadioButton radioOnLongPress;
         private TabRadioButton radioOnLongPressRelease;
+        private ButtonPrimary btnEditJson;
     }
 }

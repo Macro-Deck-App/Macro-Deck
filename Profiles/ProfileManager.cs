@@ -133,6 +133,7 @@ namespace SuchByte.MacroDeck.Profiles
 
         internal static void Load()
         {
+            MacroDeckLogger.Info(typeof(ProfileManager), "Loading profiles...");
             _profiles = new List<MacroDeckProfile>();
             var databasePath = MacroDeck.ProfilesFilePath;
 

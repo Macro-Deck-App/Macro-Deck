@@ -1,4 +1,6 @@
 ﻿
+using FastColoredTextBoxNS;
+
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
     partial class TemplateEditor
@@ -30,7 +32,8 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.template = new SuchByte.MacroDeck.GUI.CustomControls.RoundedTextBox();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TemplateEditor));
+            this.template = new FastColoredTextBoxNS.FastColoredTextBox();
             this.btnOk = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.lblResultLabel = new System.Windows.Forms.Label();
             this.lblResult = new System.Windows.Forms.Label();
@@ -41,33 +44,46 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnNot = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.lblTemplateEngineInfo = new System.Windows.Forms.LinkLabel();
             this.variablesContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            ((System.ComponentModel.ISupportInitialize)(this.template)).BeginInit();
             this.SuspendLayout();
             // 
             // template
             // 
+            this.template.AutoCompleteBracketsList = new char[] {
+        '(',
+        ')',
+        '{',
+        '}',
+        '[',
+        ']',
+        '\"',
+        '\"',
+        '\'',
+        '\''};
+            this.template.AutoScrollMinSize = new System.Drawing.Size(25, 13);
+            this.template.BackBrush = null;
             this.template.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.template.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.template.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.template.Icon = null;
+            this.template.CaretColor = System.Drawing.Color.White;
+            this.template.CharHeight = 13;
+            this.template.CharWidth = 7;
+            this.template.CommentPrefix = "{_";
+            this.template.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.template.DisabledColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
+            this.template.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.template.IsReplaceMode = false;
             this.template.Location = new System.Drawing.Point(9, 85);
-            this.template.MaxCharacters = 32767;
-            this.template.Multiline = true;
             this.template.Name = "template";
-            this.template.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
-            this.template.PasswordChar = false;
-            this.template.PlaceHolderColor = System.Drawing.Color.Gray;
-            this.template.PlaceHolderText = "";
-            this.template.ReadOnly = false;
-            this.template.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.template.SelectionStart = 0;
+            this.template.Paddings = new System.Windows.Forms.Padding(0);
+            this.template.SelectionColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(255)))));
+            this.template.ServiceColors = ((FastColoredTextBoxNS.ServiceColors)(resources.GetObject("template.ServiceColors")));
             this.template.Size = new System.Drawing.Size(501, 265);
             this.template.TabIndex = 2;
             this.template.TabStop = false;
-            this.template.TextAlignment = System.Windows.Forms.HorizontalAlignment.Left;
+            this.template.Zoom = 100;
+            this.template.Load += new System.EventHandler(this.template_Load);
             // 
             // btnOk
             // 
-            this.btnOk.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnOk.BorderRadius = 8;
             this.btnOk.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnOk.FlatAppearance.BorderSize = 0;
@@ -85,6 +101,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOk.TabStop = false;
             this.btnOk.Text = "Ok";
             this.btnOk.UseVisualStyleBackColor = false;
+            this.btnOk.UseWindowsAccentColor = true;
             this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
             // 
             // lblResultLabel
@@ -106,7 +123,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // 
             // btnVariables
             // 
-            this.btnVariables.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnVariables.BorderRadius = 8;
             this.btnVariables.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnVariables.FlatAppearance.BorderSize = 0;
@@ -123,11 +139,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnVariables.TabIndex = 6;
             this.btnVariables.Text = "Variables";
             this.btnVariables.UseVisualStyleBackColor = false;
+            this.btnVariables.UseWindowsAccentColor = true;
             this.btnVariables.Click += new System.EventHandler(this.BtnVariables_Click);
             // 
             // btnIf
             // 
-            this.btnIf.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnIf.BorderRadius = 8;
             this.btnIf.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnIf.FlatAppearance.BorderSize = 0;
@@ -144,11 +160,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnIf.TabIndex = 7;
             this.btnIf.Text = "If";
             this.btnIf.UseVisualStyleBackColor = false;
+            this.btnIf.UseWindowsAccentColor = true;
             this.btnIf.Click += new System.EventHandler(this.BtnIf_Click);
             // 
             // btnAnd
             // 
-            this.btnAnd.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnAnd.BorderRadius = 8;
             this.btnAnd.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnAnd.FlatAppearance.BorderSize = 0;
@@ -165,11 +181,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnAnd.TabIndex = 8;
             this.btnAnd.Text = "And";
             this.btnAnd.UseVisualStyleBackColor = false;
+            this.btnAnd.UseWindowsAccentColor = true;
             this.btnAnd.Click += new System.EventHandler(this.BtnAnd_Click);
             // 
             // btnOr
             // 
-            this.btnOr.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnOr.BorderRadius = 8;
             this.btnOr.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnOr.FlatAppearance.BorderSize = 0;
@@ -186,11 +202,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOr.TabIndex = 9;
             this.btnOr.Text = "Or";
             this.btnOr.UseVisualStyleBackColor = false;
+            this.btnOr.UseWindowsAccentColor = true;
             this.btnOr.Click += new System.EventHandler(this.BtnOr_Click);
             // 
             // btnNot
             // 
-            this.btnNot.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnNot.BorderRadius = 8;
             this.btnNot.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnNot.FlatAppearance.BorderSize = 0;
@@ -207,6 +223,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnNot.TabIndex = 10;
             this.btnNot.Text = "Not";
             this.btnNot.UseVisualStyleBackColor = false;
+            this.btnNot.UseWindowsAccentColor = true;
             this.btnNot.Click += new System.EventHandler(this.BtnNot_Click);
             // 
             // lblTemplateEngineInfo
@@ -245,6 +262,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.Controls.Add(this.lblResultLabel);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.template);
+            this.Location = new System.Drawing.Point(0, 0);
             this.Name = "TemplateEditor";
             this.Text = "TemplateEditor";
             this.Controls.SetChildIndex(this.template, 0);
@@ -257,13 +275,14 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.Controls.SetChildIndex(this.btnOr, 0);
             this.Controls.SetChildIndex(this.btnNot, 0);
             this.Controls.SetChildIndex(this.lblTemplateEngineInfo, 0);
+            ((System.ComponentModel.ISupportInitialize)(this.template)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private CustomControls.RoundedTextBox template;
+        private FastColoredTextBox template;
         private CustomControls.ButtonPrimary btnOk;
         private System.Windows.Forms.Label lblResultLabel;
         private System.Windows.Forms.Label lblResult;
