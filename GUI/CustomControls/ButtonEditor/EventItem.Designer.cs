@@ -85,6 +85,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.lblTrigger.TabIndex = 6;
             this.lblTrigger.Text = "Trigger";
             this.lblTrigger.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblTrigger.UseMnemonic = false;
             // 
             // panelEdit
             // 

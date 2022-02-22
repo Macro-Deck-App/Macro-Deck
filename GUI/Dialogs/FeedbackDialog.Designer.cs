@@ -48,6 +48,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnSendFeedback.Size = new System.Drawing.Size(163, 23);
             this.btnSendFeedback.TabIndex = 3;
             this.btnSendFeedback.Text = "Send feedback";
+            this.btnSendFeedback.UseMnemonic = false;
             this.btnSendFeedback.UseVisualStyleBackColor = false;
             this.btnSendFeedback.Click += new System.EventHandler(this.BtnSendFeedback_Click);
             // 
@@ -81,6 +82,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.label1.Size = new System.Drawing.Size(206, 19);
             this.label1.TabIndex = 6;
             this.label1.Text = "E-Mail for contact (optional)";
+            this.label1.UseMnemonic = false;
             // 
             // label3
             // 
@@ -91,6 +93,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.label3.Size = new System.Drawing.Size(74, 19);
             this.label3.TabIndex = 7;
             this.label3.Text = "Feedback";
+            this.label3.UseMnemonic = false;
             // 
             // FeedbackDialog
             // 

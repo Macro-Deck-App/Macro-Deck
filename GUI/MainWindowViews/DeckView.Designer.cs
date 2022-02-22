@@ -369,6 +369,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblColumns.TabIndex = 16;
             this.lblColumns.Text = "Columns";
             this.lblColumns.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblColumns.UseMnemonic = false;
             // 
             // lblRows
             // 
@@ -382,6 +383,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblRows.TabIndex = 17;
             this.lblRows.Text = "Rows";
             this.lblRows.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblRows.UseMnemonic = false;
             // 
             // lblSpacing
             // 
@@ -395,6 +397,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblSpacing.TabIndex = 19;
             this.lblSpacing.Text = "Spacing";
             this.lblSpacing.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblSpacing.UseMnemonic = false;
             // 
             // buttonSpacing
             // 
@@ -431,6 +434,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblCornerRadius.TabIndex = 21;
             this.lblCornerRadius.Text = "Corner radius";
             this.lblCornerRadius.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblCornerRadius.UseMnemonic = false;
             // 
             // cornerRadius
             // 
@@ -465,6 +469,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.checkButtonBackground.Size = new System.Drawing.Size(151, 22);
             this.checkButtonBackground.TabIndex = 22;
             this.checkButtonBackground.Text = "Button Background";
+            this.checkButtonBackground.UseMnemonic = false;
             this.checkButtonBackground.UseVisualStyleBackColor = false;
             this.checkButtonBackground.CheckedChanged += new System.EventHandler(this.ButtonSettingsChanged);
             // 

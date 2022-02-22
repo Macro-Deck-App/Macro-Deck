@@ -56,6 +56,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblName.TabIndex = 0;
             this.lblName.Text = "Plugin name";
             this.lblName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblName.UseMnemonic = false;
             // 
             // btnInstall
             // 
@@ -74,6 +75,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnInstall.Size = new System.Drawing.Size(110, 30);
             this.btnInstall.TabIndex = 1;
             this.btnInstall.Text = "Install";
+            this.btnInstall.UseMnemonic = false;
             this.btnInstall.UseVisualStyleBackColor = false;
             this.btnInstall.UseWindowsAccentColor = true;
             this.btnInstall.Click += new System.EventHandler(this.BtnInstall_Click);
@@ -86,6 +88,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblAuthor.TabIndex = 2;
             this.lblAuthor.Text = "Author";
             this.lblAuthor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblAuthor.UseMnemonic = false;
             // 
             // icon
             // 
@@ -104,6 +107,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblDescription.Size = new System.Drawing.Size(191, 44);
             this.lblDescription.TabIndex = 4;
             this.lblDescription.Text = "Description";
+            this.lblDescription.UseMnemonic = false;
             // 
             // lblDownloads
             // 
@@ -114,6 +118,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblDownloads.TabIndex = 6;
             this.lblDownloads.Text = "0000";
             this.lblDownloads.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblDownloads.UseMnemonic = false;
             // 
             // lblVersion
             // 
@@ -123,6 +128,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblVersion.TabIndex = 7;
             this.lblVersion.Text = "1.0.0.0";
             this.lblVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblVersion.UseMnemonic = false;
             // 
             // lblType
             // 
@@ -133,6 +139,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblType.TabIndex = 8;
             this.lblType.Text = "Plugin";
             this.lblType.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblType.UseMnemonic = false;
             // 
             // iconDownloads
             // 
@@ -161,6 +168,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnConfigure.Size = new System.Drawing.Size(110, 30);
             this.btnConfigure.TabIndex = 10;
             this.btnConfigure.Text = "Configure";
+            this.btnConfigure.UseMnemonic = false;
             this.btnConfigure.UseVisualStyleBackColor = false;
             this.btnConfigure.UseWindowsAccentColor = false;
             this.btnConfigure.Click += new System.EventHandler(this.BtnConfigure_Click);
@@ -175,6 +183,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblCategory.TabIndex = 11;
             this.lblCategory.Text = "Category";
             this.lblCategory.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblCategory.UseMnemonic = false;
             // 
             // lblRepository
             // 
@@ -188,6 +197,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblRepository.TabStop = true;
             this.lblRepository.Text = "Repository";
             this.lblRepository.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblRepository.UseMnemonic = false;
             this.lblRepository.VisitedLinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.lblRepository.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LblRepository_LinkClicked);
             // 
