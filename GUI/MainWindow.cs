@@ -162,6 +162,7 @@ namespace SuchByte.MacroDeck.GUI
         private void MainWindow_Load(object sender, EventArgs e)
         {
             this.SetView(new LoadingView());
+            
             this.lblVersion.Text = "Macro Deck " + MacroDeck.VersionString + (Debugger.IsAttached  ? " (debug)" : "");
             
             PluginManager.OnPluginsChange += this.OnPluginsChanged;
