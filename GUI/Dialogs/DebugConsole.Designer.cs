@@ -78,6 +78,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnClear.Size = new System.Drawing.Size(122, 27);
             this.btnClear.TabIndex = 2;
             this.btnClear.Text = "Clear";
+            this.btnClear.UseMnemonic = false;
             this.btnClear.UseVisualStyleBackColor = false;
             this.btnClear.UseWindowsAccentColor = true;
             this.btnClear.Click += new System.EventHandler(this.BtnClear_Click);
@@ -100,6 +101,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnRestartMacroDeck.Size = new System.Drawing.Size(122, 27);
             this.btnRestartMacroDeck.TabIndex = 3;
             this.btnRestartMacroDeck.Text = "Restart Macro Deck";
+            this.btnRestartMacroDeck.UseMnemonic = false;
             this.btnRestartMacroDeck.UseVisualStyleBackColor = false;
             this.btnRestartMacroDeck.UseWindowsAccentColor = true;
             this.btnRestartMacroDeck.Click += new System.EventHandler(this.BtnRestartMacroDeck_Click);
@@ -122,6 +124,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnExit.Size = new System.Drawing.Size(122, 27);
             this.btnExit.TabIndex = 4;
             this.btnExit.Text = "Exit Macro Deck";
+            this.btnExit.UseMnemonic = false;
             this.btnExit.UseVisualStyleBackColor = false;
             this.btnExit.UseWindowsAccentColor = true;
             this.btnExit.Click += new System.EventHandler(this.BtnExit_Click);
@@ -144,6 +147,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOpenUser.Size = new System.Drawing.Size(122, 27);
             this.btnOpenUser.TabIndex = 5;
             this.btnOpenUser.Text = "Open user directory";
+            this.btnOpenUser.UseMnemonic = false;
             this.btnOpenUser.UseVisualStyleBackColor = false;
             this.btnOpenUser.UseWindowsAccentColor = true;
             this.btnOpenUser.Click += new System.EventHandler(this.BtnOpenUser_Click);
@@ -157,6 +161,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.label1.TabIndex = 6;
             this.label1.Text = "Log level:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label1.UseMnemonic = false;
             // 
             // logLevel
             // 
@@ -192,6 +197,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnExportOutput.Size = new System.Drawing.Size(122, 27);
             this.btnExportOutput.TabIndex = 8;
             this.btnExportOutput.Text = "Export output";
+            this.btnExportOutput.UseMnemonic = false;
             this.btnExportOutput.UseVisualStyleBackColor = false;
             this.btnExportOutput.UseWindowsAccentColor = true;
             this.btnExportOutput.Click += new System.EventHandler(this.BtnExportOutput_Click);
@@ -206,6 +212,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.label3.TabIndex = 9;
             this.label3.Text = "Filter:";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label3.UseMnemonic = false;
             // 
             // filter
             // 
@@ -246,6 +253,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnAddFilter.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
             this.btnAddFilter.Size = new System.Drawing.Size(25, 25);
             this.btnAddFilter.TabIndex = 11;
+            this.btnAddFilter.UseMnemonic = false;
             this.btnAddFilter.UseVisualStyleBackColor = false;
             this.btnAddFilter.UseWindowsAccentColor = true;
             this.btnAddFilter.Click += new System.EventHandler(this.BtnAddFilter_Click);
@@ -275,6 +283,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnRemoveFilters.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
             this.btnRemoveFilters.Size = new System.Drawing.Size(25, 25);
             this.btnRemoveFilters.TabIndex = 12;
+            this.btnRemoveFilters.UseMnemonic = false;
             this.btnRemoveFilters.UseVisualStyleBackColor = false;
             this.btnRemoveFilters.UseWindowsAccentColor = false;
             this.btnRemoveFilters.Click += new System.EventHandler(this.btnRemoveFilters_Click);

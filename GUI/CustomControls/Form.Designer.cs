@@ -95,6 +95,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnHelp.TabStop = true;
             this.btnHelp.Text = "Help";
             this.btnHelp.VisitedLinkColor = System.Drawing.Color.Silver;
+            this.btnHelp.UseMnemonic = false;
             this.btnHelp.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.BtnHelp_LinkClicked);
             // 
             // lblSafeMode
@@ -108,6 +109,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblSafeMode.Text = "Safe Mode";
             this.lblSafeMode.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblSafeMode.Visible = false;
+            this.lblSafeMode.UseMnemonic = false;
             // 
             // pictureBox1
             // 
@@ -130,6 +132,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.label2.TabIndex = 4;
             this.label2.Text = "Macro Deck";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label2.UseMnemonic = false;
             // 
             // helpMenu
             // 

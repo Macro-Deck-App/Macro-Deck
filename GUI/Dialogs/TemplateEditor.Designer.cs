@@ -100,6 +100,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOk.TabIndex = 3;
             this.btnOk.TabStop = false;
             this.btnOk.Text = "Ok";
+            this.btnOk.UseMnemonic = false;
             this.btnOk.UseVisualStyleBackColor = false;
             this.btnOk.UseWindowsAccentColor = true;
             this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
@@ -113,6 +114,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblResultLabel.TabIndex = 4;
             this.lblResultLabel.Text = "Result";
             this.lblResultLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblResult.UseMnemonic = false;
             // 
             // lblResult
             // 
@@ -120,6 +122,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblResult.Name = "lblResult";
             this.lblResult.Size = new System.Drawing.Size(306, 232);
             this.lblResult.TabIndex = 5;
+            this.lblResult.UseMnemonic = false;
             // 
             // btnVariables
             // 
@@ -138,6 +141,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnVariables.Size = new System.Drawing.Size(75, 30);
             this.btnVariables.TabIndex = 6;
             this.btnVariables.Text = "Variables";
+            this.btnVariables.UseMnemonic = false;
             this.btnVariables.UseVisualStyleBackColor = false;
             this.btnVariables.UseWindowsAccentColor = true;
             this.btnVariables.Click += new System.EventHandler(this.BtnVariables_Click);
@@ -159,6 +163,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnIf.Size = new System.Drawing.Size(75, 30);
             this.btnIf.TabIndex = 7;
             this.btnIf.Text = "If";
+            this.btnIf.UseMnemonic = false;
             this.btnIf.UseVisualStyleBackColor = false;
             this.btnIf.UseWindowsAccentColor = true;
             this.btnIf.Click += new System.EventHandler(this.BtnIf_Click);
@@ -180,6 +185,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnAnd.Size = new System.Drawing.Size(75, 30);
             this.btnAnd.TabIndex = 8;
             this.btnAnd.Text = "And";
+            this.btnAnd.UseMnemonic = false;
             this.btnAnd.UseVisualStyleBackColor = false;
             this.btnAnd.UseWindowsAccentColor = true;
             this.btnAnd.Click += new System.EventHandler(this.BtnAnd_Click);
@@ -201,6 +207,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOr.Size = new System.Drawing.Size(75, 30);
             this.btnOr.TabIndex = 9;
             this.btnOr.Text = "Or";
+            this.btnOr.UseMnemonic = false;
             this.btnOr.UseVisualStyleBackColor = false;
             this.btnOr.UseWindowsAccentColor = true;
             this.btnOr.Click += new System.EventHandler(this.BtnOr_Click);
@@ -222,6 +229,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnNot.Size = new System.Drawing.Size(75, 30);
             this.btnNot.TabIndex = 10;
             this.btnNot.Text = "Not";
+            this.btnNot.UseMnemonic = false;
             this.btnNot.UseVisualStyleBackColor = false;
             this.btnNot.UseWindowsAccentColor = true;
             this.btnNot.Click += new System.EventHandler(this.BtnNot_Click);
@@ -236,6 +244,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblTemplateEngineInfo.TabIndex = 11;
             this.lblTemplateEngineInfo.TabStop = true;
             this.lblTemplateEngineInfo.Text = "Macro Deck uses the Cottle template engine. Click here for more information.";
+            this.lblTemplateEngineInfo.UseMnemonic = false;
             this.lblTemplateEngineInfo.VisitedLinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.lblTemplateEngineInfo.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LblTemplateEngineInfo_LinkClicked);
             // 

@@ -46,6 +46,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblWantIcons.TabIndex = 6;
             this.lblWantIcons.Text = "Do you want some icons?";
             this.lblWantIcons.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblWantIcons.UseMnemonic = false;
             // 
             // lblInstallLaterPackageManager
             // 
@@ -58,6 +59,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblInstallLaterPackageManager.TabIndex = 7;
             this.lblInstallLaterPackageManager.Text = "You can also install icon packs later in the package manager";
             this.lblInstallLaterPackageManager.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblInstallLaterPackageManager.UseMnemonic = false;
             // 
             // progressBar
             // 

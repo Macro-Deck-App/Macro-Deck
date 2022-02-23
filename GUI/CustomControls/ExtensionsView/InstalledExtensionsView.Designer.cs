@@ -54,6 +54,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             this.btnAddExtensions.Size = new System.Drawing.Size(186, 40);
             this.btnAddExtensions.TabIndex = 0;
             this.btnAddExtensions.Text = "Add extensions";
+            this.btnAddExtensions.UseMnemonic = false;
             this.btnAddExtensions.UseVisualStyleBackColor = true;
             this.btnAddExtensions.UseWindowsAccentColor = true;
             this.btnAddExtensions.Click += new System.EventHandler(this.BtnAddExtensions_Click);
@@ -84,6 +85,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             this.btnCheckUpdates.Size = new System.Drawing.Size(191, 30);
             this.btnCheckUpdates.TabIndex = 3;
             this.btnCheckUpdates.Text = "Check updates";
+            this.btnCheckUpdates.UseMnemonic = false;
             this.btnCheckUpdates.UseVisualStyleBackColor = true;
             this.btnCheckUpdates.UseWindowsAccentColor = true;
             this.btnCheckUpdates.Click += new System.EventHandler(this.BtnCheckUpdates_Click);
@@ -98,6 +100,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             this.lblUpdateState.TabIndex = 4;
             this.lblUpdateState.Text = "All extensions are up-to-date";
             this.lblUpdateState.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblUpdateState.UseMnemonic = false;
             // 
             // lblInstalledExtensions
             // 
@@ -109,6 +112,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             this.lblInstalledExtensions.TabIndex = 2;
             this.lblInstalledExtensions.Text = "Installed Extensions";
             this.lblInstalledExtensions.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblInstalledExtensions.UseMnemonic = false;
             // 
             // InstalledExtensionsView
             // 

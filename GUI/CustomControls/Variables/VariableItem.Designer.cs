@@ -59,6 +59,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblType.TabIndex = 1;
             this.lblType.Text = "Type";
             this.lblType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblType.UseMnemonic = false;
             // 
             // lblValue
             // 
@@ -81,6 +82,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblCreator.TabIndex = 3;
             this.lblCreator.Text = "Creator";
             this.lblCreator.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblCreator.UseMnemonic = false;
             // 
             // btnEdit
             // 
@@ -101,6 +103,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnEdit.Size = new System.Drawing.Size(35, 35);
             this.btnEdit.TabIndex = 4;
             this.btnEdit.Text = "...";
+            this.btnEdit.UseMnemonic = false;
             this.btnEdit.UseVisualStyleBackColor = false;
             this.btnEdit.Click += new System.EventHandler(this.BtnEdit_Click);
             // 

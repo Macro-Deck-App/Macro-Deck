@@ -43,6 +43,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblName.Size = new System.Drawing.Size(338, 22);
             this.lblName.TabIndex = 0;
             this.lblName.Text = "Name";
+            this.lblName.UseMnemonic = false;
             // 
             // lblAuthor
             // 
@@ -51,6 +52,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblAuthor.Size = new System.Drawing.Size(210, 15);
             this.lblAuthor.TabIndex = 1;
             this.lblAuthor.Text = "Author";
+            this.lblAuthor.UseMnemonic = false;
             // 
             // lblLicense
             // 
@@ -64,6 +66,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblLicense.TabStop = true;
             this.lblLicense.Text = "View license";
             this.lblLicense.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblLicense.UseMnemonic = false;
             this.lblLicense.VisitedLinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(155)))), ((int)(((byte)(155)))), ((int)(((byte)(155)))));
             this.lblLicense.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LblLicense_LinkClicked);
             // 
@@ -79,6 +82,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblProjectPage.TabStop = true;
             this.lblProjectPage.Text = "Project page";
             this.lblProjectPage.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblProjectPage.UseMnemonic = false;
             this.lblProjectPage.VisitedLinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(155)))), ((int)(((byte)(155)))), ((int)(((byte)(155)))));
             this.lblProjectPage.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblProjectPage_LinkClicked);
             // 

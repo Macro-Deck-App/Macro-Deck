@@ -76,6 +76,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnApply.Size = new System.Drawing.Size(100, 25);
             this.btnApply.TabIndex = 3;
             this.btnApply.Text = "Apply";
+            this.btnApply.UseMnemonic = false;
             this.btnApply.UseVisualStyleBackColor = true;
             this.btnApply.UseWindowsAccentColor = true;
             this.btnApply.Click += new System.EventHandler(this.BtnApply_Click);

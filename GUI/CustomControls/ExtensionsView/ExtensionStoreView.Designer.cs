@@ -75,6 +75,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             this.lblInstalledExtensions.TabIndex = 3;
             this.lblInstalledExtensions.Text = "Extension Store";
             this.lblInstalledExtensions.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblInstalledExtensions.UseMnemonic = false;
             // 
             // ExtensionStoreView
             // 

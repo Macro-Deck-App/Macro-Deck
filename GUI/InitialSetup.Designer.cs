@@ -48,6 +48,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnNext.Size = new System.Drawing.Size(100, 35);
             this.btnNext.TabIndex = 3;
             this.btnNext.Text = "Next ->";
+            this.btnNext.UseMnemonic = false;
             this.btnNext.UseVisualStyleBackColor = false;
             this.btnNext.Click += new System.EventHandler(this.BtnNext_Click);
             // 
@@ -63,6 +64,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnBack.Size = new System.Drawing.Size(100, 35);
             this.btnBack.TabIndex = 4;
             this.btnBack.Text = "<- Back";
+            this.btnBack.UseMnemonic = false;
             this.btnBack.UseVisualStyleBackColor = false;
             this.btnBack.Click += new System.EventHandler(this.BtnBack_Click);
             // 
@@ -81,6 +83,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblPage.TabIndex = 6;
             this.lblPage.Text = "Page 0/0";
             this.lblPage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblPage.UseMnemonic = false;
             // 
             // InitialSetup
             // 
