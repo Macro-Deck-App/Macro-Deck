@@ -49,6 +49,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             this.lblExtensionType.TabIndex = 0;
             this.lblExtensionType.Text = "label1";
             this.lblExtensionType.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblExtensionType.UseMnemonic = false;
             // 
             // extensionIcon
             // 
@@ -68,6 +69,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             this.lblExtensionName.Size = new System.Drawing.Size(229, 23);
             this.lblExtensionName.TabIndex = 2;
             this.lblExtensionName.Text = "label1";
+            this.lblExtensionName.UseMnemonic = false;
             // 
             // lblVersion
             // 
@@ -79,6 +81,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             this.lblVersion.TabIndex = 3;
             this.lblVersion.Text = "label1";
             this.lblVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblVersion.UseMnemonic = false;
             // 
             // btnConfigure
             // 
@@ -99,6 +102,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             this.btnConfigure.Text = "Configure";
             this.btnConfigure.UseVisualStyleBackColor = true;
             this.btnConfigure.UseWindowsAccentColor = true;
+            this.btnConfigure.UseMnemonic = false;
             this.btnConfigure.Click += new System.EventHandler(this.BtnConfigure_Click);
             // 
             // lblStatus
@@ -112,6 +116,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             this.lblStatus.TabIndex = 6;
             this.lblStatus.Text = "Active";
             this.lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblStatus.UseMnemonic = false;
             // 
             // btnUninstall
             // 
@@ -126,6 +131,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             this.btnUninstall.TabStop = true;
             this.btnUninstall.Text = "Uninstall";
             this.btnUninstall.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.btnUninstall.UseMnemonic = false;
             this.btnUninstall.VisitedLinkColor = System.Drawing.Color.Silver;
             this.btnUninstall.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.BtnUninstall_LinkClicked);
             // 
@@ -146,6 +152,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             this.btnUpdate.Size = new System.Drawing.Size(140, 27);
             this.btnUpdate.TabIndex = 8;
             this.btnUpdate.Text = "Update";
+            this.btnUpdate.UseMnemonic = false;
             this.btnUpdate.UseVisualStyleBackColor = true;
             this.btnUpdate.UseWindowsAccentColor = false;
             this.btnUpdate.Visible = false;

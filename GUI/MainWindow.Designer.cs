@@ -96,6 +96,7 @@ namespace SuchByte.MacroDeck.GUI
             // lblSafeMode
             // 
             this.lblSafeMode.Size = new System.Drawing.Size(140, 30);
+            this.lblSafeMode.UseMnemonic = false;
             // 
             // lblPluginsLoaded
             // 
@@ -108,6 +109,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblPluginsLoaded.TabIndex = 3;
             this.lblPluginsLoaded.Text = "0 plugins loaded.";
             this.lblPluginsLoaded.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblPluginsLoaded.UseMnemonic = false;
             // 
             // lblVersion
             // 
@@ -119,6 +121,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblVersion.TabIndex = 3;
             this.lblVersion.Text = "2.0.0";
             this.lblVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblVersion.UseMnemonic = false;
             // 
             // contentPanel
             // 
@@ -261,6 +264,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblNumClientsConnected.TabIndex = 8;
             this.lblNumClientsConnected.Text = "0 clients connected";
             this.lblNumClientsConnected.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblNumClientsConnected.UseMnemonic = false;
             // 
             // lblIPAddress
             // 
@@ -275,6 +279,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblIPAddress.TabIndex = 9;
             this.lblIPAddress.Text = "0.0.0.0";
             this.lblIPAddress.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblIPAddress.UseMnemonic = false;
             // 
             // label1
             // 
@@ -286,6 +291,7 @@ namespace SuchByte.MacroDeck.GUI
             this.label1.Size = new System.Drawing.Size(15, 19);
             this.label1.TabIndex = 10;
             this.label1.Text = ":";
+            this.label1.UseMnemonic = false;
             // 
             // lblPort
             // 
@@ -300,6 +306,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblPort.TabIndex = 11;
             this.lblPort.Text = "8191";
             this.lblPort.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblPort.UseMnemonic = false;
             // 
             // lblServerStatus
             // 
@@ -312,6 +319,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblServerStatus.TabIndex = 12;
             this.lblServerStatus.Text = "Server offline";
             this.lblServerStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblServerStatus.UseMnemonic = false;
             // 
             // lblIpAddressHostname
             // 
@@ -324,6 +332,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblIpAddressHostname.TabIndex = 13;
             this.lblIpAddressHostname.Text = "IP address/hostname : Port";
             this.lblIpAddressHostname.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblIpAddressHostname.UseMnemonic = false;
             // 
             // lblTitle
             // 
@@ -334,6 +343,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblTitle.Size = new System.Drawing.Size(305, 27);
             this.lblTitle.TabIndex = 14;
             this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblTitle.UseMnemonic = false;
             // 
             // navigation
             // 
@@ -379,6 +389,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblErrorsWarnings.TabIndex = 0;
             this.lblErrorsWarnings.TabStop = true;
             this.lblErrorsWarnings.Text = "0 warning(s), 0 error(s)";
+            this.lblErrorsWarnings.UseMnemonic = false;
             this.lblErrorsWarnings.VisitedLinkColor = System.Drawing.Color.Red;
             this.lblErrorsWarnings.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LblErrorsWarnings_LinkClicked);
             // 

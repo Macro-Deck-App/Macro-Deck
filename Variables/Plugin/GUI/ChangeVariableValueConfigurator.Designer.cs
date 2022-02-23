@@ -54,6 +54,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.radioToggle.TabStop = true;
             this.radioToggle.Text = "Toggle";
             this.radioToggle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.radioToggle.UseMnemonic = false;
             this.radioToggle.UseVisualStyleBackColor = true;
             this.radioToggle.CheckedChanged += new System.EventHandler(this.MethodChanged);
             // 
@@ -68,6 +69,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.radioSet.TabStop = true;
             this.radioSet.Text = "Set";
             this.radioSet.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.radioSet.UseMnemonic = false;
             this.radioSet.UseVisualStyleBackColor = true;
             this.radioSet.CheckedChanged += new System.EventHandler(this.MethodChanged);
             // 
@@ -82,6 +84,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.radioCountDown.TabStop = true;
             this.radioCountDown.Text = "Count down";
             this.radioCountDown.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.radioCountDown.UseMnemonic = false;
             this.radioCountDown.UseVisualStyleBackColor = true;
             this.radioCountDown.CheckedChanged += new System.EventHandler(this.MethodChanged);
             // 
@@ -96,6 +99,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.radioCountUp.TabStop = true;
             this.radioCountUp.Text = "Count up";
             this.radioCountUp.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.radioCountUp.UseMnemonic = false;
             this.radioCountUp.UseVisualStyleBackColor = true;
             this.radioCountUp.CheckedChanged += new System.EventHandler(this.MethodChanged);
             // 
@@ -144,6 +148,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.lblVariable.TabIndex = 4;
             this.lblVariable.Text = "Variable";
             this.lblVariable.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblVariable.UseMnemonic = false;
             // 
             // lblOnlyUserCreatedVariablesVisible
             // 
@@ -154,6 +159,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.lblOnlyUserCreatedVariablesVisible.TabIndex = 5;
             this.lblOnlyUserCreatedVariablesVisible.Text = "Only user-created variables are visible";
             this.lblOnlyUserCreatedVariablesVisible.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblOnlyUserCreatedVariablesVisible.UseMnemonic = false;
             // 
             // btnTemplateEditor
             // 

@@ -45,6 +45,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblAlmostDone.TabIndex = 7;
             this.lblAlmostDone.Text = "We\'re almost done!";
             this.lblAlmostDone.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblAlmostDone.UseMnemonic = false;
             // 
             // checkAutoUpdates
             // 
@@ -58,6 +59,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.checkAutoUpdates.Size = new System.Drawing.Size(253, 23);
             this.checkAutoUpdates.TabIndex = 8;
             this.checkAutoUpdates.Text = "Automatically check for updates";
+            this.checkAutoUpdates.UseMnemonic = false;
             this.checkAutoUpdates.UseVisualStyleBackColor = true;
             this.checkAutoUpdates.CheckedChanged += new System.EventHandler(this.CheckAutoUpdates_CheckedChanged);
             // 
@@ -73,6 +75,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.checkAutoStart.Size = new System.Drawing.Size(264, 23);
             this.checkAutoStart.TabIndex = 9;
             this.checkAutoStart.Text = "Automatically start with Windows\r\n";
+            this.checkAutoStart.UseMnemonic = false;
             this.checkAutoStart.UseVisualStyleBackColor = true;
             this.checkAutoStart.CheckedChanged += new System.EventHandler(this.CheckAutoStart_CheckedChanged);
             // 

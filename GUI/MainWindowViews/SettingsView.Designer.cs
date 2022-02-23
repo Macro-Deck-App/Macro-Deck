@@ -141,6 +141,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.checkIconCache.Size = new System.Drawing.Size(375, 23);
             this.checkIconCache.TabIndex = 14;
             this.checkIconCache.Text = "Enable icon cache (faster; higher memory usage)";
+            this.checkIconCache.UseMnemonic = false;
             this.checkIconCache.UseVisualStyleBackColor = true;
             this.checkIconCache.CheckedChanged += new System.EventHandler(this.CheckIconCache_CheckedChanged);
             // 
@@ -171,6 +172,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblLanguage.Size = new System.Drawing.Size(93, 23);
             this.lblLanguage.TabIndex = 3;
             this.lblLanguage.Text = "Language";
+            this.lblLanguage.UseMnemonic = false;
             // 
             // checkStartWindows
             // 
@@ -180,6 +182,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.checkStartWindows.Size = new System.Drawing.Size(165, 23);
             this.checkStartWindows.TabIndex = 2;
             this.checkStartWindows.Text = "Start with Windows";
+            this.checkStartWindows.UseMnemonic = false;
             this.checkStartWindows.UseVisualStyleBackColor = true;
             this.checkStartWindows.CheckedChanged += new System.EventHandler(this.CheckStartWindows_CheckedChanged);
             // 
@@ -193,6 +196,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblBehaviour.Size = new System.Drawing.Size(82, 23);
             this.lblBehaviour.TabIndex = 1;
             this.lblBehaviour.Text = "Behavior";
+            this.lblBehaviour.UseMnemonic = false;
             // 
             // lblGeneral
             // 
@@ -203,6 +207,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblGeneral.Size = new System.Drawing.Size(84, 25);
             this.lblGeneral.TabIndex = 0;
             this.lblGeneral.Text = "General";
+            this.lblGeneral.UseMnemonic = false;
             // 
             // tabConnection
             // 
@@ -241,6 +246,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.btnChangePort.Size = new System.Drawing.Size(46, 24);
             this.btnChangePort.TabIndex = 12;
             this.btnChangePort.Text = "Ok";
+            this.btnChangePort.UseMnemonic = false;
             this.btnChangePort.UseVisualStyleBackColor = false;
             this.btnChangePort.UseWindowsAccentColor = true;
             this.btnChangePort.Click += new System.EventHandler(this.BtnChangePort_Click);
@@ -265,6 +271,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblConnectionInfo.Size = new System.Drawing.Size(673, 146);
             this.lblConnectionInfo.TabIndex = 0;
             this.lblConnectionInfo.Text = resources.GetString("lblConnectionInfo.Text");
+            this.lblConnectionInfo.UseMnemonic = false;
             // 
             // port
             // 
@@ -297,6 +304,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblPort.Size = new System.Drawing.Size(43, 23);
             this.lblPort.TabIndex = 8;
             this.lblPort.Text = "Port";
+            this.lblPort.UseMnemonic = false;
             // 
             // lblIpAddessLabel
             // 
@@ -307,6 +315,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblIpAddessLabel.Size = new System.Drawing.Size(83, 18);
             this.lblIpAddessLabel.TabIndex = 7;
             this.lblIpAddessLabel.Text = "IP address:";
+            this.lblIpAddessLabel.UseMnemonic = false;
             // 
             // lblIpAddress
             // 
@@ -316,6 +325,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblIpAddress.Size = new System.Drawing.Size(187, 17);
             this.lblIpAddress.TabIndex = 6;
             this.lblIpAddress.Text = "0.0.0.0";
+            this.lblIpAddress.UseMnemonic = false;
             // 
             // networkAdapter
             // 
@@ -345,6 +355,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblNetworkAdapter.Size = new System.Drawing.Size(150, 23);
             this.lblNetworkAdapter.TabIndex = 2;
             this.lblNetworkAdapter.Text = "Network adapter";
+            this.lblNetworkAdapter.UseMnemonic = false;
             // 
             // lblConnection
             // 
@@ -355,6 +366,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblConnection.Size = new System.Drawing.Size(116, 25);
             this.lblConnection.TabIndex = 1;
             this.lblConnection.Text = "Connection";
+            this.lblConnection.UseMnemonic = false;
             // 
             // tabUpdater
             // 
@@ -383,6 +395,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.checkAutoUpdate.Size = new System.Drawing.Size(253, 23);
             this.checkAutoUpdate.TabIndex = 17;
             this.checkAutoUpdate.Text = "Automatically check for updates";
+            this.checkAutoUpdate.UseMnemonic = false;
             this.checkAutoUpdate.UseVisualStyleBackColor = true;
             // 
             // checkInstallBetaVersions
@@ -393,6 +406,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.checkInstallBetaVersions.Size = new System.Drawing.Size(169, 23);
             this.checkInstallBetaVersions.TabIndex = 16;
             this.checkInstallBetaVersions.Text = "Install Beta versions";
+            this.checkInstallBetaVersions.UseMnemonic = false;
             this.checkInstallBetaVersions.UseVisualStyleBackColor = true;
             // 
             // checkInstallDevVersions
@@ -403,6 +417,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.checkInstallDevVersions.Size = new System.Drawing.Size(166, 23);
             this.checkInstallDevVersions.TabIndex = 15;
             this.checkInstallDevVersions.Text = "Install Dev versions";
+            this.checkInstallDevVersions.UseMnemonic = false;
             this.checkInstallDevVersions.UseVisualStyleBackColor = true;
             // 
             // updaterPanel
@@ -429,6 +444,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.btnCheckUpdates.Size = new System.Drawing.Size(215, 32);
             this.btnCheckUpdates.TabIndex = 9;
             this.btnCheckUpdates.Text = "Check for updates now";
+            this.btnCheckUpdates.UseMnemonic = false;
             this.btnCheckUpdates.UseVisualStyleBackColor = false;
             this.btnCheckUpdates.UseWindowsAccentColor = true;
             this.btnCheckUpdates.Click += new System.EventHandler(this.BtnCheckUpdates_Click);
@@ -441,6 +457,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblInstalledVersion.TabIndex = 8;
             this.lblInstalledVersion.Text = "2.0.0";
             this.lblInstalledVersion.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblInstalledVersion.UseMnemonic = false;
             // 
             // lblInstalledVersionLabel
             // 
@@ -450,6 +467,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblInstalledVersionLabel.TabIndex = 7;
             this.lblInstalledVersionLabel.Text = "Installed Version:";
             this.lblInstalledVersionLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblInstalledVersionLabel.UseMnemonic = false;
             // 
             // lblUpdates
             // 
@@ -460,6 +478,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblUpdates.Size = new System.Drawing.Size(88, 25);
             this.lblUpdates.TabIndex = 2;
             this.lblUpdates.Text = "Updates";
+            this.lblUpdates.UseMnemonic = false;
             // 
             // tabBackups
             // 
@@ -491,6 +510,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.btnCreateBackup.Size = new System.Drawing.Size(150, 30);
             this.btnCreateBackup.TabIndex = 5;
             this.btnCreateBackup.Text = "Create backup";
+            this.btnCreateBackup.UseMnemonic = false;
             this.btnCreateBackup.UseVisualStyleBackColor = false;
             this.btnCreateBackup.UseWindowsAccentColor = true;
             this.btnCreateBackup.Click += new System.EventHandler(this.BtnCreateBackup_Click);
@@ -512,6 +532,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblBackups.Size = new System.Drawing.Size(89, 25);
             this.lblBackups.TabIndex = 3;
             this.lblBackups.Text = "Backups";
+            this.lblBackups.UseMnemonic = false;
             // 
             // tabAbout
             // 
@@ -547,6 +568,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.label1.TabIndex = 15;
             this.label1.Text = "Licensed under Apache-2.0";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label1.UseMnemonic = false;
             // 
             // lblTranslationBy
             // 
@@ -557,6 +579,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblTranslationBy.TabIndex = 14;
             this.lblTranslationBy.Text = "English translation by Macro Deck";
             this.lblTranslationBy.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblTranslationBy.UseMnemonic = false;
             // 
             // btnLicenses
             // 
@@ -575,6 +598,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.btnLicenses.Size = new System.Drawing.Size(200, 27);
             this.btnLicenses.TabIndex = 13;
             this.btnLicenses.Text = "3rd party licenses";
+            this.btnLicenses.UseMnemonic = false;
             this.btnLicenses.UseVisualStyleBackColor = false;
             this.btnLicenses.UseWindowsAccentColor = true;
             this.btnLicenses.Click += new System.EventHandler(this.BtnLicenses_Click);
@@ -587,6 +611,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblPluginAPIVersion.Size = new System.Drawing.Size(27, 19);
             this.lblPluginAPIVersion.TabIndex = 12;
             this.lblPluginAPIVersion.Text = "20";
+            this.lblPluginAPIVersion.UseMnemonic = false;
             // 
             // lblWebsocketAPIVersion
             // 
@@ -596,6 +621,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblWebsocketAPIVersion.Size = new System.Drawing.Size(27, 19);
             this.lblWebsocketAPIVersion.TabIndex = 11;
             this.lblWebsocketAPIVersion.Text = "20";
+            this.lblWebsocketAPIVersion.UseMnemonic = false;
             // 
             // lblPluginAPILabel
             // 
@@ -605,6 +631,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblPluginAPILabel.Size = new System.Drawing.Size(146, 19);
             this.lblPluginAPILabel.TabIndex = 10;
             this.lblPluginAPILabel.Text = "Plugin API version:";
+            this.lblPluginAPILabel.UseMnemonic = false;
             // 
             // lblWebSocketAPILabel
             // 
@@ -614,6 +641,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblWebSocketAPILabel.Size = new System.Drawing.Size(177, 19);
             this.lblWebSocketAPILabel.TabIndex = 9;
             this.lblWebSocketAPILabel.Text = "Websocket API version:";
+            this.lblWebSocketAPILabel.UseMnemonic = false;
             // 
             // lblOS
             // 
@@ -623,6 +651,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblOS.Size = new System.Drawing.Size(25, 19);
             this.lblOS.TabIndex = 8;
             this.lblOS.Text = "os";
+            this.lblOS.UseMnemonic = false;
             // 
             // lblInstalledPlugins
             // 
@@ -632,6 +661,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblInstalledPlugins.Size = new System.Drawing.Size(18, 19);
             this.lblInstalledPlugins.TabIndex = 7;
             this.lblInstalledPlugins.Text = "0";
+            this.lblInstalledPlugins.UseMnemonic = false;
             // 
             // lblOSLabel
             // 
@@ -641,6 +671,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblOSLabel.Size = new System.Drawing.Size(36, 19);
             this.lblOSLabel.TabIndex = 5;
             this.lblOSLabel.Text = "OS:";
+            this.lblOSLabel.UseMnemonic = false;
             // 
             // lblInstalledPluginsLabel
             // 
@@ -650,6 +681,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblInstalledPluginsLabel.Size = new System.Drawing.Size(131, 19);
             this.lblInstalledPluginsLabel.TabIndex = 4;
             this.lblInstalledPluginsLabel.Text = "Installed plugins:";
+            this.lblInstalledPluginsLabel.UseMnemonic= false;
             // 
             // lblDeveloped
             // 
@@ -660,6 +692,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblDeveloped.TabIndex = 2;
             this.lblDeveloped.Text = "Developed by Manuel Mayer (SuchByte) in Germany";
             this.lblDeveloped.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblDeveloped.UseMnemonic = false;
             // 
             // lblMacroDeck
             // 
@@ -671,6 +704,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblMacroDeck.TabIndex = 1;
             this.lblMacroDeck.Text = "Macro Deck";
             this.lblMacroDeck.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblMacroDeck.UseMnemonic = false;
             // 
             // pictureBox1
             // 

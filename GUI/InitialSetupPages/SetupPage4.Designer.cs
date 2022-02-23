@@ -46,6 +46,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblPickAllPlugins.TabIndex = 5;
             this.lblPickAllPlugins.Text = "Pick all the plugins you need";
             this.lblPickAllPlugins.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblPickAllPlugins.UseMnemonic = false;
             // 
             // lblDontWorry
             // 
@@ -59,6 +60,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblDontWorry.Text = "Don\'t worry, you can always install/uninstall plugins later in the package manage" +
     "r";
             this.lblDontWorry.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblDontWorry.UseMnemonic = false;
             // 
             // plugins
             // 

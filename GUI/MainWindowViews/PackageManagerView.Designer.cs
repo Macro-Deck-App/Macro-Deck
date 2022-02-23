@@ -88,6 +88,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.radioInstalled.TabIndex = 24;
             this.radioInstalled.Text = "Installed";
             this.radioInstalled.UseVisualStyleBackColor = true;
+            this.radioInstalled.UseMnemonic = false;
             this.radioInstalled.CheckedChanged += new System.EventHandler(this.RadioAll_CheckedChanged);
             // 
             // progressBar
@@ -112,6 +113,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.checkIconPacks.Size = new System.Drawing.Size(98, 22);
             this.checkIconPacks.TabIndex = 23;
             this.checkIconPacks.Text = "Icon packs";
+            this.checkIconPacks.UseMnemonic = false;
             this.checkIconPacks.UseVisualStyleBackColor = true;
             this.checkIconPacks.CheckedChanged += new System.EventHandler(this.Type_CheckedChanged);
             // 
@@ -127,6 +129,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.checkPlugins.Size = new System.Drawing.Size(70, 22);
             this.checkPlugins.TabIndex = 22;
             this.checkPlugins.Text = "Plugins";
+            this.checkPlugins.UseMnemonic = false;
             this.checkPlugins.UseVisualStyleBackColor = true;
             this.checkPlugins.CheckedChanged += new System.EventHandler(this.Type_CheckedChanged);
             // 
@@ -142,6 +145,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.radioOnlyUpdates.Size = new System.Drawing.Size(84, 23);
             this.radioOnlyUpdates.TabIndex = 20;
             this.radioOnlyUpdates.Text = "Updates";
+            this.radioOnlyUpdates.UseMnemonic = false;
             this.radioOnlyUpdates.UseVisualStyleBackColor = true;
             this.radioOnlyUpdates.CheckedChanged += new System.EventHandler(this.RadioAll_CheckedChanged);
             // 
@@ -159,6 +163,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.radioAll.TabIndex = 19;
             this.radioAll.TabStop = true;
             this.radioAll.Text = "Online";
+            this.radioAll.UseMnemonic = false;
             this.radioAll.UseVisualStyleBackColor = true;
             this.radioAll.CheckedChanged += new System.EventHandler(this.RadioAll_CheckedChanged);
             // 

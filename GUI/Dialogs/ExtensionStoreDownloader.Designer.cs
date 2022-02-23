@@ -62,6 +62,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnDone.Size = new System.Drawing.Size(231, 30);
             this.btnDone.TabIndex = 3;
             this.btnDone.Text = "Done";
+            this.btnDone.UseMnemonic = false;
             this.btnDone.UseVisualStyleBackColor = true;
             this.btnDone.UseWindowsAccentColor = true;
             this.btnDone.Visible = false;
@@ -77,6 +78,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.label2.TabIndex = 5;
             this.label2.Text = "Extension Store Downloader";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label2.UseMnemonic = false;
             // 
             // ExtensionStoreDownloader
             // 

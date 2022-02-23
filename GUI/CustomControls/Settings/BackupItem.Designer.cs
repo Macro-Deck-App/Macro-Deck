@@ -45,6 +45,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             this.lblFileName.TabIndex = 0;
             this.lblFileName.Text = "label1";
             this.lblFileName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblFileName.UseMnemonic = false;
             // 
             // lblDateCreated
             // 
@@ -54,6 +55,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             this.lblDateCreated.TabIndex = 1;
             this.lblDateCreated.Text = "label1";
             this.lblDateCreated.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblDateCreated.UseMnemonic = false;
             // 
             // lblSize
             // 
@@ -63,6 +65,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             this.lblSize.TabIndex = 2;
             this.lblSize.Text = "label1";
             this.lblSize.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblSize.UseMnemonic = false;
             // 
             // btnDelete
             // 
@@ -80,6 +83,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             this.btnDelete.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
             this.btnDelete.Size = new System.Drawing.Size(35, 35);
             this.btnDelete.TabIndex = 3;
+            this.btnDelete.UseMnemonic = false;
             this.btnDelete.UseVisualStyleBackColor = false;
             this.btnDelete.UseWindowsAccentColor = false;
             this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
@@ -100,6 +104,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             this.btnRestore.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
             this.btnRestore.Size = new System.Drawing.Size(35, 35);
             this.btnRestore.TabIndex = 4;
+            this.btnRestore.UseMnemonic = false;
             this.btnRestore.UseVisualStyleBackColor = false;
             this.btnRestore.UseWindowsAccentColor = true;
             this.btnRestore.Click += new System.EventHandler(this.BtnRestore_Click);

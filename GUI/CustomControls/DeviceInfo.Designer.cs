@@ -60,6 +60,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblDisplayName.Size = new System.Drawing.Size(110, 19);
             this.lblDisplayName.TabIndex = 0;
             this.lblDisplayName.Text = "Display name:";
+            this.lblDisplayName.UseMnemonic = false;
             // 
             // displayName
             // 
@@ -109,6 +110,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblIdLabel.Size = new System.Drawing.Size(77, 19);
             this.lblIdLabel.TabIndex = 3;
             this.lblIdLabel.Text = "Client ID:";
+            this.lblIdLabel.UseMnemonic = false;
             // 
             // lblId
             // 
@@ -118,6 +120,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblId.Name = "lblId";
             this.lblId.Size = new System.Drawing.Size(194, 23);
             this.lblId.TabIndex = 4;
+            this.lblId.UseMnemonic = false;
             // 
             // checkBlockConnection
             // 
@@ -130,6 +133,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.checkBlockConnection.TabIndex = 5;
             this.checkBlockConnection.Text = "Block connection";
             this.checkBlockConnection.TextAlign = System.Drawing.ContentAlignment.TopLeft;
+            this.checkBlockConnection.UseMnemonic = false;
             this.checkBlockConnection.UseVisualStyleBackColor = true;
             this.checkBlockConnection.CheckedChanged += new System.EventHandler(this.CheckBlockConnection_CheckedChanged);
             // 
@@ -143,6 +147,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblStatusLabel.Size = new System.Drawing.Size(58, 19);
             this.lblStatusLabel.TabIndex = 6;
             this.lblStatusLabel.Text = "Status:";
+            this.lblStatusLabel.UseMnemonic = false;
             // 
             // lblStatus
             // 
@@ -153,6 +158,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblStatus.Size = new System.Drawing.Size(226, 23);
             this.lblStatus.TabIndex = 7;
             this.lblStatus.Text = "?";
+            this.lblStatus.UseMnemonic = false;
             // 
             // btnChangeDisplayName
             // 
@@ -197,6 +203,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblProfile.Size = new System.Drawing.Size(60, 19);
             this.lblProfile.TabIndex = 10;
             this.lblProfile.Text = "Profile:";
+            this.lblProfile.UseMnemonic = false;
             // 
             // lblDeviceType
             // 
@@ -208,6 +215,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblDeviceType.TabIndex = 11;
             this.lblDeviceType.Text = "Web client";
             this.lblDeviceType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblDeviceType.UseMnemonic = false;
             // 
             // iconDeviceType
             // 
@@ -235,6 +243,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnConfigure.Size = new System.Drawing.Size(183, 27);
             this.btnConfigure.TabIndex = 13;
             this.btnConfigure.Text = "Device settings";
+            this.btnConfigure.UseMnemonic = false;
             this.btnConfigure.UseVisualStyleBackColor = false;
             this.btnConfigure.Click += new System.EventHandler(this.BtnConfigure_Click);
             // 
