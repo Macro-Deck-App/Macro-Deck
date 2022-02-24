@@ -403,6 +403,8 @@ namespace SuchByte.MacroDeck
             ProfileManager.AddVariableChangedListener();
             ProfileManager.AddWindowFocusChangedListener();
 
+            Colors.Initialize();
+
             MacroDeckLogger.Info("Macro Deck started successfully");
 
             if (show || SafeMode)
