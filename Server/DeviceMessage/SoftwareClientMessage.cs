@@ -13,10 +13,16 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
 {
     public class SoftwareClientMessage : IDeviceMessage
     {
+
         public void Connected(MacroDeckClient macroDeckClient)
         {
             SendConfiguration(macroDeckClient);
             MacroDeckServer.SendAllIcons(macroDeckClient);
+            if (macroDeckClient.DeviceType != DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).DeviceType)
+            {
+                DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).DeviceType = macroDeckClient.DeviceType;
+                DeviceManager.SaveKnownDevices();
+            }
             GC.Collect();
         }
 
