@@ -425,6 +425,10 @@ namespace SuchByte.MacroDeck
             ProfileManager.AddVariableChangedListener();
             ProfileManager.AddWindowFocusChangedListener();
 
+            Colors.Initialize();
+
+            MacroDeckLogger.Info("Macro Deck started successfully");
+
             MacroDeckPipeServer.Initialize();
             MacroDeckPipeServer.PipeMessage += MacroDeckPipeServer_PipeMessage;
 

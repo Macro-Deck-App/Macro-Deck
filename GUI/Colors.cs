@@ -9,55 +9,25 @@ using Windows.UI.ViewManagement;
 
 namespace SuchByte.MacroDeck.GUI
 {
-    public class Colors : UserControl
+    public class Colors
     {
-
-        static readonly UISettings uISettings = new UISettings();
-
-        public static Color WindowsAccentColor
+        public static void Initialize()
         {
-            get
+            try
             {
-                try
-                {
-                    var accentColor = uISettings.GetColorValue(UIColorType.Accent);
-                    return ConvertWindowsUiColorToColor(accentColor);
-                } catch
-                {
-                    return DefaultAccentColor;
-                }
-            }
+                UISettings uISettings = new UISettings();
+                var accentColor = uISettings.GetColorValue(UIColorType.Accent);
+                WindowsAccentColor = ConvertWindowsUiColorToColor(accentColor);
+                WindowsAccentColorLight = LighterColor(ConvertWindowsUiColorToColor(accentColor), 30);
+                WindowsAccentColorDark = DarkerColor(ConvertWindowsUiColorToColor(accentColor), 30);
+            } catch {}
         }
 
-        public static Color WindowsAccentColorLight
-        {
-            get
-            {
-                try
-                {
-                    var accentColor = uISettings.GetColorValue(UIColorType.Accent);
-                    return LighterColor(ConvertWindowsUiColorToColor(accentColor), 30);
-                } catch
-                {
-                    return DefaultAccentColorLight;
-                }
-            }
-        }
+        public static Color WindowsAccentColor { get; set; } = DefaultAccentColor;
 
-        public static Color WindowsAccentColorDark
-        {
-            get
-            {
-                try
-                {
-                    var accentColor = uISettings.GetColorValue(UIColorType.Accent);
-                    return DarkerColor(ConvertWindowsUiColorToColor(accentColor), 30);
-                } catch
-                {
-                    return DefaultAccentColorDark;
-                }
-            }
-        }
+        public static Color WindowsAccentColorLight { get; set; } = DefaultAccentColorLight;
+
+        public static Color WindowsAccentColorDark { get; set; } = DefaultAccentColorDark;
 
         public static Color DefaultAccentColor
         {
@@ -94,8 +64,7 @@ namespace SuchByte.MacroDeck.GUI
         {
             correctionfactory = correctionfactory / 100f;
             const float rgb255 = 255f;
-            return Color.FromArgb((int)((float)color.R + ((rgb255 - (float)color.R) * correctionfactory)), (int)((float)color.G + ((rgb255 - (float)color.G) * correctionfactory)), (int)((float)color.B + ((rgb255 - (float)color.B) * correctionfactory))
-                );
+            return Color.FromArgb((int)((float)color.R + ((rgb255 - (float)color.R) * correctionfactory)), (int)((float)color.G + ((rgb255 - (float)color.G) * correctionfactory)), (int)((float)color.B + ((rgb255 - (float)color.B) * correctionfactory)));
         }
 
         public static Color ConvertWindowsUiColorToColor(Windows.UI.Color windowsUiColor)
