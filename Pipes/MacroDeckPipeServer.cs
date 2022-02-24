@@ -30,7 +30,9 @@ namespace SuchByte.MacroDeck.Pipes
                     byte[] buffer = new byte[255];
                     pipeServer.Read(buffer, 0, 255);
                     string stringData = Encoding.ASCII.GetString(buffer).Trim('\0');
-                    Task.Run(() => PipeMessage.Invoke(stringData));
+                    Thread t = new Thread(new ThreadStart(() => PipeMessage.Invoke(stringData)));
+                    t.SetApartmentState(ApartmentState.STA);
+                    t.Start();
                     pipeServer.Close();
                     SpawnServerStream();
                 }
