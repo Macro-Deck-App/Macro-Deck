@@ -33,6 +33,14 @@ namespace SuchByte.MacroDeck.GUI
 {
     public partial class ButtonEditor : DialogForm
     {
+        static JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Auto,
+            NullValueHandling = NullValueHandling.Ignore,
+            Error = (sender, args) => { args.ErrorContext.Handled = true; }
+        };
+
+
         private ActionButton.ActionButton actionButton;
         private ActionButton.ActionButton actionButtonEdited;
         private readonly Folders.MacroDeckFolder folder;
@@ -329,13 +337,6 @@ namespace SuchByte.MacroDeck.GUI
 
         public void LoadButton()
         {
-            JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-                NullValueHandling = NullValueHandling.Ignore,
-                Error = (sender, args) => { args.ErrorContext.Handled = true; }
-            };
-
             this.actionButtonEdited = JsonConvert.DeserializeObject<ActionButton.ActionButton>(JsonConvert.SerializeObject(this.actionButton, jsonSerializerSettings), jsonSerializerSettings); // Make a copy of the current action button
 
             bool currentState = this.actionButton.State;
@@ -375,6 +376,7 @@ namespace SuchByte.MacroDeck.GUI
         {
             this.RefreshLabel();
             this.RefreshIcon();
+            this.UpdateLabel();
         }
 
         private void BtnEditIcon_Click(object sender, EventArgs e)
@@ -532,5 +534,19 @@ namespace SuchByte.MacroDeck.GUI
             }
         }
 
+        private void BtnEditJson_Click(object sender, EventArgs e)
+        {
+            using (var jsonButtonEditor = new JsonButtonEditor(this.actionButtonEdited))
+            {
+                if (jsonButtonEditor.ShowDialog() == DialogResult.OK)
+                {
+                    jsonButtonEditor.ActionButton.Position_X = this.actionButtonEdited.Position_X;
+                    jsonButtonEditor.ActionButton.Position_Y = this.actionButtonEdited.Position_Y;                 
+                    this.actionButton = jsonButtonEditor.ActionButton;
+                    this.LoadButton();
+                    this.UpdateLabel();
+                }
+            }
+        }
     }
 }

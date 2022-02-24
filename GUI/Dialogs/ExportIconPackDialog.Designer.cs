@@ -51,6 +51,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblVersion.TabIndex = 14;
             this.lblVersion.Text = "Version:";
             this.lblVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblVersion.UseMnemonic = false;
             // 
             // version
             // 
@@ -82,6 +83,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblAuthor.TabIndex = 12;
             this.lblAuthor.Text = "Author:";
             this.lblAuthor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblAuthor.UseMnemonic = false;
             // 
             // author
             // 
@@ -123,6 +125,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOk.Size = new System.Drawing.Size(75, 25);
             this.btnOk.TabIndex = 10;
             this.btnOk.Text = "Ok";
+            this.btnOk.UseMnemonic = false;
             this.btnOk.UseVisualStyleBackColor = false;
             this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
             // 
@@ -155,6 +158,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblDescription.Size = new System.Drawing.Size(70, 16);
             this.lblDescription.TabIndex = 16;
             this.lblDescription.Text = "Description";
+            this.lblDescription.UseMnemonic = false;
             // 
             // lblLicense
             // 
@@ -165,6 +169,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblLicense.TabIndex = 18;
             this.lblLicense.Text = "License";
             this.lblLicense.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblLicense.UseMnemonic = false;
             // 
             // license
             // 

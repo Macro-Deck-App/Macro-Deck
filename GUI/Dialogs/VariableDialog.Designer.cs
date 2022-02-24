@@ -67,6 +67,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblType.Size = new System.Drawing.Size(50, 19);
             this.lblType.TabIndex = 4;
             this.lblType.Text = "Type:";
+            this.lblType.UseMnemonic = false;
             // 
             // btnOk
             // 
@@ -86,6 +87,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOk.Size = new System.Drawing.Size(75, 25);
             this.btnOk.TabIndex = 5;
             this.btnOk.Text = "Ok";
+            this.btnOk.UseMnemonic = false;
             this.btnOk.UseVisualStyleBackColor = false;
             this.btnOk.UseWindowsAccentColor = true;
             this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
@@ -99,6 +101,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblName.Size = new System.Drawing.Size(56, 19);
             this.lblName.TabIndex = 6;
             this.lblName.Text = "Name:";
+            this.lblName.UseMnemonic = false;
             // 
             // variableName
             // 
@@ -131,6 +134,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblValue.Size = new System.Drawing.Size(54, 19);
             this.lblValue.TabIndex = 8;
             this.lblValue.Text = "Value:";
+            this.lblValue.UseMnemonic = false;
             // 
             // variableValue
             // 
@@ -164,6 +168,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnDelete.TabIndex = 10;
             this.btnDelete.TabStop = true;
             this.btnDelete.Text = "Delete variable";
+            this.btnDelete.UseMnemonic = false;
             this.btnDelete.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.BtnDelete_LinkClicked);
             // 
             // VariableDialog

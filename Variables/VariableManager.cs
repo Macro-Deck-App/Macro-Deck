@@ -219,6 +219,7 @@ namespace SuchByte.MacroDeck.Variables
 
         internal static void Load()
         {
+            MacroDeckLogger.Info(typeof(VariableManager), "Loading variables...");
             var db = new SQLiteConnection(MacroDeck.VariablesFilePath);
             db.CreateTable<Variable>();
 
@@ -231,26 +232,13 @@ namespace SuchByte.MacroDeck.Variables
             foreach (Variable variable in variablesLoaded.ToArray())
             {
                 variable.Name = ConvertNameString(variable.Name);
-                while (variablesLoaded.FindAll(x => x.Name.Equals(variable.Name)).Count > 1)
-                {
-                    MacroDeckLogger.Trace(typeof(VariableManager), $"Found {variable.Name} more then once");
-                    variablesLoaded.Remove(variable);
-                } 
             }
 
             Variables = variablesLoaded;
 
             db.Close();
 
-            MacroDeckLogger.Info(Variables.Count + " variables loaded");
-        }
-
-        internal static void LoadAsync()
-        {
-            Task.Run(() =>
-            {
-                Load();
-            });
+            MacroDeckLogger.Info(typeof(VariableManager), Variables.Count + " variables loaded");
         }
 
         internal static void Save()

@@ -41,6 +41,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblActionName.TabIndex = 0;
             this.lblActionName.Text = "label1";
             this.lblActionName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblActionName.UseMnemonic = false;
             // 
             // ActionConfiguratorActionItem
             // 

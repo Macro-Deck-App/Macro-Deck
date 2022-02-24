@@ -56,6 +56,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.pluginName.Size = new System.Drawing.Size(203, 20);
             this.pluginName.TabIndex = 1;
             this.pluginName.Text = "label1";
+            this.pluginName.UseMnemonic = false;
             // 
             // lblCountActions
             // 
@@ -67,6 +68,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblCountActions.TabIndex = 2;
             this.lblCountActions.Text = "label1";
             this.lblCountActions.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblCountActions.UseMnemonic = false;
             // 
             // chevron
             // 

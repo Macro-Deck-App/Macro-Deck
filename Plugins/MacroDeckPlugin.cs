@@ -76,7 +76,7 @@ namespace SuchByte.MacroDeck.Plugins
         /// <summary>
         /// This list contains all the actions of the plugin. If your plugin does not contain any actions, you can delete this.
         /// </summary>
-        public List<PluginAction> Actions { get; set; }
+        public List<PluginAction> Actions { get; set; } = new List<PluginAction>();
         /// <summary>
         /// Set a custom icon that will be shown in the package manager and in the action configurator.
         /// </summary>

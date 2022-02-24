@@ -2,7 +2,7 @@
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
     <VersionMinor>8</VersionMinor>
-    <VersionPatch>0</VersionPatch>
+    <VersionPatch>2</VersionPatch>
     <VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
   </PropertyGroup>
   
@@ -81,11 +81,13 @@
 
   <ItemGroup>
     <PackageReference Include="Cottle" Version="2.0.4" />
+    <PackageReference Include="FCTB" Version="2.16.24" />
     <PackageReference Include="Fleck" Version="1.2.0" />
     <PackageReference Include="GiphyDotNet" Version="2.0.0" />
     <PackageReference Include="Magick.NET-Q16-x64" Version="8.3.1" />
     <PackageReference Include="Magick.NET.Core" Version="8.3.1" />
     <PackageReference Include="Magick.NET.SystemDrawing" Version="4.0.6" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1108.44" />
     <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.22000.196" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="RestSharp" Version="106.12.0" />

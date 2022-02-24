@@ -148,10 +148,14 @@ namespace SuchByte.MacroDeck.Icons
                 {
                     SearchUpdate(iconPack);
                 }
+                if (OnUpdateCheckFinished != null)
+                {
+                    OnUpdateCheckFinished(null, EventArgs.Empty);
+                }
             });
         }
 
-        private static void SearchUpdate(IconPack iconPack)
+        internal static void SearchUpdate(IconPack iconPack)
         {
             try
             {
@@ -165,10 +169,6 @@ namespace SuchByte.MacroDeck.Icons
                         MacroDeckLogger.Info("Update available for " + iconPack.Name);
                         IconPacksUpdateAvailable.Add(iconPack);
                     }
-                }
-                if (OnUpdateCheckFinished != null)
-                {
-                    OnUpdateCheckFinished(null, EventArgs.Empty);
                 }
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
@@ -301,6 +301,7 @@ namespace SuchByte.MacroDeck.Icons
             }
             return null;
         }
+
 
         public static void DeleteIcon(IconPack iconPack, Icon icon)
         {

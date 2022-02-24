@@ -1,5 +1,6 @@
 ﻿using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Server;
 using System;
 using System.Collections.Generic;
@@ -31,7 +32,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private void DeviceManagerPage_Load(object sender, EventArgs e)
         {
             this.LoadDevices();
-            MacroDeckServer.OnDeviceConnectionStateChanged += new EventHandler(this.OnClientsChanged);
+            MacroDeckServer.OnDeviceConnectionStateChanged += this.OnClientsChanged;
+            DeviceManager.OnDevicesChange += this.OnClientsChanged;
             this.radioAllowAll.CheckedChanged -= RadioBehaviour_CheckedChanged;
             this.radioAskNewConnections.CheckedChanged -= RadioBehaviour_CheckedChanged;
             this.radioBlockNew.CheckedChanged -= RadioBehaviour_CheckedChanged;
@@ -45,15 +47,18 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void OnClientsChanged(object sender, EventArgs e)
         {
-            this.Invoke(new Action(() =>
-                this.LoadDevices()
-            ));
+            this.LoadDevices();
         }
 
         private void LoadDevices()
         {
-            DeviceManager.OnDevicesChange -= this.OnClientsChanged;
-            foreach (DeviceInfo control in this.devicesList.Controls)
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => LoadDevices()));
+                return;
+            }
+
+            foreach (DeviceInfo control in this.devicesList.Controls.OfType<DeviceInfo>())
             {
                 if (!DeviceManager.GetKnownDevices().Contains(control.MacroDeckDevice))
                 {
@@ -63,7 +68,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 }
                 control.LoadDevice();
             }
-            //this.devicesList.Controls.Clear();
 
             foreach (MacroDeckDevice macroDeckDevice in DeviceManager.GetKnownDevices().ToArray())
             {
@@ -72,17 +76,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     continue;
                 }
 
-                Task.Run(() =>
-                {
-                    DeviceInfo deviceInfo = new DeviceInfo(macroDeckDevice);
-                    this.Invoke(new Action(() => this.devicesList.Controls.Add(deviceInfo)));
-                });
+                DeviceInfo deviceInfo = new DeviceInfo(macroDeckDevice);
+                this.devicesList.Controls.Add(deviceInfo);
             }
-
-            DeviceManager.OnDevicesChange += new EventHandler(this.OnClientsChanged);
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
         }
 
         private void RadioBehaviour_CheckedChanged(object sender, EventArgs e)

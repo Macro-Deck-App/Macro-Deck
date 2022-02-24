@@ -50,8 +50,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         private void DialogForm_Load(object sender, EventArgs e)
         {
             this.btnClose.Location = new Point(this.Width - this.btnClose.Width - 2, 2);
-            CenterToScreen();
-            CenterToParent();
         }
 
         private void DialogForm_MouseDown(object sender, MouseEventArgs e)

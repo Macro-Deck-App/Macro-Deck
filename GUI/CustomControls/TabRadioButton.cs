@@ -51,7 +51,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 Y = rectSurface.Height - 3,
             };
             using (SolidBrush backgroundBrush = new SolidBrush(this.Parent.BackColor))
-            using (SolidBrush selectedBrush = new SolidBrush(Colors.WindowsAccentColor))
+            using (SolidBrush selectedBrush = new SolidBrush(!DesignMode ? Colors.WindowsAccentColor : Colors.DefaultAccentColor))
             using (SolidBrush hoverBrush = new SolidBrush(Color.White))
             {
                 pe.Graphics.FillRectangle(backgroundBrush, rectSurface);

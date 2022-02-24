@@ -75,7 +75,6 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                 }
                 JObject actionButtonObject = JObject.FromObject(new
                 {
-                    actionButton.ButtonId,
                     Icon,
                     actionButton.Position_X,
                     actionButton.Position_Y,
@@ -147,7 +146,6 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
             }
             JObject actionButtonObject = JObject.FromObject(new
             {
-                actionButton.ButtonId,
                 Icon,
                 actionButton.Position_X,
                 actionButton.Position_Y,

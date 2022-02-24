@@ -43,6 +43,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.label1.Size = new System.Drawing.Size(174, 23);
             this.label1.TabIndex = 3;
             this.label1.Text = "Third-party licenses";
+            this.label1.UseMnemonic = false;
             // 
             // label3
             // 
@@ -53,6 +54,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.label3.Text = "Macro Deck uses some awesome free and open-source software. Some of them require " +
     "their licenses to be included. Thank you all who created this awesome software!\r" +
     "\n";
+            this.label3.UseMnemonic = false;
             this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // licensesPanel

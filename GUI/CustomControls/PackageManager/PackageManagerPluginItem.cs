@@ -289,7 +289,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                     PluginManager.PluginsUpdateAvailable.Remove(this._macroDeckPlugin);
                 }
 
-                PluginManager.InstallPlugin(extractedDirectory, this._jsonObject["uuid"].ToString(), this._update);
+                PluginManager.InstallPlugin(extractedDirectory, this._jsonObject["uuid"].ToString());
 
                 try
                 {

@@ -55,6 +55,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblPleaseWait.TabIndex = 3;
             this.lblPleaseWait.Text = "Please wait...";
             this.lblPleaseWait.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblPleaseWait.UseMnemonic = false;
             // 
             // WaitDialog
             // 

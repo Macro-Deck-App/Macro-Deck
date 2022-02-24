@@ -15,6 +15,7 @@ using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,7 +36,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblTotalProgress.Text = Language.LanguageManager.Strings.TotalProgress;
             this.SetCloseIconVisible(false);
         }
-
 
         public void InstallAll(List<JObject> plugins)
         {
@@ -132,7 +132,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                             var extractedDirectory = Path.Combine(MacroDeck.TempDirectoryPath, jsonObject["uuid"].ToString());
                             ZipFile.ExtractToDirectory(Path.Combine(MacroDeck.TempDirectoryPath, jsonObject["filename"].ToString()), extractedDirectory, true);
 
-                            PluginManager.InstallPlugin(extractedDirectory, jsonObject["uuid"].ToString(), false);
+                            PluginManager.InstallPlugin(extractedDirectory, jsonObject["uuid"].ToString());
                         }
                         catch (Exception ex)
                         {
@@ -207,4 +207,5 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             
         }
     }
+
 }

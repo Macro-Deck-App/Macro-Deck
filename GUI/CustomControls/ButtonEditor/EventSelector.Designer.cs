@@ -66,6 +66,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.btnAddEvent.Size = new System.Drawing.Size(165, 30);
             this.btnAddEvent.TabIndex = 6;
             this.btnAddEvent.Text = "+ Event";
+            this.btnAddEvent.UseMnemonic = false;
             this.btnAddEvent.UseVisualStyleBackColor = false;
             this.btnAddEvent.Click += new System.EventHandler(this.BtnAddEvent_Click);
             // 

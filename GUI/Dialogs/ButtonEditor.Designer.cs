@@ -81,6 +81,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblHotkeyInfo = new System.Windows.Forms.Label();
             this.btnRemoveHotkey = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.hotkey = new SuchByte.MacroDeck.GUI.CustomControls.RoundedTextBox();
+            this.btnEditJson = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             ((System.ComponentModel.ISupportInitialize)(this.btnPreview)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.fontSize)).BeginInit();
             this.panel1.SuspendLayout();
@@ -114,6 +115,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnApply.Size = new System.Drawing.Size(75, 25);
             this.btnApply.TabIndex = 1;
             this.btnApply.Text = "Apply";
+            this.btnApply.UseMnemonic = false;
             this.btnApply.UseVisualStyleBackColor = true;
             this.btnApply.UseWindowsAccentColor = true;
             this.btnApply.Click += new System.EventHandler(this.BtnSave_Click);
@@ -197,6 +199,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblButtonState.Size = new System.Drawing.Size(130, 19);
             this.lblButtonState.TabIndex = 12;
             this.lblButtonState.Text = "Button state";
+            this.lblButtonState.UseMnemonic = false;
             // 
             // radioButtonOff
             // 
@@ -209,6 +212,7 @@ namespace SuchByte.MacroDeck.GUI
             this.radioButtonOff.TabIndex = 13;
             this.radioButtonOff.TabStop = true;
             this.radioButtonOff.Text = "Off";
+            this.radioButtonOff.UseMnemonic = false;
             this.radioButtonOff.UseVisualStyleBackColor = true;
             this.radioButtonOff.CheckedChanged += new System.EventHandler(this.RadioButton_CheckedChanged);
             // 
@@ -221,6 +225,7 @@ namespace SuchByte.MacroDeck.GUI
             this.radioButtonOn.Size = new System.Drawing.Size(70, 23);
             this.radioButtonOn.TabIndex = 14;
             this.radioButtonOn.Text = "On";
+            this.radioButtonOn.UseMnemonic = false;
             this.radioButtonOn.UseVisualStyleBackColor = true;
             this.radioButtonOn.CheckedChanged += new System.EventHandler(this.RadioButton_CheckedChanged);
             // 
@@ -256,6 +261,7 @@ namespace SuchByte.MacroDeck.GUI
             this.labelAlignBottom.TabIndex = 11;
             this.labelAlignBottom.TabStop = true;
             this.labelAlignBottom.Text = "Bottom";
+            this.labelAlignBottom.UseMnemonic = false;
             this.labelAlignBottom.UseVisualStyleBackColor = true;
             this.labelAlignBottom.CheckedChanged += new System.EventHandler(this.LabelChanged);
             // 
@@ -269,6 +275,7 @@ namespace SuchByte.MacroDeck.GUI
             this.labelAlignCenter.Size = new System.Drawing.Size(69, 22);
             this.labelAlignCenter.TabIndex = 10;
             this.labelAlignCenter.Text = "Center";
+            this.labelAlignCenter.UseMnemonic = false;
             this.labelAlignCenter.UseVisualStyleBackColor = true;
             this.labelAlignCenter.CheckedChanged += new System.EventHandler(this.LabelChanged);
             // 
@@ -282,6 +289,7 @@ namespace SuchByte.MacroDeck.GUI
             this.labelAlignTop.Size = new System.Drawing.Size(52, 22);
             this.labelAlignTop.TabIndex = 9;
             this.labelAlignTop.Text = "Top";
+            this.labelAlignTop.UseMnemonic = false;
             this.labelAlignTop.UseVisualStyleBackColor = true;
             this.labelAlignTop.CheckedChanged += new System.EventHandler(this.LabelChanged);
             // 
@@ -405,6 +413,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnForeColor.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
             this.btnForeColor.Size = new System.Drawing.Size(27, 27);
             this.btnForeColor.TabIndex = 21;
+            this.btnForeColor.UseMnemonic = false;
             this.btnForeColor.UseVisualStyleBackColor = false;
             this.btnForeColor.UseWindowsAccentColor = false;
             this.btnForeColor.Click += new System.EventHandler(this.BtnForeColor_Click);
@@ -435,6 +444,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblCurrentState.Size = new System.Drawing.Size(66, 16);
             this.lblCurrentState.TabIndex = 22;
             this.lblCurrentState.Text = "Off";
+            this.lblCurrentState.UseMnemonic = false;
             // 
             // lblCurrentStateLabel
             // 
@@ -445,6 +455,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblCurrentStateLabel.TabIndex = 23;
             this.lblCurrentStateLabel.Text = "Current state:";
             this.lblCurrentStateLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblCurrentStateLabel.UseMnemonic = false;
             // 
             // btnOk
             // 
@@ -462,6 +473,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnOk.Size = new System.Drawing.Size(75, 25);
             this.btnOk.TabIndex = 25;
             this.btnOk.Text = "Ok";
+            this.btnOk.UseMnemonic = false;
             this.btnOk.UseVisualStyleBackColor = true;
             this.btnOk.UseWindowsAccentColor = true;
             this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
@@ -484,6 +496,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblStateBinding.TabIndex = 26;
             this.lblStateBinding.Text = "State binding:";
             this.lblStateBinding.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblStateBinding.UseMnemonic = false;
             // 
             // listStateBinding
             // 
@@ -550,6 +563,7 @@ namespace SuchByte.MacroDeck.GUI
             this.radioOnPress.TabIndex = 0;
             this.radioOnPress.TabStop = true;
             this.radioOnPress.Text = "On press";
+            this.radioOnPress.UseMnemonic = false;
             this.radioOnPress.UseVisualStyleBackColor = true;
             this.radioOnPress.CheckedChanged += new System.EventHandler(this.RadioOnPress_CheckedChanged);
             // 
@@ -563,6 +577,7 @@ namespace SuchByte.MacroDeck.GUI
             this.radioOnRelease.Size = new System.Drawing.Size(96, 22);
             this.radioOnRelease.TabIndex = 2;
             this.radioOnRelease.Text = "On release";
+            this.radioOnRelease.UseMnemonic = false;
             this.radioOnRelease.UseVisualStyleBackColor = true;
             this.radioOnRelease.CheckedChanged += new System.EventHandler(this.RadioOnRelease_CheckedChanged);
             // 
@@ -576,6 +591,7 @@ namespace SuchByte.MacroDeck.GUI
             this.radioOnLongPress.Size = new System.Drawing.Size(116, 22);
             this.radioOnLongPress.TabIndex = 3;
             this.radioOnLongPress.Text = "On long press";
+            this.radioOnLongPress.UseMnemonic = false;
             this.radioOnLongPress.UseVisualStyleBackColor = true;
             this.radioOnLongPress.CheckedChanged += new System.EventHandler(this.RadioOnLongPress_CheckedChanged);
             // 
@@ -589,6 +605,7 @@ namespace SuchByte.MacroDeck.GUI
             this.radioOnLongPressRelease.Size = new System.Drawing.Size(167, 22);
             this.radioOnLongPressRelease.TabIndex = 4;
             this.radioOnLongPressRelease.Text = "On long press release";
+            this.radioOnLongPressRelease.UseMnemonic = false;
             this.radioOnLongPressRelease.UseVisualStyleBackColor = true;
             this.radioOnLongPressRelease.CheckedChanged += new System.EventHandler(this.RadioOnLongPressRelease_CheckedChanged);
             // 
@@ -602,6 +619,7 @@ namespace SuchByte.MacroDeck.GUI
             this.radioOnEvent.Size = new System.Drawing.Size(87, 22);
             this.radioOnEvent.TabIndex = 1;
             this.radioOnEvent.Text = "On event";
+            this.radioOnEvent.UseMnemonic = false;
             this.radioOnEvent.UseVisualStyleBackColor = true;
             this.radioOnEvent.CheckedChanged += new System.EventHandler(this.RadioOnEvent_CheckedChanged);
             // 
@@ -644,6 +662,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblHotkeyInfo.TabIndex = 21;
             this.lblHotkeyInfo.Text = "The hotkey executes the \"On press\" actions when pressed";
             this.lblHotkeyInfo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblHotkeyInfo.UseMnemonic = false;
             // 
             // btnRemoveHotkey
             // 
@@ -682,12 +701,35 @@ namespace SuchByte.MacroDeck.GUI
             this.hotkey.TabIndex = 0;
             this.hotkey.TextAlignment = System.Windows.Forms.HorizontalAlignment.Left;
             // 
+            // btnEditJson
+            // 
+            this.btnEditJson.BorderRadius = 8;
+            this.btnEditJson.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnEditJson.FlatAppearance.BorderSize = 0;
+            this.btnEditJson.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnEditJson.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnEditJson.ForeColor = System.Drawing.Color.White;
+            this.btnEditJson.HoverColor = System.Drawing.Color.Empty;
+            this.btnEditJson.Icon = null;
+            this.btnEditJson.Location = new System.Drawing.Point(320, 601);
+            this.btnEditJson.Name = "btnEditJson";
+            this.btnEditJson.Progress = 0;
+            this.btnEditJson.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(225)))));
+            this.btnEditJson.Size = new System.Drawing.Size(150, 25);
+            this.btnEditJson.TabIndex = 33;
+            this.btnEditJson.Text = "Edit JSON";
+            this.btnEditJson.UseMnemonic = false;
+            this.btnEditJson.UseVisualStyleBackColor = true;
+            this.btnEditJson.UseWindowsAccentColor = true;
+            this.btnEditJson.Click += new System.EventHandler(this.BtnEditJson_Click);
+            // 
             // ButtonEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.ClientSize = new System.Drawing.Size(1200, 635);
+            this.Controls.Add(this.btnEditJson);
             this.Controls.Add(this.groupHotkey);
             this.Controls.Add(this.groupButtonState);
             this.Controls.Add(this.flowLayoutPanel1);
@@ -708,6 +750,7 @@ namespace SuchByte.MacroDeck.GUI
             this.Controls.SetChildIndex(this.flowLayoutPanel1, 0);
             this.Controls.SetChildIndex(this.groupButtonState, 0);
             this.Controls.SetChildIndex(this.groupHotkey, 0);
+            this.Controls.SetChildIndex(this.btnEditJson, 0);
             ((System.ComponentModel.ISupportInitialize)(this.btnPreview)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.fontSize)).EndInit();
             this.panel1.ResumeLayout(false);
@@ -770,5 +813,6 @@ namespace SuchByte.MacroDeck.GUI
         private TabRadioButton radioOnRelease;
         private TabRadioButton radioOnLongPress;
         private TabRadioButton radioOnLongPressRelease;
+        private ButtonPrimary btnEditJson;
     }
 }

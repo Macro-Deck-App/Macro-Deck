@@ -56,6 +56,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblDownloadingPlugins.Name = "lblDownloadingPlugins";
             this.lblDownloadingPlugins.Size = new System.Drawing.Size(503, 25);
             this.lblDownloadingPlugins.TabIndex = 4;
+            this.lblDownloadingPlugins.UseMnemonic = false;
             // 
             // currentProgress
             // 
@@ -79,6 +80,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblTotalProgress.Size = new System.Drawing.Size(90, 16);
             this.lblTotalProgress.TabIndex = 8;
             this.lblTotalProgress.Text = "Total progress";
+            this.lblTotalProgress.UseMnemonic = false;
             // 
             // lblCurrentProgress
             // 
@@ -88,6 +90,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblCurrentProgress.Size = new System.Drawing.Size(104, 16);
             this.lblCurrentProgress.TabIndex = 9;
             this.lblCurrentProgress.Text = "Current progress";
+            this.lblCurrentProgress.UseMnemonic = false;
             // 
             // PluginDownloader
             // 
