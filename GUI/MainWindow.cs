@@ -46,7 +46,6 @@ namespace SuchByte.MacroDeck.GUI
 
         public MainWindow()
         {
-            MacroDeck.SyncContext ??= SynchronizationContext.Current;
             this.InitializeComponent();
             this.UpdateTranslation();
             this.UpdateWarningsErrors();

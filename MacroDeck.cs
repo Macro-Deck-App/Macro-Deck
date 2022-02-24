@@ -433,6 +433,11 @@ namespace SuchByte.MacroDeck
             long startTook = DateTimeOffset.Now.ToUnixTimeMilliseconds() - _macroDeckStarted;
             MacroDeckLogger.Info($"Macro Deck startup finished (took {startTook}ms)");
 
+            using (mainWindow = new MainWindow())
+            {
+                SyncContext = SynchronizationContext.Current;
+            }
+
             if (show || SafeMode)
             {
                 ShowMainWindow();
@@ -567,6 +572,8 @@ namespace SuchByte.MacroDeck
             mainWindow.FormClosed += MainWindow_FormClosed;
             mainWindow.Show();
         }
+
+        
 
         private static void MainWindow_FormClosed(object sender, FormClosedEventArgs e)
         {
