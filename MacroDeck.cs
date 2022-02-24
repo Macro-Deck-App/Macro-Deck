@@ -66,6 +66,8 @@ namespace SuchByte.MacroDeck
         public static string VariablesFilePath;
         public static string ProfilesFilePath;
 
+        public static SynchronizationContext SyncContext { get; set; }
+
         [System.Security.Permissions.PermissionSet(System.Security.Permissions.SecurityAction.Demand, Name = "FullTrust")]
         protected override void WndProc(ref Message m)
         {
@@ -539,6 +541,22 @@ namespace SuchByte.MacroDeck
 
         public static void ShowMainWindow()
         {
+            if (SyncContext == null)
+            {
+                CreateMainForm();
+            } else
+            {
+                SyncContext.Send(o =>
+                {
+                    CreateMainForm();
+                }, null);
+            }
+            
+            MacroDeckLogger.Trace("MainWindow created");
+        }
+
+        private static void CreateMainForm()
+        {
             if (Application.OpenForms.OfType<MainWindow>().Count() > 0 && mainWindow != null && !mainWindow.IsDisposed)
             {
                 if (mainWindow.InvokeRequired)
@@ -555,8 +573,6 @@ namespace SuchByte.MacroDeck
             mainWindow.Load += MainWindowLoadEvent;
             mainWindow.FormClosed += MainWindow_FormClosed;
             mainWindow.Show();
-            Application.Run();
-            MacroDeckLogger.Trace("MainWindow created");
         }
 
         private static void MainWindow_FormClosed(object sender, FormClosedEventArgs e)
