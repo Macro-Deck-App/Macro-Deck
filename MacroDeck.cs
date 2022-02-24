@@ -104,7 +104,7 @@ namespace SuchByte.MacroDeck
         {
             Icon = Properties.Resources.appicon,
             Text = "Macro Deck " + VersionString,
-            Visible = true,
+            Visible = false,
             ContextMenuStrip = _trayIconContextMenu
         };
 
@@ -446,7 +446,6 @@ namespace SuchByte.MacroDeck
             switch (message)
             {
                 case "show":
-                    MacroDeckLogger.Trace("Show main window now!");
                     ShowMainWindow();
                     break;
             }
@@ -464,6 +463,8 @@ namespace SuchByte.MacroDeck
 
         private static void CreateTrayIcon()
         {
+            _trayIcon.Visible = true;
+
             ToolStripMenuItem showItem = new ToolStripMenuItem
             {
                 Text = Language.LanguageManager.Strings.Show,
@@ -504,6 +505,7 @@ namespace SuchByte.MacroDeck
 
         public static void RestartMacroDeck(string parameters = "")
         {
+            _trayIcon.Visible = false;
             var p = new Process
             {
                 StartInfo = new ProcessStartInfo(ExecutablePath)
@@ -518,6 +520,7 @@ namespace SuchByte.MacroDeck
 
         private static void ExitItemClick(object sender, EventArgs e)
         {
+            _trayIcon.Visible = false;
             Environment.Exit(0);
         }
 
