@@ -20,6 +20,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         TextStyle lightYellowStyle = new TextStyle(Brushes.LightYellow, null, FontStyle.Regular);
         TextStyle commentStyle = new TextStyle(Brushes.Green, null, FontStyle.Regular);
         TextStyle royaleBlueStyle = new TextStyle(Brushes.RoyalBlue, null, FontStyle.Regular);
+        TextStyle blueVioletStyle = new TextStyle(Brushes.BlueViolet, null, FontStyle.Regular);
 
         public string Template 
         { 
@@ -56,9 +57,10 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             range.ClearStyle(royaleBlueStyle);
             //comment highlighting
             range.SetStyle(commentStyle, @"{\s*_\}", RegexOptions.Multiline);
-            //built in functions
 
-            range.SetStyle(lightYellowStyle, @"(?x: and | cmp | default | defined| eq | ge | gt | has | le | lt | ne | not | or | xor | when)", RegexOptions.Singleline);
+            range.SetStyle(royaleBlueStyle, @"(?x: and | cmp | default | defined| eq | ge | gt | has | le | lt | ne 
+                                    | not | or | xor | when | declare | as | dump | echo | empty | set | to | return 
+                                    | true | false | void)", RegexOptions.Singleline);
 
             range.SetStyle(lightYellowStyle, @"(?x:
                                       abs | add | call | cast | cat | ceil | char | cmp | cos | cross | default
@@ -67,14 +69,14 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                                     | mul | ne | ord | pow | rand | range | round | sin | slice | sort | split
                                     | sub | token | type | ucase | union | when | xor | zip
                                     )", RegexOptions.Singleline);
-            //expressions
-            range.SetStyle(royaleBlueStyle, @"(?x: if | elif | else | for | while | declare | as | dump | echo | empty | set | to | return | true | false | void)", RegexOptions.Singleline);
+
+            range.SetStyle(blueVioletStyle, @"(?x: if | elif | else | for | while)", RegexOptions.Singleline);
 
         }
         
         private void Insert(string str)
         {
-            var selectionIndex = this.template.SelectionStart;
+            var selectionIndex = this.template.SelectionStart ;
             this.template.Text = this.template.Text.Insert(selectionIndex, str);
             this.template.SelectionStart = selectionIndex + str.Length;
         }

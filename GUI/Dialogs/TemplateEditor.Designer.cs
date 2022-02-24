@@ -38,12 +38,12 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblResultLabel = new System.Windows.Forms.Label();
             this.lblResult = new System.Windows.Forms.Label();
             this.btnVariables = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
+            this.lblTemplateEngineInfo = new System.Windows.Forms.LinkLabel();
+            this.variablesContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.btnIf = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.btnAnd = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.btnOr = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.btnNot = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
-            this.lblTemplateEngineInfo = new System.Windows.Forms.LinkLabel();
-            this.variablesContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.template)).BeginInit();
             this.SuspendLayout();
             // 
@@ -71,12 +71,12 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.template.DisabledColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
             this.template.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.template.IsReplaceMode = false;
-            this.template.Location = new System.Drawing.Point(9, 85);
+            this.template.Location = new System.Drawing.Point(12, 85);
             this.template.Name = "template";
             this.template.Paddings = new System.Windows.Forms.Padding(0);
             this.template.SelectionColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(255)))));
             this.template.ServiceColors = ((FastColoredTextBoxNS.ServiceColors)(resources.GetObject("template.ServiceColors")));
-            this.template.Size = new System.Drawing.Size(501, 265);
+            this.template.Size = new System.Drawing.Size(743, 265);
             this.template.TabIndex = 2;
             this.template.TabStop = false;
             this.template.Zoom = 100;
@@ -92,7 +92,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOk.ForeColor = System.Drawing.Color.White;
             this.btnOk.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
             this.btnOk.Icon = null;
-            this.btnOk.Location = new System.Drawing.Point(739, 357);
+            this.btnOk.Location = new System.Drawing.Point(680, 550);
             this.btnOk.Name = "btnOk";
             this.btnOk.Progress = 0;
             this.btnOk.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
@@ -108,19 +108,18 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // lblResultLabel
             // 
             this.lblResultLabel.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblResultLabel.Location = new System.Drawing.Point(516, 85);
+            this.lblResultLabel.Location = new System.Drawing.Point(12, 357);
             this.lblResultLabel.Name = "lblResultLabel";
             this.lblResultLabel.Size = new System.Drawing.Size(289, 22);
             this.lblResultLabel.TabIndex = 4;
             this.lblResultLabel.Text = "Result";
             this.lblResultLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.lblResult.UseMnemonic = false;
             // 
             // lblResult
             // 
-            this.lblResult.Location = new System.Drawing.Point(516, 118);
+            this.lblResult.Location = new System.Drawing.Point(12, 379);
             this.lblResult.Name = "lblResult";
-            this.lblResult.Size = new System.Drawing.Size(306, 232);
+            this.lblResult.Size = new System.Drawing.Size(501, 176);
             this.lblResult.TabIndex = 5;
             this.lblResult.UseMnemonic = false;
             // 
@@ -138,101 +137,13 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnVariables.Name = "btnVariables";
             this.btnVariables.Progress = 0;
             this.btnVariables.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
-            this.btnVariables.Size = new System.Drawing.Size(75, 30);
+            this.btnVariables.Size = new System.Drawing.Size(116, 30);
             this.btnVariables.TabIndex = 6;
             this.btnVariables.Text = "Variables";
             this.btnVariables.UseMnemonic = false;
             this.btnVariables.UseVisualStyleBackColor = false;
             this.btnVariables.UseWindowsAccentColor = true;
             this.btnVariables.Click += new System.EventHandler(this.BtnVariables_Click);
-            // 
-            // btnIf
-            // 
-            this.btnIf.BorderRadius = 8;
-            this.btnIf.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnIf.FlatAppearance.BorderSize = 0;
-            this.btnIf.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnIf.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnIf.ForeColor = System.Drawing.Color.White;
-            this.btnIf.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
-            this.btnIf.Icon = null;
-            this.btnIf.Location = new System.Drawing.Point(90, 49);
-            this.btnIf.Name = "btnIf";
-            this.btnIf.Progress = 0;
-            this.btnIf.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
-            this.btnIf.Size = new System.Drawing.Size(75, 30);
-            this.btnIf.TabIndex = 7;
-            this.btnIf.Text = "If";
-            this.btnIf.UseMnemonic = false;
-            this.btnIf.UseVisualStyleBackColor = false;
-            this.btnIf.UseWindowsAccentColor = true;
-            this.btnIf.Click += new System.EventHandler(this.BtnIf_Click);
-            // 
-            // btnAnd
-            // 
-            this.btnAnd.BorderRadius = 8;
-            this.btnAnd.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnAnd.FlatAppearance.BorderSize = 0;
-            this.btnAnd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnAnd.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnAnd.ForeColor = System.Drawing.Color.White;
-            this.btnAnd.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
-            this.btnAnd.Icon = null;
-            this.btnAnd.Location = new System.Drawing.Point(171, 49);
-            this.btnAnd.Name = "btnAnd";
-            this.btnAnd.Progress = 0;
-            this.btnAnd.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
-            this.btnAnd.Size = new System.Drawing.Size(75, 30);
-            this.btnAnd.TabIndex = 8;
-            this.btnAnd.Text = "And";
-            this.btnAnd.UseMnemonic = false;
-            this.btnAnd.UseVisualStyleBackColor = false;
-            this.btnAnd.UseWindowsAccentColor = true;
-            this.btnAnd.Click += new System.EventHandler(this.BtnAnd_Click);
-            // 
-            // btnOr
-            // 
-            this.btnOr.BorderRadius = 8;
-            this.btnOr.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnOr.FlatAppearance.BorderSize = 0;
-            this.btnOr.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnOr.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnOr.ForeColor = System.Drawing.Color.White;
-            this.btnOr.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
-            this.btnOr.Icon = null;
-            this.btnOr.Location = new System.Drawing.Point(252, 49);
-            this.btnOr.Name = "btnOr";
-            this.btnOr.Progress = 0;
-            this.btnOr.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
-            this.btnOr.Size = new System.Drawing.Size(75, 30);
-            this.btnOr.TabIndex = 9;
-            this.btnOr.Text = "Or";
-            this.btnOr.UseMnemonic = false;
-            this.btnOr.UseVisualStyleBackColor = false;
-            this.btnOr.UseWindowsAccentColor = true;
-            this.btnOr.Click += new System.EventHandler(this.BtnOr_Click);
-            // 
-            // btnNot
-            // 
-            this.btnNot.BorderRadius = 8;
-            this.btnNot.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnNot.FlatAppearance.BorderSize = 0;
-            this.btnNot.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnNot.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnNot.ForeColor = System.Drawing.Color.White;
-            this.btnNot.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
-            this.btnNot.Icon = null;
-            this.btnNot.Location = new System.Drawing.Point(333, 49);
-            this.btnNot.Name = "btnNot";
-            this.btnNot.Progress = 0;
-            this.btnNot.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
-            this.btnNot.Size = new System.Drawing.Size(75, 30);
-            this.btnNot.TabIndex = 10;
-            this.btnNot.Text = "Not";
-            this.btnNot.UseMnemonic = false;
-            this.btnNot.UseVisualStyleBackColor = false;
-            this.btnNot.UseWindowsAccentColor = true;
-            this.btnNot.Click += new System.EventHandler(this.BtnNot_Click);
             // 
             // lblTemplateEngineInfo
             // 
@@ -256,11 +167,103 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.variablesContextMenu.ShowImageMargin = false;
             this.variablesContextMenu.Size = new System.Drawing.Size(36, 4);
             // 
+            // btnIf
+            // 
+            this.btnIf.BorderRadius = 8;
+            this.btnIf.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnIf.FlatAppearance.BorderSize = 0;
+            this.btnIf.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnIf.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnIf.ForeColor = System.Drawing.Color.White;
+            this.btnIf.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnIf.Icon = null;
+            this.btnIf.Location = new System.Drawing.Point(131, 49);
+            this.btnIf.Name = "btnIf";
+            this.btnIf.Progress = 0;
+            this.btnIf.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
+            this.btnIf.Size = new System.Drawing.Size(75, 30);
+            this.btnIf.TabIndex = 7;
+            this.btnIf.Text = "If";
+            this.btnIf.UseMnemonic = false;
+            this.btnIf.UseVisualStyleBackColor = false;
+            this.btnIf.UseWindowsAccentColor = true;
+            this.btnIf.Visible = false;
+            this.btnIf.Click += new System.EventHandler(this.BtnIf_Click);
+            // 
+            // btnAnd
+            // 
+            this.btnAnd.BorderRadius = 8;
+            this.btnAnd.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnAnd.FlatAppearance.BorderSize = 0;
+            this.btnAnd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAnd.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnAnd.ForeColor = System.Drawing.Color.White;
+            this.btnAnd.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnAnd.Icon = null;
+            this.btnAnd.Location = new System.Drawing.Point(212, 49);
+            this.btnAnd.Name = "btnAnd";
+            this.btnAnd.Progress = 0;
+            this.btnAnd.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
+            this.btnAnd.Size = new System.Drawing.Size(75, 30);
+            this.btnAnd.TabIndex = 8;
+            this.btnAnd.Text = "And";
+            this.btnAnd.UseMnemonic = false;
+            this.btnAnd.UseVisualStyleBackColor = false;
+            this.btnAnd.UseWindowsAccentColor = true;
+            this.btnAnd.Visible = false;
+            this.btnAnd.Click += new System.EventHandler(this.BtnAnd_Click);
+            // 
+            // btnOr
+            // 
+            this.btnOr.BorderRadius = 8;
+            this.btnOr.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnOr.FlatAppearance.BorderSize = 0;
+            this.btnOr.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnOr.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnOr.ForeColor = System.Drawing.Color.White;
+            this.btnOr.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnOr.Icon = null;
+            this.btnOr.Location = new System.Drawing.Point(293, 49);
+            this.btnOr.Name = "btnOr";
+            this.btnOr.Progress = 0;
+            this.btnOr.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
+            this.btnOr.Size = new System.Drawing.Size(75, 30);
+            this.btnOr.TabIndex = 9;
+            this.btnOr.Text = "Or";
+            this.btnOr.UseMnemonic = false;
+            this.btnOr.UseVisualStyleBackColor = false;
+            this.btnOr.UseWindowsAccentColor = true;
+            this.btnOr.Visible = false;
+            this.btnOr.Click += new System.EventHandler(this.BtnOr_Click);
+            // 
+            // btnNot
+            // 
+            this.btnNot.BorderRadius = 8;
+            this.btnNot.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnNot.FlatAppearance.BorderSize = 0;
+            this.btnNot.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnNot.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnNot.ForeColor = System.Drawing.Color.White;
+            this.btnNot.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnNot.Icon = null;
+            this.btnNot.Location = new System.Drawing.Point(374, 49);
+            this.btnNot.Name = "btnNot";
+            this.btnNot.Progress = 0;
+            this.btnNot.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
+            this.btnNot.Size = new System.Drawing.Size(75, 30);
+            this.btnNot.TabIndex = 10;
+            this.btnNot.Text = "Not";
+            this.btnNot.UseMnemonic = false;
+            this.btnNot.UseVisualStyleBackColor = false;
+            this.btnNot.UseWindowsAccentColor = true;
+            this.btnNot.Visible = false;
+            this.btnNot.Click += new System.EventHandler(this.BtnNot_Click);
+            // 
             // TemplateEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(831, 395);
+            this.ClientSize = new System.Drawing.Size(766, 585);
             this.Controls.Add(this.lblTemplateEngineInfo);
             this.Controls.Add(this.btnNot);
             this.Controls.Add(this.btnOr);
@@ -296,11 +299,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         private System.Windows.Forms.Label lblResultLabel;
         private System.Windows.Forms.Label lblResult;
         private CustomControls.ButtonPrimary btnVariables;
+        private System.Windows.Forms.LinkLabel lblTemplateEngineInfo;
+        private System.Windows.Forms.ContextMenuStrip variablesContextMenu;
         private CustomControls.ButtonPrimary btnIf;
         private CustomControls.ButtonPrimary btnAnd;
         private CustomControls.ButtonPrimary btnOr;
         private CustomControls.ButtonPrimary btnNot;
-        private System.Windows.Forms.LinkLabel lblTemplateEngineInfo;
-        private System.Windows.Forms.ContextMenuStrip variablesContextMenu;
     }
 }
