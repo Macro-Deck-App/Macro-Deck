@@ -46,6 +46,7 @@ namespace SuchByte.MacroDeck.GUI
 
         public MainWindow()
         {
+            MacroDeck.SyncContext ??= SynchronizationContext.Current;
             this.InitializeComponent();
             this.UpdateTranslation();
             this.UpdateWarningsErrors();
@@ -162,6 +163,7 @@ namespace SuchByte.MacroDeck.GUI
         private void MainWindow_Load(object sender, EventArgs e)
         {
             this.SetView(new LoadingView());
+            
             this.lblVersion.Text = "Macro Deck " + MacroDeck.VersionString + (Debugger.IsAttached  ? " (debug)" : "");
             
             PluginManager.OnPluginsChange += this.OnPluginsChanged;
