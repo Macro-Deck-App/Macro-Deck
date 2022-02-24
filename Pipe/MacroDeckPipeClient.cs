@@ -21,7 +21,7 @@ namespace SuchByte.MacroDeck.Pipes
         internal static bool SendPipeMessage(string message)
         {
             var client = new NamedPipeClientStream("macrodeck");
-            client.Connect(1000);
+            client.Connect(2000);
             if (client.IsConnected)
             {
                 byte[] buffer = Encoding.ASCII.GetBytes(message);

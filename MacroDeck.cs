@@ -66,7 +66,7 @@ namespace SuchByte.MacroDeck
         public static string VariablesFilePath;
         public static string ProfilesFilePath;
 
-        public static SynchronizationContext SyncContext { get; set; }
+        internal static SynchronizationContext SyncContext { get; set; }
 
         private static void InitializePaths(bool portable)
         {
