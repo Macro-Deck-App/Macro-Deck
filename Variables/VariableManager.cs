@@ -24,7 +24,7 @@ namespace SuchByte.MacroDeck.Variables
 
         private static DocumentConfiguration templateConfiguration = new DocumentConfiguration
         {
-            Trimmer = DocumentConfiguration.TrimNothing,
+            Trimmer = DocumentConfiguration.TrimFirstAndLastBlankLines,
         };
 
 

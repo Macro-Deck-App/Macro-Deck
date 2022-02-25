@@ -16,11 +16,25 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 {
     public partial class TemplateEditor : DialogForm
     {
-
-        TextStyle lightYellowStyle = new TextStyle(Brushes.LightYellow, null, FontStyle.Regular);
-        TextStyle commentStyle = new TextStyle(Brushes.Green, null, FontStyle.Regular);
-        TextStyle royaleBlueStyle = new TextStyle(Brushes.RoyalBlue, null, FontStyle.Regular);
-        TextStyle blueVioletStyle = new TextStyle(Brushes.BlueViolet, null, FontStyle.Regular);
+        private readonly TextStyle functionStyle = new TextStyle(Brushes.DarkKhaki, null, FontStyle.Regular);
+        private readonly TextStyle commentStyle = new TextStyle(Brushes.Green, null, FontStyle.Regular);
+        private readonly TextStyle operatorStyle = new TextStyle(Brushes.SteelBlue, null, FontStyle.Regular);
+        private readonly TextStyle commandStyle = new TextStyle(Brushes.Plum, null, FontStyle.Regular);
+        private readonly Regex commentRegex = new Regex(
+                                @"{\s*_\}", RegexOptions.Multiline | RegexOptions.Compiled);
+        private readonly Regex operatorRegex = new Regex(
+                                @"\b(?x: and | cmp | default | defined| eq | ge | gt | has | le | lt | ne 
+                                    | not | or | xor | when | declare | as | dump | echo | empty | set | to | return 
+                                    | true | false | void)\b", RegexOptions.Singleline | RegexOptions.Compiled);
+        private readonly Regex functionRegex = new Regex(
+                                @"\b(?x: abs | add | call | cast | cat | ceil | char | cmp | cos | cross | default
+                                    | defined | div | eq | except | filter | find | flip | floor | format | ge
+                                    | gt | has | join | lcase | le | len | lt | map | match | max | min | mod
+                                    | mul | ne | ord | pow | rand | range | round | sin | slice | sort | split
+                                    | sub | token | type | ucase | union | when | xor | zip
+                                    )\b", RegexOptions.Singleline | RegexOptions.Compiled);
+        private readonly Regex commandRegex = new Regex(
+                                @"\b(?x: if | elif | else | for | while)\b", RegexOptions.Singleline | RegexOptions.Compiled);
 
         public string Template 
         { 
@@ -49,28 +63,20 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         private void Template_TextChanged(object sender, TextChangedEventArgs e)
         {
             this.lblResult.Text = VariableManager.RenderTemplate(this.template.Text);
-            FastColoredTextBoxNS.Range range = (sender as FastColoredTextBox).VisibleRange;
+            FastColoredTextBoxNS.Range range = (sender as FastColoredTextBox).Range;
 
             //clear style of changed range
-            range.ClearStyle(lightYellowStyle);
+            range.ClearStyle(functionStyle);
             range.ClearStyle(commentStyle);
-            range.ClearStyle(royaleBlueStyle);
+            range.ClearStyle(operatorStyle);
             //comment highlighting
-            range.SetStyle(commentStyle, @"{\s*_\}", RegexOptions.Multiline);
+            range.SetStyle(commentStyle, commentRegex);
 
-            range.SetStyle(royaleBlueStyle, @"(?x: and | cmp | default | defined| eq | ge | gt | has | le | lt | ne 
-                                    | not | or | xor | when | declare | as | dump | echo | empty | set | to | return 
-                                    | true | false | void)", RegexOptions.Singleline);
+            range.SetStyle(operatorStyle, operatorRegex);
 
-            range.SetStyle(lightYellowStyle, @"(?x:
-                                      abs | add | call | cast | cat | ceil | char | cmp | cos | cross | default
-                                    | defined | div | eq | except | filter | find | flip | floor | format | ge
-                                    | gt | has | join | lcase | le | len | lt | map | match | max | min | mod
-                                    | mul | ne | ord | pow | rand | range | round | sin | slice | sort | split
-                                    | sub | token | type | ucase | union | when | xor | zip
-                                    )", RegexOptions.Singleline);
+            range.SetStyle(functionStyle, functionRegex);
 
-            range.SetStyle(blueVioletStyle, @"(?x: if | elif | else | for | while)", RegexOptions.Singleline);
+            range.SetStyle(commandStyle, commandRegex);
 
         }
         
