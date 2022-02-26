@@ -24,9 +24,8 @@ namespace SuchByte.MacroDeck.Variables
 
         private static DocumentConfiguration templateConfiguration = new DocumentConfiguration
         {
-            Trimmer = DocumentConfiguration.TrimNothing,
+            Trimmer = DocumentConfiguration.TrimFirstAndLastBlankLines,
         };
-
 
         private static bool _saving = false; // To prevent multiple save processes
 
@@ -175,6 +174,8 @@ namespace SuchByte.MacroDeck.Variables
             string result = "";
             try 
             {
+                templateConfiguration.Trimmer = template.StartsWith("_trimblank_", StringComparison.OrdinalIgnoreCase) ? DocumentConfiguration.TrimFirstAndLastBlankLines : DocumentConfiguration.TrimNothing;
+                template = template.Replace("_trimblank_", "", StringComparison.OrdinalIgnoreCase);
                 var document = Document.CreateDefault(template, templateConfiguration).DocumentOrThrow;
 
                 Dictionary<Value, Value> vars = new Dictionary<Value, Value>();
