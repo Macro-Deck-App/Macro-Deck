@@ -44,6 +44,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnAnd = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.btnOr = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.btnNot = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
+            this.checkTrimBlankLines = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.template)).BeginInit();
             this.SuspendLayout();
             // 
@@ -80,7 +81,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.template.TabIndex = 2;
             this.template.TabStop = false;
             this.template.Zoom = 100;
-            this.template.Load += new System.EventHandler(this.template_Load);
             // 
             // btnOk
             // 
@@ -108,7 +108,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // lblResultLabel
             // 
             this.lblResultLabel.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblResultLabel.Location = new System.Drawing.Point(12, 357);
+            this.lblResultLabel.Location = new System.Drawing.Point(12, 386);
             this.lblResultLabel.Name = "lblResultLabel";
             this.lblResultLabel.Size = new System.Drawing.Size(289, 22);
             this.lblResultLabel.TabIndex = 4;
@@ -117,9 +117,9 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // 
             // lblResult
             // 
-            this.lblResult.Location = new System.Drawing.Point(12, 379);
+            this.lblResult.Location = new System.Drawing.Point(12, 408);
             this.lblResult.Name = "lblResult";
-            this.lblResult.Size = new System.Drawing.Size(501, 176);
+            this.lblResult.Size = new System.Drawing.Size(501, 147);
             this.lblResult.TabIndex = 5;
             this.lblResult.UseMnemonic = false;
             // 
@@ -151,7 +151,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblTemplateEngineInfo.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.lblTemplateEngineInfo.Location = new System.Drawing.Point(9, 17);
             this.lblTemplateEngineInfo.Name = "lblTemplateEngineInfo";
-            this.lblTemplateEngineInfo.Size = new System.Drawing.Size(743, 29);
+            this.lblTemplateEngineInfo.Size = new System.Drawing.Size(695, 29);
             this.lblTemplateEngineInfo.TabIndex = 11;
             this.lblTemplateEngineInfo.TabStop = true;
             this.lblTemplateEngineInfo.Text = "Macro Deck uses the Cottle template engine. Click here for more information.";
@@ -187,7 +187,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnIf.UseMnemonic = false;
             this.btnIf.UseVisualStyleBackColor = false;
             this.btnIf.UseWindowsAccentColor = true;
-            this.btnIf.Visible = false;
             this.btnIf.Click += new System.EventHandler(this.BtnIf_Click);
             // 
             // btnAnd
@@ -210,7 +209,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnAnd.UseMnemonic = false;
             this.btnAnd.UseVisualStyleBackColor = false;
             this.btnAnd.UseWindowsAccentColor = true;
-            this.btnAnd.Visible = false;
             this.btnAnd.Click += new System.EventHandler(this.BtnAnd_Click);
             // 
             // btnOr
@@ -233,7 +231,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOr.UseMnemonic = false;
             this.btnOr.UseVisualStyleBackColor = false;
             this.btnOr.UseWindowsAccentColor = true;
-            this.btnOr.Visible = false;
             this.btnOr.Click += new System.EventHandler(this.BtnOr_Click);
             // 
             // btnNot
@@ -256,14 +253,25 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnNot.UseMnemonic = false;
             this.btnNot.UseVisualStyleBackColor = false;
             this.btnNot.UseWindowsAccentColor = true;
-            this.btnNot.Visible = false;
             this.btnNot.Click += new System.EventHandler(this.BtnNot_Click);
+            // 
+            // checkTrimBlankLines
+            // 
+            this.checkTrimBlankLines.Location = new System.Drawing.Point(18, 356);
+            this.checkTrimBlankLines.Name = "checkTrimBlankLines";
+            this.checkTrimBlankLines.Size = new System.Drawing.Size(338, 27);
+            this.checkTrimBlankLines.TabIndex = 12;
+            this.checkTrimBlankLines.Text = "Trim blank lines";
+            this.checkTrimBlankLines.UseVisualStyleBackColor = true;
+            this.checkTrimBlankLines.CheckedChanged += new System.EventHandler(this.CheckTrimBlankLines_CheckedChanged);
             // 
             // TemplateEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.ClientSize = new System.Drawing.Size(766, 585);
+            this.Controls.Add(this.checkTrimBlankLines);
             this.Controls.Add(this.lblTemplateEngineInfo);
             this.Controls.Add(this.btnNot);
             this.Controls.Add(this.btnOr);
@@ -287,6 +295,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.Controls.SetChildIndex(this.btnOr, 0);
             this.Controls.SetChildIndex(this.btnNot, 0);
             this.Controls.SetChildIndex(this.lblTemplateEngineInfo, 0);
+            this.Controls.SetChildIndex(this.checkTrimBlankLines, 0);
             ((System.ComponentModel.ISupportInitialize)(this.template)).EndInit();
             this.ResumeLayout(false);
 
@@ -305,5 +314,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         private CustomControls.ButtonPrimary btnAnd;
         private CustomControls.ButtonPrimary btnOr;
         private CustomControls.ButtonPrimary btnNot;
+        private System.Windows.Forms.CheckBox checkTrimBlankLines;
     }
 }
