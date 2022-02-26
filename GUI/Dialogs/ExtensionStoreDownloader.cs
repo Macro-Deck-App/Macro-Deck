@@ -138,10 +138,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
                 try
                 {
-                    var extractedDirectory = Path.Combine(MacroDeck.TempDirectoryPath, pluginExtensionStoreModel.PackageId);
-                    ZipFile.ExtractToDirectory(Path.Combine(MacroDeck.TempDirectoryPath, pluginExtensionStoreModel.Filename), extractedDirectory, true);
-
-                    PluginManager.InstallPlugin(extractedDirectory, pluginExtensionStoreModel.PackageId);
+                    PluginManager.InstallPluginFromZip(Path.Combine(MacroDeck.TempDirectoryPath, pluginExtensionStoreModel.Filename));
                 }
                 catch (Exception ex)
                 {

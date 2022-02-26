@@ -34,6 +34,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             this.btnCheckUpdates = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.lblUpdateState = new System.Windows.Forms.Label();
             this.lblInstalledExtensions = new System.Windows.Forms.Label();
+            this.btnAddViaZip = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.SuspendLayout();
             // 
             // btnAddExtensions
@@ -114,11 +115,33 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             this.lblInstalledExtensions.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblInstalledExtensions.UseMnemonic = false;
             // 
+            // btnAddViaZip
+            // 
+            this.btnAddViaZip.BorderRadius = 8;
+            this.btnAddViaZip.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnAddViaZip.FlatAppearance.BorderSize = 0;
+            this.btnAddViaZip.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAddViaZip.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnAddViaZip.ForeColor = System.Drawing.Color.White;
+            this.btnAddViaZip.HoverColor = System.Drawing.Color.Empty;
+            this.btnAddViaZip.Icon = null;
+            this.btnAddViaZip.Location = new System.Drawing.Point(750, 497);
+            this.btnAddViaZip.Name = "btnAddViaZip";
+            this.btnAddViaZip.Progress = 0;
+            this.btnAddViaZip.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(225)))));
+            this.btnAddViaZip.Size = new System.Drawing.Size(192, 40);
+            this.btnAddViaZip.TabIndex = 5;
+            this.btnAddViaZip.Text = "Add via Zip";
+            this.btnAddViaZip.UseVisualStyleBackColor = true;
+            this.btnAddViaZip.UseWindowsAccentColor = true;
+            this.btnAddViaZip.Click += new System.EventHandler(this.BtnAddViaZip_Click);
+            // 
             // InstalledExtensionsView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.Controls.Add(this.btnAddViaZip);
             this.Controls.Add(this.lblUpdateState);
             this.Controls.Add(this.btnCheckUpdates);
             this.Controls.Add(this.lblInstalledExtensions);
@@ -140,5 +163,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
         private ButtonPrimary btnCheckUpdates;
         private System.Windows.Forms.Label lblUpdateState;
         private System.Windows.Forms.Label lblInstalledExtensions;
+        private ButtonPrimary btnAddViaZip;
     }
 }
