@@ -66,6 +66,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblTemplateEngineInfo.Text = LanguageManager.Strings.MacroDeckUsesCottleTemplateEngine;
             this.lblResultLabel.Text = LanguageManager.Strings.Result;
             this.btnVariables.Text = LanguageManager.Strings.Variable;
+            this.checkTrimBlankLines.Text = LanguageManager.Strings.TrimBlankLines;
 
             List<string> variablesList = new List<string>();
             foreach (var v in VariableManager.Variables)
