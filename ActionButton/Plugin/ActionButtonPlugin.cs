@@ -15,8 +15,8 @@ namespace SuchByte.MacroDeck.ActionButton
 {
     public class ActionButtonPlugin : MacroDeckPlugin
     {
-        public override string Name => LanguageManager.Strings.PluginActionButton;
-        public override string Author => "Macro Deck";
+        internal override string Name => LanguageManager.Strings.PluginActionButton;
+        internal override string Author => "Macro Deck";
         public override void Enable()
         {
             this.Actions = new List<PluginAction>()

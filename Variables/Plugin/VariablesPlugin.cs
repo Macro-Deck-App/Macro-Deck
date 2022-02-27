@@ -19,8 +19,8 @@ namespace SuchByte.MacroDeck.Variables.Plugin
 {
     public class VariablesPlugin : MacroDeckPlugin
     {
-        public override string Name => LanguageManager.Strings.PluginMacroDeckVariables;
-        public override string Author => "Macro Deck";
+        internal override string Name => LanguageManager.Strings.PluginMacroDeckVariables;
+        internal override string Author => "Macro Deck";
 
         private VariableChangedEvent variableChangedEvent = new VariableChangedEvent();
 
