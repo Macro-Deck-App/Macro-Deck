@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -264,6 +265,15 @@ namespace SuchByte.MacroDeck.Plugins
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
+        }
+
+        public static void InstallPluginFromZip(string zipFilePath)
+        {
+            var pluginManifest = PluginManifest.FromZipFilePath(zipFilePath);
+            var extractedDirectory = Path.Combine(MacroDeck.TempDirectoryPath, pluginManifest.PackageId);
+            ZipFile.ExtractToDirectory(Path.Combine(MacroDeck.TempDirectoryPath, zipFilePath), extractedDirectory, true);
+
+            PluginManager.InstallPlugin(extractedDirectory, pluginManifest.PackageId);
         }
 
         public static void InstallPlugin(string directory, string packageName)

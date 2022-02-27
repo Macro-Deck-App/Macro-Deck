@@ -15,6 +15,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
     public partial class ExtensionsView : UserControl
     {
         private ExtensionStoreView extensionStoreView;
+        private ExtensionZipInstallerView extensionZipInstallerView;
         private InstalledExtensionsView installedExtensionsView;
 
         public ExtensionsView()
@@ -35,6 +36,19 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
             this.Controls.Add(this.extensionStoreView);
         }
 
+        private void SetExtensionZipInstallerView()
+        {
+            if (this.extensionZipInstallerView == null || this.extensionZipInstallerView.IsDisposed)
+            {
+                this.extensionZipInstallerView = new ExtensionZipInstallerView();
+                this.extensionZipInstallerView.RequestClose += ExtensionStoreView_RequestClose;
+            }
+            this.extensionZipInstallerView.Height = this.ClientRectangle.Height;
+            this.extensionZipInstallerView.Width = this.ClientRectangle.Width;
+            this.Controls.Clear();
+            this.Controls.Add(this.extensionZipInstallerView);
+        }
+
         private void ExtensionStoreView_RequestClose(object sender, EventArgs e)
         {
             this.SetInstalledExtensionsView();
@@ -46,6 +60,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
             {
                 this.installedExtensionsView = new InstalledExtensionsView();
                 this.installedExtensionsView.RequestExtensionStore += InstalledExtensionsView_RequestExtensionStore;
+                this.installedExtensionsView.RequestZipInstaller += InstalledExtensionsView_RequestZipInstaller;
             }
             if (this.extensionStoreView != null)
             {
@@ -55,6 +70,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
             this.Controls.Clear();
             this.Controls.Add(this.installedExtensionsView);
             this.installedExtensionsView.ListInstalledExtensions();
+        }
+
+        private void InstalledExtensionsView_RequestZipInstaller(object sender, EventArgs e)
+        {
+            this.SetExtensionZipInstallerView();
         }
 
         private void InstalledExtensionsView_RequestExtensionStore(object sender, EventArgs e)

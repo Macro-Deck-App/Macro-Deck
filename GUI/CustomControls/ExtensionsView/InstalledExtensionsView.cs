@@ -17,6 +17,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
     {
 
         public event EventHandler RequestExtensionStore;
+        public event EventHandler RequestZipInstaller;
         public InstalledExtensionsView()
         {
             InitializeComponent();
@@ -27,6 +28,14 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             if (RequestExtensionStore != null)
             {
                 RequestExtensionStore(this, EventArgs.Empty);
+            }
+        }
+
+        private void BtnAddViaZip_Click(object sender, EventArgs e)
+        {
+            if (RequestZipInstaller != null)
+            {
+                RequestZipInstaller(this, EventArgs.Empty);
             }
         }
 
