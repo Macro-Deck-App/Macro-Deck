@@ -43,6 +43,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
                 this.extensionZipInstallerView = new ExtensionZipInstallerView();
                 this.extensionZipInstallerView.RequestClose += ExtensionStoreView_RequestClose;
             }
+            this.extensionZipInstallerView.Height = this.ClientRectangle.Height;
+            this.extensionZipInstallerView.Width = this.ClientRectangle.Width;
             this.Controls.Clear();
             this.Controls.Add(this.extensionZipInstallerView);
         }
