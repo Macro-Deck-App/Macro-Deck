@@ -286,4 +286,13 @@ Marque todas las casillas (Redes privadas, Redes públicas y, si existe, Redes d
 
 Si este cuadro de diálogo no aparece y aún experimenta problemas de conexión, visite la wiki o el servidor de discord para obtener ayuda. </FirewallAlertInfo>
   <GotIt>¡Entendido!</GotIt>
+  <DeviceSettings>Configuración de dispositivo</DeviceSettings>
+  <Brightness>Brillo</Brightness>
+  <AutoConnect>Connect automatically</AutoConnect>
+  <DiscordSupport>Soporte de Discord</DiscordSupport>
+  <Wiki>Wiki</Wiki>
+  <ExportLatestLog>Exportar último registro</ExportLatestLog>
+  <LogSuccessfullyExportedToX>Registro exportado con éxito a {0}</LogSuccessfullyExportedToX>
+  <Help>Ayuda</Help>
+  <XWarningsXErrors>{0} alerta(s), {1} error(es)</XWarningsXErrors>
 </Strings>
