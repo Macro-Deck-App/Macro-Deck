@@ -7,6 +7,8 @@ using System.Linq;
 
 namespace SuchByte.MacroDeck.Plugins
 {
+
+    [Obsolete("Will be removed in version 2.11.0")]
     public class PluginManifest
     {
 

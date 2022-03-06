@@ -1,4 +1,5 @@
 ﻿using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Plugins;
 using System;
 using System.Collections.Generic;
@@ -30,11 +31,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             var dialog = sender as OpenFileDialog;
             try
             {
-                var manifest = PluginManifest.FromZipFilePath(dialog.FileName);
+                var manifest = ExtensionManifestModel.FromZipFilePath(dialog.FileName);
                 txtZipPath.Text = dialog.FileName;
                 txtPackageId.Text = manifest.PackageId;
                 txtAuthor.Text = manifest.Author;
-                txtMainFile.Text = manifest.MainFile;
+                txtMainFile.Text = manifest.Dll;
                 btnInstall.Enabled = true;
             } catch (Exception)
             {

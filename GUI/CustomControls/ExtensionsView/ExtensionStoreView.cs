@@ -62,9 +62,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             string packageId = hash.Substring(hash.IndexOf("=") + 1);
             switch (method)
             {
-                case "install_plugin":
+                case "install":
                     MacroDeckLogger.Trace(GetType(), $"Installation requested for {packageId}");
-                    ExtensionStoreHelper.InstallPluginById(packageId);
+                    ExtensionStoreHelper.InstallById(packageId);
                     break;
             }
         }

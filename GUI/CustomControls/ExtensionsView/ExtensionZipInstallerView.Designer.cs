@@ -72,10 +72,11 @@
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.tableLayoutPanel1.ColumnCount = 2;
+            this.tableLayoutPanel1.ColumnCount = 4;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.Controls.Add(this.txtZipPath, 1, 0);
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Controls.Add(this.label3, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.label1, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.lblPackageId, 0, 1);
@@ -83,7 +84,8 @@
             this.tableLayoutPanel1.Controls.Add(this.txtMainFile, 1, 3);
             this.tableLayoutPanel1.Controls.Add(this.txtAuthor, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.txtPackageId, 1, 1);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(16, 82);
+            this.tableLayoutPanel1.Controls.Add(this.txtZipPath, 1, 0);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(11, 82);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 4;
@@ -176,6 +178,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtMainFile.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.txtMainFile.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.txtMainFile.Enabled = false;
             this.txtMainFile.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.txtMainFile.Icon = null;
             this.txtMainFile.Location = new System.Drawing.Point(87, 96);
@@ -199,6 +202,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtAuthor.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.txtAuthor.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.txtAuthor.Enabled = false;
             this.txtAuthor.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.txtAuthor.Icon = null;
             this.txtAuthor.Location = new System.Drawing.Point(87, 65);
@@ -222,6 +226,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtPackageId.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.txtPackageId.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.txtPackageId.Enabled = false;
             this.txtPackageId.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.txtPackageId.Icon = null;
             this.txtPackageId.Location = new System.Drawing.Point(87, 34);
@@ -251,7 +256,7 @@
             this.btnInstall.ForeColor = System.Drawing.Color.White;
             this.btnInstall.HoverColor = System.Drawing.Color.Empty;
             this.btnInstall.Icon = null;
-            this.btnInstall.Location = new System.Drawing.Point(377, 258);
+            this.btnInstall.Location = new System.Drawing.Point(369, 258);
             this.btnInstall.Name = "btnInstall";
             this.btnInstall.Progress = 0;
             this.btnInstall.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(225)))));
@@ -266,13 +271,14 @@
             // 
             this.btnSelectFile.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.btnSelectFile.BorderRadius = 8;
+            this.btnSelectFile.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSelectFile.FlatAppearance.BorderSize = 0;
             this.btnSelectFile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSelectFile.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnSelectFile.ForeColor = System.Drawing.Color.White;
             this.btnSelectFile.HoverColor = System.Drawing.Color.Empty;
             this.btnSelectFile.Icon = null;
-            this.btnSelectFile.Location = new System.Drawing.Point(377, 39);
+            this.btnSelectFile.Location = new System.Drawing.Point(369, 39);
             this.btnSelectFile.Name = "btnSelectFile";
             this.btnSelectFile.Progress = 0;
             this.btnSelectFile.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(225)))));
