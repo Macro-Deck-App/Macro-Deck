@@ -16,6 +16,15 @@ namespace SuchByte.MacroDeck.Plugins
         public string Author = ""; // Author of the plugin
         public string Repository = ""; // Repository of the plugin
         public string MainFile = ""; // Main file e.g. "MyPlugin.dll"
+
+        public static PluginManifest FromManifestFile(string path)
+        {
+            using (var s = File.OpenRead(path))
+            {
+                return FromXmlStream(s);
+            }
+        }
+
         public static PluginManifest FromZipFilePath(string zipFilePath)
         {
             Stream stream = new System.IO.StreamReader(

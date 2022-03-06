@@ -14,6 +14,7 @@ using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.ExtensionStore;
 
 namespace SuchByte.MacroDeck.Icons
 {
@@ -161,9 +162,9 @@ namespace SuchByte.MacroDeck.Icons
             {
                 using (WebClient wc = new WebClient())
                 {
-                    var jsonString = wc.DownloadString("https://macrodeck.org/files/packagemanager/iconpacks.php?action=check-version&name=" + iconPack.Name + "&version=" + iconPack.Version + "&target-api=" + MacroDeck.PluginApiVersion);
+                    var jsonString = wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=check-update&package-id={ExtensionStoreHelper.GetPackageId(iconPack)}&installed-version={iconPack.Version}&target-api={MacroDeck.PluginApiVersion}");
                     JObject jsonObject = JObject.Parse(jsonString);
-                    bool update = (bool)jsonObject["newer-version-available"];
+                    bool update = (bool)jsonObject["update-available"];
                     if (update)
                     {
                         MacroDeckLogger.Info("Update available for " + iconPack.Name);

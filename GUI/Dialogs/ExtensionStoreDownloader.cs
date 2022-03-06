@@ -108,7 +108,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                     return;
                 }
 
-                /*
                 using (var stream = File.OpenRead(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename)))
                 {
                     using (var md5 = MD5.Create())
@@ -125,7 +124,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                             return;
                         }
                     }
-                }*/
+                }
 
                 AppendText($"Start installation of {extensionStoreModel.Name} version {extensionStoreModel.Version}", Color.White);
 

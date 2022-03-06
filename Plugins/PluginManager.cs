@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Utils;
@@ -95,26 +96,37 @@ namespace SuchByte.MacroDeck.Plugins
                     }
                     var manifestFile = Path.Combine(directory, _manifestFileName);
                     var manifestFileLegacy = Path.Combine(directory, _manifestFileNameLegacy);
-                    if (!File.Exists(manifestFile) && !File.Exists(manifestFileLegacy)) continue;
+                    if (!File.Exists(manifestFile) && !File.Exists(manifestFileLegacy))
+                    {
+                        continue;
+                    }
+
                     if (File.Exists(manifestFile))
                     {
                         try
                         {
-                            ExtensionManifestModel extensionManifest = ExtensionManifestModel.FromZipFilePath(manifestFile);
+                            ExtensionManifestModel extensionManifest = ExtensionManifestModel.FromManifestFile(manifestFile);
                             if (extensionManifest == null) continue;
                             var plugin = LoadPlugin(extensionManifest, directory);
                             plugin.Author = extensionManifest.Author;
-                        } catch { }
+                        }
+                        catch (Exception ex)
+                        {
+                            MacroDeckLogger.Error(typeof(PluginManager), $"Error while deserializing manifest for {directory}: {ex.Message}");
+                        }
                     } else if (File.Exists(manifestFileLegacy))
                     {
                         try
                         {
-                            PluginManifest pluginManifest = PluginManifest.FromZipFilePath(manifestFileLegacy);
+                            PluginManifest pluginManifest = PluginManifest.FromManifestFile(manifestFileLegacy);
                             if (pluginManifest == null) continue;
                             var plugin = LoadLegacyPlugin(pluginManifest, directory);
                             plugin.Author = pluginManifest.Author;
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            MacroDeckLogger.Error(typeof(PluginManager), $"Error while deserializing legacy manifest for {directory}: {ex.Message}");
+                        }
                     }
                 }
 
@@ -273,13 +285,13 @@ namespace SuchByte.MacroDeck.Plugins
             {
                 using (WebClient wc = new WebClient())
                 {
-                    var jsonString = wc.DownloadString("https://macrodeck.org/files/packagemanager/plugins.php?action=check-version&name=" + plugin.Name + "&version=" + plugin.Version + "&target-api=" + MacroDeck.PluginApiVersion);
+                    var jsonString = wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=check-update&package-id={ExtensionStoreHelper.GetPackageId(plugin)}&installed-version={plugin.Version}&target-api={MacroDeck.PluginApiVersion}");
                     JObject jsonObject = JObject.Parse(jsonString);
-                    bool update = (bool)jsonObject["newer-version-available"];
+                    bool update = (bool)jsonObject["update-available"];
                     if (update)
                     {
-                            MacroDeckLogger.Info("Update available for " + plugin.Name);
-                            PluginsUpdateAvailable.Add(plugin);
+                        MacroDeckLogger.Info("Update available for " + plugin.Name);
+                        PluginsUpdateAvailable.Add(plugin);
                     }
                 }
                 GC.Collect();
@@ -360,7 +372,7 @@ namespace SuchByte.MacroDeck.Plugins
             MacroDeckLogger.Info(typeof(PluginManager), $"{(update ? "Updating" : "Installing")} " + packageName);
             Assembly asm = null;
             bool error = false;
-            PluginManifest pluginManifest = new PluginManifest();
+            ExtensionManifestModel extensionManifest = new ExtensionManifestModel();
             try
             {
                 var installationDirectory = Path.Combine(MacroDeck.PluginsDirectoryPath, packageName);
@@ -382,17 +394,14 @@ namespace SuchByte.MacroDeck.Plugins
                     {
                         try
                         {
-                            using (Stream stream = new FileStream(manifestFile, FileMode.Open, FileAccess.Read))
-                            {
-                                pluginManifest = (PluginManifest)new XmlSerializer(typeof(PluginManifest)).Deserialize(stream);
-                            }
-                            if (pluginManifest == null)
+                            extensionManifest = ExtensionManifestModel.FromManifestFile(manifestFile);
+                            if (extensionManifest == null)
                             {
                                 error = true;
                             }
                             else
                             {
-                                var plugin = LoadLegacyPlugin(pluginManifest, installationDirectory, true);
+                                var plugin = LoadPlugin(extensionManifest, installationDirectory, true);
 
                                 if (plugin != null && plugin.CanConfigure)
                                 {
@@ -427,13 +436,13 @@ namespace SuchByte.MacroDeck.Plugins
             }
             if (error)
             {
-                if (asm != null)
+                if (asm != null && extensionManifest != null)
                 {
                     var disabledPlugin = new DisabledPlugin
                     {
                         Name = asm.GetName().Name,
                         Version = asm.GetName().Version.ToString(),
-                        Author = pluginManifest.Author,
+                        Author = extensionManifest.Author,
                     };
 
                     PluginsNotLoaded[asm.GetName().Name] = disabledPlugin;
