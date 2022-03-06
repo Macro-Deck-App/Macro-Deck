@@ -401,6 +401,14 @@ namespace SuchByte.MacroDeck.Plugins
                             }
                             else
                             {
+                                try
+                                {
+                                    using (WebClient wc = new WebClient())
+                                    {
+                                        wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=count-download&package-id={extensionManifest.PackageId}");
+                                    }
+                                } catch { }
+                              
                                 var plugin = LoadPlugin(extensionManifest, installationDirectory, true);
 
                                 if (plugin != null && plugin.CanConfigure)

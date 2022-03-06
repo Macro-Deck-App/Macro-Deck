@@ -50,19 +50,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             AppendText($"Starting download of {this._pluginsToInstall} package(s)...", Color.White);
             foreach(var packageInfo in this._packageIds)
             {
-                /*using (WebClient wc = new WebClient())
-                {
-                    switch (packageInfo.ExtensionType)
-                    {
-                        case ExtensionType.Plugin:
-                            wc.DownloadString($"https://macrodeck.org/files/packagemanager/plugins.php?action=countdl&uuid={packageInfo.PackageId}");
-                            break;
-                        case ExtensionType.IconPack:
-                            wc.DownloadString($"https://macrodeck.org/files/packagemanager/iconpacks.php?action=countdl&uuid={packageInfo.PackageId}");
-                            break;
-                    }
-                }*/
-
                 using (WebClient wc = new WebClient())
                 {
                     var extensionStoreModel = JsonConvert.DeserializeObject<ExtensionStoreExtensionModel>(wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=info&package-id={packageInfo.PackageId}"), new JsonSerializerSettings
