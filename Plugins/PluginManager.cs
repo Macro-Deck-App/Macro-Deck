@@ -95,26 +95,37 @@ namespace SuchByte.MacroDeck.Plugins
                     }
                     var manifestFile = Path.Combine(directory, _manifestFileName);
                     var manifestFileLegacy = Path.Combine(directory, _manifestFileNameLegacy);
-                    if (!File.Exists(manifestFile) && !File.Exists(manifestFileLegacy)) continue;
+                    if (!File.Exists(manifestFile) && !File.Exists(manifestFileLegacy))
+                    {
+                        continue;
+                    }
+
                     if (File.Exists(manifestFile))
                     {
                         try
                         {
-                            ExtensionManifestModel extensionManifest = ExtensionManifestModel.FromZipFilePath(manifestFile);
+                            ExtensionManifestModel extensionManifest = ExtensionManifestModel.FromManifestFile(manifestFile);
                             if (extensionManifest == null) continue;
                             var plugin = LoadPlugin(extensionManifest, directory);
                             plugin.Author = extensionManifest.Author;
-                        } catch { }
+                        }
+                        catch (Exception ex)
+                        {
+                            MacroDeckLogger.Error(typeof(PluginManager), $"Error while deserializing manifest for {directory}: {ex.Message}");
+                        }
                     } else if (File.Exists(manifestFileLegacy))
                     {
                         try
                         {
-                            PluginManifest pluginManifest = PluginManifest.FromZipFilePath(manifestFileLegacy);
+                            PluginManifest pluginManifest = PluginManifest.FromManifestFile(manifestFileLegacy);
                             if (pluginManifest == null) continue;
                             var plugin = LoadLegacyPlugin(pluginManifest, directory);
                             plugin.Author = pluginManifest.Author;
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            MacroDeckLogger.Error(typeof(PluginManager), $"Error while deserializing legacy manifest for {directory}: {ex.Message}");
+                        }
                     }
                 }
 
