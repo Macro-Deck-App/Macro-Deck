@@ -342,6 +342,7 @@ namespace SuchByte.MacroDeck.GUI
             bool currentState = this.actionButton.State;
             this.lblCurrentState.Text = currentState ? "On" : "Off";
             this.listStateBinding.Text = this.actionButtonEdited.StateBindingVariable;
+            this.buttonGUIDLabel.Text = this.actionButtonEdited.Guid;
 
             if (this.actionButton.KeyCode != Keys.None)
             {
@@ -541,7 +542,8 @@ namespace SuchByte.MacroDeck.GUI
                 if (jsonButtonEditor.ShowDialog() == DialogResult.OK)
                 {
                     jsonButtonEditor.ActionButton.Position_X = this.actionButtonEdited.Position_X;
-                    jsonButtonEditor.ActionButton.Position_Y = this.actionButtonEdited.Position_Y;                 
+                    jsonButtonEditor.ActionButton.Position_Y = this.actionButtonEdited.Position_Y;
+                    jsonButtonEditor.ActionButton.Guid = this.actionButtonEdited.Guid;
                     this.actionButton = jsonButtonEditor.ActionButton;
                     this.LoadButton();
                     this.UpdateLabel();

@@ -82,6 +82,8 @@ namespace SuchByte.MacroDeck.GUI
             this.btnRemoveHotkey = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.hotkey = new SuchByte.MacroDeck.GUI.CustomControls.RoundedTextBox();
             this.btnEditJson = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
+            this.label1 = new System.Windows.Forms.Label();
+            this.buttonGUIDLabel = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.btnPreview)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.fontSize)).BeginInit();
             this.panel1.SuspendLayout();
@@ -723,12 +725,34 @@ namespace SuchByte.MacroDeck.GUI
             this.btnEditJson.UseWindowsAccentColor = true;
             this.btnEditJson.Click += new System.EventHandler(this.BtnEditJson_Click);
             // 
+            // label1
+            // 
+            this.label1.Location = new System.Drawing.Point(488, 601);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(43, 25);
+            this.label1.TabIndex = 34;
+            this.label1.Text = "GUID:";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // buttonGUIDLabel
+            // 
+            this.buttonGUIDLabel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.buttonGUIDLabel.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.buttonGUIDLabel.ForeColor = System.Drawing.Color.White;
+            this.buttonGUIDLabel.Location = new System.Drawing.Point(537, 605);
+            this.buttonGUIDLabel.Name = "buttonGUIDLabel";
+            this.buttonGUIDLabel.ReadOnly = true;
+            this.buttonGUIDLabel.Size = new System.Drawing.Size(358, 16);
+            this.buttonGUIDLabel.TabIndex = 35;
+            // 
             // ButtonEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.ClientSize = new System.Drawing.Size(1200, 635);
+            this.Controls.Add(this.buttonGUIDLabel);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.btnEditJson);
             this.Controls.Add(this.groupHotkey);
             this.Controls.Add(this.groupButtonState);
@@ -751,6 +775,8 @@ namespace SuchByte.MacroDeck.GUI
             this.Controls.SetChildIndex(this.groupButtonState, 0);
             this.Controls.SetChildIndex(this.groupHotkey, 0);
             this.Controls.SetChildIndex(this.btnEditJson, 0);
+            this.Controls.SetChildIndex(this.label1, 0);
+            this.Controls.SetChildIndex(this.buttonGUIDLabel, 0);
             ((System.ComponentModel.ISupportInitialize)(this.btnPreview)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.fontSize)).EndInit();
             this.panel1.ResumeLayout(false);
@@ -769,6 +795,7 @@ namespace SuchByte.MacroDeck.GUI
             this.groupHotkey.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.btnRemoveHotkey)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -814,5 +841,7 @@ namespace SuchByte.MacroDeck.GUI
         private TabRadioButton radioOnLongPress;
         private TabRadioButton radioOnLongPressRelease;
         private ButtonPrimary btnEditJson;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox buttonGUIDLabel;
     }
 }
