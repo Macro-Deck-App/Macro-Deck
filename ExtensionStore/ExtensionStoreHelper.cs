@@ -26,6 +26,11 @@ namespace SuchByte.MacroDeck.ExtensionStore
             InstallPackages(new List<ExtensionStoreDownloaderPackageInfoModel> { new ExtensionStoreDownloaderPackageInfoModel() { PackageId = packageId, ExtensionType = ExtensionType.IconPack } });
         }
 
+        internal static void InstallById(string packageId)
+        {
+            InstallPackages(new List<ExtensionStoreDownloaderPackageInfoModel> { new ExtensionStoreDownloaderPackageInfoModel() { PackageId = packageId } });
+        }
+
         public static void InstallPackages(List<ExtensionStoreDownloaderPackageInfoModel> packages)
         {
             extensionStoreDownloader = new ExtensionStoreDownloader(packages)
@@ -70,6 +75,8 @@ namespace SuchByte.MacroDeck.ExtensionStore
                 }
             });
         }
+
+        
 
         public static string InstalledIconPacksAsString
         {

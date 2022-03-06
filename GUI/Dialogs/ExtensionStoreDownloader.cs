@@ -50,7 +50,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             AppendText($"Starting download of {this._pluginsToInstall} package(s)...", Color.White);
             foreach(var packageInfo in this._packageIds)
             {
-                using (WebClient wc = new WebClient())
+                /*using (WebClient wc = new WebClient())
                 {
                     switch (packageInfo.ExtensionType)
                     {
@@ -61,35 +61,29 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                             wc.DownloadString($"https://macrodeck.org/files/packagemanager/iconpacks.php?action=countdl&uuid={packageInfo.PackageId}");
                             break;
                     }
-                }
+                }*/
 
                 using (WebClient wc = new WebClient())
                 {
-                    wc.DownloadProgressChanged += Wc_DownloadProgressChanged;
-                    string url = "";
-                    switch (packageInfo.ExtensionType)
+                    var extensionStoreModel = JsonConvert.DeserializeObject<ExtensionStoreExtensionModel>(wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=info&package-id={packageInfo.PackageId}"), new JsonSerializerSettings
                     {
-                        case ExtensionType.Plugin:
-                            var pluginExtensionStoreModel = JsonConvert.DeserializeObject<PluginExtensionStoreModel>(wc.DownloadString($"https://macrodeck.org/files/packagemanager/plugins.php?uuid={packageInfo.PackageId}&target-api={MacroDeck.PluginApiVersion}"), new JsonSerializerSettings
-                            {
-                                TypeNameHandling = TypeNameHandling.Auto,
-                                NullValueHandling = NullValueHandling.Ignore,
-                                Error = (sender, args) => {
-                                    MacroDeckLogger.Error(typeof(ExtensionStoreDownloader), "Error while deserializing the pluginExtensionStoreModel file: " + args.ErrorContext.Error.Message);
-                                    args.ErrorContext.Handled = true;
-                                },
-                                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                            });
-                            wc.DownloadFileCompleted += PluginDownloadComplete(pluginExtensionStoreModel);
-                            url = $"https://macrodeck.org/files/packagemanager/plugins/{pluginExtensionStoreModel.PackageId}/{pluginExtensionStoreModel.Filename}";
-                            MacroDeckLogger.Trace(typeof(ExtensionStoreDownloader), $"Download {url}");
-                            AppendText($"Starting download of ({packageInfo.PackageId}) {pluginExtensionStoreModel.Name} {pluginExtensionStoreModel.Version}...", Color.White);
-                            wc.DownloadFileAsync(new Uri(url), Path.Combine(MacroDeck.TempDirectoryPath, pluginExtensionStoreModel.Filename));
-                            break;
-                        case ExtensionType.IconPack:
+                        TypeNameHandling = TypeNameHandling.Auto,
+                        NullValueHandling = NullValueHandling.Ignore,
+                        Error = (sender, args) => {
+                            MacroDeckLogger.Error(typeof(ExtensionStoreDownloader), "Error while deserializing the ExtensionStoreModel file: " + args.ErrorContext.Error.Message);
+                            args.ErrorContext.Handled = true;
+                        },
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                    });
+                    wc.DownloadProgressChanged += Wc_DownloadProgressChanged;
+                    wc.DownloadFileCompleted += DownloadComplete(extensionStoreModel);
+                    string url = $"https://macrodeck.org/files/extensionstore/{extensionStoreModel.PackageId}/{extensionStoreModel.Filename}";
 
-                            break;
-                    }
+                    
+                    
+                    MacroDeckLogger.Trace(typeof(ExtensionStoreDownloader), $"Download {url}");
+                    AppendText($"Starting download of ({packageInfo.PackageId}) {extensionStoreModel.Name} {extensionStoreModel.Version}...", Color.White);
+                    wc.DownloadFileAsync(new Uri(url), Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename));
 
                 }
                 
@@ -97,72 +91,100 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             
         }
 
-        private AsyncCompletedEventHandler PluginDownloadComplete(PluginExtensionStoreModel pluginExtensionStoreModel)
+        private AsyncCompletedEventHandler DownloadComplete(ExtensionStoreExtensionModel extensionStoreModel)
         {
             Action<object, AsyncCompletedEventArgs> action = (sender, e) =>
             {
-                AppendText($"Download of (Plugin) {pluginExtensionStoreModel.Name} {pluginExtensionStoreModel.Version} complete", Color.White);
+                AppendText($"Download of {extensionStoreModel.Name} {extensionStoreModel.Version} complete", Color.White);
                 if (e.Error != null)
                 {
                     MacroDeckLogger.Error("Plugin download failed: " + e.Error.Message);
                 }
 
-                if (!File.Exists(Path.Combine(MacroDeck.TempDirectoryPath, pluginExtensionStoreModel.Filename)))
+                if (!File.Exists(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename)))
                 {
-                    AppendText($"Download of {pluginExtensionStoreModel.Name} failed: {pluginExtensionStoreModel.Filename} not found", Color.Red);
-                    MacroDeckLogger.Error(typeof(ExtensionStoreDownloader), $"Download of {pluginExtensionStoreModel.Name} failed: {pluginExtensionStoreModel.Filename} not found");
+                    AppendText($"Download of {extensionStoreModel.Name} failed: {extensionStoreModel.Filename} not found", Color.Red);
+                    MacroDeckLogger.Error(typeof(ExtensionStoreDownloader), $"Download of {extensionStoreModel.Name} failed: {extensionStoreModel.Filename} not found");
                     return;
                 }
 
-                using (var stream = File.OpenRead(Path.Combine(MacroDeck.TempDirectoryPath, pluginExtensionStoreModel.Filename)))
+                /*
+                using (var stream = File.OpenRead(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename)))
                 {
                     using (var md5 = MD5.Create())
                     {
                         var hash = md5.ComputeHash(stream);
                         var checksumString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                        if (!checksumString.Equals(pluginExtensionStoreModel.MD5Checksum))
+                        if (!checksumString.Equals(extensionStoreModel.Md5Checksum))
                         {
-                            AppendText($"The md5 checksum of the downloaded file of {pluginExtensionStoreModel.Name} does not match the md5 checksum on the server. Installation aborted!", Color.Red);
+                            AppendText($"The md5 checksum of the downloaded file of {extensionStoreModel.Name} does not match the md5 checksum on the server. Installation aborted!", Color.Red);
 
-                            MacroDeckLogger.Error(typeof(ExtensionStoreDownloader), $"md5 checksum of {pluginExtensionStoreModel.Name} not matching!" + Environment.NewLine +
-                                                    $"md5 checksum on server: {pluginExtensionStoreModel.MD5Checksum}" + Environment.NewLine +
+                            MacroDeckLogger.Error(typeof(ExtensionStoreDownloader), $"md5 checksum of {extensionStoreModel.Name} not matching!" + Environment.NewLine +
+                                                    $"md5 checksum on server: {extensionStoreModel.Md5Checksum}" + Environment.NewLine +
                                                     $"md5 checksum of downloaded file: {checksumString}");
                             return;
                         }
                     }
-                }
+                }*/
 
-                AppendText($"Start installation of {pluginExtensionStoreModel.Name} version {pluginExtensionStoreModel.Version}", Color.White);
+                AppendText($"Start installation of {extensionStoreModel.Name} version {extensionStoreModel.Version}", Color.White);
 
-                MacroDeckLogger.Info(typeof(ExtensionStoreDownloader), $"Start installation of {pluginExtensionStoreModel.Name} version {pluginExtensionStoreModel.Version}");
+                MacroDeckLogger.Info(typeof(ExtensionStoreDownloader), $"Start installation of {extensionStoreModel.Name} version {extensionStoreModel.Version}");
 
+
+                JsonSerializer serializer = new JsonSerializer();
+                ExtensionManifestModel extensionManifestModel = null;
                 try
                 {
-                    var extractedDirectory = Path.Combine(MacroDeck.TempDirectoryPath, pluginExtensionStoreModel.PackageId);
-                    ZipFile.ExtractToDirectory(Path.Combine(MacroDeck.TempDirectoryPath, pluginExtensionStoreModel.Filename), extractedDirectory, true);
-
-                    PluginManager.InstallPlugin(extractedDirectory, pluginExtensionStoreModel.PackageId);
-                }
-                catch (Exception ex)
+                    extensionManifestModel = ExtensionManifestModel.FromZipFilePath(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename));
+                } catch (Exception ex)
                 {
-                    MacroDeckLogger.Error(typeof(ExtensionStoreDownloader), $"Error while installing {pluginExtensionStoreModel.Name}: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                    AppendText($"Start installation of {pluginExtensionStoreModel.Name} version {pluginExtensionStoreModel.Version} failed. Check logs for more information", Color.Red);
+                    MacroDeckLogger.Error(typeof(ExtensionStoreDownloader), $"Error while deserializing ExtensionManifest for {extensionStoreModel.Name}: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                    AppendText($"Start installation of {extensionStoreModel.Name} version {extensionStoreModel.Version} failed. Check logs for more information", Color.Red);
+                    return;
                 }
 
-                try
+                if (extensionManifestModel == null)
                 {
-                    if (Directory.Exists(Path.Combine(MacroDeck.TempDirectoryPath, pluginExtensionStoreModel.PackageId)))
-                    {
-                        Directory.Delete(Path.Combine(MacroDeck.TempDirectoryPath, pluginExtensionStoreModel.PackageId), true);
-                    }
-                    if (File.Exists(Path.Combine(MacroDeck.TempDirectoryPath, pluginExtensionStoreModel.Filename)))
-                    {
-                        File.Delete(Path.Combine(MacroDeck.TempDirectoryPath, pluginExtensionStoreModel.Filename));
-                    }
+                    MacroDeckLogger.Error(typeof(ExtensionStoreDownloader), $"ExtensionManifest for {extensionStoreModel.Name} not found. Installation aborted!");
+                    AppendText($"ExtensionManifest for {extensionStoreModel.Name} not found. Installation aborted!", Color.Red);
+                    return;
                 }
-                catch { }
-                AppendText($"Installation of {pluginExtensionStoreModel.Name} version {pluginExtensionStoreModel.Version} completed", Color.Lime);
-                MacroDeckLogger.Info(typeof(ExtensionStoreDownloader), $"Installation of {pluginExtensionStoreModel.Name} version {pluginExtensionStoreModel.Version} completed");
+
+                if (extensionManifestModel.Type == ExtensionType.Plugin)
+                {
+                    try
+                    {
+                        PluginManager.InstallPluginFromZip(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename));
+                    }
+                    catch (Exception ex)
+                    {
+                        MacroDeckLogger.Error(typeof(ExtensionStoreDownloader), $"Error while installing {extensionStoreModel.Name}: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                        AppendText($"Start installation of {extensionStoreModel.Name} version {extensionStoreModel.Version} failed. Check logs for more information", Color.Red);
+                        return;
+                    }
+
+                    try
+                    {
+                        if (Directory.Exists(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.PackageId)))
+                        {
+                            Directory.Delete(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.PackageId), true);
+                        }
+                        if (File.Exists(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename)))
+                        {
+                            File.Delete(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename));
+                        }
+                    }
+                    catch { }
+                } else if (extensionManifestModel.Type == ExtensionType.IconPack)
+                {
+                    // TODO
+                }
+                
+
+
+                AppendText($"Installation of {extensionStoreModel.Name} version {extensionStoreModel.Version} completed", Color.Lime);
+                MacroDeckLogger.Info(typeof(ExtensionStoreDownloader), $"Installation of {extensionStoreModel.Name} version {extensionStoreModel.Version} completed");
 
                 this._pluginsInstalled++;
                 if (this._pluginsInstalled == this._pluginsToInstall)
