@@ -31,19 +31,25 @@ namespace SuchByte.MacroDeck.Utils
             canvas.InterpolationMode = InterpolationMode.Bicubic;
             foreach (Icon icon in iconPack.Icons.Take(4))
             {
-                Rectangle iconRectangle = new Rectangle
+                try
                 {
-                    Height = iconSize - padding,
-                    Width = iconSize - padding,
-                    X = column * (iconSize + (column * padding)),
-                    Y = row * (iconSize + (row * padding)),
-                };
-                canvas.DrawImage(icon.IconImage, iconRectangle);
-                column++;
-                if (column >= 2)
+                    Rectangle iconRectangle = new Rectangle
+                    {
+                        Height = iconSize - padding,
+                        Width = iconSize - padding,
+                        X = column * (iconSize + (column * padding)),
+                        Y = row * (iconSize + (row * padding)),
+                    };
+                    canvas.DrawImage(new Bitmap(icon.IconImage), iconRectangle);
+                    column++;
+                    if (column >= 2)
+                    {
+                        column = 0;
+                        row++;
+                    }
+                } catch
                 {
-                    column = 0;
-                    row++;
+                    continue;
                 }
             }
             canvas.Save();

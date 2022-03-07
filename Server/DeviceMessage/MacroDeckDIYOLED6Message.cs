@@ -51,12 +51,12 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                         {
                             if (actionButton.IconOff.Length > 0)
                             {
-                                Icon = IconManager.GetIcon(IconManager.GetIconPackByName(actionButton.IconOff.Split(".")[0]), long.Parse(actionButton.IconOff.Split(".")[1])).IconHex128_64Base64;
+                                Icon = IconManager.GetIconByString(actionButton.IconOff).IconHex128_64Base64 ?? "";
                             }
                         }
                         if (!string.IsNullOrWhiteSpace(actionButton.LabelOff.LabelText))
                         {
-                            LabelBase64 = actionButton.LabelOff.LabelHex128_64Base64;
+                            LabelBase64 = actionButton.LabelOff.LabelHex128_64Base64 ?? "";
                         }
                         break;
                     case true:
@@ -64,12 +64,12 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                         {
                             if (actionButton.IconOn.Length > 0)
                             {
-                                Icon = IconManager.GetIcon(IconManager.GetIconPackByName(actionButton.IconOn.Split(".")[0]), long.Parse(actionButton.IconOn.Split(".")[1])).IconHex128_64Base64;
+                                Icon = IconManager.GetIconByString(actionButton.IconOn).IconHex128_64Base64 ?? "";
                             }
                         }
                         if (!string.IsNullOrWhiteSpace(actionButton.LabelOn.LabelText))
                         {
-                            LabelBase64 = actionButton.LabelOn.LabelHex128_64Base64;
+                            LabelBase64 = actionButton.LabelOn.LabelHex128_64Base64 ?? "";
                         }
                         break;
                 }
@@ -122,7 +122,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                     {
                         if (actionButton.IconOff.Length > 0)
                         {
-                            Icon = IconManager.GetIcon(IconManager.GetIconPackByName(actionButton.IconOff.Split(".")[0]), long.Parse(actionButton.IconOff.Split(".")[1])).IconHex128_64Base64;
+                            Icon = IconManager.GetIconByString(actionButton.IconOff).IconHex128_64Base64 ?? "";
                         }
                     }
                     if (!string.IsNullOrWhiteSpace(actionButton.LabelOff.LabelText))
@@ -135,7 +135,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                     {
                         if (actionButton.IconOn.Length > 0)
                         {
-                            Icon = IconManager.GetIcon(IconManager.GetIconPackByName(actionButton.IconOn.Split(".")[0]), long.Parse(actionButton.IconOn.Split(".")[1])).IconHex128_64Base64;
+                            Icon = IconManager.GetIconByString(actionButton.IconOn).IconHex128_64Base64 ?? "";
                         }
                     }
                     if (!string.IsNullOrWhiteSpace(actionButton.LabelOn.LabelText))

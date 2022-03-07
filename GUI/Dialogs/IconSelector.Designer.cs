@@ -157,7 +157,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnCreateIconPack.Size = new System.Drawing.Size(25, 25);
             this.btnCreateIconPack.TabIndex = 9;
             this.btnCreateIconPack.TabStop = false;
-            this.btnCreateIconPack.Click += new System.EventHandler(this.btnCreateIconPack_Click);
+            this.btnCreateIconPack.Click += new System.EventHandler(this.BtnCreateIconPack_Click);
             // 
             // btnDeleteIconPack
             // 
@@ -173,7 +173,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnDeleteIconPack.Size = new System.Drawing.Size(25, 25);
             this.btnDeleteIconPack.TabIndex = 10;
             this.btnDeleteIconPack.TabStop = false;
-            this.btnDeleteIconPack.Click += new System.EventHandler(this.btnDeleteIconPack_Click);
+            this.btnDeleteIconPack.Click += new System.EventHandler(this.BtnDeleteIconPack_Click);
             // 
             // btnImportIconPack
             // 

@@ -66,7 +66,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                     break;
                 case ExtensionType.IconPack:
                     this.lblExtensionType.BackColor = Color.FromArgb(0, 173, 14);
-                    IconPack iconPack = macroDeckExtension.ExtensionObject as IconPack;
+                    IconPackLegacy iconPack = macroDeckExtension.ExtensionObject as IconPackLegacy;
                     if (updateAvailable)
                     {
                         this.lblStatus.Text = "Update available";
@@ -78,7 +78,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                         this.lblStatus.ForeColor = Color.FromArgb(0, 192, 0);
                         this.lblStatus.BackColor = Color.Transparent;
                     }
-                    this.extensionIcon.BackgroundImage = Utils.IconPackPreview.GeneratePreviewImage(iconPack);
+                    //this.extensionIcon.BackgroundImage = Utils.IconPackPreview.GeneratePreviewImage(iconPack);
                     this.lblExtensionName.Text = iconPack.Name;
                     this.lblVersion.Text = $"{LanguageManager.Strings.InstalledVersion}: {iconPack.Version}";
                     break;
@@ -150,7 +150,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                     break;
                 case ExtensionType.IconPack:
                     IconPack iconPack = macroDeckExtension.ExtensionObject as IconPack;
-                    ExtensionStoreHelper.InstallPluginById(ExtensionStoreHelper.GetPackageId(iconPack));
+                    ExtensionStoreHelper.InstallPluginById(iconPack.PackageId);
                     break;
             }
         }

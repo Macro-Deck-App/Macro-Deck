@@ -40,7 +40,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         private void BtnOk_Click(object sender, EventArgs e)
         {
             if (this.iconPackName.Text.Length < 2) return;
-            if (IconManager.GetIconPackByName(this.iconPackName.Text) != null)
+            /*if (IconManagerLegacy.GetIconPackByName(this.iconPackName.Text) != null)
             {
                 using (var messageBox = new GUI.CustomControls.MessageBox())
                 {
@@ -53,10 +53,10 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                 this._iconPackName = this.iconPackName.Text;
                 this._author = this.author.Text;
                 this._version = this.version.Text;
-                IconManager.CreateIconPack(this._iconPackName, this._author, this._version);
+                IconManagerLegacy.CreateIconPack(this._iconPackName, this._author, this._version);
                 this.DialogResult = DialogResult.OK;
                 this.Close();
-            }
+            }*/
         }
     }
 }

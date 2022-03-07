@@ -214,12 +214,11 @@ namespace SuchByte.MacroDeck.GUI
             {
                 string iconString = radioButtonOff.Checked && !radioButtonOn.Checked ? this.actionButtonEdited.IconOff : this.actionButtonEdited.IconOn;
 
-                if (!string.IsNullOrWhiteSpace(iconString) && iconString.Split(".").Length > 1)
+                if (!string.IsNullOrWhiteSpace(iconString))
                 {
-                    IconPack iconPack = IconManager.GetIconPackByName(iconString.Split(".")[0]);
-                    Icons.Icon icon = IconManager.GetIcon(iconPack, long.Parse(iconString.Split(".")[1]));
+                    var icon = IconManager.GetIconByString(iconString);
                     if (icon != null)
-                        this.btnPreview.BackgroundImage = Utils.Base64.GetImageFromBase64(icon.IconBase64);
+                        this.btnPreview.BackgroundImage = icon.IconImage;
                 }
                 else
                 {
