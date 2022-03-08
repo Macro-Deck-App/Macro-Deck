@@ -27,7 +27,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             InitializeComponent();
 
             this.lblExtensionType.Text = macroDeckExtension.ExtensionTypeDisplayName;
-            this.btnConfigure.Visible = macroDeckExtension.Configurable;
+            this.btnConfigure.Visible = macroDeckExtension.Configurable || macroDeckExtension.GetType() == typeof(IconPackExtension);
 
             this.btnUpdate.Visible = updateAvailable;
             this.btnUpdate.BackColor = Color.FromArgb(20, 153, 0);
@@ -66,7 +66,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                     break;
                 case ExtensionType.IconPack:
                     this.lblExtensionType.BackColor = Color.FromArgb(0, 173, 14);
-                    IconPackLegacy iconPack = macroDeckExtension.ExtensionObject as IconPackLegacy;
+                    IconPack iconPack = macroDeckExtension.ExtensionObject as IconPack;
                     if (updateAvailable)
                     {
                         this.lblStatus.Text = "Update available";
@@ -78,7 +78,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                         this.lblStatus.ForeColor = Color.FromArgb(0, 192, 0);
                         this.lblStatus.BackColor = Color.Transparent;
                     }
-                    //this.extensionIcon.BackgroundImage = Utils.IconPackPreview.GeneratePreviewImage(iconPack);
+                    this.extensionIcon.BackgroundImage = Utils.IconPackPreview.GeneratePreviewImage(iconPack);
                     this.lblExtensionName.Text = iconPack.Name;
                     this.lblVersion.Text = $"{LanguageManager.Strings.InstalledVersion}: {iconPack.Version}";
                     break;
@@ -93,6 +93,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                     MacroDeckPlugin macroDeckPlugin = macroDeckExtension.ExtensionObject as MacroDeckPlugin;
                     if (!macroDeckPlugin.CanConfigure) return;
                     macroDeckPlugin.OpenConfigurator();
+                    break;
+                case ExtensionType.IconPack:
+                    IconPack iconPack = macroDeckExtension.ExtensionObject as IconPack;
+
                     break;
             }
         }

@@ -3,6 +3,7 @@ using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Text;
 
 namespace SuchByte.MacroDeck.Icons
@@ -10,6 +11,8 @@ namespace SuchByte.MacroDeck.Icons
     public class Icon
     {
         private string _filePath;
+
+        private Image _iconImage;
 
         public string FilePath
         {
@@ -24,7 +27,16 @@ namespace SuchByte.MacroDeck.Icons
 
         public Image IconImage
         {
-            get => (Image)Image.FromFile(_filePath).Clone();
+            get
+            {
+                using (var fs = new FileStream(_filePath, FileMode.Open, FileAccess.Read))
+                {
+                    var ms = new MemoryStream();
+                    fs.CopyTo(ms);
+                    ms.Position = 0;
+                    return Image.FromStream(ms);
+                }
+            }
         }
 
         public string IconBase64

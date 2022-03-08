@@ -51,6 +51,7 @@ namespace SuchByte.MacroDeck.Icons
                     Name = extensionManifest.Name,
                     Author = extensionManifest.Author,
                     Version = extensionManifest.Version,
+                    PackageId = extensionManifest.PackageId,
                     ExtensionStoreManaged = File.Exists(Path.Combine(iconPackDir, ".extensionstore")),
                     Hidden = File.Exists(Path.Combine(iconPackDir, ".hidden")),
                     Icons = new List<Icon>(),
@@ -66,7 +67,6 @@ namespace SuchByte.MacroDeck.Icons
                     {
                         Icon icon = new Icon()
                         {
-                            //IconImage = image,
                             FilePath = imageFile,
                             IconId = Path.GetFileNameWithoutExtension(imageFile),
                         };
@@ -142,17 +142,44 @@ namespace SuchByte.MacroDeck.Icons
             return icon;
         }
 
-        public static Icon AddIconImage(IconPack iconPack, Image image, bool sendIconsToClients = true)
+        public static Icon AddIconImage(IconPack iconPack, Image image, bool sendIconsToClients = true, string iconId = "")
         {
+            if (iconPack == null || image == null || iconPack.Icons.Find(x => x.IconId == iconId) != null) return null;
             try
             {
-                
+                if (string.IsNullOrWhiteSpace(iconId))
+                {
+                    iconId = Guid.NewGuid().ToString();
+                }
+
+                var format = image.RawFormat;
+                var filePath = "";
+                if (format.ToString().Equals("Gif", StringComparison.OrdinalIgnoreCase))
+                {
+                    filePath = Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId, $"{iconId}.gif");
+                }
+                else
+                {
+                    filePath = Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId, $"{iconId}.png");
+                    image = new Bitmap(image); // Generating a new bitmap if the file format is not a gif because otherwise it causes a GDI+ error in some cases
+                    format = ImageFormat.Png;
+                }
+
+                image.Save(filePath, format);
+
+                Icon icon = new Icon()
+                {
+                    FilePath = filePath,
+                    IconId = iconId,
+                };
+
+                iconPack.Icons.Add(icon);
                 
                 if (sendIconsToClients)
                 {
                     MacroDeckServer.SendAllIcons();
                 }
-                return null;
+                return icon;
             }
             catch (Exception ex)
             {
@@ -163,12 +190,28 @@ namespace SuchByte.MacroDeck.Icons
 
         internal static void DeleteIconPack(IconPack iconPack)
         {
-            throw new NotImplementedException();
+            if (iconPack == null) return;
+            if (IconPacks.Contains(iconPack))
+            {
+                IconPacks.Remove(iconPack);
+            }
+            try
+            {
+                Directory.Delete(Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId));
+            } catch { }
         }
 
-        internal static void DeleteIcon(IconPack selectedIconPack, Icon selectedIcon)
+        internal static void DeleteIcon(IconPack iconPack, Icon icon)
         {
-            throw new NotImplementedException();
+            if (iconPack == null || icon == null) return;
+            if (iconPack.Icons.Contains(icon))
+            {
+                iconPack.Icons.Remove(icon);
+            }
+            try
+            {
+                File.Delete(icon.FilePath);
+            } catch { }
         }
     }
 }

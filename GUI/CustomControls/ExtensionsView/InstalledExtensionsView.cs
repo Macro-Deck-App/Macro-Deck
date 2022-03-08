@@ -65,7 +65,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             foreach (var iconPack in IconManager.IconPacks)
             {
                 ExtensionItemView extensionItemView = new ExtensionItemView(new IconPackExtension(iconPack), IconManager.IconPacksUpdateAvailable.Contains(iconPack));
-                if (!iconPack.ExtensionStoreManaged) continue;
                 extensionItemView.ExtensionRemoved += ExtensionItemView_ExtensionRemoved;
                 this.installedExtensionsList.Controls.Add(extensionItemView);
             }

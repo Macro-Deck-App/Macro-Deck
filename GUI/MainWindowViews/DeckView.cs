@@ -199,6 +199,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
             if (button == null || actionButton == null) return;
 
+
             switch (actionButton.State)
             {
                 case false:
@@ -270,6 +271,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             if (button == null) return;
             if (button.BackgroundImage != null)
             {
+                button.BackgroundImage.Dispose();
                 button.BackgroundImage = null;
             }
             if (button.ForegroundImage != null)

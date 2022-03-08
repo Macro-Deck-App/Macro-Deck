@@ -114,6 +114,7 @@ namespace SuchByte.MacroDeck.GUI
             {
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
+                    IconPack iconPack = IconManager.GetIconPackByName(this.iconPacksBox.Text);
                     bool gif = (Path.GetExtension(openFileDialog.FileNames.FirstOrDefault()).ToLower() == "gif");
                     using (var iconImportQuality = new IconImportQuality(gif))
                     {
@@ -161,14 +162,6 @@ namespace SuchByte.MacroDeck.GUI
                                                     collection.Write(ms);
                                                     icons.Add(Image.FromStream(ms));
                                                 }
-
-                                                /*collection.Write(Path.Combine(MacroDeck.TempDirectoryPath, new FileInfo(file).Name + ".resized"));
-                                                byte[] imageBytes = File.ReadAllBytes(Path.Combine(MacroDeck.TempDirectoryPath, new FileInfo(file).Name + ".resized"));
-                                                using (var ms = new MemoryStream(imageBytes))
-                                                {
-                                                    MacroDeckLogger.Trace("Loading resized image");
-                                                    MacroDeckLogger.Trace("Resized image loaded");
-                                                }*/
                                             }
                                             MacroDeckLogger.Trace(GetType(), "Image successfully resized");
                                         }
@@ -178,7 +171,6 @@ namespace SuchByte.MacroDeck.GUI
                                         }
                                     }
                                 }
-                                IconPack iconPack = IconManager.GetIconPackByName(this.iconPacksBox.Text);
 
                                 if (iconPack == null)
                                 {
@@ -239,6 +231,7 @@ namespace SuchByte.MacroDeck.GUI
             {
                 if (giphySelector.ShowDialog() == DialogResult.OK)
                 {
+                    IconPack iconPack = IconManager.GetIconPackByName(this.iconPacksBox.Text);
                     using (var iconImportQuality = new IconImportQuality(true))
                     {
                         if (iconImportQuality.ShowDialog() == DialogResult.OK)
@@ -277,7 +270,6 @@ namespace SuchByte.MacroDeck.GUI
                                     }
                                 }
                             }
-                            IconPack iconPack = IconManager.GetIconPackByName(this.iconPacksBox.Text);
                             IconManager.AddIconImage(iconPack, icon, false);
                             using (var msgBox = new CustomControls.MessageBox())
                             {

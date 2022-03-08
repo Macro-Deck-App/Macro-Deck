@@ -30,12 +30,18 @@ namespace SuchByte.MacroDeck.Icons
         public List<Icon> Icons;
         
         /// <summary>
-        /// Icon
+        /// Icon displayed in the extension manager
         /// </summary>
         public Image IconPackIcon { get; set; }
 
+        /// <summary>
+        /// Disabled the editing of the icon pack
+        /// </summary>
         public bool ExtensionStoreManaged { get; set; } = false;
 
+        /// <summary>
+        /// Hides the icon pack
+        /// </summary>
         public bool Hidden { get; set; } = false;
     }
 }

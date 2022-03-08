@@ -133,9 +133,9 @@ namespace SuchByte.MacroDeck.Utils
                 using (MemoryStream ms = new MemoryStream())
                 {
                     var format = image.RawFormat;
-                    switch (format.ToString())
+                    switch (format.ToString().ToLower())
                     {
-                        case "Gif":
+                        case "gif":
                             break;
                         default:
                             image = new Bitmap(image); // Generating a new bitmap if the file format is not a gif because otherwise it causes a GDI+ error in some cases
