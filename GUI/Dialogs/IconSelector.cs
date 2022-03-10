@@ -197,14 +197,14 @@ namespace SuchByte.MacroDeck.GUI
 
                                 foreach (Image icon in icons)
                                 {
-                                    IconManager.AddIconImage(iconPack, icon, false);
+                                    IconManager.AddIconImage(iconPack, icon);
                                     if (convertGifToStatic)
                                     {
                                         using (var ms = new MemoryStream())
                                         {
                                             icon.Save(ms, ImageFormat.Png);
                                             Image iconStatic = Image.FromStream(ms);
-                                            IconManager.AddIconImage(iconPack, iconStatic, false);
+                                            IconManager.AddIconImage(iconPack, iconStatic);
                                         }
                                     }
                                     icon.Dispose();
@@ -216,7 +216,6 @@ namespace SuchByte.MacroDeck.GUI
                                 this.Invoke(new Action(() => this.LoadIcons(iconPack, true)));
                                 MacroDeckLogger.Info(GetType(), "Icons successfully imported");
                                 SpinnerDialog.SetVisisble(false, this);
-                                MacroDeckServer.SendAllIcons();
                             });
                         }
                         
@@ -270,7 +269,7 @@ namespace SuchByte.MacroDeck.GUI
                                     }
                                 }
                             }
-                            IconManager.AddIconImage(iconPack, icon, false);
+                            IconManager.AddIconImage(iconPack, icon);
                             using (var msgBox = new CustomControls.MessageBox())
                             {
                                 if (msgBox.ShowDialog(Language.LanguageManager.Strings.AnimatedGifImported, Language.LanguageManager.Strings.GenerateStaticIcon, MessageBoxButtons.YesNo) == DialogResult.Yes)
@@ -281,7 +280,7 @@ namespace SuchByte.MacroDeck.GUI
                                         {
                                             icon.Save(ms, ImageFormat.Png);
                                             Image iconStatic = Image.FromStream(ms);
-                                            IconManager.AddIconImage(iconPack, iconStatic, false);
+                                            IconManager.AddIconImage(iconPack, iconStatic);
                                         }
                                     }
                                 }
@@ -292,7 +291,6 @@ namespace SuchByte.MacroDeck.GUI
 
                             this.Invoke(new Action(() => this.LoadIcons(iconPack, true)));
                             MacroDeckLogger.Info("GIPHY icon successfully imported");
-                            MacroDeckServer.SendAllIcons();
                         }
                     }
                 }

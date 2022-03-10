@@ -413,8 +413,6 @@ namespace SuchByte.MacroDeck
             PluginManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
             PluginManager.EnablePlugins();
             IconManager.Initialize();
-            //IconManagerLegacy.LoadIconPacks();
-            //IconManagerLegacy.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
             ProfileManager.Load();
 
             MacroDeckServer.Start(_configuration.Host_Address, port == -1 ? _configuration.Host_Port : port);

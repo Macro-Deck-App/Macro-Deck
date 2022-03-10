@@ -12,7 +12,7 @@ namespace SuchByte.MacroDeck.Icons
     {
         private string _filePath;
 
-        private Image _iconImage;
+        private string _iconBase64 = "";
 
         public string FilePath
         {
@@ -41,7 +41,14 @@ namespace SuchByte.MacroDeck.Icons
 
         public string IconBase64
         {
-            get => Utils.Base64.GetBase64FromImage(IconImage);
+            get
+            {
+                if (string.IsNullOrWhiteSpace(this._iconBase64))
+                {
+                    this._iconBase64 = Utils.Base64.GetBase64FromImage(IconImage);
+                }
+                return this._iconBase64;
+            }
         }
 
         public string IconHex128_64Base64

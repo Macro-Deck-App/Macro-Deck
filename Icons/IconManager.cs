@@ -142,7 +142,7 @@ namespace SuchByte.MacroDeck.Icons
             return icon;
         }
 
-        public static Icon AddIconImage(IconPack iconPack, Image image, bool sendIconsToClients = true, string iconId = "")
+        public static Icon AddIconImage(IconPack iconPack, Image image, string iconId = "")
         {
             if (iconPack == null || image == null || iconPack.Icons.Find(x => x.IconId == iconId) != null) return null;
             try
@@ -175,10 +175,6 @@ namespace SuchByte.MacroDeck.Icons
 
                 iconPack.Icons.Add(icon);
                 
-                if (sendIconsToClients)
-                {
-                    MacroDeckServer.SendAllIcons();
-                }
                 return icon;
             }
             catch (Exception ex)
