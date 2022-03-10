@@ -27,7 +27,7 @@ namespace SuchByte.MacroDeck.Icons
         /// <summary>
         /// A list containing all icons of the icon pack
         /// </summary>
-        public List<Icon> Icons;
+        public List<IconLegacy> Icons;
 
         /// <summary>
         /// True = disable the possibility to edit the icon pack in the icon selector

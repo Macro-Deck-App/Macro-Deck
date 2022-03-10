@@ -29,7 +29,6 @@ namespace SuchByte.MacroDeck.Icons
             {
                 Directory.CreateDirectory(MacroDeck.IconPackDirectoryPath);
             }
-            IconManagerLegacy.ConvertOldIconPacks();
             LoadIconPacks();
         }
 

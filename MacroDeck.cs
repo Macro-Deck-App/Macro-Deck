@@ -299,6 +299,14 @@ namespace SuchByte.MacroDeck
                 }
             }
 
+            if (!Directory.Exists(IconPackDirectoryPath))
+            {
+                Directory.CreateDirectory(IconPackDirectoryPath);
+            } else
+            {
+                IconManagerLegacy.ConvertOldIconPacks();
+            }
+
             BackupManager.CheckRestoreDirectory();
 
 

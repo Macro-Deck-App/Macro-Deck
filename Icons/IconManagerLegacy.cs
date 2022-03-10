@@ -17,6 +17,8 @@ using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Model;
 using System.Drawing.Imaging;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.GUI.Dialogs;
 
 namespace SuchByte.MacroDeck.Icons
 {
@@ -33,7 +35,15 @@ namespace SuchByte.MacroDeck.Icons
 
         public static void ConvertOldIconPacks()
         {
+            if (Directory.GetFiles(MacroDeck.IconPackDirectoryPath, "*.iconpack").Length == 0) return;
             List<IconPackLegacy> iconPacks = new List<IconPackLegacy>();
+            using (var msgBox = new MessageBox())
+            {
+                if (msgBox.ShowDialog("Icon packs", "Macro Deck has found old icon packs that need to be converted to continue using. Convert now?", System.Windows.Forms.MessageBoxButtons.YesNo) != System.Windows.Forms.DialogResult.Yes)
+                {
+                    return;
+                }
+            }
             foreach (var databasePath in Directory.GetFiles(MacroDeck.IconPackDirectoryPath, "*.iconpack"))
             {
                 try
@@ -133,15 +143,22 @@ namespace SuchByte.MacroDeck.Icons
                     }
                 }
             }
-            foreach (var databasePath in Directory.GetFiles(MacroDeck.IconPackDirectoryPath, "*.iconpack"))
+
+            using (var msgBox = new MessageBox())
             {
-                try
+                if (msgBox.ShowDialog("Icon packs", "The old icon packs were successfully converted. Do you want to delete the old icon packs?", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
                 {
-                    File.Delete(databasePath);
-                }
-                catch (Exception ex)
-                {
-                    MacroDeckLogger.Error(string.Format("Failed to delete icon pack {0}: ", databasePath) + ex.Message + Environment.NewLine + ex.StackTrace);
+                    foreach (var databasePath in Directory.GetFiles(MacroDeck.IconPackDirectoryPath, "*.iconpack"))
+                    {
+                        try
+                        {
+                            File.Delete(databasePath);
+                        }
+                        catch (Exception ex)
+                        {
+                            MacroDeckLogger.Error(string.Format("Failed to delete icon pack {0}: ", databasePath) + ex.Message + Environment.NewLine + ex.StackTrace);
+                        }
+                    }
                 }
             }
         }
