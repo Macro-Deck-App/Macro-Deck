@@ -30,8 +30,11 @@ namespace SuchByte.MacroDeck.GUI
         public Icons.Icon SelectedIcon;
         public Icons.IconPack SelectedIconPack;
 
-        public IconSelector()
+        private IconPack _selectIconPack;
+
+        public IconSelector(IconPack iconPack = null)
         {
+            this._selectIconPack = iconPack;
             InitializeComponent();
             this.btnImportIconPack.Text = Language.LanguageManager.Strings.ImportIconPack;
             this.btnExportIconPack.Text = Language.LanguageManager.Strings.ExportIconPack;
@@ -325,6 +328,14 @@ namespace SuchByte.MacroDeck.GUI
             {
                 this.Invoke(new Action(() =>
                 {
+                    if (this._selectIconPack != null)
+                    {
+                        if (this.iconPacksBox.Items.Contains(this._selectIconPack.Name))
+                        {
+                            this.iconPacksBox.SelectedIndex = this.iconPacksBox.FindStringExact(this._selectIconPack.Name);
+                            return;
+                        }
+                    }
                     if (this.iconPacksBox.Items.Contains(Properties.Settings.Default.IconSelectorLastIconPack))
                     {
                         this.iconPacksBox.SelectedIndex = this.iconPacksBox.FindStringExact(Properties.Settings.Default.IconSelectorLastIconPack);

@@ -96,7 +96,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                     break;
                 case ExtensionType.IconPack:
                     IconPack iconPack = macroDeckExtension.ExtensionObject as IconPack;
-
+                    using (var iconSelector = new IconSelector(iconPack))
+                    {
+                        iconSelector.ShowDialog();
+                    }
                     break;
             }
         }
