@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Server;
@@ -8,6 +9,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -83,6 +85,7 @@ namespace SuchByte.MacroDeck.Icons
 
             MacroDeckLogger.Info(typeof(IconManager), $"Loaded {IconPacks.Count} icon packs");
         }
+
 
         public static void ScanUpdatesAsync()
         {
@@ -182,8 +185,29 @@ namespace SuchByte.MacroDeck.Icons
             }
             return null;
         }
+       
+        public static void ExportIconPack(IconPack iconPack, string destination)
+        {
+            string iconPackDir = Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId);
+            try
+            {
+                iconPack.IconPackIcon.Save(Path.Combine(iconPackDir, "ExtensionIcon.png"));
+                using (var archive = ZipFile.Open(Path.Combine(MacroDeck.BackupsDirectoryPath, destination, $"{iconPack.Name}.zip"), ZipArchiveMode.Create))
+                {
+                    if (!Directory.Exists(iconPackDir)) return;
+                    foreach (FileInfo iconPackFile in new DirectoryInfo(iconPackDir).GetFiles())
+                    {
+                        archive.CreateEntryFromFile(Path.Combine(iconPackDir, iconPackFile.Name), iconPackFile.Name);
+                    }
+                }
+            } catch (Exception ex)
+            {
+                MacroDeckLogger.Error(typeof(IconManager), $"Error while exporting icon pack: {ex.Message}");
+            }
+            
+        }
 
-        internal static void DeleteIconPack(IconPack iconPack)
+        public static void DeleteIconPack(IconPack iconPack)
         {
             if (iconPack == null) return;
             if (IconPacks.Contains(iconPack))
@@ -192,11 +216,14 @@ namespace SuchByte.MacroDeck.Icons
             }
             try
             {
-                Directory.Delete(Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId));
-            } catch { }
+                Directory.Delete(Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId), true);
+            } catch (Exception ex) 
+            {
+                MacroDeckLogger.Warning(typeof(IconManager), $"Unable to delete icon pack: {ex.Message}");
+            }
         }
 
-        internal static void DeleteIcon(IconPack iconPack, Icon icon)
+        public static void DeleteIcon(IconPack iconPack, Icon icon)
         {
             if (iconPack == null || icon == null) return;
             if (iconPack.Icons.Contains(icon))
@@ -207,6 +234,61 @@ namespace SuchByte.MacroDeck.Icons
             {
                 File.Delete(icon.FilePath);
             } catch { }
+        }
+
+        public static void SaveIconPack(IconPack iconPack)
+        {
+            ExtensionManifestModel extensionManifestModel = new ExtensionManifestModel()
+            {
+                Type = ExtensionStore.ExtensionType.IconPack,
+                Name = iconPack.Name,
+                Author = iconPack.Author,
+                PackageId = iconPack.PackageId,
+                TargetPluginAPIVersion = MacroDeck.PluginApiVersion,
+                Version = iconPack.Version,
+            };
+
+            string iconPackPath = Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId);
+
+            if (!Directory.Exists(iconPackPath))
+            {
+                Directory.CreateDirectory(iconPackPath);
+            }
+
+            JsonSerializer serializer = new JsonSerializer
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented,
+            };
+
+            try
+            {
+                using StreamWriter sw = new StreamWriter(Path.Combine(iconPackPath, "ExtensionManifest.json"));
+                using JsonWriter writer = new JsonTextWriter(sw);
+                serializer.Serialize(writer, extensionManifestModel);
+
+                MacroDeckLogger.Info(typeof(IconManager), "ExtensionManifest saved");
+            }
+            catch (Exception ex)
+            {
+                MacroDeckLogger.Error(typeof(IconManager), $"Failed to save ExtensionManifest: {ex.Message}");
+            }
+        }
+
+        public static void CreateIconPack(string iconPackName, string author, string version)
+        {
+            var iconPack = new IconPack()
+            {
+                Name = iconPackName,
+                Author = author,
+                Version = version,
+                PackageId = $"{author.Replace(" ", "").Replace(".", "")}.{iconPackName.Replace(" ", "").Replace(".", "")}",
+                Icons = new List<Icon>(),
+            };
+
+            SaveIconPack(iconPack);
+
+            IconPacks.Add(iconPack);
         }
     }
 }

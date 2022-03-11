@@ -40,11 +40,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         private void BtnOk_Click(object sender, EventArgs e)
         {
             if (this.iconPackName.Text.Length < 2) return;
-            /*if (IconManagerLegacy.GetIconPackByName(this.iconPackName.Text) != null)
+            if (IconManager.GetIconPackByName(this.iconPackName.Text) != null)
             {
                 using (var messageBox = new GUI.CustomControls.MessageBox())
                 {
-                    messageBox.ShowDialog(Language.LanguageManager.Strings.CantCreateIconPack, String.Format(Language.LanguageManager.Strings.IconPackCalledXAlreadyExists, this.iconPackName.Text), MessageBoxButtons.OK);
+                    messageBox.ShowDialog(Language.LanguageManager.Strings.CantCreateIconPack, string.Format(Language.LanguageManager.Strings.IconPackCalledXAlreadyExists, this.iconPackName.Text), MessageBoxButtons.OK);
                     messageBox.Dispose();
                     return;
                 }
@@ -53,10 +53,10 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                 this._iconPackName = this.iconPackName.Text;
                 this._author = this.author.Text;
                 this._version = this.version.Text;
-                IconManagerLegacy.CreateIconPack(this._iconPackName, this._author, this._version);
+                IconManager.CreateIconPack(this._iconPackName, this._author, this._version);
                 this.DialogResult = DialogResult.OK;
                 this.Close();
-            }*/
+            }
         }
     }
 }

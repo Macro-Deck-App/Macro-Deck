@@ -386,11 +386,11 @@ namespace SuchByte.MacroDeck.GUI
 
         private void BtnCreateIconPack_Click(object sender, EventArgs e)
         {
-            using (var createIconPackDialog = new Dialogs.CreateIconPack())
+            using (var createIconPackDialog = new CreateIconPack())
             {
                 if (createIconPackDialog.ShowDialog() == DialogResult.OK)
                 {
-
+                    
                     Task.Run(() =>
                     {
                         this.LoadIconPacks();
@@ -422,7 +422,26 @@ namespace SuchByte.MacroDeck.GUI
 
         private void BtnExportIconPack_Click(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            using (var exportIconPackDialog = new ExportIconPackDialog(this.SelectedIconPack))
+            {
+                if (exportIconPackDialog.ShowDialog() == DialogResult.OK)
+                {
+                    using (FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog())
+                    {
+                        if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            Cursor.Current = Cursors.WaitCursor;
+                            IconManager.SaveIconPack(this.SelectedIconPack);
+                            IconManager.ExportIconPack(this.SelectedIconPack, folderBrowserDialog.SelectedPath);
+                            Cursor.Current = Cursors.Default;
+                            using (var msgBox = new CustomControls.MessageBox())
+                            {
+                                msgBox.ShowDialog(Language.LanguageManager.Strings.ExportIconPack, String.Format(Language.LanguageManager.Strings.XSuccessfullyExportedToX, this.SelectedIconPack.Name, folderBrowserDialog.SelectedPath), MessageBoxButtons.OK);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private void BtnDeleteIcon_Click(object sender, EventArgs e)
