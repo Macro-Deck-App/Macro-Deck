@@ -30,19 +30,18 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             {
                 owner.Invoke(new Action(() =>
                 {
-                    SetVisisble(visible, owner);
-                    return;
+                    if (visible)
+                    {
+                        if (waitDialog.Visible) return;
+                        waitDialog.ShowDialog();
+                    }
+                    else
+                    {
+                        waitDialog.Hide();
+                    }
                 }));
             }
-            if (visible)
-            {
-                if (waitDialog.Visible) return;
-                waitDialog.ShowDialog();
-            }
-            else
-            {
-                waitDialog.Hide();
-            }
+           
         }
 
 

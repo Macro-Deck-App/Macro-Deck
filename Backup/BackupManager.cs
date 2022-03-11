@@ -247,9 +247,12 @@ namespace SuchByte.MacroDeck.Backups
                         archive.CreateEntryFromFile(Path.Combine(MacroDeck.PluginCredentialsPath, file.Name), Path.Combine(pluginCredentialsDirectoryInfo.Name, file.Name));
                     }
                     DirectoryInfo iconPackDirectoryInfo = new DirectoryInfo(MacroDeck.IconPackDirectoryPath);
-                    foreach (FileInfo file in iconPackDirectoryInfo.GetFiles("*"))
+                    foreach (DirectoryInfo dir in iconPackDirectoryInfo.GetDirectories())
                     {
-                        archive.CreateEntryFromFile(Path.Combine(MacroDeck.IconPackDirectoryPath, file.Name), Path.Combine(iconPackDirectoryInfo.Name, file.Name));
+                        foreach (FileInfo iconPackFile in dir.GetFiles())
+                        {
+                            archive.CreateEntryFromFile(Path.Combine(MacroDeck.IconPackDirectoryPath, dir.Name, iconPackFile.Name), Path.Combine(iconPackDirectoryInfo.Name, dir.Name, iconPackFile.Name));
+                        }
                     }
 
                     MacroDeckLogger.Info("Backup successfully created: " + backupFileName);
@@ -289,7 +292,5 @@ namespace SuchByte.MacroDeck.Backups
                 }
             }
         }
-
-
     }
 }
