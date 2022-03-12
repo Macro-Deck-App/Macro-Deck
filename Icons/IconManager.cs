@@ -131,8 +131,11 @@ namespace SuchByte.MacroDeck.Icons
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
+            } 
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
             }
-            catch { }
         }
 
         public static IconPack GetIconPackByName(string name)

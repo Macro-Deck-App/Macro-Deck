@@ -285,7 +285,7 @@ namespace SuchByte.MacroDeck.Plugins
 
         internal static void SearchUpdate(MacroDeckPlugin plugin)
         {
-            if (UpdatedPlugins.Contains(plugin)) return;
+            if (UpdatedPlugins.Contains(plugin) || ProtectedPlugins.Contains(plugin)) return;
             try
             {
                 using (WebClient wc = new WebClient())
@@ -303,7 +303,10 @@ namespace SuchByte.MacroDeck.Plugins
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
         }
 
         public static bool IsInstalled(string name)
