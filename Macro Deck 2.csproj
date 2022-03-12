@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
-    <VersionMinor>8</VersionMinor>
-    <VersionPatch>2</VersionPatch>
+    <VersionMinor>9</VersionMinor>
+    <VersionPatch>0</VersionPatch>
     <VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
   </PropertyGroup>
   

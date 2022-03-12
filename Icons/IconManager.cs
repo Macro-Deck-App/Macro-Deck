@@ -323,6 +323,17 @@ namespace SuchByte.MacroDeck.Icons
                 if (!Directory.Exists(destinationPath))
                 {
                     Directory.CreateDirectory(destinationPath);
+                    if (extensionStoreManaged)
+                    {
+                        try
+                        {
+                            using (WebClient wc = new WebClient())
+                            {
+                                wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=count-download&package-id={extensionManifestModel.PackageId}");
+                            }
+                        }
+                        catch { }
+                    }
                 } else
                 {
                     Directory.Delete(destinationPath, true);
