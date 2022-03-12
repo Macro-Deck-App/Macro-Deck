@@ -92,7 +92,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             ListInstalledExtensions();
             UpdateUpdateLabelInfo();
             PluginManager.OnPluginsChange += PluginManager_OnPluginsChange;
-            IconManager.IconPacksLoaded += PluginManager_OnPluginsChange;
+            IconManager.InstallationFinished += PluginManager_OnPluginsChange;
             ExtensionStoreHelper.OnUpdateCheckFinished += UpdateCheckFinished;
         }
 

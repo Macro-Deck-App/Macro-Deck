@@ -60,7 +60,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                         this.lblStatus.BackColor = Color.Transparent;
                     }
                     
-                    this.extensionIcon.BackgroundImage = macroDeckPlugin.Icon == null ? Properties.Resources.Icon : macroDeckPlugin.Icon;
+                    this.extensionIcon.BackgroundImage = macroDeckPlugin.PluginIcon == null ? Properties.Resources.Icon : macroDeckPlugin.PluginIcon;
                     this.lblExtensionName.Text = macroDeckPlugin.Name;
                     this.lblVersion.Text = $"{LanguageManager.Strings.InstalledVersion}: {macroDeckPlugin.Version}";
                     break;

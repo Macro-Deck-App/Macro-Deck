@@ -22,6 +22,8 @@ namespace SuchByte.MacroDeck.Icons
         public static List<IconPack> IconPacks = new List<IconPack>();
         public static List<IconPack> IconPacksUpdateAvailable = new List<IconPack>();
 
+        public static event EventHandler InstallationFinished;
+
         public static Action<object, EventArgs> OnUpdateCheckFinished { get; internal set; }
         public static Action<object, EventArgs> IconPacksLoaded { get; internal set; }
 
@@ -302,7 +304,7 @@ namespace SuchByte.MacroDeck.Icons
             IconPacks.Add(iconPack);
         }
 
-        public static IconPack InstallIconPackZip(string location)
+        public static IconPack InstallIconPackZip(string location, bool extensionStoreManaged = false)
         {
             try
             {
@@ -323,14 +325,30 @@ namespace SuchByte.MacroDeck.Icons
                     Directory.CreateDirectory(destinationPath);
                 } else
                 {
-                    Directory.Delete(destinationPath);
+                    Directory.Delete(destinationPath, true);
                 }
 
                 ZipFile.ExtractToDirectory(location, destinationPath);
+                if (extensionStoreManaged)
+                {
+                    try
+                    {
+                        File.Create(Path.Combine(destinationPath, ".extensionstore"));
+                    } catch { }
+                }
                 if (LoadIconPack(destinationPath))
                 {
+                    if (IconPacksUpdateAvailable.Find(x => x.PackageId.Equals(extensionManifestModel.PackageId)) != null)
+                    {
+                        IconPacksUpdateAvailable.Remove(IconPacksUpdateAvailable.Find(x => x.PackageId.Equals(extensionManifestModel.PackageId)));
+                    }
                     MacroDeckLogger.Info(typeof(IconManager), $"Successfully installed {extensionManifestModel.PackageId}");
-                    return GetIconPackByName(extensionManifestModel.Name);
+                    IconPack iconPack = GetIconPackByName(extensionManifestModel.Name);
+                    if (InstallationFinished != null)
+                    {
+                        InstallationFinished(iconPack, EventArgs.Empty);
+                    }
+                    return iconPack;
                 } else
                 {
                     MacroDeckLogger.Error(typeof(IconManager), $"{extensionManifestModel.PackageId} is maybe corruped");
