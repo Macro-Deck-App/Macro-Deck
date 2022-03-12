@@ -139,7 +139,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                 if (!string.IsNullOrWhiteSpace(actionButton.IconOn))
                 {
                     var icon = IconManager.GetIconByString(actionButton.IconOn);
-                    if (icon == null)
+                    if (icon != null)
                     {
                         IconBase64 = icon.IconBase64;
                     }
