@@ -40,50 +40,58 @@ namespace SuchByte.MacroDeck.Icons
             MacroDeckLogger.Info(typeof(IconManager), "Loading icon packs...");
             foreach (var iconPackDir in Directory.GetDirectories(MacroDeck.IconPackDirectoryPath))
             {
-                var extensionManifestFilePath = Path.Combine(iconPackDir, "ExtensionManifest.json");
-                var extensionIconPath = Path.Combine(iconPackDir, "ExtensionIcon.png");
-                if (!File.Exists(extensionManifestFilePath)) continue;
-                var extensionManifest = ExtensionManifestModel.FromManifestFile(extensionManifestFilePath);
-                if (extensionManifest == null) continue;
-
-
-                IconPack iconPack = new IconPack()
-                {
-                    Name = extensionManifest.Name,
-                    Author = extensionManifest.Author,
-                    Version = extensionManifest.Version,
-                    PackageId = extensionManifest.PackageId,
-                    ExtensionStoreManaged = File.Exists(Path.Combine(iconPackDir, ".extensionstore")),
-                    Hidden = File.Exists(Path.Combine(iconPackDir, ".hidden")),
-                    Icons = new List<Icon>(),
-                };
-
-                IconPacks.Add(iconPack);
-                
-                foreach (var imageFile in Directory.GetFiles(iconPackDir).Where(s => s.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
-                                                                                        s.EndsWith(".gif", StringComparison.OrdinalIgnoreCase) || 
-                                                                                        s.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)))
-                {
-                    try
-                    {
-                        Icon icon = new Icon()
-                        {
-                            FilePath = imageFile,
-                            IconId = Path.GetFileNameWithoutExtension(imageFile),
-                        };
-                        iconPack.Icons.Add(icon);
-                    }
-                    catch (Exception ex)
-                    {
-                        MacroDeckLogger.Warning(typeof(IconManager), $"Failed to load icon: {ex.Message}");
-                        continue;
-                    }
-                }
-
-                iconPack.IconPackIcon = Utils.IconPackPreview.GeneratePreviewImage(iconPack);
+                LoadIconPack(iconPackDir);
             }
 
             MacroDeckLogger.Info(typeof(IconManager), $"Loaded {IconPacks.Count} icon packs");
+        }
+
+        public static bool LoadIconPack(string path)
+        {
+            var extensionManifestFilePath = Path.Combine(path, "ExtensionManifest.json");
+            var extensionIconPath = Path.Combine(path, "ExtensionIcon.png");
+            if (!File.Exists(extensionManifestFilePath)) return false;
+            var extensionManifest = ExtensionManifestModel.FromManifestFile(extensionManifestFilePath);
+            if (extensionManifest == null) return false;
+
+
+            IconPack iconPack = new IconPack()
+            {
+                Name = extensionManifest.Name,
+                Author = extensionManifest.Author,
+                Version = extensionManifest.Version,
+                PackageId = extensionManifest.PackageId,
+                ExtensionStoreManaged = File.Exists(Path.Combine(path, ".extensionstore")),
+                Hidden = File.Exists(Path.Combine(path, ".hidden")),
+                Icons = new List<Icon>(),
+            };
+
+            IconPacks.Add(iconPack);
+
+            foreach (var imageFile in Directory.GetFiles(path).Where(s =>
+                                                                                    s.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+                                                                                    s.EndsWith(".gif", StringComparison.OrdinalIgnoreCase) ||
+                                                                                    s.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)))
+            {
+                try
+                {
+                    Icon icon = new Icon()
+                    {
+                        FilePath = imageFile,
+                        IconId = Path.GetFileNameWithoutExtension(imageFile),
+                    };
+                    if (icon.IconId.Equals("ExtensionIcon")) continue;
+                    iconPack.Icons.Add(icon);
+                }
+                catch (Exception ex)
+                {
+                    MacroDeckLogger.Warning(typeof(IconManager), $"Failed to load icon: {ex.Message}");
+                    continue;
+                }
+            }
+
+            iconPack.IconPackIcon = Utils.IconPackPreview.GeneratePreviewImage(iconPack);
+            return true;
         }
 
 
@@ -191,8 +199,11 @@ namespace SuchByte.MacroDeck.Icons
             string iconPackDir = Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId);
             try
             {
-                iconPack.IconPackIcon.Save(Path.Combine(iconPackDir, "ExtensionIcon.png"));
-                using (var archive = ZipFile.Open(Path.Combine(MacroDeck.BackupsDirectoryPath, destination, $"{iconPack.Name}.zip"), ZipArchiveMode.Create))
+                if (iconPack.IconPackIcon != null)
+                {
+                    iconPack.IconPackIcon.Save(Path.Combine(iconPackDir, "ExtensionIcon.png"));
+                }
+                using (var archive = ZipFile.Open(Path.Combine(MacroDeck.BackupsDirectoryPath, destination, $"{iconPack.Name}.macroDeckIconPack"), ZipArchiveMode.Create))
                 {
                     if (!Directory.Exists(iconPackDir)) return;
                     foreach (FileInfo iconPackFile in new DirectoryInfo(iconPackDir).GetFiles())
@@ -289,6 +300,47 @@ namespace SuchByte.MacroDeck.Icons
             SaveIconPack(iconPack);
 
             IconPacks.Add(iconPack);
+        }
+
+        public static IconPack InstallIconPackZip(string location)
+        {
+            try
+            {
+                ExtensionManifestModel extensionManifestModel = ExtensionManifestModel.FromZipFilePath(location);
+                if (extensionManifestModel == null)
+                {
+                    MacroDeckLogger.Error(typeof(IconManager), $"{location} does not contain a manifest file!");
+                    return null;
+                }
+                if (extensionManifestModel.Type != ExtensionStore.ExtensionType.IconPack)
+                {
+                    MacroDeckLogger.Error(typeof(IconManager), $"{extensionManifestModel.PackageId} is not a icon pack!");
+                    return null;
+                }
+                string destinationPath = Path.Combine(MacroDeck.IconPackDirectoryPath, extensionManifestModel.PackageId);
+                if (!Directory.Exists(destinationPath))
+                {
+                    Directory.CreateDirectory(destinationPath);
+                } else
+                {
+                    Directory.Delete(destinationPath);
+                }
+
+                ZipFile.ExtractToDirectory(location, destinationPath);
+                if (LoadIconPack(destinationPath))
+                {
+                    MacroDeckLogger.Info(typeof(IconManager), $"Successfully installed {extensionManifestModel.PackageId}");
+                    return GetIconPackByName(extensionManifestModel.Name);
+                } else
+                {
+                    MacroDeckLogger.Error(typeof(IconManager), $"{extensionManifestModel.PackageId} is maybe corruped");
+                }
+                return null;
+            } catch (Exception ex)
+            {
+                MacroDeckLogger.Error(typeof(IconManager), $"Error while installing icon pack from zip: {ex.Message}");
+            }
+            return null;
         }
     }
 }

@@ -407,14 +407,18 @@ namespace SuchByte.MacroDeck.GUI
                 Title = "Import icon pack",
                 CheckFileExists = true,
                 CheckPathExists = true,
-                DefaultExt = "db",
-                Filter = "Icon pack (*.iconpack)|*.iconpack|Old icon pack (*.db)|*.db",
+                DefaultExt = ".macroDeckIconPack",
+                Filter = "Macro Deck Icon Pack (*.macroDeckIconPack)|*.macroDeckIconPack|Zip Archive (*.zip)|*.zip",
             })
             {
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-
-                    throw new NotImplementedException();
+                    var importedIconPack = IconManager.InstallIconPackZip(openFileDialog.FileName);
+                    if (importedIconPack != null)
+                    {
+                        this._selectIconPack = importedIconPack;
+                        this.LoadIconPacks();
+                    }
                 }
             }
             
