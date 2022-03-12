@@ -155,7 +155,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                     case ExtensionType.IconPack:
                         try
                         {
-                            IconManager.InstallIconPackZip(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename));
+                            IconManager.InstallIconPackZip(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename), true);
                         }
                         catch (Exception ex)
                         {
