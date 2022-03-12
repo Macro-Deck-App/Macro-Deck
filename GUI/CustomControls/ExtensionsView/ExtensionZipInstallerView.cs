@@ -1,4 +1,5 @@
-﻿using SuchByte.MacroDeck.Logging;
+﻿using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Plugins;
 using System;
@@ -14,6 +15,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
     public partial class ExtensionZipInstallerView : UserControl
     {
         public event EventHandler RequestClose;
+
+        public ExtensionManifestModel ExtensionManifestModel;
+
+        
 
         public ExtensionZipInstallerView()
         {
@@ -31,11 +36,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             var dialog = sender as OpenFileDialog;
             try
             {
-                var manifest = ExtensionManifestModel.FromZipFilePath(dialog.FileName);
+                ExtensionManifestModel = ExtensionManifestModel.FromZipFilePath(dialog.FileName);
                 txtZipPath.Text = dialog.FileName;
-                txtPackageId.Text = manifest.PackageId;
-                txtAuthor.Text = manifest.Author;
-                txtMainFile.Text = manifest.Dll;
+                txtPackageId.Text = ExtensionManifestModel.PackageId;
+                txtAuthor.Text = ExtensionManifestModel.Author;
+    
                 btnInstall.Enabled = true;
             } catch (Exception)
             {
@@ -48,7 +53,18 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
         {
             try
             {
-                PluginManager.InstallPluginFromZip(txtZipPath.Text);
+                if (this.ExtensionManifestModel != null)
+                {
+                    switch (this.ExtensionManifestModel.Type)
+                    {
+                        case ExtensionStore.ExtensionType.Plugin:
+                            PluginManager.InstallPluginFromZip(txtZipPath.Text);
+                            break;
+                        case ExtensionStore.ExtensionType.IconPack:
+                            IconManager.InstallIconPackZip(txtZipPath.Text);
+                            break;
+                    }
+                }
                 RequestClose(this, EventArgs.Empty);
             }
             catch (Exception)
