@@ -6,6 +6,7 @@ using SuchByte.MacroDeck.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -161,6 +162,10 @@ namespace SuchByte.MacroDeck.Plugins
                             Task.Run(() =>
                                 SearchUpdate(plugin)
                             );
+                            if (File.Exists(Path.Combine(pluginDirectory, "ExtensionIcon.png")))
+                            {
+                                plugin.PluginIcon = (Image)Image.FromFile(Path.Combine(pluginDirectory, "ExtensionIcon.png")).Clone();
+                            }
                             plugin.Author = extensionManifest.Author;
                             if (enable) plugin.Enable();
                             return plugin;

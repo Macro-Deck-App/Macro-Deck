@@ -78,7 +78,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                         this.lblStatus.ForeColor = Color.FromArgb(0, 192, 0);
                         this.lblStatus.BackColor = Color.Transparent;
                     }
-                    this.extensionIcon.BackgroundImage = Utils.IconPackPreview.GeneratePreviewImage(iconPack);
+                    this.extensionIcon.BackgroundImage = iconPack.IconPackIcon == null ? Utils.IconPackPreview.GeneratePreviewImage(iconPack) : iconPack.IconPackIcon;
                     this.lblExtensionName.Text = iconPack.Name;
                     this.lblVersion.Text = $"{LanguageManager.Strings.InstalledVersion}: {iconPack.Version}";
                     break;
