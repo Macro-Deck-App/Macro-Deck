@@ -34,6 +34,11 @@ namespace SuchByte.MacroDeck.Model
         [JsonProperty("dll")]
         public string Dll { get; set; } = "";
 
+        public static string Serialize(ExtensionManifestModel extensionManifestModel)
+        {
+            return JsonConvert.SerializeObject(extensionManifestModel);
+        }
+
         public static ExtensionManifestModel FromManifestFile(string path)
         {
             using (var s = File.OpenRead(path))
@@ -41,7 +46,6 @@ namespace SuchByte.MacroDeck.Model
                 return FromJsonStream(s);
             }
         }
-
 
         public static ExtensionManifestModel FromZipFilePath(string zipFilePath)
         {

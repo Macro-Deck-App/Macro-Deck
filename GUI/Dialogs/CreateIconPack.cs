@@ -44,7 +44,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             {
                 using (var messageBox = new GUI.CustomControls.MessageBox())
                 {
-                    messageBox.ShowDialog(Language.LanguageManager.Strings.CantCreateIconPack, String.Format(Language.LanguageManager.Strings.IconPackCalledXAlreadyExists, this.iconPackName.Text), MessageBoxButtons.OK);
+                    messageBox.ShowDialog(Language.LanguageManager.Strings.CantCreateIconPack, string.Format(Language.LanguageManager.Strings.IconPackCalledXAlreadyExists, this.iconPackName.Text), MessageBoxButtons.OK);
                     messageBox.Dispose();
                     return;
                 }

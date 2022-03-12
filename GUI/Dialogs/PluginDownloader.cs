@@ -23,6 +23,7 @@ using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
+    [Obsolete]
     public partial class PluginDownloader : DialogForm
     {
 
@@ -147,13 +148,13 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                                 Directory.CreateDirectory(MacroDeck.IconPackDirectoryPath);
                             }
                             File.Copy(Path.Combine(MacroDeck.TempDirectoryPath, jsonObject["filename"].ToString()), Path.Combine(MacroDeck.IconPackDirectoryPath, jsonObject["name"].ToString() + ".db"), true);
-                            IconManager.LoadIconPacks();
-                            if (IconManager.GetIconPackByName(jsonObject["name"].ToString()) != null)
+                            /*IconManagerLegacy.LoadIconPacks();
+                            if (IconManagerLegacy.GetIconPackByName(jsonObject["name"].ToString()) != null)
                             {
-                                IconPack iconPack = IconManager.GetIconPackByName(jsonObject["name"].ToString());
+                                IconPackLegacy iconPack = IconManagerLegacy.GetIconPackByName(jsonObject["name"].ToString());
                                 iconPack.PackageManagerManaged = true;
-                                IconManager.SaveIconPack(iconPack);
-                            }
+                                IconManagerLegacy.SaveIconPack(iconPack);
+                            }*/
 
                         }
                         catch (Exception ex)

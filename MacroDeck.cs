@@ -299,6 +299,14 @@ namespace SuchByte.MacroDeck
                 }
             }
 
+            if (!Directory.Exists(IconPackDirectoryPath))
+            {
+                Directory.CreateDirectory(IconPackDirectoryPath);
+            } else
+            {
+                IconManagerLegacy.ConvertOldIconPacks();
+            }
+
             BackupManager.CheckRestoreDirectory();
 
 
@@ -412,8 +420,7 @@ namespace SuchByte.MacroDeck
             PluginManager.Load();
             PluginManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
             PluginManager.EnablePlugins();
-            IconManager.LoadIconPacks();
-            IconManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
+            IconManager.Initialize();
             ProfileManager.Load();
 
             MacroDeckServer.Start(_configuration.Host_Address, port == -1 ? _configuration.Host_Port : port);

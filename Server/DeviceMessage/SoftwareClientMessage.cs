@@ -17,7 +17,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
         public void Connected(MacroDeckClient macroDeckClient)
         {
             SendConfiguration(macroDeckClient);
-            MacroDeckServer.SendAllIcons(macroDeckClient);
+            SendAllButtons(macroDeckClient);
             if (macroDeckClient.DeviceType != DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).DeviceType)
             {
                 DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).DeviceType = macroDeckClient.DeviceType;
@@ -28,45 +28,46 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
 
         public void SendAllButtons(MacroDeckClient macroDeckClient)
         {
-            if (macroDeckClient.Folder == null || macroDeckClient.Folder.ActionButtons == null) return;
-            var buttons = new ConcurrentBag<JObject>();
+            if (macroDeckClient == null || macroDeckClient.Folder == null || macroDeckClient.Folder.ActionButtons == null) return;
+            var buttons = new List<JObject>();
 
             foreach (ActionButton.ActionButton actionButton in macroDeckClient.Folder.ActionButtons)
             {
-                string Icon = "";
+                string IconBase64 = "";
                 string LabelBase64 = "";
-                switch (actionButton.State)
+                if (!actionButton.State)
                 {
-                    case false:
-                        if (actionButton.IconOff != null)
+                    if (!string.IsNullOrWhiteSpace(actionButton.IconOff))
+                    {
+                        var icon = IconManager.GetIconByString(actionButton.IconOff);
+                        if (icon != null)
                         {
-                            if (actionButton.IconOff.Length > 0)
-                            {
-                                Icon = actionButton.IconOff;
-                            }
+                            IconBase64 = icon.IconBase64;
                         }
-                        if (!string.IsNullOrWhiteSpace(actionButton.LabelOff.LabelText))
+                    }
+                    if (!string.IsNullOrWhiteSpace(actionButton.LabelOff.LabelText))
+                    {
+                        LabelBase64 = actionButton.LabelOff.LabelBase64 ?? "";
+                    }
+                } else
+                {
+                    if (!string.IsNullOrWhiteSpace(actionButton.IconOn))
+                    {
+                        var icon = IconManager.GetIconByString(actionButton.IconOn);
+                        if (icon != null)
                         {
-                            LabelBase64 = actionButton.LabelOff.LabelBase64;
+                            IconBase64 = icon.IconBase64;
                         }
-                        break;
-                    case true:
-                        if (actionButton.IconOn != null)
-                        {
-                            if (actionButton.IconOn.Length > 0)
-                            {
-                                Icon = actionButton.IconOn;
-                            }
-                        }
-                        if (!string.IsNullOrWhiteSpace(actionButton.LabelOn.LabelText))
-                        {
-                            LabelBase64 = actionButton.LabelOn.LabelBase64;
-                        }
-                        break;
+                    }
+                    if (!string.IsNullOrWhiteSpace(actionButton.LabelOn.LabelText))
+                    {
+                        LabelBase64 = actionButton.LabelOn.LabelBase64 ?? "";
+                    }
                 }
+
                 JObject actionButtonObject = JObject.FromObject(new
                 {
-                    Icon,
+                    IconBase64,
                     actionButton.Position_X,
                     actionButton.Position_Y,
                     LabelBase64,
@@ -116,40 +117,42 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
         public void UpdateButton(MacroDeckClient macroDeckClient, ActionButton.ActionButton actionButton)
         {
             if (macroDeckClient.Folder == null || !macroDeckClient.Folder.ActionButtons.Contains(actionButton)) return;
-            string Icon = "";
+            string IconBase64 = "";
             string LabelBase64 = "";
-            switch (actionButton.State)
+            if (!actionButton.State)
             {
-                case false:
-                    if (actionButton.IconOff != null)
+                if (!string.IsNullOrWhiteSpace(actionButton.IconOff))
+                {
+                    var icon = IconManager.GetIconByString(actionButton.IconOff);
+                    if (icon != null)
                     {
-                        if (actionButton.IconOff.Length > 0)
-                        {
-                            Icon = actionButton.IconOff;
-                        }
+                        IconBase64 = icon.IconBase64;
                     }
-                    if (!string.IsNullOrWhiteSpace(actionButton.LabelOff.LabelText))
-                    {
-                        LabelBase64 = actionButton.LabelOff.LabelBase64;
-                    }
-                    break;
-                case true:
-                    if (actionButton.IconOn != null)
-                    {
-                        if (actionButton.IconOn.Length > 0)
-                        {
-                            Icon = actionButton.IconOn;
-                        }
-                    }
-                    if (!string.IsNullOrWhiteSpace(actionButton.LabelOn.LabelText))
-                    {
-                        LabelBase64 = actionButton.LabelOn.LabelBase64;
-                    }
-                    break;
+                }
+                if (!string.IsNullOrWhiteSpace(actionButton.LabelOff.LabelText))
+                {
+                    LabelBase64 = actionButton.LabelOff.LabelBase64 ?? "";
+                }
             }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(actionButton.IconOn))
+                {
+                    var icon = IconManager.GetIconByString(actionButton.IconOn);
+                    if (icon == null)
+                    {
+                        IconBase64 = icon.IconBase64;
+                    }
+                }
+                if (!string.IsNullOrWhiteSpace(actionButton.LabelOn.LabelText))
+                {
+                    LabelBase64 = actionButton.LabelOn.LabelBase64 ?? "";
+                }
+            }
+
             JObject actionButtonObject = JObject.FromObject(new
             {
-                Icon,
+                IconBase64,
                 actionButton.Position_X,
                 actionButton.Position_Y,
                 LabelBase64,

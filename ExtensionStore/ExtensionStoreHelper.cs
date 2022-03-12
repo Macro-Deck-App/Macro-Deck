@@ -40,11 +40,6 @@ namespace SuchByte.MacroDeck.ExtensionStore
             extensionStoreDownloader.Show();
         }
 
-        public static string GetPackageId(IconPack iconPack)
-        {
-            return $"{iconPack.Author.Replace(" ", "")}.{iconPack.Name.Replace(" ", "")}";
-        }
-
         public static string GetPackageId(MacroDeckPlugin macroDeckPlugin)
         {
             return new DirectoryInfo(PluginManager.PluginDirectories[macroDeckPlugin]).Name;
@@ -64,7 +59,7 @@ namespace SuchByte.MacroDeck.ExtensionStore
                 {
                     PluginManager.SearchUpdate(plugin);
                 }
-                foreach (IconPack iconPack in IconManager.IconPacks.FindAll(iP => iP.PackageManagerManaged && !iP.Hidden))
+                foreach (IconPack iconPack in IconManager.IconPacks.FindAll(iP => iP.ExtensionStoreManaged && !iP.Hidden))
                 {
                     IconManager.SearchUpdate(iconPack);
                 }
@@ -83,9 +78,9 @@ namespace SuchByte.MacroDeck.ExtensionStore
             get
             {
                 string installedPlugins = "";
-                foreach (var iconPack in IconManager.IconPacks.FindAll(x => x.PackageManagerManaged))
+                foreach (var iconPack in IconManager.IconPacks.FindAll(x => x.ExtensionStoreManaged))
                 {
-                    installedPlugins += $"{GetPackageId(iconPack).ToLower()}%20";
+                    installedPlugins += $"{iconPack.PackageId.ToLower()}%20";
                 }
 
                 return installedPlugins;

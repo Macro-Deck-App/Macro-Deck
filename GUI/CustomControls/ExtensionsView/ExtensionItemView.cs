@@ -27,7 +27,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             InitializeComponent();
 
             this.lblExtensionType.Text = macroDeckExtension.ExtensionTypeDisplayName;
-            this.btnConfigure.Visible = macroDeckExtension.Configurable;
+            this.btnConfigure.Visible = macroDeckExtension.Configurable || macroDeckExtension.GetType() == typeof(IconPackExtension);
 
             this.btnUpdate.Visible = updateAvailable;
             this.btnUpdate.BackColor = Color.FromArgb(20, 153, 0);
@@ -94,6 +94,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                     if (!macroDeckPlugin.CanConfigure) return;
                     macroDeckPlugin.OpenConfigurator();
                     break;
+                case ExtensionType.IconPack:
+                    IconPack iconPack = macroDeckExtension.ExtensionObject as IconPack;
+                    using (var iconSelector = new IconSelector(iconPack))
+                    {
+                        iconSelector.ShowDialog();
+                    }
+                    break;
             }
         }
 
@@ -150,7 +157,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                     break;
                 case ExtensionType.IconPack:
                     IconPack iconPack = macroDeckExtension.ExtensionObject as IconPack;
-                    ExtensionStoreHelper.InstallPluginById(ExtensionStoreHelper.GetPackageId(iconPack));
+                    ExtensionStoreHelper.InstallPluginById(iconPack.PackageId);
                     break;
             }
         }

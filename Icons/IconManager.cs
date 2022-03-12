@@ -1,151 +1,106 @@
-﻿using SuchByte.MacroDeck.JSON;
-using SuchByte.MacroDeck.Properties;
-using Newtonsoft.Json;
-using SQLite;
-using SQLiteNetExtensions.Extensions;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Model;
+using SuchByte.MacroDeck.Server;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Text;
-using SuchByte.MacroDeck.Server;
-using System.Net;
-using Newtonsoft.Json.Linq;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.ExtensionStore;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace SuchByte.MacroDeck.Icons
 {
-    public static class IconManager
+    public class IconManager
     {
         public static List<IconPack> IconPacks = new List<IconPack>();
         public static List<IconPack> IconPacksUpdateAvailable = new List<IconPack>();
 
-        public static event EventHandler OnUpdateCheckFinished;
+        public static Action<object, EventArgs> OnUpdateCheckFinished { get; internal set; }
+        public static Action<object, EventArgs> IconPacksLoaded { get; internal set; }
 
-        public static event EventHandler IconPacksLoaded;
-
-        public static void LoadIconPacks()
+        public static void Initialize()
         {
-            MacroDeckLogger.Info("Loading icon packs...");
-            IconPacks.Clear();
-            IconPacksUpdateAvailable.Clear();
-
             if (!Directory.Exists(MacroDeck.IconPackDirectoryPath))
             {
                 Directory.CreateDirectory(MacroDeck.IconPackDirectoryPath);
             }
-            else
-            {
-                // Change the file extension from icon packs of older versions
-                foreach (var databasePath in Directory.GetFiles(MacroDeck.IconPackDirectoryPath, "*.db"))
-                {
-                    try
-                    {
-                        var newFileName = Path.Combine(MacroDeck.IconPackDirectoryPath, Path.GetFileNameWithoutExtension(databasePath) + ".iconpack");
+            LoadIconPacks();
+        }
 
-                        // Delete the existing file if exists
-                        if (File.Exists(newFileName))
-                        {
-                            File.Delete(newFileName); 
-                        }
-                        File.Move(databasePath, newFileName);
-                    } catch {}
-                }
+        private static void LoadIconPacks()
+        {
+            IconPacks.Clear();
+            MacroDeckLogger.Info(typeof(IconManager), "Loading icon packs...");
+            foreach (var iconPackDir in Directory.GetDirectories(MacroDeck.IconPackDirectoryPath))
+            {
+                LoadIconPack(iconPackDir);
             }
 
-            foreach (var databasePath in Directory.GetFiles(MacroDeck.IconPackDirectoryPath, "*.iconpack"))
+            MacroDeckLogger.Info(typeof(IconManager), $"Loaded {IconPacks.Count} icon packs");
+        }
+
+        public static bool LoadIconPack(string path)
+        {
+            var extensionManifestFilePath = Path.Combine(path, "ExtensionManifest.json");
+            var extensionIconPath = Path.Combine(path, "ExtensionIcon.png");
+            if (!File.Exists(extensionManifestFilePath)) return false;
+            var extensionManifest = ExtensionManifestModel.FromManifestFile(extensionManifestFilePath);
+            if (extensionManifest == null) return false;
+
+
+            IconPack iconPack = new IconPack()
+            {
+                Name = extensionManifest.Name,
+                Author = extensionManifest.Author,
+                Version = extensionManifest.Version,
+                PackageId = extensionManifest.PackageId,
+                ExtensionStoreManaged = File.Exists(Path.Combine(path, ".extensionstore")),
+                Hidden = File.Exists(Path.Combine(path, ".hidden")),
+                Icons = new List<Icon>(),
+            };
+
+            IconPacks.Add(iconPack);
+
+            foreach (var imageFile in Directory.GetFiles(path).Where(s =>
+                                                                                    s.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+                                                                                    s.EndsWith(".gif", StringComparison.OrdinalIgnoreCase) ||
+                                                                                    s.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)))
             {
                 try
                 {
-                    var db = new SQLiteConnection(databasePath);
-                    var query = db.Table<IconPackJson>();
-
-                    string jsonString = query.First().JsonString;
-                    IconPack iconPack = JsonConvert.DeserializeObject<IconPack>(jsonString, new JsonSerializerSettings
+                    Icon icon = new Icon()
                     {
-                        TypeNameHandling = TypeNameHandling.Auto,
-                        NullValueHandling = NullValueHandling.Ignore,
-                        Error = (sender, args) => { args.ErrorContext.Handled = true; }
-                    });
-
-                    IconPacks.Add(iconPack);
-                    if (iconPack.PackageManagerManaged && !iconPack.Hidden)
-                    {
-                        Task.Run(() =>
-                            SearchUpdate(iconPack)
-                        );
-                    }
-
-                    db.Close();
-                } catch (Exception ex) 
+                        FilePath = imageFile,
+                        IconId = Path.GetFileNameWithoutExtension(imageFile),
+                    };
+                    if (icon.IconId.Equals("ExtensionIcon")) continue;
+                    iconPack.Icons.Add(icon);
+                }
+                catch (Exception ex)
                 {
-                    MacroDeckLogger.Error(String.Format("Failed to load icon pack {0}: ", databasePath) + ex.Message + Environment.NewLine + ex.StackTrace);
+                    MacroDeckLogger.Warning(typeof(IconManager), $"Failed to load icon: {ex.Message}");
+                    continue;
                 }
             }
 
-            if (IconPacks.FindAll(x => x.PackageManagerManaged == false && x.Hidden == false).Count == 0)
-            {
-                MacroDeckLogger.Info("No icon packs found. Creating a new one");
-                IconPack newIconPack = new IconPack
-                {
-                    Author = Environment.UserName,
-                    Name = "New icon pack",
-                    Version = "1.0.0",
-                    Icons = new List<Icon>()
-                };
-                IconPacks.Add(newIconPack);
-                AddIconImage(newIconPack, Resources.Icon);
-            }
-
-            MacroDeckLogger.Info(String.Format("Loaded {0} icon pack(s)", IconPacks.Count));
-
-            if (IconPacksLoaded != null)
-            {
-                IconPacksLoaded(IconPacks, EventArgs.Empty);
-            }
+            iconPack.IconPackIcon = Utils.IconPackPreview.GeneratePreviewImage(iconPack);
+            return true;
         }
 
-        [Obsolete]
-        public static IconPack AddFromFile(string path)
-        {
-            IconPack iconPack = null;
-            var db = new SQLiteConnection(path);
-            var query = db.Table<IconPackJson>();
-
-            foreach (var iconPackJson in query)
-            {
-                string jsonString = iconPackJson.JsonString;
-                iconPack = JsonConvert.DeserializeObject<IconPack>(jsonString, new JsonSerializerSettings
-                {
-                    TypeNameHandling = TypeNameHandling.Auto,
-                    NullValueHandling = NullValueHandling.Ignore,
-                    Error = (sender, args) => { args.ErrorContext.Handled = true; }
-                });
-                IconPacks.Add(iconPack);
-            }
-
-            db.Close();
-
-            return iconPack;
-        }
-
-        public static void SaveIconPacks()
-        {   
-            foreach (IconPack iconPack in IconPacks)
-            {
-                SaveIconPack(iconPack);
-            }
-        }
 
         public static void ScanUpdatesAsync()
         {
             IconPacksUpdateAvailable.Clear();
             Task.Run(() =>
             {
-                foreach (IconPack iconPack in IconPacks.FindAll(iP => iP.PackageManagerManaged && !iP.Hidden))
+                foreach (IconPack iconPack in IconPacks.FindAll(iP => iP.ExtensionStoreManaged && !iP.Hidden))
                 {
                     SearchUpdate(iconPack);
                 }
@@ -162,7 +117,7 @@ namespace SuchByte.MacroDeck.Icons
             {
                 using (WebClient wc = new WebClient())
                 {
-                    var jsonString = wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=check-update&package-id={ExtensionStoreHelper.GetPackageId(iconPack)}&installed-version={iconPack.Version}&target-api={MacroDeck.PluginApiVersion}");
+                    var jsonString = wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=check-update&package-id={iconPack.PackageId}&installed-version={iconPack.Version}&target-api={MacroDeck.PluginApiVersion}");
                     JObject jsonObject = JObject.Parse(jsonString);
                     bool update = (bool)jsonObject["update-available"];
                     if (update)
@@ -178,122 +133,58 @@ namespace SuchByte.MacroDeck.Icons
             catch { }
         }
 
-
-
-        public static void SaveIconPack(IconPack iconPack, string directory = null)
-        {
-            SQLiteConnection db;
-            if (directory == null)
-            {
-               db = new SQLiteConnection(Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.Name + ".iconpack"));
-            } else
-            {
-                // Export
-                db = new SQLiteConnection(Path.Combine(directory, iconPack.Name.ToLower().Replace(' ', '-') + "-" + iconPack.Version + ".iconpack"));
-            }
-            db.CreateTable<IconPackJson>();
-            db.DeleteAll<IconPackJson>();
-
-            string jsonString = JsonConvert.SerializeObject(iconPack, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-                NullValueHandling = NullValueHandling.Ignore,
-                Error = (sender, args) => { args.ErrorContext.Handled = true; }
-            });
-
-            IconPackJson iconPackJson = new IconPackJson
-            {
-                JsonString = jsonString
-            };
-
-            db.InsertOrReplace(iconPackJson);
-            db.Close();
-        }
-
-
-        public static void CreateIconPack(string name, string author, string version)
-        {
-            IconPack iconPack = new IconPack
-            {
-                Name = name.Replace(".", "")
-            };
-            ;
-            iconPack.Author = author;
-            iconPack.Version = version;
-            iconPack.Icons = new List<Icon>();
-            IconPacks.Add(iconPack);
-            SaveIconPacks();
-            MacroDeckServer.SendAllIcons();
-        }
-
-        public static void EditIconPack(IconPack iconPack, string author, string version)
-        {
-            IconPacks.Remove(iconPack);
-            iconPack.Author = author;
-            iconPack.Version = version;
-            IconPacks.Add(iconPack);
-            SaveIconPacks();
-            MacroDeckServer.SendAllIcons();
-        }
-
-        public static void DeleteIconPack(IconPack iconPack)
-        {
-            MacroDeckLogger.Info("Deleting icon pack " + iconPack.Name);
-            IconPacks.Remove(iconPack);
-            
-            try
-            {
-                File.Delete(Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.Name + ".iconpack"));
-            }
-            catch (Exception ex)
-            {
-                MacroDeckLogger.Error(String.Format("Failed to delete icon pack {0}: ", iconPack.Name) + ex.Message + Environment.NewLine + ex.StackTrace);
-            }
-            if (IconPacks.FindAll(x => x.PackageManagerManaged == false && x.Hidden == false).Count == 0)
-            {
-                MacroDeckLogger.Info("No icon packs found. Creating a new one");
-                IconPack newIconPack = new IconPack
-                {
-                    Author = Environment.UserName,
-                    Name = "New icon pack",
-                    Version = "1.0.0",
-                    Icons = new List<Icon>()
-                };
-                IconPacks.Add(newIconPack);
-                AddIconImage(newIconPack, Resources.Icon);
-            }
-            MacroDeckLogger.Info("Icon pack successfully deleted");
-            MacroDeckServer.SendAllIcons();
-        }
-
         public static IconPack GetIconPackByName(string name)
         {
-            return IconPacks.Find(iconPack => iconPack.Name.Equals(name));
+            return IconPacks.Find(iconPack => iconPack.Name == name);
         }
 
-        public static Icon GetIcon(IconPack iconPack, long iconId)
+        public static Icon GetIcon(IconPack iconPack, string iconId)
         {
             if (iconPack == null) return null;
-            return iconPack.Icons.Find(icon => icon.IconId.Equals(iconId));
+            return iconPack.Icons.Find(icon => icon.IconId == iconId);
         }
 
-        public static Icon AddIconImage(IconPack iconPack, Image image, bool sendIconsToClients = true)
+        public static Icon GetIconByString(string s)
         {
+            IconPack iconPack = GetIconPackByName(s.Substring(0, s.IndexOf(".")));
+            if (iconPack == null) return null;
+            Icon icon = GetIcon(iconPack, s.Substring(s.IndexOf(".") + 1));
+            return icon;
+        }
+
+        public static Icon AddIconImage(IconPack iconPack, Image image, string iconId = "")
+        {
+            if (iconPack == null || image == null || iconPack.Icons.Find(x => x.IconId == iconId) != null) return null;
             try
             {
-                var base64 = Utils.Base64.GetBase64FromImage(image);
-                Icon icon = new Icon
+                if (string.IsNullOrWhiteSpace(iconId))
                 {
-                    IconBase64 = base64,
-                    IconId = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
-                    IconPack = iconPack.Name
-                };
-                iconPack.Icons.Add(icon);
-                SaveIconPack(iconPack);
-                if (sendIconsToClients)
-                {
-                    MacroDeckServer.SendAllIcons();
+                    iconId = Guid.NewGuid().ToString();
                 }
+
+                var format = image.RawFormat;
+                var filePath = "";
+                if (format.ToString().Equals("Gif", StringComparison.OrdinalIgnoreCase))
+                {
+                    filePath = Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId, $"{iconId}.gif");
+                }
+                else
+                {
+                    filePath = Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId, $"{iconId}.png");
+                    image = new Bitmap(image); // Generating a new bitmap if the file format is not a gif because otherwise it causes a GDI+ error in some cases
+                    format = ImageFormat.Png;
+                }
+
+                image.Save(filePath, format);
+
+                Icon icon = new Icon()
+                {
+                    FilePath = filePath,
+                    IconId = iconId,
+                };
+
+                iconPack.Icons.Add(icon);
+                
                 return icon;
             }
             catch (Exception ex)
@@ -302,20 +193,154 @@ namespace SuchByte.MacroDeck.Icons
             }
             return null;
         }
+       
+        public static void ExportIconPack(IconPack iconPack, string destination)
+        {
+            string iconPackDir = Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId);
+            try
+            {
+                if (iconPack.IconPackIcon != null)
+                {
+                    iconPack.IconPackIcon.Save(Path.Combine(iconPackDir, "ExtensionIcon.png"));
+                }
+                using (var archive = ZipFile.Open(Path.Combine(MacroDeck.BackupsDirectoryPath, destination, $"{iconPack.Name}.macroDeckIconPack"), ZipArchiveMode.Create))
+                {
+                    if (!Directory.Exists(iconPackDir)) return;
+                    foreach (FileInfo iconPackFile in new DirectoryInfo(iconPackDir).GetFiles())
+                    {
+                        archive.CreateEntryFromFile(Path.Combine(iconPackDir, iconPackFile.Name), iconPackFile.Name);
+                    }
+                }
+            } catch (Exception ex)
+            {
+                MacroDeckLogger.Error(typeof(IconManager), $"Error while exporting icon pack: {ex.Message}");
+            }
+            
+        }
 
+        public static void DeleteIconPack(IconPack iconPack)
+        {
+            if (iconPack == null) return;
+            if (IconPacks.Contains(iconPack))
+            {
+                IconPacks.Remove(iconPack);
+            }
+            try
+            {
+                Directory.Delete(Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId), true);
+            } catch (Exception ex) 
+            {
+                MacroDeckLogger.Warning(typeof(IconManager), $"Unable to delete icon pack: {ex.Message}");
+            }
+        }
 
         public static void DeleteIcon(IconPack iconPack, Icon icon)
         {
-            if (!iconPack.Icons.Contains(icon)) return;
-            IconPacks[IconPacks.IndexOf(iconPack)].Icons.Remove(icon);
-
-            MacroDeckLogger.Info("Deleted icon from " + iconPack.Name);
-
-            SaveIconPack(iconPack);
-            MacroDeckServer.SendAllIcons();
+            if (iconPack == null || icon == null) return;
+            if (iconPack.Icons.Contains(icon))
+            {
+                iconPack.Icons.Remove(icon);
+            }
+            try
+            {
+                File.Delete(icon.FilePath);
+            } catch { }
         }
 
+        public static void SaveIconPack(IconPack iconPack)
+        {
+            ExtensionManifestModel extensionManifestModel = new ExtensionManifestModel()
+            {
+                Type = ExtensionStore.ExtensionType.IconPack,
+                Name = iconPack.Name,
+                Author = iconPack.Author,
+                PackageId = iconPack.PackageId,
+                TargetPluginAPIVersion = MacroDeck.PluginApiVersion,
+                Version = iconPack.Version,
+            };
 
+            string iconPackPath = Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId);
 
+            if (!Directory.Exists(iconPackPath))
+            {
+                Directory.CreateDirectory(iconPackPath);
+            }
+
+            JsonSerializer serializer = new JsonSerializer
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented,
+            };
+
+            try
+            {
+                using StreamWriter sw = new StreamWriter(Path.Combine(iconPackPath, "ExtensionManifest.json"));
+                using JsonWriter writer = new JsonTextWriter(sw);
+                serializer.Serialize(writer, extensionManifestModel);
+
+                MacroDeckLogger.Info(typeof(IconManager), "ExtensionManifest saved");
+            }
+            catch (Exception ex)
+            {
+                MacroDeckLogger.Error(typeof(IconManager), $"Failed to save ExtensionManifest: {ex.Message}");
+            }
+        }
+
+        public static void CreateIconPack(string iconPackName, string author, string version)
+        {
+            var iconPack = new IconPack()
+            {
+                Name = iconPackName,
+                Author = author,
+                Version = version,
+                PackageId = $"{author.Replace(" ", "").Replace(".", "")}.{iconPackName.Replace(" ", "").Replace(".", "")}",
+                Icons = new List<Icon>(),
+            };
+
+            SaveIconPack(iconPack);
+
+            IconPacks.Add(iconPack);
+        }
+
+        public static IconPack InstallIconPackZip(string location)
+        {
+            try
+            {
+                ExtensionManifestModel extensionManifestModel = ExtensionManifestModel.FromZipFilePath(location);
+                if (extensionManifestModel == null)
+                {
+                    MacroDeckLogger.Error(typeof(IconManager), $"{location} does not contain a manifest file!");
+                    return null;
+                }
+                if (extensionManifestModel.Type != ExtensionStore.ExtensionType.IconPack)
+                {
+                    MacroDeckLogger.Error(typeof(IconManager), $"{extensionManifestModel.PackageId} is not a icon pack!");
+                    return null;
+                }
+                string destinationPath = Path.Combine(MacroDeck.IconPackDirectoryPath, extensionManifestModel.PackageId);
+                if (!Directory.Exists(destinationPath))
+                {
+                    Directory.CreateDirectory(destinationPath);
+                } else
+                {
+                    Directory.Delete(destinationPath);
+                }
+
+                ZipFile.ExtractToDirectory(location, destinationPath);
+                if (LoadIconPack(destinationPath))
+                {
+                    MacroDeckLogger.Info(typeof(IconManager), $"Successfully installed {extensionManifestModel.PackageId}");
+                    return GetIconPackByName(extensionManifestModel.Name);
+                } else
+                {
+                    MacroDeckLogger.Error(typeof(IconManager), $"{extensionManifestModel.PackageId} is maybe corruped");
+                }
+                return null;
+            } catch (Exception ex)
+            {
+                MacroDeckLogger.Error(typeof(IconManager), $"Error while installing icon pack from zip: {ex.Message}");
+            }
+            return null;
+        }
     }
 }

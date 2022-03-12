@@ -199,6 +199,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
             if (button == null || actionButton == null) return;
 
+
             switch (actionButton.State)
             {
                 case false:
@@ -208,11 +209,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                         button.ForegroundImage = labelImage;
                     }
 
-                    if (actionButton.IconOff != null && actionButton.IconOff.Split(".").Length > 1)
+                    if (!string.IsNullOrWhiteSpace(actionButton.IconOff))
                     {
-                        Icons.IconPack iconPack = IconManager.GetIconPackByName(actionButton.IconOff.Split(".")[0]);
-                        Icons.Icon icon = IconManager.GetIcon(iconPack, long.Parse(actionButton.IconOff.Split(".")[1]));
-                        if (iconPack != null && icon != null)
+                        var icon = IconManager.GetIconByString(actionButton.IconOff);
+                        if (icon != null)
                         {
                             button.BackgroundImage = icon.IconImage;
                         }
@@ -225,11 +225,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                         button.ForegroundImage = labelImage;
                     }
 
-                    if (actionButton.IconOn != null && actionButton.IconOn.Split(".").Length > 1)
+                    if (!string.IsNullOrWhiteSpace(actionButton.IconOn))
                     {
-                        Icons.IconPack iconPack = IconManager.GetIconPackByName(actionButton.IconOn.Split(".")[0]);
-                        Icons.Icon icon = IconManager.GetIcon(iconPack, long.Parse(actionButton.IconOn.Split(".")[1]));
-                        if (iconPack != null && icon != null)
+                        var icon = IconManager.GetIconByString(actionButton.IconOn);
+                        if (icon != null)
                         {
                             button.BackgroundImage = icon.IconImage;
                         }
@@ -272,6 +271,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             if (button == null) return;
             if (button.BackgroundImage != null)
             {
+                button.BackgroundImage.Dispose();
                 button.BackgroundImage = null;
             }
             if (button.ForegroundImage != null)
