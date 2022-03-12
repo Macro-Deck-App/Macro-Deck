@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Plugins;
@@ -85,7 +86,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                 AppendText($"Download of {extensionStoreModel.Name} {extensionStoreModel.Version} complete", Color.White);
                 if (e.Error != null)
                 {
-                    MacroDeckLogger.Error("Plugin download failed: " + e.Error.Message);
+                    MacroDeckLogger.Error("Package download failed: " + e.Error.Message);
                 }
 
                 if (!File.Exists(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename)))
@@ -137,37 +138,46 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                     return;
                 }
 
-                if (extensionManifestModel.Type == ExtensionType.Plugin)
+                switch (extensionManifestModel.Type)
                 {
-                    try
-                    {
-                        PluginManager.InstallPluginFromZip(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename));
-                    }
-                    catch (Exception ex)
-                    {
-                        MacroDeckLogger.Error(typeof(ExtensionStoreDownloader), $"Error while installing {extensionStoreModel.Name}: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                        AppendText($"Start installation of {extensionStoreModel.Name} version {extensionStoreModel.Version} failed. Check logs for more information", Color.Red);
-                        return;
-                    }
-
-                    try
-                    {
-                        if (Directory.Exists(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.PackageId)))
+                    case ExtensionType.Plugin:
+                        try
                         {
-                            Directory.Delete(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.PackageId), true);
+                            PluginManager.InstallPluginFromZip(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename));
                         }
-                        if (File.Exists(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename)))
+                        catch (Exception ex)
                         {
-                            File.Delete(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename));
+                            MacroDeckLogger.Error(typeof(ExtensionStoreDownloader), $"Error while installing {extensionStoreModel.Name}: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                            AppendText($"Start installation of {extensionStoreModel.Name} version {extensionStoreModel.Version} failed. Check logs for more information", Color.Red);
+                            return;
                         }
-                    }
-                    catch { }
-                } else if (extensionManifestModel.Type == ExtensionType.IconPack)
-                {
-                    // TODO
+                        break;
+                    case ExtensionType.IconPack:
+                        try
+                        {
+                            IconManager.InstallIconPackZip(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename));
+                        }
+                        catch (Exception ex)
+                        {
+                            MacroDeckLogger.Error(typeof(ExtensionStoreDownloader), $"Error while installing {extensionStoreModel.Name}: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                            AppendText($"Start installation of {extensionStoreModel.Name} version {extensionStoreModel.Version} failed. Check logs for more information", Color.Red);
+                            return;
+                        }
+                        break;
                 }
-                
 
+                try
+                {
+                    if (Directory.Exists(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.PackageId)))
+                    {
+                        Directory.Delete(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.PackageId), true);
+                    }
+                    if (File.Exists(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename)))
+                    {
+                        File.Delete(Path.Combine(MacroDeck.TempDirectoryPath, extensionStoreModel.Filename));
+                    }
+                }
+                catch { }
 
                 AppendText($"Installation of {extensionStoreModel.Name} version {extensionStoreModel.Version} completed", Color.Lime);
                 MacroDeckLogger.Info(typeof(ExtensionStoreDownloader), $"Installation of {extensionStoreModel.Name} version {extensionStoreModel.Version} completed");

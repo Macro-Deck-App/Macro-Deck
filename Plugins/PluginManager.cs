@@ -363,7 +363,7 @@ namespace SuchByte.MacroDeck.Plugins
             var extractedDirectory = Path.Combine(MacroDeck.TempDirectoryPath, extensionManifest.PackageId);
             ZipFile.ExtractToDirectory(Path.Combine(MacroDeck.TempDirectoryPath, zipFilePath), extractedDirectory, true);
 
-            PluginManager.InstallPlugin(extractedDirectory, extensionManifest.PackageId);
+            InstallPlugin(extractedDirectory, extensionManifest.PackageId);
         }
 
         internal static void InstallPlugin(string directory, string packageName)
