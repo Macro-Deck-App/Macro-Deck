@@ -1,5 +1,6 @@
 ﻿using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
         public ExtensionsView()
         {
             InitializeComponent();
-            this.Name = "Extensions";
+            this.Dock = DockStyle.Fill;
+            this.Name = LanguageManager.Strings.Extensions;
+            this.radioInstalled.Text = LanguageManager.Strings.Installed;
+            this.radioOnline.Text = LanguageManager.Strings.Online;
         }
 
 
@@ -30,10 +34,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
             if (this.extensionStoreView == null || this.extensionStoreView.IsDisposed)
             {
                 this.extensionStoreView = new ExtensionStoreView();
-                this.extensionStoreView.RequestClose += ExtensionStoreView_RequestClose;
             }
-            this.Controls.Clear();
-            this.Controls.Add(this.extensionStoreView);
+            this.content.Controls.Clear();
+            this.content.Controls.Add(this.extensionStoreView);
         }
 
         private void SetExtensionZipInstallerView()
@@ -45,8 +48,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
             }
             this.extensionZipInstallerView.Height = this.ClientRectangle.Height;
             this.extensionZipInstallerView.Width = this.ClientRectangle.Width;
-            this.Controls.Clear();
-            this.Controls.Add(this.extensionZipInstallerView);
+            this.content.Controls.Clear();
+            this.content.Controls.Add(this.extensionZipInstallerView);
         }
 
         private void ExtensionStoreView_RequestClose(object sender, EventArgs e)
@@ -64,11 +67,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
             }
             if (this.extensionStoreView != null)
             {
-                this.extensionStoreView.RequestClose -= this.ExtensionStoreView_RequestClose;
                 this.extensionStoreView.Dispose();
             }
-            this.Controls.Clear();
-            this.Controls.Add(this.installedExtensionsView);
+            this.content.Controls.Clear();
+            this.content.Controls.Add(this.installedExtensionsView);
             this.installedExtensionsView.ListInstalledExtensions();
         }
 
@@ -85,6 +87,22 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
         private void ExtensionStoreView_Load(object sender, EventArgs e)
         {
             this.SetInstalledExtensionsView();
+        }
+
+        private void RadioInstalled_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.radioInstalled.Checked)
+            {
+                SetInstalledExtensionsView();
+            }
+        }
+
+        private void RadioOnline_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.radioOnline.Checked)
+            {
+                SetExtensionStoreView();
+            }
         }
     }
 }

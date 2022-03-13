@@ -19,11 +19,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
     {
         private readonly string extensionStoreUri = "https://macrodeck.org/extensionstore_plugins";
 
-        public event EventHandler RequestClose;
-
         public ExtensionStoreView()
         {
             InitializeComponent();
+            this.Dock = DockStyle.Fill;
+            this.DoubleBuffered = true;
 
             InitializeBrowser();
             this.webView.SourceChanged += WebView_SourceChanged;
@@ -116,14 +116,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             {
                 this.webView.Source = new Uri($"{ location }&installed_plugins={ ExtensionStoreHelper.InstalledPluginsAsString }");
                 return;
-            }
-        }
-
-        private void BtnClose_Click(object sender, EventArgs e)
-        {
-            if (RequestClose != null)
-            {
-                RequestClose(this, EventArgs.Empty);
             }
         }
     }

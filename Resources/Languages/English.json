@@ -286,5 +286,13 @@
   "LogSuccessfullyExportedToX": "Log successfully exported to {0}",
   "Help": "Help",
   "XWarningsXErrors": "{0} warning(s), {1} error(s)",
-  "TrimBlankLines": "Trim blank lines"
+  "TrimBlankLines": "Trim blank lines",
+  "Extensions": "Extensions",
+  "InstallFromFile": "Install from file",
+  "AllExtensionsUpToDate": "All extensions are up-to-date",
+  "UpdateAll": "Update all",
+  "UpdateAvailable": "Update available",
+  "PendingRestart": "Pending restart",
+  "Enabled": "Enabled",
+  "Disabled": "Disabled"
 }

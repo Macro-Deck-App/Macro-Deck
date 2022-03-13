@@ -23,6 +23,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
         public ExtensionZipInstallerView()
         {
             InitializeComponent();
+            this.Dock = DockStyle.Fill;
         }
 
         private void BtnSelectFile_Click(object sender, EventArgs e)

@@ -135,7 +135,7 @@ namespace SuchByte.MacroDeck.GUI
                 this._action = actionConfiguratorActionItem.PluginAction;
             }
 
-            this.selectedPluginIcon.BackgroundImage = actionConfiguratorActionItem.Plugin.Icon ?? Properties.Resources.Icon;
+            this.selectedPluginIcon.BackgroundImage = actionConfiguratorActionItem.Plugin.PluginIcon ?? Properties.Resources.Icon;
             this.lblSelectedActionName.Text = this._action.Name;
             this.labelDescription.Text = this._action.Description;
             foreach (Control control in this.configurationPanel.Controls)
