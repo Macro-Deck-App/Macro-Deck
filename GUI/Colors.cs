@@ -49,7 +49,7 @@ namespace SuchByte.MacroDeck.GUI
         {
             get
             {
-                return Color.FromArgb(0, 103, 225);
+                return Color.FromArgb(0, 103, 205);
             }
         }
 

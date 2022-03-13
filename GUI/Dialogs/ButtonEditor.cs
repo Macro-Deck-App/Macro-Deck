@@ -60,9 +60,6 @@ namespace SuchByte.MacroDeck.GUI
             this.lblButtonState.Text = LanguageManager.Strings.ButtonState;
             this.radioButtonOff.Text = LanguageManager.Strings.Off;
             this.radioButtonOn.Text = LanguageManager.Strings.On;
-            this.labelAlignTop.Text = LanguageManager.Strings.Top;
-            this.labelAlignCenter.Text = LanguageManager.Strings.Center;
-            this.labelAlignBottom.Text = LanguageManager.Strings.Bottom;
             this.lblCurrentStateLabel.Text = LanguageManager.Strings.CurrentState;
             this.lblStateBinding.Text = LanguageManager.Strings.StateBinding;
             this.radioOnPress.Text = LanguageManager.Strings.OnPress;
