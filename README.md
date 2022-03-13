@@ -27,7 +27,7 @@ https://macrodeck.org/download
 Learn how to create your own plugins in the wiki: https://github.com/SuchByte/Macro-Deck/wiki/Plugin-API
 
 # Helping with the translation
-All translation files are located under https://github.com/SuchByte/Macro-Deck/tree/master/Resources/Languages
+All translation files are located under https://github.com/SuchByte/Macro-Deck/tree/develop/Resources/Languages
 
 # Third party licenses
 Macro Deck uses some awesome 3rd party libraries:
