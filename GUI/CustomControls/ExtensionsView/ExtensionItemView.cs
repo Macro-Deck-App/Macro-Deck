@@ -26,6 +26,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             this.macroDeckExtension = macroDeckExtension;
             InitializeComponent();
 
+            this.btnUpdate.Text = LanguageManager.Strings.Update;
+            this.btnConfigure.Text = LanguageManager.Strings.Configure;
+            this.btnUninstall.Text = LanguageManager.Strings.Uninstall;
+
             this.lblExtensionType.Text = macroDeckExtension.ExtensionTypeDisplayName;
             this.btnConfigure.Visible = macroDeckExtension.Configurable || macroDeckExtension.GetType() == typeof(IconPackExtension);
 
@@ -40,22 +44,22 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                     MacroDeckPlugin macroDeckPlugin = macroDeckExtension.ExtensionObject as MacroDeckPlugin;
                     if (PluginManager.PluginsNotLoaded.ContainsValue(macroDeckPlugin) && !PluginManager.UpdatedPlugins.Contains(macroDeckPlugin) && !updateAvailable)
                     {
-                        this.lblStatus.Text = "Disabled";
+                        this.lblStatus.Text = LanguageManager.Strings.Disabled;
                         this.lblStatus.ForeColor = Color.White;
                         this.lblStatus.BackColor = Color.Firebrick;
                     } else if (PluginManager.UpdatedPlugins.Contains(macroDeckPlugin))
                     {
-                        this.lblStatus.Text = "Pending restart";
+                        this.lblStatus.Text = LanguageManager.Strings.PendingRestart;
                         this.lblStatus.ForeColor = Color.Yellow;
                         this.lblStatus.BackColor = Color.Transparent;
                     } else if (PluginManager.PluginsUpdateAvailable.Contains(macroDeckPlugin) && !PluginManager.UpdatedPlugins.Contains(macroDeckPlugin))
                     {
-                        this.lblStatus.Text = "Update available";
+                        this.lblStatus.Text = LanguageManager.Strings.UpdateAvailable;
                         this.lblStatus.ForeColor = Color.White;
                         this.lblStatus.BackColor = Color.Transparent;
                     } else
                     {
-                        this.lblStatus.Text = "Active";
+                        this.lblStatus.Text = LanguageManager.Strings.Enabled;
                         this.lblStatus.ForeColor = Color.FromArgb(0,192,0);
                         this.lblStatus.BackColor = Color.Transparent;
                     }
@@ -69,12 +73,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                     IconPack iconPack = macroDeckExtension.ExtensionObject as IconPack;
                     if (updateAvailable)
                     {
-                        this.lblStatus.Text = "Update available";
+                        this.lblStatus.Text = LanguageManager.Strings.UpdateAvailable;
                         this.lblStatus.ForeColor = Color.White;
                         this.lblStatus.BackColor = Color.Transparent;
                     } else
                     {
-                        this.lblStatus.Text = "Active";
+                        this.lblStatus.Text = LanguageManager.Strings.Enabled;
                         this.lblStatus.ForeColor = Color.FromArgb(0, 192, 0);
                         this.lblStatus.BackColor = Color.Transparent;
                     }
@@ -121,7 +125,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                                 ExtensionRemoved(this, EventArgs.Empty);
                             }
 
-                            if (msgBox.ShowDialog("", String.Format(LanguageManager.Strings.XSuccessfullyUninstalled, macroDeckPlugin.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                            if (msgBox.ShowDialog("", string.Format(LanguageManager.Strings.XSuccessfullyUninstalled, macroDeckPlugin.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
                             {
                                 MacroDeck.RestartMacroDeck("--show");
                             }

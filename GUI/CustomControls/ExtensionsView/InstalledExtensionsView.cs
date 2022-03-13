@@ -1,6 +1,7 @@
 ﻿using SuchByte.MacroDeck.Extension;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Plugins;
 using System;
@@ -21,6 +22,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
         public InstalledExtensionsView()
         {
             InitializeComponent();
+            this.Dock = DockStyle.Fill;
+            this.btnAddViaZip.Text = LanguageManager.Strings.InstallFromFile;
+            this.btnCheckUpdates.Text = LanguageManager.Strings.CheckForUpdatesNow;
         }
 
         private void BtnAddExtensions_Click(object sender, EventArgs e)
@@ -82,8 +86,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
 
         private void UpdateUpdateLabelInfo()
         {
-            this.lblUpdateState.Text = (PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0) ? $"{PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count + IconManager.IconPacksUpdateAvailable.Count} update(s) available" : "All extensions are up-to-date";
-            this.btnCheckUpdates.Text = (PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0) ? "Update all" : "Check for updates";
+            this.lblUpdateState.Text = (PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0) ? string.Format(LanguageManager.Strings.XUpdatesAvailable, PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count + IconManager.IconPacksUpdateAvailable.Count) : LanguageManager.Strings.AllExtensionsUpToDate;
+            this.btnCheckUpdates.Text = (PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0) ? LanguageManager.Strings.UpdateAll : LanguageManager.Strings.CheckForUpdatesNow;
             this.lblUpdateState.ForeColor = (PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0) ? Color.FromArgb(222, 170, 27) : Color.Silver;
         }
 

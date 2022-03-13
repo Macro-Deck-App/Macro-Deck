@@ -2,7 +2,7 @@
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
     <VersionMinor>9</VersionMinor>
-    <VersionPatch>0</VersionPatch>
+    <VersionPatch>1</VersionPatch>
     <VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
   </PropertyGroup>
   
@@ -106,6 +106,9 @@
     </Compile>
     <Compile Update="GUI\CustomControls\InitialSetup\InitialSetupPluginItem.cs">
       <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ButtonRadioButton.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Update="GUI\Dialogs\ButtonEditor.cs">
       <SubType>Form</SubType>
