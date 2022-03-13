@@ -8,21 +8,22 @@
 - Create a pull request of the forked repository
 
 ## Important!
-- Please use the ISO names for the file name and for the `<__Language__>` node in the file. For `<__LanguageCode__>` use the ISO-639-1 code. You can find more information here: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+- Please use the ISO names for the file name and for the `"__Language__"` key in the file. For `"__LanguageCode__"` use the ISO-639-1 code. You can find more information here: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 
-- The file name and the `<__Language__>` node must be the same.
+- The file name and the `"__Language__"` key must be the same.
 
 ## Example
 ```
-English.xml
+English.json
 ```
-```xml
-<?xml version="1.0"?>
-<Strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <__Language__>English</__Language__> <!-- The ISO name of the translation -->
-  <__LanguageCode__>en</__LanguageCode__> <!-- The ISO-639-1 code of the translation -->
-  .
-  .
-  .
-</Strings>
+```json
+{
+  "__Language__": "English",
+  "__LanguageCode__": "en",
+  "__Author__": "Macro Deck",
+  "NetworkAdapter": "Network adapter",
+  "IPAddress": "IP address",
+  "Port": "Port",
+  "Info": "Info"
+}
 ```
