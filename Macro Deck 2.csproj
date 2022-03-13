@@ -40,16 +40,16 @@
 
   <ItemGroup>
     <None Remove="Licenses.xml" />
-    <None Remove="Resources\Languages\English.xml" />
-    <None Remove="Resources\Languages\Finnish.xml" />
-    <None Remove="Resources\Languages\French.xml" />
-    <None Remove="Resources\Languages\German.xml" />
-    <None Remove="Resources\Languages\Italian.xml" />
-    <None Remove="Resources\Languages\Korean.xml" />
-    <None Remove="Resources\Languages\Portuguese.xml" />
-    <None Remove="Resources\Languages\Russian.xml" />
-    <None Remove="Resources\Languages\Spanish.xml" />
-    <None Remove="Resources\Languages\Turkish.xml" />
+    <None Remove="Resources\Languages\English.json" />
+    <None Remove="Resources\Languages\Finnish.json" />
+    <None Remove="Resources\Languages\French.json" />
+    <None Remove="Resources\Languages\German.json" />
+    <None Remove="Resources\Languages\Italian.json" />
+    <None Remove="Resources\Languages\Korean.json" />
+    <None Remove="Resources\Languages\Portuguese.json" />
+    <None Remove="Resources\Languages\Russian.json" />
+    <None Remove="Resources\Languages\Spanish.json" />
+    <None Remove="Resources\Languages\Turkish.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,18 +65,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Languages\Portuguese.xml" />
+    <EmbeddedResource Include="Resources\Languages\English.json" />
+    <EmbeddedResource Include="Resources\Languages\Finnish.json" />
+    <EmbeddedResource Include="Resources\Languages\French.json" />
+    <EmbeddedResource Include="Resources\Languages\German.json" />
+    <EmbeddedResource Include="Resources\Languages\Italian.json" />
+    <EmbeddedResource Include="Resources\Languages\Korean.json" />
+    <EmbeddedResource Include="Resources\Languages\Portuguese.json" />
+    <EmbeddedResource Include="Resources\Languages\Russian.json" />
+    <EmbeddedResource Include="Resources\Languages\Spanish.json" />
+    <EmbeddedResource Include="Resources\Languages\Turkish.json" />
     <EmbeddedResource Include="Resources\Licenses.xml">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Languages\English.xml" />
-    <EmbeddedResource Include="Resources\Languages\Finnish.xml" />
-    <EmbeddedResource Include="Resources\Languages\French.xml" />
-    <EmbeddedResource Include="Resources\Languages\German.xml" />
-    <EmbeddedResource Include="Resources\Languages\Italian.xml" />
-    <EmbeddedResource Include="Resources\Languages\Russian.xml" />
-    <EmbeddedResource Include="Resources\Languages\Spanish.xml" />
-    <EmbeddedResource Include="Resources\Languages\Turkish.xml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -94,10 +95,6 @@
     <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="106.12.0" />
     <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
     <PackageReference Include="SQLiteNetExtensions" Version="2.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Languages\Korean.xml" />
   </ItemGroup>
 
   <ItemGroup>
