@@ -285,6 +285,5 @@
   "ExportLatestLog": "Экспортировать текущий журнал",
   "LogSuccessfullyExportedToX": "Журнал экспортирован в {0}",
   "Help": "Помощь",
-  "XWarningsXErrors": "Предупреждений: {0}, ошибок: {1}",
-  "TrimBlankLines": "Trim blank lines"
+  "XWarningsXErrors": "Предупреждений: {0}, ошибок: {1}"
 }

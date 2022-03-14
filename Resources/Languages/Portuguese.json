@@ -285,6 +285,5 @@
   "ExportLatestLog": "Exportar ficheiro de registro",
   "LogSuccessfullyExportedToX": "O ficheiro de registro foi xportado para {0}",
   "Help": "Ajuda",
-  "XWarningsXErrors": "{0} Aviso(s), {1} Erro(s)",
-  "TrimBlankLines": "Trim blank lines"
+  "XWarningsXErrors": "{0} Aviso(s), {1} Erro(s)"
 }

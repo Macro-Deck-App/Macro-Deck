@@ -285,6 +285,5 @@
   "ExportLatestLog": "Exporter le dernier journal(logs)",
   "LogSuccessfullyExportedToX": "Journal(logs) exporté avec succès vers {0}",
   "Help": "Aide",
-  "XWarningsXErrors": "{0} attention(s), {1} erreur(s)",
-  "TrimBlankLines": "Trim blank lines"
+  "XWarningsXErrors": "{0} attention(s), {1} erreur(s)"
 }
