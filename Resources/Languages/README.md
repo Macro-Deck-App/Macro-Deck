@@ -1,29 +1,3 @@
 ﻿# Contributing Languages 
 
-### If your language is missing or incomplete, please consider helping me out by creating a pull request with the translated file!
-
-## Adding/editing a translation file
-- Fork this GitHub repository
-- Add/edit the translation files
-- Create a pull request of the forked repository
-
-## Important!
-- Please use the ISO names for the file name and for the `"__Language__"` key in the file. For `"__LanguageCode__"` use the ISO-639-1 code. You can find more information here: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
-
-- The file name and the `"__Language__"` key must be the same.
-
-## Example
-```
-English.json
-```
-```json
-{
-  "__Language__": "English",
-  "__LanguageCode__": "en",
-  "__Author__": "Macro Deck",
-  "NetworkAdapter": "Network adapter",
-  "IPAddress": "IP address",
-  "Port": "Port",
-  "Info": "Info"
-}
-```
+### If your language is missing or incomplete, please consider helping me out on [POEditor](https://poeditor.com/join/project/3y5UBkJvQD)
