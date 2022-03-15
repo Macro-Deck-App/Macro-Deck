@@ -139,5 +139,9 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Variables\Plugin\GUI\" />
+  </ItemGroup>
+
 
 </Project>

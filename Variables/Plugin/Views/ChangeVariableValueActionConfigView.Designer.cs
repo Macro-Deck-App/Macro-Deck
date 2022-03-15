@@ -3,7 +3,7 @@ using SuchByte.MacroDeck.GUI.CustomControls;
 
 namespace SuchByte.MacroDeck.Variables.Plugin.GUI
 {
-    partial class ChangeVariableValueConfigurator
+    partial class ChangeVariableValueActionConfigView
     {
         /// <summary> 
         /// Erforderliche Designervariable.
