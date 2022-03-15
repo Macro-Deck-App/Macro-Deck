@@ -44,6 +44,7 @@
     <None Remove="Resources\Languages\Finnish.json" />
     <None Remove="Resources\Languages\French.json" />
     <None Remove="Resources\Languages\German.json" />
+    <None Remove="Resources\Languages\Hungarian.json" />
     <None Remove="Resources\Languages\Italian.json" />
     <None Remove="Resources\Languages\Korean.json" />
     <None Remove="Resources\Languages\Portuguese.json" />
@@ -69,6 +70,7 @@
     <EmbeddedResource Include="Resources\Languages\Finnish.json" />
     <EmbeddedResource Include="Resources\Languages\French.json" />
     <EmbeddedResource Include="Resources\Languages\German.json" />
+    <EmbeddedResource Include="Resources\Languages\Hungarian.json" />
     <EmbeddedResource Include="Resources\Languages\Italian.json" />
     <EmbeddedResource Include="Resources\Languages\Korean.json" />
     <EmbeddedResource Include="Resources\Languages\Portuguese.json" />
