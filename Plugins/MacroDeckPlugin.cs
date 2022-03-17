@@ -67,7 +67,7 @@ namespace SuchByte.MacroDeck.Plugins
         /// <summary>
         /// Icon of the plugin
         /// </summary>
-        internal Image PluginIcon { get; set; } = Properties.Resources.Macro_Deck_2021;
+        internal virtual Image PluginIcon { get; set; } = Properties.Resources.Macro_Deck_2021;
         /// <summary>
         /// true = the plugin can be configured. A button to open the plugin's configurator will appear in the package manager. If your plugin cannot be configured, you can delete this.
         /// </summary>

@@ -14,11 +14,11 @@ using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.Variables.Plugin.GUI
 {
-    public partial class ChangeVariableValueConfigurator : ActionConfigControl
+    public partial class ChangeVariableValueActionConfigView : ActionConfigControl
     {
         PluginAction _macroDeckAction;
 
-        public ChangeVariableValueConfigurator(PluginAction macroDeckAction)
+        public ChangeVariableValueActionConfigView(PluginAction macroDeckAction)
         {
             this._macroDeckAction = macroDeckAction;
             InitializeComponent();

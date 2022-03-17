@@ -50,7 +50,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         private void ActionConfiguratorPluginItem_Load(object sender, EventArgs e)
         {
             if (this.Plugin == null) return;
-            this.pluginIcon.BackgroundImage = this.Plugin.Icon ?? Properties.Resources.Icon;
+            this.pluginIcon.BackgroundImage = this.Plugin.PluginIcon ?? Properties.Resources.Icon;
             this.pluginName.Text = this.Plugin.Name;
             this.lblCountActions.Text = String.Format((this.Plugin.Actions.Count == 1 ? LanguageManager.Strings.XAction : LanguageManager.Strings.XActions), this.Plugin.Actions.Count);
         }
