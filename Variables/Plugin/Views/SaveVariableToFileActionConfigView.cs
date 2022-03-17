@@ -1,12 +1,8 @@
 ﻿using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Variables.Plugin.ViewModels;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.Variables.Plugin.Views
@@ -19,6 +15,8 @@ namespace SuchByte.MacroDeck.Variables.Plugin.Views
         public SaveVariableToFileActionConfigView(PluginAction pluginAction)
         {
             InitializeComponent();
+            this.lblVariable.Text = LanguageManager.Strings.Variable;
+            this.lblPath.Text = LanguageManager.Strings.Path;
 
             this._viewModel = new SaveVariableToFileActionConfigViewModel(pluginAction);
         }
@@ -43,7 +41,12 @@ namespace SuchByte.MacroDeck.Variables.Plugin.Views
 
         private void BtnChoosePath_Click(object sender, EventArgs e)
         {
-            using (var saveFileDialog = new SaveFileDialog())
+            using (var saveFileDialog = new SaveFileDialog()
+            {
+                AddExtension = true,
+                DefaultExt = ".txt",
+                Filter = "Text file (*.txt)|*.txt|Any (*.*)|*.*",
+            })
             {
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {

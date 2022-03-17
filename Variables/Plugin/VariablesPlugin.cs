@@ -155,9 +155,9 @@ namespace SuchByte.MacroDeck.Variables.Plugin
 
     public class SaveVariableToFileAction : PluginAction
     {
-        public override string Name => "Save to file";
+        public override string Name => LanguageManager.Strings.ActionSaveVariableToFile;
 
-        public override string Description => "Saves the value of the variable to a file";
+        public override string Description => LanguageManager.Strings.ActionSaveVariableToFileDescription;
 
         public override bool CanConfigure => true;
 

@@ -321,5 +321,7 @@ namespace SuchByte.MacroDeck.Language
         public string PendingRestart = "Pending restart";
         public string Enabled = "Enabled";
         public string Disabled = "Disabled";
+        public string ActionSaveVariableToFile = "Save variable to file";
+        public string ActionSaveVariableToFileDescription = "Saves the value of the variable to a file";
     }
 }
