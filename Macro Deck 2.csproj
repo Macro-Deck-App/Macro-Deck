@@ -39,6 +39,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Variables\Plugin\GUI\**" />
+    <EmbeddedResource Remove="Variables\Plugin\GUI\**" />
+    <None Remove="Variables\Plugin\GUI\**" />
+    <Page Remove="Variables\Plugin\GUI\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Licenses.xml" />
     <None Remove="Resources\Languages\English.json" />
     <None Remove="Resources\Languages\Finnish.json" />
@@ -141,10 +148,6 @@
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Variables\Plugin\GUI\" />
   </ItemGroup>
 
 
