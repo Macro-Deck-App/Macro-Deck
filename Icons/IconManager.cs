@@ -68,6 +68,11 @@ namespace SuchByte.MacroDeck.Icons
                 Icons = new List<Icon>(),
             };
 
+            if (IconPacks.Find(x => x.PackageId.Equals(iconPack.PackageId)) != null)
+            {
+                IconPacks.RemoveAll(x => x.PackageId.Equals(iconPack.PackageId));
+            }
+
             IconPacks.Add(iconPack);
 
             foreach (var imageFile in Directory.GetFiles(path).Where(s =>
