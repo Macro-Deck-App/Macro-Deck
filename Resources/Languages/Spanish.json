@@ -287,14 +287,4 @@
     "Help": "Ayuda",
     "XWarningsXErrors": "{0} alerta(s), {1} error(es)",
     "TrimBlankLines": "Recortar líneas en blanco",
-	"Extensions": "Extensiones",
-	"InstallFromFile": "Instalar desde archivo",
-	"AllExtensionsUpToDate": "Todas las extensiones están actualizadas",
-	"UpdateAll": "Actualizar todo",
-	"UpdateAvailable": "Actualización disponible",
-	"PendingRestart": "Reinicio pendiente",
-	"Enabled": "Activado",
-	"Disabled": "Desactivado",
-	"ActionSaveVariableToFile": "Guardar variable en archivo",
-	"ActionSaveVariableToFileDescription": "Guarda el valor de la variable en un archivo"
 }
