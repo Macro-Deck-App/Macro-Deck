@@ -286,7 +286,7 @@
     "LogSuccessfullyExportedToX": "Registro exportado con éxito a {0}",
     "Help": "Ayuda",
     "XWarningsXErrors": "{0} alerta(s), {1} error(es)",
-    "TrimBlankLines": ""
+    "TrimBlankLines": "‎‎Recortar líneas en blanco"
 	"Extensions": "Extensiones",
     "InstallFromFile": "Instalar desde archivo",
 	"AllExtensionsUpToDate": "Todas las extensiones están actualizadas.",
