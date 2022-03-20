@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
 {
-    public partial class EventSelector : UserControl
+    public partial class EventSelector : RoundedUserControl
     {
         private ActionButton.ActionButton actionButton;
         public EventSelector(ActionButton.ActionButton actionButton)
@@ -46,12 +46,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
         private void RemoveClicked(object sender, EventArgs e)
         {
             EventItem eventItem = sender as EventItem;
-            if (this.actionButton.EventActions != null && eventItem.MacroDeckEvent != null && this.actionButton.EventActions.ContainsKey(eventItem.MacroDeckEvent.Name))
+            if (this.actionButton.EventListeners != null)
             {
-                this.actionButton.EventActions.Remove(eventItem.MacroDeckEvent.Name);
+                this.actionButton.EventListeners.Remove(eventItem.EventListener);
             }
             eventItem.OnRemoveClick -= this.RemoveClicked;
-            RefreshEventsList();
+            this.eventsList.Controls.Remove(eventItem);
         }
 
         public void RefreshEventsList()
@@ -61,9 +61,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
                 ((EventItem)control).OnRemoveClick -= this.RemoveClicked;
             }
             this.eventsList.Controls.Clear();
-            foreach (string macroDeckEvent in this.actionButton.EventActions.Keys)
+            if (this.actionButton.EventListeners == null) return;
+            foreach (var eventListener in this.actionButton.EventListeners)
             {
-                EventItem eventItem = new EventItem(this.actionButton, MacroDeck.EventManager.GetEventByName(macroDeckEvent), this.actionButton.EventActions[macroDeckEvent]);
+                EventItem eventItem = new EventItem(this.actionButton, eventListener);
                 AddEventItem(eventItem);
             }
         }

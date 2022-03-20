@@ -2,8 +2,12 @@
   "profiles": {
     "Macro Deck 2": {
       "commandName": "Project",
-      "commandLineArgs": "--show --export-default-string",
+      "commandLineArgs": "--show --export-default-strings --loglevel 1 --test-channel --debug-console --portable",
       "nativeDebugging": false
+    },
+    "Macro Deck exe": {
+      "commandName": "Executable",
+      "executablePath": "D:\\Macro-Deck\\Macro Deck 2\\bin\\Debug\\netcoreapp3.1\\Macro Deck 2.exe"
     }
   }
 }

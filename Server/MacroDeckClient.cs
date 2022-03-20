@@ -1,5 +1,7 @@
 ﻿using Fleck;
 using SuchByte.MacroDeck.Device;
+using SuchByte.MacroDeck.Model;
+using SuchByte.MacroDeck.Server.DeviceMessage;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -47,6 +49,8 @@ namespace SuchByte.MacroDeck.Server
         private IWebSocketConnection _socketConnection;
         private string _clientId;
 
+        private DeviceType _deviceType;
+
         public MacroDeckClient(IWebSocketConnection socket)
         {
             this._socketConnection = socket;
@@ -64,6 +68,32 @@ namespace SuchByte.MacroDeck.Server
         public Profiles.MacroDeckProfile Profile { get; set; }
         public string ClientId { get { return this._clientId; } }
 
-        public DeviceType DeviceType { get; set; }
+        public DeviceClass DeviceClass { get; set; } = DeviceClass.SoftwareClient;
+
+
+        public DeviceType DeviceType
+        {
+            get { return this._deviceType; }
+            set
+            {
+                this._deviceType = value;
+                switch (this._deviceType)
+                {
+                    case DeviceType.Unknown:
+                    case DeviceType.Web:
+                    case DeviceType.Android:
+                    case DeviceType.iOS:
+                        this.DeviceClass = DeviceClass.SoftwareClient;
+                        this.DeviceMessage = new SoftwareClientMessage();
+                        break;
+                    case DeviceType.Macro_Deck_DIY_OLED_6_V1:
+                        this.DeviceClass = DeviceClass.Macro_Deck_DIY_OLED_6_V1;
+                        this.DeviceMessage = new MacroDeckDIYOLED6Message();
+                        break;
+                }
+            }
+        }
+
+        public IDeviceMessage DeviceMessage { get; set; }
     }
 }

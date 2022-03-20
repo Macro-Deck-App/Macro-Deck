@@ -1,4 +1,5 @@
-﻿using SuchByte.MacroDeck.GUI;
+﻿using Newtonsoft.Json;
+using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using System;
 using System.Collections.Generic;
@@ -15,22 +16,19 @@ namespace SuchByte.MacroDeck.Plugins
         Assembly executingAssembly = Assembly.GetCallingAssembly();
         FileVersionInfo versionInfo;
 
-        private string _name = "", _version = "", _description = "";
-
+        private string _name = "", _version = "";
 
         public MacroDeckPlugin()
         {
             this.versionInfo = FileVersionInfo.GetVersionInfo(executingAssembly.Location);
             this._name = this.executingAssembly.GetName().Name;
             this._version = this.versionInfo.ProductVersion;
-            this._description = this.versionInfo.FileDescription;
         }
 
-
         /// <summary>
-        /// Please change only in a very special case! You can delete this from your class.
+        /// Name of the plugin
         /// </summary>
-        public virtual string Name
+        internal virtual string Name
         {
             get
             {
@@ -41,10 +39,11 @@ namespace SuchByte.MacroDeck.Plugins
                 this._name = value;
             }
         }
+
         /// <summary>
-        /// Please change only in a very special case! You can delete this from your class.
+        /// Version of the plugin
         /// </summary>
-        public virtual string Version
+        internal virtual string Version
         {
             get
             {
@@ -55,32 +54,20 @@ namespace SuchByte.MacroDeck.Plugins
                 this._version = value;
             }
         }
-        /// <summary>
-        /// The author of the plugin
-        /// </summary>
-        public virtual string Author { get; set; }
 
         /// <summary>
-        /// This gets pulled automatically out of the version info. Please change only in a very special case! You can delete this from your class.
+        /// Author of the plugin
         /// </summary>
-        public virtual string Description {
-            get
-            {
-                return this._description;
-            }
-            set
-            {
-                this._description = value;
-            }
-        }
+        internal virtual string Author { get; set; }
+
         /// <summary>
         /// This list contains all the actions of the plugin. If your plugin does not contain any actions, you can delete this.
         /// </summary>
-        public List<PluginAction> Actions { get; set; }
+        public List<PluginAction> Actions { get; set; } = new List<PluginAction>();
         /// <summary>
-        /// Set a custom icon that will be shown in the package manager and in the action configurator.
+        /// Icon of the plugin
         /// </summary>
-        public virtual Image Icon { get; }
+        internal virtual Image PluginIcon { get; set; } = Properties.Resources.Macro_Deck_2021;
         /// <summary>
         /// true = the plugin can be configured. A button to open the plugin's configurator will appear in the package manager. If your plugin cannot be configured, you can delete this.
         /// </summary>
@@ -93,10 +80,52 @@ namespace SuchByte.MacroDeck.Plugins
         /// Gets called when the plugin is enabled. Initialize your actions list here if your plugin contains any actions.
         /// </summary>
         public abstract void Enable();
+
+
+        [Obsolete("Will be removed soon")]
+        public virtual string Description { get; set; }
+
+        [Obsolete("Will be removed soon")]
+        public virtual Image Icon { get; }
     }
 
     public abstract class PluginAction
     {
+        ActionButton.ActionButton actionButton;
+        internal void SetActionButton(ActionButton.ActionButton actionButton)
+        {
+            if (actionButton == null) return;
+            if (this.actionButton != null && this.actionButton.Equals(actionButton))
+            {
+                this.OnActionButtonDelete();
+            }
+            this.actionButton = actionButton;
+            if (actionButton != null)
+            {
+                this.OnActionButtonLoaded();
+            }
+        }
+
+        /// <summary>
+        /// Gets the ActionButton which contains this action
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnore]
+        public ActionButton.ActionButton ActionButton
+        {
+            get
+            {
+                return this.actionButton;
+            }
+        }
+
+        /// <summary>
+        /// Gets called when the action button gets deleted
+        /// </summary>
+        public virtual void OnActionButtonDelete(){ }
+        /// <summary>
+        /// Gets called when the action button is loaded
+        /// </summary>
+        public virtual void OnActionButtonLoaded() { }
         /// <summary>
         /// Name of the action
         /// </summary>
@@ -135,5 +164,24 @@ namespace SuchByte.MacroDeck.Plugins
         /// <param name="actionConfigurator"></param>
         /// <returns></returns>
         public virtual ActionConfigControl GetActionConfigControl(ActionConfigurator actionConfigurator) { return null; }
+
+
+        /// <summary>
+        /// Returns a new instance of a plugin action using serilization
+        /// </summary>
+        /// <param name="pluginAction"></param>
+        /// <returns></returns>
+        public static PluginAction GetNewInstance(PluginAction pluginAction)
+        {
+            JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                NullValueHandling = NullValueHandling.Ignore,
+                Error = (sender, args) => { args.ErrorContext.Handled = true; }
+            };
+
+            // Create a copy of the action button instance
+            return JsonConvert.DeserializeObject<PluginAction>(JsonConvert.SerializeObject(pluginAction, jsonSerializerSettings), jsonSerializerSettings);
+        }
     } 
 }

@@ -15,11 +15,9 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         public IconPack IconPack;
 
-
         public ExportIconPackDialog(IconPack iconPack)
         {
             InitializeComponent();
-            this.lblAuthor.Text = Language.LanguageManager.Strings.Author;
             this.lblVersion.Text = Language.LanguageManager.Strings.Version;
             this.btnOk.Text = Language.LanguageManager.Strings.Ok;
             this.IconPack = iconPack;
@@ -27,17 +25,13 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         private void ExportIconPackDialog_Load(object sender, EventArgs e)
         {
-            this.author.Text = this.IconPack.Author;
             this.version.Text = this.IconPack.Version;
-
         }
 
         private void BtnOk_Click(object sender, EventArgs e)
         {
-            if (this.author.Text.Length < 2) return;
             if (this.version.Text.Length < 2) return;
 
-            this.IconPack.Author = this.author.Text;
             this.IconPack.Version = this.version.Text;
 
             this.DialogResult = DialogResult.OK;

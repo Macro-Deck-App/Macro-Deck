@@ -1,6 +1,7 @@
 ﻿using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Profiles;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,9 +18,10 @@ namespace SuchByte.MacroDeck.GUI
     {
         MacroDeckFolder ParentFolder;
         MacroDeckFolder Folder;
-        public AddFolder(MacroDeckFolder ParentFolder)
+
+        public AddFolder(MacroDeckFolder parentFolder)
         {
-            this.ParentFolder = ParentFolder;
+            this.ParentFolder = parentFolder;
             InitializeComponent();
             this.UpdateTranslation();
             this.btnCreateFolder.Text = Language.LanguageManager.Strings.Create;
@@ -31,6 +33,7 @@ namespace SuchByte.MacroDeck.GUI
             InitializeComponent();
             this.UpdateTranslation();
             this.btnCreateFolder.Text = Language.LanguageManager.Strings.Save;
+            this.folderName.Enabled = !folder.IsRootFolder;
         }
 
         private void UpdateTranslation()
@@ -46,64 +49,57 @@ namespace SuchByte.MacroDeck.GUI
         private void BtnCreateFolder_Click(object sender, EventArgs e)
         {
             if (folderName.Text.Length < 1) return;
-            
-            if (this.Folder == null) {
-                foreach (Folders.MacroDeckFolder folder in MacroDeck.ProfileManager.CurrentProfile.Folders)
-                {
-                    if (folder.DisplayName.Equals(folderName.Text))
-                    {
-                        using (var msgBox = new CustomControls.MessageBox())
-                        {
-                            msgBox.ShowDialog(Language.LanguageManager.Strings.CantCreateFolder, String.Format(Language.LanguageManager.Strings.FolderCalledXAlreadyExists, folderName.Text), MessageBoxButtons.OK);
-                            msgBox.Dispose();
-                        }
-                        return;
-                    }
-                }
 
-                if (ParentFolder == null || !MacroDeck.ProfileManager.CurrentProfile.Folders.Contains(ParentFolder))
-                    ParentFolder = MacroDeck.ProfileManager.CurrentProfile.Folders[0];
-
-                MacroDeckFolder newFolder = MacroDeck.ProfileManager.CreateFolder(folderName.Text, ParentFolder, MacroDeck.ProfileManager.CurrentProfile);
-                if (radioOnFocus.Checked && this.applicationList.Text.Length > 0 && this.devicesList.CheckedItems.Count > 0)
-                {
-                    newFolder.ApplicationToTrigger = this.applicationList.Text;
-                    newFolder.ApplicationsFocusDevices = new List<string>();
-                    foreach (int index in this.devicesList.CheckedIndices)
-                    {
-                        newFolder.ApplicationsFocusDevices.Add(DeviceManager.GetMacroDeckDeviceByDisplayName(this.devicesList.Items[index].ToString()).ClientId);
-                    }
-                } else
-                {
-                    newFolder.ApplicationToTrigger = "";
-                    newFolder.ApplicationsFocusDevices = new List<string>();
-                }
-                MacroDeck.ProfileManager.Save();
-            } else
+            if (this.Folder == null)
             {
-                MacroDeckFolder newFolder = this.Folder;
-                int index = MacroDeck.ProfileManager.CurrentProfile.Folders.IndexOf(this.Folder);
-                MacroDeck.ProfileManager.CurrentProfile.Folders.Remove(this.Folder);
-                newFolder.DisplayName = this.folderName.Text;
-                newFolder.ApplicationToTrigger = this.applicationList.Text;
-                
-                if (radioOnFocus.Checked && this.applicationList.Text.Length > 0 && this.devicesList.CheckedItems.Count > 0)
+                if (ProfileManager.CurrentProfile.Folders.Find(x => x.DisplayName.Equals(folderName.Text, StringComparison.OrdinalIgnoreCase)) != null)
                 {
-                    newFolder.ApplicationToTrigger = this.applicationList.Text;
-                    newFolder.ApplicationsFocusDevices = new List<string>();
-                    foreach (int i in this.devicesList.CheckedIndices)
+                    using (var msgBox = new CustomControls.MessageBox())
                     {
-                        newFolder.ApplicationsFocusDevices.Add(DeviceManager.GetMacroDeckDeviceByDisplayName(this.devicesList.Items[i].ToString()).ClientId);
+                        msgBox.ShowDialog(Language.LanguageManager.Strings.CantCreateFolder, String.Format(Language.LanguageManager.Strings.FolderCalledXAlreadyExists, folderName.Text), MessageBoxButtons.OK);
+                        msgBox.Dispose();
                     }
+                    return;
                 }
-                else
+
+                if (ParentFolder == null || !ProfileManager.CurrentProfile.Folders.Contains(ParentFolder))
                 {
-                    newFolder.ApplicationToTrigger = "";
-                    newFolder.ApplicationsFocusDevices = new List<string>();
+                    ParentFolder = ProfileManager.CurrentProfile.Folders[0];
                 }
-                MacroDeck.ProfileManager.CurrentProfile.Folders.Insert(index, newFolder);
-                MacroDeck.ProfileManager.Save();
+
+                this.Folder = ProfileManager.CreateFolder(folderName.Text, ParentFolder, ProfileManager.CurrentProfile);
             }
+            else
+            {
+                if (ProfileManager.CurrentProfile.Folders.Find(x => x.DisplayName.Equals(folderName.Text, StringComparison.OrdinalIgnoreCase)) != null && ProfileManager.CurrentProfile.Folders.Find(x => x.DisplayName.Equals(folderName.Text, StringComparison.OrdinalIgnoreCase)) != this.Folder)
+                {
+                    using (var msgBox = new CustomControls.MessageBox())
+                    {
+                        msgBox.ShowDialog(Language.LanguageManager.Strings.CantCreateFolder, String.Format(Language.LanguageManager.Strings.FolderCalledXAlreadyExists, folderName.Text), MessageBoxButtons.OK);
+                        msgBox.Dispose();
+                    }
+                    return;
+                }
+            }
+
+            this.Folder.DisplayName = this.folderName.Text;
+            this.Folder.ApplicationToTrigger = this.applicationList.Text;
+
+            if (radioOnFocus.Checked && this.applicationList.Text.Length > 0 && this.devicesList.CheckedItems.Count > 0)
+            {
+                this.Folder.ApplicationToTrigger = this.applicationList.Text;
+                this.Folder.ApplicationsFocusDevices = new List<string>();
+                foreach (int i in this.devicesList.CheckedIndices)
+                {
+                    this.Folder.ApplicationsFocusDevices.Add(DeviceManager.GetMacroDeckDeviceByDisplayName(this.devicesList.Items[i].ToString()).ClientId);
+                }
+            }
+            else
+            {
+                this.Folder.ApplicationToTrigger = "";
+                this.Folder.ApplicationsFocusDevices = new List<string>();
+            }
+            ProfileManager.Save();
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -177,22 +173,6 @@ namespace SuchByte.MacroDeck.GUI
                 this.devicesList.Items.Add(macroDeckDevice.DisplayName, (this.Folder != null && this.Folder.ApplicationsFocusDevices != null && this.Folder.ApplicationsFocusDevices.Contains(macroDeckDevice.ClientId)));
             }
            
-           
-            /*if (this.Folder != null && this.Folder.ApplicationsFocusDevices != null)
-            {
-                foreach (string macroDeckDeviceClientId in this.Folder.ApplicationsFocusDevices)
-                {
-                    this.Invoke(new Action(() =>
-                    {
-                        MacroDeckDevice macroDeckDevice = DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId);
-                        if (macroDeckDevice != null)
-                        {
-                            this.devicesList.SetItemCheckState(this.devicesList.FindStringExact(macroDeckDevice.DisplayName), CheckState.Checked);
-                        }
-                    }));
-                    
-                }
-            }*/
         }
 
         private void BtnReloadApplications_Click(object sender, EventArgs e)

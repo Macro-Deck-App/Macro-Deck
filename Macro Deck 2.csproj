@@ -1,5 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
-
+  <PropertyGroup>
+    <VersionMajor>2</VersionMajor>
+    <VersionMinor>9</VersionMinor>
+    <VersionPatch>1</VersionPatch>
+    <VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
+  </PropertyGroup>
+  
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -8,18 +14,20 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>appicon.ico</ApplicationIcon>
     <StartupObject>SuchByte.MacroDeck.MacroDeck</StartupObject>
-    <Version>2.1.2-beta</Version>
+    <Version>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(VersionRevision)</Version>
     <Company>Macro Deck</Company>
     <Authors>Manuel Mayer</Authors>
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>SuchByte.pfx</AssemblyOriginatorKeyFile>
     <Product>Macro Deck</Product>
     <AssemblyVersion>2.21.3110.100</AssemblyVersion>
-    <FileVersion>2.1.2.0</FileVersion>
+	<FileVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(VersionRevision)</FileVersion>
     <AssemblyName>Macro Deck 2</AssemblyName>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/SuchByte/Macro-Deck</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SuchByte/Macro-Deck</RepositoryUrl>
+	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	  <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -31,49 +39,68 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Licenses.xml" />
-    <None Remove="Resources\Languages\English.xml" />
-    <None Remove="Resources\Languages\Finnish.xml" />
-    <None Remove="Resources\Languages\French.xml" />
-    <None Remove="Resources\Languages\German.xml" />
-    <None Remove="Resources\Languages\Italian.xml" />
-    <None Remove="Resources\Languages\Russian.xml" />
-    <None Remove="Resources\Languages\Spanish.xml" />
-    <None Remove="Resources\Languages\Turkish.xml" />
+    <Compile Remove="Variables\Plugin\GUI\**" />
+    <EmbeddedResource Remove="Variables\Plugin\GUI\**" />
+    <None Remove="Variables\Plugin\GUI\**" />
+    <Page Remove="Variables\Plugin\GUI\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <COMReference Include="UIAutomationClient">
-      <WrapperTool>tlbimp</WrapperTool>
+    <None Remove="Licenses.xml" />
+    <None Remove="Resources\Languages\English.json" />
+    <None Remove="Resources\Languages\Finnish.json" />
+    <None Remove="Resources\Languages\French.json" />
+    <None Remove="Resources\Languages\German.json" />
+    <None Remove="Resources\Languages\Hungarian.json" />
+    <None Remove="Resources\Languages\Italian.json" />
+    <None Remove="Resources\Languages\Korean.json" />
+    <None Remove="Resources\Languages\Polish.json" />
+    <None Remove="Resources\Languages\Portuguese.json" />
+    <None Remove="Resources\Languages\Russian.json" />
+    <None Remove="Resources\Languages\Spanish.json" />
+    <None Remove="Resources\Languages\Turkish.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <COMReference Include="NetFwTypeLib">
       <VersionMinor>0</VersionMinor>
       <VersionMajor>1</VersionMajor>
-      <Guid>944de083-8fb8-45cf-bcb7-c477acb2f897</Guid>
+      <Guid>58fbcf7c-e7a9-467c-80b3-fc65e8fcca08</Guid>
       <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
       <Isolated>false</Isolated>
       <EmbedInteropTypes>true</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Licenses.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <EmbeddedResource Include="Resources\Languages\English.json" />
+    <EmbeddedResource Include="Resources\Languages\Finnish.json" />
+    <EmbeddedResource Include="Resources\Languages\French.json" />
+    <EmbeddedResource Include="Resources\Languages\German.json" />
+    <EmbeddedResource Include="Resources\Languages\Hungarian.json" />
+    <EmbeddedResource Include="Resources\Languages\Italian.json" />
+    <EmbeddedResource Include="Resources\Languages\Korean.json" />
+    <EmbeddedResource Include="Resources\Languages\Polish.json" />
+    <EmbeddedResource Include="Resources\Languages\Portuguese.json" />
+    <EmbeddedResource Include="Resources\Languages\Russian.json" />
+    <EmbeddedResource Include="Resources\Languages\Spanish.json" />
+    <EmbeddedResource Include="Resources\Languages\Turkish.json" />
+    <EmbeddedResource Include="Resources\Licenses.xml">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Languages\English.xml" />
-    <EmbeddedResource Include="Resources\Languages\Finnish.xml" />
-    <EmbeddedResource Include="Resources\Languages\French.xml" />
-    <EmbeddedResource Include="Resources\Languages\German.xml" />
-    <EmbeddedResource Include="Resources\Languages\Italian.xml" />
-    <EmbeddedResource Include="Resources\Languages\Russian.xml" />
-    <EmbeddedResource Include="Resources\Languages\Spanish.xml" />
-    <EmbeddedResource Include="Resources\Languages\Turkish.xml" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Cottle" Version="2.0.4" />
+    <PackageReference Include="FCTB" Version="2.16.24" />
     <PackageReference Include="Fleck" Version="1.2.0" />
     <PackageReference Include="GiphyDotNet" Version="2.0.0" />
     <PackageReference Include="Magick.NET-Q16-x64" Version="8.3.1" />
     <PackageReference Include="Magick.NET.Core" Version="8.3.1" />
     <PackageReference Include="Magick.NET.SystemDrawing" Version="4.0.6" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1108.44" />
+    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.22000.196" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="RestSharp" Version="106.12.0" />
     <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="106.12.0" />
@@ -90,6 +117,9 @@
     </Compile>
     <Compile Update="GUI\CustomControls\InitialSetup\InitialSetupPluginItem.cs">
       <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ButtonRadioButton.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Update="GUI\Dialogs\ButtonEditor.cs">
       <SubType>Form</SubType>

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -51,9 +52,11 @@ namespace SuchByte.MacroDeck.Updater
             {
                 CheckForUpdatesAsync();
             }
-            Timer updateCheckTimer = new Timer();
-            updateCheckTimer.Enabled = true;
-            updateCheckTimer.Interval = 1000 * 60 * 10; // Check every 10 minutes
+            Timer updateCheckTimer = new Timer
+            {
+                Enabled = true,
+                Interval = 1000 * 60 * 10 // Check every 10 minutes
+            };
         }
 
         private static void UpdateCheckTimerTick(object sender, EventArgs e)
@@ -78,49 +81,45 @@ namespace SuchByte.MacroDeck.Updater
             {
                 using (WebClient wc = new WebClient())
                 {
-                    string channel = "stable";
-                    switch (MacroDeck.Configuration.UpdateChannel)
-                    {
-                        case 0:
-                            channel = "dev";
-                            break;
-                        case 1:
-                            channel = "beta";
-                            break;
-                        /*case 2:
-                            channel = "stable";
-                            break;*/
-                        default:
-                            channel = "dev";
-                            break;
-                    }
+                    string jsonString = "";
 
                     if (_testChannel)
                     {
-                        channel = "test";
+                        jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest&channel=test");
                     }
 
-                    var jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest&channel=" + channel);
+                    jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest" + (MacroDeck.Configuration.UpdateDevVersions ? "&dev" : "") + (MacroDeck.Configuration.UpdateBetaVersions ? "&beta" : ""));
+
                     _jsonObject = JObject.Parse(jsonString);
-                    if (_jsonObject["version"].ToString() != MacroDeck.VersionString || _forceUpdate)
+                    if (_jsonObject["build"] != null)
                     {
-                        try
+                        if (Int32.TryParse(_jsonObject["build"].ToString(), out int build))
                         {
-                            _updateSizeMb = GetFileSizeMb(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]));
-                        } catch { }
-                        if (OnUpdateAvailable != null)
-                        {
-                            UpdateAvailable = true;
-                            OnUpdateAvailable(_jsonObject, EventArgs.Empty);
-                        }
-                    } else
-                    {
-                        if (OnLatestVersionInstalled != null)
-                        {
-                            UpdateAvailable = false;
-                            OnLatestVersionInstalled(_jsonObject, EventArgs.Empty);
+                            if (build > MacroDeck.BuildVersion || _forceUpdate)
+                            {
+                                MacroDeckLogger.Info("Macro Deck version " + _jsonObject["version"] + " available");
+                                try
+                                {
+                                    _updateSizeMb = GetFileSizeMb(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]));
+                                }
+                                catch { }
+                                if (OnUpdateAvailable != null)
+                                {
+                                    UpdateAvailable = true;
+                                    OnUpdateAvailable(_jsonObject, EventArgs.Empty);
+                                }
+                            }
+                            else
+                            {
+                                if (OnLatestVersionInstalled != null)
+                                {
+                                    UpdateAvailable = false;
+                                    OnLatestVersionInstalled(_jsonObject, EventArgs.Empty);
+                                }
+                            }
                         }
                     }
+                    
                 }
             } catch (Exception ex)
             {
@@ -146,12 +145,24 @@ namespace SuchByte.MacroDeck.Updater
 
         public static void DownloadUpdate()
         {
+            if (MacroDeck.PortableMode)
+            {
+                var p = new Process
+                {
+                    StartInfo = new ProcessStartInfo("https://macrodeck.org/files/portable/" + _jsonObject["filename"])
+                    {
+                        UseShellExecute = true
+                    }
+                };
+                p.Start();
+                return;
+            }
             _downloading = true;
             using (var webClient = new WebClient())
             {
                 webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(WebClient_DownloadProgressChanged);
                 webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(WebClient_DownloadComplete);
-                webClient.DownloadFileAsync(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]), MacroDeck.TempDirectoryPath + _jsonObject["filename"]);
+                webClient.DownloadFileAsync(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]), Path.Combine(MacroDeck.TempDirectoryPath, _jsonObject["filename"].ToString()));
             }
         }
 
@@ -161,8 +172,7 @@ namespace SuchByte.MacroDeck.Updater
             _downloading = false;
             try
             {
-                //lblStatus.Text = Language.LanguageManager.Strings.VerifyingUpdateFile;
-                if (!File.Exists(MacroDeck.TempDirectoryPath + _jsonObject["filename"]))
+                if (!File.Exists(Path.Combine(MacroDeck.TempDirectoryPath, _jsonObject["filename"].ToString())))
                 {
                     using (var msgBox = new GUI.CustomControls.MessageBox())
                     {
@@ -172,11 +182,10 @@ namespace SuchByte.MacroDeck.Updater
                     {
                         OnError(null, EventArgs.Empty);
                     }
-                    //lblStatus.Text = String.Format(Language.LanguageManager.Strings.FileNotFound);
                     return;
                 }
 
-                using (var stream = File.OpenRead(MacroDeck.TempDirectoryPath + _jsonObject["filename"]))
+                using (var stream = File.OpenRead(Path.Combine(MacroDeck.TempDirectoryPath, _jsonObject["filename"].ToString())))
                 {
                     using (var md5 = MD5.Create())
                     {
@@ -192,16 +201,14 @@ namespace SuchByte.MacroDeck.Updater
                             {
                                 OnError(null, EventArgs.Empty);
                             }
-                            //lblStatus.Text = String.Format(Language.LanguageManager.Strings.MD5NotValid);
                             return;
                         }
                     }
                 }
 
-                //lblStatus.Text = String.Format(Language.LanguageManager.Strings.StartingInstaller);
                 var p = new Process
                 {
-                    StartInfo = new ProcessStartInfo(MacroDeck.TempDirectoryPath + _jsonObject["filename"])
+                    StartInfo = new ProcessStartInfo(Path.Combine(MacroDeck.TempDirectoryPath, _jsonObject["filename"].ToString()))
                     {
                         UseShellExecute = true
                     }
@@ -219,20 +226,16 @@ namespace SuchByte.MacroDeck.Updater
                 {
                     msgBox.ShowDialog(Language.LanguageManager.Strings.Error, Language.LanguageManager.Strings.TryAgainOrDownloadManually, MessageBoxButtons.OK);
                 }
-                //lblStatus.Text = String.Format(Language.LanguageManager.Strings.TryAgainOrDownloadManually);
             }
         }
 
         public static void WebClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
-            //double megaBytesIn = Math.Round(double.Parse(e.BytesReceived.ToString()) / (1024 * 1024), 2);
-            //double totalMegaBytes = Math.Round(double.Parse(e.TotalBytesToReceive.ToString()) / (1024 * 1024), 2);
             _progressPercentage = e.ProgressPercentage;
             if (OnProgressChanged != null)
             {
                 OnProgressChanged(sender, new ProgressChangedEventArgs { ProgressPercentage = e.ProgressPercentage });
             }
-            //lblStatus.Text = String.Format(Language.LanguageManager.Strings.DownloadingUpdate, e.ProgressPercentage, megaBytesIn, totalMegaBytes);
         }
 
 

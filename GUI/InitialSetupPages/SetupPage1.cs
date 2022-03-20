@@ -17,26 +17,12 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
         public SetupPage1()
         {
             InitializeComponent();
-            this.SetSystemLanguage();
             this.lblWelcome.Text = LanguageManager.Strings.InitialSetupWelcome;
             this.lblLetsConfigure.Text = LanguageManager.Strings.InitialSetupLetsConfigure;
             this.lblSelectLanguage.Text = LanguageManager.Strings.InitialSetupSelectLanguage;
         }
 
-        private void SetSystemLanguage()
-        {
-            try
-            {
-                CultureInfo cultureInfo = CultureInfo.InstalledUICulture;
-                string languageIso = cultureInfo.TwoLetterISOLanguageName;
-                Strings language = LanguageManager.Languages.Find(l => l.__LanguageCode__.ToLower().Equals(languageIso.ToLower()));
-                if (language != null)
-                {
-                    LanguageManager.SetLanguage(language);
-                }
-
-            } catch { }
-        }
+       
 
         private void Languages_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -50,12 +36,13 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
         private void SetupPage1_Load(object sender, EventArgs e)
         {
             this.languages.SelectedIndexChanged -= this.Languages_SelectedIndexChanged;
-            foreach(Strings languageStrings in LanguageManager.Languages)
+            foreach (Strings languageStrings in LanguageManager.Languages)
             {
                 this.languages.Items.Add(languageStrings.__Language__);
             }
             this.languages.SelectedItem = LanguageManager.Strings.__Language__;
             this.languages.SelectedIndexChanged += this.Languages_SelectedIndexChanged;
+            
         }
     }
 }

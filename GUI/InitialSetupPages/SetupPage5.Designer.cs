@@ -42,42 +42,45 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblWantIcons.ImageAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.lblWantIcons.Location = new System.Drawing.Point(3, 0);
             this.lblWantIcons.Name = "lblWantIcons";
-            this.lblWantIcons.Size = new System.Drawing.Size(685, 45);
+            this.lblWantIcons.Size = new System.Drawing.Size(685, 48);
             this.lblWantIcons.TabIndex = 6;
             this.lblWantIcons.Text = "Do you want some icons?";
             this.lblWantIcons.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblWantIcons.UseMnemonic = false;
             // 
             // lblInstallLaterPackageManager
             // 
             this.lblInstallLaterPackageManager.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblInstallLaterPackageManager.ForeColor = System.Drawing.Color.White;
             this.lblInstallLaterPackageManager.ImageAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.lblInstallLaterPackageManager.Location = new System.Drawing.Point(3, 45);
+            this.lblInstallLaterPackageManager.Location = new System.Drawing.Point(3, 48);
             this.lblInstallLaterPackageManager.Name = "lblInstallLaterPackageManager";
-            this.lblInstallLaterPackageManager.Size = new System.Drawing.Size(685, 45);
+            this.lblInstallLaterPackageManager.Size = new System.Drawing.Size(685, 48);
             this.lblInstallLaterPackageManager.TabIndex = 7;
             this.lblInstallLaterPackageManager.Text = "You can also install icon packs later in the package manager";
             this.lblInstallLaterPackageManager.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblInstallLaterPackageManager.UseMnemonic = false;
             // 
             // progressBar
             // 
-            this.progressBar.Location = new System.Drawing.Point(3, 513);
+            this.progressBar.Location = new System.Drawing.Point(208, 547);
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(275, 17);
+            this.progressBar.Size = new System.Drawing.Size(275, 18);
             this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
             this.progressBar.TabIndex = 10;
             this.progressBar.Visible = false;
             // 
             // iconPacks
             // 
-            this.iconPacks.Location = new System.Drawing.Point(2, 93);
+            this.iconPacks.AutoScroll = true;
+            this.iconPacks.Location = new System.Drawing.Point(120, 99);
             this.iconPacks.Name = "iconPacks";
-            this.iconPacks.Size = new System.Drawing.Size(688, 414);
+            this.iconPacks.Size = new System.Drawing.Size(450, 442);
             this.iconPacks.TabIndex = 9;
             // 
             // SetupPage5
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.progressBar);
@@ -85,7 +88,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.Controls.Add(this.lblInstallLaterPackageManager);
             this.Controls.Add(this.lblWantIcons);
             this.Name = "SetupPage5";
-            this.Size = new System.Drawing.Size(691, 571);
+            this.Size = new System.Drawing.Size(691, 609);
             this.Load += new System.EventHandler(this.SetupPage5_Load);
             this.ResumeLayout(false);
 

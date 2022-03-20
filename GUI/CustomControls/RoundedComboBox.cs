@@ -32,6 +32,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             }
         }
 
+        public int FindStringExact(string str)
+        {
+            return this.borderlessComboBox1.FindStringExact(str);
+        }
+
         public new bool Enabled
         {
             get

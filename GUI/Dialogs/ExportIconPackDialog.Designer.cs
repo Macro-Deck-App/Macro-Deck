@@ -32,84 +32,81 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         private void InitializeComponent()
         {
             this.lblVersion = new System.Windows.Forms.Label();
-            this.version = new RoundedTextBox();
-            this.lblAuthor = new System.Windows.Forms.Label();
-            this.author = new RoundedTextBox();
+            this.version = new SuchByte.MacroDeck.GUI.CustomControls.RoundedTextBox();
             this.btnOk = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.SuspendLayout();
             // 
             // lblVersion
             // 
-            this.lblVersion.AutoSize = true;
             this.lblVersion.ForeColor = System.Drawing.Color.White;
-            this.lblVersion.Location = new System.Drawing.Point(12, 62);
+            this.lblVersion.Location = new System.Drawing.Point(14, 15);
             this.lblVersion.Name = "lblVersion";
-            this.lblVersion.Size = new System.Drawing.Size(55, 16);
+            this.lblVersion.Size = new System.Drawing.Size(75, 25);
             this.lblVersion.TabIndex = 14;
             this.lblVersion.Text = "Version:";
+            this.lblVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblVersion.UseMnemonic = false;
             // 
             // version
             // 
+            this.version.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.version.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.version.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.version.ForeColor = System.Drawing.Color.White;
-            this.version.Location = new System.Drawing.Point(73, 60);
+            this.version.Icon = null;
+            this.version.Location = new System.Drawing.Point(95, 15);
+            this.version.MaxCharacters = 32767;
+            this.version.Multiline = false;
             this.version.Name = "version";
-            this.version.Size = new System.Drawing.Size(89, 23);
+            this.version.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
+            this.version.PasswordChar = false;
+            this.version.PlaceHolderColor = System.Drawing.Color.Gray;
+            this.version.PlaceHolderText = "";
+            this.version.ReadOnly = false;
+            this.version.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.version.SelectionStart = 0;
+            this.version.Size = new System.Drawing.Size(89, 25);
             this.version.TabIndex = 13;
-            // 
-            // lblAuthor
-            // 
-            this.lblAuthor.AutoSize = true;
-            this.lblAuthor.ForeColor = System.Drawing.Color.White;
-            this.lblAuthor.Location = new System.Drawing.Point(12, 33);
-            this.lblAuthor.Name = "lblAuthor";
-            this.lblAuthor.Size = new System.Drawing.Size(50, 16);
-            this.lblAuthor.TabIndex = 12;
-            this.lblAuthor.Text = "Author:";
-            // 
-            // author
-            // 
-            this.author.ForeColor = System.Drawing.Color.White;
-            this.author.Location = new System.Drawing.Point(73, 28);
-            this.author.Name = "author";
-            this.author.Size = new System.Drawing.Size(207, 23);
-            this.author.TabIndex = 11;
+            this.version.TextAlignment = System.Windows.Forms.HorizontalAlignment.Left;
             // 
             // btnOk
             // 
-            this.btnOk.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
+            this.btnOk.BorderRadius = 8;
             this.btnOk.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnOk.FlatAppearance.BorderSize = 0;
             this.btnOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnOk.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnOk.ForeColor = System.Drawing.Color.White;
-            this.btnOk.Location = new System.Drawing.Point(204, 86);
+            this.btnOk.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnOk.Icon = null;
+            this.btnOk.Location = new System.Drawing.Point(141, 46);
             this.btnOk.Name = "btnOk";
+            this.btnOk.Progress = 0;
+            this.btnOk.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
             this.btnOk.Size = new System.Drawing.Size(75, 25);
             this.btnOk.TabIndex = 10;
             this.btnOk.Text = "Ok";
+            this.btnOk.UseMnemonic = false;
             this.btnOk.UseVisualStyleBackColor = false;
+            this.btnOk.UseWindowsAccentColor = true;
             this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
             // 
             // ExportIconPackDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(291, 122);
+            this.ClientSize = new System.Drawing.Size(220, 84);
             this.Controls.Add(this.lblVersion);
             this.Controls.Add(this.version);
-            this.Controls.Add(this.lblAuthor);
-            this.Controls.Add(this.author);
             this.Controls.Add(this.btnOk);
+            this.Location = new System.Drawing.Point(0, 0);
             this.Name = "ExportIconPackDialog";
             this.Text = "ExportIconPackDialog";
             this.Load += new System.EventHandler(this.ExportIconPackDialog_Load);
             this.Controls.SetChildIndex(this.btnOk, 0);
-            this.Controls.SetChildIndex(this.author, 0);
-            this.Controls.SetChildIndex(this.lblAuthor, 0);
             this.Controls.SetChildIndex(this.version, 0);
             this.Controls.SetChildIndex(this.lblVersion, 0);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -117,8 +114,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         private System.Windows.Forms.Label lblVersion;
         private RoundedTextBox version;
-        private System.Windows.Forms.Label lblAuthor;
-        private RoundedTextBox author;
         private CustomControls.ButtonPrimary btnOk;
     }
 }

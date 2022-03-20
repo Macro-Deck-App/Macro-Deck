@@ -65,6 +65,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.label1.TabIndex = 4;
             this.label1.Text = "Oops, there was a problem :-(";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label1.UseMnemonic = false;
             // 
             // crashReport
             // 
@@ -88,6 +89,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.label4.Size = new System.Drawing.Size(51, 16);
             this.label4.TabIndex = 8;
             this.label4.Text = "Details";
+            this.label4.UseMnemonic = false;
             // 
             // comment
             // 
@@ -110,6 +112,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.label5.Size = new System.Drawing.Size(421, 16);
             this.label5.TabIndex = 10;
             this.label5.Text = "Comment e.g. what did you do before this happened? (optional)";
+            this.label5.UseMnemonic = false;
             // 
             // label6
             // 
@@ -118,6 +121,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.label6.Size = new System.Drawing.Size(563, 114);
             this.label6.TabIndex = 11;
             this.label6.Text = resources.GetString("label6.Text");
+            this.label6.UseMnemonic = false;
             // 
             // label7
             // 
@@ -128,6 +132,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.label7.Size = new System.Drawing.Size(217, 16);
             this.label7.TabIndex = 12;
             this.label7.Text = "Things that can cause a problem";
+            this.label7.UseMnemonic = false;
             // 
             // btnSendCrashReport
             // 
@@ -147,6 +152,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnSendCrashReport.Size = new System.Drawing.Size(217, 37);
             this.btnSendCrashReport.TabIndex = 14;
             this.btnSendCrashReport.Text = "Send report and continue";
+            this.btnSendCrashReport.UseMnemonic = false;
             this.btnSendCrashReport.UseVisualStyleBackColor = false;
             this.btnSendCrashReport.Click += new System.EventHandler(this.BtnSendCrashReport_Click);
             // 
@@ -168,6 +174,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnContinue.Size = new System.Drawing.Size(334, 37);
             this.btnContinue.TabIndex = 15;
             this.btnContinue.Text = "Just continue";
+            this.btnContinue.UseMnemonic = false;
             this.btnContinue.UseVisualStyleBackColor = false;
             this.btnContinue.Click += new System.EventHandler(this.BtnContinue_Click);
             // 
@@ -180,6 +187,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.label3.TabIndex = 16;
             this.label3.Text = "Macro Deck will try to continue...";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label3.UseMnemonic = false;
             // 
             // autoContinueTimer
             // 

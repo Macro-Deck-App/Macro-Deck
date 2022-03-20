@@ -59,6 +59,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblPlugin.TabIndex = 1;
             this.lblPlugin.Text = "Macro-Deck OBS-WebSocket";
             this.lblPlugin.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblPlugin.UseMnemonic = false;
             // 
             // btnRemove
             // 
@@ -134,12 +135,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             // panelEdit
             // 
+            this.panelEdit.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.panelEdit.Controls.Add(this.btnRemove);
             this.panelEdit.Controls.Add(this.btnEdit);
             this.panelEdit.Controls.Add(this.btnDown);
             this.panelEdit.Controls.Add(this.btnUp);
             this.panelEdit.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.panelEdit.Location = new System.Drawing.Point(757, 8);
+            this.panelEdit.Location = new System.Drawing.Point(717, 6);
             this.panelEdit.Name = "panelEdit";
             this.panelEdit.Size = new System.Drawing.Size(121, 26);
             this.panelEdit.TabIndex = 6;
@@ -155,6 +157,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblAction.TabIndex = 7;
             this.lblAction.Text = "Action";
             this.lblAction.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblAction.UseMnemonic = false;
             // 
             // panel1
             // 
@@ -173,34 +176,35 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.flowLayoutPanel1.Controls.Add(this.panel1);
             this.flowLayoutPanel1.Controls.Add(this.lblConfigurationSummary);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Left;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(2, 2);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(751, 43);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(713, 46);
             this.flowLayoutPanel1.TabIndex = 9;
             // 
             // lblConfigurationSummary
             // 
             this.lblConfigurationSummary.Location = new System.Drawing.Point(229, 0);
             this.lblConfigurationSummary.Name = "lblConfigurationSummary";
-            this.lblConfigurationSummary.Size = new System.Drawing.Size(479, 43);
+            this.lblConfigurationSummary.Size = new System.Drawing.Size(481, 43);
             this.lblConfigurationSummary.TabIndex = 9;
             this.lblConfigurationSummary.Text = "ConfigurationSummary";
             this.lblConfigurationSummary.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblConfigurationSummary.UseMnemonic = false;
             // 
             // ActionItem
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(8)))), ((int)(((byte)(107)))), ((int)(((byte)(138)))));
-            this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.panelEdit);
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ForeColor = System.Drawing.Color.White;
             this.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.Name = "ActionItem";
-            this.Size = new System.Drawing.Size(893, 43);
+            this.Padding = new System.Windows.Forms.Padding(2);
+            this.Size = new System.Drawing.Size(842, 50);
             ((System.ComponentModel.ISupportInitialize)(this.btnRemove)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnEdit)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnDown)).EndInit();

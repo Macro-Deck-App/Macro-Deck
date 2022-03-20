@@ -43,7 +43,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void btnUp_Click(object sender, EventArgs e)
         {
-            this.panelEdit.Visible = false;
             if (this.OnMoveUpClick != null)
             {
                 this.OnMoveUpClick(this, EventArgs.Empty);
@@ -52,7 +51,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void btnDown_Click(object sender, EventArgs e)
         {
-            this.panelEdit.Visible = false;
             if (this.OnMoveDownClick != null)
             {
                 this.OnMoveDownClick(this, EventArgs.Empty);

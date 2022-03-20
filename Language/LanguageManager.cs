@@ -1,14 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using SuchByte.MacroDeck.Logging;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Xml;
-using System.Xml.Serialization;
 
 namespace SuchByte.MacroDeck.Language
 {
@@ -31,83 +26,58 @@ namespace SuchByte.MacroDeck.Language
                 SaveDefault();
             }
 
-            // Load language files
-            /*foreach (var file in Directory.GetFiles(MacroDeck.MainDirectoryPath + "Language", "*.xml"))
-            {
-                try
-                {
-                    using (Stream stream = new FileStream(file, FileMode.Open, FileAccess.Read))
-                    {
-                    
-                        Strings strings = (Strings)new XmlSerializer(typeof(Strings)).Deserialize(stream);
-                        if (_languages.FindAll(l => l.__Language__.Equals(strings.__Language__) && l.__LanguageCode__.Equals(strings.__LanguageCode__) && l.__Author__.Equals(strings.__Author__)).Count > 0) continue;
-                        _languages.Add(strings);
-                    }
-                }
-                catch { }
-            }
-
-            // Load user language files
-            foreach (var file in Directory.GetFiles(MacroDeck.LanguagesPath, "*.xml"))
-            {
-                try
-                {
-                    using (Stream stream = new FileStream(file, FileMode.Open, FileAccess.Read))
-                    {
-                    
-                        Strings strings = (Strings)new XmlSerializer(typeof(Strings)).Deserialize(stream);
-                        if (_languages.FindAll(l => l.__Language__.Equals(strings.__Language__) && l.__LanguageCode__.Equals(strings.__LanguageCode__) && l.__Author__.Equals(strings.__Author__)).Count > 0) continue;
-                        _languages.Add(strings);
-                    }
-                }
-                catch { }
-            }*/
-
-
-
             // Loading languages from resources
+            MacroDeckLogger.Info("Loading language files...");
             var assembly = typeof(Strings).Assembly;
             foreach (var manifestResource in assembly.GetManifestResourceNames())
             {
                 try
                 {
-                    if (!manifestResource.StartsWith("SuchByte.MacroDeck.Resources.Languages.") ||! manifestResource.EndsWith(".xml")) continue;
-
+                    if (!manifestResource.StartsWith("SuchByte.MacroDeck.Resources.Languages.") || !manifestResource.EndsWith(".json")) continue;
+                    MacroDeckLogger.Info(typeof(LanguageManager), $"Loading ${manifestResource}...");
                     using var resourceStream = assembly.GetManifestResourceStream(manifestResource);
-                    using var streamReader = new StreamReader(resourceStream);
 
-                    using (TextReader reader = new StringReader(streamReader.ReadToEnd()))
+                    JsonSerializer serializer = new JsonSerializer();
+                    using (var sr = new StreamReader(resourceStream))
+                    using (var jsonReader = new JsonTextReader(sr))
                     {
-                        Strings language = (Strings)new XmlSerializer(typeof(Strings)).Deserialize(reader);
-                        if (_languages.FindAll(l => l.__Language__.Equals(language.__Language__) && l.__LanguageCode__.Equals(language.__LanguageCode__) && l.__Author__.Equals(language.__Author__)).Count > 0) continue;
-                        _languages.Add(language);
+                        while (!sr.EndOfStream)
+                        {
+                            Strings language = serializer.Deserialize<Strings>(jsonReader);
+                            if (_languages.FindAll(l => l.__Language__.Equals(language.__Language__) && l.__LanguageCode__.Equals(language.__LanguageCode__) && l.__Author__.Equals(language.__Author__)).Count > 0) continue;
+                            _languages.Add(language);
+                        }
                     }
-                } catch { }
+                } catch (Exception ex) {
+
+                    MacroDeckLogger.Warning("Failed to load language resource: " + ex.Message);
+                }
             }
 
             _languages = _languages.OrderBy(x => x.__Language__).ToList();
-          
-            foreach (Strings languageString in _languages)
-            {
-                Debug.WriteLine(languageString.__Language__);
-            }
         }
-
 
         private static void SaveDefault()
         {
+            var path = Path.Combine(MacroDeck.MainDirectoryPath, "Language", _strings.__Language__ + ".json");
+            JsonSerializer serializer = new JsonSerializer
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Newtonsoft.Json.Formatting.Indented,
+            };
+
             try
             {
-                XmlSerializer writer = new XmlSerializer(typeof(Strings));
+                using StreamWriter sw = new StreamWriter(path);
+                using JsonWriter writer = new JsonTextWriter(sw);
+                serializer.Serialize(writer, _strings);
 
-                var path = MacroDeck.MainDirectoryPath + "Language" + "//" + _strings.__Language__ + ".xml";
-                using (FileStream fileStream = File.Create(path))
-                {
-                    writer.Serialize(fileStream, _strings);
-                    fileStream.Close();
-                }
-                Debug.WriteLine("Default language file saved");
-            } catch { }
+                MacroDeckLogger.Info(typeof(LanguageManager), $"{_strings.__Language__} saved");
+            }
+            catch (Exception ex)
+            {
+                MacroDeckLogger.Error(typeof(LanguageManager), $"Failed to save {_strings.__Language__}: {ex.Message}");
+            }
         }
 
         public static void SetLanguage(string languageName)
@@ -121,7 +91,7 @@ namespace SuchByte.MacroDeck.Language
 
         public static void SetLanguage(Strings language)
         {
-            Debug.WriteLine("Set language to " + language.__Language__);
+            MacroDeckLogger.Info("Set language to " + language.__Language__);
             _strings = language;
             if (LanguageChanged != null)
             {
