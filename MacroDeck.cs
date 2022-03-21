@@ -1,3 +1,5 @@
+using CefSharp;
+using CefSharp.WinForms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.Backups;
@@ -358,6 +360,15 @@ namespace SuchByte.MacroDeck
                     msgBox.ShowDialog("Macro Deck started with administrator privileges", "It's not recommended to start Macro Deck with administrator privileges.", MessageBoxButtons.OK);
                 }
             }
+
+            // Initializing Cef Browser
+            CefSettings settings = new CefSettings();
+            settings.CefCommandLineArgs.Add("force-device-scale-factor", "1");
+            settings.CefCommandLineArgs.Add("disable-gpu-vsync", "1");
+            settings.CefCommandLineArgs.Add("disable-gpu", "1");
+            settings.CachePath = Path.Combine(UserDirectoryPath, "CefSharp", "Cache");
+            
+            Cef.Initialize(settings);
 
             // Check if config exists
             if (!File.Exists(ConfigFilePath))

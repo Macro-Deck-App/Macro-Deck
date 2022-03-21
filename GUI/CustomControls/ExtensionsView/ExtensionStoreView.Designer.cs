@@ -29,38 +29,65 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
         /// </summary>
         private void InitializeComponent()
         {
-            this.webView = new Microsoft.Web.WebView2.WinForms.WebView2();
-            ((System.ComponentModel.ISupportInitialize)(this.webView)).BeginInit();
+            this.extensionStoreIcon = new System.Windows.Forms.PictureBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.webView = new CefSharp.WinForms.ChromiumWebBrowser();
+            ((System.ComponentModel.ISupportInitialize)(this.extensionStoreIcon)).BeginInit();
             this.SuspendLayout();
+            // 
+            // extensionStoreIcon
+            // 
+            this.extensionStoreIcon.Image = global::SuchByte.MacroDeck.Properties.Resources.Macro_Deck_2021;
+            this.extensionStoreIcon.Location = new System.Drawing.Point(9, 3);
+            this.extensionStoreIcon.Name = "extensionStoreIcon";
+            this.extensionStoreIcon.Size = new System.Drawing.Size(41, 41);
+            this.extensionStoreIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.extensionStoreIcon.TabIndex = 1;
+            this.extensionStoreIcon.TabStop = false;
+            // 
+            // label1
+            // 
+            this.label1.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label1.ForeColor = System.Drawing.Color.Silver;
+            this.label1.Location = new System.Drawing.Point(56, 3);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(250, 41);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "Extension Store";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // webView
             // 
-            this.webView.CreationProperties = null;
-            this.webView.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.webView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webView.Location = new System.Drawing.Point(0, 0);
+            this.webView.ActivateBrowserOnCreation = false;
+            this.webView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.webView.Location = new System.Drawing.Point(0, 50);
             this.webView.Name = "webView";
-            this.webView.Size = new System.Drawing.Size(1137, 540);
-            this.webView.TabIndex = 0;
-            this.webView.ZoomFactor = 1D;
+            this.webView.Size = new System.Drawing.Size(1137, 490);
+            this.webView.TabIndex = 3;
+            this.webView.Text = "Extension Store";
             // 
             // ExtensionStoreView
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.webView);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.extensionStoreIcon);
             this.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ForeColor = System.Drawing.Color.White;
             this.Name = "ExtensionStoreView";
             this.Size = new System.Drawing.Size(1137, 540);
-            ((System.ComponentModel.ISupportInitialize)(this.webView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.extensionStoreIcon)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private Microsoft.Web.WebView2.WinForms.WebView2 webView;
+        private System.Windows.Forms.PictureBox extensionStoreIcon;
+        private System.Windows.Forms.Label label1;
+        private CefSharp.WinForms.ChromiumWebBrowser webView;
     }
 }

@@ -1,5 +1,4 @@
-﻿using Microsoft.Web.WebView2.Core;
-using SuchByte.MacroDeck.ExtensionStore;
+﻿using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Logging;
 using System;
@@ -19,53 +18,57 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
     {
         private readonly string extensionStoreUri = "https://macrodeck.org/extensionstore_plugins";
 
+
         public ExtensionStoreView()
         {
             InitializeComponent();
+
             this.Dock = DockStyle.Fill;
             this.DoubleBuffered = true;
 
-            InitializeBrowser();
-            this.webView.SourceChanged += WebView_SourceChanged;
-            this.webView.NavigationStarting += WebView_NavigationStarting;
-            this.webView.NavigationCompleted += WebView_NavigationCompleted;
+            this.webView.AddressChanged += WebView_AddressChanged;
+            this.webView.LoadingStateChanged += WebView_LoadingStateChanged;
+            this.webView.IsBrowserInitializedChanged += WebView_IsBrowserInitializedChanged;
+            
             this.Load += ExtensionStoreView_Load;
         }
 
-        private async void InitializeBrowser()
+        private void WebView_IsBrowserInitializedChanged(object sender, EventArgs e)
         {
-            var env = await CoreWebView2Environment.CreateAsync(null, MacroDeck.UserDirectoryPath);
-            await webView.EnsureCoreWebView2Async(env);
+            if (this.webView.IsBrowserInitialized)
+            {
+                this.webView.LoadUrl(this.extensionStoreUri);
+            }
         }
 
-        private void WebView_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
+
+        private void WebView_LoadingStateChanged(object sender, CefSharp.LoadingStateChangedEventArgs e)
         {
-            SpinnerDialog.SetVisisble(false, FindForm());
+            this.Invoke(new Action(() =>
+            {
+                this.extensionStoreIcon.Image = e.IsLoading ? Properties.Resources.Spinner : Properties.Resources.Macro_Deck_2021;
+            }));
         }
 
-        private void WebView_NavigationStarting(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationStartingEventArgs e)
+        private void WebView_AddressChanged(object sender, CefSharp.AddressChangedEventArgs e)
         {
-            Task.Run(() => SpinnerDialog.SetVisisble(true, FindForm()));
-        }
-
-        private void ExtensionStoreView_Load(object sender, EventArgs e)
-        {
-            this.webView.Source = new Uri($"{ this.extensionStoreUri }");
-        }
-
-        private void WebView_SourceChanged(object sender, Microsoft.Web.WebView2.Core.CoreWebView2SourceChangedEventArgs e)
-        {
-            this.webView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = Debugger.IsAttached;
-            string location = this.webView.Source.OriginalString;
+            string location = this.webView.Address;
             MacroDeckLogger.Trace(GetType(), $"Navigated to {location}");
             CheckHash();
             SetInstalledPlugins();
             SetInstalledIconPacks();
+            this.Invoke(new Action(() =>
+            {
+                this.webView.Update();
+            }));
         }
 
+        private void ExtensionStoreView_Load(object sender, EventArgs e)
+        {
+        }
         private void CheckHash()
         {
-            string location = this.webView.Source.OriginalString;
+            string location = this.webView.Address;
             if (location.IndexOf("#") == -1 || location.IndexOf("=") == -1) return;
             string hash = location.Substring(location.IndexOf("#") + 1);
             string method = hash.Substring(0, hash.IndexOf("="));
@@ -81,7 +84,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
 
         private void SetInstalledIconPacks()
         {
-            string location = this.webView.Source.OriginalString;
+            string location = this.webView.Address;
             if (!location.Contains("extensionstore_iconpacks")) return;
             if (location.IndexOf("#") != -1)
             {
@@ -89,19 +92,19 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             }
             if (location.IndexOf("?") == -1)
             {
-                this.webView.Source = new Uri($"{ location }?installed_iconpacks={ ExtensionStoreHelper.InstalledIconPacksAsString }");
+                this.webView.LoadUrl($"{ location }?installed_iconpacks={ ExtensionStoreHelper.InstalledIconPacksAsString }");
                 return;
             }
             if (!location.Contains("installed_iconpacks", StringComparison.OrdinalIgnoreCase))
             {
-                this.webView.Source = new Uri($"{ location }&installed_iconpacks={ ExtensionStoreHelper.InstalledIconPacksAsString }");
+                this.webView.LoadUrl($"{ location }&installed_iconpacks={ ExtensionStoreHelper.InstalledIconPacksAsString }");
                 return;
             }
         }
 
         private void SetInstalledPlugins()
         {
-            string location = this.webView.Source.OriginalString;
+            string location = this.webView.Address;
             if (!location.Contains("extensionstore_plugins")) return;
             if (location.IndexOf("#") != -1)
             {
@@ -109,12 +112,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             }
             if (location.IndexOf("?") == -1)
             {
-                this.webView.Source = new Uri($"{ location }?installed_plugins={ ExtensionStoreHelper.InstalledPluginsAsString }");
+                this.webView.LoadUrl($"{ location }?installed_plugins={ ExtensionStoreHelper.InstalledPluginsAsString }");
                 return;
             }
             if (!location.Contains("installed_plugins", StringComparison.OrdinalIgnoreCase))
             {
-                this.webView.Source = new Uri($"{ location }&installed_plugins={ ExtensionStoreHelper.InstalledPluginsAsString }");
+                this.webView.LoadUrl($"{ location }&installed_plugins={ ExtensionStoreHelper.InstalledPluginsAsString }");
                 return;
             }
         }
