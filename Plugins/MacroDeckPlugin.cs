@@ -16,7 +16,7 @@ namespace SuchByte.MacroDeck.Plugins
         Assembly executingAssembly = Assembly.GetCallingAssembly();
         FileVersionInfo versionInfo;
 
-        private string _name = "", _version = "";
+        private string _name = "", _version = "", _author = "";
 
         public MacroDeckPlugin()
         {
@@ -58,7 +58,16 @@ namespace SuchByte.MacroDeck.Plugins
         /// <summary>
         /// Author of the plugin
         /// </summary>
-        internal virtual string Author { get; set; }
+        internal virtual string Author { 
+            get 
+            {
+                return this._author; 
+            } 
+            set 
+            { 
+                this._author = value;
+            }
+        }
 
         /// <summary>
         /// This list contains all the actions of the plugin. If your plugin does not contain any actions, you can delete this.
