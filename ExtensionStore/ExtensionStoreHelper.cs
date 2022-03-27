@@ -33,11 +33,15 @@ namespace SuchByte.MacroDeck.ExtensionStore
 
         public static void InstallPackages(List<ExtensionStoreDownloaderPackageInfoModel> packages)
         {
-            extensionStoreDownloader = new ExtensionStoreDownloader(packages)
+            if (MacroDeck.MainWindow == null) return;
+            MacroDeck.MainWindow.Invoke(new Action(() =>
             {
-                Owner = MacroDeck.MainWindow,
-            };
-            extensionStoreDownloader.Show();
+                extensionStoreDownloader = new ExtensionStoreDownloader(packages)
+                {
+                    Owner = MacroDeck.MainWindow,
+                };
+                extensionStoreDownloader.Show();
+            }));
         }
 
         public static string GetPackageId(MacroDeckPlugin macroDeckPlugin)
