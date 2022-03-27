@@ -96,7 +96,6 @@ namespace SuchByte.MacroDeck.GUI
             // lblSafeMode
             // 
             this.lblSafeMode.Size = new System.Drawing.Size(140, 30);
-            this.lblSafeMode.UseMnemonic = false;
             // 
             // lblPluginsLoaded
             // 
@@ -359,6 +358,7 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // warningsErrorPanel
             // 
+            this.warningsErrorPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.warningsErrorPanel.Controls.Add(this.pictureBox2);
             this.warningsErrorPanel.Controls.Add(this.lblErrorsWarnings);
             this.warningsErrorPanel.Location = new System.Drawing.Point(267, 611);
