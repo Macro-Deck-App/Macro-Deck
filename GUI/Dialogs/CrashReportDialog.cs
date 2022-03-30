@@ -21,7 +21,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             InitializeComponent();
             this.SetCloseIconVisible(false);
             this.crashReport.Text = "Macro Deck version: " + MacroDeck.VersionString + Environment.NewLine +
-                                "Windows version: " + Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", "ProductName", "").ToString() + " " + (Environment.Is64BitOperatingSystem ? "64 bit" : "32 bit") + Environment.NewLine +
+                                "Windows version: " + Utils.OperatingSystemInformation.GetWindowsVersionName() + Environment.NewLine +
                                 Environment.NewLine + 
                                 crashReport;
             this.autoContinueTimer.Tick += AutoContinueTimerTick;
@@ -57,7 +57,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             if (this._secondsAutoClose >= 1)
             {
                 this._secondsAutoClose--;
-                this.btnContinue.Text = String.Format("Just continue ({0})", this._secondsAutoClose);
+                this.btnContinue.Text = string.Format("Just continue ({0})", this._secondsAutoClose);
             } else
             {
                 this.Close();

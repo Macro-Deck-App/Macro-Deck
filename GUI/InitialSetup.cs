@@ -1,11 +1,14 @@
 ﻿using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.InitialSetupPages;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -13,17 +16,15 @@ using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI
 {
-    public partial class InitialSetup : GUI.CustomControls.DialogForm
+    public partial class InitialSetup : CustomControls.DialogForm
     {
 
         public Configuration.Configuration configuration;
 
-        //public int Rows = 3, Columns = 5;
-
         int currentPage = 0;
         List<Control> pages;
 
-        List<JObject> objectsToInstall = new List<JObject>();
+        //List<JObject> objectsToInstall = new List<JObject>();
 
 
         public InitialSetup()
@@ -41,7 +42,8 @@ namespace SuchByte.MacroDeck.GUI
                 Host_Port = 8191,
             };
 
-            Language.LanguageManager.LanguageChanged += OnLanguageChanged;
+            LanguageManager.LanguageChanged += OnLanguageChanged;
+            this.SetSystemLanguage();
         }
 
 
@@ -56,8 +58,8 @@ namespace SuchByte.MacroDeck.GUI
                 new SetupPage1(),
                 new SetupPage2(this),
                 //new SetupPage3(this),
-                new SetupPage4(),
-                new SetupPage5(),
+                //new SetupPage4(),
+                //new SetupPage5(),
                 new SetupPage6(this),
             };
             this.SetPage(0);
@@ -65,21 +67,21 @@ namespace SuchByte.MacroDeck.GUI
 
         private void OnLanguageChanged(object sender, EventArgs e)
         {
-            this.configuration.Language = ((Language.Strings)sender).__Language__;
+            this.configuration.Language = ((Strings)sender).__Language__;
             this.UpdateLanguage();
             this.LoadSetupPages();
         }
 
         private void UpdateLanguage()
         {
-            this.btnBack.Text = Language.LanguageManager.Strings.InitialSetupButtonBack;
-            this.btnNext.Text = Language.LanguageManager.Strings.InitialSetupButtonNext;
+            this.btnBack.Text = LanguageManager.Strings.InitialSetupButtonBack;
+            this.btnNext.Text = LanguageManager.Strings.InitialSetupButtonNext;
         }
 
         private void BtnNext_Click(object sender, EventArgs e)
         {
             // Get all the selected plugins for installation
-            if (this.currentPage == pages.IndexOf(pages.OfType<SetupPage4>().FirstOrDefault()))
+            /*if (this.currentPage == pages.IndexOf(pages.OfType<SetupPage4>().FirstOrDefault()))
             {
                 SetupPage4 setupPage4 = pages.OfType<SetupPage4>().FirstOrDefault();
                 this.objectsToInstall = setupPage4.GetObjectsToInstall();
@@ -87,15 +89,15 @@ namespace SuchByte.MacroDeck.GUI
             {
                 SetupPage5 setupPage5 = pages.OfType<SetupPage5>().FirstOrDefault();
                 this.objectsToInstall.AddRange(setupPage5.GetObjectsToInstall());
-            }
+            }*/
 
             // Next page
             if (this.currentPage == this.pages.Count - 1)
             {
-                if (this.objectsToInstall.Count == 0)
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+                /*if (this.objectsToInstall.Count == 0)
                 {
-                    this.DialogResult = DialogResult.OK;
-                    this.Close();
                 } else
                 {
                     using (var pluginDownloader = new PluginDownloader())
@@ -108,8 +110,8 @@ namespace SuchByte.MacroDeck.GUI
                         }
 
                     }
-                }
-                
+                }*/
+
             } else
             {
                 this.currentPage++;
@@ -149,14 +151,32 @@ namespace SuchByte.MacroDeck.GUI
             }
             if (page == this.pages.Count - 1)
             {
-                this.btnNext.Text = Language.LanguageManager.Strings.InitialSetupButtonFinish;
+                this.btnNext.Text = LanguageManager.Strings.InitialSetupButtonFinish;
             } else
             {
-                this.btnNext.Text = Language.LanguageManager.Strings.InitialSetupButtonNext;
+                this.btnNext.Text = LanguageManager.Strings.InitialSetupButtonNext;
             }
-            this.lblPage.Text = String.Format(Language.LanguageManager.Strings.InitialSetupPage, this.currentPage + 1, this.pages.Count);
+            this.lblPage.Text = String.Format(LanguageManager.Strings.InitialSetupPage, this.currentPage + 1, this.pages.Count);
         }
 
+        private void SetSystemLanguage()
+        {
+            try
+            {
+                CultureInfo cultureInfo = CultureInfo.InstalledUICulture;
+                string languageIso = cultureInfo.TwoLetterISOLanguageName;
+                Strings language = LanguageManager.Languages.Find(l => l.__LanguageCode__.ToLower().Equals(languageIso.ToLower()));
+                if (language != null)
+                {
+                    LanguageManager.SetLanguage(language);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MacroDeckLogger.Warning("Not able to set system language: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            }
+        }
         private void InitialSetup_Load(object sender, EventArgs e)
         {
             

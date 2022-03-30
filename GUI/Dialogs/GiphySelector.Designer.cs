@@ -91,6 +91,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnSearch.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
             this.btnSearch.Size = new System.Drawing.Size(27, 27);
             this.btnSearch.TabIndex = 6;
+            this.btnSearch.UseMnemonic = false;
             this.btnSearch.UseVisualStyleBackColor = false;
             this.btnSearch.Click += new System.EventHandler(this.BtnSearch_Click);
             // 
@@ -112,6 +113,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnTrending.Size = new System.Drawing.Size(87, 27);
             this.btnTrending.TabIndex = 8;
             this.btnTrending.Text = "Trending";
+            this.btnTrending.UseMnemonic = false;
             this.btnTrending.UseVisualStyleBackColor = false;
             this.btnTrending.Click += new System.EventHandler(this.BtnTrending_Click);
             // 
@@ -132,6 +134,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOk.Size = new System.Drawing.Size(75, 25);
             this.btnOk.TabIndex = 10;
             this.btnOk.Text = "Ok";
+            this.btnOk.UseMnemonic = false;
             this.btnOk.UseVisualStyleBackColor = true;
             this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
             // 
@@ -180,6 +183,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblDownloading.TabIndex = 14;
             this.lblDownloading.Text = "Downloading...";
             this.lblDownloading.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblDownloading.UseMnemonic = false;
             this.lblDownloading.Visible = false;
             // 
             // GiphySelector

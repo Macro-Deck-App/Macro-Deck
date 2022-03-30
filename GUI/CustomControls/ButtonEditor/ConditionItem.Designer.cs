@@ -60,6 +60,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.addItemContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.menuItemAction = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItemDelay = new System.Windows.Forms.ToolStripMenuItem();
+            this.template = new SuchByte.MacroDeck.GUI.CustomControls.RoundedTextBox();
+            this.btnOpenTemplateEditor = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             ((System.ComponentModel.ISupportInitialize)(this.btnAddAction)).BeginInit();
             this.panelEdit.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.btnRemove)).BeginInit();
@@ -77,24 +79,26 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblIf.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lblIf.Location = new System.Drawing.Point(9, 2);
             this.lblIf.Name = "lblIf";
-            this.lblIf.Size = new System.Drawing.Size(91, 28);
+            this.lblIf.Size = new System.Drawing.Size(77, 28);
             this.lblIf.TabIndex = 4;
             this.lblIf.Text = "If";
+            this.lblIf.UseMnemonic = false;
             this.lblIf.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // typeBox
             // 
             this.typeBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.typeBox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.typeBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.typeBox.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.typeBox.Icon = null;
-            this.typeBox.Location = new System.Drawing.Point(110, 2);
+            this.typeBox.Location = new System.Drawing.Point(93, 2);
             this.typeBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.typeBox.Name = "typeBox";
             this.typeBox.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
             this.typeBox.SelectedIndex = -1;
             this.typeBox.SelectedItem = null;
-            this.typeBox.Size = new System.Drawing.Size(147, 28);
+            this.typeBox.Size = new System.Drawing.Size(115, 28);
             this.typeBox.TabIndex = 5;
             this.typeBox.SelectedIndexChanged += new System.EventHandler(this.TypeBox_SelectedIndexChanged);
             this.typeBox.Load += new System.EventHandler(this.typeBox_Load);
@@ -102,10 +106,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // methodBox
             // 
             this.methodBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.methodBox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.methodBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.methodBox.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.methodBox.Icon = null;
-            this.methodBox.Location = new System.Drawing.Point(291, 0);
+            this.methodBox.Location = new System.Drawing.Point(245, 0);
             this.methodBox.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
             this.methodBox.Name = "methodBox";
             this.methodBox.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
@@ -124,13 +129,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.valueToCompare.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDown;
             this.valueToCompare.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.valueToCompare.Icon = null;
-            this.valueToCompare.Location = new System.Drawing.Point(394, 0);
+            this.valueToCompare.Location = new System.Drawing.Point(348, 0);
             this.valueToCompare.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
             this.valueToCompare.Name = "valueToCompare";
             this.valueToCompare.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
             this.valueToCompare.SelectedIndex = -1;
             this.valueToCompare.SelectedItem = null;
-            this.valueToCompare.Size = new System.Drawing.Size(122, 28);
+            this.valueToCompare.Size = new System.Drawing.Size(166, 28);
             this.valueToCompare.TabIndex = 7;
             this.valueToCompare.SelectedIndexChanged += new System.EventHandler(this.ValueToCompare_TextChanged);
             // 
@@ -141,10 +146,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.actionsList.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.actionsList.Location = new System.Drawing.Point(0, 0);
             this.actionsList.Margin = new System.Windows.Forms.Padding(0);
-            this.actionsList.MaximumSize = new System.Drawing.Size(883, 0);
-            this.actionsList.MinimumSize = new System.Drawing.Size(883, 0);
+            this.actionsList.MaximumSize = new System.Drawing.Size(840, 0);
+            this.actionsList.MinimumSize = new System.Drawing.Size(840, 0);
             this.actionsList.Name = "actionsList";
-            this.actionsList.Size = new System.Drawing.Size(883, 0);
+            this.actionsList.Size = new System.Drawing.Size(840, 0);
             this.actionsList.TabIndex = 8;
             // 
             // btnAddAction
@@ -167,6 +172,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // source
             // 
             this.source.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.source.Cursor = System.Windows.Forms.Cursors.Hand;
             this.source.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.source.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.source.Icon = null;
@@ -176,7 +182,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.source.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
             this.source.SelectedIndex = -1;
             this.source.SelectedItem = null;
-            this.source.Size = new System.Drawing.Size(282, 28);
+            this.source.Size = new System.Drawing.Size(236, 28);
             this.source.TabIndex = 10;
             this.source.SelectedIndexChanged += new System.EventHandler(this.Source_SelectedIndexChanged);
             // 
@@ -187,7 +193,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.panelEdit.Controls.Add(this.btnDown);
             this.panelEdit.Controls.Add(this.btnUp);
             this.panelEdit.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.panelEdit.Location = new System.Drawing.Point(795, 2);
+            this.panelEdit.Location = new System.Drawing.Point(758, 2);
             this.panelEdit.Name = "panelEdit";
             this.panelEdit.Size = new System.Drawing.Size(89, 26);
             this.panelEdit.TabIndex = 11;
@@ -256,6 +262,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblElse.TabIndex = 12;
             this.lblElse.Text = "Else";
             this.lblElse.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblElse.UseMnemonic = false;
             // 
             // elseActionsList
             // 
@@ -265,10 +272,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.elseActionsList.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.elseActionsList.Location = new System.Drawing.Point(0, 66);
             this.elseActionsList.Margin = new System.Windows.Forms.Padding(0);
-            this.elseActionsList.MaximumSize = new System.Drawing.Size(883, 0);
-            this.elseActionsList.MinimumSize = new System.Drawing.Size(883, 0);
+            this.elseActionsList.MaximumSize = new System.Drawing.Size(840, 0);
+            this.elseActionsList.MinimumSize = new System.Drawing.Size(840, 0);
             this.elseActionsList.Name = "elseActionsList";
-            this.elseActionsList.Size = new System.Drawing.Size(883, 0);
+            this.elseActionsList.Size = new System.Drawing.Size(840, 0);
             this.elseActionsList.TabIndex = 9;
             // 
             // btnAddActionElse
@@ -303,19 +310,25 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(9, 37);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
-            this.flowLayoutPanel1.MaximumSize = new System.Drawing.Size(883, 0);
-            this.flowLayoutPanel1.MinimumSize = new System.Drawing.Size(883, 0);
+            this.flowLayoutPanel1.MaximumSize = new System.Drawing.Size(840, 0);
+            this.flowLayoutPanel1.MinimumSize = new System.Drawing.Size(840, 0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Padding = new System.Windows.Forms.Padding(0, 0, 0, 10);
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(883, 109);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(840, 109);
             this.flowLayoutPanel1.TabIndex = 14;
             // 
             // flowLayoutPanel2
             // 
+            this.flowLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flowLayoutPanel2.Controls.Add(this.source);
             this.flowLayoutPanel2.Controls.Add(this.methodBox);
             this.flowLayoutPanel2.Controls.Add(this.valueToCompare);
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(261, 2);
+            this.flowLayoutPanel2.Controls.Add(this.template);
+            this.flowLayoutPanel2.Controls.Add(this.btnOpenTemplateEditor);
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(215, 2);
+            this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
+            this.flowLayoutPanel2.MaximumSize = new System.Drawing.Size(522, 0);
+            this.flowLayoutPanel2.MinimumSize = new System.Drawing.Size(522, 28);
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
             this.flowLayoutPanel2.Size = new System.Drawing.Size(522, 28);
             this.flowLayoutPanel2.TabIndex = 15;
@@ -348,6 +361,49 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.menuItemDelay.Text = "Delay";
             this.menuItemDelay.Click += new System.EventHandler(this.MenuItemDelay_Click);
             // 
+            // template
+            // 
+            this.template.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.template.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.template.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.template.Icon = null;
+            this.template.Location = new System.Drawing.Point(3, 31);
+            this.template.MaxCharacters = 32767;
+            this.template.Multiline = false;
+            this.template.Name = "template";
+            this.template.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
+            this.template.PasswordChar = false;
+            this.template.PlaceHolderColor = System.Drawing.Color.Gray;
+            this.template.PlaceHolderText = "";
+            this.template.ReadOnly = false;
+            this.template.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.template.SelectionStart = 0;
+            this.template.Size = new System.Drawing.Size(467, 25);
+            this.template.TabIndex = 11;
+            this.template.TextAlignment = System.Windows.Forms.HorizontalAlignment.Left;
+            this.template.TextChanged += Template_TextChanged;
+            // 
+            // btnOpenTemplateEditor
+            // 
+            this.btnOpenTemplateEditor.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
+            this.btnOpenTemplateEditor.BorderRadius = 8;
+            this.btnOpenTemplateEditor.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnOpenTemplateEditor.FlatAppearance.BorderSize = 0;
+            this.btnOpenTemplateEditor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnOpenTemplateEditor.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnOpenTemplateEditor.ForeColor = System.Drawing.Color.White;
+            this.btnOpenTemplateEditor.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnOpenTemplateEditor.Icon = global::SuchByte.MacroDeck.Properties.Resources.Arrow_Top_Right_Hover;
+            this.btnOpenTemplateEditor.Location = new System.Drawing.Point(476, 31);
+            this.btnOpenTemplateEditor.Name = "btnOpenTemplateEditor";
+            this.btnOpenTemplateEditor.Progress = 0;
+            this.btnOpenTemplateEditor.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
+            this.btnOpenTemplateEditor.Size = new System.Drawing.Size(28, 28);
+            this.btnOpenTemplateEditor.TabIndex = 12;
+            this.btnOpenTemplateEditor.UseVisualStyleBackColor = false;
+            this.btnOpenTemplateEditor.UseMnemonic = false;
+            this.btnOpenTemplateEditor.Click += new System.EventHandler(this.BtnOpenTemplateEditor_Click);
+            // 
             // ConditionItem
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
@@ -355,7 +411,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(32)))), ((int)(((byte)(32)))));
-            this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Controls.Add(this.panelEdit);
             this.Controls.Add(this.typeBox);
             this.Controls.Add(this.lblIf);
@@ -364,8 +419,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ForeColor = System.Drawing.Color.White;
             this.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
+            this.MaximumSize = new System.Drawing.Size(850, 0);
+            this.MinimumSize = new System.Drawing.Size(850, 0);
             this.Name = "ConditionItem";
-            this.Size = new System.Drawing.Size(893, 146);
+            this.Size = new System.Drawing.Size(850, 146);
             this.Load += new System.EventHandler(this.ConditionItem_Load);
             ((System.ComponentModel.ISupportInitialize)(this.btnAddAction)).EndInit();
             this.panelEdit.ResumeLayout(false);
@@ -382,10 +439,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         }
 
-        private void Source_SelectedIndexChanged1(object sender, System.EventArgs e)
-        {
-            throw new System.NotImplementedException();
-        }
+        
+
 
         #endregion
         private System.Windows.Forms.Label lblIf;
@@ -407,5 +462,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         private System.Windows.Forms.ContextMenuStrip addItemContextMenu;
         private System.Windows.Forms.ToolStripMenuItem menuItemAction;
         private System.Windows.Forms.ToolStripMenuItem menuItemDelay;
+        private RoundedTextBox template;
+        private ButtonPrimary btnOpenTemplateEditor;
     }
 }

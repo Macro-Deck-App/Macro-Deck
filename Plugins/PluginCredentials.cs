@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SuchByte.MacroDeck.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,7 +26,7 @@ namespace SuchByte.MacroDeck.Plugins
                 pluginCredentials = new List<Dictionary<string, string>>();
             } else
             {
-                pluginCredentials = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(File.ReadAllText(MacroDeck.PluginCredentialsPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower()), new JsonSerializerSettings
+                pluginCredentials = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(File.ReadAllText(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())), new JsonSerializerSettings
                 {
                     TypeNameHandling = TypeNameHandling.Auto,
                 });
@@ -41,7 +42,7 @@ namespace SuchByte.MacroDeck.Plugins
 
             try
             {
-                using (StreamWriter sw = new StreamWriter(MacroDeck.PluginCredentialsPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower()))
+                using (StreamWriter sw = new StreamWriter(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {
                     serializer.Serialize(writer, pluginCredentials);
@@ -49,7 +50,7 @@ namespace SuchByte.MacroDeck.Plugins
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                MacroDeckLogger.Error("Error while adding plugin credential: " + ex.Message);
             }
 
         }
@@ -76,7 +77,7 @@ namespace SuchByte.MacroDeck.Plugins
 
             try
             {
-                using (StreamWriter sw = new StreamWriter(MacroDeck.PluginCredentialsPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower()))
+                using (StreamWriter sw = new StreamWriter(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {
                     serializer.Serialize(writer, pluginCredentials);
@@ -84,25 +85,25 @@ namespace SuchByte.MacroDeck.Plugins
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                MacroDeckLogger.Error("Error while setting plugin credential: " + ex.Message);
             }
         }
 
         public static void DeletePluginCredentials(MacroDeckPlugin plugin)
         {
-            File.Delete(MacroDeck.PluginCredentialsPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower());
+            File.Delete(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower()));
         }
 
         public static List<Dictionary<string, string>> GetPluginCredentials(MacroDeckPlugin plugin)
         {
             List<Dictionary<string, string>> pluginCredentialsEncrypted;
-            if (!File.Exists(MacroDeck.PluginCredentialsPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower()))
+            if (!File.Exists(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
             {
                 pluginCredentialsEncrypted = new List<Dictionary<string, string>>();
             }
             else
             {
-                pluginCredentialsEncrypted = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(File.ReadAllText(MacroDeck.PluginCredentialsPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower()), new JsonSerializerSettings
+                pluginCredentialsEncrypted = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(File.ReadAllText(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())), new JsonSerializerSettings
                 {
                     TypeNameHandling = TypeNameHandling.Auto,
                 });
@@ -115,7 +116,13 @@ namespace SuchByte.MacroDeck.Plugins
                 Dictionary<string, string> pluginCredentialDecrypted = new Dictionary<string, string>();
                 foreach (KeyValuePair<string, string> entry in pluginCredentialEncrypted)
                 {
-                    pluginCredentialDecrypted[entry.Key] = Utils.StringCipher.Decrypt(entry.Value, Utils.StringCipher.GetMachineGuid());
+                    try
+                    {
+                        pluginCredentialDecrypted[entry.Key] = Utils.StringCipher.Decrypt(entry.Value, Utils.StringCipher.GetMachineGuid());
+                    } catch
+                    {
+                        MacroDeckLogger.Warning(typeof(PluginCredentials), $"Unable to decrypt credentials for {plugin.Name}. Perhaps the machine GUID changed?");
+                    }
                 }
                 pluginCredentialsDecrypted.Add(pluginCredentialDecrypted);
             }

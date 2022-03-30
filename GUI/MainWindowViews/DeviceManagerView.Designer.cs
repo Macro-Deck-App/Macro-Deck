@@ -67,6 +67,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblKnownDevices.Size = new System.Drawing.Size(134, 23);
             this.lblKnownDevices.TabIndex = 13;
             this.lblKnownDevices.Text = "Known devices";
+            this.lblKnownDevices.UseMnemonic = false;
             // 
             // lblBehaviour
             // 
@@ -78,6 +79,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblBehaviour.Size = new System.Drawing.Size(93, 23);
             this.lblBehaviour.TabIndex = 14;
             this.lblBehaviour.Text = "Behaviour";
+            this.lblBehaviour.UseMnemonic = false;
             // 
             // panel1
             // 
@@ -102,6 +104,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.radioBlockNew.TabIndex = 2;
             this.radioBlockNew.TabStop = true;
             this.radioBlockNew.Text = "Block all new connections";
+            this.radioBlockNew.UseMnemonic = false;
             this.radioBlockNew.UseVisualStyleBackColor = true;
             this.radioBlockNew.CheckedChanged += new System.EventHandler(this.RadioBehaviour_CheckedChanged);
             // 
@@ -116,6 +119,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.radioAllowAll.TabIndex = 1;
             this.radioAllowAll.TabStop = true;
             this.radioAllowAll.Text = "Allow all new connections (Not recommended)";
+            this.radioAllowAll.UseMnemonic = false;
             this.radioAllowAll.UseVisualStyleBackColor = true;
             this.radioAllowAll.CheckedChanged += new System.EventHandler(this.RadioBehaviour_CheckedChanged);
             // 
@@ -130,6 +134,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.radioAskNewConnections.TabIndex = 0;
             this.radioAskNewConnections.TabStop = true;
             this.radioAskNewConnections.Text = "Ask on new connections";
+            this.radioAskNewConnections.UseMnemonic = false;
             this.radioAskNewConnections.UseVisualStyleBackColor = true;
             this.radioAskNewConnections.CheckedChanged += new System.EventHandler(this.RadioBehaviour_CheckedChanged);
             // 

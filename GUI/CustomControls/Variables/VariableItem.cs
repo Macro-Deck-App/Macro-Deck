@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
-    public partial class VariableItem : UserControl
+    public partial class VariableItem : RoundedUserControl
     {
 
         public Variables.Variable Variable;
@@ -18,11 +18,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             this.Variable = variable;
             InitializeComponent();
+            this.SuspendLayout();
             this.lblName.Text = Language.LanguageManager.Strings.Name;
             this.lblType.Text = Language.LanguageManager.Strings.Type;
             this.lblValue.Text = Language.LanguageManager.Strings.Value;
             this.lblCreator.Text = Language.LanguageManager.Strings.Creator;
             this.Update();
+            this.ResumeLayout();
         }
 
         public new void Update()

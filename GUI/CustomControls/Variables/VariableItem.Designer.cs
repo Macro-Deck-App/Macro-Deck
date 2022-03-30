@@ -29,7 +29,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// </summary>
         private void InitializeComponent()
         {
-            this.lblName = new System.Windows.Forms.Label();
+            this.lblName = new System.Windows.Forms.TextBox();
             this.lblType = new System.Windows.Forms.Label();
             this.lblValue = new System.Windows.Forms.Label();
             this.lblCreator = new System.Windows.Forms.Label();
@@ -38,44 +38,51 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             // lblName
             // 
+            this.lblName.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
+            this.lblName.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.lblName.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblName.Location = new System.Drawing.Point(3, 0);
+            this.lblName.ForeColor = System.Drawing.Color.White;
+            this.lblName.Location = new System.Drawing.Point(11, 15);
+            this.lblName.Margin = new System.Windows.Forms.Padding(0);
             this.lblName.Name = "lblName";
-            this.lblName.Size = new System.Drawing.Size(354, 50);
+            this.lblName.Size = new System.Drawing.Size(349, 20);
             this.lblName.TabIndex = 0;
             this.lblName.Text = "Name";
-            this.lblName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblName.ReadOnly = true;
             // 
             // lblType
             // 
             this.lblType.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblType.Location = new System.Drawing.Point(363, 0);
+            this.lblType.Location = new System.Drawing.Point(363, 5);
             this.lblType.Name = "lblType";
-            this.lblType.Size = new System.Drawing.Size(175, 50);
+            this.lblType.Size = new System.Drawing.Size(175, 40);
             this.lblType.TabIndex = 1;
             this.lblType.Text = "Type";
             this.lblType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblType.UseMnemonic = false;
             // 
             // lblValue
             // 
             this.lblValue.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblValue.Location = new System.Drawing.Point(544, 0);
+            this.lblValue.Location = new System.Drawing.Point(544, 5);
             this.lblValue.Name = "lblValue";
-            this.lblValue.Size = new System.Drawing.Size(258, 50);
+            this.lblValue.Size = new System.Drawing.Size(258, 40);
             this.lblValue.TabIndex = 2;
             this.lblValue.Text = "Value";
             this.lblValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblValue.UseMnemonic = false;
             // 
             // lblCreator
             // 
             this.lblCreator.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblCreator.ForeColor = System.Drawing.Color.Silver;
-            this.lblCreator.Location = new System.Drawing.Point(808, 0);
+            this.lblCreator.Location = new System.Drawing.Point(808, 5);
             this.lblCreator.Name = "lblCreator";
-            this.lblCreator.Size = new System.Drawing.Size(212, 50);
+            this.lblCreator.Size = new System.Drawing.Size(212, 40);
             this.lblCreator.TabIndex = 3;
             this.lblCreator.Text = "Creator";
             this.lblCreator.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblCreator.UseMnemonic = false;
             // 
             // btnEdit
             // 
@@ -87,6 +94,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnEdit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnEdit.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnEdit.ForeColor = System.Drawing.Color.White;
+            this.btnEdit.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnEdit.Icon = null;
             this.btnEdit.Location = new System.Drawing.Point(1056, 8);
             this.btnEdit.Name = "btnEdit";
             this.btnEdit.Progress = 0;
@@ -94,6 +103,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnEdit.Size = new System.Drawing.Size(35, 35);
             this.btnEdit.TabIndex = 4;
             this.btnEdit.Text = "...";
+            this.btnEdit.UseMnemonic = false;
             this.btnEdit.UseVisualStyleBackColor = false;
             this.btnEdit.Click += new System.EventHandler(this.BtnEdit_Click);
             // 
@@ -112,12 +122,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.Name = "VariableItem";
             this.Size = new System.Drawing.Size(1100, 50);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Label lblName;
+        private System.Windows.Forms.TextBox lblName;
         private System.Windows.Forms.Label lblType;
         private System.Windows.Forms.Label lblValue;
         private System.Windows.Forms.Label lblCreator;

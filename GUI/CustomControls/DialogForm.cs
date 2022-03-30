@@ -25,7 +25,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         public DialogForm()
         {
             InitializeComponent();
+            (new DropShadow()).ApplyShadows(this);
             this.ResizeEnd += OnResizeEnd;
+            this.MouseDown += DialogForm_MouseDown;
         }
 
         private void OnResizeEnd(object sender, EventArgs e)
@@ -37,13 +39,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             this.btnClose.Visible = visible;
         }
-
-
-        private void TitleBar_MouseDown(object sender, MouseEventArgs e)
-        {
-            ReleaseCapture();
-            SendMessage(this.Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
-        }
+        
 
         private void Btn_close_Click(object sender, EventArgs e)
         {
@@ -53,36 +49,15 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void DialogForm_Load(object sender, EventArgs e)
         {
-            /*this.Opacity = 0;
-            open_animation_timer.Start();*/
             this.btnClose.Location = new Point(this.Width - this.btnClose.Width - 2, 2);
         }
 
-        private void open_animation_timer_Tick(object sender, EventArgs e)
+        private void DialogForm_MouseDown(object sender, MouseEventArgs e)
         {
-            if (this.Opacity < 1)
+            if (this.PointToClient(Cursor.Position).Y <= 25)
             {
-                this.Opacity += 0.1;
-            }
-            if (this.Opacity >= 1)
-            {
-                open_animation_timer.Stop();
-            }
-        }
-
-        
-        private void DialogForm_Paint(object sender, PaintEventArgs e)
-        {
-            Pen pen = new Pen(Color.FromArgb(0, 123, 255), 1);
-            Rectangle rect = new Rectangle(0, 0, this.Width - 2, this.Height - 2);
-            e.Graphics.DrawRectangle(pen, rect);
-        }
-
-        private void BtnFeedback_Click(object sender, EventArgs e)
-        {
-            using (var feedbackDialog = new FeedbackDialog())
-            {
-                feedbackDialog.ShowDialog();
+                ReleaseCapture();
+                SendMessage(this.Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
             }
         }
 

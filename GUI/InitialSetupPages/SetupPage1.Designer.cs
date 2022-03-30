@@ -32,7 +32,6 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblWelcome = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.lblLetsConfigure = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
             this.languages = new System.Windows.Forms.ListBox();
             this.lblSelectLanguage = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -48,6 +47,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblWelcome.TabIndex = 0;
             this.lblWelcome.Text = "Welcome to Macro Deck 2!";
             this.lblWelcome.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblWelcome.UseMnemonic = false;
             // 
             // pictureBox1
             // 
@@ -70,19 +70,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblLetsConfigure.TabIndex = 2;
             this.lblLetsConfigure.Text = "Let\'s configure your Macro Deck experience";
             this.lblLetsConfigure.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label3
-            // 
-            this.label3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.label3.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label3.ForeColor = System.Drawing.Color.White;
-            this.label3.Location = new System.Drawing.Point(3, 531);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(685, 40);
-            this.label3.TabIndex = 3;
-            this.label3.Text = "This is a beta version! Bugs and errors are expected. Use the \"Feedback\" button i" +
-    "n the title bar to report bugs or request other features.";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblLetsConfigure.UseMnemonic = false;
             // 
             // languages
             // 
@@ -92,7 +80,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.languages.ForeColor = System.Drawing.Color.White;
             this.languages.FormattingEnabled = true;
             this.languages.ItemHeight = 18;
-            this.languages.Location = new System.Drawing.Point(231, 246);
+            this.languages.Location = new System.Drawing.Point(231, 297);
             this.languages.Name = "languages";
             this.languages.Size = new System.Drawing.Size(228, 218);
             this.languages.TabIndex = 4;
@@ -102,12 +90,13 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             // 
             this.lblSelectLanguage.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblSelectLanguage.ForeColor = System.Drawing.Color.White;
-            this.lblSelectLanguage.Location = new System.Drawing.Point(231, 213);
+            this.lblSelectLanguage.Location = new System.Drawing.Point(231, 264);
             this.lblSelectLanguage.Name = "lblSelectLanguage";
             this.lblSelectLanguage.Size = new System.Drawing.Size(228, 26);
             this.lblSelectLanguage.TabIndex = 5;
             this.lblSelectLanguage.Text = "Select your language";
             this.lblSelectLanguage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblSelectLanguage.UseMnemonic = false;
             // 
             // SetupPage1
             // 
@@ -116,7 +105,6 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.lblSelectLanguage);
             this.Controls.Add(this.languages);
-            this.Controls.Add(this.label3);
             this.Controls.Add(this.lblLetsConfigure);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.lblWelcome);
@@ -134,7 +122,6 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
         private System.Windows.Forms.Label lblWelcome;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Label lblLetsConfigure;
-        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ListBox languages;
         private System.Windows.Forms.Label lblSelectLanguage;
     }

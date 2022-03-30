@@ -3,46 +3,57 @@ using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Text;
 
 namespace SuchByte.MacroDeck.Icons
 {
     public class Icon
     {
-        private Image _cachedIconImage;
+        private string _filePath;
+
         private string _iconBase64 = "";
 
-        public long IconId { get; set; }
-        public string IconBase64 { 
+        public string FilePath
+        {
+            get => _filePath;
+            set
+            {
+                this._filePath = value;
+            }
+        }
+
+        public string IconId { get; set; } = Guid.NewGuid().ToString();
+
+        public Image IconImage
+        {
             get
             {
-                return this._iconBase64;
-            }
-            set {
-                this._iconBase64 = value;
-                if (MacroDeck.Configuration.CacheIcons)
+                using (var fs = new FileStream(_filePath, FileMode.Open, FileAccess.Read))
                 {
-                    try
-                    {
-                        this._cachedIconImage = Utils.Base64.GetImageFromBase64(value);
-                    } catch { }
+                    var ms = new MemoryStream();
+                    fs.CopyTo(ms);
+                    ms.Position = 0;
+                    return Image.FromStream(ms);
                 }
             }
         }
-        public string IconPack { get; set; }
 
-        [JsonIgnore]
-        public Image IconImage { 
+        public string IconBase64
+        {
             get
             {
-                if (this._cachedIconImage != null)
+                if (string.IsNullOrWhiteSpace(this._iconBase64))
                 {
-                    return this._cachedIconImage;
-                } else
-                {
-                    return Utils.Base64.GetImageFromBase64(this._iconBase64);
+                    this._iconBase64 = Utils.Base64.GetBase64FromImage(IconImage);
                 }
+                return this._iconBase64;
             }
+        }
+
+        public string IconHex128_64Base64
+        {
+            get => Utils.Base64.GetBase64ByteArray((Bitmap)IconImage, new Size(128,64));
         }
 
     }

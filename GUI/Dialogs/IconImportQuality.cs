@@ -14,9 +14,10 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         public int Pixels;
 
-        public IconImportQuality()
+        public IconImportQuality(bool gif = false)
         {
             InitializeComponent();
+            this.SuspendLayout();
             this.lblInfo.Text = Language.LanguageManager.Strings.IconImportQualityInfo;
             this.qualityOriginal.Text = Language.LanguageManager.Strings.Original;
             this.qualityHigh.Text = Language.LanguageManager.Strings.High350px;
@@ -24,9 +25,14 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.qualityLow.Text = Language.LanguageManager.Strings.Low150px;
             this.qualityLowest.Text = Language.LanguageManager.Strings.Lowest100px;
             this.btnOk.Text = Language.LanguageManager.Strings.Ok;
+            if (gif)
+            {
+                this.qualityLowest.Checked = true;
+            }
+            this.ResumeLayout();
         }
 
-        private void btnOk_Click(object sender, EventArgs e)
+        private void BtnOk_Click(object sender, EventArgs e)
         {
             if (this.qualityOriginal.Checked)
             {

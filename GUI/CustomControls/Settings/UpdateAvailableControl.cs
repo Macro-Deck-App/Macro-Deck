@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
+using SuchByte.MacroDeck.Backups;
+using SuchByte.MacroDeck.Language;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,55 +22,65 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
         {
             InitializeComponent();
 
-            this.lblVersion.Text = String.Format(Language.LanguageManager.Strings.VersionXIsNowAvailable, Updater.Updater.UpdateObject["version"], Updater.Updater.UpdateObject["channel"]);
-            this.btnInstall.Text = Language.LanguageManager.Strings.DownloadAndInstall;
+            this.lblVersion.Text = String.Format(LanguageManager.Strings.VersionXIsNowAvailable, Updater.Updater.UpdateObject["version"], Updater.Updater.UpdateObject["channel"]);
+            this.btnInstall.Text = LanguageManager.Strings.DownloadAndInstall;
             this.lblSize.Text = Updater.Updater.UpdateSizeMb.ToString("0.##") + "MB";
             //this.lblStatus.Text = Language.LanguageManager.Strings.ReadyToDownloadUpdate;
 
             Updater.Updater.OnProgressChanged += ProgressChanged;
             Updater.Updater.OnError += Error;
 
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(Updater.Updater.UpdateObject["changelog"].ToString());
-            foreach (XmlNode node in doc.DocumentElement.ChildNodes)
+            string changelogXml = Updater.Updater.UpdateObject["changelog"].ToString();
+
+            if (!string.IsNullOrWhiteSpace(changelogXml))
             {
-                if (node.HasChildNodes == true)
+                try
                 {
-                    Label title = new Label
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml(changelogXml);
+                    foreach (XmlNode node in doc.DocumentElement.ChildNodes)
                     {
-                        AutoSize = true,
-                        MinimumSize = new Size(950, 0),
-                        MaximumSize = new Size(950, 0),
-                        Font = new Font("Tahoma", 14F, FontStyle.Bold, GraphicsUnit.Point),
-                        ForeColor = Color.White,
-                        Text = node.Name.ToString()
-                    };
-                    this.changelogPanel.Controls.Add(title);
-                    foreach (XmlNode childNode in node.ChildNodes)
-                    {
-                        if (childNode.Name.ToString() == "Text")
+                        if (node.HasChildNodes == true)
                         {
-                            Label text = new Label
+                            Label title = new Label
                             {
                                 AutoSize = true,
-                                MinimumSize = new Size(645, 0),
-                                MaximumSize = new Size(645, 0),
-                                Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point),
+                                MinimumSize = new Size(880, 0),
+                                MaximumSize = new Size(880, 0),
+                                Font = new Font("Tahoma", 14F, FontStyle.Bold, GraphicsUnit.Point),
                                 ForeColor = Color.White,
-                                Text = "● " + childNode.InnerText.ToString()
+                                Text = node.Name.ToString()
                             };
-                            this.changelogPanel.Controls.Add(text);
+                            this.changelogPanel.Controls.Add(title);
+                            foreach (XmlNode childNode in node.ChildNodes)
+                            {
+                                if (childNode.Name.ToString() == "Text")
+                                {
+                                    Label text = new Label
+                                    {
+                                        AutoSize = true,
+                                        MinimumSize = new Size(880, 0),
+                                        MaximumSize = new Size(880, 0),
+                                        Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point),
+                                        ForeColor = Color.White,
+                                        Text = "● " + childNode.InnerText.ToString()
+                                    };
+                                    this.changelogPanel.Controls.Add(text);
+                                }
+                            }
+                            Panel spacer = new Panel
+                            {
+                                AutoSize = true,
+                                MinimumSize = new Size(880, 15),
+                                MaximumSize = new Size(880, 15)
+                            };
+                            this.changelogPanel.Controls.Add(spacer);
                         }
                     }
-                    Panel spacer = new Panel
-                    {
-                        AutoSize = true,
-                        MinimumSize = new Size(950, 15),
-                        MaximumSize = new Size(950, 15)
-                    };
-                    this.changelogPanel.Controls.Add(spacer);
-                }
+                } catch { }
             }
+
+            
 
             if (Updater.Updater.Downloading)
             {
@@ -83,6 +95,20 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
         private void BtnInstall_Click(object sender, EventArgs e)
         {
             this.btnInstall.Enabled = false;
+            this.btnInstall.Spinner = true;
+            bool createBackup = false;
+            using (var msgBox = new MessageBox())
+            {
+                if (msgBox.ShowDialog(LanguageManager.Strings.Backup, LanguageManager.Strings.CreateBackupBeforeUpdate, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    createBackup = true;
+                }
+            }
+            if (createBackup)
+            {
+                this.btnInstall.Text = LanguageManager.Strings.CreatingBackup;
+                BackupManager.CreateBackup();
+            }
             Updater.Updater.DownloadUpdate();
            
         }
@@ -90,6 +116,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
         private void ProgressChanged(object sender, Updater.ProgressChangedEventArgs e)
         {
             this.btnInstall.Enabled = false;
+            this.btnInstall.Spinner = true;
             this.btnInstall.Progress = e.ProgressPercentage;
         }
 
@@ -97,6 +124,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
         {
             this.btnInstall.Progress = 0;
             this.btnInstall.Enabled = true;
+            this.btnInstall.Spinner = false;
         }
         
 

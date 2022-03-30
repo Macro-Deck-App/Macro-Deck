@@ -1,12 +1,19 @@
-﻿using SuchByte.MacroDeck.ActionButton;
+﻿using Newtonsoft.Json;
+using SuchByte.MacroDeck.ActionButton;
 using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor;
+using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowContents;
+using SuchByte.MacroDeck.Hotkeys;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Interfaces;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Variables;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,31 +33,44 @@ namespace SuchByte.MacroDeck.GUI
 {
     public partial class ButtonEditor : DialogForm
     {
+        static JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Auto,
+            NullValueHandling = NullValueHandling.Ignore,
+            Error = (sender, args) => { args.ErrorContext.Handled = true; }
+        };
+
+
         private ActionButton.ActionButton actionButton;
         private ActionButton.ActionButton actionButtonEdited;
         private readonly Folders.MacroDeckFolder folder;
         private EventSelector eventSelector;
         private ActionSelectorOnPress actionSelectorOnPress;
+        private ActionSelectorOnPress actionSelectorOnRelease;
+        private ActionSelectorOnPress actionSelectorOnLongPress;
+        private ActionSelectorOnPress actionSelectorOnLongPressRelease;
 
         public ActionButton.ActionButton ActionButton { get { return this.actionButton; } }
 
         public ButtonEditor(ActionButton.ActionButton actionButton, Folders.MacroDeckFolder folder)
         {
             InitializeComponent();
-            this.groupAppearance.Text = Language.LanguageManager.Strings.Appearance;
-            this.lblButtonState.Text = Language.LanguageManager.Strings.ButtonState;
-            this.radioButtonOff.Text = Language.LanguageManager.Strings.Off;
-            this.radioButtonOn.Text = Language.LanguageManager.Strings.On;
-            this.labelAlignTop.Text = Language.LanguageManager.Strings.Top;
-            this.labelAlignCenter.Text = Language.LanguageManager.Strings.Center;
-            this.labelAlignBottom.Text = Language.LanguageManager.Strings.Bottom;
-            this.lblPath.Text = Language.LanguageManager.Strings.Path;
-            this.lblCurrentStateLabel.Text = Language.LanguageManager.Strings.CurrentState;
-            this.lblStateBinding.Text = Language.LanguageManager.Strings.StateBinding;
-            this.radioOnPress.Text = Language.LanguageManager.Strings.OnPress;
-            this.radioOnEvent.Text = Language.LanguageManager.Strings.OnEvent;
-            this.btnApply.Text = Language.LanguageManager.Strings.Save;
-            this.btnOk.Text = Language.LanguageManager.Strings.Ok;
+            this.groupAppearance.Text = LanguageManager.Strings.Appearance;
+            this.groupButtonState.Text = LanguageManager.Strings.ButtonState;
+            this.lblButtonState.Text = LanguageManager.Strings.ButtonState;
+            this.radioButtonOff.Text = LanguageManager.Strings.Off;
+            this.radioButtonOn.Text = LanguageManager.Strings.On;
+            this.lblCurrentStateLabel.Text = LanguageManager.Strings.CurrentState;
+            this.lblStateBinding.Text = LanguageManager.Strings.StateBinding;
+            this.radioOnPress.Text = LanguageManager.Strings.OnPress;
+            this.radioOnRelease.Text = LanguageManager.Strings.OnRelease;
+            this.radioOnLongPress.Text = LanguageManager.Strings.OnLongPress;
+            this.radioOnLongPressRelease.Text = LanguageManager.Strings.OnLongPressRelease;
+            this.radioOnEvent.Text = LanguageManager.Strings.OnEvent;
+            this.btnApply.Text = LanguageManager.Strings.Save;
+            this.btnOk.Text = LanguageManager.Strings.Ok;
+            this.groupHotkey.Text = LanguageManager.Strings.Hotkey;
+            this.lblHotkeyInfo.Text = LanguageManager.Strings.HotkeyExecutesOnPress;
 
             this.folder = folder;
             this.actionButton = actionButton;
@@ -63,18 +83,19 @@ namespace SuchByte.MacroDeck.GUI
                 }
             }
             this.listStateBinding.Items.Add("");
-            foreach (Variables.Variable variable in Variables.VariableManager.Variables)
+            foreach (Variable variable in VariableManager.Variables)
             {
                 this.listStateBinding.Items.Add(variable.Name);
             }
             this.actionButton.StateChanged += this.OnStateChanged;
+            this.hotkey.Click += Hotkey_Click;
             this.LoadButton();
         }
 
         private void ButtonEditor_Load(object sender, EventArgs e)
         {
-            this.btnPreview.Radius = MacroDeck.ProfileManager.CurrentProfile.ButtonRadius;
-
+            this.btnPreview.Radius = ProfileManager.CurrentProfile.ButtonRadius;
+            this.UpdateLabel();
         }
 
         private void OnStateChanged(object sender, EventArgs e)
@@ -99,84 +120,43 @@ namespace SuchByte.MacroDeck.GUI
         {
             try
             {
-                if (radioButtonOff.Checked && !radioButtonOn.Checked)
+                ButtonLabel buttonLabel = radioButtonOff.Checked && !radioButtonOn.Checked ? this.actionButtonEdited.LabelOff : this.actionButtonEdited.LabelOn;
+                buttonLabel.LabelText = this.labelText.Text;
+                buttonLabel.Size = (float)this.fontSize.Value;
+                buttonLabel.FontFamily = this.fonts.Text;
+                if (this.labelAlignTop.Checked)
                 {
-                    this.actionButtonEdited.LabelOff.LabelText = this.labelText.Text;
-                    this.actionButtonEdited.LabelOff.Size = (float)this.fontSize.Value;
-                    this.actionButtonEdited.LabelOff.FontFamily = this.fonts.Text;
-                    if (this.labelAlignTop.Checked)
-                    {
-                        this.actionButtonEdited.LabelOff.LabelPosition = ButtonLabelPosition.TOP;
-                    }
-                    else if (this.labelAlignCenter.Checked)
-                    {
-                        this.actionButtonEdited.LabelOff.LabelPosition = ButtonLabelPosition.CENTER;
-                    }
-                    else if (this.labelAlignBottom.Checked)
-                    {
-                        this.actionButtonEdited.LabelOff.LabelPosition = ButtonLabelPosition.BOTTOM;
-                    }
-                    Task.Run(() =>
-                    {
-                        Bitmap labelBitmap = new Bitmap(250, 250);
-                        string labelOffText = actionButtonEdited.LabelOff.LabelText;
-                        foreach (Variables.Variable variable in Variables.VariableManager.Variables)
-                        {
-                            if (labelOffText.ToLower().Contains("{" + variable.Name.ToLower() + "}"))
-                            {
-                                labelOffText = labelOffText.Replace("{" + variable.Name + "}", variable.Value.ToString(), StringComparison.OrdinalIgnoreCase);
-                            }
-                        }
-                        labelBitmap = Utils.LabelGenerator.GetLabel(labelBitmap, labelOffText, this.actionButtonEdited.LabelOff.LabelPosition, new Font(this.actionButtonEdited.LabelOff.FontFamily, this.actionButtonEdited.LabelOff.Size), this.actionButtonEdited.LabelOff.LabelColor, Color.Black, new SizeF(2.0F, 2.0F));
-                        this.actionButtonEdited.LabelOff.LabelBase64 = Utils.Base64.GetBase64FromBitmap(labelBitmap);
-                        this.Invoke(new Action(() => {
-                            if (this != null && this.Disposing == false && this.IsDisposed == false)
-                            {
-                                this.btnPreview.ForegroundImage = labelBitmap;
-                            }
-                            }));
-                        });
+                    buttonLabel.LabelPosition = ButtonLabelPosition.TOP;
+                }
+                else if (this.labelAlignCenter.Checked)
+                {
+                    buttonLabel.LabelPosition = ButtonLabelPosition.CENTER;
+                }
+                else if (this.labelAlignBottom.Checked)
+                {
+                    buttonLabel.LabelPosition = ButtonLabelPosition.BOTTOM;
+                }
+                Task.Run(() =>
+                {
+                    this.btnForeColor.BackColor = buttonLabel.LabelColor;
+                    this.btnForeColor.HoverColor = buttonLabel.LabelColor;
+                    Bitmap labelBitmap = new Bitmap(250, 250);
+                    string labelText = buttonLabel.LabelText.ToString();
+                    labelText = VariableManager.RenderTemplate(labelText);
 
-                }
-                else if(!radioButtonOff.Checked && radioButtonOn.Checked)
-                {
-                    this.actionButtonEdited.LabelOn.LabelText = this.labelText.Text;
-                    this.actionButtonEdited.LabelOn.Size = (float)this.fontSize.Value;
-                    this.actionButtonEdited.LabelOn.FontFamily = this.fonts.Text;
-                    if (this.labelAlignTop.Checked)
-                    {
-                        this.actionButtonEdited.LabelOn.LabelPosition = ButtonLabelPosition.TOP;
-                    }
-                    else if (this.labelAlignCenter.Checked)
-                    {
-                        this.actionButtonEdited.LabelOn.LabelPosition = ButtonLabelPosition.CENTER;
-                    }
-                    else if (this.labelAlignBottom.Checked)
-                    {
-                        this.actionButtonEdited.LabelOn.LabelPosition = ButtonLabelPosition.BOTTOM;
-                    }
-                    Task.Run(() =>
-                    {
-                        Bitmap labelBitmap = new Bitmap(250, 250);
-                        string labelOnText = actionButtonEdited.LabelOn.LabelText;
-                        foreach (Variables.Variable variable in Variables.VariableManager.Variables)
+                    labelBitmap = (Bitmap)Utils.LabelGenerator.GetLabel(labelBitmap, labelText, buttonLabel.LabelPosition, new Font(buttonLabel.FontFamily, buttonLabel.Size), buttonLabel.LabelColor, Color.Black, new SizeF(2.0F, 2.0F));
+                    buttonLabel.LabelBase64 = Utils.Base64.GetBase64FromImage(labelBitmap);
+                    this.Invoke(new Action(() => {
+                        if (this != null && this.Disposing == false && this.IsDisposed == false)
                         {
-                            if (labelOnText.ToLower().Contains("{" + variable.Name.ToLower() + "}"))
-                            {
-                                labelOnText = labelOnText.Replace("{" + variable.Name + "}", variable.Value.ToString(), StringComparison.OrdinalIgnoreCase);
-                            }
+                            this.btnPreview.ForegroundImage = labelBitmap;
                         }
-                        labelBitmap = Utils.LabelGenerator.GetLabel(labelBitmap, labelOnText, this.actionButtonEdited.LabelOn.LabelPosition, new Font(this.actionButtonEdited.LabelOn.FontFamily, this.actionButtonEdited.LabelOn.Size), this.actionButtonEdited.LabelOn.LabelColor, Color.Black, new SizeF(2.0F, 2.0F));
-                        this.actionButtonEdited.LabelOn.LabelBase64 = Utils.Base64.GetBase64FromBitmap(labelBitmap);
-                        this.Invoke(new Action(() => {
-                            if (this != null && this.Disposing == false && this.IsDisposed == false)
-                            {
-                                this.btnPreview.ForegroundImage = labelBitmap;
-                            }
-                        }));
+                    }));
                 });
-                }
-            } catch { }
+            } catch (Exception ex)
+            {
+                MacroDeckLogger.Error(GetType(), "Error while updating label: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            }
         }
 
         private void RefreshLabel()
@@ -190,154 +170,123 @@ namespace SuchByte.MacroDeck.GUI
             
             try
             {
-                if (radioButtonOff.Checked && !radioButtonOn.Checked)
-                {
-                    this.labelText.Text = this.actionButtonEdited.LabelOff.LabelText;
-                    this.fontSize.Value = (int)this.actionButtonEdited.LabelOff.Size;
-                    this.fonts.Text = this.actionButtonEdited.LabelOff.FontFamily;
-                    
-                    if (this.actionButtonEdited.LabelOff.LabelPosition == SuchByte.MacroDeck.ActionButton.ButtonLabelPosition.TOP)
-                    {
-                        this.labelAlignTop.Checked = true;
-                    }
-                    else if (this.actionButtonEdited.LabelOff.LabelPosition == SuchByte.MacroDeck.ActionButton.ButtonLabelPosition.CENTER)
-                    {
-                        this.labelAlignCenter.Checked = true;
-                    }
-                    else
-                    {
-                        this.labelAlignBottom.Checked = true;
-                    }
-                }
-                else
-                {
-                    this.labelText.Text = this.actionButtonEdited.LabelOn.LabelText;
-                    this.fontSize.Value = (int)this.actionButtonEdited.LabelOn.Size;
-                    this.fonts.Text = this.actionButtonEdited.LabelOn.FontFamily;
+                ButtonLabel buttonLabel = radioButtonOff.Checked && !radioButtonOn.Checked ? this.actionButtonEdited.LabelOff : this.actionButtonEdited.LabelOn;
 
-                    if (this.actionButtonEdited.LabelOn.LabelPosition == SuchByte.MacroDeck.ActionButton.ButtonLabelPosition.TOP)
-                    {
-                        this.labelAlignTop.Checked = true;
-                    }
-                    else if (this.actionButtonEdited.LabelOn.LabelPosition == SuchByte.MacroDeck.ActionButton.ButtonLabelPosition.CENTER)
-                    {
-                        this.labelAlignCenter.Checked = true;
-                    }
-                    else
-                    {
-                        this.labelAlignBottom.Checked = true;
-                    }
-                }
-                if (this.labelText.Text.Length == 0)
+                this.labelText.Text = buttonLabel.LabelText;
+                this.fontSize.Value = (int)buttonLabel.Size;
+                this.fonts.Text = buttonLabel.FontFamily;
+
+                switch (buttonLabel.LabelPosition)
                 {
-                    this.labelText.PlaceHolderText = Language.LanguageManager.Strings.Label;
+                    case ButtonLabelPosition.TOP:
+                        this.labelAlignTop.Checked = true;
+                        break;
+                    case ButtonLabelPosition.CENTER:
+                        this.labelAlignCenter.Checked = true;
+                        break;
+                    case ButtonLabelPosition.BOTTOM:
+                        this.labelAlignBottom.Checked = true;
+                        break;
                 }
+
+                if (string.IsNullOrWhiteSpace(this.labelText.Text))
+                {
+                    this.labelText.PlaceHolderText = LanguageManager.Strings.Label;
+                }
+            } catch (Exception ex) 
+            {
+                MacroDeckLogger.Error(GetType(), "Error while refreshing label: " + ex.Message + Environment.NewLine + ex.StackTrace);
             }
-            catch (Exception ex) { Debug.WriteLine(ex.Message); }
             this.labelText.TextChanged += this.LabelChanged;
             this.fontSize.ValueChanged += this.LabelChanged;
             this.labelAlignTop.CheckedChanged += this.LabelChanged;
             this.labelAlignCenter.CheckedChanged += this.LabelChanged;
             this.labelAlignBottom.CheckedChanged += this.LabelChanged;
             this.fonts.SelectedIndexChanged += this.LabelChanged;
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
         }
 
         public void RefreshIcon()
         {
             try
             {
-                if (radioButtonOff.Checked && !radioButtonOn.Checked)
-                {
-                    if (this.actionButtonEdited.IconOff != null && this.actionButtonEdited.IconOff.Split(".").Length > 1)
-                    {
-                        Icons.IconPack iconPack = IconManager.GetIconPackByName(this.actionButtonEdited.IconOff.Split(".")[0]);
-                        Icons.Icon icon = IconManager.GetIcon(iconPack, long.Parse(this.actionButtonEdited.IconOff.Split(".")[1]));
-                        if (icon != null)
-                            this.btnPreview.BackgroundImage = Utils.Base64.GetImageFromBase64(icon.IconBase64);
-                    } else
-                    {
-                        this.btnPreview.BackgroundImage = null;
-                    }
+                string iconString = radioButtonOff.Checked && !radioButtonOn.Checked ? this.actionButtonEdited.IconOff : this.actionButtonEdited.IconOn;
 
-                    if (this.actionButtonEdited.LabelOff != null && this.actionButtonEdited.LabelOff.LabelBase64.Length > 0)
-                    {
-                        Image label = Utils.Base64.GetImageFromBase64(this.actionButtonEdited.LabelOff.LabelBase64);
-                        if (label != null)
-                            this.btnPreview.ForegroundImage = label;
-                    }
-                    else
-                    {
-                        this.btnPreview.ForegroundImage = null;
-                    }
-                }
-                else if(!radioButtonOff.Checked && radioButtonOn.Checked)
+                if (!string.IsNullOrWhiteSpace(iconString))
                 {
-                    if (this.actionButtonEdited.IconOn != null && this.actionButtonEdited.IconOn.Split(".").Length > 1)
-                    {
-                        Icons.IconPack iconPack = IconManager.GetIconPackByName(this.actionButtonEdited.IconOn.Split(".")[0]);
-                        Icons.Icon icon = IconManager.GetIcon(iconPack, long.Parse(this.actionButtonEdited.IconOn.Split(".")[1]));
-                        if (icon != null)
-                            this.btnPreview.BackgroundImage = Utils.Base64.GetImageFromBase64(icon.IconBase64);
-                    }
-                    else
-                    {
-                        this.btnPreview.BackgroundImage = null;
-                    }
+                    var icon = IconManager.GetIconByString(iconString);
+                    if (icon != null)
+                        this.btnPreview.BackgroundImage = icon.IconImage;
+                }
+                else
+                {
+                    this.btnPreview.BackgroundImage = null;
+                }
 
-                    if (this.actionButtonEdited.LabelOn != null && this.actionButtonEdited.LabelOn.LabelBase64.Length > 0)
-                    {
-                        Image label = Utils.Base64.GetImageFromBase64(this.actionButtonEdited.LabelOn.LabelBase64);
-                        if (label != null)
-                            this.btnPreview.ForegroundImage = label;
-                    }
-                    else
-                    {
-                        this.btnPreview.ForegroundImage = null;
-                    }
-                }
-                if (this.btnPreview.BackgroundImage != null && this.btnPreview.BackgroundImage.RawFormat.ToString().ToLower() == "gif")
+                ButtonLabel buttonLabel = radioButtonOff.Checked && !radioButtonOn.Checked ? this.actionButtonEdited.LabelOff : this.actionButtonEdited.LabelOn;
+
+                if (buttonLabel != null && !string.IsNullOrWhiteSpace(buttonLabel.LabelBase64)) 
                 {
-                    this.btnPreview.ShowGIFIndicator = true;
+                    Image label = Utils.Base64.GetImageFromBase64(buttonLabel.LabelBase64);
+                    if (label != null)
+                        this.btnPreview.ForegroundImage = label;
                 }
+                else
+                {
+                    this.btnPreview.ForegroundImage = null;
+                }
+
+                
+                this.btnPreview.ShowGIFIndicator = this.btnPreview.BackgroundImage != null && this.btnPreview.BackgroundImage.RawFormat.ToString().ToLower() == "gif";
+            } catch (Exception ex) 
+            {
+                MacroDeckLogger.Error(GetType(), "Error while refreshing icon: " + ex.Message + Environment.NewLine + ex.StackTrace);
             }
-            catch (Exception ex) { Debug.WriteLine(ex.Message); }
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
         }
 
         private void Apply()
         {
-            this.actionButtonEdited.EventActions = new Dictionary<string, List<PluginAction>>();
+            Debug.WriteLine("Apply");
+            HotkeyManager.RemoveHotkey(this.actionButton);
+            this.actionButton = this.actionButtonEdited;
+            this.actionButton.EventListeners = new List<EventListener>();
+
+            foreach (PluginAction pluginAction in this.actionButton.Actions)
+            {
+                pluginAction.SetActionButton(this.actionButton);
+            }
+            foreach (PluginAction pluginAction in this.actionButton.ActionsRelease)
+            {
+                pluginAction.SetActionButton(this.actionButton);
+            }
+            foreach (PluginAction pluginAction in this.actionButton.ActionsLongPress)
+            {
+                pluginAction.SetActionButton(this.actionButton);
+            }
+            foreach (PluginAction pluginAction in this.actionButton.ActionsLongPressRelease)
+            {
+                pluginAction.SetActionButton(this.actionButton);
+            }
+
             foreach (EventItem eventItem in this.eventSelector.EventItems())
             {
                 if (eventItem == null) continue;
-                if (this.actionButtonEdited.EventActions.ContainsKey(eventItem.MacroDeckEvent.Name))
+                foreach (PluginAction pluginAction in eventItem.EventListener.Actions)
                 {
-                    this.actionButtonEdited.EventActions[eventItem.MacroDeckEvent.Name].AddRange(eventItem.Actions);
+                    pluginAction.SetActionButton(this.actionButton);
                 }
-                else
-                {
-                    this.actionButtonEdited.EventActions[eventItem.MacroDeckEvent.Name] = eventItem.Actions;
-                }
+                this.actionButton.EventListeners.Add(eventItem.EventListener);
             }
 
-
-            this.actionButton = this.actionButtonEdited;
             foreach (ActionButton.ActionButton actionButton in this.folder.ActionButtons.FindAll(actionButton => actionButton.Position_Y == this.actionButton.Position_Y && actionButton.Position_X == this.actionButton.Position_X).ToArray())
             {
-                MacroDeck.ProfileManager.RemoveEventHandler(actionButton);
                 this.folder.ActionButtons.Remove(actionButton);
             }
             this.folder.ActionButtons.Add(this.actionButton);
-            MacroDeck.ProfileManager.AddEventHandler(this.actionButton);
-            MacroDeck.ProfileManager.Save();
+            ProfileManager.Save();
             MacroDeckServer.UpdateFolder(this.folder);
-            MacroDeck.ProfileManager.UpdateVariableLabels(this.actionButton);
+            ProfileManager.UpdateVariableLabels(this.actionButton);
             this.actionButton.UpdateBindingState();
+            this.actionButton.UpdateHotkey();
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
@@ -359,8 +308,6 @@ namespace SuchByte.MacroDeck.GUI
         {
             this.OpenIconSelector();
         }
-
-
 
         private void OpenIconSelector()
         {
@@ -386,33 +333,30 @@ namespace SuchByte.MacroDeck.GUI
 
         public void LoadButton()
         {
-            this.actionButtonEdited = new ActionButton.ActionButton
-            {
-                Actions = this.actionButton.Actions,
-                ButtonId = this.actionButton.ButtonId,
-                EventActions = this.actionButton.EventActions,
-                IconOff = this.actionButton.IconOff,
-                IconOn = this.actionButton.IconOn,
-                LabelOff = this.actionButton.LabelOff,
-                LabelOn = this.actionButton.LabelOn,
-                Position_X = this.actionButton.Position_X,
-                Position_Y = this.actionButton.Position_Y,
-                State = this.actionButton.State
-            };
-
-            this.buttonPath.Text = this.folder.DisplayName + "\\" + (this.actionButton.Position_Y + 1) + "." + (this.actionButton.Position_X + 1);
-            this.btnPreview.BackgroundImageLayout = ImageLayout.Stretch;
+            this.actionButtonEdited = JsonConvert.DeserializeObject<ActionButton.ActionButton>(JsonConvert.SerializeObject(this.actionButton, jsonSerializerSettings), jsonSerializerSettings); // Make a copy of the current action button
 
             bool currentState = this.actionButton.State;
             this.lblCurrentState.Text = currentState ? "On" : "Off";
-            this.listStateBinding.Text = this.actionButton.StateBindingVariable;
+            this.listStateBinding.Text = this.actionButtonEdited.StateBindingVariable;
+            this.buttonGUIDLabel.Text = this.actionButtonEdited.Guid;
+
+            if (this.actionButton.KeyCode != Keys.None)
+            {
+                this.hotkey.Text = this.actionButton.ModifierKeyCodes.ToString().Replace("Control", "CTRL").Replace("None", string.Empty).Replace(", ", " + ") + (!actionButton.ModifierKeyCodes.ToString().Equals("None") ? " + " : string.Empty) + this.actionButton.KeyCode.ToString();
+            }
 
             this.RefreshLabel();
             this.RefreshIcon();
-            actionSelectorOnPress = new ActionSelectorOnPress(this.actionButtonEdited);
+            this.actionSelectorOnPress = new ActionSelectorOnPress(this.actionButtonEdited.Actions);
+            this.actionSelectorOnRelease = new ActionSelectorOnPress(this.actionButtonEdited.ActionsRelease);
+            this.actionSelectorOnLongPress = new ActionSelectorOnPress(this.actionButtonEdited.ActionsLongPress);
+            this.actionSelectorOnLongPressRelease = new ActionSelectorOnPress(this.actionButtonEdited.ActionsLongPressRelease);
+            this.actionSelectorOnPress.RefreshActions();
+            this.actionSelectorOnRelease.RefreshActions();
+            this.actionSelectorOnLongPress.RefreshActions();
+            this.actionSelectorOnLongPressRelease.RefreshActions();
             this.eventSelector = new EventSelector(this.actionButtonEdited);
-            actionSelectorOnPress.RefreshActions();
-            eventSelector.RefreshEventsList();
+            this.eventSelector.RefreshEventsList();
             this.SetSelector(actionSelectorOnPress);
         }
 
@@ -429,6 +373,7 @@ namespace SuchByte.MacroDeck.GUI
         {
             this.RefreshLabel();
             this.RefreshIcon();
+            this.UpdateLabel();
         }
 
         private void BtnEditIcon_Click(object sender, EventArgs e)
@@ -477,7 +422,7 @@ namespace SuchByte.MacroDeck.GUI
         private void BtnAddVariable_Click(object sender, EventArgs e)
         {
             this.variablesContextMenu.Items.Clear();
-            foreach (Variables.Variable variable in Variables.VariableManager.Variables)
+            foreach (Variable variable in VariableManager.Variables)
             {
                 ToolStripMenuItem item = new ToolStripMenuItem
                 {
@@ -516,6 +461,30 @@ namespace SuchByte.MacroDeck.GUI
             }
         }
 
+        private void RadioOnRelease_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioOnRelease.Checked)
+            {
+                this.SetSelector(actionSelectorOnRelease);
+            }
+        }
+
+        private void RadioOnLongPress_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioOnLongPress.Checked)
+            {
+                this.SetSelector(actionSelectorOnLongPress);
+            }
+        }
+
+        private void RadioOnLongPressRelease_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioOnLongPressRelease.Checked)
+            {
+                this.SetSelector(actionSelectorOnLongPressRelease);
+            }
+        }
+
         private void RadioOnEvent_CheckedChanged(object sender, EventArgs e)
         {
             if (radioOnEvent.Checked)
@@ -530,5 +499,52 @@ namespace SuchByte.MacroDeck.GUI
             this.selectorPanel.Controls.Add(control);
         }
 
+        private void BtnOpenTemplateEditor_Click(object sender, EventArgs e)
+        {
+            using (var templateEditor = new TemplateEditor(this.labelText.Text))
+            {
+                if (templateEditor.ShowDialog() == DialogResult.OK)
+                {
+                    this.labelText.Text = templateEditor.Template;
+                }
+            }
+        }
+
+        private void BtnRemoveHotkey_Click(object sender, EventArgs e)
+        {
+            this.actionButtonEdited.ModifierKeyCodes = Keys.None;
+            this.actionButtonEdited.KeyCode = Keys.None;
+            HotkeyManager.RemoveHotkey(this.actionButtonEdited);
+            this.hotkey.Text = string.Empty;
+        }
+
+        private void Hotkey_Click(object sender, EventArgs e)
+        {
+            using (var hotkeySelector = new HotkeySelector())
+            {
+                if (hotkeySelector.ShowDialog() == DialogResult.OK)
+                {
+                    this.hotkey.Text = hotkeySelector.ModifierKeys.ToString().Replace("Control", "CTRL").Replace("None", string.Empty).Replace(", ", " + ") + (!hotkeySelector.ModifierKeys.ToString().Equals("None") ? " + " : string.Empty) + hotkeySelector.Key.ToString();
+                    this.actionButtonEdited.ModifierKeyCodes = hotkeySelector.ModifierKeys;
+                    this.actionButtonEdited.KeyCode = hotkeySelector.Key;
+                }
+            }
+        }
+
+        private void BtnEditJson_Click(object sender, EventArgs e)
+        {
+            using (var jsonButtonEditor = new JsonButtonEditor(this.actionButtonEdited))
+            {
+                if (jsonButtonEditor.ShowDialog() == DialogResult.OK)
+                {
+                    jsonButtonEditor.ActionButton.Position_X = this.actionButtonEdited.Position_X;
+                    jsonButtonEditor.ActionButton.Position_Y = this.actionButtonEdited.Position_Y;
+                    jsonButtonEditor.ActionButton.Guid = this.actionButtonEdited.Guid;
+                    this.actionButton = jsonButtonEditor.ActionButton;
+                    this.LoadButton();
+                    this.UpdateLabel();
+                }
+            }
+        }
     }
 }

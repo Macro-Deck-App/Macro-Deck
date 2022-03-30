@@ -53,8 +53,9 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOk.Size = new System.Drawing.Size(75, 25);
             this.btnOk.TabIndex = 3;
             this.btnOk.Text = "Ok";
+            this.btnOk.UseMnemonic = false;
             this.btnOk.UseVisualStyleBackColor = false;
-            this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
+            this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
             // 
             // qualityLowest
             // 
@@ -64,6 +65,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.qualityLowest.Size = new System.Drawing.Size(113, 20);
             this.qualityLowest.TabIndex = 4;
             this.qualityLowest.Text = "Lowest (100px)";
+            this.qualityLowest.UseMnemonic = false;
             this.qualityLowest.UseVisualStyleBackColor = true;
             // 
             // label1
@@ -75,6 +77,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.label1.Size = new System.Drawing.Size(59, 19);
             this.label1.TabIndex = 5;
             this.label1.Text = "Quality";
+            this.label1.UseMnemonic = false;
             // 
             // qualityLow
             // 
@@ -84,6 +87,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.qualityLow.Size = new System.Drawing.Size(96, 20);
             this.qualityLow.TabIndex = 6;
             this.qualityLow.Text = "Low (150px)";
+            this.qualityLow.UseMnemonic = false;
             this.qualityLow.UseVisualStyleBackColor = true;
             // 
             // qualityNormal
@@ -96,6 +100,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.qualityNormal.TabIndex = 7;
             this.qualityNormal.TabStop = true;
             this.qualityNormal.Text = "Normal (200px)";
+            this.qualityLowest.UseMnemonic = false;
             this.qualityNormal.UseVisualStyleBackColor = true;
             // 
             // qualityHigh
@@ -106,6 +111,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.qualityHigh.Size = new System.Drawing.Size(98, 20);
             this.qualityHigh.TabIndex = 8;
             this.qualityHigh.Text = "High (350px)";
+            this.qualityHigh.UseMnemonic = false;
             this.qualityHigh.UseVisualStyleBackColor = true;
             // 
             // qualityOriginal
@@ -116,6 +122,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.qualityOriginal.Size = new System.Drawing.Size(69, 20);
             this.qualityOriginal.TabIndex = 9;
             this.qualityOriginal.Text = "Original";
+            this.qualityOriginal.UseMnemonic = false;
             this.qualityOriginal.UseVisualStyleBackColor = true;
             // 
             // lblInfo
@@ -127,6 +134,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblInfo.Text = "High quality icons can lead to an increase of memory usage and loading times espe" +
     "cially when using many big animated gifs.\r\n\r\nFor gifs it is recommended to use t" +
     "he low or the lowest preset.";
+            this.lblInfo.UseMnemonic = false;
             // 
             // IconImportQuality
             // 

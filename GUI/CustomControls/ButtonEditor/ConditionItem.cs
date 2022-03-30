@@ -1,6 +1,7 @@
 ﻿using SuchByte.MacroDeck.ActionButton;
 using SuchByte.MacroDeck.ActionButton.Plugin;
 using SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor;
+using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Interfaces;
 using SuchByte.MacroDeck.Plugins;
 using System;
@@ -49,13 +50,16 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
             this.typeBox.Items.AddRange(new object[] {
             "Variable",
-            "Button_State"});
+            "Button_State",
+            "Template"
+            });
 
             this.methodBox.Items.AddRange(new object[] {
             "Equals",
             "Not",
             "Bigger",
-            "Smaller"});
+            "Smaller"
+            });
         }
 
 
@@ -70,6 +74,24 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.addItemContextMenu.Show(this.btnAddActionElse, new Point(0, 0 + this.btnAddActionElse.Height));
         }
 
+        private void AddActionItem(PluginAction action, FlowLayoutPanel container)
+        {
+            IActionConditionItem actionItem = null;
+            if (action.GetType() != typeof(DelayAction))
+            {
+                actionItem = new ActionItem(action);
+            }
+            else
+            {
+                actionItem = new DelayItem(action);
+            }
+            container.Controls.Add((Control)actionItem);
+            actionItem.OnRemoveClick += this.RemoveClicked;
+            actionItem.OnEditClick += this.EditClicked;
+            actionItem.OnMoveUpClick += this.MoveUpClicked;
+            actionItem.OnMoveDownClick += this.MoveDownClicked;
+        }
+
         private void RefreshActions()
         {
             this.typeBox.SelectedIndexChanged -= TypeBox_SelectedIndexChanged;
@@ -78,17 +100,35 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.valueToCompare.TextChanged -= ValueToCompare_TextChanged;
 
             this.source.Items.Clear();
-            if (((ConditionAction)this.Action).ConditionType == ConditionType.Variable)
+
+            switch (((ConditionAction)this.Action).ConditionType)
             {
-                this.source.Visible = true;
-                foreach (Variables.Variable variable in Variables.VariableManager.Variables)
-                {
-                    this.source.Items.Add(variable.Name);
-                }
-            }
-            else if (((ConditionAction)this.Action).ConditionType == ConditionType.Button_State)
-            {
-                this.source.Visible = false;
+                case ConditionType.Variable:
+                    this.source.Visible = true;
+                    this.methodBox.Visible = true;
+                    this.valueToCompare.Visible = true;
+                    this.template.Visible = false;
+                    this.btnOpenTemplateEditor.Visible = false;
+                    foreach (Variables.Variable variable in Variables.VariableManager.Variables)
+                    {
+                        this.source.Items.Add(variable.Name);
+                    }
+                    break;
+                case ConditionType.Button_State:
+                    this.source.Visible = false;
+                    this.methodBox.Visible = true;
+                    this.valueToCompare.Visible = true;
+                    this.template.Visible = false;
+                    this.btnOpenTemplateEditor.Visible = false;
+                    break;
+                case ConditionType.Template:
+                    this.source.Visible = false;
+                    this.methodBox.Visible = false;
+                    this.valueToCompare.Visible = false;
+                    this.template.Visible = true;
+                    this.btnOpenTemplateEditor.Visible = true;
+                    this.template.Text = ((ConditionAction)this.Action).ConditionValue1Source.ToString();
+                    break;
             }
 
             this.typeBox.Text = ((ConditionAction)this.Action).ConditionType.ToString();
@@ -124,36 +164,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.elseActionsList.Controls.Clear();
             foreach (PluginAction action in ((ConditionAction)this.Action).Actions)
             {
-                IActionConditionItem actionItem = null;
-                if (action.GetType() != typeof(DelayAction))
-                {
-                    actionItem = new ActionItem(action);
-                } else
-                {
-                    actionItem = new DelayItem(action);
-                }
-                this.actionsList.Controls.Add((Control)actionItem);
-                actionItem.OnRemoveClick += this.RemoveClicked;
-                actionItem.OnEditClick += this.EditClicked;
-                actionItem.OnMoveUpClick += this.MoveUpClicked;
-                actionItem.OnMoveDownClick += this.MoveDownClicked;
+                this.AddActionItem(action, this.actionsList);
             }
             foreach (PluginAction action in ((ConditionAction)this.Action).ActionsElse)
             {
-                IActionConditionItem actionItem = null;
-                if (action.GetType() != typeof(DelayAction))
-                {
-                    actionItem = new ActionItem(action);
-                }
-                else
-                {
-                    actionItem = new DelayItem(action);
-                }
-                this.elseActionsList.Controls.Add((Control)actionItem);
-                actionItem.OnRemoveClick += this.RemoveClicked;
-                actionItem.OnEditClick += this.EditClicked;
-                actionItem.OnMoveUpClick += this.MoveUpClicked;
-                actionItem.OnMoveDownClick += this.MoveDownClicked;
+                this.AddActionItem(action, this.elseActionsList);
             }
 
             this.Source_SelectedIndexChanged(null, EventArgs.Empty);
@@ -161,42 +176,48 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void MoveUpClicked(object sender, EventArgs e)
         {
-            PluginAction action = ((IActionConditionItem)sender).Action;
+            IActionConditionItem actionItem = sender as IActionConditionItem;
+            PluginAction action = actionItem.Action;
             if (((ConditionAction)this.Action).Actions.Contains(action))
             {
                 int currentIndex = ((ConditionAction)this.Action).Actions.IndexOf(action);
                 if (currentIndex == 0) return;
                 ((ConditionAction)this.Action).Actions.RemoveAt(currentIndex);
                 ((ConditionAction)this.Action).Actions.Insert(currentIndex - 1, action);
+                this.actionsList.Controls.SetChildIndex((Control)actionItem, currentIndex - 1);
             } else if (((ConditionAction)this.Action).ActionsElse.Contains(action))
             {
                 int currentIndex = ((ConditionAction)this.Action).ActionsElse.IndexOf(action);
                 if (currentIndex == 0) return;
                 ((ConditionAction)this.Action).ActionsElse.RemoveAt(currentIndex);
                 ((ConditionAction)this.Action).ActionsElse.Insert(currentIndex - 1, action);
+                this.elseActionsList.Controls.SetChildIndex((Control)actionItem, currentIndex - 1);
             }
-            
-            this.RefreshActions();
+
+            //this.RefreshActions();
         }
 
         private void MoveDownClicked(object sender, EventArgs e)
         {
-            PluginAction action = ((IActionConditionItem)sender).Action;
+            IActionConditionItem actionItem = sender as IActionConditionItem;
+            PluginAction action = actionItem.Action;
             if (((ConditionAction)this.Action).Actions.Contains(action))
             {
                 int currentIndex = ((ConditionAction)this.Action).Actions.IndexOf(action);
-                if (currentIndex >= ((ConditionAction)this.Action).Actions.Count - 1) return;
+                if (currentIndex + 1 >= ((ConditionAction)this.Action).Actions.Count) return;
                 ((ConditionAction)this.Action).Actions.RemoveAt(currentIndex);
                 ((ConditionAction)this.Action).Actions.Insert(currentIndex + 1, action);
+                this.actionsList.Controls.SetChildIndex((Control)actionItem, currentIndex + 1);
             }
             else if (((ConditionAction)this.Action).ActionsElse.Contains(action))
             {
                 int currentIndex = ((ConditionAction)this.Action).ActionsElse.IndexOf(action);
-                if (currentIndex >= ((ConditionAction)this.Action).Actions.Count - 1) return;
+                if (currentIndex + 1 >= ((ConditionAction)this.Action).Actions.Count) return;
                 ((ConditionAction)this.Action).ActionsElse.RemoveAt(currentIndex);
                 ((ConditionAction)this.Action).ActionsElse.Insert(currentIndex + 1, action);
+                this.elseActionsList.Controls.SetChildIndex((Control)actionItem, currentIndex + 1);
             }
-            this.RefreshActions();
+            //this.RefreshActions();
         }
 
 
@@ -206,14 +227,17 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             if (((ConditionAction)this.Action).Actions.Contains(actionItem.Action))
             {
                 ((ConditionAction)this.Action).Actions.Remove(actionItem.Action);
+                this.actionsList.Controls.Remove((Control)actionItem);
             }
             else if (((ConditionAction)this.Action).ActionsElse.Contains(actionItem.Action))
             {
                 ((ConditionAction)this.Action).ActionsElse.Remove(actionItem.Action);
+                this.elseActionsList.Controls.Remove((Control)actionItem);
             }
             actionItem.OnRemoveClick -= this.RemoveClicked;
+            ((Control)actionItem).Dispose();
 
-            RefreshActions();
+            //RefreshActions();
         }
 
         private void EditClicked(object sender, EventArgs e)
@@ -260,28 +284,63 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             ConditionType type = (ConditionType)Enum.Parse(typeof(ConditionType), typeBox.Text);
             ((ConditionAction)this.Action).ConditionType = type;
             this.source.Items.Clear();
-            if (type == ConditionType.Variable)
+
+
+            switch (type)
             {
-                this.source.Visible = true;
-                foreach (Variables.Variable variable in Variables.VariableManager.Variables)
-                {
-                    this.source.Items.Add(variable.Name);
-                }
-            } else if (type == ConditionType.Button_State)
-            {
-                this.source.Visible = false;
-                this.valueToCompare.Items.Clear();
-                this.valueToCompare.SetAutoCompleteMode(AutoCompleteMode.Suggest);
-                this.valueToCompare.SetAutoCompleteSource(AutoCompleteSource.CustomSource);
-                this.valueToCompare.Items.AddRange(this.stateSuggestions);
+                case ConditionType.Variable:
+                    this.source.Visible = true;
+                    this.methodBox.Visible = true;
+                    this.valueToCompare.Visible = true;
+                    this.template.Visible = false;
+                    this.btnOpenTemplateEditor.Visible = false;
+                    foreach (Variables.Variable variable in Variables.VariableManager.Variables)
+                    {
+                        this.source.Items.Add(variable.Name);
+                    }
+
+                    foreach (Variables.Variable variable in Variables.VariableManager.Variables)
+                    {
+                        this.valueToCompare.Items.Add("{" + variable.Name + "}");
+                    }
+                    break;
+                case ConditionType.Button_State:
+                    this.source.Visible = false;
+                    this.methodBox.Visible = true;
+                    this.valueToCompare.Visible = true;
+                    this.template.Visible = false;
+                    this.btnOpenTemplateEditor.Visible = false;
+                    this.valueToCompare.Items.Clear();
+                    this.valueToCompare.SetAutoCompleteMode(AutoCompleteMode.Suggest);
+                    this.valueToCompare.SetAutoCompleteSource(AutoCompleteSource.CustomSource);
+                    this.valueToCompare.Items.AddRange(this.stateSuggestions);
+                    break;
+                case ConditionType.Template:
+                    this.source.Visible = false;
+                    this.methodBox.Visible = false;
+                    this.valueToCompare.Visible = false;
+                    this.template.Visible = true;
+                    this.btnOpenTemplateEditor.Visible = true;
+
+
+                    break;
             }
-            
+
+
+        }
+
+        private void Template_TextChanged(object sender, EventArgs e)
+        {
+            if (!String.IsNullOrWhiteSpace(template.Text))
+            {
+                ((ConditionAction)this.Action).ConditionValue1Source = template.Text;
+            }
         }
 
         private void MethodBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             ((ConditionAction)this.Action).ConditionMethod = (ConditionMethod)Enum.Parse(typeof(ConditionMethod), methodBox.Text);
-            if (((ConditionAction)this.Action).ConditionType == ConditionType.Variable)
+            if (((ConditionAction)this.Action).ConditionType == ConditionType.Variable && String.IsNullOrWhiteSpace(this.methodBox.Text))
             {
                 try
                 {
@@ -307,7 +366,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         private void Source_SelectedIndexChanged(object sender, EventArgs e)
         {
             ((ConditionAction)this.Action).ConditionValue1Source = source.Text;
-            methodBox.Text = "Equals";
 
             Variables.Variable variable = Variables.VariableManager.Variables.Find(v => v.Name.Equals(this.source.Text));
 
@@ -329,11 +387,15 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                     this.valueToCompare.Items.AddRange(this.boolSuggestions);
                 }
             }
+
+            foreach (Variables.Variable v in Variables.VariableManager.Variables)
+            {
+                this.valueToCompare.Items.Add("{" + v.Name + "}");
+            }
         }
 
         private void BtnUp_Click(object sender, EventArgs e)
         {
-            this.panelEdit.Visible = false;
             if (this.OnMoveUpClick != null)
             {
                 this.OnMoveUpClick(this, EventArgs.Empty);
@@ -342,7 +404,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void BtnDown_Click(object sender, EventArgs e)
         {
-            this.panelEdit.Visible = false;
             if (this.OnMoveDownClick != null)
             {
                 this.OnMoveDownClick(this, EventArgs.Empty);
@@ -359,33 +420,53 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                     if (this.addItemContextMenu.SourceControl.Equals(this.btnAddAction))
                     {
                         ((ConditionAction)this.Action).Actions.Add(actionConfigurator.Action);
+                        this.AddActionItem(actionConfigurator.Action, this.actionsList);
                     } else if (this.addItemContextMenu.SourceControl.Equals(this.btnAddActionElse))
                     {
                         ((ConditionAction)this.Action).ActionsElse.Add(actionConfigurator.Action);
+                        this.AddActionItem(actionConfigurator.Action, this.elseActionsList);
                     }
 
-                    this.RefreshActions();
+                    //this.RefreshActions();
                 }
             }
         }
 
         private void MenuItemDelay_Click(object sender, EventArgs e)
         {
+            DelayAction delayAction = new DelayAction();
             if (this.addItemContextMenu.SourceControl.Equals(this.btnAddAction))
             {
-                ((ConditionAction)this.Action).Actions.Add(new DelayAction());
+
+                ((ConditionAction)this.Action).Actions.Add(delayAction);
+                this.AddActionItem(delayAction, this.actionsList);
             }
             else if (this.addItemContextMenu.SourceControl.Equals(this.btnAddActionElse))
             {
-                ((ConditionAction)this.Action).ActionsElse.Add(new DelayAction());
+                ((ConditionAction)this.Action).ActionsElse.Add(delayAction);
+                this.AddActionItem(delayAction, this.elseActionsList);
             }
 
-            this.RefreshActions();
         }
 
         private void typeBox_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void BtnOpenTemplateEditor_Click(object sender, EventArgs e)
+        {
+            using (var templateEditor = new TemplateEditor(this.template.Text))
+            {
+                if (templateEditor.ShowDialog() == DialogResult.OK)
+                {
+                    this.template.Text = templateEditor.Template;
+                    if (!String.IsNullOrWhiteSpace(template.Text))
+                    {
+                        ((ConditionAction)this.Action).ConditionValue1Source = template.Text;
+                    }
+                }
+            }
         }
     }
 }

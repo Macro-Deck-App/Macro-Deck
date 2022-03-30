@@ -9,7 +9,7 @@ namespace SuchByte.MacroDeck.Utils
 {
     public class LabelGenerator
     {
-        public static Bitmap GetLabel(Bitmap img, String text, ButtonLabelPosition buttonLabelPosition, Font font, Color textColor, Color shadowColor, SizeF shadowOffset)
+        public static Image GetLabel(Image img, String text, ButtonLabelPosition buttonLabelPosition, Font font, Color textColor, Color shadowColor, SizeF shadowOffset)
         {
             if (img == null) return img;
 
@@ -32,8 +32,7 @@ namespace SuchByte.MacroDeck.Utils
                 LineJoin = LineJoin.Round
             };
 
-            Rectangle fr = new Rectangle(0, img.Height - font.Height, img.Width, font.Height);
-            LinearGradientBrush b = new LinearGradientBrush(fr, textColor, textColor, 90);
+            SolidBrush b = new SolidBrush(textColor);
 
             Rectangle r = new Rectangle(2, 2, img.Width - 2, img.Height - 2);
 

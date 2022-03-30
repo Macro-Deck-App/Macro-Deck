@@ -62,16 +62,18 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblCreator.TabIndex = 15;
             this.lblCreator.Text = "Creator";
             this.lblCreator.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblCreator.UseMnemonic = false;
             // 
             // lblValue
             // 
             this.lblValue.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblValue.Location = new System.Drawing.Point(1, 37);
+            this.lblValue.Location = new System.Drawing.Point(542, 38);
             this.lblValue.Name = "lblValue";
             this.lblValue.Size = new System.Drawing.Size(258, 50);
             this.lblValue.TabIndex = 14;
             this.lblValue.Text = "Value";
             this.lblValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblValue.UseMnemonic = false;
             // 
             // lblType
             // 
@@ -82,6 +84,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblType.TabIndex = 13;
             this.lblType.Text = "Type";
             this.lblType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblType.UseMnemonic = false;
             // 
             // lblName
             // 
@@ -92,6 +95,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblName.TabIndex = 12;
             this.lblName.Text = "Name";
             this.lblName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblName.UseMnemonic = false;
             // 
             // btnCreateVariable
             // 
@@ -112,6 +116,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.btnCreateVariable.Size = new System.Drawing.Size(120, 27);
             this.btnCreateVariable.TabIndex = 16;
             this.btnCreateVariable.Text = "Create variable";
+            this.btnCreateVariable.UseMnemonic = false;
             this.btnCreateVariable.UseVisualStyleBackColor = false;
             this.btnCreateVariable.Click += new System.EventHandler(this.BtnCreateVariable_Click);
             // 

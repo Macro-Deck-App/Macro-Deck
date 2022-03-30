@@ -27,9 +27,15 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         private void LicensesDialog_Load(object sender, EventArgs e)
         {
-            string  result = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Licenses.xml"));
+            string result = "";
+            var assembly = typeof(MacroDeck).Assembly;
 
-            
+            string licensesFileName = $"SuchByte.MacroDeck.Resources.Licenses.xml";
+
+            using var resourceStream = assembly.GetManifestResourceStream(licensesFileName);
+            using var streamReader = new StreamReader(resourceStream);
+            result= streamReader.ReadToEnd();
+
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(result);
             foreach (XmlNode node in doc.DocumentElement.ChildNodes)

@@ -33,14 +33,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             // ActionConfigControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 23F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ForeColor = System.Drawing.Color.White;
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "ActionConfigControl";
-            this.Size = new System.Drawing.Size(715, 270);
+            this.Size = new System.Drawing.Size(857, 424);
             this.ResumeLayout(false);
 
         }

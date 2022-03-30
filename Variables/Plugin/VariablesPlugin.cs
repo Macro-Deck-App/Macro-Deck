@@ -4,13 +4,17 @@ using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Variables.Plugin.GUI;
+using SuchByte.MacroDeck.Variables.Plugin.Models;
+using SuchByte.MacroDeck.Variables.Plugin.Views;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
@@ -19,8 +23,10 @@ namespace SuchByte.MacroDeck.Variables.Plugin
 {
     public class VariablesPlugin : MacroDeckPlugin
     {
-        public override string Name => LanguageManager.Strings.PluginMacroDeckVariables;
-        public override string Author => "Macro Deck";
+        internal override string Name => LanguageManager.Strings.PluginMacroDeckVariables;
+        internal override string Author => "Macro Deck";
+
+        internal override Image PluginIcon => Properties.Resources.Variable_Normal;
 
         private VariableChangedEvent variableChangedEvent = new VariableChangedEvent();
 
@@ -31,8 +37,9 @@ namespace SuchByte.MacroDeck.Variables.Plugin
             this.Actions = new List<PluginAction>
             {
                 new ChangeVariableValueAction(),
+                new SaveVariableToFileAction(),
             };
-            MacroDeck.EventManager.RegisterEvent(this.variableChangedEvent);
+            EventManager.RegisterEvent(this.variableChangedEvent);
             VariableManager.OnVariableChanged += VariableChanged;
 
             this.timeDateTimer = new Timer(1000)
@@ -46,13 +53,14 @@ namespace SuchByte.MacroDeck.Variables.Plugin
         {
             Task.Run(() =>
             {
-                VariableManager.SetValue("Time", DateTime.Now.ToString("t"), VariableType.String, "Macro Deck", false);
-                VariableManager.SetValue("Date", DateTime.Now.ToString("d"), VariableType.String, "Macro Deck", false);
+                VariableManager.SetValue("time", DateTime.Now.ToString("t"), VariableType.String, "Macro Deck", false);
+                VariableManager.SetValue("date", DateTime.Now.ToString("d"), VariableType.String, "Macro Deck", false);
+                VariableManager.SetValue("day_of_week", DateTime.Now.DayOfWeek.ToString(), VariableType.String, "Macro Deck", false);
             });
         }
         private void VariableChanged(object sender, EventArgs e)
         {
-            this.variableChangedEvent.Trigger();
+            this.variableChangedEvent.Trigger(sender);
         }
     }
 
@@ -61,25 +69,42 @@ namespace SuchByte.MacroDeck.Variables.Plugin
         public string Name => "Variable changed";
 
         public EventHandler<MacroDeckEventArgs> OnEvent { get; set; }
+        public List<string> ParameterSuggestions {
+            get 
+            {
+                List<string> variables = new List<string>();
+                foreach (Variable variable in VariableManager.Variables)
+                {
+                    variables.Add(variable.Name);
+                }
+                return variables;
+            } set { }
+        }
 
-        public void Trigger()
+        public void Trigger(object sender)
         {
             if (this.OnEvent != null)
             {
-                foreach (MacroDeckProfile macroDeckProfile in MacroDeck.ProfileManager.Profiles)
+                try
                 {
-                    foreach (MacroDeckFolder folder in macroDeckProfile.Folders)
+                    foreach (MacroDeckProfile macroDeckProfile in ProfileManager.Profiles)
                     {
-                        foreach (ActionButton.ActionButton actionButton in folder.ActionButtons.FindAll(actionButton => actionButton.EventActions != null && actionButton.EventActions.ContainsKey(this.Name)))
+                        foreach (MacroDeckFolder folder in macroDeckProfile.Folders)
                         {
-                            MacroDeckEventArgs macroDeckEventArgs = new MacroDeckEventArgs
+                            if (folder.ActionButtons == null) continue;
+                            foreach (ActionButton.ActionButton actionButton in folder.ActionButtons.FindAll(actionButton => actionButton.EventListeners != null && actionButton.EventListeners.Find(x => x.EventToListen != null && x.EventToListen.Equals(this.Name)) != null))
                             {
-                                ActionButton = actionButton
-                            };
-                            this.OnEvent(this, macroDeckEventArgs);
+                                MacroDeckEventArgs macroDeckEventArgs = new MacroDeckEventArgs
+                                {
+                                    ActionButton = actionButton,
+                                    Parameter = ((Variable)sender).Name,
+                                };
+                                this.OnEvent(this, macroDeckEventArgs);
+                            }
                         }
                     }
                 }
+                catch { }
             }
         }
     }
@@ -94,7 +119,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin
 
         public override ActionConfigControl GetActionConfigControl(ActionConfigurator actionConfigurator)
         {
-            return new ChangeVariableValueConfigurator(this);
+            return new ChangeVariableValueActionConfigView(this);
         }
 
         public override void Trigger(string clientId, ActionButton.ActionButton actionButton)
@@ -114,7 +139,11 @@ namespace SuchByte.MacroDeck.Variables.Plugin
                         VariableManager.SetValue(variable.Name, float.Parse(variable.Value) - 1, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
                         break;
                     case "set":
-                        VariableManager.SetValue(variable.Name, jsonObject["value"].ToString(), (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
+                        if (jsonObject["value"] != null && !String.IsNullOrWhiteSpace(jsonObject["value"].ToString()))
+                        {
+                            var value = VariableManager.RenderTemplate(jsonObject["value"].ToString());
+                            VariableManager.SetValue(variable.Name, value, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
+                        }
                         break;
                     case "toggle":
                         VariableManager.SetValue(variable.Name, !Boolean.Parse(variable.Value.Replace("on", "true")), (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
@@ -122,5 +151,46 @@ namespace SuchByte.MacroDeck.Variables.Plugin
                 }
             } catch { }
         }
+    }
+
+    public class SaveVariableToFileAction : PluginAction
+    {
+        public override string Name => LanguageManager.Strings.ActionSaveVariableToFile;
+
+        public override string Description => LanguageManager.Strings.ActionSaveVariableToFileDescription;
+
+        public override bool CanConfigure => true;
+
+        public override void Trigger(string clientId, ActionButton.ActionButton actionButton)
+        {
+            var configurationModel = SaveVariableToFileActionConfigModel.Deserialize(this.Configuration);
+            if (configurationModel == null) return;
+            var filePath = configurationModel.FilePath;
+            var variable = VariableManager.Variables.Find(x => x.Name.Equals(configurationModel.Variable));
+            string variableValue;
+            if (variable == null)
+            {
+                variableValue = "Variable not found";
+            } else
+            {
+                variableValue = variable.Value;
+            }
+            try
+            {
+                Utils.Retry.Do(new Action(() =>
+                {
+                    File.WriteAllText(filePath, variableValue);
+                })); 
+            } catch (Exception ex)
+            {
+                MacroDeckLogger.Error(typeof(VariablesPlugin), $"Failed to save variable value to file: {ex.Message}");
+            }
+        }
+
+        public override ActionConfigControl GetActionConfigControl(ActionConfigurator actionConfigurator)
+        {
+            return new SaveVariableToFileActionConfigView(this);
+        }
+
     }
 }

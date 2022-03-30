@@ -63,6 +63,46 @@ namespace SuchByte.MacroDeck.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        public static System.Drawing.Bitmap Alert {
+            get {
+                object obj = ResourceManager.GetObject("Alert", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap AlignBottom {
+            get {
+                object obj = ResourceManager.GetObject("AlignBottom", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap AlignCenter {
+            get {
+                object obj = ResourceManager.GetObject("AlignCenter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap AlignTop {
+            get {
+                object obj = ResourceManager.GetObject("AlignTop", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         public static System.Drawing.Bitmap Android {
             get {
                 object obj = ResourceManager.GetObject("Android", resourceCulture);
@@ -103,6 +143,26 @@ namespace SuchByte.MacroDeck.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        public static System.Drawing.Bitmap Arrow_Top_Right_Hover {
+            get {
+                object obj = ResourceManager.GetObject("Arrow_Top_Right_Hover", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap Arrow_Top_Right_Normal {
+            get {
+                object obj = ResourceManager.GetObject("Arrow_Top_Right_Normal", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         public static System.Drawing.Bitmap Arrow_Up_Hover {
             get {
                 object obj = ResourceManager.GetObject("Arrow_Up_Hover", resourceCulture);
@@ -116,6 +176,36 @@ namespace SuchByte.MacroDeck.Properties {
         public static System.Drawing.Bitmap Arrow_Up_Normal {
             get {
                 object obj = ResourceManager.GetObject("Arrow_Up_Normal", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap Backup_Restore {
+            get {
+                object obj = ResourceManager.GetObject("Backup-Restore", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap Chevron_Down {
+            get {
+                object obj = ResourceManager.GetObject("Chevron_Down", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap Chevron_Right {
+            get {
+                object obj = ResourceManager.GetObject("Chevron_Right", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -283,6 +373,16 @@ namespace SuchByte.MacroDeck.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        public static System.Drawing.Bitmap Harddisk {
+            get {
+                object obj = ResourceManager.GetObject("Harddisk", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         public static System.Drawing.Bitmap Icon {
             get {
                 object obj = ResourceManager.GetObject("Icon", resourceCulture);
@@ -293,9 +393,9 @@ namespace SuchByte.MacroDeck.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
-        public static System.Drawing.Bitmap icon_color_picker {
+        public static System.Drawing.Bitmap iOS {
             get {
-                object obj = ResourceManager.GetObject("icon_color_picker", resourceCulture);
+                object obj = ResourceManager.GetObject("iOS", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -303,9 +403,9 @@ namespace SuchByte.MacroDeck.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
-        public static System.Drawing.Bitmap iOS {
+        public static System.Drawing.Bitmap Keyboard {
             get {
-                object obj = ResourceManager.GetObject("iOS", resourceCulture);
+                object obj = ResourceManager.GetObject("Keyboard", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -363,6 +463,16 @@ namespace SuchByte.MacroDeck.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        public static System.Drawing.Bitmap Palette {
+            get {
+                object obj = ResourceManager.GetObject("Palette", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         public static System.Drawing.Bitmap PoweredBy_200px_Black_HorizLogo {
             get {
                 object obj = ResourceManager.GetObject("PoweredBy_200px-Black_HorizLogo", resourceCulture);
@@ -386,6 +496,16 @@ namespace SuchByte.MacroDeck.Properties {
         public static System.Drawing.Bitmap settings {
             get {
                 object obj = ResourceManager.GetObject("settings", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap Spinner {
+            get {
+                object obj = ResourceManager.GetObject("Spinner", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -426,6 +546,26 @@ namespace SuchByte.MacroDeck.Properties {
         public static System.Drawing.Bitmap Web {
             get {
                 object obj = ResourceManager.GetObject("Web", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap Web2 {
+            get {
+                object obj = ResourceManager.GetObject("Web2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap WindowsDefenderSecurityAlert {
+            get {
+                object obj = ResourceManager.GetObject("WindowsDefenderSecurityAlert", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

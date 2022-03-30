@@ -2,9 +2,13 @@
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowContents;
+using SuchByte.MacroDeck.GUI.MainWindowViews;
 using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,17 +26,37 @@ namespace SuchByte.MacroDeck.GUI
 
     public partial class MainWindow : CustomControls.Form
     {
-        private DeckView DeckView { get; set; }
-        private PackageManagerView PackageManagerView { get; set; }
-        private VariablesView VariablesView { get; set; }
-        private SettingsView SettingsView { get; set; }
+        private DeckView _deckView { get; set; }
+        
+        public DeckView DeckView
+        {
+            get
+            {
+                if (this._deckView == null || this._deckView.IsDisposed)
+                {
+                    this._deckView = new DeckView();
+                }
+                return this._deckView;
+            }
+        }
+
+        public ExtensionsView ExtensionsView { get; set; }
+        public VariablesView VariablesView { get; set; }
+        public SettingsView SettingsView { get; set; }
 
         public MainWindow()
         {
             this.InitializeComponent();
             this.UpdateTranslation();
-            Language.LanguageManager.LanguageChanged += LanguageChanged;
+            this.UpdateWarningsErrors();
+            LanguageManager.LanguageChanged += LanguageChanged;
             Updater.Updater.OnUpdateAvailable += UpdateAvailable;
+            MacroDeckLogger.OnWarningOrError += MacroDeckLogger_OnWarningOrError;
+        }
+
+        private void MacroDeckLogger_OnWarningOrError(object sender, EventArgs e)
+        {
+            UpdateWarningsErrors();
         }
 
         private void UpdateTranslation()
@@ -47,14 +71,19 @@ namespace SuchByte.MacroDeck.GUI
             {
                 this.DeckView.UpdateTranslation();
             }
-            if (this.PackageManagerView != null)
-            {
-                this.PackageManagerView.UpdateTranslation();
-            }
             if (this.VariablesView != null)
             {
                 this.VariablesView.UpdateTranslation();
             }
+        }
+
+        private void UpdateWarningsErrors()
+        {
+            this.Invoke(new Action(() =>
+            {
+                this.warningsErrorPanel.Visible = MacroDeckLogger.Errors > 0 || MacroDeckLogger.Warnings > 0;
+                this.lblErrorsWarnings.Text = string.Format(LanguageManager.Strings.XWarningsXErrors, MacroDeckLogger.Warnings, MacroDeckLogger.Errors);
+            }));
         }
 
         private void UpdateAvailable(object sender, EventArgs e)
@@ -94,7 +123,7 @@ namespace SuchByte.MacroDeck.GUI
             {
                 this.Invoke(new Action(() =>
                 {
-                    if (control != this.DeckView && (clearAll && (control != this.SettingsView && control != this.PackageManagerView && control != this.VariablesView)) && control != view)
+                    if (control != this.DeckView && (clearAll && (control != this.SettingsView && control != this.VariablesView)) && control != view)
                     {
                         control.Dispose();
                     }
@@ -111,9 +140,10 @@ namespace SuchByte.MacroDeck.GUI
             } else if (view.GetType().Equals(typeof(DeviceManagerView)))
             {
                 SelectContentButton(btnDeviceManager);
-            } else if (view.GetType().Equals(typeof(PackageManagerView)))
+            }
+            else if (view.GetType().Equals(typeof(ExtensionsView)))
             {
-                SelectContentButton(btnPackageManager);
+                SelectContentButton(btnExtensions);
             }
             else if (view.GetType().Equals(typeof(SettingsView)))
             {
@@ -122,8 +152,7 @@ namespace SuchByte.MacroDeck.GUI
             else if (view.GetType().Equals(typeof(VariablesView)))
             {
                 SelectContentButton(btnVariables);
-            }
-
+            } 
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
@@ -133,6 +162,7 @@ namespace SuchByte.MacroDeck.GUI
         private void MainWindow_Load(object sender, EventArgs e)
         {
             this.SetView(new LoadingView());
+            
             this.lblVersion.Text = "Macro Deck " + MacroDeck.VersionString + (Debugger.IsAttached  ? " (debug)" : "");
             
             PluginManager.OnPluginsChange += this.OnPluginsChanged;
@@ -148,39 +178,31 @@ namespace SuchByte.MacroDeck.GUI
             {
                 this.BackColor = Color.FromArgb(99, 0, 0);
                 this.lblSafeMode.Visible = true;
-                using (var msgBox = new GUI.CustomControls.MessageBox())
+                using (var msgBox = new CustomControls.MessageBox())
                 {
                     msgBox.ShowDialog("Safe mode", "Macro Deck was started in safe mode! This means no changes on the action buttons will be saved to prevent damage.", MessageBoxButtons.OK);
 
                 }
             }
 
-            this.btnPackageManager.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);
+            this.btnExtensions.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);
 
             Task.Run(() =>
             {
-                this.DeckView = new DeckView();
+                this._deckView ??= new DeckView();
                 Thread.Sleep(500);
                 this.SetView(this.DeckView);
                 this.Invoke(new Action(() =>
                 {
                     this.navigation.Visible = true;
-                    this.btnSettings.SetNotification(Updater.Updater.UpdateAvailable);
-                    /*if (Updater.Updater.UpdateAvailable)
-                    {
-                        using (var downloadUpdateDialog = new DownloadUpdateDialog(Updater.Updater.UpdateObject))
-                        {
-                            downloadUpdateDialog.ShowDialog();
-                        }
-                    }*/
-            
+                    this.btnSettings.SetNotification(Updater.Updater.UpdateAvailable);           
                 }));
                 
             });
 
             PluginManager.ScanUpdatesAsync();
             IconManager.ScanUpdatesAsync();
-            
+            CenterToScreen();
         }
 
         private void OnPackageManagerUpdateCheckFinished(object sender, EventArgs e)
@@ -198,10 +220,8 @@ namespace SuchByte.MacroDeck.GUI
         {
             this.Invoke(new Action(() =>
             {
-                this.lblPluginsLoaded.Text = String.Format(Language.LanguageManager.Strings.XPluginsLoaded, PluginManager.Plugins.Values.Count);
-                this.lblPluginsNotLoaded.Text = String.Format(Language.LanguageManager.Strings.XPluginsDisabled, PluginManager.PluginsNotLoaded.Values.Count);
-                this.lblPluginsNotLoaded.Visible = PluginManager.PluginsNotLoaded.Values.Count > 0;
-                this.btnPackageManager.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);
+                this.lblPluginsLoaded.Text = string.Format(Language.LanguageManager.Strings.XPluginsLoaded, $"{ PluginManager.Plugins.Values.Count } / { PluginManager.Plugins.Values.Count + PluginManager.PluginsNotLoaded.Values.Count } ");
+                this.btnExtensions.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);
             }));
             
         }
@@ -233,15 +253,16 @@ namespace SuchByte.MacroDeck.GUI
         private void BtnDeck_Click(object sender, EventArgs e)
         {
             this.SetView(this.DeckView);
+            this.DeckView.UpdateButtons();
         }
 
-        private void BtnPackageManager_Click(object sender, EventArgs e)
+        private void BtnExtensions_Click(object sender, EventArgs e)
         {
-            if (this.PackageManagerView == null)
+            if (this.ExtensionsView == null)
             {
-                this.PackageManagerView = new PackageManagerView();
+                this.ExtensionsView = new ExtensionsView();
             }
-            this.SetView(this.PackageManagerView);
+            this.SetView(this.ExtensionsView);
         }
 
         private void BtnSettings_Click(object sender, EventArgs e)
@@ -273,6 +294,18 @@ namespace SuchByte.MacroDeck.GUI
                 this.VariablesView = new VariablesView();
             }
             this.SetView(this.VariablesView);
+        }
+
+        private void LblErrorsWarnings_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var p = new Process
+            {
+                StartInfo = new ProcessStartInfo(MacroDeckLogger.CurrentFilename)
+                {
+                    UseShellExecute = true,
+                }
+            };
+            p.Start();
         }
     }
 }
