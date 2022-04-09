@@ -181,6 +181,8 @@ namespace SuchByte.MacroDeck.ActionButton
 
         public ButtonLabel LabelOff { get; set; } = new ButtonLabel();
         public ButtonLabel LabelOn { get; set; } = new ButtonLabel();
+        public Color BackColorOff = Color.FromArgb(35, 35, 35);
+        public Color BackColorOn = Color.FromArgb(35, 35, 35);
         public int Position_X { get; set; } = -1;
         public int Position_Y { get; set; } = -1;
         public string StateBindingVariable { get; set; } = string.Empty;
