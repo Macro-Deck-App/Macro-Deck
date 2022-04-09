@@ -362,13 +362,19 @@ namespace SuchByte.MacroDeck
             }
 
             // Initializing Cef Browser
-            CefSettings settings = new CefSettings();
-            settings.CefCommandLineArgs.Add("force-device-scale-factor", "1");
-            settings.CefCommandLineArgs.Add("disable-gpu-vsync", "1");
-            settings.CefCommandLineArgs.Add("disable-gpu", "1");
-            settings.CachePath = Path.Combine(UserDirectoryPath, "CefSharp", "Cache");
-            
-            Cef.Initialize(settings);
+            try
+            {
+                CefSettings settings = new CefSettings();
+                settings.CefCommandLineArgs.Add("force-device-scale-factor", "1");
+                settings.CefCommandLineArgs.Add("disable-gpu-vsync", "1");
+                settings.CefCommandLineArgs.Add("disable-gpu", "1");
+                settings.CachePath = Path.Combine(UserDirectoryPath, "CefSharp", "Cache");
+
+                Cef.Initialize(settings);
+            } catch (Exception ex)
+            {
+                MacroDeckLogger.Error(typeof(MacroDeck), $"Could not initialize Chromium Embedded Framework: {ex.Message}" + Environment.NewLine + $"Make sure, Microsoft Visual C++ Redistributable is installed on your computer. You can download it here: https://aka.ms/vs/17/release/vc_redist.x64.exe");
+            }
 
             // Check if config exists
             if (!File.Exists(ConfigFilePath))
