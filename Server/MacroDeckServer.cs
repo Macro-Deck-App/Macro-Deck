@@ -26,8 +26,11 @@ namespace SuchByte.MacroDeck.Server
         public static event EventHandler OnFolderChanged;
 
         private static WebSocketServer _webSocketServer;
+        private static WebSocketServer _usbWebSocketServer;
 
         public static WebSocketServer WebSocketServer { get { return _webSocketServer; } }
+
+        public static WebSocketServer USBWebSocketServer { get { return _usbWebSocketServer; } }
 
 
         private static readonly List<MacroDeckClient> _clients = new List<MacroDeckClient>();
@@ -38,7 +41,56 @@ namespace SuchByte.MacroDeck.Server
         /// </summary>
         /// <param name="ipAddress"></param>
         /// <param name="port"></param>
+        /// 
         public static void Start(string ipAddress, int port)
+        {
+            StartWebSocketServer(ipAddress, port);
+            StartUSBWebSocketServer("127.0.0.1", port);
+        }
+
+        private static void StartUSBWebSocketServer(string ipAddress, int port)
+        {
+            DeviceManager.LoadKnownDevices();
+            Thread.Sleep(100);
+            if (_usbWebSocketServer != null)
+            {
+                MacroDeckLogger.Info("Stopping USB websocket server...");
+                foreach (MacroDeckClient macroDeckClient in _clients)
+                {
+                    if (macroDeckClient.SocketConnection != null && macroDeckClient.SocketConnection.IsAvailable)
+                    {
+                        macroDeckClient.SocketConnection.Close();
+                    }
+                }
+                _usbWebSocketServer.Dispose();
+                MacroDeckLogger.Info("USB websocket server stopped");
+                if (OnServerStateChanged != null)
+                {
+                    OnServerStateChanged(_webSocketServer, EventArgs.Empty);
+                }
+
+            }
+            MacroDeckLogger.Info(string.Format("Starting USB websocket server @ {0}:{1}", ipAddress, port));
+            _usbWebSocketServer = new WebSocketServer("ws://" + ipAddress + ":" + port);
+            _usbWebSocketServer.ListenerSocket.NoDelay = true;
+            try
+            {
+                _usbWebSocketServer.Start(socket =>
+                {
+                    MacroDeckClient macroDeckClient = new MacroDeckClient(socket);
+                    socket.OnOpen = () => OnOpen(macroDeckClient);
+                    socket.OnClose = () => OnClose(macroDeckClient);
+                    socket.OnError = delegate (Exception ex) { OnClose(macroDeckClient); };
+                    socket.OnMessage = message => OnMessage(macroDeckClient, message);
+                });
+            }
+            catch (Exception ex)
+            {
+                MacroDeckLogger.Error("Failed to start USB server: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            }
+        }
+
+        private static void StartWebSocketServer(string ipAddress, int port)
         {
             DeviceManager.LoadKnownDevices();
             Thread.Sleep(100);
@@ -281,7 +333,7 @@ namespace SuchByte.MacroDeck.Server
                 case JsonMethod.GET_ICONS:
                     Task.Run(() =>
                     {
-                        SendAllIcons(macroDeckClient);
+                        //SendAllIcons(macroDeckClient);
                     });
                     break;
             }
@@ -407,7 +459,7 @@ namespace SuchByte.MacroDeck.Server
         /// Sends all icon packs to the client
         /// </summary>
         /// <param name="macroDeckClient"></param>
-        public static void SendAllIcons(MacroDeckClient macroDeckClient = null)
+        /*public static void SendAllIcons(MacroDeckClient macroDeckClient = null)
         {
             if (macroDeckClient == null)
             {
@@ -419,7 +471,7 @@ namespace SuchByte.MacroDeck.Server
             {
                 macroDeckClient.DeviceMessage.SendIconPacks(macroDeckClient);
             }
-        }
+        }*/
 
         /// <summary>
         /// Sends all buttons of the current folder to the client

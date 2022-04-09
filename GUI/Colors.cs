@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Windows.Controls;
 using Windows.UI.ViewManagement;
 
 namespace SuchByte.MacroDeck.GUI
 {
     public class Colors
     {
-
         public static void Initialize()
         {
             try
@@ -48,7 +49,7 @@ namespace SuchByte.MacroDeck.GUI
         {
             get
             {
-                return Color.FromArgb(0, 103, 225);
+                return Color.FromArgb(0, 103, 205);
             }
         }
 

@@ -15,8 +15,8 @@ namespace SuchByte.MacroDeck.Folders.Plugin
 {
     public class FolderPlugin : MacroDeckPlugin
     {
-        public override string Name => LanguageManager.Strings.PluginMacroDeckFolder;
-        public override string Author => "Macro Deck";
+        internal override string Name => LanguageManager.Strings.PluginMacroDeckFolder;
+        internal override string Author => "Macro Deck";
         public override void Enable()
         {
             this.Actions = new List<PluginAction>

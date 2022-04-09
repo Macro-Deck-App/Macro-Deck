@@ -44,6 +44,11 @@ namespace SuchByte.MacroDeck.Device
                 {
                     serializer.Serialize(writer, _macroDeckDevices);
                 }
+
+                if (OnDevicesChange != null)
+                {
+                    OnDevicesChange(null, EventArgs.Empty);
+                }
             }
             catch (Exception ex)
             {
@@ -58,11 +63,6 @@ namespace SuchByte.MacroDeck.Device
                 _macroDeckDevices.Add(macroDeckDevice);
             }
             SaveKnownDevices();
-
-            if (OnDevicesChange != null)
-            {
-                OnDevicesChange(macroDeckDevice, EventArgs.Empty);
-            }
         }
 
         public static bool IsKnownDevice(string clientId)
@@ -111,10 +111,6 @@ namespace SuchByte.MacroDeck.Device
             if (macroDeckDevice.Available)
             {
                 MacroDeckServer.SetProfile(MacroDeckServer.GetMacroDeckClient(macroDeckDevice.ClientId), macroDeckProfile);
-            }   
-            if (OnDevicesChange != null)
-            {
-                OnDevicesChange(macroDeckDevice, EventArgs.Empty);
             }
         }
 
@@ -129,10 +125,6 @@ namespace SuchByte.MacroDeck.Device
             {
                 MacroDeckServer.GetMacroDeckClient(macroDeckDevice.ClientId).SocketConnection.Close();
             }
-            if (OnDevicesChange != null)
-            {
-                OnDevicesChange(macroDeckDevice, EventArgs.Empty);
-            }
         }
 
         public static void RenameMacroDeckDevice(MacroDeckDevice macroDeckDevice, string displayName)
@@ -142,10 +134,6 @@ namespace SuchByte.MacroDeck.Device
                 macroDeckDevice.DisplayName = displayName;
                 SaveKnownDevices();
             }
-            if (OnDevicesChange != null)
-            {
-                OnDevicesChange(macroDeckDevice, EventArgs.Empty);
-            }
         }
 
         public static void RemoveKnownDevice(MacroDeckDevice macroDeckDevice)
@@ -154,10 +142,6 @@ namespace SuchByte.MacroDeck.Device
             {
                 _macroDeckDevices.Remove(macroDeckDevice);
                 SaveKnownDevices();
-            }
-            if (OnDevicesChange != null)
-            {
-                OnDevicesChange(macroDeckDevice, EventArgs.Empty);
             }
         }
 

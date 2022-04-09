@@ -216,6 +216,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             base.OnPaint(pe);
 
+            pe.Graphics.InterpolationMode = InterpolationMode.High;
+
             Rectangle rectSurface = this.ClientRectangle;
             Rectangle rectProgressSurface = new Rectangle
             {

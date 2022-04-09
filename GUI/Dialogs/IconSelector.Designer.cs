@@ -83,6 +83,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnImport.Size = new System.Drawing.Size(115, 25);
             this.btnImport.TabIndex = 1;
             this.btnImport.Text = "Import icon";
+            this.btnImport.UseMnemonic = false;
             this.btnImport.UseVisualStyleBackColor = true;
             this.btnImport.UseWindowsAccentColor = true;
             this.btnImport.Click += new System.EventHandler(this.BtnImport_Click);
@@ -120,6 +121,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnOk.Size = new System.Drawing.Size(75, 25);
             this.btnOk.TabIndex = 6;
             this.btnOk.Text = "Ok";
+            this.btnOk.UseMnemonic = false;
             this.btnOk.UseVisualStyleBackColor = true;
             this.btnOk.UseWindowsAccentColor = true;
             this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
@@ -155,7 +157,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnCreateIconPack.Size = new System.Drawing.Size(25, 25);
             this.btnCreateIconPack.TabIndex = 9;
             this.btnCreateIconPack.TabStop = false;
-            this.btnCreateIconPack.Click += new System.EventHandler(this.btnCreateIconPack_Click);
+            this.btnCreateIconPack.Click += new System.EventHandler(this.BtnCreateIconPack_Click);
             // 
             // btnDeleteIconPack
             // 
@@ -171,7 +173,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnDeleteIconPack.Size = new System.Drawing.Size(25, 25);
             this.btnDeleteIconPack.TabIndex = 10;
             this.btnDeleteIconPack.TabStop = false;
-            this.btnDeleteIconPack.Click += new System.EventHandler(this.btnDeleteIconPack_Click);
+            this.btnDeleteIconPack.Click += new System.EventHandler(this.BtnDeleteIconPack_Click);
             // 
             // btnImportIconPack
             // 
@@ -190,6 +192,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnImportIconPack.Size = new System.Drawing.Size(130, 23);
             this.btnImportIconPack.TabIndex = 11;
             this.btnImportIconPack.Text = "Import icon pack...";
+            this.btnImportIconPack.UseMnemonic = false;
             this.btnImportIconPack.UseVisualStyleBackColor = false;
             this.btnImportIconPack.UseWindowsAccentColor = true;
             this.btnImportIconPack.Click += new System.EventHandler(this.BtnImportIconPack_Click);
@@ -211,6 +214,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnExportIconPack.Size = new System.Drawing.Size(130, 23);
             this.btnExportIconPack.TabIndex = 12;
             this.btnExportIconPack.Text = "Export icon pack...";
+            this.btnExportIconPack.UseMnemonic = false;
             this.btnExportIconPack.UseVisualStyleBackColor = false;
             this.btnExportIconPack.UseWindowsAccentColor = true;
             this.btnExportIconPack.Visible = false;
@@ -232,6 +236,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnDeleteIcon.Size = new System.Drawing.Size(105, 25);
             this.btnDeleteIcon.TabIndex = 13;
             this.btnDeleteIcon.Text = "Delete icon";
+            this.btnDeleteIcon.UseMnemonic = false;
             this.btnDeleteIcon.UseVisualStyleBackColor = false;
             this.btnDeleteIcon.UseWindowsAccentColor = false;
             this.btnDeleteIcon.Click += new System.EventHandler(this.BtnDeleteIcon_Click);
@@ -244,6 +249,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblSizeLabel.Size = new System.Drawing.Size(36, 16);
             this.lblSizeLabel.TabIndex = 14;
             this.lblSizeLabel.Text = "Size:";
+            this.lblSizeLabel.UseMnemonic = false;
             // 
             // lblSize
             // 
@@ -252,6 +258,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblSize.Size = new System.Drawing.Size(235, 15);
             this.lblSize.TabIndex = 15;
             this.lblSize.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblSize.UseMnemonic = false;
             // 
             // lblType
             // 
@@ -260,6 +267,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblType.Size = new System.Drawing.Size(46, 16);
             this.lblType.TabIndex = 17;
             this.lblType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblType.UseMnemonic = false;
             // 
             // lblTypeLabel
             // 
@@ -269,6 +277,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblTypeLabel.Size = new System.Drawing.Size(40, 16);
             this.lblTypeLabel.TabIndex = 16;
             this.lblTypeLabel.Text = "Type:";
+            this.lblTypeLabel.UseMnemonic = false;
             // 
             // btnCreateIcon
             // 
@@ -286,6 +295,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnCreateIcon.Size = new System.Drawing.Size(115, 25);
             this.btnCreateIcon.TabIndex = 18;
             this.btnCreateIcon.Text = "Create icon";
+            this.btnCreateIcon.UseMnemonic = false;
             this.btnCreateIcon.UseVisualStyleBackColor = true;
             this.btnCreateIcon.UseWindowsAccentColor = true;
             this.btnCreateIcon.Click += new System.EventHandler(this.BtnCreateIcon_Click);
@@ -307,6 +317,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnGiphy.Size = new System.Drawing.Size(78, 25);
             this.btnGiphy.TabIndex = 20;
             this.btnGiphy.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.btnGiphy.UseMnemonic = false;
             this.btnGiphy.UseVisualStyleBackColor = true;
             this.btnGiphy.UseWindowsAccentColor = true;
             this.btnGiphy.Visible = false;
@@ -331,6 +342,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblManaged.Size = new System.Drawing.Size(290, 16);
             this.lblManaged.TabIndex = 21;
             this.lblManaged.Text = "This icon pack is managed by the plugin manager";
+            this.lblManaged.UseMnemonic = false;
             this.lblManaged.Visible = false;
             // 
             // btnGenerateStatic
@@ -349,6 +361,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnGenerateStatic.Size = new System.Drawing.Size(145, 25);
             this.btnGenerateStatic.TabIndex = 22;
             this.btnGenerateStatic.Text = "Generate static";
+            this.btnGenerateStatic.UseMnemonic = false;
             this.btnGenerateStatic.UseVisualStyleBackColor = true;
             this.btnGenerateStatic.UseWindowsAccentColor = true;
             this.btnGenerateStatic.Visible = false;

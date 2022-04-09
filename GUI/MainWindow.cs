@@ -40,8 +40,7 @@ namespace SuchByte.MacroDeck.GUI
             }
         }
 
-        public ExtensionStoreView ExtensionStoreView { get; set; }
-        public PackageManagerView PackageManagerView { get; set; }
+        public ExtensionsView ExtensionsView { get; set; }
         public VariablesView VariablesView { get; set; }
         public SettingsView SettingsView { get; set; }
 
@@ -71,10 +70,6 @@ namespace SuchByte.MacroDeck.GUI
             if (this.DeckView != null)
             {
                 this.DeckView.UpdateTranslation();
-            }
-            if (this.PackageManagerView != null)
-            {
-                this.PackageManagerView.UpdateTranslation();
             }
             if (this.VariablesView != null)
             {
@@ -128,7 +123,7 @@ namespace SuchByte.MacroDeck.GUI
             {
                 this.Invoke(new Action(() =>
                 {
-                    if (control != this.DeckView && (clearAll && (control != this.SettingsView && control != this.PackageManagerView && control != this.VariablesView)) && control != view)
+                    if (control != this.DeckView && (clearAll && (control != this.SettingsView && control != this.VariablesView)) && control != view)
                     {
                         control.Dispose();
                     }
@@ -145,13 +140,10 @@ namespace SuchByte.MacroDeck.GUI
             } else if (view.GetType().Equals(typeof(DeviceManagerView)))
             {
                 SelectContentButton(btnDeviceManager);
-            } else if (view.GetType().Equals(typeof(PackageManagerView)))
-            {
-                SelectContentButton(btnPackageManager);
             }
-            else if (view.GetType().Equals(typeof(ExtensionStoreView)))
+            else if (view.GetType().Equals(typeof(ExtensionsView)))
             {
-                SelectContentButton(btnExtensionStore);
+                SelectContentButton(btnExtensions);
             }
             else if (view.GetType().Equals(typeof(SettingsView)))
             {
@@ -170,6 +162,7 @@ namespace SuchByte.MacroDeck.GUI
         private void MainWindow_Load(object sender, EventArgs e)
         {
             this.SetView(new LoadingView());
+            
             this.lblVersion.Text = "Macro Deck " + MacroDeck.VersionString + (Debugger.IsAttached  ? " (debug)" : "");
             
             PluginManager.OnPluginsChange += this.OnPluginsChanged;
@@ -192,7 +185,7 @@ namespace SuchByte.MacroDeck.GUI
                 }
             }
 
-            this.btnPackageManager.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);
+            this.btnExtensions.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);
 
             Task.Run(() =>
             {
@@ -228,7 +221,7 @@ namespace SuchByte.MacroDeck.GUI
             this.Invoke(new Action(() =>
             {
                 this.lblPluginsLoaded.Text = string.Format(Language.LanguageManager.Strings.XPluginsLoaded, $"{ PluginManager.Plugins.Values.Count } / { PluginManager.Plugins.Values.Count + PluginManager.PluginsNotLoaded.Values.Count } ");
-                this.btnPackageManager.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);
+                this.btnExtensions.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);
             }));
             
         }
@@ -263,13 +256,13 @@ namespace SuchByte.MacroDeck.GUI
             this.DeckView.UpdateButtons();
         }
 
-        private void BtnPackageManager_Click(object sender, EventArgs e)
+        private void BtnExtensions_Click(object sender, EventArgs e)
         {
-            if (this.PackageManagerView == null)
+            if (this.ExtensionsView == null)
             {
-                this.PackageManagerView = new PackageManagerView();
+                this.ExtensionsView = new ExtensionsView();
             }
-            this.SetView(this.PackageManagerView);
+            this.SetView(this.ExtensionsView);
         }
 
         private void BtnSettings_Click(object sender, EventArgs e)
@@ -313,15 +306,6 @@ namespace SuchByte.MacroDeck.GUI
                 }
             };
             p.Start();
-        }
-
-        private void btnExtensionStore_Click(object sender, EventArgs e)
-        {
-            if (this.ExtensionStoreView == null)
-            {
-                this.ExtensionStoreView = new ExtensionStoreView();
-            }
-            this.SetView(this.ExtensionStoreView);
         }
     }
 }

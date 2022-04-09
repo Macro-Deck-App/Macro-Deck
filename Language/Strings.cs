@@ -312,5 +312,16 @@ namespace SuchByte.MacroDeck.Language
         public string LogSuccessfullyExportedToX = "Log successfully exported to {0}";
         public string Help = "Help";
         public string XWarningsXErrors = "{0} warning(s), {1} error(s)";
+        public string TrimBlankLines = "Trim blank lines";
+        public string Extensions = "Extensions";
+        public string InstallFromFile = "Install from file";
+        public string AllExtensionsUpToDate = "All extensions are up-to-date";
+        public string UpdateAll = "Update all";
+        public string UpdateAvailable = "Update available";
+        public string PendingRestart = "Pending restart";
+        public string Enabled = "Enabled";
+        public string Disabled = "Disabled";
+        public string ActionSaveVariableToFile = "Save variable to file";
+        public string ActionSaveVariableToFileDescription = "Saves the value of the variable to a file";
     }
 }

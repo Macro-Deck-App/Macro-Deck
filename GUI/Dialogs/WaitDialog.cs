@@ -26,18 +26,22 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         public static void SetVisisble(bool visible, System.Windows.Forms.Form owner)
         {
-            owner.Invoke(new Action(() =>
+            if (owner != null)
             {
-                if (visible)
+                owner.Invoke(new Action(() =>
                 {
-                    if (waitDialog.Visible) return;
-                    waitDialog.ShowDialog();
-                }
-                else
-                {
-                    waitDialog.Hide();
-                }
-            }));
+                    if (visible)
+                    {
+                        if (waitDialog.Visible) return;
+                        waitDialog.ShowDialog();
+                    }
+                    else
+                    {
+                        waitDialog.Hide();
+                    }
+                }));
+            }
+           
         }
 
 

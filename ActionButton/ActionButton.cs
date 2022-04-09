@@ -126,10 +126,10 @@ namespace SuchByte.MacroDeck.ActionButton
             }
         }
 
+        public string Guid { get; set; } = System.Guid.NewGuid().ToString();
 
         public event EventHandler StateChanged;
         public event EventHandler IconChanged;
-        public long ButtonId { get; set; }
 
         private bool _state = false;
         public bool State

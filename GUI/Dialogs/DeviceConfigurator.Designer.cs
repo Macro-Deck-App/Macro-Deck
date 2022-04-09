@@ -59,6 +59,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOk.Size = new System.Drawing.Size(75, 25);
             this.btnOk.TabIndex = 2;
             this.btnOk.Text = "Ok";
+            this.btnOk.UseMnemonic = false;
             this.btnOk.UseVisualStyleBackColor = false;
             this.btnOk.UseWindowsAccentColor = true;
             this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
@@ -71,6 +72,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblBrightness.Size = new System.Drawing.Size(110, 19);
             this.lblBrightness.TabIndex = 3;
             this.lblBrightness.Text = "Brightness";
+            this.lblBrightness.UseMnemonic = false;
             // 
             // brightness
             // 
@@ -92,6 +94,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.checkAutoConnect.Size = new System.Drawing.Size(541, 22);
             this.checkAutoConnect.TabIndex = 5;
             this.checkAutoConnect.Text = "Connect automatically";
+            this.checkAutoConnect.UseMnemonic = false;
             this.checkAutoConnect.UseVisualStyleBackColor = true;
             this.checkAutoConnect.CheckedChanged += new System.EventHandler(this.CheckAutoConnect_CheckedChanged);
             // 
@@ -103,6 +106,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblKeepWake.Size = new System.Drawing.Size(169, 19);
             this.lblKeepWake.TabIndex = 6;
             this.lblKeepWake.Text = "Keep awake";
+            this.lblKeepWake.UseMnemonic = false;
             // 
             // radioKeepAwakeNever
             // 
@@ -114,6 +118,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.radioKeepAwakeNever.Size = new System.Drawing.Size(58, 20);
             this.radioKeepAwakeNever.TabIndex = 0;
             this.radioKeepAwakeNever.Text = "Never";
+            this.radioKeepAwakeNever.UseMnemonic = false;
             this.radioKeepAwakeNever.UseVisualStyleBackColor = true;
             this.radioKeepAwakeNever.CheckedChanged += new System.EventHandler(this.RadioKeepAwakeNever_CheckedChanged);
             // 
@@ -140,6 +145,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.radioKeepAwakeConnected.TabIndex = 1;
             this.radioKeepAwakeConnected.TabStop = true;
             this.radioKeepAwakeConnected.Text = "When connected";
+            this.radioKeepAwakeConnected.UseMnemonic = false;
             this.radioKeepAwakeConnected.UseVisualStyleBackColor = true;
             this.radioKeepAwakeConnected.CheckedChanged += new System.EventHandler(this.RadioKeepAwakeConnected_CheckedChanged);
             // 
@@ -153,6 +159,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.radioKeepAwakeAlways.Size = new System.Drawing.Size(65, 20);
             this.radioKeepAwakeAlways.TabIndex = 2;
             this.radioKeepAwakeAlways.Text = "Always";
+            this.radioKeepAwakeAlways.UseMnemonic = false;
             this.radioKeepAwakeAlways.UseVisualStyleBackColor = true;
             this.radioKeepAwakeAlways.CheckedChanged += new System.EventHandler(this.RadioKeepAwakeAlways_CheckedChanged);
             // 

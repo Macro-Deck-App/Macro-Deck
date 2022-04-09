@@ -49,6 +49,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblConfigureGridPreferences.TabIndex = 4;
             this.lblConfigureGridPreferences.Text = "Now let\'s configure the grid to your preferences";
             this.lblConfigureGridPreferences.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblConfigureGridPreferences.UseMnemonic = false;
             // 
             // panel1
             // 

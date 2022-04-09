@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
-using System.Text.Json.Serialization;
 
 namespace SuchByte.MacroDeck.Icons
 {
     public class IconPack
     {
+        public string PackageId;
+
         /// <summary>
         /// Name of the icon pack
         /// </summary>
@@ -21,36 +22,26 @@ namespace SuchByte.MacroDeck.Icons
         /// <summary>
         /// Version of the icon pack
         /// </summary>
-        public String Version;
+        public string Version;
 
         /// <summary>
         /// A list containing all icons of the icon pack
         /// </summary>
         public List<Icon> Icons;
+        
+        /// <summary>
+        /// Icon displayed in the extension manager
+        /// </summary>
+        public Image IconPackIcon { get; set; }
 
         /// <summary>
-        /// True = disable the possibility to edit the icon pack in the icon selector
+        /// Disabled the editing of the icon pack
         /// </summary>
-        public bool PackageManagerManaged = false;
+        public bool ExtensionStoreManaged { get; set; } = false;
 
         /// <summary>
-        /// True = the icon pack is hidden in the icon selector
+        /// Hides the icon pack
         /// </summary>
-        public bool Hidden = false;
-
-        /// <summary>
-        /// Description of the icon pack when exported
-        /// </summary>
-        public string Description;
-
-        /// <summary>
-        /// Link to the used license
-        /// </summary>
-        public string License = String.Empty;
-
-        /// <summary>
-        /// Icon preview
-        /// </summary>
-        public string IconPreviewBase64 { get; set; }
+        public bool Hidden { get; set; } = false;
     }
 }

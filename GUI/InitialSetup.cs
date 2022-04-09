@@ -24,7 +24,7 @@ namespace SuchByte.MacroDeck.GUI
         int currentPage = 0;
         List<Control> pages;
 
-        List<JObject> objectsToInstall = new List<JObject>();
+        //List<JObject> objectsToInstall = new List<JObject>();
 
 
         public InitialSetup()
@@ -58,8 +58,8 @@ namespace SuchByte.MacroDeck.GUI
                 new SetupPage1(),
                 new SetupPage2(this),
                 //new SetupPage3(this),
-                new SetupPage4(),
-                new SetupPage5(),
+                //new SetupPage4(),
+                //new SetupPage5(),
                 new SetupPage6(this),
             };
             this.SetPage(0);
@@ -81,7 +81,7 @@ namespace SuchByte.MacroDeck.GUI
         private void BtnNext_Click(object sender, EventArgs e)
         {
             // Get all the selected plugins for installation
-            if (this.currentPage == pages.IndexOf(pages.OfType<SetupPage4>().FirstOrDefault()))
+            /*if (this.currentPage == pages.IndexOf(pages.OfType<SetupPage4>().FirstOrDefault()))
             {
                 SetupPage4 setupPage4 = pages.OfType<SetupPage4>().FirstOrDefault();
                 this.objectsToInstall = setupPage4.GetObjectsToInstall();
@@ -89,15 +89,15 @@ namespace SuchByte.MacroDeck.GUI
             {
                 SetupPage5 setupPage5 = pages.OfType<SetupPage5>().FirstOrDefault();
                 this.objectsToInstall.AddRange(setupPage5.GetObjectsToInstall());
-            }
+            }*/
 
             // Next page
             if (this.currentPage == this.pages.Count - 1)
             {
-                if (this.objectsToInstall.Count == 0)
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+                /*if (this.objectsToInstall.Count == 0)
                 {
-                    this.DialogResult = DialogResult.OK;
-                    this.Close();
                 } else
                 {
                     using (var pluginDownloader = new PluginDownloader())
@@ -110,8 +110,8 @@ namespace SuchByte.MacroDeck.GUI
                         }
 
                     }
-                }
-                
+                }*/
+
             } else
             {
                 this.currentPage++;

@@ -82,6 +82,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblIf.Size = new System.Drawing.Size(77, 28);
             this.lblIf.TabIndex = 4;
             this.lblIf.Text = "If";
+            this.lblIf.UseMnemonic = false;
             this.lblIf.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // typeBox
@@ -261,6 +262,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblElse.TabIndex = 12;
             this.lblElse.Text = "Else";
             this.lblElse.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblElse.UseMnemonic = false;
             // 
             // elseActionsList
             // 
@@ -399,6 +401,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnOpenTemplateEditor.Size = new System.Drawing.Size(28, 28);
             this.btnOpenTemplateEditor.TabIndex = 12;
             this.btnOpenTemplateEditor.UseVisualStyleBackColor = false;
+            this.btnOpenTemplateEditor.UseMnemonic = false;
             this.btnOpenTemplateEditor.Click += new System.EventHandler(this.BtnOpenTemplateEditor_Click);
             // 
             // ConditionItem
