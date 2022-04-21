@@ -235,7 +235,11 @@ namespace SuchByte.MacroDeck.GUI
                     this.btnPreview.ForegroundImage = null;
                 }
 
-                
+                Color backColor = radioButtonOff.Checked && !radioButtonOn.Checked ? this.actionButtonEdited.BackColorOff : this.actionButtonEdited.BackColorOn;
+                this.btnBackColor.BackColor = backColor;
+                this.btnBackColor.HoverColor = backColor;
+                this.btnPreview.BackColor = backColor;
+
                 this.btnPreview.ShowGIFIndicator = this.btnPreview.BackgroundImage != null && this.btnPreview.BackgroundImage.RawFormat.ToString().ToLower() == "gif";
             } catch (Exception ex) 
             {
@@ -392,6 +396,26 @@ namespace SuchByte.MacroDeck.GUI
                 this.actionButtonEdited.IconOn = null;
             }
             this.RefreshIcon();
+        }
+
+        private void BtnBackColor_Click(object sender, EventArgs e)
+        {
+            using (var colorDialog = new ColorDialog())
+            {
+                if (colorDialog.ShowDialog() == DialogResult.OK)
+                {
+                    if (radioButtonOff.Checked && !radioButtonOn.Checked)
+                    {
+                        this.actionButtonEdited.BackColorOff = colorDialog.Color;
+                    }
+                    else
+                    {
+                        this.actionButtonEdited.BackColorOn = colorDialog.Color;
+                    }
+                    this.RefreshIcon();
+                }
+            }
+
         }
 
         private void BtnClearLabelText_Click(object sender, EventArgs e)

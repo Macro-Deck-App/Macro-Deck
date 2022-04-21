@@ -217,6 +217,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                             button.BackgroundImage = icon.IconImage;
                         }
                     }
+
+                    button.BackColor = ProfileManager.CurrentProfile.ButtonBackground ? actionButton.BackColorOff : Color.Transparent;
                     break;
                 case true:
                     if (actionButton.LabelOn != null && !string.IsNullOrWhiteSpace(actionButton.LabelOn.LabelBase64))
@@ -233,6 +235,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                             button.BackgroundImage = icon.IconImage;
                         }
                     }
+
+                    button.BackColor = ProfileManager.CurrentProfile.ButtonBackground ? actionButton.BackColorOn : Color.Transparent;
                     break;
             }
 

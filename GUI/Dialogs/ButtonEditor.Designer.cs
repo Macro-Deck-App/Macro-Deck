@@ -59,6 +59,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnRemoveIcon = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.btnClearLabelText = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.groupAppearance = new System.Windows.Forms.GroupBox();
+            this.btnBackColor = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.btnOpenTemplateEditor = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.btnAddVariable = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.btnForeColor = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
@@ -367,6 +368,7 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // groupAppearance
             // 
+            this.groupAppearance.Controls.Add(this.btnBackColor);
             this.groupAppearance.Controls.Add(this.btnOpenTemplateEditor);
             this.groupAppearance.Controls.Add(this.btnAddVariable);
             this.groupAppearance.Controls.Add(this.btnForeColor);
@@ -387,6 +389,28 @@ namespace SuchByte.MacroDeck.GUI
             this.groupAppearance.TabIndex = 20;
             this.groupAppearance.TabStop = false;
             this.groupAppearance.Text = "Appearance";
+            // 
+            // btnBackColor
+            // 
+            this.btnBackColor.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnBackColor.BorderRadius = 8;
+            this.btnBackColor.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnBackColor.FlatAppearance.BorderSize = 0;
+            this.btnBackColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnBackColor.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnBackColor.ForeColor = System.Drawing.Color.White;
+            this.btnBackColor.HoverColor = System.Drawing.Color.Transparent;
+            this.btnBackColor.Icon = global::SuchByte.MacroDeck.Properties.Resources.Palette;
+            this.btnBackColor.Location = new System.Drawing.Point(218, 142);
+            this.btnBackColor.Name = "btnBackColor";
+            this.btnBackColor.Progress = 0;
+            this.btnBackColor.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
+            this.btnBackColor.Size = new System.Drawing.Size(27, 27);
+            this.btnBackColor.TabIndex = 25;
+            this.btnBackColor.UseMnemonic = false;
+            this.btnBackColor.UseVisualStyleBackColor = false;
+            this.btnBackColor.UseWindowsAccentColor = false;
+            this.btnBackColor.Click += new System.EventHandler(this.BtnBackColor_Click);
             // 
             // btnOpenTemplateEditor
             // 
@@ -882,5 +906,6 @@ namespace SuchByte.MacroDeck.GUI
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox buttonGUIDLabel;
         private System.Windows.Forms.Label label2;
+        private ButtonPrimary btnBackColor;
     }
 }
