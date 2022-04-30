@@ -296,5 +296,7 @@
   "Enabled": "Aktiviert",
   "Disabled": "Deaktiviert",
   "ActionSaveVariableToFile": "Variable in Datei speichern",
-  "ActionSaveVariableToFileDescription": "Speichert den Wert einer Variable in eine Datei"
+  "ActionSaveVariableToFileDescription": "Speichert den Wert einer Variable in eine Datei",
+  "Folders": "Ordner",
+  "Grid": "Raster"
 }

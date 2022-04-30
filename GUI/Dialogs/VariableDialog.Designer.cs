@@ -173,8 +173,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // 
             // VariableDialog
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(363, 149);
             this.Controls.Add(this.btnDelete);
             this.Controls.Add(this.variableValue);

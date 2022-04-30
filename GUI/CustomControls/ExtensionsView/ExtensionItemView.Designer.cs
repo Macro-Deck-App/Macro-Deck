@@ -160,8 +160,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             // 
             // ExtensionItemView
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.Controls.Add(this.btnUpdate);
             this.Controls.Add(this.btnUninstall);

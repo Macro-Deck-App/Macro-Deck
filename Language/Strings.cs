@@ -323,5 +323,7 @@ namespace SuchByte.MacroDeck.Language
         public string Disabled = "Disabled";
         public string ActionSaveVariableToFile = "Save variable to file";
         public string ActionSaveVariableToFileDescription = "Saves the value of the variable to a file";
+        public string Folders = "Folders";
+        public string Grid = "Grid";
     }
 }

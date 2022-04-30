@@ -82,8 +82,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // 
             // ExtensionStoreDownloader
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(597, 293);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.btnDone);

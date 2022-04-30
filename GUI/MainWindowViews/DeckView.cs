@@ -69,6 +69,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.actionButtonContextMenuItemSimulateRelease.Text = LanguageManager.Strings.SimulateOnRelease;
             this.actionButtonContextMenuItemSimulateLongPress.Text = LanguageManager.Strings.SimulateOnLongPress;
             this.actionButtonContextMenuItemSimulateLongPressRelease.Text = LanguageManager.Strings.SimulateOnLongPressRelease;
+            this.lblFolders.Text = LanguageManager.Strings.Folders;
+            this.lblGrid.Text = LanguageManager.Strings.Grid;
         }
 
 

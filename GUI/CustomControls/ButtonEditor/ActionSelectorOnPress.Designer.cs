@@ -104,7 +104,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             // 
             // btnAdd
             // 
-            this.btnAdd.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnAdd.BorderRadius = 8;
             this.btnAdd.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnAdd.FlatAppearance.BorderSize = 0;
@@ -122,6 +121,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.btnAdd.Text = "+";
             this.btnAdd.UseMnemonic = false;
             this.btnAdd.UseVisualStyleBackColor = false;
+            this.btnAdd.UseWindowsAccentColor = true;
             this.btnAdd.Click += new System.EventHandler(this.BtnAdd_Click);
             // 
             // flowLayoutPanel1
@@ -133,19 +133,18 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.flowLayoutPanel1.Location = new System.Drawing.Point(5, 5);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Padding = new System.Windows.Forms.Padding(3);
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(869, 531);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(866, 512);
             this.flowLayoutPanel1.TabIndex = 8;
             // 
             // ActionSelectorOnPress
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.Controls.Add(this.flowLayoutPanel1);
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.Name = "ActionSelectorOnPress";
-            this.Padding = new System.Windows.Forms.Padding(5);
-            this.Size = new System.Drawing.Size(879, 541);
+            this.Size = new System.Drawing.Size(876, 522);
             this.Load += new System.EventHandler(this.ActionSelectorOnPress_Load);
             this.addItemContextMenu.ResumeLayout(false);
             this.flowLayoutPanel1.ResumeLayout(false);

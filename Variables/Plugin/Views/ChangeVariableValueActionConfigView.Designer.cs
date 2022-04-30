@@ -178,7 +178,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             // ChangeVariableValueConfigurator
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 23F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.Controls.Add(this.btnTemplateEditor);
             this.Controls.Add(this.lblOnlyUserCreatedVariablesVisible);
             this.Controls.Add(this.radioToggle);

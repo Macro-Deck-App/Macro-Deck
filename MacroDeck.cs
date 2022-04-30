@@ -41,7 +41,7 @@ namespace SuchByte.MacroDeck
         internal static readonly int BuildVersion = Int32.Parse(VersionString.Split(".")[3].ToString());
 
         public static readonly int ApiVersion = 20;
-        public static readonly int PluginApiVersion = 32;
+        public static readonly int PluginApiVersion = 33;
 
         // Start parameters
         internal static bool ForceUpdate = false;

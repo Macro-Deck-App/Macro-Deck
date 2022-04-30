@@ -89,8 +89,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // 
             // CreateProfileDialog
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(316, 99);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.lblName);

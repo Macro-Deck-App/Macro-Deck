@@ -92,8 +92,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // 
             // DefenderFirewallAlert
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(586, 655);
             this.Controls.Add(this.btnGotIt);
             this.Controls.Add(this.lblInfo);

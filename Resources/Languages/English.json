@@ -296,5 +296,7 @@
   "Enabled": "Enabled",
   "Disabled": "Disabled",
   "ActionSaveVariableToFile": "Save variable to file",
-  "ActionSaveVariableToFileDescription": "Saves the value of the variable to a file"
+  "ActionSaveVariableToFileDescription": "Saves the value of the variable to a file",
+  "Folders": "Folders",
+  "Grid" : "Grid"
 }

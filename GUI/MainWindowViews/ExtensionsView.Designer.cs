@@ -78,8 +78,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
             // 
             // ExtensionsView
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.radioOnline);
             this.Controls.Add(this.radioInstalled);

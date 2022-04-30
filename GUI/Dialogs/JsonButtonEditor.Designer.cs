@@ -83,8 +83,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // 
             // JsonButtonEditor
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(1070, 577);
             this.Controls.Add(this.btnApply);
             this.Controls.Add(this.jsonTextBox);
