@@ -117,8 +117,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // 
             // CreateIconPack
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(299, 133);
             this.Controls.Add(this.lblVersion);
             this.Controls.Add(this.version);

@@ -55,8 +55,8 @@ namespace SuchByte.MacroDeck.GUI
         public ButtonEditor(ActionButton.ActionButton actionButton, Folders.MacroDeckFolder folder)
         {
             InitializeComponent();
-            this.groupAppearance.Text = LanguageManager.Strings.Appearance;
-            this.groupButtonState.Text = LanguageManager.Strings.ButtonState;
+            this.lblAppearance.Text = LanguageManager.Strings.Appearance;
+            this.lblState.Text = LanguageManager.Strings.ButtonState;
             this.lblButtonState.Text = LanguageManager.Strings.ButtonState;
             this.radioButtonOff.Text = LanguageManager.Strings.Off;
             this.radioButtonOn.Text = LanguageManager.Strings.On;
@@ -69,8 +69,7 @@ namespace SuchByte.MacroDeck.GUI
             this.radioOnEvent.Text = LanguageManager.Strings.OnEvent;
             this.btnApply.Text = LanguageManager.Strings.Save;
             this.btnOk.Text = LanguageManager.Strings.Ok;
-            this.groupHotkey.Text = LanguageManager.Strings.Hotkey;
-            this.lblHotkeyInfo.Text = LanguageManager.Strings.HotkeyExecutesOnPress;
+            this.lblKeyBinding.Text = LanguageManager.Strings.Hotkey;
 
             this.folder = folder;
             this.actionButton = actionButton;
@@ -569,6 +568,11 @@ namespace SuchByte.MacroDeck.GUI
                     this.UpdateLabel();
                 }
             }
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

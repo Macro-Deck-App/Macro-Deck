@@ -80,8 +80,8 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             // 
             // SetupPage5
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+           
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.iconPacks);

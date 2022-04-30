@@ -189,8 +189,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // GiphySelector
             // 
             this.AcceptButton = this.btnSearch;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(787, 607);
             this.Controls.Add(this.lblDownloading);
             this.Controls.Add(this.pictureBox3);

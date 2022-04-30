@@ -20,6 +20,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
         {
             this._pluginActions = pluginActions;
             InitializeComponent();
+            this.Dock = DockStyle.Fill;
             this.menuItemAction.Text = Language.LanguageManager.Strings.Action;
             this.menuItemCondition.Text = Language.LanguageManager.Strings.Condition;
             this.menuItemDelay.Text = Language.LanguageManager.Strings.Delay;

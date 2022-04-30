@@ -108,20 +108,11 @@ namespace SuchByte.MacroDeck.GUI
         public void SetView(Control view, bool clearAll = false)
         {
             if (this.contentPanel.Controls.Contains(view)) return;
-            this.Invoke(new Action(() => 
-            { 
-                this.contentPanel.Controls.Add(view);
-                if (!view.GetType().Equals(typeof(LoadingView)))
-                {
-                    this.lblTitle.Text = view.Name;
-                } else
-                {
-                    this.lblTitle.Text = "";
-                }
-            }));
-            foreach (Control control in this.contentPanel.Controls)
+            
+
+            this.Invoke(new Action(() =>
             {
-                this.Invoke(new Action(() =>
+                foreach (Control control in this.contentPanel.Controls)
                 {
                     if (control != this.DeckView && (clearAll && (control != this.SettingsView && control != this.VariablesView)) && control != view)
                     {
@@ -131,8 +122,9 @@ namespace SuchByte.MacroDeck.GUI
                     {
                         this.contentPanel.Controls.Remove(control);
                     }
-                }));
-            }
+                }
+                this.contentPanel.Controls.Add(view);
+            }));
 
             if (view.GetType().Equals(typeof(DeckView)))
             {
@@ -306,6 +298,11 @@ namespace SuchByte.MacroDeck.GUI
                 }
             };
             p.Start();
+        }
+
+        private void lblPluginsLoaded_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

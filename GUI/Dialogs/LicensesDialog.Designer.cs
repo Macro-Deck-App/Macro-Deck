@@ -67,8 +67,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // 
             // LicensesDialog
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(563, 632);
             this.Controls.Add(this.licensesPanel);
             this.Controls.Add(this.label3);

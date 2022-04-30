@@ -109,8 +109,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             // VariableItem
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
             this.Controls.Add(this.btnEdit);
             this.Controls.Add(this.lblCreator);
