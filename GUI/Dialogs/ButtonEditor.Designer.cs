@@ -194,6 +194,7 @@ namespace SuchByte.MacroDeck.GUI
             this.fontSize.Name = "fontSize";
             this.fontSize.Size = new System.Drawing.Size(55, 26);
             this.fontSize.TabIndex = 10;
+            this.fontSize.TabStop = false;
             this.fontSize.Value = new decimal(new int[] {
             6,
             0,
@@ -872,6 +873,7 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // ButtonEditor
             // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.ClientSize = new System.Drawing.Size(1200, 635);
