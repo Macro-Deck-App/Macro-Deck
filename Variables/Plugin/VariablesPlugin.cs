@@ -38,6 +38,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin
             {
                 new ChangeVariableValueAction(),
                 new SaveVariableToFileAction(),
+                new ReadVariableFromFileAction(),
             };
             EventManager.RegisterEvent(this.variableChangedEvent);
             VariableManager.OnVariableChanged += VariableChanged;
@@ -163,7 +164,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin
 
         public override void Trigger(string clientId, ActionButton.ActionButton actionButton)
         {
-            var configurationModel = SaveVariableToFileActionConfigModel.Deserialize(this.Configuration);
+            var configurationModel = ReadVariableFromFileActionConfigModel.Deserialize(this.Configuration);
             if (configurationModel == null) return;
             var filePath = configurationModel.FilePath;
             var variable = VariableManager.Variables.Find(x => x.Name.Equals(configurationModel.Variable));
@@ -190,6 +191,63 @@ namespace SuchByte.MacroDeck.Variables.Plugin
         public override ActionConfigControl GetActionConfigControl(ActionConfigurator actionConfigurator)
         {
             return new SaveVariableToFileActionConfigView(this);
+        }
+
+    }
+    public class ReadVariableFromFileAction : PluginAction
+    {
+        public override string Name => LanguageManager.Strings.ActionReadVariableFromFile;
+
+        public override string Description => LanguageManager.Strings.ActionReadVariableFromFileDescription;
+
+        public override bool CanConfigure => true;
+
+        public override void Trigger(string clientId, ActionButton.ActionButton actionButton)
+        {
+            var configurationModel = SaveVariableToFileActionConfigModel.Deserialize(this.Configuration);
+            if (configurationModel == null) return;
+            var filePath = configurationModel.FilePath;
+            var variable = VariableManager.Variables.Find(x => x.Name.Equals(configurationModel.Variable));
+            try
+            {
+                Utils.Retry.Do(new Action(() =>
+                {
+                    var value = File.ReadAllText(filePath).Trim();
+                    switch (variable.Type)
+                    {
+                        case nameof(VariableType.Bool):
+                            if (bool.TryParse(value, out bool valueBool))
+                            {
+                                VariableManager.SetValue(variable.Name, valueBool, VariableType.Bool, save: true);
+                            }
+                            break;
+                        case nameof(VariableType.Float):
+                            if (float.TryParse(value, out float valueFloat))
+                            {
+                                VariableManager.SetValue(variable.Name, valueFloat, VariableType.Float, save: true);
+                            }
+                            break;
+                        case nameof(VariableType.Integer):
+                            if (Int32.TryParse(value, out int valueInt))
+                            {
+                                VariableManager.SetValue(variable.Name, valueInt, VariableType.Integer, save: true);
+                            }
+                            break;
+                        case nameof(VariableType.String):
+                            VariableManager.SetValue(variable.Name, value, VariableType.String, save: true);
+                            break;
+                    }
+                }));
+            }
+            catch (Exception ex)
+            {
+                MacroDeckLogger.Error(typeof(VariablesPlugin), $"Failed to read variable value from file: {ex.Message}");
+            }
+        }
+
+        public override ActionConfigControl GetActionConfigControl(ActionConfigurator actionConfigurator)
+        {
+            return new ReadVariableFromFileActionConfigView(this);
         }
 
     }

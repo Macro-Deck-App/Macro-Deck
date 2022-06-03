@@ -59,7 +59,7 @@ namespace SuchByte.MacroDeck.Variables
                 switch (type)
                 {
                     case VariableType.Bool:
-                        if (Boolean.TryParse(value.ToString(), out bool boolResult))
+                        if (bool.TryParse(value.ToString(), out bool boolResult))
                         {
                             value = boolResult;
                         }

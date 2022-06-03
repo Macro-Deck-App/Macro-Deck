@@ -34,6 +34,8 @@ namespace SuchByte.MacroDeck.Variables.Plugin.Views
             this.btnChoosePath = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.lblVariable = new System.Windows.Forms.Label();
             this.lblPath = new System.Windows.Forms.Label();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // path
@@ -43,7 +45,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.Views
             this.path.Cursor = System.Windows.Forms.Cursors.Hand;
             this.path.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.path.Icon = null;
-            this.path.Location = new System.Drawing.Point(165, 196);
+            this.path.Location = new System.Drawing.Point(236, 241);
             this.path.MaxCharacters = 32767;
             this.path.Multiline = false;
             this.path.Name = "path";
@@ -66,7 +68,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.Views
             this.variable.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.variable.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.variable.Icon = null;
-            this.variable.Location = new System.Drawing.Point(165, 164);
+            this.variable.Location = new System.Drawing.Point(236, 158);
             this.variable.Name = "variable";
             this.variable.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
             this.variable.SelectedIndex = -1;
@@ -85,7 +87,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.Views
             this.btnChoosePath.ForeColor = System.Drawing.Color.White;
             this.btnChoosePath.HoverColor = System.Drawing.Color.Empty;
             this.btnChoosePath.Icon = null;
-            this.btnChoosePath.Location = new System.Drawing.Point(659, 196);
+            this.btnChoosePath.Location = new System.Drawing.Point(730, 241);
             this.btnChoosePath.Name = "btnChoosePath";
             this.btnChoosePath.Progress = 0;
             this.btnChoosePath.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(205)))));
@@ -100,7 +102,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.Views
             // 
             this.lblVariable.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lblVariable.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblVariable.Location = new System.Drawing.Point(24, 164);
+            this.lblVariable.Location = new System.Drawing.Point(95, 158);
             this.lblVariable.Name = "lblVariable";
             this.lblVariable.Size = new System.Drawing.Size(135, 26);
             this.lblVariable.TabIndex = 3;
@@ -111,17 +113,28 @@ namespace SuchByte.MacroDeck.Variables.Plugin.Views
             // 
             this.lblPath.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lblPath.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblPath.Location = new System.Drawing.Point(24, 196);
+            this.lblPath.Location = new System.Drawing.Point(95, 241);
             this.lblPath.Name = "lblPath";
             this.lblPath.Size = new System.Drawing.Size(135, 25);
             this.lblPath.TabIndex = 4;
             this.lblPath.Text = "Path";
             this.lblPath.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.Arrow_Down_Hover;
+            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.pictureBox1.Location = new System.Drawing.Point(404, 190);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(48, 45);
+            this.pictureBox1.TabIndex = 11;
+            this.pictureBox1.TabStop = false;
+            // 
             // SaveVariableToFileActionConfigView
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 23F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.lblPath);
             this.Controls.Add(this.lblVariable);
             this.Controls.Add(this.btnChoosePath);
@@ -129,6 +142,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.Views
             this.Controls.Add(this.path);
             this.Name = "SaveVariableToFileActionConfigView";
             this.Load += new System.EventHandler(this.SaveVariableToFileActionConfigView_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -140,5 +154,6 @@ namespace SuchByte.MacroDeck.Variables.Plugin.Views
         private SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary btnChoosePath;
         private System.Windows.Forms.Label lblVariable;
         private System.Windows.Forms.Label lblPath;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }

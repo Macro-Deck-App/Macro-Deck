@@ -325,5 +325,7 @@ namespace SuchByte.MacroDeck.Language
         public string ActionSaveVariableToFileDescription = "Saves the value of the variable to a file";
         public string Folders = "Folders";
         public string Grid = "Grid";
+        public string ActionReadVariableFromFile = "Read variable from file";
+        public string ActionReadVariableFromFileDescription = "Reads a file and sets the content as value for a variable";
     }
 }
