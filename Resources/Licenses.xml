@@ -40,4 +40,29 @@
 		<Author>r3c</Author>
 		<Repository>http://r3c.github.io/cottle/</Repository>
 	</Cottle>
+	<CefSharp>
+		<License>https://www.nuget.org/packages/CefSharp.WinForms.NETCore/99.2.120/license</License>
+		<Author>The CefSharp Authors</Author>
+		<Repository>https://github.com/cefsharp/cefsharp</Repository>
+	</CefSharp>
+	<FCTB>
+		<License>https://github.com/PavelTorgashov/FastColoredTextBox/blob/master/license.txt</License>
+		<Author>Pavel Torgashov</Author>
+		<Repository>https://github.com/PavelTorgashov/FastColoredTextBox</Repository>
+	</FCTB>
+	<HidSharp>
+		<License>https://www.zer7.com/files/oss/hidsharp/LICENSE.txt</License>
+		<Author>James F. Bellinger</Author>
+		<Repository>https://www.zer7.com/software/hidsharp</Repository>
+	</HidSharp>
+	<Microsoft.Windows.SDK.Contracts>
+		<License>https://download.microsoft.com/download/0/F/F/0FF2B061-47DD-4F55-89B6-FD1D8C44F14D/sdk_license.rtf</License>
+		<Author>Microsoft</Author>
+		<Repository>https://www.nuget.org/packages/Microsoft.Windows.SDK.Contracts</Repository>
+	</Microsoft.Windows.SDK.Contracts>
+	<Microsoft.Win32.Registry>
+		<License>https://licenses.nuget.org/MIT</License>
+		<Author>Microsoft</Author>
+		<Repository>https://github.com/dotnet/runtime</Repository>
+	</Microsoft.Win32.Registry>
 </Licenses>
