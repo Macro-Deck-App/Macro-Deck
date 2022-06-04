@@ -16,7 +16,7 @@
 
 
 # Companion App
-[Repository](https://github.com/SuchByte/Macro-Deck-Client)
+[Repository]([https://github.com/SuchByte/Macro-Deck-Client](https://github.com/Macro-Deck-org/Macro-Deck-Client))
 
 [Google Play](https://play.google.com/store/apps/details?id=com.suchbyte.macrodeck)
 
@@ -39,6 +39,11 @@ Macro Deck uses some awesome 3rd party libraries:
 - [SQLiteNetExtensions (MIT license)](https://bitbucket.org/twincoders/sqlite-net-extensions/src/master/)
 - [sqlite-net-pcl (MIT license)](https://github.com/praeclarum/sqlite-net)
 - [Cottle (MIT license)](https://github.com/r3c/cottle)
+- [CefSharp](https://github.com/cefsharp/cefsharp)
+- [FCTB](https://github.com/PavelTorgashov/FastColoredTextBox)
+- [HidSharp](https://www.zer7.com/software/hidsharp)
+- [Microsoft.Windows.SDK.Contracts](https://www.nuget.org/packages/Microsoft.Windows.SDK.Contracts)
+- [Microsoft.Win32.Registry](https://github.com/dotnet/runtime)
 
 Macro Deck also uses free icons from:
 - [Material Design Icons](https://materialdesignicons.com/)
