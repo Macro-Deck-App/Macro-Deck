@@ -155,7 +155,6 @@ namespace SuchByte.MacroDeck.Variables.Plugin.Views
             // 
             // ReadVariableFromFileActionConfigView
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.Controls.Add(this.btnCreateVariable);
             this.Controls.Add(this.pictureBox1);
