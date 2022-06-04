@@ -286,5 +286,19 @@
     "LogSuccessfullyExportedToX": "Журнал экспортирован в {0}",
     "Help": "Помощь",
     "XWarningsXErrors": "Предупреждений: {0}, ошибок: {1}",
-    "TrimBlankLines": ""
+    "TrimBlankLines": "Удалять пустые строки",
+    "Extensions": "Расширения",
+    "InstallFromFile": "Установить из файла",
+    "AllExtensionsUpToDate": "Все расширения обновлены",
+    "UpdateAll": "Обновить все",
+    "UpdateAvailable": "Доступно обновление",
+    "PendingRestart": "Ожидается перезапуск",
+    "Enabled": "Включено",
+    "Disabled": "Отключено",
+    "ActionSaveVariableToFile": "Сохранить переменную в файл",
+    "ActionSaveVariableToFileDescription": "Сохранить значение переменной в файл",
+    "Folders": "Папки",
+    "Grid": "Сетка",
+    "ActionReadVariableFromFile": "Читать переменную из файла",
+    "ActionReadVariableFromFileDescription": "Читает файл и устанавливает содержимое как значение для переменной"
 }

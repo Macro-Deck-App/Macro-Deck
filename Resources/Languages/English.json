@@ -298,5 +298,7 @@
   "ActionSaveVariableToFile": "Save variable to file",
   "ActionSaveVariableToFileDescription": "Saves the value of the variable to a file",
   "Folders": "Folders",
-  "Grid" : "Grid"
+  "Grid": "Grid",
+  "ActionReadVariableFromFile": "Read variable from file",
+  "ActionReadVariableFromFileDescription": "Reads a file and sets the content as value for a variable"
 }

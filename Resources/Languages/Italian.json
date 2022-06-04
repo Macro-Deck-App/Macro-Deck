@@ -286,5 +286,19 @@
     "LogSuccessfullyExportedToX": "Log esportato con successo in {0}",
     "Help": "Aiuto",
     "XWarningsXErrors": "{0} avviso/i, {1} errore/i",
-    "TrimBlankLines": ""
+    "TrimBlankLines": "Rimuovi righe vuote",
+    "Extensions": "Estensioni",
+    "InstallFromFile": "Installa da file",
+    "AllExtensionsUpToDate": "Tutte le estensioni sono aggiornate",
+    "UpdateAll": "Aggiorna tutto",
+    "UpdateAvailable": "Aggiornamenti disponibili",
+    "PendingRestart": "In attesa di riavvio",
+    "Enabled": "Abilitato",
+    "Disabled": "Disabilitato",
+    "ActionSaveVariableToFile": "Salva variabile in un file",
+    "ActionSaveVariableToFileDescription": "Salva il valore di una variabile in un file",
+    "Folders": "Cartelle",
+    "Grid": "Griglia",
+    "ActionReadVariableFromFile": "Leggi la variabile dal file",
+    "ActionReadVariableFromFileDescription": "Legge un file e imposta il contenuto come valore per una variabile"
 }

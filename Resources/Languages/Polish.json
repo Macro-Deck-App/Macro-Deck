@@ -1,7 +1,7 @@
 {
     "__Language__": "Polish",
     "__LanguageCode__": "pl",
-    "__Author__": "KALI",
+    "__Author__": "Macro Deck",
     "NetworkAdapter": "Adapter sieciowy",
     "IPAddress": "Adres IP",
     "Port": "Port",
@@ -286,5 +286,19 @@
     "LogSuccessfullyExportedToX": "Dziennik (logi) pomyślnie wyeksportowano do {0}",
     "Help": "Pomoc",
     "XWarningsXErrors": "Ostrzeżenia: {0}. Błędy: {1}.",
-    "TrimBlankLines": "Przytnij puste wiersze"
+    "TrimBlankLines": "Przytnij puste wiersze",
+    "Extensions": "Rozszerzenia",
+    "InstallFromFile": "Zainstaluj z pliku",
+    "AllExtensionsUpToDate": "Wszystkie rozszerzenia są aktualne",
+    "UpdateAll": "Zaktualizuj wszystko",
+    "UpdateAvailable": "Dostępna aktualizacja",
+    "PendingRestart": "Oczekuje na ponowne uruchomienie",
+    "Enabled": "Włączony",
+    "Disabled": "Wyłączone",
+    "ActionSaveVariableToFile": "Zapisz zmienną do pliku",
+    "ActionSaveVariableToFileDescription": "Zapisuje wartość zmiennej do pliku",
+    "Folders": "Lornetka składana",
+    "Grid": "Krata",
+    "ActionReadVariableFromFile": "Odczytaj zmienną z pliku",
+    "ActionReadVariableFromFileDescription": "Czyta plik i ustawia zawartość jako wartość zmiennej"
 }

@@ -286,5 +286,19 @@
     "LogSuccessfullyExportedToX": "O ficheiro de registro foi xportado para {0}",
     "Help": "Ajuda",
     "XWarningsXErrors": "{0} Aviso(s), {1} Erro(s)",
-    "TrimBlankLines": ""
+    "TrimBlankLines": "Aparar linhas em branco",
+    "Extensions": "Extensões",
+    "InstallFromFile": "Instalar a partir do arquivo",
+    "AllExtensionsUpToDate": "Todas as extensões estão atualizadas",
+    "UpdateAll": "Atualize tudo",
+    "UpdateAvailable": "Atualização disponível",
+    "PendingRestart": "Reinicialização pendente",
+    "Enabled": "Habilitado",
+    "Disabled": "Desabilitado",
+    "ActionSaveVariableToFile": "Salvar variável em arquivo",
+    "ActionSaveVariableToFileDescription": "Salva o valor da variável em um arquivo",
+    "Folders": "Pastas",
+    "Grid": "Rede",
+    "ActionReadVariableFromFile": "Ler variável do arquivo",
+    "ActionReadVariableFromFileDescription": "Lê um arquivo e define o conteúdo como valor para uma variável"
 }

@@ -286,5 +286,19 @@
     "LogSuccessfullyExportedToX": "Journal(logs) exporté avec succès vers {0}",
     "Help": "Aide",
     "XWarningsXErrors": "{0} attention(s), {1} erreur(s)",
-    "TrimBlankLines": ""
+    "TrimBlankLines": "Couper les lignes vides",
+    "Extensions": "Rallonges",
+    "InstallFromFile": "Installer à partir du fichier",
+    "AllExtensionsUpToDate": "Toutes les extensions sont à jour",
+    "UpdateAll": "Tout mettre à jour",
+    "UpdateAvailable": "Mise à jour disponible",
+    "PendingRestart": "En attente de redémarrage",
+    "Enabled": "Activé",
+    "Disabled": "Handicapé",
+    "ActionSaveVariableToFile": "Enregistrer la variable dans le fichier",
+    "ActionSaveVariableToFileDescription": "Enregistre la valeur de la variable dans un fichier",
+    "Folders": "Dossiers",
+    "Grid": "Grille",
+    "ActionReadVariableFromFile": "Lire la variable du fichier",
+    "ActionReadVariableFromFileDescription": "Lit un fichier et définit le contenu comme valeur pour une variable"
 }

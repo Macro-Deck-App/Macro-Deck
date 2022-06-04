@@ -286,5 +286,19 @@
     "LogSuccessfullyExportedToX": "A napló sikeresen exportálva ide: {0}",
     "Help": "Segítség",
     "XWarningsXErrors": "{0} figyelmeztetés, {1} hiba",
-    "TrimBlankLines": "Vágja le az üres sorokat"
+    "TrimBlankLines": "Vágja le az üres sorokat",
+    "Extensions": "Kiterjesztések",
+    "InstallFromFile": "Telepítés fájlból",
+    "AllExtensionsUpToDate": "Minden bővítmény naprakész",
+    "UpdateAll": "Mindent frissíteni",
+    "UpdateAvailable": "Frissítés elérhető",
+    "PendingRestart": "Újraindítás függőben",
+    "Enabled": "Engedélyezve",
+    "Disabled": "Tiltva",
+    "ActionSaveVariableToFile": "Változó mentése fájlba",
+    "ActionSaveVariableToFileDescription": "Fájlba menti a változó értékét",
+    "Folders": "Mappák",
+    "Grid": "Rács",
+    "ActionReadVariableFromFile": "Változó olvasása fájlból",
+    "ActionReadVariableFromFileDescription": "Beolvas egy fájlt, és beállítja a tartalmat egy változó értékének"
 }

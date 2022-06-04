@@ -51,12 +51,15 @@
 
   <ItemGroup>
     <None Remove="Licenses.xml" />
+    <None Remove="Resources\Languages\Dutch.json" />
     <None Remove="Resources\Languages\English.json" />
+    <None Remove="Resources\Languages\Filipino.json" />
     <None Remove="Resources\Languages\Finnish.json" />
     <None Remove="Resources\Languages\French.json" />
     <None Remove="Resources\Languages\German.json" />
     <None Remove="Resources\Languages\Hungarian.json" />
     <None Remove="Resources\Languages\Italian.json" />
+    <None Remove="Resources\Languages\Japanese.json" />
     <None Remove="Resources\Languages\Korean.json" />
     <None Remove="Resources\Languages\Polish.json" />
     <None Remove="Resources\Languages\Portuguese.json" />
@@ -78,12 +81,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\Languages\Dutch.json" />
     <EmbeddedResource Include="Resources\Languages\English.json" />
+    <EmbeddedResource Include="Resources\Languages\Filipino.json" />
     <EmbeddedResource Include="Resources\Languages\Finnish.json" />
     <EmbeddedResource Include="Resources\Languages\French.json" />
     <EmbeddedResource Include="Resources\Languages\German.json" />
     <EmbeddedResource Include="Resources\Languages\Hungarian.json" />
     <EmbeddedResource Include="Resources\Languages\Italian.json" />
+    <EmbeddedResource Include="Resources\Languages\Japanese.json" />
     <EmbeddedResource Include="Resources\Languages\Korean.json" />
     <EmbeddedResource Include="Resources\Languages\Polish.json" />
     <EmbeddedResource Include="Resources\Languages\Portuguese.json" />
