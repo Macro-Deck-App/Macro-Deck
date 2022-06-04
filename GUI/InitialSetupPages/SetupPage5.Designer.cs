@@ -46,6 +46,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblWantIcons.TabIndex = 6;
             this.lblWantIcons.Text = "Do you want some icons?";
             this.lblWantIcons.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblWantIcons.UseMnemonic = false;
             // 
             // lblInstallLaterPackageManager
             // 
@@ -58,6 +59,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblInstallLaterPackageManager.TabIndex = 7;
             this.lblInstallLaterPackageManager.Text = "You can also install icon packs later in the package manager";
             this.lblInstallLaterPackageManager.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblInstallLaterPackageManager.UseMnemonic = false;
             // 
             // progressBar
             // 
@@ -78,8 +80,8 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             // 
             // SetupPage5
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+           
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.iconPacks);

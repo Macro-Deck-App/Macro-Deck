@@ -59,6 +59,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             this.lblVersion.TabIndex = 6;
             this.lblVersion.Text = "Version {0} is now available";
             this.lblVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblVersion.UseMnemonic = false;
             // 
             // changelogPanel
             // 
@@ -89,6 +90,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             this.btnInstall.Size = new System.Drawing.Size(283, 32);
             this.btnInstall.TabIndex = 13;
             this.btnInstall.Text = "Download and install";
+            this.btnInstall.UseMnemonic = false;
             this.btnInstall.UseVisualStyleBackColor = false;
             this.btnInstall.Click += new System.EventHandler(this.BtnInstall_Click);
             // 
@@ -101,11 +103,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             this.lblSize.TabIndex = 14;
             this.lblSize.Text = "0,00MB";
             this.lblSize.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblSize.UseMnemonic = false;
             // 
             // UpdateAvailableControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.lblSize);
             this.Controls.Add(this.btnInstall);

@@ -56,6 +56,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblImportant.TabIndex = 3;
             this.lblImportant.Text = "Important!";
             this.lblImportant.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblImportant.UseMnemonic = false;
             // 
             // lblInfo
             // 
@@ -65,6 +66,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblInfo.Size = new System.Drawing.Size(529, 187);
             this.lblInfo.TabIndex = 4;
             this.lblInfo.Text = resources.GetString("lblInfo.Text");
+            this.lblInfo.UseMnemonic = false;
             // 
             // btnGotIt
             // 
@@ -84,13 +86,13 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnGotIt.Size = new System.Drawing.Size(150, 40);
             this.btnGotIt.TabIndex = 5;
             this.btnGotIt.Text = "Got it!";
+            this.btnGotIt.UseMnemonic = false;
             this.btnGotIt.UseVisualStyleBackColor = false;
             this.btnGotIt.Click += new System.EventHandler(this.BtnGotIt_Click);
             // 
             // DefenderFirewallAlert
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(586, 655);
             this.Controls.Add(this.btnGotIt);
             this.Controls.Add(this.lblInfo);

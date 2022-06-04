@@ -44,6 +44,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblName.Size = new System.Drawing.Size(325, 18);
             this.lblName.TabIndex = 0;
             this.lblName.Text = "label1";
+            this.lblName.UseMnemonic = false;
             // 
             // icon
             // 
@@ -61,6 +62,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblDescription.Size = new System.Drawing.Size(325, 29);
             this.lblDescription.TabIndex = 4;
             this.lblDescription.Text = "label1";
+            this.lblDescription.UseMnemonic = false;
             // 
             // checkInstall
             // 
@@ -70,12 +72,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.checkInstall.Name = "checkInstall";
             this.checkInstall.Size = new System.Drawing.Size(25, 42);
             this.checkInstall.TabIndex = 5;
+            this.checkInstall.UseMnemonic = false;
             this.checkInstall.UseVisualStyleBackColor = true;
             // 
             // InitialSetupPluginItem
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
             this.Controls.Add(this.checkInstall);
             this.Controls.Add(this.lblDescription);

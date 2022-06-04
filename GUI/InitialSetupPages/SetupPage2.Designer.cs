@@ -56,6 +56,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblConfigureNetwork.TabIndex = 3;
             this.lblConfigureNetwork.Text = "Configure your network settings\r\n";
             this.lblConfigureNetwork.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblConfigureNetwork.UseMnemonic = false;
             // 
             // adapter
             // 
@@ -82,6 +83,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblNetworkAdapter.Size = new System.Drawing.Size(132, 19);
             this.lblNetworkAdapter.TabIndex = 5;
             this.lblNetworkAdapter.Text = "Network adapter:";
+            this.lblNetworkAdapter.UseMnemonic = false;
             // 
             // iPAddress
             // 
@@ -91,6 +93,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.iPAddress.Name = "iPAddress";
             this.iPAddress.Size = new System.Drawing.Size(547, 24);
             this.iPAddress.TabIndex = 6;
+            this.iPAddress.UseMnemonic = false;
             this.iPAddress.Click += new System.EventHandler(this.lblIpAddress_Click);
             // 
             // lblIpAddress
@@ -103,6 +106,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblIpAddress.Size = new System.Drawing.Size(89, 19);
             this.lblIpAddress.TabIndex = 7;
             this.lblIpAddress.Text = "IP address:";
+            this.lblIpAddress.UseMnemonic = false;
             // 
             // lblPort
             // 
@@ -114,6 +118,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblPort.Size = new System.Drawing.Size(44, 19);
             this.lblPort.TabIndex = 8;
             this.lblPort.Text = "Port:";
+            this.lblPort.UseMnemonic = false;
             // 
             // port
             // 
@@ -161,11 +166,11 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblInfo.Size = new System.Drawing.Size(673, 167);
             this.lblInfo.TabIndex = 0;
             this.lblInfo.Text = resources.GetString("lblInfo.Text");
+            this.lblInfo.UseMnemonic = false;
             // 
             // SetupPage2
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.groupInfo);
             this.Controls.Add(this.port);

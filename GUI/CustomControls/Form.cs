@@ -25,6 +25,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private const int cGrip = 16;      // Grip size
 
+
         public Form()
         {
             InitializeComponent();
@@ -34,7 +35,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.helpMenuWiki.Text = LanguageManager.Strings.Wiki;
             this.helpMenuExportLog.Text = LanguageManager.Strings.ExportLatestLog;
         }
-
 
         protected override void WndProc(ref Message m)
         {

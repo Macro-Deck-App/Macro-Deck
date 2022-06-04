@@ -65,7 +65,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             base.OnPaint(pe);
 
-            pe.Graphics.InterpolationMode = InterpolationMode.High;
+            pe.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
             int radius = (int)(((float)this.Radius / 100.0f) * (float)this.Height);
 
@@ -76,6 +76,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
             if (radius > 2) //Rounded button
             {
+                pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 using (GraphicsPath pathSurface = GetFigurePath(rectSurface, radius))
                 using (Pen penSurface = new Pen(this.Parent.BackColor, smoothSize))
                 {

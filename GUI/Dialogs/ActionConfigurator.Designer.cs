@@ -60,6 +60,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnApply.Size = new System.Drawing.Size(75, 25);
             this.btnApply.TabIndex = 1;
             this.btnApply.Text = "Ok";
+            this.btnApply.UseMnemonic = false;
             this.btnApply.UseVisualStyleBackColor = true;
             this.btnApply.Click += new System.EventHandler(this.BtnApply_Click);
             // 
@@ -73,6 +74,7 @@ namespace SuchByte.MacroDeck.GUI
             this.label2.Size = new System.Drawing.Size(58, 21);
             this.label2.TabIndex = 2;
             this.label2.Text = "Action";
+            this.label2.UseMnemonic = false;
             // 
             // labelDescription
             // 
@@ -82,6 +84,7 @@ namespace SuchByte.MacroDeck.GUI
             this.labelDescription.Name = "labelDescription";
             this.labelDescription.Size = new System.Drawing.Size(854, 58);
             this.labelDescription.TabIndex = 3;
+            this.labelDescription.UseMnemonic = false;
             // 
             // configurationPanel
             // 
@@ -101,6 +104,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblSelectToBegin.TabIndex = 0;
             this.lblSelectToBegin.Text = "Select a plugin and a action to begin";
             this.lblSelectToBegin.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblSelectToBegin.UseMnemonic = false;
             // 
             // pluginSearch
             // 
@@ -152,11 +156,11 @@ namespace SuchByte.MacroDeck.GUI
             this.lblSelectedActionName.Size = new System.Drawing.Size(798, 50);
             this.lblSelectedActionName.TabIndex = 13;
             this.lblSelectedActionName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblSelectedActionName.UseMnemonic = false;
             // 
             // ActionConfigurator
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.ClientSize = new System.Drawing.Size(1200, 635);
             this.Controls.Add(this.lblSelectedActionName);

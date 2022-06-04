@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
-    <VersionMinor>8</VersionMinor>
-    <VersionPatch>0</VersionPatch>
+    <VersionMinor>10</VersionMinor>
+    <VersionPatch>3</VersionPatch>
     <VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
   
   <PropertyGroup>
@@ -26,30 +27,45 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/SuchByte/Macro-Deck</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SuchByte/Macro-Deck</RepositoryUrl>
-	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-	  <ApplicationManifest>app.manifest</ApplicationManifest>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Variables\Plugin\GUI\**" />
+    <EmbeddedResource Remove="Variables\Plugin\GUI\**" />
+    <None Remove="Variables\Plugin\GUI\**" />
+    <Page Remove="Variables\Plugin\GUI\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Licenses.xml" />
-    <None Remove="Resources\Languages\English.xml" />
-    <None Remove="Resources\Languages\Finnish.xml" />
-    <None Remove="Resources\Languages\French.xml" />
-    <None Remove="Resources\Languages\German.xml" />
-    <None Remove="Resources\Languages\Italian.xml" />
-    <None Remove="Resources\Languages\Korean.xml" />
-    <None Remove="Resources\Languages\Portuguese.xml" />
-    <None Remove="Resources\Languages\Russian.xml" />
-    <None Remove="Resources\Languages\Spanish.xml" />
-    <None Remove="Resources\Languages\Turkish.xml" />
+    <None Remove="Resources\Languages\Dutch.json" />
+    <None Remove="Resources\Languages\English.json" />
+    <None Remove="Resources\Languages\Filipino.json" />
+    <None Remove="Resources\Languages\Finnish.json" />
+    <None Remove="Resources\Languages\French.json" />
+    <None Remove="Resources\Languages\German.json" />
+    <None Remove="Resources\Languages\Hungarian.json" />
+    <None Remove="Resources\Languages\Italian.json" />
+    <None Remove="Resources\Languages\Japanese.json" />
+    <None Remove="Resources\Languages\Korean.json" />
+    <None Remove="Resources\Languages\Polish.json" />
+    <None Remove="Resources\Languages\Portuguese.json" />
+    <None Remove="Resources\Languages\Russian.json" />
+    <None Remove="Resources\Languages\Spanish.json" />
+    <None Remove="Resources\Languages\Turkish.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,27 +81,37 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Languages\Portuguese.xml" />
+    <EmbeddedResource Include="Resources\Languages\Dutch.json" />
+    <EmbeddedResource Include="Resources\Languages\English.json" />
+    <EmbeddedResource Include="Resources\Languages\Filipino.json" />
+    <EmbeddedResource Include="Resources\Languages\Finnish.json" />
+    <EmbeddedResource Include="Resources\Languages\French.json" />
+    <EmbeddedResource Include="Resources\Languages\German.json" />
+    <EmbeddedResource Include="Resources\Languages\Hungarian.json" />
+    <EmbeddedResource Include="Resources\Languages\Italian.json" />
+    <EmbeddedResource Include="Resources\Languages\Japanese.json" />
+    <EmbeddedResource Include="Resources\Languages\Korean.json" />
+    <EmbeddedResource Include="Resources\Languages\Polish.json" />
+    <EmbeddedResource Include="Resources\Languages\Portuguese.json" />
+    <EmbeddedResource Include="Resources\Languages\Russian.json" />
+    <EmbeddedResource Include="Resources\Languages\Spanish.json" />
+    <EmbeddedResource Include="Resources\Languages\Turkish.json" />
     <EmbeddedResource Include="Resources\Licenses.xml">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Languages\English.xml" />
-    <EmbeddedResource Include="Resources\Languages\Finnish.xml" />
-    <EmbeddedResource Include="Resources\Languages\French.xml" />
-    <EmbeddedResource Include="Resources\Languages\German.xml" />
-    <EmbeddedResource Include="Resources\Languages\Italian.xml" />
-    <EmbeddedResource Include="Resources\Languages\Russian.xml" />
-    <EmbeddedResource Include="Resources\Languages\Spanish.xml" />
-    <EmbeddedResource Include="Resources\Languages\Turkish.xml" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CefSharp.WinForms.NETCore" Version="99.2.120" />
     <PackageReference Include="Cottle" Version="2.0.4" />
+    <PackageReference Include="FCTB" Version="2.16.24" />
     <PackageReference Include="Fleck" Version="1.2.0" />
     <PackageReference Include="GiphyDotNet" Version="2.0.0" />
+    <PackageReference Include="HidSharp" Version="2.1.0" />
     <PackageReference Include="Magick.NET-Q16-x64" Version="8.3.1" />
     <PackageReference Include="Magick.NET.Core" Version="8.3.1" />
     <PackageReference Include="Magick.NET.SystemDrawing" Version="4.0.6" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.22000.196" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="RestSharp" Version="106.12.0" />
@@ -95,7 +121,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Languages\Korean.xml" />
+    <Reference Include="DeckSurf.SDK">
+      <HintPath>C:\Users\Manuel\Desktop\decksurf-sdk-main\src\DeckSurf.SDK\bin\Debug\netcoreapp3.1\DeckSurf.SDK.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
@@ -107,6 +135,9 @@
     </Compile>
     <Compile Update="GUI\CustomControls\InitialSetup\InitialSetupPluginItem.cs">
       <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ButtonRadioButton.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Update="GUI\Dialogs\ButtonEditor.cs">
       <SubType>Form</SubType>

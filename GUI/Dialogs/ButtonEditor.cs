@@ -33,6 +33,14 @@ namespace SuchByte.MacroDeck.GUI
 {
     public partial class ButtonEditor : DialogForm
     {
+        static JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Auto,
+            NullValueHandling = NullValueHandling.Ignore,
+            Error = (sender, args) => { args.ErrorContext.Handled = true; }
+        };
+
+
         private ActionButton.ActionButton actionButton;
         private ActionButton.ActionButton actionButtonEdited;
         private readonly Folders.MacroDeckFolder folder;
@@ -47,14 +55,11 @@ namespace SuchByte.MacroDeck.GUI
         public ButtonEditor(ActionButton.ActionButton actionButton, Folders.MacroDeckFolder folder)
         {
             InitializeComponent();
-            this.groupAppearance.Text = LanguageManager.Strings.Appearance;
-            this.groupButtonState.Text = LanguageManager.Strings.ButtonState;
+            this.lblAppearance.Text = LanguageManager.Strings.Appearance;
+            this.lblState.Text = LanguageManager.Strings.ButtonState;
             this.lblButtonState.Text = LanguageManager.Strings.ButtonState;
             this.radioButtonOff.Text = LanguageManager.Strings.Off;
             this.radioButtonOn.Text = LanguageManager.Strings.On;
-            this.labelAlignTop.Text = LanguageManager.Strings.Top;
-            this.labelAlignCenter.Text = LanguageManager.Strings.Center;
-            this.labelAlignBottom.Text = LanguageManager.Strings.Bottom;
             this.lblCurrentStateLabel.Text = LanguageManager.Strings.CurrentState;
             this.lblStateBinding.Text = LanguageManager.Strings.StateBinding;
             this.radioOnPress.Text = LanguageManager.Strings.OnPress;
@@ -64,8 +69,7 @@ namespace SuchByte.MacroDeck.GUI
             this.radioOnEvent.Text = LanguageManager.Strings.OnEvent;
             this.btnApply.Text = LanguageManager.Strings.Save;
             this.btnOk.Text = LanguageManager.Strings.Ok;
-            this.groupHotkey.Text = LanguageManager.Strings.Hotkey;
-            this.lblHotkeyInfo.Text = LanguageManager.Strings.HotkeyExecutesOnPress;
+            this.lblKeyBinding.Text = LanguageManager.Strings.Hotkey;
 
             this.folder = folder;
             this.actionButton = actionButton;
@@ -206,12 +210,11 @@ namespace SuchByte.MacroDeck.GUI
             {
                 string iconString = radioButtonOff.Checked && !radioButtonOn.Checked ? this.actionButtonEdited.IconOff : this.actionButtonEdited.IconOn;
 
-                if (!string.IsNullOrWhiteSpace(iconString) && iconString.Split(".").Length > 1)
+                if (!string.IsNullOrWhiteSpace(iconString))
                 {
-                    IconPack iconPack = IconManager.GetIconPackByName(iconString.Split(".")[0]);
-                    Icons.Icon icon = IconManager.GetIcon(iconPack, long.Parse(iconString.Split(".")[1]));
+                    var icon = IconManager.GetIconByString(iconString);
                     if (icon != null)
-                        this.btnPreview.BackgroundImage = Utils.Base64.GetImageFromBase64(icon.IconBase64);
+                        this.btnPreview.BackgroundImage = icon.IconImage;
                 }
                 else
                 {
@@ -231,7 +234,11 @@ namespace SuchByte.MacroDeck.GUI
                     this.btnPreview.ForegroundImage = null;
                 }
 
-                
+                Color backColor = radioButtonOff.Checked && !radioButtonOn.Checked ? this.actionButtonEdited.BackColorOff : this.actionButtonEdited.BackColorOn;
+                this.btnBackColor.BackColor = backColor;
+                this.btnBackColor.HoverColor = backColor;
+                this.btnPreview.BackColor = backColor;
+
                 this.btnPreview.ShowGIFIndicator = this.btnPreview.BackgroundImage != null && this.btnPreview.BackgroundImage.RawFormat.ToString().ToLower() == "gif";
             } catch (Exception ex) 
             {
@@ -329,18 +336,12 @@ namespace SuchByte.MacroDeck.GUI
 
         public void LoadButton()
         {
-            JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-                NullValueHandling = NullValueHandling.Ignore,
-                Error = (sender, args) => { args.ErrorContext.Handled = true; }
-            };
-
             this.actionButtonEdited = JsonConvert.DeserializeObject<ActionButton.ActionButton>(JsonConvert.SerializeObject(this.actionButton, jsonSerializerSettings), jsonSerializerSettings); // Make a copy of the current action button
 
             bool currentState = this.actionButton.State;
             this.lblCurrentState.Text = currentState ? "On" : "Off";
             this.listStateBinding.Text = this.actionButtonEdited.StateBindingVariable;
+            this.buttonGUIDLabel.Text = this.actionButtonEdited.Guid;
 
             if (this.actionButton.KeyCode != Keys.None)
             {
@@ -375,6 +376,7 @@ namespace SuchByte.MacroDeck.GUI
         {
             this.RefreshLabel();
             this.RefreshIcon();
+            this.UpdateLabel();
         }
 
         private void BtnEditIcon_Click(object sender, EventArgs e)
@@ -393,6 +395,26 @@ namespace SuchByte.MacroDeck.GUI
                 this.actionButtonEdited.IconOn = null;
             }
             this.RefreshIcon();
+        }
+
+        private void BtnBackColor_Click(object sender, EventArgs e)
+        {
+            using (var colorDialog = new ColorDialog())
+            {
+                if (colorDialog.ShowDialog() == DialogResult.OK)
+                {
+                    if (radioButtonOff.Checked && !radioButtonOn.Checked)
+                    {
+                        this.actionButtonEdited.BackColorOff = colorDialog.Color;
+                    }
+                    else
+                    {
+                        this.actionButtonEdited.BackColorOn = colorDialog.Color;
+                    }
+                    this.RefreshIcon();
+                }
+            }
+
         }
 
         private void BtnClearLabelText_Click(object sender, EventArgs e)
@@ -532,5 +554,25 @@ namespace SuchByte.MacroDeck.GUI
             }
         }
 
+        private void BtnEditJson_Click(object sender, EventArgs e)
+        {
+            using (var jsonButtonEditor = new JsonButtonEditor(this.actionButtonEdited))
+            {
+                if (jsonButtonEditor.ShowDialog() == DialogResult.OK)
+                {
+                    jsonButtonEditor.ActionButton.Position_X = this.actionButtonEdited.Position_X;
+                    jsonButtonEditor.ActionButton.Position_Y = this.actionButtonEdited.Position_Y;
+                    jsonButtonEditor.ActionButton.Guid = this.actionButtonEdited.Guid;
+                    this.actionButton = jsonButtonEditor.ActionButton;
+                    this.LoadButton();
+                    this.UpdateLabel();
+                }
+            }
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

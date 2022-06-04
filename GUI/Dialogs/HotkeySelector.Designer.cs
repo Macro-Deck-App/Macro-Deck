@@ -45,6 +45,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblPressKeysNow.TabIndex = 2;
             this.lblPressKeysNow.Text = "Press the keys now";
             this.lblPressKeysNow.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblPressKeysNow.UseMnemonic = false;
             // 
             // lblDetectedKeys
             // 
@@ -54,11 +55,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblDetectedKeys.Size = new System.Drawing.Size(405, 31);
             this.lblDetectedKeys.TabIndex = 3;
             this.lblDetectedKeys.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblDetectedKeys.UseMnemonic = false;
             // 
             // HotkeySelector
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(413, 200);
             this.Controls.Add(this.lblDetectedKeys);
             this.Controls.Add(this.lblPressKeysNow);

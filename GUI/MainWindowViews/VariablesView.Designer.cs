@@ -62,6 +62,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblCreator.TabIndex = 15;
             this.lblCreator.Text = "Creator";
             this.lblCreator.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblCreator.UseMnemonic = false;
             // 
             // lblValue
             // 
@@ -72,6 +73,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblValue.TabIndex = 14;
             this.lblValue.Text = "Value";
             this.lblValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblValue.UseMnemonic = false;
             // 
             // lblType
             // 
@@ -82,6 +84,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblType.TabIndex = 13;
             this.lblType.Text = "Type";
             this.lblType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblType.UseMnemonic = false;
             // 
             // lblName
             // 
@@ -92,6 +95,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblName.TabIndex = 12;
             this.lblName.Text = "Name";
             this.lblName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblName.UseMnemonic = false;
             // 
             // btnCreateVariable
             // 
@@ -112,6 +116,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.btnCreateVariable.Size = new System.Drawing.Size(120, 27);
             this.btnCreateVariable.TabIndex = 16;
             this.btnCreateVariable.Text = "Create variable";
+            this.btnCreateVariable.UseMnemonic = false;
             this.btnCreateVariable.UseVisualStyleBackColor = false;
             this.btnCreateVariable.Click += new System.EventHandler(this.BtnCreateVariable_Click);
             // 
@@ -127,8 +132,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // VariablesView
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.creatorFilter);
             this.Controls.Add(this.btnCreateVariable);

@@ -59,6 +59,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblPlugin.TabIndex = 1;
             this.lblPlugin.Text = "Macro-Deck OBS-WebSocket";
             this.lblPlugin.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblPlugin.UseMnemonic = false;
             // 
             // btnRemove
             // 
@@ -156,6 +157,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblAction.TabIndex = 7;
             this.lblAction.Text = "Action";
             this.lblAction.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblAction.UseMnemonic = false;
             // 
             // panel1
             // 
@@ -188,11 +190,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblConfigurationSummary.TabIndex = 9;
             this.lblConfigurationSummary.Text = "ConfigurationSummary";
             this.lblConfigurationSummary.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblConfigurationSummary.UseMnemonic = false;
             // 
             // ActionItem
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(8)))), ((int)(((byte)(107)))), ((int)(((byte)(138)))));
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.panelEdit);

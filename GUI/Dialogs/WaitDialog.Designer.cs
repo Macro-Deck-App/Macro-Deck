@@ -55,11 +55,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblPleaseWait.TabIndex = 3;
             this.lblPleaseWait.Text = "Please wait...";
             this.lblPleaseWait.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblPleaseWait.UseMnemonic = false;
             // 
             // WaitDialog
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(273, 160);
             this.Controls.Add(this.lblPleaseWait);
             this.Controls.Add(this.pictureBox1);

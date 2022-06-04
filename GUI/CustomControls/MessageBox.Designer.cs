@@ -47,6 +47,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblMessage.Size = new System.Drawing.Size(439, 112);
             this.lblMessage.TabIndex = 3;
             this.lblMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblMessage.UseMnemonic = false;
             // 
             // buttonMessageBoxPanel
             // 
@@ -67,11 +68,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblTitle.Size = new System.Drawing.Size(439, 32);
             this.lblTitle.TabIndex = 5;
             this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblTitle.UseMnemonic = false;
             // 
             // MessageBox
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(463, 204);
             this.Controls.Add(this.lblTitle);
             this.Controls.Add(this.buttonMessageBoxPanel);

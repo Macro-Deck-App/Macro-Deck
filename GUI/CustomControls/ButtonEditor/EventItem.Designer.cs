@@ -85,6 +85,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.lblTrigger.TabIndex = 6;
             this.lblTrigger.Text = "Trigger";
             this.lblTrigger.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblTrigger.UseMnemonic = false;
             // 
             // panelEdit
             // 
@@ -211,8 +212,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             // 
             // EventItem
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(32)))), ((int)(((byte)(32)))));

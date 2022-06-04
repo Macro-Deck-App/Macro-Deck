@@ -71,6 +71,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblFolderName.TabIndex = 1;
             this.lblFolderName.Text = "Folder name:";
             this.lblFolderName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblFolderName.UseMnemonic = false;
             // 
             // btnCreateFolder
             // 
@@ -90,6 +91,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnCreateFolder.Size = new System.Drawing.Size(75, 25);
             this.btnCreateFolder.TabIndex = 2;
             this.btnCreateFolder.Text = "Ok";
+            this.btnCreateFolder.UseMnemonic = false;
             this.btnCreateFolder.UseVisualStyleBackColor = false;
             this.btnCreateFolder.Click += new System.EventHandler(this.BtnCreateFolder_Click);
             // 
@@ -139,6 +141,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnReloadApplications.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
             this.btnReloadApplications.Size = new System.Drawing.Size(25, 25);
             this.btnReloadApplications.TabIndex = 6;
+            this.btnReloadApplications.UseMnemonic = false;
             this.btnReloadApplications.UseVisualStyleBackColor = false;
             this.btnReloadApplications.Click += new System.EventHandler(this.BtnReloadApplications_Click);
             // 
@@ -163,6 +166,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblDevices.Size = new System.Drawing.Size(58, 18);
             this.lblDevices.TabIndex = 4;
             this.lblDevices.Text = "Devices";
+            this.lblDevices.UseMnemonic = false;
             // 
             // applicationList
             // 
@@ -188,6 +192,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblApplication.TabIndex = 2;
             this.lblApplication.Text = "Application:";
             this.lblApplication.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblApplication.UseMnemonic = false;
             // 
             // radioOnFocus
             // 
@@ -197,6 +202,7 @@ namespace SuchByte.MacroDeck.GUI
             this.radioOnFocus.Size = new System.Drawing.Size(160, 22);
             this.radioOnFocus.TabIndex = 1;
             this.radioOnFocus.Text = "On application focus";
+            this.radioOnFocus.UseMnemonic = false;
             this.radioOnFocus.UseVisualStyleBackColor = true;
             this.radioOnFocus.CheckedChanged += new System.EventHandler(this.RadioOnFocus_CheckedChanged);
             // 
@@ -210,13 +216,13 @@ namespace SuchByte.MacroDeck.GUI
             this.radioNever.TabIndex = 0;
             this.radioNever.TabStop = true;
             this.radioNever.Text = "Never";
+            this.radioNever.UseMnemonic = false;
             this.radioNever.UseVisualStyleBackColor = true;
             this.radioNever.CheckedChanged += new System.EventHandler(this.RadioOnFocus_CheckedChanged);
             // 
             // AddFolder
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.ClientSize = new System.Drawing.Size(468, 368);
             this.Controls.Add(this.groupAutomaticallySwitchFolder);

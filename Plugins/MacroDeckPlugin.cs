@@ -16,21 +16,19 @@ namespace SuchByte.MacroDeck.Plugins
         Assembly executingAssembly = Assembly.GetCallingAssembly();
         FileVersionInfo versionInfo;
 
-        private string _name = "", _version = "", _description = "";
+        private string _name = "", _version = "", _author = "";
 
         public MacroDeckPlugin()
         {
             this.versionInfo = FileVersionInfo.GetVersionInfo(executingAssembly.Location);
             this._name = this.executingAssembly.GetName().Name;
             this._version = this.versionInfo.ProductVersion;
-            this._description = this.versionInfo.FileDescription;
         }
 
-
         /// <summary>
-        /// Please change only in a very special case! You can delete this from your class.
+        /// Name of the plugin
         /// </summary>
-        public virtual string Name
+        internal virtual string Name
         {
             get
             {
@@ -41,10 +39,11 @@ namespace SuchByte.MacroDeck.Plugins
                 this._name = value;
             }
         }
+
         /// <summary>
-        /// Please change only in a very special case! You can delete this from your class.
+        /// Version of the plugin
         /// </summary>
-        public virtual string Version
+        internal virtual string Version
         {
             get
             {
@@ -55,32 +54,29 @@ namespace SuchByte.MacroDeck.Plugins
                 this._version = value;
             }
         }
-        /// <summary>
-        /// The author of the plugin
-        /// </summary>
-        public virtual string Author { get; set; }
 
         /// <summary>
-        /// This gets pulled automatically out of the version info. Please change only in a very special case! You can delete this from your class.
+        /// Author of the plugin
         /// </summary>
-        public virtual string Description {
-            get
+        internal virtual string Author { 
+            get 
             {
-                return this._description;
-            }
-            set
-            {
-                this._description = value;
+                return this._author; 
+            } 
+            set 
+            { 
+                this._author = value;
             }
         }
+
         /// <summary>
         /// This list contains all the actions of the plugin. If your plugin does not contain any actions, you can delete this.
         /// </summary>
-        public List<PluginAction> Actions { get; set; }
+        public List<PluginAction> Actions { get; set; } = new List<PluginAction>();
         /// <summary>
-        /// Set a custom icon that will be shown in the package manager and in the action configurator.
+        /// Icon of the plugin
         /// </summary>
-        public virtual Image Icon { get; }
+        internal virtual Image PluginIcon { get; set; } = Properties.Resources.Macro_Deck_2021;
         /// <summary>
         /// true = the plugin can be configured. A button to open the plugin's configurator will appear in the package manager. If your plugin cannot be configured, you can delete this.
         /// </summary>
@@ -93,6 +89,13 @@ namespace SuchByte.MacroDeck.Plugins
         /// Gets called when the plugin is enabled. Initialize your actions list here if your plugin contains any actions.
         /// </summary>
         public abstract void Enable();
+
+
+        [Obsolete("Will be removed soon")]
+        public virtual string Description { get; set; }
+
+        [Obsolete("Will be removed soon")]
+        public virtual Image Icon { get; }
     }
 
     public abstract class PluginAction

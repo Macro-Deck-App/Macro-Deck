@@ -123,6 +123,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.lblWait.TabIndex = 8;
             this.lblWait.Text = "Wait";
             this.lblWait.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblWait.UseMnemonic = false;
             // 
             // minutes
             // 
@@ -149,6 +150,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.label1.TabIndex = 10;
             this.label1.Text = ":";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label1.UseMnemonic = false;
             // 
             // seconds
             // 
@@ -180,6 +182,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.label2.TabIndex = 12;
             this.label2.Text = ":";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label2.UseMnemonic = false;
             // 
             // millis
             // 
@@ -207,11 +210,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.label3.TabIndex = 14;
             this.label3.Text = "(Minutes:Seconds:Milliseconds)";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label3.UseMnemonic = false;
             // 
             // DelayItem
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(8)))), ((int)(((byte)(107)))), ((int)(((byte)(138)))));
             this.Controls.Add(this.label3);
             this.Controls.Add(this.millis);

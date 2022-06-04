@@ -106,6 +106,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblLayers.Size = new System.Drawing.Size(62, 19);
             this.lblLayers.TabIndex = 7;
             this.lblLayers.Text = "Layers";
+            this.lblLayers.UseMnemonic = false;
             // 
             // btnAddImage
             // 
@@ -120,6 +121,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnAddImage.Size = new System.Drawing.Size(128, 23);
             this.btnAddImage.TabIndex = 8;
             this.btnAddImage.Text = "Add image";
+            this.btnAddImage.UseMnemonic = false;
             this.btnAddImage.UseVisualStyleBackColor = false;
             this.btnAddImage.Click += new System.EventHandler(this.BtnAddImage_Click);
             // 
@@ -136,6 +138,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOk.Size = new System.Drawing.Size(75, 25);
             this.btnOk.TabIndex = 9;
             this.btnOk.Text = "Ok";
+            this.btnOk.UseMnemonic = false;
             this.btnOk.UseVisualStyleBackColor = false;
             this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
             // 
@@ -152,13 +155,13 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnBackgroundColor.Size = new System.Drawing.Size(128, 23);
             this.btnBackgroundColor.TabIndex = 10;
             this.btnBackgroundColor.Text = "Background color";
+            this.btnBackgroundColor.UseMnemonic = false;
             this.btnBackgroundColor.UseVisualStyleBackColor = false;
             this.btnBackgroundColor.Click += new System.EventHandler(this.BtnBackgroundColor_Click);
             // 
             // IconCreator
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(475, 391);
             this.Controls.Add(this.btnBackgroundColor);
             this.Controls.Add(this.btnOk);

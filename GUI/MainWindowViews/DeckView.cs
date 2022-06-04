@@ -69,6 +69,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.actionButtonContextMenuItemSimulateRelease.Text = LanguageManager.Strings.SimulateOnRelease;
             this.actionButtonContextMenuItemSimulateLongPress.Text = LanguageManager.Strings.SimulateOnLongPress;
             this.actionButtonContextMenuItemSimulateLongPressRelease.Text = LanguageManager.Strings.SimulateOnLongPressRelease;
+            this.lblFolders.Text = LanguageManager.Strings.Folders;
+            this.lblGrid.Text = LanguageManager.Strings.Grid;
         }
 
 
@@ -199,6 +201,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
             if (button == null || actionButton == null) return;
 
+
             switch (actionButton.State)
             {
                 case false:
@@ -208,15 +211,16 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                         button.ForegroundImage = labelImage;
                     }
 
-                    if (actionButton.IconOff != null && actionButton.IconOff.Split(".").Length > 1)
+                    if (!string.IsNullOrWhiteSpace(actionButton.IconOff))
                     {
-                        Icons.IconPack iconPack = IconManager.GetIconPackByName(actionButton.IconOff.Split(".")[0]);
-                        Icons.Icon icon = IconManager.GetIcon(iconPack, long.Parse(actionButton.IconOff.Split(".")[1]));
-                        if (iconPack != null && icon != null)
+                        var icon = IconManager.GetIconByString(actionButton.IconOff);
+                        if (icon != null)
                         {
                             button.BackgroundImage = icon.IconImage;
                         }
                     }
+
+                    button.BackColor = ProfileManager.CurrentProfile.ButtonBackground ? actionButton.BackColorOff : Color.Transparent;
                     break;
                 case true:
                     if (actionButton.LabelOn != null && !string.IsNullOrWhiteSpace(actionButton.LabelOn.LabelBase64))
@@ -225,15 +229,16 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                         button.ForegroundImage = labelImage;
                     }
 
-                    if (actionButton.IconOn != null && actionButton.IconOn.Split(".").Length > 1)
+                    if (!string.IsNullOrWhiteSpace(actionButton.IconOn))
                     {
-                        Icons.IconPack iconPack = IconManager.GetIconPackByName(actionButton.IconOn.Split(".")[0]);
-                        Icons.Icon icon = IconManager.GetIcon(iconPack, long.Parse(actionButton.IconOn.Split(".")[1]));
-                        if (iconPack != null && icon != null)
+                        var icon = IconManager.GetIconByString(actionButton.IconOn);
+                        if (icon != null)
                         {
                             button.BackgroundImage = icon.IconImage;
                         }
                     }
+
+                    button.BackColor = ProfileManager.CurrentProfile.ButtonBackground ? actionButton.BackColorOn : Color.Transparent;
                     break;
             }
 
@@ -272,6 +277,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             if (button == null) return;
             if (button.BackgroundImage != null)
             {
+                button.BackgroundImage.Dispose();
                 button.BackgroundImage = null;
             }
             if (button.ForegroundImage != null)
@@ -465,7 +471,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 {
                     Actions = new List<PluginAction>(),
                     EventListeners = new List<EventListener>(),
-                    ButtonId = this._currentFolder.ActionButtons.Count,
                     Position_Y = row,
                     Position_X = column,
                     IconOff = "",
@@ -651,7 +656,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 }
             }
 
-            actionButtonNew.ButtonId = this._currentFolder.ActionButtons.Count;
             actionButtonNew.Position_X = col;
             actionButtonNew.Position_Y = row;
 

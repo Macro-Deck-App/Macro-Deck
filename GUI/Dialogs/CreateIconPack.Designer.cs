@@ -54,6 +54,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOk.Size = new System.Drawing.Size(75, 25);
             this.btnOk.TabIndex = 5;
             this.btnOk.Text = "Ok";
+            this.btnOk.UseMnemonic = false;
             this.btnOk.UseVisualStyleBackColor = false;
             this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
             // 
@@ -66,6 +67,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblName.Size = new System.Drawing.Size(45, 16);
             this.lblName.TabIndex = 4;
             this.lblName.Text = "Name:";
+            this.lblName.UseMnemonic = false;
             // 
             // iconPackName
             // 
@@ -84,6 +86,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblAuthor.Size = new System.Drawing.Size(50, 16);
             this.lblAuthor.TabIndex = 7;
             this.lblAuthor.Text = "Author:";
+            this.lblAuthor.UseMnemonic = false;
             // 
             // author
             // 
@@ -110,11 +113,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblVersion.Size = new System.Drawing.Size(55, 16);
             this.lblVersion.TabIndex = 9;
             this.lblVersion.Text = "Version:";
+            this.lblVersion.UseMnemonic = false;
             // 
             // CreateIconPack
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(299, 133);
             this.Controls.Add(this.lblVersion);
             this.Controls.Add(this.version);

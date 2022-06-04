@@ -46,6 +46,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblName.Size = new System.Drawing.Size(52, 18);
             this.lblName.TabIndex = 4;
             this.lblName.Text = "Name:";
+            this.lblName.UseMnemonic = false;
             // 
             // profileName
             // 
@@ -82,13 +83,13 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnOk.Size = new System.Drawing.Size(75, 25);
             this.btnOk.TabIndex = 5;
             this.btnOk.Text = "Ok";
+            this.btnOk.UseMnemonic = false;
             this.btnOk.UseVisualStyleBackColor = false;
             this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
             // 
             // CreateProfileDialog
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(316, 99);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.lblName);

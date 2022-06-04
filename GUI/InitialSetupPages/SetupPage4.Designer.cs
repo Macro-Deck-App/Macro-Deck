@@ -46,6 +46,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblPickAllPlugins.TabIndex = 5;
             this.lblPickAllPlugins.Text = "Pick all the plugins you need";
             this.lblPickAllPlugins.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblPickAllPlugins.UseMnemonic = false;
             // 
             // lblDontWorry
             // 
@@ -59,6 +60,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblDontWorry.Text = "Don\'t worry, you can always install/uninstall plugins later in the package manage" +
     "r";
             this.lblDontWorry.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblDontWorry.UseMnemonic = false;
             // 
             // plugins
             // 
@@ -79,8 +81,8 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             // 
             // SetupPage4
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+           
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.plugins);

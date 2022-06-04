@@ -126,10 +126,10 @@ namespace SuchByte.MacroDeck.ActionButton
             }
         }
 
+        public string Guid { get; set; } = System.Guid.NewGuid().ToString();
 
         public event EventHandler StateChanged;
         public event EventHandler IconChanged;
-        public long ButtonId { get; set; }
 
         private bool _state = false;
         public bool State
@@ -181,6 +181,8 @@ namespace SuchByte.MacroDeck.ActionButton
 
         public ButtonLabel LabelOff { get; set; } = new ButtonLabel();
         public ButtonLabel LabelOn { get; set; } = new ButtonLabel();
+        public Color BackColorOff = Color.FromArgb(35, 35, 35);
+        public Color BackColorOn = Color.FromArgb(35, 35, 35);
         public int Position_X { get; set; } = -1;
         public int Position_Y { get; set; } = -1;
         public string StateBindingVariable { get; set; } = string.Empty;

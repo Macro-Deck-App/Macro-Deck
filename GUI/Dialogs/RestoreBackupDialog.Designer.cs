@@ -49,6 +49,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.checkRestoreConfig.Size = new System.Drawing.Size(102, 20);
             this.checkRestoreConfig.TabIndex = 2;
             this.checkRestoreConfig.Text = "Configuration";
+            this.checkRestoreConfig.UseMnemonic = false;
             this.checkRestoreConfig.UseVisualStyleBackColor = true;
             // 
             // checkRestoreProfiles
@@ -59,6 +60,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.checkRestoreProfiles.Size = new System.Drawing.Size(68, 20);
             this.checkRestoreProfiles.TabIndex = 3;
             this.checkRestoreProfiles.Text = "Profiles";
+            this.checkRestoreProfiles.UseMnemonic = false;
             this.checkRestoreProfiles.UseVisualStyleBackColor = true;
             // 
             // checkRestoreDevices
@@ -69,6 +71,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.checkRestoreDevices.Size = new System.Drawing.Size(69, 20);
             this.checkRestoreDevices.TabIndex = 4;
             this.checkRestoreDevices.Text = "Devices";
+            this.checkRestoreDevices.UseMnemonic = false;
             this.checkRestoreDevices.UseVisualStyleBackColor = true;
             // 
             // checkRestoreVariables
@@ -79,6 +82,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.checkRestoreVariables.Size = new System.Drawing.Size(79, 20);
             this.checkRestoreVariables.TabIndex = 5;
             this.checkRestoreVariables.Text = "Variables";
+            this.checkRestoreVariables.UseMnemonic = false;
             this.checkRestoreVariables.UseVisualStyleBackColor = true;
             // 
             // checkRestorePlugins
@@ -89,6 +93,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.checkRestorePlugins.Size = new System.Drawing.Size(118, 20);
             this.checkRestorePlugins.TabIndex = 6;
             this.checkRestorePlugins.Text = "Installed plugins";
+            this.checkRestorePlugins.UseMnemonic = false;
             this.checkRestorePlugins.UseVisualStyleBackColor = true;
             // 
             // checkRestorePluginConfigs
@@ -99,6 +104,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.checkRestorePluginConfigs.Size = new System.Drawing.Size(144, 20);
             this.checkRestorePluginConfigs.TabIndex = 7;
             this.checkRestorePluginConfigs.Text = "Plugin configurations";
+            this.checkRestorePluginConfigs.UseMnemonic = false;
             this.checkRestorePluginConfigs.UseVisualStyleBackColor = true;
             // 
             // checkRestorePluginCredentials
@@ -109,6 +115,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.checkRestorePluginCredentials.Size = new System.Drawing.Size(126, 20);
             this.checkRestorePluginCredentials.TabIndex = 8;
             this.checkRestorePluginCredentials.Text = "Plugin credentials";
+            this.checkRestorePluginCredentials.UseMnemonic = false;
             this.checkRestorePluginCredentials.UseVisualStyleBackColor = true;
             // 
             // checkRestoreIconPacks
@@ -119,6 +126,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.checkRestoreIconPacks.Size = new System.Drawing.Size(137, 20);
             this.checkRestoreIconPacks.TabIndex = 9;
             this.checkRestoreIconPacks.Text = "Installed icon packs";
+            this.checkRestoreIconPacks.UseMnemonic = false;
             this.checkRestoreIconPacks.UseVisualStyleBackColor = true;
             // 
             // lblWhatToRestore
@@ -129,6 +137,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblWhatToRestore.Size = new System.Drawing.Size(353, 47);
             this.lblWhatToRestore.TabIndex = 10;
             this.lblWhatToRestore.Text = "What do you want to restore from the backup?";
+            this.lblWhatToRestore.UseMnemonic = false;
             // 
             // btnRestore
             // 
@@ -148,13 +157,13 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnRestore.Size = new System.Drawing.Size(150, 30);
             this.btnRestore.TabIndex = 11;
             this.btnRestore.Text = "Restore";
+            this.btnRestore.UseMnemonic = false;
             this.btnRestore.UseVisualStyleBackColor = false;
             this.btnRestore.Click += new System.EventHandler(this.BtnRestore_Click);
             // 
             // RestoreBackupDialog
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(414, 343);
             this.Controls.Add(this.btnRestore);
             this.Controls.Add(this.lblWhatToRestore);

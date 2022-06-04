@@ -24,9 +24,8 @@ namespace SuchByte.MacroDeck.Variables
 
         private static DocumentConfiguration templateConfiguration = new DocumentConfiguration
         {
-            Trimmer = DocumentConfiguration.TrimNothing,
+            Trimmer = DocumentConfiguration.TrimFirstAndLastBlankLines,
         };
-
 
         private static bool _saving = false; // To prevent multiple save processes
 
@@ -60,7 +59,7 @@ namespace SuchByte.MacroDeck.Variables
                 switch (type)
                 {
                     case VariableType.Bool:
-                        if (Boolean.TryParse(value.ToString(), out bool boolResult))
+                        if (bool.TryParse(value.ToString(), out bool boolResult))
                         {
                             value = boolResult;
                         }
@@ -175,6 +174,8 @@ namespace SuchByte.MacroDeck.Variables
             string result = "";
             try 
             {
+                templateConfiguration.Trimmer = template.StartsWith("_trimblank_", StringComparison.OrdinalIgnoreCase) ? DocumentConfiguration.TrimFirstAndLastBlankLines : DocumentConfiguration.TrimNothing;
+                template = template.Replace("_trimblank_", "", StringComparison.OrdinalIgnoreCase);
                 var document = Document.CreateDefault(template, templateConfiguration).DocumentOrThrow;
 
                 Dictionary<Value, Value> vars = new Dictionary<Value, Value>();
@@ -219,6 +220,7 @@ namespace SuchByte.MacroDeck.Variables
 
         internal static void Load()
         {
+            MacroDeckLogger.Info(typeof(VariableManager), "Loading variables...");
             var db = new SQLiteConnection(MacroDeck.VariablesFilePath);
             db.CreateTable<Variable>();
 
@@ -231,26 +233,13 @@ namespace SuchByte.MacroDeck.Variables
             foreach (Variable variable in variablesLoaded.ToArray())
             {
                 variable.Name = ConvertNameString(variable.Name);
-                while (variablesLoaded.FindAll(x => x.Name.Equals(variable.Name)).Count > 1)
-                {
-                    MacroDeckLogger.Trace(typeof(VariableManager), $"Found {variable.Name} more then once");
-                    variablesLoaded.Remove(variable);
-                } 
             }
 
             Variables = variablesLoaded;
 
             db.Close();
 
-            MacroDeckLogger.Info(Variables.Count + " variables loaded");
-        }
-
-        internal static void LoadAsync()
-        {
-            Task.Run(() =>
-            {
-                Load();
-            });
+            MacroDeckLogger.Info(typeof(VariableManager), Variables.Count + " variables loaded");
         }
 
         internal static void Save()

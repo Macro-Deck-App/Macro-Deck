@@ -66,6 +66,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.btnAddEvent.Size = new System.Drawing.Size(165, 30);
             this.btnAddEvent.TabIndex = 6;
             this.btnAddEvent.Text = "+ Event";
+            this.btnAddEvent.UseMnemonic = false;
             this.btnAddEvent.UseVisualStyleBackColor = false;
             this.btnAddEvent.Click += new System.EventHandler(this.BtnAddEvent_Click);
             // 
@@ -83,8 +84,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             // 
             // EventSelector
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.Controls.Add(this.flowLayoutPanel1);
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);

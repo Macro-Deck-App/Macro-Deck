@@ -83,6 +83,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.checkButtonBackground = new System.Windows.Forms.CheckBox();
             this.btnEditProfile = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.lblFolders = new System.Windows.Forms.Label();
+            this.lblGrid = new System.Windows.Forms.Label();
             this.foldersContextMenu.SuspendLayout();
             this.actionButtonContextMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.btnAddProfile)).BeginInit();
@@ -99,17 +101,17 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             this.foldersView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.foldersView.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
+            this.foldersView.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.foldersView.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.foldersView.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.foldersView.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.foldersView.ForeColor = System.Drawing.Color.White;
             this.foldersView.FullRowSelect = true;
             this.foldersView.ItemHeight = 26;
             this.foldersView.LineColor = System.Drawing.Color.White;
-            this.foldersView.Location = new System.Drawing.Point(865, 0);
+            this.foldersView.Location = new System.Drawing.Point(854, 45);
             this.foldersView.Name = "foldersView";
             this.foldersView.PathSeparator = "/";
-            this.foldersView.Size = new System.Drawing.Size(272, 402);
+            this.foldersView.Size = new System.Drawing.Size(272, 339);
             this.foldersView.TabIndex = 6;
             this.foldersView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.FoldersView_AfterSelect);
             this.foldersView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.FoldersView_MouseDown);
@@ -121,7 +123,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonPanel.Location = new System.Drawing.Point(6, 45);
             this.buttonPanel.Name = "buttonPanel";
-            this.buttonPanel.Size = new System.Drawing.Size(852, 495);
+            this.buttonPanel.Size = new System.Drawing.Size(841, 500);
             this.buttonPanel.TabIndex = 5;
             // 
             // actionButtonContextMenuItemEdit
@@ -194,7 +196,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.actionButtonContextMenuItemDelete});
             this.actionButtonContextMenu.Name = "actionButtonContextMenu";
             this.actionButtonContextMenu.ShowImageMargin = false;
-            this.actionButtonContextMenu.Size = new System.Drawing.Size(331, 268);
+            this.actionButtonContextMenu.Size = new System.Drawing.Size(331, 246);
             this.actionButtonContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.ActionButtonContextMenuOpened);
             // 
             // toolStripSeparator2
@@ -316,16 +318,16 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.buttonColumns.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonColumns.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
             this.buttonColumns.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.buttonColumns.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.buttonColumns.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.buttonColumns.ForeColor = System.Drawing.Color.White;
-            this.buttonColumns.Location = new System.Drawing.Point(941, 408);
+            this.buttonColumns.Location = new System.Drawing.Point(930, 425);
             this.buttonColumns.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             0});
             this.buttonColumns.Name = "buttonColumns";
-            this.buttonColumns.Size = new System.Drawing.Size(55, 30);
+            this.buttonColumns.Size = new System.Drawing.Size(55, 26);
             this.buttonColumns.TabIndex = 14;
             this.buttonColumns.Value = new decimal(new int[] {
             5,
@@ -339,16 +341,16 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.buttonRows.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonRows.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
             this.buttonRows.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.buttonRows.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.buttonRows.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.buttonRows.ForeColor = System.Drawing.Color.White;
-            this.buttonRows.Location = new System.Drawing.Point(1079, 408);
+            this.buttonRows.Location = new System.Drawing.Point(1068, 425);
             this.buttonRows.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             0});
             this.buttonRows.Name = "buttonRows";
-            this.buttonRows.Size = new System.Drawing.Size(55, 30);
+            this.buttonRows.Size = new System.Drawing.Size(55, 26);
             this.buttonRows.TabIndex = 15;
             this.buttonRows.Value = new decimal(new int[] {
             3,
@@ -363,12 +365,13 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblColumns.BackColor = System.Drawing.Color.Transparent;
             this.lblColumns.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblColumns.ForeColor = System.Drawing.Color.White;
-            this.lblColumns.Location = new System.Drawing.Point(863, 408);
+            this.lblColumns.Location = new System.Drawing.Point(854, 425);
             this.lblColumns.Name = "lblColumns";
-            this.lblColumns.Size = new System.Drawing.Size(72, 30);
+            this.lblColumns.Size = new System.Drawing.Size(72, 26);
             this.lblColumns.TabIndex = 16;
             this.lblColumns.Text = "Columns";
             this.lblColumns.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblColumns.UseMnemonic = false;
             // 
             // lblRows
             // 
@@ -376,12 +379,13 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblRows.BackColor = System.Drawing.Color.Transparent;
             this.lblRows.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblRows.ForeColor = System.Drawing.Color.White;
-            this.lblRows.Location = new System.Drawing.Point(1001, 408);
+            this.lblRows.Location = new System.Drawing.Point(990, 425);
             this.lblRows.Name = "lblRows";
-            this.lblRows.Size = new System.Drawing.Size(72, 30);
+            this.lblRows.Size = new System.Drawing.Size(72, 26);
             this.lblRows.TabIndex = 17;
             this.lblRows.Text = "Rows";
             this.lblRows.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblRows.UseMnemonic = false;
             // 
             // lblSpacing
             // 
@@ -389,28 +393,29 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblSpacing.BackColor = System.Drawing.Color.Transparent;
             this.lblSpacing.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblSpacing.ForeColor = System.Drawing.Color.White;
-            this.lblSpacing.Location = new System.Drawing.Point(941, 444);
+            this.lblSpacing.Location = new System.Drawing.Point(930, 457);
             this.lblSpacing.Name = "lblSpacing";
-            this.lblSpacing.Size = new System.Drawing.Size(132, 30);
+            this.lblSpacing.Size = new System.Drawing.Size(132, 26);
             this.lblSpacing.TabIndex = 19;
             this.lblSpacing.Text = "Spacing";
             this.lblSpacing.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblSpacing.UseMnemonic = false;
             // 
             // buttonSpacing
             // 
             this.buttonSpacing.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonSpacing.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
             this.buttonSpacing.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.buttonSpacing.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.buttonSpacing.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.buttonSpacing.ForeColor = System.Drawing.Color.White;
-            this.buttonSpacing.Location = new System.Drawing.Point(1079, 444);
+            this.buttonSpacing.Location = new System.Drawing.Point(1068, 457);
             this.buttonSpacing.Maximum = new decimal(new int[] {
             25,
             0,
             0,
             0});
             this.buttonSpacing.Name = "buttonSpacing";
-            this.buttonSpacing.Size = new System.Drawing.Size(55, 30);
+            this.buttonSpacing.Size = new System.Drawing.Size(55, 26);
             this.buttonSpacing.TabIndex = 18;
             this.buttonSpacing.Value = new decimal(new int[] {
             10,
@@ -425,23 +430,24 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblCornerRadius.BackColor = System.Drawing.Color.Transparent;
             this.lblCornerRadius.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblCornerRadius.ForeColor = System.Drawing.Color.White;
-            this.lblCornerRadius.Location = new System.Drawing.Point(941, 480);
+            this.lblCornerRadius.Location = new System.Drawing.Point(930, 489);
             this.lblCornerRadius.Name = "lblCornerRadius";
-            this.lblCornerRadius.Size = new System.Drawing.Size(132, 30);
+            this.lblCornerRadius.Size = new System.Drawing.Size(132, 26);
             this.lblCornerRadius.TabIndex = 21;
             this.lblCornerRadius.Text = "Corner radius";
             this.lblCornerRadius.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblCornerRadius.UseMnemonic = false;
             // 
             // cornerRadius
             // 
             this.cornerRadius.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cornerRadius.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
             this.cornerRadius.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.cornerRadius.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.cornerRadius.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.cornerRadius.ForeColor = System.Drawing.Color.White;
-            this.cornerRadius.Location = new System.Drawing.Point(1079, 480);
+            this.cornerRadius.Location = new System.Drawing.Point(1068, 489);
             this.cornerRadius.Name = "cornerRadius";
-            this.cornerRadius.Size = new System.Drawing.Size(55, 30);
+            this.cornerRadius.Size = new System.Drawing.Size(55, 26);
             this.cornerRadius.TabIndex = 20;
             this.cornerRadius.Value = new decimal(new int[] {
             40,
@@ -460,11 +466,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.checkButtonBackground.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkButtonBackground.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.checkButtonBackground.ForeColor = System.Drawing.Color.White;
-            this.checkButtonBackground.Location = new System.Drawing.Point(983, 513);
+            this.checkButtonBackground.Location = new System.Drawing.Point(972, 518);
             this.checkButtonBackground.Name = "checkButtonBackground";
             this.checkButtonBackground.Size = new System.Drawing.Size(151, 22);
             this.checkButtonBackground.TabIndex = 22;
             this.checkButtonBackground.Text = "Button Background";
+            this.checkButtonBackground.UseMnemonic = false;
             this.checkButtonBackground.UseVisualStyleBackColor = false;
             this.checkButtonBackground.CheckedChanged += new System.EventHandler(this.ButtonSettingsChanged);
             // 
@@ -494,14 +501,41 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.panel1.Controls.Add(this.btnEditProfile);
             this.panel1.Location = new System.Drawing.Point(6, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(852, 36);
+            this.panel1.Size = new System.Drawing.Size(841, 36);
             this.panel1.TabIndex = 24;
+            // 
+            // lblFolders
+            // 
+            this.lblFolders.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblFolders.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
+            this.lblFolders.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblFolders.ForeColor = System.Drawing.Color.White;
+            this.lblFolders.Location = new System.Drawing.Point(854, 3);
+            this.lblFolders.Name = "lblFolders";
+            this.lblFolders.Size = new System.Drawing.Size(269, 35);
+            this.lblFolders.TabIndex = 40;
+            this.lblFolders.Text = "Folders";
+            this.lblFolders.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lblGrid
+            // 
+            this.lblGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblGrid.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
+            this.lblGrid.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblGrid.ForeColor = System.Drawing.Color.White;
+            this.lblGrid.Location = new System.Drawing.Point(854, 387);
+            this.lblGrid.Name = "lblGrid";
+            this.lblGrid.Size = new System.Drawing.Size(269, 35);
+            this.lblGrid.TabIndex = 41;
+            this.lblGrid.Text = "Grid";
+            this.lblGrid.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // DeckView
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.Controls.Add(this.lblGrid);
+            this.Controls.Add(this.lblFolders);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.checkButtonBackground);
             this.Controls.Add(this.lblCornerRadius);
@@ -516,7 +550,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.Controls.Add(this.buttonPanel);
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.Name = "DeckView";
-            this.Size = new System.Drawing.Size(1137, 540);
+            this.Size = new System.Drawing.Size(1126, 545);
             this.Load += new System.EventHandler(this.Deck_Load);
             this.foldersContextMenu.ResumeLayout(false);
             this.actionButtonContextMenu.ResumeLayout(false);
@@ -566,5 +600,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private System.Windows.Forms.ToolStripMenuItem actionButtonContextMenuItemSimulateLongPress;
         private System.Windows.Forms.ToolStripMenuItem actionButtonContextMenuItemSimulateLongPressRelease;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.Label lblFolders;
+        private System.Windows.Forms.Label lblGrid;
     }
 }

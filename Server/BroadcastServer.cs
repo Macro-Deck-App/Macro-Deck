@@ -20,7 +20,6 @@ namespace SuchByte.MacroDeck.Server
             try
             {
                 _udpClient = new UdpClient();
-                //_udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, MacroDeck.Configuration.Host_Port));
 
                 Timer broadcastTimer = new Timer(1000 * 5)
                 {

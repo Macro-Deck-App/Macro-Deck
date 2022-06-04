@@ -47,6 +47,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblWelcome.TabIndex = 0;
             this.lblWelcome.Text = "Welcome to Macro Deck 2!";
             this.lblWelcome.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblWelcome.UseMnemonic = false;
             // 
             // pictureBox1
             // 
@@ -69,6 +70,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblLetsConfigure.TabIndex = 2;
             this.lblLetsConfigure.Text = "Let\'s configure your Macro Deck experience";
             this.lblLetsConfigure.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblLetsConfigure.UseMnemonic = false;
             // 
             // languages
             // 
@@ -94,11 +96,12 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             this.lblSelectLanguage.TabIndex = 5;
             this.lblSelectLanguage.Text = "Select your language";
             this.lblSelectLanguage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblSelectLanguage.UseMnemonic = false;
             // 
             // SetupPage1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.lblSelectLanguage);
             this.Controls.Add(this.languages);

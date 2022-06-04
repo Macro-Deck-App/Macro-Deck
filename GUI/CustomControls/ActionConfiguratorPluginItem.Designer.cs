@@ -56,6 +56,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.pluginName.Size = new System.Drawing.Size(203, 20);
             this.pluginName.TabIndex = 1;
             this.pluginName.Text = "label1";
+            this.pluginName.UseMnemonic = false;
             // 
             // lblCountActions
             // 
@@ -67,6 +68,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblCountActions.TabIndex = 2;
             this.lblCountActions.Text = "label1";
             this.lblCountActions.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblCountActions.UseMnemonic = false;
             // 
             // chevron
             // 
@@ -81,8 +83,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             // ActionConfiguratorPluginItem
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
             this.Controls.Add(this.chevron);
             this.Controls.Add(this.lblCountActions);
