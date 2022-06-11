@@ -1,6 +1,7 @@
 ﻿using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.InternalPlugins.DevicePlugin.ViewModels;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using System;
@@ -21,6 +22,8 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
         public SetProfileActionConfigView(PluginAction action)
         {
             InitializeComponent();
+            this.lblDevice.Text = LanguageManager.Strings.Device;
+            this.lblProfile.Text = LanguageManager.Strings.Profile;
             this._viewModel = new SetProfileActionConfigViewModel(action);
         }
 

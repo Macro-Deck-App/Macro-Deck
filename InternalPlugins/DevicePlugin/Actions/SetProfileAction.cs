@@ -3,6 +3,7 @@ using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Models;
 using SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using System;
@@ -13,9 +14,9 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Actions
 {
     public class SetProfileAction : PluginAction
     {
-        public override string Name => "Set profile";
+        public override string Name => LanguageManager.Strings.ActionSetProfile;
 
-        public override string Description => "Sets the profile on the device";
+        public override string Description => LanguageManager.Strings.ActionSetProfileDescription;
 
         public override bool CanConfigure => true;
 
