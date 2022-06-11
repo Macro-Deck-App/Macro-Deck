@@ -1,4 +1,3 @@
-﻿
 namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
 {
     partial class SetProfileActionConfigView

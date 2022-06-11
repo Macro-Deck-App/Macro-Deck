@@ -52,6 +52,7 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
                     }
                 }
                 var profile = ProfileManager.FindProfileById(this._viewModel.ProfileId);
+
                 if (profile != null)
                 {
                     this.profilesList.Text = profile.DisplayName;
@@ -89,7 +90,7 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
                 }
             }
             var profile = ProfileManager.FindProfileByDisplayName(this.profilesList.Text);
-            
+
             if (profile != null)
             {
                 this._viewModel.ProfileId = profile.ProfileId;
@@ -103,6 +104,5 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
         {
             this.devicesList.Enabled = this.radioFixedDevice.Checked;
         }
-
     }
 }

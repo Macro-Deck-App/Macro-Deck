@@ -333,7 +333,5 @@ namespace SuchByte.MacroDeck.Language
         public string WhereExecuted = "Where executed";
         public string ActionSetBrightness = "Set brightness";
         public string ActionSetBrightnessDescription = "Sets the display brightness (Only on the Android app!)";
-    
-    
     }
 }
