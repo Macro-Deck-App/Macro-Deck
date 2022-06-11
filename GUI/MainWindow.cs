@@ -52,6 +52,7 @@ namespace SuchByte.MacroDeck.GUI
             LanguageManager.LanguageChanged += LanguageChanged;
             Updater.Updater.OnUpdateAvailable += UpdateAvailable;
             MacroDeckLogger.OnWarningOrError += MacroDeckLogger_OnWarningOrError;
+            this._deckView ??= new DeckView();
         }
 
         private void MacroDeckLogger_OnWarningOrError(object sender, EventArgs e)
@@ -153,8 +154,8 @@ namespace SuchByte.MacroDeck.GUI
 
         private void MainWindow_Load(object sender, EventArgs e)
         {
-            this.SetView(new LoadingView());
-            
+            this.SetView(this.DeckView);
+
             this.lblVersion.Text = "Macro Deck " + MacroDeck.VersionString + (Debugger.IsAttached  ? " (debug)" : "");
             
             PluginManager.OnPluginsChange += this.OnPluginsChanged;
@@ -179,19 +180,10 @@ namespace SuchByte.MacroDeck.GUI
 
             this.btnExtensions.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);
 
-            Task.Run(() =>
-            {
-                this._deckView ??= new DeckView();
-                Thread.Sleep(500);
-                this.SetView(this.DeckView);
-                this.Invoke(new Action(() =>
-                {
-                    this.navigation.Visible = true;
-                    this.btnSettings.SetNotification(Updater.Updater.UpdateAvailable);           
-                }));
-                
-            });
+            this.navigation.Visible = true;
+            this.btnSettings.SetNotification(Updater.Updater.UpdateAvailable);
 
+            
             PluginManager.ScanUpdatesAsync();
             IconManager.ScanUpdatesAsync();
             CenterToScreen();
@@ -301,6 +293,11 @@ namespace SuchByte.MacroDeck.GUI
         }
 
         private void lblPluginsLoaded_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void contentButtonPanel_Paint(object sender, PaintEventArgs e)
         {
 
         }

@@ -1,4 +1,5 @@
-﻿using SuchByte.MacroDeck.Icons;
+﻿using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
@@ -77,7 +78,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblPort = new System.Windows.Forms.Label();
             this.lblServerStatus = new System.Windows.Forms.Label();
             this.lblIpAddressHostname = new System.Windows.Forms.Label();
-            this.navigation = new System.Windows.Forms.Panel();
+            this.navigation = new SuchByte.MacroDeck.GUI.CustomControls.RoundedPanel();
             this.warningsErrorPanel = new System.Windows.Forms.Panel();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.lblErrorsWarnings = new System.Windows.Forms.LinkLabel();
@@ -138,6 +139,9 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // contentButtonPanel
             // 
+            this.contentButtonPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.contentButtonPanel.AutoScroll = true;
             this.contentButtonPanel.Controls.Add(this.btnDeck);
             this.contentButtonPanel.Controls.Add(this.panel1);
@@ -145,13 +149,13 @@ namespace SuchByte.MacroDeck.GUI
             this.contentButtonPanel.Controls.Add(this.btnDeviceManager);
             this.contentButtonPanel.Controls.Add(this.btnVariables);
             this.contentButtonPanel.Controls.Add(this.panel2);
-            this.contentButtonPanel.Dock = System.Windows.Forms.DockStyle.Top;
             this.contentButtonPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.contentButtonPanel.Location = new System.Drawing.Point(0, 0);
+            this.contentButtonPanel.Location = new System.Drawing.Point(5, 6);
             this.contentButtonPanel.Margin = new System.Windows.Forms.Padding(0);
             this.contentButtonPanel.Name = "contentButtonPanel";
-            this.contentButtonPanel.Size = new System.Drawing.Size(54, 510);
+            this.contentButtonPanel.Size = new System.Drawing.Size(44, 502);
             this.contentButtonPanel.TabIndex = 5;
+            this.contentButtonPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.contentButtonPanel_Paint);
             // 
             // btnDeck
             // 
@@ -161,8 +165,8 @@ namespace SuchByte.MacroDeck.GUI
             this.btnDeck.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnDeck.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnDeck.ForeColor = System.Drawing.Color.White;
-            this.btnDeck.Location = new System.Drawing.Point(5, 4);
-            this.btnDeck.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            this.btnDeck.Location = new System.Drawing.Point(0, 0);
+            this.btnDeck.Margin = new System.Windows.Forms.Padding(0, 0, 0, 4);
             this.btnDeck.Name = "btnDeck";
             this.btnDeck.Selected = false;
             this.btnDeck.Size = new System.Drawing.Size(44, 44);
@@ -173,8 +177,8 @@ namespace SuchByte.MacroDeck.GUI
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.Silver;
-            this.panel1.Location = new System.Drawing.Point(5, 55);
-            this.panel1.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
+            this.panel1.Location = new System.Drawing.Point(0, 51);
+            this.panel1.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(44, 2);
             this.panel1.TabIndex = 4;
@@ -187,8 +191,8 @@ namespace SuchByte.MacroDeck.GUI
             this.btnExtensions.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnExtensions.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnExtensions.ForeColor = System.Drawing.Color.White;
-            this.btnExtensions.Location = new System.Drawing.Point(5, 64);
-            this.btnExtensions.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            this.btnExtensions.Location = new System.Drawing.Point(0, 60);
+            this.btnExtensions.Margin = new System.Windows.Forms.Padding(0, 4, 0, 4);
             this.btnExtensions.Name = "btnExtensions";
             this.btnExtensions.Selected = false;
             this.btnExtensions.Size = new System.Drawing.Size(44, 44);
@@ -204,8 +208,8 @@ namespace SuchByte.MacroDeck.GUI
             this.btnDeviceManager.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnDeviceManager.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnDeviceManager.ForeColor = System.Drawing.Color.White;
-            this.btnDeviceManager.Location = new System.Drawing.Point(5, 116);
-            this.btnDeviceManager.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            this.btnDeviceManager.Location = new System.Drawing.Point(0, 112);
+            this.btnDeviceManager.Margin = new System.Windows.Forms.Padding(0, 4, 0, 4);
             this.btnDeviceManager.Name = "btnDeviceManager";
             this.btnDeviceManager.Selected = false;
             this.btnDeviceManager.Size = new System.Drawing.Size(44, 44);
@@ -221,8 +225,8 @@ namespace SuchByte.MacroDeck.GUI
             this.btnVariables.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnVariables.Font = new System.Drawing.Font("Tahoma", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnVariables.ForeColor = System.Drawing.Color.White;
-            this.btnVariables.Location = new System.Drawing.Point(5, 168);
-            this.btnVariables.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            this.btnVariables.Location = new System.Drawing.Point(0, 164);
+            this.btnVariables.Margin = new System.Windows.Forms.Padding(0, 4, 0, 4);
             this.btnVariables.Name = "btnVariables";
             this.btnVariables.Selected = false;
             this.btnVariables.Size = new System.Drawing.Size(44, 44);
@@ -234,8 +238,8 @@ namespace SuchByte.MacroDeck.GUI
             // panel2
             // 
             this.panel2.BackColor = System.Drawing.Color.Silver;
-            this.panel2.Location = new System.Drawing.Point(5, 219);
-            this.panel2.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
+            this.panel2.Location = new System.Drawing.Point(0, 215);
+            this.panel2.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(44, 2);
             this.panel2.TabIndex = 5;
@@ -249,7 +253,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnSettings.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSettings.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnSettings.ForeColor = System.Drawing.Color.White;
-            this.btnSettings.Location = new System.Drawing.Point(5, 515);
+            this.btnSettings.Location = new System.Drawing.Point(5, 512);
             this.btnSettings.Margin = new System.Windows.Forms.Padding(8, 4, 8, 4);
             this.btnSettings.Name = "btnSettings";
             this.btnSettings.Selected = false;
@@ -347,11 +351,13 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // navigation
             // 
+            this.navigation.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.navigation.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(32)))), ((int)(((byte)(32)))));
             this.navigation.Controls.Add(this.contentButtonPanel);
             this.navigation.Controls.Add(this.btnSettings);
-            this.navigation.Location = new System.Drawing.Point(2, 41);
-            this.navigation.Margin = new System.Windows.Forms.Padding(0, 3, 6, 3);
+            this.navigation.Location = new System.Drawing.Point(0, 41);
+            this.navigation.Margin = new System.Windows.Forms.Padding(0);
             this.navigation.Name = "navigation";
             this.navigation.Size = new System.Drawing.Size(54, 563);
             this.navigation.TabIndex = 15;
@@ -397,7 +403,7 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // MainWindow
             // 
-            
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.ClientSize = new System.Drawing.Size(1200, 635);
@@ -463,7 +469,7 @@ namespace SuchByte.MacroDeck.GUI
         private System.Windows.Forms.Label lblIpAddressHostname;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Panel navigation;
+        private RoundedPanel navigation;
         private System.Windows.Forms.Panel warningsErrorPanel;
         private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.LinkLabel lblErrorsWarnings;

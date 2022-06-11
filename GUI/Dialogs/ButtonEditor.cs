@@ -88,11 +88,11 @@ namespace SuchByte.MacroDeck.GUI
             }
             this.actionButton.StateChanged += this.OnStateChanged;
             this.hotkey.Click += Hotkey_Click;
-            this.LoadButton();
         }
 
         private void ButtonEditor_Load(object sender, EventArgs e)
         {
+            this.LoadButton();
             this.btnPreview.Radius = ProfileManager.CurrentProfile.ButtonRadius;
             this.UpdateLabel();
         }

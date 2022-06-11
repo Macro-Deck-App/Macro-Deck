@@ -36,8 +36,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.ForeColor = Color.White;
             this.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             this.Text = "";
-            this.Height = 43;
-            this.Width = 43;
+            this.Height = 44;
+            this.Width = 44;
+            this.Margin = new Padding(left: 0, top: 3, right: 0, bottom: 3);
             this.Cursor = Cursors.Hand;
             this.MouseEnter += MouseEnterEvent;
             this.MouseLeave += MouseLeaveEvent;

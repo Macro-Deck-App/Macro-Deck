@@ -109,50 +109,47 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         public void UpdateButtons(bool clear = false)
         {
-            Task.Run(() =>
+            if (clear)
             {
-                if (clear)
+                foreach (RoundedButton roundedButton in this.buttonPanel.Controls)
                 {
-                    foreach (RoundedButton roundedButton in this.buttonPanel.Controls)
+                    ActionButton.ActionButton actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == roundedButton.Column && aB.Position_Y == roundedButton.Row);
+                    if (actionButton != null)
                     {
-                        ActionButton.ActionButton actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == roundedButton.Column && aB.Position_Y == roundedButton.Row);
-                        if (actionButton != null)
-                        {
-                            actionButton.StateChanged -= this.ButtonStateChanged;
-                            actionButton.IconChanged -= ActionButton_IconChanged;
-                            actionButton.LabelOff.LabelBase64Changed -= this.LabelChanged;
-                            actionButton.LabelOn.LabelBase64Changed -= this.LabelChanged;
-                        }
-                        
-                        roundedButton.MouseDown -= this.ActionButton_Down;
-                        roundedButton.DragDrop -= Button_DragDrop;
-                        roundedButton.DragEnter -= Button_DragEnter;
-                        this.Invoke(new Action(() => roundedButton.Dispose()));
-
+                        actionButton.StateChanged -= this.ButtonStateChanged;
+                        actionButton.IconChanged -= ActionButton_IconChanged;
+                        actionButton.LabelOff.LabelBase64Changed -= this.LabelChanged;
+                        actionButton.LabelOn.LabelBase64Changed -= this.LabelChanged;
                     }
-                    this.Invoke(new Action(() => this.buttonPanel.Controls.Clear()));
+
+                    roundedButton.MouseDown -= this.ActionButton_Down;
+                    roundedButton.DragDrop -= Button_DragDrop;
+                    roundedButton.DragEnter -= Button_DragEnter;
+                    this.Invoke(new Action(() => roundedButton.Dispose()));
+
                 }
+                this.Invoke(new Action(() => this.buttonPanel.Controls.Clear()));
+            }
 
 
-                // Button size algorithm from @PhoenixWyllow
+            // Button size algorithm from @PhoenixWyllow
 
-                int buttonSize = 100;
-                int rows = ProfileManager.CurrentProfile.Rows, columns = ProfileManager.CurrentProfile.Columns, spacing = ProfileManager.CurrentProfile.ButtonSpacing; // from settings
-                int width = buttonPanel.Width, height = buttonPanel.Height; // from panel
-                int buttonSizeX, buttonSizeY;
+            int buttonSize = 100;
+            int rows = ProfileManager.CurrentProfile.Rows, columns = ProfileManager.CurrentProfile.Columns, spacing = ProfileManager.CurrentProfile.ButtonSpacing; // from settings
+            int width = buttonPanel.Width, height = buttonPanel.Height; // from panel
+            int buttonSizeX, buttonSizeY;
 
-                buttonSizeX = width / columns; //calc with spacing, remove it after
-                buttonSizeY = height / rows;
-                buttonSize = Math.Min(buttonSizeX, buttonSizeY) - spacing;
+            buttonSizeX = width / columns; //calc with spacing, remove it after
+            buttonSizeY = height / rows;
+            buttonSize = Math.Min(buttonSizeX, buttonSizeY) - spacing;
 
-                for (int row = 0; row < rows; row++)
+            for (int row = 0; row < rows; row++)
+            {
+                for (int column = 0; column < columns; column++)
                 {
-                    for (int column = 0; column < columns; column++)
-                    {
-                        this.Invoke(new Action(() => this.LoadButton(row, column, buttonSize)));
-                    }
+                    this.Invoke(new Action(() => this.LoadButton(row, column, buttonSize)));
                 }
-            });
+            }
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -274,7 +271,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             button.Location = new Point((column * buttonSize) + (column * ProfileManager.CurrentProfile.ButtonSpacing), (row * buttonSize) + (row * ProfileManager.CurrentProfile.ButtonSpacing));
             button.BackColor = ProfileManager.CurrentProfile.ButtonBackground ? Color.FromArgb(35, 35, 35) : Color.Transparent;
 
-            if (button == null) return;
+            
             if (button.BackgroundImage != null)
             {
                 button.BackgroundImage.Dispose();
@@ -517,15 +514,23 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void Deck_Load(object sender, EventArgs e)
         {
-            this.LoadProfiles();
-            this.LoadProfileSettings();
-            this.UpdateButtons();
+            Task.Run(() =>
+            {
+                this.LoadProfiles();
+                this.LoadProfileSettings();
+                this.UpdateButtons();
+            });
             CustomControls.Form mainWindow = (CustomControls.Form)this.Parent.Parent;
             mainWindow.ResizeEnd += MainWindow_ResizeEnd;
         }
 
         private void LoadProfiles()
         {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => this.LoadProfiles()));
+                return;
+            }
             this.boxProfiles.Items.Clear();
             foreach (MacroDeckProfile macroDeckProfile in ProfileManager.Profiles)
             {
@@ -693,6 +698,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void LoadProfileSettings()
         {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => this.LoadProfileSettings()));
+                return;
+            }
             this.buttonRows.ValueChanged -= this.ButtonSettingsChanged;
             this.buttonColumns.ValueChanged -= this.ButtonSettingsChanged;
             this.buttonSpacing.ValueChanged -= this.ButtonSettingsChanged;
@@ -715,10 +725,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.buttonSpacing.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
             this.cornerRadius.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
             this.checkButtonBackground.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
-
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
         }
 
 
