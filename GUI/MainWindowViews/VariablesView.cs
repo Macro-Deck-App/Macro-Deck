@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -37,11 +38,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void LoadCreators()
         {
-            foreach (CheckBox checkBox in this.creatorFilter.Controls)
-            {
-                checkBox.CheckedChanged -= CreatorCheckBox_CheckedChanged;
-            }
-            this.creatorFilter.Controls.Clear();
             List<string> variableCreators = new List<string>();
             foreach (Variable variable in VariableManager.Variables)
             {
@@ -49,15 +45,19 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     variableCreators.Add(variable.Creator);
                 }
             }
+
             foreach (string creator in variableCreators)
             {
+                if (this.creatorFilter.Controls.OfType<CheckBox>().Where(x => x.Name.Equals(creator)).Count() > 0)
+                    continue;
+
                 CheckBox creatorCheckBox = new CheckBox
                 {
                     Checked = true,
                     Text = creator,
                     Name = creator,
-                    AutoSize = true,
-                    Padding = new Padding(10, 0, 10, 0),
+                    AutoSize = false,
+                    Size = new Size(200, 20),
                 };
                 this.creatorFilter.Controls.Add(creatorCheckBox);
                 creatorCheckBox.CheckedChanged += CreatorCheckBox_CheckedChanged;
@@ -86,57 +86,41 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             VariableManager.OnVariableRemoved += this.VariableRemoved;
         }
 
-        private void VariableRemoved(object sender, EventArgs e) {
-            Task.Run(() =>
+        private void VariableRemoved(object sender, EventArgs e)
+        {
+            if (this.InvokeRequired)
             {
-                this.Invoke(new Action(() => this.SuspendLayout()));
-                foreach (VariableItem variableItem in this.variablesPanel.Controls)
-                {
-                    if (sender.Equals(variableItem.Variable.Name))
-                    {
-                        this.Invoke(new Action(() =>
-                        {
-                            this.variablesPanel.Controls.Remove(variableItem);
-                        }));
-                        return;
-                    }
-                }
-
-                this.Invoke(new Action(() => this.ResumeLayout()));
-            });
+                this.Invoke(new Action(() => VariableRemoved(sender, e)));
+                return;
+            }
+            string variableName = sender as string;
+            var variableItemView = this.variablesPanel.Controls.OfType<VariableItem>().Where(x => x.Variable.Name.Equals(variableName)).FirstOrDefault();
+            if (variableItemView != null)
+            {
+                this.variablesPanel.Controls.Remove(variableItemView);
+            }
         }
 
         private void VariableChanged(object sender, EventArgs e)
         {
-            Variable variable = sender as Variable;
-            Task.Run(() =>
+            if (this.InvokeRequired)
             {
-                if (this.IsDisposed) return;
-                this.Invoke(new Action(() => this.SuspendLayout()));
-                foreach (VariableItem variableItem in this.variablesPanel.Controls)
-                {
-                    if (variable.Name.Equals(variableItem.Variable.Name))
-                    {
-                        this.Invoke(new Action(() =>
-                        {
-                            try
-                            {
-                                if (this == null || this.Disposing || this.IsDisposed) return;
-                                variableItem.Variable = variable;
-                                variableItem.Update();
-                            } catch { }
-                        }));
-                        return;
-                    }
-                }
+                this.Invoke(new Action(() => VariableChanged(sender, e)));
+                return;
+            }
+            Variable variable = sender as Variable;
+            if (this.IsDisposed) return;
+            var variableItemView = this.variablesPanel.Controls.OfType<VariableItem>().Where(x => x.Variable.Name.Equals(variable.Name)).FirstOrDefault();
+            if (variableItemView == null)
+            {
                 VariableItem newVariableItem = new VariableItem(variable);
-                this.Invoke(new Action(() =>
-                {
-                    this.variablesPanel.Controls.Add(newVariableItem);
-                    this.ResumeLayout();
-                }));
-
-            });
+                this.variablesPanel.Controls.Add(newVariableItem);
+                this.LoadCreators();
+            } else
+            {
+                variableItemView.Variable = variable;
+                variableItemView.Update();
+            }                        
         }
 
         private void LoadVariables()

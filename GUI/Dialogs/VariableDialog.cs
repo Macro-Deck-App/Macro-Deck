@@ -67,7 +67,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                 int variableCount = VariableManager.Variables.FindAll(v => v.Name.Equals(this.variableName.Text)).Count;
                 if (variableCount > 0)
                 {
-                    variableName.Text = String.Format(variableName.Text + " ({0})", variableCount);
+                    variableName.Text = String.Format(variableName.Text + " _{0}", variableCount);
                 }
                 this.Variable.Name = VariableManager.ConvertNameString(this.variableName.Text);
             }
@@ -91,7 +91,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                     break;
             }
 
-            VariableManager.RefreshVariable(this.Variable);
+            VariableManager.SetValue(this.Variable.Name, this.Variable.Value, this.Variable.VariableType, this.Variable.Creator);
 
             this.DialogResult = DialogResult.OK;
             this.Close();

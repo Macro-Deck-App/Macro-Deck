@@ -433,7 +433,7 @@ namespace SuchByte.MacroDeck
         {
             Language.LanguageManager.SetLanguage(_configuration.Language);
             _ = new HotkeyManager();
-            VariableManager.Load();
+            VariableManager.Initialize();
             PluginManager.Load();
             PluginManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
             PluginManager.EnablePlugins();
@@ -622,7 +622,7 @@ namespace SuchByte.MacroDeck
 
         private static void OnApplicationExit(object sender, EventArgs e)
         {
-            VariableManager.Save();
+            //VariableManager.Save();
             MacroDeckLogger.Info("Exiting Macro Deck...");
         }
 
