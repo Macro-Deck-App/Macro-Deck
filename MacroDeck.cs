@@ -544,7 +544,7 @@ namespace SuchByte.MacroDeck
                 StartInfo = new ProcessStartInfo(ExecutablePath)
                 {
                     UseShellExecute = true,
-                    Arguments = (mainWindow != null && !mainWindow.IsDisposed ? "--show " : "") + parameters
+                    Arguments = (mainWindow != null && !mainWindow.IsDisposed ? "--show " : "") + string.Join(" ", StartParameters),
                 }
             };
             p.Start();
