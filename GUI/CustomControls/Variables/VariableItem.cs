@@ -18,21 +18,17 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             this.Variable = variable;
             InitializeComponent();
-            this.SuspendLayout();
-            this.lblName.Text = Language.LanguageManager.Strings.Name;
-            this.lblType.Text = Language.LanguageManager.Strings.Type;
-            this.lblValue.Text = Language.LanguageManager.Strings.Value;
-            this.lblCreator.Text = Language.LanguageManager.Strings.Creator;
-            this.Update();
-            this.ResumeLayout();
         }
 
         public new void Update()
         {
-            this.lblName.Text = this.Variable.Name;
-            this.lblType.Text = this.Variable.Type.ToString();
-            this.lblValue.Text = this.Variable.Value;
-            this.lblCreator.Text = this.Variable.Creator;
+            this.Invoke(new Action(() =>
+            {
+                this.lblName.Text = this.Variable.Name;
+                this.lblType.Text = this.Variable.Type.ToString();
+                this.lblValue.Text = this.Variable.Value;
+                this.lblCreator.Text = this.Variable.Creator;
+            }));
         }
 
         private void BtnEdit_Click(object sender, EventArgs e)
@@ -41,6 +37,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             {
                 variableDialog.ShowDialog();
             }
+        }
+
+        private void VariableItem_Load(object sender, EventArgs e)
+        {
+            this.Update();
         }
     }
 }

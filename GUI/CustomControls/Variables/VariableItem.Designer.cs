@@ -40,22 +40,22 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             this.lblName.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
             this.lblName.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.lblName.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblName.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblName.ForeColor = System.Drawing.Color.White;
             this.lblName.Location = new System.Drawing.Point(11, 15);
             this.lblName.Margin = new System.Windows.Forms.Padding(0);
             this.lblName.Name = "lblName";
-            this.lblName.Size = new System.Drawing.Size(349, 20);
+            this.lblName.ReadOnly = true;
+            this.lblName.Size = new System.Drawing.Size(223, 19);
             this.lblName.TabIndex = 0;
             this.lblName.Text = "Name";
-            this.lblName.ReadOnly = true;
             // 
             // lblType
             // 
-            this.lblType.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblType.Location = new System.Drawing.Point(363, 5);
+            this.lblType.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblType.Location = new System.Drawing.Point(237, 3);
             this.lblType.Name = "lblType";
-            this.lblType.Size = new System.Drawing.Size(175, 40);
+            this.lblType.Size = new System.Drawing.Size(114, 40);
             this.lblType.TabIndex = 1;
             this.lblType.Text = "Type";
             this.lblType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -63,8 +63,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             // lblValue
             // 
-            this.lblValue.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblValue.Location = new System.Drawing.Point(544, 5);
+            this.lblValue.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblValue.Location = new System.Drawing.Point(357, 5);
             this.lblValue.Name = "lblValue";
             this.lblValue.Size = new System.Drawing.Size(258, 40);
             this.lblValue.TabIndex = 2;
@@ -74,11 +74,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             // lblCreator
             // 
-            this.lblCreator.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblCreator.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblCreator.ForeColor = System.Drawing.Color.Silver;
-            this.lblCreator.Location = new System.Drawing.Point(808, 5);
+            this.lblCreator.Location = new System.Drawing.Point(621, 4);
             this.lblCreator.Name = "lblCreator";
-            this.lblCreator.Size = new System.Drawing.Size(212, 40);
+            this.lblCreator.Size = new System.Drawing.Size(163, 40);
             this.lblCreator.TabIndex = 3;
             this.lblCreator.Text = "Creator";
             this.lblCreator.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -87,7 +87,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // btnEdit
             // 
             this.btnEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnEdit.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.btnEdit.BorderRadius = 8;
             this.btnEdit.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnEdit.FlatAppearance.BorderSize = 0;
@@ -96,7 +95,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnEdit.ForeColor = System.Drawing.Color.White;
             this.btnEdit.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
             this.btnEdit.Icon = null;
-            this.btnEdit.Location = new System.Drawing.Point(1056, 8);
+            this.btnEdit.Location = new System.Drawing.Point(797, 7);
             this.btnEdit.Name = "btnEdit";
             this.btnEdit.Progress = 0;
             this.btnEdit.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
@@ -105,11 +104,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnEdit.Text = "...";
             this.btnEdit.UseMnemonic = false;
             this.btnEdit.UseVisualStyleBackColor = false;
+            this.btnEdit.UseWindowsAccentColor = true;
             this.btnEdit.Click += new System.EventHandler(this.BtnEdit_Click);
             // 
             // VariableItem
             // 
-            
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
             this.Controls.Add(this.btnEdit);
@@ -120,7 +120,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ForeColor = System.Drawing.Color.White;
             this.Name = "VariableItem";
-            this.Size = new System.Drawing.Size(1100, 50);
+            this.Size = new System.Drawing.Size(840, 50);
+            this.Load += new System.EventHandler(this.VariableItem_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

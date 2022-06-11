@@ -20,37 +20,38 @@ namespace SuchByte.MacroDeck.Variables
         internal static event EventHandler OnVariableChanged;
         internal static event EventHandler OnVariableRemoved;
 
-        public static List<Variable> Variables;
+        public static List<Variable> Variables
+        {
+            get
+            {
+                var query = _database.Table<Variable>();
+                List<Variable> variables = new List<Variable>();
+                variables.AddRange(query);
+                return variables;
+            }
+        }
+
+        private static SQLiteConnection _database;
 
         private static DocumentConfiguration templateConfiguration = new DocumentConfiguration
         {
             Trimmer = DocumentConfiguration.TrimFirstAndLastBlankLines,
         };
 
-        private static bool _saving = false; // To prevent multiple save processes
-
-
-        internal static void RefreshVariable(Variable variable)
-        {
-            if (OnVariableChanged != null)
-            {
-                OnVariableChanged(variable, EventArgs.Empty);
-            }
-            VariableManager.SaveAsync();
-        }
 
         internal static Variable SetValue(string name, object value, VariableType type, string creator = "User", bool save = true)
         {
-            if (Variables == null) return null;
+            if (Variables == null || string.IsNullOrWhiteSpace(name)) return null;
             name = ConvertNameString(name);
 
             Variable variable = Variables.Find(v => v.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
             if (variable == null)
             {
                 variable = new Variable();
-                Variables.Add(variable);
+                variable.Name = name;
+                _database.Insert(variable);
+                //Variables.Add(variable);
             }
-            variable.Name = name;
             variable.Type = type.ToString();
             variable.Creator = creator;
 
@@ -102,22 +103,24 @@ namespace SuchByte.MacroDeck.Variables
                     OnVariableChanged(variable, EventArgs.Empty);
                 }
             }
-            if (save)
+            _database.Update(variable);
+            
+            /*if (save)
             {
                 SaveAsync();
-            }
+            }*/
             return variable;
         }
 
         internal static Variable SetValue(string name, object value, VariableType type, string[] suggestions, string creator = "User", bool save = true)
         {
             if (Variables == null) return null;
-            Variable variable = SetValue(name, value, type, creator, false);
+            Variable variable = SetValue(name, value, type, creator, save);
             variable.Suggestions = suggestions;
-            if (save)
+            /*if (save)
             {
                 SaveAsync();
-            }
+            }*/
 
             return variable;
         }
@@ -165,13 +168,13 @@ namespace SuchByte.MacroDeck.Variables
                     OnVariableRemoved(name, EventArgs.Empty);
                 }
             }
-            Save();
+            _database.Delete(variable);
         }
 
 
         public static string RenderTemplate(string template)
         {
-            string result = "";
+            string result;
             try 
             {
                 templateConfiguration.Trimmer = template.StartsWith("_trimblank_", StringComparison.OrdinalIgnoreCase) ? DocumentConfiguration.TrimFirstAndLastBlankLines : DocumentConfiguration.TrimNothing;
@@ -189,7 +192,7 @@ namespace SuchByte.MacroDeck.Variables
                     {
                         case nameof(VariableType.Bool):
                             bool resultBool = false;
-                            Boolean.TryParse(v.Value.Replace("On", "True", StringComparison.CurrentCultureIgnoreCase).Replace("Off", "False", StringComparison.OrdinalIgnoreCase), out resultBool);
+                            bool.TryParse(v.Value.Replace("On", "True", StringComparison.CurrentCultureIgnoreCase).Replace("Off", "False", StringComparison.OrdinalIgnoreCase), out resultBool);
                             value = Value.FromBoolean(resultBool);
                             break;
                         case nameof(VariableType.Float):
@@ -218,31 +221,17 @@ namespace SuchByte.MacroDeck.Variables
             return result;
         }
 
-        internal static void Load()
+        internal static void Initialize()
         {
-            MacroDeckLogger.Info(typeof(VariableManager), "Loading variables...");
-            var db = new SQLiteConnection(MacroDeck.VariablesFilePath);
-            db.CreateTable<Variable>();
-
-            var query = db.Table<Variable>();
-
-            List<Variable> variablesLoaded = new List<Variable>();
-            variablesLoaded.AddRange(query);
-
-            // Convert older variables to the new format and remove duplicate entries
-            foreach (Variable variable in variablesLoaded.ToArray())
-            {
-                variable.Name = ConvertNameString(variable.Name);
-            }
-
-            Variables = variablesLoaded;
-
-            db.Close();
-
-            MacroDeckLogger.Info(typeof(VariableManager), Variables.Count + " variables loaded");
+            MacroDeckLogger.Info(typeof(VariableManager), "Initialize variables database...");
+            _database = new SQLiteConnection(MacroDeck.VariablesFilePath);
+            
+            _database.CreateTable<Variable>();
+            _database.Execute("delete from Variable where 'Name'='';");
+            MacroDeckLogger.Info(typeof(VariableManager), Variables.Count + " variables found");
         }
 
-        internal static void Save()
+        /*internal static void Save()
         {
             if (MacroDeck.SafeMode || _saving || Variables == null)
             {
@@ -251,19 +240,11 @@ namespace SuchByte.MacroDeck.Variables
             _saving = true;
             try
             {
-                var databasePath = MacroDeck.VariablesFilePath;
-
-                var db = new SQLiteConnection(databasePath);
-                db.CreateTable<Variable>();
-                db.DeleteAll<Variable>();
-
                 foreach (Variable variable in Variables.ToArray())
                 {
 
-                    db.InsertOrReplace(variable);
+                    _database.InsertOrReplace(variable);
                 }
-
-                db.Close();
             }
             catch (Exception ex) 
             {
@@ -273,15 +254,15 @@ namespace SuchByte.MacroDeck.Variables
             {
                 _saving = false;
             }
-        }
+        }*/
 
-        internal static void SaveAsync()
+        /*internal static void SaveAsync()
         {
             Task.Run(() =>
             {
                 Save();
             });
-        }
+        }*/
 
 
         public static string ConvertNameString(string str)

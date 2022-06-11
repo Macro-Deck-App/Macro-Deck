@@ -48,17 +48,17 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.variablesPanel.AutoScroll = true;
-            this.variablesPanel.Location = new System.Drawing.Point(0, 91);
+            this.variablesPanel.Location = new System.Drawing.Point(240, 53);
             this.variablesPanel.Name = "variablesPanel";
-            this.variablesPanel.Size = new System.Drawing.Size(1137, 413);
+            this.variablesPanel.Size = new System.Drawing.Size(897, 451);
             this.variablesPanel.TabIndex = 11;
             // 
             // lblCreator
             // 
             this.lblCreator.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblCreator.Location = new System.Drawing.Point(806, 38);
+            this.lblCreator.Location = new System.Drawing.Point(860, 0);
             this.lblCreator.Name = "lblCreator";
-            this.lblCreator.Size = new System.Drawing.Size(212, 50);
+            this.lblCreator.Size = new System.Drawing.Size(163, 50);
             this.lblCreator.TabIndex = 15;
             this.lblCreator.Text = "Creator";
             this.lblCreator.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -67,7 +67,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblValue
             // 
             this.lblValue.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblValue.Location = new System.Drawing.Point(542, 38);
+            this.lblValue.Location = new System.Drawing.Point(596, 0);
             this.lblValue.Name = "lblValue";
             this.lblValue.Size = new System.Drawing.Size(258, 50);
             this.lblValue.TabIndex = 14;
@@ -78,9 +78,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblType
             // 
             this.lblType.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblType.Location = new System.Drawing.Point(361, 38);
+            this.lblType.Location = new System.Drawing.Point(476, 0);
             this.lblType.Name = "lblType";
-            this.lblType.Size = new System.Drawing.Size(175, 50);
+            this.lblType.Size = new System.Drawing.Size(114, 50);
             this.lblType.TabIndex = 13;
             this.lblType.Text = "Type";
             this.lblType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -89,9 +89,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblName
             // 
             this.lblName.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblName.Location = new System.Drawing.Point(1, 38);
+            this.lblName.Location = new System.Drawing.Point(247, 0);
             this.lblName.Name = "lblName";
-            this.lblName.Size = new System.Drawing.Size(354, 50);
+            this.lblName.Size = new System.Drawing.Size(223, 50);
             this.lblName.TabIndex = 12;
             this.lblName.Text = "Name";
             this.lblName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -100,7 +100,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // btnCreateVariable
             // 
             this.btnCreateVariable.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCreateVariable.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnCreateVariable.BorderRadius = 8;
             this.btnCreateVariable.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnCreateVariable.FlatAppearance.BorderSize = 0;
@@ -118,21 +117,22 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.btnCreateVariable.Text = "Create variable";
             this.btnCreateVariable.UseMnemonic = false;
             this.btnCreateVariable.UseVisualStyleBackColor = false;
+            this.btnCreateVariable.UseWindowsAccentColor = true;
             this.btnCreateVariable.Click += new System.EventHandler(this.BtnCreateVariable_Click);
             // 
             // creatorFilter
             // 
+            this.creatorFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.creatorFilter.AutoScroll = true;
-            this.creatorFilter.Dock = System.Windows.Forms.DockStyle.Top;
-            this.creatorFilter.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.creatorFilter.Location = new System.Drawing.Point(0, 0);
+            this.creatorFilter.Location = new System.Drawing.Point(0, 53);
             this.creatorFilter.Name = "creatorFilter";
-            this.creatorFilter.Size = new System.Drawing.Size(1137, 35);
+            this.creatorFilter.Size = new System.Drawing.Size(234, 451);
             this.creatorFilter.TabIndex = 17;
             // 
             // VariablesView
             // 
-            
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.creatorFilter);
