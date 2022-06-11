@@ -25,7 +25,7 @@ namespace SuchByte.MacroDeck.Icons
         public static event EventHandler InstallationFinished;
 
         public static Action<object, EventArgs> OnUpdateCheckFinished { get; internal set; }
-        public static Action<object, EventArgs> IconPacksLoaded { get; internal set; }
+        public static Action<object, EventArgs> IconPacksLoaded { get; set; }
 
         public static void Initialize()
         {
