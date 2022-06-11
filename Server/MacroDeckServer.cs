@@ -419,6 +419,7 @@ namespace SuchByte.MacroDeck.Server
             if (macroDeckProfile == null) return;
             macroDeckClient.Profile = macroDeckProfile;
             macroDeckClient.DeviceMessage.SendConfiguration(macroDeckClient);
+            
             SetFolder(macroDeckClient, macroDeckProfile.Folders[0]);
         }
 
