@@ -33,6 +33,8 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
             this.profilesList = new SuchByte.MacroDeck.GUI.CustomControls.RoundedComboBox();
             this.lblDevice = new System.Windows.Forms.Label();
             this.lblProfile = new System.Windows.Forms.Label();
+            this.radioCurrentDevice = new System.Windows.Forms.RadioButton();
+            this.radioFixedDevice = new System.Windows.Forms.RadioButton();
             this.SuspendLayout();
             // 
             // devicesList
@@ -43,12 +45,12 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
             this.devicesList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.devicesList.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.devicesList.Icon = null;
-            this.devicesList.Location = new System.Drawing.Point(271, 176);
+            this.devicesList.Location = new System.Drawing.Point(504, 176);
             this.devicesList.Name = "devicesList";
             this.devicesList.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
             this.devicesList.SelectedIndex = -1;
             this.devicesList.SelectedItem = null;
-            this.devicesList.Size = new System.Drawing.Size(432, 30);
+            this.devicesList.Size = new System.Drawing.Size(199, 30);
             this.devicesList.TabIndex = 0;
             // 
             // profilesList
@@ -89,10 +91,36 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
             this.lblProfile.Text = "Profile";
             this.lblProfile.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // radioCurrentDevice
+            // 
+            this.radioCurrentDevice.AutoSize = true;
+            this.radioCurrentDevice.Checked = true;
+            this.radioCurrentDevice.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.radioCurrentDevice.Location = new System.Drawing.Point(271, 180);
+            this.radioCurrentDevice.Name = "radioCurrentDevice";
+            this.radioCurrentDevice.Size = new System.Drawing.Size(134, 22);
+            this.radioCurrentDevice.TabIndex = 4;
+            this.radioCurrentDevice.TabStop = true;
+            this.radioCurrentDevice.Text = "Where executed";
+            this.radioCurrentDevice.UseVisualStyleBackColor = true;
+            // 
+            // radioFixedDevice
+            // 
+            this.radioFixedDevice.AutoSize = true;
+            this.radioFixedDevice.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.radioFixedDevice.Location = new System.Drawing.Point(484, 185);
+            this.radioFixedDevice.Name = "radioFixedDevice";
+            this.radioFixedDevice.Size = new System.Drawing.Size(14, 13);
+            this.radioFixedDevice.TabIndex = 5;
+            this.radioFixedDevice.UseVisualStyleBackColor = true;
+            this.radioFixedDevice.CheckedChanged += new System.EventHandler(this.radioFixedDevice_CheckedChanged);
+            // 
             // SetProfileActionConfigView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 23F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.radioFixedDevice);
+            this.Controls.Add(this.radioCurrentDevice);
             this.Controls.Add(this.lblProfile);
             this.Controls.Add(this.lblDevice);
             this.Controls.Add(this.profilesList);
@@ -100,6 +128,7 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
             this.Name = "SetProfileActionConfigView";
             this.Load += new System.EventHandler(this.SetProfileActionConfigView_Load);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -109,5 +138,7 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
         private GUI.CustomControls.RoundedComboBox profilesList;
         private System.Windows.Forms.Label lblDevice;
         private System.Windows.Forms.Label lblProfile;
+        private System.Windows.Forms.RadioButton radioCurrentDevice;
+        private System.Windows.Forms.RadioButton radioFixedDevice;
     }
 }

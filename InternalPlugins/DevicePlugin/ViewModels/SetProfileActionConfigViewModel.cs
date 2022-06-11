@@ -1,7 +1,9 @@
-﻿using SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Models;
+﻿using SuchByte.MacroDeck.Device;
+using SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Models;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -52,7 +54,7 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.ViewModels
 
         public void SetConfig()
         {
-            _action.ConfigurationSummary = $"{ClientId} -> {ProfileId}";
+            _action.ConfigurationSummary = $"{(string.IsNullOrWhiteSpace(ClientId) ? "Where executed" : DeviceManager.GetKnownDevices().Find(x => x.ClientId.Equals(ClientId)).DisplayName)} -> {ProfileManager.FindProfileById(ProfileId).DisplayName}";
             _action.Configuration = Configuration.Serialize();
         }
 

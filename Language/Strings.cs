@@ -330,6 +330,7 @@ namespace SuchByte.MacroDeck.Language
         public string ActionSetProfile = "Set profile";
         public string ActionSetProfileDescription = "Sets the profile on a device";
         public string Device = "Device";
+        public string WhereExecuted = "Where executed";
 
     }
 }

@@ -683,14 +683,24 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             {
                 profile = ProfileManager.Profiles.FirstOrDefault();
             }
+            this.SetProfile(profile);
+        }
+
+        public void SetProfile(MacroDeckProfile profile)
+        {
             Settings.Default.SelectedProfile = profile.ProfileId;
             Settings.Default.Save();
             ProfileManager.CurrentProfile = profile;
             this._currentFolder = profile.Folders.FirstOrDefault();
-            this.UpdateButtons(true);
-            this.LoadProfileSettings();
-            this.UpdateFolders();
-
+            Task.Run(() =>
+            {
+                this.UpdateButtons(true);
+            });
+            this.Invoke(new Action(() => {
+                this.boxProfiles.Text = profile.DisplayName;
+                this.UpdateFolders();
+                this.LoadProfileSettings();
+            }));
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
