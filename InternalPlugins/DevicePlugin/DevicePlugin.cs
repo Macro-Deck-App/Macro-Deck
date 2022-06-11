@@ -19,6 +19,7 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin
             this.Actions = new List<PluginAction>()
             {
                 new SetProfileAction(),
+                new SetBrightnessAction()
             };
         }
     }

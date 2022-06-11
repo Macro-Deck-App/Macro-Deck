@@ -331,6 +331,9 @@ namespace SuchByte.MacroDeck.Language
         public string ActionSetProfileDescription = "Sets the profile on a device";
         public string Device = "Device";
         public string WhereExecuted = "Where executed";
-
+        public string ActionSetBrightness = "Set brightness";
+        public string ActionSetBrightnessDescription = "Sets the display brightness (Only on the Android app!)";
+    
+    
     }
 }

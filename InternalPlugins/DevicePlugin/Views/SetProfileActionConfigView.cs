@@ -103,5 +103,6 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
         {
             this.devicesList.Enabled = this.radioFixedDevice.Checked;
         }
+
     }
 }

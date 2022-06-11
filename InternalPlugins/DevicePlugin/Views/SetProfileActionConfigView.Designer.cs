@@ -43,6 +43,7 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
             this.devicesList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.devicesList.Cursor = System.Windows.Forms.Cursors.Hand;
             this.devicesList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.devicesList.Enabled = false;
             this.devicesList.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.devicesList.Icon = null;
             this.devicesList.Location = new System.Drawing.Point(504, 176);
@@ -93,12 +94,11 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
             // 
             // radioCurrentDevice
             // 
-            this.radioCurrentDevice.AutoSize = true;
             this.radioCurrentDevice.Checked = true;
             this.radioCurrentDevice.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.radioCurrentDevice.Location = new System.Drawing.Point(271, 180);
+            this.radioCurrentDevice.Location = new System.Drawing.Point(271, 176);
             this.radioCurrentDevice.Name = "radioCurrentDevice";
-            this.radioCurrentDevice.Size = new System.Drawing.Size(134, 22);
+            this.radioCurrentDevice.Size = new System.Drawing.Size(207, 30);
             this.radioCurrentDevice.TabIndex = 4;
             this.radioCurrentDevice.TabStop = true;
             this.radioCurrentDevice.Text = "Where executed";
