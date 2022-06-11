@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 
-namespace SuchByte.MacroDeck.Folders.Plugin
+namespace SuchByte.MacroDeck.Folders.Plugin // Don't change because of backwards compatibility!
 {
     public class FolderPlugin : MacroDeckPlugin
     {

@@ -11,7 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
-namespace SuchByte.MacroDeck.ActionButton
+namespace SuchByte.MacroDeck.ActionButton // Don't change because of backwards compatibility!
 {
     public class ActionButtonPlugin : MacroDeckPlugin
     {

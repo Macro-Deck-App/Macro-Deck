@@ -19,7 +19,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace SuchByte.MacroDeck.Variables.Plugin
+namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwards compatibility!
 {
     public class VariablesPlugin : MacroDeckPlugin
     {

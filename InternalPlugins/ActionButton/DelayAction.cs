@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
-namespace SuchByte.MacroDeck.ActionButton.Plugin
+namespace SuchByte.MacroDeck.ActionButton.Plugin // Don't change because of backwards compatibility!
 {
     public class DelayAction : PluginAction
     {

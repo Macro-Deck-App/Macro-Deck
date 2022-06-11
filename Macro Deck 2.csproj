@@ -43,13 +43,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Variables\Plugin\GUI\**" />
-    <EmbeddedResource Remove="Variables\Plugin\GUI\**" />
-    <None Remove="Variables\Plugin\GUI\**" />
-    <Page Remove="Variables\Plugin\GUI\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="Licenses.xml" />
     <None Remove="Resources\Languages\Dutch.json" />
     <None Remove="Resources\Languages\English.json" />
@@ -127,7 +120,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Folders\Plugin\GUI\FolderSwitcherConfigurator.cs">
+    <Compile Update="InternalPlugins\FolderPlugin\GUI\FolderSwitcherConfigurator.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="GUI\CustomControls\HorizontalTabControl.cs">
