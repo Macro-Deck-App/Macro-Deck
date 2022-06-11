@@ -161,14 +161,13 @@ namespace SuchByte.MacroDeck.Variables
             Variable variable = Variables.Find(v => v.Name.Equals(name));
             if (variable != null)
             {
-                Variables.Remove(variable);
-                MacroDeckLogger.Info("Deleted variable " + name);
+                _database.Delete(variable);
                 if (OnVariableRemoved != null)
                 {
                     OnVariableRemoved(name, EventArgs.Empty);
                 }
             }
-            _database.Delete(variable);
+            MacroDeckLogger.Info("Deleted variable " + name);
         }
 
 

@@ -23,10 +23,33 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Actions
         public override void Trigger(string clientId, ActionButton.ActionButton actionButton)
         {
             var configModel = SetProfileActionConfigModel.Deserialize(this.Configuration);
-            MacroDeckDevice macroDeckDevice = DeviceManager.GetMacroDeckDevice(configModel.ClientId);
+
             MacroDeckProfile profile = ProfileManager.FindProfileById(configModel.ProfileId);
-            if (macroDeckDevice == null || profile == null) return;
-            DeviceManager.SetProfile(macroDeckDevice, profile);            
+            switch (clientId)
+            {
+                // ClientID -1 or "" = Macro Deck software itself
+                case "":
+                case "-1":
+                    if (MacroDeck.MainWindow != null && MacroDeck.MainWindow.DeckView != null)
+                    {
+                        MacroDeck.MainWindow.DeckView.SetProfile(profile);
+                    }
+                    break;
+                // ClientId != -1 = Connected device
+                default:
+                    MacroDeckDevice macroDeckDevice;
+                    if (string.IsNullOrWhiteSpace(configModel.ClientId))
+                    {
+                        macroDeckDevice = DeviceManager.GetMacroDeckDevice(clientId);
+                    }
+                    else
+                    {
+                        macroDeckDevice = DeviceManager.GetMacroDeckDevice(configModel.ClientId);
+                    }
+                    if (macroDeckDevice == null || profile == null) return;
+                    DeviceManager.SetProfile(macroDeckDevice, profile);
+                    break;
+            }     
         }
 
         public override ActionConfigControl GetActionConfigControl(ActionConfigurator actionConfigurator)

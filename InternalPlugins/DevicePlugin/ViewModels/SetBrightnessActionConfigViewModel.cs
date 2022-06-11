@@ -1,4 +1,4 @@
-using SuchByte.MacroDeck.Device;
+﻿using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Models;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
@@ -12,11 +12,11 @@ using System.Text;
 
 namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.ViewModels
 {
-    public class SetProfileActionConfigViewModel : ISerializableConfigViewModel
+    public class SetBrightnessActionConfigViewModel : ISerializableConfigViewModel
     {
         private readonly PluginAction _action;
 
-        public SetProfileActionConfigModel Configuration { get; set; }
+        public SetBrightnessActionConfigModel Configuration { get; set; }
 
         ISerializableConfiguration ISerializableConfigViewModel.SerializableConfiguration => Configuration;
 
@@ -26,15 +26,15 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.ViewModels
             set => this.Configuration.ClientId = value;
         }
 
-        public string ProfileId
+        public float Brightness
         {
-            get => this.Configuration.ProfileId;
-            set => this.Configuration.ProfileId = value;
+            get => this.Configuration.Brightness;
+            set => this.Configuration.Brightness = value;
         }
 
-        public SetProfileActionConfigViewModel(PluginAction action)
+        public SetBrightnessActionConfigViewModel(PluginAction action)
         {
-            this.Configuration = SetProfileActionConfigModel.Deserialize(action.Configuration);
+            this.Configuration = SetBrightnessActionConfigModel.Deserialize(action.Configuration);
             this._action = action;
         }
 
@@ -55,7 +55,7 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.ViewModels
 
         public void SetConfig()
         {
-            _action.ConfigurationSummary = $"{(string.IsNullOrWhiteSpace(ClientId) ? LanguageManager.Strings.WhereExecuted : DeviceManager.GetKnownDevices().Find(x => x.ClientId.Equals(ClientId)).DisplayName)} -> {ProfileManager.FindProfileById(ProfileId).DisplayName}";
+            _action.ConfigurationSummary = $"{(string.IsNullOrWhiteSpace(ClientId) ? LanguageManager.Strings.WhereExecuted : DeviceManager.GetKnownDevices().Find(x => x.ClientId.Equals(ClientId)).DisplayName)} -> {Math.Round(Brightness * 100)}%";
             _action.Configuration = Configuration.Serialize();
         }
 

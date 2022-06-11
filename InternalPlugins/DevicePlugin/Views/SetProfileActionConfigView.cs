@@ -24,6 +24,7 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
             InitializeComponent();
             this.lblDevice.Text = LanguageManager.Strings.Device;
             this.lblProfile.Text = LanguageManager.Strings.Profile;
+            this.radioCurrentDevice.Text = LanguageManager.Strings.WhereExecuted;
             this._viewModel = new SetProfileActionConfigViewModel(action);
         }
 
@@ -38,12 +39,20 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
         {
             try
             {
-                var macroDeckDevice = DeviceManager.GetKnownDevices().Find(x => x.ClientId.Equals(this._viewModel.ClientId));
-                var profile = ProfileManager.FindProfileById(this._viewModel.ProfileId);
-                if (macroDeckDevice != null)
+                if (string.IsNullOrWhiteSpace(this._viewModel.ClientId))
                 {
-                    this.devicesList.Text = macroDeckDevice.DisplayName ?? "";
+                    this.radioCurrentDevice.Checked = true;
+                } else
+                {
+                    this.radioFixedDevice.Checked = true;
+                    var macroDeckDevice = DeviceManager.GetKnownDevices().Find(x => x.ClientId.Equals(this._viewModel.ClientId));
+                    if (macroDeckDevice != null)
+                    {
+                        this.devicesList.Text = macroDeckDevice.DisplayName ?? "";
+                    }
                 }
+                var profile = ProfileManager.FindProfileById(this._viewModel.ProfileId);
+
                 if (profile != null)
                 {
                     this.profilesList.Text = profile.DisplayName;
@@ -69,20 +78,31 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
 
         public override bool OnActionSave()
         {
-            var macroDeckDevice = DeviceManager.GetKnownDevices().Find(x => x.DisplayName.Equals(this.devicesList.Text));
-            var profile = ProfileManager.FindProfileByDisplayName(this.profilesList.Text);
-            if (macroDeckDevice != null)
+            if (this.radioCurrentDevice.Checked)
             {
-                this._viewModel.ClientId = macroDeckDevice.ClientId ?? "";
+                this._viewModel.ClientId = "";
+            } else
+            {
+                var macroDeckDevice = DeviceManager.GetKnownDevices().Find(x => x.DisplayName.Equals(this.devicesList.Text));
+                if (macroDeckDevice != null)
+                {
+                    this._viewModel.ClientId = macroDeckDevice.ClientId ?? "";
+                }
             }
+            var profile = ProfileManager.FindProfileByDisplayName(this.profilesList.Text);
+
             if (profile != null)
             {
                 this._viewModel.ProfileId = profile.ProfileId;
             }
-            if (string.IsNullOrWhiteSpace(this._viewModel.ClientId) || string.IsNullOrWhiteSpace(this._viewModel.ProfileId)) return false;
+            if ((this.radioFixedDevice.Checked && string.IsNullOrWhiteSpace(this._viewModel.ClientId)) || string.IsNullOrWhiteSpace(this._viewModel.ProfileId)) return false;
             
             return this._viewModel.SaveConfig();
         }
 
+        private void radioFixedDevice_CheckedChanged(object sender, EventArgs e)
+        {
+            this.devicesList.Enabled = this.radioFixedDevice.Checked;
+        }
     }
 }
