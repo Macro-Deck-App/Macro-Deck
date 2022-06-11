@@ -300,5 +300,8 @@
   "Folders": "Folders",
   "Grid": "Grid",
   "ActionReadVariableFromFile": "Read variable from file",
-  "ActionReadVariableFromFileDescription": "Reads a file and sets the content as value for a variable"
+  "ActionReadVariableFromFileDescription": "Reads a file and sets the content as value for a variable",
+  "ActionSetProfile": "Set profile",
+  "ActionSetProfileDescription": "Sets the profile on a device",
+  "Device": "Device"
 }

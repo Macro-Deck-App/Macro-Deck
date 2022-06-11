@@ -327,5 +327,9 @@ namespace SuchByte.MacroDeck.Language
         public string Grid = "Grid";
         public string ActionReadVariableFromFile = "Read variable from file";
         public string ActionReadVariableFromFileDescription = "Reads a file and sets the content as value for a variable";
+        public string ActionSetProfile = "Set profile";
+        public string ActionSetProfileDescription = "Sets the profile on a device";
+        public string Device = "Device";
+
     }
 }

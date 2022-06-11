@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.ExtensionStore;
+using SuchByte.MacroDeck.InternalPlugins.DevicePlugin;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Utils;
@@ -140,6 +141,7 @@ namespace SuchByte.MacroDeck.Plugins
             AddPlugin(new ActionButton.ActionButtonPlugin(), true);
             AddPlugin(new Variables.Plugin.VariablesPlugin(), true);
             AddPlugin(new Folders.Plugin.FolderPlugin(), true);
+            AddPlugin(new DevicePlugin(), true);
         }
 
         private static MacroDeckPlugin LoadPlugin(ExtensionManifestModel extensionManifest, string pluginDirectory, bool enable = false)
