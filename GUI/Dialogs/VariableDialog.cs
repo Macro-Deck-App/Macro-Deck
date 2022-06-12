@@ -64,10 +64,10 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                 {
                     this.variableName.Text = "new_variable";
                 }
-                int variableCount = VariableManager.Variables.FindAll(v => v.Name.Equals(this.variableName.Text)).Count;
+                int variableCount = VariableManager.ListVariables.ToList().FindAll(v => v.Name.Equals(this.variableName.Text)).Count;
                 if (variableCount > 0)
                 {
-                    variableName.Text = String.Format(variableName.Text + " _{0}", variableCount);
+                    variableName.Text = string.Format(variableName.Text + " _{0}", variableCount);
                 }
                 this.Variable.Name = VariableManager.ConvertNameString(this.variableName.Text);
             }

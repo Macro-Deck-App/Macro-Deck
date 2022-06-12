@@ -88,16 +88,14 @@ namespace SuchByte.MacroDeck.ActionButton
 
         public override string Description => "";
 
-        public override string DisplayName { get; set; }
-
         public ActionConfigControl GetActionConfigurator(ActionConfigurator actionConfigurator) { return null; }
 
         public override void Trigger(string clientId, ActionButton actionButton) {
             bool result = false;
             string conditionValue2 = this.ConditionValue2.ToString();
-            Variables.Variable variable = Variables.VariableManager.Variables.Find(v => v.Name.Equals(this._conditionValue1Source));
+            Variable variable = VariableManager.ListVariables.ToList().Find(v => v.Name.Equals(this._conditionValue1Source));
 
-            foreach (Variables.Variable v in Variables.VariableManager.Variables)
+            foreach (Variable v in VariableManager.ListVariables)
             {
                 if (conditionValue2.ToLower().Contains("{" + v.Name.ToLower() + "}"))
                 {

@@ -54,9 +54,9 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
         {
             Task.Run(() =>
             {
-                VariableManager.SetValue("time", DateTime.Now.ToString("t"), VariableType.String, "Macro Deck", false);
-                VariableManager.SetValue("date", DateTime.Now.ToString("d"), VariableType.String, "Macro Deck", false);
-                VariableManager.SetValue("day_of_week", DateTime.Now.DayOfWeek.ToString(), VariableType.String, "Macro Deck", false);
+                VariableManager.SetValue("time", DateTime.Now.ToString("t"), VariableType.String, "Macro Deck");
+                VariableManager.SetValue("date", DateTime.Now.ToString("d"), VariableType.String, "Macro Deck");
+                VariableManager.SetValue("day_of_week", DateTime.Now.DayOfWeek.ToString(), VariableType.String, "Macro Deck");
             });
         }
         private void VariableChanged(object sender, EventArgs e)
@@ -74,7 +74,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
             get 
             {
                 List<string> variables = new List<string>();
-                foreach (Variable variable in VariableManager.Variables)
+                foreach (Variable variable in VariableManager.ListVariables)
                 {
                     variables.Add(variable.Name);
                 }
@@ -129,7 +129,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
             try
             {
                 JObject jsonObject = JObject.Parse(this.Configuration);
-                Variable variable = VariableManager.Variables.Find(v => v.Name.Equals(jsonObject["variable"].ToString()));
+                Variable variable = VariableManager.ListVariables.Where(v => v.Name == jsonObject["variable"].ToString()).FirstOrDefault();
                 if (variable == null) return;
                 switch (jsonObject["method"].ToString())
                 {
@@ -140,14 +140,14 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
                         VariableManager.SetValue(variable.Name, float.Parse(variable.Value) - 1, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
                         break;
                     case "set":
-                        if (jsonObject["value"] != null && !String.IsNullOrWhiteSpace(jsonObject["value"].ToString()))
+                        if (jsonObject["value"] != null && !string.IsNullOrWhiteSpace(jsonObject["value"].ToString()))
                         {
                             var value = VariableManager.RenderTemplate(jsonObject["value"].ToString());
                             VariableManager.SetValue(variable.Name, value, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
                         }
                         break;
                     case "toggle":
-                        VariableManager.SetValue(variable.Name, !Boolean.Parse(variable.Value.Replace("on", "true")), (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
+                        VariableManager.SetValue(variable.Name, !bool.Parse(variable.Value.Replace("on", "true")), (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
                         break;
                 }
             } catch { }
@@ -167,7 +167,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
             var configurationModel = ReadVariableFromFileActionConfigModel.Deserialize(this.Configuration);
             if (configurationModel == null) return;
             var filePath = configurationModel.FilePath;
-            var variable = VariableManager.Variables.Find(x => x.Name.Equals(configurationModel.Variable));
+            var variable = VariableManager.ListVariables.Where(x => x.Name == configurationModel.Variable).FirstOrDefault();
             string variableValue;
             if (variable == null)
             {
@@ -207,7 +207,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
             var configurationModel = SaveVariableToFileActionConfigModel.Deserialize(this.Configuration);
             if (configurationModel == null) return;
             var filePath = configurationModel.FilePath;
-            var variable = VariableManager.Variables.Find(x => x.Name.Equals(configurationModel.Variable));
+            var variable = VariableManager.ListVariables.Where(x => x.Name == configurationModel.Variable).FirstOrDefault();
             try
             {
                 Utils.Retry.Do(new Action(() =>
@@ -218,23 +218,23 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
                         case nameof(VariableType.Bool):
                             if (bool.TryParse(value, out bool valueBool))
                             {
-                                VariableManager.SetValue(variable.Name, valueBool, VariableType.Bool, save: true);
+                                VariableManager.SetValue(variable.Name, valueBool, VariableType.Bool);
                             }
                             break;
                         case nameof(VariableType.Float):
                             if (float.TryParse(value, out float valueFloat))
                             {
-                                VariableManager.SetValue(variable.Name, valueFloat, VariableType.Float, save: true);
+                                VariableManager.SetValue(variable.Name, valueFloat, VariableType.Float);
                             }
                             break;
                         case nameof(VariableType.Integer):
                             if (Int32.TryParse(value, out int valueInt))
                             {
-                                VariableManager.SetValue(variable.Name, valueInt, VariableType.Integer, save: true);
+                                VariableManager.SetValue(variable.Name, valueInt, VariableType.Integer);
                             }
                             break;
                         case nameof(VariableType.String):
-                            VariableManager.SetValue(variable.Name, value, VariableType.String, save: true);
+                            VariableManager.SetValue(variable.Name, value, VariableType.String);
                             break;
                     }
                 }));

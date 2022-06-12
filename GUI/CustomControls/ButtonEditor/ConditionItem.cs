@@ -109,7 +109,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                     this.valueToCompare.Visible = true;
                     this.template.Visible = false;
                     this.btnOpenTemplateEditor.Visible = false;
-                    foreach (Variables.Variable variable in Variables.VariableManager.Variables)
+                    foreach (Variables.Variable variable in Variables.VariableManager.ListVariables)
                     {
                         this.source.Items.Add(variable.Name);
                     }
@@ -294,12 +294,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                     this.valueToCompare.Visible = true;
                     this.template.Visible = false;
                     this.btnOpenTemplateEditor.Visible = false;
-                    foreach (Variables.Variable variable in Variables.VariableManager.Variables)
+                    foreach (Variables.Variable variable in Variables.VariableManager.ListVariables)
                     {
                         this.source.Items.Add(variable.Name);
                     }
 
-                    foreach (Variables.Variable variable in Variables.VariableManager.Variables)
+                    foreach (Variables.Variable variable in Variables.VariableManager.ListVariables)
                     {
                         this.valueToCompare.Items.Add("{" + variable.Name + "}");
                     }
@@ -344,7 +344,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             {
                 try
                 {
-                    Variables.Variable variable = Variables.VariableManager.Variables.Find(v => v.Name.Equals(this.source.Text));
+                    Variables.Variable variable = Variables.VariableManager.ListVariables.ToList().Find(v => v.Name.Equals(this.source.Text));
                     if (variable != null)
                     {
                         this.valueToCompare.Text = variable.Value;
@@ -367,7 +367,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             ((ConditionAction)this.Action).ConditionValue1Source = source.Text;
 
-            Variables.Variable variable = Variables.VariableManager.Variables.Find(v => v.Name.Equals(this.source.Text));
+            Variables.Variable variable = Variables.VariableManager.ListVariables.ToList().Find(v => v.Name.Equals(this.source.Text));
 
             this.valueToCompare.Items.Clear();
 
@@ -388,7 +388,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 }
             }
 
-            foreach (Variables.Variable v in Variables.VariableManager.Variables)
+            foreach (Variables.Variable v in Variables.VariableManager.ListVariables)
             {
                 this.valueToCompare.Items.Add("{" + v.Name + "}");
             }

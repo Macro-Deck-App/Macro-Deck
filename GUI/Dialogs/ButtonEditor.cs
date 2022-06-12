@@ -82,7 +82,7 @@ namespace SuchByte.MacroDeck.GUI
                 }
             }
             this.listStateBinding.Items.Add("");
-            foreach (Variable variable in VariableManager.Variables)
+            foreach (Variable variable in VariableManager.ListVariables)
             {
                 this.listStateBinding.Items.Add(variable.Name);
             }
@@ -445,7 +445,7 @@ namespace SuchByte.MacroDeck.GUI
         private void BtnAddVariable_Click(object sender, EventArgs e)
         {
             this.variablesContextMenu.Items.Clear();
-            foreach (Variable variable in VariableManager.Variables)
+            foreach (Variable variable in VariableManager.ListVariables)
             {
                 ToolStripMenuItem item = new ToolStripMenuItem
                 {

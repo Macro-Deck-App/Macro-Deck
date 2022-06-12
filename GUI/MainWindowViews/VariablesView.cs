@@ -39,7 +39,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private void LoadCreators()
         {
             List<string> variableCreators = new List<string>();
-            foreach (Variable variable in VariableManager.Variables)
+            foreach (Variable variable in VariableManager.ListVariables)
             {
                 if (!variableCreators.Contains(variable.Creator)) {
                     variableCreators.Add(variable.Creator);
@@ -126,7 +126,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private void LoadVariables()
         {
             this.variablesPanel.Controls.Clear();
-            foreach (Variable variable in VariableManager.Variables.ToArray())
+            foreach (Variable variable in VariableManager.ListVariables)
             {
                 VariableItem variableItem = new VariableItem(variable);
                 this.variablesPanel.Controls.Add(variableItem);
@@ -139,7 +139,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             {
                 if (variableDialog.ShowDialog() == DialogResult.OK)
                 {
-                    VariableManager.Variables.Add(variableDialog.Variable);
+                    VariableManager.InsertVariable(variableDialog.Variable);
                 }
             }
         }

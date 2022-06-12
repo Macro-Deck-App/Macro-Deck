@@ -37,7 +37,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.Views
         private void LoadVariables()
         {
             this.variable.Items.Clear();
-            foreach (var variable in VariableManager.Variables.FindAll(x => x.Creator == "User"))
+            foreach (var variable in VariableManager.ListVariables.Where(x => x.Creator == "User"))
             {
                 this.variable.Items.Add(variable.Name);
             }
@@ -72,7 +72,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.Views
             {
                 if (variableDialog.ShowDialog() == DialogResult.OK)
                 {
-                    VariableManager.Variables.Add(variableDialog.Variable);
+                    VariableManager.InsertVariable(variableDialog.Variable);
                     LoadVariables();
                     this.variable.Text = variableDialog.Variable.Name;
                 }

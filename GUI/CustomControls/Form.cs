@@ -119,5 +119,16 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             }
         }
 
+        private void BtnDonate_Click(object sender, EventArgs e)
+        {
+            var p = new Process
+            {
+                StartInfo = new ProcessStartInfo("https://www.buymeacoffee.com/suchbyte")
+                {
+                    UseShellExecute = true,
+                }
+            };
+            p.Start();
+        }
     }
 }

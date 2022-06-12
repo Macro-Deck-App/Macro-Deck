@@ -23,7 +23,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.Views
 
         private void SaveVariableToFileActionConfigView_Load(object sender, EventArgs e)
         {
-            foreach (var variable in VariableManager.Variables)
+            foreach (var variable in VariableManager.ListVariables)
             {
                 this.variable.Items.Add(variable.Name);
             }

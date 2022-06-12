@@ -45,9 +45,9 @@ namespace SuchByte.MacroDeck.ActionButton
 
         public void UpdateBindingState()
         {
-            if (!String.IsNullOrWhiteSpace(this.StateBindingVariable))
+            if (!string.IsNullOrWhiteSpace(this.StateBindingVariable))
             {
-                Variables.Variable variable = Variables.VariableManager.Variables.Find(v => v.Name.Equals(this.StateBindingVariable));
+                Variables.Variable variable = Variables.VariableManager.ListVariables.ToList().Find(v => v.Name.Equals(this.StateBindingVariable));
                 if (variable != null)
                 {
                     this.UpdateBindingState(variable);

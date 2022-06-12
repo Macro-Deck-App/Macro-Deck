@@ -69,7 +69,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.checkTrimBlankLines.Text = LanguageManager.Strings.TrimBlankLines;
 
             List<string> variablesList = new List<string>();
-            foreach (var v in VariableManager.Variables)
+            foreach (var v in VariableManager.ListVariables)
             {
                 variablesList.Add(v.Name);
             }
@@ -117,7 +117,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         private void BtnIf_Click(object sender, EventArgs e)
         {
-            var dummyVariable = VariableManager.Variables.Find(x => x.Type == VariableType.Bool.ToString());
+            var dummyVariable = VariableManager.ListVariables.ToList().Find(x => x.Type == VariableType.Bool.ToString());
             string dummyVariableName = dummyVariable != null ? dummyVariable.Name : "VARIABLE";            
             this.Insert("{if VARIABLE: " + Environment.NewLine + "true" + Environment.NewLine + " |else: " + Environment.NewLine + "false" + Environment.NewLine + "}");
         }
@@ -141,7 +141,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         private void BtnVariables_Click(object sender, EventArgs e)
         {
             this.variablesContextMenu.Items.Clear();
-            foreach (Variable variable in VariableManager.Variables)
+            foreach (Variable variable in VariableManager.ListVariables)
             {
                 ToolStripMenuItem item = new ToolStripMenuItem
                 {

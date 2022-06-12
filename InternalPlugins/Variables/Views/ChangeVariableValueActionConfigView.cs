@@ -45,7 +45,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
         {
             try
             {
-                Variable variable = VariableManager.Variables.Find(v => v.Name.Equals(this.variables.Text));
+                Variable variable = VariableManager.ListVariables.Where(v => v.Name == this.variables.Text).FirstOrDefault();
                 if (variable != null)
                 {
                     switch (variable.Type)
@@ -144,7 +144,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
         private void LoadVariables()
         {
             this.variables.Items.Clear();
-            foreach (Variable variable in VariableManager.Variables.FindAll(v => v.Creator.Equals("User")))
+            foreach (Variable variable in VariableManager.ListVariables.Where(v => v.Creator.Equals("User")))
             {
                 this.variables.Items.Add(variable.Name);
             }

@@ -32,6 +32,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form));
             this.header = new SuchByte.MacroDeck.GUI.CustomControls.BufferedPanel();
+            this.btnDonate = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.btnClose = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.btnHelp = new System.Windows.Forms.LinkLabel();
             this.lblSafeMode = new System.Windows.Forms.Label();
@@ -49,6 +50,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // header
             // 
             this.header.BackColor = System.Drawing.Color.Transparent;
+            this.header.Controls.Add(this.btnDonate);
             this.header.Controls.Add(this.btnClose);
             this.header.Controls.Add(this.btnHelp);
             this.header.Controls.Add(this.lblSafeMode);
@@ -60,6 +62,28 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.header.Size = new System.Drawing.Size(1400, 34);
             this.header.TabIndex = 0;
             this.header.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TitleBar_MouseDown);
+            // 
+            // btnDonate
+            // 
+            this.btnDonate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnDonate.BorderRadius = 8;
+            this.btnDonate.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnDonate.FlatAppearance.BorderSize = 0;
+            this.btnDonate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnDonate.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnDonate.ForeColor = System.Drawing.Color.White;
+            this.btnDonate.HoverColor = System.Drawing.Color.Empty;
+            this.btnDonate.Icon = null;
+            this.btnDonate.Location = new System.Drawing.Point(1114, 4);
+            this.btnDonate.Name = "btnDonate";
+            this.btnDonate.Progress = 0;
+            this.btnDonate.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(205)))));
+            this.btnDonate.Size = new System.Drawing.Size(131, 25);
+            this.btnDonate.TabIndex = 10;
+            this.btnDonate.Text = "Donate";
+            this.btnDonate.UseVisualStyleBackColor = true;
+            this.btnDonate.UseWindowsAccentColor = false;
+            this.btnDonate.Click += new System.EventHandler(this.BtnDonate_Click);
             // 
             // btnClose
             // 
@@ -101,7 +125,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             this.lblSafeMode.Font = new System.Drawing.Font("Tahoma", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblSafeMode.ForeColor = System.Drawing.Color.Silver;
-            this.lblSafeMode.Location = new System.Drawing.Point(821, 3);
+            this.lblSafeMode.Location = new System.Drawing.Point(13, 3);
             this.lblSafeMode.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblSafeMode.Name = "lblSafeMode";
             this.lblSafeMode.Size = new System.Drawing.Size(163, 29);
@@ -170,6 +194,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             // Form
             // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.ClientSize = new System.Drawing.Size(1400, 700);
@@ -204,5 +229,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem helpMenuExportLog;
         private PictureButton btnClose;
+        private ButtonPrimary btnDonate;
     }
 }

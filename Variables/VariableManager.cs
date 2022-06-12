@@ -20,6 +20,17 @@ namespace SuchByte.MacroDeck.Variables
         internal static event EventHandler OnVariableChanged;
         internal static event EventHandler OnVariableRemoved;
 
+        public static TableQuery<Variable> ListVariables
+        {
+            get => _database.Table<Variable>();
+        }
+
+        /// <summary>
+        /// Do not add/remove items to this list
+        /// Use SetValue
+        /// or
+        /// DeleteVariable
+        /// </summary>
         public static List<Variable> Variables
         {
             get
@@ -38,19 +49,25 @@ namespace SuchByte.MacroDeck.Variables
             Trimmer = DocumentConfiguration.TrimFirstAndLastBlankLines,
         };
 
-
-        internal static Variable SetValue(string name, object value, VariableType type, string creator = "User", bool save = true)
+        internal static void InsertVariable(Variable variable)
         {
-            if (Variables == null || string.IsNullOrWhiteSpace(name)) return null;
+            if (ListVariables.Where(x => x.Name.ToLower() == variable.Name.ToLower()).Count() > 0) return;
+            _database.Insert(variable);
+        }
+
+        internal static Variable SetValue(string name, object value, VariableType type, string creator = "User")
+        {
+            if (string.IsNullOrWhiteSpace(name)) return null;
             name = ConvertNameString(name);
 
-            Variable variable = Variables.Find(v => v.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            Variable variable = ListVariables.Where(v => v.Name.ToLower() == name.ToLower()).FirstOrDefault();
             if (variable == null)
             {
-                variable = new Variable();
-                variable.Name = name;
+                variable = new Variable
+                {
+                    Name = name
+                };
                 _database.Insert(variable);
-                //Variables.Add(variable);
             }
             variable.Type = type.ToString();
             variable.Creator = creator;
@@ -105,39 +122,29 @@ namespace SuchByte.MacroDeck.Variables
             }
             _database.Update(variable);
             
-            /*if (save)
-            {
-                SaveAsync();
-            }*/
             return variable;
         }
 
-        internal static Variable SetValue(string name, object value, VariableType type, string[] suggestions, string creator = "User", bool save = true)
+        internal static Variable SetValue(string name, object value, VariableType type, string[] suggestions, string creator = "User")
         {
-            if (Variables == null) return null;
-            Variable variable = SetValue(name, value, type, creator, save);
+            Variable variable = SetValue(name, value, type, creator);
             variable.Suggestions = suggestions;
-            /*if (save)
-            {
-                SaveAsync();
-            }*/
 
             return variable;
         }
 
-        /// <summary>
-        /// Set the value of an variable. If the variable does not exists, Macro Deck automatically creates it.
-        /// </summary>
-        /// <param name="name">Name of the variable</param>
-        /// <param name="value">Value of the variable</param>
-        /// <param name="type">Type of the variable</param>
-        /// <param name="plugin">The instance of your plugin</param>
-        /// <param name="save">Save the variable to the database? set to false if your plugin updates the variable often.</param>
+        [Obsolete("Remove save parameter")]
         public static void SetValue(string name, object value, VariableType type, MacroDeckPlugin plugin, bool save = true)
         {
-            SetValue(name, value, type, plugin.Name, save);
+            SetValue(name, value, type, plugin.Name);
         }
 
+
+        [Obsolete("Remove save parameter")]
+        public static void SetValue(string name, object value, VariableType type, MacroDeckPlugin plugin, string[] suggestions, bool save = true)
+        {
+            SetValue(name, value, type, suggestions, plugin.Name);
+        }
 
         /// <summary>
         /// Set the value of an variable. If the variable does not exists, Macro Deck automatically creates it.
@@ -147,25 +154,22 @@ namespace SuchByte.MacroDeck.Variables
         /// <param name="type">Type of the variable</param>
         /// <param name="plugin">The instance of your plugin</param>
         /// <param name="suggestions">Suggestions for the value.</param>
-        /// <param name="save">Save the variable to the database? set to false if your plugin updates the variable often.</param>
-        public static void SetValue(string name, object value, VariableType type, MacroDeckPlugin plugin, string[] suggestions, bool save = true)
+        public static void SetValue(string name, object value, VariableType type, MacroDeckPlugin plugin, string[] suggestions = null)
         {
-            SetValue(name, value, type, suggestions, plugin.Name, save);
+            SetValue(name, value, type, suggestions, plugin.Name);
         }
 
 
-
+        /// <summary>
+        /// Deletes a variable
+        /// </summary>
+        /// <param name="name">Name of the variable</param>
         public static void DeleteVariable(string name)
         {
-            if (Variables == null) return;
-            Variable variable = Variables.Find(v => v.Name.Equals(name));
-            if (variable != null)
+            _database.Delete(new Variable() { Name = name });
+            if (OnVariableRemoved != null)
             {
-                _database.Delete(variable);
-                if (OnVariableRemoved != null)
-                {
-                    OnVariableRemoved(name, EventArgs.Empty);
-                }
+                OnVariableRemoved(name, EventArgs.Empty);
             }
             MacroDeckLogger.Info("Deleted variable " + name);
         }
@@ -182,7 +186,7 @@ namespace SuchByte.MacroDeck.Variables
 
                 Dictionary<Value, Value> vars = new Dictionary<Value, Value>();
 
-                foreach (Variable v in VariableManager.Variables)
+                foreach (Variable v in ListVariables)
                 {
                     if (vars.ContainsKey(v.Name)) continue;
                     Value value = "";
@@ -227,42 +231,8 @@ namespace SuchByte.MacroDeck.Variables
             
             _database.CreateTable<Variable>();
             _database.Execute("delete from Variable where 'Name'='';");
-            MacroDeckLogger.Info(typeof(VariableManager), Variables.Count + " variables found");
+            MacroDeckLogger.Info(typeof(VariableManager), ListVariables.Count() + " variables found");
         }
-
-        /*internal static void Save()
-        {
-            if (MacroDeck.SafeMode || _saving || Variables == null)
-            {
-                return;
-            }
-            _saving = true;
-            try
-            {
-                foreach (Variable variable in Variables.ToArray())
-                {
-
-                    _database.InsertOrReplace(variable);
-                }
-            }
-            catch (Exception ex) 
-            {
-                MacroDeckLogger.Error("Error while saving variables: " + ex.Message);
-            } 
-            finally
-            {
-                _saving = false;
-            }
-        }*/
-
-        /*internal static void SaveAsync()
-        {
-            Task.Run(() =>
-            {
-                Save();
-            });
-        }*/
-
 
         public static string ConvertNameString(string str)
         {
