@@ -35,6 +35,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
             {
                 string IconBase64 = "";
                 string LabelBase64 = "";
+                string BackgroundColorHex;
                 if (!actionButton.State)
                 {
                     if (!string.IsNullOrWhiteSpace(actionButton.IconOff))
@@ -49,6 +50,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                     {
                         LabelBase64 = actionButton.LabelOff.LabelBase64 ?? "";
                     }
+                    BackgroundColorHex = $"#{actionButton.BackColorOff.R:X2}{actionButton.BackColorOff.G:X2}{actionButton.BackColorOff.B:X2}";
                 } else
                 {
                     if (!string.IsNullOrWhiteSpace(actionButton.IconOn))
@@ -63,6 +65,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                     {
                         LabelBase64 = actionButton.LabelOn.LabelBase64 ?? "";
                     }
+                    BackgroundColorHex = $"#{actionButton.BackColorOn.R:X2}{actionButton.BackColorOn.G:X2}{actionButton.BackColorOn.B:X2}";
                 }
 
                 JObject actionButtonObject = JObject.FromObject(new
@@ -71,6 +74,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                     actionButton.Position_X,
                     actionButton.Position_Y,
                     LabelBase64,
+                    BackgroundColorHex
                 });
                 buttons.Add(actionButtonObject);
             }
@@ -119,6 +123,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
             if (macroDeckClient.Folder == null || !macroDeckClient.Folder.ActionButtons.Contains(actionButton)) return;
             string IconBase64 = "";
             string LabelBase64 = "";
+            string BackgroundColorHex;
             if (!actionButton.State)
             {
                 if (!string.IsNullOrWhiteSpace(actionButton.IconOff))
@@ -133,6 +138,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                 {
                     LabelBase64 = actionButton.LabelOff.LabelBase64 ?? "";
                 }
+                BackgroundColorHex = $"#{actionButton.BackColorOff.R:X2}{actionButton.BackColorOff.G:X2}{actionButton.BackColorOff.B:X2}";
             }
             else
             {
@@ -148,6 +154,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                 {
                     LabelBase64 = actionButton.LabelOn.LabelBase64 ?? "";
                 }
+                BackgroundColorHex = $"#{actionButton.BackColorOn.R:X2}{actionButton.BackColorOn.G:X2}{actionButton.BackColorOn.B:X2}";
             }
 
             JObject actionButtonObject = JObject.FromObject(new
@@ -156,6 +163,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                 actionButton.Position_X,
                 actionButton.Position_Y,
                 LabelBase64,
+                BackgroundColorHex
             });
 
             JObject updateObject = JObject.FromObject(new
