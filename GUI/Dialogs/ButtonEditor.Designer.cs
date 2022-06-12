@@ -409,7 +409,6 @@ namespace SuchByte.MacroDeck.GUI
             this.btnBackColor.UseMnemonic = false;
             this.btnBackColor.UseVisualStyleBackColor = false;
             this.btnBackColor.UseWindowsAccentColor = false;
-            this.btnBackColor.Visible = false;
             this.btnBackColor.Click += new System.EventHandler(this.BtnBackColor_Click);
             // 
             // btnOpenTemplateEditor
