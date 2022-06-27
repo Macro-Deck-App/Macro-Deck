@@ -1,4 +1,5 @@
 ﻿using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,12 +23,27 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         [DllImportAttribute("user32.dll")]
         public static extern bool ReleaseCapture();
 
+        public bool IgnoreEscapeKey = false;
+
         public DialogForm()
         {
             InitializeComponent();
             (new DropShadow()).ApplyShadows(this);
             this.ResizeEnd += OnResizeEnd;
             this.MouseDown += DialogForm_MouseDown;
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (IgnoreEscapeKey) return base.ProcessCmdKey(ref msg, keyData);
+            MacroDeckLogger.Trace(keyData.ToString());
+            switch (keyData)
+            {
+                case Keys.Escape:
+                    this.Close();
+                    return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         private void OnResizeEnd(object sender, EventArgs e)

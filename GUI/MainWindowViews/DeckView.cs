@@ -78,32 +78,28 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         {
             this.foldersView.Nodes.Clear();
 
-                var stack = new Stack<TreeNode>();
-                var rootDirectory = ProfileManager.CurrentProfile.Folders.FirstOrDefault();
-                var node = new TreeNode(rootDirectory.DisplayName) { Tag = rootDirectory };
-                stack.Push(node);
+            var stack = new Stack<TreeNode>();
+            var rootDirectory = ProfileManager.CurrentProfile.Folders.FirstOrDefault();
+            var node = new TreeNode(rootDirectory.DisplayName) { Tag = rootDirectory };
+            stack.Push(node);
 
-                while (stack.Count > 0)
+            while (stack.Count > 0)
+            {
+                var currentNode = stack.Pop();
+                var directoryInfo = (Folders.MacroDeckFolder)currentNode.Tag;
+                foreach (var directoryId in directoryInfo.Childs.ToList())
                 {
-                    var currentNode = stack.Pop();
-                    var directoryInfo = (Folders.MacroDeckFolder)currentNode.Tag;
-                    foreach (var directoryId in directoryInfo.Childs.ToList())
+                    try
                     {
-                        try
-                        {
-                            var directory = ProfileManager.FindFolderById(directoryId, ProfileManager.CurrentProfile);
-                            var childDirectoryNode = new TreeNode(directory.DisplayName) { Tag = directory };
-                            this.Invoke(new Action(() => currentNode.Nodes.Add(childDirectoryNode)));
-                            stack.Push(childDirectoryNode);
-                        } catch { }
-                    }
+                        var directory = ProfileManager.FindFolderById(directoryId, ProfileManager.CurrentProfile);
+                        var childDirectoryNode = new TreeNode(directory.DisplayName) { Tag = directory };
+                        this.Invoke(new Action(() => currentNode.Nodes.Add(childDirectoryNode)));
+                        stack.Push(childDirectoryNode);
+                    } catch { }
                 }
-                this.foldersView.Nodes.Add(node);
-                this.foldersView.ExpandAll();
-
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
+            }
+            this.foldersView.Nodes.Add(node);
+            this.foldersView.ExpandAll();
         }
 
 
@@ -134,6 +130,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
             // Button size algorithm from @PhoenixWyllow
 
+
             int buttonSize = 100;
             int rows = ProfileManager.CurrentProfile.Rows, columns = ProfileManager.CurrentProfile.Columns, spacing = ProfileManager.CurrentProfile.ButtonSpacing; // from settings
             int width = buttonPanel.Width, height = buttonPanel.Height; // from panel
@@ -143,11 +140,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             buttonSizeY = height / rows;
             buttonSize = Math.Min(buttonSizeX, buttonSizeY) - spacing;
 
+
             for (int row = 0; row < rows; row++)
             {
                 for (int column = 0; column < columns; column++)
                 {
-                    this.Invoke(new Action(() => this.LoadButton(row, column, buttonSize)));
+                    this.LoadButton(row, column, buttonSize);
                 }
             }
 
@@ -244,6 +242,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void LoadButton(int row, int column, int buttonSize)
         {
+            long drawStarted = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             RoundedButton button = this.buttonPanel.Controls.Cast<RoundedButton>().Where(x => x.Row.Equals(row) && x.Column.Equals(column)).FirstOrDefault();
 
             if (button == null)
@@ -271,7 +270,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             button.Location = new Point((column * buttonSize) + (column * ProfileManager.CurrentProfile.ButtonSpacing), (row * buttonSize) + (row * ProfileManager.CurrentProfile.ButtonSpacing));
             button.BackColor = ProfileManager.CurrentProfile.ButtonBackground ? Color.FromArgb(35, 35, 35) : Color.Transparent;
 
-            
             if (button.BackgroundImage != null)
             {
                 button.BackgroundImage.Dispose();
@@ -287,6 +285,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             }
 
             ActionButton.ActionButton actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
+
             if (actionButton != null)
             {
                 // Remove event handlers if there are any to prevent multiple event handlers
@@ -311,12 +310,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
             if (!this.buttonPanel.Controls.Contains(button))
             {
-                this.buttonPanel.Controls.Add(button);
+                this.Invoke(new Action(() => this.buttonPanel.Controls.Add(button)));
             }
 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
         }
 
         private void ActionButton_IconChanged(object sender, EventArgs e)
@@ -339,58 +335,62 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             }
             else
             {
-                RoundedButton draggedButton = (RoundedButton)e.Data.GetData(typeof(RoundedButton));
-                RoundedButton targetButton = (RoundedButton)sender;
-
-                ActionButton.ActionButton targetActionButton = ProfileManager.FindActionButton(this._currentFolder, targetButton.Row, targetButton.Column);
-                ActionButton.ActionButton draggedActionButton = ProfileManager.FindActionButton(this._currentFolder, draggedButton.Row, draggedButton.Column);
-
-                if (draggedActionButton == null) return;
-
-                ActionButton.ActionButton newActionButton = draggedActionButton;
-                newActionButton.Position_Y = targetButton.Row;
-                newActionButton.Position_X = targetButton.Column;
-
-                this._currentFolder.ActionButtons.Remove(draggedActionButton);
-                this._currentFolder.ActionButtons.Add(newActionButton);
-
-                if (targetActionButton != null)
+                Task.Run(() =>
                 {
-                    ActionButton.ActionButton newTargetButton = targetActionButton;
-                    newTargetButton.Position_Y = draggedButton.Row;
-                    newTargetButton.Position_X = draggedButton.Column;
-                    this._currentFolder.ActionButtons.Remove(targetActionButton);
-                    this._currentFolder.ActionButtons.Add(newTargetButton);
+                    RoundedButton draggedButton = (RoundedButton)e.Data.GetData(typeof(RoundedButton));
+                    RoundedButton targetButton = (RoundedButton)sender;
 
-                    foreach (PluginAction pluginAction in newTargetButton.Actions)
-                    {
-                        pluginAction.SetActionButton(newTargetButton);
-                    }
-                    foreach (PluginAction pluginAction in newTargetButton.ActionsRelease)
-                    {
-                        pluginAction.SetActionButton(newTargetButton);
-                    }
-                    foreach (PluginAction pluginAction in newTargetButton.ActionsLongPress)
-                    {
-                        pluginAction.SetActionButton(newTargetButton);
-                    }
-                    foreach (PluginAction pluginAction in newTargetButton.ActionsLongPressRelease)
-                    {
-                        pluginAction.SetActionButton(newTargetButton);
-                    }
+                    ActionButton.ActionButton targetActionButton = ProfileManager.FindActionButton(this._currentFolder, targetButton.Row, targetButton.Column);
+                    ActionButton.ActionButton draggedActionButton = ProfileManager.FindActionButton(this._currentFolder, draggedButton.Row, draggedButton.Column);
 
-                    if (newTargetButton.EventListeners == null)
+                    if (draggedActionButton == null) return;
+
+                    ActionButton.ActionButton newActionButton = draggedActionButton;
+                    newActionButton.Position_Y = targetButton.Row;
+                    newActionButton.Position_X = targetButton.Column;
+
+                    this._currentFolder.ActionButtons.Remove(draggedActionButton);
+                    this._currentFolder.ActionButtons.Add(newActionButton);
+
+                    if (targetActionButton != null)
                     {
-                        newTargetButton.EventListeners = new List<EventListener>();
-                    }
-                    foreach (var eventListener in newTargetButton.EventListeners)
-                    {
-                        foreach (PluginAction pluginAction in eventListener.Actions)
+                        ActionButton.ActionButton newTargetButton = targetActionButton;
+                        newTargetButton.Position_Y = draggedButton.Row;
+                        newTargetButton.Position_X = draggedButton.Column;
+                        this._currentFolder.ActionButtons.Remove(targetActionButton);
+                        this._currentFolder.ActionButtons.Add(newTargetButton);
+
+                        foreach (PluginAction pluginAction in newTargetButton.Actions)
                         {
                             pluginAction.SetActionButton(newTargetButton);
                         }
+                        foreach (PluginAction pluginAction in newTargetButton.ActionsRelease)
+                        {
+                            pluginAction.SetActionButton(newTargetButton);
+                        }
+                        foreach (PluginAction pluginAction in newTargetButton.ActionsLongPress)
+                        {
+                            pluginAction.SetActionButton(newTargetButton);
+                        }
+                        foreach (PluginAction pluginAction in newTargetButton.ActionsLongPressRelease)
+                        {
+                            pluginAction.SetActionButton(newTargetButton);
+                        }
+
+                        if (newTargetButton.EventListeners == null)
+                        {
+                            newTargetButton.EventListeners = new List<EventListener>();
+                        }
+                        foreach (var eventListener in newTargetButton.EventListeners)
+                        {
+                            foreach (PluginAction pluginAction in eventListener.Actions)
+                            {
+                                pluginAction.SetActionButton(newTargetButton);
+                            }
+                        }
                     }
-                }
+                });
+                
                 ProfileManager.Save();
                 this.UpdateButtons();
                 MacroDeckServer.UpdateFolder(this._currentFolder);
@@ -692,10 +692,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             Settings.Default.Save();
             ProfileManager.CurrentProfile = profile;
             this._currentFolder = profile.Folders.FirstOrDefault();
-            Task.Run(() =>
-            {
-                this.UpdateButtons(true);
-            });
+            this.UpdateButtons(true);
             this.Invoke(new Action(() => {
                 this.boxProfiles.Text = profile.DisplayName;
                 this.UpdateFolders();

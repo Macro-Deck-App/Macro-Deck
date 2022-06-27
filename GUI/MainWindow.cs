@@ -40,10 +40,6 @@ namespace SuchByte.MacroDeck.GUI
             }
         }
 
-        public ExtensionsView ExtensionsView { get; set; }
-        public VariablesView VariablesView { get; set; }
-        public SettingsView SettingsView { get; set; }
-
         public MainWindow()
         {
             this.InitializeComponent();
@@ -72,10 +68,6 @@ namespace SuchByte.MacroDeck.GUI
             {
                 this.DeckView.UpdateTranslation();
             }
-            if (this.VariablesView != null)
-            {
-                this.VariablesView.UpdateTranslation();
-            }
         }
 
         private void UpdateWarningsErrors()
@@ -94,67 +86,51 @@ namespace SuchByte.MacroDeck.GUI
 
         public void SelectContentButton(Control control)
         {
-            this.Invoke(new Action(() => 
+            foreach (Control contentButton in this.contentButtonPanel.Controls.OfType<ContentSelectorButton>().Where(x => x != control && x.Selected))
             {
-                if (!control.GetType().Equals(typeof(ContentSelectorButton))) return;
-                foreach (Control contentButton in this.contentButtonPanel.Controls.OfType<ContentSelectorButton>())
-                {
-                    ((ContentSelectorButton)contentButton).Selected = false;
-                }
-                btnSettings.Selected = false;
-                ((ContentSelectorButton)control).Selected = true;
-            }));
+                ((ContentSelectorButton)contentButton).Selected = false;
+            }
+            btnSettings.Selected = false;
+            ((ContentSelectorButton)control).Selected = true;
         }
 
-        public void SetView(Control view, bool clearAll = false)
+        public void SetView(Control view)
         {
             if (this.contentPanel.Controls.Contains(view)) return;
-            
 
-            this.Invoke(new Action(() =>
+            foreach (Control control in this.contentPanel.Controls.OfType<Control>().Where(x => x != view && x != this.DeckView))
             {
-                foreach (Control control in this.contentPanel.Controls)
-                {
-                    if (control != this.DeckView && (clearAll && (control != this.SettingsView && control != this.VariablesView)) && control != view)
-                    {
-                        control.Dispose();
-                    }
-                    if (control != view)
-                    {
-                        this.contentPanel.Controls.Remove(control);
-                    }
-                }
-                this.contentPanel.Controls.Add(view);
-            }));
+                control.Dispose();
+            }
+            foreach (Control control in this.contentPanel.Controls.OfType<Control>().Where(x => x != view))
+            {
+                this.contentPanel.Controls.Remove(control);
+            }
+            this.contentPanel.Controls.Add(view);
 
-            if (view.GetType().Equals(typeof(DeckView)))
+            switch (view)
             {
-                SelectContentButton(btnDeck);
-            } else if (view.GetType().Equals(typeof(DeviceManagerView)))
-            {
-                SelectContentButton(btnDeviceManager);
+                case DeckView deck:
+                    SelectContentButton(btnDeck);
+                    break;
+                case DeviceManagerView deviceManager:
+                    SelectContentButton(btnDeviceManager);
+                    break;
+                case ExtensionsView extensions:
+                    SelectContentButton(btnExtensions);
+                    break;
+                case SettingsView settings:
+                    SelectContentButton(btnSettings);
+                    break;
+                case VariablesView variables:
+                    SelectContentButton(btnVariables);
+                    break;
             }
-            else if (view.GetType().Equals(typeof(ExtensionsView)))
-            {
-                SelectContentButton(btnExtensions);
-            }
-            else if (view.GetType().Equals(typeof(SettingsView)))
-            {
-                SelectContentButton(btnSettings);
-            }
-            else if (view.GetType().Equals(typeof(VariablesView)))
-            {
-                SelectContentButton(btnVariables);
-            } 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
         }
 
 
         private void MainWindow_Load(object sender, EventArgs e)
         {
-            this.SetView(this.DeckView);
 
             this.lblVersion.Text = "Macro Deck " + MacroDeck.VersionString + (Debugger.IsAttached  ? " (debug)" : "");
             
@@ -183,7 +159,9 @@ namespace SuchByte.MacroDeck.GUI
             this.navigation.Visible = true;
             this.btnSettings.SetNotification(Updater.Updater.UpdateAvailable);
 
-            
+
+            this.SetView(this.DeckView);
+
             PluginManager.ScanUpdatesAsync();
             IconManager.ScanUpdatesAsync();
             CenterToScreen();
@@ -230,7 +208,7 @@ namespace SuchByte.MacroDeck.GUI
         private void OnClientsConnectedChanged(object sender, EventArgs e)
         {
             this.Invoke(new Action(() =>
-                this.lblNumClientsConnected.Text = String.Format(Language.LanguageManager.Strings.XClientsConnected, MacroDeckServer.Clients.Count)
+                this.lblNumClientsConnected.Text = string.Format(LanguageManager.Strings.XClientsConnected, MacroDeckServer.Clients.Count)
             ));
         }
 
@@ -242,20 +220,12 @@ namespace SuchByte.MacroDeck.GUI
 
         private void BtnExtensions_Click(object sender, EventArgs e)
         {
-            if (this.ExtensionsView == null)
-            {
-                this.ExtensionsView = new ExtensionsView();
-            }
-            this.SetView(this.ExtensionsView);
+            this.SetView(new ExtensionsView());
         }
 
         private void BtnSettings_Click(object sender, EventArgs e)
         {
-            if (this.SettingsView == null)
-            {
-                this.SettingsView = new SettingsView();
-            }
-            this.SetView(this.SettingsView);
+            this.SetView(new SettingsView());
         }
 
         private void BtnDeviceManager_Click(object sender, EventArgs e)
@@ -273,11 +243,7 @@ namespace SuchByte.MacroDeck.GUI
 
         private void BtnVariables_Click(object sender, EventArgs e)
         {
-            if (this.VariablesView == null)
-            {
-                this.VariablesView = new VariablesView();
-            }
-            this.SetView(this.VariablesView);
+            this.SetView(new VariablesView());
         }
 
         private void LblErrorsWarnings_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

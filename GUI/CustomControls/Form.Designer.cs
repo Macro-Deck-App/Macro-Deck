@@ -32,7 +32,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form));
             this.header = new SuchByte.MacroDeck.GUI.CustomControls.BufferedPanel();
-            this.btnDonate = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.btnClose = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
             this.btnHelp = new System.Windows.Forms.LinkLabel();
             this.lblSafeMode = new System.Windows.Forms.Label();
@@ -42,6 +41,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.helpMenuWiki = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.helpMenuExportLog = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnDonate = new System.Windows.Forms.LinkLabel();
             this.header.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.btnClose)).BeginInit();
             this.helpMenu.SuspendLayout();
@@ -62,28 +62,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.header.Size = new System.Drawing.Size(1400, 34);
             this.header.TabIndex = 0;
             this.header.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TitleBar_MouseDown);
-            // 
-            // btnDonate
-            // 
-            this.btnDonate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnDonate.BorderRadius = 8;
-            this.btnDonate.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnDonate.FlatAppearance.BorderSize = 0;
-            this.btnDonate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnDonate.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnDonate.ForeColor = System.Drawing.Color.White;
-            this.btnDonate.HoverColor = System.Drawing.Color.Empty;
-            this.btnDonate.Icon = null;
-            this.btnDonate.Location = new System.Drawing.Point(1114, 4);
-            this.btnDonate.Name = "btnDonate";
-            this.btnDonate.Progress = 0;
-            this.btnDonate.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(205)))));
-            this.btnDonate.Size = new System.Drawing.Size(131, 25);
-            this.btnDonate.TabIndex = 10;
-            this.btnDonate.Text = "Donate";
-            this.btnDonate.UseVisualStyleBackColor = true;
-            this.btnDonate.UseWindowsAccentColor = false;
-            this.btnDonate.Click += new System.EventHandler(this.BtnDonate_Click);
             // 
             // btnClose
             // 
@@ -192,6 +170,24 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.helpMenuExportLog.Text = "Export latest log";
             this.helpMenuExportLog.Click += new System.EventHandler(this.HelpMenuExportLog_Click);
             // 
+            // btnDonate
+            // 
+            this.btnDonate.ActiveLinkColor = System.Drawing.Color.White;
+            this.btnDonate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnDonate.AutoSize = true;
+            this.btnDonate.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnDonate.LinkColor = System.Drawing.Color.Silver;
+            this.btnDonate.Location = new System.Drawing.Point(1190, 8);
+            this.btnDonate.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.btnDonate.Name = "btnDonate";
+            this.btnDonate.Size = new System.Drawing.Size(55, 18);
+            this.btnDonate.TabIndex = 10;
+            this.btnDonate.TabStop = true;
+            this.btnDonate.Text = "Donate";
+            this.btnDonate.UseMnemonic = false;
+            this.btnDonate.VisitedLinkColor = System.Drawing.Color.Silver;
+            this.btnDonate.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.btnDonate_LinkClicked);
+            // 
             // Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -229,6 +225,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem helpMenuExportLog;
         private PictureButton btnClose;
-        private ButtonPrimary btnDonate;
+        private System.Windows.Forms.LinkLabel btnDonate;
     }
 }

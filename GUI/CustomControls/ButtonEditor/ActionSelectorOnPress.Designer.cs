@@ -59,7 +59,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             this.actionsOnPress.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.actionsOnPress.Location = new System.Drawing.Point(3, 3);
             this.actionsOnPress.Margin = new System.Windows.Forms.Padding(0);
-            this.actionsOnPress.MaximumSize = new System.Drawing.Size(869, 490);
+            this.actionsOnPress.MaximumSize = new System.Drawing.Size(869, 450);
             this.actionsOnPress.MinimumSize = new System.Drawing.Size(869, 1);
             this.actionsOnPress.Name = "actionsOnPress";
             this.actionsOnPress.Size = new System.Drawing.Size(869, 1);
@@ -138,7 +138,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             // 
             // ActionSelectorOnPress
             // 
-            
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.Controls.Add(this.flowLayoutPanel1);

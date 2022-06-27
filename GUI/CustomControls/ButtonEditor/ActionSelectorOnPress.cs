@@ -1,6 +1,7 @@
 ﻿using SuchByte.MacroDeck.ActionButton;
 using SuchByte.MacroDeck.ActionButton.Plugin;
 using SuchByte.MacroDeck.Interfaces;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using System;
 using System.Collections.Generic;
@@ -16,9 +17,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
     {
         private List<PluginAction> _pluginActions;
 
-        public ActionSelectorOnPress(List<PluginAction> pluginActions)
+        private GUI.ButtonEditor _buttonEditor;
+
+        public ActionSelectorOnPress(List<PluginAction> pluginActions, GUI.ButtonEditor buttonEditor)
         {
             this._pluginActions = pluginActions;
+            this._buttonEditor = buttonEditor;
             InitializeComponent();
             this.Dock = DockStyle.Fill;
             this.menuItemAction.Text = Language.LanguageManager.Strings.Action;
@@ -138,6 +142,16 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
                 {
                     this._pluginActions.Add(actionConfigurator.Action);
                     this.AddActionItem(actionConfigurator.Action);
+                    if (!string.IsNullOrWhiteSpace(actionConfigurator.Action.BindableVariable))
+                    {
+                        using (var msgBox = new MessageBox())
+                        {
+                            if (msgBox.ShowDialog(LanguageManager.Strings.BindableVarible, string.Format(LanguageManager.Strings.BindableVariableInfo, actionConfigurator.Action.BindableVariable), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                            {
+                                this._buttonEditor.SetBindableVariable(actionConfigurator.Action.BindableVariable);
+                            }
+                        }
+                    }
                 }
             }
         }

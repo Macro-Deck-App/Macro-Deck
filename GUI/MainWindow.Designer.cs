@@ -35,14 +35,6 @@ namespace SuchByte.MacroDeck.GUI
                 {
                     this.DeckView.Dispose();
                 }
-                if (this.ExtensionsView != null)
-                {
-                    this.ExtensionsView.Dispose();
-                }
-                if (this.VariablesView != null)
-                {
-                    this.VariablesView.Dispose();
-                }
             }
             catch { }
             if (disposing && (components != null))

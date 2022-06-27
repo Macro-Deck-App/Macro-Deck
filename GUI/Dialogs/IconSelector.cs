@@ -356,7 +356,7 @@ namespace SuchByte.MacroDeck.GUI
             this.SelectedIconPack = iconPack;
             this.btnImport.Visible = !iconPack.ExtensionStoreManaged;
             this.btnCreateIcon.Visible = !iconPack.ExtensionStoreManaged;
-            this.btnGiphy.Visible = !iconPack.ExtensionStoreManaged;
+            //this.btnGiphy.Visible = !iconPack.ExtensionStoreManaged;
             this.btnDeleteIcon.Visible = !iconPack.ExtensionStoreManaged;
             this.btnExportIconPack.Visible = !iconPack.ExtensionStoreManaged;
             this.lblManaged.Visible = iconPack.ExtensionStoreManaged;

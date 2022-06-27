@@ -4,6 +4,7 @@ using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Utils;
+using SuchByte.MacroDeck.Variables;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -217,6 +218,7 @@ namespace SuchByte.MacroDeck.Backups
         {
             if (BackupInProgress) return;
             BackupInProgress = true;
+            VariableManager.Close();
             string backupFileName = string.Format("backup_{0}.zip", DateTime.Now.ToString("yy-MM-dd_HH-mm-ss"));
             MacroDeckLogger.Info("Sarting creation of backup: " + backupFileName);
 
@@ -270,6 +272,7 @@ namespace SuchByte.MacroDeck.Backups
                 }
             } finally
             {
+                VariableManager.Initialize();
                 BackupInProgress = false;
             }
         }

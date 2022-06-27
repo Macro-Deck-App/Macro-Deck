@@ -350,10 +350,10 @@ namespace SuchByte.MacroDeck.GUI
 
             this.RefreshLabel();
             this.RefreshIcon();
-            this.actionSelectorOnPress = new ActionSelectorOnPress(this.actionButtonEdited.Actions);
-            this.actionSelectorOnRelease = new ActionSelectorOnPress(this.actionButtonEdited.ActionsRelease);
-            this.actionSelectorOnLongPress = new ActionSelectorOnPress(this.actionButtonEdited.ActionsLongPress);
-            this.actionSelectorOnLongPressRelease = new ActionSelectorOnPress(this.actionButtonEdited.ActionsLongPressRelease);
+            this.actionSelectorOnPress = new ActionSelectorOnPress(this.actionButtonEdited.Actions, this);
+            this.actionSelectorOnRelease = new ActionSelectorOnPress(this.actionButtonEdited.ActionsRelease, this);
+            this.actionSelectorOnLongPress = new ActionSelectorOnPress(this.actionButtonEdited.ActionsLongPress, this);
+            this.actionSelectorOnLongPressRelease = new ActionSelectorOnPress(this.actionButtonEdited.ActionsLongPressRelease, this);
             this.actionSelectorOnPress.RefreshActions();
             this.actionSelectorOnRelease.RefreshActions();
             this.actionSelectorOnLongPress.RefreshActions();
@@ -363,7 +363,10 @@ namespace SuchByte.MacroDeck.GUI
             this.SetSelector(actionSelectorOnPress);
         }
 
-        
+        public void SetBindableVariable(string variable)
+        {
+            this.listStateBinding.Text = variable;
+        }
 
         private void LabelChanged(object sender, EventArgs e)
         {

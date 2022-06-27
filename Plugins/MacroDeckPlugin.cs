@@ -127,6 +127,12 @@ namespace SuchByte.MacroDeck.Plugins
             }
         }
 
+
+        /// <summary>
+        /// Returns a variable name which can be bound to the button state
+        /// </summary>
+        public virtual string BindableVariable { get; set; }
+
         /// <summary>
         /// Gets called when the action button gets deleted
         /// </summary>

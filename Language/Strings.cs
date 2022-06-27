@@ -333,5 +333,8 @@ namespace SuchByte.MacroDeck.Language
         public string WhereExecuted = "Where executed";
         public string ActionSetBrightness = "Set brightness";
         public string ActionSetBrightnessDescription = "Sets the display brightness (Only on the Android app!)";
+        public string BindableVarible = "Bindable variable";
+        public string BindableVariableInfo = "The state of this button can be bound to the variable {0}. Do you want to bind the state?";
+
     }
 }

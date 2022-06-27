@@ -41,7 +41,7 @@ namespace SuchByte.MacroDeck
         internal static readonly int BuildVersion = Int32.Parse(VersionString.Split(".")[3].ToString());
 
         public static readonly int ApiVersion = 20;
-        public static readonly int PluginApiVersion = 34;
+        public static readonly int PluginApiVersion = 35;
 
         // Start parameters
         internal static bool ForceUpdate = false;
@@ -309,7 +309,6 @@ namespace SuchByte.MacroDeck
                 IconManagerLegacy.ConvertOldIconPacks();
             }
 
-            BackupManager.CheckRestoreDirectory();
 
 
             if (!Directory.Exists(TempDirectoryPath))
@@ -350,6 +349,9 @@ namespace SuchByte.MacroDeck
                     }
                 }
             }
+
+
+            BackupManager.CheckRestoreDirectory();
 
             Language.LanguageManager.Load(ExportDefaultStrings);
 

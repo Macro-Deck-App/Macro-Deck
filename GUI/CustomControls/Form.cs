@@ -36,6 +36,18 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.helpMenuExportLog.Text = LanguageManager.Strings.ExportLatestLog;
         }
 
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            MacroDeckLogger.Trace(keyData.ToString());
+            switch (keyData)
+            {
+                case Keys.Escape:
+                    this.Close();
+                    return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         protected override void WndProc(ref Message m)
         {
             if (m.Msg == 0x84)
@@ -119,7 +131,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             }
         }
 
-        private void BtnDonate_Click(object sender, EventArgs e)
+        private void btnDonate_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             var p = new Process
             {

@@ -31,6 +31,7 @@ namespace SuchByte.MacroDeck.Variables
         /// or
         /// DeleteVariable
         /// </summary>
+        [Obsolete("Use ListVariables to list all variables")]
         public static List<Variable> Variables
         {
             get
@@ -120,7 +121,11 @@ namespace SuchByte.MacroDeck.Variables
                     OnVariableChanged(variable, EventArgs.Empty);
                 }
             }
-            _database.Update(variable);
+
+            try
+            {
+                _database.Update(variable);
+            } catch { }
             
             return variable;
         }
@@ -232,6 +237,14 @@ namespace SuchByte.MacroDeck.Variables
             _database.CreateTable<Variable>();
             _database.Execute("delete from Variable where 'Name'='';");
             MacroDeckLogger.Info(typeof(VariableManager), ListVariables.Count() + " variables found");
+        }
+
+        internal static void Close()
+        {
+            try
+            {
+                _database.Close();
+            } catch { }
         }
 
         public static string ConvertNameString(string str)

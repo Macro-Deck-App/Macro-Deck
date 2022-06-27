@@ -113,7 +113,7 @@ namespace SuchByte.MacroDeck.Server
                 }
                 
             }
-            MacroDeckLogger.Info(String.Format("Starting websocket server @ {0}:{1}", ipAddress, port));
+            MacroDeckLogger.Info(string.Format("Starting websocket server @ {0}:{1}", ipAddress, port));
             _webSocketServer = new WebSocketServer("ws://" + ipAddress + ":" + port);
             _webSocketServer.ListenerSocket.NoDelay = true;
             try
