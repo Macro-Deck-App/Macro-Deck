@@ -82,6 +82,7 @@ namespace SuchByte.MacroDeck.Server
                     case DeviceType.Unknown:
                     case DeviceType.Web:
                     case DeviceType.Android:
+                    case DeviceType.StreamDeck:
                     case DeviceType.iOS:
                         this.DeviceClass = DeviceClass.SoftwareClient;
                         this.DeviceMessage = new SoftwareClientMessage();

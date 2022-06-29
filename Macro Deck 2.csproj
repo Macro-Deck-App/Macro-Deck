@@ -4,22 +4,20 @@
     <VersionMinor>11</VersionMinor>
     <VersionPatch>1</VersionPatch>
     <VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
-    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
   
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-      <UseWPF>true</UseWPF>
+    <UseWPF>true</UseWPF>
     <RootNamespace>SuchByte.MacroDeck</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>appicon.ico</ApplicationIcon>
-    <StartupObject>SuchByte.MacroDeck.MacroDeck</StartupObject>
+    <StartupObject></StartupObject>
     <Version>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(VersionRevision)</Version>
     <Company>Macro Deck</Company>
     <Authors>Manuel Mayer</Authors>
-    <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>SuchByte.pfx</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>Macro Deck.pfx</AssemblyOriginatorKeyFile>
     <Product>Macro Deck</Product>
     <AssemblyVersion>2.21.3110.100</AssemblyVersion>
 	<FileVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(VersionRevision)</FileVersion>
@@ -27,20 +25,22 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/SuchByte/Macro-Deck</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SuchByte/Macro-Deck</RepositoryUrl>
-	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
+	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <Platforms>AnyCPU;x64</Platforms>
+	<PublishSingleFile>true</PublishSingleFile>
+	<SelfContained>true</SelfContained>  
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <SelfContained>true</SelfContained>
-  </PropertyGroup>
+	
+	<PropertyGroup>
+      <DebugType>embedded</DebugType>
+      <OutputType>WinExe</OutputType>
+    </PropertyGroup>
+	
+	<ItemGroup>
+      <Content Update="Macro Deck 2.dll">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      </Content>
+    </ItemGroup>
 
   <ItemGroup>
     <None Remove="Licenses.xml" />
@@ -100,7 +100,6 @@
     <PackageReference Include="FCTB" Version="2.16.24" />
     <PackageReference Include="Fleck" Version="1.2.0" />
     <PackageReference Include="GiphyDotNet" Version="2.0.0" />
-    <PackageReference Include="HidSharp" Version="2.1.0" />
     <PackageReference Include="Magick.NET-Q16-x64" Version="8.3.1" />
     <PackageReference Include="Magick.NET.Core" Version="8.3.1" />
     <PackageReference Include="Magick.NET.SystemDrawing" Version="4.0.6" />
@@ -111,12 +110,6 @@
     <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="106.12.0" />
     <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
     <PackageReference Include="SQLiteNetExtensions" Version="2.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="DeckSurf.SDK">
-      <HintPath>C:\Users\Manuel\Desktop\decksurf-sdk-main\src\DeckSurf.SDK\bin\Debug\netcoreapp3.1\DeckSurf.SDK.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>
@@ -160,6 +153,10 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy /Y &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(ProjectDir)bin\Release\netcoreapp3.1\publish\$(TargetName).dll&quot;" />
+  </Target>
 
 
 </Project>

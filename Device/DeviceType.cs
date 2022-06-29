@@ -12,5 +12,6 @@ namespace SuchByte.MacroDeck.Device
         Web,
         Android,
         iOS,
+        StreamDeck,
     }
 }
