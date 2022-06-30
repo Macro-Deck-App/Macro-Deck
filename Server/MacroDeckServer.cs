@@ -480,6 +480,7 @@ namespace SuchByte.MacroDeck.Server
         /// <param name="macroDeckClient"></param>
         private static void SendAllButtons(MacroDeckClient macroDeckClient)
         {
+            if (macroDeckClient == null) return;
             macroDeckClient.DeviceMessage.SendAllButtons(macroDeckClient);
         }
 
@@ -490,6 +491,7 @@ namespace SuchByte.MacroDeck.Server
         /// <param name="actionButton"></param>
         public static void SendButton(MacroDeckClient macroDeckClient, ActionButton.ActionButton actionButton)
         {
+            if (macroDeckClient == null) return;
             macroDeckClient.DeviceMessage.UpdateButton(macroDeckClient, actionButton);
         }
 

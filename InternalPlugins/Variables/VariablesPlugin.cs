@@ -3,6 +3,7 @@ using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.InternalPlugins.Variables.Models;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
@@ -125,32 +126,28 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
 
         public override void Trigger(string clientId, ActionButton.ActionButton actionButton)
         {
-            if (this.Configuration.Length == 0) return;
-            try
+            if (string.IsNullOrWhiteSpace(this.Configuration)) return;
+            var changeVariableActionConfigModel = ChangeVariableValueActionConfigModel.Deserialize(this.Configuration);
+            Variable variable = VariableManager.ListVariables.Where(v => v.Name == changeVariableActionConfigModel.Variable).FirstOrDefault();
+            if (variable == null) return;
+            switch (changeVariableActionConfigModel.Method)
             {
-                JObject jsonObject = JObject.Parse(this.Configuration);
-                Variable variable = VariableManager.ListVariables.Where(v => v.Name == jsonObject["variable"].ToString()).FirstOrDefault();
-                if (variable == null) return;
-                switch (jsonObject["method"].ToString())
-                {
-                    case "countUp": case "increase":
-                        VariableManager.SetValue(variable.Name, float.Parse(variable.Value) + 1, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
-                        break;
-                    case "countDown": case "decrease":
-                        VariableManager.SetValue(variable.Name, float.Parse(variable.Value) - 1, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
-                        break;
-                    case "set":
-                        if (jsonObject["value"] != null && !string.IsNullOrWhiteSpace(jsonObject["value"].ToString()))
-                        {
-                            var value = VariableManager.RenderTemplate(jsonObject["value"].ToString());
-                            VariableManager.SetValue(variable.Name, value, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
-                        }
-                        break;
-                    case "toggle":
-                        VariableManager.SetValue(variable.Name, !bool.Parse(variable.Value.Replace("on", "true")), (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
-                        break;
-                }
-            } catch { }
+
+                case InternalPlugins.Variables.Enums.ChangeVariableMethod.countUp:
+                    VariableManager.SetValue(variable.Name, float.Parse(variable.Value) + 1, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
+                    break;
+                case InternalPlugins.Variables.Enums.ChangeVariableMethod.countDown:
+                    VariableManager.SetValue(variable.Name, float.Parse(variable.Value) - 1, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
+                    break;
+                case InternalPlugins.Variables.Enums.ChangeVariableMethod.set:
+                    var value = VariableManager.RenderTemplate(changeVariableActionConfigModel.Value);
+                    VariableManager.SetValue(variable.Name, value, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
+                    break;
+                case InternalPlugins.Variables.Enums.ChangeVariableMethod.toggle:
+                    VariableManager.SetValue(variable.Name, !bool.Parse(variable.Value.Replace("on", "true")), (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
+                    break;
+
+            }
         }
     }
 

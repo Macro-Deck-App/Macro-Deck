@@ -173,7 +173,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             this.btnTemplateEditor.Size = new System.Drawing.Size(25, 25);
             this.btnTemplateEditor.TabIndex = 6;
             this.btnTemplateEditor.TabStop = false;
-            this.btnTemplateEditor.Click += new System.EventHandler(this.btnTemplateEditor_Click);
+            this.btnTemplateEditor.Click += new System.EventHandler(this.BtnTemplateEditor_Click);
             // 
             // ChangeVariableValueConfigurator
             // 

@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.InternalPlugins.Variables.Enums;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Variables.Plugin.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,11 +18,11 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
 {
     public partial class ChangeVariableValueActionConfigView : ActionConfigControl
     {
-        PluginAction _macroDeckAction;
+        private readonly ChangeVariableValueActionConfigViewModel _viewModel;
 
-        public ChangeVariableValueActionConfigView(PluginAction macroDeckAction)
+        public ChangeVariableValueActionConfigView(PluginAction pluginAction)
         {
-            this._macroDeckAction = macroDeckAction;
+            this._viewModel = new ChangeVariableValueActionConfigViewModel(pluginAction);
             InitializeComponent();
 
             this.radioCountUp.Text = LanguageManager.Strings.CountUp;
@@ -98,47 +100,28 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
 
         public override bool OnActionSave()
         {
-            if (String.IsNullOrWhiteSpace(this.variables.Text))
-            {
-                return false;
-            }
-            JObject jObject = null;
-            try
-            {
-                jObject = JObject.Parse(this._macroDeckAction.Configuration);
-            }
-            catch { }
-            if (jObject == null)
-            {
-                jObject = new JObject();
-            }
+            this._viewModel.Variable = this.variables.Text;
 
             if (this.radioCountUp.Checked)
             {
-                jObject["method"] = "countUp";
+                this._viewModel.Method = InternalPlugins.Variables.Enums.ChangeVariableMethod.countUp;
             }
             else if (this.radioCountDown.Checked)
             {
-                jObject["method"] = "countDown";
+                this._viewModel.Method = InternalPlugins.Variables.Enums.ChangeVariableMethod.countDown;
             }
             else if (this.radioSet.Checked)
             {
-                if (String.IsNullOrWhiteSpace(this.value.Text))
-                {
-                    return false;
-                }
-                jObject["method"] = "set";
+                this._viewModel.Method = InternalPlugins.Variables.Enums.ChangeVariableMethod.set;
             }
             else if (this.radioToggle.Checked)
             {
-                jObject["method"] = "toggle";
+                this._viewModel.Method = InternalPlugins.Variables.Enums.ChangeVariableMethod.toggle;
             }
-            jObject["variable"] = variables.Text;
-            jObject["value"] = this.radioSet.Checked ? this.value.Text : String.Empty;
 
-            this._macroDeckAction.Configuration = jObject.ToString();
-            this._macroDeckAction.ConfigurationSummary = jObject["variable"].ToString() + " -> " + GetMethodName(jObject["method"].ToString()) + (this.radioSet.Checked ? " -> " + jObject["value"].ToString() : "");
-            return true;
+            this._viewModel.Value = this.radioSet.Checked ? this.value.Text : String.Empty;
+
+            return this._viewModel.SaveConfig();
         }
 
         private void LoadVariables()
@@ -148,79 +131,37 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
             {
                 this.variables.Items.Add(variable.Name);
             }
-
-
-            /*if (this.radioCountUp.Checked || this.radioCountDown.Checked)
-            {
-                foreach (Variable variable in VariableManager.Variables.FindAll(v => v.Creator.Equals("User") && (v.Type.Equals(VariableType.Integer.ToString()) || v.Type.Equals(VariableType.Float.ToString()))))
-                {
-                    this.variables.Items.Add(variable.Name);
-                }
-            } else if (this.radioToggle.Checked)
-            {
-                foreach (Variable variable in VariableManager.Variables.FindAll(v => v.Creator.Equals("User") && (v.Type.Equals(VariableType.Bool.ToString()))))
-                {
-                    this.variables.Items.Add(variable.Name);
-                }
-            }
-            else if (this.radioSet.Checked)
-            {
-                
-            }*/
         }
 
-        private string GetMethodName(string method)
-        {
-            switch (method)
-            {
-                case "countUp":
-                    return LanguageManager.Strings.CountUp;
-                case "countDown":
-                    return LanguageManager.Strings.CountDown;
-                case "set":
-                    return LanguageManager.Strings.Set;
-                case "toggle":
-                    return LanguageManager.Strings.Toggle;
-            }
-            return "";
-        }
+        
 
         private void ChangeVariableValueConfigurator_Load(object sender, EventArgs e)
         {
             this.LoadVariables();
-            JObject jObject = null;
-            try
-            {
-                jObject = JObject.Parse(this._macroDeckAction.Configuration);
-            }
-            catch { }
-            if (jObject == null) return;
 
-            switch (jObject["method"].ToString())
+            switch (this._viewModel.Method)
             {
-                case "countUp":
+                case ChangeVariableMethod.countUp:
                     this.radioCountUp.Checked = true;
                     break;
-                case "countDown":
+                case ChangeVariableMethod.countDown:
                     this.radioCountDown.Checked = true;
                     break;
-                case "set":
+                case ChangeVariableMethod.set:
                     this.radioSet.Checked = true;
                     break;
-                case "toggle":
+                case ChangeVariableMethod.toggle:
                     this.radioToggle.Checked = true;
                     break;
             }
 
-
-
-            this.variables.Text = jObject["variable"].ToString();
-            this.value.Text = jObject["value"].ToString();
+            this.variables.Text = this._viewModel.Variable;
+            this.value.Text = this._viewModel.Value;
             this.value.Visible = this.radioSet.Checked;
 
         }
 
-        private void btnTemplateEditor_Click(object sender, EventArgs e)
+        private void BtnTemplateEditor_Click(object sender, EventArgs e)
         {
             using (var templateEditor = new TemplateEditor(this.value.Text))
             {
