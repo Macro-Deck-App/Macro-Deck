@@ -132,9 +132,15 @@ namespace SuchByte.MacroDeck.ActionButton
         public event EventHandler IconChanged;
 
         private bool _state = false;
+        private string _iconOff = string.Empty;
+        private string _iconOn = string.Empty;
+        private Color _backgroundColorOff = Color.FromArgb(35, 35, 35);
+        private Color _backgroundColorOn = Color.FromArgb(35, 35, 35);
+
+
         public bool State
         {
-            get { return _state; }
+            get => _state;
             set
             {
                 if (_state == value) return;
@@ -147,12 +153,9 @@ namespace SuchByte.MacroDeck.ActionButton
             }
         }
 
-        private string _iconOff = string.Empty;
         public string IconOff { 
-            get
-            {
-                return this._iconOff;
-            }
+            get => this._iconOff;
+
             set
             {
                 this._iconOff = value;
@@ -162,13 +165,10 @@ namespace SuchByte.MacroDeck.ActionButton
                 }
             }
         }
-        private string _iconOn = string.Empty;
+
         public string IconOn
         {
-            get
-            {
-                return this._iconOn;
-            }
+            get => this._iconOn;
             set
             {
                 this._iconOn = value;
@@ -179,10 +179,30 @@ namespace SuchByte.MacroDeck.ActionButton
             }
         }
 
+        public Color BackColorOff
+        {
+            get => this._backgroundColorOff;
+            set
+            {
+                if (this._backgroundColorOff == value) return;
+                this._backgroundColorOff = value;
+                MacroDeckServer.UpdateState(this);
+            }
+        }
+
+        public Color BackColorOn
+        {
+            get => this._backgroundColorOn;
+            set
+            {
+                if (this._backgroundColorOn == value) return;
+                this._backgroundColorOn = value;
+                MacroDeckServer.UpdateState(this);
+            }
+        }
+
         public ButtonLabel LabelOff { get; set; } = new ButtonLabel();
         public ButtonLabel LabelOn { get; set; } = new ButtonLabel();
-        public Color BackColorOff = Color.FromArgb(35, 35, 35);
-        public Color BackColorOn = Color.FromArgb(35, 35, 35);
         public int Position_X { get; set; } = -1;
         public int Position_Y { get; set; } = -1;
         public string StateBindingVariable { get; set; } = string.Empty;

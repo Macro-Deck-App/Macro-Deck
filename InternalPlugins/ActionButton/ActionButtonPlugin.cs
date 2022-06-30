@@ -45,6 +45,7 @@ namespace SuchByte.MacroDeck.ActionButton // Don't change because of backwards c
         public override string Description => LanguageManager.Strings.ActionSetActionButtonStateOffDescription;
         public override void Trigger(string clientId, ActionButton actionButton)
         {
+            if (actionButton.State == false) return;
             MacroDeckServer.SetState(actionButton, false);
         }
     }
@@ -56,6 +57,7 @@ namespace SuchByte.MacroDeck.ActionButton // Don't change because of backwards c
         public override bool CanConfigure => false;
         public override void Trigger(string clientId, ActionButton actionButton)
         {
+            if (actionButton.State == true) return;
             MacroDeckServer.SetState(actionButton, true);
         }
     }

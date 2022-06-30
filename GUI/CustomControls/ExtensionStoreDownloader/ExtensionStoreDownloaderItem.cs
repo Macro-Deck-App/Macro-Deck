@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Plugins;
@@ -43,7 +44,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
                 }
                 this.Invoke(new Action(() =>
                 {
-                    this.lblStatus.Text = $"Cancelled";
+                    this.lblStatus.Text = LanguageManager.Strings.Cancelled;
                     this.progressBar.Visible = false;
                     this.btnAbort.Visible = false;
                 }));
@@ -72,7 +73,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
                 MacroDeckLogger.Error(GetType(), ex.Message);
                 this.Invoke(new Action(() =>
                 {
-                    this.lblStatus.Text = $"Error";
+                    this.lblStatus.Text = LanguageManager.Strings.Error;
                 }));
             }
         }
@@ -81,7 +82,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
         {
             this.Invoke(new Action(() =>
             {
-                this.lblStatus.Text = $"Preparing...";
+                this.lblStatus.Text = LanguageManager.Strings.Preparing;
             }));
             using (_webClient = new WebClient())
             {
@@ -108,7 +109,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
                 this.Invoke(new Action(() =>
                 {
                     this.extensionIcon.BackgroundImage = iconBitmap;
-                    this.lblPackageName.Text = $"{PackageInfo.PackageId} version {ExtensionModel.Version}";
+                    this.lblPackageName.Text = string.Format(LanguageManager.Strings.ExtensionStoreDownloaderPackageIdVersion, PackageInfo.PackageId, ExtensionModel.Version);
                 }));
 
                 MacroDeckLogger.Trace(typeof(ExtensionStoreDownloaderItem), $"Download {url}");
@@ -126,7 +127,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
             this.Invoke(new Action(() =>
             {
                 this.progressBar.Visible = false;
-                this.lblStatus.Text = $"Installing...";
+                this.lblStatus.Text = LanguageManager.Strings.Installing;
             }));
             try
             {
@@ -147,7 +148,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
             this.Invoke(new Action(() =>
             {
                 this.progressBar.Visible = true;
-                this.lblStatus.Text = $"Downloading... {(e.BytesReceived / 1024f / 1024f).ToString("0.00")} MB / {(e.TotalBytesToReceive / 1024f / 1024f).ToString("0.00")} MB";
+                this.lblStatus.Text = $"{LanguageManager.Strings.Downloading} {(e.BytesReceived / 1024f / 1024f).ToString("0.00")} MB / {(e.TotalBytesToReceive / 1024f / 1024f).ToString("0.00")} MB";
                 this.progressBar.Progress = e.ProgressPercentage;
             }));
         }
@@ -181,8 +182,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
             MacroDeckLogger.Info(GetType(), $"Start installation of {ExtensionModel.Name} version {ExtensionModel.Version}");
 
 
-            JsonSerializer serializer = new JsonSerializer();
-            ExtensionManifestModel extensionManifestModel = null;
+            ExtensionManifestModel extensionManifestModel;
             try
             {
                 extensionManifestModel = ExtensionManifestModel.FromZipFilePath(Path.Combine(MacroDeck.TempDirectoryPath, ExtensionModel.Filename));
@@ -254,7 +254,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
             this.Invoke(new Action(() =>
             {
                 this.btnAbort.Visible = false;
-                this.lblStatus.Text = error ? $"Error" : "Completed";
+                this.lblStatus.Text = error ? LanguageManager.Strings.Error : LanguageManager.Strings.Completed;
             }));
             if (OnInstallationCompleted != null)
             {

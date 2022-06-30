@@ -335,6 +335,13 @@ namespace SuchByte.MacroDeck.Language
         public string ActionSetBrightnessDescription = "Sets the display brightness (Only on the Android app!)";
         public string BindableVarible = "Bindable variable";
         public string BindableVariableInfo = "The state of this button can be bound to the variable {0}. Do you want to bind the state?";
+        public string Cancelled = "Cancelled";
+        public string Preparing = "Preparing...";
+        public string Installing = "Installing...";
+        public string Completed = "Completed";
+        public string ExtensionStoreDownloaderPackageIdVersion = "(0) version (1)";
+        public string DownloadingAndInstallingXPackages = "Downloading and installing (0) package(s)";
+        public string InstallationOfXPackagesDone = "Installation of (0) package(s) done";
 
     }
 }

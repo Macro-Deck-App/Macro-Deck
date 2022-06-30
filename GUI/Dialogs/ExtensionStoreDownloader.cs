@@ -3,6 +3,7 @@ using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader;
 using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Plugins;
@@ -51,7 +52,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         {
             this._pluginsToInstall = this._packageIds.Count;
             
-            this.Invoke(new Action(() => this.lblPackagesToDownload.Text = $"Downloading and installing {this._pluginsToInstall} package(s)"));
+            this.Invoke(new Action(() => this.lblPackagesToDownload.Text =string.Format(LanguageManager.Strings.DownloadingAndInstallingXPackages, this._pluginsToInstall)));
             foreach (var packageInfo in this._packageIds)
             {
                 var extensionStoreDownloaderItem = new ExtensionStoreDownloaderItem(packageInfo);
@@ -62,7 +63,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                     {
                         this.Invoke(new Action(() =>
                         {
-                            this.lblPackagesToDownload.Text = $"Installation of {this._pluginsToInstall} package(s) done";
+                            this.lblPackagesToDownload.Text = string.Format(LanguageManager.Strings.InstallationOfXPackagesDone, this._pluginsToInstall);
                             this.btnDone.Visible = true;
                         }));
                         MacroDeckLogger.Info(typeof(ExtensionStoreDownloader), $"*** Installation of {this._pluginsToInstall} package(s) done ***");
@@ -90,10 +91,9 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             {
                 using (var msgBox = new CustomControls.MessageBox())
                 {
-                    if (msgBox.ShowDialog(Language.LanguageManager.Strings.MacroDeckNeedsARestart, Language.LanguageManager.Strings.MacroDeckMustBeRestartedForTheChanges, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    if (msgBox.ShowDialog(LanguageManager.Strings.MacroDeckNeedsARestart, Language.LanguageManager.Strings.MacroDeckMustBeRestartedForTheChanges, MessageBoxButtons.YesNo) == DialogResult.Yes)
                     {
-                        Process.Start(Path.Combine(MacroDeck.MainDirectoryPath, AppDomain.CurrentDomain.FriendlyName), "--show");
-                        Environment.Exit(0);
+                        MacroDeck.RestartMacroDeck();
                     }
                 }
             }
