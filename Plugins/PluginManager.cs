@@ -421,16 +421,20 @@ namespace SuchByte.MacroDeck.Plugins
                               
                                 var plugin = LoadPlugin(extensionManifest, installationDirectory, true);
 
-                                if (plugin != null && plugin.CanConfigure)
+                                try
                                 {
-                                    using (var msgBox = new GUI.CustomControls.MessageBox())
+                                    if (plugin != null && plugin.CanConfigure)
                                     {
-                                        if (msgBox.ShowDialog(Language.LanguageManager.Strings.PluginNeedsConfiguration, String.Format(Language.LanguageManager.Strings.ConfigureNow, plugin.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                                        using (var msgBox = new GUI.CustomControls.MessageBox())
                                         {
-                                            plugin.OpenConfigurator();
+                                            if (msgBox.ShowDialog(Language.LanguageManager.Strings.PluginNeedsConfiguration, String.Format(Language.LanguageManager.Strings.ConfigureNow, plugin.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                                            {
+                                                plugin.OpenConfigurator();
+                                            }
                                         }
                                     }
-                                }
+                                } catch { }
+                                
                             }
                         }
                         catch

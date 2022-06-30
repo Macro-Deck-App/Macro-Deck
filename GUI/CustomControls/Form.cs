@@ -38,7 +38,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            MacroDeckLogger.Trace(keyData.ToString());
             switch (keyData)
             {
                 case Keys.Escape:

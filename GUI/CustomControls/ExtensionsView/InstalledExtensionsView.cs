@@ -95,9 +95,22 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
         {
             ListInstalledExtensions();
             UpdateUpdateLabelInfo();
-            PluginManager.OnPluginsChange += PluginManager_OnPluginsChange;
-            IconManager.InstallationFinished += PluginManager_OnPluginsChange;
+            //PluginManager.OnPluginsChange += PluginManager_OnPluginsChange;
+            //IconManager.InstallationFinished += PluginManager_OnPluginsChange;
             ExtensionStoreHelper.OnUpdateCheckFinished += UpdateCheckFinished;
+            ExtensionStoreHelper.OnInstallationFinished += ExtensionStoreHelper_OnInstallationFinished;
+        }
+
+        private void ExtensionStoreHelper_OnInstallationFinished(object sender, EventArgs e)
+        {
+            this.Invoke(new Action(() => {
+                try
+                {
+                    ListInstalledExtensions();
+                    UpdateUpdateLabelInfo();
+                }
+                catch { }
+            }));
         }
 
         private void UpdateCheckFinished(object sender, EventArgs e)
@@ -107,17 +120,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                 this.btnCheckUpdates.Spinner = false;
                 this.btnCheckUpdates.Enabled = true;
                 UpdateUpdateLabelInfo();
-                ListInstalledExtensions();
+                if (PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0)
+                {
+                    ListInstalledExtensions();
+                }
             }));
-        }
+        } 
 
-        private void PluginManager_OnPluginsChange(object sender, EventArgs e)
-        {
-            this.Invoke(new Action(() => {
-                ListInstalledExtensions();
-                UpdateUpdateLabelInfo();
-            }));
-        }
         private void BtnCheckUpdates_Click(object sender, EventArgs e)
         {
             if (PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0)

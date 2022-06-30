@@ -1,4 +1,5 @@
 ﻿using Fleck;
+using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowContents;
@@ -164,7 +165,13 @@ namespace SuchByte.MacroDeck.GUI
 
             PluginManager.ScanUpdatesAsync();
             IconManager.ScanUpdatesAsync();
+            ExtensionStoreHelper.OnInstallationFinished += ExtensionStoreHelper_OnInstallationFinished;
             CenterToScreen();
+        }
+
+        private void ExtensionStoreHelper_OnInstallationFinished(object sender, EventArgs e)
+        {
+            this.RefreshPluginsLabels();
         }
 
         private void OnPackageManagerUpdateCheckFinished(object sender, EventArgs e)

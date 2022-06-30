@@ -29,21 +29,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// </summary>
         private void InitializeComponent()
         {
-            this.output = new System.Windows.Forms.RichTextBox();
             this.btnDone = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.label2 = new System.Windows.Forms.Label();
+            this.downloadList = new System.Windows.Forms.FlowLayoutPanel();
+            this.lblPackagesToDownload = new System.Windows.Forms.Label();
             this.SuspendLayout();
-            // 
-            // output
-            // 
-            this.output.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.output.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.output.Location = new System.Drawing.Point(10, 31);
-            this.output.Name = "output";
-            this.output.ReadOnly = true;
-            this.output.Size = new System.Drawing.Size(576, 213);
-            this.output.TabIndex = 2;
-            this.output.Text = "";
             // 
             // btnDone
             // 
@@ -55,7 +45,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnDone.ForeColor = System.Drawing.Color.White;
             this.btnDone.HoverColor = System.Drawing.Color.Empty;
             this.btnDone.Icon = null;
-            this.btnDone.Location = new System.Drawing.Point(183, 255);
+            this.btnDone.Location = new System.Drawing.Point(183, 358);
             this.btnDone.Name = "btnDone";
             this.btnDone.Progress = 0;
             this.btnDone.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(225)))));
@@ -80,29 +70,51 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.label2.UseMnemonic = false;
             // 
+            // downloadList
+            // 
+            this.downloadList.AutoScroll = true;
+            this.downloadList.Location = new System.Drawing.Point(6, 54);
+            this.downloadList.Name = "downloadList";
+            this.downloadList.Size = new System.Drawing.Size(607, 298);
+            this.downloadList.TabIndex = 6;
+            // 
+            // lblPackagesToDownload
+            // 
+            this.lblPackagesToDownload.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblPackagesToDownload.ForeColor = System.Drawing.Color.Silver;
+            this.lblPackagesToDownload.Location = new System.Drawing.Point(10, 28);
+            this.lblPackagesToDownload.Name = "lblPackagesToDownload";
+            this.lblPackagesToDownload.Size = new System.Drawing.Size(245, 23);
+            this.lblPackagesToDownload.TabIndex = 7;
+            this.lblPackagesToDownload.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblPackagesToDownload.UseMnemonic = false;
+            // 
             // ExtensionStoreDownloader
             // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(597, 293);
+            this.ClientSize = new System.Drawing.Size(618, 392);
+            this.Controls.Add(this.lblPackagesToDownload);
+            this.Controls.Add(this.downloadList);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.btnDone);
-            this.Controls.Add(this.output);
             this.Location = new System.Drawing.Point(0, 0);
             this.Name = "ExtensionStoreDownloader";
             this.ShowIcon = true;
             this.Text = "Extension Store Downloader";
             this.Load += new System.EventHandler(this.ExtensionStoreDownloader_Load);
-            this.Controls.SetChildIndex(this.output, 0);
             this.Controls.SetChildIndex(this.btnDone, 0);
             this.Controls.SetChildIndex(this.label2, 0);
+            this.Controls.SetChildIndex(this.downloadList, 0);
+            this.Controls.SetChildIndex(this.lblPackagesToDownload, 0);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private System.Windows.Forms.RichTextBox output;
         private CustomControls.ButtonPrimary btnDone;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.FlowLayoutPanel downloadList;
+        private System.Windows.Forms.Label lblPackagesToDownload;
     }
 }

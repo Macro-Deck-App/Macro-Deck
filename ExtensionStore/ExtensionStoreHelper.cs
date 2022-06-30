@@ -16,6 +16,8 @@ namespace SuchByte.MacroDeck.ExtensionStore
 
         private static ExtensionStoreDownloader extensionStoreDownloader;
 
+        public static event EventHandler OnInstallationFinished;
+
         public static void InstallPluginById(string packageId)
         {
             InstallPackages(new List<ExtensionStoreDownloaderPackageInfoModel> { new ExtensionStoreDownloaderPackageInfoModel() { PackageId = packageId, ExtensionType = ExtensionType.Plugin } });
@@ -40,7 +42,11 @@ namespace SuchByte.MacroDeck.ExtensionStore
                 {
                     Owner = MacroDeck.MainWindow,
                 };
-                extensionStoreDownloader.Show();
+                extensionStoreDownloader.ShowDialog();
+                if (OnInstallationFinished != null)
+                {
+                    OnInstallationFinished(null, EventArgs.Empty);
+                }
             }));
         }
 
