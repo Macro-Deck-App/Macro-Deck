@@ -11,5 +11,8 @@
     <Setting Name="SelectedProfile" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="VariableViewSelectedFilter" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

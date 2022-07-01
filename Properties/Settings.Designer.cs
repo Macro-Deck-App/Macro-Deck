@@ -58,5 +58,17 @@ namespace SuchByte.MacroDeck.Properties {
                 this["SelectedProfile"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string VariableViewSelectedFilter {
+            get {
+                return ((string)(this["VariableViewSelectedFilter"]));
+            }
+            set {
+                this["VariableViewSelectedFilter"] = value;
+            }
+        }
     }
 }

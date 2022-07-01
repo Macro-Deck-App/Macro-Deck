@@ -1,5 +1,7 @@
 ﻿using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Variables;
 using System;
 using System.Collections.Generic;
@@ -21,7 +23,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             InitializeComponent();
             this.Dock = DockStyle.Fill;
             this.UpdateTranslation();
-            this.LoadCreators();
         }
 
         public void UpdateTranslation()
@@ -46,6 +47,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 }
             }
 
+            var filterModel = VariableViewCreatorFilterModel.Deserialize(Properties.Settings.Default.VariableViewSelectedFilter);            
+
             foreach (string creator in variableCreators)
             {
                 if (this.creatorFilter.Controls.OfType<CheckBox>().Where(x => x.Name.Equals(creator)).Count() > 0)
@@ -53,11 +56,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
                 CheckBox creatorCheckBox = new CheckBox
                 {
-                    Checked = true,
+                    Checked = !filterModel.HiddenCreators.Contains(creator),
                     Text = creator,
                     Name = creator,
                     AutoSize = false,
-                    Size = new Size(200, 20),
+                    Size = new Size(creatorFilter.Width - 30, 20),
                 };
                 this.creatorFilter.Controls.Add(creatorCheckBox);
                 creatorCheckBox.CheckedChanged += CreatorCheckBox_CheckedChanged;
@@ -66,21 +69,27 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void CreatorCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            this.SuspendLayout();
             CheckBox checkBox = sender as CheckBox;
-
-            foreach (VariableItem variableItem in this.variablesPanel.Controls)
-            {
-                if (variableItem.Variable.Creator.Equals(checkBox.Name))
+            Parallel.ForEach(this.variablesPanel.Controls.OfType<VariableItem>().Where(x => x.Variable.Creator == checkBox.Name).ToArray(),
+                variableItem =>
                 {
-                    variableItem.Visible = checkBox.Checked;
-                }
-            }
-            this.ResumeLayout();
+                    if (this.IsDisposed) return;
+                    this.Invoke(new Action(() => variableItem.Visible = checkBox.Checked));
+                });
+
+            var filterModel = new VariableViewCreatorFilterModel()
+            {
+                HiddenCreators = (from creator in creatorFilter.Controls.OfType<CheckBox>()
+                                    where !creator.Checked
+                                    select creator.Name).ToList()
+            };
+            Properties.Settings.Default.VariableViewSelectedFilter = filterModel.Serialize();
+            Properties.Settings.Default.Save();
         }
 
         private void VariablesPage_Load(object sender, EventArgs e)
         {
+            LoadCreators();
             LoadVariables();
             VariableManager.OnVariableChanged += this.VariableChanged;
             VariableManager.OnVariableRemoved += this.VariableRemoved;
@@ -126,9 +135,13 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private void LoadVariables()
         {
             this.variablesPanel.Controls.Clear();
-            foreach (Variable variable in VariableManager.ListVariables)
+            foreach (var variable in VariableManager.ListVariables)
             {
-                VariableItem variableItem = new VariableItem(variable);
+                if (this.IsDisposed) return;
+                VariableItem variableItem = new VariableItem(variable)
+                {
+                    Visible = this.creatorFilter.Controls.OfType<CheckBox>().Where(x => variable.Creator == x.Name).FirstOrDefault().Checked
+                };
                 this.variablesPanel.Controls.Add(variableItem);
             }
         }
