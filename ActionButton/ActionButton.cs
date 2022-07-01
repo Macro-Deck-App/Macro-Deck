@@ -187,6 +187,10 @@ namespace SuchByte.MacroDeck.ActionButton
                 if (this._backgroundColorOff == value) return;
                 this._backgroundColorOff = value;
                 MacroDeckServer.UpdateState(this);
+                if (StateChanged != null)
+                {
+                    StateChanged(this, EventArgs.Empty);
+                }
             }
         }
 
@@ -198,6 +202,10 @@ namespace SuchByte.MacroDeck.ActionButton
                 if (this._backgroundColorOn == value) return;
                 this._backgroundColorOn = value;
                 MacroDeckServer.UpdateState(this);
+                if (StateChanged != null)
+                {
+                    StateChanged(this, EventArgs.Empty);
+                }
             }
         }
 

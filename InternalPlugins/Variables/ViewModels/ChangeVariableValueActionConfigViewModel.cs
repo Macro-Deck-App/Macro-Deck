@@ -53,11 +53,11 @@ namespace SuchByte.MacroDeck.Variables.Plugin.ViewModels
             try
             {
                 SetConfig();
-                MacroDeckLogger.Info(typeof(SaveVariableToFileActionConfigViewModel), "config saved");
+                MacroDeckLogger.Info(typeof(ChangeVariableValueActionConfigViewModel), "config saved");
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error(typeof(SaveVariableToFileActionConfigViewModel), $"Error while saving config: { ex.Message + Environment.NewLine + ex.StackTrace }");
+                MacroDeckLogger.Error(typeof(ChangeVariableValueActionConfigViewModel), $"Error while saving config: { ex.Message + Environment.NewLine + ex.StackTrace }");
             }
             return true;
         }
