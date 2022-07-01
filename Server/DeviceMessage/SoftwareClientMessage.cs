@@ -8,6 +8,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SuchByte.MacroDeck.Server.DeviceMessage
 {
@@ -23,15 +24,14 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                 DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).DeviceType = macroDeckClient.DeviceType;
                 DeviceManager.SaveKnownDevices();
             }
-            GC.Collect();
         }
 
         public void SendAllButtons(MacroDeckClient macroDeckClient)
         {
             if (macroDeckClient == null || macroDeckClient.Folder == null || macroDeckClient.Folder.ActionButtons == null) return;
-            var buttons = new List<JObject>();
+            var buttons = new ConcurrentBag<JObject>();
 
-            foreach (ActionButton.ActionButton actionButton in macroDeckClient.Folder.ActionButtons)
+            Parallel.ForEach(macroDeckClient.Folder.ActionButtons, actionButton =>
             {
                 string IconBase64 = "";
                 string LabelBase64 = "";
@@ -51,7 +51,8 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                         LabelBase64 = actionButton.LabelOff.LabelBase64 ?? "";
                     }
                     BackgroundColorHex = $"#{actionButton.BackColorOff.R:X2}{actionButton.BackColorOff.G:X2}{actionButton.BackColorOff.B:X2}";
-                } else
+                }
+                else
                 {
                     if (!string.IsNullOrWhiteSpace(actionButton.IconOn))
                     {
@@ -77,7 +78,8 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                     BackgroundColorHex
                 });
                 buttons.Add(actionButtonObject);
-            }
+            });
+
             JObject buttonsObject = JObject.FromObject(new
             {
                 Method = JsonMethod.GET_BUTTONS.ToString(),
@@ -105,17 +107,6 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
             });
             MacroDeckLogger.Trace(GetType(), configurationObject.ToString());
             MacroDeckServer.Send(macroDeckClient.SocketConnection, configurationObject);
-        }
-
-        public void SendIconPacks(MacroDeckClient macroDeckClient)
-        {
-            JObject iconsObject = JObject.FromObject(new
-            {
-                Method = JsonMethod.GET_ICONS.ToString(),
-                IconPacks = IconManager.IconPacks
-            });
-
-            MacroDeckServer.Send(macroDeckClient.SocketConnection, iconsObject);
         }
 
         public void UpdateButton(MacroDeckClient macroDeckClient, ActionButton.ActionButton actionButton)

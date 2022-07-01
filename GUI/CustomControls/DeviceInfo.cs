@@ -83,12 +83,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                     this.btnConfigure.Visible = false; //TODO
                     this.profiles.Enabled = true;
                     break;
-                case DeviceType.Macro_Deck_DIY_OLED_6_V1:
-                    this.lblDeviceType.Text = "Macro Deck DIY OLED 6 v1";
-                    this.iconDeviceType.Image = null;
-                    this.btnConfigure.Visible = false; //TODO
-                    this.profiles.Enabled = false;
-                    break;
                 default:
                     this.lblDeviceType.Text = LanguageManager.Strings.WebClient;
                     this.iconDeviceType.Image = Properties.Resources.Web;

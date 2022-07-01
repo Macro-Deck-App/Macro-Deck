@@ -87,10 +87,6 @@ namespace SuchByte.MacroDeck.Server
                         this.DeviceClass = DeviceClass.SoftwareClient;
                         this.DeviceMessage = new SoftwareClientMessage();
                         break;
-                    case DeviceType.Macro_Deck_DIY_OLED_6_V1:
-                        this.DeviceClass = DeviceClass.Macro_Deck_DIY_OLED_6_V1;
-                        this.DeviceMessage = new MacroDeckDIYOLED6Message();
-                        break;
                 }
             }
         }

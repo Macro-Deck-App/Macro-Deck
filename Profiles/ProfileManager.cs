@@ -63,7 +63,7 @@ namespace SuchByte.MacroDeck.Profiles
                     foreach (string macroDeckDevice in macroDeckFolder.ApplicationsFocusDevices.FindAll(delegate (string macroDeckDeviceClientId)
                     {
                         if (DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId) == null) return false;
-                        return DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId).Available && !String.IsNullOrWhiteSpace(DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId).ClientId);
+                        return DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId).Available && !string.IsNullOrWhiteSpace(DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId).ClientId);
                     }))
                     {
                         MacroDeckClient macroDeckClient = MacroDeckServer.GetMacroDeckClient(DeviceManager.GetMacroDeckDevice(macroDeckDevice).ClientId);
@@ -74,15 +74,11 @@ namespace SuchByte.MacroDeck.Profiles
                     }
                 }
             }
-
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
         }
 
         private static void VariableChanged(object sender, EventArgs e)
         {
-            Variable variable = sender as Variable;
+            var variable = sender as Variable;
             if (variable != null)
             {
                 UpdateAllVariableLabels(variable);
@@ -91,19 +87,17 @@ namespace SuchByte.MacroDeck.Profiles
 
         public static void UpdateAllVariableLabels(Variable variable)
         {
-            Task.Run(() =>
+            Parallel.ForEach(_profiles, macroDeckProfile =>
             {
-                foreach (MacroDeckProfile macroDeckProfile in _profiles)
+                Parallel.ForEach(macroDeckProfile.Folders, macroDeckFolder =>
                 {
-                    foreach (MacroDeckFolder macroDeckFolder in macroDeckProfile.Folders)
+                    Parallel.ForEach(macroDeckFolder.ActionButtons.FindAll(x => (x.LabelOff != null && !string.IsNullOrWhiteSpace(x.LabelOff.LabelText) && x.LabelOff.LabelText.Contains(variable.Name.ToLower(), StringComparison.OrdinalIgnoreCase)) ||
+                                                                                (x.LabelOn != null && !string.IsNullOrWhiteSpace(x.LabelOn.LabelText) && x.LabelOn.LabelText.Contains(variable.Name.ToLower(), StringComparison.OrdinalIgnoreCase))).ToArray(),
+                    actionButton =>
                     {
-                        foreach (ActionButton.ActionButton actionButton in macroDeckFolder.ActionButtons.FindAll(x => (x.LabelOff != null && !String.IsNullOrWhiteSpace(x.LabelOff.LabelText) && x.LabelOff.LabelText.Contains(variable.Name.ToLower(), StringComparison.OrdinalIgnoreCase)) ||
-                                                                                                                    (x.LabelOn != null && !String.IsNullOrWhiteSpace(x.LabelOn.LabelText) && x.LabelOn.LabelText.Contains(variable.Name.ToLower(), StringComparison.OrdinalIgnoreCase))).ToArray())
-                        {
-                            UpdateVariableLabels(actionButton);
-                        }
-                    }
-                }
+                        UpdateVariableLabels(actionButton);
+                    });
+                });
             });
         }
 
@@ -396,8 +390,6 @@ namespace SuchByte.MacroDeck.Profiles
             {
                 DeviceManager.SetProfile(macroDeckDevice, _profiles[0]);
             }
-
-
 
             MacroDeckLogger.Info("Delete profile " + macroDeckProfile.DisplayName);
 

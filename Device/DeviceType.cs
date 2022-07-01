@@ -7,8 +7,6 @@ namespace SuchByte.MacroDeck.Device
     public enum DeviceType
     {
         Unknown,
-        Macro_Deck_DIY_OLED_6_V1,
-        WebPackageManager,
         Web,
         Android,
         iOS,

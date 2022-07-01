@@ -579,8 +579,6 @@ namespace SuchByte.MacroDeck
                     CreateMainForm();
                 }, null);
             }
-            
-            MacroDeckLogger.Trace("MainWindow created");
         }
 
         private static void CreateMainForm()
@@ -610,7 +608,6 @@ namespace SuchByte.MacroDeck
             mainWindow.Load -= MainWindowLoadEvent;
             mainWindow.FormClosed -= MainWindow_FormClosed;
             mainWindow.Dispose();
-            MacroDeckLogger.Trace("MainWindow disposed");
         }
 
         private static void MainWindowLoadEvent(object sender, EventArgs e)
