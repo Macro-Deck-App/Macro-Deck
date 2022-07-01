@@ -339,9 +339,9 @@ namespace SuchByte.MacroDeck.Language
         public string Preparing = "Preparing...";
         public string Installing = "Installing...";
         public string Completed = "Completed";
-        public string ExtensionStoreDownloaderPackageIdVersion = "(0) version (1)";
-        public string DownloadingAndInstallingXPackages = "Downloading and installing (0) package(s)";
-        public string InstallationOfXPackagesDone = "Installation of (0) package(s) done";
+        public string ExtensionStoreDownloaderPackageIdVersion = "{0} version {1}";
+        public string DownloadingAndInstallingXPackages = "Downloading and installing {0} package(s)";
+        public string InstallationOfXPackagesDone = "Installation of {0} package(s) done";
         public string ActionSetBackgroundColor = "Set background color";
         public string ActionSetBackgroundColorDescription = "Changes the background color of a action button";
         public string Fixed = "Fixed";

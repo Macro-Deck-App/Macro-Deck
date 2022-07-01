@@ -187,6 +187,7 @@ namespace SuchByte.MacroDeck.GUI
 
         private void RefreshPluginsLabels()
         {
+            if (!this.IsHandleCreated || this.IsDisposed) return;
             this.Invoke(new Action(() =>
             {
                 this.lblPluginsLoaded.Text = string.Format(Language.LanguageManager.Strings.XPluginsLoaded, $"{ PluginManager.Plugins.Values.Count } / { PluginManager.Plugins.Values.Count + PluginManager.PluginsNotLoaded.Values.Count } ");

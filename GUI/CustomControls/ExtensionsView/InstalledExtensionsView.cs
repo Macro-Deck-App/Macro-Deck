@@ -103,6 +103,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
 
         private void ExtensionStoreHelper_OnInstallationFinished(object sender, EventArgs e)
         {
+            if (!this.IsHandleCreated || this.IsDisposed) return;
             this.Invoke(new Action(() => {
                 try
                 {
