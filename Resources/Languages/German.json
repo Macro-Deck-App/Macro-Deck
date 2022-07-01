@@ -308,5 +308,16 @@
   "ActionSetBrightness": "Helligkeit ändern",
   "ActionSetBrightnessDescription": "Ändert die Display Helligkeit (Funktioniert nur mit der Android App!)",
   "BindableVarible": "Tastenzustand binden",
-  "BindableVariableInfo": "Der Zustand dieser Taste kann an die Variable {0} gebunden werden. Soll der Zustand an diese Variable gebunden werden?"
+  "BindableVariableInfo": "Der Zustand dieser Taste kann an die Variable {0} gebunden werden. Soll der Zustand an diese Variable gebunden werden?",
+  "Cancelled": "Abgebrochen",
+  "Preparing": "Wird vorbereitet...",
+  "Installing": "Installiere...",
+  "Completed": "Fertig",
+  "ExtensionStoreDownloaderPackageIdVersion": "(0) Version (1)",
+  "DownloadingAndInstallingXPackages": "(0) Paket(e) werden heruntergeladen und installiert",
+  "InstallationOfXPackagesDone": "Installation von (0) Pakete(n) fertig",
+  "ActionSetBackgroundColor": "Hintergrundfarbe ändern",
+  "ActionSetBackgroundColorDescription": "Ändert die Hindergrundfarbe einer Taste",
+  "Fixed": "Fest",
+  "Random": "Zufällig"
 }
