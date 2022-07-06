@@ -146,7 +146,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
                     {
                         using (var msgBox = new MessageBox())
                         {
-                            if (msgBox.ShowDialog(LanguageManager.Strings.BindableVarible, string.Format(LanguageManager.Strings.BindableVariableInfo, actionConfigurator.Action.BindableVariable), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                            if (msgBox.ShowDialog(LanguageManager.Strings.BindableVariable, string.Format(LanguageManager.Strings.BindableVariableInfo, actionConfigurator.Action.BindableVariable), MessageBoxButtons.YesNo) == DialogResult.Yes)
                             {
                                 this._buttonEditor.SetBindableVariable(actionConfigurator.Action.BindableVariable);
                             }

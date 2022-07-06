@@ -307,7 +307,7 @@
     "WhereExecuted": "Wo ausgeführt",
     "ActionSetBrightness": "Helligkeit ändern",
     "ActionSetBrightnessDescription": "Ändert die Display Helligkeit (Funktioniert nur mit der Android App!)",
-    "BindableVarible": "Tastenzustand binden",
+    "BindableVariable": "Tastenzustand binden",
     "BindableVariableInfo": "Der Zustand dieser Taste kann an die Variable {0} gebunden werden. Soll der Zustand an diese Variable gebunden werden?",
     "Cancelled": "Abgebrochen",
     "Preparing": "Wird vorbereitet...",
