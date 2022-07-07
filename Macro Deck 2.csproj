@@ -4,12 +4,11 @@
 		<IsBeta>true</IsBeta>
 		<BetaPatch>0</BetaPatch>
 
-		<VersionPatch>0</VersionPatch>
+		<VersionMajor>22</VersionMajor> <!-- Year (Release) -->
+		<VersionMinor>8</VersionMinor> <!-- Month (Release) -->
+		<VersionPatch>0</VersionPatch> <!-- Patch (Not Beta patch) -->
 
 		<VersionSuffix Condition="'$(IsBeta)' == 'true'">b$(BetaPatch)</VersionSuffix>
-
-		<VersionMajor>$([System.DateTime]::UtcNow.ToString("yy"))</VersionMajor>
-		<VersionMinor>$([System.UInt16]::Parse($([System.DateTime]::UtcNow.ToString("MM"))))</VersionMinor>
 		<VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
 	</PropertyGroup>
 	
