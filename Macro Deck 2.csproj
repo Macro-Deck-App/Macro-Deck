@@ -1,14 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
 	<PropertyGroup>
-
 		<IsBeta>true</IsBeta>
-		<BetaPatch>3</BetaPatch>
+		<BetaPatch>0</BetaPatch>
 
 		<VersionPatch>0</VersionPatch>
 
 		<VersionSuffix Condition="'$(IsBeta)' == 'true'">b$(BetaPatch)</VersionSuffix>
-		
+
 		<VersionMajor>$([System.DateTime]::UtcNow.ToString("yy"))</VersionMajor>
 		<VersionMinor>$([System.UInt16]::Parse($([System.DateTime]::UtcNow.ToString("MM"))))</VersionMinor>
 		<VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
