@@ -69,15 +69,14 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabBackups.Text = LanguageManager.Strings.Backups;
             this.lblBackups.Text = LanguageManager.Strings.Backups;
             this.btnCreateBackup.Text = LanguageManager.Strings.CreateBackup;
-            //this.lblUpdateChannelLabel.Text = LanguageManager.Strings.UpdateChannel;
-            this.checkInstallDevVersions.Text = LanguageManager.Strings.InstallDevVersions;
             this.checkInstallBetaVersions.Text = LanguageManager.Strings.InstallBetaVersions;
             this.btnCheckUpdates.Text = LanguageManager.Strings.CheckForUpdatesNow;
+            this.lblBuildLabel.Text = LanguageManager.Strings.VersionBuild;
+            this.lblBuild.Text = MacroDeck.Version.Build.ToString();
             this.lblWebSocketAPILabel.Text = LanguageManager.Strings.WebSocketAPIVersion;
             this.lblPluginAPILabel.Text = LanguageManager.Strings.PluginAPIVersion;
             this.lblInstalledPluginsLabel.Text = LanguageManager.Strings.InstalledPlugins;
-            this.lblOSLabel.Text = LanguageManager.Strings.OperatingSystem;
-            this.lblTranslationBy.Text = String.Format(LanguageManager.Strings.XTranslationByX, LanguageManager.Strings.__Language__, LanguageManager.Strings.__Author__);
+            this.lblTranslationBy.Text = string.Format(LanguageManager.Strings.XTranslationByX, LanguageManager.Strings.__Language__, LanguageManager.Strings.__Author__);
             Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
         }
 
@@ -91,12 +90,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.LoadIconCache();
             this.LoadBackups();
 
-            this.lblInstalledVersion.Text = MacroDeck.VersionString;
+            this.lblInstalledVersion.Text = MacroDeck.Version.VersionString;
             this.lblWebsocketAPIVersion.Text = MacroDeck.ApiVersion.ToString();
             this.lblPluginAPIVersion.Text = MacroDeck.PluginApiVersion.ToString();
-            this.lblMacroDeck.Text = "Macro Deck " + MacroDeck.VersionString;
+            this.lblMacroDeck.Text = "Macro Deck " + MacroDeck.Version.VersionString;
             this.lblInstalledPlugins.Text = PluginManager.Plugins.Count.ToString();
-            this.lblOS.Text = Utils.OperatingSystemInformation.GetWindowsVersionName();
 
             this.verticalTabControl.SetNotification(2, Updater.Updater.UpdateAvailable);
 
@@ -143,11 +141,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void LoadUpdateChannel()
         {
-            this.checkInstallDevVersions.CheckedChanged -= CheckInstallDevVersions_CheckedChanged;
             this.checkInstallBetaVersions.CheckedChanged -= CheckInstallBetaVersions_CheckedChanged;
-            this.checkInstallDevVersions.Checked = MacroDeck.Configuration.UpdateDevVersions;
             this.checkInstallBetaVersions.Checked = MacroDeck.Configuration.UpdateBetaVersions;
-            this.checkInstallDevVersions.CheckedChanged += CheckInstallDevVersions_CheckedChanged;
             this.checkInstallBetaVersions.CheckedChanged += CheckInstallBetaVersions_CheckedChanged;
         }
 
@@ -158,34 +153,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             {
                 BackupItem backupItem = new BackupItem(macroDeckBackupInfo);
                 this.backupsPanel.Controls.Add(backupItem);
-            }
-        }
-
-        private void CheckInstallDevVersions_CheckedChanged(object sender, EventArgs e)
-        {
-            if (this.checkInstallDevVersions.Checked)
-            {
-                using (var msgBox = new CustomControls.MessageBox())
-                {
-                    if (msgBox.ShowDialog(LanguageManager.Strings.Warning, LanguageManager.Strings.WarningDevVersions, MessageBoxButtons.YesNo) == DialogResult.Yes)
-                    {
-                        this.updaterPanel.Controls.Clear();
-                        MacroDeck.Configuration.UpdateDevVersions = true;
-                        MacroDeck.SaveConfiguration();
-                        Updater.Updater.CheckForUpdatesAsync();
-                    }
-                    else
-                    {
-                        this.LoadUpdateChannel();
-                    }
-                }
-            } 
-            else
-            {
-                this.updaterPanel.Controls.Clear();
-                MacroDeck.Configuration.UpdateDevVersions = false;
-                MacroDeck.SaveConfiguration();
-                Updater.Updater.CheckForUpdatesAsync();
             }
         }
 
@@ -425,6 +392,18 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private void BackupManager_DeleteSuccess(object sender, EventArgs e)
         {
             this.LoadBackups();
+        }
+
+        private void BtnGitHub_Click(object sender, EventArgs e)
+        {
+            var p = new Process
+            {
+                StartInfo = new ProcessStartInfo("https://github.com/Macro-Deck-org/Macro-Deck")
+                {
+                    UseShellExecute = true,
+                }
+            };
+            p.Start();
         }
     }
 }

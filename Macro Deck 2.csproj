@@ -1,18 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
-  <PropertyGroup>
-    <VersionMajor>2</VersionMajor>
-    <VersionMinor>11</VersionMinor>
-    <VersionPatch>2</VersionPatch>
-    <VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
-  </PropertyGroup>
-  
+
+	<PropertyGroup>
+
+		<IsBeta>true</IsBeta>
+		<BetaPatch>3</BetaPatch>
+
+		<VersionPatch>0</VersionPatch>
+
+		<VersionSuffix Condition="'$(IsBeta)' == 'true'">b$(BetaPatch)</VersionSuffix>
+		
+		<VersionMajor>$([System.DateTime]::UtcNow.ToString("yy"))</VersionMajor>
+		<VersionMinor>$([System.UInt16]::Parse($([System.DateTime]::UtcNow.ToString("MM"))))</VersionMinor>
+		<VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
+	</PropertyGroup>
+	
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
     <RootNamespace>SuchByte.MacroDeck</RootNamespace>
-    <UseWindowsForms>true</UseWindowsForms>
+	  <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>appicon.ico</ApplicationIcon>
-    <StartupObject></StartupObject>
+    <StartupObject>SuchByte.MacroDeck.MacroDeck</StartupObject>
     <Version>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(VersionRevision)</Version>
     <Company>Macro Deck</Company>
     <Authors>Manuel Mayer</Authors>
@@ -20,7 +28,7 @@
     <AssemblyOriginatorKeyFile>Macro Deck.pfx</AssemblyOriginatorKeyFile>
     <Product>Macro Deck</Product>
     <AssemblyVersion>2.21.3110.100</AssemblyVersion>
-	<FileVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(VersionRevision)</FileVersion>
+	<FileVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(VersionRevision)$(VersionSuffix)</FileVersion>
     <AssemblyName>Macro Deck 2</AssemblyName>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/SuchByte/Macro-Deck</PackageProjectUrl>

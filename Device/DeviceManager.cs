@@ -1,10 +1,12 @@
 ﻿using Newtonsoft.Json;
+using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
@@ -184,7 +186,7 @@ namespace SuchByte.MacroDeck.Device
                             mainForm = form;
                         }
                     }
-                    if (mainForm != null)
+                    if (mainForm != null && mainForm.IsHandleCreated && !mainForm.IsDisposed)
                     {
                         mainForm.Invoke(new Action(() =>
                         {
@@ -201,6 +203,7 @@ namespace SuchByte.MacroDeck.Device
                         {
                             ClientId = macroDeckClient.ClientId,
                             DisplayName = "Client " + macroDeckClient.ClientId,
+                            ProfileId = ProfileManager.Profiles.FirstOrDefault().ProfileId,
                         };
                         AddKnownDevice(macroDeckDevice);
                         macroDeckDevice.ClientId = macroDeckClient.ClientId;
@@ -227,35 +230,27 @@ namespace SuchByte.MacroDeck.Device
 
         private static bool ShowConnectionDialog(MacroDeckClient macroDeckClient)
         {
-            using (var msgBox = new GUI.CustomControls.MessageBox())
+            System.Media.SystemSounds.Exclamation.Play();
+            using var newConnectionDialog = new NewConnectionDialog(macroDeckClient);
+            if (newConnectionDialog.ShowDialog() == DialogResult.Yes)
             {
-                System.Media.SystemSounds.Exclamation.Play();
-                if (msgBox.ShowDialog(Language.LanguageManager.Strings.NewConnection, String.Format(Language.LanguageManager.Strings.XIsAnUnknownDevice, macroDeckClient.ClientId), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                return true;
+            }
+            else
+            {
+                macroDeckClient?.SocketConnection?.Close();
+                if (newConnectionDialog.Blocked)
                 {
                     MacroDeckDevice macroDeckDevice = new MacroDeckDevice
                     {
                         ClientId = macroDeckClient.ClientId,
                         DisplayName = "Client " + macroDeckClient.ClientId,
-                        ProfileId = ProfileManager.Profiles[0].ProfileId
+                        Blocked = true
                     };
-                    DeviceManager.AddKnownDevice(macroDeckDevice);
-                    return true;
+                    AddKnownDevice(macroDeckDevice);
                 }
-                else
-                {
-                    macroDeckClient.SocketConnection.Close();
-                    if (msgBox.ShowDialog(Language.LanguageManager.Strings.BlockConnection, String.Format(Language.LanguageManager.Strings.ShouldMacroDeckBlockConnectionsFromX, macroDeckClient.ClientId), MessageBoxButtons.YesNo) == DialogResult.Yes)
-                    {
-                        MacroDeckDevice macroDeckDevice = new MacroDeckDevice
-                        {
-                            ClientId = macroDeckClient.ClientId,
-                            DisplayName = "Client " + macroDeckClient.ClientId,
-                            Blocked = true
-                        };
-                        DeviceManager.AddKnownDevice(macroDeckDevice);
-                    }
-                    return false;
-                }
+                return false;
+
             }
         }
 

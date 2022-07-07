@@ -133,7 +133,7 @@ namespace SuchByte.MacroDeck.GUI
         private void MainWindow_Load(object sender, EventArgs e)
         {
 
-            this.lblVersion.Text = "Macro Deck " + MacroDeck.VersionString + (Debugger.IsAttached  ? " (debug)" : "");
+            this.lblVersion.Text = "Macro Deck " + MacroDeck.Version.VersionString;
             
             PluginManager.OnPluginsChange += this.OnPluginsChanged;
             PluginManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;

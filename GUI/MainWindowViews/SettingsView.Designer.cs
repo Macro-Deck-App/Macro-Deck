@@ -55,7 +55,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabUpdater = new System.Windows.Forms.TabPage();
             this.checkAutoUpdate = new System.Windows.Forms.CheckBox();
             this.checkInstallBetaVersions = new System.Windows.Forms.CheckBox();
-            this.checkInstallDevVersions = new System.Windows.Forms.CheckBox();
             this.updaterPanel = new System.Windows.Forms.Panel();
             this.btnCheckUpdates = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.lblInstalledVersion = new System.Windows.Forms.Label();
@@ -66,6 +65,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.backupsPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.lblBackups = new System.Windows.Forms.Label();
             this.tabAbout = new System.Windows.Forms.TabPage();
+            this.btnGitHub = new SuchByte.MacroDeck.GUI.CustomControls.PictureButton();
+            this.lblBuild = new System.Windows.Forms.Label();
+            this.lblBuildLabel = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.lblTranslationBy = new System.Windows.Forms.Label();
             this.btnLicenses = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
@@ -73,9 +75,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblWebsocketAPIVersion = new System.Windows.Forms.Label();
             this.lblPluginAPILabel = new System.Windows.Forms.Label();
             this.lblWebSocketAPILabel = new System.Windows.Forms.Label();
-            this.lblOS = new System.Windows.Forms.Label();
             this.lblInstalledPlugins = new System.Windows.Forms.Label();
-            this.lblOSLabel = new System.Windows.Forms.Label();
             this.lblInstalledPluginsLabel = new System.Windows.Forms.Label();
             this.lblDeveloped = new System.Windows.Forms.Label();
             this.lblMacroDeck = new System.Windows.Forms.Label();
@@ -89,6 +89,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabUpdater.SuspendLayout();
             this.tabBackups.SuspendLayout();
             this.tabAbout.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.btnGitHub)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -373,7 +374,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabUpdater.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.tabUpdater.Controls.Add(this.checkAutoUpdate);
             this.tabUpdater.Controls.Add(this.checkInstallBetaVersions);
-            this.tabUpdater.Controls.Add(this.checkInstallDevVersions);
             this.tabUpdater.Controls.Add(this.updaterPanel);
             this.tabUpdater.Controls.Add(this.btnCheckUpdates);
             this.tabUpdater.Controls.Add(this.lblInstalledVersion);
@@ -401,24 +401,13 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // checkInstallBetaVersions
             // 
             this.checkInstallBetaVersions.AutoSize = true;
-            this.checkInstallBetaVersions.Location = new System.Drawing.Point(13, 74);
+            this.checkInstallBetaVersions.Location = new System.Drawing.Point(13, 57);
             this.checkInstallBetaVersions.Name = "checkInstallBetaVersions";
             this.checkInstallBetaVersions.Size = new System.Drawing.Size(169, 23);
             this.checkInstallBetaVersions.TabIndex = 16;
             this.checkInstallBetaVersions.Text = "Install Beta versions";
             this.checkInstallBetaVersions.UseMnemonic = false;
             this.checkInstallBetaVersions.UseVisualStyleBackColor = true;
-            // 
-            // checkInstallDevVersions
-            // 
-            this.checkInstallDevVersions.AutoSize = true;
-            this.checkInstallDevVersions.Location = new System.Drawing.Point(13, 51);
-            this.checkInstallDevVersions.Name = "checkInstallDevVersions";
-            this.checkInstallDevVersions.Size = new System.Drawing.Size(166, 23);
-            this.checkInstallDevVersions.TabIndex = 15;
-            this.checkInstallDevVersions.Text = "Install Dev versions";
-            this.checkInstallDevVersions.UseMnemonic = false;
-            this.checkInstallDevVersions.UseVisualStyleBackColor = true;
             // 
             // updaterPanel
             // 
@@ -537,6 +526,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // tabAbout
             // 
             this.tabAbout.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.tabAbout.Controls.Add(this.btnGitHub);
+            this.tabAbout.Controls.Add(this.lblBuild);
+            this.tabAbout.Controls.Add(this.lblBuildLabel);
             this.tabAbout.Controls.Add(this.label1);
             this.tabAbout.Controls.Add(this.lblTranslationBy);
             this.tabAbout.Controls.Add(this.btnLicenses);
@@ -544,9 +536,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabAbout.Controls.Add(this.lblWebsocketAPIVersion);
             this.tabAbout.Controls.Add(this.lblPluginAPILabel);
             this.tabAbout.Controls.Add(this.lblWebSocketAPILabel);
-            this.tabAbout.Controls.Add(this.lblOS);
             this.tabAbout.Controls.Add(this.lblInstalledPlugins);
-            this.tabAbout.Controls.Add(this.lblOSLabel);
             this.tabAbout.Controls.Add(this.lblInstalledPluginsLabel);
             this.tabAbout.Controls.Add(this.lblDeveloped);
             this.tabAbout.Controls.Add(this.lblMacroDeck);
@@ -559,10 +549,44 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabAbout.TabIndex = 2;
             this.tabAbout.Text = "About";
             // 
+            // btnGitHub
+            // 
+            this.btnGitHub.BackColor = System.Drawing.Color.Transparent;
+            this.btnGitHub.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.GitHub_Mark_Light;
+            this.btnGitHub.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnGitHub.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnGitHub.HoverImage = null;
+            this.btnGitHub.Location = new System.Drawing.Point(436, 63);
+            this.btnGitHub.Name = "btnGitHub";
+            this.btnGitHub.Size = new System.Drawing.Size(50, 50);
+            this.btnGitHub.TabIndex = 18;
+            this.btnGitHub.TabStop = false;
+            this.btnGitHub.Click += new System.EventHandler(this.BtnGitHub_Click);
+            // 
+            // lblBuild
+            // 
+            this.lblBuild.AutoSize = true;
+            this.lblBuild.Location = new System.Drawing.Point(564, 380);
+            this.lblBuild.Name = "lblBuild";
+            this.lblBuild.Size = new System.Drawing.Size(27, 19);
+            this.lblBuild.TabIndex = 17;
+            this.lblBuild.Text = "13";
+            this.lblBuild.UseMnemonic = false;
+            // 
+            // lblBuildLabel
+            // 
+            this.lblBuildLabel.AutoSize = true;
+            this.lblBuildLabel.Location = new System.Drawing.Point(332, 380);
+            this.lblBuildLabel.Name = "lblBuildLabel";
+            this.lblBuildLabel.Size = new System.Drawing.Size(44, 19);
+            this.lblBuildLabel.TabIndex = 16;
+            this.lblBuildLabel.Text = "Build";
+            this.lblBuildLabel.UseMnemonic = false;
+            // 
             // label1
             // 
             this.label1.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(219, 173);
+            this.label1.Location = new System.Drawing.Point(219, 226);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(485, 18);
             this.label1.TabIndex = 15;
@@ -573,7 +597,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblTranslationBy
             // 
             this.lblTranslationBy.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblTranslationBy.Location = new System.Drawing.Point(219, 111);
+            this.lblTranslationBy.Location = new System.Drawing.Point(219, 164);
             this.lblTranslationBy.Name = "lblTranslationBy";
             this.lblTranslationBy.Size = new System.Drawing.Size(485, 18);
             this.lblTranslationBy.TabIndex = 14;
@@ -591,7 +615,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.btnLicenses.ForeColor = System.Drawing.Color.White;
             this.btnLicenses.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
             this.btnLicenses.Icon = null;
-            this.btnLicenses.Location = new System.Drawing.Point(361, 244);
+            this.btnLicenses.Location = new System.Drawing.Point(361, 297);
             this.btnLicenses.Name = "btnLicenses";
             this.btnLicenses.Progress = 0;
             this.btnLicenses.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
@@ -606,7 +630,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblPluginAPIVersion
             // 
             this.lblPluginAPIVersion.AutoSize = true;
-            this.lblPluginAPIVersion.Location = new System.Drawing.Point(567, 437);
+            this.lblPluginAPIVersion.Location = new System.Drawing.Point(564, 434);
             this.lblPluginAPIVersion.Name = "lblPluginAPIVersion";
             this.lblPluginAPIVersion.Size = new System.Drawing.Size(27, 19);
             this.lblPluginAPIVersion.TabIndex = 12;
@@ -616,7 +640,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblWebsocketAPIVersion
             // 
             this.lblWebsocketAPIVersion.AutoSize = true;
-            this.lblWebsocketAPIVersion.Location = new System.Drawing.Point(567, 412);
+            this.lblWebsocketAPIVersion.Location = new System.Drawing.Point(564, 407);
             this.lblWebsocketAPIVersion.Name = "lblWebsocketAPIVersion";
             this.lblWebsocketAPIVersion.Size = new System.Drawing.Size(27, 19);
             this.lblWebsocketAPIVersion.TabIndex = 11;
@@ -626,7 +650,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblPluginAPILabel
             // 
             this.lblPluginAPILabel.AutoSize = true;
-            this.lblPluginAPILabel.Location = new System.Drawing.Point(329, 437);
+            this.lblPluginAPILabel.Location = new System.Drawing.Point(332, 434);
             this.lblPluginAPILabel.Name = "lblPluginAPILabel";
             this.lblPluginAPILabel.Size = new System.Drawing.Size(146, 19);
             this.lblPluginAPILabel.TabIndex = 10;
@@ -636,57 +660,37 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblWebSocketAPILabel
             // 
             this.lblWebSocketAPILabel.AutoSize = true;
-            this.lblWebSocketAPILabel.Location = new System.Drawing.Point(329, 412);
+            this.lblWebSocketAPILabel.Location = new System.Drawing.Point(332, 407);
             this.lblWebSocketAPILabel.Name = "lblWebSocketAPILabel";
             this.lblWebSocketAPILabel.Size = new System.Drawing.Size(177, 19);
             this.lblWebSocketAPILabel.TabIndex = 9;
             this.lblWebSocketAPILabel.Text = "Websocket API version:";
             this.lblWebSocketAPILabel.UseMnemonic = false;
             // 
-            // lblOS
-            // 
-            this.lblOS.AutoSize = true;
-            this.lblOS.Location = new System.Drawing.Point(567, 488);
-            this.lblOS.Name = "lblOS";
-            this.lblOS.Size = new System.Drawing.Size(25, 19);
-            this.lblOS.TabIndex = 8;
-            this.lblOS.Text = "os";
-            this.lblOS.UseMnemonic = false;
-            // 
             // lblInstalledPlugins
             // 
             this.lblInstalledPlugins.AutoSize = true;
-            this.lblInstalledPlugins.Location = new System.Drawing.Point(567, 463);
+            this.lblInstalledPlugins.Location = new System.Drawing.Point(564, 461);
             this.lblInstalledPlugins.Name = "lblInstalledPlugins";
             this.lblInstalledPlugins.Size = new System.Drawing.Size(18, 19);
             this.lblInstalledPlugins.TabIndex = 7;
             this.lblInstalledPlugins.Text = "0";
             this.lblInstalledPlugins.UseMnemonic = false;
             // 
-            // lblOSLabel
-            // 
-            this.lblOSLabel.AutoSize = true;
-            this.lblOSLabel.Location = new System.Drawing.Point(329, 488);
-            this.lblOSLabel.Name = "lblOSLabel";
-            this.lblOSLabel.Size = new System.Drawing.Size(36, 19);
-            this.lblOSLabel.TabIndex = 5;
-            this.lblOSLabel.Text = "OS:";
-            this.lblOSLabel.UseMnemonic = false;
-            // 
             // lblInstalledPluginsLabel
             // 
             this.lblInstalledPluginsLabel.AutoSize = true;
-            this.lblInstalledPluginsLabel.Location = new System.Drawing.Point(329, 463);
+            this.lblInstalledPluginsLabel.Location = new System.Drawing.Point(332, 461);
             this.lblInstalledPluginsLabel.Name = "lblInstalledPluginsLabel";
             this.lblInstalledPluginsLabel.Size = new System.Drawing.Size(131, 19);
             this.lblInstalledPluginsLabel.TabIndex = 4;
             this.lblInstalledPluginsLabel.Text = "Installed plugins:";
-            this.lblInstalledPluginsLabel.UseMnemonic= false;
+            this.lblInstalledPluginsLabel.UseMnemonic = false;
             // 
             // lblDeveloped
             // 
             this.lblDeveloped.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblDeveloped.Location = new System.Drawing.Point(219, 153);
+            this.lblDeveloped.Location = new System.Drawing.Point(219, 206);
             this.lblDeveloped.Name = "lblDeveloped";
             this.lblDeveloped.Size = new System.Drawing.Size(485, 18);
             this.lblDeveloped.TabIndex = 2;
@@ -729,7 +733,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // SettingsView
             // 
-            
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.verticalTabControl);
@@ -750,6 +754,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.tabBackups.PerformLayout();
             this.tabAbout.ResumeLayout(false);
             this.tabAbout.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.btnGitHub)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
@@ -763,9 +768,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Label lblMacroDeck;
         private System.Windows.Forms.Label lblDeveloped;
-        private System.Windows.Forms.Label lblOSLabel;
         private System.Windows.Forms.Label lblInstalledPluginsLabel;
-        private System.Windows.Forms.Label lblOS;
         private System.Windows.Forms.Label lblInstalledPlugins;
         private System.Windows.Forms.TabPage tabConnection;
         private System.Windows.Forms.Label lblGeneral;
@@ -798,11 +801,13 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private System.Windows.Forms.ImageList tabIcons;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.CheckBox checkInstallBetaVersions;
-        private System.Windows.Forms.CheckBox checkInstallDevVersions;
         private System.Windows.Forms.CheckBox checkAutoUpdate;
         private System.Windows.Forms.TabPage tabBackups;
         private System.Windows.Forms.Label lblBackups;
         private System.Windows.Forms.FlowLayoutPanel backupsPanel;
         private ButtonPrimary btnCreateBackup;
+        private System.Windows.Forms.Label lblBuild;
+        private System.Windows.Forms.Label lblBuildLabel;
+        private PictureButton btnGitHub;
     }
 }

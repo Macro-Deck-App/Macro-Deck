@@ -12,6 +12,7 @@ using SuchByte.MacroDeck.Hotkeys;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
+using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Pipes;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
@@ -37,8 +38,7 @@ namespace SuchByte.MacroDeck
     public class MacroDeck : NativeWindow
     {
         static Assembly assembly = Assembly.GetExecutingAssembly();
-        internal static readonly string VersionString = FileVersionInfo.GetVersionInfo(assembly.Location).ProductVersion;
-        internal static readonly int BuildVersion = Int32.Parse(VersionString.Split(".")[3].ToString());
+        public static readonly VersionModel Version = new VersionModel(FileVersionInfo.GetVersionInfo(assembly.Location).FileVersion);
 
         public static readonly int ApiVersion = 20;
         public static readonly int PluginApiVersion = 35;
@@ -105,7 +105,7 @@ namespace SuchByte.MacroDeck
         private static NotifyIcon _trayIcon = new NotifyIcon
         {
             Icon = Properties.Resources.appicon,
-            Text = "Macro Deck " + VersionString,
+            Text = "Macro Deck " + Version.VersionString,
             Visible = false,
             ContextMenuStrip = _trayIconContextMenu
         };
@@ -218,7 +218,7 @@ namespace SuchByte.MacroDeck
             InitializePaths(PortableMode);
 
             MacroDeckLogger.Info(Environment.NewLine + "==========================================");
-            MacroDeckLogger.Info("Starting Macro Deck version " + VersionString + (args.Length > 0 ? " with parameters: " + string.Join(" ", args) : ""));
+            MacroDeckLogger.Info("Starting Macro Deck version " + Version.VersionString + " build " + Version.Build + (args.Length > 0 ? " with parameters: " + string.Join(" ", args) : ""));
             MacroDeckLogger.Info("Executable: " + ExecutablePath);
             MacroDeckLogger.Info("OS: " + OperatingSystemInformation.GetWindowsVersionName());
             string networkInterfaces = "";

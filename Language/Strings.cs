@@ -346,6 +346,10 @@ namespace SuchByte.MacroDeck.Language
         public string ActionSetBackgroundColorDescription = "Changes the background color of a action button";
         public string Fixed = "Fixed";
         public string Random = "Random";
-
+        public string NewConnectionRequest = "New connection request";
+        public string ClientId = "Client id";
+        public string Accept = "Accept";
+        public string Deny = "Deny";
+        public string VersionBuild = "Build";
     }
 }

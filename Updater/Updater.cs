@@ -88,14 +88,14 @@ namespace SuchByte.MacroDeck.Updater
                         jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest&channel=test");
                     }
 
-                    jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest" + (MacroDeck.Configuration.UpdateDevVersions ? "&dev" : "") + (MacroDeck.Configuration.UpdateBetaVersions ? "&beta" : ""));
+                    jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest" + (MacroDeck.Configuration.UpdateBetaVersions ? "&beta" : ""));
 
                     _jsonObject = JObject.Parse(jsonString);
                     if (_jsonObject["build"] != null)
                     {
                         if (Int32.TryParse(_jsonObject["build"].ToString(), out int build))
                         {
-                            if (build > MacroDeck.BuildVersion || _forceUpdate)
+                            if (build > MacroDeck.Version.Build || _forceUpdate)
                             {
                                 MacroDeckLogger.Info("Macro Deck version " + _jsonObject["version"] + " available");
                                 try

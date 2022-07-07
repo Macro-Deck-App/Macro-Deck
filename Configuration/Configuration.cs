@@ -41,9 +41,6 @@ namespace SuchByte.MacroDeck.Configuration
         [JsonProperty("Update.Auto")]
         public bool AutoUpdates { get; set; } = true;
 
-        [JsonProperty("Update.Channel.Dev")]
-        public bool UpdateDevVersions { get; set; } = false;
-
         [JsonProperty("Update.Channel.Beta")]
         public bool UpdateBetaVersions { get; set; } = true;
 
