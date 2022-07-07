@@ -2,10 +2,10 @@
 
 	<PropertyGroup>
 		<IsBeta>true</IsBeta>
-		<BetaPatch>0</BetaPatch>
+		<BetaPatch>3</BetaPatch>
 
-		<VersionMajor>22</VersionMajor> <!-- Year (Release) -->
-		<VersionMinor>8</VersionMinor> <!-- Month (Release) -->
+		<VersionMajor>2</VersionMajor>
+		<VersionMinor>12</VersionMinor>
 		<VersionPatch>0</VersionPatch> <!-- Patch (Not Beta patch) -->
 
 		<VersionSuffix Condition="'$(IsBeta)' == 'true'">b$(BetaPatch)</VersionSuffix>
