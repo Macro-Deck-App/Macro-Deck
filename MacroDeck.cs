@@ -444,6 +444,7 @@ namespace SuchByte.MacroDeck
 
             MacroDeckServer.Start(_configuration.Host_Address, port == -1 ? _configuration.Host_Port : port);
             BroadcastServer.Start();
+            ADBServerHelper.Initialize();
 
             Updater.Updater.Initialize(ForceUpdate, TestUpdateChannel);
             Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
