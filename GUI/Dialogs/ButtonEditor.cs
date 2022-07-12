@@ -248,7 +248,6 @@ namespace SuchByte.MacroDeck.GUI
 
         private void Apply()
         {
-            Debug.WriteLine("Apply");
             HotkeyManager.RemoveHotkey(this.actionButton);
             this.actionButton = this.actionButtonEdited;
             this.actionButton.EventListeners = new List<EventListener>();
@@ -290,9 +289,6 @@ namespace SuchByte.MacroDeck.GUI
             ProfileManager.UpdateVariableLabels(this.actionButton);
             this.actionButton.UpdateBindingState();
             this.actionButton.UpdateHotkey();
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
         }
 
         private void BtnSave_Click(object sender, EventArgs e)
