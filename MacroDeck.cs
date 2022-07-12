@@ -13,6 +13,7 @@ using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Models;
+using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Pipes;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
@@ -41,7 +42,7 @@ namespace SuchByte.MacroDeck
         public static readonly VersionModel Version = new VersionModel(FileVersionInfo.GetVersionInfo(assembly.Location).FileVersion);
 
         public static readonly int ApiVersion = 20;
-        public static readonly int PluginApiVersion = 35;
+        public static readonly int PluginApiVersion = 36;
 
         // Start parameters
         internal static bool ForceUpdate = false;
@@ -95,6 +96,8 @@ namespace SuchByte.MacroDeck
         }
 
         public static event EventHandler OnMainWindowLoad;
+
+        public static event EventHandler OnMacroDeckLoaded;
 
         private static Configuration.Configuration _configuration = new Configuration.Configuration();
 
@@ -461,12 +464,18 @@ namespace SuchByte.MacroDeck
 
             CreateTrayIcon();
 
-            long startTook = DateTimeOffset.Now.ToUnixTimeMilliseconds() - _macroDeckStarted;
-            MacroDeckLogger.Info($"Macro Deck startup finished (took {startTook}ms)");
 
             using (mainWindow = new MainWindow())
             {
                 SyncContext = SynchronizationContext.Current;
+            }
+
+            long startTook = DateTimeOffset.Now.ToUnixTimeMilliseconds() - _macroDeckStarted;
+            MacroDeckLogger.Info($"Macro Deck startup finished (took {startTook}ms)");
+
+            if (OnMacroDeckLoaded != null)
+            {
+                OnMacroDeckLoaded(null, EventArgs.Empty);
             }
 
             if (show || SafeMode)
@@ -495,6 +504,15 @@ namespace SuchByte.MacroDeck
             {
                 _trayIcon.ShowBalloonTip(5000, "Macro Deck Updater", String.Format(Language.LanguageManager.Strings.VersionXIsNowAvailable, versionObject["version"].ToString(), versionObject["channel"].ToString()), ToolTipIcon.Info);
             } catch { }
+        }
+
+        internal static void ShowBalloonTip(string title, string message)
+        {
+            try
+            {
+                _trayIcon?.ShowBalloonTip(5000, title, message, ToolTipIcon.Info);
+            }
+            catch { }
         }
 
         private static void CreateTrayIcon()

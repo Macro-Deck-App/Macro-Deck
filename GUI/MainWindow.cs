@@ -7,6 +7,7 @@ using SuchByte.MacroDeck.GUI.MainWindowViews;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
 using SuchByte.MacroDeck.Utils;
@@ -41,21 +42,17 @@ namespace SuchByte.MacroDeck.GUI
             }
         }
 
+        private NotificationsList notificationsList;
+
         public MainWindow()
         {
             this.InitializeComponent();
             this.UpdateTranslation();
-            this.UpdateWarningsErrors();
             LanguageManager.LanguageChanged += LanguageChanged;
             Updater.Updater.OnUpdateAvailable += UpdateAvailable;
-            MacroDeckLogger.OnWarningOrError += MacroDeckLogger_OnWarningOrError;
             this._deckView ??= new DeckView();
         }
 
-        private void MacroDeckLogger_OnWarningOrError(object sender, EventArgs e)
-        {
-            UpdateWarningsErrors();
-        }
 
         private void UpdateTranslation()
         {
@@ -71,14 +68,6 @@ namespace SuchByte.MacroDeck.GUI
             }
         }
 
-        private void UpdateWarningsErrors()
-        {
-            this.Invoke(new Action(() =>
-            {
-                this.warningsErrorPanel.Visible = MacroDeckLogger.Errors > 0 || MacroDeckLogger.Warnings > 0;
-                this.lblErrorsWarnings.Text = string.Format(LanguageManager.Strings.XWarningsXErrors, MacroDeckLogger.Warnings, MacroDeckLogger.Errors);
-            }));
-        }
 
         private void UpdateAvailable(object sender, EventArgs e)
         {
@@ -162,11 +151,18 @@ namespace SuchByte.MacroDeck.GUI
 
 
             this.SetView(this.DeckView);
-
+            NotificationManager.OnNotification += NotificationsChanged;
+            NotificationManager.OnNotificationRemoved += NotificationsChanged;
             PluginManager.ScanUpdatesAsync();
             IconManager.ScanUpdatesAsync();
             ExtensionStoreHelper.OnInstallationFinished += ExtensionStoreHelper_OnInstallationFinished;
             CenterToScreen();
+            this.btnNotifications.NotificationCount = NotificationManager.Notifications.Count;
+        }
+
+        private void NotificationsChanged(object sender, EventArgs e)
+        {
+            this.btnNotifications.NotificationCount = NotificationManager.Notifications.Count;
         }
 
         private void ExtensionStoreHelper_OnInstallationFinished(object sender, EventArgs e)
@@ -266,13 +262,30 @@ namespace SuchByte.MacroDeck.GUI
             p.Start();
         }
 
-        private void lblPluginsLoaded_Click(object sender, EventArgs e)
-        {
 
-        }
-
-        private void contentButtonPanel_Paint(object sender, PaintEventArgs e)
+        private void BtnNotifications_Click(object sender, EventArgs e)
         {
+            if (this.notificationsList == null || this.notificationsList.IsDisposed)
+            {
+                this.notificationsList = new NotificationsList
+                {
+                    Location = new Point(this.btnNotifications.Location.X, this.btnNotifications.Location.Y + this.btnNotifications.Height)
+                };
+                this.notificationsList.OnCloseRequested += (sender, e) =>
+                {
+                    this.Controls.Remove(this.notificationsList);
+                };
+            }
+
+            if (this.Controls.Contains(this.notificationsList))
+            {
+                this.Controls.Remove(this.notificationsList);
+            } else
+            {
+                this.Controls.Add(this.notificationsList);
+                this.notificationsList.BringToFront();
+            }
+
 
         }
     }

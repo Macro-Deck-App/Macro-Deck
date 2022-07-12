@@ -3,9 +3,11 @@ using SQLite;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -20,6 +22,10 @@ namespace SuchByte.MacroDeck.Variables
         internal static event EventHandler OnVariableChanged;
         internal static event EventHandler OnVariableRemoved;
 
+
+        /// <summary>
+        /// Use GetVariables(MacroDeckPlugin macroDeckPlugin)
+        /// </summary>
         public static TableQuery<Variable> ListVariables
         {
             get => _database.Table<Variable>();
@@ -31,7 +37,7 @@ namespace SuchByte.MacroDeck.Variables
         /// or
         /// DeleteVariable
         /// </summary>
-        [Obsolete("Use ListVariables to list all variables")]
+        [Obsolete("Use GetVariables to list all variables")]
         public static List<Variable> Variables
         {
             get
@@ -41,6 +47,21 @@ namespace SuchByte.MacroDeck.Variables
                 variables.AddRange(query);
                 return variables;
             }
+        }
+
+        public static List<Variable> GetVariables(MacroDeckPlugin macroDeckPlugin)
+        {
+            var variables = new ConcurrentBag<Variable>();
+            Parallel.ForEach(ListVariables.Where(x => x.Creator == macroDeckPlugin.Name), variable =>
+            {
+                variables.Add(variable);
+            });
+            return variables.ToList();
+        }
+
+        public static Variable GetVariable(MacroDeckPlugin macroDeckPlugin, string variableName)
+        {
+            return ListVariables.Where(x => x.Creator == macroDeckPlugin.Name && x.Name.ToLower() == variableName.ToLower()).FirstOrDefault();
         }
 
         private static SQLiteConnection _database;

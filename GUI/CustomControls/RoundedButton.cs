@@ -38,7 +38,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         private void OnMouseEnter(object sender, EventArgs e)
         {
             this.Invalidate();
-            this.Image = this.BackgroundImage;
+            try
+            {
+                this.Image = this.BackgroundImage;
+            } catch { }
         }
 
         private void OnMouseLeave(object sender, EventArgs e)

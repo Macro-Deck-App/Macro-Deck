@@ -1,4 +1,6 @@
-﻿using SuchByte.MacroDeck.GUI.Dialogs;
+﻿using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
 using System;
 using System.Collections.Generic;
@@ -13,31 +15,10 @@ namespace SuchByte.MacroDeck.Logging
 {
     public static class MacroDeckLogger
     {
-        public static event EventHandler OnWarningOrError;
-
         private static LogLevel _logLevel = LogLevel.Info;
 
         private static DebugConsole _debugConsole;
 
-        private static int _errors = 0;
-
-        private static int _warnings = 0;
-
-        public static int Errors
-        {
-            get
-            {
-                return _errors;
-            }
-        }
-
-        public static int Warnings
-        {
-            get
-            {
-                return _warnings;
-            }
-        }
 
 
         public static void StartDebugConsole()
@@ -214,25 +195,34 @@ namespace SuchByte.MacroDeck.Logging
             Log("Macro Deck", LogLevel.Error, message);
         }
 
+        private static void OpenLatestLog()
+        {
+            var p = new Process
+            {
+                StartInfo = new ProcessStartInfo(CurrentFilename)
+                {
+                    UseShellExecute = true,
+                }
+            };
+            p.Start();
+        }
 
         private static void Log(string sender, LogLevel logLevel, string message)
         {
-            switch (logLevel)
+            if (logLevel == LogLevel.Warning)
             {
-                case LogLevel.Warning:
-                    _warnings++;
-                    if (OnWarningOrError != null)
-                    {
-                        OnWarningOrError(message, EventArgs.Empty);
-                    }
-                    break;
-                case LogLevel.Error:
-                    _errors++;
-                    if (OnWarningOrError != null)
-                    {
-                        OnWarningOrError(message, EventArgs.Empty);
-                    }
-                    break;
+                var btnShowLog = new ButtonPrimary()
+                {
+                    Size = new Size(75, 25),
+                    AutoSize = true,
+                    Text = "Show log"
+                };
+                btnShowLog.Click += (sender, e) =>
+                {
+                    OpenLatestLog();
+                };
+
+                NotificationManager.SystemNotification("Error", $"{sender} caused an error: {TruncateForDisplay(message, 250)}", controls: new List<Control>() { btnShowLog });
             }
             if ((!Debugger.IsAttached && !FileLogging) || logLevel < LogLevel) return;
 
@@ -273,6 +263,19 @@ namespace SuchByte.MacroDeck.Logging
                     FileLogging = true;
                 }
             }
+        }
+
+        private static string TruncateForDisplay(this string value, int length)
+        {
+            if (string.IsNullOrEmpty(value)) return string.Empty;
+            var returnValue = value;
+            if (value.Length > length)
+            {
+                var tmp = value.Substring(0, length);
+                if (tmp.LastIndexOf(' ') > 0)
+                    returnValue = tmp.Substring(0, tmp.LastIndexOf(' ')) + " ...";
+            }
+            return returnValue;
         }
 
         internal static string CurrentFilename
