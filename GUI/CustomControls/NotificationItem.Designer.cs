@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
@@ -16,10 +17,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// <param name="disposing">True, wenn verwaltete Ressourcen gelöscht werden sollen; andernfalls False.</param>
         protected override void Dispose(bool disposing)
         {
-            foreach (var control in this.additionalControls.Controls)
-            {
-                this.additionalControls.Controls.Remove((Control)control);
-            }
             if (disposing && (components != null))
             {
                 components.Dispose();

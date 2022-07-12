@@ -14,6 +14,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// <param name="disposing">True, wenn verwaltete Ressourcen gelöscht werden sollen; andernfalls False.</param>
         protected override void Dispose(bool disposing)
         {
+            foreach (var control in this.notificationList.Controls)
+            {
+                ((NotificationItem)control).ClearAdditionalControls();
+            }
+
             if (disposing && (components != null))
             {
                 components.Dispose();

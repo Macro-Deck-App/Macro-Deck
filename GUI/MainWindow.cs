@@ -153,8 +153,7 @@ namespace SuchByte.MacroDeck.GUI
             this.SetView(this.DeckView);
             NotificationManager.OnNotification += NotificationsChanged;
             NotificationManager.OnNotificationRemoved += NotificationsChanged;
-            PluginManager.ScanUpdatesAsync();
-            IconManager.ScanUpdatesAsync();
+            ExtensionStoreHelper.SearchUpdatesAsync();
             ExtensionStoreHelper.OnInstallationFinished += ExtensionStoreHelper_OnInstallationFinished;
             CenterToScreen();
             this.btnNotifications.NotificationCount = NotificationManager.Notifications.Count;

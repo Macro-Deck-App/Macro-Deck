@@ -4,12 +4,14 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.Backups;
 using SuchByte.MacroDeck.Events;
+using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowContents;
 using SuchByte.MacroDeck.Hotkeys;
 using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Models;
@@ -437,6 +439,7 @@ namespace SuchByte.MacroDeck
         private static void Start(bool show = false, int port = -1)
         {
             Language.LanguageManager.SetLanguage(_configuration.Language);
+            Colors.Initialize();
             _ = new HotkeyManager();
             VariableManager.Initialize();
             PluginManager.Load();
@@ -449,21 +452,13 @@ namespace SuchByte.MacroDeck
             BroadcastServer.Start();
             ADBServerHelper.Initialize();
 
-            Updater.Updater.Initialize(ForceUpdate, TestUpdateChannel);
-            Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
-
             ProfileManager.AddVariableChangedListener();
             ProfileManager.AddWindowFocusChangedListener();
-
-            Colors.Initialize();
-
-            MacroDeckLogger.Info("Macro Deck started successfully");
 
             MacroDeckPipeServer.Initialize();
             MacroDeckPipeServer.PipeMessage += MacroDeckPipeServer_PipeMessage;
 
             CreateTrayIcon();
-
 
             using (mainWindow = new MainWindow())
             {
@@ -477,6 +472,10 @@ namespace SuchByte.MacroDeck
             {
                 OnMacroDeckLoaded(null, EventArgs.Empty);
             }
+
+            Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
+            Updater.Updater.Initialize(ForceUpdate, TestUpdateChannel);
+            ExtensionStoreHelper.SearchUpdatesAsync();
 
             if (show || SafeMode)
             {
@@ -502,7 +501,16 @@ namespace SuchByte.MacroDeck
             JObject versionObject = sender as JObject;
             try
             {
-                _trayIcon.ShowBalloonTip(5000, "Macro Deck Updater", String.Format(Language.LanguageManager.Strings.VersionXIsNowAvailable, versionObject["version"].ToString(), versionObject["channel"].ToString()), ToolTipIcon.Info);
+                var btnOpenSettings = new ButtonPrimary()
+                {
+                    AutoSize = true,
+                    Text = LanguageManager.Strings.OpenSettings,
+                };
+                btnOpenSettings.Click += (sender, e) =>
+                {
+                    MainWindow?.SetView(new SettingsView(2));
+                };
+                NotificationManager.SystemNotification("Macro Deck Updater", string.Format(Language.LanguageManager.Strings.VersionXIsNowAvailable, versionObject["version"].ToString(), versionObject["channel"].ToString()), true, new List<Control>() { btnOpenSettings }, Properties.Resources.Macro_Deck_2021_update);
             } catch { }
         }
 

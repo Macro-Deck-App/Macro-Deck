@@ -209,7 +209,7 @@ namespace SuchByte.MacroDeck.Logging
 
         private static void Log(string sender, LogLevel logLevel, string message)
         {
-            if (logLevel == LogLevel.Warning)
+            if (logLevel == LogLevel.Error)
             {
                 var btnShowLog = new ButtonPrimary()
                 {
@@ -222,7 +222,7 @@ namespace SuchByte.MacroDeck.Logging
                     OpenLatestLog();
                 };
 
-                NotificationManager.SystemNotification("Error", $"{sender} caused an error: {TruncateForDisplay(message, 250)}", controls: new List<Control>() { btnShowLog });
+                NotificationManager.SystemNotification("Error", $"{sender} caused an error: {TruncateForDisplay(message, 250)}", controls: new List<Control>() { btnShowLog }, image: Properties.Resources.Macro_Deck_error);
             }
             if ((!Debugger.IsAttached && !FileLogging) || logLevel < LogLevel) return;
 

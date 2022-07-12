@@ -324,5 +324,7 @@
   "ClientId": "Client Id",
   "Accept": "Akzeptieren",
   "Deny": "Ablehnen",
-  "VersionBuild": "Build"
+  "VersionBuild": "Build",
+  "OpenExtensionManager": "Extension Manager öffnen",
+  "OpenSettings": "Einstellungen öffnen"
 }

@@ -36,8 +36,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void NotificationAdded(object sender, NotificationEventArgs e)
         {
+            if (this.IsDisposed || !this.IsHandleCreated) return;
             var notificationItem = new NotificationItem(e.Notification);
-            this.notificationList.Controls.Add(notificationItem);
+            this.Invoke(new Action(() => this.notificationList.Controls.Add(notificationItem)));
         }
 
         private void NotificationRemoved(object sender, NotificationRemovedEventArgs e)
@@ -45,7 +46,15 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             var control = this.notificationList.Controls.OfType<NotificationItem>().Where(x => x.Id == e.Id).FirstOrDefault();
             if (control != null)
             {
+                control.ClearAdditionalControls();
                 this.notificationList.Controls.Remove(control);
+            }
+            if (this.notificationList.Controls.Count == 0)
+            {
+                if (this.OnCloseRequested != null)
+                {
+                    this.OnCloseRequested(this, EventArgs.Empty);
+                }
             }
         }
     }

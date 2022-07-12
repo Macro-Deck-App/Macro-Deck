@@ -17,6 +17,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             get => _notificationCount;
             set
             {
+                if (this.InvokeRequired)
+                {
+                    this.Invoke(new Action(() => NotificationCount = value));
+                    return;
+                }
                 _notificationCount = value;
                 if (!DesignMode)
                 {

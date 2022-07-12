@@ -21,6 +21,10 @@ namespace SuchByte.MacroDeck.GUI
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
             try
             {
                 Language.LanguageManager.LanguageChanged -= LanguageChanged;
@@ -32,6 +36,7 @@ namespace SuchByte.MacroDeck.GUI
                 IconManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
                 NotificationManager.OnNotification -= NotificationsChanged;
                 NotificationManager.OnNotificationRemoved -= NotificationsChanged;
+                notificationsList?.Dispose();
 
                 if (this.DeckView != null)
                 {
@@ -39,10 +44,6 @@ namespace SuchByte.MacroDeck.GUI
                 }
             }
             catch { }
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
             base.Dispose(disposing);
         }
 

@@ -19,6 +19,18 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private NotificationModel _notificationModel;
 
+        public void ClearAdditionalControls()
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => ClearAdditionalControls()));
+                return;
+            }
+            foreach (Control control in this.additionalControls.Controls)
+            {
+                control.Parent = null;
+            }
+        }
 
         public NotificationItem(NotificationModel notificationModel)
         {
@@ -29,14 +41,22 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblTitle.Text = notificationModel.Title;
             this.lblDateTime.Text = DateTimeOffset.FromUnixTimeSeconds(notificationModel.Timestamp).LocalDateTime.ToString();
             this.lblMessage.Text = notificationModel.Message;
-            MacroDeckPlugin plugin = PluginManager.Plugins.Values.Where(x => x.Name == notificationModel.SenderName).FirstOrDefault();
-            if (plugin == null)
+            if (notificationModel.CustomImage == null)
             {
-                this.pluginIcon.BackgroundImage = Properties.Resources.Macro_Deck_2021;
+                MacroDeckPlugin plugin = PluginManager.Plugins.Values.Where(x => x.Name == notificationModel.SenderName).FirstOrDefault();
+                if (plugin == null)
+                {
+                    this.pluginIcon.BackgroundImage = Properties.Resources.Macro_Deck_2021;
+                }
+                else
+                {
+                    this.pluginIcon.BackgroundImage = plugin.PluginIcon;
+                }
             } else
             {
-                this.pluginIcon.BackgroundImage = plugin.PluginIcon;
+                this.pluginIcon.BackgroundImage = notificationModel.CustomImage;
             }
+            
             if (notificationModel.AdditionalControls != null)
             {
                 foreach (var control in notificationModel.AdditionalControls)
@@ -53,6 +73,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void BtnRemove_Click(object sender, EventArgs e)
         {
+            ClearAdditionalControls();
             NotificationManager.RemoveNotification(this._notificationModel);
         }
     }

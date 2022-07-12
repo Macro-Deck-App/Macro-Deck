@@ -351,5 +351,7 @@ namespace SuchByte.MacroDeck.Language
         public string Accept = "Accept";
         public string Deny = "Deny";
         public string VersionBuild = "Build";
+        public string OpenExtensionManager = "Open Extension Manager";
+        public string OpenSettings = "Open settings";
     }
 }

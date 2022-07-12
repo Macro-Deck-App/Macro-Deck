@@ -2,6 +2,7 @@
 using SuchByte.MacroDeck.Plugins;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
@@ -34,8 +35,6 @@ namespace SuchByte.MacroDeck.Notifications
         /// <summary>
         /// Returns the notification
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
         public static NotificationModel GetNotification(string id)
         {
             return _notifications.Find(x => x.Id == id);
@@ -44,10 +43,6 @@ namespace SuchByte.MacroDeck.Notifications
         /// <summary>
         /// Returns the id of the notification
         /// </summary>
-        /// <param name="macroDeckPlugin"></param>
-        /// <param name="title"></param>
-        /// <param name="message"></param>
-        /// <returns></returns>
         public static string Notify(MacroDeckPlugin macroDeckPlugin, string title, string message, bool showBalloonTip = false, List<Control> controls = null)
         {
             var notificationModel = new NotificationModel()
@@ -66,10 +61,9 @@ namespace SuchByte.MacroDeck.Notifications
         /// <summary>
         /// Removes a notification
         /// </summary>
-        /// <param name="notificationModel"></param>
         public static void RemoveNotification(NotificationModel notificationModel)
         {
-            if (!_notifications.Contains(notificationModel)) return;
+            if (notificationModel == null || !_notifications.Contains(notificationModel)) return;
             _notifications.Remove(notificationModel);
 
             if (OnNotificationRemoved != null)
@@ -78,14 +72,15 @@ namespace SuchByte.MacroDeck.Notifications
             }
         }
 
-        internal static string SystemNotification(string title, string message, bool showBalloonTip = false, List<Control> controls = null)
+        internal static string SystemNotification(string title, string message, bool showBalloonTip = false, List<Control> controls = null, Bitmap image = null)
         {
             var notificationModel = new NotificationModel()
             {
                 SenderName = "Macro Deck",
                 Title = $"{title}",
                 Message = message,
-                AdditionalControls = controls
+                AdditionalControls = controls,
+                CustomImage = image
             };
 
             Notify(notificationModel, showBalloonTip);
