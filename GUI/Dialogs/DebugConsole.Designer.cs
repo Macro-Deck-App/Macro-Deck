@@ -43,6 +43,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnAddFilter = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.filtersList = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.btnRemoveFilters = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
+            this.btnTestNotification = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.SuspendLayout();
             // 
             // logOutput
@@ -288,10 +289,35 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnRemoveFilters.UseWindowsAccentColor = false;
             this.btnRemoveFilters.Click += new System.EventHandler(this.btnRemoveFilters_Click);
             // 
+            // btnTestNotification
+            // 
+            this.btnTestNotification.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnTestNotification.BorderRadius = 8;
+            this.btnTestNotification.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnTestNotification.FlatAppearance.BorderSize = 0;
+            this.btnTestNotification.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnTestNotification.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnTestNotification.ForeColor = System.Drawing.Color.White;
+            this.btnTestNotification.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnTestNotification.Icon = null;
+            this.btnTestNotification.Location = new System.Drawing.Point(389, 416);
+            this.btnTestNotification.Name = "btnTestNotification";
+            this.btnTestNotification.Progress = 0;
+            this.btnTestNotification.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
+            this.btnTestNotification.Size = new System.Drawing.Size(122, 27);
+            this.btnTestNotification.TabIndex = 13;
+            this.btnTestNotification.Text = "Test notification";
+            this.btnTestNotification.UseMnemonic = false;
+            this.btnTestNotification.UseVisualStyleBackColor = false;
+            this.btnTestNotification.UseWindowsAccentColor = true;
+            this.btnTestNotification.Click += new System.EventHandler(this.btnTestNotification_Click);
+            // 
             // DebugConsole
             // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.btnTestNotification);
             this.Controls.Add(this.btnRemoveFilters);
             this.Controls.Add(this.btnAddFilter);
             this.Controls.Add(this.filter);
@@ -322,6 +348,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.Controls.SetChildIndex(this.filter, 0);
             this.Controls.SetChildIndex(this.btnAddFilter, 0);
             this.Controls.SetChildIndex(this.btnRemoveFilters, 0);
+            this.Controls.SetChildIndex(this.btnTestNotification, 0);
             this.ResumeLayout(false);
 
         }
@@ -341,5 +368,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         private CustomControls.ButtonPrimary btnAddFilter;
         private System.Windows.Forms.ContextMenuStrip filtersList;
         private CustomControls.ButtonPrimary btnRemoveFilters;
+        private CustomControls.ButtonPrimary btnTestNotification;
     }
 }

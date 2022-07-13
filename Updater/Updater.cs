@@ -77,6 +77,7 @@ namespace SuchByte.MacroDeck.Updater
 
         private static void CheckForUpdates()
         {
+            if (UpdateAvailable) return;
             try
             {
                 using (WebClient wc = new WebClient())

@@ -3,6 +3,7 @@ using SuchByte.MacroDeck.ActionButton.Plugin;
 using SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Interfaces;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using System;
 using System.Collections.Generic;
@@ -321,8 +322,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                     this.valueToCompare.Visible = false;
                     this.template.Visible = true;
                     this.btnOpenTemplateEditor.Visible = true;
-
-
                     break;
             }
 
@@ -331,7 +330,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void Template_TextChanged(object sender, EventArgs e)
         {
-            if (!String.IsNullOrWhiteSpace(template.Text))
+            if (((ConditionAction)this.Action).ConditionType == ConditionType.Template && !string.IsNullOrWhiteSpace(template.Text))
             {
                 ((ConditionAction)this.Action).ConditionValue1Source = template.Text;
             }
@@ -340,7 +339,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         private void MethodBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             ((ConditionAction)this.Action).ConditionMethod = (ConditionMethod)Enum.Parse(typeof(ConditionMethod), methodBox.Text);
-            if (((ConditionAction)this.Action).ConditionType == ConditionType.Variable && String.IsNullOrWhiteSpace(this.methodBox.Text))
+            if (((ConditionAction)this.Action).ConditionType == ConditionType.Variable && string.IsNullOrWhiteSpace(this.methodBox.Text))
             {
                 try
                 {
@@ -357,7 +356,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void ValueToCompare_TextChanged(object sender, EventArgs e)
         {
-            if (!String.IsNullOrWhiteSpace(valueToCompare.Text))
+            if (!string.IsNullOrWhiteSpace(valueToCompare.Text))
             {
                 ((ConditionAction)this.Action).ConditionValue2 = valueToCompare.Text;
             }
@@ -365,6 +364,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void Source_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (((ConditionAction)this.Action).ConditionType == ConditionType.Template) return;
+
             ((ConditionAction)this.Action).ConditionValue1Source = source.Text;
 
             Variables.Variable variable = Variables.VariableManager.ListVariables.ToList().Find(v => v.Name.Equals(this.source.Text));
@@ -461,7 +462,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 if (templateEditor.ShowDialog() == DialogResult.OK)
                 {
                     this.template.Text = templateEditor.Template;
-                    if (!String.IsNullOrWhiteSpace(template.Text))
+                    if (!string.IsNullOrWhiteSpace(template.Text))
                     {
                         ((ConditionAction)this.Action).ConditionValue1Source = template.Text;
                     }

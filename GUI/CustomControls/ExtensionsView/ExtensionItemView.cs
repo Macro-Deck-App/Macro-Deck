@@ -2,6 +2,7 @@
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
 using System;
 using System.Collections.Generic;
@@ -129,6 +130,17 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                             {
                                 MacroDeck.RestartMacroDeck("--show");
                             }
+
+                            var btnRestart = new ButtonPrimary()
+                            {
+                                AutoSize = true,
+                                Text = LanguageManager.Strings.Restart,
+                            };
+                            btnRestart.Click += (sender, e) =>
+                            {
+                                MacroDeck.RestartMacroDeck("--show");
+                            };
+                            NotificationManager.SystemNotification("Extension Manager", string.Format(LanguageManager.Strings.XSuccessfullyUninstalled, macroDeckPlugin.Name), true, controls: new List<Control>() { btnRestart });
                         }
                     }
                     break;

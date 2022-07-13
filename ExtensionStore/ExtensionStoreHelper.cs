@@ -1,6 +1,11 @@
-﻿using SuchByte.MacroDeck.GUI.Dialogs;
+﻿using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.GUI.MainWindowViews;
 using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
+using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
 using System;
 using System.Collections.Generic;
@@ -17,6 +22,10 @@ namespace SuchByte.MacroDeck.ExtensionStore
         private static ExtensionStoreDownloader extensionStoreDownloader;
 
         public static event EventHandler OnInstallationFinished;
+
+        private static string _updateNotification;
+
+        private static bool _updateCheckRunning = false;
 
         public static void InstallPluginById(string packageId)
         {
@@ -57,6 +66,8 @@ namespace SuchByte.MacroDeck.ExtensionStore
 
         public static void SearchUpdatesAsync()
         {
+            if (_updateCheckRunning) return;
+            _updateCheckRunning = true;
             PluginManager.PluginsUpdateAvailable.Clear();
             IconManager.IconPacksUpdateAvailable.Clear();
             Task.Run(() =>
@@ -74,6 +85,32 @@ namespace SuchByte.MacroDeck.ExtensionStore
                     IconManager.SearchUpdate(iconPack);
                 }
 
+                if (NotificationManager.GetNotification(_updateNotification) == null && (PluginManager.PluginsUpdateAvailable.Count + IconManager.IconPacksUpdateAvailable.Count) > 0)
+                {
+                    var btnOpenExtensionManager = new ButtonPrimary()
+                    {
+                        AutoSize = true,
+                        Text = LanguageManager.Strings.OpenExtensionManager
+                    };
+                    btnOpenExtensionManager.Click += (sender, e) =>
+                    {
+                        MacroDeck.MainWindow?.SetView(new ExtensionsView());
+                    };
+                    var btnUpdateAll = new ButtonPrimary()
+                    {
+                        AutoSize = true,
+                        Text = LanguageManager.Strings.UpdateAll,
+                    };
+                    btnUpdateAll.Click += (sender, e) =>
+                    {
+                        NotificationManager.RemoveNotification(_updateNotification);
+                        UpdateAllPackages();
+                    };
+                    _updateNotification = NotificationManager.SystemNotification("Extension Store", LanguageManager.Strings.UpdatesAvailable, true, icon: Properties.Resources.Macro_Deck_2021_update, controls: new List<System.Windows.Forms.Control>() { btnOpenExtensionManager, btnUpdateAll });
+                }
+
+                _updateCheckRunning = false;
+
                 if (OnUpdateCheckFinished != null)
                 {
                     OnUpdateCheckFinished(null, EventArgs.Empty);
@@ -81,7 +118,28 @@ namespace SuchByte.MacroDeck.ExtensionStore
             });
         }
 
-        
+        public static void UpdateAllPackages()
+        {
+            List<ExtensionStoreDownloaderPackageInfoModel> packages = new List<ExtensionStoreDownloaderPackageInfoModel>();
+            foreach (var updatePlugin in PluginManager.PluginsUpdateAvailable)
+            {
+                if (PluginManager.UpdatedPlugins.Contains(updatePlugin)) continue;
+                packages.Add(new ExtensionStoreDownloaderPackageInfoModel()
+                {
+                    ExtensionType = ExtensionType.Plugin,
+                    PackageId = ExtensionStoreHelper.GetPackageId(updatePlugin)
+                });
+            }
+            foreach (var updateIconPack in IconManager.IconPacksUpdateAvailable)
+            {
+                packages.Add(new ExtensionStoreDownloaderPackageInfoModel()
+                {
+                    ExtensionType = ExtensionType.IconPack,
+                    PackageId = updateIconPack.PackageId,
+                });
+            }
+            InstallPackages(packages);
+        }
 
         public static string InstalledIconPacksAsString
         {

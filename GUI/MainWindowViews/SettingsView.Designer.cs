@@ -411,6 +411,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // updaterPanel
             // 
+            this.updaterPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.updaterPanel.Location = new System.Drawing.Point(3, 103);
             this.updaterPanel.Name = "updaterPanel";
             this.updaterPanel.Size = new System.Drawing.Size(920, 420);

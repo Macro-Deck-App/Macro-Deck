@@ -265,25 +265,6 @@ namespace SuchByte.MacroDeck.Plugins
             return null;
         }
 
-        public static void ScanUpdatesAsync()
-        {
-            PluginsUpdateAvailable.Clear();
-            Task.Run(() =>
-            {
-                foreach (MacroDeckPlugin plugin in Plugins.Values)
-                {
-                    SearchUpdate(plugin);
-                }
-                foreach (MacroDeckPlugin plugin in PluginsNotLoaded.Values)
-                {
-                    SearchUpdate(plugin);
-                }
-                if (OnUpdateCheckFinished != null)
-                {
-                    OnUpdateCheckFinished(null, EventArgs.Empty);
-                }
-            });
-        }
 
         internal static void SearchUpdate(MacroDeckPlugin plugin)
         {

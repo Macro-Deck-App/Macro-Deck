@@ -68,13 +68,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             this.changelogPanel.Location = new System.Drawing.Point(3, 59);
             this.changelogPanel.Name = "changelogPanel";
             this.changelogPanel.Padding = new System.Windows.Forms.Padding(5);
-            this.changelogPanel.Size = new System.Drawing.Size(975, 318);
+            this.changelogPanel.Size = new System.Drawing.Size(975, 300);
             this.changelogPanel.TabIndex = 12;
             // 
             // btnInstall
             // 
             this.btnInstall.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnInstall.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.btnInstall.BorderRadius = 8;
             this.btnInstall.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnInstall.FlatAppearance.BorderSize = 0;
@@ -83,7 +82,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             this.btnInstall.ForeColor = System.Drawing.Color.White;
             this.btnInstall.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
             this.btnInstall.Icon = null;
-            this.btnInstall.Location = new System.Drawing.Point(349, 383);
+            this.btnInstall.Location = new System.Drawing.Point(349, 365);
             this.btnInstall.Name = "btnInstall";
             this.btnInstall.Progress = 0;
             this.btnInstall.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
@@ -92,6 +91,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             this.btnInstall.Text = "Download and install";
             this.btnInstall.UseMnemonic = false;
             this.btnInstall.UseVisualStyleBackColor = false;
+            this.btnInstall.UseWindowsAccentColor = true;
             this.btnInstall.Click += new System.EventHandler(this.BtnInstall_Click);
             // 
             // lblSize
@@ -107,7 +107,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             // 
             // UpdateAvailableControl
             // 
-            
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.lblSize);

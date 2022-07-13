@@ -24,9 +24,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 {
     public partial class SettingsView : UserControl
     {
-        public SettingsView()
+        public SettingsView(int page = 0)
         {
             InitializeComponent();
+            this.verticalTabControl.SelectTab(page);
             if (!DesignMode)
             {
                 this.verticalTabControl.SelectedTabColor = Colors.WindowsAccentColor;

@@ -132,25 +132,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
         {
             if (PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0)
             {
-                List<ExtensionStoreDownloaderPackageInfoModel> packages = new List<ExtensionStoreDownloaderPackageInfoModel>();
-                foreach (var updatePlugin in PluginManager.PluginsUpdateAvailable)
-                {
-                    if (PluginManager.UpdatedPlugins.Contains(updatePlugin)) continue;
-                    packages.Add(new ExtensionStoreDownloaderPackageInfoModel()
-                    {
-                        ExtensionType = ExtensionType.Plugin,
-                        PackageId = ExtensionStoreHelper.GetPackageId(updatePlugin)
-                    });
-                }
-                foreach (var updateIconPack in IconManager.IconPacksUpdateAvailable)
-                {
-                    packages.Add(new ExtensionStoreDownloaderPackageInfoModel()
-                    {
-                        ExtensionType = ExtensionType.IconPack,
-                        PackageId = updateIconPack.PackageId,
-                    });
-                }
-                ExtensionStoreHelper.InstallPackages(packages);
+                ExtensionStoreHelper.UpdateAllPackages();
             } else
             {
                 this.btnCheckUpdates.Spinner = true;
