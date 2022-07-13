@@ -85,9 +85,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.panel1 = new System.Windows.Forms.Panel();
             this.lblFolders = new System.Windows.Forms.Label();
             this.lblGrid = new System.Windows.Forms.Label();
+<<<<<<< HEAD
             this.roundedPanel1 = new SuchByte.MacroDeck.GUI.CustomControls.RoundedPanel();
             this.roundedPanel2 = new SuchByte.MacroDeck.GUI.CustomControls.RoundedPanel();
             this.label1 = new System.Windows.Forms.Label();
+=======
+>>>>>>> origin/main
             this.foldersContextMenu.SuspendLayout();
             this.actionButtonContextMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.btnAddProfile)).BeginInit();
@@ -511,28 +514,49 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // lblFolders
             // 
+<<<<<<< HEAD
             this.lblFolders.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
             this.lblFolders.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblFolders.ForeColor = System.Drawing.Color.White;
             this.lblFolders.Location = new System.Drawing.Point(9, 6);
             this.lblFolders.Name = "lblFolders";
             this.lblFolders.Size = new System.Drawing.Size(250, 22);
+=======
+            this.lblFolders.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblFolders.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
+            this.lblFolders.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblFolders.ForeColor = System.Drawing.Color.White;
+            this.lblFolders.Location = new System.Drawing.Point(854, 3);
+            this.lblFolders.Name = "lblFolders";
+            this.lblFolders.Size = new System.Drawing.Size(269, 35);
+>>>>>>> origin/main
             this.lblFolders.TabIndex = 40;
             this.lblFolders.Text = "Folders";
             this.lblFolders.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lblGrid
             // 
+<<<<<<< HEAD
             this.lblGrid.BackColor = System.Drawing.Color.Transparent;
             this.lblGrid.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblGrid.ForeColor = System.Drawing.Color.White;
             this.lblGrid.Location = new System.Drawing.Point(9, 6);
             this.lblGrid.Name = "lblGrid";
             this.lblGrid.Size = new System.Drawing.Size(250, 22);
+=======
+            this.lblGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblGrid.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
+            this.lblGrid.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblGrid.ForeColor = System.Drawing.Color.White;
+            this.lblGrid.Location = new System.Drawing.Point(854, 387);
+            this.lblGrid.Name = "lblGrid";
+            this.lblGrid.Size = new System.Drawing.Size(269, 35);
+>>>>>>> origin/main
             this.lblGrid.TabIndex = 41;
             this.lblGrid.Text = "Grid";
             this.lblGrid.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+<<<<<<< HEAD
             // roundedPanel1
             // 
             this.roundedPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -574,6 +598,14 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.roundedPanel2);
             this.Controls.Add(this.roundedPanel1);
+=======
+            // DeckView
+            // 
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.Controls.Add(this.lblGrid);
+            this.Controls.Add(this.lblFolders);
+>>>>>>> origin/main
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.checkButtonBackground);
             this.Controls.Add(this.lblCornerRadius);
@@ -642,8 +674,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.Label lblFolders;
         private System.Windows.Forms.Label lblGrid;
+<<<<<<< HEAD
         private RoundedPanel roundedPanel1;
         private RoundedPanel roundedPanel2;
         private System.Windows.Forms.Label label1;
+=======
+>>>>>>> origin/main
     }
 }

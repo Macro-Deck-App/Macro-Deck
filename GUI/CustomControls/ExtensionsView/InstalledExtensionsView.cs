@@ -95,6 +95,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
         {
             ListInstalledExtensions();
             UpdateUpdateLabelInfo();
+<<<<<<< HEAD
             //PluginManager.OnPluginsChange += PluginManager_OnPluginsChange;
             //IconManager.InstallationFinished += PluginManager_OnPluginsChange;
             ExtensionStoreHelper.OnUpdateCheckFinished += UpdateCheckFinished;
@@ -112,6 +113,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                 }
                 catch { }
             }));
+=======
+            PluginManager.OnPluginsChange += PluginManager_OnPluginsChange;
+            IconManager.InstallationFinished += PluginManager_OnPluginsChange;
+            ExtensionStoreHelper.OnUpdateCheckFinished += UpdateCheckFinished;
+>>>>>>> origin/main
         }
 
         private void UpdateCheckFinished(object sender, EventArgs e)
@@ -121,6 +127,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                 this.btnCheckUpdates.Spinner = false;
                 this.btnCheckUpdates.Enabled = true;
                 UpdateUpdateLabelInfo();
+<<<<<<< HEAD
                 if (PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0)
                 {
                     ListInstalledExtensions();
@@ -128,11 +135,46 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             }));
         } 
 
+=======
+                ListInstalledExtensions();
+            }));
+        }
+
+        private void PluginManager_OnPluginsChange(object sender, EventArgs e)
+        {
+            this.Invoke(new Action(() => {
+                ListInstalledExtensions();
+                UpdateUpdateLabelInfo();
+            }));
+        }
+>>>>>>> origin/main
         private void BtnCheckUpdates_Click(object sender, EventArgs e)
         {
             if (PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0)
             {
+<<<<<<< HEAD
                 ExtensionStoreHelper.UpdateAllPackages();
+=======
+                List<ExtensionStoreDownloaderPackageInfoModel> packages = new List<ExtensionStoreDownloaderPackageInfoModel>();
+                foreach (var updatePlugin in PluginManager.PluginsUpdateAvailable)
+                {
+                    if (PluginManager.UpdatedPlugins.Contains(updatePlugin)) continue;
+                    packages.Add(new ExtensionStoreDownloaderPackageInfoModel()
+                    {
+                        ExtensionType = ExtensionType.Plugin,
+                        PackageId = ExtensionStoreHelper.GetPackageId(updatePlugin)
+                    });
+                }
+                foreach (var updateIconPack in IconManager.IconPacksUpdateAvailable)
+                {
+                    packages.Add(new ExtensionStoreDownloaderPackageInfoModel()
+                    {
+                        ExtensionType = ExtensionType.IconPack,
+                        PackageId = updateIconPack.PackageId,
+                    });
+                }
+                ExtensionStoreHelper.InstallPackages(packages);
+>>>>>>> origin/main
             } else
             {
                 this.btnCheckUpdates.Spinner = true;

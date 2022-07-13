@@ -138,7 +138,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             // 
             // ActionSelectorOnPress
             // 
+<<<<<<< HEAD
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+=======
+            
+>>>>>>> origin/main
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.Controls.Add(this.flowLayoutPanel1);

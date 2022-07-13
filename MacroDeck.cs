@@ -14,8 +14,11 @@ using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
+<<<<<<< HEAD
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Notifications;
+=======
+>>>>>>> origin/main
 using SuchByte.MacroDeck.Pipes;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
@@ -44,7 +47,11 @@ namespace SuchByte.MacroDeck
         public static readonly VersionModel Version = new VersionModel(FileVersionInfo.GetVersionInfo(assembly.Location).FileVersion);
 
         public static readonly int ApiVersion = 20;
+<<<<<<< HEAD
         public static readonly int PluginApiVersion = 36;
+=======
+        public static readonly int PluginApiVersion = 33;
+>>>>>>> origin/main
 
         // Start parameters
         internal static bool ForceUpdate = false;
@@ -110,7 +117,11 @@ namespace SuchByte.MacroDeck
         private static NotifyIcon _trayIcon = new NotifyIcon
         {
             Icon = Properties.Resources.appicon,
+<<<<<<< HEAD
             Text = "Macro Deck " + Version.VersionString,
+=======
+            Text = "Macro Deck " + VersionString,
+>>>>>>> origin/main
             Visible = false,
             ContextMenuStrip = _trayIconContextMenu
         };
@@ -314,6 +325,10 @@ namespace SuchByte.MacroDeck
                 IconManagerLegacy.ConvertOldIconPacks();
             }
 
+<<<<<<< HEAD
+=======
+            BackupManager.CheckRestoreDirectory();
+>>>>>>> origin/main
 
 
             if (!Directory.Exists(TempDirectoryPath))
@@ -439,7 +454,10 @@ namespace SuchByte.MacroDeck
         private static void Start(bool show = false, int port = -1)
         {
             Language.LanguageManager.SetLanguage(_configuration.Language);
+<<<<<<< HEAD
             Colors.Initialize();
+=======
+>>>>>>> origin/main
             _ = new HotkeyManager();
             VariableManager.Initialize();
             PluginManager.Load();
@@ -455,6 +473,7 @@ namespace SuchByte.MacroDeck
             ProfileManager.AddVariableChangedListener();
             ProfileManager.AddWindowFocusChangedListener();
 
+<<<<<<< HEAD
             MacroDeckPipeServer.Initialize();
             MacroDeckPipeServer.PipeMessage += MacroDeckPipeServer_PipeMessage;
 
@@ -476,6 +495,24 @@ namespace SuchByte.MacroDeck
             Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
             Updater.Updater.Initialize(ForceUpdate, TestUpdateChannel);
             ExtensionStoreHelper.SearchUpdatesAsync();
+=======
+            Colors.Initialize();
+
+            MacroDeckLogger.Info("Macro Deck started successfully");
+>>>>>>> origin/main
+
+            MacroDeckPipeServer.Initialize();
+            MacroDeckPipeServer.PipeMessage += MacroDeckPipeServer_PipeMessage;
+
+            CreateTrayIcon();
+
+            long startTook = DateTimeOffset.Now.ToUnixTimeMilliseconds() - _macroDeckStarted;
+            MacroDeckLogger.Info($"Macro Deck startup finished (took {startTook}ms)");
+
+            using (mainWindow = new MainWindow())
+            {
+                SyncContext = SynchronizationContext.Current;
+            }
 
             if (show || SafeMode)
             {
@@ -597,6 +634,7 @@ namespace SuchByte.MacroDeck
         public static void ShowMainWindow()
         {
             if (SyncContext == null)
+<<<<<<< HEAD
             {
                 CreateMainForm();
             } else
@@ -612,6 +650,25 @@ namespace SuchByte.MacroDeck
         {
             if (Application.OpenForms.OfType<MainWindow>().Count() > 0 && mainWindow != null && !mainWindow.IsDisposed)
             {
+=======
+            {
+                CreateMainForm();
+            } else
+            {
+                SyncContext.Send(o =>
+                {
+                    CreateMainForm();
+                }, null);
+            }
+            
+            MacroDeckLogger.Trace("MainWindow created");
+        }
+
+        private static void CreateMainForm()
+        {
+            if (Application.OpenForms.OfType<MainWindow>().Count() > 0 && mainWindow != null && !mainWindow.IsDisposed)
+            {
+>>>>>>> origin/main
                 if (mainWindow.InvokeRequired)
                 {
                     mainWindow.Invoke(new Action(() => ShowMainWindow()));

@@ -300,6 +300,7 @@
     "Folders": "Kansiot",
     "Grid": "Ruudukko",
     "ActionReadVariableFromFile": "Lue muuttuja tiedostosta",
+<<<<<<< HEAD
     "ActionReadVariableFromFileDescription": "Lukee tiedoston ja asettaa sen sisällön muuttujan arvoksi",
     "ActionSetProfile": "Set profile",
     "ActionSetProfileDescription": "Sets the profile on a device",
@@ -320,4 +321,7 @@
     "ActionSetBackgroundColorDescription": "Changes the background color of a action button",
     "Fixed": "Fixed",
     "Random": "Random"
+=======
+    "ActionReadVariableFromFileDescription": "Lukee tiedoston ja asettaa sen sisällön muuttujan arvoksi"
+>>>>>>> origin/main
 }

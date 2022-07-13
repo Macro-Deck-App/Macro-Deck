@@ -42,7 +42,13 @@ namespace SuchByte.MacroDeck.GUI
             }
         }
 
+<<<<<<< HEAD
         private NotificationsList notificationsList;
+=======
+        public ExtensionsView ExtensionsView { get; set; }
+        public VariablesView VariablesView { get; set; }
+        public SettingsView SettingsView { get; set; }
+>>>>>>> origin/main
 
         public MainWindow()
         {
@@ -67,6 +73,13 @@ namespace SuchByte.MacroDeck.GUI
             {
                 this.DeckView.UpdateTranslation();
             }
+<<<<<<< HEAD
+=======
+            if (this.VariablesView != null)
+            {
+                this.VariablesView.UpdateTranslation();
+            }
+>>>>>>> origin/main
         }
 
 
@@ -88,14 +101,42 @@ namespace SuchByte.MacroDeck.GUI
         public void SetView(Control view)
         {
             if (this.contentPanel.Controls.Contains(view)) return;
+<<<<<<< HEAD
+=======
+            
+
+            this.Invoke(new Action(() =>
+            {
+                foreach (Control control in this.contentPanel.Controls)
+                {
+                    if (control != this.DeckView && (clearAll && (control != this.SettingsView && control != this.VariablesView)) && control != view)
+                    {
+                        control.Dispose();
+                    }
+                    if (control != view)
+                    {
+                        this.contentPanel.Controls.Remove(control);
+                    }
+                }
+                this.contentPanel.Controls.Add(view);
+            }));
+>>>>>>> origin/main
 
             foreach (Control control in this.contentPanel.Controls.OfType<Control>().Where(x => x != view && x != this.DeckView))
             {
+<<<<<<< HEAD
                 control.Dispose();
             }
             foreach (Control control in this.contentPanel.Controls.OfType<Control>().Where(x => x != view))
             {
                 this.contentPanel.Controls.Remove(control);
+=======
+                SelectContentButton(btnDeviceManager);
+            }
+            else if (view.GetType().Equals(typeof(ExtensionsView)))
+            {
+                SelectContentButton(btnExtensions);
+>>>>>>> origin/main
             }
             this.contentPanel.Controls.Add(view);
 
@@ -122,8 +163,14 @@ namespace SuchByte.MacroDeck.GUI
 
         private void MainWindow_Load(object sender, EventArgs e)
         {
+<<<<<<< HEAD
 
             this.lblVersion.Text = "Macro Deck " + MacroDeck.Version.VersionString;
+=======
+            this.SetView(new LoadingView());
+            
+            this.lblVersion.Text = "Macro Deck " + MacroDeck.VersionString + (Debugger.IsAttached  ? " (debug)" : "");
+>>>>>>> origin/main
             
             PluginManager.OnPluginsChange += this.OnPluginsChanged;
             PluginManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
@@ -224,7 +271,15 @@ namespace SuchByte.MacroDeck.GUI
 
         private void BtnExtensions_Click(object sender, EventArgs e)
         {
+<<<<<<< HEAD
             this.SetView(new ExtensionsView());
+=======
+            if (this.ExtensionsView == null)
+            {
+                this.ExtensionsView = new ExtensionsView();
+            }
+            this.SetView(this.ExtensionsView);
+>>>>>>> origin/main
         }
 
         private void BtnSettings_Click(object sender, EventArgs e)
@@ -262,6 +317,7 @@ namespace SuchByte.MacroDeck.GUI
             p.Start();
         }
 
+<<<<<<< HEAD
 
         private void BtnNotifications_Click(object sender, EventArgs e)
         {
@@ -286,6 +342,10 @@ namespace SuchByte.MacroDeck.GUI
                 this.notificationsList.BringToFront();
             }
 
+=======
+        private void lblPluginsLoaded_Click(object sender, EventArgs e)
+        {
+>>>>>>> origin/main
 
         }
     }

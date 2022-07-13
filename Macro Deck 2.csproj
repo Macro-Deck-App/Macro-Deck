@@ -13,6 +13,18 @@
 	</PropertyGroup>
 	
   <PropertyGroup>
+<<<<<<< HEAD
+=======
+    <VersionMajor>2</VersionMajor>
+    <VersionMinor>10</VersionMinor>
+    <VersionPatch>3</VersionPatch>
+    <VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
+    <Platforms>AnyCPU;x64</Platforms>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+>>>>>>> origin/main
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
     <RootNamespace>SuchByte.MacroDeck</RootNamespace>
@@ -31,10 +43,26 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/SuchByte/Macro-Deck</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SuchByte/Macro-Deck</RepositoryUrl>
+<<<<<<< HEAD
 	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Platforms>AnyCPU;x64</Platforms>
 	<PublishSingleFile>true</PublishSingleFile>
 	<SelfContained>true</SelfContained>  
+=======
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+>>>>>>> origin/main
   </PropertyGroup>
 	
 	<PropertyGroup>
@@ -49,8 +77,18 @@
     </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Variables\Plugin\GUI\**" />
+    <EmbeddedResource Remove="Variables\Plugin\GUI\**" />
+    <None Remove="Variables\Plugin\GUI\**" />
+    <Page Remove="Variables\Plugin\GUI\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Licenses.xml" />
+<<<<<<< HEAD
     <None Remove="Resources\Languages\Chinese.json" />
+=======
+>>>>>>> origin/main
     <None Remove="Resources\Languages\Dutch.json" />
     <None Remove="Resources\Languages\English.json" />
     <None Remove="Resources\Languages\Filipino.json" />
@@ -81,7 +119,10 @@
   </ItemGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
     <EmbeddedResource Include="Resources\Languages\Chinese.json" />
+=======
+>>>>>>> origin/main
     <EmbeddedResource Include="Resources\Languages\Dutch.json" />
     <EmbeddedResource Include="Resources\Languages\English.json" />
     <EmbeddedResource Include="Resources\Languages\Filipino.json" />
@@ -108,10 +149,14 @@
     <PackageReference Include="FCTB" Version="2.16.24" />
     <PackageReference Include="Fleck" Version="1.2.0" />
     <PackageReference Include="GiphyDotNet" Version="2.0.0" />
+    <PackageReference Include="HidSharp" Version="2.1.0" />
     <PackageReference Include="Magick.NET-Q16-x64" Version="8.3.1" />
     <PackageReference Include="Magick.NET.Core" Version="8.3.1" />
     <PackageReference Include="Magick.NET.SystemDrawing" Version="4.0.6" />
+<<<<<<< HEAD
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+=======
+>>>>>>> origin/main
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.22000.196" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
@@ -123,7 +168,17 @@
   </ItemGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
     <Compile Update="InternalPlugins\FolderPlugin\GUI\FolderSwitcherConfigurator.cs">
+=======
+    <Reference Include="DeckSurf.SDK">
+      <HintPath>C:\Users\Manuel\Desktop\decksurf-sdk-main\src\DeckSurf.SDK\bin\Debug\netcoreapp3.1\DeckSurf.SDK.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Folders\Plugin\GUI\FolderSwitcherConfigurator.cs">
+>>>>>>> origin/main
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="GUI\CustomControls\HorizontalTabControl.cs">

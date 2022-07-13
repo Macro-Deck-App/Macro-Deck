@@ -24,18 +24,29 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                 DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).DeviceType = macroDeckClient.DeviceType;
                 DeviceManager.SaveKnownDevices();
             }
+<<<<<<< HEAD
+=======
+            GC.Collect();
+>>>>>>> origin/main
         }
 
         public void SendAllButtons(MacroDeckClient macroDeckClient)
         {
             if (macroDeckClient == null || macroDeckClient.Folder == null || macroDeckClient.Folder.ActionButtons == null) return;
+<<<<<<< HEAD
             var buttons = new ConcurrentBag<JObject>();
+=======
+            var buttons = new List<JObject>();
+>>>>>>> origin/main
 
             Parallel.ForEach(macroDeckClient.Folder.ActionButtons, actionButton =>
             {
                 string IconBase64 = "";
                 string LabelBase64 = "";
+<<<<<<< HEAD
                 string BackgroundColorHex;
+=======
+>>>>>>> origin/main
                 if (!actionButton.State)
                 {
                     if (!string.IsNullOrWhiteSpace(actionButton.IconOff))
@@ -50,9 +61,13 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                     {
                         LabelBase64 = actionButton.LabelOff.LabelBase64 ?? "";
                     }
+<<<<<<< HEAD
                     BackgroundColorHex = $"#{actionButton.BackColorOff.R:X2}{actionButton.BackColorOff.G:X2}{actionButton.BackColorOff.B:X2}";
                 }
                 else
+=======
+                } else
+>>>>>>> origin/main
                 {
                     if (!string.IsNullOrWhiteSpace(actionButton.IconOn))
                     {
@@ -66,7 +81,10 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                     {
                         LabelBase64 = actionButton.LabelOn.LabelBase64 ?? "";
                     }
+<<<<<<< HEAD
                     BackgroundColorHex = $"#{actionButton.BackColorOn.R:X2}{actionButton.BackColorOn.G:X2}{actionButton.BackColorOn.B:X2}";
+=======
+>>>>>>> origin/main
                 }
 
                 JObject actionButtonObject = JObject.FromObject(new
@@ -114,7 +132,10 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
             if (macroDeckClient.Folder == null || !macroDeckClient.Folder.ActionButtons.Contains(actionButton)) return;
             string IconBase64 = "";
             string LabelBase64 = "";
+<<<<<<< HEAD
             string BackgroundColorHex;
+=======
+>>>>>>> origin/main
             if (!actionButton.State)
             {
                 if (!string.IsNullOrWhiteSpace(actionButton.IconOff))
@@ -129,7 +150,10 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                 {
                     LabelBase64 = actionButton.LabelOff.LabelBase64 ?? "";
                 }
+<<<<<<< HEAD
                 BackgroundColorHex = $"#{actionButton.BackColorOff.R:X2}{actionButton.BackColorOff.G:X2}{actionButton.BackColorOff.B:X2}";
+=======
+>>>>>>> origin/main
             }
             else
             {
@@ -145,7 +169,10 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                 {
                     LabelBase64 = actionButton.LabelOn.LabelBase64 ?? "";
                 }
+<<<<<<< HEAD
                 BackgroundColorHex = $"#{actionButton.BackColorOn.R:X2}{actionButton.BackColorOn.G:X2}{actionButton.BackColorOn.B:X2}";
+=======
+>>>>>>> origin/main
             }
 
             JObject actionButtonObject = JObject.FromObject(new

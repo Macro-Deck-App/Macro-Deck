@@ -8,6 +8,10 @@ namespace SuchByte.MacroDeck.Model
 {
     public class ExtensionStoreExtensionModel
     {
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
         [JsonProperty("package-id")]
         public string PackageId { get; set; } = "";
 
@@ -35,8 +39,11 @@ namespace SuchByte.MacroDeck.Model
         [JsonProperty("md5")]
         public string Md5Checksum { get; set; } = "";
 
+<<<<<<< HEAD
         [JsonProperty("icon")]
         public string IconBase64 { get; set; } = "";
 
+=======
+>>>>>>> origin/main
     }
 }

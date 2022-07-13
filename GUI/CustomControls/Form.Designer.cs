@@ -41,7 +41,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.helpMenuWiki = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.helpMenuExportLog = new System.Windows.Forms.ToolStripMenuItem();
+<<<<<<< HEAD
             this.btnDonate = new System.Windows.Forms.LinkLabel();
+=======
+>>>>>>> origin/main
             this.header.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.btnClose)).BeginInit();
             this.helpMenu.SuspendLayout();
@@ -50,7 +53,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // header
             // 
             this.header.BackColor = System.Drawing.Color.Transparent;
+<<<<<<< HEAD
             this.header.Controls.Add(this.btnDonate);
+=======
+>>>>>>> origin/main
             this.header.Controls.Add(this.btnClose);
             this.header.Controls.Add(this.btnHelp);
             this.header.Controls.Add(this.lblSafeMode);
@@ -103,7 +109,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             this.lblSafeMode.Font = new System.Drawing.Font("Tahoma", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblSafeMode.ForeColor = System.Drawing.Color.Silver;
+<<<<<<< HEAD
             this.lblSafeMode.Location = new System.Drawing.Point(13, 3);
+=======
+            this.lblSafeMode.Location = new System.Drawing.Point(821, 3);
+>>>>>>> origin/main
             this.lblSafeMode.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblSafeMode.Name = "lblSafeMode";
             this.lblSafeMode.Size = new System.Drawing.Size(163, 29);
@@ -170,6 +180,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.helpMenuExportLog.Text = "Export latest log";
             this.helpMenuExportLog.Click += new System.EventHandler(this.HelpMenuExportLog_Click);
             // 
+<<<<<<< HEAD
             // btnDonate
             // 
             this.btnDonate.ActiveLinkColor = System.Drawing.Color.White;
@@ -191,6 +202,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+=======
+            // Form
+            // 
+>>>>>>> origin/main
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.ClientSize = new System.Drawing.Size(1400, 700);

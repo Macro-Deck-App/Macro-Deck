@@ -383,6 +383,7 @@ namespace SuchByte.MacroDeck.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+<<<<<<< HEAD
         public static System.Drawing.Bitmap GitHub_Mark_Light {
             get {
                 object obj = ResourceManager.GetObject("GitHub-Mark-Light", resourceCulture);
@@ -393,6 +394,8 @@ namespace SuchByte.MacroDeck.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+=======
+>>>>>>> origin/main
         public static System.Drawing.Bitmap Harddisk {
             get {
                 object obj = ResourceManager.GetObject("Harddisk", resourceCulture);

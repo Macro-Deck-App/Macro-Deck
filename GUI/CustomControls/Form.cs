@@ -36,6 +36,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.helpMenuExportLog.Text = LanguageManager.Strings.ExportLatestLog;
         }
 
+<<<<<<< HEAD
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             switch (keyData)
@@ -47,6 +48,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
+=======
+>>>>>>> origin/main
         protected override void WndProc(ref Message m)
         {
             if (m.Msg == 0x84)

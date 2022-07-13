@@ -1,6 +1,9 @@
 ﻿using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.ExtensionStore;
+<<<<<<< HEAD
 using SuchByte.MacroDeck.InternalPlugins.DevicePlugin;
+=======
+>>>>>>> origin/main
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Utils;
@@ -189,6 +192,68 @@ namespace SuchByte.MacroDeck.Plugins
                         Name = asm.GetName().Name,
                         Version = FileVersionInfo.GetVersionInfo(asm.Location).ProductVersion,
                         Author = extensionManifest.Author,
+<<<<<<< HEAD
+=======
+                    };
+
+                    PluginsNotLoaded[disabledPlugin.Name] = disabledPlugin;
+                    PluginDirectories[disabledPlugin] = pluginDirectory;
+
+                    MacroDeck.SafeMode = true;
+
+                    using (var msgBox = new GUI.CustomControls.MessageBox())
+                    {
+                        msgBox.ShowDialog(Language.LanguageManager.Strings.ErrorWhileLoadingPlugins, String.Format(Language.LanguageManager.Strings.PluginXCouldNotBeLoaded, disabledPlugin.Name, disabledPlugin.Version), MessageBoxButtons.OK);
+                    }
+                    return disabledPlugin;
+                }
+            }
+            return null;
+        }
+
+        [Obsolete("Will be removed in version 2.11.0")]
+        private static MacroDeckPlugin LoadLegacyPlugin(PluginManifest pluginManifest, string pluginDirectory, bool enable = false)
+        {
+            Assembly asm = null;
+            try
+            {
+                asm = Assembly.LoadFrom(Path.Combine(pluginDirectory, pluginManifest.MainFile));
+                MacroDeckLogger.Info("Loading legacy plugin " + asm.GetName().Name);
+
+                foreach (var type in asm.GetTypes())
+                {
+                    try
+                    {
+                        if (type.IsClass && type.IsSubclassOf(typeof(MacroDeckPlugin)))
+                        {
+                            var plugin = Activator.CreateInstance(type) as MacroDeckPlugin;
+                            AddPlugin(plugin);
+                            PluginDirectories[plugin] = pluginDirectory;
+                            Task.Run(() =>
+                                SearchUpdate(plugin)
+                            );
+                            plugin.Author = pluginManifest.Author;
+                            if (enable) plugin.Enable();
+                            return plugin;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MacroDeckLogger.Error("Error while loading legacy plugin: " + ex.Message);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MacroDeckLogger.Error("Error while loading legacy plugin: " + ex.Message);
+                if (asm != null)
+                {
+                    var disabledPlugin = new DisabledPlugin
+                    {
+                        Name = asm.GetName().Name,
+                        Version = FileVersionInfo.GetVersionInfo(asm.Location).ProductVersion,
+                        Author = pluginManifest.Author,
+>>>>>>> origin/main
                     };
 
                     PluginsNotLoaded[disabledPlugin.Name] = disabledPlugin;
@@ -265,7 +330,10 @@ namespace SuchByte.MacroDeck.Plugins
             return null;
         }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
         internal static void SearchUpdate(MacroDeckPlugin plugin)
         {
             if (UpdatedPlugins.Contains(plugin) || ProtectedPlugins.Contains(plugin)) return;

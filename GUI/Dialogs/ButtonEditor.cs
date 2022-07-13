@@ -398,12 +398,16 @@ namespace SuchByte.MacroDeck.GUI
 
         private void BtnBackColor_Click(object sender, EventArgs e)
         {
+<<<<<<< HEAD
             using (var colorDialog = new ColorDialog()
             {
                 Color = radioButtonOff.Checked && !radioButtonOn.Checked ? this.actionButtonEdited.BackColorOff : this.actionButtonEdited.BackColorOn,
                 FullOpen = true,
                 CustomColors = new int[] { ColorTranslator.ToOle(Color.FromArgb(35, 35, 35)) }
             })
+=======
+            using (var colorDialog = new ColorDialog())
+>>>>>>> origin/main
             {
                 if (colorDialog.ShowDialog() == DialogResult.OK)
                 {

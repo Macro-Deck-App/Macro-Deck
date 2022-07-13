@@ -29,12 +29,31 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// </summary>
         private void InitializeComponent()
         {
+<<<<<<< HEAD
             this.btnDone = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.label2 = new System.Windows.Forms.Label();
             this.downloadList = new System.Windows.Forms.FlowLayoutPanel();
             this.lblPackagesToDownload = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
+=======
+            this.output = new System.Windows.Forms.RichTextBox();
+            this.btnDone = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
+            this.label2 = new System.Windows.Forms.Label();
+            this.SuspendLayout();
+            // 
+            // output
+            // 
+            this.output.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.output.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.output.Location = new System.Drawing.Point(10, 31);
+            this.output.Name = "output";
+            this.output.ReadOnly = true;
+            this.output.Size = new System.Drawing.Size(576, 213);
+            this.output.TabIndex = 2;
+            this.output.Text = "";
+            // 
+>>>>>>> origin/main
             // btnDone
             // 
             this.btnDone.BorderRadius = 8;
@@ -45,7 +64,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnDone.ForeColor = System.Drawing.Color.White;
             this.btnDone.HoverColor = System.Drawing.Color.Empty;
             this.btnDone.Icon = null;
+<<<<<<< HEAD
             this.btnDone.Location = new System.Drawing.Point(183, 358);
+=======
+            this.btnDone.Location = new System.Drawing.Point(183, 255);
+>>>>>>> origin/main
             this.btnDone.Name = "btnDone";
             this.btnDone.Progress = 0;
             this.btnDone.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(225)))));
@@ -70,6 +93,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.label2.UseMnemonic = false;
             // 
+<<<<<<< HEAD
             // downloadList
             // 
             this.downloadList.AutoScroll = true;
@@ -98,23 +122,45 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.Controls.Add(this.downloadList);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.btnDone);
+=======
+            // ExtensionStoreDownloader
+            // 
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.ClientSize = new System.Drawing.Size(597, 293);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.btnDone);
+            this.Controls.Add(this.output);
+>>>>>>> origin/main
             this.Location = new System.Drawing.Point(0, 0);
             this.Name = "ExtensionStoreDownloader";
             this.ShowIcon = true;
             this.Text = "Extension Store Downloader";
             this.Load += new System.EventHandler(this.ExtensionStoreDownloader_Load);
+<<<<<<< HEAD
             this.Controls.SetChildIndex(this.btnDone, 0);
             this.Controls.SetChildIndex(this.label2, 0);
             this.Controls.SetChildIndex(this.downloadList, 0);
             this.Controls.SetChildIndex(this.lblPackagesToDownload, 0);
+=======
+            this.Controls.SetChildIndex(this.output, 0);
+            this.Controls.SetChildIndex(this.btnDone, 0);
+            this.Controls.SetChildIndex(this.label2, 0);
+>>>>>>> origin/main
             this.ResumeLayout(false);
 
         }
 
         #endregion
+<<<<<<< HEAD
         private CustomControls.ButtonPrimary btnDone;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.FlowLayoutPanel downloadList;
         private System.Windows.Forms.Label lblPackagesToDownload;
+=======
+
+        private System.Windows.Forms.RichTextBox output;
+        private CustomControls.ButtonPrimary btnDone;
+        private System.Windows.Forms.Label label2;
+>>>>>>> origin/main
     }
 }

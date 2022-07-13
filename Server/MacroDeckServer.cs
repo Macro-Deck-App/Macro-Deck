@@ -330,6 +330,15 @@ namespace SuchByte.MacroDeck.Server
                         SendAllButtons(macroDeckClient);
                     });
                     break;
+<<<<<<< HEAD
+=======
+                case JsonMethod.GET_ICONS:
+                    Task.Run(() =>
+                    {
+                        //SendAllIcons(macroDeckClient);
+                    });
+                    break;
+>>>>>>> origin/main
             }
         }
 
@@ -449,6 +458,28 @@ namespace SuchByte.MacroDeck.Server
             }
         }
 
+<<<<<<< HEAD
+=======
+
+        /// <summary>
+        /// Sends all icon packs to the client
+        /// </summary>
+        /// <param name="macroDeckClient"></param>
+        /*public static void SendAllIcons(MacroDeckClient macroDeckClient = null)
+        {
+            if (macroDeckClient == null)
+            {
+                foreach (MacroDeckClient client in MacroDeckServer.Clients)
+                {
+                    client.DeviceMessage.SendIconPacks(client);
+                }
+            } else
+            {
+                macroDeckClient.DeviceMessage.SendIconPacks(macroDeckClient);
+            }
+        }*/
+
+>>>>>>> origin/main
         /// <summary>
         /// Sends all buttons of the current folder to the client
         /// </summary>

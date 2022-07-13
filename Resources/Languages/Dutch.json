@@ -1,16 +1,27 @@
 {
     "__Language__": "Nederlands",
     "__LanguageCode__": "nl",
+<<<<<<< HEAD
     "__Author__": "Robin Louwersheimer en Lucas",
     "NetworkAdapter": "Netwerkadapter",
+=======
+    "__Author__": "Macro Deck",
+    "NetworkAdapter": "Netwerk adapter",
+>>>>>>> origin/main
     "IPAddress": "IP-adres",
     "Port": "Poort",
     "Info": "Info",
     "Error": "Fout",
     "Warning": "Waarschuwing",
+<<<<<<< HEAD
     "ConfigureNetworkInfo": "Het is erg belangrijk om de juiste netwerkadapter te selecteren, anders kunt u geen verbinding maken met de client met de server. In de meeste gevallen ziet de naam van de netwerkadapter eruit als \"Ethernet\" of \"Wi-Fi\" en het ip-adres in de meeste gevallen als \"192.168.178.xxx\".\n\nDe standaardpoort voor Macro Deck is 8191. Als een andere toepassing deze poort gebruikt, kunt u deze wijzigen.",
     "AutomaticallyCheckUpdates": "Automatisch controleren op nieuwe updates",
     "AutomaticallyStartWithWindows": "Automatisch opstarten met Windows",
+=======
+    "ConfigureNetworkInfo": "Het is heel belangrijk om de juiste netwerk adapter te selecteren ander zal je niet in staat zijn de client met de server te laten verbinden. In de meeste gevallen zal de naam van de netwerk adapter \"Ethernet\" of \"Wi-Fi\" zijn en het Ip-adres zal in de meeste gevallen \"192.168.1.xxx\" zijn.\n\nDe standaard poort voor Macro Deck is 8191. Als een ander programma deze poort gebruikt kan je deze poort in Macro Deck aanpassen.",
+    "AutomaticallyCheckUpdates": "Automatisch naar nieuwe versies controleren",
+    "AutomaticallyStartWithWindows": "Automatisch opstarten in Windows",
+>>>>>>> origin/main
     "Show": "Configureer Macro Deck",
     "Exit": "Sluit Macro Deck",
     "XUpdatesAvailable": "{0} updates beschikbaar",
@@ -18,9 +29,15 @@
     "Columns": "Kolommen",
     "Rows": "Rijen",
     "Spacing": "Afstand",
+<<<<<<< HEAD
     "CornerRadius": "Hoekradius",
     "ButtonBackGround": "Knop achtergrond",
     "AreYouSure": "Weet je het zeker?",
+=======
+    "CornerRadius": "Hoek radius",
+    "ButtonBackGround": "Knop achtergrond",
+    "AreYouSure": "Weet u het zeker?",
+>>>>>>> origin/main
     "Behaviour": "Gedrag",
     "Plugins": "Plugins",
     "IconPacks": "pictogrampakketten",
@@ -43,7 +60,11 @@
     "Save": "Opslaan",
     "Appearance": "Opmaak",
     "ButtonState": "Knop status",
+<<<<<<< HEAD
     "Label": "Label",
+=======
+    "Label": "Etiket",
+>>>>>>> origin/main
     "Top": "Boven",
     "Center": "Midden",
     "Bottom": "Onder",
@@ -62,13 +83,21 @@
     "Update": "Update",
     "Plugin": "Plug-in",
     "MacroDeckNeedsARestart": "Macro Deck moet opnieuw starten\n",
+<<<<<<< HEAD
     "MacroDeckMustBeRestartedForTheChanges": "Macro Deck moet opnieuw worden gestart om de wijzigingen door te voeren.\nWil je Macro Deck nu opnieuw starten?",
+=======
+    "MacroDeckMustBeRestartedForTheChanges": "Macro Deck moet opnieuw starten zodat de veranderingen effectief worden.\nWil je Macro Deck nu opnieuw starten?\n",
+>>>>>>> origin/main
     "Configure": "Instellen",
     "Uninstall": "Verwijderen",
     "NotLoaded": "Niet geladen",
     "Yes": "Ja",
     "No": "Nee",
+<<<<<<< HEAD
     "Status": "Status",
+=======
+    "Status": "Toestand",
+>>>>>>> origin/main
     "BlockConnection": "Blokkeer verbinding",
     "Change": "Verander",
     "Id": "ID",
@@ -78,14 +107,24 @@
     "Action": "Actie",
     "Condition": "Voorwaarde",
     "InstalledVersion": "geïnstalleerde versie",
+<<<<<<< HEAD
     "UpdateChannel": "Updatekanaal",
     "CheckForUpdatesNow": "Controleer of er updates zijn",
     "Author": "Auteur",
+=======
+    "UpdateChannel": "Update kanaal",
+    "CheckForUpdatesNow": "Controleer nu of er updates zijn",
+    "Author": "Maker",
+>>>>>>> origin/main
     "Version": "Versie",
     "TheFolderWillBeDeleted": "De map {0} met al zijn actie knoppen zullen verwijderd worden.",
     "TheProfileWillBeDeleted": "Het profiel {0} met al zijn mappen en al zijn actie knoppen zullen verwijderd worden.",
     "ServerOffline": "Server offline",
+<<<<<<< HEAD
     "ServerRunning": "Server loopt",
+=======
+    "ServerRunning": "Server running",
+>>>>>>> origin/main
     "XPluginsLoaded": "{0} plugins geladen",
     "XPluginsDisabled": "{0} plugins uitgeschakeld",
     "XClientsConnected": "{0} clients verbonden",
@@ -97,11 +136,16 @@
     "InitialSetupPage": "Pagina {0}/{1}",
     "InitialSetupWelcome": "Welkom op Macro Deck 2!",
     "InitialSetupLetsConfigure": "Laten we jouw Macro Deck-ervaring configureren",
+<<<<<<< HEAD
     "InitialSetupConfigureNetworkSettings": "Configureer jouw netwerkinstellingen",
+=======
+    "InitialSetupConfigureNetworkSettings": "Configureer jouw netwerk instellingen",
+>>>>>>> origin/main
     "InitialSetupConfigureGridPreferences": "Laten we nu het raster naar uw voorkeuren configureren",
     "InitialSetupPickAllPluginsYouNeed": "Neem alle plugins die je nodig hebt",
     "InitialSetupDontWorryInstallUninstallPlugins": "Maak je geen zorgen, je kunt plug-ins altijd later in de pakketbeheerder installeren/verwijderen",
     "InitialSetupWantSomeIcons": "Wil je pictogrammen?",
+<<<<<<< HEAD
     "InitialSetupInstallIconPacksPackageManager": "Je kunt ook later pictogrampakketten installeren in het pakketbeheer",
     "InitialSetupAlmostDone": "We zijn bijna klaar!",
     "KnownDevices": "Bekende apparaten",
@@ -110,6 +154,16 @@
     "BlockAllNewConnections": "Alle nieuwe verbindingen blokkeren",
     "InstallDLL": "Installeer .dll (niet aangeraden)",
     "NeverInstallDLLFiles": "Installeer nooit .dll-bestanden van bronnen die je niet vertrouwt! .dll-bestanden van onbekende bronnen kunnen uw systeem beschadigen, installeer het alleen als je weet wat u doet! Wilt u echt de .dll-plug-in installeren?",
+=======
+    "InitialSetupInstallIconPacksPackageManager": "Je kunt ook later pictogrampakketten installeren in de pakketmanager",
+    "InitialSetupAlmostDone": "We zijn bijna klaar!",
+    "KnownDevices": "Bekende apparaten",
+    "AskOnNewConnections": "Vraag wanneer er nieuw verbindingen zijn",
+    "AllowAllNewConnections": "Alle nieuwe verbindingen toestaan (niet aangeraden)",
+    "BlockAllNewConnections": "Alle nieuwe verbindingen blokkeren",
+    "InstallDLL": "Installeer .dll (niet aangeraden)",
+    "NeverInstallDLLFiles": "Installeer nooit .dll-bestanden van bronnen die je niet vertrouwt! .dll-bestanden van onbekende bronnen kunnen uw systeem beschadigen, installeer het alleen als u weet wat u doet! Wilt u echt de .dll-plug-in installeren?",
+>>>>>>> origin/main
     "XWillBeUninstalled": "{0} wordt verwijderd.",
     "XSuccessfullyUninstalled": "{0} wordt verwijderd. Macro Deck moet opnieuw worden gestart om het effect van de wijzigingen te krijgen. Nu Macro Deck opnieuw starten?",
     "CreateVariable": "Maak variabele",
@@ -175,7 +229,11 @@
     "VariableXGetsDeleted": "De variabele {0} wordt verwijderd",
     "DeckTitle": "Deck",
     "DeviceManagerTitle": "Apparaatbeheer",
+<<<<<<< HEAD
     "PackageManagerTitle": "Pakketbeheer",
+=======
+    "PackageManagerTitle": "Pakket manager",
+>>>>>>> origin/main
     "SettingsTitle": "Instellingen",
     "VariablesTitle": "Globale variabelen",
     "Edit": "Bewerken",
@@ -200,7 +258,11 @@
     "Online": "Online",
     "By": "Door",
     "StateBinding": "Verbind staat aan",
+<<<<<<< HEAD
     "ErrorWhileLoadingPackageManager": "Er heeft zich een fout opgetreden tijdens het laden van het pakketbeheer. Misschien ben je niet verbonden met internet of wordt Macro Deck geblokkeerd door je firewall",
+=======
+    "ErrorWhileLoadingPackageManager": "Er heeft zich een fout opgetreden tijdens het laden van het pakket manager. Misschien bent u niet verbonden met internet of wordt Macro Deck geblokkeerd door uw firewall",
+>>>>>>> origin/main
     "UpdatesAvailable": "Update verkrijgbaar",
     "EnableIconCache": "Zet pictogrammen cache aan (sneller; hogere geheugen gebruik)",
     "WebClient": "Web client",
@@ -291,12 +353,17 @@
     "InstallFromFile": "Installeer vanaf bestand",
     "AllExtensionsUpToDate": "Alle extensies zijn up-to-date",
     "UpdateAll": "Alles updaten",
+<<<<<<< HEAD
     "UpdateAvailable": "Nieuwe update verkrijgbaar",
+=======
+    "UpdateAvailable": "Nieuwe versie verkrijgbaar",
+>>>>>>> origin/main
     "PendingRestart": "In afwachting van herstart",
     "Enabled": "Ingeschakeld",
     "Disabled": "Uitgeschakeld",
     "ActionSaveVariableToFile": "Variabele opslaan naar bestand",
     "ActionSaveVariableToFileDescription": "Slaat de waarde van de variabele op in een bestand",
+<<<<<<< HEAD
     "Folders": "Mappen",
     "Grid": "Rooster",
     "ActionReadVariableFromFile": "Variabele uit bestand lezen",
@@ -320,4 +387,10 @@
     "ActionSetBackgroundColorDescription": "Changes the background color of a action button",
     "Fixed": "Fixed",
     "Random": "Random"
+=======
+    "Folders": "mappen",
+    "Grid": "Rooster",
+    "ActionReadVariableFromFile": "ActieLezenVariabeleVanBestand",
+    "ActionReadVariableFromFileDescription": "ActieReadVariableFromFileDescription"
+>>>>>>> origin/main
 }

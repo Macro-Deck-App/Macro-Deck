@@ -300,6 +300,7 @@
     "Folders": "Mga folder",
     "Grid": "Grid",
     "ActionReadVariableFromFile": "Basahin ang variable mula sa file",
+<<<<<<< HEAD
     "ActionReadVariableFromFileDescription": "Basahin ang file at i-set ang content ng file sa value ng variable",
     "ActionSetProfile": "Set profile",
     "ActionSetProfileDescription": "Sets the profile on a device",
@@ -320,4 +321,7 @@
     "ActionSetBackgroundColorDescription": "Changes the background color of a action button",
     "Fixed": "Fixed",
     "Random": "Random"
+=======
+    "ActionReadVariableFromFileDescription": "Binabasa ang isang file at itinatakda ang nilalaman bilang halaga para sa isang variable"
+>>>>>>> origin/main
 }

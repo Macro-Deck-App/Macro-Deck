@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowViews;
@@ -6,6 +7,11 @@ using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Notifications;
+=======
+﻿using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.Model;
+>>>>>>> origin/main
 using SuchByte.MacroDeck.Plugins;
 using System;
 using System.Collections.Generic;
@@ -21,12 +27,15 @@ namespace SuchByte.MacroDeck.ExtensionStore
 
         private static ExtensionStoreDownloader extensionStoreDownloader;
 
+<<<<<<< HEAD
         public static event EventHandler OnInstallationFinished;
 
         private static string _updateNotification;
 
         private static bool _updateCheckRunning = false;
 
+=======
+>>>>>>> origin/main
         public static void InstallPluginById(string packageId)
         {
             InstallPackages(new List<ExtensionStoreDownloaderPackageInfoModel> { new ExtensionStoreDownloaderPackageInfoModel() { PackageId = packageId, ExtensionType = ExtensionType.Plugin } });
@@ -51,11 +60,15 @@ namespace SuchByte.MacroDeck.ExtensionStore
                 {
                     Owner = MacroDeck.MainWindow,
                 };
+<<<<<<< HEAD
                 extensionStoreDownloader.ShowDialog();
                 if (OnInstallationFinished != null)
                 {
                     OnInstallationFinished(null, EventArgs.Empty);
                 }
+=======
+                extensionStoreDownloader.Show();
+>>>>>>> origin/main
             }));
         }
 
@@ -66,8 +79,11 @@ namespace SuchByte.MacroDeck.ExtensionStore
 
         public static void SearchUpdatesAsync()
         {
+<<<<<<< HEAD
             if (_updateCheckRunning) return;
             _updateCheckRunning = true;
+=======
+>>>>>>> origin/main
             PluginManager.PluginsUpdateAvailable.Clear();
             IconManager.IconPacksUpdateAvailable.Clear();
             Task.Run(() =>
@@ -85,6 +101,7 @@ namespace SuchByte.MacroDeck.ExtensionStore
                     IconManager.SearchUpdate(iconPack);
                 }
 
+<<<<<<< HEAD
                 if (NotificationManager.GetNotification(_updateNotification) == null && (PluginManager.PluginsUpdateAvailable.Count + IconManager.IconPacksUpdateAvailable.Count) > 0)
                 {
                     var btnOpenExtensionManager = new ButtonPrimary()
@@ -111,6 +128,8 @@ namespace SuchByte.MacroDeck.ExtensionStore
 
                 _updateCheckRunning = false;
 
+=======
+>>>>>>> origin/main
                 if (OnUpdateCheckFinished != null)
                 {
                     OnUpdateCheckFinished(null, EventArgs.Empty);
@@ -118,6 +137,7 @@ namespace SuchByte.MacroDeck.ExtensionStore
             });
         }
 
+<<<<<<< HEAD
         public static void UpdateAllPackages()
         {
             List<ExtensionStoreDownloaderPackageInfoModel> packages = new List<ExtensionStoreDownloaderPackageInfoModel>();
@@ -140,6 +160,9 @@ namespace SuchByte.MacroDeck.ExtensionStore
             }
             InstallPackages(packages);
         }
+=======
+        
+>>>>>>> origin/main
 
         public static string InstalledIconPacksAsString
         {

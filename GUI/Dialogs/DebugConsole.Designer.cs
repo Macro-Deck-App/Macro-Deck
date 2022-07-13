@@ -314,7 +314,10 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             // 
             // DebugConsole
             // 
+<<<<<<< HEAD
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+=======
+>>>>>>> origin/main
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.btnTestNotification);

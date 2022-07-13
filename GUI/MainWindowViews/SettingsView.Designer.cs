@@ -409,6 +409,20 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.checkInstallBetaVersions.UseMnemonic = false;
             this.checkInstallBetaVersions.UseVisualStyleBackColor = true;
             // 
+<<<<<<< HEAD
+=======
+            // checkInstallDevVersions
+            // 
+            this.checkInstallDevVersions.AutoSize = true;
+            this.checkInstallDevVersions.Location = new System.Drawing.Point(13, 51);
+            this.checkInstallDevVersions.Name = "checkInstallDevVersions";
+            this.checkInstallDevVersions.Size = new System.Drawing.Size(166, 23);
+            this.checkInstallDevVersions.TabIndex = 15;
+            this.checkInstallDevVersions.Text = "Install Dev versions";
+            this.checkInstallDevVersions.UseMnemonic = false;
+            this.checkInstallDevVersions.UseVisualStyleBackColor = true;
+            // 
+>>>>>>> origin/main
             // updaterPanel
             // 
             this.updaterPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -669,6 +683,19 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblWebSocketAPILabel.TabIndex = 9;
             this.lblWebSocketAPILabel.Text = "Websocket API version:";
             this.lblWebSocketAPILabel.UseMnemonic = false;
+<<<<<<< HEAD
+=======
+            // 
+            // lblOS
+            // 
+            this.lblOS.AutoSize = true;
+            this.lblOS.Location = new System.Drawing.Point(567, 488);
+            this.lblOS.Name = "lblOS";
+            this.lblOS.Size = new System.Drawing.Size(25, 19);
+            this.lblOS.TabIndex = 8;
+            this.lblOS.Text = "os";
+            this.lblOS.UseMnemonic = false;
+>>>>>>> origin/main
             // 
             // lblInstalledPlugins
             // 
@@ -679,6 +706,19 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblInstalledPlugins.TabIndex = 7;
             this.lblInstalledPlugins.Text = "0";
             this.lblInstalledPlugins.UseMnemonic = false;
+<<<<<<< HEAD
+=======
+            // 
+            // lblOSLabel
+            // 
+            this.lblOSLabel.AutoSize = true;
+            this.lblOSLabel.Location = new System.Drawing.Point(329, 488);
+            this.lblOSLabel.Name = "lblOSLabel";
+            this.lblOSLabel.Size = new System.Drawing.Size(36, 19);
+            this.lblOSLabel.TabIndex = 5;
+            this.lblOSLabel.Text = "OS:";
+            this.lblOSLabel.UseMnemonic = false;
+>>>>>>> origin/main
             // 
             // lblInstalledPluginsLabel
             // 
@@ -688,7 +728,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblInstalledPluginsLabel.Size = new System.Drawing.Size(131, 19);
             this.lblInstalledPluginsLabel.TabIndex = 4;
             this.lblInstalledPluginsLabel.Text = "Installed plugins:";
+<<<<<<< HEAD
             this.lblInstalledPluginsLabel.UseMnemonic = false;
+=======
+            this.lblInstalledPluginsLabel.UseMnemonic= false;
+>>>>>>> origin/main
             // 
             // lblDeveloped
             // 
@@ -736,7 +780,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // SettingsView
             // 
+<<<<<<< HEAD
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+=======
+            
+>>>>>>> origin/main
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.verticalTabControl);

@@ -28,6 +28,7 @@ namespace SuchByte.MacroDeck.Variables
         /// </summary>
         public static TableQuery<Variable> ListVariables
         {
+<<<<<<< HEAD
             get => _database.Table<Variable>();
         }
 
@@ -63,6 +64,12 @@ namespace SuchByte.MacroDeck.Variables
         {
             return ListVariables.Where(x => x.Creator == macroDeckPlugin.Name && x.Name.ToLower() == variableName.ToLower()).FirstOrDefault();
         }
+=======
+            Trimmer = DocumentConfiguration.TrimFirstAndLastBlankLines,
+        };
+
+        private static bool _saving = false; // To prevent multiple save processes
+>>>>>>> origin/main
 
         private static SQLiteConnection _database;
 
@@ -250,6 +257,7 @@ namespace SuchByte.MacroDeck.Variables
             return result;
         }
 
+<<<<<<< HEAD
         internal static void Initialize()
         {
             MacroDeckLogger.Info(typeof(VariableManager), "Initialize variables database...");
@@ -258,6 +266,30 @@ namespace SuchByte.MacroDeck.Variables
             _database.CreateTable<Variable>();
             _database.Execute("delete from Variable where 'Name'='';");
             MacroDeckLogger.Info(typeof(VariableManager), ListVariables.Count() + " variables found");
+=======
+        internal static void Load()
+        {
+            MacroDeckLogger.Info(typeof(VariableManager), "Loading variables...");
+            var db = new SQLiteConnection(MacroDeck.VariablesFilePath);
+            db.CreateTable<Variable>();
+
+            var query = db.Table<Variable>();
+
+            List<Variable> variablesLoaded = new List<Variable>();
+            variablesLoaded.AddRange(query);
+
+            // Convert older variables to the new format and remove duplicate entries
+            foreach (Variable variable in variablesLoaded.ToArray())
+            {
+                variable.Name = ConvertNameString(variable.Name);
+            }
+
+            Variables = variablesLoaded;
+
+            db.Close();
+
+            MacroDeckLogger.Info(typeof(VariableManager), Variables.Count + " variables loaded");
+>>>>>>> origin/main
         }
 
         internal static void Close()
