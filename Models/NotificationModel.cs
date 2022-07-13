@@ -21,7 +21,7 @@ namespace SuchByte.MacroDeck.Models
 
         public List<Control> AdditionalControls { get; set; }
 
-        public Bitmap CustomImage { get; set; }
+        public Bitmap Icon { get; set; }
 
 
     }

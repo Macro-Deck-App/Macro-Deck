@@ -47,6 +47,7 @@ namespace SuchByte.MacroDeck.GUI
         public MainWindow()
         {
             this.InitializeComponent();
+            this.btnNotifications.BackColor = Color.Transparent;
             this.UpdateTranslation();
             LanguageManager.LanguageChanged += LanguageChanged;
             Updater.Updater.OnUpdateAvailable += UpdateAvailable;

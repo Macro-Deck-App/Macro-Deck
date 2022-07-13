@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Controls;
 using System.Windows.Forms;
 
-namespace SuchByte.MacroDeck.GUI.CustomControls
+namespace SuchByte.MacroDeck.GUI.CustomControls.Notifications
 {
     public class NotificationButton : ButtonPrimary
     {

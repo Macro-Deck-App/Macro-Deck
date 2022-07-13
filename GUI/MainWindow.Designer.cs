@@ -1,4 +1,5 @@
 ﻿using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.GUI.CustomControls.Notifications;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Notifications;
@@ -27,6 +28,10 @@ namespace SuchByte.MacroDeck.GUI
             }
             try
             {
+                if (this.notificationsList != null && this.Controls.Contains(this.notificationsList))
+                {
+                    this.Controls.Remove(this.notificationsList);
+                }
                 Language.LanguageManager.LanguageChanged -= LanguageChanged;
                 Updater.Updater.OnUpdateAvailable -= UpdateAvailable;
                 MacroDeckServer.OnDeviceConnectionStateChanged -= this.OnClientsConnectedChanged;
@@ -36,12 +41,7 @@ namespace SuchByte.MacroDeck.GUI
                 IconManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
                 NotificationManager.OnNotification -= NotificationsChanged;
                 NotificationManager.OnNotificationRemoved -= NotificationsChanged;
-                notificationsList?.Dispose();
-
-                if (this.DeckView != null)
-                {
-                    this.DeckView.Dispose();
-                }
+                DeckView?.Dispose();
             }
             catch { }
             base.Dispose(disposing);
@@ -74,7 +74,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblServerStatus = new System.Windows.Forms.Label();
             this.lblIpAddressHostname = new System.Windows.Forms.Label();
             this.navigation = new SuchByte.MacroDeck.GUI.CustomControls.RoundedPanel();
-            this.btnNotifications = new SuchByte.MacroDeck.GUI.CustomControls.NotificationButton();
+            this.btnNotifications = new SuchByte.MacroDeck.GUI.CustomControls.Notifications.NotificationButton();
             this.contentButtonPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.btnDeck)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnExtensions)).BeginInit();
@@ -370,7 +370,7 @@ namespace SuchByte.MacroDeck.GUI
             this.btnNotifications.Size = new System.Drawing.Size(43, 43);
             this.btnNotifications.TabIndex = 16;
             this.btnNotifications.UseVisualStyleBackColor = true;
-            this.btnNotifications.UseWindowsAccentColor = true;
+            this.btnNotifications.UseWindowsAccentColor = false;
             this.btnNotifications.Visible = false;
             this.btnNotifications.Click += new System.EventHandler(this.BtnNotifications_Click);
             // 

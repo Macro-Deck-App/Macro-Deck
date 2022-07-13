@@ -222,7 +222,7 @@ namespace SuchByte.MacroDeck.Logging
                     OpenLatestLog();
                 };
 
-                NotificationManager.SystemNotification("Error", $"{sender} caused an error: {TruncateForDisplay(message, 250)}", controls: new List<Control>() { btnShowLog }, image: Properties.Resources.Macro_Deck_error);
+                NotificationManager.SystemNotification("Error", $"{sender} caused an error: {TruncateForDisplay(message, 250)}", controls: new List<Control>() { btnShowLog }, icon: Properties.Resources.Macro_Deck_error);
             }
             if ((!Debugger.IsAttached && !FileLogging) || logLevel < LogLevel) return;
 

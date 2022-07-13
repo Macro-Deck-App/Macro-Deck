@@ -1,4 +1,5 @@
 ﻿using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
 using System;
 using System.Collections.Generic;
@@ -144,6 +145,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         private void btnRemoveFilters_Click(object sender, EventArgs e)
         {
             this.filter.Text = string.Empty;
+        }
+
+        private void btnTestNotification_Click(object sender, EventArgs e)
+        {
+            NotificationManager.SystemNotification("Test", $"Test notification sent at {DateTime.Now.ToString()}", true);
         }
     }
 }

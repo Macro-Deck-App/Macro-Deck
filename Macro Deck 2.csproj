@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
 	<PropertyGroup>
-		<IsBeta>true</IsBeta>
-		<BetaPatch>4</BetaPatch>
+		<IsBeta>false</IsBeta>
+		<BetaPatch>0</BetaPatch>
 
 		<VersionMajor>2</VersionMajor>
 		<VersionMinor>12</VersionMinor>

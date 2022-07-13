@@ -1,4 +1,5 @@
-﻿using SuchByte.MacroDeck.Models;
+﻿using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Utils;
@@ -21,6 +22,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         public void ClearAdditionalControls()
         {
+            MacroDeckLogger.Trace("Clear");
             if (this.InvokeRequired)
             {
                 this.Invoke(new Action(() => ClearAdditionalControls()));
@@ -41,22 +43,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblTitle.Text = notificationModel.Title;
             this.lblDateTime.Text = DateTimeOffset.FromUnixTimeSeconds(notificationModel.Timestamp).LocalDateTime.ToString();
             this.lblMessage.Text = notificationModel.Message;
-            if (notificationModel.CustomImage == null)
-            {
-                MacroDeckPlugin plugin = PluginManager.Plugins.Values.Where(x => x.Name == notificationModel.SenderName).FirstOrDefault();
-                if (plugin == null)
-                {
-                    this.pluginIcon.BackgroundImage = Properties.Resources.Macro_Deck_2021;
-                }
-                else
-                {
-                    this.pluginIcon.BackgroundImage = plugin.PluginIcon;
-                }
-            } else
-            {
-                this.pluginIcon.BackgroundImage = notificationModel.CustomImage;
-            }
-            
+            this.pluginIcon.BackgroundImage = notificationModel.Icon;
+
             if (notificationModel.AdditionalControls != null)
             {
                 foreach (var control in notificationModel.AdditionalControls)

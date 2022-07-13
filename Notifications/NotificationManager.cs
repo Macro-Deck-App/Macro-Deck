@@ -48,9 +48,10 @@ namespace SuchByte.MacroDeck.Notifications
             var notificationModel = new NotificationModel()
             {
                 SenderName = macroDeckPlugin.Name,
-                Title = $"{macroDeckPlugin.Name}: {title}",
+                Title = title,
                 Message = message,
-                AdditionalControls = controls
+                AdditionalControls = controls,
+                Icon = (Bitmap)macroDeckPlugin.PluginIcon
             };
 
             Notify(notificationModel, showBalloonTip);
@@ -72,15 +73,23 @@ namespace SuchByte.MacroDeck.Notifications
             }
         }
 
-        internal static string SystemNotification(string title, string message, bool showBalloonTip = false, List<Control> controls = null, Bitmap image = null)
+        /// <summary>
+        /// Removes a notification
+        /// </summary>
+        public static void RemoveNotification(string id)
+        {
+            RemoveNotification(_notifications.Find(x => x.Id == id));
+        }
+
+        internal static string SystemNotification(string title, string message, bool showBalloonTip = false, List<Control> controls = null, Bitmap icon = null)
         {
             var notificationModel = new NotificationModel()
             {
                 SenderName = "Macro Deck",
-                Title = $"{title}",
+                Title = title,
                 Message = message,
                 AdditionalControls = controls,
-                CustomImage = image
+                Icon = icon == null ? Properties.Resources.Macro_Deck_2021 : icon
             };
 
             Notify(notificationModel, showBalloonTip);
@@ -95,10 +104,14 @@ namespace SuchByte.MacroDeck.Notifications
 
             _notifications.Add(notificationModel);
 
-            if (OnNotification != null)
+            MacroDeck.SyncContext?.Send(o =>
             {
-                OnNotification(null, new NotificationEventArgs() { Notification = notificationModel });
-            }
+                if (OnNotification != null)
+                {
+                    OnNotification(null, new NotificationEventArgs() { Notification = notificationModel });
+                }
+            }, null);
+
 
             if (showBalloonTip)
             {

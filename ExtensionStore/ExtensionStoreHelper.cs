@@ -90,7 +90,7 @@ namespace SuchByte.MacroDeck.ExtensionStore
                     var btnOpenExtensionManager = new ButtonPrimary()
                     {
                         AutoSize = true,
-                        Text = "Open Extension Manager"
+                        Text = LanguageManager.Strings.OpenExtensionManager
                     };
                     btnOpenExtensionManager.Click += (sender, e) =>
                     {
@@ -103,10 +103,10 @@ namespace SuchByte.MacroDeck.ExtensionStore
                     };
                     btnUpdateAll.Click += (sender, e) =>
                     {
-                        NotificationManager.RemoveNotification(NotificationManager.GetNotification(_updateNotification));
+                        NotificationManager.RemoveNotification(_updateNotification);
                         UpdateAllPackages();
                     };
-                    _updateNotification = NotificationManager.SystemNotification("Extension Store", "Updates available", true, image: Properties.Resources.Macro_Deck_2021_update, controls: new List<System.Windows.Forms.Control>() { btnOpenExtensionManager, btnUpdateAll });
+                    _updateNotification = NotificationManager.SystemNotification("Extension Store", LanguageManager.Strings.UpdatesAvailable, true, icon: Properties.Resources.Macro_Deck_2021_update, controls: new List<System.Windows.Forms.Control>() { btnOpenExtensionManager, btnUpdateAll });
                 }
 
                 _updateCheckRunning = false;
