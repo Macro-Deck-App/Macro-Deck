@@ -53,7 +53,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
         {
             Task.Run(() =>
             {
-                CultureInfo culture = new System.Globalization.CultureInfo(LanguageManager.GetLanguageCode()); //Set CultureInfo locale by selected language
+                CultureInfo culture = new CultureInfo(LanguageManager.GetLanguageCode()); //Set CultureInfo locale by selected language
 
                 VariableManager.SetValue("time", DateTime.Now.ToString("t"), VariableType.String, "Macro Deck");
                 VariableManager.SetValue("date", DateTime.Now.ToString("d"), VariableType.String, "Macro Deck");
