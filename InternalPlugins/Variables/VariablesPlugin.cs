@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using SuchByte.MacroDeck.Events;
+﻿using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
@@ -13,10 +12,9 @@ using SuchByte.MacroDeck.Variables.Plugin.Models;
 using SuchByte.MacroDeck.Variables.Plugin.Views;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -55,9 +53,11 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
         {
             Task.Run(() =>
             {
+                CultureInfo culture = new System.Globalization.CultureInfo(LanguageManager.GetLanguageCode()); //Set CultureInfo locale by selected language
+
                 VariableManager.SetValue("time", DateTime.Now.ToString("t"), VariableType.String, "Macro Deck");
                 VariableManager.SetValue("date", DateTime.Now.ToString("d"), VariableType.String, "Macro Deck");
-                VariableManager.SetValue("day_of_week", DateTime.Now.DayOfWeek.ToString(), VariableType.String, "Macro Deck");
+                VariableManager.SetValue("day_of_week", culture.DateTimeFormat.GetDayName(DateTime.Now.DayOfWeek), VariableType.String, "Macro Deck");
             });
         }
         private void VariableChanged(object sender, EventArgs e)
