@@ -1,17 +1,9 @@
-﻿using Newtonsoft.Json.Linq;
-using SuchByte.MacroDeck.GUI.Dialogs;
-using SuchByte.MacroDeck.GUI.InitialSetupPages;
+﻿using SuchByte.MacroDeck.GUI.InitialSetupPages;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Globalization;
-using System.Linq;
-using System.Net;
-using System.Text;
 using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI
