@@ -28,7 +28,7 @@ namespace SuchByte.MacroDeck.Variables
         /// </summary>
         public static TableQuery<Variable> ListVariables
         {
-            get => _database.Table<Variable>();
+            get => _database.Table<Variable>().OrderBy(v => v.Name);
         }
 
         /// <summary>
@@ -40,13 +40,7 @@ namespace SuchByte.MacroDeck.Variables
         [Obsolete("Use GetVariables to list all variables")]
         public static List<Variable> Variables
         {
-            get
-            {
-                var query = _database.Table<Variable>();
-                List<Variable> variables = new List<Variable>();
-                variables.AddRange(query);
-                return variables;
-            }
+            get => _database.Table<Variable>().OrderBy(v => v.Name).ToList();
         }
 
         public static List<Variable> GetVariables(MacroDeckPlugin macroDeckPlugin)
@@ -56,7 +50,13 @@ namespace SuchByte.MacroDeck.Variables
             {
                 variables.Add(variable);
             });
-            return variables.ToList();
+
+            List<Variable> vars = variables.ToList();
+            vars.Sort((Variable v1, Variable v2) => {
+                return v1.Name.CompareTo(v2.Name);
+            });
+
+            return vars;
         }
 
         public static Variable GetVariable(MacroDeckPlugin macroDeckPlugin, string variableName)
