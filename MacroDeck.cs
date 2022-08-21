@@ -55,7 +55,7 @@ namespace SuchByte.MacroDeck
         // Start parameters end
 
         public static readonly string ExecutablePath = Process.GetCurrentProcess().MainModule.FileName;
-        internal static readonly string MainDirectoryPath = AppDomain.CurrentDomain.BaseDirectory;
+        internal static readonly string MainDirectoryPath = Application.StartupPath;
         public static string UserDirectoryPath;
         public static string PluginsDirectoryPath;
         public static string UpdatePluginsDirectoryPath;
@@ -221,6 +221,8 @@ namespace SuchByte.MacroDeck
 
 
             InitializePaths(PortableMode);
+
+            MacroDeckLogger.CleanUpLogsDir();
 
             MacroDeckLogger.Info(Environment.NewLine + "==========================================");
             MacroDeckLogger.Info("Starting Macro Deck version " + Version.VersionString + " build " + Version.Build + (args.Length > 0 ? " with parameters: " + string.Join(" ", args) : ""));

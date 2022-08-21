@@ -2,7 +2,7 @@
   "profiles": {
     "Macro Deck 2": {
       "commandName": "Project",
-      "commandLineArgs": "--export-default-strings --loglevel 1 --test-channel --debug-console --force-update",
+      "commandLineArgs": "--show --export-default-strings --loglevel 1 --test-channel --debug-console",
       "nativeDebugging": false
     },
     "Macro Deck exe": {

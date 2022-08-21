@@ -16,6 +16,8 @@ using System.Diagnostics;
 using SuchByte.MacroDeck.Icons;
 using System.Linq;
 using SuchByte.MacroDeck.Logging;
+using System.Net;
+using SuchByte.MacroDeck.Enums;
 
 namespace SuchByte.MacroDeck.Server
 {
@@ -26,12 +28,8 @@ namespace SuchByte.MacroDeck.Server
         public static event EventHandler OnFolderChanged;
 
         private static WebSocketServer _webSocketServer;
-        private static WebSocketServer _usbWebSocketServer;
 
         public static WebSocketServer WebSocketServer { get { return _webSocketServer; } }
-
-        public static WebSocketServer USBWebSocketServer { get { return _usbWebSocketServer; } }
-
 
         private static readonly List<MacroDeckClient> _clients = new List<MacroDeckClient>();
         public static List<MacroDeckClient> Clients { get { return _clients; } }
@@ -44,50 +42,7 @@ namespace SuchByte.MacroDeck.Server
         /// 
         public static void Start(string ipAddress, int port)
         {
-            StartWebSocketServer(ipAddress, port);
-            StartUSBWebSocketServer("127.0.0.1", port);
-        }
-
-        private static void StartUSBWebSocketServer(string ipAddress, int port)
-        {
-            DeviceManager.LoadKnownDevices();
-            Thread.Sleep(100);
-            if (_usbWebSocketServer != null)
-            {
-                MacroDeckLogger.Info("Stopping USB websocket server...");
-                foreach (MacroDeckClient macroDeckClient in _clients)
-                {
-                    if (macroDeckClient.SocketConnection != null && macroDeckClient.SocketConnection.IsAvailable)
-                    {
-                        macroDeckClient.SocketConnection.Close();
-                    }
-                }
-                _usbWebSocketServer.Dispose();
-                MacroDeckLogger.Info("USB websocket server stopped");
-                if (OnServerStateChanged != null)
-                {
-                    OnServerStateChanged(_webSocketServer, EventArgs.Empty);
-                }
-
-            }
-            MacroDeckLogger.Info(string.Format("Starting USB websocket server @ {0}:{1}", ipAddress, port));
-            _usbWebSocketServer = new WebSocketServer("ws://" + ipAddress + ":" + port);
-            _usbWebSocketServer.ListenerSocket.NoDelay = true;
-            try
-            {
-                _usbWebSocketServer.Start(socket =>
-                {
-                    MacroDeckClient macroDeckClient = new MacroDeckClient(socket);
-                    socket.OnOpen = () => OnOpen(macroDeckClient);
-                    socket.OnClose = () => OnClose(macroDeckClient);
-                    socket.OnError = delegate (Exception ex) { OnClose(macroDeckClient); };
-                    socket.OnMessage = message => OnMessage(macroDeckClient, message);
-                });
-            }
-            catch (Exception ex)
-            {
-                MacroDeckLogger.Error("Failed to start USB server: " + ex.Message + Environment.NewLine + ex.StackTrace);
-            }
+            StartWebSocketServer(IPAddress.Any.ToString(), port);
         }
 
         private static void StartWebSocketServer(string ipAddress, int port)
@@ -107,11 +62,7 @@ namespace SuchByte.MacroDeck.Server
                 _webSocketServer.Dispose();
                 _clients.Clear();
                 MacroDeckLogger.Info("Websocket server stopped");
-                if (OnServerStateChanged != null)
-                {
-                    OnServerStateChanged(_webSocketServer, EventArgs.Empty);
-                }
-                
+                OnServerStateChanged?.Invoke(_webSocketServer, EventArgs.Empty);
             }
             MacroDeckLogger.Info(string.Format("Starting websocket server @ {0}:{1}", ipAddress, port));
             _webSocketServer = new WebSocketServer("ws://" + ipAddress + ":" + port);
@@ -126,17 +77,11 @@ namespace SuchByte.MacroDeck.Server
                     socket.OnError = delegate (Exception ex) { OnClose(macroDeckClient); };
                     socket.OnMessage = message => OnMessage(macroDeckClient, message);
                 });
-                if (OnServerStateChanged != null)
-                {
-                    OnServerStateChanged(_webSocketServer, EventArgs.Empty);
-                }
+                OnServerStateChanged?.Invoke(_webSocketServer, EventArgs.Empty);
             }
             catch (Exception ex)
             {
-                if (OnServerStateChanged != null)
-                {
-                    OnServerStateChanged(_webSocketServer, EventArgs.Empty);
-                }
+                OnServerStateChanged.Invoke(_webSocketServer, EventArgs.Empty);
 
                 MacroDeckLogger.Error("Failed to start server: " + ex.Message + Environment.NewLine + ex.StackTrace);
 
@@ -166,13 +111,7 @@ namespace SuchByte.MacroDeck.Server
             macroDeckClient.Dispose();
             _clients.Remove(macroDeckClient);
             MacroDeckLogger.Info(macroDeckClient.ClientId + " connection closed");
-            if (OnDeviceConnectionStateChanged != null)
-            {
-                OnDeviceConnectionStateChanged(macroDeckClient, EventArgs.Empty);
-            }
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
+            OnDeviceConnectionStateChanged?.Invoke(macroDeckClient, EventArgs.Empty);
         }
 
         /// <summary>
@@ -253,70 +192,28 @@ namespace SuchByte.MacroDeck.Server
                     MacroDeckLogger.Info(macroDeckClient.ClientId + " connected");
                     break;
                 case JsonMethod.BUTTON_PRESS:
-                    try
-                    {
-                        if (macroDeckClient == null ||macroDeckClient.Folder == null || macroDeckClient.Folder.ActionButtons == null) return;
-                        int row = Int32.Parse(responseObject["Message"].ToString().Split('_')[0]);
-                        int column = Int32.Parse(responseObject["Message"].ToString().Split('_')[1]);
-
-                        ActionButton.ActionButton actionButton = macroDeckClient.Folder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
-                        if (actionButton != null)
-                        {
-                            ExecutePress(actionButton, macroDeckClient.ClientId);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MacroDeckLogger.Warning("Action button press caused an exception: " + ex.Message);
-                    }
-                    break;
                 case JsonMethod.BUTTON_RELEASE:
-                    try
-                    {
-                        if (macroDeckClient == null || macroDeckClient.Folder == null || macroDeckClient.Folder.ActionButtons == null) return;
-                        int row = Int32.Parse(responseObject["Message"].ToString().Split('_')[0]);
-                        int column = Int32.Parse(responseObject["Message"].ToString().Split('_')[1]);
-
-                        ActionButton.ActionButton actionButton = macroDeckClient.Folder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
-                        if (actionButton != null)
-                        {
-                            ExecuteRelease(actionButton, macroDeckClient.ClientId);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MacroDeckLogger.Warning("Action button release caused an exception: " + ex.Message);
-                    }
-                    break;
                 case JsonMethod.BUTTON_LONG_PRESS:
-                    try
-                    {
-                        if (macroDeckClient == null || macroDeckClient.Folder == null || macroDeckClient.Folder.ActionButtons == null) return;
-                        int row = Int32.Parse(responseObject["Message"].ToString().Split('_')[0]);
-                        int column = Int32.Parse(responseObject["Message"].ToString().Split('_')[1]);
-
-                        ActionButton.ActionButton actionButton = macroDeckClient.Folder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
-                        if (actionButton != null)
-                        {
-                            ExecuteLongPress(actionButton, macroDeckClient.ClientId);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MacroDeckLogger.Warning("Action button long press caused an exception: " + ex.Message);
-                    }
-                    break;
                 case JsonMethod.BUTTON_LONG_PRESS_RELEASE:
+                    ButtonPressType buttonPressType = method switch
+                    {
+                        JsonMethod.BUTTON_PRESS => ButtonPressType.SHORT,
+                        JsonMethod.BUTTON_RELEASE => ButtonPressType.SHORT_RELEASE,
+                        JsonMethod.BUTTON_LONG_PRESS => ButtonPressType.LONG,
+                        JsonMethod.BUTTON_LONG_PRESS_RELEASE => ButtonPressType.LONG_RELEASE,
+                        _ => ButtonPressType.SHORT
+                    };
+
                     try
                     {
                         if (macroDeckClient == null || macroDeckClient.Folder == null || macroDeckClient.Folder.ActionButtons == null) return;
-                        int row = Int32.Parse(responseObject["Message"].ToString().Split('_')[0]);
-                        int column = Int32.Parse(responseObject["Message"].ToString().Split('_')[1]);
+                        int row = int.Parse(responseObject["Message"].ToString().Split('_')[0]);
+                        int column = int.Parse(responseObject["Message"].ToString().Split('_')[1]);
 
                         ActionButton.ActionButton actionButton = macroDeckClient.Folder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
                         if (actionButton != null)
                         {
-                            ExecuteLongPressRelease(actionButton, macroDeckClient.ClientId);
+                            Execute(actionButton, macroDeckClient.ClientId, buttonPressType);
                         }
                     }
                     catch (Exception ex)
@@ -333,28 +230,20 @@ namespace SuchByte.MacroDeck.Server
             }
         }
 
-        public static void ExecutePress(ActionButton.ActionButton actionButton, string clientId)
+        internal static void Execute(ActionButton.ActionButton actionButton, string clientId, ButtonPressType buttonPressType)
         {
-            Task.Run(() =>
+            List< PluginAction> actions = buttonPressType switch
             {
-                foreach (PluginAction action in actionButton.Actions)
-                {
-                    try
-                    {
-                        action.Trigger(clientId, actionButton);
-                    } catch { }
-                }
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
-            });
-        }
+                ButtonPressType.SHORT => actionButton.Actions,
+                ButtonPressType.SHORT_RELEASE => actionButton.ActionsRelease,
+                ButtonPressType.LONG => actionButton.ActionsLongPress,
+                ButtonPressType.LONG_RELEASE => actionButton.ActionsLongPressRelease,
+                _ => actionButton.Actions
+            };
 
-        public static void ExecuteRelease(ActionButton.ActionButton actionButton, string clientId)
-        {
             Task.Run(() =>
             {
-                foreach (PluginAction action in actionButton.ActionsRelease)
+                foreach (PluginAction action in actions)
                 {
                     try
                     {
@@ -362,44 +251,6 @@ namespace SuchByte.MacroDeck.Server
                     }
                     catch { }
                 }
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
-            });
-        }
-        public static void ExecuteLongPress(ActionButton.ActionButton actionButton, string clientId)
-        {
-            Task.Run(() =>
-            {
-                foreach (PluginAction action in actionButton.ActionsLongPress)
-                {
-                    try
-                    {
-                        action.Trigger(clientId, actionButton);
-                    }
-                    catch { }
-                }
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
-            });
-        }
-
-        public static void ExecuteLongPressRelease(ActionButton.ActionButton actionButton, string clientId)
-        {
-            Task.Run(() =>
-            {
-                foreach (PluginAction action in actionButton.ActionsLongPressRelease)
-                {
-                    try
-                    {
-                        action.Trigger(clientId, actionButton);
-                    }
-                    catch { }
-                }
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
             });
         }
 
@@ -455,8 +306,7 @@ namespace SuchByte.MacroDeck.Server
         /// <param name="macroDeckClient"></param>
         private static void SendAllButtons(MacroDeckClient macroDeckClient)
         {
-            if (macroDeckClient == null) return;
-            macroDeckClient.DeviceMessage.SendAllButtons(macroDeckClient);
+            macroDeckClient?.DeviceMessage?.SendAllButtons(macroDeckClient);
         }
 
         /// <summary>
@@ -466,8 +316,7 @@ namespace SuchByte.MacroDeck.Server
         /// <param name="actionButton"></param>
         public static void SendButton(MacroDeckClient macroDeckClient, ActionButton.ActionButton actionButton)
         {
-            if (macroDeckClient == null) return;
-            macroDeckClient.DeviceMessage.UpdateButton(macroDeckClient, actionButton);
+            macroDeckClient?.DeviceMessage?.UpdateButton(macroDeckClient, actionButton);
         }
 
         /// <summary>

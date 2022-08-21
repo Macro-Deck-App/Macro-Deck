@@ -6,7 +6,7 @@
 
 		<VersionMajor>2</VersionMajor>
 		<VersionMinor>12</VersionMinor>
-		<VersionPatch>0</VersionPatch> <!-- Patch (Not Beta patch) -->
+		<VersionPatch>1</VersionPatch> <!-- Patch (Not Beta patch) -->
 
 		<VersionSuffix Condition="'$(IsBeta)' == 'true'">b$(BetaPatch)</VersionSuffix>
 		<VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>

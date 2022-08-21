@@ -18,6 +18,8 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -126,13 +128,16 @@ namespace SuchByte.MacroDeck.GUI
             this.lblVersion.Text = "Macro Deck " + MacroDeck.Version.VersionString;
             
             PluginManager.OnPluginsChange += this.OnPluginsChanged;
+            IconManager.OnIconPacksChanged += this.OnPluginsChanged;
             PluginManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
             IconManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
+            
             MacroDeckServer.OnDeviceConnectionStateChanged += this.OnClientsConnectedChanged;
             MacroDeckServer.OnServerStateChanged += this.OnServerStateChanged;
             this.OnClientsConnectedChanged(null, EventArgs.Empty);
             this.OnServerStateChanged(null, EventArgs.Empty);
             this.RefreshPluginsLabels();
+            this.LoadHosts();
 
             if (MacroDeck.SafeMode)
             {
@@ -158,6 +163,17 @@ namespace SuchByte.MacroDeck.GUI
             ExtensionStoreHelper.OnInstallationFinished += ExtensionStoreHelper_OnInstallationFinished;
             CenterToScreen();
             this.btnNotifications.NotificationCount = NotificationManager.Notifications.Count;
+        }
+
+        private void LoadHosts()
+        {
+            this.hosts.SelectedIndexChanged -= this.Hosts_SelectedIndexChanged;
+            foreach (var networkInterface in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                this.hosts.Items.Add(networkInterface.GetIPProperties().UnicastAddresses.Where(x => x.Address.AddressFamily == AddressFamily.InterNetwork).FirstOrDefault().Address.ToString());
+            }
+            this.hosts.Text = MacroDeck.Configuration.Host_Address;
+            this.hosts.SelectedIndexChanged += this.Hosts_SelectedIndexChanged;
         }
 
         private void NotificationsChanged(object sender, EventArgs e)
@@ -186,7 +202,6 @@ namespace SuchByte.MacroDeck.GUI
             if (!this.IsHandleCreated || this.IsDisposed) return;
             this.Invoke(new Action(() =>
             {
-                this.lblPluginsLoaded.Text = string.Format(Language.LanguageManager.Strings.XPluginsLoaded, $"{ PluginManager.Plugins.Values.Count } / { PluginManager.Plugins.Values.Count + PluginManager.PluginsNotLoaded.Values.Count } ");
                 this.btnExtensions.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);
             }));
             
@@ -203,7 +218,7 @@ namespace SuchByte.MacroDeck.GUI
                 else
                 {
                     lblServerStatus.Text = Language.LanguageManager.Strings.ServerRunning;
-                    lblIPAddress.Text = MacroDeck.Configuration.Host_Address;
+                    hosts.Text = MacroDeck.Configuration.Host_Address;
                     lblPort.Text = MacroDeckServer.WebSocketServer.Port.ToString();
                 }
             }));
@@ -287,6 +302,12 @@ namespace SuchByte.MacroDeck.GUI
             }
 
 
+        }
+
+        private void Hosts_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            MacroDeck.Configuration.Host_Address = this.hosts.Text;
+            MacroDeck.SaveConfiguration();
         }
     }
 }

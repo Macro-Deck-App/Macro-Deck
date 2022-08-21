@@ -240,7 +240,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.btnChangePort.ForeColor = System.Drawing.Color.White;
             this.btnChangePort.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
             this.btnChangePort.Icon = null;
-            this.btnChangePort.Location = new System.Drawing.Point(125, 178);
+            this.btnChangePort.Location = new System.Drawing.Point(126, 89);
             this.btnChangePort.Name = "btnChangePort";
             this.btnChangePort.Progress = 0;
             this.btnChangePort.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
@@ -254,22 +254,26 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // groupConnectionInfo
             // 
+            this.groupConnectionInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupConnectionInfo.Controls.Add(this.lblConnectionInfo);
             this.groupConnectionInfo.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.groupConnectionInfo.ForeColor = System.Drawing.Color.White;
             this.groupConnectionInfo.Location = new System.Drawing.Point(12, 342);
             this.groupConnectionInfo.Name = "groupConnectionInfo";
-            this.groupConnectionInfo.Size = new System.Drawing.Size(685, 173);
+            this.groupConnectionInfo.Size = new System.Drawing.Size(896, 173);
             this.groupConnectionInfo.TabIndex = 11;
             this.groupConnectionInfo.TabStop = false;
             this.groupConnectionInfo.Text = "Info";
             // 
             // lblConnectionInfo
             // 
+            this.lblConnectionInfo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblConnectionInfo.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblConnectionInfo.Location = new System.Drawing.Point(6, 24);
+            this.lblConnectionInfo.Location = new System.Drawing.Point(3, 26);
             this.lblConnectionInfo.Name = "lblConnectionInfo";
-            this.lblConnectionInfo.Size = new System.Drawing.Size(673, 146);
+            this.lblConnectionInfo.Size = new System.Drawing.Size(890, 144);
             this.lblConnectionInfo.TabIndex = 0;
             this.lblConnectionInfo.Text = resources.GetString("lblConnectionInfo.Text");
             this.lblConnectionInfo.UseMnemonic = false;
@@ -280,7 +284,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.port.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.port.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.port.ForeColor = System.Drawing.Color.White;
-            this.port.Location = new System.Drawing.Point(12, 178);
+            this.port.Location = new System.Drawing.Point(13, 89);
             this.port.Maximum = new decimal(new int[] {
             65535,
             0,
@@ -300,7 +304,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblPort.AutoSize = true;
             this.lblPort.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblPort.ForeColor = System.Drawing.Color.Gray;
-            this.lblPort.Location = new System.Drawing.Point(3, 154);
+            this.lblPort.Location = new System.Drawing.Point(3, 63);
             this.lblPort.Name = "lblPort";
             this.lblPort.Size = new System.Drawing.Size(43, 23);
             this.lblPort.TabIndex = 8;
@@ -311,22 +315,24 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             this.lblIpAddessLabel.AutoSize = true;
             this.lblIpAddessLabel.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblIpAddessLabel.Location = new System.Drawing.Point(12, 122);
+            this.lblIpAddessLabel.Location = new System.Drawing.Point(18, 280);
             this.lblIpAddessLabel.Name = "lblIpAddessLabel";
             this.lblIpAddessLabel.Size = new System.Drawing.Size(83, 18);
             this.lblIpAddessLabel.TabIndex = 7;
             this.lblIpAddessLabel.Text = "IP address:";
             this.lblIpAddessLabel.UseMnemonic = false;
+            this.lblIpAddessLabel.Visible = false;
             // 
             // lblIpAddress
             // 
             this.lblIpAddress.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblIpAddress.Location = new System.Drawing.Point(101, 122);
+            this.lblIpAddress.Location = new System.Drawing.Point(107, 280);
             this.lblIpAddress.Name = "lblIpAddress";
             this.lblIpAddress.Size = new System.Drawing.Size(187, 17);
             this.lblIpAddress.TabIndex = 6;
             this.lblIpAddress.Text = "0.0.0.0";
             this.lblIpAddress.UseMnemonic = false;
+            this.lblIpAddress.Visible = false;
             // 
             // networkAdapter
             // 
@@ -336,7 +342,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.networkAdapter.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.networkAdapter.ForeColor = System.Drawing.Color.White;
             this.networkAdapter.Icon = null;
-            this.networkAdapter.Location = new System.Drawing.Point(12, 87);
+            this.networkAdapter.Location = new System.Drawing.Point(18, 245);
             this.networkAdapter.Margin = new System.Windows.Forms.Padding(4);
             this.networkAdapter.Name = "networkAdapter";
             this.networkAdapter.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
@@ -344,6 +350,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.networkAdapter.SelectedItem = null;
             this.networkAdapter.Size = new System.Drawing.Size(276, 31);
             this.networkAdapter.TabIndex = 5;
+            this.networkAdapter.Visible = false;
             this.networkAdapter.SelectedIndexChanged += new System.EventHandler(this.NetworkAdapter_SelectedIndexChanged);
             // 
             // lblNetworkAdapter
@@ -351,12 +358,13 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             this.lblNetworkAdapter.AutoSize = true;
             this.lblNetworkAdapter.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblNetworkAdapter.ForeColor = System.Drawing.Color.Gray;
-            this.lblNetworkAdapter.Location = new System.Drawing.Point(3, 63);
+            this.lblNetworkAdapter.Location = new System.Drawing.Point(9, 221);
             this.lblNetworkAdapter.Name = "lblNetworkAdapter";
             this.lblNetworkAdapter.Size = new System.Drawing.Size(150, 23);
             this.lblNetworkAdapter.TabIndex = 2;
             this.lblNetworkAdapter.Text = "Network adapter";
             this.lblNetworkAdapter.UseMnemonic = false;
+            this.lblNetworkAdapter.Visible = false;
             // 
             // lblConnection
             // 

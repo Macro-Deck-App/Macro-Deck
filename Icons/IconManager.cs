@@ -24,8 +24,11 @@ namespace SuchByte.MacroDeck.Icons
 
         public static event EventHandler InstallationFinished;
 
+        public static event EventHandler OnIconPacksChanged;
+
         public static Action<object, EventArgs> OnUpdateCheckFinished { get; internal set; }
         public static Action<object, EventArgs> IconPacksLoaded { get; set; }
+
 
         public static void Initialize()
         {
@@ -235,6 +238,7 @@ namespace SuchByte.MacroDeck.Icons
             {
                 IconPacks.Remove(iconPack);
             }
+            OnIconPacksChanged?.Invoke(null, EventArgs.Empty);
             try
             {
                 Directory.Delete(Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId), true);

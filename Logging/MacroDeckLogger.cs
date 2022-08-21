@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -263,6 +264,18 @@ namespace SuchByte.MacroDeck.Logging
                     FileLogging = true;
                 }
             }
+        }
+
+        internal static void CleanUpLogsDir()
+        {
+            foreach (FileInfo file in new DirectoryInfo(MacroDeck.LogsDirectoryPath).GetFiles().Where(p => p.CreationTime < DateTime.Now.AddDays(-30)).ToArray())
+            {
+                try
+                {
+                    File.Delete(file.FullName);
+                } catch { }
+            }
+
         }
 
         private static string TruncateForDisplay(this string value, int length)

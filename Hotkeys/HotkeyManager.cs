@@ -75,7 +75,7 @@ namespace SuchByte.MacroDeck.Hotkeys
             int hotkeyId = Hotkeys[actionButton];
             UnregisterHotKey(formHandle, hotkeyId);
             Hotkeys.Remove(actionButton);
-            MacroDeckLogger.Info(String.Format("Unregistered hotkey #{0}", hotkeyId));
+            MacroDeckLogger.Info(string.Format("Unregistered hotkey #{0}", hotkeyId));
         }
 
 
@@ -91,7 +91,7 @@ namespace SuchByte.MacroDeck.Hotkeys
                     {
                         try
                         {
-                            MacroDeckServer.ExecutePress(actionButton, "");
+                            MacroDeckServer.Execute(actionButton, "", Enums.ButtonPressType.SHORT);
                         }
                         catch { }
                     }

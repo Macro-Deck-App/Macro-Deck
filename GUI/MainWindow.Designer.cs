@@ -56,7 +56,6 @@ namespace SuchByte.MacroDeck.GUI
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
-            this.lblPluginsLoaded = new System.Windows.Forms.Label();
             this.lblVersion = new System.Windows.Forms.Label();
             this.contentPanel = new SuchByte.MacroDeck.GUI.CustomControls.BufferedPanel();
             this.contentButtonPanel = new System.Windows.Forms.FlowLayoutPanel();
@@ -68,13 +67,13 @@ namespace SuchByte.MacroDeck.GUI
             this.panel2 = new System.Windows.Forms.Panel();
             this.btnSettings = new SuchByte.MacroDeck.GUI.CustomControls.ContentSelectorButton();
             this.lblNumClientsConnected = new System.Windows.Forms.Label();
-            this.lblIPAddress = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.lblPort = new System.Windows.Forms.Label();
             this.lblServerStatus = new System.Windows.Forms.Label();
             this.lblIpAddressHostname = new System.Windows.Forms.Label();
             this.navigation = new SuchByte.MacroDeck.GUI.CustomControls.RoundedPanel();
             this.btnNotifications = new SuchByte.MacroDeck.GUI.CustomControls.Notifications.NotificationButton();
+            this.hosts = new SuchByte.MacroDeck.GUI.CustomControls.RoundedComboBox();
             this.contentButtonPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.btnDeck)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnExtensions)).BeginInit();
@@ -88,20 +87,6 @@ namespace SuchByte.MacroDeck.GUI
             // 
             this.lblSafeMode.Margin = new System.Windows.Forms.Padding(7, 0, 7, 0);
             this.lblSafeMode.Size = new System.Drawing.Size(222, 28);
-            // 
-            // lblPluginsLoaded
-            // 
-            this.lblPluginsLoaded.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblPluginsLoaded.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblPluginsLoaded.ForeColor = System.Drawing.Color.White;
-            this.lblPluginsLoaded.Location = new System.Drawing.Point(987, 613);
-            this.lblPluginsLoaded.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.lblPluginsLoaded.Name = "lblPluginsLoaded";
-            this.lblPluginsLoaded.Size = new System.Drawing.Size(209, 20);
-            this.lblPluginsLoaded.TabIndex = 3;
-            this.lblPluginsLoaded.Text = "0 plugins loaded.";
-            this.lblPluginsLoaded.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.lblPluginsLoaded.UseMnemonic = false;
             // 
             // lblVersion
             // 
@@ -255,37 +240,21 @@ namespace SuchByte.MacroDeck.GUI
             this.lblNumClientsConnected.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblNumClientsConnected.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblNumClientsConnected.ForeColor = System.Drawing.Color.White;
-            this.lblNumClientsConnected.Location = new System.Drawing.Point(742, 614);
+            this.lblNumClientsConnected.Location = new System.Drawing.Point(844, 64);
             this.lblNumClientsConnected.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.lblNumClientsConnected.Name = "lblNumClientsConnected";
-            this.lblNumClientsConnected.Size = new System.Drawing.Size(233, 18);
+            this.lblNumClientsConnected.Size = new System.Drawing.Size(252, 18);
             this.lblNumClientsConnected.TabIndex = 8;
             this.lblNumClientsConnected.Text = "0 clients connected";
-            this.lblNumClientsConnected.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblNumClientsConnected.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lblNumClientsConnected.UseMnemonic = false;
-            // 
-            // lblIPAddress
-            // 
-            this.lblIPAddress.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblIPAddress.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.lblIPAddress.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lblIPAddress.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblIPAddress.ForeColor = System.Drawing.Color.White;
-            this.lblIPAddress.Location = new System.Drawing.Point(778, 45);
-            this.lblIPAddress.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.lblIPAddress.Name = "lblIPAddress";
-            this.lblIPAddress.Size = new System.Drawing.Size(252, 21);
-            this.lblIPAddress.TabIndex = 9;
-            this.lblIPAddress.Text = "0.0.0.0";
-            this.lblIPAddress.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblIPAddress.UseMnemonic = false;
             // 
             // label1
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(1033, 45);
+            this.label1.Location = new System.Drawing.Point(1096, 41);
             this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(15, 19);
@@ -297,16 +266,15 @@ namespace SuchByte.MacroDeck.GUI
             // 
             this.lblPort.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblPort.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.lblPort.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblPort.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblPort.ForeColor = System.Drawing.Color.White;
-            this.lblPort.Location = new System.Drawing.Point(1067, 45);
+            this.lblPort.Location = new System.Drawing.Point(1113, 40);
             this.lblPort.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.lblPort.Name = "lblPort";
-            this.lblPort.Size = new System.Drawing.Size(124, 21);
+            this.lblPort.Size = new System.Drawing.Size(80, 21);
             this.lblPort.TabIndex = 11;
             this.lblPort.Text = "8191";
-            this.lblPort.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblPort.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lblPort.UseMnemonic = false;
             // 
             // lblServerStatus
@@ -314,13 +282,13 @@ namespace SuchByte.MacroDeck.GUI
             this.lblServerStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblServerStatus.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblServerStatus.ForeColor = System.Drawing.Color.White;
-            this.lblServerStatus.Location = new System.Drawing.Point(512, 614);
+            this.lblServerStatus.Location = new System.Drawing.Point(614, 64);
             this.lblServerStatus.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.lblServerStatus.Name = "lblServerStatus";
             this.lblServerStatus.Size = new System.Drawing.Size(218, 18);
             this.lblServerStatus.TabIndex = 12;
             this.lblServerStatus.Text = "Server offline";
-            this.lblServerStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblServerStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.lblServerStatus.UseMnemonic = false;
             // 
             // lblIpAddressHostname
@@ -328,7 +296,7 @@ namespace SuchByte.MacroDeck.GUI
             this.lblIpAddressHostname.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblIpAddressHostname.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblIpAddressHostname.ForeColor = System.Drawing.Color.White;
-            this.lblIpAddressHostname.Location = new System.Drawing.Point(454, 47);
+            this.lblIpAddressHostname.Location = new System.Drawing.Point(520, 43);
             this.lblIpAddressHostname.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.lblIpAddressHostname.Name = "lblIpAddressHostname";
             this.lblIpAddressHostname.Size = new System.Drawing.Size(312, 18);
@@ -367,12 +335,27 @@ namespace SuchByte.MacroDeck.GUI
             this.btnNotifications.Padding = new System.Windows.Forms.Padding(0, 3, 3, 0);
             this.btnNotifications.Progress = 0;
             this.btnNotifications.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(205)))));
-            this.btnNotifications.Size = new System.Drawing.Size(43, 43);
+            this.btnNotifications.Size = new System.Drawing.Size(41, 41);
             this.btnNotifications.TabIndex = 16;
             this.btnNotifications.UseVisualStyleBackColor = true;
             this.btnNotifications.UseWindowsAccentColor = false;
             this.btnNotifications.Visible = false;
             this.btnNotifications.Click += new System.EventHandler(this.BtnNotifications_Click);
+            // 
+            // hosts
+            // 
+            this.hosts.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.hosts.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.hosts.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.hosts.Icon = null;
+            this.hosts.Location = new System.Drawing.Point(841, 38);
+            this.hosts.Name = "hosts";
+            this.hosts.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
+            this.hosts.SelectedIndex = -1;
+            this.hosts.SelectedItem = null;
+            this.hosts.Size = new System.Drawing.Size(250, 26);
+            this.hosts.TabIndex = 17;
+            this.hosts.SelectedIndexChanged += new System.EventHandler(this.Hosts_SelectedIndexChanged);
             // 
             // MainWindow
             // 
@@ -380,17 +363,16 @@ namespace SuchByte.MacroDeck.GUI
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.ClientSize = new System.Drawing.Size(1200, 635);
+            this.Controls.Add(this.hosts);
             this.Controls.Add(this.btnNotifications);
             this.Controls.Add(this.navigation);
             this.Controls.Add(this.lblIpAddressHostname);
             this.Controls.Add(this.lblServerStatus);
             this.Controls.Add(this.lblPort);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.lblIPAddress);
             this.Controls.Add(this.lblNumClientsConnected);
             this.Controls.Add(this.contentPanel);
             this.Controls.Add(this.lblVersion);
-            this.Controls.Add(this.lblPluginsLoaded);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Location = new System.Drawing.Point(0, 0);
             this.Margin = new System.Windows.Forms.Padding(7, 3, 7, 3);
@@ -399,17 +381,16 @@ namespace SuchByte.MacroDeck.GUI
             this.Text = "Macro Deck 2";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
             this.Load += new System.EventHandler(this.MainWindow_Load);
-            this.Controls.SetChildIndex(this.lblPluginsLoaded, 0);
             this.Controls.SetChildIndex(this.lblVersion, 0);
             this.Controls.SetChildIndex(this.contentPanel, 0);
             this.Controls.SetChildIndex(this.lblNumClientsConnected, 0);
-            this.Controls.SetChildIndex(this.lblIPAddress, 0);
             this.Controls.SetChildIndex(this.label1, 0);
             this.Controls.SetChildIndex(this.lblPort, 0);
             this.Controls.SetChildIndex(this.lblServerStatus, 0);
             this.Controls.SetChildIndex(this.lblIpAddressHostname, 0);
             this.Controls.SetChildIndex(this.navigation, 0);
             this.Controls.SetChildIndex(this.btnNotifications, 0);
+            this.Controls.SetChildIndex(this.hosts, 0);
             this.contentButtonPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.btnDeck)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnExtensions)).EndInit();
@@ -424,7 +405,6 @@ namespace SuchByte.MacroDeck.GUI
 
         #endregion
         private System.Windows.Forms.Label lblVersion;
-        private System.Windows.Forms.Label lblPluginsLoaded;
         private CustomControls.BufferedPanel contentPanel;
         private CustomControls.ContentSelectorButton btnDeck;
         private CustomControls.ContentSelectorButton btnSettings;
@@ -432,7 +412,6 @@ namespace SuchByte.MacroDeck.GUI
         private CustomControls.ContentSelectorButton btnExtensions;
         private CustomControls.ContentSelectorButton btnDeviceManager;
         private System.Windows.Forms.Label lblNumClientsConnected;
-        private System.Windows.Forms.Label lblIPAddress;
         private CustomControls.ContentSelectorButton btnVariables;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label lblPort;
@@ -442,5 +421,6 @@ namespace SuchByte.MacroDeck.GUI
         private System.Windows.Forms.Panel panel2;
         private RoundedPanel navigation;
         private NotificationButton btnNotifications;
+        private RoundedComboBox hosts;
     }
 }

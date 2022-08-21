@@ -262,7 +262,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             }
             MacroDeck.Configuration.Host_Address = this.lblIpAddress.Text;
             MacroDeck.SaveConfiguration();
-            MacroDeckServer.Start(MacroDeck.Configuration.Host_Address, MacroDeck.Configuration.Host_Port);
         }
 
         private void BtnChangePort_Click(object sender, EventArgs e)
