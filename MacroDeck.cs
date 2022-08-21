@@ -40,7 +40,7 @@ namespace SuchByte.MacroDeck
 {
     public class MacroDeck : NativeWindow
     {
-        static Assembly assembly = Assembly.GetExecutingAssembly();
+        static readonly Assembly assembly = Assembly.GetExecutingAssembly();
         public static readonly VersionModel Version = new VersionModel(FileVersionInfo.GetVersionInfo(assembly.Location).FileVersion);
 
         public static readonly int ApiVersion = 20;
@@ -70,6 +70,8 @@ namespace SuchByte.MacroDeck
         public static string DevicesFilePath;
         public static string VariablesFilePath;
         public static string ProfilesFilePath;
+
+        private static Stopwatch _startUpTimeStopWatch = new Stopwatch();
 
         internal static SynchronizationContext SyncContext { get; set; }
 
@@ -115,8 +117,6 @@ namespace SuchByte.MacroDeck
             ContextMenuStrip = _trayIconContextMenu
         };
 
-        private static long _macroDeckStarted = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-
         private static MainWindow mainWindow;
 
         public static MainWindow MainWindow
@@ -144,6 +144,9 @@ namespace SuchByte.MacroDeck
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
             Application.ThreadException += ApplicationThreadException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
+
+            _startUpTimeStopWatch = new Stopwatch();
+            _startUpTimeStopWatch.Start();
 
             // Check if Macro Deck is already running
             Process proc = Process.GetCurrentProcess();
@@ -175,9 +178,7 @@ namespace SuchByte.MacroDeck
                 }
             }
 
-            //AppDomain.CurrentDomain.ProcessExit += OnApplicationExit;
             // Check for start arguments
-
             int port = -1;
             bool show = false;
             StartParameters = args;
@@ -360,7 +361,7 @@ namespace SuchByte.MacroDeck
 
             BackupManager.CheckRestoreDirectory();
 
-            Language.LanguageManager.Load(ExportDefaultStrings);
+            LanguageManager.Load(ExportDefaultStrings);
 
             if (IsAdministrator())
             {
@@ -440,7 +441,7 @@ namespace SuchByte.MacroDeck
 
         private static void Start(bool show = false, int port = -1)
         {
-            Language.LanguageManager.SetLanguage(_configuration.Language);
+            LanguageManager.SetLanguage(_configuration.Language);
             Colors.Initialize();
             _ = new HotkeyManager();
             VariableManager.Initialize();
@@ -467,13 +468,12 @@ namespace SuchByte.MacroDeck
                 SyncContext = SynchronizationContext.Current;
             }
 
-            long startTook = DateTimeOffset.Now.ToUnixTimeMilliseconds() - _macroDeckStarted;
+            _startUpTimeStopWatch.Stop();
+
+            double startTook = _startUpTimeStopWatch.Elapsed.TotalMilliseconds;
             MacroDeckLogger.Info($"Macro Deck startup finished (took {startTook}ms)");
 
-            if (OnMacroDeckLoaded != null)
-            {
-                OnMacroDeckLoaded(null, EventArgs.Empty);
-            }
+            OnMacroDeckLoaded?.Invoke(null, EventArgs.Empty);
 
             Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
             Updater.Updater.Initialize(ForceUpdate, TestUpdateChannel);
@@ -500,7 +500,7 @@ namespace SuchByte.MacroDeck
         private static void OnUpdateAvailable(object sender, EventArgs e)
         {
             Updater.Updater.OnUpdateAvailable -= OnUpdateAvailable;
-            JObject versionObject = sender as JObject;
+            var versionObject = sender as JObject;
             try
             {
                 var btnOpenSettings = new ButtonPrimary()
@@ -529,21 +529,21 @@ namespace SuchByte.MacroDeck
         {
             _trayIcon.Visible = true;
 
-            ToolStripMenuItem showItem = new ToolStripMenuItem
+            var showItem = new ToolStripMenuItem
             {
                 Text = Language.LanguageManager.Strings.Show,
                 Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point)
             };
             showItem.Click += ShowItemClick;
 
-            ToolStripMenuItem restartItem = new ToolStripMenuItem
+            var restartItem = new ToolStripMenuItem
             {
                 Text = Language.LanguageManager.Strings.Restart,
                 Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point)
             };
             restartItem.Click += RestartItemClick;
 
-            ToolStripMenuItem exitItem = new ToolStripMenuItem
+            var exitItem = new ToolStripMenuItem
             {
                 Text = Language.LanguageManager.Strings.Exit,
                 Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point)
@@ -641,17 +641,7 @@ namespace SuchByte.MacroDeck
 
         private static void MainWindowLoadEvent(object sender, EventArgs e)
         {
-            if (OnMainWindowLoad != null)
-            {
-                OnMainWindowLoad((MainWindow)sender, EventArgs.Empty);
-            }
-        }
-
-
-        private static void OnApplicationExit(object sender, EventArgs e)
-        {
-            //VariableManager.Save();
-            MacroDeckLogger.Info("Exiting Macro Deck...");
+            OnMainWindowLoad?.Invoke((MainWindow)sender, EventArgs.Empty);
         }
 
         private static void OnPackageManagerUpdateCheckFinished(object sender, EventArgs e)

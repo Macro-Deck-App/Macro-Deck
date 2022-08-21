@@ -137,10 +137,7 @@ namespace SuchByte.MacroDeck.Variables
                         break;
                 }
 
-                if (OnVariableChanged != null)
-                {
-                    OnVariableChanged(variable, EventArgs.Empty);
-                }
+                OnVariableChanged?.Invoke(variable, EventArgs.Empty);
             }
 
             try
@@ -193,10 +190,7 @@ namespace SuchByte.MacroDeck.Variables
         public static void DeleteVariable(string name)
         {
             _database.Delete(new Variable() { Name = name });
-            if (OnVariableRemoved != null)
-            {
-                OnVariableRemoved(name, EventArgs.Empty);
-            }
+            OnVariableRemoved?.Invoke(name, EventArgs.Empty);
             MacroDeckLogger.Info("Deleted variable " + name);
         }
 
@@ -231,7 +225,7 @@ namespace SuchByte.MacroDeck.Variables
                             break;
                         case nameof(VariableType.Integer):
                             int resultInteger = 0;
-                            Int32.TryParse(v.Value, out resultInteger);
+                            int.TryParse(v.Value, out resultInteger);
                             value = Value.FromNumber(resultInteger);
                             break;
                         case nameof(VariableType.String):
