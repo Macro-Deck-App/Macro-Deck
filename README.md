@@ -1,5 +1,12 @@
 # Macro Deck
+![VersionBadge](https://img.shields.io/github/v/release/Macro-Deck-org/Macro-Deck)
+![LicenseBadge](https://img.shields.io/github/license/Macro-Deck-org/Macro-Deck)
+![PlatformBadge](https://img.shields.io/badge/platform-windows-blue)
+![ExtensionStoreBadge](https://img.shields.io/website?down_message=offline&label=Extension%20Store&up_message=online&url=https%3A%2F%2Fmacrodeck.org%2Fextensionstore%2Fextensionstore.php)
+
+
 ![Screenshot_2](https://user-images.githubusercontent.com/45011179/149414436-60e0ab75-e9ef-4ab8-a62e-b61ac9ae3f49.png)
+
 
 ## More than just a macro pad!
 
