@@ -21,13 +21,13 @@ namespace SuchByte.MacroDeck.Device
 
         public static void LoadKnownDevices()
         {
-            if (File.Exists(MacroDeck.DevicesFilePath))
+            if (File.Exists(MacroDeck.ApplicationPaths.DevicesFilePath))
             {
-                _macroDeckDevices = JsonConvert.DeserializeObject<List<MacroDeckDevice>>(File.ReadAllText(MacroDeck.DevicesFilePath), new JsonSerializerSettings
+                _macroDeckDevices = JsonConvert.DeserializeObject<List<MacroDeckDevice>>(File.ReadAllText(MacroDeck.ApplicationPaths.DevicesFilePath), new JsonSerializerSettings
                 {
                     TypeNameHandling = TypeNameHandling.Auto,
                     NullValueHandling = NullValueHandling.Ignore,
-                });
+                })!;
             }
         }
 
@@ -41,7 +41,7 @@ namespace SuchByte.MacroDeck.Device
 
             try
             {
-                using (var sw = new StreamWriter(MacroDeck.DevicesFilePath))
+                using (var sw = new StreamWriter(MacroDeck.ApplicationPaths.DevicesFilePath))
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {
                     serializer.Serialize(writer, _macroDeckDevices);
@@ -76,29 +76,11 @@ namespace SuchByte.MacroDeck.Device
             return false;
         }
 
-        public static MacroDeckDevice GetMacroDeckDevice(string clientId)
-        {
-            foreach (var macroDeckDevice in _macroDeckDevices)
-            {
-                if (macroDeckDevice.ClientId.Equals(clientId))
-                {
-                    return macroDeckDevice;
-                }
-            }
-            return null;
-        }
+        public static MacroDeckDevice? GetMacroDeckDevice(string clientId) => 
+            _macroDeckDevices.FirstOrDefault(macroDeckDevice => macroDeckDevice.ClientId.Equals(clientId));
 
-        public static MacroDeckDevice GetMacroDeckDeviceByDisplayName(string displayName)
-        {
-            foreach (var macroDeckDevice in _macroDeckDevices)
-            {
-                if (macroDeckDevice.DisplayName.Equals(displayName))
-                {
-                    return macroDeckDevice;
-                }
-            }
-            return null;
-        }
+        public static MacroDeckDevice? GetMacroDeckDeviceByDisplayName(string displayName) => 
+            _macroDeckDevices.FirstOrDefault(macroDeckDevice => macroDeckDevice.DisplayName.Equals(displayName));
 
         public static void SetProfile(MacroDeckDevice macroDeckDevice, MacroDeckProfile macroDeckProfile)
         {
@@ -128,31 +110,22 @@ namespace SuchByte.MacroDeck.Device
 
         public static void RenameMacroDeckDevice(MacroDeckDevice macroDeckDevice, string displayName)
         {
-            if (_macroDeckDevices.Contains(macroDeckDevice))
-            {
-                macroDeckDevice.DisplayName = displayName;
-                SaveKnownDevices();
-            }
+            if (!_macroDeckDevices.Contains(macroDeckDevice)) return;
+            macroDeckDevice.DisplayName = displayName;
+            SaveKnownDevices();
         }
 
         public static void RemoveKnownDevice(MacroDeckDevice macroDeckDevice)
         {
-            if (_macroDeckDevices.Contains(macroDeckDevice))
-            {
-                _macroDeckDevices.Remove(macroDeckDevice);
-                SaveKnownDevices();
-            }
+            if (!_macroDeckDevices.Contains(macroDeckDevice)) return;
+            _macroDeckDevices.Remove(macroDeckDevice);
+            SaveKnownDevices();
         }
 
-        public static bool IsDisplayNameAvailable(string displayName)
-        {
-            return !(_macroDeckDevices.FindAll(macroDeckDevice => macroDeckDevice.DisplayName.Equals(displayName)).Count > 0);
-        }
+        public static bool IsDisplayNameAvailable(string displayName) => 
+            !(_macroDeckDevices.FindAll(macroDeckDevice => macroDeckDevice.DisplayName.Equals(displayName)).Count > 0);
 
-        public static List<MacroDeckDevice> GetKnownDevices()
-        {
-            return _macroDeckDevices;
-        }
+        public static List<MacroDeckDevice> GetKnownDevices() => _macroDeckDevices; // TODO: Array
 
         public static bool RequestConnection(MacroDeckClient macroDeckClient)
         {
@@ -161,17 +134,17 @@ namespace SuchByte.MacroDeck.Device
                 if (IsKnownDevice(macroDeckClient.ClientId))
                 {
                     var macroDeckDevice = GetMacroDeckDevice(macroDeckClient.ClientId);
-                    if (macroDeckDevice.Blocked)
+                    if (macroDeckDevice is { Blocked: true })
                     {
                         return false;
                     }
 
-                    macroDeckDevice.ClientId = macroDeckClient.ClientId;
+                    macroDeckDevice!.ClientId = macroDeckClient.ClientId;
                     macroDeckDevice.DeviceType = macroDeckClient.DeviceType;
                     return true;
                 }
 
-                Form mainForm = null;
+                Form? mainForm = null;
                 var dialogResult = false;
                 foreach (Form form in Application.OpenForms)
                 {
@@ -180,7 +153,7 @@ namespace SuchByte.MacroDeck.Device
                         mainForm = form;
                     }
                 }
-                if (mainForm != null && mainForm.IsHandleCreated && !mainForm.IsDisposed)
+                if (mainForm is { IsHandleCreated: true, IsDisposed: false })
                 {
                     mainForm.Invoke(() =>
                     {
@@ -191,13 +164,14 @@ namespace SuchByte.MacroDeck.Device
                 {
                     dialogResult = ShowConnectionDialog(macroDeckClient);
                 }
-                if (dialogResult)
+
+                if (!dialogResult) return dialogResult;
                 {
                     var macroDeckDevice = new MacroDeckDevice
                     {
                         ClientId = macroDeckClient.ClientId,
                         DisplayName = "Client " + macroDeckClient.ClientId,
-                        ProfileId = ProfileManager.Profiles.FirstOrDefault().ProfileId,
+                        ProfileId = ProfileManager.Profiles.FirstOrDefault()?.ProfileId ?? "0",
                     };
                     AddKnownDevice(macroDeckDevice);
                     macroDeckDevice.ClientId = macroDeckClient.ClientId;
@@ -233,7 +207,7 @@ namespace SuchByte.MacroDeck.Device
             {
                 var macroDeckDevice = new MacroDeckDevice
                 {
-                    ClientId = macroDeckClient.ClientId,
+                    ClientId = macroDeckClient?.ClientId,
                     DisplayName = "Client " + macroDeckClient.ClientId,
                     Blocked = true
                 };

@@ -247,7 +247,7 @@ namespace SuchByte.MacroDeck.Logging
                 }
                 _debugConsole.AppendText(formattedLog + Environment.NewLine, sender, logColor);
             }
-            if (FileLogging && Directory.Exists(MacroDeck.LogsDirectoryPath) && CurrentFilename != null)
+            if (FileLogging && MacroDeck.ApplicationPaths != null && Directory.Exists(MacroDeck.ApplicationPaths.LogsDirectoryPath) && CurrentFilename != null)
             {
                 try
                 {
@@ -266,7 +266,7 @@ namespace SuchByte.MacroDeck.Logging
 
         internal static void CleanUpLogsDir()
         {
-            foreach (var file in new DirectoryInfo(MacroDeck.LogsDirectoryPath).GetFiles().Where(p => p.CreationTime < DateTime.Now.AddDays(-30)).ToArray())
+            foreach (var file in new DirectoryInfo(MacroDeck.ApplicationPaths.LogsDirectoryPath).GetFiles().Where(p => p.CreationTime < DateTime.Now.AddDays(-30)).ToArray())
             {
                 try
                 {
@@ -289,7 +289,7 @@ namespace SuchByte.MacroDeck.Logging
             return returnValue;
         }
 
-        internal static string CurrentFilename => Path.Combine(MacroDeck.LogsDirectoryPath, DateTime.Now.ToString("yyyy-MM-dd") + ".log");
+        internal static string CurrentFilename => Path.Combine(MacroDeck.ApplicationPaths.LogsDirectoryPath, DateTime.Now.ToString("yyyy-MM-dd") + ".log");
     }
 
     public enum LogLevel

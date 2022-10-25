@@ -81,7 +81,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         {
             var p = new Process
             {
-                StartInfo = new ProcessStartInfo(MacroDeck.UserDirectoryPath)
+                StartInfo = new ProcessStartInfo(MacroDeck.ApplicationPaths.UserDirectoryPath)
                 {
                     UseShellExecute = true
                 }

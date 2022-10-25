@@ -104,7 +104,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
                 });
 
                 MacroDeckLogger.Trace(typeof(ExtensionStoreDownloaderItem), $"Download {url}");
-                _webClient.DownloadFileAsync(new Uri(url), Path.Combine(MacroDeck.TempDirectoryPath, ExtensionModel.Filename));
+                _webClient.DownloadFileAsync(new Uri(url), Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, ExtensionModel.Filename));
 
             }
         }
@@ -146,14 +146,14 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
 
         private void Install()
         {
-            if (!File.Exists(Path.Combine(MacroDeck.TempDirectoryPath, ExtensionModel.Filename)))
+            if (!File.Exists(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, ExtensionModel.Filename)))
             {
                 Finished();
                 MacroDeckLogger.Error(GetType(), $"Download of {ExtensionModel.Name} failed: {ExtensionModel.Filename} not found");
                 return;
             }
 
-            using (var stream = File.OpenRead(Path.Combine(MacroDeck.TempDirectoryPath, ExtensionModel.Filename)))
+            using (var stream = File.OpenRead(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, ExtensionModel.Filename)))
             {
                 using (var md5 = MD5.Create())
                 {
@@ -176,7 +176,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
             ExtensionManifestModel extensionManifestModel;
             try
             {
-                extensionManifestModel = ExtensionManifestModel.FromZipFilePath(Path.Combine(MacroDeck.TempDirectoryPath, ExtensionModel.Filename));
+                extensionManifestModel = ExtensionManifestModel.FromZipFilePath(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, ExtensionModel.Filename));
             }
             catch (Exception ex)
             {
@@ -201,7 +201,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
                 case ExtensionType.Plugin:
                     try
                     {
-                        PluginManager.InstallPluginFromZip(Path.Combine(MacroDeck.TempDirectoryPath, ExtensionModel.Filename));
+                        PluginManager.InstallPluginFromZip(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, ExtensionModel.Filename));
                     }
                     catch (Exception ex)
                     {
@@ -213,7 +213,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
                 case ExtensionType.IconPack:
                     try
                     {
-                        IconManager.InstallIconPackZip(Path.Combine(MacroDeck.TempDirectoryPath, ExtensionModel.Filename), true);
+                        IconManager.InstallIconPackZip(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, ExtensionModel.Filename), true);
                     }
                     catch (Exception ex)
                     {
@@ -226,13 +226,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
 
             try
             {
-                if (Directory.Exists(Path.Combine(MacroDeck.TempDirectoryPath, ExtensionModel.PackageId)))
+                if (Directory.Exists(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, ExtensionModel.PackageId)))
                 {
-                    Directory.Delete(Path.Combine(MacroDeck.TempDirectoryPath, ExtensionModel.PackageId), true);
+                    Directory.Delete(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, ExtensionModel.PackageId), true);
                 }
-                if (File.Exists(Path.Combine(MacroDeck.TempDirectoryPath, ExtensionModel.Filename)))
+                if (File.Exists(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, ExtensionModel.Filename)))
                 {
-                    File.Delete(Path.Combine(MacroDeck.TempDirectoryPath, ExtensionModel.Filename));
+                    File.Delete(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, ExtensionModel.Filename));
                 }
             }
             catch { }

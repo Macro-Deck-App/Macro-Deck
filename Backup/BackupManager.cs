@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using Newtonsoft.Json;
 using SuchByte.MacroDeck.Backup;
 using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Utils;
 using SuchByte.MacroDeck.Variables;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
@@ -31,7 +32,7 @@ namespace SuchByte.MacroDeck.Backups
         public static List<MacroDeckBackupInfo> GetBackups()
         {
             var backups = new List<MacroDeckBackupInfo>();
-            foreach (var filename in Directory.GetFiles(MacroDeck.BackupsDirectoryPath))
+            foreach (var filename in Directory.GetFiles(MacroDeck.ApplicationPaths.BackupsDirectoryPath))
             {
                 backups.Add(new MacroDeckBackupInfo
                 {
@@ -45,7 +46,7 @@ namespace SuchByte.MacroDeck.Backups
 
         public static void CheckRestoreDirectory()
         {
-            var restoreDirectory = Path.Combine(MacroDeck.TempDirectoryPath, "backup_restore");
+            var restoreDirectory = Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, "backup_restore");
             if (!Directory.Exists(restoreDirectory)) return;
             if (!File.Exists(Path.Combine(restoreDirectory, ".restore"))) return;
             RestoreBackupInfo restoreBackupInfo;
@@ -60,104 +61,104 @@ namespace SuchByte.MacroDeck.Backups
                 File.Delete(Path.Combine(restoreDirectory, ".restore"));
             } catch { return; }
 
-            if (restoreBackupInfo.RestoreConfig && File.Exists(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.ConfigFilePath))))
+            if (restoreBackupInfo.RestoreConfig && File.Exists(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.ApplicationPaths.MainConfigFilePath))))
             {
                 try
                 {
-                    File.Copy(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.ConfigFilePath)), MacroDeck.ConfigFilePath, true);
+                    File.Copy(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.ApplicationPaths.MainConfigFilePath)), MacroDeck.ApplicationPaths.MainConfigFilePath, true);
                 }
                 catch (Exception ex)
                 {
                     MacroDeckLogger.Error("Backup (config) restore failed: " + ex.Message);
                 }
             }
-            if (restoreBackupInfo.RestoreProfiles && File.Exists(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.ProfilesFilePath))))
+            if (restoreBackupInfo.RestoreProfiles && File.Exists(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.ApplicationPaths.ProfilesFilePath))))
             {
                 try
                 {
-                    File.Copy(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.ProfilesFilePath)), MacroDeck.ProfilesFilePath, true);
+                    File.Copy(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.ApplicationPaths.ProfilesFilePath)), MacroDeck.ApplicationPaths.ProfilesFilePath, true);
                 }
                 catch (Exception ex)
                 {
                     MacroDeckLogger.Error("Backup (profiles) restore failed: " + ex.Message);
                 }
             }
-            if (restoreBackupInfo.RestoreDevices && File.Exists(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.DevicesFilePath))))
+            if (restoreBackupInfo.RestoreDevices && File.Exists(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.ApplicationPaths.DevicesFilePath))))
             {
                 try
                 {
-                    File.Copy(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.DevicesFilePath)), MacroDeck.DevicesFilePath, true);
+                    File.Copy(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.ApplicationPaths.DevicesFilePath)), MacroDeck.ApplicationPaths.DevicesFilePath, true);
                 }
                 catch (Exception ex)
                 {
                     MacroDeckLogger.Error("Backup (devices) restore failed: " + ex.Message);
                 }
             }
-            if (restoreBackupInfo.RestoreVariables && File.Exists(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.VariablesFilePath))))
+            if (restoreBackupInfo.RestoreVariables && File.Exists(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.ApplicationPaths.VariablesFilePath))))
             {
                 try
                 {
-                    File.Copy(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.VariablesFilePath)), MacroDeck.VariablesFilePath, true);
+                    File.Copy(Path.Combine(restoreDirectory, Path.GetFileName(MacroDeck.ApplicationPaths.VariablesFilePath)), MacroDeck.ApplicationPaths.VariablesFilePath, true);
                 }
                 catch (Exception ex)
                 {
                     MacroDeckLogger.Error("Backup (variables) restore failed: " + ex.Message);
                 }
             }
-            if (restoreBackupInfo.RestorePlugins && Directory.Exists(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.PluginsDirectoryPath).Name)))
+            if (restoreBackupInfo.RestorePlugins && Directory.Exists(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.ApplicationPaths.PluginsDirectoryPath).Name)))
             {
                 try
                 {
-                    if (Directory.Exists(MacroDeck.PluginsDirectoryPath))
+                    if (Directory.Exists(MacroDeck.ApplicationPaths.PluginsDirectoryPath))
                     {
-                        Directory.Delete(MacroDeck.PluginsDirectoryPath, true);
+                        Directory.Delete(MacroDeck.ApplicationPaths.PluginsDirectoryPath, true);
                     }
-                    DirectoryCopy.Copy(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.PluginsDirectoryPath).Name), MacroDeck.PluginsDirectoryPath, true);
+                    DirectoryCopy.Copy(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.ApplicationPaths.PluginsDirectoryPath).Name), MacroDeck.ApplicationPaths.PluginsDirectoryPath, true);
                 }
                 catch (Exception ex)
                 {
                     MacroDeckLogger.Error("Backup (plugins) restore failed: " + ex.Message);
                 }
             }
-            if (restoreBackupInfo.RestorePluginConfigs && Directory.Exists(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.PluginConfigPath).Name)))
+            if (restoreBackupInfo.RestorePluginConfigs && Directory.Exists(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.ApplicationPaths.PluginConfigPath).Name)))
             {
                 try
                 {
-                    if (Directory.Exists(MacroDeck.PluginConfigPath))
+                    if (Directory.Exists(MacroDeck.ApplicationPaths.PluginConfigPath))
                     {
-                        Directory.Delete(MacroDeck.PluginConfigPath, true);
+                        Directory.Delete(MacroDeck.ApplicationPaths.PluginConfigPath, true);
                     }
-                    DirectoryCopy.Copy(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.PluginConfigPath).Name), MacroDeck.PluginConfigPath, true);
+                    DirectoryCopy.Copy(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.ApplicationPaths.PluginConfigPath).Name), MacroDeck.ApplicationPaths.PluginConfigPath, true);
                 }
                 catch (Exception ex)
                 {
                     MacroDeckLogger.Error("Backup (plugin configs) restore failed: " + ex.Message);
                 }
             }
-            if (restoreBackupInfo.RestorePluginCredentials && Directory.Exists(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.PluginCredentialsPath).Name)))
+            if (restoreBackupInfo.RestorePluginCredentials && Directory.Exists(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.ApplicationPaths.PluginCredentialsPath).Name)))
             {
                 try
                 {
-                    if (Directory.Exists(MacroDeck.PluginCredentialsPath))
+                    if (Directory.Exists(MacroDeck.ApplicationPaths.PluginCredentialsPath))
                     {
-                        Directory.Delete(MacroDeck.PluginCredentialsPath, true);
+                        Directory.Delete(MacroDeck.ApplicationPaths.PluginCredentialsPath, true);
                     }
-                    DirectoryCopy.Copy(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.PluginCredentialsPath).Name), MacroDeck.PluginCredentialsPath, true);
+                    DirectoryCopy.Copy(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.ApplicationPaths.PluginCredentialsPath).Name), MacroDeck.ApplicationPaths.PluginCredentialsPath, true);
                 }
                 catch (Exception ex)
                 {
                     MacroDeckLogger.Error("Backup (plugin credentials) restore failed: " + ex.Message);
                 }
             }
-            if (restoreBackupInfo.RestoreIconPacks && Directory.Exists(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.IconPackDirectoryPath).Name)))
+            if (restoreBackupInfo.RestoreIconPacks && Directory.Exists(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.ApplicationPaths.IconPackDirectoryPath).Name)))
             {
                 try
                 {
-                    if (Directory.Exists(MacroDeck.IconPackDirectoryPath))
+                    if (Directory.Exists(MacroDeck.ApplicationPaths.IconPackDirectoryPath))
                     {
-                        Directory.Delete(MacroDeck.IconPackDirectoryPath, true);
+                        Directory.Delete(MacroDeck.ApplicationPaths.IconPackDirectoryPath, true);
                     }
-                    DirectoryCopy.Copy(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.IconPackDirectoryPath).Name), MacroDeck.IconPackDirectoryPath, true);
+                    DirectoryCopy.Copy(Path.Combine(restoreDirectory, new DirectoryInfo(MacroDeck.ApplicationPaths.IconPackDirectoryPath).Name), MacroDeck.ApplicationPaths.IconPackDirectoryPath, true);
                 }
                 catch (Exception ex)
                 {
@@ -173,7 +174,7 @@ namespace SuchByte.MacroDeck.Backups
 
         public static void RestoreBackup(string backupFileName, RestoreBackupInfo restoreBackupInfo)
         {
-            var restoreDirectory = Path.Combine(MacroDeck.TempDirectoryPath, "backup_restore");
+            var restoreDirectory = Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, "backup_restore");
             try
             {
                 if (!Directory.Exists(restoreDirectory))
@@ -190,7 +191,7 @@ namespace SuchByte.MacroDeck.Backups
 
             try
             {
-                ZipFile.ExtractToDirectory(Path.Combine(MacroDeck.BackupsDirectoryPath, backupFileName), restoreDirectory, true);
+                ZipFile.ExtractToDirectory(Path.Combine(MacroDeck.ApplicationPaths.BackupsDirectoryPath, backupFileName), restoreDirectory, true);
 
                 var serializer = new JsonSerializer
                 {
@@ -217,47 +218,45 @@ namespace SuchByte.MacroDeck.Backups
             if (BackupInProgress) return;
             BackupInProgress = true;
             VariableManager.Close();
-            var backupFileName = string.Format("backup_{0}.zip", DateTime.Now.ToString("yy-MM-dd_HH-mm-ss"));
-            MacroDeckLogger.Info("Sarting creation of backup: " + backupFileName);
+            var backupFileName = $"backup_{DateTime.Now:yy-MM-dd_HH-mm-ss}.zip";
+            MacroDeckLogger.Info("Starting creation of backup: " + backupFileName);
 
             try
             {
-                using (var archive = ZipFile.Open(Path.Combine(MacroDeck.BackupsDirectoryPath, backupFileName), ZipArchiveMode.Create))
+                using var archive = ZipFile.Open(Path.Combine(MacroDeck.ApplicationPaths.BackupsDirectoryPath, backupFileName), ZipArchiveMode.Create);
+                archive.CreateEntryFromFile(MacroDeck.ApplicationPaths.MainConfigFilePath, Path.GetFileName(MacroDeck.ApplicationPaths.MainConfigFilePath));
+                archive.CreateEntryFromFile(MacroDeck.ApplicationPaths.ProfilesFilePath, Path.GetFileName(MacroDeck.ApplicationPaths.ProfilesFilePath));
+                archive.CreateEntryFromFile(MacroDeck.ApplicationPaths.DevicesFilePath, Path.GetFileName(MacroDeck.ApplicationPaths.DevicesFilePath));
+                archive.CreateEntryFromFile(MacroDeck.ApplicationPaths.VariablesFilePath, Path.GetFileName(MacroDeck.ApplicationPaths.VariablesFilePath));
+                foreach (var directory in Directory.GetDirectories(MacroDeck.ApplicationPaths.PluginsDirectoryPath))
                 {
-                    archive.CreateEntryFromFile(MacroDeck.ConfigFilePath, Path.GetFileName(MacroDeck.ConfigFilePath));
-                    archive.CreateEntryFromFile(MacroDeck.ProfilesFilePath, Path.GetFileName(MacroDeck.ProfilesFilePath));
-                    archive.CreateEntryFromFile(MacroDeck.DevicesFilePath, Path.GetFileName(MacroDeck.DevicesFilePath));
-                    archive.CreateEntryFromFile(MacroDeck.VariablesFilePath, Path.GetFileName(MacroDeck.VariablesFilePath));
-                    foreach (var directory in Directory.GetDirectories(MacroDeck.PluginsDirectoryPath))
+                    var pluginDirectoryInfo = new DirectoryInfo(directory);
+                    foreach (var file in pluginDirectoryInfo.GetFiles("*"))
                     {
-                        var pluginDirectoryInfo = new DirectoryInfo(directory);
-                        foreach (var file in pluginDirectoryInfo.GetFiles("*"))
-                        {
-                            archive.CreateEntryFromFile(Path.Combine(MacroDeck.PluginsDirectoryPath, pluginDirectoryInfo.Name, file.Name), Path.Combine(new DirectoryInfo(MacroDeck.PluginsDirectoryPath).Name, pluginDirectoryInfo.Name, file.Name));
-                        }
+                        archive.CreateEntryFromFile(Path.Combine(MacroDeck.ApplicationPaths.PluginsDirectoryPath, pluginDirectoryInfo.Name, file.Name), Path.Combine(new DirectoryInfo(MacroDeck.ApplicationPaths.PluginsDirectoryPath).Name, pluginDirectoryInfo.Name, file.Name));
                     }
-                    var pluginConfigDirectoryInfo = new DirectoryInfo(MacroDeck.PluginConfigPath);
-                    foreach (var file in pluginConfigDirectoryInfo.GetFiles("*"))
-                    {
-                        archive.CreateEntryFromFile(Path.Combine(MacroDeck.PluginConfigPath, file.Name), Path.Combine(pluginConfigDirectoryInfo.Name, file.Name));
-                    }
-                    var pluginCredentialsDirectoryInfo = new DirectoryInfo(MacroDeck.PluginCredentialsPath);
-                    foreach (var file in pluginCredentialsDirectoryInfo.GetFiles("*"))
-                    {
-                        archive.CreateEntryFromFile(Path.Combine(MacroDeck.PluginCredentialsPath, file.Name), Path.Combine(pluginCredentialsDirectoryInfo.Name, file.Name));
-                    }
-                    var iconPackDirectoryInfo = new DirectoryInfo(MacroDeck.IconPackDirectoryPath);
-                    foreach (var dir in iconPackDirectoryInfo.GetDirectories())
-                    {
-                        foreach (var iconPackFile in dir.GetFiles())
-                        {
-                            archive.CreateEntryFromFile(Path.Combine(MacroDeck.IconPackDirectoryPath, dir.Name, iconPackFile.Name), Path.Combine(iconPackDirectoryInfo.Name, dir.Name, iconPackFile.Name));
-                        }
-                    }
-
-                    MacroDeckLogger.Info("Backup successfully created: " + backupFileName);
-                    BackupSaved?.Invoke(null, EventArgs.Empty);
                 }
+                var pluginConfigDirectoryInfo = new DirectoryInfo(MacroDeck.ApplicationPaths.PluginConfigPath);
+                foreach (var file in pluginConfigDirectoryInfo.GetFiles("*"))
+                {
+                    archive.CreateEntryFromFile(Path.Combine(MacroDeck.ApplicationPaths.PluginConfigPath, file.Name), Path.Combine(pluginConfigDirectoryInfo.Name, file.Name));
+                }
+                var pluginCredentialsDirectoryInfo = new DirectoryInfo(MacroDeck.ApplicationPaths.PluginCredentialsPath);
+                foreach (var file in pluginCredentialsDirectoryInfo.GetFiles("*"))
+                {
+                    archive.CreateEntryFromFile(Path.Combine(MacroDeck.ApplicationPaths.PluginCredentialsPath, file.Name), Path.Combine(pluginCredentialsDirectoryInfo.Name, file.Name));
+                }
+                var iconPackDirectoryInfo = new DirectoryInfo(MacroDeck.ApplicationPaths.IconPackDirectoryPath);
+                foreach (var dir in iconPackDirectoryInfo.GetDirectories())
+                {
+                    foreach (var iconPackFile in dir.GetFiles())
+                    {
+                        archive.CreateEntryFromFile(Path.Combine(MacroDeck.ApplicationPaths.IconPackDirectoryPath, dir.Name, iconPackFile.Name), Path.Combine(iconPackDirectoryInfo.Name, dir.Name, iconPackFile.Name));
+                    }
+                }
+
+                MacroDeckLogger.Info("Backup successfully created: " + backupFileName);
+                BackupSaved?.Invoke(null, EventArgs.Empty);
             } catch (Exception ex)
             {
                 MacroDeckLogger.Error("Backup creation failed: " + ex.Message + Environment.NewLine + ex.StackTrace);

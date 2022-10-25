@@ -26,7 +26,7 @@ namespace SuchByte.MacroDeck.Server
 
         private static string _adbFolderName = "Android Debug Bridge";
 
-        private static string _adbPath = Path.Combine(MacroDeck.MainDirectoryPath, _adbFolderName, "adb.exe");
+        private static string _adbPath = Path.Combine(MacroDeck.ApplicationPaths.MainDirectoryPath, _adbFolderName, "adb.exe");
 
         public static EventHandler<AdbDeviceConnectionStateChangedEventArgs> OnDeviceConnectionStateChanged;
 

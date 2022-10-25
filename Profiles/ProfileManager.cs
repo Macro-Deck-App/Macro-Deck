@@ -117,7 +117,7 @@ namespace SuchByte.MacroDeck.Profiles
         {
             MacroDeckLogger.Info(typeof(ProfileManager), "Loading profiles...");
             Profiles = new List<MacroDeckProfile>();
-            var databasePath = MacroDeck.ProfilesFilePath;
+            var databasePath = MacroDeck.ApplicationPaths.ProfilesFilePath;
 
             var db = new SQLiteConnection(databasePath);
             db.CreateTable<ProfileJson>();
@@ -211,7 +211,7 @@ namespace SuchByte.MacroDeck.Profiles
             {
                 return;
             }
-            var databasePath = MacroDeck.ProfilesFilePath;
+            var databasePath = MacroDeck.ApplicationPaths.ProfilesFilePath;
 
             var db = new SQLiteConnection(databasePath);
             db.CreateTable<ProfileJson>();
