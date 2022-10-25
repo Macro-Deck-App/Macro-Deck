@@ -59,7 +59,7 @@ namespace SuchByte.MacroDeck.Language
 
         private static void SaveDefault()
         {
-            var path = Path.Combine(MacroDeck.MainDirectoryPath, "Language", _strings.__Language__ + ".json");
+            var path = Path.Combine(MacroDeck.ApplicationPaths.MainDirectoryPath, "Language", _strings.__Language__ + ".json");
             var serializer = new JsonSerializer
             {
                 NullValueHandling = NullValueHandling.Ignore,

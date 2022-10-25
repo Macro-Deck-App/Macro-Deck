@@ -34,7 +34,8 @@
 	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Platforms>AnyCPU;x64</Platforms>
 	<SelfContained>true</SelfContained>
-	<OutputType>WinExe</OutputType>  
+	<OutputType>WinExe</OutputType>
+	<Nullable>enable</Nullable>  
   </PropertyGroup>
 	
 	<ItemGroup>

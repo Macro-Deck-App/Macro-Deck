@@ -478,9 +478,9 @@ namespace SuchByte.MacroDeck.GUI
                             }
                             else
                             {
-                                iconCreator.Image.Save(Path.Combine(MacroDeck.TempDirectoryPath, "iconcreator"));
+                                iconCreator.Image.Save(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, "iconcreator"));
 
-                                using (var collection = new MagickImageCollection(new FileInfo(Path.GetFullPath(Path.Combine(MacroDeck.TempDirectoryPath, "iconcreator")))))
+                                using (var collection = new MagickImageCollection(new FileInfo(Path.GetFullPath(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, "iconcreator")))))
                                 {
                                     Cursor.Current = Cursors.WaitCursor;
                                     collection.Coalesce();
@@ -492,8 +492,8 @@ namespace SuchByte.MacroDeck.GUI
                                     }
                                     try
                                     {
-                                        collection.Write(new FileInfo(Path.GetFullPath(Path.Combine(MacroDeck.TempDirectoryPath, "iconcreator.resized"))));
-                                        var imageBytes = File.ReadAllBytes(Path.Combine(MacroDeck.TempDirectoryPath, "iconcreator.resized"));
+                                        collection.Write(new FileInfo(Path.GetFullPath(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, "iconcreator.resized"))));
+                                        var imageBytes = File.ReadAllBytes(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, "iconcreator.resized"));
                                         using (var ms = new MemoryStream(imageBytes))
                                         {
                                             icon = Image.FromStream(ms);

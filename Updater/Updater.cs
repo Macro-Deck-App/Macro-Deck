@@ -158,7 +158,7 @@ namespace SuchByte.MacroDeck.Updater
             {
                 webClient.DownloadProgressChanged += WebClient_DownloadProgressChanged;
                 webClient.DownloadFileCompleted += WebClient_DownloadComplete;
-                webClient.DownloadFileAsync(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]), Path.Combine(MacroDeck.TempDirectoryPath, _jsonObject["filename"].ToString()));
+                webClient.DownloadFileAsync(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]), Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString()));
             }
         }
 
@@ -168,7 +168,7 @@ namespace SuchByte.MacroDeck.Updater
             _downloading = false;
             try
             {
-                if (!File.Exists(Path.Combine(MacroDeck.TempDirectoryPath, _jsonObject["filename"].ToString())))
+                if (!File.Exists(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString())))
                 {
                     using (var msgBox = new MessageBox())
                     {
@@ -179,7 +179,7 @@ namespace SuchByte.MacroDeck.Updater
                     return;
                 }
 
-                using (var stream = File.OpenRead(Path.Combine(MacroDeck.TempDirectoryPath, _jsonObject["filename"].ToString())))
+                using (var stream = File.OpenRead(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString())))
                 {
                     using (var md5 = MD5.Create())
                     {
@@ -200,7 +200,7 @@ namespace SuchByte.MacroDeck.Updater
 
                 var p = new Process
                 {
-                    StartInfo = new ProcessStartInfo(Path.Combine(MacroDeck.TempDirectoryPath, _jsonObject["filename"].ToString()))
+                    StartInfo = new ProcessStartInfo(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString()))
                     {
                         UseShellExecute = true
                     }

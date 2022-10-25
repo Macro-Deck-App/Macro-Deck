@@ -28,7 +28,7 @@ namespace SuchByte.MacroDeck.Icons
 
         public static void ConvertOldIconPacks()
         {
-            if (Directory.GetFiles(MacroDeck.IconPackDirectoryPath, "*.iconpack").Length == 0) return;
+            if (Directory.GetFiles(MacroDeck.ApplicationPaths.IconPackDirectoryPath, "*.iconpack").Length == 0) return;
             var iconPacks = new List<IconPackLegacy>();
             using (var msgBox = new MessageBox())
             {
@@ -37,7 +37,7 @@ namespace SuchByte.MacroDeck.Icons
                     return;
                 }
             }
-            foreach (var databasePath in Directory.GetFiles(MacroDeck.IconPackDirectoryPath, "*.iconpack"))
+            foreach (var databasePath in Directory.GetFiles(MacroDeck.ApplicationPaths.IconPackDirectoryPath, "*.iconpack"))
             {
                 try
                 {
@@ -74,16 +74,16 @@ namespace SuchByte.MacroDeck.Icons
                     Version = iconPack.Version,
                 };
 
-                if (!Directory.Exists(Path.Combine(MacroDeck.IconPackDirectoryPath, extensionManifestModel.PackageId)))
+                if (!Directory.Exists(Path.Combine(MacroDeck.ApplicationPaths.IconPackDirectoryPath, extensionManifestModel.PackageId)))
                 {
-                    Directory.CreateDirectory(Path.Combine(MacroDeck.IconPackDirectoryPath, extensionManifestModel.PackageId));
+                    Directory.CreateDirectory(Path.Combine(MacroDeck.ApplicationPaths.IconPackDirectoryPath, extensionManifestModel.PackageId));
                 }
 
                 if (iconPack.PackageManagerManaged)
                 {
                     try
                     {
-                        File.Create(Path.Combine(Path.Combine(MacroDeck.IconPackDirectoryPath, extensionManifestModel.PackageId, ".extensionstore")));
+                        File.Create(Path.Combine(Path.Combine(MacroDeck.ApplicationPaths.IconPackDirectoryPath, extensionManifestModel.PackageId, ".extensionstore")));
                     }catch { }
                 }
 
@@ -91,7 +91,7 @@ namespace SuchByte.MacroDeck.Icons
                 {
                     try
                     {
-                        File.Create(Path.Combine(Path.Combine(MacroDeck.IconPackDirectoryPath, extensionManifestModel.PackageId, ".hidden")));
+                        File.Create(Path.Combine(Path.Combine(MacroDeck.ApplicationPaths.IconPackDirectoryPath, extensionManifestModel.PackageId, ".hidden")));
                     }
                     catch { }
                 }
@@ -104,7 +104,7 @@ namespace SuchByte.MacroDeck.Icons
 
                 try
                 {
-                    using var sw = new StreamWriter(Path.Combine(MacroDeck.IconPackDirectoryPath, extensionManifestModel.PackageId, "ExtensionManifest.json"));
+                    using var sw = new StreamWriter(Path.Combine(MacroDeck.ApplicationPaths.IconPackDirectoryPath, extensionManifestModel.PackageId, "ExtensionManifest.json"));
                     using JsonWriter writer = new JsonTextWriter(sw);
                     serializer.Serialize(writer, extensionManifestModel);
                 }
@@ -122,13 +122,13 @@ namespace SuchByte.MacroDeck.Icons
                         var format = iconImage.RawFormat;
                         if (format.ToString().Equals("Gif", StringComparison.OrdinalIgnoreCase))
                         {
-                            iconImage.Save(Path.Combine(MacroDeck.IconPackDirectoryPath, extensionManifestModel.PackageId, $"{icon.IconId}.gif"));
+                            iconImage.Save(Path.Combine(MacroDeck.ApplicationPaths.IconPackDirectoryPath, extensionManifestModel.PackageId, $"{icon.IconId}.gif"));
                         }
                         else
                         {
                             iconImage = new Bitmap(iconImage); // Generating a new bitmap if the file format is not a gif because otherwise it causes a GDI+ error in some cases
                             format = ImageFormat.Png;
-                            iconImage.Save(Path.Combine(MacroDeck.IconPackDirectoryPath, extensionManifestModel.PackageId, $"{icon.IconId}.png"), format);
+                            iconImage.Save(Path.Combine(MacroDeck.ApplicationPaths.IconPackDirectoryPath, extensionManifestModel.PackageId, $"{icon.IconId}.png"), format);
                         }
                     } catch
                     {
@@ -140,7 +140,7 @@ namespace SuchByte.MacroDeck.Icons
             {
                 if (msgBox.ShowDialog("Icon packs", "The old icon packs were successfully converted. Do you want to delete the old icon packs?", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    foreach (var databasePath in Directory.GetFiles(MacroDeck.IconPackDirectoryPath, "*.iconpack"))
+                    foreach (var databasePath in Directory.GetFiles(MacroDeck.ApplicationPaths.IconPackDirectoryPath, "*.iconpack"))
                     {
                         try
                         {
@@ -161,18 +161,18 @@ namespace SuchByte.MacroDeck.Icons
             IconPacks.Clear();
             IconPacksUpdateAvailable.Clear();
 
-            if (!Directory.Exists(MacroDeck.IconPackDirectoryPath))
+            if (!Directory.Exists(MacroDeck.ApplicationPaths.IconPackDirectoryPath))
             {
-                Directory.CreateDirectory(MacroDeck.IconPackDirectoryPath);
+                Directory.CreateDirectory(MacroDeck.ApplicationPaths.IconPackDirectoryPath);
             }
             else
             {
                 // Change the file extension from icon packs of older versions
-                foreach (var databasePath in Directory.GetFiles(MacroDeck.IconPackDirectoryPath, "*.db"))
+                foreach (var databasePath in Directory.GetFiles(MacroDeck.ApplicationPaths.IconPackDirectoryPath, "*.db"))
                 {
                     try
                     {
-                        var newFileName = Path.Combine(MacroDeck.IconPackDirectoryPath, Path.GetFileNameWithoutExtension(databasePath) + ".iconpack");
+                        var newFileName = Path.Combine(MacroDeck.ApplicationPaths.IconPackDirectoryPath, Path.GetFileNameWithoutExtension(databasePath) + ".iconpack");
 
                         // Delete the existing file if exists
                         if (File.Exists(newFileName))
@@ -184,7 +184,7 @@ namespace SuchByte.MacroDeck.Icons
                 }
             }
 
-            foreach (var databasePath in Directory.GetFiles(MacroDeck.IconPackDirectoryPath, "*.iconpack"))
+            foreach (var databasePath in Directory.GetFiles(MacroDeck.ApplicationPaths.IconPackDirectoryPath, "*.iconpack"))
             {
                 try
                 {
@@ -313,7 +313,7 @@ namespace SuchByte.MacroDeck.Icons
             SQLiteConnection db;
             if (directory == null)
             {
-               db = new SQLiteConnection(Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.Name + ".iconpack"));
+               db = new SQLiteConnection(Path.Combine(MacroDeck.ApplicationPaths.IconPackDirectoryPath, iconPack.Name + ".iconpack"));
             } else
             {
                 // Export
@@ -371,7 +371,7 @@ namespace SuchByte.MacroDeck.Icons
             
             try
             {
-                File.Delete(Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.Name + ".iconpack"));
+                File.Delete(Path.Combine(MacroDeck.ApplicationPaths.IconPackDirectoryPath, iconPack.Name + ".iconpack"));
             }
             catch (Exception ex)
             {

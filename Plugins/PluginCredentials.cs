@@ -21,12 +21,12 @@ namespace SuchByte.MacroDeck.Plugins
 
             List<Dictionary<string, string>> pluginCredentials;
 
-            if (!File.Exists(MacroDeck.PluginCredentialsPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower()))
+            if (!File.Exists(MacroDeck.ApplicationPaths.PluginCredentialsPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower()))
             {
                 pluginCredentials = new List<Dictionary<string, string>>();
             } else
             {
-                pluginCredentials = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(File.ReadAllText(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())), new JsonSerializerSettings
+                pluginCredentials = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(File.ReadAllText(Path.Combine(MacroDeck.ApplicationPaths.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())), new JsonSerializerSettings
                 {
                     TypeNameHandling = TypeNameHandling.Auto,
                 });
@@ -42,7 +42,7 @@ namespace SuchByte.MacroDeck.Plugins
 
             try
             {
-                using (var sw = new StreamWriter(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
+                using (var sw = new StreamWriter(Path.Combine(MacroDeck.ApplicationPaths.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {
                     serializer.Serialize(writer, pluginCredentials);
@@ -77,7 +77,7 @@ namespace SuchByte.MacroDeck.Plugins
 
             try
             {
-                using (var sw = new StreamWriter(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
+                using (var sw = new StreamWriter(Path.Combine(MacroDeck.ApplicationPaths.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {
                     serializer.Serialize(writer, pluginCredentials);
@@ -91,19 +91,19 @@ namespace SuchByte.MacroDeck.Plugins
 
         public static void DeletePluginCredentials(MacroDeckPlugin plugin)
         {
-            File.Delete(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower()));
+            File.Delete(Path.Combine(MacroDeck.ApplicationPaths.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower()));
         }
 
         public static List<Dictionary<string, string>> GetPluginCredentials(MacroDeckPlugin plugin)
         {
             List<Dictionary<string, string>> pluginCredentialsEncrypted;
-            if (!File.Exists(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
+            if (!File.Exists(Path.Combine(MacroDeck.ApplicationPaths.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
             {
                 pluginCredentialsEncrypted = new List<Dictionary<string, string>>();
             }
             else
             {
-                pluginCredentialsEncrypted = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(File.ReadAllText(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())), new JsonSerializerSettings
+                pluginCredentialsEncrypted = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(File.ReadAllText(Path.Combine(MacroDeck.ApplicationPaths.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())), new JsonSerializerSettings
                 {
                     TypeNameHandling = TypeNameHandling.Auto,
                 });

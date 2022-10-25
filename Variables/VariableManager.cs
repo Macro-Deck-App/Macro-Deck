@@ -216,7 +216,7 @@ public static class VariableManager
     internal static void Initialize()
     {
         MacroDeckLogger.Info(typeof(VariableManager), "Initialize variables database...");
-        _database = new SQLiteConnection(MacroDeck.VariablesFilePath);
+        _database = new SQLiteConnection(MacroDeck.ApplicationPaths.VariablesFilePath);
             
         _database.CreateTable<Variable>();
         _database.Execute("delete from Variable where 'Name'='';");
