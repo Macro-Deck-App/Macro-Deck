@@ -1,7 +1,6 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.Interfaces;
-using System.Windows.Controls;
-using ComboBox = SuchByte.MacroDeck.GUI.CustomControls.ComboBox;
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
 
 namespace SuchByte.MacroDeck.GUI
 {
@@ -10,7 +9,7 @@ namespace SuchByte.MacroDeck.GUI
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -966,33 +965,33 @@ namespace SuchByte.MacroDeck.GUI
 
 
         #endregion
-        private CustomControls.ButtonPrimary btnApply;
-        private CustomControls.RoundedButton btnPreview;
+        private ButtonPrimary btnApply;
+        private RoundedButton btnPreview;
         private RoundedTextBox labelText;
-        private System.Windows.Forms.NumericUpDown fontSize;
-        private System.Windows.Forms.Label lblButtonState;
-        private CustomControls.ButtonRadioButton radioButtonOff;
-        private CustomControls.ButtonRadioButton radioButtonOn;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Panel panel2;
-        private CustomControls.ButtonRadioButton labelAlignBottom;
-        private CustomControls.ButtonRadioButton labelAlignCenter;
-        private CustomControls.ButtonRadioButton labelAlignTop;
+        private NumericUpDown fontSize;
+        private Label lblButtonState;
+        private ButtonRadioButton radioButtonOff;
+        private ButtonRadioButton radioButtonOn;
+        private Panel panel1;
+        private Panel panel2;
+        private ButtonRadioButton labelAlignBottom;
+        private ButtonRadioButton labelAlignCenter;
+        private ButtonRadioButton labelAlignTop;
         private PictureButton btnEditIcon;
         private PictureButton btnRemoveIcon;
         private PictureButton btnClearLabelText;
         private RoundedComboBox fonts;
         private ButtonPrimary btnForeColor;
-        private System.Windows.Forms.Label lblCurrentState;
-        private System.Windows.Forms.Label lblCurrentStateLabel;
+        private Label lblCurrentState;
+        private Label lblCurrentStateLabel;
         private ButtonPrimary btnOk;
         private PictureButton btnAddVariable;
-        protected System.Windows.Forms.ContextMenuStrip variablesContextMenu;
-        private System.Windows.Forms.Label lblStateBinding;
+        protected ContextMenuStrip variablesContextMenu;
+        private Label lblStateBinding;
         private RoundedComboBox listStateBinding;
         private PictureButton btnDeleteStateBinding;
-        private System.Windows.Forms.Panel selectorPanel;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private Panel selectorPanel;
+        private FlowLayoutPanel flowLayoutPanel1;
         private ButtonRadioButton radioOnPress;
         private ButtonRadioButton radioOnEvent;
         private PictureButton btnOpenTemplateEditor;
@@ -1002,15 +1001,15 @@ namespace SuchByte.MacroDeck.GUI
         private ButtonRadioButton radioOnLongPress;
         private ButtonRadioButton radioOnLongPressRelease;
         private ButtonPrimary btnEditJson;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox buttonGUIDLabel;
-        private System.Windows.Forms.Label label2;
+        private Label label1;
+        private TextBox buttonGUIDLabel;
+        private Label label2;
         private ButtonPrimary btnBackColor;
-        private System.Windows.Forms.Label lblAppearance;
-        private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.Label lblState;
-        private System.Windows.Forms.Label lblKeyBinding;
-        private System.Windows.Forms.Label lblActions;
-        private System.Windows.Forms.Panel panel4;
+        private Label lblAppearance;
+        private Panel panel3;
+        private Label lblState;
+        private Label lblKeyBinding;
+        private Label lblActions;
+        private Panel panel4;
     }
 }

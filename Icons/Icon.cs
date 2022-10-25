@@ -1,10 +1,7 @@
-﻿using Newtonsoft.Json;
-using SQLite;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Drawing;
 using System.IO;
-using System.Text;
+using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Icons
 {
@@ -17,10 +14,7 @@ namespace SuchByte.MacroDeck.Icons
         public string FilePath
         {
             get => _filePath;
-            set
-            {
-                this._filePath = value;
-            }
+            set => _filePath = value;
         }
 
         public string IconId { get; set; } = Guid.NewGuid().ToString();
@@ -43,18 +37,14 @@ namespace SuchByte.MacroDeck.Icons
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(this._iconBase64))
+                if (string.IsNullOrWhiteSpace(_iconBase64))
                 {
-                    this._iconBase64 = Utils.Base64.GetBase64FromImage(IconImage);
+                    _iconBase64 = Base64.GetBase64FromImage(IconImage);
                 }
-                return this._iconBase64;
+                return _iconBase64;
             }
         }
 
-        public string IconHex128_64Base64
-        {
-            get => Utils.Base64.GetBase64ByteArray((Bitmap)IconImage, new Size(128,64));
-        }
-
+        public string IconHex128_64Base64 => Base64.GetBase64ByteArray((Bitmap)IconImage, new Size(128,64));
     }
 }

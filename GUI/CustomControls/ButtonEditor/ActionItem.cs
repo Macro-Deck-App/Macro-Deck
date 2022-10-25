@@ -1,7 +1,7 @@
-﻿using SuchByte.MacroDeck.Plugins;
-using System;
-using SuchByte.MacroDeck.Interfaces;
+﻿using System;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.Interfaces;
+using SuchByte.MacroDeck.Plugins;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
@@ -17,44 +17,32 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         public ActionItem(PluginAction macroDeckAction)
         {
-            this.Action = macroDeckAction;
+            Action = macroDeckAction;
             InitializeComponent();
-            this.lblPlugin.Text = PluginManager.GetPluginByAction(this.Action).Name;
-            this.lblAction.Text = this.Action.Name;
-            this.lblConfigurationSummary.Text = this.Action.ConfigurationSummary;
+            lblPlugin.Text = PluginManager.GetPluginByAction(Action).Name;
+            lblAction.Text = Action.Name;
+            lblConfigurationSummary.Text = Action.ConfigurationSummary;
         }
 
 
         private void BtnRemove_Click(object sender, EventArgs e)
         {
-            if (this.OnRemoveClick != null)
-            {
-                this.OnRemoveClick(this, EventArgs.Empty);
-            }
+            OnRemoveClick?.Invoke(this, EventArgs.Empty);
         }
 
         private void BtnEdit_Click(object sender, EventArgs e)
         {
-            if (this.OnEditClick != null)
-            {
-                this.OnEditClick(this, EventArgs.Empty);
-            }
+            OnEditClick?.Invoke(this, EventArgs.Empty);
         }
 
         private void btnUp_Click(object sender, EventArgs e)
         {
-            if (this.OnMoveUpClick != null)
-            {
-                this.OnMoveUpClick(this, EventArgs.Empty);
-            }
+            OnMoveUpClick?.Invoke(this, EventArgs.Empty);
         }
 
         private void btnDown_Click(object sender, EventArgs e)
         {
-            if (this.OnMoveDownClick != null)
-            {
-                this.OnMoveDownClick(this, EventArgs.Empty);
-            }
+            OnMoveDownClick?.Invoke(this, EventArgs.Empty);
         }
     }
 }

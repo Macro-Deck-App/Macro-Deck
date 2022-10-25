@@ -1,11 +1,12 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.CustomControls.Notifications;
 using SuchByte.MacroDeck.Icons;
-using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
-using System;
 
 namespace SuchByte.MacroDeck.GUI
 {
@@ -14,7 +15,7 @@ namespace SuchByte.MacroDeck.GUI
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -32,12 +33,11 @@ namespace SuchByte.MacroDeck.GUI
                 {
                     this.Controls.Remove(this.notificationsList);
                 }
-                Language.LanguageManager.LanguageChanged -= LanguageChanged;
+                LanguageManager.LanguageChanged -= LanguageChanged;
                 Updater.Updater.OnUpdateAvailable -= UpdateAvailable;
                 MacroDeckServer.OnDeviceConnectionStateChanged -= this.OnClientsConnectedChanged;
                 MacroDeckServer.OnServerStateChanged -= this.OnServerStateChanged;
                 PluginManager.OnPluginsChange -= this.OnPluginsChanged;
-                PluginManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
                 IconManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
                 NotificationManager.OnNotification -= NotificationsChanged;
                 NotificationManager.OnNotificationRemoved -= NotificationsChanged;
@@ -404,21 +404,21 @@ namespace SuchByte.MacroDeck.GUI
         }
 
         #endregion
-        private System.Windows.Forms.Label lblVersion;
-        private CustomControls.BufferedPanel contentPanel;
-        private CustomControls.ContentSelectorButton btnDeck;
-        private CustomControls.ContentSelectorButton btnSettings;
-        public System.Windows.Forms.FlowLayoutPanel contentButtonPanel;
-        private CustomControls.ContentSelectorButton btnExtensions;
-        private CustomControls.ContentSelectorButton btnDeviceManager;
-        private System.Windows.Forms.Label lblNumClientsConnected;
-        private CustomControls.ContentSelectorButton btnVariables;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label lblPort;
-        private System.Windows.Forms.Label lblServerStatus;
-        private System.Windows.Forms.Label lblIpAddressHostname;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Panel panel2;
+        private Label lblVersion;
+        private BufferedPanel contentPanel;
+        private ContentSelectorButton btnDeck;
+        private ContentSelectorButton btnSettings;
+        public FlowLayoutPanel contentButtonPanel;
+        private ContentSelectorButton btnExtensions;
+        private ContentSelectorButton btnDeviceManager;
+        private Label lblNumClientsConnected;
+        private ContentSelectorButton btnVariables;
+        private Label label1;
+        private Label lblPort;
+        private Label lblServerStatus;
+        private Label lblIpAddressHostname;
+        private Panel panel1;
+        private Panel panel2;
         private RoundedPanel navigation;
         private NotificationButton btnNotifications;
         private RoundedComboBox hosts;

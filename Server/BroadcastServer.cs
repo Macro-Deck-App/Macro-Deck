@@ -1,12 +1,9 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Net;
+﻿using System;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using Newtonsoft.Json.Linq;
 
 namespace SuchByte.MacroDeck.Server
 {
@@ -21,7 +18,7 @@ namespace SuchByte.MacroDeck.Server
             {
                 _udpClient = new UdpClient();
 
-                Timer broadcastTimer = new Timer(1000 * 5)
+                var broadcastTimer = new Timer(1000 * 5)
                 {
                     Enabled = true
                 };
@@ -35,7 +32,7 @@ namespace SuchByte.MacroDeck.Server
             {
                 Task.Run(() =>
                 {
-                    JObject broacastObject = new JObject
+                    var broacastObject = new JObject
                     {
                         ["computer-name"] = Environment.MachineName,
                         ["ip-address"] = MacroDeck.Configuration.Host_Address,

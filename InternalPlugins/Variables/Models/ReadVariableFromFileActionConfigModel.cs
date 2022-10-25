@@ -1,8 +1,5 @@
-﻿using SuchByte.MacroDeck.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
+using SuchByte.MacroDeck.Models;
 
 namespace SuchByte.MacroDeck.Variables.Plugin.Models
 {

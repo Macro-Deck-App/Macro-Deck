@@ -1,138 +1,135 @@
-﻿using SuchByte.MacroDeck.Device;
+﻿using System;
+using System.Drawing;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Profiles;
+using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.Server;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
     public partial class DeviceInfo : RoundedUserControl
     {
         MacroDeckDevice _macroDeckDevice;
-        public MacroDeckDevice MacroDeckDevice { get { return this._macroDeckDevice; } }
+        public MacroDeckDevice MacroDeckDevice => _macroDeckDevice;
 
         public DeviceInfo(MacroDeckDevice macroDeckDevice)
         {
-            this._macroDeckDevice = macroDeckDevice;
+            _macroDeckDevice = macroDeckDevice;
             InitializeComponent();
-            this.btnConfigure.Text = LanguageManager.Strings.DeviceSettings;
-            this.lblIdLabel.Text = LanguageManager.Strings.Id;
-            this.lblStatusLabel.Text = LanguageManager.Strings.Status;
-            this.lblDisplayName.Text = LanguageManager.Strings.Name;
-            this.lblProfile.Text = LanguageManager.Strings.Profile;
-            this.checkBlockConnection.Text = LanguageManager.Strings.BlockConnection;
+            btnConfigure.Text = LanguageManager.Strings.DeviceSettings;
+            lblIdLabel.Text = LanguageManager.Strings.Id;
+            lblStatusLabel.Text = LanguageManager.Strings.Status;
+            lblDisplayName.Text = LanguageManager.Strings.Name;
+            lblProfile.Text = LanguageManager.Strings.Profile;
+            checkBlockConnection.Text = LanguageManager.Strings.BlockConnection;
         }
 
         private void DeviceInfo_Load(object sender, EventArgs e)
         {
-            this.LoadDevice();
+            LoadDevice();
 
         }
 
         public void LoadDevice()
         {
-            this.profiles.SelectedIndexChanged -= this.Profiles_SelectedIndexChanged;
-            this.profiles.Items.Clear();
-            foreach (MacroDeckProfile macroDeckProfile in ProfileManager.Profiles)
+            profiles.SelectedIndexChanged -= Profiles_SelectedIndexChanged;
+            profiles.Items.Clear();
+            foreach (var macroDeckProfile in ProfileManager.Profiles)
             {
-                this.profiles.Items.Add(macroDeckProfile.DisplayName);
+                profiles.Items.Add(macroDeckProfile.DisplayName);
             }
 
-            if (this._macroDeckDevice.ProfileId != null && this._macroDeckDevice.ProfileId.Length > 0)
+            if (_macroDeckDevice.ProfileId != null && _macroDeckDevice.ProfileId.Length > 0)
             {
-                MacroDeckProfile macroDeckProfile = ProfileManager.FindProfileById(this._macroDeckDevice.ProfileId);
+                var macroDeckProfile = ProfileManager.FindProfileById(_macroDeckDevice.ProfileId);
                 if (macroDeckProfile != null)
                 {
-                    this.profiles.Text = macroDeckProfile.DisplayName;
+                    profiles.Text = macroDeckProfile.DisplayName;
                 }
             }
-            this.profiles.SelectedIndexChanged += this.Profiles_SelectedIndexChanged;
+            profiles.SelectedIndexChanged += Profiles_SelectedIndexChanged;
 
-            this.lblId.Text = this._macroDeckDevice.ClientId;
-            this.checkBlockConnection.CheckedChanged -= this.CheckBlockConnection_CheckedChanged;
-            this.checkBlockConnection.Checked = this._macroDeckDevice.Blocked;
-            this.checkBlockConnection.CheckedChanged += this.CheckBlockConnection_CheckedChanged;
-            this.displayName.Text = this._macroDeckDevice.DisplayName;
-            this.lblStatus.Text = this._macroDeckDevice.Available ? LanguageManager.Strings.Connected : LanguageManager.Strings.Disconnected;
-            this.lblStatus.ForeColor = this._macroDeckDevice.Available ? Color.Green : Color.Red;
+            lblId.Text = _macroDeckDevice.ClientId;
+            checkBlockConnection.CheckedChanged -= CheckBlockConnection_CheckedChanged;
+            checkBlockConnection.Checked = _macroDeckDevice.Blocked;
+            checkBlockConnection.CheckedChanged += CheckBlockConnection_CheckedChanged;
+            displayName.Text = _macroDeckDevice.DisplayName;
+            lblStatus.Text = _macroDeckDevice.Available ? LanguageManager.Strings.Connected : LanguageManager.Strings.Disconnected;
+            lblStatus.ForeColor = _macroDeckDevice.Available ? Color.Green : Color.Red;
 
-            switch (this._macroDeckDevice.DeviceType)
+            switch (_macroDeckDevice.DeviceType)
             {
                 case DeviceType.Web:
-                    this.lblDeviceType.Text = LanguageManager.Strings.WebClient;
-                    this.iconDeviceType.Image = Properties.Resources.Web;
-                    this.btnConfigure.Visible = false;
-                    this.profiles.Enabled = true;
+                    lblDeviceType.Text = LanguageManager.Strings.WebClient;
+                    iconDeviceType.Image = Resources.Web;
+                    btnConfigure.Visible = false;
+                    profiles.Enabled = true;
                     break;
                 case DeviceType.Android:
-                    this.lblDeviceType.Text = LanguageManager.Strings.AndroidApp;
-                    this.iconDeviceType.Image = Properties.Resources.Android;
-                    this.btnConfigure.Visible = this._macroDeckDevice.Available;
-                    this.profiles.Enabled = true;
+                    lblDeviceType.Text = LanguageManager.Strings.AndroidApp;
+                    iconDeviceType.Image = Resources.Android;
+                    btnConfigure.Visible = _macroDeckDevice.Available;
+                    profiles.Enabled = true;
                     break;
                 case DeviceType.iOS:
-                    this.lblDeviceType.Text = LanguageManager.Strings.IOSApp;
-                    this.iconDeviceType.Image = Properties.Resources.iOS;
-                    this.btnConfigure.Visible = false; //TODO
-                    this.profiles.Enabled = true;
+                    lblDeviceType.Text = LanguageManager.Strings.IOSApp;
+                    iconDeviceType.Image = Resources.iOS;
+                    btnConfigure.Visible = false; //TODO
+                    profiles.Enabled = true;
                     break;
                 default:
-                    this.lblDeviceType.Text = LanguageManager.Strings.WebClient;
-                    this.iconDeviceType.Image = Properties.Resources.Web;
-                    this.btnConfigure.Visible = false;
-                    this.profiles.Enabled = true;
+                    lblDeviceType.Text = LanguageManager.Strings.WebClient;
+                    iconDeviceType.Image = Resources.Web;
+                    btnConfigure.Visible = false;
+                    profiles.Enabled = true;
                     break;
             }
         }
 
         private void BtnRemove_Click(object sender, EventArgs e)
         {
-            if (this._macroDeckDevice.Available)
+            if (_macroDeckDevice.Available)
             {
-                MacroDeckServer.GetMacroDeckClient(this._macroDeckDevice.ClientId).SocketConnection.Close();
+                MacroDeckServer.GetMacroDeckClient(_macroDeckDevice.ClientId).SocketConnection.Close();
             }
-            DeviceManager.RemoveKnownDevice(this._macroDeckDevice);
+            DeviceManager.RemoveKnownDevice(_macroDeckDevice);
         }
 
         private void BtnChangeDisplayName_Click(object sender, EventArgs e)
         {
-            if (DeviceManager.IsDisplayNameAvailable(this.displayName.Text))
+            if (DeviceManager.IsDisplayNameAvailable(displayName.Text))
             {
-                DeviceManager.RenameMacroDeckDevice(this._macroDeckDevice, this.displayName.Text);
+                DeviceManager.RenameMacroDeckDevice(_macroDeckDevice, displayName.Text);
             } else
             {
-                using (MessageBox msgBox = new MessageBox())
+                using (var msgBox = new MessageBox())
                 {
-                    msgBox.ShowDialog(LanguageManager.Strings.CantChangeName, string.Format(LanguageManager.Strings.DeviceCalledXAlreadyExists, this.displayName.Text), MessageBoxButtons.OK);
+                    msgBox.ShowDialog(LanguageManager.Strings.CantChangeName, string.Format(LanguageManager.Strings.DeviceCalledXAlreadyExists, displayName.Text), MessageBoxButtons.OK);
                 }
             }
         }
 
         private void CheckBlockConnection_CheckedChanged(object sender, EventArgs e)
         {
-            DeviceManager.SetBlocked(this._macroDeckDevice, this.checkBlockConnection.Checked);
+            DeviceManager.SetBlocked(_macroDeckDevice, checkBlockConnection.Checked);
         }
 
         private void Profiles_SelectedIndexChanged(object sender, EventArgs e)
         {
-            MacroDeckProfile macroDeckProfile = ProfileManager.FindProfileByDisplayName(this.profiles.Text);
+            var macroDeckProfile = ProfileManager.FindProfileByDisplayName(profiles.Text);
             if (macroDeckProfile != null)
             {
-                DeviceManager.SetProfile(this._macroDeckDevice, macroDeckProfile);
+                DeviceManager.SetProfile(_macroDeckDevice, macroDeckProfile);
                 DeviceManager.SaveKnownDevices();
             }
         }
 
         private void BtnConfigure_Click(object sender, EventArgs e)
         {
-            using (var deviceConfigurator = new DeviceConfigurator(this._macroDeckDevice))
+            using (var deviceConfigurator = new DeviceConfigurator(_macroDeckDevice))
             {
                 deviceConfigurator.ShowDialog();
             }

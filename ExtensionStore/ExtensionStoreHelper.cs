@@ -1,17 +1,17 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowViews;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
+using SuchByte.MacroDeck.Properties;
 
 namespace SuchByte.MacroDeck.ExtensionStore
 {
@@ -25,38 +25,35 @@ namespace SuchByte.MacroDeck.ExtensionStore
 
         private static string _updateNotification;
 
-        private static bool _updateCheckRunning = false;
+        private static bool _updateCheckRunning;
 
         public static void InstallPluginById(string packageId)
         {
-            InstallPackages(new List<ExtensionStoreDownloaderPackageInfoModel> { new ExtensionStoreDownloaderPackageInfoModel() { PackageId = packageId, ExtensionType = ExtensionType.Plugin } });
+            InstallPackages(new List<ExtensionStoreDownloaderPackageInfoModel> { new() { PackageId = packageId, ExtensionType = ExtensionType.Plugin } });
         }
 
         public static void InstallIconPackById(string packageId)
         {
-            InstallPackages(new List<ExtensionStoreDownloaderPackageInfoModel> { new ExtensionStoreDownloaderPackageInfoModel() { PackageId = packageId, ExtensionType = ExtensionType.IconPack } });
+            InstallPackages(new List<ExtensionStoreDownloaderPackageInfoModel> { new() { PackageId = packageId, ExtensionType = ExtensionType.IconPack } });
         }
 
         internal static void InstallById(string packageId)
         {
-            InstallPackages(new List<ExtensionStoreDownloaderPackageInfoModel> { new ExtensionStoreDownloaderPackageInfoModel() { PackageId = packageId } });
+            InstallPackages(new List<ExtensionStoreDownloaderPackageInfoModel> { new() { PackageId = packageId } });
         }
 
         public static void InstallPackages(List<ExtensionStoreDownloaderPackageInfoModel> packages)
         {
             if (MacroDeck.MainWindow == null) return;
-            MacroDeck.MainWindow.Invoke(new Action(() =>
+            MacroDeck.MainWindow.Invoke(() =>
             {
                 extensionStoreDownloader = new ExtensionStoreDownloader(packages)
                 {
                     Owner = MacroDeck.MainWindow,
                 };
                 extensionStoreDownloader.ShowDialog();
-                if (OnInstallationFinished != null)
-                {
-                    OnInstallationFinished(null, EventArgs.Empty);
-                }
-            }));
+                OnInstallationFinished?.Invoke(null, EventArgs.Empty);
+            });
         }
 
         public static string GetPackageId(MacroDeckPlugin macroDeckPlugin)
@@ -72,22 +69,22 @@ namespace SuchByte.MacroDeck.ExtensionStore
             IconManager.IconPacksUpdateAvailable.Clear();
             Task.Run(() =>
             {
-                foreach (MacroDeckPlugin plugin in PluginManager.Plugins.Values)
+                foreach (var plugin in PluginManager.Plugins.Values)
                 {
                     PluginManager.SearchUpdate(plugin);
                 }
-                foreach (MacroDeckPlugin plugin in PluginManager.PluginsNotLoaded.Values)
+                foreach (var plugin in PluginManager.PluginsNotLoaded.Values)
                 {
                     PluginManager.SearchUpdate(plugin);
                 }
-                foreach (IconPack iconPack in IconManager.IconPacks.FindAll(iP => iP.ExtensionStoreManaged && !iP.Hidden))
+                foreach (var iconPack in IconManager.IconPacks.FindAll(iP => iP.ExtensionStoreManaged && !iP.Hidden))
                 {
                     IconManager.SearchUpdate(iconPack);
                 }
 
                 if (NotificationManager.GetNotification(_updateNotification) == null && (PluginManager.PluginsUpdateAvailable.Count + IconManager.IconPacksUpdateAvailable.Count) > 0)
                 {
-                    var btnOpenExtensionManager = new ButtonPrimary()
+                    var btnOpenExtensionManager = new ButtonPrimary
                     {
                         AutoSize = true,
                         Text = LanguageManager.Strings.OpenExtensionManager
@@ -96,7 +93,7 @@ namespace SuchByte.MacroDeck.ExtensionStore
                     {
                         MacroDeck.MainWindow?.SetView(new ExtensionsView());
                     };
-                    var btnUpdateAll = new ButtonPrimary()
+                    var btnUpdateAll = new ButtonPrimary
                     {
                         AutoSize = true,
                         Text = LanguageManager.Strings.UpdateAll,
@@ -106,33 +103,30 @@ namespace SuchByte.MacroDeck.ExtensionStore
                         NotificationManager.RemoveNotification(_updateNotification);
                         UpdateAllPackages();
                     };
-                    _updateNotification = NotificationManager.SystemNotification("Extension Store", LanguageManager.Strings.UpdatesAvailable, true, icon: Properties.Resources.Macro_Deck_2021_update, controls: new List<System.Windows.Forms.Control>() { btnOpenExtensionManager, btnUpdateAll });
+                    _updateNotification = NotificationManager.SystemNotification("Extension Store", LanguageManager.Strings.UpdatesAvailable, true, icon: Resources.Macro_Deck_2021_update, controls: new List<Control> { btnOpenExtensionManager, btnUpdateAll });
                 }
 
                 _updateCheckRunning = false;
 
-                if (OnUpdateCheckFinished != null)
-                {
-                    OnUpdateCheckFinished(null, EventArgs.Empty);
-                }
+                OnUpdateCheckFinished?.Invoke(null, EventArgs.Empty);
             });
         }
 
         public static void UpdateAllPackages()
         {
-            List<ExtensionStoreDownloaderPackageInfoModel> packages = new List<ExtensionStoreDownloaderPackageInfoModel>();
+            var packages = new List<ExtensionStoreDownloaderPackageInfoModel>();
             foreach (var updatePlugin in PluginManager.PluginsUpdateAvailable)
             {
                 if (PluginManager.UpdatedPlugins.Contains(updatePlugin)) continue;
-                packages.Add(new ExtensionStoreDownloaderPackageInfoModel()
+                packages.Add(new ExtensionStoreDownloaderPackageInfoModel
                 {
                     ExtensionType = ExtensionType.Plugin,
-                    PackageId = ExtensionStoreHelper.GetPackageId(updatePlugin)
+                    PackageId = GetPackageId(updatePlugin)
                 });
             }
             foreach (var updateIconPack in IconManager.IconPacksUpdateAvailable)
             {
-                packages.Add(new ExtensionStoreDownloaderPackageInfoModel()
+                packages.Add(new ExtensionStoreDownloaderPackageInfoModel
                 {
                     ExtensionType = ExtensionType.IconPack,
                     PackageId = updateIconPack.PackageId,
@@ -145,7 +139,7 @@ namespace SuchByte.MacroDeck.ExtensionStore
         {
             get
             {
-                string installedPlugins = "";
+                var installedPlugins = "";
                 foreach (var iconPack in IconManager.IconPacks.FindAll(x => x.ExtensionStoreManaged))
                 {
                     installedPlugins += $"{iconPack.PackageId.ToLower()}%20";
@@ -159,7 +153,7 @@ namespace SuchByte.MacroDeck.ExtensionStore
         {
             get
             {
-                string installedPlugins = "";
+                var installedPlugins = "";
                 foreach (var path in PluginManager.PluginDirectories.Values)
                 {
                     installedPlugins += $"{new DirectoryInfo(path).Name.ToLower()}%20";

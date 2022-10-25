@@ -1,12 +1,7 @@
-﻿using SuchByte.MacroDeck.Events;
-using SuchByte.MacroDeck.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.Language;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
 {
@@ -17,13 +12,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
         {
             this.actionButton = actionButton;
             InitializeComponent();
-            this.btnAddEvent.Text = "+ " + Language.LanguageManager.Strings.Event;
+            btnAddEvent.Text = "+ " + LanguageManager.Strings.Event;
         }
 
         public List<EventItem> EventItems()
         {
-            List<EventItem> eventItems = new List<EventItem>();
-            foreach (EventItem eventItem in this.eventsList.Controls)
+            var eventItems = new List<EventItem>();
+            foreach (EventItem eventItem in eventsList.Controls)
             {
                 eventItems.Add(eventItem);
             }
@@ -32,39 +27,36 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
 
         private void BtnAddEvent_Click(object sender, EventArgs e)
         {
-            EventItem eventItem = new EventItem(this.actionButton);
+            var eventItem = new EventItem(actionButton);
             AddEventItem(eventItem);
         }
 
         private void AddEventItem(EventItem eventItem)
         {
-            this.eventsList.Controls.Add(eventItem);
+            eventsList.Controls.Add(eventItem);
             eventItem.OnRemoveClick += RemoveClicked;
         }
 
 
         private void RemoveClicked(object sender, EventArgs e)
         {
-            EventItem eventItem = sender as EventItem;
-            if (this.actionButton.EventListeners != null)
-            {
-                this.actionButton.EventListeners.Remove(eventItem.EventListener);
-            }
-            eventItem.OnRemoveClick -= this.RemoveClicked;
-            this.eventsList.Controls.Remove(eventItem);
+            var eventItem = sender as EventItem;
+            actionButton.EventListeners?.Remove(eventItem.EventListener);
+            eventItem.OnRemoveClick -= RemoveClicked;
+            eventsList.Controls.Remove(eventItem);
         }
 
         public void RefreshEventsList()
         {
-            foreach (Control control in this.eventsList.Controls)
+            foreach (Control control in eventsList.Controls)
             {
-                ((EventItem)control).OnRemoveClick -= this.RemoveClicked;
+                ((EventItem)control).OnRemoveClick -= RemoveClicked;
             }
-            this.eventsList.Controls.Clear();
-            if (this.actionButton.EventListeners == null) return;
-            foreach (var eventListener in this.actionButton.EventListeners)
+            eventsList.Controls.Clear();
+            if (actionButton.EventListeners == null) return;
+            foreach (var eventListener in actionButton.EventListeners)
             {
-                EventItem eventItem = new EventItem(this.actionButton, eventListener);
+                var eventItem = new EventItem(actionButton, eventListener);
                 AddEventItem(eventItem);
             }
         }

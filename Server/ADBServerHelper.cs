@@ -1,12 +1,11 @@
-﻿using SharpAdbClient;
-using SuchByte.MacroDeck.Enums;
-using SuchByte.MacroDeck.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
+using SharpAdbClient;
+using SuchByte.MacroDeck.Enums;
+using SuchByte.MacroDeck.Logging;
 
 namespace SuchByte.MacroDeck.Server
 {
@@ -31,15 +30,9 @@ namespace SuchByte.MacroDeck.Server
 
         public static EventHandler<AdbDeviceConnectionStateChangedEventArgs> OnDeviceConnectionStateChanged;
 
-        public static bool ServerRunning
-        {
-            get => _adbServer != null && _adbClient != null && _adbServer.GetStatus().IsRunning;
-        }
+        public static bool ServerRunning => _adbServer != null && _adbClient != null && _adbServer.GetStatus().IsRunning;
 
-        public static List<DeviceData> Devices
-        {
-            get => _adbClient.GetDevices();
-        }
+        public static List<DeviceData> Devices => _adbClient.GetDevices();
 
         public static void Initialize()
         {
@@ -50,10 +43,10 @@ namespace SuchByte.MacroDeck.Server
             }
             MacroDeckLogger.Info(typeof(ADBServerHelper), $"Starting ADB server using {_adbPath}");
             _adbServer = new AdbServer();
-            StartServerResult result = _adbServer.StartServer(_adbPath, true);
+            var result = _adbServer.StartServer(_adbPath, true);
             if (result != StartServerResult.Started)
             {
-                MacroDeckLogger.Info(typeof(ADBServerHelper), $"Unable to start ADB server");
+                MacroDeckLogger.Info(typeof(ADBServerHelper), "Unable to start ADB server");
             }
 
             _adbClient = new AdbClient();
@@ -77,27 +70,21 @@ namespace SuchByte.MacroDeck.Server
         private static void Monitor_DeviceDisconnected(object sender, DeviceDataEventArgs e)
         {
             MacroDeckLogger.Info(typeof(ADBServerHelper), $"{e.Device.Name} disconnected");
-            if (OnDeviceConnectionStateChanged != null)
+            OnDeviceConnectionStateChanged?.Invoke(null, new AdbDeviceConnectionStateChangedEventArgs
             {
-                OnDeviceConnectionStateChanged(null, new AdbDeviceConnectionStateChangedEventArgs()
-                {
-                    Device = e.Device,
-                    ConnectionState = AdbDeviceConnectionState.DISCONNECTED
-                });
-            }
+                Device = e.Device,
+                ConnectionState = AdbDeviceConnectionState.DISCONNECTED
+            });
         }
 
         private static void Monitor_DeviceConnected(object sender, DeviceDataEventArgs e)
         {
             MacroDeckLogger.Info(typeof(ADBServerHelper), $"{e.Device.Name} connected");
-            if (OnDeviceConnectionStateChanged != null)
+            OnDeviceConnectionStateChanged?.Invoke(null, new AdbDeviceConnectionStateChangedEventArgs
             {
-                OnDeviceConnectionStateChanged(null, new AdbDeviceConnectionStateChangedEventArgs()
-                {
-                    Device = e.Device,
-                    ConnectionState = AdbDeviceConnectionState.CONNECTED
-                });
-            }
+                Device = e.Device,
+                ConnectionState = AdbDeviceConnectionState.CONNECTED
+            });
             StartReverseForward(e.Device);
         }
 

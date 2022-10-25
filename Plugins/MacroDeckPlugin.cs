@@ -1,13 +1,12 @@
-﻿using Newtonsoft.Json;
-using SuchByte.MacroDeck.GUI;
-using SuchByte.MacroDeck.GUI.CustomControls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Reflection;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
+using SuchByte.MacroDeck.GUI;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Properties;
 
 namespace SuchByte.MacroDeck.Plugins
 {
@@ -20,9 +19,9 @@ namespace SuchByte.MacroDeck.Plugins
 
         public MacroDeckPlugin()
         {
-            this.versionInfo = FileVersionInfo.GetVersionInfo(executingAssembly.Location);
-            this._name = this.executingAssembly.GetName().Name;
-            this._version = this.versionInfo.ProductVersion;
+            versionInfo = FileVersionInfo.GetVersionInfo(executingAssembly.Location);
+            _name = executingAssembly.GetName().Name;
+            _version = versionInfo.ProductVersion;
         }
 
         /// <summary>
@@ -30,14 +29,8 @@ namespace SuchByte.MacroDeck.Plugins
         /// </summary>
         internal virtual string Name
         {
-            get
-            {
-                return this._name;
-            }
-            set
-            {
-                this._name = value;
-            }
+            get => _name;
+            set => _name = value;
         }
 
         /// <summary>
@@ -45,38 +38,26 @@ namespace SuchByte.MacroDeck.Plugins
         /// </summary>
         internal virtual string Version
         {
-            get
-            {
-                return this._version;
-            }
-            set
-            {
-                this._version = value;
-            }
+            get => _version;
+            set => _version = value;
         }
 
         /// <summary>
         /// Author of the plugin
         /// </summary>
         internal virtual string Author { 
-            get 
-            {
-                return this._author; 
-            } 
-            set 
-            { 
-                this._author = value;
-            }
+            get => _author;
+            set => _author = value;
         }
 
         /// <summary>
         /// This list contains all the actions of the plugin. If your plugin does not contain any actions, you can delete this.
         /// </summary>
-        public List<PluginAction> Actions { get; set; } = new List<PluginAction>();
+        public List<PluginAction> Actions { get; set; } = new();
         /// <summary>
         /// Icon of the plugin
         /// </summary>
-        internal virtual Image PluginIcon { get; set; } = Properties.Resources.Macro_Deck_2021;
+        internal virtual Image PluginIcon { get; set; } = Resources.Macro_Deck_2021;
         /// <summary>
         /// true = the plugin can be configured. A button to open the plugin's configurator will appear in the package manager. If your plugin cannot be configured, you can delete this.
         /// </summary>
@@ -106,26 +87,20 @@ namespace SuchByte.MacroDeck.Plugins
             if (actionButton == null) return;
             if (this.actionButton != null && this.actionButton.Equals(actionButton))
             {
-                this.OnActionButtonDelete();
+                OnActionButtonDelete();
             }
             this.actionButton = actionButton;
             if (actionButton != null)
             {
-                this.OnActionButtonLoaded();
+                OnActionButtonLoaded();
             }
         }
 
         /// <summary>
         /// Gets the ActionButton which contains this action
         /// </summary>
-        [Newtonsoft.Json.JsonIgnore]
-        public ActionButton.ActionButton ActionButton
-        {
-            get
-            {
-                return this.actionButton;
-            }
-        }
+        [JsonIgnore]
+        public ActionButton.ActionButton ActionButton => actionButton;
 
 
         /// <summary>
@@ -188,7 +163,7 @@ namespace SuchByte.MacroDeck.Plugins
         /// <returns></returns>
         public static PluginAction GetNewInstance(PluginAction pluginAction)
         {
-            JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
+            var jsonSerializerSettings = new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.Auto,
                 NullValueHandling = NullValueHandling.Ignore,

@@ -1,13 +1,11 @@
-﻿using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Server;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows.Forms;
-using System.Windows.Input;
+using SuchByte.MacroDeck.Enums;
+using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Server;
 
 namespace SuchByte.MacroDeck.Hotkeys
 {
@@ -19,18 +17,18 @@ namespace SuchByte.MacroDeck.Hotkeys
         [DllImport("user32.dll")]
         public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
-        public static Dictionary<ActionButton.ActionButton, int> Hotkeys = new Dictionary<ActionButton.ActionButton, int>();
+        public static Dictionary<ActionButton.ActionButton, int> Hotkeys = new();
 
-        private static Random random = new Random();
+        private static Random random = new();
 
         private static IntPtr formHandle;
 
-        private static bool paused = false;
+        private static bool paused;
 
         public HotkeyManager()
         {
-            this.CreateHandle(new CreateParams());
-            formHandle = this.Handle;
+            CreateHandle(new CreateParams());
+            formHandle = Handle;
         }
 
 
@@ -38,9 +36,9 @@ namespace SuchByte.MacroDeck.Hotkeys
         {
             RemoveHotkey(actionButton);
             if (key == Keys.None) return;
-            int hotkeyId = random.Next(Int32.MaxValue);
+            var hotkeyId = random.Next(int.MaxValue);
             Hotkeys[actionButton] = hotkeyId;
-            int modifierKeyCode = 0;
+            var modifierKeyCode = 0;
 
             if ((modifierKeys & Keys.Control) == Keys.Control)
             {
@@ -55,8 +53,8 @@ namespace SuchByte.MacroDeck.Hotkeys
                 modifierKeyCode += (int)ModifierKeyCode.ALT;
             }
 
-            RegisterHotKey(formHandle, hotkeyId, (int)modifierKeyCode, (int)key);
-            MacroDeckLogger.Info(String.Format("Registered hotkey #{0} ({1}) with modifier(s): {2}", hotkeyId, key.ToString(), modifierKeys.ToString()));
+            RegisterHotKey(formHandle, hotkeyId, modifierKeyCode, (int)key);
+            MacroDeckLogger.Info(string.Format("Registered hotkey #{0} ({1}) with modifier(s): {2}", hotkeyId, key.ToString(), modifierKeys.ToString()));
         }
 
         public static void Pause()
@@ -72,7 +70,7 @@ namespace SuchByte.MacroDeck.Hotkeys
         public static void RemoveHotkey(ActionButton.ActionButton actionButton)
         {
             if (!Hotkeys.ContainsKey(actionButton)) return;
-            int hotkeyId = Hotkeys[actionButton];
+            var hotkeyId = Hotkeys[actionButton];
             UnregisterHotKey(formHandle, hotkeyId);
             Hotkeys.Remove(actionButton);
             MacroDeckLogger.Info(string.Format("Unregistered hotkey #{0}", hotkeyId));
@@ -91,7 +89,7 @@ namespace SuchByte.MacroDeck.Hotkeys
                     {
                         try
                         {
-                            MacroDeckServer.Execute(actionButton, "", Enums.ButtonPressType.SHORT);
+                            MacroDeckServer.Execute(actionButton, "", ButtonPressType.SHORT);
                         }
                         catch { }
                     }

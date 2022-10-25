@@ -1,16 +1,11 @@
-﻿using SuchByte.MacroDeck.Extension;
+﻿using System;
+using System.Drawing;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.Extension;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Plugins;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
 {
@@ -22,73 +17,67 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
         public InstalledExtensionsView()
         {
             InitializeComponent();
-            this.Dock = DockStyle.Fill;
-            this.btnAddViaZip.Text = LanguageManager.Strings.InstallFromFile;
-            this.btnCheckUpdates.Text = LanguageManager.Strings.CheckForUpdatesNow;
+            Dock = DockStyle.Fill;
+            btnAddViaZip.Text = LanguageManager.Strings.InstallFromFile;
+            btnCheckUpdates.Text = LanguageManager.Strings.CheckForUpdatesNow;
         }
 
         private void BtnAddExtensions_Click(object sender, EventArgs e)
         {
-            if (RequestExtensionStore != null)
-            {
-                RequestExtensionStore(this, EventArgs.Empty);
-            }
+            RequestExtensionStore?.Invoke(this, EventArgs.Empty);
         }
 
         private void BtnAddViaZip_Click(object sender, EventArgs e)
         {
-            if (RequestZipInstaller != null)
-            {
-                RequestZipInstaller(this, EventArgs.Empty);
-            }
+            RequestZipInstaller?.Invoke(this, EventArgs.Empty);
         }
 
         public void ListInstalledExtensions()
         {
-            if (this.IsDisposed) return;
-            foreach (var control in this.installedExtensionsList.Controls)
+            if (IsDisposed) return;
+            foreach (var control in installedExtensionsList.Controls)
             {
                 (control as ExtensionItemView).ExtensionRemoved -= ExtensionItemView_ExtensionRemoved;
             }
-            this.installedExtensionsList.Controls.Clear();
+            installedExtensionsList.Controls.Clear();
             foreach (var macroDeckPlugin in PluginManager.Plugins.Values)
             {
                 if (PluginManager.ProtectedPlugins.Contains(macroDeckPlugin)) continue;
-                ExtensionItemView extensionItemView = new ExtensionItemView(new PluginExtension(macroDeckPlugin), PluginManager.PluginsUpdateAvailable.Contains(macroDeckPlugin) && !PluginManager.UpdatedPlugins.Contains(macroDeckPlugin));
+                var extensionItemView = new ExtensionItemView(new PluginExtension(macroDeckPlugin), PluginManager.PluginsUpdateAvailable.Contains(macroDeckPlugin) && !PluginManager.UpdatedPlugins.Contains(macroDeckPlugin));
                 extensionItemView.ExtensionRemoved += ExtensionItemView_ExtensionRemoved;
-                this.installedExtensionsList.Controls.Add(extensionItemView);
+                installedExtensionsList.Controls.Add(extensionItemView);
             }
             foreach (var macroDeckPlugin in PluginManager.PluginsNotLoaded.Values)
             {
                 if (PluginManager.ProtectedPlugins.Contains(macroDeckPlugin)) continue;
-                ExtensionItemView extensionItemView = new ExtensionItemView(new PluginExtension(macroDeckPlugin), PluginManager.PluginsUpdateAvailable.Contains(macroDeckPlugin) && !PluginManager.UpdatedPlugins.Contains(macroDeckPlugin));
+                var extensionItemView = new ExtensionItemView(new PluginExtension(macroDeckPlugin), PluginManager.PluginsUpdateAvailable.Contains(macroDeckPlugin) && !PluginManager.UpdatedPlugins.Contains(macroDeckPlugin));
                 extensionItemView.ExtensionRemoved += ExtensionItemView_ExtensionRemoved;
-                this.installedExtensionsList.Controls.Add(extensionItemView);
+                installedExtensionsList.Controls.Add(extensionItemView);
             }
 
             foreach (var iconPack in IconManager.IconPacks)
             {
-                ExtensionItemView extensionItemView = new ExtensionItemView(new IconPackExtension(iconPack), IconManager.IconPacksUpdateAvailable.Contains(iconPack));
+                var extensionItemView = new ExtensionItemView(new IconPackExtension(iconPack), IconManager.IconPacksUpdateAvailable.Contains(iconPack));
                 extensionItemView.ExtensionRemoved += ExtensionItemView_ExtensionRemoved;
-                this.installedExtensionsList.Controls.Add(extensionItemView);
+                installedExtensionsList.Controls.Add(extensionItemView);
             }
         }
 
 
         private void ExtensionItemView_ExtensionRemoved(object sender, EventArgs e)
         {
-            if (this.installedExtensionsList.Controls.Contains(sender as ExtensionItemView))
+            if (installedExtensionsList.Controls.Contains(sender as ExtensionItemView))
             {
                 (sender as ExtensionItemView).Dispose();
-                this.installedExtensionsList.Controls.Remove(sender as ExtensionItemView);
+                installedExtensionsList.Controls.Remove(sender as ExtensionItemView);
             }
         }
 
         private void UpdateUpdateLabelInfo()
         {
-            this.lblUpdateState.Text = (PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0) ? string.Format(LanguageManager.Strings.XUpdatesAvailable, PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count + IconManager.IconPacksUpdateAvailable.Count) : LanguageManager.Strings.AllExtensionsUpToDate;
-            this.btnCheckUpdates.Text = (PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0) ? LanguageManager.Strings.UpdateAll : LanguageManager.Strings.CheckForUpdatesNow;
-            this.lblUpdateState.ForeColor = (PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0) ? Color.FromArgb(222, 170, 27) : Color.Silver;
+            lblUpdateState.Text = (PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0) ? string.Format(LanguageManager.Strings.XUpdatesAvailable, PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count + IconManager.IconPacksUpdateAvailable.Count) : LanguageManager.Strings.AllExtensionsUpToDate;
+            btnCheckUpdates.Text = (PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0) ? LanguageManager.Strings.UpdateAll : LanguageManager.Strings.CheckForUpdatesNow;
+            lblUpdateState.ForeColor = (PluginManager.PluginsUpdateAvailable.Count - PluginManager.UpdatedPlugins.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0) ? Color.FromArgb(222, 170, 27) : Color.Silver;
         }
 
         private void InstalledExtensionsView_Load(object sender, EventArgs e)
@@ -103,29 +92,29 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
 
         private void ExtensionStoreHelper_OnInstallationFinished(object sender, EventArgs e)
         {
-            if (!this.IsHandleCreated || this.IsDisposed) return;
-            this.Invoke(new Action(() => {
+            if (!IsHandleCreated || IsDisposed) return;
+            Invoke(() => {
                 try
                 {
                     ListInstalledExtensions();
                     UpdateUpdateLabelInfo();
                 }
                 catch { }
-            }));
+            });
         }
 
         private void UpdateCheckFinished(object sender, EventArgs e)
         {
-            this.Invoke(new Action(() =>
+            Invoke(() =>
             {
-                this.btnCheckUpdates.Spinner = false;
-                this.btnCheckUpdates.Enabled = true;
+                btnCheckUpdates.Spinner = false;
+                btnCheckUpdates.Enabled = true;
                 UpdateUpdateLabelInfo();
                 if (PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0)
                 {
                     ListInstalledExtensions();
                 }
-            }));
+            });
         } 
 
         private void BtnCheckUpdates_Click(object sender, EventArgs e)
@@ -135,8 +124,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                 ExtensionStoreHelper.UpdateAllPackages();
             } else
             {
-                this.btnCheckUpdates.Spinner = true;
-                this.btnCheckUpdates.Enabled = false;
+                btnCheckUpdates.Spinner = true;
+                btnCheckUpdates.Enabled = false;
                 ExtensionStoreHelper.SearchUpdatesAsync();
             }
         }

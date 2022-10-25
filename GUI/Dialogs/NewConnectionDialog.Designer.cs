@@ -1,4 +1,8 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
     partial class NewConnectionDialog
@@ -6,7 +10,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -217,16 +221,16 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         #endregion
 
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Label lblNewConnectionRequest;
-        private System.Windows.Forms.Label lblClientId;
-        private System.Windows.Forms.Label lblIPAddress;
-        private System.Windows.Forms.Label lblType;
-        private System.Windows.Forms.Label type;
-        private System.Windows.Forms.Label ipAddress;
-        private System.Windows.Forms.Label clientId;
-        private CustomControls.ButtonPrimary btnAccept;
-        private CustomControls.ButtonPrimary btnDeny;
-        private System.Windows.Forms.CheckBox checkBlockThisDevice;
+        private PictureBox pictureBox1;
+        private Label lblNewConnectionRequest;
+        private Label lblClientId;
+        private Label lblIPAddress;
+        private Label lblType;
+        private Label type;
+        private Label ipAddress;
+        private Label clientId;
+        private ButtonPrimary btnAccept;
+        private ButtonPrimary btnDeny;
+        private CheckBox checkBlockThisDevice;
     }
 }

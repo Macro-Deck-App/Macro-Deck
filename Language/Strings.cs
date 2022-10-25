@@ -1,15 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Xml;
-using System.Xml.Linq;
-using System.Xml.Schema;
-using System.Xml.Serialization;
-
-namespace SuchByte.MacroDeck.Language
+﻿namespace SuchByte.MacroDeck.Language
 {
     public class Strings
     {

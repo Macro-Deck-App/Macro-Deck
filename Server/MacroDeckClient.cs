@@ -1,11 +1,11 @@
-﻿using Fleck;
-using SuchByte.MacroDeck.Device;
-using SuchByte.MacroDeck.Model;
-using SuchByte.MacroDeck.Server.DeviceMessage;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
+using Fleck;
+using SuchByte.MacroDeck.Device;
+using SuchByte.MacroDeck.Folders;
+using SuchByte.MacroDeck.Model;
+using SuchByte.MacroDeck.Profiles;
+using SuchByte.MacroDeck.Server.DeviceMessage;
 
 namespace SuchByte.MacroDeck.Server
 {
@@ -13,7 +13,7 @@ namespace SuchByte.MacroDeck.Server
     {
         private IntPtr _bufferPtr;
         private int BUFFER_SIZE = 1024 * 1024; // 1 MB
-        private bool _disposed = false;
+        private bool _disposed;
 
         public MacroDeckClient()
         {
@@ -53,39 +53,39 @@ namespace SuchByte.MacroDeck.Server
 
         public MacroDeckClient(IWebSocketConnection socket)
         {
-            this._socketConnection = socket;
+            _socketConnection = socket;
         }
 
         public void SetClientId(string clientId)
         {
-            this._clientId = clientId;
+            _clientId = clientId;
         }
 
-        public IWebSocketConnection SocketConnection { get { return this._socketConnection; } }
+        public IWebSocketConnection SocketConnection => _socketConnection;
 
-        public Folders.MacroDeckFolder Folder { get; set; }
+        public MacroDeckFolder Folder { get; set; }
 
-        public Profiles.MacroDeckProfile Profile { get; set; }
-        public string ClientId { get { return this._clientId; } }
+        public MacroDeckProfile Profile { get; set; }
+        public string ClientId => _clientId;
 
         public DeviceClass DeviceClass { get; set; } = DeviceClass.SoftwareClient;
 
 
         public DeviceType DeviceType
         {
-            get { return this._deviceType; }
+            get => _deviceType;
             set
             {
-                this._deviceType = value;
-                switch (this._deviceType)
+                _deviceType = value;
+                switch (_deviceType)
                 {
                     case DeviceType.Unknown:
                     case DeviceType.Web:
                     case DeviceType.Android:
                     case DeviceType.StreamDeck:
                     case DeviceType.iOS:
-                        this.DeviceClass = DeviceClass.SoftwareClient;
-                        this.DeviceMessage = new SoftwareClientMessage();
+                        DeviceClass = DeviceClass.SoftwareClient;
+                        DeviceMessage = new SoftwareClientMessage();
                         break;
                 }
             }

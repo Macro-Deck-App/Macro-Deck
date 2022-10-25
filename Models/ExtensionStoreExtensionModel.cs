@@ -1,8 +1,5 @@
 ﻿using Newtonsoft.Json;
 using SuchByte.MacroDeck.ExtensionStore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SuchByte.MacroDeck.Model
 {
@@ -30,7 +27,7 @@ namespace SuchByte.MacroDeck.Model
         public string Filename { get; set; } = "";
 
         [JsonProperty("target-api")]
-        public int TargetAPI { get; set; } = 0;
+        public int TargetAPI { get; set; }
 
         [JsonProperty("md5")]
         public string Md5Checksum { get; set; } = "";

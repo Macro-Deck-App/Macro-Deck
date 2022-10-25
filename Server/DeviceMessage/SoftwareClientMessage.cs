@@ -1,14 +1,13 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.JSON;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SuchByte.MacroDeck.Server.DeviceMessage
 {
@@ -33,8 +32,8 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
 
             Parallel.ForEach(macroDeckClient.Folder.ActionButtons, actionButton =>
             {
-                string IconBase64 = "";
-                string LabelBase64 = "";
+                var IconBase64 = "";
+                var LabelBase64 = "";
                 string BackgroundColorHex;
                 if (!actionButton.State)
                 {
@@ -69,7 +68,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                     BackgroundColorHex = $"#{actionButton.BackColorOn.R:X2}{actionButton.BackColorOn.G:X2}{actionButton.BackColorOn.B:X2}";
                 }
 
-                JObject actionButtonObject = JObject.FromObject(new
+                var actionButtonObject = JObject.FromObject(new
                 {
                     IconBase64,
                     actionButton.Position_X,
@@ -80,7 +79,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                 buttons.Add(actionButtonObject);
             });
 
-            JObject buttonsObject = JObject.FromObject(new
+            var buttonsObject = JObject.FromObject(new
             {
                 Method = JsonMethod.GET_BUTTONS.ToString(),
                 Buttons = buttons
@@ -92,16 +91,16 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
         public void SendConfiguration(MacroDeckClient macroDeckClient)
         {
             if (macroDeckClient == null || macroDeckClient.SocketConnection == null || !macroDeckClient.SocketConnection.IsAvailable) return;
-            JObject configurationObject = JObject.FromObject(new
+            var configurationObject = JObject.FromObject(new
             {
                 Method = JsonMethod.GET_CONFIG.ToString(),
-                Rows = macroDeckClient.Profile.Rows,
-                Columns = macroDeckClient.Profile.Columns,
-                ButtonSpacing = macroDeckClient.Profile.ButtonSpacing,
-                ButtonRadius = macroDeckClient.Profile.ButtonRadius,
-                ButtonBackground = macroDeckClient.Profile.ButtonBackground,
-                Brightness = DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).Configuration.Brightness,
-                AutoConnect = DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).Configuration.AutoConnect,
+                macroDeckClient.Profile.Rows,
+                macroDeckClient.Profile.Columns,
+                macroDeckClient.Profile.ButtonSpacing,
+                macroDeckClient.Profile.ButtonRadius,
+                macroDeckClient.Profile.ButtonBackground,
+                DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).Configuration.Brightness,
+                DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).Configuration.AutoConnect,
                 WakeLock = Enum.GetName(typeof(WakeLockMethod), DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).Configuration.WakeLockMethod),
                 SupportButtonReleaseLongPress = true,
             });
@@ -112,8 +111,8 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
         public void UpdateButton(MacroDeckClient macroDeckClient, ActionButton.ActionButton actionButton)
         {
             if (macroDeckClient.Folder == null || !macroDeckClient.Folder.ActionButtons.Contains(actionButton)) return;
-            string IconBase64 = "";
-            string LabelBase64 = "";
+            var IconBase64 = "";
+            var LabelBase64 = "";
             string BackgroundColorHex;
             if (!actionButton.State)
             {
@@ -148,7 +147,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                 BackgroundColorHex = $"#{actionButton.BackColorOn.R:X2}{actionButton.BackColorOn.G:X2}{actionButton.BackColorOn.B:X2}";
             }
 
-            JObject actionButtonObject = JObject.FromObject(new
+            var actionButtonObject = JObject.FromObject(new
             {
                 IconBase64,
                 actionButton.Position_X,
@@ -157,7 +156,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage
                 BackgroundColorHex
             });
 
-            JObject updateObject = JObject.FromObject(new
+            var updateObject = JObject.FromObject(new
             {
                 Method = JsonMethod.UPDATE_BUTTON.ToString(),
                 Buttons = new List<JObject>

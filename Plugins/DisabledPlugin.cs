@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
-
-namespace SuchByte.MacroDeck.Plugins
+﻿namespace SuchByte.MacroDeck.Plugins
 {
     public class DisabledPlugin : MacroDeckPlugin
     {

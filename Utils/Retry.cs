@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 
 namespace SuchByte.MacroDeck.Utils
@@ -41,8 +40,8 @@ namespace SuchByte.MacroDeck.Utils
         /// <returns></returns>
         public static T Do<T>(Func<T> func, TimeSpan retryInterval, int maxAttemptCount = 3)
         {
-            List<Exception> exceptions = new List<Exception>();
-            int attempted = 0;
+            var exceptions = new List<Exception>();
+            var attempted = 0;
             while (attempted < maxAttemptCount)
             {
                 try

@@ -1,4 +1,10 @@
 ﻿
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.Properties;
+
 namespace SuchByte.MacroDeck.GUI.InitialSetupPages
 {
     partial class SetupPage1
@@ -6,7 +12,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
         /// <summary> 
         /// Erforderliche Designervariable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary> 
         /// Verwendete Ressourcen bereinigen.
@@ -29,100 +35,100 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
         /// </summary>
         private void InitializeComponent()
         {
-            this.lblWelcome = new System.Windows.Forms.Label();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.lblLetsConfigure = new System.Windows.Forms.Label();
-            this.languages = new System.Windows.Forms.ListBox();
-            this.lblSelectLanguage = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.lblWelcome = new Label();
+            this.pictureBox1 = new PictureBox();
+            this.lblLetsConfigure = new Label();
+            this.languages = new ListBox();
+            this.lblSelectLanguage = new Label();
+            ((ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // lblWelcome
             // 
-            this.lblWelcome.Font = new System.Drawing.Font("Tahoma", 26.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblWelcome.ForeColor = System.Drawing.Color.White;
-            this.lblWelcome.Location = new System.Drawing.Point(129, 3);
+            this.lblWelcome.Font = new Font("Tahoma", 26.25F, FontStyle.Regular, GraphicsUnit.Point);
+            this.lblWelcome.ForeColor = Color.White;
+            this.lblWelcome.Location = new Point(129, 3);
             this.lblWelcome.Name = "lblWelcome";
-            this.lblWelcome.Size = new System.Drawing.Size(559, 109);
+            this.lblWelcome.Size = new Size(559, 109);
             this.lblWelcome.TabIndex = 0;
             this.lblWelcome.Text = "Welcome to Macro Deck 2!";
-            this.lblWelcome.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblWelcome.TextAlign = ContentAlignment.MiddleCenter;
             this.lblWelcome.UseMnemonic = false;
             // 
             // pictureBox1
             // 
-            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.pictureBox1.Image = global::SuchByte.MacroDeck.Properties.Resources.Macro_Deck_2021;
-            this.pictureBox1.Location = new System.Drawing.Point(3, 3);
+            this.pictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
+            this.pictureBox1.Image = Resources.Macro_Deck_2021;
+            this.pictureBox1.Location = new Point(3, 3);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(120, 112);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.Size = new Size(120, 112);
+            this.pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 1;
             this.pictureBox1.TabStop = false;
             // 
             // lblLetsConfigure
             // 
-            this.lblLetsConfigure.Font = new System.Drawing.Font("Tahoma", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblLetsConfigure.ForeColor = System.Drawing.Color.White;
-            this.lblLetsConfigure.Location = new System.Drawing.Point(3, 118);
+            this.lblLetsConfigure.Font = new Font("Tahoma", 18F, FontStyle.Regular, GraphicsUnit.Point);
+            this.lblLetsConfigure.ForeColor = Color.White;
+            this.lblLetsConfigure.Location = new Point(3, 118);
             this.lblLetsConfigure.Name = "lblLetsConfigure";
-            this.lblLetsConfigure.Size = new System.Drawing.Size(685, 67);
+            this.lblLetsConfigure.Size = new Size(685, 67);
             this.lblLetsConfigure.TabIndex = 2;
             this.lblLetsConfigure.Text = "Let\'s configure your Macro Deck experience";
-            this.lblLetsConfigure.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblLetsConfigure.TextAlign = ContentAlignment.MiddleCenter;
             this.lblLetsConfigure.UseMnemonic = false;
             // 
             // languages
             // 
-            this.languages.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
-            this.languages.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.languages.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.languages.ForeColor = System.Drawing.Color.White;
+            this.languages.BackColor = Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
+            this.languages.BorderStyle = BorderStyle.FixedSingle;
+            this.languages.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            this.languages.ForeColor = Color.White;
             this.languages.FormattingEnabled = true;
             this.languages.ItemHeight = 18;
-            this.languages.Location = new System.Drawing.Point(231, 297);
+            this.languages.Location = new Point(231, 297);
             this.languages.Name = "languages";
-            this.languages.Size = new System.Drawing.Size(228, 218);
+            this.languages.Size = new Size(228, 218);
             this.languages.TabIndex = 4;
-            this.languages.SelectedIndexChanged += new System.EventHandler(this.Languages_SelectedIndexChanged);
+            this.languages.SelectedIndexChanged += new EventHandler(this.Languages_SelectedIndexChanged);
             // 
             // lblSelectLanguage
             // 
-            this.lblSelectLanguage.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblSelectLanguage.ForeColor = System.Drawing.Color.White;
-            this.lblSelectLanguage.Location = new System.Drawing.Point(231, 264);
+            this.lblSelectLanguage.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            this.lblSelectLanguage.ForeColor = Color.White;
+            this.lblSelectLanguage.Location = new Point(231, 264);
             this.lblSelectLanguage.Name = "lblSelectLanguage";
-            this.lblSelectLanguage.Size = new System.Drawing.Size(228, 26);
+            this.lblSelectLanguage.Size = new Size(228, 26);
             this.lblSelectLanguage.TabIndex = 5;
             this.lblSelectLanguage.Text = "Select your language";
-            this.lblSelectLanguage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblSelectLanguage.TextAlign = ContentAlignment.MiddleCenter;
             this.lblSelectLanguage.UseMnemonic = false;
             // 
             // SetupPage1
             // 
             
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.AutoScaleMode = AutoScaleMode.Dpi;
+            this.BackColor = Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.lblSelectLanguage);
             this.Controls.Add(this.languages);
             this.Controls.Add(this.lblLetsConfigure);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.lblWelcome);
-            this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
             this.Name = "SetupPage1";
-            this.Size = new System.Drawing.Size(691, 571);
-            this.Load += new System.EventHandler(this.SetupPage1_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.Size = new Size(691, 571);
+            this.Load += new EventHandler(this.SetupPage1_Load);
+            ((ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Label lblWelcome;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Label lblLetsConfigure;
-        private System.Windows.Forms.ListBox languages;
-        private System.Windows.Forms.Label lblSelectLanguage;
+        private Label lblWelcome;
+        private PictureBox pictureBox1;
+        private Label lblLetsConfigure;
+        private ListBox languages;
+        private Label lblSelectLanguage;
     }
 }

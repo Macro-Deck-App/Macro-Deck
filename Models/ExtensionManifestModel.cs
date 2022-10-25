@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
-using SuchByte.MacroDeck.ExtensionStore;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
+using SuchByte.MacroDeck.ExtensionStore;
 
 namespace SuchByte.MacroDeck.Model
 {
@@ -49,8 +49,8 @@ namespace SuchByte.MacroDeck.Model
 
         public static ExtensionManifestModel FromZipFilePath(string zipFilePath)
         {
-            Stream stream = new StreamReader(
-                System.IO.Compression.ZipFile.OpenRead(zipFilePath)
+            var stream = new StreamReader(
+                ZipFile.OpenRead(zipFilePath)
                                                 .Entries.Where(x => x.Name.Equals("ExtensionManifest.json", StringComparison.InvariantCulture))
                                                 .FirstOrDefault()
                                                 .Open(), Encoding.UTF8).BaseStream;
@@ -59,7 +59,7 @@ namespace SuchByte.MacroDeck.Model
 
         public static ExtensionManifestModel FromJsonStream(Stream stream)
         {
-            JsonSerializer serializer = new JsonSerializer();
+            var serializer = new JsonSerializer();
             using (var sr = new StreamReader(stream))
             using (var jsonReader = new JsonTextReader(sr))
             {

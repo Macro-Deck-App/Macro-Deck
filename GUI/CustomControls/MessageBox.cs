@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
+﻿using System.Drawing;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.Language;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
@@ -13,55 +9,55 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         public MessageBox()
         {
             InitializeComponent();
-            this.SetCloseIconVisible(false);
-            if (this.Parent == null)
+            SetCloseIconVisible(false);
+            if (Parent == null)
             {
-                this.StartPosition = FormStartPosition.CenterScreen;
+                StartPosition = FormStartPosition.CenterScreen;
             }
         }
 
-        public DialogResult ShowDialog(String title, String message, MessageBoxButtons messageBoxButtons)
+        public DialogResult ShowDialog(string title, string message, MessageBoxButtons messageBoxButtons)
         {
-            this.lblTitle.Text = title;
-            this.lblMessage.Text = message;
+            lblTitle.Text = title;
+            lblMessage.Text = message;
             buttonMessageBoxPanel.Controls.Clear();
             switch (messageBoxButtons)
             {
                 default:
                 case MessageBoxButtons.OK:
-                    ButtonPrimary btnOK = new ButtonPrimary();
-                    btnOK.Text = Language.LanguageManager.Strings.Ok;
+                    var btnOK = new ButtonPrimary();
+                    btnOK.Text = LanguageManager.Strings.Ok;
                     btnOK.AutoSize = true;
                     btnOK.AutoSizeMode = AutoSizeMode.GrowAndShrink;
                     btnOK.MinimumSize = new Size(75, 0);
                     btnOK.Select();
                     btnOK.Click += (sender, args) =>
                     {
-                        this.DialogResult = DialogResult.OK;
+                        DialogResult = DialogResult.OK;
                         Close();
                     };
                     buttonMessageBoxPanel.Controls.Add(btnOK);
                     break;
                 case MessageBoxButtons.YesNo:
-                    ButtonPrimary btnNo = new ButtonPrimary();
-                    btnNo.Text = Language.LanguageManager.Strings.No;
+                    var btnNo = new ButtonPrimary();
+                    btnNo.Text = LanguageManager.Strings.No;
                     btnNo.AutoSize = true;
                     btnNo.AutoSizeMode = AutoSizeMode.GrowAndShrink;
                     btnNo.MinimumSize = new Size(75, 0);
                     btnNo.Click += (sender, args) =>
                     {
-                        this.DialogResult = DialogResult.No;
+                        DialogResult = DialogResult.No;
                         Close();
                     };
-                    ButtonPrimary btnYes = new ButtonPrimary();
-                    btnYes.Text = Language.LanguageManager.Strings.Yes;
+                    var btnYes = new ButtonPrimary();
+                    btnYes.Text = LanguageManager.Strings.Yes;
                     btnYes.AutoSize = true;
                     btnYes.AutoSizeMode = AutoSizeMode.GrowAndShrink;
                     btnYes.MinimumSize = new Size(75, 0);
                     btnYes.Select();
                     btnYes.Click += (sender, args) =>
                     {
-                        this.DialogResult = DialogResult.Yes;
+                        DialogResult = DialogResult.Yes;
                         Close();
                     };
                     
@@ -69,7 +65,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                     buttonMessageBoxPanel.Controls.Add(btnYes);
                     break;
             }
-            return this.ShowDialog();
+            return ShowDialog();
         }
     }
 }

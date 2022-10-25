@@ -1,20 +1,20 @@
-﻿using Newtonsoft.Json;
-using SuchByte.MacroDeck.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
+using SuchByte.MacroDeck.Logging;
 
 namespace SuchByte.MacroDeck.Language
 {
     public static class LanguageManager
     {
         public static event EventHandler LanguageChanged;
-        public static List<Strings> Languages { get { return _languages; } }
-        private static List<Strings> _languages = new List<Strings>();
+        public static List<Strings> Languages => _languages;
+        private static List<Strings> _languages = new();
 
-        private static Strings _strings = new Strings();
-        public static Strings Strings { get { return _strings; } }
+        private static Strings _strings = new();
+        public static Strings Strings => _strings;
 
 
         public static void Load(bool exportDefaultStrings = false)
@@ -37,13 +37,13 @@ namespace SuchByte.MacroDeck.Language
                     MacroDeckLogger.Info(typeof(LanguageManager), $"Loading ${manifestResource}...");
                     using var resourceStream = assembly.GetManifestResourceStream(manifestResource);
 
-                    JsonSerializer serializer = new JsonSerializer();
+                    var serializer = new JsonSerializer();
                     using (var sr = new StreamReader(resourceStream))
                     using (var jsonReader = new JsonTextReader(sr))
                     {
                         while (!sr.EndOfStream)
                         {
-                            Strings language = serializer.Deserialize<Strings>(jsonReader);
+                            var language = serializer.Deserialize<Strings>(jsonReader);
                             if (_languages.FindAll(l => l.__Language__.Equals(language.__Language__) && l.__LanguageCode__.Equals(language.__LanguageCode__) && l.__Author__.Equals(language.__Author__)).Count > 0) continue;
                             _languages.Add(language);
                         }
@@ -60,15 +60,15 @@ namespace SuchByte.MacroDeck.Language
         private static void SaveDefault()
         {
             var path = Path.Combine(MacroDeck.MainDirectoryPath, "Language", _strings.__Language__ + ".json");
-            JsonSerializer serializer = new JsonSerializer
+            var serializer = new JsonSerializer
             {
                 NullValueHandling = NullValueHandling.Ignore,
-                Formatting = Newtonsoft.Json.Formatting.Indented,
+                Formatting = Formatting.Indented,
             };
 
             try
             {
-                using StreamWriter sw = new StreamWriter(path);
+                using var sw = new StreamWriter(path);
                 using JsonWriter writer = new JsonTextWriter(sw);
                 serializer.Serialize(writer, _strings);
 
@@ -82,7 +82,7 @@ namespace SuchByte.MacroDeck.Language
 
         public static void SetLanguage(string languageName)
         {
-            Strings strings = _languages.Find(l => l.__Language__.Equals(languageName));
+            var strings = _languages.Find(l => l.__Language__.Equals(languageName));
             if (strings != null)
             {
                 SetLanguage(strings);
@@ -93,10 +93,7 @@ namespace SuchByte.MacroDeck.Language
         {
             MacroDeckLogger.Info("Set language to " + language.__Language__);
             _strings = language;
-            if (LanguageChanged != null)
-            {
-                LanguageChanged(language, EventArgs.Empty);
-            }
+            LanguageChanged?.Invoke(language, EventArgs.Empty);
         }
 
         public static string GetLanguageName()

@@ -1,12 +1,9 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.Profiles;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
+﻿using System;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Profiles;
+using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
@@ -16,47 +13,47 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         public MacroDeckProfile Profile;
         public CreateProfileDialog(MacroDeckProfile macroDeckProfile = null)
         {
-            this.Profile = macroDeckProfile;
+            Profile = macroDeckProfile;
             InitializeComponent();
-            this.lblName.Text = Language.LanguageManager.Strings.Name;
-            this.btnOk.Text = Language.LanguageManager.Strings.Ok;
+            lblName.Text = LanguageManager.Strings.Name;
+            btnOk.Text = LanguageManager.Strings.Ok;
         }
 
         private void BtnOk_Click(object sender, EventArgs e)
         {
             if (profileName.Text.Length < 1) return;
 
-            if (this.Profile == null)
+            if (Profile == null)
             {
-                foreach (MacroDeckProfile profile in ProfileManager.Profiles)
+                foreach (var profile in ProfileManager.Profiles)
                 {
                     if (profile.DisplayName.Equals(profileName.Text))
                     {
-                        using (var msgBox = new CustomControls.MessageBox())
+                        using (var msgBox = new MessageBox())
                         {
-                            msgBox.ShowDialog(Language.LanguageManager.Strings.CantCreateProfile, String.Format(Language.LanguageManager.Strings.ProfileCalledXAlreadyExists, this.profileName.Text), MessageBoxButtons.OK);
+                            msgBox.ShowDialog(LanguageManager.Strings.CantCreateProfile, string.Format(LanguageManager.Strings.ProfileCalledXAlreadyExists, profileName.Text), MessageBoxButtons.OK);
                         }
                         return;
                     }
                 }
 
 
-                this.Profile = ProfileManager.CreateProfile(profileName.Text);
+                Profile = ProfileManager.CreateProfile(profileName.Text);
             } else
             {
-                this.Profile.DisplayName = profileName.Text;
+                Profile.DisplayName = profileName.Text;
                 ProfileManager.Save();
             }
 
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void CreateProfileDialog_Load(object sender, EventArgs e)
         {
-            if (this.Profile != null)
+            if (Profile != null)
             {
-                this.profileName.Text = this.Profile.DisplayName;
+                profileName.Text = Profile.DisplayName;
             }
         }
     }

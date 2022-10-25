@@ -1,10 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using SuchByte.MacroDeck.ExtensionStore;
-using SuchByte.MacroDeck.InternalPlugins.DevicePlugin;
-using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Model;
-using SuchByte.MacroDeck.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -13,31 +7,39 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Forms;
 using System.Xml.Serialization;
+using Newtonsoft.Json.Linq;
+using SuchByte.MacroDeck.ActionButton;
+using SuchByte.MacroDeck.ExtensionStore;
+using SuchByte.MacroDeck.Folders.Plugin;
+using SuchByte.MacroDeck.InternalPlugins.DevicePlugin;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Model;
+using SuchByte.MacroDeck.Utils;
+using SuchByte.MacroDeck.Variables.Plugin;
+using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.Plugins
 {
     public static class PluginManager
     {
         public static event EventHandler OnPluginsChange;
-        public static event EventHandler OnUpdateCheckFinished;
 
 
-        public static Dictionary<string, MacroDeckPlugin> Plugins = new Dictionary<string, MacroDeckPlugin>();
-        public static List<MacroDeckPlugin> ProtectedPlugins = new List<MacroDeckPlugin>();
-        public static List<MacroDeckPlugin> UpdatedPlugins = new List<MacroDeckPlugin>();
-        public static Dictionary<string, MacroDeckPlugin> PluginsNotLoaded = new Dictionary<string, MacroDeckPlugin>();
-        public static List<MacroDeckPlugin> PluginsUpdateAvailable = new List<MacroDeckPlugin>();
-        public static Dictionary<MacroDeckPlugin, string> PluginDirectories = new Dictionary<MacroDeckPlugin, string>();
+        public static Dictionary<string, MacroDeckPlugin> Plugins = new();
+        public static List<MacroDeckPlugin> ProtectedPlugins = new();
+        public static List<MacroDeckPlugin> UpdatedPlugins = new();
+        public static Dictionary<string, MacroDeckPlugin> PluginsNotLoaded = new();
+        public static List<MacroDeckPlugin> PluginsUpdateAvailable = new();
+        public static Dictionary<MacroDeckPlugin, string> PluginDirectories = new();
 
-        static string _manifestFileName = "ExtensionManifest.json";
-        static string _deleteMarkerFileName = ".delete";
+        private const string ManifestFileName = "ExtensionManifest.json";
+        private const string DeleteMarkerFileName = ".delete";
 
-        static bool _loaded = false;
+        private static bool _loaded;
 
         public static void Load()
         {
@@ -86,16 +88,16 @@ namespace SuchByte.MacroDeck.Plugins
                 foreach (var directory in Directory.GetDirectories(MacroDeck.PluginsDirectoryPath))
                 {
                     // Delete plugin if file ".delete" exists
-                    if (File.Exists(Path.Combine(directory, _deleteMarkerFileName)))
+                    if (File.Exists(Path.Combine(directory, DeleteMarkerFileName)))
                     {
                         try
                         {
-                            File.Delete(Path.Combine(directory, _deleteMarkerFileName));
+                            File.Delete(Path.Combine(directory, DeleteMarkerFileName));
                             Directory.Delete(directory, true);
                         } catch { }
                         continue;
                     }
-                    var manifestFile = Path.Combine(directory, _manifestFileName);
+                    var manifestFile = Path.Combine(directory, ManifestFileName);
                     if (!File.Exists(manifestFile))
                     {
                         continue;
@@ -103,7 +105,7 @@ namespace SuchByte.MacroDeck.Plugins
 
                     try
                     {
-                        ExtensionManifestModel extensionManifest = ExtensionManifestModel.FromManifestFile(manifestFile);
+                        var extensionManifest = ExtensionManifestModel.FromManifestFile(manifestFile);
                         if (extensionManifest == null) continue;
                         var plugin = LoadPlugin(extensionManifest, directory);
                         plugin.Author = extensionManifest.Author;
@@ -117,9 +119,9 @@ namespace SuchByte.MacroDeck.Plugins
             }
 
             // Add internal plugins
-            AddPlugin(new ActionButton.ActionButtonPlugin(), true);
-            AddPlugin(new Variables.Plugin.VariablesPlugin(), true);
-            AddPlugin(new Folders.Plugin.FolderPlugin(), true);
+            AddPlugin(new ActionButtonPlugin(), true);
+            AddPlugin(new VariablesPlugin(), true);
+            AddPlugin(new FolderPlugin(), true);
             AddPlugin(new DevicePlugin(), true);
         }
 
@@ -160,7 +162,6 @@ namespace SuchByte.MacroDeck.Plugins
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error("Error while loading plugin: " + ex.Message);
                 if (asm != null)
                 {
                     var disabledPlugin = new DisabledPlugin
@@ -174,34 +175,25 @@ namespace SuchByte.MacroDeck.Plugins
                     PluginDirectories[disabledPlugin] = pluginDirectory;
 
                     MacroDeck.SafeMode = true;
-
-                    using (var msgBox = new GUI.CustomControls.MessageBox())
-                    {
-                        msgBox.ShowDialog(Language.LanguageManager.Strings.ErrorWhileLoadingPlugins, String.Format(Language.LanguageManager.Strings.PluginXCouldNotBeLoaded, disabledPlugin.Name, disabledPlugin.Version), MessageBoxButtons.OK);
-                    }
+                    MacroDeckLogger.Warning($"Cannot load {disabledPlugin.Name} version {disabledPlugin.Version}. Macro Deck was started in safe mode.");
                     return disabledPlugin;
                 }
             }
             return null;
         }
-
        
         internal static void SearchUpdate(MacroDeckPlugin plugin)
         {
             if (UpdatedPlugins.Contains(plugin) || ProtectedPlugins.Contains(plugin)) return;
             try
             {
-                using (WebClient wc = new WebClient())
-                {
-                    var jsonString = wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=check-update&package-id={ExtensionStoreHelper.GetPackageId(plugin)}&installed-version={plugin.Version}&target-api={MacroDeck.PluginApiVersion}");
-                    JObject jsonObject = JObject.Parse(jsonString);
-                    bool update = (bool)jsonObject["update-available"];
-                    if (update)
-                    {
-                        MacroDeckLogger.Info("Update available for " + plugin.Name);
-                        PluginsUpdateAvailable.Add(plugin);
-                    }
-                }
+                using var wc = new WebClient();
+                var jsonString = wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=check-update&package-id={ExtensionStoreHelper.GetPackageId(plugin)}&installed-version={plugin.Version}&target-api={MacroDeck.PluginApiVersion}");
+                var jsonObject = JObject.Parse(jsonString);
+                var update = (bool)jsonObject["update-available"];
+                if (!update) return;
+                MacroDeckLogger.Info("Update available for " + plugin.Name);
+                PluginsUpdateAvailable.Add(plugin);
             }
             catch (Exception ex)
             {
@@ -247,13 +239,13 @@ namespace SuchByte.MacroDeck.Plugins
                     {
                         Plugins.Remove(name);
                     }
-                    var deleteMarkerFile = Path.Combine(PluginDirectories[plugin], _deleteMarkerFileName);
+                    var deleteMarkerFile = Path.Combine(PluginDirectories[plugin], DeleteMarkerFileName);
                     File.Create(deleteMarkerFile);
                     MacroDeckLogger.Info(name + " deleted");
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.Forms.MessageBox.Show(ex.Message.ToString());
+                    System.Windows.Forms.MessageBox.Show(ex.Message);
                 }
             }
 
@@ -271,11 +263,11 @@ namespace SuchByte.MacroDeck.Plugins
 
         internal static void InstallPlugin(string directory, string packageName)
         {
-            bool update = Directory.Exists(Path.Combine(MacroDeck.PluginsDirectoryPath, packageName));
+            var update = Directory.Exists(Path.Combine(MacroDeck.PluginsDirectoryPath, packageName));
             MacroDeckLogger.Info(typeof(PluginManager), $"{(update ? "Updating" : "Installing")} " + packageName);
             Assembly asm = null;
-            bool error = false;
-            ExtensionManifestModel extensionManifest = new ExtensionManifestModel();
+            var error = false;
+            var extensionManifest = new ExtensionManifestModel();
             try
             {
                 var installationDirectory = Path.Combine(MacroDeck.PluginsDirectoryPath, packageName);
@@ -288,7 +280,7 @@ namespace SuchByte.MacroDeck.Plugins
 
                 if (!update)
                 {
-                    var manifestFile = Path.Combine(installationDirectory, _manifestFileName);
+                    var manifestFile = Path.Combine(installationDirectory, ManifestFileName);
                     if (!File.Exists(manifestFile))
                     {
                         error = true;
@@ -306,7 +298,7 @@ namespace SuchByte.MacroDeck.Plugins
                             {
                                 try
                                 {
-                                    using (WebClient wc = new WebClient())
+                                    using (var wc = new WebClient())
                                     {
                                         wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=count-download&package-id={extensionManifest.PackageId}");
                                     }
@@ -318,9 +310,9 @@ namespace SuchByte.MacroDeck.Plugins
                                 {
                                     if (plugin != null && plugin.CanConfigure)
                                     {
-                                        using (var msgBox = new GUI.CustomControls.MessageBox())
+                                        using (var msgBox = new MessageBox())
                                         {
-                                            if (msgBox.ShowDialog(Language.LanguageManager.Strings.PluginNeedsConfiguration, String.Format(Language.LanguageManager.Strings.ConfigureNow, plugin.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                                            if (msgBox.ShowDialog(LanguageManager.Strings.PluginNeedsConfiguration, string.Format(LanguageManager.Strings.ConfigureNow, plugin.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
                                             {
                                                 plugin.OpenConfigurator();
                                             }
@@ -359,9 +351,9 @@ namespace SuchByte.MacroDeck.Plugins
 
                     PluginsNotLoaded[asm.GetName().Name] = disabledPlugin;
 
-                    using (var msgBox = new GUI.CustomControls.MessageBox())
+                    using (var msgBox = new MessageBox())
                     {
-                        msgBox.ShowDialog(Language.LanguageManager.Strings.ErrorWhileInstallingPlugin, String.Format(Language.LanguageManager.Strings.PluginXCouldNotBeInstalled, asm.GetName().Name), MessageBoxButtons.OK);
+                        msgBox.ShowDialog(LanguageManager.Strings.ErrorWhileInstallingPlugin, string.Format(LanguageManager.Strings.PluginXCouldNotBeInstalled, asm.GetName().Name), MessageBoxButtons.OK);
                     }
                 }
             }
@@ -388,26 +380,33 @@ namespace SuchByte.MacroDeck.Plugins
         internal static void EnablePlugins()
         {
             MacroDeckLogger.Info(typeof(PluginManager), "Enabling plugins...");
-            foreach (MacroDeckPlugin plugin in Plugins.Values)
+            foreach (var plugin in Plugins.Values)
             {
                 if (plugin == null) continue;
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
-                plugin.Enable();
+                try
+                {
+                    plugin.Enable();
+                }
+                catch (Exception ex)
+                {
+                    MacroDeckLogger.Warning($"Error while enabling {plugin.Name}: {ex.Message}");
+                }
                 stopWatch.Stop();
-                double enablingTook = stopWatch.Elapsed.TotalMilliseconds;
+                var enablingTook = stopWatch.Elapsed.TotalMilliseconds;
                 MacroDeckLogger.Info($"{plugin.Name} version {plugin.Version} enabled (took {enablingTook}ms)");
             }
-            MacroDeckLogger.Info(typeof(PluginManager), $"Plugins enabled");
+            MacroDeckLogger.Info(typeof(PluginManager), "Plugins enabled");
         }
 
         public static PluginAction GetActionByName(MacroDeckPlugin plugin, string name)
         {
-            PluginAction action = plugin.Actions.Find(plugin => plugin.Name.Equals(name));
+            var action = plugin.Actions.Find(plugin => plugin.Name.Equals(name));
             if (action == null) return null;
             using (var ms = new MemoryStream())
             {
-                XmlSerializer serializer = new XmlSerializer(action.GetType());
+                var serializer = new XmlSerializer(action.GetType());
                 serializer.Serialize(ms, action);
                 ms.Seek(0, SeekOrigin.Begin);
                 return (PluginAction)serializer.Deserialize(ms);
@@ -419,7 +418,7 @@ namespace SuchByte.MacroDeck.Plugins
             if (action == null) return null;
             using (var ms = new MemoryStream())
             {
-                XmlSerializer serializer = new XmlSerializer(action.GetType());
+                var serializer = new XmlSerializer(action.GetType());
                 serializer.Serialize(ms, action);
                 ms.Seek(0, SeekOrigin.Begin);
                 return (PluginAction)serializer.Deserialize(ms);
@@ -428,14 +427,14 @@ namespace SuchByte.MacroDeck.Plugins
         
         public static MacroDeckPlugin GetPluginByAction(PluginAction pluginAction)
         {
-            foreach (MacroDeckPlugin macroDeckPlugin in Plugins.Values)
+            foreach (var macroDeckPlugin in Plugins.Values)
             {
                 if (macroDeckPlugin.Actions.Find(mdp => mdp.GetType().FullName.Equals(pluginAction.GetType().FullName)) != null)
                 {
                     return macroDeckPlugin;
                 }
             }
-            return  new DisabledPlugin()
+            return  new DisabledPlugin
             {
                 Name = "Plugin not available",
             };
@@ -443,14 +442,14 @@ namespace SuchByte.MacroDeck.Plugins
 
         public static MacroDeckPlugin GetPluginByName(string name)
         {
-            foreach (MacroDeckPlugin macroDeckPlugin in Plugins.Values)
+            foreach (var macroDeckPlugin in Plugins.Values)
             {
                 if (macroDeckPlugin.Name.Equals(name))
                 {
                     return macroDeckPlugin;
                 }
             }
-            return new DisabledPlugin()
+            return new DisabledPlugin
             {
                 Name = "Plugin not available",
             };

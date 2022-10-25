@@ -1,21 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
 	<PropertyGroup>
-		<IsBeta>false</IsBeta>
+		<IsBeta>true</IsBeta>
 		<BetaPatch>0</BetaPatch>
 
 		<VersionMajor>2</VersionMajor>
-		<VersionMinor>12</VersionMinor>
-		<VersionPatch>1</VersionPatch> <!-- Patch (Not Beta patch) -->
+		<VersionMinor>13</VersionMinor>
+		<VersionPatch>0</VersionPatch> <!-- Patch (Not Beta patch) -->
 
 		<VersionSuffix Condition="'$(IsBeta)' == 'true'">b$(BetaPatch)</VersionSuffix>
 		<VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
 	</PropertyGroup>
 	
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0-windows10.0.22000.0</TargetFramework>
     <UseWPF>true</UseWPF>
-    <RootNamespace>SuchByte.MacroDeck</RootNamespace>
+	  <RootNamespace>SuchByte.MacroDeck</RootNamespace>
 	  <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>appicon.ico</ApplicationIcon>
     <StartupObject>SuchByte.MacroDeck.MacroDeck</StartupObject>
@@ -33,14 +33,9 @@
     <RepositoryUrl>https://github.com/SuchByte/Macro-Deck</RepositoryUrl>
 	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Platforms>AnyCPU;x64</Platforms>
-	<PublishSingleFile>true</PublishSingleFile>
-	<SelfContained>true</SelfContained>  
+	<SelfContained>true</SelfContained>
+	<OutputType>WinExe</OutputType>  
   </PropertyGroup>
-	
-	<PropertyGroup>
-      <DebugType>embedded</DebugType>
-      <OutputType>WinExe</OutputType>
-    </PropertyGroup>
 	
 	<ItemGroup>
       <Content Update="Macro Deck 2.dll">
@@ -106,23 +101,23 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CefSharp.WinForms.NETCore" Version="99.2.120" />
-    <PackageReference Include="Cottle" Version="2.0.4" />
+    <PackageReference Include="CefSharp.WinForms.NETCore" Version="106.0.290" />
+    <PackageReference Include="Cottle" Version="2.0.8" />
     <PackageReference Include="FCTB" Version="2.16.24" />
     <PackageReference Include="Fleck" Version="1.2.0" />
     <PackageReference Include="GiphyDotNet" Version="2.0.0" />
     <PackageReference Include="Magick.NET-Q16-x64" Version="8.3.1" />
     <PackageReference Include="Magick.NET.Core" Version="8.3.1" />
     <PackageReference Include="Magick.NET.SystemDrawing" Version="4.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.22000.196" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="RestSharp" Version="106.12.0" />
     <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="106.12.0" />
     <PackageReference Include="sharpadbclient" Version="2.3.23" />
     <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
-    <PackageReference Include="SQLiteNetExtensions" Version="2.1.0" />
+    <PackageReference Include="System.Collections" Version="4.3.0" />
+    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -168,7 +163,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy /Y &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(ProjectDir)bin\Release\netcoreapp3.1\publish\$(TargetName).dll&quot;" />
+    <!--<Exec Command="copy /Y &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(ProjectDir)bin\Release\netcoreapp3.1\publish\$(TargetName).dll&quot;" />-->
   </Target>
 
 

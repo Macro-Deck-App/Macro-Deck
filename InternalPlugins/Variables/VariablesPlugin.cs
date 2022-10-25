@@ -1,22 +1,24 @@
-﻿using SuchByte.MacroDeck.Events;
-using SuchByte.MacroDeck.Folders;
-using SuchByte.MacroDeck.GUI;
-using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.InternalPlugins.Variables.Models;
-using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Plugins;
-using SuchByte.MacroDeck.Profiles;
-using SuchByte.MacroDeck.Variables.Plugin.GUI;
-using SuchByte.MacroDeck.Variables.Plugin.Models;
-using SuchByte.MacroDeck.Variables.Plugin.Views;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using System.Timers;
+using SuchByte.MacroDeck.Events;
+using SuchByte.MacroDeck.GUI;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.InternalPlugins.Variables.Enums;
+using SuchByte.MacroDeck.InternalPlugins.Variables.Models;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Profiles;
+using SuchByte.MacroDeck.Properties;
+using SuchByte.MacroDeck.Utils;
+using SuchByte.MacroDeck.Variables.Plugin.GUI;
+using SuchByte.MacroDeck.Variables.Plugin.Models;
+using SuchByte.MacroDeck.Variables.Plugin.Views;
 
 namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwards compatibility!
 {
@@ -25,35 +27,35 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
         internal override string Name => LanguageManager.Strings.PluginMacroDeckVariables;
         internal override string Author => "Macro Deck";
 
-        internal override Image PluginIcon => Properties.Resources.Variable_Normal;
+        internal override Image PluginIcon => Resources.Variable_Normal;
 
-        private VariableChangedEvent variableChangedEvent = new VariableChangedEvent();
+        private VariableChangedEvent variableChangedEvent = new();
 
         Timer timeDateTimer;
 
         public override void Enable()
         {
-            this.Actions = new List<PluginAction>
+            Actions = new List<PluginAction>
             {
                 new ChangeVariableValueAction(),
                 new SaveVariableToFileAction(),
                 new ReadVariableFromFileAction(),
             };
-            EventManager.RegisterEvent(this.variableChangedEvent);
+            EventManager.RegisterEvent(variableChangedEvent);
             VariableManager.OnVariableChanged += VariableChanged;
 
-            this.timeDateTimer = new Timer(1000)
+            timeDateTimer = new Timer(1000)
             {
                 Enabled = true
             };
-            this.timeDateTimer.Elapsed += this.OnTimerTick;
-            this.timeDateTimer.Start();
+            timeDateTimer.Elapsed += OnTimerTick;
+            timeDateTimer.Start();
         }
         private void OnTimerTick(object sender, EventArgs e)
         {
             Task.Run(() =>
             {
-                CultureInfo culture = new CultureInfo(LanguageManager.GetLanguageCode()); //Set CultureInfo locale by selected language
+                var culture = new CultureInfo(LanguageManager.GetLanguageCode()); //Set CultureInfo locale by selected language
 
                 VariableManager.SetValue("time", DateTime.Now.ToString("t"), VariableType.String, "Macro Deck");
                 VariableManager.SetValue("date", DateTime.Now.ToString("d"), VariableType.String, "Macro Deck");
@@ -62,7 +64,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
         }
         private void VariableChanged(object sender, EventArgs e)
         {
-            this.variableChangedEvent.Trigger(sender);
+            variableChangedEvent.Trigger(sender);
         }
     }
 
@@ -74,8 +76,8 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
         public List<string> ParameterSuggestions {
             get 
             {
-                List<string> variables = new List<string>();
-                foreach (Variable variable in VariableManager.ListVariables)
+                var variables = new List<string>();
+                foreach (var variable in VariableManager.ListVariables)
                 {
                     variables.Add(variable.Name);
                 }
@@ -85,23 +87,23 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
 
         public void Trigger(object sender)
         {
-            if (this.OnEvent != null)
+            if (OnEvent != null)
             {
                 try
                 {
-                    foreach (MacroDeckProfile macroDeckProfile in ProfileManager.Profiles)
+                    foreach (var macroDeckProfile in ProfileManager.Profiles)
                     {
-                        foreach (MacroDeckFolder folder in macroDeckProfile.Folders)
+                        foreach (var folder in macroDeckProfile.Folders)
                         {
                             if (folder.ActionButtons == null) continue;
-                            foreach (ActionButton.ActionButton actionButton in folder.ActionButtons.FindAll(actionButton => actionButton.EventListeners != null && actionButton.EventListeners.Find(x => x.EventToListen != null && x.EventToListen.Equals(this.Name)) != null))
+                            foreach (var actionButton in folder.ActionButtons.FindAll(actionButton => actionButton.EventListeners != null && actionButton.EventListeners.Find(x => x.EventToListen != null && x.EventToListen.Equals(Name)) != null))
                             {
-                                MacroDeckEventArgs macroDeckEventArgs = new MacroDeckEventArgs
+                                var macroDeckEventArgs = new MacroDeckEventArgs
                                 {
                                     ActionButton = actionButton,
                                     Parameter = ((Variable)sender).Name,
                                 };
-                                this.OnEvent(this, macroDeckEventArgs);
+                                OnEvent(this, macroDeckEventArgs);
                             }
                         }
                     }
@@ -126,24 +128,24 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
 
         public override void Trigger(string clientId, ActionButton.ActionButton actionButton)
         {
-            if (string.IsNullOrWhiteSpace(this.Configuration)) return;
-            var changeVariableActionConfigModel = ChangeVariableValueActionConfigModel.Deserialize(this.Configuration);
-            Variable variable = VariableManager.ListVariables.Where(v => v.Name == changeVariableActionConfigModel.Variable).FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(Configuration)) return;
+            var changeVariableActionConfigModel = ChangeVariableValueActionConfigModel.Deserialize(Configuration);
+            var variable = VariableManager.ListVariables.Where(v => v.Name == changeVariableActionConfigModel.Variable).FirstOrDefault();
             if (variable == null) return;
             switch (changeVariableActionConfigModel.Method)
             {
 
-                case InternalPlugins.Variables.Enums.ChangeVariableMethod.countUp:
+                case ChangeVariableMethod.countUp:
                     VariableManager.SetValue(variable.Name, float.Parse(variable.Value) + 1, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
                     break;
-                case InternalPlugins.Variables.Enums.ChangeVariableMethod.countDown:
+                case ChangeVariableMethod.countDown:
                     VariableManager.SetValue(variable.Name, float.Parse(variable.Value) - 1, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
                     break;
-                case InternalPlugins.Variables.Enums.ChangeVariableMethod.set:
+                case ChangeVariableMethod.set:
                     var value = VariableManager.RenderTemplate(changeVariableActionConfigModel.Value);
                     VariableManager.SetValue(variable.Name, value, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
                     break;
-                case InternalPlugins.Variables.Enums.ChangeVariableMethod.toggle:
+                case ChangeVariableMethod.toggle:
                     VariableManager.SetValue(variable.Name, !bool.Parse(variable.Value.Replace("on", "true")), (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
                     break;
 
@@ -161,7 +163,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
 
         public override void Trigger(string clientId, ActionButton.ActionButton actionButton)
         {
-            var configurationModel = ReadVariableFromFileActionConfigModel.Deserialize(this.Configuration);
+            var configurationModel = ReadVariableFromFileActionConfigModel.Deserialize(Configuration);
             if (configurationModel == null) return;
             var filePath = configurationModel.FilePath;
             var variable = VariableManager.ListVariables.Where(x => x.Name == configurationModel.Variable).FirstOrDefault();
@@ -175,10 +177,10 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
             }
             try
             {
-                Utils.Retry.Do(new Action(() =>
+                Retry.Do(() =>
                 {
                     File.WriteAllText(filePath, variableValue);
-                })); 
+                }); 
             } catch (Exception ex)
             {
                 MacroDeckLogger.Error(typeof(VariablesPlugin), $"Failed to save variable value to file: {ex.Message}");
@@ -201,31 +203,31 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
 
         public override void Trigger(string clientId, ActionButton.ActionButton actionButton)
         {
-            var configurationModel = SaveVariableToFileActionConfigModel.Deserialize(this.Configuration);
+            var configurationModel = SaveVariableToFileActionConfigModel.Deserialize(Configuration);
             if (configurationModel == null) return;
             var filePath = configurationModel.FilePath;
             var variable = VariableManager.ListVariables.Where(x => x.Name == configurationModel.Variable).FirstOrDefault();
             try
             {
-                Utils.Retry.Do(new Action(() =>
+                Retry.Do(() =>
                 {
                     var value = File.ReadAllText(filePath).Trim();
                     switch (variable.Type)
                     {
                         case nameof(VariableType.Bool):
-                            if (bool.TryParse(value, out bool valueBool))
+                            if (bool.TryParse(value, out var valueBool))
                             {
                                 VariableManager.SetValue(variable.Name, valueBool, VariableType.Bool);
                             }
                             break;
                         case nameof(VariableType.Float):
-                            if (float.TryParse(value, out float valueFloat))
+                            if (float.TryParse(value, out var valueFloat))
                             {
                                 VariableManager.SetValue(variable.Name, valueFloat, VariableType.Float);
                             }
                             break;
                         case nameof(VariableType.Integer):
-                            if (Int32.TryParse(value, out int valueInt))
+                            if (int.TryParse(value, out var valueInt))
                             {
                                 VariableManager.SetValue(variable.Name, valueInt, VariableType.Integer);
                             }
@@ -234,7 +236,7 @@ namespace SuchByte.MacroDeck.Variables.Plugin // Don't change because of backwar
                             VariableManager.SetValue(variable.Name, value, VariableType.String);
                             break;
                     }
-                }));
+                });
             }
             catch (Exception ex)
             {

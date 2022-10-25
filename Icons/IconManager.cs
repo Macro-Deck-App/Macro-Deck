@@ -1,9 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Model;
-using SuchByte.MacroDeck.Server;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -12,15 +7,20 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using SuchByte.MacroDeck.ExtensionStore;
+using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Model;
+using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Icons
 {
     public class IconManager
     {
-        public static List<IconPack> IconPacks = new List<IconPack>();
-        public static List<IconPack> IconPacksUpdateAvailable = new List<IconPack>();
+        public static List<IconPack> IconPacks = new();
+        public static List<IconPack> IconPacksUpdateAvailable = new();
 
         public static event EventHandler InstallationFinished;
 
@@ -60,7 +60,7 @@ namespace SuchByte.MacroDeck.Icons
             if (extensionManifest == null) return false;
 
 
-            IconPack iconPack = new IconPack()
+            var iconPack = new IconPack
             {
                 Name = extensionManifest.Name,
                 Author = extensionManifest.Author,
@@ -85,7 +85,7 @@ namespace SuchByte.MacroDeck.Icons
             {
                 try
                 {
-                    Icon icon = new Icon()
+                    var icon = new Icon
                     {
                         FilePath = imageFile,
                         IconId = Path.GetFileNameWithoutExtension(imageFile),
@@ -96,11 +96,10 @@ namespace SuchByte.MacroDeck.Icons
                 catch (Exception ex)
                 {
                     MacroDeckLogger.Warning(typeof(IconManager), $"Failed to load icon: {ex.Message}");
-                    continue;
                 }
             }
 
-            iconPack.IconPackIcon = Utils.IconPackPreview.GeneratePreviewImage(iconPack);
+            iconPack.IconPackIcon = IconPackPreview.GeneratePreviewImage(iconPack);
             return true;
         }
 
@@ -110,14 +109,12 @@ namespace SuchByte.MacroDeck.Icons
             IconPacksUpdateAvailable.Clear();
             Task.Run(() =>
             {
-                foreach (IconPack iconPack in IconPacks.FindAll(iP => iP.ExtensionStoreManaged && !iP.Hidden))
+                foreach (var iconPack in IconPacks.FindAll(iP => iP.ExtensionStoreManaged && !iP.Hidden))
                 {
                     SearchUpdate(iconPack);
                 }
-                if (OnUpdateCheckFinished != null)
-                {
-                    OnUpdateCheckFinished(null, EventArgs.Empty);
-                }
+
+                OnUpdateCheckFinished?.Invoke(null, EventArgs.Empty);
             });
         }
 
@@ -125,11 +122,11 @@ namespace SuchByte.MacroDeck.Icons
         {
             try
             {
-                using (WebClient wc = new WebClient())
+                using (var wc = new WebClient())
                 {
                     var jsonString = wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=check-update&package-id={iconPack.PackageId}&installed-version={iconPack.Version}&target-api={MacroDeck.PluginApiVersion}");
-                    JObject jsonObject = JObject.Parse(jsonString);
-                    bool update = (bool)jsonObject["update-available"];
+                    var jsonObject = JObject.Parse(jsonString);
+                    var update = (bool)jsonObject["update-available"];
                     if (update)
                     {
                         MacroDeckLogger.Info("Update available for " + iconPack.Name);
@@ -153,15 +150,14 @@ namespace SuchByte.MacroDeck.Icons
 
         public static Icon GetIcon(IconPack iconPack, string iconId)
         {
-            if (iconPack == null) return null;
-            return iconPack.Icons.Find(icon => icon.IconId == iconId);
+            return iconPack?.Icons.Find(icon => icon.IconId == iconId);
         }
 
         public static Icon GetIconByString(string s)
         {
-            IconPack iconPack = GetIconPackByName(s.Substring(0, s.IndexOf(".")));
+            var iconPack = GetIconPackByName(s.Substring(0, s.IndexOf(".")));
             if (iconPack == null) return null;
-            Icon icon = GetIcon(iconPack, s.Substring(s.IndexOf(".") + 1));
+            var icon = GetIcon(iconPack, s.Substring(s.IndexOf(".") + 1));
             return icon;
         }
 
@@ -190,7 +186,7 @@ namespace SuchByte.MacroDeck.Icons
 
                 image.Save(filePath, format);
 
-                Icon icon = new Icon()
+                var icon = new Icon
                 {
                     FilePath = filePath,
                     IconId = iconId,
@@ -209,17 +205,14 @@ namespace SuchByte.MacroDeck.Icons
        
         public static void ExportIconPack(IconPack iconPack, string destination)
         {
-            string iconPackDir = Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId);
+            var iconPackDir = Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId);
             try
             {
-                if (iconPack.IconPackIcon != null)
-                {
-                    iconPack.IconPackIcon.Save(Path.Combine(iconPackDir, "ExtensionIcon.png"));
-                }
+                iconPack.IconPackIcon?.Save(Path.Combine(iconPackDir, "ExtensionIcon.png"));
                 using (var archive = ZipFile.Open(Path.Combine(MacroDeck.BackupsDirectoryPath, destination, $"{iconPack.Name}.macroDeckIconPack"), ZipArchiveMode.Create))
                 {
                     if (!Directory.Exists(iconPackDir)) return;
-                    foreach (FileInfo iconPackFile in new DirectoryInfo(iconPackDir).GetFiles())
+                    foreach (var iconPackFile in new DirectoryInfo(iconPackDir).GetFiles())
                     {
                         archive.CreateEntryFromFile(Path.Combine(iconPackDir, iconPackFile.Name), iconPackFile.Name);
                     }
@@ -263,9 +256,9 @@ namespace SuchByte.MacroDeck.Icons
 
         public static void SaveIconPack(IconPack iconPack)
         {
-            ExtensionManifestModel extensionManifestModel = new ExtensionManifestModel()
+            var extensionManifestModel = new ExtensionManifestModel
             {
-                Type = ExtensionStore.ExtensionType.IconPack,
+                Type = ExtensionType.IconPack,
                 Name = iconPack.Name,
                 Author = iconPack.Author,
                 PackageId = iconPack.PackageId,
@@ -273,14 +266,14 @@ namespace SuchByte.MacroDeck.Icons
                 Version = iconPack.Version,
             };
 
-            string iconPackPath = Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId);
+            var iconPackPath = Path.Combine(MacroDeck.IconPackDirectoryPath, iconPack.PackageId);
 
             if (!Directory.Exists(iconPackPath))
             {
                 Directory.CreateDirectory(iconPackPath);
             }
 
-            JsonSerializer serializer = new JsonSerializer
+            var serializer = new JsonSerializer
             {
                 NullValueHandling = NullValueHandling.Ignore,
                 Formatting = Formatting.Indented,
@@ -288,7 +281,7 @@ namespace SuchByte.MacroDeck.Icons
 
             try
             {
-                using StreamWriter sw = new StreamWriter(Path.Combine(iconPackPath, "ExtensionManifest.json"));
+                using var sw = new StreamWriter(Path.Combine(iconPackPath, "ExtensionManifest.json"));
                 using JsonWriter writer = new JsonTextWriter(sw);
                 serializer.Serialize(writer, extensionManifestModel);
 
@@ -302,7 +295,7 @@ namespace SuchByte.MacroDeck.Icons
 
         public static void CreateIconPack(string iconPackName, string author, string version)
         {
-            var iconPack = new IconPack()
+            var iconPack = new IconPack
             {
                 Name = iconPackName,
                 Author = author,
@@ -320,18 +313,18 @@ namespace SuchByte.MacroDeck.Icons
         {
             try
             {
-                ExtensionManifestModel extensionManifestModel = ExtensionManifestModel.FromZipFilePath(location);
+                var extensionManifestModel = ExtensionManifestModel.FromZipFilePath(location);
                 if (extensionManifestModel == null)
                 {
                     MacroDeckLogger.Error(typeof(IconManager), $"{location} does not contain a manifest file!");
                     return null;
                 }
-                if (extensionManifestModel.Type != ExtensionStore.ExtensionType.IconPack)
+                if (extensionManifestModel.Type != ExtensionType.IconPack)
                 {
                     MacroDeckLogger.Error(typeof(IconManager), $"{extensionManifestModel.PackageId} is not a icon pack!");
                     return null;
                 }
-                string destinationPath = Path.Combine(MacroDeck.IconPackDirectoryPath, extensionManifestModel.PackageId);
+                var destinationPath = Path.Combine(MacroDeck.IconPackDirectoryPath, extensionManifestModel.PackageId);
                 if (!Directory.Exists(destinationPath))
                 {
                     Directory.CreateDirectory(destinationPath);
@@ -339,7 +332,7 @@ namespace SuchByte.MacroDeck.Icons
                     {
                         try
                         {
-                            using (WebClient wc = new WebClient())
+                            using (var wc = new WebClient())
                             {
                                 wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=count-download&package-id={extensionManifestModel.PackageId}");
                             }
@@ -366,16 +359,12 @@ namespace SuchByte.MacroDeck.Icons
                         IconPacksUpdateAvailable.Remove(IconPacksUpdateAvailable.Find(x => x.PackageId.Equals(extensionManifestModel.PackageId)));
                     }
                     MacroDeckLogger.Info(typeof(IconManager), $"Successfully installed {extensionManifestModel.PackageId}");
-                    IconPack iconPack = GetIconPackByName(extensionManifestModel.Name);
-                    if (InstallationFinished != null)
-                    {
-                        InstallationFinished(iconPack, EventArgs.Empty);
-                    }
+                    var iconPack = GetIconPackByName(extensionManifestModel.Name);
+                    InstallationFinished?.Invoke(iconPack, EventArgs.Empty);
                     return iconPack;
-                } else
-                {
-                    MacroDeckLogger.Error(typeof(IconManager), $"{extensionManifestModel.PackageId} is maybe corruped");
                 }
+
+                MacroDeckLogger.Error(typeof(IconManager), $"{extensionManifestModel.PackageId} is maybe corruped");
                 return null;
             } catch (Exception ex)
             {

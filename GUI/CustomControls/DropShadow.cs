@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using System.Text;
 
 /// <summary>
 /// DropShadow class to make a awesome window without control box
@@ -93,7 +91,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             if (Environment.OSVersion.Version.Major >= 6)
             {
-                int enabled = 0;
+                var enabled = 0;
                 DwmIsCompositionEnabled(ref enabled);
 
                 return (enabled == 1) ? true : false;
@@ -111,7 +109,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
             DwmSetWindowAttribute(form.Handle, 2, ref v, 4);
 
-            MARGINS margins = new MARGINS()
+            var margins = new MARGINS
             {
                 bottomHeight = 1,
                 leftWidth = 0,
@@ -128,7 +126,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
             DwmSetWindowAttribute(form.Handle, 2, ref v, 4);
 
-            MARGINS margins = new MARGINS()
+            var margins = new MARGINS
             {
                 bottomHeight = 1,
                 leftWidth = 0,

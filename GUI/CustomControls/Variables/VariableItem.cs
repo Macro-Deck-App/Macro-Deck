@@ -1,39 +1,34 @@
-﻿using SuchByte.MacroDeck.GUI.Dialogs;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
+﻿using System;
+using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.Variables;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
     public partial class VariableItem : RoundedUserControl
     {
 
-        public Variables.Variable Variable;
+        public Variable Variable;
 
-        public VariableItem(Variables.Variable variable)
+        public VariableItem(Variable variable)
         {
-            this.Variable = variable;
+            Variable = variable;
             InitializeComponent();
         }
 
         public new void Update()
         {
-            this.Invoke(new Action(() =>
+            Invoke(() =>
             {
-                this.lblName.Text = this.Variable.Name;
-                this.lblType.Text = this.Variable.Type.ToString();
-                this.lblValue.Text = this.Variable.Value;
-                this.lblCreator.Text = this.Variable.Creator;
-            }));
+                lblName.Text = Variable.Name;
+                lblType.Text = Variable.Type;
+                lblValue.Text = Variable.Value;
+                lblCreator.Text = Variable.Creator;
+            });
         }
 
         private void BtnEdit_Click(object sender, EventArgs e)
         {
-            using (var variableDialog = new VariableDialog(this.Variable))
+            using (var variableDialog = new VariableDialog(Variable))
             {
                 variableDialog.ShowDialog();
             }
@@ -41,7 +36,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void VariableItem_Load(object sender, EventArgs e)
         {
-            this.Update();
+            Update();
         }
     }
 }

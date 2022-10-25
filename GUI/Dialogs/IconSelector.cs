@@ -1,60 +1,55 @@
-﻿using ImageMagick;
-using Newtonsoft.Json;
-using SQLite;
-using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.GUI.Dialogs;
-using SuchByte.MacroDeck.Icons;
-using SuchByte.MacroDeck.JSON;
-using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Plugins;
-using SuchByte.MacroDeck.Profiles;
-using SuchByte.MacroDeck.Server;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Forms;
+using ImageMagick;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Profiles;
+using SuchByte.MacroDeck.Properties;
+using Icon = SuchByte.MacroDeck.Icons.Icon;
+using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.GUI
 {
     public partial class IconSelector : DialogForm
     {
-        public Icons.Icon SelectedIcon;
-        public Icons.IconPack SelectedIconPack;
+        public Icon SelectedIcon;
+        public IconPack SelectedIconPack;
 
         private IconPack _selectIconPack;
 
         public IconSelector(IconPack iconPack = null)
         {
-            this._selectIconPack = iconPack;
+            _selectIconPack = iconPack;
             InitializeComponent();
-            this.btnImportIconPack.Text = Language.LanguageManager.Strings.ImportIconPack;
-            this.btnExportIconPack.Text = Language.LanguageManager.Strings.ExportIconPack;
-            this.btnCreateIcon.Text = Language.LanguageManager.Strings.CreateIcon;
-            this.btnImport.Text = Language.LanguageManager.Strings.ImportIcon;
-            this.btnDeleteIcon.Text = Language.LanguageManager.Strings.DeleteIcon;
-            this.lblManaged.Text = Language.LanguageManager.Strings.IconSelectorManagedInfo;
-            this.lblSizeLabel.Text = Language.LanguageManager.Strings.Size;
-            this.lblTypeLabel.Text = Language.LanguageManager.Strings.Type;
-            this.btnPreview.Radius = ProfileManager.CurrentProfile.ButtonRadius;
-            this.btnGenerateStatic.Text = Language.LanguageManager.Strings.GenerateStatic;
+            btnImportIconPack.Text = LanguageManager.Strings.ImportIconPack;
+            btnExportIconPack.Text = LanguageManager.Strings.ExportIconPack;
+            btnCreateIcon.Text = LanguageManager.Strings.CreateIcon;
+            btnImport.Text = LanguageManager.Strings.ImportIcon;
+            btnDeleteIcon.Text = LanguageManager.Strings.DeleteIcon;
+            lblManaged.Text = LanguageManager.Strings.IconSelectorManagedInfo;
+            lblSizeLabel.Text = LanguageManager.Strings.Size;
+            lblTypeLabel.Text = LanguageManager.Strings.Type;
+            btnPreview.Radius = ProfileManager.CurrentProfile.ButtonRadius;
+            btnGenerateStatic.Text = LanguageManager.Strings.GenerateStatic;
         }
 
         private void LoadIcons(IconPack iconPack, bool scrollDown = false)
         {
-            this.iconList.Controls.Clear();
-            this.SuspendLayout();
-            foreach (Icons.Icon icon in iconPack.Icons)
+            iconList.Controls.Clear();
+            SuspendLayout();
+            foreach (var icon in iconPack.Icons)
             {
-                RoundedButton button = new RoundedButton
+                var button = new RoundedButton
                 {
                     Width = 100,
                     Height = 100,
@@ -68,14 +63,14 @@ namespace SuchByte.MacroDeck.GUI
                     button.ShowGIFIndicator = true;
                 }
                 button.Tag = icon;
-                button.Click += new EventHandler(this.IconButton_Click);
+                button.Click += IconButton_Click;
                 button.Cursor = Cursors.Hand;
-                this.iconList.Controls.Add(button);
+                iconList.Controls.Add(button);
             }
-            this.ResumeLayout();
+            ResumeLayout();
             if (scrollDown)
             {
-                this.iconList.ScrollControlIntoView(this.iconList.Controls[this.iconList.Controls.Count - 1]);
+                iconList.ScrollControlIntoView(iconList.Controls[iconList.Controls.Count - 1]);
             }
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -84,23 +79,23 @@ namespace SuchByte.MacroDeck.GUI
 
         private void IconButton_Click(object sender, EventArgs e)
         {
-            RoundedButton button = (RoundedButton)sender;
-            Icons.Icon icon = button.Tag as Icons.Icon;
-            this.SelectIcon(icon);
+            var button = (RoundedButton)sender;
+            var icon = button.Tag as Icon;
+            SelectIcon(icon);
         }
 
-        private void SelectIcon(Icons.Icon icon)
+        private void SelectIcon(Icon icon)
         {
-            Image previewImage = icon.IconImage;
+            var previewImage = icon.IconImage;
 
-            this.btnGenerateStatic.Visible = icon.IconImage.RawFormat.ToString().ToLower() == "gif";
+            btnGenerateStatic.Visible = icon.IconImage.RawFormat.ToString().ToLower() == "gif";
 
             btnPreview.BackgroundImage = previewImage;
             lblSize.Text = string.Format("{0:n0}", ASCIIEncoding.Unicode.GetByteCount(icon.IconBase64) / 1000) + " kByte";
             lblType.Text = previewImage.RawFormat.ToString().ToUpper();
 
-            this.SelectedIconPack = IconManager.GetIconPackByName(this.iconPacksBox.Text);
-            this.SelectedIcon = icon;
+            SelectedIconPack = IconManager.GetIconPackByName(iconPacksBox.Text);
+            SelectedIcon = icon;
         }
 
         private void BtnImport_Click(object sender, EventArgs e)
@@ -117,14 +112,14 @@ namespace SuchByte.MacroDeck.GUI
             {
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    IconPack iconPack = IconManager.GetIconPackByName(this.iconPacksBox.Text);
-                    bool gif = (Path.GetExtension(openFileDialog.FileNames.FirstOrDefault()).ToLower() == "gif");
+                    var iconPack = IconManager.GetIconPackByName(iconPacksBox.Text);
+                    var gif = (Path.GetExtension(openFileDialog.FileNames.FirstOrDefault()).ToLower() == "gif");
                     using (var iconImportQuality = new IconImportQuality(gif))
                     {
                         if (iconImportQuality.ShowDialog() == DialogResult.OK)
                         {
                             Task.Run(() => SpinnerDialog.SetVisisble(true, this));
-                            List<Image> icons = new List<Image>();
+                            var icons = new List<Image>();
 
                             Task.Run(() =>
                             {
@@ -182,23 +177,23 @@ namespace SuchByte.MacroDeck.GUI
                                     return;
                                 }
                                 MacroDeckLogger.Info(GetType(), string.Format("Adding {0} icons to {1}", icons.Count, iconPack.Name));
-                                List<Image> gifIcons = new List<Image>();
+                                var gifIcons = new List<Image>();
                                 gifIcons.AddRange(icons.FindAll(x => x.RawFormat.ToString().ToLower() == "gif").ToArray());
-                                bool convertGifToStatic = false;
+                                var convertGifToStatic = false;
                                 if (gifIcons.Count > 0)
                                 {
-                                    this.Invoke(new Action(() =>
+                                    Invoke(() =>
                                     {
-                                        using (var msgBox = new CustomControls.MessageBox())
+                                        using (var msgBox = new MessageBox())
                                         {
-                                            convertGifToStatic = msgBox.ShowDialog(Language.LanguageManager.Strings.AnimatedGifImported, Language.LanguageManager.Strings.GenerateStaticIcon, MessageBoxButtons.YesNo) == DialogResult.Yes;
+                                            convertGifToStatic = msgBox.ShowDialog(LanguageManager.Strings.AnimatedGifImported, LanguageManager.Strings.GenerateStaticIcon, MessageBoxButtons.YesNo) == DialogResult.Yes;
                                         }
-                                    }));
+                                    });
                                     MacroDeckLogger.Info(GetType(), "Convert gif to static? " + convertGifToStatic);
                                 }
 
 
-                                foreach (Image icon in icons)
+                                foreach (var icon in icons)
                                 {
                                     IconManager.AddIconImage(iconPack, icon);
                                     if (convertGifToStatic)
@@ -206,7 +201,7 @@ namespace SuchByte.MacroDeck.GUI
                                         using (var ms = new MemoryStream())
                                         {
                                             icon.Save(ms, ImageFormat.Png);
-                                            Image iconStatic = Image.FromStream(ms);
+                                            var iconStatic = Image.FromStream(ms);
                                             IconManager.AddIconImage(iconPack, iconStatic);
                                         }
                                     }
@@ -216,7 +211,7 @@ namespace SuchByte.MacroDeck.GUI
                                     GC.Collect();
                                 }
 
-                                this.Invoke(new Action(() => this.LoadIcons(iconPack, true)));
+                                Invoke(() => LoadIcons(iconPack, true));
                                 MacroDeckLogger.Info(GetType(), "Icons successfully imported");
                                 SpinnerDialog.SetVisisble(false, this);
                             });
@@ -233,7 +228,7 @@ namespace SuchByte.MacroDeck.GUI
             {
                 if (giphySelector.ShowDialog() == DialogResult.OK)
                 {
-                    IconPack iconPack = IconManager.GetIconPackByName(this.iconPacksBox.Text);
+                    var iconPack = IconManager.GetIconPackByName(iconPacksBox.Text);
                     using (var iconImportQuality = new IconImportQuality(true))
                     {
                         if (iconImportQuality.ShowDialog() == DialogResult.OK)
@@ -273,16 +268,16 @@ namespace SuchByte.MacroDeck.GUI
                                 }
                             }
                             IconManager.AddIconImage(iconPack, icon);
-                            using (var msgBox = new CustomControls.MessageBox())
+                            using (var msgBox = new MessageBox())
                             {
-                                if (msgBox.ShowDialog(Language.LanguageManager.Strings.AnimatedGifImported, Language.LanguageManager.Strings.GenerateStaticIcon, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                                if (msgBox.ShowDialog(LanguageManager.Strings.AnimatedGifImported, LanguageManager.Strings.GenerateStaticIcon, MessageBoxButtons.YesNo) == DialogResult.Yes)
                                 {
                                     if (icon.RawFormat.ToString().ToLower() == "gif")
                                     {
                                         using (var ms = new MemoryStream())
                                         {
                                             icon.Save(ms, ImageFormat.Png);
-                                            Image iconStatic = Image.FromStream(ms);
+                                            var iconStatic = Image.FromStream(ms);
                                             IconManager.AddIconImage(iconPack, iconStatic);
                                         }
                                     }
@@ -292,7 +287,7 @@ namespace SuchByte.MacroDeck.GUI
                             giphySelector.DownloadedGifStream.Close();
                             giphySelector.DownloadedGifStream.Dispose();
 
-                            this.Invoke(new Action(() => this.LoadIcons(iconPack, true)));
+                            Invoke(() => LoadIcons(iconPack, true));
                             MacroDeckLogger.Info("GIPHY icon successfully imported");
                         }
                     }
@@ -302,83 +297,83 @@ namespace SuchByte.MacroDeck.GUI
 
         private void BtnOk_Click(object sender, EventArgs e)
         {
-            if (this.SelectedIcon != null)
+            if (SelectedIcon != null)
             {
-                this.DialogResult = DialogResult.OK;
+                DialogResult = DialogResult.OK;
             }
-            this.Close();
+            Close();
         }
 
         private void IconSelector_Load(object sender, EventArgs e)
         {
             Task.Run(() =>
             {
-                this.LoadIconPacks();
+                LoadIconPacks();
             });
         }
 
         private void LoadIconPacks()
         {
-            this.Invoke(new Action(() => this.iconPacksBox.Items.Clear()));
-            foreach (IconPack iconPack in IconManager.IconPacks)
+            Invoke(() => iconPacksBox.Items.Clear());
+            foreach (var iconPack in IconManager.IconPacks)
             {
-                this.Invoke(new Action(() => this.iconPacksBox.Items.Add(iconPack.Name)));
+                Invoke(new Action(() => iconPacksBox.Items.Add(iconPack.Name)));
             }
-            if (Properties.Settings.Default.IconSelectorLastIconPack != null)
+            if (Settings.Default.IconSelectorLastIconPack != null)
             {
-                this.Invoke(new Action(() =>
+                Invoke(() =>
                 {
-                    if (this._selectIconPack != null)
+                    if (_selectIconPack != null)
                     {
-                        if (this.iconPacksBox.Items.Contains(this._selectIconPack.Name))
+                        if (iconPacksBox.Items.Contains(_selectIconPack.Name))
                         {
-                            this.iconPacksBox.SelectedIndex = this.iconPacksBox.FindStringExact(this._selectIconPack.Name);
+                            iconPacksBox.SelectedIndex = iconPacksBox.FindStringExact(_selectIconPack.Name);
                             return;
                         }
                     }
-                    if (this.iconPacksBox.Items.Contains(Properties.Settings.Default.IconSelectorLastIconPack))
+                    if (iconPacksBox.Items.Contains(Settings.Default.IconSelectorLastIconPack))
                     {
-                        this.iconPacksBox.SelectedIndex = this.iconPacksBox.FindStringExact(Properties.Settings.Default.IconSelectorLastIconPack);
+                        iconPacksBox.SelectedIndex = iconPacksBox.FindStringExact(Settings.Default.IconSelectorLastIconPack);
                     }
                     else
                     {
-                        this.iconPacksBox.SelectedIndex = 0;
+                        iconPacksBox.SelectedIndex = 0;
                     }
-                }));
+                });
             }
         }
 
         private void IconPacksBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            IconPack iconPack = IconManager.GetIconPackByName(this.iconPacksBox.Text);
-            Properties.Settings.Default.IconSelectorLastIconPack = iconPack.Name;
-            Properties.Settings.Default.Save();
-            this.SelectedIconPack = iconPack;
-            this.btnImport.Visible = !iconPack.ExtensionStoreManaged;
-            this.btnCreateIcon.Visible = !iconPack.ExtensionStoreManaged;
+            var iconPack = IconManager.GetIconPackByName(iconPacksBox.Text);
+            Settings.Default.IconSelectorLastIconPack = iconPack.Name;
+            Settings.Default.Save();
+            SelectedIconPack = iconPack;
+            btnImport.Visible = !iconPack.ExtensionStoreManaged;
+            btnCreateIcon.Visible = !iconPack.ExtensionStoreManaged;
             //this.btnGiphy.Visible = !iconPack.ExtensionStoreManaged;
-            this.btnDeleteIcon.Visible = !iconPack.ExtensionStoreManaged;
-            this.btnExportIconPack.Visible = !iconPack.ExtensionStoreManaged;
-            this.lblManaged.Visible = iconPack.ExtensionStoreManaged;
+            btnDeleteIcon.Visible = !iconPack.ExtensionStoreManaged;
+            btnExportIconPack.Visible = !iconPack.ExtensionStoreManaged;
+            lblManaged.Visible = iconPack.ExtensionStoreManaged;
 
-            this.LoadIcons(iconPack);
+            LoadIcons(iconPack);
         }
 
         private void BtnDeleteIconPack_Click(object sender, EventArgs e)
         {
-            using (var messageBox = new CustomControls.MessageBox())
+            using (var messageBox = new MessageBox())
             {
-                IconPack iconPack = IconManager.GetIconPackByName(this.iconPacksBox.Text);
-                if (messageBox.ShowDialog(Language.LanguageManager.Strings.AreYouSure, String.Format(Language.LanguageManager.Strings.SelectedIconPackWillBeDeleted, iconPack.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                var iconPack = IconManager.GetIconPackByName(iconPacksBox.Text);
+                if (messageBox.ShowDialog(LanguageManager.Strings.AreYouSure, string.Format(LanguageManager.Strings.SelectedIconPackWillBeDeleted, iconPack.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     IconManager.DeleteIconPack(iconPack);
-                    this.btnPreview.BackgroundImage = null;
-                    this.SelectedIcon = null;
-                    this.lblSize.Text = "";
-                    this.lblType.Text = "";
+                    btnPreview.BackgroundImage = null;
+                    SelectedIcon = null;
+                    lblSize.Text = "";
+                    lblType.Text = "";
                     Task.Run(() =>
                     {
-                        this.LoadIconPacks();
+                        LoadIconPacks();
                     });
                 }
             }
@@ -393,9 +388,9 @@ namespace SuchByte.MacroDeck.GUI
                     
                     Task.Run(() =>
                     {
-                        this.LoadIconPacks();
+                        LoadIconPacks();
                     });
-                    this.iconPacksBox.SelectedItem = createIconPackDialog.IconPackName;
+                    iconPacksBox.SelectedItem = createIconPackDialog.IconPackName;
                 }
             }
         }
@@ -416,8 +411,8 @@ namespace SuchByte.MacroDeck.GUI
                     var importedIconPack = IconManager.InstallIconPackZip(openFileDialog.FileName);
                     if (importedIconPack != null)
                     {
-                        this._selectIconPack = importedIconPack;
-                        this.LoadIconPacks();
+                        _selectIconPack = importedIconPack;
+                        LoadIconPacks();
                     }
                 }
             }
@@ -426,21 +421,21 @@ namespace SuchByte.MacroDeck.GUI
 
         private void BtnExportIconPack_Click(object sender, EventArgs e)
         {
-            using (var exportIconPackDialog = new ExportIconPackDialog(this.SelectedIconPack))
+            using (var exportIconPackDialog = new ExportIconPackDialog(SelectedIconPack))
             {
                 if (exportIconPackDialog.ShowDialog() == DialogResult.OK)
                 {
-                    using (FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog())
+                    using (var folderBrowserDialog = new FolderBrowserDialog())
                     {
                         if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
                         {
                             Cursor.Current = Cursors.WaitCursor;
-                            IconManager.SaveIconPack(this.SelectedIconPack);
-                            IconManager.ExportIconPack(this.SelectedIconPack, folderBrowserDialog.SelectedPath);
+                            IconManager.SaveIconPack(SelectedIconPack);
+                            IconManager.ExportIconPack(SelectedIconPack, folderBrowserDialog.SelectedPath);
                             Cursor.Current = Cursors.Default;
-                            using (var msgBox = new CustomControls.MessageBox())
+                            using (var msgBox = new MessageBox())
                             {
-                                msgBox.ShowDialog(Language.LanguageManager.Strings.ExportIconPack, String.Format(Language.LanguageManager.Strings.XSuccessfullyExportedToX, this.SelectedIconPack.Name, folderBrowserDialog.SelectedPath), MessageBoxButtons.OK);
+                                msgBox.ShowDialog(LanguageManager.Strings.ExportIconPack, string.Format(LanguageManager.Strings.XSuccessfullyExportedToX, SelectedIconPack.Name, folderBrowserDialog.SelectedPath), MessageBoxButtons.OK);
                             }
                         }
                     }
@@ -450,25 +445,25 @@ namespace SuchByte.MacroDeck.GUI
 
         private void BtnDeleteIcon_Click(object sender, EventArgs e)
         {
-            if (this.SelectedIcon == null || this.SelectedIconPack == null) return;
-            using (var messageBox = new CustomControls.MessageBox())
+            if (SelectedIcon == null || SelectedIconPack == null) return;
+            using (var messageBox = new MessageBox())
             {
-                if (messageBox.ShowDialog(Language.LanguageManager.Strings.AreYouSure, String.Format(Language.LanguageManager.Strings.SelectedIconWillBeDeleted, this.SelectedIconPack.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                if (messageBox.ShowDialog(LanguageManager.Strings.AreYouSure, string.Format(LanguageManager.Strings.SelectedIconWillBeDeleted, SelectedIconPack.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    IconManager.DeleteIcon(this.SelectedIconPack, this.SelectedIcon);
-                    this.btnPreview.BackgroundImage = null;
-                    this.btnPreview.Image = null;
-                    this.SelectedIcon = null;
-                    this.lblSize.Text = "";
-                    this.lblType.Text = "";
-                    this.LoadIcons(this.SelectedIconPack);
+                    IconManager.DeleteIcon(SelectedIconPack, SelectedIcon);
+                    btnPreview.BackgroundImage = null;
+                    btnPreview.Image = null;
+                    SelectedIcon = null;
+                    lblSize.Text = "";
+                    lblType.Text = "";
+                    LoadIcons(SelectedIconPack);
                 }
             }
         }
 
         private void BtnCreateIcon_Click(object sender, EventArgs e)
         {
-            using (var iconCreator = new Dialogs.IconCreator())
+            using (var iconCreator = new IconCreator())
             {
                 if (iconCreator.ShowDialog() == DialogResult.OK)
                 {
@@ -498,7 +493,7 @@ namespace SuchByte.MacroDeck.GUI
                                     try
                                     {
                                         collection.Write(new FileInfo(Path.GetFullPath(Path.Combine(MacroDeck.TempDirectoryPath, "iconcreator.resized"))));
-                                        byte[] imageBytes = File.ReadAllBytes(Path.Combine(MacroDeck.TempDirectoryPath, "iconcreator.resized"));
+                                        var imageBytes = File.ReadAllBytes(Path.Combine(MacroDeck.TempDirectoryPath, "iconcreator.resized"));
                                         using (var ms = new MemoryStream(imageBytes))
                                         {
                                             icon = Image.FromStream(ms);
@@ -507,9 +502,9 @@ namespace SuchByte.MacroDeck.GUI
                                     Cursor.Current = Cursors.Default;
                                 }
                             }
-                            IconPack iconPack = IconManager.GetIconPackByName(this.iconPacksBox.Text);
+                            var iconPack = IconManager.GetIconPackByName(iconPacksBox.Text);
                             IconManager.AddIconImage(iconPack, icon);
-                            this.LoadIcons(iconPack, true);
+                            LoadIcons(iconPack, true);
                         }
                     }
                 }
@@ -525,18 +520,18 @@ namespace SuchByte.MacroDeck.GUI
 
         private void BtnGenerateStatic_Click(object sender, EventArgs e)
         {
-            IconPack iconPack = IconManager.GetIconPackByName(this.iconPacksBox.Text);
-            Image icon = this.SelectedIcon.IconImage;
-            MemoryStream ms = new MemoryStream();
+            var iconPack = IconManager.GetIconPackByName(iconPacksBox.Text);
+            var icon = SelectedIcon.IconImage;
+            var ms = new MemoryStream();
             icon.Save(ms, ImageFormat.Png);
-            byte[] bmpBytes = ms.GetBuffer();
+            var bmpBytes = ms.GetBuffer();
             ms = new MemoryStream(bmpBytes);
-            Image iconStatic = Image.FromStream(ms);
+            var iconStatic = Image.FromStream(ms);
             ms.Close();
             ms.Dispose();
-            Icons.Icon addedIcon = IconManager.AddIconImage(iconPack, iconStatic);
-            this.SelectIcon(addedIcon);
-            this.LoadIcons(iconPack, true);
+            var addedIcon = IconManager.AddIconImage(iconPack, iconStatic);
+            SelectIcon(addedIcon);
+            LoadIcons(iconPack, true);
 
         }
     }

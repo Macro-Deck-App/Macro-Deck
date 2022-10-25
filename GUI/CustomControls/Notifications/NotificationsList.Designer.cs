@@ -1,4 +1,8 @@
 ﻿
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
     partial class NotificationsList
@@ -6,7 +10,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// <summary> 
         /// Erforderliche Designervariable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary> 
         /// Verwendete Ressourcen bereinigen.
@@ -34,37 +38,37 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// </summary>
         private void InitializeComponent()
         {
-            this.notificationList = new System.Windows.Forms.FlowLayoutPanel();
+            this.notificationList = new FlowLayoutPanel();
             this.SuspendLayout();
             // 
             // notificationList
             // 
             this.notificationList.AutoScroll = true;
             this.notificationList.AutoSize = true;
-            this.notificationList.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.notificationList.Location = new System.Drawing.Point(3, 3);
-            this.notificationList.Margin = new System.Windows.Forms.Padding(0);
-            this.notificationList.MaximumSize = new System.Drawing.Size(544, 444);
-            this.notificationList.MinimumSize = new System.Drawing.Size(544, 126);
+            this.notificationList.FlowDirection = FlowDirection.TopDown;
+            this.notificationList.Location = new Point(3, 3);
+            this.notificationList.Margin = new Padding(0);
+            this.notificationList.MaximumSize = new Size(544, 444);
+            this.notificationList.MinimumSize = new Size(544, 126);
             this.notificationList.Name = "notificationList";
-            this.notificationList.Size = new System.Drawing.Size(544, 134);
+            this.notificationList.Size = new Size(544, 134);
             this.notificationList.TabIndex = 0;
             this.notificationList.WrapContents = false;
             // 
             // NotificationsList
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleDimensions = new SizeF(7F, 14F);
+            this.AutoScaleMode = AutoScaleMode.Font;
             this.AutoSize = true;
-            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            this.BackColor = Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
             this.Controls.Add(this.notificationList);
-            this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ForeColor = System.Drawing.Color.White;
-            this.MaximumSize = new System.Drawing.Size(550, 450);
-            this.MinimumSize = new System.Drawing.Size(550, 140);
+            this.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            this.ForeColor = Color.White;
+            this.MaximumSize = new Size(550, 450);
+            this.MinimumSize = new Size(550, 140);
             this.Name = "NotificationsList";
-            this.Size = new System.Drawing.Size(550, 142);
+            this.Size = new Size(550, 142);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -72,6 +76,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         #endregion
 
-        private System.Windows.Forms.FlowLayoutPanel notificationList;
+        private FlowLayoutPanel notificationList;
     }
 }

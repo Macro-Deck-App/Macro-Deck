@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Automation;
+using SuchByte.MacroDeck.Variables;
 
 namespace SuchByte.MacroDeck.WindowsFocus
 {
@@ -25,19 +22,19 @@ namespace SuchByte.MacroDeck.WindowsFocus
         public event EventHandler OnWindowFocusChanged;
         private string _focusedApplication = "";
 
-        static WinEventDelegate dele = null;
+        static WinEventDelegate dele;
 
         public WindowFocusDetection()
         {
-            dele = new WinEventDelegate(WinEventProc);
-            IntPtr m_hhook = SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, dele, 0, 0, WINEVENT_OUTOFCONTEXT);
+            dele = WinEventProc;
+            var m_hhook = SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, dele, 0, 0, WINEVENT_OUTOFCONTEXT);
 
         }
 
         private uint GetActiveWindowProcessId(IntPtr hwnd)
         {
             uint processId = 0;
-            IntPtr handle = IntPtr.Zero;
+            var handle = IntPtr.Zero;
 
             if (GetWindowThreadProcessId(hwnd, out processId) > 0)
             {
@@ -51,17 +48,14 @@ namespace SuchByte.MacroDeck.WindowsFocus
         {
             try
             {
-                uint processId = GetActiveWindowProcessId(hwnd);
-                using (Process process = Process.GetProcessById((int)processId))
+                var processId = GetActiveWindowProcessId(hwnd);
+                using (var process = Process.GetProcessById((int)processId))
                 {
-                    if (process.ProcessName != this._focusedApplication)
+                    if (process.ProcessName != _focusedApplication)
                     {
-                        this._focusedApplication = process.ProcessName;
-                        if (this.OnWindowFocusChanged != null)
-                        {
-                            this.OnWindowFocusChanged(this._focusedApplication, EventArgs.Empty);
-                        }
-                        Variables.VariableManager.SetValue("focused_application", process.ProcessName, Variables.VariableType.String, "Macro Deck");
+                        _focusedApplication = process.ProcessName;
+                        OnWindowFocusChanged?.Invoke(_focusedApplication, EventArgs.Empty);
+                        VariableManager.SetValue("focused_application", process.ProcessName, VariableType.String, "Macro Deck");
                     }
                 }
             }

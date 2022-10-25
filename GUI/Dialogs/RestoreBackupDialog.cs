@@ -1,13 +1,8 @@
-﻿using SuchByte.MacroDeck.Backup;
+﻿using System;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.Backup;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
@@ -17,16 +12,16 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         {
             InitializeComponent();
 
-            this.lblWhatToRestore.Text = LanguageManager.Strings.WhatDoYouWantToRestore;
-            this.checkRestoreConfig.Text = LanguageManager.Strings.Configuration;
-            this.checkRestoreProfiles.Text = LanguageManager.Strings.Profiles;
-            this.checkRestoreDevices.Text = LanguageManager.Strings.KnownDevices;
-            this.checkRestoreVariables.Text = LanguageManager.Strings.Variables;
-            this.checkRestorePlugins.Text = LanguageManager.Strings.InstalledPlugins;
-            this.checkRestorePluginConfigs.Text = LanguageManager.Strings.PluginConfigurations;
-            this.checkRestorePluginCredentials.Text = LanguageManager.Strings.PluginCredentials;
-            this.checkRestoreIconPacks.Text = LanguageManager.Strings.InstalledIconPacks;
-            this.btnRestore.Text = LanguageManager.Strings.Restore;
+            lblWhatToRestore.Text = LanguageManager.Strings.WhatDoYouWantToRestore;
+            checkRestoreConfig.Text = LanguageManager.Strings.Configuration;
+            checkRestoreProfiles.Text = LanguageManager.Strings.Profiles;
+            checkRestoreDevices.Text = LanguageManager.Strings.KnownDevices;
+            checkRestoreVariables.Text = LanguageManager.Strings.Variables;
+            checkRestorePlugins.Text = LanguageManager.Strings.InstalledPlugins;
+            checkRestorePluginConfigs.Text = LanguageManager.Strings.PluginConfigurations;
+            checkRestorePluginCredentials.Text = LanguageManager.Strings.PluginCredentials;
+            checkRestoreIconPacks.Text = LanguageManager.Strings.InstalledIconPacks;
+            btnRestore.Text = LanguageManager.Strings.Restore;
         }
 
 
@@ -34,16 +29,16 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         {
             get
             {
-                RestoreBackupInfo restoreBackupInfo = new RestoreBackupInfo()
+                var restoreBackupInfo = new RestoreBackupInfo
                 {
-                    RestoreConfig = this.checkRestoreConfig.Checked,
-                    RestoreProfiles = this.checkRestoreProfiles.Checked,
-                    RestoreDevices = this.checkRestoreDevices.Checked,
-                    RestoreVariables = this.checkRestoreVariables.Checked,
-                    RestorePlugins = this.checkRestorePlugins.Checked,
-                    RestorePluginConfigs = this.checkRestorePluginConfigs.Checked,
-                    RestorePluginCredentials = this.checkRestorePluginCredentials.Checked,
-                    RestoreIconPacks = this.checkRestoreIconPacks.Checked
+                    RestoreConfig = checkRestoreConfig.Checked,
+                    RestoreProfiles = checkRestoreProfiles.Checked,
+                    RestoreDevices = checkRestoreDevices.Checked,
+                    RestoreVariables = checkRestoreVariables.Checked,
+                    RestorePlugins = checkRestorePlugins.Checked,
+                    RestorePluginConfigs = checkRestorePluginConfigs.Checked,
+                    RestorePluginCredentials = checkRestorePluginCredentials.Checked,
+                    RestoreIconPacks = checkRestoreIconPacks.Checked
                 };
 
                 return restoreBackupInfo;
@@ -52,8 +47,8 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         private void BtnRestore_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
         }
     }
 }

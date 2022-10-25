@@ -1,9 +1,6 @@
 ﻿using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SuchByte.MacroDeck.ActionButton // Don't change because of backwards compatibility!
 {
@@ -14,7 +11,7 @@ namespace SuchByte.MacroDeck.ActionButton // Don't change because of backwards c
         public override bool CanConfigure => false;
         public override void Trigger(string clientId, ActionButton actionButton)
         {
-            if (actionButton.State == true) return;
+            if (actionButton.State) return;
             MacroDeckServer.SetState(actionButton, true);
         }
     }

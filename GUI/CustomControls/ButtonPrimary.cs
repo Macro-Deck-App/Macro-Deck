@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Text;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.Properties;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
@@ -13,27 +10,27 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
     {
         //public static Color border = Colors.AccentColor;
 
-        private bool _hover = false;
+        private bool _hover;
 
         private int borderRadius = 8;
-        private int progress = 0;
+        private int progress;
         private Color backColor;
         private Color progressColor = Colors.DefaultAccentColorDark;
         private Color hoverColor;
         private string text = "";
         private Image _icon;
-        private bool currentlyAnimating = false;
-        private Bitmap spinnerBitmap = Properties.Resources.Spinner;
+        private bool currentlyAnimating;
+        private Bitmap spinnerBitmap = Resources.Spinner;
         public bool UseWindowsAccentColor { get; set; } = true;
 
 
         public Image Icon
         {
-            get { return this._icon; }
+            get => _icon;
             set
             {
-                this._icon = value;
-                this.Invalidate();
+                _icon = value;
+                Invalidate();
             }
         }
 
@@ -47,14 +44,14 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             {
 
                 //Begin the animation only once.
-                ImageAnimator.Animate(spinnerBitmap, new EventHandler(this.OnFrameChanged));
+                ImageAnimator.Animate(spinnerBitmap, OnFrameChanged);
                 currentlyAnimating = true;
             }
         }
 
         private void OnFrameChanged(object o, EventArgs e)
         {
-            this.Invalidate();
+            Invalidate();
         }
 
         public new Color BackColor
@@ -64,7 +61,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 {
                     return backColor;
                 }
-                switch (this.UseWindowsAccentColor)
+                switch (UseWindowsAccentColor)
                 {
                     case true:
                         return Colors.WindowsAccentColor;
@@ -75,7 +72,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             set
             {
                 backColor = value;
-                this.Invalidate();
+                Invalidate();
             }
         }
 
@@ -87,7 +84,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 {
                     return hoverColor;
                 }
-                switch (this.UseWindowsAccentColor)
+                switch (UseWindowsAccentColor)
                 {
                     case true:
                         return Colors.WindowsAccentColorLight;
@@ -98,7 +95,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             set
             {
                 hoverColor = value;
-                this.Invalidate();
+                Invalidate();
             }
         }
 
@@ -110,7 +107,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 {
                     return progressColor;
                 }
-                switch (this.UseWindowsAccentColor)
+                switch (UseWindowsAccentColor)
                 {
                     case true:
                         return Colors.WindowsAccentColorDark;
@@ -121,37 +118,37 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             set
             {
                 progressColor = value;
-                this.Invalidate();
+                Invalidate();
             }
         }
 
 
         public int BorderRadius
         {
-            get { return borderRadius; }
+            get => borderRadius;
             set
             {
                 borderRadius = value;
-                this.Invalidate();
+                Invalidate();
             }
         }
 
         public int Progress
         {
-            get { return progress; }
+            get => progress;
             set
             {
                 progress = value;
-                this.Invalidate();
+                Invalidate();
             }
         }
         public override string Text
         {
-            get { return text; }
+            get => text;
             set
             {
                 text = value;
-                this.Invalidate();
+                Invalidate();
             }
         }
         
@@ -159,15 +156,15 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         public ButtonPrimary()
         {
-            this.FlatStyle = FlatStyle.Flat;
-            this.ForeColor = Color.White;
-            this.BackColor = Color.FromArgb(0, 123, 255);
-            this.FlatAppearance.BorderSize = 0;
-            this.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            this.Cursor = Cursors.Hand;
-            this.Size = new Size(150, 40);
-            this.Resize += new EventHandler(Button_Resize);
-            this.DoubleBuffered = true;
+            FlatStyle = FlatStyle.Flat;
+            ForeColor = Color.White;
+            BackColor = Color.FromArgb(0, 123, 255);
+            FlatAppearance.BorderSize = 0;
+            Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            Cursor = Cursors.Hand;
+            Size = new Size(150, 40);
+            Resize += Button_Resize;
+            DoubleBuffered = true;
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             SetStyle(ControlStyles.Selectable, false);
             MouseEnter += ButtonPrimary_MouseEnter;
@@ -177,32 +174,32 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void ButtonPrimary_MouseUp(object sender, MouseEventArgs e)
         {
-            this._hover = false;
-            this.Invalidate();
+            _hover = false;
+            Invalidate();
         }
 
         private void ButtonPrimary_MouseLeave(object sender, EventArgs e)
         {
-            this._hover = false;
-            this.Invalidate();
+            _hover = false;
+            Invalidate();
         }
 
         private void ButtonPrimary_MouseEnter(object sender, EventArgs e)
         {
-            this._hover = true;
-            this.Invalidate();
+            _hover = true;
+            Invalidate();
         }
 
         private void Button_Resize(object sender, EventArgs e)
         {
-            if (borderRadius > this.Height)
-                borderRadius = this.Height;
+            if (borderRadius > Height)
+                borderRadius = Height;
         }
 
         private GraphicsPath GetFigurePath(Rectangle rect, float radius)
         {
-            GraphicsPath path = new GraphicsPath();
-            float curveSize = radius * 2F;
+            var path = new GraphicsPath();
+            var curveSize = radius * 2F;
             path.StartFigure();
             path.AddArc(rect.X, rect.Y, curveSize, curveSize, 180, 90);
             path.AddArc(rect.Right - curveSize, rect.Y, curveSize, curveSize, 270, 90);
@@ -218,38 +215,38 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
             pe.Graphics.InterpolationMode = InterpolationMode.High;
 
-            Rectangle rectSurface = this.ClientRectangle;
-            Rectangle rectProgressSurface = new Rectangle
+            var rectSurface = ClientRectangle;
+            var rectProgressSurface = new Rectangle
             {
-                Height = this.Height,
-                Width = (int)((float)(Width / 100.0f) * progress)
+                Height = Height,
+                Width = (int)(Width / 100.0f * progress)
             };
-            int smoothSize = 2;
+            var smoothSize = 2;
             if (borderRadius > 2)
             {
-                using (GraphicsPath pathSurface = GetFigurePath(rectSurface, borderRadius))
-                using (SolidBrush progressBrush = new SolidBrush(this.ProgressColor))
-                using (Pen penSurface = new Pen(this.Parent.BackColor, smoothSize))
+                using (var pathSurface = GetFigurePath(rectSurface, borderRadius))
+                using (var progressBrush = new SolidBrush(ProgressColor))
+                using (var penSurface = new Pen(Parent.BackColor, smoothSize))
                 {
                     pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                    if (this._hover)
+                    if (_hover)
                     {
-                        pe.Graphics.FillRectangle(new SolidBrush(this.HoverColor), rectSurface);
+                        pe.Graphics.FillRectangle(new SolidBrush(HoverColor), rectSurface);
                     } else
                     {
-                        pe.Graphics.FillRectangle(new SolidBrush(this.BackColor), rectSurface);
+                        pe.Graphics.FillRectangle(new SolidBrush(BackColor), rectSurface);
                     }
                     pe.Graphics.FillRectangle(progressBrush, rectProgressSurface);
-                    if (this._icon != null)
+                    if (_icon != null)
                     {
-                        pe.Graphics.DrawImage(this._icon, rectSurface);
+                        pe.Graphics.DrawImage(_icon, rectSurface);
                     }
-                    this.Region = new Region(pathSurface);
+                    Region = new Region(pathSurface);
                     pe.Graphics.DrawPath(penSurface, pathSurface);
-                    TextFormatFlags flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak;
+                    var flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak;
                     if (progress > 0)
                     {
-                        TextRenderer.DrawText(pe.Graphics, String.Format("{0}%", progress), Font, ClientRectangle, ForeColor, flags);
+                        TextRenderer.DrawText(pe.Graphics, string.Format("{0}%", progress), Font, ClientRectangle, ForeColor, flags);
                     } else
                     {
                         TextRenderer.DrawText(pe.Graphics, text, Font, ClientRectangle, ForeColor, flags);
@@ -258,7 +255,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                     {
                         AnimateImage();
                         ImageAnimator.UpdateFrames();
-                        float spinnerSize = this.Height - 8;
+                        float spinnerSize = Height - 8;
                         pe.Graphics.DrawImage(spinnerBitmap, 5, 4, spinnerSize, spinnerSize);
                     }
                 }

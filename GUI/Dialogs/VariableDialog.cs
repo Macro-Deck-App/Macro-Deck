@@ -1,13 +1,9 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.Variables;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Text;
+﻿using System;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Variables;
+using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
@@ -15,128 +11,128 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
     {
         public Variable Variable;
 
-        private readonly bool _protected = false;
-        private readonly bool _edit = false;
+        private readonly bool _protected;
+        private readonly bool _edit;
 
         public VariableDialog(Variable variable = null)
         {
             InitializeComponent();
-            this.lblType.Text = Language.LanguageManager.Strings.Type;
-            this.lblName.Text = Language.LanguageManager.Strings.Name;
-            this.lblValue.Text = Language.LanguageManager.Strings.Value;
-            this.btnDelete.Text = Language.LanguageManager.Strings.DeleteVariable;
-            this.btnOk.Text = Language.LanguageManager.Strings.Ok;
+            lblType.Text = LanguageManager.Strings.Type;
+            lblName.Text = LanguageManager.Strings.Name;
+            lblValue.Text = LanguageManager.Strings.Value;
+            btnDelete.Text = LanguageManager.Strings.DeleteVariable;
+            btnOk.Text = LanguageManager.Strings.Ok;
             if (variable == null)
             {
-                this.Variable = new Variable();
-                this.variableName.Enabled = true;
-                this._edit = false;
+                Variable = new Variable();
+                variableName.Enabled = true;
+                _edit = false;
             } else
             {
-                this.Variable = variable;
-                this.variableName.Enabled = false;
-                this._edit = true;
+                Variable = variable;
+                variableName.Enabled = false;
+                _edit = true;
             }
             
-            this._protected = (this.Variable.Creator != "User");
-            this.variableType.Enabled = !this._protected;
-            this.variableValue.Enabled = !this._protected;
+            _protected = (Variable.Creator != "User");
+            variableType.Enabled = !_protected;
+            variableValue.Enabled = !_protected;
         }
 
 
-        private void VariableName_TextChanged(object sender, System.EventArgs e)
+        private void VariableName_TextChanged(object sender, EventArgs e)
         {
             
         }
 
         private void BtnOk_Click(object sender, EventArgs e)
         {
-            if (this._protected)
+            if (_protected)
             {
-                this.DialogResult = DialogResult.Cancel;
-                this.Close();
+                DialogResult = DialogResult.Cancel;
+                Close();
                 return;
             }
 
-            if (!this._edit)
+            if (!_edit)
             {
-                if (this.variableName.Text.Length == 0)
+                if (variableName.Text.Length == 0)
                 {
-                    this.variableName.Text = "new_variable";
+                    variableName.Text = "new_variable";
                 }
-                int variableCount = VariableManager.ListVariables.ToList().FindAll(v => v.Name.Equals(this.variableName.Text)).Count;
+                var variableCount = VariableManager.ListVariables.ToList().FindAll(v => v.Name.Equals(variableName.Text)).Count;
                 if (variableCount > 0)
                 {
                     variableName.Text = string.Format(variableName.Text + " _{0}", variableCount);
                 }
-                this.Variable.Name = VariableManager.ConvertNameString(this.variableName.Text);
+                Variable.Name = VariableManager.ConvertNameString(variableName.Text);
             }
 
-            this.Variable.Type = this.variableType.Text;
-            switch (this.Variable.Type)
+            Variable.Type = variableType.Text;
+            switch (Variable.Type)
             {
                 case "Bool":
-                    this.Variable.Value = (variableValue.Text.ToLower().Equals("true") ? true : false).ToString();
+                    Variable.Value = (variableValue.Text.ToLower().Equals("true") ? true : false).ToString();
                     break;
                 case "Integer":
-                    Int32.TryParse(variableValue.Text, out int intVal);
-                    this.Variable.Value = intVal.ToString();
+                    int.TryParse(variableValue.Text, out var intVal);
+                    Variable.Value = intVal.ToString();
                     break;
                 case "Float":
-                    float.TryParse(variableValue.Text, out float floatVal);
-                    this.Variable.Value = floatVal.ToString();
+                    float.TryParse(variableValue.Text, out var floatVal);
+                    Variable.Value = floatVal.ToString();
                     break;
                 case "String":
-                    this.Variable.Value = variableValue.Text;
+                    Variable.Value = variableValue.Text;
                     break;
             }
 
-            VariableManager.SetValue(this.Variable.Name, this.Variable.Value, this.Variable.VariableType, this.Variable.Creator);
+            VariableManager.SetValue(Variable.Name, Variable.Value, Variable.VariableType, Variable.Creator);
 
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void VariableDialog_Load(object sender, EventArgs e)
         {
-            foreach (string name in Enum.GetNames(typeof(Variables.VariableType)))
+            foreach (var name in Enum.GetNames(typeof(VariableType)))
             {
-                this.variableType.Items.Add(name);
+                variableType.Items.Add(name);
             }
-            this.variableType.Text = this.Variable.Type;
-            this.variableName.Text = this.Variable.Name;
-            this.variableValue.Text = this.Variable.Value;
+            variableType.Text = Variable.Type;
+            variableName.Text = Variable.Name;
+            variableValue.Text = Variable.Value;
             CenterToScreen();
         }
 
         private void BtnDelete_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            using (var msgBox = new CustomControls.MessageBox())
+            using (var msgBox = new MessageBox())
             {
-                if(msgBox.ShowDialog(Language.LanguageManager.Strings.AreYouSure, String.Format(Language.LanguageManager.Strings.VariableXGetsDeleted, this.Variable.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                if(msgBox.ShowDialog(LanguageManager.Strings.AreYouSure, string.Format(LanguageManager.Strings.VariableXGetsDeleted, Variable.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    VariableManager.DeleteVariable(this.Variable.Name);
-                    this.DialogResult = DialogResult.Cancel;
-                    this.Close();
+                    VariableManager.DeleteVariable(Variable.Name);
+                    DialogResult = DialogResult.Cancel;
+                    Close();
                 }
             }
         }
 
         private void variableType_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch (this.variableType.Text)
+            switch (variableType.Text)
             {
                 case "Bool":
-                    this.variableValue.Text = "false";
+                    variableValue.Text = "false";
                     break;
                 case "Integer":
-                    this.variableValue.Text = "0";
+                    variableValue.Text = "0";
                     break;
                 case "Float":
-                    this.variableValue.Text = "0.0";
+                    variableValue.Text = "0.0";
                     break;
                 case "String":
-                    this.variableValue.Text = "";
+                    variableValue.Text = "";
                     break;
             }
         }

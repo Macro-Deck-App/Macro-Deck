@@ -1,21 +1,18 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.IO;
+using System.Net;
+using System.Security.Cryptography;
+using Newtonsoft.Json;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Plugins;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Globalization;
-using System.IO;
-using System.Net;
-using System.Security.Cryptography;
-using System.Text;
-using System.Windows.Forms;
+using SuchByte.MacroDeck.Properties;
+using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
 {
@@ -30,7 +27,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
 
         private WebClient _webClient;
 
-        private bool _cancel = false;
+        private bool _cancel;
 
         public bool Cancel
         {
@@ -38,28 +35,22 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
             private set
             {
                 _cancel = true;
-                if (_webClient != null)
+                _webClient?.CancelAsync();
+                Invoke(() =>
                 {
-                    _webClient.CancelAsync();
-                }
-                this.Invoke(new Action(() =>
-                {
-                    this.lblStatus.Text = LanguageManager.Strings.Cancelled;
-                    this.progressBar.Visible = false;
-                    this.btnAbort.Visible = false;
-                }));
+                    lblStatus.Text = LanguageManager.Strings.Cancelled;
+                    progressBar.Visible = false;
+                    btnAbort.Visible = false;
+                });
 
-                if (OnInstallationCompleted != null)
-                {
-                    OnInstallationCompleted(this, EventArgs.Empty);
-                }
+                OnInstallationCompleted?.Invoke(this, EventArgs.Empty);
             }
         }
 
         public ExtensionStoreDownloaderItem(ExtensionStoreDownloaderPackageInfoModel extensionStoreDownloaderPackageInfoModel)
         {
             InitializeComponent();
-            this.PackageInfo = extensionStoreDownloaderPackageInfoModel;
+            PackageInfo = extensionStoreDownloaderPackageInfoModel;
         }
 
         private void ExtensionStoreDownloaderItem_Load(object sender, EventArgs e)
@@ -71,19 +62,19 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
             catch (Exception ex)
             {
                 MacroDeckLogger.Error(GetType(), ex.Message);
-                this.Invoke(new Action(() =>
+                Invoke(() =>
                 {
-                    this.lblStatus.Text = LanguageManager.Strings.Error;
-                }));
+                    lblStatus.Text = LanguageManager.Strings.Error;
+                });
             }
         }
 
         private void DownloadAndInstallPackage()
         {
-            this.Invoke(new Action(() =>
+            Invoke(() =>
             {
-                this.lblStatus.Text = LanguageManager.Strings.Preparing;
-            }));
+                lblStatus.Text = LanguageManager.Strings.Preparing;
+            });
             using (_webClient = new WebClient())
             {
                 ExtensionModel = JsonConvert.DeserializeObject<ExtensionStoreExtensionModel>(_webClient.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=info&package-id={PackageInfo.PackageId}"), new JsonSerializerSettings
@@ -98,19 +89,19 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
                 });
                 _webClient.DownloadProgressChanged += Wc_DownloadProgressChanged;
                 _webClient.DownloadFileCompleted += Wc_DownloadFileCompleted;
-                string url = $"https://macrodeck.org/files/extensionstore/{ExtensionModel.PackageId}/{ExtensionModel.Filename}";
+                var url = $"https://macrodeck.org/files/extensionstore/{ExtensionModel.PackageId}/{ExtensionModel.Filename}";
 
-                Bitmap iconBitmap = Properties.Resources.Macro_Deck_2021_update;
+                var iconBitmap = Resources.Macro_Deck_2021_update;
                 try
                 {
-                    iconBitmap = (Bitmap)Utils.Base64.GetImageFromBase64(ExtensionModel.IconBase64);
+                    iconBitmap = (Bitmap)Base64.GetImageFromBase64(ExtensionModel.IconBase64);
                 } catch { }
 
-                this.Invoke(new Action(() =>
+                Invoke(() =>
                 {
-                    this.extensionIcon.BackgroundImage = iconBitmap;
-                    this.lblPackageName.Text = string.Format(LanguageManager.Strings.ExtensionStoreDownloaderPackageIdVersion, PackageInfo.PackageId, ExtensionModel.Version);
-                }));
+                    extensionIcon.BackgroundImage = iconBitmap;
+                    lblPackageName.Text = string.Format(LanguageManager.Strings.ExtensionStoreDownloaderPackageIdVersion, PackageInfo.PackageId, ExtensionModel.Version);
+                });
 
                 MacroDeckLogger.Trace(typeof(ExtensionStoreDownloaderItem), $"Download {url}");
                 _webClient.DownloadFileAsync(new Uri(url), Path.Combine(MacroDeck.TempDirectoryPath, ExtensionModel.Filename));
@@ -124,11 +115,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
             {
                 return;
             }
-            this.Invoke(new Action(() =>
+            Invoke(() =>
             {
-                this.progressBar.Visible = false;
-                this.lblStatus.Text = LanguageManager.Strings.Installing;
-            }));
+                progressBar.Visible = false;
+                lblStatus.Text = LanguageManager.Strings.Installing;
+            });
             try
             {
                 Install();
@@ -141,16 +132,16 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
 
         private void Wc_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
-            if (this.Cancel)
+            if (Cancel)
             {
                 return;
             }
-            this.Invoke(new Action(() =>
+            Invoke(() =>
             {
-                this.progressBar.Visible = true;
-                this.lblStatus.Text = $"{LanguageManager.Strings.Downloading} {(e.BytesReceived / 1024f / 1024f).ToString("0.00")} MB / {(e.TotalBytesToReceive / 1024f / 1024f).ToString("0.00")} MB";
-                this.progressBar.Progress = e.ProgressPercentage;
-            }));
+                progressBar.Visible = true;
+                lblStatus.Text = $"{LanguageManager.Strings.Downloading} {(e.BytesReceived / 1024f / 1024f).ToString("0.00")} MB / {(e.TotalBytesToReceive / 1024f / 1024f).ToString("0.00")} MB";
+                progressBar.Progress = e.ProgressPercentage;
+            });
         }
 
         private void Install()
@@ -251,15 +242,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader
 
         private void Finished(bool error = false)
         {
-            this.Invoke(new Action(() =>
+            Invoke(() =>
             {
-                this.btnAbort.Visible = false;
-                this.lblStatus.Text = error ? LanguageManager.Strings.Error : LanguageManager.Strings.Completed;
-            }));
-            if (OnInstallationCompleted != null)
-            {
-                OnInstallationCompleted(this, EventArgs.Empty);
-            }
+                btnAbort.Visible = false;
+                lblStatus.Text = error ? LanguageManager.Strings.Error : LanguageManager.Strings.Completed;
+            });
+            OnInstallationCompleted?.Invoke(this, EventArgs.Empty);
         }
 
         private void BtnAbort_Click(object sender, EventArgs e)

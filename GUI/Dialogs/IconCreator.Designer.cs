@@ -1,4 +1,6 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
 using SuchByte.MacroDeck.GUI.CustomControls;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs
@@ -8,7 +10,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -191,11 +193,11 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         #endregion
 
-        private CustomControls.BufferedPanel preview;
-        private System.Windows.Forms.ListBox Layers;
+        private BufferedPanel preview;
+        private ListBox Layers;
         private PictureButton btnAddLayer;
         private PictureButton btnRemoveLayer;
-        private System.Windows.Forms.Label lblLayers;
+        private Label lblLayers;
         private ButtonPrimary btnAddImage;
         private ButtonPrimary btnOk;
         private ButtonPrimary btnBackgroundColor;

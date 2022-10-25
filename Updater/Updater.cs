@@ -1,17 +1,15 @@
-﻿using Newtonsoft.Json.Linq;
-using SuchByte.MacroDeck.GUI.Dialogs;
-using SuchByte.MacroDeck.Logging;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Forms;
+using Newtonsoft.Json.Linq;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
+using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.Updater
 {
@@ -22,27 +20,27 @@ namespace SuchByte.MacroDeck.Updater
 
     public static class Updater
     {
-        public static bool UpdateAvailable = false;
+        public static bool UpdateAvailable;
 
         public static event EventHandler OnUpdateAvailable;
         public static event EventHandler OnLatestVersionInstalled;
         public static event EventHandler OnError;
         public static event EventHandler<ProgressChangedEventArgs> OnProgressChanged;
 
-        private static bool _forceUpdate = false;
-        private static bool _testChannel = false;
+        private static bool _forceUpdate;
+        private static bool _testChannel;
 
         private static JObject _jsonObject;
-        public static JObject UpdateObject { get { return _jsonObject; } }
+        public static JObject UpdateObject => _jsonObject;
 
-        private static bool _downloading = false;
-        public static bool Downloading { get { return _downloading; } }
+        private static bool _downloading;
+        public static bool Downloading => _downloading;
 
-        private static int _progressPercentage = 0;
-        public static int ProgressPercentage { get { return _progressPercentage; } }
+        private static int _progressPercentage;
+        public static int ProgressPercentage => _progressPercentage;
 
-        private static double _updateSizeMb = 0;
-        public static double UpdateSizeMb { get { return _updateSizeMb; } }
+        private static double _updateSizeMb;
+        public static double UpdateSizeMb => _updateSizeMb;
 
         public static void Initialize(bool forceUpdate = false, bool testChannel = false)
         {
@@ -52,7 +50,7 @@ namespace SuchByte.MacroDeck.Updater
             {
                 CheckForUpdatesAsync();
             }
-            Timer updateCheckTimer = new Timer
+            var updateCheckTimer = new Timer
             {
                 Enabled = true,
                 Interval = 1000 * 60 * 10 // Check every 10 minutes
@@ -80,9 +78,9 @@ namespace SuchByte.MacroDeck.Updater
             if (UpdateAvailable) return;
             try
             {
-                using (WebClient wc = new WebClient())
+                using (var wc = new WebClient())
                 {
-                    string jsonString = "";
+                    var jsonString = "";
 
                     if (_testChannel)
                     {
@@ -94,7 +92,7 @@ namespace SuchByte.MacroDeck.Updater
                     _jsonObject = JObject.Parse(jsonString);
                     if (_jsonObject["build"] != null)
                     {
-                        if (Int32.TryParse(_jsonObject["build"].ToString(), out int build))
+                        if (int.TryParse(_jsonObject["build"].ToString(), out var build))
                         {
                             if (build > MacroDeck.Version.Build || _forceUpdate)
                             {
@@ -124,10 +122,7 @@ namespace SuchByte.MacroDeck.Updater
                 }
             } catch (Exception ex)
             {
-                if (OnError != null)
-                {
-                    OnError(ex, EventArgs.Empty);
-                }
+                OnError?.Invoke(ex, EventArgs.Empty);
             }
         }
 
@@ -161,8 +156,8 @@ namespace SuchByte.MacroDeck.Updater
             _downloading = true;
             using (var webClient = new WebClient())
             {
-                webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(WebClient_DownloadProgressChanged);
-                webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(WebClient_DownloadComplete);
+                webClient.DownloadProgressChanged += WebClient_DownloadProgressChanged;
+                webClient.DownloadFileCompleted += WebClient_DownloadComplete;
                 webClient.DownloadFileAsync(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]), Path.Combine(MacroDeck.TempDirectoryPath, _jsonObject["filename"].ToString()));
             }
         }
@@ -175,14 +170,12 @@ namespace SuchByte.MacroDeck.Updater
             {
                 if (!File.Exists(Path.Combine(MacroDeck.TempDirectoryPath, _jsonObject["filename"].ToString())))
                 {
-                    using (var msgBox = new GUI.CustomControls.MessageBox())
+                    using (var msgBox = new MessageBox())
                     {
-                        msgBox.ShowDialog(Language.LanguageManager.Strings.Error, Language.LanguageManager.Strings.FileNotFound, MessageBoxButtons.OK);
+                        msgBox.ShowDialog(LanguageManager.Strings.Error, LanguageManager.Strings.FileNotFound, MessageBoxButtons.OK);
                     }
-                    if (OnError != null)
-                    {
-                        OnError(null, EventArgs.Empty);
-                    }
+
+                    OnError?.Invoke(null, EventArgs.Empty);
                     return;
                 }
 
@@ -194,14 +187,12 @@ namespace SuchByte.MacroDeck.Updater
                         var checksumString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
                         if (!checksumString.Equals(_jsonObject["md5"].ToString()))
                         {
-                            using (var msgBox = new GUI.CustomControls.MessageBox())
+                            using (var msgBox = new MessageBox())
                             {
-                                msgBox.ShowDialog(Language.LanguageManager.Strings.Error, Language.LanguageManager.Strings.MD5NotValid, MessageBoxButtons.OK);
+                                msgBox.ShowDialog(LanguageManager.Strings.Error, LanguageManager.Strings.MD5NotValid, MessageBoxButtons.OK);
                             }
-                            if (OnError != null)
-                            {
-                                OnError(null, EventArgs.Empty);
-                            }
+
+                            OnError?.Invoke(null, EventArgs.Empty);
                             return;
                         }
                     }
@@ -219,13 +210,10 @@ namespace SuchByte.MacroDeck.Updater
             }
             catch
             {
-                if (OnError != null)
+                OnError?.Invoke(null, EventArgs.Empty);
+                using (var msgBox = new MessageBox())
                 {
-                    OnError(null, EventArgs.Empty);
-                }
-                using (var msgBox = new GUI.CustomControls.MessageBox())
-                {
-                    msgBox.ShowDialog(Language.LanguageManager.Strings.Error, Language.LanguageManager.Strings.TryAgainOrDownloadManually, MessageBoxButtons.OK);
+                    msgBox.ShowDialog(LanguageManager.Strings.Error, LanguageManager.Strings.TryAgainOrDownloadManually, MessageBoxButtons.OK);
                 }
             }
         }
@@ -233,10 +221,7 @@ namespace SuchByte.MacroDeck.Updater
         public static void WebClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
             _progressPercentage = e.ProgressPercentage;
-            if (OnProgressChanged != null)
-            {
-                OnProgressChanged(sender, new ProgressChangedEventArgs { ProgressPercentage = e.ProgressPercentage });
-            }
+            OnProgressChanged?.Invoke(sender, new ProgressChangedEventArgs { ProgressPercentage = e.ProgressPercentage });
         }
 
 

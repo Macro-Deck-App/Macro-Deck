@@ -1,5 +1,5 @@
 ﻿
-using System.Drawing;
+using System.ComponentModel;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
@@ -8,7 +8,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.

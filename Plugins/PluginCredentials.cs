@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
-using SuchByte.MacroDeck.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using Newtonsoft.Json;
+using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Plugins
 {
@@ -12,11 +12,11 @@ namespace SuchByte.MacroDeck.Plugins
 
         public static void AddCredentials(MacroDeckPlugin plugin, Dictionary<string, string> keyValuePairs)
         {
-            Dictionary<string, string> keyValuePairsEncrypted = new Dictionary<string, string>();
+            var keyValuePairsEncrypted = new Dictionary<string, string>();
 
-            foreach (KeyValuePair<string, string> entry in keyValuePairs)
+            foreach (var entry in keyValuePairs)
             {
-                keyValuePairsEncrypted[entry.Key] = Utils.StringCipher.Encrypt(entry.Value, Utils.StringCipher.GetMachineGuid());
+                keyValuePairsEncrypted[entry.Key] = StringCipher.Encrypt(entry.Value, StringCipher.GetMachineGuid());
             }
 
             List<Dictionary<string, string>> pluginCredentials;
@@ -34,7 +34,7 @@ namespace SuchByte.MacroDeck.Plugins
 
             pluginCredentials.Add(keyValuePairsEncrypted);
 
-            JsonSerializer serializer = new JsonSerializer
+            var serializer = new JsonSerializer
             {
                 TypeNameHandling = TypeNameHandling.Auto,
                 NullValueHandling = NullValueHandling.Ignore,
@@ -42,7 +42,7 @@ namespace SuchByte.MacroDeck.Plugins
 
             try
             {
-                using (StreamWriter sw = new StreamWriter(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
+                using (var sw = new StreamWriter(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {
                     serializer.Serialize(writer, pluginCredentials);
@@ -57,11 +57,11 @@ namespace SuchByte.MacroDeck.Plugins
 
         public static void SetCredentials(MacroDeckPlugin plugin, Dictionary<string, string> keyValuePairs)
         {
-            Dictionary<string, string> keyValuePairsEncrypted = new Dictionary<string, string>();
+            var keyValuePairsEncrypted = new Dictionary<string, string>();
 
-            foreach (KeyValuePair<string, string> entry in keyValuePairs)
+            foreach (var entry in keyValuePairs)
             {
-                keyValuePairsEncrypted[entry.Key] = Utils.StringCipher.Encrypt(entry.Value, Utils.StringCipher.GetMachineGuid());
+                keyValuePairsEncrypted[entry.Key] = StringCipher.Encrypt(entry.Value, StringCipher.GetMachineGuid());
             }
 
             List<Dictionary<string, string>> pluginCredentials;
@@ -69,7 +69,7 @@ namespace SuchByte.MacroDeck.Plugins
             pluginCredentials = new List<Dictionary<string, string>>();
             pluginCredentials.Add(keyValuePairsEncrypted);
 
-            JsonSerializer serializer = new JsonSerializer
+            var serializer = new JsonSerializer
             {
                 TypeNameHandling = TypeNameHandling.Auto,
                 NullValueHandling = NullValueHandling.Ignore,
@@ -77,7 +77,7 @@ namespace SuchByte.MacroDeck.Plugins
 
             try
             {
-                using (StreamWriter sw = new StreamWriter(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
+                using (var sw = new StreamWriter(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {
                     serializer.Serialize(writer, pluginCredentials);
@@ -109,16 +109,16 @@ namespace SuchByte.MacroDeck.Plugins
                 });
             }
 
-            List<Dictionary<string, string>> pluginCredentialsDecrypted = new List<Dictionary<string, string>>();
+            var pluginCredentialsDecrypted = new List<Dictionary<string, string>>();
 
-            foreach (Dictionary<string, string> pluginCredentialEncrypted in pluginCredentialsEncrypted)
+            foreach (var pluginCredentialEncrypted in pluginCredentialsEncrypted)
             {
-                Dictionary<string, string> pluginCredentialDecrypted = new Dictionary<string, string>();
-                foreach (KeyValuePair<string, string> entry in pluginCredentialEncrypted)
+                var pluginCredentialDecrypted = new Dictionary<string, string>();
+                foreach (var entry in pluginCredentialEncrypted)
                 {
                     try
                     {
-                        pluginCredentialDecrypted[entry.Key] = Utils.StringCipher.Decrypt(entry.Value, Utils.StringCipher.GetMachineGuid());
+                        pluginCredentialDecrypted[entry.Key] = StringCipher.Decrypt(entry.Value, StringCipher.GetMachineGuid());
                     } catch
                     {
                         MacroDeckLogger.Warning(typeof(PluginCredentials), $"Unable to decrypt credentials for {plugin.Name}. Perhaps the machine GUID changed?");

@@ -1,11 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
+using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
@@ -13,25 +7,25 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
     {
         private JObject _jsonObject;
 
-        public JObject JsonObject { get { return this._jsonObject; } }
+        public JObject JsonObject => _jsonObject;
 
-        public bool Install { get { return this.checkInstall.Checked; } }
+        public bool Install => checkInstall.Checked;
 
         public void SetInstall(bool install)
         {
-            this.checkInstall.Checked = install;
-            this.checkInstall.Enabled = !install;
+            checkInstall.Checked = install;
+            checkInstall.Enabled = !install;
         }
 
         public InitialSetupIconPackItem(JObject jsonObject)
         {
             InitializeComponent();
 
-            this._jsonObject = jsonObject;
+            _jsonObject = jsonObject;
 
-            this.lblName.Text = jsonObject["name"].ToString();
-            this.lblDescription.Text = jsonObject["description"].ToString();
-            this.preview.BackgroundImage = Utils.Base64.GetImageFromBase64(jsonObject["preview"].ToString());
+            lblName.Text = jsonObject["name"].ToString();
+            lblDescription.Text = jsonObject["description"].ToString();
+            preview.BackgroundImage = Base64.GetImageFromBase64(jsonObject["preview"].ToString());
         }
     }
 }

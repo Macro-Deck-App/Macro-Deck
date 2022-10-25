@@ -1,14 +1,11 @@
-﻿using SuchByte.MacroDeck.Device;
+﻿using System;
+using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Models;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
-using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.ViewModels
 {
@@ -22,20 +19,20 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.ViewModels
 
         public string ClientId
         {
-            get => this.Configuration.ClientId;
-            set => this.Configuration.ClientId = value;
+            get => Configuration.ClientId;
+            set => Configuration.ClientId = value;
         }
 
         public float Brightness
         {
-            get => this.Configuration.Brightness;
-            set => this.Configuration.Brightness = value;
+            get => Configuration.Brightness;
+            set => Configuration.Brightness = value;
         }
 
         public SetBrightnessActionConfigViewModel(PluginAction action)
         {
-            this.Configuration = SetBrightnessActionConfigModel.Deserialize(action.Configuration);
-            this._action = action;
+            Configuration = SetBrightnessActionConfigModel.Deserialize(action.Configuration);
+            _action = action;
         }
 
         public bool SaveConfig()

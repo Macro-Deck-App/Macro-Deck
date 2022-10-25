@@ -1,16 +1,14 @@
-﻿using SuchByte.MacroDeck.Device;
-using SuchByte.MacroDeck.Folders;
-using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.Profiles;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.Device;
+using SuchByte.MacroDeck.Folders;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Profiles;
+using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.GUI
 {
@@ -21,42 +19,42 @@ namespace SuchByte.MacroDeck.GUI
 
         public AddFolder(MacroDeckFolder parentFolder)
         {
-            this.ParentFolder = parentFolder;
+            ParentFolder = parentFolder;
             InitializeComponent();
-            this.UpdateTranslation();
-            this.btnCreateFolder.Text = Language.LanguageManager.Strings.Create;
+            UpdateTranslation();
+            btnCreateFolder.Text = LanguageManager.Strings.Create;
         }
 
         public AddFolder(MacroDeckFolder folder, bool rename)
         {
-            this.Folder = folder;
+            Folder = folder;
             InitializeComponent();
-            this.UpdateTranslation();
-            this.btnCreateFolder.Text = Language.LanguageManager.Strings.Save;
-            this.folderName.Enabled = !folder.IsRootFolder;
+            UpdateTranslation();
+            btnCreateFolder.Text = LanguageManager.Strings.Save;
+            folderName.Enabled = !folder.IsRootFolder;
         }
 
         private void UpdateTranslation()
         {
-            this.lblFolderName.Text = Language.LanguageManager.Strings.FolderName;
-            this.lblApplication.Text = Language.LanguageManager.Strings.Application;
-            this.lblDevices.Text = Language.LanguageManager.Strings.Devices;
-            this.groupAutomaticallySwitchFolder.Text = Language.LanguageManager.Strings.AutomaticallySwitchToFolder;
-            this.radioNever.Text = Language.LanguageManager.Strings.Never;
-            this.radioOnFocus.Text = Language.LanguageManager.Strings.OnApplicationFocus;
+            lblFolderName.Text = LanguageManager.Strings.FolderName;
+            lblApplication.Text = LanguageManager.Strings.Application;
+            lblDevices.Text = LanguageManager.Strings.Devices;
+            groupAutomaticallySwitchFolder.Text = LanguageManager.Strings.AutomaticallySwitchToFolder;
+            radioNever.Text = LanguageManager.Strings.Never;
+            radioOnFocus.Text = LanguageManager.Strings.OnApplicationFocus;
         }
 
         private void BtnCreateFolder_Click(object sender, EventArgs e)
         {
             if (folderName.Text.Length < 1) return;
 
-            if (this.Folder == null)
+            if (Folder == null)
             {
                 if (ProfileManager.CurrentProfile.Folders.Find(x => x.DisplayName.Equals(folderName.Text, StringComparison.OrdinalIgnoreCase)) != null)
                 {
-                    using (var msgBox = new CustomControls.MessageBox())
+                    using (var msgBox = new MessageBox())
                     {
-                        msgBox.ShowDialog(Language.LanguageManager.Strings.CantCreateFolder, String.Format(Language.LanguageManager.Strings.FolderCalledXAlreadyExists, folderName.Text), MessageBoxButtons.OK);
+                        msgBox.ShowDialog(LanguageManager.Strings.CantCreateFolder, string.Format(LanguageManager.Strings.FolderCalledXAlreadyExists, folderName.Text), MessageBoxButtons.OK);
                         msgBox.Dispose();
                     }
                     return;
@@ -67,54 +65,54 @@ namespace SuchByte.MacroDeck.GUI
                     ParentFolder = ProfileManager.CurrentProfile.Folders[0];
                 }
 
-                this.Folder = ProfileManager.CreateFolder(folderName.Text, ParentFolder, ProfileManager.CurrentProfile);
+                Folder = ProfileManager.CreateFolder(folderName.Text, ParentFolder, ProfileManager.CurrentProfile);
             }
             else
             {
-                if (ProfileManager.CurrentProfile.Folders.Find(x => x.DisplayName.Equals(folderName.Text, StringComparison.OrdinalIgnoreCase)) != null && ProfileManager.CurrentProfile.Folders.Find(x => x.DisplayName.Equals(folderName.Text, StringComparison.OrdinalIgnoreCase)) != this.Folder)
+                if (ProfileManager.CurrentProfile.Folders.Find(x => x.DisplayName.Equals(folderName.Text, StringComparison.OrdinalIgnoreCase)) != null && ProfileManager.CurrentProfile.Folders.Find(x => x.DisplayName.Equals(folderName.Text, StringComparison.OrdinalIgnoreCase)) != Folder)
                 {
-                    using (var msgBox = new CustomControls.MessageBox())
+                    using (var msgBox = new MessageBox())
                     {
-                        msgBox.ShowDialog(Language.LanguageManager.Strings.CantCreateFolder, String.Format(Language.LanguageManager.Strings.FolderCalledXAlreadyExists, folderName.Text), MessageBoxButtons.OK);
+                        msgBox.ShowDialog(LanguageManager.Strings.CantCreateFolder, string.Format(LanguageManager.Strings.FolderCalledXAlreadyExists, folderName.Text), MessageBoxButtons.OK);
                         msgBox.Dispose();
                     }
                     return;
                 }
             }
 
-            this.Folder.DisplayName = this.folderName.Text;
-            this.Folder.ApplicationToTrigger = this.applicationList.Text;
+            Folder.DisplayName = folderName.Text;
+            Folder.ApplicationToTrigger = applicationList.Text;
 
-            if (radioOnFocus.Checked && this.applicationList.Text.Length > 0 && this.devicesList.CheckedItems.Count > 0)
+            if (radioOnFocus.Checked && applicationList.Text.Length > 0 && devicesList.CheckedItems.Count > 0)
             {
-                this.Folder.ApplicationToTrigger = this.applicationList.Text;
-                this.Folder.ApplicationsFocusDevices = new List<string>();
-                foreach (int i in this.devicesList.CheckedIndices)
+                Folder.ApplicationToTrigger = applicationList.Text;
+                Folder.ApplicationsFocusDevices = new List<string>();
+                foreach (int i in devicesList.CheckedIndices)
                 {
-                    this.Folder.ApplicationsFocusDevices.Add(DeviceManager.GetMacroDeckDeviceByDisplayName(this.devicesList.Items[i].ToString()).ClientId);
+                    Folder.ApplicationsFocusDevices.Add(DeviceManager.GetMacroDeckDeviceByDisplayName(devicesList.Items[i].ToString()).ClientId);
                 }
             }
             else
             {
-                this.Folder.ApplicationToTrigger = "";
-                this.Folder.ApplicationsFocusDevices = new List<string>();
+                Folder.ApplicationToTrigger = "";
+                Folder.ApplicationsFocusDevices = new List<string>();
             }
             ProfileManager.Save();
 
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void AddFolder_Load(object sender, EventArgs e)
         {
-            if (this.Folder != null)
+            if (Folder != null)
             {
-                this.folderName.Text = Folder.DisplayName;
-                if (this.Folder.ApplicationToTrigger.Length > 0 && this.Folder.ApplicationsFocusDevices.Count > 0)
+                folderName.Text = Folder.DisplayName;
+                if (Folder.ApplicationToTrigger.Length > 0 && Folder.ApplicationsFocusDevices.Count > 0)
                 {
-                    this.radioOnFocus.CheckedChanged -= RadioOnFocus_CheckedChanged;
-                    this.radioOnFocus.Checked = true;
-                    this.radioOnFocus.CheckedChanged += RadioOnFocus_CheckedChanged;
+                    radioOnFocus.CheckedChanged -= RadioOnFocus_CheckedChanged;
+                    radioOnFocus.Checked = true;
+                    radioOnFocus.CheckedChanged += RadioOnFocus_CheckedChanged;
                 }
             }
             
@@ -124,7 +122,7 @@ namespace SuchByte.MacroDeck.GUI
         {
             if (radioOnFocus.Checked && !radioNever.Checked)
             {
-                this.applicationDeviceSettings.Enabled = true;
+                applicationDeviceSettings.Enabled = true;
                 Task.Run(() =>
                 {
                     LoadApplications();
@@ -133,44 +131,44 @@ namespace SuchByte.MacroDeck.GUI
 
             } else
             {
-                this.applicationDeviceSettings.Enabled = false;
-                this.devicesList.Items.Clear();
+                applicationDeviceSettings.Enabled = false;
+                devicesList.Items.Clear();
             }
         }
 
         private void LoadApplications()
         {
-            Process[] processCollection = Process.GetProcesses();
-            foreach (Process p in processCollection)
+            var processCollection = Process.GetProcesses();
+            foreach (var p in processCollection)
             {
-                this.Invoke(new Action(() =>
+                Invoke(() =>
                 {
-                    if (!this.applicationList.Items.Contains(p.ProcessName) && !String.IsNullOrEmpty(p.MainWindowTitle))
+                    if (!applicationList.Items.Contains(p.ProcessName) && !string.IsNullOrEmpty(p.MainWindowTitle))
                     {
-                        this.applicationList.Items.Add(p.ProcessName);
+                        applicationList.Items.Add(p.ProcessName);
                     }
-                }));
+                });
             }
            
-            if (this.Folder != null) {
-                this.Invoke(new Action(() =>
+            if (Folder != null) {
+                Invoke(() =>
                 {
-                    if (this.Folder.ApplicationToTrigger.Length > 0 && !this.applicationList.Items.Contains(this.Folder.ApplicationToTrigger))
+                    if (Folder.ApplicationToTrigger.Length > 0 && !applicationList.Items.Contains(Folder.ApplicationToTrigger))
                     {
-                        this.applicationList.Items.Add(this.Folder.ApplicationToTrigger);
+                        applicationList.Items.Add(Folder.ApplicationToTrigger);
                     }
-                    this.applicationList.Text = this.Folder.ApplicationToTrigger;
-                }));
+                    applicationList.Text = Folder.ApplicationToTrigger;
+                });
             }
         }
 
         private void LoadDevices()
         {
-            this.devicesList.Items.Clear();
+            devicesList.Items.Clear();
 
-            foreach (MacroDeckDevice macroDeckDevice in DeviceManager.GetKnownDevices())
+            foreach (var macroDeckDevice in DeviceManager.GetKnownDevices())
             {
-                this.devicesList.Items.Add(macroDeckDevice.DisplayName, (this.Folder != null && this.Folder.ApplicationsFocusDevices != null && this.Folder.ApplicationsFocusDevices.Contains(macroDeckDevice.ClientId)));
+                devicesList.Items.Add(macroDeckDevice.DisplayName, (Folder != null && Folder.ApplicationsFocusDevices != null && Folder.ApplicationsFocusDevices.Contains(macroDeckDevice.ClientId)));
             }
            
         }

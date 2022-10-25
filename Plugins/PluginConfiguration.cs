@@ -1,10 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Threading;
+using Newtonsoft.Json;
 
 namespace SuchByte.MacroDeck.Plugins
 {
@@ -30,13 +26,13 @@ namespace SuchByte.MacroDeck.Plugins
 
                 pluginConfig[key] = value;
 
-                JsonSerializer serializer = new JsonSerializer
+                var serializer = new JsonSerializer
                 {
                     TypeNameHandling = TypeNameHandling.Auto,
                     NullValueHandling = NullValueHandling.Ignore,
                 };
 
-                using (StreamWriter sw = new StreamWriter(Path.Combine(MacroDeck.PluginConfigPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json")))
+                using (var sw = new StreamWriter(Path.Combine(MacroDeck.PluginConfigPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json")))
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {
                     serializer.Serialize(writer, pluginConfig);
@@ -47,7 +43,7 @@ namespace SuchByte.MacroDeck.Plugins
 
         public static string GetValue(MacroDeckPlugin plugin = null, string key = "")
         {
-            string value = "";
+            var value = "";
             try
             {
                 if (plugin == null || key == null) return value;
@@ -67,7 +63,7 @@ namespace SuchByte.MacroDeck.Plugins
                     });
                 }
 
-                if (pluginConfig != null && !String.IsNullOrWhiteSpace(pluginConfig[key]))
+                if (pluginConfig != null && !string.IsNullOrWhiteSpace(pluginConfig[key]))
                 {
                     value = pluginConfig[key];
                 }

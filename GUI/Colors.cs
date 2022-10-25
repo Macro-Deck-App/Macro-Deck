@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Controls;
+﻿using System.Drawing;
 using Windows.UI.ViewManagement;
 
 namespace SuchByte.MacroDeck.GUI
@@ -15,7 +9,7 @@ namespace SuchByte.MacroDeck.GUI
         {
             try
             {
-                UISettings uISettings = new UISettings();
+                var uISettings = new UISettings();
                 var accentColor = uISettings.GetColorValue(UIColorType.Accent);
                 WindowsAccentColor = ConvertWindowsUiColorToColor(accentColor);
                 WindowsAccentColorLight = LighterColor(ConvertWindowsUiColorToColor(accentColor), 30);
@@ -29,42 +23,24 @@ namespace SuchByte.MacroDeck.GUI
 
         public static Color WindowsAccentColorDark { get; set; } = DefaultAccentColorDark;
 
-        public static Color DefaultAccentColor
-        {
-            get
-            {
-                return Color.FromArgb(0, 123, 255);
-            }
-        }
+        public static Color DefaultAccentColor => Color.FromArgb(0, 123, 255);
 
-        public static Color DefaultAccentColorLight
-        {
-            get
-            {
-                return Color.FromArgb(20, 143, 255);
-            }
-        }
+        public static Color DefaultAccentColorLight => Color.FromArgb(20, 143, 255);
 
-        public static Color DefaultAccentColorDark
-        {
-            get
-            {
-                return Color.FromArgb(0, 103, 205);
-            }
-        }
+        public static Color DefaultAccentColorDark => Color.FromArgb(0, 103, 205);
 
         public static Color DarkerColor(Color color, float correctionfactory = 50f)
         {
             const float hundredpercent = 100f;
-            return Color.FromArgb((int)(((float)color.R / hundredpercent) * correctionfactory),
-                (int)(((float)color.G / hundredpercent) * correctionfactory), (int)(((float)color.B / hundredpercent) * correctionfactory));
+            return Color.FromArgb((int)((color.R / hundredpercent) * correctionfactory),
+                (int)((color.G / hundredpercent) * correctionfactory), (int)((color.B / hundredpercent) * correctionfactory));
         }
 
         public static Color LighterColor(Color color, float correctionfactory = 50f)
         {
             correctionfactory = correctionfactory / 100f;
             const float rgb255 = 255f;
-            return Color.FromArgb((int)((float)color.R + ((rgb255 - (float)color.R) * correctionfactory)), (int)((float)color.G + ((rgb255 - (float)color.G) * correctionfactory)), (int)((float)color.B + ((rgb255 - (float)color.B) * correctionfactory)));
+            return Color.FromArgb((int)(color.R + ((rgb255 - color.R) * correctionfactory)), (int)(color.G + ((rgb255 - color.G) * correctionfactory)), (int)(color.B + ((rgb255 - color.B) * correctionfactory)));
         }
 
         public static Color ConvertWindowsUiColorToColor(Windows.UI.Color windowsUiColor)

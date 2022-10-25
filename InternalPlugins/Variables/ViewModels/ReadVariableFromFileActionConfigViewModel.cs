@@ -1,11 +1,9 @@
-﻿using SuchByte.MacroDeck.Logging;
+﻿using System;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Variables.Plugin.Models;
 using SuchByte.MacroDeck.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SuchByte.MacroDeck.Variables.Plugin.ViewModels
 {
@@ -31,13 +29,13 @@ namespace SuchByte.MacroDeck.Variables.Plugin.ViewModels
 
         public ReadVariableFromFileActionConfigViewModel(PluginAction pluginAction)
         {
-            this._pluginAction = pluginAction;
-            this.Configuration = ReadVariableFromFileActionConfigModel.Deserialize(pluginAction.Configuration);
+            _pluginAction = pluginAction;
+            Configuration = ReadVariableFromFileActionConfigModel.Deserialize(pluginAction.Configuration);
         }
 
         public bool SaveConfig()
         {
-            if (string.IsNullOrWhiteSpace(this.FilePath) || string.IsNullOrWhiteSpace(this.Variable))
+            if (string.IsNullOrWhiteSpace(FilePath) || string.IsNullOrWhiteSpace(Variable))
             {
                 return false;
             }
@@ -55,8 +53,8 @@ namespace SuchByte.MacroDeck.Variables.Plugin.ViewModels
 
         public void SetConfig()
         {
-            this._pluginAction.ConfigurationSummary = $"{ Configuration.FilePath }";
-            this._pluginAction.Configuration = Configuration.Serialize();
+            _pluginAction.ConfigurationSummary = $"{ Configuration.FilePath }";
+            _pluginAction.Configuration = Configuration.Serialize();
         }
     }
 }

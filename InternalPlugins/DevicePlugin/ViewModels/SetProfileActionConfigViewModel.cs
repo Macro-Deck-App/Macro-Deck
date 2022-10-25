@@ -1,3 +1,4 @@
+using System;
 using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Models;
 using SuchByte.MacroDeck.Language;
@@ -6,9 +7,6 @@ using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.ViewModels
 {
@@ -22,20 +20,20 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.ViewModels
 
         public string ClientId
         {
-            get => this.Configuration.ClientId;
-            set => this.Configuration.ClientId = value;
+            get => Configuration.ClientId;
+            set => Configuration.ClientId = value;
         }
 
         public string ProfileId
         {
-            get => this.Configuration.ProfileId;
-            set => this.Configuration.ProfileId = value;
+            get => Configuration.ProfileId;
+            set => Configuration.ProfileId = value;
         }
 
         public SetProfileActionConfigViewModel(PluginAction action)
         {
-            this.Configuration = SetProfileActionConfigModel.Deserialize(action.Configuration);
-            this._action = action;
+            Configuration = SetProfileActionConfigModel.Deserialize(action.Configuration);
+            _action = action;
         }
 
         public bool SaveConfig()

@@ -1,4 +1,8 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
     partial class RestoreBackupDialog
@@ -6,7 +10,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -194,15 +198,15 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         #endregion
 
-        private System.Windows.Forms.CheckBox checkRestoreConfig;
-        private System.Windows.Forms.CheckBox checkRestoreProfiles;
-        private System.Windows.Forms.CheckBox checkRestoreDevices;
-        private System.Windows.Forms.CheckBox checkRestoreVariables;
-        private System.Windows.Forms.CheckBox checkRestorePlugins;
-        private System.Windows.Forms.CheckBox checkRestorePluginConfigs;
-        private System.Windows.Forms.CheckBox checkRestorePluginCredentials;
-        private System.Windows.Forms.CheckBox checkRestoreIconPacks;
-        private System.Windows.Forms.Label lblWhatToRestore;
-        private CustomControls.ButtonPrimary btnRestore;
+        private CheckBox checkRestoreConfig;
+        private CheckBox checkRestoreProfiles;
+        private CheckBox checkRestoreDevices;
+        private CheckBox checkRestoreVariables;
+        private CheckBox checkRestorePlugins;
+        private CheckBox checkRestorePluginConfigs;
+        private CheckBox checkRestorePluginCredentials;
+        private CheckBox checkRestoreIconPacks;
+        private Label lblWhatToRestore;
+        private ButtonPrimary btnRestore;
     }
 }

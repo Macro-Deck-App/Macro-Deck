@@ -1,15 +1,12 @@
-﻿using SuchByte.MacroDeck.ActionButton;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.ActionButton;
 using SuchByte.MacroDeck.ActionButton.Plugin;
 using SuchByte.MacroDeck.Interfaces;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
 {
@@ -21,117 +18,117 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
 
         public ActionSelectorOnPress(List<PluginAction> pluginActions, GUI.ButtonEditor buttonEditor)
         {
-            this._pluginActions = pluginActions;
-            this._buttonEditor = buttonEditor;
+            _pluginActions = pluginActions;
+            _buttonEditor = buttonEditor;
             InitializeComponent();
-            this.Dock = DockStyle.Fill;
-            this.menuItemAction.Text = Language.LanguageManager.Strings.Action;
-            this.menuItemCondition.Text = Language.LanguageManager.Strings.Condition;
-            this.menuItemDelay.Text = Language.LanguageManager.Strings.Delay;
+            Dock = DockStyle.Fill;
+            menuItemAction.Text = LanguageManager.Strings.Action;
+            menuItemCondition.Text = LanguageManager.Strings.Condition;
+            menuItemDelay.Text = LanguageManager.Strings.Delay;
         }
 
         private void AddActionItem(PluginAction action)
         {
             if (action.GetType() == typeof(ConditionAction))
             {
-                ConditionItem conditionItem = new ConditionItem(action);
-                this.actionsOnPress.Controls.Add(conditionItem);
-                conditionItem.OnRemoveClick += this.RemoveClicked;
-                conditionItem.OnMoveUpClick += this.MoveUpClicked;
-                conditionItem.OnMoveDownClick += this.MoveDownClicked;
+                var conditionItem = new ConditionItem(action);
+                actionsOnPress.Controls.Add(conditionItem);
+                conditionItem.OnRemoveClick += RemoveClicked;
+                conditionItem.OnMoveUpClick += MoveUpClicked;
+                conditionItem.OnMoveDownClick += MoveDownClicked;
             }
             else if (action.GetType() == typeof(DelayAction))
             {
-                DelayItem delayItem = new DelayItem(action);
-                this.actionsOnPress.Controls.Add(delayItem);
-                delayItem.OnRemoveClick += this.RemoveClicked;
-                delayItem.OnMoveUpClick += this.MoveUpClicked;
-                delayItem.OnMoveDownClick += this.MoveDownClicked;
+                var delayItem = new DelayItem(action);
+                actionsOnPress.Controls.Add(delayItem);
+                delayItem.OnRemoveClick += RemoveClicked;
+                delayItem.OnMoveUpClick += MoveUpClicked;
+                delayItem.OnMoveDownClick += MoveDownClicked;
             }
             else
             {
-                ActionItem actionItem = new ActionItem(action);
-                this.actionsOnPress.Controls.Add(actionItem);
-                actionItem.OnRemoveClick += this.RemoveClicked;
-                actionItem.OnEditClick += this.EditClicked;
-                actionItem.OnMoveUpClick += this.MoveUpClicked;
-                actionItem.OnMoveDownClick += this.MoveDownClicked;
+                var actionItem = new ActionItem(action);
+                actionsOnPress.Controls.Add(actionItem);
+                actionItem.OnRemoveClick += RemoveClicked;
+                actionItem.OnEditClick += EditClicked;
+                actionItem.OnMoveUpClick += MoveUpClicked;
+                actionItem.OnMoveDownClick += MoveDownClicked;
             }
         }
 
         public void RefreshActions()
         {
-            this.SuspendLayout();
-            foreach (IActionConditionItem actionItem in this.actionsOnPress.Controls)
+            SuspendLayout();
+            foreach (IActionConditionItem actionItem in actionsOnPress.Controls)
             {
-                actionItem.OnRemoveClick -= this.RemoveClicked;
-                actionItem.OnEditClick -= this.EditClicked;
-                actionItem.OnMoveUpClick -= this.MoveUpClicked;
-                actionItem.OnMoveDownClick -= this.MoveDownClicked;
+                actionItem.OnRemoveClick -= RemoveClicked;
+                actionItem.OnEditClick -= EditClicked;
+                actionItem.OnMoveUpClick -= MoveUpClicked;
+                actionItem.OnMoveDownClick -= MoveDownClicked;
 
             }
-            this.actionsOnPress.Controls.Clear();
-            foreach (PluginAction action in this._pluginActions)
+            actionsOnPress.Controls.Clear();
+            foreach (var action in _pluginActions)
             {
                 AddActionItem(action);
             }
-            this.ResumeLayout();
+            ResumeLayout();
         }
 
         private void MoveUpClicked(object sender, EventArgs e)
         {
-            IActionConditionItem actionItem = sender as IActionConditionItem;
-            PluginAction action = actionItem.Action;
-            int currentIndex = this._pluginActions.IndexOf(action);
+            var actionItem = sender as IActionConditionItem;
+            var action = actionItem.Action;
+            var currentIndex = _pluginActions.IndexOf(action);
             if (currentIndex == 0) return;
-            this._pluginActions.RemoveAt(currentIndex);
-            this._pluginActions.Insert(currentIndex - 1, action);
-            this.actionsOnPress.Controls.SetChildIndex((Control)actionItem, currentIndex - 1);
+            _pluginActions.RemoveAt(currentIndex);
+            _pluginActions.Insert(currentIndex - 1, action);
+            actionsOnPress.Controls.SetChildIndex((Control)actionItem, currentIndex - 1);
         }
 
         private void MoveDownClicked(object sender, EventArgs e)
         {
-            IActionConditionItem actionItem = sender as IActionConditionItem;
-            PluginAction action = actionItem.Action;
-            int currentIndex = this._pluginActions.IndexOf(action);
-            if (currentIndex + 1 >= this._pluginActions.Count) return;
-            this._pluginActions.RemoveAt(currentIndex);
-            this._pluginActions.Insert(currentIndex + 1, action);
-            this.actionsOnPress.Controls.SetChildIndex((Control)actionItem, currentIndex + 1);
+            var actionItem = sender as IActionConditionItem;
+            var action = actionItem.Action;
+            var currentIndex = _pluginActions.IndexOf(action);
+            if (currentIndex + 1 >= _pluginActions.Count) return;
+            _pluginActions.RemoveAt(currentIndex);
+            _pluginActions.Insert(currentIndex + 1, action);
+            actionsOnPress.Controls.SetChildIndex((Control)actionItem, currentIndex + 1);
         }
 
         private void RemoveClicked(object sender, EventArgs e)
         {
-            this.SuspendLayout();
-            IActionConditionItem actionItem = sender as IActionConditionItem;
-            this._pluginActions.Remove(actionItem.Action);
-            actionItem.OnRemoveClick -= this.RemoveClicked;
-            this.actionsOnPress.Controls.Remove((Control)actionItem);
+            SuspendLayout();
+            var actionItem = sender as IActionConditionItem;
+            _pluginActions.Remove(actionItem.Action);
+            actionItem.OnRemoveClick -= RemoveClicked;
+            actionsOnPress.Controls.Remove((Control)actionItem);
             ((Control)actionItem).Dispose();
-            this.ResumeLayout();
+            ResumeLayout();
         }
 
         private void EditClicked(object sender, EventArgs e)
         {
-            IActionConditionItem actionItem = sender as IActionConditionItem;
+            var actionItem = sender as IActionConditionItem;
             using (var configurator = new ActionConfigurator(actionItem.Action))
             {
                 if (configurator.ShowDialog() == DialogResult.OK)
                 {
-                    this.SuspendLayout();
+                    SuspendLayout();
                     if (configurator.Action.CanConfigure && configurator.Action.Configuration.Length == 0) return;
-                    int index = this._pluginActions.IndexOf(actionItem.Action);
-                    this._pluginActions.RemoveAt(index);
-                    this._pluginActions.Insert(index, configurator.Action);
-                    this.RefreshActions();
-                    this.ResumeLayout();
+                    var index = _pluginActions.IndexOf(actionItem.Action);
+                    _pluginActions.RemoveAt(index);
+                    _pluginActions.Insert(index, configurator.Action);
+                    RefreshActions();
+                    ResumeLayout();
                 }
             }
         }
 
         private void BtnAdd_Click(object sender, EventArgs e)
         {
-            this.addItemContextMenu.Show(this.btnAdd, new Point(0, 0 + this.btnAdd.Height));
+            addItemContextMenu.Show(btnAdd, new Point(0, 0 + btnAdd.Height));
         }
 
         private void MenuItemAction_Click(object sender, EventArgs e)
@@ -140,15 +137,15 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
             {
                 if (actionConfigurator.ShowDialog() == DialogResult.OK)
                 {
-                    this._pluginActions.Add(actionConfigurator.Action);
-                    this.AddActionItem(actionConfigurator.Action);
+                    _pluginActions.Add(actionConfigurator.Action);
+                    AddActionItem(actionConfigurator.Action);
                     if (!string.IsNullOrWhiteSpace(actionConfigurator.Action.BindableVariable))
                     {
                         using (var msgBox = new MessageBox())
                         {
                             if (msgBox.ShowDialog(LanguageManager.Strings.BindableVariable, string.Format(LanguageManager.Strings.BindableVariableInfo, actionConfigurator.Action.BindableVariable), MessageBoxButtons.YesNo) == DialogResult.Yes)
                             {
-                                this._buttonEditor.SetBindableVariable(actionConfigurator.Action.BindableVariable);
+                                _buttonEditor.SetBindableVariable(actionConfigurator.Action.BindableVariable);
                             }
                         }
                     }
@@ -158,9 +155,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
 
         private void MenuItemCondition_Click(object sender, EventArgs e)
         {
-            ConditionItem conditionItem = new ConditionItem();
-            this._pluginActions.Add(conditionItem.Action);
-            this.AddActionItem(conditionItem.Action);
+            var conditionItem = new ConditionItem();
+            _pluginActions.Add(conditionItem.Action);
+            AddActionItem(conditionItem.Action);
         }
 
         private void ActionSelectorOnPress_Load(object sender, EventArgs e)
@@ -170,9 +167,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor
 
         private void DelayToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DelayItem delayItem = new DelayItem();
-            this._pluginActions.Add(delayItem.Action);
-            this.AddActionItem(delayItem.Action);
+            var delayItem = new DelayItem();
+            _pluginActions.Add(delayItem.Action);
+            AddActionItem(delayItem.Action);
         }
     }
 }

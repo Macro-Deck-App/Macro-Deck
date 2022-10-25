@@ -10,7 +10,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         public HorizontalTabControl()
         {
 
-            this.SetStyle(ControlStyles.UserPaint |
+            SetStyle(ControlStyles.UserPaint |
                           ControlStyles.AllPaintingInWmPaint |
                           ControlStyles.DoubleBuffer |
                           ControlStyles.OptimizedDoubleBuffer, true);
@@ -26,20 +26,20 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            Bitmap b = new Bitmap(Width, Height);
-            Graphics g = Graphics.FromImage(b);
+            var b = new Bitmap(Width, Height);
+            var g = Graphics.FromImage(b);
 
             g.Clear(BackgroundColor);
             g.FillRectangle(new SolidBrush(BackgroundColor), new Rectangle(0, 0, ItemSize.Height + 4, Height));
 
             g.SmoothingMode = SmoothingMode.HighQuality;
 
-            for (int i = 0; i <= TabCount - 1; i++)
+            for (var i = 0; i <= TabCount - 1; i++)
             {
-                Rectangle buttonSurface = new Rectangle(new Point(GetTabRect(i).Location.X + 6, GetTabRect(i).Location.Y - 2), new Size(GetTabRect(i).Width - 5, GetTabRect(i).Height - 1));
+                var buttonSurface = new Rectangle(new Point(GetTabRect(i).Location.X + 6, GetTabRect(i).Location.Y - 2), new Size(GetTabRect(i).Width - 5, GetTabRect(i).Height - 1));
                 
-                using (SolidBrush backgroundBrush = new SolidBrush(this.Parent.BackColor))
-                using (SolidBrush selectedBrush = new SolidBrush(Colors.WindowsAccentColorDark))
+                using (var backgroundBrush = new SolidBrush(Parent.BackColor))
+                using (var selectedBrush = new SolidBrush(Colors.WindowsAccentColorDark))
                 {
                     switch (i == SelectedIndex)
                     {

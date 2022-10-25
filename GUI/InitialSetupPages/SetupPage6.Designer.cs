@@ -1,4 +1,9 @@
 ﻿
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
 namespace SuchByte.MacroDeck.GUI.InitialSetupPages
 {
     partial class SetupPage6
@@ -6,7 +11,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
         /// <summary> 
         /// Erforderliche Designervariable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary> 
         /// Verwendete Ressourcen bereinigen.
@@ -29,66 +34,66 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
         /// </summary>
         private void InitializeComponent()
         {
-            this.lblAlmostDone = new System.Windows.Forms.Label();
-            this.checkAutoUpdates = new System.Windows.Forms.CheckBox();
-            this.checkAutoStart = new System.Windows.Forms.CheckBox();
+            this.lblAlmostDone = new Label();
+            this.checkAutoUpdates = new CheckBox();
+            this.checkAutoStart = new CheckBox();
             this.SuspendLayout();
             // 
             // lblAlmostDone
             // 
-            this.lblAlmostDone.Font = new System.Drawing.Font("Tahoma", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblAlmostDone.ForeColor = System.Drawing.Color.White;
-            this.lblAlmostDone.ImageAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.lblAlmostDone.Location = new System.Drawing.Point(3, 0);
+            this.lblAlmostDone.Font = new Font("Tahoma", 24F, FontStyle.Regular, GraphicsUnit.Point);
+            this.lblAlmostDone.ForeColor = Color.White;
+            this.lblAlmostDone.ImageAlign = ContentAlignment.BottomCenter;
+            this.lblAlmostDone.Location = new Point(3, 0);
             this.lblAlmostDone.Name = "lblAlmostDone";
-            this.lblAlmostDone.Size = new System.Drawing.Size(685, 45);
+            this.lblAlmostDone.Size = new Size(685, 45);
             this.lblAlmostDone.TabIndex = 7;
             this.lblAlmostDone.Text = "We\'re almost done!";
-            this.lblAlmostDone.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblAlmostDone.TextAlign = ContentAlignment.TopCenter;
             this.lblAlmostDone.UseMnemonic = false;
             // 
             // checkAutoUpdates
             // 
             this.checkAutoUpdates.AutoSize = true;
             this.checkAutoUpdates.Checked = true;
-            this.checkAutoUpdates.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkAutoUpdates.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.checkAutoUpdates.ForeColor = System.Drawing.Color.White;
-            this.checkAutoUpdates.Location = new System.Drawing.Point(16, 100);
+            this.checkAutoUpdates.CheckState = CheckState.Checked;
+            this.checkAutoUpdates.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            this.checkAutoUpdates.ForeColor = Color.White;
+            this.checkAutoUpdates.Location = new Point(16, 100);
             this.checkAutoUpdates.Name = "checkAutoUpdates";
-            this.checkAutoUpdates.Size = new System.Drawing.Size(253, 23);
+            this.checkAutoUpdates.Size = new Size(253, 23);
             this.checkAutoUpdates.TabIndex = 8;
             this.checkAutoUpdates.Text = "Automatically check for updates";
             this.checkAutoUpdates.UseMnemonic = false;
             this.checkAutoUpdates.UseVisualStyleBackColor = true;
-            this.checkAutoUpdates.CheckedChanged += new System.EventHandler(this.CheckAutoUpdates_CheckedChanged);
+            this.checkAutoUpdates.CheckedChanged += new EventHandler(this.CheckAutoUpdates_CheckedChanged);
             // 
             // checkAutoStart
             // 
             this.checkAutoStart.AutoSize = true;
             this.checkAutoStart.Checked = true;
-            this.checkAutoStart.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkAutoStart.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.checkAutoStart.ForeColor = System.Drawing.Color.White;
-            this.checkAutoStart.Location = new System.Drawing.Point(16, 129);
+            this.checkAutoStart.CheckState = CheckState.Checked;
+            this.checkAutoStart.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            this.checkAutoStart.ForeColor = Color.White;
+            this.checkAutoStart.Location = new Point(16, 129);
             this.checkAutoStart.Name = "checkAutoStart";
-            this.checkAutoStart.Size = new System.Drawing.Size(264, 23);
+            this.checkAutoStart.Size = new Size(264, 23);
             this.checkAutoStart.TabIndex = 9;
             this.checkAutoStart.Text = "Automatically start with Windows\r\n";
             this.checkAutoStart.UseMnemonic = false;
             this.checkAutoStart.UseVisualStyleBackColor = true;
-            this.checkAutoStart.CheckedChanged += new System.EventHandler(this.CheckAutoStart_CheckedChanged);
+            this.checkAutoStart.CheckedChanged += new EventHandler(this.CheckAutoStart_CheckedChanged);
             // 
             // SetupPage6
             // 
             
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.AutoScaleMode = AutoScaleMode.Dpi;
+            this.BackColor = Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.checkAutoStart);
             this.Controls.Add(this.checkAutoUpdates);
             this.Controls.Add(this.lblAlmostDone);
             this.Name = "SetupPage6";
-            this.Size = new System.Drawing.Size(691, 571);
+            this.Size = new Size(691, 571);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -96,8 +101,8 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
 
         #endregion
 
-        private System.Windows.Forms.Label lblAlmostDone;
-        private System.Windows.Forms.CheckBox checkAutoUpdates;
-        private System.Windows.Forms.CheckBox checkAutoStart;
+        private Label lblAlmostDone;
+        private CheckBox checkAutoUpdates;
+        private CheckBox checkAutoStart;
     }
 }

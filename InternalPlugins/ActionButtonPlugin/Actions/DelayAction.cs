@@ -1,10 +1,5 @@
-﻿using SuchByte.MacroDeck.GUI;
-using SuchByte.MacroDeck.GUI.CustomControls;
+﻿using System.Threading;
 using SuchByte.MacroDeck.Plugins;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 
 namespace SuchByte.MacroDeck.ActionButton.Plugin // Don't change because of backwards compatibility!
 {
@@ -16,7 +11,7 @@ namespace SuchByte.MacroDeck.ActionButton.Plugin // Don't change because of back
         {
             try
             {
-                Thread.Sleep(int.Parse(this.Configuration));
+                Thread.Sleep(int.Parse(Configuration));
             } catch { }
         }
     }

@@ -1,23 +1,20 @@
-﻿using Fleck;
-using SuchByte.MacroDeck.ActionButton;
-using SuchByte.MacroDeck.JSON;
-using SuchByte.MacroDeck.Plugins;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Fleck;
+using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.Device;
-using SuchByte.MacroDeck.Folders;
-using SuchByte.MacroDeck.Profiles;
-using System.Diagnostics;
-using SuchByte.MacroDeck.Icons;
-using System.Linq;
-using SuchByte.MacroDeck.Logging;
-using System.Net;
 using SuchByte.MacroDeck.Enums;
+using SuchByte.MacroDeck.Folders;
+using SuchByte.MacroDeck.JSON;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Profiles;
+using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.Server
 {
@@ -29,10 +26,10 @@ namespace SuchByte.MacroDeck.Server
 
         private static WebSocketServer _webSocketServer;
 
-        public static WebSocketServer WebSocketServer { get { return _webSocketServer; } }
+        public static WebSocketServer WebSocketServer => _webSocketServer;
 
-        private static readonly List<MacroDeckClient> _clients = new List<MacroDeckClient>();
-        public static List<MacroDeckClient> Clients { get { return _clients; } }
+        private static readonly List<MacroDeckClient> _clients = new();
+        public static List<MacroDeckClient> Clients => _clients;
 
         /// <summary>
         /// Starts the websocket server
@@ -52,7 +49,7 @@ namespace SuchByte.MacroDeck.Server
             if (_webSocketServer != null)
             {
                 MacroDeckLogger.Info("Stopping websocket server...");
-                foreach (MacroDeckClient macroDeckClient in _clients)
+                foreach (var macroDeckClient in _clients)
                 {
                     if (macroDeckClient.SocketConnection != null && macroDeckClient.SocketConnection.IsAvailable)
                     {
@@ -71,10 +68,10 @@ namespace SuchByte.MacroDeck.Server
             {
                 _webSocketServer.Start(socket =>
                 {
-                    MacroDeckClient macroDeckClient = new MacroDeckClient(socket);
+                    var macroDeckClient = new MacroDeckClient(socket);
                     socket.OnOpen = () => OnOpen(macroDeckClient);
                     socket.OnClose = () => OnClose(macroDeckClient);
-                    socket.OnError = delegate (Exception ex) { OnClose(macroDeckClient); };
+                    socket.OnError = delegate { OnClose(macroDeckClient); };
                     socket.OnMessage = message => OnMessage(macroDeckClient, message);
                 });
                 OnServerStateChanged?.Invoke(_webSocketServer, EventArgs.Empty);
@@ -85,9 +82,9 @@ namespace SuchByte.MacroDeck.Server
 
                 MacroDeckLogger.Error("Failed to start server: " + ex.Message + Environment.NewLine + ex.StackTrace);
 
-                using (var msgBox = new GUI.CustomControls.MessageBox())
+                using (var msgBox = new MessageBox())
                 {
-                    msgBox.ShowDialog(Language.LanguageManager.Strings.Error, Language.LanguageManager.Strings.FailedToStartServer + Environment.NewLine + ex.Message, MessageBoxButtons.OK);
+                    msgBox.ShowDialog(LanguageManager.Strings.Error, LanguageManager.Strings.FailedToStartServer + Environment.NewLine + ex.Message, MessageBoxButtons.OK);
                 }
             }
         }
@@ -130,13 +127,13 @@ namespace SuchByte.MacroDeck.Server
 
         private static void OnMessage(MacroDeckClient macroDeckClient, string jsonMessageString)
         {
-            JObject responseObject = JObject.Parse(jsonMessageString);
+            var responseObject = JObject.Parse(jsonMessageString);
 
             if (responseObject["Method"] == null) return;
 
-            if (!Enum.TryParse(typeof(JsonMethod), responseObject["Method"].ToString(), out object method)) return;
+            if (!Enum.TryParse(typeof(JsonMethod), responseObject["Method"].ToString(), out var method)) return;
 
-            MacroDeckLogger.Trace("Received method: " + method.ToString());
+            MacroDeckLogger.Trace("Received method: " + method);
 
             switch (method)
             {
@@ -151,7 +148,7 @@ namespace SuchByte.MacroDeck.Server
 
                     MacroDeckLogger.Info("Connection request from " + macroDeckClient.ClientId);
 
-                    DeviceType deviceType = DeviceType.Unknown;
+                    var deviceType = DeviceType.Unknown;
                     Enum.TryParse(responseObject["Device-Type"].ToString(), out deviceType);
                     macroDeckClient.DeviceType = deviceType;
 
@@ -185,17 +182,14 @@ namespace SuchByte.MacroDeck.Server
                     macroDeckClient.DeviceMessage.Connected(macroDeckClient);
 
 
-                    if (OnDeviceConnectionStateChanged != null)
-                    {
-                        OnDeviceConnectionStateChanged(macroDeckClient, EventArgs.Empty);
-                    }
+                    OnDeviceConnectionStateChanged?.Invoke(macroDeckClient, EventArgs.Empty);
                     MacroDeckLogger.Info(macroDeckClient.ClientId + " connected");
                     break;
                 case JsonMethod.BUTTON_PRESS:
                 case JsonMethod.BUTTON_RELEASE:
                 case JsonMethod.BUTTON_LONG_PRESS:
                 case JsonMethod.BUTTON_LONG_PRESS_RELEASE:
-                    ButtonPressType buttonPressType = method switch
+                    var buttonPressType = method switch
                     {
                         JsonMethod.BUTTON_PRESS => ButtonPressType.SHORT,
                         JsonMethod.BUTTON_RELEASE => ButtonPressType.SHORT_RELEASE,
@@ -207,10 +201,10 @@ namespace SuchByte.MacroDeck.Server
                     try
                     {
                         if (macroDeckClient == null || macroDeckClient.Folder == null || macroDeckClient.Folder.ActionButtons == null) return;
-                        int row = int.Parse(responseObject["Message"].ToString().Split('_')[0]);
-                        int column = int.Parse(responseObject["Message"].ToString().Split('_')[1]);
+                        var row = int.Parse(responseObject["Message"].ToString().Split('_')[0]);
+                        var column = int.Parse(responseObject["Message"].ToString().Split('_')[1]);
 
-                        ActionButton.ActionButton actionButton = macroDeckClient.Folder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
+                        var actionButton = macroDeckClient.Folder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
                         if (actionButton != null)
                         {
                             Execute(actionButton, macroDeckClient.ClientId, buttonPressType);
@@ -232,7 +226,7 @@ namespace SuchByte.MacroDeck.Server
 
         internal static void Execute(ActionButton.ActionButton actionButton, string clientId, ButtonPressType buttonPressType)
         {
-            List< PluginAction> actions = buttonPressType switch
+            var actions = buttonPressType switch
             {
                 ButtonPressType.SHORT => actionButton.Actions,
                 ButtonPressType.SHORT_RELEASE => actionButton.ActionsRelease,
@@ -243,7 +237,7 @@ namespace SuchByte.MacroDeck.Server
 
             Task.Run(() =>
             {
-                foreach (PluginAction action in actions)
+                foreach (var action in actions)
                 {
                     try
                     {
@@ -279,10 +273,7 @@ namespace SuchByte.MacroDeck.Server
             if (folder == null) return;
             macroDeckClient.Folder = folder;
             SendAllButtons(macroDeckClient);
-            if (OnFolderChanged != null)
-            {
-                OnFolderChanged(macroDeckClient, EventArgs.Empty);
-            }
+            OnFolderChanged?.Invoke(macroDeckClient, EventArgs.Empty);
         }
 
         /// <summary>
@@ -291,7 +282,7 @@ namespace SuchByte.MacroDeck.Server
         /// <param name="folder"></param>
         public static void UpdateFolder(MacroDeckFolder folder)
         {
-            foreach (MacroDeckClient macroDeckClient in _clients.FindAll(delegate (MacroDeckClient macroDeckClient)
+            foreach (var macroDeckClient in _clients.FindAll(delegate (MacroDeckClient macroDeckClient)
             {
                 return macroDeckClient.Folder.Equals(folder);
             }))
@@ -331,7 +322,7 @@ namespace SuchByte.MacroDeck.Server
 
         internal static void UpdateState(ActionButton.ActionButton actionButton)
         {
-            foreach (MacroDeckClient macroDeckClient in _clients.FindAll(delegate (MacroDeckClient macroDeckClient)
+            foreach (var macroDeckClient in _clients.FindAll(delegate (MacroDeckClient macroDeckClient)
             {
                 return macroDeckClient.Folder.ActionButtons.Contains(actionButton);
             }))

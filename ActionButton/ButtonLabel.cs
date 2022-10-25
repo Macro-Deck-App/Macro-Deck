@@ -1,8 +1,7 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Drawing;
-using System.Text;
+using Newtonsoft.Json;
+using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.ActionButton
 {
@@ -15,15 +14,12 @@ namespace SuchByte.MacroDeck.ActionButton
 
         public string LabelBase64
         {
-            get { return _labelBase64; }
+            get => _labelBase64;
             set
             {
-                this._labelBase64 = value;
-                this.UpdateLabelHex128_64();
-                if (LabelBase64Changed != null)
-                {
-                    LabelBase64Changed(this, EventArgs.Empty);
-                }
+                _labelBase64 = value;
+                UpdateLabelHex128_64();
+                LabelBase64Changed?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -42,17 +38,17 @@ namespace SuchByte.MacroDeck.ActionButton
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(this._labelHex128_64Base64))
+                if (string.IsNullOrWhiteSpace(_labelHex128_64Base64))
                 {
-                    this.UpdateLabelHex128_64();
+                    UpdateLabelHex128_64();
                 }
-                return this._labelHex128_64Base64;
+                return _labelHex128_64Base64;
             }
         }
 
         private void UpdateLabelHex128_64()
         {
-            ContentAlignment contentAlignment = ContentAlignment.MiddleCenter;
+            var contentAlignment = ContentAlignment.MiddleCenter;
             switch (LabelPosition)
             {
                 case ButtonLabelPosition.TOP:
@@ -62,7 +58,7 @@ namespace SuchByte.MacroDeck.ActionButton
                     contentAlignment = ContentAlignment.BottomCenter;
                     break;
             }
-            this._labelHex128_64Base64 = Utils.Base64.GetBase64ByteArray((Bitmap)Utils.Base64.GetImageFromBase64(this._labelBase64), new Size(128, 64), contentAlignment);
+            _labelHex128_64Base64 = Base64.GetBase64ByteArray((Bitmap)Base64.GetImageFromBase64(_labelBase64), new Size(128, 64), contentAlignment);
         }
     }
 

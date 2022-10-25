@@ -1,4 +1,6 @@
 ﻿
+using System.ComponentModel;
+
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
     partial class BufferedPanel
@@ -6,7 +8,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// <summary>
         /// Erforderliche Designervariable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Verwendete Ressourcen bereinigen.
@@ -29,7 +31,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
+            components = new Container();
         }
 
         #endregion

@@ -1,4 +1,8 @@
 ﻿
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
     partial class ActionConfigControl
@@ -6,7 +10,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// <summary> 
         /// Erforderliche Designervariable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary> 
         /// Verwendete Ressourcen bereinigen.
@@ -33,13 +37,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             // 
             // ActionConfigControl
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ForeColor = System.Drawing.Color.White;
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.AutoScaleMode = AutoScaleMode.Dpi;
+            this.BackColor = Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
+            this.ForeColor = Color.White;
+            this.Margin = new Padding(4, 5, 4, 5);
             this.Name = "ActionConfigControl";
-            this.Size = new System.Drawing.Size(857, 424);
+            this.Size = new Size(857, 424);
             this.ResumeLayout(false);
 
         }

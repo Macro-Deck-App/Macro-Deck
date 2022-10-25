@@ -1,12 +1,6 @@
-﻿using SuchByte.MacroDeck.Language;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Globalization;
-using System.Text;
+﻿using System;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.Language;
 
 namespace SuchByte.MacroDeck.GUI.InitialSetupPages
 {
@@ -17,9 +11,9 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
         public SetupPage1()
         {
             InitializeComponent();
-            this.lblWelcome.Text = LanguageManager.Strings.InitialSetupWelcome;
-            this.lblLetsConfigure.Text = LanguageManager.Strings.InitialSetupLetsConfigure;
-            this.lblSelectLanguage.Text = LanguageManager.Strings.InitialSetupSelectLanguage;
+            lblWelcome.Text = LanguageManager.Strings.InitialSetupWelcome;
+            lblLetsConfigure.Text = LanguageManager.Strings.InitialSetupLetsConfigure;
+            lblSelectLanguage.Text = LanguageManager.Strings.InitialSetupSelectLanguage;
         }
 
        
@@ -27,21 +21,18 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
         private void Languages_SelectedIndexChanged(object sender, EventArgs e)
         {
             LanguageManager.SetLanguage(languages.SelectedItem.ToString());
-            if (LanguageChanged != null)
-            {
-                LanguageChanged(null, EventArgs.Empty);
-            }
+            LanguageChanged?.Invoke(null, EventArgs.Empty);
         }
 
         private void SetupPage1_Load(object sender, EventArgs e)
         {
-            this.languages.SelectedIndexChanged -= this.Languages_SelectedIndexChanged;
-            foreach (Strings languageStrings in LanguageManager.Languages)
+            languages.SelectedIndexChanged -= Languages_SelectedIndexChanged;
+            foreach (var languageStrings in LanguageManager.Languages)
             {
-                this.languages.Items.Add(languageStrings.__Language__);
+                languages.Items.Add(languageStrings.__Language__);
             }
-            this.languages.SelectedItem = LanguageManager.Strings.__Language__;
-            this.languages.SelectedIndexChanged += this.Languages_SelectedIndexChanged;
+            languages.SelectedItem = LanguageManager.Strings.__Language__;
+            languages.SelectedIndexChanged += Languages_SelectedIndexChanged;
             
         }
     }

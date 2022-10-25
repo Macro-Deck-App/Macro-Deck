@@ -1,76 +1,65 @@
-﻿using Newtonsoft.Json;
-using SuchByte.MacroDeck.ExtensionStore;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader;
-using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Plugins;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.IO.Compression;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
     public partial class ExtensionStoreDownloader : DialogForm
     {
-        private int _pluginsToInstall = 0;
-        private int _pluginsInstalled = 0;
+        private int _pluginsToInstall;
+        private int _pluginsInstalled;
 
         private List<ExtensionStoreDownloaderPackageInfoModel> _packageIds;
 
 
         public ExtensionStoreDownloader(List<ExtensionStoreDownloaderPackageInfoModel> packageIds)
         {
-            this.Owner = MacroDeck.MainWindow;
-            this._packageIds = packageIds;
+            Owner = MacroDeck.MainWindow;
+            _packageIds = packageIds;
             InitializeComponent();
-            this.SetCloseIconVisible(false);
+            SetCloseIconVisible(false);
 
-            this.FormClosing += ExtensionStoreDownloader_FormClosing;
+            FormClosing += ExtensionStoreDownloader_FormClosing;
         }
 
         private void ExtensionStoreDownloader_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!e.Cancel)
-                PUtils.SetNativeEnabled(this.Owner.Handle, true);
+                PUtils.SetNativeEnabled(Owner.Handle, true);
         }
 
         public void DownloadAndInstall()
         {
-            this._pluginsToInstall = this._packageIds.Count;
+            _pluginsToInstall = _packageIds.Count;
             
-            this.Invoke(new Action(() => this.lblPackagesToDownload.Text =string.Format(LanguageManager.Strings.DownloadingAndInstallingXPackages, this._pluginsToInstall)));
-            foreach (var packageInfo in this._packageIds)
+            Invoke(new Action(() => lblPackagesToDownload.Text =string.Format(LanguageManager.Strings.DownloadingAndInstallingXPackages, _pluginsToInstall)));
+            foreach (var packageInfo in _packageIds)
             {
                 var extensionStoreDownloaderItem = new ExtensionStoreDownloaderItem(packageInfo);
                 extensionStoreDownloaderItem.OnInstallationCompleted += (sender, e) =>
                 {
-                    this._pluginsInstalled++;
-                    if (this._pluginsInstalled == this._pluginsToInstall)
+                    _pluginsInstalled++;
+                    if (_pluginsInstalled == _pluginsToInstall)
                     {
-                        this.Invoke(new Action(() =>
+                        Invoke(() =>
                         {
-                            this.lblPackagesToDownload.Text = string.Format(LanguageManager.Strings.InstallationOfXPackagesDone, this._pluginsToInstall);
-                            this.btnDone.Visible = true;
-                        }));
-                        MacroDeckLogger.Info(typeof(ExtensionStoreDownloader), $"*** Installation of {this._pluginsToInstall} package(s) done ***");
+                            lblPackagesToDownload.Text = string.Format(LanguageManager.Strings.InstallationOfXPackagesDone, _pluginsToInstall);
+                            btnDone.Visible = true;
+                        });
+                        MacroDeckLogger.Info(typeof(ExtensionStoreDownloader), $"*** Installation of {_pluginsToInstall} package(s) done ***");
                        
                     }
                 };
-                this.Invoke(new Action(() => this.downloadList.Controls.Add(extensionStoreDownloaderItem)));
+                Invoke(() => downloadList.Controls.Add(extensionStoreDownloaderItem));
             }
             
         }
@@ -78,7 +67,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         private void ExtensionStoreDownloader_Load(object sender, EventArgs e)
         {
             CenterToScreen();
-            PUtils.SetNativeEnabled(this.Owner.Handle, false);
+            PUtils.SetNativeEnabled(Owner.Handle, false);
             Task.Run(() =>
             {
                 DownloadAndInstall();
@@ -89,19 +78,19 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         {
             if (PluginManager.UpdatedPlugins.Count > 0)
             {
-                using (var msgBox = new CustomControls.MessageBox())
+                using (var msgBox = new MessageBox())
                 {
-                    if (msgBox.ShowDialog(LanguageManager.Strings.MacroDeckNeedsARestart, Language.LanguageManager.Strings.MacroDeckMustBeRestartedForTheChanges, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    if (msgBox.ShowDialog(LanguageManager.Strings.MacroDeckNeedsARestart, LanguageManager.Strings.MacroDeckMustBeRestartedForTheChanges, MessageBoxButtons.YesNo) == DialogResult.Yes)
                     {
                         MacroDeck.RestartMacroDeck();
                     }
                 }
             }
-            this.Close();
+            Close();
         }
     }
 
-    partial class PUtils
+    class PUtils
     {
         const int GWL_STYLE = -16;
         const int WS_DISABLED = 0x08000000;

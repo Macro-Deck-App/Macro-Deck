@@ -1,12 +1,6 @@
 ﻿using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
+using Form = System.Windows.Forms.Form;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
@@ -15,33 +9,30 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         public WaitDialog()
         {
             InitializeComponent();
-            this.SetCloseIconVisible(false);
-            this.lblPleaseWait.Text = LanguageManager.Strings.PleaseWait;
+            SetCloseIconVisible(false);
+            lblPleaseWait.Text = LanguageManager.Strings.PleaseWait;
         }
     }
 
     public static class SpinnerDialog
     {
-        private static WaitDialog waitDialog = new WaitDialog();
+        private static WaitDialog waitDialog = new();
 
-        public static void SetVisisble(bool visible, System.Windows.Forms.Form owner)
+        public static void SetVisisble(bool visible, Form owner)
         {
-            if (owner != null)
+            owner?.Invoke(() =>
             {
-                owner.Invoke(new Action(() =>
+                if (visible)
                 {
-                    if (visible)
-                    {
-                        if (waitDialog.Visible) return;
-                        waitDialog.ShowDialog();
-                    }
-                    else
-                    {
-                        waitDialog.Hide();
-                    }
-                }));
-            }
-           
+                    if (waitDialog.Visible) return;
+                    waitDialog.ShowDialog();
+                }
+                else
+                {
+                    waitDialog.Hide();
+                }
+            });
+
         }
 
 

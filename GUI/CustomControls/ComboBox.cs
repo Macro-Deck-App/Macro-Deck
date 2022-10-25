@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Text;
 using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
@@ -13,16 +10,16 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
     {
 
         private int _borderRadius = 8;
-        private bool _regionSet = false;
-        private bool _hover = false;
+        private bool _regionSet;
+        private bool _hover;
 
         public int BorderRadius
         {
-            get { return _borderRadius; }
+            get => _borderRadius;
             set
             {
                 _borderRadius = value;
-                this.Invalidate();
+                Invalidate();
             }
         }
 
@@ -36,37 +33,37 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                      | ControlStyles.UserPaint,
                      true);
 
-            this.DoubleBuffered = true;
-            this.BackColor = Color.FromArgb(65, 65, 65);
-            this.ForeColor = Color.White;
-            this.Cursor = Cursors.Hand;
-            this.MouseEnter += MouseEnterEvent;
-            this.MouseLeave += MouseLeaveEvent;
-            this.SelectedIndexChanged += SelectedIndexEvent;
+            DoubleBuffered = true;
+            BackColor = Color.FromArgb(65, 65, 65);
+            ForeColor = Color.White;
+            Cursor = Cursors.Hand;
+            MouseEnter += MouseEnterEvent;
+            MouseLeave += MouseLeaveEvent;
+            SelectedIndexChanged += SelectedIndexEvent;
         }
 
         private void SelectedIndexEvent(object sender, EventArgs e)
         {
-            this._hover = false;
-            this.Invalidate();
+            _hover = false;
+            Invalidate();
         }
 
         private void MouseEnterEvent(object sender, EventArgs e)
         {
-            this._hover = true;
-            this.Invalidate();
+            _hover = true;
+            Invalidate();
         }
 
         private void MouseLeaveEvent(object sender, EventArgs e)
         {
-            this._hover = false;
-            this.Invalidate();
+            _hover = false;
+            Invalidate();
         }
 
         private GraphicsPath GetFigurePath(Rectangle rect, float radius)
         {
-            GraphicsPath path = new GraphicsPath();
-            float curveSize = radius * 2F;
+            var path = new GraphicsPath();
+            var curveSize = radius * 2F;
             path.StartFigure();
             path.AddArc(rect.X, rect.Y, curveSize, curveSize, 180, 90);
             path.AddArc(rect.Right - curveSize, rect.Y, curveSize, curveSize, 270, 90);
@@ -80,42 +77,42 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             base.OnPaint(pe);
             
-            Rectangle rectSurface = this.ClientRectangle;
-            Rectangle rectText = new Rectangle
+            var rectSurface = ClientRectangle;
+            var rectText = new Rectangle
             {
-                Height = this.Height,
-                Width = this.Width,
+                Height = Height,
+                Width = Width,
                 X = 10,
             };
-            int smoothSize = 2;
-            if (this._borderRadius > 2)
+            var smoothSize = 2;
+            if (_borderRadius > 2)
             {
-                using (GraphicsPath pathSurface = GetFigurePath(rectSurface, this._borderRadius))
-                using (Pen penSurface = new Pen(this.Parent.BackColor, smoothSize))
+                using (var pathSurface = GetFigurePath(rectSurface, _borderRadius))
+                using (var penSurface = new Pen(Parent.BackColor, smoothSize))
                 {
                     pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                    if (!this._regionSet)
+                    if (!_regionSet)
                     {
-                        this.Region = new Region(pathSurface);
-                        this._regionSet = true; // Preventing future region changes because the event raises on every region change
+                        Region = new Region(pathSurface);
+                        _regionSet = true; // Preventing future region changes because the event raises on every region change
                     }
                     pe.Graphics.DrawPath(penSurface, pathSurface);
                 }
             }
 
 
-            StringFormat stringFormat = new StringFormat
+            var stringFormat = new StringFormat
             {
                 Alignment = StringAlignment.Near,
                 LineAlignment = StringAlignment.Center
             };
 
-            using (SolidBrush brush = new SolidBrush(this.Enabled ? (this._hover ? Color.White : Color.Silver) : Color.FromArgb(95,95,95)))
+            using (var brush = new SolidBrush(Enabled ? (_hover ? Color.White : Color.Silver) : Color.FromArgb(95,95,95)))
             {
-                pe.Graphics.DrawString(this.Text, this.Font, brush, rectText, stringFormat);
-                if (this.Enabled)
+                pe.Graphics.DrawString(Text, Font, brush, rectText, stringFormat);
+                if (Enabled)
                 {
-                    pe.Graphics.FillPolygon(brush, new Point[] { new Point(this.Width - 10, this.Height / 2 - 2), new Point(this.Width - 20, this.Height / 2 - 2), new Point(this.Width - 15, this.Height / 2 + 3) });
+                    pe.Graphics.FillPolygon(brush, new Point[] { new(Width - 10, Height / 2 - 2), new(Width - 20, Height / 2 - 2), new(Width - 15, Height / 2 + 3) });
                 }
             }
 

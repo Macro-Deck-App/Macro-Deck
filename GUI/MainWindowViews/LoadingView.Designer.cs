@@ -1,4 +1,9 @@
 ﻿
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.Properties;
+
 namespace SuchByte.MacroDeck.GUI.MainWindowContents
 {
     partial class LoadingView
@@ -6,7 +11,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         /// <summary> 
         /// Erforderliche Designervariable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary> 
         /// Verwendete Ressourcen bereinigen.
@@ -29,41 +34,41 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         /// </summary>
         private void InitializeComponent()
         {
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.pictureBox1 = new PictureBox();
+            ((ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.pictureBox1.Image = global::SuchByte.MacroDeck.Properties.Resources.Macro_Deck_2021;
-            this.pictureBox1.Location = new System.Drawing.Point(3, 109);
+            this.pictureBox1.Anchor = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom) 
+                                                        | AnchorStyles.Left) 
+                                                       | AnchorStyles.Right)));
+            this.pictureBox1.BackgroundImageLayout = ImageLayout.Zoom;
+            this.pictureBox1.Image = Resources.Macro_Deck_2021;
+            this.pictureBox1.Location = new Point(3, 109);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(1131, 309);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.pictureBox1.Size = new Size(1131, 309);
+            this.pictureBox1.SizeMode = PictureBoxSizeMode.CenterImage;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
             // LoadingView
             // 
             
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.AutoScaleMode = AutoScaleMode.Dpi;
+            this.BackColor = Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.pictureBox1);
-            this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ForeColor = System.Drawing.Color.White;
+            this.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            this.ForeColor = Color.White;
             this.Name = "LoadingView";
-            this.Size = new System.Drawing.Size(1137, 540);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.Size = new Size(1137, 540);
+            ((ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private PictureBox pictureBox1;
     }
 }

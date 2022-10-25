@@ -1,4 +1,11 @@
 ﻿
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Properties;
+
 namespace SuchByte.MacroDeck.GUI.MainWindowViews
 {
     partial class ExtensionsView
@@ -6,7 +13,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
         /// <summary> 
         /// Erforderliche Designervariable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary> 
         /// Verwendete Ressourcen bereinigen.
@@ -29,73 +36,73 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
         /// </summary>
         private void InitializeComponent()
         {
-            this.content = new System.Windows.Forms.Panel();
-            this.radioInstalled = new SuchByte.MacroDeck.GUI.CustomControls.ButtonRadioButton();
-            this.radioOnline = new SuchByte.MacroDeck.GUI.CustomControls.ButtonRadioButton();
+            this.content = new Panel();
+            this.radioInstalled = new ButtonRadioButton();
+            this.radioOnline = new ButtonRadioButton();
             this.SuspendLayout();
             // 
             // content
             // 
-            this.content.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.content.Location = new System.Drawing.Point(0, 45);
+            this.content.Anchor = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom) 
+                                                    | AnchorStyles.Left) 
+                                                   | AnchorStyles.Right)));
+            this.content.Location = new Point(0, 45);
             this.content.Name = "content";
-            this.content.Size = new System.Drawing.Size(1137, 495);
+            this.content.Size = new Size(1137, 495);
             this.content.TabIndex = 0;
             // 
             // radioInstalled
             // 
             this.radioInstalled.BorderRadius = 8;
             this.radioInstalled.Checked = true;
-            this.radioInstalled.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioInstalled.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.radioInstalled.ForeColor = System.Drawing.Color.White;
-            this.radioInstalled.Icon = global::SuchByte.MacroDeck.Properties.Resources.Harddisk;
-            this.radioInstalled.Location = new System.Drawing.Point(3, 3);
+            this.radioInstalled.Cursor = Cursors.Hand;
+            this.radioInstalled.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            this.radioInstalled.ForeColor = Color.White;
+            this.radioInstalled.Icon = Resources.Harddisk;
+            this.radioInstalled.Location = new Point(3, 3);
             this.radioInstalled.Name = "radioInstalled";
-            this.radioInstalled.Size = new System.Drawing.Size(186, 37);
+            this.radioInstalled.Size = new Size(186, 37);
             this.radioInstalled.TabIndex = 1;
             this.radioInstalled.TabStop = true;
             this.radioInstalled.Text = "Installed";
             this.radioInstalled.UseVisualStyleBackColor = true;
-            this.radioInstalled.CheckedChanged += new System.EventHandler(this.RadioInstalled_CheckedChanged);
+            this.radioInstalled.CheckedChanged += new EventHandler(this.RadioInstalled_CheckedChanged);
             // 
             // radioOnline
             // 
             this.radioOnline.BorderRadius = 8;
-            this.radioOnline.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioOnline.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.radioOnline.ForeColor = System.Drawing.Color.White;
-            this.radioOnline.Icon = global::SuchByte.MacroDeck.Properties.Resources.Web2;
-            this.radioOnline.Location = new System.Drawing.Point(195, 3);
+            this.radioOnline.Cursor = Cursors.Hand;
+            this.radioOnline.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            this.radioOnline.ForeColor = Color.White;
+            this.radioOnline.Icon = Resources.Web2;
+            this.radioOnline.Location = new Point(195, 3);
             this.radioOnline.Name = "radioOnline";
-            this.radioOnline.Size = new System.Drawing.Size(186, 37);
+            this.radioOnline.Size = new Size(186, 37);
             this.radioOnline.TabIndex = 2;
             this.radioOnline.Text = "Online";
             this.radioOnline.UseVisualStyleBackColor = true;
-            this.radioOnline.CheckedChanged += new System.EventHandler(this.RadioOnline_CheckedChanged);
+            this.radioOnline.CheckedChanged += new EventHandler(this.RadioOnline_CheckedChanged);
             // 
             // ExtensionsView
             // 
             
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.AutoScaleMode = AutoScaleMode.Dpi;
+            this.BackColor = Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.radioOnline);
             this.Controls.Add(this.radioInstalled);
             this.Controls.Add(this.content);
-            this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
             this.Name = "ExtensionsView";
-            this.Size = new System.Drawing.Size(1137, 540);
-            this.Load += new System.EventHandler(this.ExtensionStoreView_Load);
+            this.Size = new Size(1137, 540);
+            this.Load += new EventHandler(this.ExtensionStoreView_Load);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Panel content;
-        private CustomControls.ButtonRadioButton radioInstalled;
-        private CustomControls.ButtonRadioButton radioOnline;
+        private Panel content;
+        private ButtonRadioButton radioInstalled;
+        private ButtonRadioButton radioOnline;
     }
 }

@@ -1,4 +1,6 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
 using SuchByte.MacroDeck.GUI.CustomControls;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs
@@ -8,7 +10,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -206,12 +208,12 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         #endregion
 
         private RoundedComboBox variableType;
-        private System.Windows.Forms.Label lblType;
-        private CustomControls.ButtonPrimary btnOk;
-        private System.Windows.Forms.Label lblName;
+        private Label lblType;
+        private ButtonPrimary btnOk;
+        private Label lblName;
         private RoundedTextBox variableName;
-        private System.Windows.Forms.Label lblValue;
+        private Label lblValue;
         private RoundedTextBox variableValue;
-        private System.Windows.Forms.LinkLabel btnDelete;
+        private LinkLabel btnDelete;
     }
 }

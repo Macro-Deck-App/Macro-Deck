@@ -1,24 +1,18 @@
-﻿using Microsoft.Win32;
-using Newtonsoft.Json.Linq;
+﻿using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using SuchByte.MacroDeck.Backups;
 using SuchByte.MacroDeck.GUI.CustomControls.Settings;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.GUI.MainWindowContents
 {
@@ -27,13 +21,13 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         public SettingsView(int page = 0)
         {
             InitializeComponent();
-            this.verticalTabControl.SelectTab(page);
+            verticalTabControl.SelectTab(page);
             if (!DesignMode)
             {
-                this.verticalTabControl.SelectedTabColor = Colors.WindowsAccentColor;
+                verticalTabControl.SelectedTabColor = Colors.WindowsAccentColor;
             }
-            this.Dock = DockStyle.Fill;
-            this.UpdateTranslation();
+            Dock = DockStyle.Fill;
+            UpdateTranslation();
             Updater.Updater.OnUpdateAvailable += UpdateAvailable;
             BackupManager.BackupSaved += BackupManager_BackupSaved;
             BackupManager.BackupFailed += BackupManager_BackupFailed;
@@ -42,143 +36,143 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void UpdateAvailable(object sender, EventArgs e)
         {
-            this.verticalTabControl.SetNotification(2, Updater.Updater.UpdateAvailable);
+            verticalTabControl.SetNotification(2, Updater.Updater.UpdateAvailable);
         }
 
         private void UpdateTranslation()
         {
-            this.Name = LanguageManager.Strings.SettingsTitle;
-            this.tabGeneral.Text = LanguageManager.Strings.General;
-            this.tabConnection.Text = LanguageManager.Strings.Connection;
-            this.tabUpdater.Text = LanguageManager.Strings.Updates;
-            this.tabAbout.Text = LanguageManager.Strings.About;
-            this.lblGeneral.Text = LanguageManager.Strings.General;
-            this.lblBehaviour.Text = LanguageManager.Strings.Behaviour;
-            this.checkStartWindows.Text = LanguageManager.Strings.AutomaticallyStartWithWindows;
-            this.checkIconCache.Text = LanguageManager.Strings.EnableIconCache;
-            this.lblLanguage.Text = LanguageManager.Strings.Language;
-            this.lblConnection.Text = LanguageManager.Strings.Connection;
-            this.lblNetworkAdapter.Text = LanguageManager.Strings.NetworkAdapter;
-            this.lblIpAddessLabel.Text = LanguageManager.Strings.IPAddress;
-            this.lblPort.Text = LanguageManager.Strings.Port;
-            this.btnChangePort.Text = LanguageManager.Strings.Ok;
-            this.groupConnectionInfo.Text = LanguageManager.Strings.Info;
-            this.lblConnectionInfo.Text = LanguageManager.Strings.ConfigureNetworkInfo;
-            this.lblUpdates.Text = LanguageManager.Strings.Updates;
-            this.checkAutoUpdate.Text = LanguageManager.Strings.AutomaticallyCheckUpdates;
-            this.lblInstalledVersionLabel.Text = LanguageManager.Strings.InstalledVersion;
-            this.tabBackups.Text = LanguageManager.Strings.Backups;
-            this.lblBackups.Text = LanguageManager.Strings.Backups;
-            this.btnCreateBackup.Text = LanguageManager.Strings.CreateBackup;
-            this.checkInstallBetaVersions.Text = LanguageManager.Strings.InstallBetaVersions;
-            this.btnCheckUpdates.Text = LanguageManager.Strings.CheckForUpdatesNow;
-            this.lblBuildLabel.Text = LanguageManager.Strings.VersionBuild;
-            this.lblBuild.Text = MacroDeck.Version.Build.ToString();
-            this.lblWebSocketAPILabel.Text = LanguageManager.Strings.WebSocketAPIVersion;
-            this.lblPluginAPILabel.Text = LanguageManager.Strings.PluginAPIVersion;
-            this.lblInstalledPluginsLabel.Text = LanguageManager.Strings.InstalledPlugins;
-            this.lblTranslationBy.Text = string.Format(LanguageManager.Strings.XTranslationByX, LanguageManager.Strings.__Language__, LanguageManager.Strings.__Author__);
+            Name = LanguageManager.Strings.SettingsTitle;
+            tabGeneral.Text = LanguageManager.Strings.General;
+            tabConnection.Text = LanguageManager.Strings.Connection;
+            tabUpdater.Text = LanguageManager.Strings.Updates;
+            tabAbout.Text = LanguageManager.Strings.About;
+            lblGeneral.Text = LanguageManager.Strings.General;
+            lblBehaviour.Text = LanguageManager.Strings.Behaviour;
+            checkStartWindows.Text = LanguageManager.Strings.AutomaticallyStartWithWindows;
+            checkIconCache.Text = LanguageManager.Strings.EnableIconCache;
+            lblLanguage.Text = LanguageManager.Strings.Language;
+            lblConnection.Text = LanguageManager.Strings.Connection;
+            lblNetworkAdapter.Text = LanguageManager.Strings.NetworkAdapter;
+            lblIpAddessLabel.Text = LanguageManager.Strings.IPAddress;
+            lblPort.Text = LanguageManager.Strings.Port;
+            btnChangePort.Text = LanguageManager.Strings.Ok;
+            groupConnectionInfo.Text = LanguageManager.Strings.Info;
+            lblConnectionInfo.Text = LanguageManager.Strings.ConfigureNetworkInfo;
+            lblUpdates.Text = LanguageManager.Strings.Updates;
+            checkAutoUpdate.Text = LanguageManager.Strings.AutomaticallyCheckUpdates;
+            lblInstalledVersionLabel.Text = LanguageManager.Strings.InstalledVersion;
+            tabBackups.Text = LanguageManager.Strings.Backups;
+            lblBackups.Text = LanguageManager.Strings.Backups;
+            btnCreateBackup.Text = LanguageManager.Strings.CreateBackup;
+            checkInstallBetaVersions.Text = LanguageManager.Strings.InstallBetaVersions;
+            btnCheckUpdates.Text = LanguageManager.Strings.CheckForUpdatesNow;
+            lblBuildLabel.Text = LanguageManager.Strings.VersionBuild;
+            lblBuild.Text = MacroDeck.Version.Build.ToString();
+            lblWebSocketAPILabel.Text = LanguageManager.Strings.WebSocketAPIVersion;
+            lblPluginAPILabel.Text = LanguageManager.Strings.PluginAPIVersion;
+            lblInstalledPluginsLabel.Text = LanguageManager.Strings.InstalledPlugins;
+            lblTranslationBy.Text = string.Format(LanguageManager.Strings.XTranslationByX, LanguageManager.Strings.__Language__, LanguageManager.Strings.__Author__);
             Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
         }
 
         private void Settings_Load(object sender, EventArgs e)
         {
-            this.LoadAutoStart();
-            this.LoadLanguage();
-            this.LoadNetworkAdapters();
-            this.LoadUpdateChannel();
-            this.LoadAutoUpdate();
-            this.LoadIconCache();
-            this.LoadBackups();
+            LoadAutoStart();
+            LoadLanguage();
+            LoadNetworkAdapters();
+            LoadUpdateChannel();
+            LoadAutoUpdate();
+            LoadIconCache();
+            LoadBackups();
 
-            this.lblInstalledVersion.Text = MacroDeck.Version.VersionString;
-            this.lblWebsocketAPIVersion.Text = MacroDeck.ApiVersion.ToString();
-            this.lblPluginAPIVersion.Text = MacroDeck.PluginApiVersion.ToString();
-            this.lblMacroDeck.Text = "Macro Deck " + MacroDeck.Version.VersionString;
-            this.lblInstalledPlugins.Text = PluginManager.Plugins.Count.ToString();
+            lblInstalledVersion.Text = MacroDeck.Version.VersionString;
+            lblWebsocketAPIVersion.Text = MacroDeck.ApiVersion.ToString();
+            lblPluginAPIVersion.Text = MacroDeck.PluginApiVersion.ToString();
+            lblMacroDeck.Text = "Macro Deck " + MacroDeck.Version.VersionString;
+            lblInstalledPlugins.Text = PluginManager.Plugins.Count.ToString();
 
-            this.verticalTabControl.SetNotification(2, Updater.Updater.UpdateAvailable);
+            verticalTabControl.SetNotification(2, Updater.Updater.UpdateAvailable);
 
             if (Updater.Updater.UpdateAvailable)
             {
-                this.AddUpdateAvailableControl();
+                AddUpdateAvailableControl();
             }
 
         }
 
         private void LoadLanguage()
         {
-            this.language.SelectedIndexChanged -= Language_SelectedIndexChanged;
-            this.language.Items.Clear();
-            foreach (Strings strings in LanguageManager.Languages)
+            language.SelectedIndexChanged -= Language_SelectedIndexChanged;
+            language.Items.Clear();
+            foreach (var strings in LanguageManager.Languages)
             {
-                this.language.Items.Add(strings.__Language__);
+                language.Items.Add(strings.__Language__);
             }
-            this.language.Text = MacroDeck.Configuration.Language;
-            this.language.SelectedIndexChanged += Language_SelectedIndexChanged;
+            language.Text = MacroDeck.Configuration.Language;
+            language.SelectedIndexChanged += Language_SelectedIndexChanged;
         }
 
         private void LoadAutoUpdate()
         {
-            this.checkAutoUpdate.CheckedChanged -= this.CheckAutoUpdate_CheckedChanged;
-            this.checkAutoUpdate.Checked = MacroDeck.Configuration.AutoUpdates;
-            this.checkAutoUpdate.CheckedChanged += new EventHandler(this.CheckAutoUpdate_CheckedChanged);
+            checkAutoUpdate.CheckedChanged -= CheckAutoUpdate_CheckedChanged;
+            checkAutoUpdate.Checked = MacroDeck.Configuration.AutoUpdates;
+            checkAutoUpdate.CheckedChanged += CheckAutoUpdate_CheckedChanged;
         }
 
         private void LoadAutoStart()
         {
-            this.checkStartWindows.CheckedChanged -= this.CheckStartWindows_CheckedChanged;
-            this.checkStartWindows.Checked = MacroDeck.Configuration.AutoStart;
-            this.checkStartWindows.CheckedChanged += new EventHandler(this.CheckStartWindows_CheckedChanged);
+            checkStartWindows.CheckedChanged -= CheckStartWindows_CheckedChanged;
+            checkStartWindows.Checked = MacroDeck.Configuration.AutoStart;
+            checkStartWindows.CheckedChanged += CheckStartWindows_CheckedChanged;
         }
 
         private void LoadIconCache()
         {
-            this.checkIconCache.CheckedChanged -= this.CheckIconCache_CheckedChanged;
-            this.checkIconCache.Checked = MacroDeck.Configuration.CacheIcons;
-            this.checkIconCache.CheckedChanged += this.CheckIconCache_CheckedChanged;
+            checkIconCache.CheckedChanged -= CheckIconCache_CheckedChanged;
+            checkIconCache.Checked = MacroDeck.Configuration.CacheIcons;
+            checkIconCache.CheckedChanged += CheckIconCache_CheckedChanged;
 
         }
 
         private void LoadUpdateChannel()
         {
-            this.checkInstallBetaVersions.CheckedChanged -= CheckInstallBetaVersions_CheckedChanged;
-            this.checkInstallBetaVersions.Checked = MacroDeck.Configuration.UpdateBetaVersions;
-            this.checkInstallBetaVersions.CheckedChanged += CheckInstallBetaVersions_CheckedChanged;
+            checkInstallBetaVersions.CheckedChanged -= CheckInstallBetaVersions_CheckedChanged;
+            checkInstallBetaVersions.Checked = MacroDeck.Configuration.UpdateBetaVersions;
+            checkInstallBetaVersions.CheckedChanged += CheckInstallBetaVersions_CheckedChanged;
         }
 
         private void LoadBackups()
         {
-            this.backupsPanel.Controls.Clear();
-            foreach (MacroDeckBackupInfo macroDeckBackupInfo in BackupManager.GetBackups().ToArray())
+            backupsPanel.Controls.Clear();
+            foreach (var macroDeckBackupInfo in BackupManager.GetBackups().ToArray())
             {
-                BackupItem backupItem = new BackupItem(macroDeckBackupInfo);
-                this.backupsPanel.Controls.Add(backupItem);
+                var backupItem = new BackupItem(macroDeckBackupInfo);
+                backupsPanel.Controls.Add(backupItem);
             }
         }
 
         private void CheckInstallBetaVersions_CheckedChanged(object sender, EventArgs e)
         {
-            if (this.checkInstallBetaVersions.Checked)
+            if (checkInstallBetaVersions.Checked)
             {
-                using (var msgBox = new CustomControls.MessageBox())
+                using (var msgBox = new MessageBox())
                 {
                     if (msgBox.ShowDialog(LanguageManager.Strings.Warning, LanguageManager.Strings.WarningBetaVersions, MessageBoxButtons.YesNo) == DialogResult.Yes)
                     {
-                        this.updaterPanel.Controls.Clear();
+                        updaterPanel.Controls.Clear();
                         MacroDeck.Configuration.UpdateBetaVersions = true;
                         MacroDeck.SaveConfiguration();
                         Updater.Updater.CheckForUpdatesAsync();
                     }
                     else
                     {
-                        this.LoadUpdateChannel();
+                        LoadUpdateChannel();
                     }
                 }
             }
             else
             {
-                this.updaterPanel.Controls.Clear();
+                updaterPanel.Controls.Clear();
                 MacroDeck.Configuration.UpdateBetaVersions = false;
                 MacroDeck.SaveConfiguration();
                 Updater.Updater.CheckForUpdatesAsync();
@@ -187,28 +181,28 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void LoadNetworkAdapters()
         {
-            this.networkAdapter.SelectedIndexChanged -= this.NetworkAdapter_SelectedIndexChanged;
-            this.networkAdapter.Items.Clear();
+            networkAdapter.SelectedIndexChanged -= NetworkAdapter_SelectedIndexChanged;
+            networkAdapter.Items.Clear();
             try
             {
-                NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
-                foreach (NetworkInterface adapter in adapters)
+                var adapters = NetworkInterface.GetAllNetworkInterfaces();
+                foreach (var adapter in adapters)
                 {
-                    this.networkAdapter.Items.Add(adapter.Name);
+                    networkAdapter.Items.Add(adapter.Name);
                 }
             }
             catch { }
-            this.networkAdapter.Text = this.GetAdapterFromIPAddress(MacroDeck.Configuration.Host_Address);
-            this.lblIpAddress.Text = MacroDeck.Configuration.Host_Address;
-            this.networkAdapter.SelectedIndexChanged += new EventHandler(this.NetworkAdapter_SelectedIndexChanged);
+            networkAdapter.Text = GetAdapterFromIPAddress(MacroDeck.Configuration.Host_Address);
+            lblIpAddress.Text = MacroDeck.Configuration.Host_Address;
+            networkAdapter.SelectedIndexChanged += NetworkAdapter_SelectedIndexChanged;
         }
 
         private string GetAdapterFromIPAddress(string address)
         {
-            NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
-            foreach (NetworkInterface adapter in adapters)
+            var adapters = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (var adapter in adapters)
             {
-                foreach (UnicastIPAddressInformation ip in adapter.GetIPProperties().UnicastAddresses)
+                foreach (var ip in adapter.GetIPProperties().UnicastAddresses)
                 {
                     if (ip.Address.AddressFamily == AddressFamily.InterNetwork && ip.Address.ToString().Equals(address))
                     {
@@ -226,7 +220,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             {
                 return null;
             }
-            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
+            var host = Dns.GetHostEntry(Dns.GetHostName());
 
             return host
                 .AddressList
@@ -235,12 +229,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         public string GetIPAddressFromAdapter(string adapterName)
         {
-            NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
-            foreach (NetworkInterface adapter in adapters)
+            var adapters = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (var adapter in adapters)
             {
                 if (adapter.Name.Equals(adapterName))
                 {
-                    foreach (UnicastIPAddressInformation ip in adapter.GetIPProperties().UnicastAddresses)
+                    foreach (var ip in adapter.GetIPProperties().UnicastAddresses)
                     {
                         if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
                             return ip.Address.ToString();
@@ -254,20 +248,20 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         {
             if (networkAdapter.SelectedItem.ToString().Equals("All"))
             {
-                this.lblIpAddress.Text = "0.0.0.0";
+                lblIpAddress.Text = "0.0.0.0";
             }
             else
             {
-                this.lblIpAddress.Text = this.GetIPAddressFromAdapter(networkAdapter.SelectedItem.ToString());
+                lblIpAddress.Text = GetIPAddressFromAdapter(networkAdapter.SelectedItem.ToString());
             }
-            MacroDeck.Configuration.Host_Address = this.lblIpAddress.Text;
+            MacroDeck.Configuration.Host_Address = lblIpAddress.Text;
             MacroDeck.SaveConfiguration();
         }
 
         private void BtnChangePort_Click(object sender, EventArgs e)
         {
-            if (this.port.Value == MacroDeck.Configuration.Host_Port) return;
-            MacroDeck.Configuration.Host_Port = (int)this.port.Value;
+            if (port.Value == MacroDeck.Configuration.Host_Port) return;
+            MacroDeck.Configuration.Host_Port = (int)port.Value;
             MacroDeck.SaveConfiguration();
             MacroDeckServer.Start(MacroDeck.Configuration.Host_Address, MacroDeck.Configuration.Host_Port);
         }
@@ -286,11 +280,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void BtnCheckUpdates_Click(object sender, EventArgs e)
         {
-            this.Invoke(new Action(() => {
-                this.btnCheckUpdates.Enabled = false;
-                this.btnCheckUpdates.Spinner = true;
-                }
-            ));
+            Invoke(() => {
+                btnCheckUpdates.Enabled = false;
+                btnCheckUpdates.Spinner = true;
+            });
             Updater.Updater.OnLatestVersionInstalled += OnLatestVersion;
             Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
             Updater.Updater.CheckForUpdatesAsync();
@@ -299,15 +292,15 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private void OnLatestVersion(object sender, EventArgs e)
         {
             Updater.Updater.OnLatestVersionInstalled -= OnLatestVersion;
-            this.Invoke(new Action(() =>
+            Invoke(() =>
             {
-                this.btnCheckUpdates.Enabled = true;
-                this.btnCheckUpdates.Spinner = false;
-                using (var msgBox = new CustomControls.MessageBox())
+                btnCheckUpdates.Enabled = true;
+                btnCheckUpdates.Spinner = false;
+                using (var msgBox = new MessageBox())
                 {
                     msgBox.ShowDialog(LanguageManager.Strings.NoUpdatesAvailable, LanguageManager.Strings.LatestVersionInstalled, MessageBoxButtons.OK);
                 }
-            }));
+            });
 
             
         }
@@ -315,22 +308,22 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private void OnUpdateAvailable(object sender, EventArgs e)
         {
             Updater.Updater.OnUpdateAvailable -= OnUpdateAvailable;
-            this.Invoke(new Action(() =>
+            Invoke(() =>
             {
-                this.AddUpdateAvailableControl();
-            }));
+                AddUpdateAvailableControl();
+            });
         }
 
         private void AddUpdateAvailableControl()
         {
-            this.btnCheckUpdates.Enabled = true;
-            this.btnCheckUpdates.Spinner = false;
-            if (this.updaterPanel.Controls.Count != 0)
+            btnCheckUpdates.Enabled = true;
+            btnCheckUpdates.Spinner = false;
+            if (updaterPanel.Controls.Count != 0)
             {
-                this.updaterPanel.Controls.Clear();
+                updaterPanel.Controls.Clear();
             }
 
-            this.updaterPanel.Controls.Add(new UpdateAvailableControl());
+            updaterPanel.Controls.Add(new UpdateAvailableControl());
         }
 
         private void BtnLicenses_Click(object sender, EventArgs e)
@@ -343,46 +336,46 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void Language_SelectedIndexChanged(object sender, EventArgs e)
         {
-            MacroDeck.Configuration.Language = this.language.Text;
+            MacroDeck.Configuration.Language = language.Text;
             MacroDeck.SaveConfiguration();
             LanguageManager.SetLanguage(MacroDeck.Configuration.Language);
-            this.UpdateTranslation();
+            UpdateTranslation();
         }
 
         private void CheckIconCache_CheckedChanged(object sender, EventArgs e)
         {
-            MacroDeck.Configuration.CacheIcons = this.checkIconCache.Checked;
+            MacroDeck.Configuration.CacheIcons = checkIconCache.Checked;
             MacroDeck.SaveConfiguration();
         }
 
         private void BackupManager_BackupFailed(object sender, BackupFailedEventArgs e)
         {
-            this.Invoke(new Action(() =>
+            Invoke(() =>
             {
-                this.btnCreateBackup.Spinner = false;
-                using (var msgBox = new CustomControls.MessageBox())
+                btnCreateBackup.Spinner = false;
+                using (var msgBox = new MessageBox())
                 {
                     msgBox.ShowDialog(LanguageManager.Strings.Backup, LanguageManager.Strings.BackupFailed + ": " + Environment.NewLine + e.Message, MessageBoxButtons.OK);
                 }
-            }));
+            });
         }
 
         private void BackupManager_BackupSaved(object sender, EventArgs e)
         {
-            this.Invoke(new Action(() =>
+            Invoke(() =>
             {
-                this.btnCreateBackup.Spinner = false;
-                using (var msgBox = new CustomControls.MessageBox())
+                btnCreateBackup.Spinner = false;
+                using (var msgBox = new MessageBox())
                 {
                     msgBox.ShowDialog(LanguageManager.Strings.Backup, LanguageManager.Strings.BackupSuccessfullyCreated, MessageBoxButtons.OK);
                 }
-                this.LoadBackups();
-            }));
+                LoadBackups();
+            });
         }
 
         private void BtnCreateBackup_Click(object sender, EventArgs e)
         {
-            this.btnCreateBackup.Spinner = true;
+            btnCreateBackup.Spinner = true;
             Task.Run(() =>
             {
                 BackupManager.CreateBackup();
@@ -391,7 +384,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void BackupManager_DeleteSuccess(object sender, EventArgs e)
         {
-            this.LoadBackups();
+            LoadBackups();
         }
 
         private void BtnGitHub_Click(object sender, EventArgs e)

@@ -1,10 +1,10 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Win32;
 
 namespace SuchByte.MacroDeck.Utils
 {
@@ -105,19 +105,19 @@ namespace SuchByte.MacroDeck.Utils
 
         public static string GetMachineGuid()
         {
-            string location = @"SOFTWARE\Microsoft\Cryptography";
-            string name = "MachineGuid";
+            var location = @"SOFTWARE\Microsoft\Cryptography";
+            var name = "MachineGuid";
 
-            using (RegistryKey localMachineX64View =
+            using (var localMachineX64View =
                 RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
             {
-                using (RegistryKey rk = localMachineX64View.OpenSubKey(location))
+                using (var rk = localMachineX64View.OpenSubKey(location))
                 {
                     if (rk == null)
                         throw new KeyNotFoundException(
                             string.Format("Key Not Found: {0}", location));
 
-                    object machineGuid = rk.GetValue(name);
+                    var machineGuid = rk.GetValue(name);
                     if (machineGuid == null)
                         throw new IndexOutOfRangeException(
                             string.Format("Index Not Found: {0}", name));

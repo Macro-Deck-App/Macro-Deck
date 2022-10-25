@@ -1,13 +1,10 @@
-﻿using SuchByte.MacroDeck.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace SuchByte.MacroDeck.Utils
 {
@@ -15,7 +12,7 @@ namespace SuchByte.MacroDeck.Utils
     {
         public static string GetBase64ByteArray(Bitmap originalBitmap, Size size, ContentAlignment contentAlignment = ContentAlignment.MiddleCenter)
         {
-            Rectangle section = new Rectangle(new Point(0, (size.Width / 2) - (size.Height / 2)), new Size(size.Width, size.Height));
+            var section = new Rectangle(new Point(0, (size.Width / 2) - (size.Height / 2)), new Size(size.Width, size.Height));
             switch (contentAlignment)
             {
                 case ContentAlignment.TopLeft:
@@ -45,27 +42,27 @@ namespace SuchByte.MacroDeck.Utils
                             g.DrawImage(scaledBitmap, 0, 0, section, GraphicsUnit.Pixel);
                         }
 
-                        int totalPixels = bitmap.Width * bitmap.Height;
-                        int currentPixels = 0;
-                        int colorByte = 0;
-                        int bitInBlock = 7;
+                        var totalPixels = bitmap.Width * bitmap.Height;
+                        var currentPixels = 0;
+                        var colorByte = 0;
+                        var bitInBlock = 7;
 
-                        byte[] result = new byte[totalPixels / 8];
+                        var result = new byte[totalPixels / 8];
 
-                        Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
-                        BitmapData bitmapData = bitmap.LockBits(rect, ImageLockMode.ReadWrite, bitmap.PixelFormat);
+                        var rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+                        var bitmapData = bitmap.LockBits(rect, ImageLockMode.ReadWrite, bitmap.PixelFormat);
 
-                        IntPtr ptr = bitmapData.Scan0;
-                        int bytes = bitmapData.Stride * bitmap.Height;
-                        byte[] rgbValues = new byte[bytes];
+                        var ptr = bitmapData.Scan0;
+                        var bytes = bitmapData.Stride * bitmap.Height;
+                        var rgbValues = new byte[bytes];
 
                         Marshal.Copy(ptr, rgbValues, 0, bytes);
 
-                        int pixelByte = 0;
+                        var pixelByte = 0;
 
-                        for (int y = 0; y < bitmap.Height; y++)
+                        for (var y = 0; y < bitmap.Height; y++)
                         {
-                            for (int x = 0; x < bitmap.Width; x++)
+                            for (var x = 0; x < bitmap.Width; x++)
                             {
                                 pixelByte = (y * bitmap.Width + x) * 4;
 
@@ -108,11 +105,11 @@ namespace SuchByte.MacroDeck.Utils
             if (string.IsNullOrWhiteSpace(base64)) return null;
             try
             {
-                HashSet<char> whiteSpace = new HashSet<char> { '\t', '\n', '\r', ' ' };
-                int length = base64.Count(c => !whiteSpace.Contains(c));
+                var whiteSpace = new HashSet<char> { '\t', '\n', '\r', ' ' };
+                var length = base64.Count(c => !whiteSpace.Contains(c));
                 if (length % 4 != 0)
                     base64 += new string('=', 4 - length % 4);
-                byte[] imageBytes = Convert.FromBase64String(base64);
+                var imageBytes = Convert.FromBase64String(base64);
 
                 var ms = new MemoryStream(imageBytes);
                 Image image = image = Image.FromStream(ms, true);
@@ -130,7 +127,7 @@ namespace SuchByte.MacroDeck.Utils
             if (image == null) return "";
             try
             {
-                using (MemoryStream ms = new MemoryStream())
+                using (var ms = new MemoryStream())
                 {
                     var format = image.RawFormat;
                     switch (format.ToString().ToLower())

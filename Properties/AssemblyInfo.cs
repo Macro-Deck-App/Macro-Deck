@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
+using System.Windows;
 
-[assembly: System.Windows.ThemeInfo(System.Windows.ResourceDictionaryLocation.None, System.Windows.ResourceDictionaryLocation.SourceAssembly)]
+[assembly: ThemeInfo(ResourceDictionaryLocation.None, ResourceDictionaryLocation.SourceAssembly)]
 
 // In Projekten im SDK-Stil wie dem vorliegenden, bei dem verschiedene Assemblyattribute
 // üblicherweise in dieser Datei definiert wurden, werden diese Attribute jetzt während

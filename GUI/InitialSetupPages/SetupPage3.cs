@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.Language;
 
 namespace SuchByte.MacroDeck.GUI.InitialSetupPages
 {
@@ -16,7 +12,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
         {
             InitializeComponent();
             this.initialSetup = initialSetup;
-            this.lblConfigureGridPreferences.Text = Language.LanguageManager.Strings.InitialSetupConfigureGridPreferences;
+            lblConfigureGridPreferences.Text = LanguageManager.Strings.InitialSetupConfigureGridPreferences;
         }
 
         private void SetupPage3_Load(object sender, EventArgs e)

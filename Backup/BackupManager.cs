@@ -1,17 +1,15 @@
-﻿using Newtonsoft.Json;
-using SuchByte.MacroDeck.Backup;
-using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Utils;
-using SuchByte.MacroDeck.Variables;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
+using System.Windows.Forms;
+using Newtonsoft.Json;
+using SuchByte.MacroDeck.Backup;
+using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Utils;
+using SuchByte.MacroDeck.Variables;
+using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.Backups
 {
@@ -23,7 +21,7 @@ namespace SuchByte.MacroDeck.Backups
 
     public class BackupManager
     {
-        private static bool BackupInProgress = false;
+        private static bool BackupInProgress;
 
         public static event EventHandler BackupSaved;
         public static event EventHandler<BackupFailedEventArgs> BackupFailed;
@@ -32,10 +30,10 @@ namespace SuchByte.MacroDeck.Backups
         
         public static List<MacroDeckBackupInfo> GetBackups()
         {
-            List<MacroDeckBackupInfo> backups = new List<MacroDeckBackupInfo>();
+            var backups = new List<MacroDeckBackupInfo>();
             foreach (var filename in Directory.GetFiles(MacroDeck.BackupsDirectoryPath))
             {
-                backups.Add(new MacroDeckBackupInfo()
+                backups.Add(new MacroDeckBackupInfo
                 {
                     BackupCreated = File.GetCreationTime(filename),
                     FileName = filename,
@@ -47,7 +45,7 @@ namespace SuchByte.MacroDeck.Backups
 
         public static void CheckRestoreDirectory()
         {
-            string restoreDirectory = Path.Combine(MacroDeck.TempDirectoryPath, "backup_restore");
+            var restoreDirectory = Path.Combine(MacroDeck.TempDirectoryPath, "backup_restore");
             if (!Directory.Exists(restoreDirectory)) return;
             if (!File.Exists(Path.Combine(restoreDirectory, ".restore"))) return;
             RestoreBackupInfo restoreBackupInfo;
@@ -169,13 +167,13 @@ namespace SuchByte.MacroDeck.Backups
             MacroDeckLogger.Info("Backup successfully restored");
             using (var msgBox = new MessageBox())
             {
-                msgBox.ShowDialog("Backup restored", "Backup successfully restored", System.Windows.Forms.MessageBoxButtons.OK);
+                msgBox.ShowDialog("Backup restored", "Backup successfully restored", MessageBoxButtons.OK);
             }
         }
 
         public static void RestoreBackup(string backupFileName, RestoreBackupInfo restoreBackupInfo)
         {
-            string restoreDirectory = Path.Combine(MacroDeck.TempDirectoryPath, "backup_restore");
+            var restoreDirectory = Path.Combine(MacroDeck.TempDirectoryPath, "backup_restore");
             try
             {
                 if (!Directory.Exists(restoreDirectory))
@@ -184,9 +182,9 @@ namespace SuchByte.MacroDeck.Backups
                 }
                 else
                 {
-                    DirectoryInfo directory = new DirectoryInfo(restoreDirectory);
-                    foreach (FileInfo file in directory.GetFiles()) file.Delete();
-                    foreach (DirectoryInfo subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
+                    var directory = new DirectoryInfo(restoreDirectory);
+                    foreach (var file in directory.GetFiles()) file.Delete();
+                    foreach (var subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
                 }
             } catch { return; }
 
@@ -194,13 +192,13 @@ namespace SuchByte.MacroDeck.Backups
             {
                 ZipFile.ExtractToDirectory(Path.Combine(MacroDeck.BackupsDirectoryPath, backupFileName), restoreDirectory, true);
 
-                JsonSerializer serializer = new JsonSerializer
+                var serializer = new JsonSerializer
                 {
                     TypeNameHandling = TypeNameHandling.Auto,
                     NullValueHandling = NullValueHandling.Ignore,
                 };
 
-                using (StreamWriter sw = new StreamWriter(Path.Combine(restoreDirectory, ".restore")))
+                using (var sw = new StreamWriter(Path.Combine(restoreDirectory, ".restore")))
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {
                     serializer.Serialize(writer, restoreBackupInfo);
@@ -219,7 +217,7 @@ namespace SuchByte.MacroDeck.Backups
             if (BackupInProgress) return;
             BackupInProgress = true;
             VariableManager.Close();
-            string backupFileName = string.Format("backup_{0}.zip", DateTime.Now.ToString("yy-MM-dd_HH-mm-ss"));
+            var backupFileName = string.Format("backup_{0}.zip", DateTime.Now.ToString("yy-MM-dd_HH-mm-ss"));
             MacroDeckLogger.Info("Sarting creation of backup: " + backupFileName);
 
             try
@@ -232,44 +230,38 @@ namespace SuchByte.MacroDeck.Backups
                     archive.CreateEntryFromFile(MacroDeck.VariablesFilePath, Path.GetFileName(MacroDeck.VariablesFilePath));
                     foreach (var directory in Directory.GetDirectories(MacroDeck.PluginsDirectoryPath))
                     {
-                        DirectoryInfo pluginDirectoryInfo = new DirectoryInfo(directory);
-                        foreach (FileInfo file in pluginDirectoryInfo.GetFiles("*"))
+                        var pluginDirectoryInfo = new DirectoryInfo(directory);
+                        foreach (var file in pluginDirectoryInfo.GetFiles("*"))
                         {
                             archive.CreateEntryFromFile(Path.Combine(MacroDeck.PluginsDirectoryPath, pluginDirectoryInfo.Name, file.Name), Path.Combine(new DirectoryInfo(MacroDeck.PluginsDirectoryPath).Name, pluginDirectoryInfo.Name, file.Name));
                         }
                     }
-                    DirectoryInfo pluginConfigDirectoryInfo = new DirectoryInfo(MacroDeck.PluginConfigPath);
-                    foreach (FileInfo file in pluginConfigDirectoryInfo.GetFiles("*"))
+                    var pluginConfigDirectoryInfo = new DirectoryInfo(MacroDeck.PluginConfigPath);
+                    foreach (var file in pluginConfigDirectoryInfo.GetFiles("*"))
                     {
                         archive.CreateEntryFromFile(Path.Combine(MacroDeck.PluginConfigPath, file.Name), Path.Combine(pluginConfigDirectoryInfo.Name, file.Name));
                     }
-                    DirectoryInfo pluginCredentialsDirectoryInfo = new DirectoryInfo(MacroDeck.PluginCredentialsPath);
-                    foreach (FileInfo file in pluginCredentialsDirectoryInfo.GetFiles("*"))
+                    var pluginCredentialsDirectoryInfo = new DirectoryInfo(MacroDeck.PluginCredentialsPath);
+                    foreach (var file in pluginCredentialsDirectoryInfo.GetFiles("*"))
                     {
                         archive.CreateEntryFromFile(Path.Combine(MacroDeck.PluginCredentialsPath, file.Name), Path.Combine(pluginCredentialsDirectoryInfo.Name, file.Name));
                     }
-                    DirectoryInfo iconPackDirectoryInfo = new DirectoryInfo(MacroDeck.IconPackDirectoryPath);
-                    foreach (DirectoryInfo dir in iconPackDirectoryInfo.GetDirectories())
+                    var iconPackDirectoryInfo = new DirectoryInfo(MacroDeck.IconPackDirectoryPath);
+                    foreach (var dir in iconPackDirectoryInfo.GetDirectories())
                     {
-                        foreach (FileInfo iconPackFile in dir.GetFiles())
+                        foreach (var iconPackFile in dir.GetFiles())
                         {
                             archive.CreateEntryFromFile(Path.Combine(MacroDeck.IconPackDirectoryPath, dir.Name, iconPackFile.Name), Path.Combine(iconPackDirectoryInfo.Name, dir.Name, iconPackFile.Name));
                         }
                     }
 
                     MacroDeckLogger.Info("Backup successfully created: " + backupFileName);
-                    if (BackupSaved != null)
-                    {
-                        BackupSaved(null, EventArgs.Empty);
-                    }
+                    BackupSaved?.Invoke(null, EventArgs.Empty);
                 }
             } catch (Exception ex)
             {
                 MacroDeckLogger.Error("Backup creation failed: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                if (BackupFailed != null)
-                {
-                    BackupFailed(null, new BackupFailedEventArgs() { Message = ex.Message });
-                }
+                BackupFailed?.Invoke(null, new BackupFailedEventArgs { Message = ex.Message });
             } finally
             {
                 VariableManager.Initialize();
@@ -285,10 +277,7 @@ namespace SuchByte.MacroDeck.Backups
                 {
                     File.Delete(fileName);
                     MacroDeckLogger.Info("Backup successfully deleted: " + fileName);
-                    if (DeleteSuccess != null)
-                    {
-                        DeleteSuccess(null, EventArgs.Empty);
-                    }
+                    DeleteSuccess?.Invoke(null, EventArgs.Empty);
                 } catch (Exception ex)
                 {
                     MacroDeckLogger.Error("Backup deletion failed: " + ex.Message + Environment.NewLine + ex.StackTrace);

@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Text;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.Language;
 
 namespace SuchByte.MacroDeck.GUI.InitialSetupPages
 {
@@ -20,12 +16,12 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
         {
             InitializeComponent();
             this.initialSetup = initialSetup;
-            this.lblConfigureNetwork.Text = Language.LanguageManager.Strings.InitialSetupConfigureNetworkSettings;
-            this.lblNetworkAdapter.Text = Language.LanguageManager.Strings.NetworkAdapter;
-            this.lblIpAddress.Text = Language.LanguageManager.Strings.IPAddress;
-            this.lblPort.Text = Language.LanguageManager.Strings.Port;
-            this.groupInfo.Text = Language.LanguageManager.Strings.Info;
-            this.lblInfo.Text = Language.LanguageManager.Strings.ConfigureNetworkInfo;
+            lblConfigureNetwork.Text = LanguageManager.Strings.InitialSetupConfigureNetworkSettings;
+            lblNetworkAdapter.Text = LanguageManager.Strings.NetworkAdapter;
+            lblIpAddress.Text = LanguageManager.Strings.IPAddress;
+            lblPort.Text = LanguageManager.Strings.Port;
+            groupInfo.Text = LanguageManager.Strings.Info;
+            lblInfo.Text = LanguageManager.Strings.ConfigureNetworkInfo;
         }
 
         private void lblIpAddress_Click(object sender, EventArgs e)
@@ -38,12 +34,12 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             //this.adapter.Items.Add("All");
             try
             {
-                NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
-                foreach (NetworkInterface adapter in adapters)
+                var adapters = NetworkInterface.GetAllNetworkInterfaces();
+                foreach (var adapter in adapters)
                 {
                     this.adapter.Items.Add(adapter.Name);
                 }
-                this.adapter.Text = this.GetAdapterFromIPAddress(this.GetDefaultIPAddress().ToString());
+                this.adapter.Text = GetAdapterFromIPAddress(GetDefaultIPAddress().ToString());
             } catch { }   
         }
 
@@ -51,28 +47,28 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
         {
             if (adapter.SelectedItem.ToString().Equals("All"))
             {
-                this.iPAddress.Text = "0.0.0.0";
+                iPAddress.Text = "0.0.0.0";
             } else
             {
-                this.iPAddress.Text = this.GetIPAddressFromAdapter(adapter.SelectedItem.ToString());
+                iPAddress.Text = GetIPAddressFromAdapter(adapter.SelectedItem.ToString());
             }
-            this.initialSetup.configuration.Host_Address = this.iPAddress.Text;
+            initialSetup.configuration.Host_Address = iPAddress.Text;
         }
 
         private void port_ValueChanged(object sender, EventArgs e)
         {
-            this.initialSetup.configuration.Host_Port = (int)this.port.Value;
+            initialSetup.configuration.Host_Port = (int)port.Value;
         }
 
 
-        private String GetAdapterFromIPAddress(string address)
+        private string GetAdapterFromIPAddress(string address)
         {
-            NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
-            foreach (NetworkInterface adapter in adapters)
+            var adapters = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (var adapter in adapters)
             {
-                foreach (UnicastIPAddressInformation ip in adapter.GetIPProperties().UnicastAddresses)
+                foreach (var ip in adapter.GetIPProperties().UnicastAddresses)
                 {
-                    if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork && ip.Address.ToString().Equals(GetDefaultIPAddress().ToString()))
+                    if (ip.Address.AddressFamily == AddressFamily.InterNetwork && ip.Address.ToString().Equals(GetDefaultIPAddress().ToString()))
                     {
                         return adapter.Name;
                     }
@@ -88,21 +84,21 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
             {
                 return null;
             }
-            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
+            var host = Dns.GetHostEntry(Dns.GetHostName());
 
             return host
                 .AddressList
                 .FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork);
         }
 
-        public String GetIPAddressFromAdapter(string adapterName)
+        public string GetIPAddressFromAdapter(string adapterName)
         {
-            NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
-            foreach (NetworkInterface adapter in adapters)
+            var adapters = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (var adapter in adapters)
             {
                 if (adapter.Name.Equals(adapterName))
                 {
-                    foreach (UnicastIPAddressInformation ip in adapter.GetIPProperties().UnicastAddresses)
+                    foreach (var ip in adapter.GetIPProperties().UnicastAddresses)
                     {
                         if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
                             return ip.Address.ToString();

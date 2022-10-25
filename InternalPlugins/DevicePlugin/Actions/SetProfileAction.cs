@@ -6,9 +6,6 @@ using SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Actions
 {
@@ -22,9 +19,9 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Actions
 
         public override void Trigger(string clientId, ActionButton.ActionButton actionButton)
         {
-            var configModel = SetProfileActionConfigModel.Deserialize(this.Configuration);
+            var configModel = SetProfileActionConfigModel.Deserialize(Configuration);
 
-            MacroDeckProfile profile = ProfileManager.FindProfileById(configModel.ProfileId);
+            var profile = ProfileManager.FindProfileById(configModel.ProfileId);
             switch (clientId)
             {
                 // ClientID -1 or "" = Macro Deck software itself

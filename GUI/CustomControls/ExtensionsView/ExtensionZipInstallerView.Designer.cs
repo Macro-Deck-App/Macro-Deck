@@ -1,11 +1,14 @@
-﻿namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+
+namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
 {
     partial class ExtensionZipInstallerView
     {
         /// <summary> 
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary> 
         /// Clean up any resources being used.
@@ -273,15 +276,15 @@
 
         #endregion
         private PictureButton btnClose;
-        private System.Windows.Forms.OpenFileDialog dlgSelectPluginFile;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label lblPackageId;
+        private OpenFileDialog dlgSelectPluginFile;
+        private Label label1;
+        private Label lblPackageId;
         private RoundedTextBox txtPackageId;
         private RoundedTextBox txtAuthor;
         private ButtonPrimary btnInstall;
         private ButtonPrimary btnSelectFile;
         private RoundedTextBox txtZipPath;
-        private System.Windows.Forms.Label lblZipPath;
+        private Label lblZipPath;
         private RoundedTextBox roundedTextBox1;
     }
 }

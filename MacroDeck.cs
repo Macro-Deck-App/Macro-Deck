@@ -1,27 +1,3 @@
-using CefSharp;
-using CefSharp.WinForms;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using SuchByte.MacroDeck.Backups;
-using SuchByte.MacroDeck.Events;
-using SuchByte.MacroDeck.ExtensionStore;
-using SuchByte.MacroDeck.GUI;
-using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.GUI.Dialogs;
-using SuchByte.MacroDeck.GUI.MainWindowContents;
-using SuchByte.MacroDeck.Hotkeys;
-using SuchByte.MacroDeck.Icons;
-using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Model;
-using SuchByte.MacroDeck.Models;
-using SuchByte.MacroDeck.Notifications;
-using SuchByte.MacroDeck.Pipes;
-using SuchByte.MacroDeck.Plugins;
-using SuchByte.MacroDeck.Profiles;
-using SuchByte.MacroDeck.Server;
-using SuchByte.MacroDeck.Utils;
-using SuchByte.MacroDeck.Variables;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -33,25 +9,47 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Principal;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using CefSharp;
+using CefSharp.WinForms;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using SuchByte.MacroDeck.Backups;
+using SuchByte.MacroDeck.ExtensionStore;
+using SuchByte.MacroDeck.GUI;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.GUI.MainWindowContents;
+using SuchByte.MacroDeck.Hotkeys;
+using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Models;
+using SuchByte.MacroDeck.Notifications;
+using SuchByte.MacroDeck.Pipes;
+using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Profiles;
+using SuchByte.MacroDeck.Properties;
+using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Utils;
+using SuchByte.MacroDeck.Variables;
 
 namespace SuchByte.MacroDeck
 {
     public class MacroDeck : NativeWindow
     {
         static readonly Assembly assembly = Assembly.GetExecutingAssembly();
-        public static readonly VersionModel Version = new VersionModel(FileVersionInfo.GetVersionInfo(assembly.Location).FileVersion);
+        public static readonly VersionModel Version = new(FileVersionInfo.GetVersionInfo(assembly.Location).FileVersion);
 
         public static readonly int ApiVersion = 20;
-        public static readonly int PluginApiVersion = 36;
+        public static readonly int PluginApiVersion = 40;
 
         // Start parameters
-        internal static bool ForceUpdate = false;
-        internal static bool TestUpdateChannel = false;
-        internal static bool ExportDefaultStrings = false;
+        internal static bool ForceUpdate;
+        internal static bool TestUpdateChannel;
+        internal static bool ExportDefaultStrings;
         internal static bool SafeMode = false;
-        internal static bool PortableMode = false;
+        internal static bool PortableMode;
         // Start parameters end
 
         public static readonly string ExecutablePath = Process.GetCurrentProcess().MainModule.FileName;
@@ -71,7 +69,7 @@ namespace SuchByte.MacroDeck
         public static string VariablesFilePath;
         public static string ProfilesFilePath;
 
-        private static Stopwatch _startUpTimeStopWatch = new Stopwatch();
+        private static Stopwatch _startUpTimeStopWatch = new();
 
         internal static SynchronizationContext SyncContext { get; set; }
 
@@ -103,15 +101,15 @@ namespace SuchByte.MacroDeck
 
         public static event EventHandler OnMacroDeckLoaded;
 
-        private static Configuration.Configuration _configuration = new Configuration.Configuration();
+        private static Configuration.Configuration _configuration = new();
 
-        public static Configuration.Configuration Configuration { get { return _configuration; } }
+        public static Configuration.Configuration Configuration => _configuration;
 
-        private static ContextMenuStrip _trayIconContextMenu = new ContextMenuStrip();
+        private static ContextMenuStrip _trayIconContextMenu = new();
 
-        private static NotifyIcon _trayIcon = new NotifyIcon
+        private static NotifyIcon _trayIcon = new()
         {
-            Icon = Properties.Resources.appicon,
+            Icon = Resources.appicon,
             Text = "Macro Deck " + Version.VersionString,
             Visible = false,
             ContextMenuStrip = _trayIconContextMenu
@@ -149,8 +147,8 @@ namespace SuchByte.MacroDeck
             _startUpTimeStopWatch.Start();
 
             // Check if Macro Deck is already running
-            Process proc = Process.GetCurrentProcess();
-            Process[] processes = Process.GetProcessesByName(proc.ProcessName);
+            var proc = Process.GetCurrentProcess();
+            var processes = Process.GetProcessesByName(proc.ProcessName);
             if (processes.Length > 1)
             {
                 MacroDeckLogger.Warning("Detected running instance, trying to show it...");
@@ -160,35 +158,33 @@ namespace SuchByte.MacroDeck
                     Environment.Exit(0);
                     return;
                 }
-                else
+
+                MacroDeckLogger.Warning("Running instance seems not to respond, killing it and continue this instance...");
+                foreach (var p in processes.Where(x => x.Id != proc.Id))
                 {
-                    MacroDeckLogger.Warning("Running instance seems not to respond, killing it and continue this instance...");
-                    foreach (var p in processes.Where(x => x.Id != proc.Id))
+                    try
                     {
-                        try
-                        {
-                            p.Kill();
-                            MacroDeckLogger.Info($"Killed pid {p.Id}");
-                        }
-                        catch (Exception ex)
-                        {
-                            MacroDeckLogger.Warning($"Could not kill pid {p.Id}: {ex.Message}");
-                        }
+                        p.Kill();
+                        MacroDeckLogger.Info($"Killed pid {p.Id}");
+                    }
+                    catch (Exception ex)
+                    {
+                        MacroDeckLogger.Warning($"Could not kill pid {p.Id}: {ex.Message}");
                     }
                 }
             }
 
             // Check for start arguments
-            int port = -1;
-            bool show = false;
+            var port = -1;
+            var show = false;
             StartParameters = args;
-            for (int i = 0; i < args.Length; i++)
+            for (var i = 0; i < args.Length; i++)
             {
                 switch (args[i].ToLower())
                 {
                     case "--port":
                         if (args[i + 1] == null) break;
-                        port = Int32.Parse(args[i + 1]);
+                        port = int.Parse(args[i + 1]);
                         break;
                     case "--show":
                         show = true;
@@ -209,7 +205,7 @@ namespace SuchByte.MacroDeck
                         MacroDeckLogger.FileLogging = false;
                         break;
                     case "--loglevel":
-                        if (args[i + 1] != null && Enum.TryParse(typeof(LogLevel), args[i + 1], true, out object logLevel))
+                        if (args[i + 1] != null && Enum.TryParse(typeof(LogLevel), args[i + 1], true, out var logLevel))
                         {
                             MacroDeckLogger.LogLevel = (LogLevel)logLevel;
                         }
@@ -229,13 +225,13 @@ namespace SuchByte.MacroDeck
             MacroDeckLogger.Info("Starting Macro Deck version " + Version.VersionString + " build " + Version.Build + (args.Length > 0 ? " with parameters: " + string.Join(" ", args) : ""));
             MacroDeckLogger.Info("Executable: " + ExecutablePath);
             MacroDeckLogger.Info("OS: " + OperatingSystemInformation.GetWindowsVersionName());
-            string networkInterfaces = "";
+            var networkInterfaces = "";
             try
             {
-                NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
-                foreach (NetworkInterface adapter in adapters)
+                var adapters = NetworkInterface.GetAllNetworkInterfaces();
+                foreach (var adapter in adapters)
                 {
-                    networkInterfaces += Environment.NewLine + $"{adapter.Name} - {adapter.GetIPProperties().UnicastAddresses.Where(x => x.Address.AddressFamily == AddressFamily.InterNetwork).FirstOrDefault().Address.ToString()}";
+                    networkInterfaces += Environment.NewLine + $"{adapter.Name} - {adapter.GetIPProperties().UnicastAddresses.Where(x => x.Address.AddressFamily == AddressFamily.InterNetwork).FirstOrDefault().Address}";
                 }
             }
             catch { }
@@ -333,9 +329,9 @@ namespace SuchByte.MacroDeck
             } else
             {
                 // Clean up temp directory
-                DirectoryInfo di = new DirectoryInfo(TempDirectoryPath);
+                var di = new DirectoryInfo(TempDirectoryPath);
 
-                foreach (FileInfo file in di.GetFiles())
+                foreach (var file in di.GetFiles())
                 {
                     try
                     {
@@ -345,7 +341,7 @@ namespace SuchByte.MacroDeck
                         MacroDeckLogger.Warning("Failed to clean up files in the temp directory: " + ex.Message);
                     }
                 }
-                foreach (DirectoryInfo dir in di.GetDirectories())
+                foreach (var dir in di.GetDirectories())
                 {
                     try
                     {
@@ -365,16 +361,13 @@ namespace SuchByte.MacroDeck
 
             if (IsAdministrator())
             {
-                using (var msgBox = new GUI.CustomControls.MessageBox())
-                {
-                    msgBox.ShowDialog("Macro Deck started with administrator privileges", "It's not recommended to start Macro Deck with administrator privileges.", MessageBoxButtons.OK);
-                }
+                MacroDeckLogger.Info("Macro Deck started with administrator privileges");
             }
 
             // Initializing Cef Browser
             try
             {
-                CefSettings settings = new CefSettings();
+                var settings = new CefSettings();
                 settings.CefCommandLineArgs.Add("force-device-scale-factor", "1");
                 settings.CefCommandLineArgs.Add("disable-gpu-vsync", "1");
                 settings.CefCommandLineArgs.Add("disable-gpu", "1");
@@ -383,7 +376,7 @@ namespace SuchByte.MacroDeck
                 Cef.Initialize(settings);
             } catch (Exception ex)
             {
-                MacroDeckLogger.Error(typeof(MacroDeck), $"Could not initialize Chromium Embedded Framework: {ex.Message}" + Environment.NewLine + $"Make sure, Microsoft Visual C++ Redistributable is installed on your computer. You can download it here: https://aka.ms/vs/17/release/vc_redist.x64.exe");
+                MacroDeckLogger.Error(typeof(MacroDeck), $"Could not initialize Chromium Embedded Framework: {ex.Message}" + Environment.NewLine + "Make sure, Microsoft Visual C++ Redistributable is installed on your computer. You can download it here: https://aka.ms/vs/17/release/vc_redist.x64.exe");
             }
 
             // Check if config exists
@@ -422,12 +415,14 @@ namespace SuchByte.MacroDeck
 
         public static void SaveConfiguration()
         {
-            JsonSerializer serializer = new JsonSerializer();
-            serializer.NullValueHandling = NullValueHandling.Ignore;
+            var serializer = new JsonSerializer
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            };
 
             try
             {
-                using StreamWriter sw = new StreamWriter(ConfigFilePath);
+                using var sw = new StreamWriter(ConfigFilePath);
                 using JsonWriter writer = new JsonTextWriter(sw);
                 serializer.Serialize(writer, _configuration);
 
@@ -446,7 +441,6 @@ namespace SuchByte.MacroDeck
             _ = new HotkeyManager();
             VariableManager.Initialize();
             PluginManager.Load();
-            PluginManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
             PluginManager.EnablePlugins();
             IconManager.Initialize();
             ProfileManager.Load();
@@ -470,7 +464,7 @@ namespace SuchByte.MacroDeck
 
             _startUpTimeStopWatch.Stop();
 
-            double startTook = _startUpTimeStopWatch.Elapsed.TotalMilliseconds;
+            var startTook = _startUpTimeStopWatch.Elapsed.TotalMilliseconds;
             MacroDeckLogger.Info($"Macro Deck startup finished (took {startTook}ms)");
 
             OnMacroDeckLoaded?.Invoke(null, EventArgs.Empty);
@@ -503,7 +497,7 @@ namespace SuchByte.MacroDeck
             var versionObject = sender as JObject;
             try
             {
-                var btnOpenSettings = new ButtonPrimary()
+                var btnOpenSettings = new ButtonPrimary
                 {
                     AutoSize = true,
                     Text = LanguageManager.Strings.OpenSettings,
@@ -512,7 +506,7 @@ namespace SuchByte.MacroDeck
                 {
                     MainWindow?.SetView(new SettingsView(2));
                 };
-                NotificationManager.SystemNotification("Macro Deck Updater", string.Format(Language.LanguageManager.Strings.VersionXIsNowAvailable, versionObject["version"].ToString(), versionObject["channel"].ToString()), true, new List<Control>() { btnOpenSettings }, Properties.Resources.Macro_Deck_2021_update);
+                NotificationManager.SystemNotification("Macro Deck Updater", string.Format(LanguageManager.Strings.VersionXIsNowAvailable, versionObject["version"], versionObject["channel"]), true, new List<Control> { btnOpenSettings }, Resources.Macro_Deck_2021_update);
             } catch { }
         }
 
@@ -531,21 +525,21 @@ namespace SuchByte.MacroDeck
 
             var showItem = new ToolStripMenuItem
             {
-                Text = Language.LanguageManager.Strings.Show,
+                Text = LanguageManager.Strings.Show,
                 Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point)
             };
             showItem.Click += ShowItemClick;
 
             var restartItem = new ToolStripMenuItem
             {
-                Text = Language.LanguageManager.Strings.Restart,
+                Text = LanguageManager.Strings.Restart,
                 Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point)
             };
             restartItem.Click += RestartItemClick;
 
             var exitItem = new ToolStripMenuItem
             {
-                Text = Language.LanguageManager.Strings.Exit,
+                Text = LanguageManager.Strings.Exit,
                 Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point)
             };
             exitItem.Click += ExitItemClick;
@@ -612,11 +606,11 @@ namespace SuchByte.MacroDeck
 
         private static void CreateMainForm()
         {
-            if (Application.OpenForms.OfType<MainWindow>().Count() > 0 && mainWindow != null && !mainWindow.IsDisposed)
+            if (Application.OpenForms.OfType<MainWindow>().Any() && mainWindow is { IsDisposed: false })
             {
                 if (mainWindow.InvokeRequired)
                 {
-                    mainWindow.Invoke(new Action(() => ShowMainWindow()));
+                    mainWindow.Invoke(ShowMainWindow);
                     return;
                 }
                 mainWindow.WindowState = FormWindowState.Minimized;
@@ -648,15 +642,14 @@ namespace SuchByte.MacroDeck
         {
             if (PluginManager.PluginsUpdateAvailable.Count > 0)
             {
-                PluginManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
                 IconManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
-                _trayIcon.ShowBalloonTip(5000, "Macro Deck Package Manager", Language.LanguageManager.Strings.UpdatesAvailable, ToolTipIcon.Info);
+                _trayIcon.ShowBalloonTip(5000, "Macro Deck Package Manager", LanguageManager.Strings.UpdatesAvailable, ToolTipIcon.Info);
             }
         }
 
         private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            MacroDeckLogger.Error(typeof(MacroDeck), "CurrentDomainOnUnhandledException: " + e.ExceptionObject.ToString());
+            MacroDeckLogger.Error(typeof(MacroDeck), "CurrentDomainOnUnhandledException: " + e.ExceptionObject);
         }
 
         private static void ApplicationThreadException(object sender, ThreadExceptionEventArgs e)

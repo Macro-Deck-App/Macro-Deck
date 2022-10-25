@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Text.Json;
 
 namespace SuchByte.MacroDeck.Models
 {
     public class VariableViewCreatorFilterModel : ISerializableConfiguration
     {
-        public List<string> HiddenCreators { get; set; } = new List<string>();
+        public List<string> HiddenCreators { get; set; } = new();
 
         public string Serialize()
         {

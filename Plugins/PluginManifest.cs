@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
-using System.Linq;
 
 namespace SuchByte.MacroDeck.Plugins
 {
@@ -27,8 +27,8 @@ namespace SuchByte.MacroDeck.Plugins
 
         public static PluginManifest FromZipFilePath(string zipFilePath)
         {
-            Stream stream = new System.IO.StreamReader(
-                System.IO.Compression.ZipFile.OpenRead(zipFilePath)
+            var stream = new StreamReader(
+                ZipFile.OpenRead(zipFilePath)
                                                 .Entries.Where(x => x.Name.Equals("Plugin.xml", StringComparison.InvariantCulture))
                                                 .FirstOrDefault()
                                                 .Open(), Encoding.UTF8).BaseStream;

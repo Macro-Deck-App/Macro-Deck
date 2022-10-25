@@ -1,58 +1,51 @@
-﻿using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Plugins;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
+﻿using System;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Properties;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
     public partial class ActionConfiguratorPluginItem : RoundedUserControl
     {
-        private bool selected = false;
+        private bool selected;
 
         public MacroDeckPlugin Plugin { get; set; }
 
         public bool Selected 
         { 
-            get
-            {
-                return this.selected;
-            }
+            get => selected;
             set
             {
-                this.selected = value;
-                this.chevron.BackgroundImage = this.selected ? Properties.Resources.Chevron_Down : Properties.Resources.Chevron_Right;
+                selected = value;
+                chevron.BackgroundImage = selected ? Resources.Chevron_Down : Resources.Chevron_Right;
             }
         }
 
         public ActionConfiguratorPluginItem(MacroDeckPlugin macroDeckPlugin)
         {
-            this.Plugin ??= macroDeckPlugin;
+            Plugin ??= macroDeckPlugin;
             InitializeComponent();
-            this.DoubleBuffered = true;
+            DoubleBuffered = true;
 
-            this.pluginIcon.MouseClick += Control_MouseClick;
-            this.pluginName.MouseClick += Control_MouseClick;
-            this.lblCountActions.MouseClick += Control_MouseClick;
-            this.chevron.MouseClick += Control_MouseClick;
+            pluginIcon.MouseClick += Control_MouseClick;
+            pluginName.MouseClick += Control_MouseClick;
+            lblCountActions.MouseClick += Control_MouseClick;
+            chevron.MouseClick += Control_MouseClick;
         }
 
 
         private void Control_MouseClick(object sender, MouseEventArgs e)
         {
-            this.OnMouseClick(e);
+            OnMouseClick(e);
         }
 
         private void ActionConfiguratorPluginItem_Load(object sender, EventArgs e)
         {
-            if (this.Plugin == null) return;
-            this.pluginIcon.BackgroundImage = this.Plugin.PluginIcon ?? Properties.Resources.Icon;
-            this.pluginName.Text = this.Plugin.Name;
-            this.lblCountActions.Text = String.Format((this.Plugin.Actions.Count == 1 ? LanguageManager.Strings.XAction : LanguageManager.Strings.XActions), this.Plugin.Actions.Count);
+            if (Plugin == null) return;
+            pluginIcon.BackgroundImage = Plugin.PluginIcon ?? Resources.Icon;
+            pluginName.Text = Plugin.Name;
+            lblCountActions.Text = string.Format((Plugin.Actions.Count == 1 ? LanguageManager.Strings.XAction : LanguageManager.Strings.XActions), Plugin.Actions.Count);
         }
 
 

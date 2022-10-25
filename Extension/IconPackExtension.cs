@@ -1,9 +1,6 @@
 ﻿using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SuchByte.MacroDeck.Extension
 {
@@ -16,7 +13,7 @@ namespace SuchByte.MacroDeck.Extension
 
         public IconPackExtension(IconPack iconPack)
         {
-            this.ExtensionObject = iconPack;
+            ExtensionObject = iconPack;
         }
 
         public void Uninstall()

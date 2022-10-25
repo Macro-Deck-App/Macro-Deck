@@ -1,9 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
+using Microsoft.Win32;
+using Newtonsoft.Json;
 
 namespace SuchByte.MacroDeck.Configuration
 {
@@ -12,23 +9,20 @@ namespace SuchByte.MacroDeck.Configuration
         bool _autoStart = true;
 
         [JsonProperty("AutoStart")]
-        public bool AutoStart { get
-            {
-                return this._autoStart;
-            }
+        public bool AutoStart { get => _autoStart;
             set
             {
-                this._autoStart = value;
+                _autoStart = value;
                 try
                 {
                     if (value)
                     {
-                        Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-                        key.SetValue("Macro Deck", System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
+                        var key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                        key.SetValue("Macro Deck", Process.GetCurrentProcess().MainModule.FileName);
                     }
                     else
                     {
-                        Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                        var key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
                         key.DeleteValue("Macro Deck", false);
                     }
                 }
@@ -42,7 +36,7 @@ namespace SuchByte.MacroDeck.Configuration
         public bool AutoUpdates { get; set; } = true;
 
         [JsonProperty("Update.InstallBeta")]
-        public bool UpdateBetaVersions { get; set; } = false;
+        public bool UpdateBetaVersions { get; set; }
 
         [JsonProperty("Connection.Host.Address")]
         public string Host_Address { get; set; }
@@ -54,7 +48,7 @@ namespace SuchByte.MacroDeck.Configuration
         public bool AskOnNewConnections { get; set; } = true;
 
         [JsonProperty("Connection.BlockNewConnections")]
-        public bool BlockNewConnections { get; set; } = false;
+        public bool BlockNewConnections { get; set; }
         [JsonProperty("Language")]
         public string Language { get; set; } = "English";
     }

@@ -1,21 +1,18 @@
-﻿using SuchByte.MacroDeck.ActionButton;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Text;
+using SuchByte.MacroDeck.ActionButton;
 
 namespace SuchByte.MacroDeck.Utils
 {
     public class LabelGenerator
     {
-        public static Image GetLabel(Image img, String text, ButtonLabelPosition buttonLabelPosition, Font font, Color textColor, Color shadowColor, SizeF shadowOffset)
+        public static Image GetLabel(Image img, string text, ButtonLabelPosition buttonLabelPosition, Font font, Color textColor, Color shadowColor, SizeF shadowOffset)
         {
             if (img == null) return img;
 
-            Graphics g = Graphics.FromImage(img);
+            var g = Graphics.FromImage(img);
 
-            StringFormat sf = new StringFormat
+            var sf = new StringFormat
             {
                 Alignment = StringAlignment.Center
             };
@@ -27,16 +24,16 @@ namespace SuchByte.MacroDeck.Utils
             else
                 sf.LineAlignment = StringAlignment.Far;
 
-            Pen p = new Pen(Color.Black, 2)
+            var p = new Pen(Color.Black, 2)
             {
                 LineJoin = LineJoin.Round
             };
 
-            SolidBrush b = new SolidBrush(textColor);
+            var b = new SolidBrush(textColor);
 
-            Rectangle r = new Rectangle(2, 2, img.Width - 2, img.Height - 2);
+            var r = new Rectangle(2, 2, img.Width - 2, img.Height - 2);
 
-            GraphicsPath gp = new GraphicsPath();
+            var gp = new GraphicsPath();
 
             gp.AddString(text, font.FontFamily, (int)font.Style, font.Size * 5, r, sf);
 

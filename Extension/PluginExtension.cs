@@ -1,9 +1,6 @@
 ﻿using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SuchByte.MacroDeck.Extension
 {
@@ -13,11 +10,11 @@ namespace SuchByte.MacroDeck.Extension
         public string ExtensionTypeDisplayName => LanguageManager.Strings.Plugin;
         public object ExtensionObject { get; set; }
 
-        public bool Configurable => this.ExtensionObject != null && (this.ExtensionObject as MacroDeckPlugin).CanConfigure;
+        public bool Configurable => ExtensionObject != null && (ExtensionObject as MacroDeckPlugin).CanConfigure;
 
         public PluginExtension(MacroDeckPlugin macroDeckPlugin)
         {
-            this.ExtensionObject = macroDeckPlugin;
+            ExtensionObject = macroDeckPlugin;
         }
 
         public void Uninstall()

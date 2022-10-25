@@ -1,21 +1,20 @@
-﻿using SuchByte.MacroDeck.Device;
-using SuchByte.MacroDeck.Folders;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
+using SuchByte.MacroDeck.Device;
+using SuchByte.MacroDeck.Folders;
 
 namespace SuchByte.MacroDeck.Profiles
 {
     public class MacroDeckProfile : IDisposable
     {
-        private IntPtr _bufferPtr;
-        public int BUFFER_SIZE = 1024 * 1024; // 1 MB
-        private bool _disposed = false;
+        private readonly IntPtr _bufferPtr;
+        public int BufferSize = 1024 * 1024; // 1 MB
+        private bool _disposed;
 
         public MacroDeckProfile()
         {
-            _bufferPtr = Marshal.AllocHGlobal(BUFFER_SIZE);
+            _bufferPtr = Marshal.AllocHGlobal(BufferSize);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -25,12 +24,10 @@ namespace SuchByte.MacroDeck.Profiles
 
             if (disposing)
             {
-                // Free any other managed objects here.
-            }
-
-            foreach (MacroDeckFolder folder in this.Folders)
-            {
-                folder.Dispose();
+                foreach (var folder in Folders)
+                {
+                    folder.Dispose();
+                }
             }
 
             // Free any unmanaged objects here.
@@ -51,7 +48,7 @@ namespace SuchByte.MacroDeck.Profiles
 
         public string ProfileId { get; set; } = "";
         public string DisplayName { get; set; } = "";
-        public List<MacroDeckFolder> Folders { get; set; } = new List<MacroDeckFolder>();
+        public List<MacroDeckFolder> Folders { get; set; } = new();
         public int Rows { get; set; } = 3;
         public int Columns { get; set; } = 5;
         public int ButtonSpacing { get; set; } = 10;
@@ -63,7 +60,7 @@ namespace SuchByte.MacroDeck.Profiles
         {
             get
             {
-                switch (this.ProfileTarget)
+                switch (ProfileTarget)
                 {
                     case DeviceClass.SoftwareClient:
                         return true;

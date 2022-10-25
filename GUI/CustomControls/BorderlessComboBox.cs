@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
@@ -19,13 +16,13 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 using (var g = Graphics.FromHwnd(Handle))
                 {                    
                     // Remove white border
-                    using (var p = new Pen(this.Parent.BackColor, 1))
+                    using (var p = new Pen(Parent.BackColor, 1))
                     {
                         g.DrawRectangle(p, 0, 0, Width - 1, Height - 1);
                     }
-                    if (!this.Enabled)
+                    if (!Enabled)
                     {
-                        using (var p = new Pen(this.Parent.BackColor, 5))
+                        using (var p = new Pen(Parent.BackColor, 5))
                         {
                             g.DrawRectangle(p, 0, 0, Width - 1, Height - 1);
                         }
@@ -33,19 +30,19 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
 
                     // Remove white drop down button
-                    using (SolidBrush brush = new SolidBrush(this.Parent.BackColor))
+                    using (var brush = new SolidBrush(Parent.BackColor))
                     {
                         g.FillRectangle(brush, Width - buttonWidth - 5, 0, buttonWidth + 5, Height);
                     }
                     // Draw custom drop down button
-                    using (SolidBrush brush = new SolidBrush(this.Enabled ? Color.White : Color.FromArgb(95, 95, 95)))
+                    using (var brush = new SolidBrush(Enabled ? Color.White : Color.FromArgb(95, 95, 95)))
                     {
-                        g.FillPolygon(brush, new Point[] { new Point(this.Width - 5, this.Height / 2 - 2), new Point(this.Width - 15, this.Height / 2 - 2), new Point(this.Width - 10, this.Height / 2 + 3) });
+                        g.FillPolygon(brush, new Point[] { new(Width - 5, Height / 2 - 2), new(Width - 15, Height / 2 - 2), new(Width - 10, Height / 2 + 3) });
                     }
                 }
                 try
                 {
-                    this.SelectionLength = 0;
+                    SelectionLength = 0;
                 } catch { }
             }
         }

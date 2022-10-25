@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Text;
 
 namespace SuchByte.MacroDeck.Utils
 {
@@ -11,12 +9,12 @@ namespace SuchByte.MacroDeck.Utils
     {
         public static Bitmap CombineAll(List<Bitmap> bitmaps)
         {
-            Bitmap combined = new Bitmap(350, 350);
+            var combined = new Bitmap(350, 350);
 
-            using (Graphics g = Graphics.FromImage(combined))
+            using (var g = Graphics.FromImage(combined))
             {
                 g.SmoothingMode = SmoothingMode.AntiAlias;
-                foreach(Bitmap bitmap in bitmaps)
+                foreach(var bitmap in bitmaps)
                 {
                     g.DrawImage(bitmap, Point.Empty);
                 }
@@ -28,7 +26,7 @@ namespace SuchByte.MacroDeck.Utils
 
         public static Bitmap Combine(Bitmap backgroundBitmap, Bitmap iconBitmap)
         {
-            int px = 350;
+            var px = 350;
             if (backgroundBitmap == null) backgroundBitmap = new Bitmap(px, px);
             if (iconBitmap == null) iconBitmap = new Bitmap(px, px);
             Image background = new Bitmap(backgroundBitmap.Width, backgroundBitmap.Height, PixelFormat.Format32bppArgb);

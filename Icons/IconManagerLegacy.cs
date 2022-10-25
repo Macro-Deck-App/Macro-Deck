@@ -1,33 +1,26 @@
-﻿using SuchByte.MacroDeck.JSON;
-using SuchByte.MacroDeck.Properties;
-using Newtonsoft.Json;
-using SQLite;
-using SQLiteNetExtensions.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Text;
-using SuchByte.MacroDeck.Server;
-using System.Net;
-using Newtonsoft.Json.Linq;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.ExtensionStore;
-using SuchByte.MacroDeck.Model;
 using System.Drawing.Imaging;
-using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.GUI.Dialogs;
+using System.IO;
+using System.Windows.Forms;
+using Newtonsoft.Json;
+using SQLite;
+using SuchByte.MacroDeck.ExtensionStore;
+using SuchByte.MacroDeck.JSON;
+using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Model;
+using SuchByte.MacroDeck.Utils;
+using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.Icons
 {
     [Obsolete("Will be replaced with IconManager")]
     public static class IconManagerLegacy
     {
-        public static List<IconPackLegacy> IconPacks = new List<IconPackLegacy>();
+        public static List<IconPackLegacy> IconPacks = new();
 
-        public static List<IconPackLegacy> IconPacksUpdateAvailable = new List<IconPackLegacy>();
+        public static List<IconPackLegacy> IconPacksUpdateAvailable = new();
 
         public static event EventHandler OnUpdateCheckFinished;
 
@@ -36,10 +29,10 @@ namespace SuchByte.MacroDeck.Icons
         public static void ConvertOldIconPacks()
         {
             if (Directory.GetFiles(MacroDeck.IconPackDirectoryPath, "*.iconpack").Length == 0) return;
-            List<IconPackLegacy> iconPacks = new List<IconPackLegacy>();
+            var iconPacks = new List<IconPackLegacy>();
             using (var msgBox = new MessageBox())
             {
-                if (msgBox.ShowDialog("Icon packs", "Macro Deck has found old icon packs that need to be converted to continue using. Convert now?", System.Windows.Forms.MessageBoxButtons.YesNo) != System.Windows.Forms.DialogResult.Yes)
+                if (msgBox.ShowDialog("Icon packs", "Macro Deck has found old icon packs that need to be converted to continue using. Convert now?", MessageBoxButtons.YesNo) != DialogResult.Yes)
                 {
                     return;
                 }
@@ -51,8 +44,8 @@ namespace SuchByte.MacroDeck.Icons
                     var db = new SQLiteConnection(databasePath);
                     var query = db.Table<IconPackJson>();
 
-                    string jsonString = query.First().JsonString;
-                    IconPackLegacy iconPack = JsonConvert.DeserializeObject<IconPackLegacy>(jsonString, new JsonSerializerSettings
+                    var jsonString = query.First().JsonString;
+                    var iconPack = JsonConvert.DeserializeObject<IconPackLegacy>(jsonString, new JsonSerializerSettings
                     {
                         TypeNameHandling = TypeNameHandling.Auto,
                         NullValueHandling = NullValueHandling.Ignore,
@@ -71,7 +64,7 @@ namespace SuchByte.MacroDeck.Icons
             }
             foreach (var iconPack in iconPacks)
             {
-                ExtensionManifestModel extensionManifestModel = new ExtensionManifestModel()
+                var extensionManifestModel = new ExtensionManifestModel
                 {
                     Type = ExtensionType.IconPack,
                     Name = iconPack.Name,
@@ -103,7 +96,7 @@ namespace SuchByte.MacroDeck.Icons
                     catch { }
                 }
 
-                JsonSerializer serializer = new JsonSerializer
+                var serializer = new JsonSerializer
                 {
                     NullValueHandling = NullValueHandling.Ignore,
                     Formatting = Formatting.Indented,
@@ -111,7 +104,7 @@ namespace SuchByte.MacroDeck.Icons
 
                 try
                 {
-                    using StreamWriter sw = new StreamWriter(Path.Combine(MacroDeck.IconPackDirectoryPath, extensionManifestModel.PackageId, "ExtensionManifest.json"));
+                    using var sw = new StreamWriter(Path.Combine(MacroDeck.IconPackDirectoryPath, extensionManifestModel.PackageId, "ExtensionManifest.json"));
                     using JsonWriter writer = new JsonTextWriter(sw);
                     serializer.Serialize(writer, extensionManifestModel);
                 }
@@ -125,7 +118,7 @@ namespace SuchByte.MacroDeck.Icons
                 {
                     try
                     {
-                        var iconImage = Utils.Base64.GetImageFromBase64(icon.IconBase64);
+                        var iconImage = Base64.GetImageFromBase64(icon.IconBase64);
                         var format = iconImage.RawFormat;
                         if (format.ToString().Equals("Gif", StringComparison.OrdinalIgnoreCase))
                         {
@@ -139,14 +132,13 @@ namespace SuchByte.MacroDeck.Icons
                         }
                     } catch
                     {
-                        continue;
                     }
                 }
             }
 
             using (var msgBox = new MessageBox())
             {
-                if (msgBox.ShowDialog("Icon packs", "The old icon packs were successfully converted. Do you want to delete the old icon packs?", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                if (msgBox.ShowDialog("Icon packs", "The old icon packs were successfully converted. Do you want to delete the old icon packs?", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     foreach (var databasePath in Directory.GetFiles(MacroDeck.IconPackDirectoryPath, "*.iconpack"))
                     {

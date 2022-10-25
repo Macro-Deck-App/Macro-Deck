@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Text;
 using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
@@ -11,53 +8,53 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
     {
 
         public Image HoverImage { 
-            get { return this._hoverImage; }
+            get => _hoverImage;
             set { 
-                this._hoverImage = value;
-                this.Invalidate();
+                _hoverImage = value;
+                Invalidate();
             }
         
         }
 
-        private Image _hoverImage = null;
+        private Image _hoverImage;
 
-        private bool _hover = false;
+        private bool _hover;
 
         public PictureButton()
         {
-            this.BackColor = Color.Transparent;
-            this.BackgroundImageLayout = ImageLayout.Stretch;
-            this.Cursor = Cursors.Hand;
-            this.MouseEnter += MouseEnterEvent;
-            this.MouseLeave += MouseLeaveEvent;
-            this.MouseUp += MouseUpEvent;
+            BackColor = Color.Transparent;
+            BackgroundImageLayout = ImageLayout.Stretch;
+            Cursor = Cursors.Hand;
+            MouseEnter += MouseEnterEvent;
+            MouseLeave += MouseLeaveEvent;
+            MouseUp += MouseUpEvent;
         }
 
         private void MouseUpEvent(object sender, EventArgs e)
         {
-            this._hover = false;
-            this.Invalidate();
+            _hover = false;
+            Invalidate();
         }
 
         private void MouseEnterEvent(object sender, EventArgs e)
         {
-            this._hover = true;
-            this.Invalidate();
+            _hover = true;
+            Invalidate();
         }
 
         private void MouseLeaveEvent(object sender, EventArgs e)
         {
-            this._hover = false;
-            this.Invalidate();
+            _hover = false;
+            Invalidate();
         }
 
         protected override void OnPaint(PaintEventArgs pe)
         {
-            if (this._hover)
+            if (_hover)
             {
-                if (this._hoverImage != null)
+                if (_hoverImage != null)
                 {
-                    pe.Graphics.DrawImage(this._hoverImage, new Rectangle(0, 0, this.Width, this.Height));
+                    pe.Graphics.DrawImage(_hoverImage, new Rectangle(0, 0, Width, Height));
                 }
             } else
             {

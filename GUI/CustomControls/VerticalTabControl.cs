@@ -8,7 +8,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 {
     public class VerticalTabControl : TabControl
     {
-        private List<int> _notificationIndexes = new List<int>();
+        private List<int> _notificationIndexes = new();
 
         public Color SelectedTabColor { get; set; } = Colors.DefaultAccentColorDark;
 
@@ -28,20 +28,20 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             if (value)
             {
-                if (!this._notificationIndexes.Contains(tabIndex))
-                    this._notificationIndexes.Add(tabIndex);
+                if (!_notificationIndexes.Contains(tabIndex))
+                    _notificationIndexes.Add(tabIndex);
             } else
             {
-                if (!this._notificationIndexes.Contains(tabIndex))
-                    this._notificationIndexes.Remove(tabIndex);
+                if (!_notificationIndexes.Contains(tabIndex))
+                    _notificationIndexes.Remove(tabIndex);
             }
-            this.Invalidate();
+            Invalidate();
         }
 
         private GraphicsPath GetFigurePath(Rectangle rect, int radius)
         {
-            GraphicsPath path = new GraphicsPath();
-            float curveSize = radius * 2F;
+            var path = new GraphicsPath();
+            var curveSize = radius * 2F;
 
             path.StartFigure();
             path.AddArc(rect.X, rect.Y, curveSize, curveSize, 180, 90);
@@ -54,8 +54,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            Bitmap b = new Bitmap(Width, Height);
-            Graphics g = Graphics.FromImage(b);
+            var b = new Bitmap(Width, Height);
+            var g = Graphics.FromImage(b);
 
             g.Clear(Color.FromArgb(45, 45, 45));
             g.FillRectangle(new SolidBrush(Color.FromArgb(45, 45, 45)), new Rectangle(0, 0, ItemSize.Height + 4, Height));
@@ -63,15 +63,15 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             g.DrawLine(new Pen(Color.FromArgb(45, 45, 45)), new Point(0, Size.Height - 1), new Point(Width + 3, Size.Height - 1));
 
 
-            for (int i = 0; i <= TabCount - 1; i++)
+            for (var i = 0; i <= TabCount - 1; i++)
             {
-                Rectangle buttonRectangle = new Rectangle(new Point(GetTabRect(i).Location.X - 2, GetTabRect(i).Location.Y - 2), new Size(GetTabRect(i).Width + 3, GetTabRect(i).Height - 1));
+                var buttonRectangle = new Rectangle(new Point(GetTabRect(i).Location.X - 2, GetTabRect(i).Location.Y - 2), new Size(GetTabRect(i).Width + 3, GetTabRect(i).Height - 1));
 
                 switch (i == SelectedIndex)
                 {
                     case true:
 
-                        using (GraphicsPath pathBorderSmooth = GetFigurePath(buttonRectangle, 8))
+                        using (var pathBorderSmooth = GetFigurePath(buttonRectangle, 8))
                         {
                             g.SmoothingMode = SmoothingMode.AntiAlias;
                             g.FillPath(new SolidBrush(SelectedTabColor), pathBorderSmooth);
@@ -79,11 +79,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
                         break;
                     case false:
-                        g.FillRectangle(new SolidBrush(this.Parent.BackColor), buttonRectangle);
+                        g.FillRectangle(new SolidBrush(Parent.BackColor), buttonRectangle);
                         break;
                 }
 
-                if (this._notificationIndexes.Contains(i))
+                if (_notificationIndexes.Contains(i))
                 {
                     g.FillEllipse(Brushes.Red, buttonRectangle.X + buttonRectangle.Width - 22, buttonRectangle.Y + 6, 10, 10);
                 }

@@ -1,10 +1,5 @@
-﻿using SQLite;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Windows.Forms;
-using static System.Windows.Forms.ComboBox;
+﻿using System;
+using SQLite;
 
 namespace SuchByte.MacroDeck.Variables
 {
@@ -18,10 +13,7 @@ namespace SuchByte.MacroDeck.Variables
         public string Type { get; set; } = VariableType.Bool.ToString();
 
         [Ignore]
-        public VariableType VariableType
-        {
-            get => (VariableType)Enum.Parse(typeof(VariableType), this.Type);
-        }
+        public VariableType VariableType => (VariableType)Enum.Parse(typeof(VariableType), Type);
 
         [Ignore]
         public string[] Suggestions { get; set; }

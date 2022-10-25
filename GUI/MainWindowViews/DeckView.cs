@@ -1,4 +1,11 @@
-﻿using SuchByte.MacroDeck.Enums;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.ActionButton;
+using SuchByte.MacroDeck.Enums;
 using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.GUI.CustomControls;
@@ -10,16 +17,10 @@ using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.Server;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using SuchByte.MacroDeck.Utils;
+using Clipboard = SuchByte.MacroDeck.Utils.Clipboard;
+using Form = SuchByte.MacroDeck.GUI.CustomControls.Form;
+using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.GUI.MainWindowContents
 {
@@ -29,55 +30,49 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private Control _buttonClicked;
 
-        public MacroDeckFolder CurrentFolder
-        {
-            get
-            {
-                return this._currentFolder;
-            }
-        }
+        public MacroDeckFolder CurrentFolder => _currentFolder;
 
         public DeckView()
         {
             InitializeComponent();
-            this.Dock = DockStyle.Fill;
-            this.UpdateTranslation();
-            this._currentFolder = ProfileManager.CurrentProfile.Folders.FirstOrDefault();
+            Dock = DockStyle.Fill;
+            UpdateTranslation();
+            _currentFolder = ProfileManager.CurrentProfile.Folders.FirstOrDefault();
 
         }
 
         private void MainWindow_ResizeEnd(object sender, EventArgs e)
         {
-            this.UpdateButtons();
+            UpdateButtons();
         }
 
         public void UpdateTranslation()
         {
-            this.Name = LanguageManager.Strings.DeckTitle;
-            this.lblColumns.Text = LanguageManager.Strings.Columns;
-            this.lblRows.Text = LanguageManager.Strings.Rows;
-            this.lblSpacing.Text = LanguageManager.Strings.Spacing;
-            this.lblCornerRadius.Text = LanguageManager.Strings.CornerRadius;
-            this.checkButtonBackground.Text = LanguageManager.Strings.ButtonBackGround;
-            this.foldersContextMenuNew.Text = LanguageManager.Strings.Create;
-            this.foldersContextMenuEdit.Text = LanguageManager.Strings.Edit;
-            this.foldersContextMenuDelete.Text = LanguageManager.Strings.Delete;
-            this.actionButtonContextMenuItemEdit.Text = LanguageManager.Strings.Edit;
-            this.actionButtonContextMenuItemCopy.Text = LanguageManager.Strings.Copy;
-            this.actionButtonContextMenuItemPaste.Text = LanguageManager.Strings.Paste;
-            this.actionButtonContextMenuItemDelete.Text = LanguageManager.Strings.Delete;
-            this.actionButtonContextMenuItemSimulatePress.Text = LanguageManager.Strings.SimulateOnPress;
-            this.actionButtonContextMenuItemSimulateRelease.Text = LanguageManager.Strings.SimulateOnRelease;
-            this.actionButtonContextMenuItemSimulateLongPress.Text = LanguageManager.Strings.SimulateOnLongPress;
-            this.actionButtonContextMenuItemSimulateLongPressRelease.Text = LanguageManager.Strings.SimulateOnLongPressRelease;
-            this.lblFolders.Text = LanguageManager.Strings.Folders;
-            this.lblGrid.Text = LanguageManager.Strings.Grid;
+            Name = LanguageManager.Strings.DeckTitle;
+            lblColumns.Text = LanguageManager.Strings.Columns;
+            lblRows.Text = LanguageManager.Strings.Rows;
+            lblSpacing.Text = LanguageManager.Strings.Spacing;
+            lblCornerRadius.Text = LanguageManager.Strings.CornerRadius;
+            checkButtonBackground.Text = LanguageManager.Strings.ButtonBackGround;
+            foldersContextMenuNew.Text = LanguageManager.Strings.Create;
+            foldersContextMenuEdit.Text = LanguageManager.Strings.Edit;
+            foldersContextMenuDelete.Text = LanguageManager.Strings.Delete;
+            actionButtonContextMenuItemEdit.Text = LanguageManager.Strings.Edit;
+            actionButtonContextMenuItemCopy.Text = LanguageManager.Strings.Copy;
+            actionButtonContextMenuItemPaste.Text = LanguageManager.Strings.Paste;
+            actionButtonContextMenuItemDelete.Text = LanguageManager.Strings.Delete;
+            actionButtonContextMenuItemSimulatePress.Text = LanguageManager.Strings.SimulateOnPress;
+            actionButtonContextMenuItemSimulateRelease.Text = LanguageManager.Strings.SimulateOnRelease;
+            actionButtonContextMenuItemSimulateLongPress.Text = LanguageManager.Strings.SimulateOnLongPress;
+            actionButtonContextMenuItemSimulateLongPressRelease.Text = LanguageManager.Strings.SimulateOnLongPressRelease;
+            lblFolders.Text = LanguageManager.Strings.Folders;
+            lblGrid.Text = LanguageManager.Strings.Grid;
         }
 
 
         public void UpdateFolders()
         {
-            this.foldersView.Nodes.Clear();
+            foldersView.Nodes.Clear();
 
             var stack = new Stack<TreeNode>();
             var rootDirectory = ProfileManager.CurrentProfile.Folders.FirstOrDefault();
@@ -87,20 +82,20 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             while (stack.Count > 0)
             {
                 var currentNode = stack.Pop();
-                var directoryInfo = (Folders.MacroDeckFolder)currentNode.Tag;
+                var directoryInfo = (MacroDeckFolder)currentNode.Tag;
                 foreach (var directoryId in directoryInfo.Childs.ToList())
                 {
                     try
                     {
                         var directory = ProfileManager.FindFolderById(directoryId, ProfileManager.CurrentProfile);
                         var childDirectoryNode = new TreeNode(directory.DisplayName) { Tag = directory };
-                        this.Invoke(new Action(() => currentNode.Nodes.Add(childDirectoryNode)));
+                        Invoke(new Action(() => currentNode.Nodes.Add(childDirectoryNode)));
                         stack.Push(childDirectoryNode);
                     } catch { }
                 }
             }
-            this.foldersView.Nodes.Add(node);
-            this.foldersView.ExpandAll();
+            foldersView.Nodes.Add(node);
+            foldersView.ExpandAll();
         }
 
 
@@ -108,27 +103,27 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         {
             if (clear)
             {
-                foreach (RoundedButton roundedButton in this.buttonPanel.Controls)
+                foreach (RoundedButton roundedButton in buttonPanel.Controls)
                 {
-                    var actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == roundedButton.Column && aB.Position_Y == roundedButton.Row);
+                    var actionButton = _currentFolder.ActionButtons.Find(aB => aB.Position_X == roundedButton.Column && aB.Position_Y == roundedButton.Row);
                     if (actionButton != null)
                     {
-                        actionButton.StateChanged -= this.ButtonStateChanged;
+                        actionButton.StateChanged -= ButtonStateChanged;
                         actionButton.IconChanged -= ActionButton_IconChanged;
-                        actionButton.LabelOff.LabelBase64Changed -= this.LabelChanged;
-                        actionButton.LabelOn.LabelBase64Changed -= this.LabelChanged;
+                        actionButton.LabelOff.LabelBase64Changed -= LabelChanged;
+                        actionButton.LabelOn.LabelBase64Changed -= LabelChanged;
                     }
 
-                    roundedButton.MouseDown -= this.ActionButton_Down;
+                    roundedButton.MouseDown -= ActionButton_Down;
                     roundedButton.DragDrop -= Button_DragDrop;
                     roundedButton.DragEnter -= Button_DragEnter;
-                    this.Invoke(new Action(() => roundedButton.Dispose()));
+                    Invoke(() => roundedButton.Dispose());
 
                 }
-                this.Invoke(new Action(() => this.buttonPanel.Controls.Clear()));
+                Invoke(() => buttonPanel.Controls.Clear());
             }
 
-            int buttonSize = 100;
+            var buttonSize = 100;
             int rows = ProfileManager.CurrentProfile.Rows, columns = ProfileManager.CurrentProfile.Columns, spacing = ProfileManager.CurrentProfile.ButtonSpacing; // from settings
             int width = buttonPanel.Width, height = buttonPanel.Height; // from panel
             int buttonSizeX, buttonSizeY;
@@ -138,43 +133,43 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             buttonSize = Math.Min(buttonSizeX, buttonSizeY) - spacing;
 
 
-            for (int row = 0; row < rows; row++)
+            for (var row = 0; row < rows; row++)
             {
-                for (int column = 0; column < columns; column++)
+                for (var column = 0; column < columns; column++)
                 {
-                    this.LoadButton(row, column, buttonSize);
+                    LoadButton(row, column, buttonSize);
                 }
             }
         }
 
         private void LabelChanged(object sender, EventArgs e)
         {
-            var actionButton = this._currentFolder.ActionButtons.Find(aB => (aB.LabelOff != null && aB.LabelOff.Equals(sender)) || (aB.LabelOn != null && aB.LabelOn.Equals(sender)));
-            this.UpdateButtonIcon(actionButton);
+            var actionButton = _currentFolder.ActionButtons.Find(aB => (aB.LabelOff != null && aB.LabelOff.Equals(sender)) || (aB.LabelOn != null && aB.LabelOn.Equals(sender)));
+            UpdateButtonIcon(actionButton);
         }
 
         private void ButtonStateChanged(object sender, EventArgs e)
         {
-            ActionButton.ActionButton actionButton = (ActionButton.ActionButton)sender;
-            this.UpdateButtonIcon(actionButton);
+            var actionButton = (ActionButton.ActionButton)sender;
+            UpdateButtonIcon(actionButton);
         }
 
         private void UpdateButtonIcon(ActionButton.ActionButton actionButton, RoundedButton button = null)
         {
-            if (this.IsDisposed || !this.IsHandleCreated || actionButton == null) return;
-            if (this.InvokeRequired)
+            if (IsDisposed || !IsHandleCreated || actionButton == null) return;
+            if (InvokeRequired)
             {
-                this.Invoke(new Action(() => UpdateButtonIcon(actionButton, button)));
+                Invoke(() => UpdateButtonIcon(actionButton, button));
                 return;
             }
 
-            button ??= this.buttonPanel.Controls.Cast<RoundedButton>().Where(x => x.Row.Equals(actionButton.Position_Y) && x.Column.Equals(actionButton.Position_X)).FirstOrDefault();
+            button ??= buttonPanel.Controls.Cast<RoundedButton>().Where(x => x.Row.Equals(actionButton.Position_Y) && x.Column.Equals(actionButton.Position_X)).FirstOrDefault();
 
-            if (actionButton.State == true)
+            if (actionButton.State)
             {
                 if (actionButton.LabelOn != null && !string.IsNullOrWhiteSpace(actionButton.LabelOn.LabelBase64))
                 {
-                    Image labelImage = Utils.Base64.GetImageFromBase64(actionButton.LabelOn.LabelBase64);
+                    var labelImage = Base64.GetImageFromBase64(actionButton.LabelOn.LabelBase64);
                     button.ForegroundImage = labelImage;
                 }
 
@@ -192,7 +187,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             {
                 if (actionButton.LabelOff != null && !string.IsNullOrWhiteSpace(actionButton.LabelOff.LabelBase64))
                 {
-                    Image labelImage = Utils.Base64.GetImageFromBase64(actionButton.LabelOff.LabelBase64);
+                    var labelImage = Base64.GetImageFromBase64(actionButton.LabelOff.LabelBase64);
                     button.ForegroundImage = labelImage;
                 }
 
@@ -212,7 +207,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void LoadButton(int row, int column, int buttonSize)
         {
-            var button = this.buttonPanel.Controls.Cast<RoundedButton>().Where(x => x.Row.Equals(row) && x.Column.Equals(column)).FirstOrDefault();
+            var button = buttonPanel.Controls.Cast<RoundedButton>().Where(x => x.Row.Equals(row) && x.Column.Equals(column)).FirstOrDefault();
 
             if (button == null)
             {
@@ -224,7 +219,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     Column = column,
                     ForeColor = Color.White
                 };
-                button.MouseDown += this.ActionButton_Down;
+                button.MouseDown += ActionButton_Down;
                 button.DragDrop += Button_DragDrop;
                 button.DragEnter += Button_DragEnter;
                 button.AllowDrop = true;
@@ -253,33 +248,33 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 button.Image = null;
             }
 
-            var actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
+            var actionButton = _currentFolder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
 
             if (actionButton != null)
             {
                 // Remove event handlers if there are any to prevent multiple event handlers
-                actionButton.StateChanged -= this.ButtonStateChanged;
-                actionButton.LabelOff.LabelBase64Changed -= this.LabelChanged;
-                actionButton.LabelOn.LabelBase64Changed -= this.LabelChanged;
+                actionButton.StateChanged -= ButtonStateChanged;
+                actionButton.LabelOff.LabelBase64Changed -= LabelChanged;
+                actionButton.LabelOn.LabelBase64Changed -= LabelChanged;
                 actionButton.IconChanged -= ActionButton_IconChanged;
                 // Add event handlers
-                actionButton.StateChanged += this.ButtonStateChanged;
-                actionButton.LabelOff.LabelBase64Changed += this.LabelChanged;
-                actionButton.LabelOn.LabelBase64Changed += this.LabelChanged;
+                actionButton.StateChanged += ButtonStateChanged;
+                actionButton.LabelOff.LabelBase64Changed += LabelChanged;
+                actionButton.LabelOn.LabelBase64Changed += LabelChanged;
                 actionButton.IconChanged += ActionButton_IconChanged;
 
                 button.ShowKeyboardHotkeyIndicator = actionButton.KeyCode != Keys.None;
                 if (button.ShowKeyboardHotkeyIndicator)
                 {
-                    button.KeyboardHotkeyIndicatorText = actionButton.ModifierKeyCodes.ToString().Replace("Control", "CTRL").Replace("None", string.Empty).Replace(", ", "  + ") + (!actionButton.ModifierKeyCodes.ToString().Equals("None") ? " + " : string.Empty) + actionButton.KeyCode.ToString();
+                    button.KeyboardHotkeyIndicatorText = actionButton.ModifierKeyCodes.ToString().Replace("Control", "CTRL").Replace("None", string.Empty).Replace(", ", "  + ") + (!actionButton.ModifierKeyCodes.ToString().Equals("None") ? " + " : string.Empty) + actionButton.KeyCode;
                 }
 
-                this.UpdateButtonIcon(actionButton, button);
+                UpdateButtonIcon(actionButton, button);
             }
 
-            if (!this.buttonPanel.Controls.Contains(button))
+            if (!buttonPanel.Controls.Contains(button))
             {
-                this.Invoke(new Action(() => this.buttonPanel.Controls.Add(button)));
+                Invoke(() => buttonPanel.Controls.Add(button));
             }
 
         }
@@ -289,9 +284,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             var actionButton = sender as ActionButton.ActionButton;
             if (actionButton != null)
             {
-                if (this._currentFolder.ActionButtons.Contains(actionButton))
+                if (_currentFolder.ActionButtons.Contains(actionButton))
                 {
-                    this.UpdateButtonIcon(actionButton);
+                    UpdateButtonIcon(actionButton);
                 }
             }
         }
@@ -309,8 +304,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     var draggedButton = (RoundedButton)e.Data.GetData(typeof(RoundedButton));
                     var targetButton = (RoundedButton)sender;
 
-                    var targetActionButton = ProfileManager.FindActionButton(this._currentFolder, targetButton.Row, targetButton.Column);
-                    var draggedActionButton = ProfileManager.FindActionButton(this._currentFolder, draggedButton.Row, draggedButton.Column);
+                    var targetActionButton = ProfileManager.FindActionButton(_currentFolder, targetButton.Row, targetButton.Column);
+                    var draggedActionButton = ProfileManager.FindActionButton(_currentFolder, draggedButton.Row, draggedButton.Column);
 
                     if (draggedActionButton == null) return;
 
@@ -318,30 +313,30 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     newActionButton.Position_Y = targetButton.Row;
                     newActionButton.Position_X = targetButton.Column;
 
-                    this._currentFolder.ActionButtons.Remove(draggedActionButton);
-                    this._currentFolder.ActionButtons.Add(newActionButton);
+                    _currentFolder.ActionButtons.Remove(draggedActionButton);
+                    _currentFolder.ActionButtons.Add(newActionButton);
 
                     if (targetActionButton != null)
                     {
                         var newTargetButton = targetActionButton;
                         newTargetButton.Position_Y = draggedButton.Row;
                         newTargetButton.Position_X = draggedButton.Column;
-                        this._currentFolder.ActionButtons.Remove(targetActionButton);
-                        this._currentFolder.ActionButtons.Add(newTargetButton);
+                        _currentFolder.ActionButtons.Remove(targetActionButton);
+                        _currentFolder.ActionButtons.Add(newTargetButton);
 
-                        foreach (PluginAction pluginAction in newTargetButton.Actions)
+                        foreach (var pluginAction in newTargetButton.Actions)
                         {
                             pluginAction.SetActionButton(newTargetButton);
                         }
-                        foreach (PluginAction pluginAction in newTargetButton.ActionsRelease)
+                        foreach (var pluginAction in newTargetButton.ActionsRelease)
                         {
                             pluginAction.SetActionButton(newTargetButton);
                         }
-                        foreach (PluginAction pluginAction in newTargetButton.ActionsLongPress)
+                        foreach (var pluginAction in newTargetButton.ActionsLongPress)
                         {
                             pluginAction.SetActionButton(newTargetButton);
                         }
-                        foreach (PluginAction pluginAction in newTargetButton.ActionsLongPressRelease)
+                        foreach (var pluginAction in newTargetButton.ActionsLongPressRelease)
                         {
                             pluginAction.SetActionButton(newTargetButton);
                         }
@@ -350,7 +345,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
                         foreach (var eventListener in newTargetButton.EventListeners)
                         {
-                            foreach (PluginAction pluginAction in eventListener.Actions)
+                            foreach (var pluginAction in eventListener.Actions)
                             {
                                 pluginAction.SetActionButton(newTargetButton);
                             }
@@ -359,8 +354,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                 });
                 
                 ProfileManager.Save();
-                this.UpdateButtons();
-                MacroDeckServer.UpdateFolder(this._currentFolder);
+                UpdateButtons();
+                MacroDeckServer.UpdateFolder(_currentFolder);
             }
         }
         private void Button_DragEnter(object sender, DragEventArgs e)
@@ -381,7 +376,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         {
             var button = (RoundedButton)sender;
             
-            this._buttonClicked = button;
+            _buttonClicked = button;
             switch (e.Button)
             {
                 case MouseButtons.Left:
@@ -395,37 +390,37 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     }
                     break;
                 case MouseButtons.Right:
-                    this.actionButtonContextMenu.Show(button, button.PointToClient(Control.MousePosition));
+                    actionButtonContextMenu.Show(button, button.PointToClient(MousePosition));
                     break;
             }
         }
 
         public void ContextMenuEditItemClick(object sender, EventArgs e)
         {
-            this.OpenButtonEditor((RoundedButton)this._buttonClicked);
+            OpenButtonEditor((RoundedButton)_buttonClicked);
         }
 
         public void ContextMenuDeleteItemClick(object sender, EventArgs e)
         {
-            int row = ((RoundedButton)this._buttonClicked).Row;
-            int col = ((RoundedButton)this._buttonClicked).Column;
-            var actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == col && aB.Position_Y == row);
+            var row = ((RoundedButton)_buttonClicked).Row;
+            var col = ((RoundedButton)_buttonClicked).Column;
+            var actionButton = _currentFolder.ActionButtons.Find(aB => aB.Position_X == col && aB.Position_Y == row);
             if (actionButton != null)
             {
                 actionButton.Dispose();
-                this._currentFolder.ActionButtons.Remove(actionButton);
+                _currentFolder.ActionButtons.Remove(actionButton);
                 ProfileManager.Save();
-                this.UpdateButtons();
-                MacroDeckServer.UpdateFolder(this._currentFolder);
+                UpdateButtons();
+                MacroDeckServer.UpdateFolder(_currentFolder);
             }
         }
 
         public void OpenButtonEditor(RoundedButton button)
         {
-            int row = button.Row;
-            int column = button.Column;
+            var row = button.Row;
+            var column = button.Column;
 
-            var actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
+            var actionButton = _currentFolder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
             actionButton ??= new ActionButton.ActionButton
                 {
                     Actions = new List<PluginAction>(),
@@ -434,28 +429,28 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     Position_X = column,
                     IconOff = "",
                     IconOn = "",
-                    LabelOff = new ActionButton.ButtonLabel(),
-                    LabelOn = new ActionButton.ButtonLabel(),
+                    LabelOff = new ButtonLabel(),
+                    LabelOn = new ButtonLabel(),
                 };
 
 
-            using var buttonEditor = new ButtonEditor(actionButton, this._currentFolder);
+            using var buttonEditor = new ButtonEditor(actionButton, _currentFolder);
             buttonEditor.ShowDialog();
             ProfileManager.Save();
-            this.UpdateButtons();
+            UpdateButtons();
 
         }
 
         public void SetFolder(MacroDeckFolder macroDeckFolder)
         {
             if (macroDeckFolder == null || !ProfileManager.CurrentProfile.Folders.Contains(macroDeckFolder)) return;
-            this._currentFolder = macroDeckFolder;
-            this.UpdateButtons();
+            _currentFolder = macroDeckFolder;
+            UpdateButtons();
         }
 
         private void FoldersView_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            this.SetFolder(ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, ProfileManager.CurrentProfile));
+            SetFolder(ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, ProfileManager.CurrentProfile));
         }
 
         private void FoldersView_MouseDown(object sender, MouseEventArgs e)
@@ -464,9 +459,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             switch (e.Button)
             {
                 case MouseButtons.Right:
-                    this.foldersView.SelectedNode = this.foldersView.GetNodeAt(e.X, e.Y);
-                    if (this.foldersView.SelectedNode == null) this.foldersView.SelectedNode = this.foldersView.Nodes[0];
-                    this.foldersContextMenu.Show(this.foldersView, this.foldersView.PointToClient(Control.MousePosition));
+                    foldersView.SelectedNode = foldersView.GetNodeAt(e.X, e.Y);
+                    if (foldersView.SelectedNode == null) foldersView.SelectedNode = foldersView.Nodes[0];
+                    foldersContextMenu.Show(foldersView, foldersView.PointToClient(MousePosition));
                     break;
             }
         }
@@ -475,32 +470,32 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         {
             Task.Run(() =>
             {
-                this.LoadProfiles();
-                this.LoadProfileSettings();
-                this.UpdateButtons();
+                LoadProfiles();
+                LoadProfileSettings();
+                UpdateButtons();
             });
-            CustomControls.Form mainWindow = (CustomControls.Form)this.Parent.Parent;
+            var mainWindow = (Form)Parent.Parent;
             mainWindow.ResizeEnd += MainWindow_ResizeEnd;
         }
 
         private void LoadProfiles()
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.Invoke(new Action(() => this.LoadProfiles()));
+                Invoke(() => LoadProfiles());
                 return;
             }
-            this.boxProfiles.Items.Clear();
-            foreach (MacroDeckProfile macroDeckProfile in ProfileManager.Profiles)
+            boxProfiles.Items.Clear();
+            foreach (var macroDeckProfile in ProfileManager.Profiles)
             {
-                this.boxProfiles.Items.Add(macroDeckProfile.DisplayName);
+                boxProfiles.Items.Add(macroDeckProfile.DisplayName);
             }
-            this.boxProfiles.Text = ProfileManager.CurrentProfile.DisplayName;
+            boxProfiles.Text = ProfileManager.CurrentProfile.DisplayName;
         }
 
         private void BtnGoToRoot_Click(object sender, EventArgs e)
         {
-            this.foldersView.SelectedNode = this.foldersView.Nodes[0];
+            foldersView.SelectedNode = foldersView.Nodes[0];
         }
 
         private void BtnCreateFolder_Click(object sender, EventArgs e)
@@ -511,7 +506,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             using var addFolder = new AddFolder(selectedFolder);
             if (addFolder.ShowDialog() == DialogResult.OK)
             {
-                this.UpdateFolders();
+                UpdateFolders();
             }
         }
 
@@ -523,7 +518,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             using var addFolder = new AddFolder(selectedFolder, true);
             if (addFolder.ShowDialog() == DialogResult.OK)
             {
-                this.UpdateFolders();
+                UpdateFolders();
             }
         }
 
@@ -531,82 +526,82 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         {
             var selectedFolder = ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, ProfileManager.CurrentProfile);
             if (selectedFolder.Equals(ProfileManager.CurrentProfile.Folders[0])) return;
-            using var msgBox = new CustomControls.MessageBox();
+            using var msgBox = new MessageBox();
             if (msgBox.ShowDialog(LanguageManager.Strings.AreYouSure, string.Format(LanguageManager.Strings.TheFolderWillBeDeleted, selectedFolder.DisplayName), MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                if (this._currentFolder == selectedFolder)
+                if (_currentFolder == selectedFolder)
                 {
-                    this._currentFolder = ProfileManager.CurrentProfile.Folders[0];
+                    _currentFolder = ProfileManager.CurrentProfile.Folders[0];
                     UpdateButtons();
                 }
 
                 ProfileManager.DeleteFolder(selectedFolder, ProfileManager.CurrentProfile);
-                this.UpdateFolders();
+                UpdateFolders();
             }
         }
 
         private void ActionButtonContextMenuItemCopy_Click(object sender, EventArgs e)
         {
-            var button = (RoundedButton)this._buttonClicked;
-            int row = button.Row;
-            int col = button.Column;
-            var actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == col && aB.Position_Y == row);
+            var button = (RoundedButton)_buttonClicked;
+            var row = button.Row;
+            var col = button.Column;
+            var actionButton = _currentFolder.ActionButtons.Find(aB => aB.Position_X == col && aB.Position_Y == row);
             if (actionButton != null)
             {
-                Utils.Clipboard.CopyActionButton(actionButton);
+                Clipboard.CopyActionButton(actionButton);
             }
         }
 
         private void ActionButtonContextMenuOpened(object sender, EventArgs e)
         {
-            var button = (RoundedButton)this._buttonClicked;
-            int row = button.Row;
-            int col = button.Column;
-            var actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == col && aB.Position_Y == row);
-            this.actionButtonContextMenuItemSimulatePress.Enabled = !(actionButton == null);
-            this.actionButtonContextMenuItemSimulateRelease.Enabled = !(actionButton == null);
-            this.actionButtonContextMenuItemSimulateLongPress.Enabled = !(actionButton == null);
-            this.actionButtonContextMenuItemSimulateLongPressRelease.Enabled = !(actionButton == null);
-            this.actionButtonContextMenuItemCopy.Enabled = !(actionButton == null);
-            this.actionButtonContextMenuItemPaste.Enabled = !(Utils.Clipboard.GetActionButtonCopy() == null);
-            this.actionButtonContextMenuItemDelete.Enabled = !(actionButton == null);
+            var button = (RoundedButton)_buttonClicked;
+            var row = button.Row;
+            var col = button.Column;
+            var actionButton = _currentFolder.ActionButtons.Find(aB => aB.Position_X == col && aB.Position_Y == row);
+            actionButtonContextMenuItemSimulatePress.Enabled = !(actionButton == null);
+            actionButtonContextMenuItemSimulateRelease.Enabled = !(actionButton == null);
+            actionButtonContextMenuItemSimulateLongPress.Enabled = !(actionButton == null);
+            actionButtonContextMenuItemSimulateLongPressRelease.Enabled = !(actionButton == null);
+            actionButtonContextMenuItemCopy.Enabled = !(actionButton == null);
+            actionButtonContextMenuItemPaste.Enabled = !(Clipboard.GetActionButtonCopy() == null);
+            actionButtonContextMenuItemDelete.Enabled = !(actionButton == null);
         }
 
         private void ActionButtonContextMenuItemPaste_Click(object sender, EventArgs e)
         {
-            var button = (RoundedButton)this._buttonClicked;
-            int row = button.Row;
-            int col = button.Column;
-            var actionButtonOld = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == col && aB.Position_Y == row);
+            var button = (RoundedButton)_buttonClicked;
+            var row = button.Row;
+            var col = button.Column;
+            var actionButtonOld = _currentFolder.ActionButtons.Find(aB => aB.Position_X == col && aB.Position_Y == row);
 
-            if (this._currentFolder != null && this._currentFolder.ActionButtons != null && actionButtonOld != null)
+            if (_currentFolder != null && _currentFolder.ActionButtons != null && actionButtonOld != null)
             {
-                this._currentFolder.ActionButtons.Remove(actionButtonOld);
+                _currentFolder.ActionButtons.Remove(actionButtonOld);
             }
 
-            if (Utils.Clipboard.GetActionButtonCopy() == null) return;
+            if (Clipboard.GetActionButtonCopy() == null) return;
 
-            var actionButtonNew = Utils.Clipboard.GetActionButtonCopy();
-            foreach (PluginAction pluginAction in actionButtonNew.Actions)
+            var actionButtonNew = Clipboard.GetActionButtonCopy();
+            foreach (var pluginAction in actionButtonNew.Actions)
             {
                 pluginAction.SetActionButton(actionButtonNew);
             }
-            foreach (PluginAction pluginAction in actionButtonNew.ActionsRelease)
+            foreach (var pluginAction in actionButtonNew.ActionsRelease)
             {
                 pluginAction.SetActionButton(actionButtonNew);
             }
-            foreach (PluginAction pluginAction in actionButtonNew.ActionsLongPress)
+            foreach (var pluginAction in actionButtonNew.ActionsLongPress)
             {
                 pluginAction.SetActionButton(actionButtonNew);
             }
-            foreach (PluginAction pluginAction in actionButtonNew.ActionsLongPressRelease)
+            foreach (var pluginAction in actionButtonNew.ActionsLongPressRelease)
             {
                 pluginAction.SetActionButton(actionButtonNew);
             }
 
             foreach (var eventListener in actionButtonNew.EventListeners)
             {
-                foreach (PluginAction pluginAction in eventListener.Actions)
+                foreach (var pluginAction in eventListener.Actions)
                 {
                     pluginAction.SetActionButton(actionButtonNew);
                 }
@@ -615,18 +610,18 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             actionButtonNew.Position_X = col;
             actionButtonNew.Position_Y = row;
 
-            this._currentFolder.ActionButtons.Add(actionButtonNew);
+            _currentFolder.ActionButtons.Add(actionButtonNew);
 
             ProfileManager.Save();
-            this.UpdateButtons();
-            this.UpdateButtonIcon(actionButtonNew);
-            MacroDeckServer.UpdateFolder(this._currentFolder);
+            UpdateButtons();
+            UpdateButtonIcon(actionButtonNew);
+            MacroDeckServer.UpdateFolder(_currentFolder);
         }
 
         private void BoxProfiles_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var profile = ProfileManager.FindProfileByDisplayName(this.boxProfiles.Text) ?? ProfileManager.Profiles.FirstOrDefault();
-            this.SetProfile(profile);
+            var profile = ProfileManager.FindProfileByDisplayName(boxProfiles.Text) ?? ProfileManager.Profiles.FirstOrDefault();
+            SetProfile(profile);
         }
 
         public void SetProfile(MacroDeckProfile profile)
@@ -634,44 +629,44 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             Settings.Default.SelectedProfile = profile.ProfileId;
             Settings.Default.Save();
             ProfileManager.CurrentProfile = profile;
-            this._currentFolder = profile.Folders.FirstOrDefault();
-            this.UpdateButtons(true);
-            this.Invoke(new Action(() => {
-                this.boxProfiles.Text = profile.DisplayName;
-                this.UpdateFolders();
-                this.LoadProfileSettings();
-            }));
+            _currentFolder = profile.Folders.FirstOrDefault();
+            UpdateButtons(true);
+            Invoke(() => {
+                boxProfiles.Text = profile.DisplayName;
+                UpdateFolders();
+                LoadProfileSettings();
+            });
         }
 
         private void LoadProfileSettings()
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.Invoke(new Action(() => this.LoadProfileSettings()));
+                Invoke(() => LoadProfileSettings());
                 return;
             }
-            this.buttonRows.ValueChanged -= this.ButtonSettingsChanged;
-            this.buttonColumns.ValueChanged -= this.ButtonSettingsChanged;
-            this.buttonSpacing.ValueChanged -= this.ButtonSettingsChanged;
-            this.cornerRadius.ValueChanged -= this.ButtonSettingsChanged;
-            this.checkButtonBackground.CheckedChanged -= this.ButtonSettingsChanged;
+            buttonRows.ValueChanged -= ButtonSettingsChanged;
+            buttonColumns.ValueChanged -= ButtonSettingsChanged;
+            buttonSpacing.ValueChanged -= ButtonSettingsChanged;
+            cornerRadius.ValueChanged -= ButtonSettingsChanged;
+            checkButtonBackground.CheckedChanged -= ButtonSettingsChanged;
 
-            this.buttonRows.Value = ProfileManager.CurrentProfile.Rows;
-            this.buttonColumns.Value = ProfileManager.CurrentProfile.Columns;
-            this.buttonSpacing.Value = ProfileManager.CurrentProfile.ButtonSpacing;
-            this.cornerRadius.Value = ProfileManager.CurrentProfile.ButtonRadius;
-            this.checkButtonBackground.Checked = ProfileManager.CurrentProfile.ButtonBackground;
-            this.buttonRows.ValueChanged += this.ButtonSettingsChanged;
-            this.buttonColumns.ValueChanged += this.ButtonSettingsChanged;
-            this.buttonSpacing.ValueChanged += this.ButtonSettingsChanged;
-            this.cornerRadius.ValueChanged += this.ButtonSettingsChanged;
-            this.checkButtonBackground.CheckedChanged += this.ButtonSettingsChanged;
+            buttonRows.Value = ProfileManager.CurrentProfile.Rows;
+            buttonColumns.Value = ProfileManager.CurrentProfile.Columns;
+            buttonSpacing.Value = ProfileManager.CurrentProfile.ButtonSpacing;
+            cornerRadius.Value = ProfileManager.CurrentProfile.ButtonRadius;
+            checkButtonBackground.Checked = ProfileManager.CurrentProfile.ButtonBackground;
+            buttonRows.ValueChanged += ButtonSettingsChanged;
+            buttonColumns.ValueChanged += ButtonSettingsChanged;
+            buttonSpacing.ValueChanged += ButtonSettingsChanged;
+            cornerRadius.ValueChanged += ButtonSettingsChanged;
+            checkButtonBackground.CheckedChanged += ButtonSettingsChanged;
 
-            this.buttonRows.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
-            this.buttonColumns.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
-            this.buttonSpacing.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
-            this.cornerRadius.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
-            this.checkButtonBackground.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
+            buttonRows.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
+            buttonColumns.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
+            buttonSpacing.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
+            cornerRadius.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
+            checkButtonBackground.Enabled = ProfileManager.CurrentProfile.ButtonsCustomizable;
         }
 
 
@@ -681,11 +676,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             if (createProfileDialog.ShowDialog() == DialogResult.OK)
             {
                 ProfileManager.CurrentProfile = createProfileDialog.Profile;
-                this.LoadProfiles();
-                this._currentFolder = ProfileManager.CurrentProfile.Folders[0];
-                this.UpdateButtons(true);
-                this.LoadProfileSettings();
-                this.UpdateFolders();
+                LoadProfiles();
+                _currentFolder = ProfileManager.CurrentProfile.Folders[0];
+                UpdateButtons(true);
+                LoadProfileSettings();
+                UpdateFolders();
             }
         }
 
@@ -694,23 +689,23 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             using var createProfileDialog = new CreateProfileDialog(ProfileManager.CurrentProfile);
             if (createProfileDialog.ShowDialog() == DialogResult.OK)
             {
-                this.LoadProfiles();
+                LoadProfiles();
             }
         }
 
         private void BtnDeleteProfile_Click(object sender, EventArgs e)
         {
             if (ProfileManager.Profiles.Count < 2) return;
-            using var msgBox = new CustomControls.MessageBox();
-            if (msgBox.ShowDialog(LanguageManager.Strings.AreYouSure, string.Format(Language.LanguageManager.Strings.TheProfileWillBeDeleted, ProfileManager.CurrentProfile.DisplayName), MessageBoxButtons.YesNo) == DialogResult.Yes)
+            using var msgBox = new MessageBox();
+            if (msgBox.ShowDialog(LanguageManager.Strings.AreYouSure, string.Format(LanguageManager.Strings.TheProfileWillBeDeleted, ProfileManager.CurrentProfile.DisplayName), MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
                 ProfileManager.DeleteProfile(ProfileManager.CurrentProfile);
                 ProfileManager.CurrentProfile = ProfileManager.Profiles[0];
-                this.LoadProfiles();
-                this._currentFolder = ProfileManager.CurrentProfile.Folders[0];
-                this.UpdateButtons(true);
-                this.LoadProfileSettings();
-                this.UpdateFolders();
+                LoadProfiles();
+                _currentFolder = ProfileManager.CurrentProfile.Folders[0];
+                UpdateButtons(true);
+                LoadProfileSettings();
+                UpdateFolders();
             }
         }
 
@@ -728,8 +723,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                                             string.Format("ButtonSpacing: {0}", ProfileManager.CurrentProfile.ButtonSpacing) + Environment.NewLine +
                                             string.Format("ButtonRadius: {0}", ProfileManager.CurrentProfile.ButtonRadius) + Environment.NewLine +
                                             string.Format("ButtonBackground: {0}", ProfileManager.CurrentProfile.ButtonBackground));
-            this.UpdateButtons(true);
-            foreach (MacroDeckClient macroDeckClient in MacroDeckServer.Clients.FindAll(macroDeckClient => macroDeckClient.Profile.ProfileId.Equals(ProfileManager.CurrentProfile.ProfileId)))
+            UpdateButtons(true);
+            foreach (var macroDeckClient in MacroDeckServer.Clients.FindAll(macroDeckClient => macroDeckClient.Profile.ProfileId.Equals(ProfileManager.CurrentProfile.ProfileId)))
             {
                 MacroDeckServer.SetProfile(macroDeckClient, ProfileManager.CurrentProfile);
             }
@@ -757,9 +752,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void SimulatePress(ButtonPressType buttonPressType)
         {
-            int row = ((RoundedButton)this._buttonClicked).Row;
-            int column = ((RoundedButton)this._buttonClicked).Column;
-            var actionButton = this._currentFolder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
+            var row = ((RoundedButton)_buttonClicked).Row;
+            var column = ((RoundedButton)_buttonClicked).Column;
+            var actionButton = _currentFolder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
             MacroDeckServer.Execute(actionButton, "", buttonPressType);
 
         }

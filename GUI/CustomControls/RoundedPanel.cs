@@ -1,29 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Text;
 using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
-    public partial class RoundedPanel : Panel
+    public class RoundedPanel : Panel
     {
         private int borderRadius = 8;
 
         public RoundedPanel()
         {
-            this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
         }
 
 
 
         private GraphicsPath GetFigurePath(Rectangle rect, int radius)
         {
-            GraphicsPath path = new GraphicsPath();
-            float curveSize = radius * 2F;
+            var path = new GraphicsPath();
+            var curveSize = radius * 2F;
 
             path.StartFigure();
             path.AddArc(rect.X, rect.Y, curveSize, curveSize, 180, 90);
@@ -37,24 +32,24 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            Graphics graph = e.Graphics;
+            var graph = e.Graphics;
 
             if (borderRadius > 1)
             {
-                var rectBorderSmooth = this.ClientRectangle;
-                int smoothSize = 2;
-                using (GraphicsPath pathBorderSmooth = GetFigurePath(rectBorderSmooth, borderRadius))
-                using (Pen penBorderSmooth = new Pen(this.Parent.BackColor, smoothSize))
+                var rectBorderSmooth = ClientRectangle;
+                var smoothSize = 2;
+                using (var pathBorderSmooth = GetFigurePath(rectBorderSmooth, borderRadius))
+                using (var penBorderSmooth = new Pen(Parent.BackColor, smoothSize))
                 {
 
-                    this.Region = new Region(pathBorderSmooth);
+                    Region = new Region(pathBorderSmooth);
                     graph.SmoothingMode = SmoothingMode.AntiAlias;
                     graph.DrawPath(penBorderSmooth, pathBorderSmooth);
                 }
             }
             else
             {
-                this.Region = new Region(this.ClientRectangle);
+                Region = new Region(ClientRectangle);
             }
         }
     }

@@ -1,4 +1,10 @@
 ﻿
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+
 namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
 {
     partial class SetBrightnessActionConfigView
@@ -6,7 +12,7 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
         /// <summary> 
         /// Erforderliche Designervariable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary> 
         /// Verwendete Ressourcen bereinigen.
@@ -29,32 +35,32 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
         /// </summary>
         private void InitializeComponent()
         {
-            this.radioFixedDevice = new System.Windows.Forms.RadioButton();
-            this.radioCurrentDevice = new System.Windows.Forms.RadioButton();
-            this.lblBrightness = new System.Windows.Forms.Label();
-            this.lblDevice = new System.Windows.Forms.Label();
-            this.devicesList = new SuchByte.MacroDeck.GUI.CustomControls.RoundedComboBox();
-            this.brightness = new System.Windows.Forms.TrackBar();
-            ((System.ComponentModel.ISupportInitialize)(this.brightness)).BeginInit();
+            this.radioFixedDevice = new RadioButton();
+            this.radioCurrentDevice = new RadioButton();
+            this.lblBrightness = new Label();
+            this.lblDevice = new Label();
+            this.devicesList = new RoundedComboBox();
+            this.brightness = new TrackBar();
+            ((ISupportInitialize)(this.brightness)).BeginInit();
             this.SuspendLayout();
             // 
             // radioFixedDevice
             // 
             this.radioFixedDevice.AutoSize = true;
-            this.radioFixedDevice.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.radioFixedDevice.Location = new System.Drawing.Point(484, 185);
+            this.radioFixedDevice.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            this.radioFixedDevice.Location = new Point(484, 185);
             this.radioFixedDevice.Name = "radioFixedDevice";
-            this.radioFixedDevice.Size = new System.Drawing.Size(14, 13);
+            this.radioFixedDevice.Size = new Size(14, 13);
             this.radioFixedDevice.TabIndex = 11;
             this.radioFixedDevice.UseVisualStyleBackColor = true;
             // 
             // radioCurrentDevice
             // 
             this.radioCurrentDevice.Checked = true;
-            this.radioCurrentDevice.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.radioCurrentDevice.Location = new System.Drawing.Point(271, 176);
+            this.radioCurrentDevice.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            this.radioCurrentDevice.Location = new Point(271, 176);
             this.radioCurrentDevice.Name = "radioCurrentDevice";
-            this.radioCurrentDevice.Size = new System.Drawing.Size(207, 30);
+            this.radioCurrentDevice.Size = new Size(207, 30);
             this.radioCurrentDevice.TabIndex = 10;
             this.radioCurrentDevice.TabStop = true;
             this.radioCurrentDevice.Text = "Where executed";
@@ -62,59 +68,59 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
             // 
             // lblBrightness
             // 
-            this.lblBrightness.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.lblBrightness.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblBrightness.Location = new System.Drawing.Point(153, 218);
+            this.lblBrightness.Anchor = AnchorStyles.None;
+            this.lblBrightness.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            this.lblBrightness.Location = new Point(153, 218);
             this.lblBrightness.Name = "lblBrightness";
-            this.lblBrightness.Size = new System.Drawing.Size(112, 30);
+            this.lblBrightness.Size = new Size(112, 30);
             this.lblBrightness.TabIndex = 9;
             this.lblBrightness.Text = "Brightness";
-            this.lblBrightness.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblBrightness.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // lblDevice
             // 
-            this.lblDevice.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.lblDevice.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblDevice.Location = new System.Drawing.Point(153, 176);
+            this.lblDevice.Anchor = AnchorStyles.None;
+            this.lblDevice.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            this.lblDevice.Location = new Point(153, 176);
             this.lblDevice.Name = "lblDevice";
-            this.lblDevice.Size = new System.Drawing.Size(112, 30);
+            this.lblDevice.Size = new Size(112, 30);
             this.lblDevice.TabIndex = 8;
             this.lblDevice.Text = "Device";
-            this.lblDevice.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblDevice.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // devicesList
             // 
-            this.devicesList.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.devicesList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.devicesList.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.devicesList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.devicesList.Anchor = AnchorStyles.None;
+            this.devicesList.BackColor = Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
+            this.devicesList.Cursor = Cursors.Hand;
+            this.devicesList.DropDownStyle = ComboBoxStyle.DropDownList;
             this.devicesList.Enabled = false;
-            this.devicesList.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.devicesList.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
             this.devicesList.Icon = null;
-            this.devicesList.Location = new System.Drawing.Point(504, 176);
+            this.devicesList.Location = new Point(504, 176);
             this.devicesList.Name = "devicesList";
-            this.devicesList.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
+            this.devicesList.Padding = new Padding(8, 2, 8, 2);
             this.devicesList.SelectedIndex = -1;
             this.devicesList.SelectedItem = null;
-            this.devicesList.Size = new System.Drawing.Size(199, 30);
+            this.devicesList.Size = new Size(199, 30);
             this.devicesList.TabIndex = 6;
-            this.devicesList.SelectedIndexChanged += new System.EventHandler(this.DevicesList_SelectedIndexChanged);
+            this.devicesList.SelectedIndexChanged += new EventHandler(this.DevicesList_SelectedIndexChanged);
             // 
             // brightness
             // 
-            this.brightness.Location = new System.Drawing.Point(271, 225);
+            this.brightness.Location = new Point(271, 225);
             this.brightness.Minimum = 1;
             this.brightness.Name = "brightness";
-            this.brightness.Size = new System.Drawing.Size(188, 45);
+            this.brightness.Size = new Size(188, 45);
             this.brightness.TabIndex = 12;
-            this.brightness.TickStyle = System.Windows.Forms.TickStyle.None;
+            this.brightness.TickStyle = TickStyle.None;
             this.brightness.Value = 10;
-            this.brightness.Scroll += new System.EventHandler(this.Brightness_Scroll);
+            this.brightness.Scroll += new EventHandler(this.Brightness_Scroll);
             // 
             // SetBrightnessActionConfigView
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 23F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleDimensions = new SizeF(10F, 23F);
+            this.AutoScaleMode = AutoScaleMode.Font;
             this.Controls.Add(this.brightness);
             this.Controls.Add(this.radioFixedDevice);
             this.Controls.Add(this.radioCurrentDevice);
@@ -122,8 +128,8 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
             this.Controls.Add(this.lblDevice);
             this.Controls.Add(this.devicesList);
             this.Name = "SetBrightnessActionConfigView";
-            this.Load += new System.EventHandler(this.SetBrightnessActionConfigView_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.brightness)).EndInit();
+            this.Load += new EventHandler(this.SetBrightnessActionConfigView_Load);
+            ((ISupportInitialize)(this.brightness)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -131,11 +137,11 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views
 
         #endregion
 
-        private System.Windows.Forms.RadioButton radioFixedDevice;
-        private System.Windows.Forms.RadioButton radioCurrentDevice;
-        private System.Windows.Forms.Label lblBrightness;
-        private System.Windows.Forms.Label lblDevice;
-        private GUI.CustomControls.RoundedComboBox devicesList;
-        private System.Windows.Forms.TrackBar brightness;
+        private RadioButton radioFixedDevice;
+        private RadioButton radioCurrentDevice;
+        private Label lblBrightness;
+        private Label lblDevice;
+        private RoundedComboBox devicesList;
+        private TrackBar brightness;
     }
 }

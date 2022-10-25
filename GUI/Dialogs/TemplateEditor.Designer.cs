@@ -1,5 +1,8 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
 using FastColoredTextBoxNS;
+using SuchByte.MacroDeck.GUI.CustomControls;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
@@ -8,7 +11,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -303,16 +306,16 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         #endregion
 
         private FastColoredTextBox template;
-        private CustomControls.ButtonPrimary btnOk;
-        private System.Windows.Forms.Label lblResultLabel;
-        private System.Windows.Forms.Label lblResult;
-        private CustomControls.ButtonPrimary btnVariables;
-        private System.Windows.Forms.LinkLabel lblTemplateEngineInfo;
-        private System.Windows.Forms.ContextMenuStrip variablesContextMenu;
-        private CustomControls.ButtonPrimary btnIf;
-        private CustomControls.ButtonPrimary btnAnd;
-        private CustomControls.ButtonPrimary btnOr;
-        private CustomControls.ButtonPrimary btnNot;
-        private System.Windows.Forms.CheckBox checkTrimBlankLines;
+        private ButtonPrimary btnOk;
+        private Label lblResultLabel;
+        private Label lblResult;
+        private ButtonPrimary btnVariables;
+        private LinkLabel lblTemplateEngineInfo;
+        private ContextMenuStrip variablesContextMenu;
+        private ButtonPrimary btnIf;
+        private ButtonPrimary btnAnd;
+        private ButtonPrimary btnOr;
+        private ButtonPrimary btnNot;
+        private CheckBox checkTrimBlankLines;
     }
 }

@@ -1,4 +1,9 @@
 ﻿
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
     partial class ActionConfiguratorActionItem
@@ -6,7 +11,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// <summary> 
         /// Erforderliche Designervariable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary> 
         /// Verwendete Ressourcen bereinigen.
@@ -29,38 +34,38 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// </summary>
         private void InitializeComponent()
         {
-            this.lblActionName = new System.Windows.Forms.Label();
+            this.lblActionName = new Label();
             this.SuspendLayout();
             // 
             // lblActionName
             // 
-            this.lblActionName.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.lblActionName.Location = new System.Drawing.Point(8, 5);
+            this.lblActionName.Cursor = Cursors.Hand;
+            this.lblActionName.Location = new Point(8, 5);
             this.lblActionName.Name = "lblActionName";
-            this.lblActionName.Size = new System.Drawing.Size(252, 30);
+            this.lblActionName.Size = new Size(252, 30);
             this.lblActionName.TabIndex = 0;
             this.lblActionName.Text = "label1";
-            this.lblActionName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblActionName.TextAlign = ContentAlignment.MiddleLeft;
             this.lblActionName.UseMnemonic = false;
             // 
             // ActionConfiguratorActionItem
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
+            this.AutoScaleMode = AutoScaleMode.Dpi;
+            this.BackColor = Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
             this.Controls.Add(this.lblActionName);
-            this.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ForeColor = System.Drawing.Color.White;
-            this.Margin = new System.Windows.Forms.Padding(6, 0, 6, 1);
+            this.Cursor = Cursors.Hand;
+            this.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            this.ForeColor = Color.White;
+            this.Margin = new Padding(6, 0, 6, 1);
             this.Name = "ActionConfiguratorActionItem";
-            this.Size = new System.Drawing.Size(268, 40);
-            this.Load += new System.EventHandler(this.ActionConfiguratorActionItem_Load);
+            this.Size = new Size(268, 40);
+            this.Load += new EventHandler(this.ActionConfiguratorActionItem_Load);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Label lblActionName;
+        private Label lblActionName;
     }
 }

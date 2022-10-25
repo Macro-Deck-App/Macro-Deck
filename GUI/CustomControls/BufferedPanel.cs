@@ -7,8 +7,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         public BufferedPanel()
         {
             InitializeComponent();
-            this.DoubleBuffered = true;
-            this.SetStyle(ControlStyles.UserPaint |
+            DoubleBuffered = true;
+            SetStyle(ControlStyles.UserPaint |
                           ControlStyles.AllPaintingInWmPaint |
                           ControlStyles.ResizeRedraw |
                           ControlStyles.ContainerControl |

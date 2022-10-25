@@ -1,17 +1,12 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Xml.Serialization;
 
 namespace SuchByte.MacroDeck.Utils
 {
     public class Clipboard
     {
-        static ActionButton.ActionButton _actionButtonSource = null;
+        static ActionButton.ActionButton _actionButtonSource;
 
-        static JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
+        static JsonSerializerSettings jsonSerializerSettings = new()
         {
             TypeNameHandling = TypeNameHandling.Auto,
             NullValueHandling = NullValueHandling.Ignore,

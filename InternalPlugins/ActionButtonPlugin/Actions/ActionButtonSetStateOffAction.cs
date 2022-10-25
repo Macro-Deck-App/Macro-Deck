@@ -1,9 +1,6 @@
 ﻿using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SuchByte.MacroDeck.ActionButton // Don't change because of backwards compatibility!
 {

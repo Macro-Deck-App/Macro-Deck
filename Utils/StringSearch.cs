@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SuchByte.MacroDeck.Utils
+﻿namespace SuchByte.MacroDeck.Utils
 {
     public class StringSearch
     {

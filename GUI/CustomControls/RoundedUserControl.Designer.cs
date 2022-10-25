@@ -1,4 +1,7 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
+
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
     partial class RoundedUserControl
@@ -6,7 +9,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// <summary> 
         /// Erforderliche Designervariable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary> 
         /// Verwendete Ressourcen bereinigen.
@@ -29,9 +32,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-            this.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            components = new Container();
+            this.AutoScaleMode = AutoScaleMode.None;
+            this.Padding = new Padding(5, 5, 5, 5);
         }
 
         #endregion

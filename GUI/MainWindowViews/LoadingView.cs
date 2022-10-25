@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.MainWindowContents
 {
@@ -13,7 +7,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         public LoadingView()
         {
             InitializeComponent();
-            this.Dock = DockStyle.Fill;
+            Dock = DockStyle.Fill;
         }
     }
 }

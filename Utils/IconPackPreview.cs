@@ -1,39 +1,35 @@
-﻿using SuchByte.MacroDeck.Icons;
-using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Text;
-using System.Windows.Controls;
-using Icon = SuchByte.MacroDeck.Icons.Icon;
+using SuchByte.MacroDeck.Icons;
 
 namespace SuchByte.MacroDeck.Utils
 {
     public static class IconPackPreview
     {
 
-        public static System.Drawing.Image GeneratePreviewImage(IconPack iconPack)
+        public static Image GeneratePreviewImage(IconPack iconPack)
         {
-            int totalSize = 80;
-            Bitmap bitmap = new Bitmap(totalSize, totalSize);
+            var totalSize = 80;
+            var bitmap = new Bitmap(totalSize, totalSize);
 
-            int padding = 2;
-            int iconSize = (80 / 2);
+            var padding = 2;
+            var iconSize = (80 / 2);
 
             int row = 0, column = 0;
 
-            using (Graphics g = Graphics.FromImage(bitmap))
+            using (var g = Graphics.FromImage(bitmap))
             {
                 g.Clear(Color.FromArgb(32,32,32));
             }
 
             var canvas = Graphics.FromImage(bitmap);
             canvas.InterpolationMode = InterpolationMode.Bicubic;
-            foreach (Icon icon in iconPack.Icons.Take(4))
+            foreach (var icon in iconPack.Icons.Take(4))
             {
                 try
                 {
-                    Rectangle iconRectangle = new Rectangle
+                    var iconRectangle = new Rectangle
                     {
                         Height = iconSize - padding,
                         Width = iconSize - padding,
@@ -49,7 +45,6 @@ namespace SuchByte.MacroDeck.Utils
                     }
                 } catch
                 {
-                    continue;
                 }
             }
             canvas.Save();

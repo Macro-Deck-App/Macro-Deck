@@ -1,18 +1,11 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System;
+using System.Windows.Forms;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.InternalPlugins.Variables.Enums;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Variables.Plugin.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.Variables.Plugin.GUI
 {
@@ -22,24 +15,24 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
 
         public ChangeVariableValueActionConfigView(PluginAction pluginAction)
         {
-            this._viewModel = new ChangeVariableValueActionConfigViewModel(pluginAction);
+            _viewModel = new ChangeVariableValueActionConfigViewModel(pluginAction);
             InitializeComponent();
 
-            this.radioCountUp.Text = LanguageManager.Strings.CountUp;
-            this.radioCountDown.Text = LanguageManager.Strings.CountDown;
-            this.radioSet.Text = LanguageManager.Strings.Set;
-            this.radioToggle.Text = LanguageManager.Strings.Toggle;
-            this.lblVariable.Text = LanguageManager.Strings.Variable;
-            this.lblOnlyUserCreatedVariablesVisible.Text = LanguageManager.Strings.OnlyUserCreatedVariablesVisible;
+            radioCountUp.Text = LanguageManager.Strings.CountUp;
+            radioCountDown.Text = LanguageManager.Strings.CountDown;
+            radioSet.Text = LanguageManager.Strings.Set;
+            radioToggle.Text = LanguageManager.Strings.Toggle;
+            lblVariable.Text = LanguageManager.Strings.Variable;
+            lblOnlyUserCreatedVariablesVisible.Text = LanguageManager.Strings.OnlyUserCreatedVariablesVisible;
 
-            this.radioCountUp.Visible = false;
-            this.radioCountDown.Visible = false;
-            this.radioSet.Visible = false;
-            this.radioToggle.Visible = false;
-            this.value.Visible = false;
-            this.btnTemplateEditor.Visible = false;
+            radioCountUp.Visible = false;
+            radioCountDown.Visible = false;
+            radioSet.Visible = false;
+            radioToggle.Visible = false;
+            value.Visible = false;
+            btnTemplateEditor.Visible = false;
 
-            this.variables.SelectedIndexChanged += Variables_SelectedIndexChanged;
+            variables.SelectedIndexChanged += Variables_SelectedIndexChanged;
         }
 
 
@@ -47,44 +40,44 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
         {
             try
             {
-                Variable variable = VariableManager.ListVariables.Where(v => v.Name == this.variables.Text).FirstOrDefault();
+                var variable = VariableManager.ListVariables.Where(v => v.Name == variables.Text).FirstOrDefault();
                 if (variable != null)
                 {
                     switch (variable.Type)
                     {
                         case nameof(VariableType.String):
-                            this.radioCountUp.Visible = false;
-                            this.radioCountDown.Visible = false;
-                            this.radioSet.Visible = true;
-                            this.radioToggle.Visible = false;
-                            this.radioSet.Checked = true;
-                            this.btnTemplateEditor.Visible = true;
+                            radioCountUp.Visible = false;
+                            radioCountDown.Visible = false;
+                            radioSet.Visible = true;
+                            radioToggle.Visible = false;
+                            radioSet.Checked = true;
+                            btnTemplateEditor.Visible = true;
                             break;
                         case nameof(VariableType.Bool):
-                            this.radioCountUp.Visible = false;
-                            this.radioCountDown.Visible = false;
-                            this.radioSet.Visible = true;
-                            this.radioToggle.Visible = true;
-                            this.radioSet.Checked = true;
-                            this.btnTemplateEditor.Visible = true;
+                            radioCountUp.Visible = false;
+                            radioCountDown.Visible = false;
+                            radioSet.Visible = true;
+                            radioToggle.Visible = true;
+                            radioSet.Checked = true;
+                            btnTemplateEditor.Visible = true;
                             break;
                         case nameof(VariableType.Integer):
                         case nameof(VariableType.Float):
-                            this.radioCountUp.Visible = true;
-                            this.radioCountDown.Visible = true;
-                            this.radioSet.Visible = true;
-                            this.btnTemplateEditor.Visible = true;
-                            this.radioToggle.Visible = false;
+                            radioCountUp.Visible = true;
+                            radioCountDown.Visible = true;
+                            radioSet.Visible = true;
+                            btnTemplateEditor.Visible = true;
+                            radioToggle.Visible = false;
                             break;
                     }
 
-                    if (this.value != null)
+                    if (value != null)
                     {
-                        this.value.SetAutoCompleteMode(AutoCompleteMode.Suggest);
-                        this.value.SetAutoCompleteSource(AutoCompleteSource.CustomSource);
-                        AutoCompleteStringCollection suggestions = new AutoCompleteStringCollection();
+                        value.SetAutoCompleteMode(AutoCompleteMode.Suggest);
+                        value.SetAutoCompleteSource(AutoCompleteSource.CustomSource);
+                        var suggestions = new AutoCompleteStringCollection();
                         suggestions.AddRange(variable.Suggestions);
-                        this.value.SetAutoCompleteCustomSource(suggestions);
+                        value.SetAutoCompleteCustomSource(suggestions);
                     }
                    
 
@@ -95,41 +88,41 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
 
         private void MethodChanged(object sender, EventArgs e)
         {
-            this.value.Visible = this.radioSet.Checked;
+            value.Visible = radioSet.Checked;
         }
 
         public override bool OnActionSave()
         {
-            this._viewModel.Variable = this.variables.Text;
+            _viewModel.Variable = variables.Text;
 
-            if (this.radioCountUp.Checked)
+            if (radioCountUp.Checked)
             {
-                this._viewModel.Method = InternalPlugins.Variables.Enums.ChangeVariableMethod.countUp;
+                _viewModel.Method = ChangeVariableMethod.countUp;
             }
-            else if (this.radioCountDown.Checked)
+            else if (radioCountDown.Checked)
             {
-                this._viewModel.Method = InternalPlugins.Variables.Enums.ChangeVariableMethod.countDown;
+                _viewModel.Method = ChangeVariableMethod.countDown;
             }
-            else if (this.radioSet.Checked)
+            else if (radioSet.Checked)
             {
-                this._viewModel.Method = InternalPlugins.Variables.Enums.ChangeVariableMethod.set;
+                _viewModel.Method = ChangeVariableMethod.set;
             }
-            else if (this.radioToggle.Checked)
+            else if (radioToggle.Checked)
             {
-                this._viewModel.Method = InternalPlugins.Variables.Enums.ChangeVariableMethod.toggle;
+                _viewModel.Method = ChangeVariableMethod.toggle;
             }
 
-            this._viewModel.Value = this.radioSet.Checked ? this.value.Text : String.Empty;
+            _viewModel.Value = radioSet.Checked ? value.Text : string.Empty;
 
-            return this._viewModel.SaveConfig();
+            return _viewModel.SaveConfig();
         }
 
         private void LoadVariables()
         {
-            this.variables.Items.Clear();
-            foreach (Variable variable in VariableManager.ListVariables.Where(v => v.Creator.Equals("User")))
+            variables.Items.Clear();
+            foreach (var variable in VariableManager.ListVariables.Where(v => v.Creator.Equals("User")))
             {
-                this.variables.Items.Add(variable.Name);
+                variables.Items.Add(variable.Name);
             }
         }
 
@@ -137,37 +130,37 @@ namespace SuchByte.MacroDeck.Variables.Plugin.GUI
 
         private void ChangeVariableValueConfigurator_Load(object sender, EventArgs e)
         {
-            this.LoadVariables();
+            LoadVariables();
 
-            switch (this._viewModel.Method)
+            switch (_viewModel.Method)
             {
                 case ChangeVariableMethod.countUp:
-                    this.radioCountUp.Checked = true;
+                    radioCountUp.Checked = true;
                     break;
                 case ChangeVariableMethod.countDown:
-                    this.radioCountDown.Checked = true;
+                    radioCountDown.Checked = true;
                     break;
                 case ChangeVariableMethod.set:
-                    this.radioSet.Checked = true;
+                    radioSet.Checked = true;
                     break;
                 case ChangeVariableMethod.toggle:
-                    this.radioToggle.Checked = true;
+                    radioToggle.Checked = true;
                     break;
             }
 
-            this.variables.Text = this._viewModel.Variable;
-            this.value.Text = this._viewModel.Value;
-            this.value.Visible = this.radioSet.Checked;
+            variables.Text = _viewModel.Variable;
+            value.Text = _viewModel.Value;
+            value.Visible = radioSet.Checked;
 
         }
 
         private void BtnTemplateEditor_Click(object sender, EventArgs e)
         {
-            using (var templateEditor = new TemplateEditor(this.value.Text))
+            using (var templateEditor = new TemplateEditor(value.Text))
             {
                 if (templateEditor.ShowDialog() == DialogResult.OK)
                 {
-                    this.value.Text = templateEditor.Template;
+                    value.Text = templateEditor.Template;
                 }
             }
         }

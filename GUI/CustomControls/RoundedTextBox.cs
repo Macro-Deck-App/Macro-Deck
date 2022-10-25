@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Text;
 using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
@@ -14,50 +10,41 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         private int borderRadius = 8;
         private Color placeHolderColor = Color.Gray;
         private string placeHolderText = "";
-        private bool isPlaceHolder = false;
-        private bool isPasswordChar = false;
+        private bool isPlaceHolder;
+        private bool isPasswordChar;
         private Image icon;
 
         public Image Icon
         {
-            get { return icon; }
+            get => icon;
             set
             {
                 icon = value;
-                this.Padding = icon == null ? new Padding(8, 5, 8, 5) : new Padding(this.textBox1.Height + 8 + 3, 5, 8, 5);
-                this.Invalidate();
+                Padding = icon == null ? new Padding(8, 5, 8, 5) : new Padding(textBox1.Height + 8 + 3, 5, 8, 5);
+                Invalidate();
             }
         }
 
         public ScrollBars ScrollBars
         {
-            get { return this.textBox1.ScrollBars; }
-            set
-            {
-                this.textBox1.ScrollBars = value;
-            }
+            get => textBox1.ScrollBars;
+            set => textBox1.ScrollBars = value;
         }
 
         public bool ReadOnly
         {
-            get { return textBox1.ReadOnly; }
-            set
-            {
-                textBox1.ReadOnly = value;
-            }
+            get => textBox1.ReadOnly;
+            set => textBox1.ReadOnly = value;
         }
 
         public HorizontalAlignment TextAlignment {
-            get { return textBox1.TextAlign; }
-            set
-            {
-                textBox1.TextAlign = value;
-            }
+            get => textBox1.TextAlign;
+            set => textBox1.TextAlign = value;
         }
         
         public bool PasswordChar
         {
-            get { return isPasswordChar; }
+            get => isPasswordChar;
             set
             {
                 isPasswordChar = value;
@@ -68,11 +55,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         public int MaxCharacters
         {
-            get { return this.textBox1.MaxLength; }
-            set
-            {
-                this.textBox1.MaxLength = value;
-            }
+            get => textBox1.MaxLength;
+            set => textBox1.MaxLength = value;
         }
 
         public void SetAutoCompleteCustomSource(AutoCompleteStringCollection autoCompleteStringCollection)
@@ -92,14 +76,14 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         public bool Multiline
         {
-            get { return textBox1.Multiline; }
-            set { textBox1.Multiline = value; }
+            get => textBox1.Multiline;
+            set => textBox1.Multiline = value;
         }
 
         
         public override Color BackColor
         {
-            get { return base.BackColor; }
+            get => base.BackColor;
             set
             {
                 base.BackColor = value;
@@ -110,7 +94,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         
         public override Color ForeColor
         {
-            get { return base.ForeColor; }
+            get => base.ForeColor;
             set
             {
                 base.ForeColor = value;
@@ -121,12 +105,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         
         public override Font Font
         {
-            get { return base.Font; }
+            get => base.Font;
             set
             {
                 base.Font = value;
                 textBox1.Font = value;
-                if (this.DesignMode)
+                if (DesignMode)
                 {
                     UpdateControlHeight();
                 }
@@ -137,10 +121,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         public override string Text
         {
 
-            get { return (isPlaceHolder || textBox1.Text == this.placeHolderText) ? string.Empty : textBox1.Text; }
+            get => (isPlaceHolder || textBox1.Text == placeHolderText) ? string.Empty : textBox1.Text;
             set
             {
-                if (value != null && value != this.placeHolderText && value.Length > 0 && value != "")
+                if (value != null && value != placeHolderText && value.Length > 0 && value != "")
                 {
                     RemovePlaceholder();
                 }
@@ -156,7 +140,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         
         public Color PlaceHolderColor
         {
-            get { return placeHolderColor; }
+            get => placeHolderColor;
             set
             {
                 placeHolderColor = value;
@@ -170,7 +154,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         
         public string PlaceHolderText
         {
-            get { return placeHolderText; }
+            get => placeHolderText;
             set
             {
                 placeHolderText = value;
@@ -181,11 +165,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         public int SelectionStart
         {
-            get { return textBox1.SelectionStart; }
-            set
-            {
-                textBox1.SelectionStart = value;
-            }
+            get => textBox1.SelectionStart;
+            set => textBox1.SelectionStart = value;
         }
 
         public void Clear()
@@ -202,7 +183,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             if (string.IsNullOrWhiteSpace(textBox1.Text) && placeHolderText != "")
             {
-                this.Font = new Font(this.Font, FontStyle.Italic);
+                Font = new Font(Font, FontStyle.Italic);
                 isPlaceHolder = true;
                 textBox1.Text = placeHolderText;
                 textBox1.ForeColor = placeHolderColor;
@@ -214,18 +195,18 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             if (isPlaceHolder && placeHolderText != "")
             {
-                this.Font = new Font(this.Font, FontStyle.Regular);
+                Font = new Font(Font, FontStyle.Regular);
                 isPlaceHolder = false;
                 textBox1.Text = "";
-                textBox1.ForeColor = this.ForeColor;
+                textBox1.ForeColor = ForeColor;
                 if (isPasswordChar)
                     textBox1.UseSystemPasswordChar = true;
             }
         }
         private GraphicsPath GetFigurePath(Rectangle rect, int radius)
         {
-            GraphicsPath path = new GraphicsPath();
-            float curveSize = radius * 2F;
+            var path = new GraphicsPath();
+            var curveSize = radius * 2F;
 
             path.StartFigure();
             path.AddArc(rect.X, rect.Y, curveSize, curveSize, 180, 90);
@@ -240,19 +221,19 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             if (textBox1.Multiline == false)
             {
-                int txtHeight = TextRenderer.MeasureText("Text", this.Font).Height + 1;
+                var txtHeight = TextRenderer.MeasureText("Text", Font).Height + 1;
                 textBox1.Multiline = true;
                 textBox1.MinimumSize = new Size(0, txtHeight);
                 textBox1.Multiline = false;
 
-                this.Height = textBox1.Height + this.Padding.Top + this.Padding.Bottom;
+                Height = textBox1.Height + Padding.Top + Padding.Bottom;
             }
         }
 
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
-            if (this.DesignMode)
+            if (DesignMode)
                 UpdateControlHeight();
         }
         protected override void OnLoad(EventArgs e)
@@ -263,21 +244,21 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            Graphics graph = e.Graphics;
+            var graph = e.Graphics;
 
             if (borderRadius > 1)
             {
-                var rectBorderSmooth = this.ClientRectangle;
-                var rectIcon = new Rectangle(this.ClientRectangle.X + 3, this.ClientRectangle.Y + (this.ClientRectangle.Height / 2) - (this.textBox1.Height / 2), this.textBox1.Height, this.textBox1.Height);
+                var rectBorderSmooth = ClientRectangle;
+                var rectIcon = new Rectangle(ClientRectangle.X + 3, ClientRectangle.Y + (ClientRectangle.Height / 2) - (textBox1.Height / 2), textBox1.Height, textBox1.Height);
 
-                int smoothSize = 2;
+                var smoothSize = 2;
 
 
-                using (GraphicsPath pathBorderSmooth = GetFigurePath(rectBorderSmooth, borderRadius))
-                using (Pen penBorderSmooth = new Pen(this.Parent.BackColor, smoothSize))
+                using (var pathBorderSmooth = GetFigurePath(rectBorderSmooth, borderRadius))
+                using (var penBorderSmooth = new Pen(Parent.BackColor, smoothSize))
                 {
 
-                    this.Region = new Region(pathBorderSmooth);
+                    Region = new Region(pathBorderSmooth);
                     if (icon != null)
                     {
                         graph.DrawImage(icon, rectIcon);
@@ -288,7 +269,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             }
             else 
             {
-                this.Region = new Region(this.ClientRectangle);
+                Region = new Region(ClientRectangle);
             }
         }
 
@@ -302,35 +283,35 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             RemovePlaceholder();
         }
 
-        private void TextBox1_MouseEnter(object sender, System.EventArgs e)
+        private void TextBox1_MouseEnter(object sender, EventArgs e)
         {
-            this.OnMouseEnter(e);
+            OnMouseEnter(e);
         }
 
-        private void TextBox1_MouseLeave(object sender, System.EventArgs e)
+        private void TextBox1_MouseLeave(object sender, EventArgs e)
         {
-            this.OnMouseLeave(e);
+            OnMouseLeave(e);
         }
 
-        private void TextBox1_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
+        private void TextBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
-            this.OnKeyPress(e);
+            OnKeyPress(e);
         }
 
-        private void TextBox1_Enter(object sender, System.EventArgs e)
+        private void TextBox1_Enter(object sender, EventArgs e)
         {
-            this.OnEnter(e);
+            OnEnter(e);
         }
 
-        private void TextBox1_TextChanged(object sender, System.EventArgs e)
+        private void TextBox1_TextChanged(object sender, EventArgs e)
         {
             if (isPlaceHolder) return;
-            this.OnTextChanged(e);
+            OnTextChanged(e);
         }
 
-        private void TextBox1_Click(object sender, System.EventArgs e)
+        private void TextBox1_Click(object sender, EventArgs e)
         {
-            this.OnClick(e);
+            OnClick(e);
         }
     }
 }

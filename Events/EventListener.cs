@@ -1,7 +1,5 @@
-﻿using SuchByte.MacroDeck.Plugins;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using SuchByte.MacroDeck.Plugins;
 
 namespace SuchByte.MacroDeck.Events
 {
@@ -10,7 +8,7 @@ namespace SuchByte.MacroDeck.Events
         public string EventToListen { get; set; }
         public string Parameter { get; set; } = "";
 
-        public List<PluginAction> Actions = new List<PluginAction>();
+        public List<PluginAction> Actions = new();
 
     }
 }

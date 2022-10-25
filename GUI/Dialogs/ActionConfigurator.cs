@@ -1,55 +1,50 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Plugins;
-using SuchByte.MacroDeck.Utils;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
+﻿using System;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Properties;
+using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.GUI
 {
     public partial class ActionConfigurator : DialogForm
     {
-        public PluginAction Action { get { return this._action; } }
+        public PluginAction Action => _action;
 
-        private PluginAction _action = null;
+        private PluginAction _action;
 
         public ActionConfigurator()
         {
             InitializeComponent();
-            this.lblSelectToBegin.Text = Language.LanguageManager.Strings.SelectAPluginAndActionToBegin;
-            this.btnApply.Text = Language.LanguageManager.Strings.Ok;
-            this.pluginSearch.PlaceHolderText = Language.LanguageManager.Strings.Search;
-            this.AddPlugins();
+            lblSelectToBegin.Text = LanguageManager.Strings.SelectAPluginAndActionToBegin;
+            btnApply.Text = LanguageManager.Strings.Ok;
+            pluginSearch.PlaceHolderText = LanguageManager.Strings.Search;
+            AddPlugins();
         }
 
        
 
         public ActionConfigurator(PluginAction action)
         {
-            this._action = action;
-            this.InitializeComponent();
+            _action = action;
+            InitializeComponent();
 
-            this.AddPlugins();
+            AddPlugins();
 
 
-            foreach (MacroDeckPlugin plugin in PluginManager.Plugins.Values)
+            foreach (var plugin in PluginManager.Plugins.Values)
             {
-                foreach (PluginAction macroDeckAction in plugin.Actions)
+                foreach (var macroDeckAction in plugin.Actions)
                 {
-                    if (macroDeckAction.GetType().Equals(this._action.GetType()))
+                    if (macroDeckAction.GetType().Equals(_action.GetType()))
                     {
                         SetExpand(plugin, true);
-                        foreach (Control item in this.pluginsList.Controls)
+                        foreach (Control item in pluginsList.Controls)
                         {
                             if (!(item is ActionConfiguratorActionItem)) continue;
-                            if ((item as ActionConfiguratorActionItem).PluginAction.GetType() == this._action.GetType())
+                            if ((item as ActionConfiguratorActionItem).PluginAction.GetType() == _action.GetType())
                             {
                                 ActionConfiguratorActionItem_MouseClick(item, new MouseEventArgs(MouseButtons.Left, 1, 0, 0, 0));
                             }
@@ -63,12 +58,12 @@ namespace SuchByte.MacroDeck.GUI
         {
             if (pluginSearch.Text.Length > 1)
             {
-                foreach (Control item in this.pluginsList.Controls)
+                foreach (Control item in pluginsList.Controls)
                 {
                     if (!(item is ActionConfiguratorPluginItem)) continue;
                     item.Visible = StringSearch.StringContains(((item as ActionConfiguratorPluginItem).Plugin.Name), filter);
                 }
-                foreach (Control item in this.pluginsList.Controls)
+                foreach (Control item in pluginsList.Controls)
                 {
                     if (!(item is ActionConfiguratorActionItem)) continue;
                     item.Visible = StringSearch.StringContains((item as ActionConfiguratorActionItem).PluginAction.Name, filter);
@@ -79,7 +74,7 @@ namespace SuchByte.MacroDeck.GUI
                 }
             } else
             {
-                foreach (Control item in this.pluginsList.Controls)
+                foreach (Control item in pluginsList.Controls)
                 {
                     if (!(item is ActionConfiguratorPluginItem)) continue;
                     item.Visible = true;
@@ -90,8 +85,8 @@ namespace SuchByte.MacroDeck.GUI
         
         private void AddPlugins()
         {
-            this.SuspendLayout();
-            foreach (Control item in this.pluginsList.Controls)
+            SuspendLayout();
+            foreach (Control item in pluginsList.Controls)
             {
                 if (item is ActionConfiguratorActionItem)
                 {
@@ -102,66 +97,66 @@ namespace SuchByte.MacroDeck.GUI
                 }
             }
 
-            this.pluginsList.Controls.Clear();
+            pluginsList.Controls.Clear();
 
-            foreach (MacroDeckPlugin plugin in PluginManager.Plugins.Values)
+            foreach (var plugin in PluginManager.Plugins.Values)
             {
                 if (plugin.Actions.Count > 0)
                 {
-                    ActionConfiguratorPluginItem actionConfiguratorPluginItem = new ActionConfiguratorPluginItem(plugin);
+                    var actionConfiguratorPluginItem = new ActionConfiguratorPluginItem(plugin);
                     actionConfiguratorPluginItem.MouseClick += ActionConfiguratorPluginItem_MouseClick;
-                    this.pluginsList.Controls.Add(actionConfiguratorPluginItem);
+                    pluginsList.Controls.Add(actionConfiguratorPluginItem);
                     foreach (var action in plugin.Actions)
                     {
-                        ActionConfiguratorActionItem actionConfiguratorActionItem = new ActionConfiguratorActionItem(plugin, PluginManager.GetNewActionInstance(action))
+                        var actionConfiguratorActionItem = new ActionConfiguratorActionItem(plugin, PluginManager.GetNewActionInstance(action))
                         {
                             Visible = false
                         };
                         actionConfiguratorActionItem.MouseClick += ActionConfiguratorActionItem_MouseClick;
-                        this.pluginsList.Controls.Add(actionConfiguratorActionItem);
+                        pluginsList.Controls.Add(actionConfiguratorActionItem);
                     }
                 }
             }
-            this.ResumeLayout();
+            ResumeLayout();
         }
 
         private void ActionConfiguratorActionItem_MouseClick(object sender, MouseEventArgs e)
         {
-            ActionConfiguratorActionItem actionConfiguratorActionItem = sender as ActionConfiguratorActionItem;
+            var actionConfiguratorActionItem = sender as ActionConfiguratorActionItem;
 
             if (actionConfiguratorActionItem.PluginAction == null) return;
-            if (this._action == null || this._action.GetType() != actionConfiguratorActionItem.PluginAction.GetType())
+            if (_action == null || _action.GetType() != actionConfiguratorActionItem.PluginAction.GetType())
             {
-                this._action = actionConfiguratorActionItem.PluginAction;
+                _action = actionConfiguratorActionItem.PluginAction;
             }
 
-            this.selectedPluginIcon.BackgroundImage = actionConfiguratorActionItem.Plugin.PluginIcon ?? Properties.Resources.Icon;
-            this.lblSelectedActionName.Text = this._action.Name;
-            this.labelDescription.Text = this._action.Description;
-            foreach (Control control in this.configurationPanel.Controls)
+            selectedPluginIcon.BackgroundImage = actionConfiguratorActionItem.Plugin.PluginIcon ?? Resources.Icon;
+            lblSelectedActionName.Text = _action.Name;
+            labelDescription.Text = _action.Description;
+            foreach (Control control in configurationPanel.Controls)
             {
                 control.Dispose();
             }
-            this.configurationPanel.Controls.Clear();
-            if (this._action.CanConfigure)
+            configurationPanel.Controls.Clear();
+            if (_action.CanConfigure)
             {
-                this.configurationPanel.Controls.Add(this._action.GetActionConfigControl(this));
+                configurationPanel.Controls.Add(_action.GetActionConfigControl(this));
             }
             else
             {
-                Label noConfigure = new Label
+                var noConfigure = new Label
                 {
-                    Text = Language.LanguageManager.Strings.ActionNeedsNoConfiguration,
-                    Size = this.configurationPanel.Size,
+                    Text = LanguageManager.Strings.ActionNeedsNoConfiguration,
+                    Size = configurationPanel.Size,
                     TextAlign = ContentAlignment.MiddleCenter
                 };
-                this.configurationPanel.Controls.Add(noConfigure);
+                configurationPanel.Controls.Add(noConfigure);
             }
         }
 
         private void ActionConfiguratorPluginItem_MouseClick(object sender, MouseEventArgs e)
         {
-            ActionConfiguratorPluginItem actionConfiguratorPluginItem = sender as ActionConfiguratorPluginItem;
+            var actionConfiguratorPluginItem = sender as ActionConfiguratorPluginItem;
             SetExpand(actionConfiguratorPluginItem, !actionConfiguratorPluginItem.Selected);
             
         }
@@ -170,8 +165,8 @@ namespace SuchByte.MacroDeck.GUI
         {
             actionConfiguratorPluginItem.Selected = expand;
             actionConfiguratorPluginItem.Visible = true;
-            this.pluginsList.ScrollControlIntoView(actionConfiguratorPluginItem);
-            foreach (var actionConfiguratorActionItem in this.pluginsList.Controls)
+            pluginsList.ScrollControlIntoView(actionConfiguratorPluginItem);
+            foreach (var actionConfiguratorActionItem in pluginsList.Controls)
             {
                 if (!(actionConfiguratorActionItem is ActionConfiguratorActionItem) || !(actionConfiguratorActionItem as ActionConfiguratorActionItem).Plugin.Equals(actionConfiguratorPluginItem.Plugin)) continue;
                 (actionConfiguratorActionItem as ActionConfiguratorActionItem).Visible = actionConfiguratorPluginItem.Selected;
@@ -182,7 +177,7 @@ namespace SuchByte.MacroDeck.GUI
         {
             ActionConfiguratorPluginItem actionConfiguratorPluginItem = null;
 
-            foreach (Control control in this.pluginsList.Controls)
+            foreach (Control control in pluginsList.Controls)
             {
                 if (!(control is ActionConfiguratorPluginItem)) continue;
                 if ((control as ActionConfiguratorPluginItem).Plugin.Equals(plugin))
@@ -198,25 +193,25 @@ namespace SuchByte.MacroDeck.GUI
 
         private void BtnApply_Click(object sender, EventArgs e)
         {
-            if (this._action != null)
+            if (_action != null)
             {
-                ActionConfigControl actionConfigControl = this.configurationPanel.Controls[0] as ActionConfigControl;
-                if (this._action.CanConfigure && actionConfigControl != null)
+                var actionConfigControl = configurationPanel.Controls[0] as ActionConfigControl;
+                if (_action.CanConfigure && actionConfigControl != null)
                 {
                     if (!actionConfigControl.OnActionSave())
                     {
                     return;
                     }
                 }
-                if (this._action.CanConfigure && this._action.Configuration == null && String.IsNullOrWhiteSpace(this._action.Configuration)) return;
-                this.DialogResult = DialogResult.OK;
+                if (_action.CanConfigure && _action.Configuration == null && string.IsNullOrWhiteSpace(_action.Configuration)) return;
+                DialogResult = DialogResult.OK;
             }
-            this.Close();
+            Close();
         }
 
         private void PluginSearch_TextChanged(object sender, EventArgs e)
         {
-            this.Filter(this.pluginSearch.Text);
+            Filter(pluginSearch.Text);
         }
     }
 }

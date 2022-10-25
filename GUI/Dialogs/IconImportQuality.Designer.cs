@@ -1,4 +1,8 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
     partial class IconImportQuality
@@ -6,7 +10,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -165,13 +169,13 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         #endregion
 
-        private CustomControls.ButtonPrimary btnOk;
-        private System.Windows.Forms.RadioButton qualityLowest;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.RadioButton qualityLow;
-        private System.Windows.Forms.RadioButton qualityNormal;
-        private System.Windows.Forms.RadioButton qualityHigh;
-        private System.Windows.Forms.RadioButton qualityOriginal;
-        private System.Windows.Forms.Label lblInfo;
+        private ButtonPrimary btnOk;
+        private RadioButton qualityLowest;
+        private Label label1;
+        private RadioButton qualityLow;
+        private RadioButton qualityNormal;
+        private RadioButton qualityHigh;
+        private RadioButton qualityOriginal;
+        private Label lblInfo;
     }
 }

@@ -1,4 +1,9 @@
 ﻿
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
 namespace SuchByte.MacroDeck.GUI.InitialSetupPages
 {
     partial class SetupPage4
@@ -6,7 +11,7 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
         /// <summary> 
         /// Erforderliche Designervariable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary> 
         /// Verwendete Ressourcen bereinigen.
@@ -29,77 +34,77 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
         /// </summary>
         private void InitializeComponent()
         {
-            this.lblPickAllPlugins = new System.Windows.Forms.Label();
-            this.lblDontWorry = new System.Windows.Forms.Label();
-            this.plugins = new System.Windows.Forms.FlowLayoutPanel();
-            this.progressBar = new System.Windows.Forms.ProgressBar();
+            this.lblPickAllPlugins = new Label();
+            this.lblDontWorry = new Label();
+            this.plugins = new FlowLayoutPanel();
+            this.progressBar = new ProgressBar();
             this.SuspendLayout();
             // 
             // lblPickAllPlugins
             // 
-            this.lblPickAllPlugins.Font = new System.Drawing.Font("Tahoma", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblPickAllPlugins.ForeColor = System.Drawing.Color.White;
-            this.lblPickAllPlugins.ImageAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.lblPickAllPlugins.Location = new System.Drawing.Point(3, 0);
+            this.lblPickAllPlugins.Font = new Font("Tahoma", 24F, FontStyle.Regular, GraphicsUnit.Point);
+            this.lblPickAllPlugins.ForeColor = Color.White;
+            this.lblPickAllPlugins.ImageAlign = ContentAlignment.BottomCenter;
+            this.lblPickAllPlugins.Location = new Point(3, 0);
             this.lblPickAllPlugins.Name = "lblPickAllPlugins";
-            this.lblPickAllPlugins.Size = new System.Drawing.Size(685, 48);
+            this.lblPickAllPlugins.Size = new Size(685, 48);
             this.lblPickAllPlugins.TabIndex = 5;
             this.lblPickAllPlugins.Text = "Pick all the plugins you need";
-            this.lblPickAllPlugins.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblPickAllPlugins.TextAlign = ContentAlignment.TopCenter;
             this.lblPickAllPlugins.UseMnemonic = false;
             // 
             // lblDontWorry
             // 
-            this.lblDontWorry.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblDontWorry.ForeColor = System.Drawing.Color.White;
-            this.lblDontWorry.ImageAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.lblDontWorry.Location = new System.Drawing.Point(3, 48);
+            this.lblDontWorry.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            this.lblDontWorry.ForeColor = Color.White;
+            this.lblDontWorry.ImageAlign = ContentAlignment.BottomCenter;
+            this.lblDontWorry.Location = new Point(3, 48);
             this.lblDontWorry.Name = "lblDontWorry";
-            this.lblDontWorry.Size = new System.Drawing.Size(685, 48);
+            this.lblDontWorry.Size = new Size(685, 48);
             this.lblDontWorry.TabIndex = 6;
             this.lblDontWorry.Text = "Don\'t worry, you can always install/uninstall plugins later in the package manage" +
     "r";
-            this.lblDontWorry.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblDontWorry.TextAlign = ContentAlignment.TopCenter;
             this.lblDontWorry.UseMnemonic = false;
             // 
             // plugins
             // 
             this.plugins.AutoScroll = true;
-            this.plugins.Location = new System.Drawing.Point(120, 99);
+            this.plugins.Location = new Point(120, 99);
             this.plugins.Name = "plugins";
-            this.plugins.Size = new System.Drawing.Size(450, 442);
+            this.plugins.Size = new Size(450, 442);
             this.plugins.TabIndex = 7;
             // 
             // progressBar
             // 
-            this.progressBar.Location = new System.Drawing.Point(208, 547);
+            this.progressBar.Location = new Point(208, 547);
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(275, 18);
-            this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
+            this.progressBar.Size = new Size(275, 18);
+            this.progressBar.Style = ProgressBarStyle.Marquee;
             this.progressBar.TabIndex = 8;
             this.progressBar.Visible = false;
             // 
             // SetupPage4
             // 
            
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.AutoScaleMode = AutoScaleMode.Dpi;
+            this.BackColor = Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.plugins);
             this.Controls.Add(this.lblDontWorry);
             this.Controls.Add(this.lblPickAllPlugins);
             this.Name = "SetupPage4";
-            this.Size = new System.Drawing.Size(691, 609);
-            this.Load += new System.EventHandler(this.SetupPage4_Load);
+            this.Size = new Size(691, 609);
+            this.Load += new EventHandler(this.SetupPage4_Load);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Label lblPickAllPlugins;
-        private System.Windows.Forms.Label lblDontWorry;
-        private System.Windows.Forms.FlowLayoutPanel plugins;
-        private System.Windows.Forms.ProgressBar progressBar;
+        private Label lblPickAllPlugins;
+        private Label lblDontWorry;
+        private FlowLayoutPanel plugins;
+        private ProgressBar progressBar;
     }
 }

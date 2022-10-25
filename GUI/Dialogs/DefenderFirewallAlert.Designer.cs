@@ -1,4 +1,8 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
     partial class DefenderFirewallAlert
@@ -6,7 +10,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -112,9 +116,9 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         #endregion
 
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Label lblImportant;
-        private System.Windows.Forms.Label lblInfo;
-        private CustomControls.ButtonPrimary btnGotIt;
+        private PictureBox pictureBox1;
+        private Label lblImportant;
+        private Label lblInfo;
+        private ButtonPrimary btnGotIt;
     }
 }

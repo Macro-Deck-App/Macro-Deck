@@ -1,14 +1,11 @@
-﻿using SuchByte.MacroDeck.Icons;
+﻿using System;
+using System.ComponentModel;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.ExtensionStore;
+using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Plugins;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
 {
@@ -23,7 +20,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
         public ExtensionZipInstallerView()
         {
             InitializeComponent();
-            this.Dock = DockStyle.Fill;
+            Dock = DockStyle.Fill;
         }
 
         private void BtnSelectFile_Click(object sender, EventArgs e)
@@ -46,7 +43,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             } catch (Exception)
             {
                 btnInstall.Enabled = false;
-                MacroDeckLogger.Error(GetType(), $"Invalid or corrupt zip archive provided for installation");
+                MacroDeckLogger.Error(GetType(), "Invalid or corrupt zip archive provided for installation");
             }
         }
 
@@ -54,14 +51,14 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
         {
             try
             {
-                if (this.ExtensionManifestModel != null)
+                if (ExtensionManifestModel != null)
                 {
-                    switch (this.ExtensionManifestModel.Type)
+                    switch (ExtensionManifestModel.Type)
                     {
-                        case ExtensionStore.ExtensionType.Plugin:
+                        case ExtensionType.Plugin:
                             PluginManager.InstallPluginFromZip(txtZipPath.Text);
                             break;
-                        case ExtensionStore.ExtensionType.IconPack:
+                        case ExtensionType.IconPack:
                             IconManager.InstallIconPackZip(txtZipPath.Text);
                             break;
                     }

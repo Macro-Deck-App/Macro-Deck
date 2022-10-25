@@ -1,10 +1,7 @@
-﻿using SuchByte.MacroDeck.InternalPlugins.Variables.Enums;
-using SuchByte.MacroDeck.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using SuchByte.MacroDeck.InternalPlugins.Variables.Enums;
+using SuchByte.MacroDeck.Models;
 
 namespace SuchByte.MacroDeck.InternalPlugins.Variables.Models
 {

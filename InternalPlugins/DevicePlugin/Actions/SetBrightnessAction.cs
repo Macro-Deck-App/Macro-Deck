@@ -6,9 +6,6 @@ using SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Views;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Actions
 {
@@ -22,7 +19,7 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Actions
 
         public override void Trigger(string clientId, ActionButton.ActionButton actionButton)
         {
-            var configModel = SetBrightnessActionConfigModel.Deserialize(this.Configuration);
+            var configModel = SetBrightnessActionConfigModel.Deserialize(Configuration);
             if (clientId == "" || clientId == "-1") return;
             MacroDeckDevice macroDeckDevice;
             if (string.IsNullOrWhiteSpace(configModel.ClientId))
@@ -37,11 +34,8 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Actions
             macroDeckDevice.Configuration.Brightness = configModel.Brightness;
 
             DeviceManager.SaveKnownDevices();
-            MacroDeckClient macroDeckClient = MacroDeckServer.GetMacroDeckClient(macroDeckDevice.ClientId);
-            if (macroDeckClient != null)
-            {
-                macroDeckClient.DeviceMessage.SendConfiguration(macroDeckClient);
-            }
+            var macroDeckClient = MacroDeckServer.GetMacroDeckClient(macroDeckDevice.ClientId);
+            macroDeckClient?.DeviceMessage.SendConfiguration(macroDeckClient);
         }
 
         public override ActionConfigControl GetActionConfigControl(ActionConfigurator actionConfigurator)

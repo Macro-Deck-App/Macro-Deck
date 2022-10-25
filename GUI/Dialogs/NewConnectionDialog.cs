@@ -1,13 +1,10 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
+﻿using System;
+using System.Drawing;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Server;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
+using Timer = System.Timers.Timer;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
@@ -18,51 +15,48 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         private int _denyTimeout = 15;
 
-        private System.Timers.Timer _denyTimer;
+        private Timer _denyTimer;
 
-        public bool Blocked
-        {
-            get => this.checkBlockThisDevice.Checked;
-        }
+        public bool Blocked => checkBlockThisDevice.Checked;
 
 
         public NewConnectionDialog(MacroDeckClient macroDeckClient)
         {
-            this._macroDeckClient = macroDeckClient;
+            _macroDeckClient = macroDeckClient;
             InitializeComponent();
             (new DropShadow()).ApplyShadows(this);
-            this.btnDeny.BackColor = Color.FromArgb(192, 0, 0);
-            this.lblNewConnectionRequest.Text = LanguageManager.Strings.NewConnectionRequest;
-            this.lblClientId.Text = LanguageManager.Strings.ClientId;
-            this.lblIPAddress.Text = LanguageManager.Strings.IPAddress;
-            this.lblType.Text = LanguageManager.Strings.Type;
-            this.btnAccept.Text = LanguageManager.Strings.Accept;
-            this.btnDeny.Text = $"{LanguageManager.Strings.Deny} ({this._denyTimeout})";
-            this.checkBlockThisDevice.Text = LanguageManager.Strings.BlockConnection;
+            btnDeny.BackColor = Color.FromArgb(192, 0, 0);
+            lblNewConnectionRequest.Text = LanguageManager.Strings.NewConnectionRequest;
+            lblClientId.Text = LanguageManager.Strings.ClientId;
+            lblIPAddress.Text = LanguageManager.Strings.IPAddress;
+            lblType.Text = LanguageManager.Strings.Type;
+            btnAccept.Text = LanguageManager.Strings.Accept;
+            btnDeny.Text = $"{LanguageManager.Strings.Deny} ({_denyTimeout})";
+            checkBlockThisDevice.Text = LanguageManager.Strings.BlockConnection;
         }
 
         private void NewConnectionDialog_Load(object sender, EventArgs e)
         {
-            this.CenterToParent();
-            this.TopMost = true;
-            this.clientId.Text = this._macroDeckClient?.ClientId;
-            this.ipAddress.Text = this._macroDeckClient?.SocketConnection?.ConnectionInfo?.ClientIpAddress;
-            this.type.Text = this._macroDeckClient?.DeviceType.ToString();
+            CenterToParent();
+            TopMost = true;
+            clientId.Text = _macroDeckClient?.ClientId;
+            ipAddress.Text = _macroDeckClient?.SocketConnection?.ConnectionInfo?.ClientIpAddress;
+            type.Text = _macroDeckClient?.DeviceType.ToString();
 
-            this._denyTimer = new System.Timers.Timer()
+            _denyTimer = new Timer
             {
                 Enabled = true,
                 Interval = 1000
             };
-            this._denyTimer.Elapsed += (sender, e) => {
-                this._denyTimeout--;
-                this.btnDeny.Text = $"{LanguageManager.Strings.Deny} ({this._denyTimeout})";
-                if (this._denyTimeout <= 0)
+            _denyTimer.Elapsed += (sender, e) => {
+                _denyTimeout--;
+                btnDeny.Text = $"{LanguageManager.Strings.Deny} ({_denyTimeout})";
+                if (_denyTimeout <= 0)
                 {
-                    this._denyTimer.Stop();
-                    if (this.IsHandleCreated && !this.IsDisposed)
+                    _denyTimer.Stop();
+                    if (IsHandleCreated && !IsDisposed)
                     {
-                        this.Invoke(new Action(() => this.Close()));
+                        Invoke(() => Close());
                     }
                 }
             };
@@ -70,13 +64,13 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         private void BtnAccept_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Yes;
-            this.Close();
+            DialogResult = DialogResult.Yes;
+            Close();
         }
 
         private void BtnDeny_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
     }
 }

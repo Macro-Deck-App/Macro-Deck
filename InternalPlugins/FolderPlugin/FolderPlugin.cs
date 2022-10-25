@@ -1,4 +1,5 @@
-﻿using SuchByte.MacroDeck.Folders.Plugin.GUI;
+﻿using System.Collections.Generic;
+using SuchByte.MacroDeck.Folders.Plugin.GUI;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
@@ -6,10 +7,6 @@ using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
 
 namespace SuchByte.MacroDeck.Folders.Plugin // Don't change because of backwards compatibility!
 {
@@ -19,7 +16,7 @@ namespace SuchByte.MacroDeck.Folders.Plugin // Don't change because of backwards
         internal override string Author => "Macro Deck";
         public override void Enable()
         {
-            this.Actions = new List<PluginAction>
+            Actions = new List<PluginAction>
             {
                 new FolderSwitcher(),
                 new GoToParentFolder(),
@@ -44,12 +41,12 @@ namespace SuchByte.MacroDeck.Folders.Plugin // Don't change because of backwards
                 case "-1":
                     if (MacroDeck.MainWindow != null && MacroDeck.MainWindow.DeckView != null)
                     {
-                        MacroDeck.MainWindow.DeckView.SetFolder(ProfileManager.FindFolderById(this.Configuration, ProfileManager.CurrentProfile));
+                        MacroDeck.MainWindow.DeckView.SetFolder(ProfileManager.FindFolderById(Configuration, ProfileManager.CurrentProfile));
                     }
                     break;
                 // ClientId != -1 = Connected device
                 default:
-                    MacroDeckServer.SetFolder(MacroDeckServer.GetMacroDeckClient(clientId), ProfileManager.FindFolderById(this.Configuration, MacroDeckServer.GetMacroDeckClient(clientId).Profile));
+                    MacroDeckServer.SetFolder(MacroDeckServer.GetMacroDeckClient(clientId), ProfileManager.FindFolderById(Configuration, MacroDeckServer.GetMacroDeckClient(clientId).Profile));
                     break;
             }
         }
@@ -80,8 +77,8 @@ namespace SuchByte.MacroDeck.Folders.Plugin // Don't change because of backwards
                         break;
                     // ClientId != -1 = Connected device
                     default:
-                        MacroDeckClient macroDeckClient = MacroDeckServer.GetMacroDeckClient(clientId);
-                        MacroDeckFolder parentFolder = ProfileManager.FindParentFolder(macroDeckClient.Folder, macroDeckClient.Profile);
+                        var macroDeckClient = MacroDeckServer.GetMacroDeckClient(clientId);
+                        var parentFolder = ProfileManager.FindParentFolder(macroDeckClient.Folder, macroDeckClient.Profile);
                         MacroDeckServer.SetFolder(macroDeckClient, parentFolder);
                         break;
                 }
@@ -114,8 +111,8 @@ namespace SuchByte.MacroDeck.Folders.Plugin // Don't change because of backwards
                         break;
                     // ClientId != -1 = Connected device
                     default:
-                        MacroDeckClient macroDeckClient = MacroDeckServer.GetMacroDeckClient(clientId);
-                        MacroDeckFolder rootFolder = macroDeckClient.Profile.Folders.Find(folder => folder.IsRootFolder);
+                        var macroDeckClient = MacroDeckServer.GetMacroDeckClient(clientId);
+                        var rootFolder = macroDeckClient.Profile.Folders.Find(folder => folder.IsRootFolder);
                         MacroDeckServer.SetFolder(macroDeckClient, rootFolder);
                         break;
                 }

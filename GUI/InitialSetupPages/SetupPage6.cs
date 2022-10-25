@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.Language;
 
 namespace SuchByte.MacroDeck.GUI.InitialSetupPages
 {
@@ -15,19 +11,19 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages
         {
             this.initialSetup = initialSetup;
             InitializeComponent();
-            this.lblAlmostDone.Text = Language.LanguageManager.Strings.InitialSetupAlmostDone;
-            this.checkAutoStart.Text = Language.LanguageManager.Strings.AutomaticallyStartWithWindows;
-            this.checkAutoUpdates.Text = Language.LanguageManager.Strings.AutomaticallyCheckUpdates;
+            lblAlmostDone.Text = LanguageManager.Strings.InitialSetupAlmostDone;
+            checkAutoStart.Text = LanguageManager.Strings.AutomaticallyStartWithWindows;
+            checkAutoUpdates.Text = LanguageManager.Strings.AutomaticallyCheckUpdates;
         }
 
         private void CheckAutoUpdates_CheckedChanged(object sender, EventArgs e)
         {
-            initialSetup.configuration.AutoUpdates = this.checkAutoUpdates.Checked;
+            initialSetup.configuration.AutoUpdates = checkAutoUpdates.Checked;
         }
 
         private void CheckAutoStart_CheckedChanged(object sender, EventArgs e)
         {
-            initialSetup.configuration.AutoStart = this.checkAutoStart.Checked;
+            initialSetup.configuration.AutoStart = checkAutoStart.Checked;
         }
     }
 }

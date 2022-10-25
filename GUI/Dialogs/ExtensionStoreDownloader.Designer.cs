@@ -1,4 +1,8 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
     partial class ExtensionStoreDownloader
@@ -6,7 +10,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -112,9 +116,9 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         }
 
         #endregion
-        private CustomControls.ButtonPrimary btnDone;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.FlowLayoutPanel downloadList;
-        private System.Windows.Forms.Label lblPackagesToDownload;
+        private ButtonPrimary btnDone;
+        private Label label2;
+        private FlowLayoutPanel downloadList;
+        private Label lblPackagesToDownload;
     }
 }

@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Windows.Forms;
-using SuchByte.MacroDeck;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
-using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Folders.Plugin.GUI
 {
@@ -24,7 +17,7 @@ namespace SuchByte.MacroDeck.Folders.Plugin.GUI
         {
             if (ProfileManager.CurrentProfile.Folders == null) return;
 
-            this._macroDeckAction = macroDeckAction;
+            _macroDeckAction = macroDeckAction;
             InitializeComponent();
 
 
@@ -58,10 +51,10 @@ namespace SuchByte.MacroDeck.Folders.Plugin.GUI
         public override bool OnActionSave()
         {
             if (foldersView.SelectedNode == null) return false;
-            MacroDeckFolder folder = ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, ProfileManager.CurrentProfile);
-            this.SelectedFolder = folder;
-            this._macroDeckAction.Configuration = this.SelectedFolder.FolderId;
-            this._macroDeckAction.ConfigurationSummary = folder.DisplayName;
+            var folder = ProfileManager.FindFolderByDisplayName(foldersView.SelectedNode.Text, ProfileManager.CurrentProfile);
+            SelectedFolder = folder;
+            _macroDeckAction.Configuration = SelectedFolder.FolderId;
+            _macroDeckAction.ConfigurationSummary = folder.DisplayName;
             return true;
         }
     }

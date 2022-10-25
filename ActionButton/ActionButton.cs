@@ -1,23 +1,14 @@
-﻿using SuchByte.MacroDeck.Plugins;
-using Newtonsoft.Json;
-using SQLite;
-using SQLiteNetExtensions.Attributes;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SuchByte.MacroDeck.Events;
-using SuchByte.MacroDeck.JSON;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
-using SuchByte.MacroDeck.Server;
-using System.Diagnostics;
 using System.Drawing;
-using SuchByte.MacroDeck.Profiles;
-using SuchByte.MacroDeck.Hotkeys;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using SuchByte.MacroDeck.GUI.Dialogs;
+using Newtonsoft.Json;
+using SuchByte.MacroDeck.Events;
+using SuchByte.MacroDeck.Hotkeys;
+using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Variables;
 
 namespace SuchByte.MacroDeck.ActionButton
 {
@@ -26,43 +17,37 @@ namespace SuchByte.MacroDeck.ActionButton
 
         private IntPtr _bufferPtr;
         private int BUFFER_SIZE = 1024 * 1024;
-        private bool _disposed = false;
+        private bool _disposed;
 
 
         public ActionButton()
         {
             _bufferPtr = Marshal.AllocHGlobal(BUFFER_SIZE);
-            Variables.VariableManager.OnVariableChanged += VariableChanged;
+            VariableManager.OnVariableChanged += VariableChanged;
         }
 
         public void UpdateHotkey()
         {
-            if (this.KeyCode != Keys.None)
+            if (KeyCode != Keys.None)
             {
-                HotkeyManager.AddHotkey(this, this.ModifierKeyCodes, this.KeyCode);
+                HotkeyManager.AddHotkey(this, ModifierKeyCodes, KeyCode);
             }
         }
 
         public void UpdateBindingState()
         {
-            if (!string.IsNullOrWhiteSpace(this.StateBindingVariable))
+            if (!string.IsNullOrWhiteSpace(StateBindingVariable))
             {
-                Variables.Variable variable = Variables.VariableManager.ListVariables.ToList().Find(v => v.Name.Equals(this.StateBindingVariable));
+                var variable = VariableManager.ListVariables.ToList().Find(v => v.Name.Equals(StateBindingVariable));
                 if (variable != null)
                 {
-                    this.UpdateBindingState(variable);
+                    UpdateBindingState(variable);
                 }
             }
         }
 
         [JsonIgnore]
-        public bool IsDisposed
-        {
-            get
-            {
-                return this._disposed;
-            }
-        }
+        public bool IsDisposed => _disposed;
 
 
         protected virtual void Dispose(bool disposing)
@@ -75,19 +60,19 @@ namespace SuchByte.MacroDeck.ActionButton
             }
 
             HotkeyManager.RemoveHotkey(this);
-            Variables.VariableManager.OnVariableChanged -= VariableChanged;
-            if (this.Actions != null)
+            VariableManager.OnVariableChanged -= VariableChanged;
+            if (Actions != null)
             {
-                foreach (PluginAction pluginAction in this.Actions)
+                foreach (var pluginAction in Actions)
                 {
                     pluginAction.OnActionButtonDelete();
                 }
             }
-            if (this.EventListeners != null)
+            if (EventListeners != null)
             {
-                foreach (var eventListeners in this.EventListeners)
+                foreach (var eventListeners in EventListeners)
                 {
-                    foreach (PluginAction pluginAction in eventListeners.Actions)
+                    foreach (var pluginAction in eventListeners.Actions)
                     {
                         pluginAction.OnActionButtonDelete();
                     }
@@ -111,18 +96,18 @@ namespace SuchByte.MacroDeck.ActionButton
 
         private void VariableChanged(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(this.StateBindingVariable)) return;
-            Variables.Variable variable = sender as Variables.Variable;
-            this.UpdateBindingState(variable);
+            if (string.IsNullOrWhiteSpace(StateBindingVariable)) return;
+            var variable = sender as Variable;
+            UpdateBindingState(variable);
         }
 
-        private void UpdateBindingState(Variables.Variable variable)
+        private void UpdateBindingState(Variable variable)
         {
-            if (variable != null && variable.Name.Equals(this.StateBindingVariable))
+            if (variable != null && variable.Name.Equals(StateBindingVariable))
             {
-                Boolean.TryParse(variable.Value, out bool newState);
-                if (variable.Value.ToString().ToLower().Equals("on")) newState = true;
-                this.State = newState;
+                bool.TryParse(variable.Value, out var newState);
+                if (variable.Value.ToLower().Equals("on")) newState = true;
+                State = newState;
             }
         }
 
@@ -131,7 +116,7 @@ namespace SuchByte.MacroDeck.ActionButton
         public event EventHandler StateChanged;
         public event EventHandler IconChanged;
 
-        private bool _state = false;
+        private bool _state;
         private string _iconOff = string.Empty;
         private string _iconOn = string.Empty;
         private Color _backgroundColorOff = Color.FromArgb(35, 35, 35);
@@ -146,79 +131,64 @@ namespace SuchByte.MacroDeck.ActionButton
                 if (_state == value) return;
                 _state = value;
                 MacroDeckServer.UpdateState(this);
-                if (StateChanged != null)
-                {
-                    StateChanged(this, EventArgs.Empty);
-                }
+                StateChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
         public string IconOff { 
-            get => this._iconOff;
+            get => _iconOff;
 
             set
             {
-                this._iconOff = value;
-                if (IconChanged != null)
-                {
-                    IconChanged(this, EventArgs.Empty);
-                }
+                _iconOff = value;
+                IconChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
         public string IconOn
         {
-            get => this._iconOn;
+            get => _iconOn;
             set
             {
-                this._iconOn = value;
-                if (IconChanged != null)
-                {
-                    IconChanged(this, EventArgs.Empty);
-                }
+                _iconOn = value;
+                IconChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
         public Color BackColorOff
         {
-            get => this._backgroundColorOff;
+            get => _backgroundColorOff;
             set
             {
-                if (this._backgroundColorOff == value) return;
-                this._backgroundColorOff = value;
+                if (_backgroundColorOff == value) return;
+                _backgroundColorOff = value;
                 MacroDeckServer.UpdateState(this);
-                if (StateChanged != null)
-                {
-                    StateChanged(this, EventArgs.Empty);
-                }
+                StateChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
         public Color BackColorOn
         {
-            get => this._backgroundColorOn;
+            get => _backgroundColorOn;
             set
             {
-                if (this._backgroundColorOn == value) return;
-                this._backgroundColorOn = value;
+                if (_backgroundColorOn == value) return;
+                _backgroundColorOn = value;
                 MacroDeckServer.UpdateState(this);
-                if (StateChanged != null)
-                {
-                    StateChanged(this, EventArgs.Empty);
-                }
+                StateChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
-        public ButtonLabel LabelOff { get; set; } = new ButtonLabel();
-        public ButtonLabel LabelOn { get; set; } = new ButtonLabel();
+        public ButtonLabel LabelOff { get; set; } = new();
+        public ButtonLabel LabelOn { get; set; } = new();
         public int Position_X { get; set; } = -1;
         public int Position_Y { get; set; } = -1;
         public string StateBindingVariable { get; set; } = string.Empty;
-        public List<PluginAction> Actions { get; set; } = new List<PluginAction>();
-        public List<PluginAction> ActionsRelease { get; set; } = new List<PluginAction>();
-        public List<PluginAction> ActionsLongPress { get; set; } = new List<PluginAction>();
-        public List<PluginAction> ActionsLongPressRelease { get; set; } = new List<PluginAction>();
-        public List<EventListener> EventListeners { get; set; } = new List<EventListener>();
+        public List<PluginAction> Actions { get; set; } = new();
+        public List<PluginAction> ActionsRelease { get; set; } = new();
+        public List<PluginAction> ActionsLongPress { get; set; } = new();
+        public List<PluginAction> ActionsLongPressRelease { get; set; } = new();
+        public List<EventListener> EventListeners { get; set; } = new();
         public Keys ModifierKeyCodes { get; set; } = Keys.None;
         public Keys KeyCode { get; set; } = Keys.None;
         

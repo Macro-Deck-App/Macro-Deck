@@ -1,4 +1,6 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
 
 namespace SuchByte.MacroDeck.GUI
 {
@@ -7,7 +9,7 @@ namespace SuchByte.MacroDeck.GUI
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -421,10 +423,10 @@ namespace SuchByte.MacroDeck.GUI
 
         #endregion
 
-        private System.Windows.Forms.FlowLayoutPanel iconList;
-        private CustomControls.ButtonPrimary btnImport;
+        private FlowLayoutPanel iconList;
+        private ButtonPrimary btnImport;
         private RoundedButton btnPreview;
-        private CustomControls.ButtonPrimary btnOk;
+        private ButtonPrimary btnOk;
         private RoundedComboBox iconPacksBox;
         private PictureButton btnCreateIconPack;
         private PictureButton btnDeleteIconPack;
@@ -432,14 +434,14 @@ namespace SuchByte.MacroDeck.GUI
         private ButtonPrimary btnImportIconPack;
         private ButtonPrimary btnExportIconPack;
         private ButtonPrimary btnDeleteIcon;
-        private System.Windows.Forms.Label lblSizeLabel;
-        private System.Windows.Forms.Label lblSize;
-        private System.Windows.Forms.Label lblType;
-        private System.Windows.Forms.Label lblTypeLabel;
+        private Label lblSizeLabel;
+        private Label lblSize;
+        private Label lblType;
+        private Label lblTypeLabel;
         private ButtonPrimary btnCreateIcon;
         private ButtonPrimary btnGiphy;
-        private System.Windows.Forms.FlowLayoutPanel panelCreateIcon;
-        private System.Windows.Forms.Label lblManaged;
+        private FlowLayoutPanel panelCreateIcon;
+        private Label lblManaged;
         private ButtonPrimary btnGenerateStatic;
     }
 }

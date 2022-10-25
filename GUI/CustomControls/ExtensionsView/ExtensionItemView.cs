@@ -1,23 +1,22 @@
-﻿using SuchByte.MacroDeck.Extension;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.Extension;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
+using SuchByte.MacroDeck.Properties;
+using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
 {
     public partial class ExtensionItemView : RoundedUserControl
     {
         private IMacroDeckExtension macroDeckExtension;
-        public IMacroDeckExtension MacroDeckExtension { get => macroDeckExtension; }
+        public IMacroDeckExtension MacroDeckExtension => macroDeckExtension;
 
         public event EventHandler ExtensionRemoved;
 
@@ -27,80 +26,80 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             this.macroDeckExtension = macroDeckExtension;
             InitializeComponent();
 
-            this.btnUpdate.Text = LanguageManager.Strings.Update;
-            this.btnConfigure.Text = LanguageManager.Strings.Configure;
-            this.btnUninstall.Text = LanguageManager.Strings.Uninstall;
+            btnUpdate.Text = LanguageManager.Strings.Update;
+            btnConfigure.Text = LanguageManager.Strings.Configure;
+            btnUninstall.Text = LanguageManager.Strings.Uninstall;
 
-            this.lblExtensionType.Text = macroDeckExtension.ExtensionTypeDisplayName;
-            this.btnConfigure.Visible = macroDeckExtension.Configurable || macroDeckExtension.GetType() == typeof(IconPackExtension);
+            lblExtensionType.Text = macroDeckExtension.ExtensionTypeDisplayName;
+            btnConfigure.Visible = macroDeckExtension.Configurable || macroDeckExtension.GetType() == typeof(IconPackExtension);
 
-            this.btnUpdate.Visible = updateAvailable;
-            this.btnUpdate.BackColor = Color.FromArgb(20, 153, 0);
-            this.BackColor = updateAvailable ? Color.FromArgb(222, 170, 27) : Color.FromArgb(65,65,65);
+            btnUpdate.Visible = updateAvailable;
+            btnUpdate.BackColor = Color.FromArgb(20, 153, 0);
+            BackColor = updateAvailable ? Color.FromArgb(222, 170, 27) : Color.FromArgb(65,65,65);
 
             switch (macroDeckExtension.ExtensionType)
             {
                 case ExtensionType.Plugin:
-                    this.lblExtensionType.BackColor = Color.FromArgb(0, 95, 173);
-                    MacroDeckPlugin macroDeckPlugin = macroDeckExtension.ExtensionObject as MacroDeckPlugin;
+                    lblExtensionType.BackColor = Color.FromArgb(0, 95, 173);
+                    var macroDeckPlugin = macroDeckExtension.ExtensionObject as MacroDeckPlugin;
                     if (PluginManager.PluginsNotLoaded.ContainsValue(macroDeckPlugin) && !PluginManager.UpdatedPlugins.Contains(macroDeckPlugin) && !updateAvailable)
                     {
-                        this.lblStatus.Text = LanguageManager.Strings.Disabled;
-                        this.lblStatus.ForeColor = Color.White;
-                        this.lblStatus.BackColor = Color.Firebrick;
+                        lblStatus.Text = LanguageManager.Strings.Disabled;
+                        lblStatus.ForeColor = Color.White;
+                        lblStatus.BackColor = Color.Firebrick;
                     } else if (PluginManager.UpdatedPlugins.Contains(macroDeckPlugin))
                     {
-                        this.lblStatus.Text = LanguageManager.Strings.PendingRestart;
-                        this.lblStatus.ForeColor = Color.Yellow;
-                        this.lblStatus.BackColor = Color.Transparent;
+                        lblStatus.Text = LanguageManager.Strings.PendingRestart;
+                        lblStatus.ForeColor = Color.Yellow;
+                        lblStatus.BackColor = Color.Transparent;
                     } else if (PluginManager.PluginsUpdateAvailable.Contains(macroDeckPlugin) && !PluginManager.UpdatedPlugins.Contains(macroDeckPlugin))
                     {
-                        this.lblStatus.Text = LanguageManager.Strings.UpdateAvailable;
-                        this.lblStatus.ForeColor = Color.White;
-                        this.lblStatus.BackColor = Color.Transparent;
+                        lblStatus.Text = LanguageManager.Strings.UpdateAvailable;
+                        lblStatus.ForeColor = Color.White;
+                        lblStatus.BackColor = Color.Transparent;
                     } else
                     {
-                        this.lblStatus.Text = LanguageManager.Strings.Enabled;
-                        this.lblStatus.ForeColor = Color.FromArgb(0,192,0);
-                        this.lblStatus.BackColor = Color.Transparent;
+                        lblStatus.Text = LanguageManager.Strings.Enabled;
+                        lblStatus.ForeColor = Color.FromArgb(0,192,0);
+                        lblStatus.BackColor = Color.Transparent;
                     }
                     
-                    this.extensionIcon.BackgroundImage = macroDeckPlugin.PluginIcon == null ? Properties.Resources.Icon : macroDeckPlugin.PluginIcon;
-                    this.lblExtensionName.Text = macroDeckPlugin.Name;
-                    this.lblVersion.Text = $"{LanguageManager.Strings.InstalledVersion}: {macroDeckPlugin.Version}";
+                    extensionIcon.BackgroundImage = macroDeckPlugin.PluginIcon == null ? Resources.Icon : macroDeckPlugin.PluginIcon;
+                    lblExtensionName.Text = macroDeckPlugin.Name;
+                    lblVersion.Text = $"{LanguageManager.Strings.InstalledVersion}: {macroDeckPlugin.Version}";
                     break;
                 case ExtensionType.IconPack:
-                    this.lblExtensionType.BackColor = Color.FromArgb(0, 173, 14);
-                    IconPack iconPack = macroDeckExtension.ExtensionObject as IconPack;
+                    lblExtensionType.BackColor = Color.FromArgb(0, 173, 14);
+                    var iconPack = macroDeckExtension.ExtensionObject as IconPack;
                     if (updateAvailable)
                     {
-                        this.lblStatus.Text = LanguageManager.Strings.UpdateAvailable;
-                        this.lblStatus.ForeColor = Color.White;
-                        this.lblStatus.BackColor = Color.Transparent;
+                        lblStatus.Text = LanguageManager.Strings.UpdateAvailable;
+                        lblStatus.ForeColor = Color.White;
+                        lblStatus.BackColor = Color.Transparent;
                     } else
                     {
-                        this.lblStatus.Text = LanguageManager.Strings.Enabled;
-                        this.lblStatus.ForeColor = Color.FromArgb(0, 192, 0);
-                        this.lblStatus.BackColor = Color.Transparent;
+                        lblStatus.Text = LanguageManager.Strings.Enabled;
+                        lblStatus.ForeColor = Color.FromArgb(0, 192, 0);
+                        lblStatus.BackColor = Color.Transparent;
                     }
-                    this.extensionIcon.BackgroundImage = iconPack.IconPackIcon == null ? Utils.IconPackPreview.GeneratePreviewImage(iconPack) : iconPack.IconPackIcon;
-                    this.lblExtensionName.Text = iconPack.Name;
-                    this.lblVersion.Text = $"{LanguageManager.Strings.InstalledVersion}: {iconPack.Version}";
+                    extensionIcon.BackgroundImage = iconPack.IconPackIcon == null ? IconPackPreview.GeneratePreviewImage(iconPack) : iconPack.IconPackIcon;
+                    lblExtensionName.Text = iconPack.Name;
+                    lblVersion.Text = $"{LanguageManager.Strings.InstalledVersion}: {iconPack.Version}";
                     break;
             }
         }
 
         private void BtnConfigure_Click(object sender, EventArgs e)
         {
-            switch (this.macroDeckExtension.ExtensionType)
+            switch (macroDeckExtension.ExtensionType)
             {
                 case ExtensionType.Plugin:
-                    MacroDeckPlugin macroDeckPlugin = macroDeckExtension.ExtensionObject as MacroDeckPlugin;
+                    var macroDeckPlugin = macroDeckExtension.ExtensionObject as MacroDeckPlugin;
                     if (!macroDeckPlugin.CanConfigure) return;
                     macroDeckPlugin.OpenConfigurator();
                     break;
                 case ExtensionType.IconPack:
-                    IconPack iconPack = macroDeckExtension.ExtensionObject as IconPack;
+                    var iconPack = macroDeckExtension.ExtensionObject as IconPack;
                     using (var iconSelector = new IconSelector(iconPack))
                     {
                         iconSelector.ShowDialog();
@@ -112,26 +111,23 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
         private void BtnUninstall_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
 
-            switch (this.macroDeckExtension.ExtensionType)
+            switch (macroDeckExtension.ExtensionType)
             {
                 case ExtensionType.Plugin:
-                    MacroDeckPlugin macroDeckPlugin = macroDeckExtension.ExtensionObject as MacroDeckPlugin;
+                    var macroDeckPlugin = macroDeckExtension.ExtensionObject as MacroDeckPlugin;
                     using (var msgBox = new MessageBox())
                     {
-                        if (msgBox.ShowDialog(LanguageManager.Strings.AreYouSure, String.Format(LanguageManager.Strings.XWillBeUninstalled, macroDeckPlugin.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        if (msgBox.ShowDialog(LanguageManager.Strings.AreYouSure, string.Format(LanguageManager.Strings.XWillBeUninstalled, macroDeckPlugin.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
                         {
                             PluginManager.DeletePlugin(macroDeckPlugin.Name);
-                            if (ExtensionRemoved != null)
-                            {
-                                ExtensionRemoved(this, EventArgs.Empty);
-                            }
+                            ExtensionRemoved?.Invoke(this, EventArgs.Empty);
 
                             if (msgBox.ShowDialog("", string.Format(LanguageManager.Strings.XSuccessfullyUninstalled, macroDeckPlugin.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
                             {
                                 MacroDeck.RestartMacroDeck("--show");
                             }
 
-                            var btnRestart = new ButtonPrimary()
+                            var btnRestart = new ButtonPrimary
                             {
                                 AutoSize = true,
                                 Text = LanguageManager.Strings.Restart,
@@ -140,21 +136,18 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
                             {
                                 MacroDeck.RestartMacroDeck("--show");
                             };
-                            NotificationManager.SystemNotification("Extension Manager", string.Format(LanguageManager.Strings.XSuccessfullyUninstalled, macroDeckPlugin.Name), true, controls: new List<Control>() { btnRestart });
+                            NotificationManager.SystemNotification("Extension Manager", string.Format(LanguageManager.Strings.XSuccessfullyUninstalled, macroDeckPlugin.Name), true, controls: new List<Control> { btnRestart });
                         }
                     }
                     break;
                 case ExtensionType.IconPack:
-                    IconPack iconPack = macroDeckExtension.ExtensionObject as IconPack;
+                    var iconPack = macroDeckExtension.ExtensionObject as IconPack;
                     using (var msgBox = new MessageBox())
                     {
-                        if (msgBox.ShowDialog(LanguageManager.Strings.AreYouSure, String.Format(LanguageManager.Strings.XWillBeUninstalled, iconPack.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        if (msgBox.ShowDialog(LanguageManager.Strings.AreYouSure, string.Format(LanguageManager.Strings.XWillBeUninstalled, iconPack.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
                         {
                             IconManager.DeleteIconPack(iconPack);
-                            if (ExtensionRemoved != null)
-                            {
-                                ExtensionRemoved(this, EventArgs.Empty);
-                            }
+                            ExtensionRemoved?.Invoke(this, EventArgs.Empty);
                         }
                     }
                     break;
@@ -163,16 +156,16 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
 
         private void BtnUpdate_Click(object sender, EventArgs e)
         {
-            this.btnUpdate.Spinner = true;
-            this.btnUpdate.Enabled = false;
-            switch (this.macroDeckExtension.ExtensionType)
+            btnUpdate.Spinner = true;
+            btnUpdate.Enabled = false;
+            switch (macroDeckExtension.ExtensionType)
             {
                 case ExtensionType.Plugin:
-                    MacroDeckPlugin macroDeckPlugin = macroDeckExtension.ExtensionObject as MacroDeckPlugin;
+                    var macroDeckPlugin = macroDeckExtension.ExtensionObject as MacroDeckPlugin;
                     ExtensionStoreHelper.InstallPluginById(ExtensionStoreHelper.GetPackageId(macroDeckPlugin));
                     break;
                 case ExtensionType.IconPack:
-                    IconPack iconPack = macroDeckExtension.ExtensionObject as IconPack;
+                    var iconPack = macroDeckExtension.ExtensionObject as IconPack;
                     ExtensionStoreHelper.InstallPluginById(iconPack.PackageId);
                     break;
             }

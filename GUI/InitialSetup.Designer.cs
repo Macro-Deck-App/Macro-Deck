@@ -1,4 +1,9 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Language;
+
 namespace SuchByte.MacroDeck.GUI
 {
     partial class InitialSetup
@@ -6,7 +11,7 @@ namespace SuchByte.MacroDeck.GUI
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -14,7 +19,7 @@ namespace SuchByte.MacroDeck.GUI
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            Language.LanguageManager.LanguageChanged -= OnLanguageChanged;
+            LanguageManager.LanguageChanged -= OnLanguageChanged;
             if (disposing && (components != null))
             {
                 components.Dispose();
@@ -108,9 +113,9 @@ namespace SuchByte.MacroDeck.GUI
 
         #endregion
 
-        private CustomControls.ButtonPrimary btnNext;
-        private CustomControls.ButtonPrimary btnBack;
-        private CustomControls.BufferedPanel pagePanel;
-        private System.Windows.Forms.Label lblPage;
+        private ButtonPrimary btnNext;
+        private ButtonPrimary btnBack;
+        private BufferedPanel pagePanel;
+        private Label lblPage;
     }
 }

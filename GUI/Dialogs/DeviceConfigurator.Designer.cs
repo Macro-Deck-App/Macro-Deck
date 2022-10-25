@@ -1,4 +1,8 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
     partial class DeviceConfigurator
@@ -6,7 +10,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -193,14 +197,14 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         #endregion
 
-        private CustomControls.ButtonPrimary btnOk;
-        private System.Windows.Forms.Label lblBrightness;
-        private System.Windows.Forms.TrackBar brightness;
-        private System.Windows.Forms.CheckBox checkAutoConnect;
-        private System.Windows.Forms.Label lblKeepWake;
-        private CustomControls.TabRadioButton radioKeepAwakeNever;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
-        private CustomControls.TabRadioButton radioKeepAwakeConnected;
-        private CustomControls.TabRadioButton radioKeepAwakeAlways;
+        private ButtonPrimary btnOk;
+        private Label lblBrightness;
+        private TrackBar brightness;
+        private CheckBox checkAutoConnect;
+        private Label lblKeepWake;
+        private TabRadioButton radioKeepAwakeNever;
+        private FlowLayoutPanel flowLayoutPanel1;
+        private TabRadioButton radioKeepAwakeConnected;
+        private TabRadioButton radioKeepAwakeAlways;
     }
 }

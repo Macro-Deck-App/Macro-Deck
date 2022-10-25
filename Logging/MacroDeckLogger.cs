@@ -1,16 +1,17 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.GUI.Dialogs;
-using SuchByte.MacroDeck.Notifications;
-using SuchByte.MacroDeck.Plugins;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.Notifications;
+using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Properties;
+using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Logging
 {
@@ -39,14 +40,11 @@ namespace SuchByte.MacroDeck.Logging
         /// </summary>
         internal static LogLevel LogLevel
         {
-            get
-            {
-                return _logLevel;
-            }
+            get => _logLevel;
             set
             {
                 _logLevel = value;
-                Info("Set log level to " + _logLevel.ToString());
+                Info("Set log level to " + _logLevel);
             }
         }
 
@@ -60,7 +58,7 @@ namespace SuchByte.MacroDeck.Logging
         /// <param name="message"></param>
         public static void Trace(MacroDeckPlugin macroDeckPlugin, Type classType, string message)
         {
-            Trace(macroDeckPlugin, string.Format("{0}: {1}", classType.Name.ToString(), message));
+            Trace(macroDeckPlugin, string.Format("{0}: {1}", classType.Name, message));
         }
 
         /// <summary>
@@ -71,7 +69,7 @@ namespace SuchByte.MacroDeck.Logging
         /// <param name="message"></param>
         public static void Info(MacroDeckPlugin macroDeckPlugin, Type classType, string message)
         {
-            Info(macroDeckPlugin, string.Format("{0}: {1}", classType.Name.ToString(), message));
+            Info(macroDeckPlugin, string.Format("{0}: {1}", classType.Name, message));
         }
 
         /// <summary>
@@ -82,7 +80,7 @@ namespace SuchByte.MacroDeck.Logging
         /// <param name="message"></param>
         public static void Warning(MacroDeckPlugin macroDeckPlugin, Type classType, string message)
         {
-            Warning(macroDeckPlugin, string.Format("{0}: {1}", classType.Name.ToString(), message));
+            Warning(macroDeckPlugin, string.Format("{0}: {1}", classType.Name, message));
         }
 
         /// <summary>
@@ -93,7 +91,7 @@ namespace SuchByte.MacroDeck.Logging
         /// <param name="message"></param>
         public static void Error(MacroDeckPlugin macroDeckPlugin, Type classType, string message)
         {
-            Error(macroDeckPlugin, string.Format("{0}: {1}", classType.Name.ToString(), message));
+            Error(macroDeckPlugin, string.Format("{0}: {1}", classType.Name, message));
         }
 
 
@@ -159,22 +157,22 @@ namespace SuchByte.MacroDeck.Logging
 
         internal static void Trace(Type classType, string message)
         {
-            Trace(string.Format("{0}: {1}", classType.Name.ToString(), message));
+            Trace(string.Format("{0}: {1}", classType.Name, message));
         }
 
         internal static void Info(Type classType, string message)
         {
-            Info(string.Format("{0}: {1}", classType.Name.ToString(), message));
+            Info(string.Format("{0}: {1}", classType.Name, message));
         }
 
         internal static void Warning(Type classType, string message)
         {
-            Warning(string.Format("{0}: {1}", classType.Name.ToString(), message));
+            Warning(string.Format("{0}: {1}", classType.Name, message));
         }
 
         internal static void Error(Type classType, string message)
         {
-            Error(string.Format("{0}: {1}", classType.Name.ToString(), message));
+            Error(string.Format("{0}: {1}", classType.Name, message));
         }
 
 
@@ -212,7 +210,7 @@ namespace SuchByte.MacroDeck.Logging
         {
             if (logLevel == LogLevel.Error)
             {
-                var btnShowLog = new ButtonPrimary()
+                var btnShowLog = new ButtonPrimary
                 {
                     Size = new Size(75, 25),
                     AutoSize = true,
@@ -223,7 +221,7 @@ namespace SuchByte.MacroDeck.Logging
                     OpenLatestLog();
                 };
 
-                NotificationManager.SystemNotification("Error", $"{sender} caused an error: {TruncateForDisplay(message, 250)}", controls: new List<Control>() { btnShowLog }, icon: Properties.Resources.Macro_Deck_error);
+                NotificationManager.SystemNotification("Error", $"{sender} caused an error: {TruncateForDisplay(message, 250)}", controls: new List<Control> { btnShowLog }, icon: Resources.Macro_Deck_error);
             }
             if ((!Debugger.IsAttached && !FileLogging) || logLevel < LogLevel) return;
 
@@ -234,7 +232,7 @@ namespace SuchByte.MacroDeck.Logging
             }
             if (_debugConsole != null && !_debugConsole.IsDisposed && _debugConsole.Visible)
             {
-                Color logColor = Color.White;
+                var logColor = Color.White;
                 switch (logLevel)
                 {
                     case LogLevel.Info:
@@ -253,10 +251,10 @@ namespace SuchByte.MacroDeck.Logging
             {
                 try
                 {
-                    Utils.Retry.Do(new Action(() =>
+                    Retry.Do(() =>
                     {
                         File.AppendAllText(CurrentFilename, Environment.NewLine + formattedLog, Encoding.UTF8);
-                    }), TimeSpan.FromMilliseconds(10), 3);
+                    }, TimeSpan.FromMilliseconds(10));
                 } catch (Exception ex)
                 {
                     FileLogging = false;
@@ -268,7 +266,7 @@ namespace SuchByte.MacroDeck.Logging
 
         internal static void CleanUpLogsDir()
         {
-            foreach (FileInfo file in new DirectoryInfo(MacroDeck.LogsDirectoryPath).GetFiles().Where(p => p.CreationTime < DateTime.Now.AddDays(-30)).ToArray())
+            foreach (var file in new DirectoryInfo(MacroDeck.LogsDirectoryPath).GetFiles().Where(p => p.CreationTime < DateTime.Now.AddDays(-30)).ToArray())
             {
                 try
                 {
@@ -291,13 +289,7 @@ namespace SuchByte.MacroDeck.Logging
             return returnValue;
         }
 
-        internal static string CurrentFilename
-        {
-            get
-            {
-                return Path.Combine(MacroDeck.LogsDirectoryPath, DateTime.Now.ToString("yyyy-MM-dd") + ".log");
-            }
-        }
+        internal static string CurrentFilename => Path.Combine(MacroDeck.LogsDirectoryPath, DateTime.Now.ToString("yyyy-MM-dd") + ".log");
     }
 
     public enum LogLevel

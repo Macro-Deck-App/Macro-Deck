@@ -1,14 +1,11 @@
-﻿using SuchByte.MacroDeck.InternalPlugins.Variables.Enums;
+﻿using System;
+using SuchByte.MacroDeck.InternalPlugins.Variables.Enums;
 using SuchByte.MacroDeck.InternalPlugins.Variables.Models;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
-using SuchByte.MacroDeck.Variables.Plugin.Models;
 using SuchByte.MacroDeck.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SuchByte.MacroDeck.Variables.Plugin.ViewModels
 {
@@ -40,13 +37,13 @@ namespace SuchByte.MacroDeck.Variables.Plugin.ViewModels
 
         public ChangeVariableValueActionConfigViewModel(PluginAction pluginAction)
         {
-            this._pluginAction = pluginAction;
-            this.Configuration = ChangeVariableValueActionConfigModel.Deserialize(pluginAction.Configuration);
+            _pluginAction = pluginAction;
+            Configuration = ChangeVariableValueActionConfigModel.Deserialize(pluginAction.Configuration);
         }
 
         public bool SaveConfig()
         {
-            if (string.IsNullOrWhiteSpace(this.Variable))
+            if (string.IsNullOrWhiteSpace(Variable))
             {
                 return false;
             }
@@ -64,8 +61,8 @@ namespace SuchByte.MacroDeck.Variables.Plugin.ViewModels
 
         public void SetConfig()
         {
-            this._pluginAction.ConfigurationSummary = this.Variable + " -> " + GetMethodName(this.Method) + (this.Method == ChangeVariableMethod.set ? " -> " + this.Value : "");
-            this._pluginAction.Configuration = Configuration.Serialize();
+            _pluginAction.ConfigurationSummary = Variable + " -> " + GetMethodName(Method) + (Method == ChangeVariableMethod.set ? " -> " + Value : "");
+            _pluginAction.Configuration = Configuration.Serialize();
         }
 
         private string GetMethodName(ChangeVariableMethod method)

@@ -1,10 +1,10 @@
-﻿using SuchByte.MacroDeck.Models;
-using SuchByte.MacroDeck.Plugins;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.Models;
+using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Properties;
 
 namespace SuchByte.MacroDeck.Notifications
 {
@@ -25,12 +25,9 @@ namespace SuchByte.MacroDeck.Notifications
 
         public static EventHandler<NotificationRemovedEventArgs> OnNotificationRemoved;
 
-        private static List<NotificationModel> _notifications = new List<NotificationModel>();
+        private static List<NotificationModel> _notifications = new();
 
-        internal static List<NotificationModel> Notifications
-        {
-            get => _notifications;
-        }
+        internal static List<NotificationModel> Notifications => _notifications;
 
         /// <summary>
         /// Returns the notification
@@ -45,7 +42,7 @@ namespace SuchByte.MacroDeck.Notifications
         /// </summary>
         public static string Notify(MacroDeckPlugin macroDeckPlugin, string title, string message, bool showBalloonTip = false, List<Control> controls = null)
         {
-            var notificationModel = new NotificationModel()
+            var notificationModel = new NotificationModel
             {
                 SenderName = macroDeckPlugin.Name,
                 Title = title,
@@ -67,10 +64,7 @@ namespace SuchByte.MacroDeck.Notifications
             if (notificationModel == null || !_notifications.Contains(notificationModel)) return;
             _notifications.Remove(notificationModel);
 
-            if (OnNotificationRemoved != null)
-            {
-                OnNotificationRemoved(null, new NotificationRemovedEventArgs() { Id = notificationModel.Id });
-            }
+            OnNotificationRemoved?.Invoke(null, new NotificationRemovedEventArgs { Id = notificationModel.Id });
         }
 
         /// <summary>
@@ -83,13 +77,13 @@ namespace SuchByte.MacroDeck.Notifications
 
         internal static string SystemNotification(string title, string message, bool showBalloonTip = false, List<Control> controls = null, Bitmap icon = null)
         {
-            var notificationModel = new NotificationModel()
+            var notificationModel = new NotificationModel
             {
                 SenderName = "Macro Deck",
                 Title = title,
                 Message = message,
                 AdditionalControls = controls,
-                Icon = icon == null ? Properties.Resources.Macro_Deck_2021 : icon
+                Icon = icon == null ? Resources.Macro_Deck_2021 : icon
             };
 
             Notify(notificationModel, showBalloonTip);
@@ -106,10 +100,7 @@ namespace SuchByte.MacroDeck.Notifications
 
             MacroDeck.SyncContext?.Send(o =>
             {
-                if (OnNotification != null)
-                {
-                    OnNotification(null, new NotificationEventArgs() { Notification = notificationModel });
-                }
+                OnNotification?.Invoke(null, new NotificationEventArgs { Notification = notificationModel });
             }, null);
 
 

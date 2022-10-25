@@ -1,7 +1,5 @@
-﻿using SuchByte.MacroDeck.Plugins;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SuchByte.MacroDeck.Events
 {
@@ -16,7 +14,7 @@ namespace SuchByte.MacroDeck.Events
     {
         string Name { get; }
         EventHandler<MacroDeckEventArgs> OnEvent { get; set; }
-        List<String> ParameterSuggestions { get; set; }
+        List<string> ParameterSuggestions { get; set; }
 
     }
 }

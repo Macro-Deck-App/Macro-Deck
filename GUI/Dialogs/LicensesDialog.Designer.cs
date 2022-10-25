@@ -1,4 +1,7 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
+
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
     partial class LicensesDialog
@@ -6,7 +9,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -85,8 +88,8 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         #endregion
 
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.FlowLayoutPanel licensesPanel;
+        private Label label1;
+        private Label label3;
+        private FlowLayoutPanel licensesPanel;
     }
 }

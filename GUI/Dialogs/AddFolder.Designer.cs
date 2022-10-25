@@ -1,5 +1,8 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
 using SuchByte.MacroDeck.GUI.CustomControls;
+using ComboBox = SuchByte.MacroDeck.GUI.CustomControls.ComboBox;
 
 namespace SuchByte.MacroDeck.GUI
 {
@@ -8,7 +11,7 @@ namespace SuchByte.MacroDeck.GUI
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -246,16 +249,16 @@ namespace SuchByte.MacroDeck.GUI
         #endregion
 
         private RoundedTextBox folderName;
-        private System.Windows.Forms.Label lblFolderName;
+        private Label lblFolderName;
         private ButtonPrimary btnCreateFolder;
-        private System.Windows.Forms.GroupBox groupAutomaticallySwitchFolder;
-        private System.Windows.Forms.RadioButton radioOnFocus;
-        private System.Windows.Forms.RadioButton radioNever;
-        private System.Windows.Forms.Panel applicationDeviceSettings;
-        private System.Windows.Forms.CheckedListBox devicesList;
-        private System.Windows.Forms.Label lblDevices;
+        private GroupBox groupAutomaticallySwitchFolder;
+        private RadioButton radioOnFocus;
+        private RadioButton radioNever;
+        private Panel applicationDeviceSettings;
+        private CheckedListBox devicesList;
+        private Label lblDevices;
         private ComboBox applicationList;
-        private System.Windows.Forms.Label lblApplication;
-        private CustomControls.ButtonPrimary btnReloadApplications;
+        private Label lblApplication;
+        private ButtonPrimary btnReloadApplications;
     }
 }

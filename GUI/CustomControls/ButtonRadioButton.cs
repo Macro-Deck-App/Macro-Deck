@@ -1,49 +1,45 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Text;
-using System.Windows.Forms;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
-    public partial class ButtonRadioButton : System.Windows.Forms.RadioButton
+    public partial class ButtonRadioButton : RadioButton
     {
         private int _borderRadius = 8;
 
         private Image _icon;
-        private bool _hover = false;
+        private bool _hover;
         private ContentAlignment _iconAlignment = ContentAlignment.MiddleLeft;
 
         public ContentAlignment IconAlignment
         {
-            get => this._iconAlignment;
+            get => _iconAlignment;
             set
             {
-                this._iconAlignment = value;
-                this.Invalidate();
+                _iconAlignment = value;
+                Invalidate();
             }
         }
 
         public Image Icon
         {
-            get => this._icon;
+            get => _icon;
             set
             {
-                this._icon = value;
-                this.Invalidate();
+                _icon = value;
+                Invalidate();
             }
         }
 
         public int BorderRadius
         {
-            get => this._borderRadius;
+            get => _borderRadius;
             set
             {
-                this._borderRadius = value;
-                this.Invalidate();
+                _borderRadius = value;
+                Invalidate();
             }
         }
 
@@ -51,29 +47,29 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             InitializeComponent();
 
-            this.Appearance = Appearance.Normal;
-            this.Cursor = Cursors.Hand;
-            this.MouseEnter += MouseEnterEvent;
-            this.MouseLeave += MouseLeaveEvent;
+            Appearance = Appearance.Normal;
+            Cursor = Cursors.Hand;
+            MouseEnter += MouseEnterEvent;
+            MouseLeave += MouseLeaveEvent;
         }
 
 
         private void MouseEnterEvent(object sender, EventArgs e)
         {
-            this._hover = true;
-            this.Invalidate();
+            _hover = true;
+            Invalidate();
         }
 
         private void MouseLeaveEvent(object sender, EventArgs e)
         {
-            this._hover = false;
-            this.Invalidate();
+            _hover = false;
+            Invalidate();
         }
 
         private GraphicsPath GetFigurePath(Rectangle rect, float radius)
         {
-            GraphicsPath path = new GraphicsPath();
-            float curveSize = radius * 2F;
+            var path = new GraphicsPath();
+            var curveSize = radius * 2F;
             path.StartFigure();
             path.AddArc(rect.X, rect.Y, curveSize, curveSize, 180, 90);
             path.AddArc(rect.Right - curveSize, rect.Y, curveSize, curveSize, 270, 90);
@@ -90,34 +86,34 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             pe.Graphics.InterpolationMode = InterpolationMode.High;
             pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-            Rectangle rectSurface = this.ClientRectangle;
-            Rectangle iconSurface = new Rectangle(rectSurface.X + this.Margin.Left, rectSurface.Y + this.Margin.Top, rectSurface.Height - this.Margin.Top - this.Margin.Bottom, rectSurface.Height - this.Margin.Top - this.Margin.Bottom);
-            switch (this._iconAlignment)
+            var rectSurface = ClientRectangle;
+            var iconSurface = new Rectangle(rectSurface.X + Margin.Left, rectSurface.Y + Margin.Top, rectSurface.Height - Margin.Top - Margin.Bottom, rectSurface.Height - Margin.Top - Margin.Bottom);
+            switch (_iconAlignment)
             {
                 case ContentAlignment.TopLeft:
                 case ContentAlignment.MiddleLeft:
                 case ContentAlignment.BottomLeft:
-                    iconSurface = new Rectangle(rectSurface.X + this.Margin.Left, rectSurface.Y + this.Margin.Top, rectSurface.Height - this.Margin.Top - this.Margin.Bottom, rectSurface.Height - this.Margin.Top - this.Margin.Bottom);
+                    iconSurface = new Rectangle(rectSurface.X + Margin.Left, rectSurface.Y + Margin.Top, rectSurface.Height - Margin.Top - Margin.Bottom, rectSurface.Height - Margin.Top - Margin.Bottom);
                     break;
                 case ContentAlignment.TopCenter:
                 case ContentAlignment.MiddleCenter:
                 case ContentAlignment.BottomCenter:
-                    iconSurface = new Rectangle(rectSurface.X + (this.Width / 2) - ((rectSurface.Height - this.Margin.Top - this.Margin.Bottom) / 2), rectSurface.Y + this.Margin.Top, rectSurface.Height - this.Margin.Top - this.Margin.Bottom, rectSurface.Height - this.Margin.Top - this.Margin.Bottom);
+                    iconSurface = new Rectangle(rectSurface.X + (Width / 2) - ((rectSurface.Height - Margin.Top - Margin.Bottom) / 2), rectSurface.Y + Margin.Top, rectSurface.Height - Margin.Top - Margin.Bottom, rectSurface.Height - Margin.Top - Margin.Bottom);
                     break;
             }
             
 
-            int smoothSize = 2;
-            using (GraphicsPath pathSurface = GetFigurePath(rectSurface, this._borderRadius))
-            using (Pen penSurface = new Pen(this.Parent.BackColor, smoothSize))
+            var smoothSize = 2;
+            using (var pathSurface = GetFigurePath(rectSurface, _borderRadius))
+            using (var penSurface = new Pen(Parent.BackColor, smoothSize))
             {
-                if (this.Checked)
+                if (Checked)
                 {
                     pe.Graphics.FillRectangle(new SolidBrush(Colors.WindowsAccentColorDark), rectSurface);
                 }
                 else
                 {
-                    if (this._hover)
+                    if (_hover)
                     {
                         pe.Graphics.FillRectangle(new SolidBrush(Colors.WindowsAccentColorLight), rectSurface);
                     }
@@ -127,15 +123,15 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                     }
                 }
 
-                if (this._icon != null)
+                if (_icon != null)
                 {
-                    pe.Graphics.DrawImage(this._icon, iconSurface);
+                    pe.Graphics.DrawImage(_icon, iconSurface);
                 }
-                this.Region = new Region(pathSurface);
+                Region = new Region(pathSurface);
                 pe.Graphics.DrawPath(penSurface, pathSurface);
 
-                TextFormatFlags flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak;
-                TextRenderer.DrawText(pe.Graphics, this.Text, Font, ClientRectangle, ForeColor, flags);
+                var flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak;
+                TextRenderer.DrawText(pe.Graphics, Text, Font, ClientRectangle, ForeColor, flags);
             }
 
 

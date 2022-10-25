@@ -1,10 +1,6 @@
-﻿using Newtonsoft.Json;
-using SQLite;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Text;
+﻿using System.Drawing;
+using Newtonsoft.Json;
+using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Icons
 {
@@ -17,17 +13,14 @@ namespace SuchByte.MacroDeck.Icons
         public long IconId { get; set; }
         public string IconBase64
         {
-            get
-            {
-                return this._iconBase64;
-            }
+            get => _iconBase64;
             set
             {
-                this._iconBase64 = value;
+                _iconBase64 = value;
                 try
                 {
-                    this._cachedIconImage = Utils.Base64.GetImageFromBase64(value);
-                    this._iconHex128_64Base64 = Utils.Base64.GetBase64ByteArray((Bitmap)this.IconImage, new Size(128, 64));
+                    _cachedIconImage = Base64.GetImageFromBase64(value);
+                    _iconHex128_64Base64 = Base64.GetBase64ByteArray((Bitmap)IconImage, new Size(128, 64));
                 }
                 catch { }
             }
@@ -39,14 +32,12 @@ namespace SuchByte.MacroDeck.Icons
         {
             get
             {
-                if (this._cachedIconImage != null)
+                if (_cachedIconImage != null)
                 {
-                    return this._cachedIconImage;
+                    return _cachedIconImage;
                 }
-                else
-                {
-                    return Utils.Base64.GetImageFromBase64(this._iconBase64);
-                }
+
+                return Base64.GetImageFromBase64(_iconBase64);
             }
         }
 
@@ -55,11 +46,11 @@ namespace SuchByte.MacroDeck.Icons
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(this._iconHex128_64Base64))
+                if (string.IsNullOrWhiteSpace(_iconHex128_64Base64))
                 {
-                    this._iconHex128_64Base64 = Utils.Base64.GetBase64ByteArray((Bitmap)this.IconImage, new Size(128, 64));
+                    _iconHex128_64Base64 = Base64.GetBase64ByteArray((Bitmap)IconImage, new Size(128, 64));
                 }
-                return this._iconHex128_64Base64;
+                return _iconHex128_64Base64;
             }
         }
 

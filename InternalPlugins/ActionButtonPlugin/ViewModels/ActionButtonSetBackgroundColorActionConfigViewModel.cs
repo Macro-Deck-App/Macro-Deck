@@ -1,15 +1,12 @@
-﻿using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Enums;
+﻿using System;
+using System.Drawing;
+using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Enums;
 using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Models;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
-using System.Text.Json;
 
 namespace SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.ViewModels
 {
@@ -36,8 +33,8 @@ namespace SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.ViewModels
 
         public ActionButtonSetBackgroundColorActionConfigViewModel(PluginAction pluginAction)
         {
-            this._pluginAction = pluginAction;
-            this.Configuration = ActionButtonSetBackgroundColorActionConfigModel.Deserialize(pluginAction.Configuration);
+            _pluginAction = pluginAction;
+            Configuration = ActionButtonSetBackgroundColorActionConfigModel.Deserialize(pluginAction.Configuration);
         }
 
         public bool SaveConfig()
@@ -56,13 +53,13 @@ namespace SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.ViewModels
 
         public void SetConfig()
         {
-            this._pluginAction.ConfigurationSummary = this.Method switch
+            _pluginAction.ConfigurationSummary = Method switch
             {
-                SetBackgroundColorMethod.Fixed => $"#{this.Color.R:X2}{this.Color.G:X2}{this.Color.B:X2}",
+                SetBackgroundColorMethod.Fixed => $"#{Color.R:X2}{Color.G:X2}{Color.B:X2}",
                 SetBackgroundColorMethod.Random => LanguageManager.Strings.Random,
                 _ => "",
             };
-            this._pluginAction.Configuration = Configuration.Serialize();
+            _pluginAction.Configuration = Configuration.Serialize();
         }
     }
 }

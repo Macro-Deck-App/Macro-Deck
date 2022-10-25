@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SuchByte.MacroDeck.Utils
 {
@@ -9,10 +7,10 @@ namespace SuchByte.MacroDeck.Utils
 
         public static string GetWindowsVersionName()
         {
-            OperatingSystem os = Environment.OSVersion;
-            Version version = os.Version;
+            var os = Environment.OSVersion;
+            var version = os.Version;
 
-            string versionString = "";
+            var versionString = "";
 
             switch (version.Major)
             {
@@ -47,7 +45,7 @@ namespace SuchByte.MacroDeck.Utils
                     break;
             }
 
-            return "Windows " + versionString + " build " + os.Version.Build + (Environment.Is64BitOperatingSystem == true ? " 64 bit" : " 32 bit");
+            return "Windows " + versionString + " build " + os.Version.Build + (Environment.Is64BitOperatingSystem ? " 64 bit" : " 32 bit");
         }
 
     }

@@ -1,22 +1,17 @@
-﻿using GiphyDotNet.Manager;
-using GiphyDotNet.Model.Parameters;
-using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Plugins;
-using SuchByte.MacroDeck.Profiles;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Net;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using GiphyDotNet.Manager;
+using GiphyDotNet.Model.Parameters;
+using GiphyDotNet.Model.Results;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Profiles;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
@@ -27,14 +22,14 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         public MemoryStream DownloadedGifStream;
 
-        Dictionary<WebClient, string> _webClients = new Dictionary<WebClient, string>();
+        Dictionary<WebClient, string> _webClients = new();
 
         public GiphySelector()
         {
             InitializeComponent();
-            this.btnTrending.Text = Language.LanguageManager.Strings.Trending;
-            this.lblDownloading.Text = Language.LanguageManager.Strings.Downloading;
-            this.btnOk.Text = Language.LanguageManager.Strings.Ok;
+            btnTrending.Text = LanguageManager.Strings.Trending;
+            lblDownloading.Text = LanguageManager.Strings.Downloading;
+            btnOk.Text = LanguageManager.Strings.Ok;
             btnPreview.Radius = ProfileManager.CurrentProfile.ButtonRadius;
             giphy = new Giphy(Credentials.Credentials.GiphyToken);
         }
@@ -67,12 +62,12 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         {
             try
             {
-                var gifResult = await giphy.TrendingGifs(new TrendingParameter()
+                var gifResult = await giphy.TrendingGifs(new TrendingParameter
                 {
-                    Limit = this.limit
+                    Limit = limit
                 });
 
-                this.Invoke(new Action(() =>
+                Invoke(() =>
                 {
                     try
                     {
@@ -81,9 +76,9 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                             roundedButton.Click -= ButtonClicked;
                             roundedButton.Dispose();
                         }
-                        this.imagesPanel.Controls.Clear();
+                        imagesPanel.Controls.Clear();
                     } catch { }
-                }));
+                });
 
                 AddGifs(gifResult);
             } catch { }
@@ -94,15 +89,15 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             try
             {
                 if (query.Length < 1) return;
-                var searchParameter = new SearchParameter()
+                var searchParameter = new SearchParameter
                 {
                     Query = searchBox.Text,
-                    Limit = this.limit,
+                    Limit = limit,
                 };
 
                 var gifResult = await giphy.GifSearch(searchParameter);
 
-                this.Invoke(new Action(() =>
+                Invoke(() =>
                 {
                     try
                     {
@@ -111,23 +106,23 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                             roundedButton.Click -= ButtonClicked;
                             roundedButton.Dispose();
                         }
-                        this.imagesPanel.Controls.Clear();
+                        imagesPanel.Controls.Clear();
                     } catch { }
-                }));
+                });
 
                 AddGifs(gifResult);
             } catch { }
         }
 
-        private void AddGifs(GiphyDotNet.Model.Results.GiphySearchResult gifResult)
+        private void AddGifs(GiphySearchResult gifResult)
         {
-            if (this.IsDisposed) return;
-            for (int i = 0; i < gifResult.Data.Length; i++)
+            if (IsDisposed) return;
+            for (var i = 0; i < gifResult.Data.Length; i++)
             {
-                WebClient client = new WebClient();
+                var client = new WebClient();
                 client.OpenReadCompleted += OnOpenReadGifResultComplete;
                 client.OpenReadAsync(new Uri(gifResult.Data[i].Images.FixedWidthDownsampled.Url));
-                this._webClients.Add(client, (string)gifResult.Data[i].Images.Original.Url.ToString());
+                _webClients.Add(client, gifResult.Data[i].Images.Original.Url);
             }
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -136,7 +131,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         private void OnOpenReadGifResultComplete(object sender, OpenReadCompletedEventArgs e)
         {
-            WebClient client = sender as WebClient;   
+            var client = sender as WebClient;   
 
             Image image = null;
 
@@ -145,12 +140,12 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                 image = Image.FromStream(stream);
             }
 
-            if (this.IsDisposed)
+            if (IsDisposed)
             {
                 return;
             }
-            this.Invoke(new Action(() => {
-                RoundedButton roundedButton = new RoundedButton
+            Invoke(() => {
+                var roundedButton = new RoundedButton
                 {
                     Size = new Size(100, 100),
                     BackColor = Color.FromArgb(35, 35, 35),
@@ -168,10 +163,10 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             
                 client.OpenReadCompleted -= OnOpenReadGifResultComplete;
                 client.Dispose();
-                this._webClients.Remove(client);
+                _webClients.Remove(client);
             
-                this.imagesPanel.Controls.Add(roundedButton);
-            }));
+                imagesPanel.Controls.Add(roundedButton);
+            });
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
@@ -181,27 +176,27 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         private void ButtonClicked(object sender, EventArgs e)
         {
-            RoundedButton selected = (RoundedButton)sender;
-            this.btnPreview.BackgroundImage = selected.Image;
-            this.btnPreview.Tag = selected.Tag;
+            var selected = (RoundedButton)sender;
+            btnPreview.BackgroundImage = selected.Image;
+            btnPreview.Tag = selected.Tag;
         }
 
         private void OnDownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
-            if (this.IsDisposed) return;
-            this.Invoke(new Action(() =>
+            if (IsDisposed) return;
+            Invoke(() =>
             {
-                this.btnOk.Progress = e.ProgressPercentage;
-            }));
+                btnOk.Progress = e.ProgressPercentage;
+            });
         }
 
         private void OnOpenReadComplete(object sender, OpenReadCompletedEventArgs e)
         {
-            if (this.IsDisposed) return;
+            if (IsDisposed) return;
             Cursor.Current = Cursors.Default;
             try
             {
-                this.DownloadedGifStream = new MemoryStream();
+                DownloadedGifStream = new MemoryStream();
                 e.Result.CopyTo(DownloadedGifStream);
                 /*using (FileStream fs = File.Create(Path.Combine(MacroDeck.TempDirectoryPath, "giphy")))
                 {
@@ -218,20 +213,20 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
                 MacroDeckLogger.Error("Error while opening GIPHY icon: " + ex.Message + Environment.NewLine + ex.StackTrace);
             }
 
-            this.Close();
+            Close();
         }
 
         private void BtnOk_Click(object sender, EventArgs e)
         {
             Task.Run(() => SpinnerDialog.SetVisisble(true, this));
-            this.lblDownloading.Visible = true;
-            this.btnOk.Enabled = false;
-            if (this.btnPreview.Tag != null)
+            lblDownloading.Visible = true;
+            btnOk.Enabled = false;
+            if (btnPreview.Tag != null)
             {
                 MacroDeckLogger.Info("Downloading GIPHY icon...");
                 try
                 {
-                    WebClient client = new WebClient();
+                    var client = new WebClient();
                     client.OpenReadAsync(new Uri(btnPreview.Tag.ToString()));
                     client.DownloadProgressChanged += OnDownloadProgressChanged;
                     client.OpenReadCompleted += OnOpenReadComplete;

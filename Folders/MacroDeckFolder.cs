@@ -1,8 +1,6 @@
-﻿using SuchByte.MacroDeck.Device;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.Json.Serialization;
 
 namespace SuchByte.MacroDeck.Folders
@@ -11,7 +9,7 @@ namespace SuchByte.MacroDeck.Folders
     {
         private IntPtr _bufferPtr;
         public int BUFFER_SIZE = 1024 * 1024; // 1 MB
-        private bool _disposed = false;
+        private bool _disposed;
 
         public MacroDeckFolder()
         {
@@ -28,7 +26,7 @@ namespace SuchByte.MacroDeck.Folders
                 // Free any other managed objects here.
             }
 
-            foreach (ActionButton.ActionButton actionButton in this.ActionButtons)
+            foreach (var actionButton in ActionButtons)
             {
                 actionButton.Dispose();
             }
@@ -50,20 +48,14 @@ namespace SuchByte.MacroDeck.Folders
         }
 
         [JsonIgnore]
-        public bool IsRootFolder
-        {
-            get
-            {
-                return this.DisplayName.Equals("*Root*");
-            }
-        }
+        public bool IsRootFolder => DisplayName.Equals("*Root*");
 
         public string FolderId { get; set; }
         public string DisplayName { get; set; }
-        public List<string> Childs { get; set; } = new List<string>();
+        public List<string> Childs { get; set; } = new();
 
         public List<ActionButton.ActionButton> ActionButtons { get; set; }
-        public List<string> ApplicationsFocusDevices { get; set; } = new List<string>();
+        public List<string> ApplicationsFocusDevices { get; set; } = new();
         public string ApplicationToTrigger { get; set; } = "";
     }
 }

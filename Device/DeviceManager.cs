@@ -1,21 +1,21 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Media;
+using System.Windows.Forms;
+using Newtonsoft.Json;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.Device
 {
     public class DeviceManager
     {
 
-        private static List<MacroDeckDevice> _macroDeckDevices = new List<MacroDeckDevice>();
+        private static List<MacroDeckDevice> _macroDeckDevices = new();
 
         public static event EventHandler OnDevicesChange;
 
@@ -33,7 +33,7 @@ namespace SuchByte.MacroDeck.Device
 
         public static void SaveKnownDevices()
         {
-            JsonSerializer serializer = new JsonSerializer
+            var serializer = new JsonSerializer
             {
                 TypeNameHandling = TypeNameHandling.Auto,
                 NullValueHandling = NullValueHandling.Ignore,
@@ -41,16 +41,13 @@ namespace SuchByte.MacroDeck.Device
 
             try
             {
-                using (StreamWriter sw = new StreamWriter(MacroDeck.DevicesFilePath))
+                using (var sw = new StreamWriter(MacroDeck.DevicesFilePath))
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {
                     serializer.Serialize(writer, _macroDeckDevices);
                 }
 
-                if (OnDevicesChange != null)
-                {
-                    OnDevicesChange(null, EventArgs.Empty);
-                }
+                OnDevicesChange?.Invoke(null, EventArgs.Empty);
             }
             catch (Exception ex)
             {
@@ -69,7 +66,7 @@ namespace SuchByte.MacroDeck.Device
 
         public static bool IsKnownDevice(string clientId)
         {
-            foreach (MacroDeckDevice macroDeckDevice in _macroDeckDevices)
+            foreach (var macroDeckDevice in _macroDeckDevices)
             {
                 if (macroDeckDevice.ClientId.Equals(clientId))
                 {
@@ -81,7 +78,7 @@ namespace SuchByte.MacroDeck.Device
 
         public static MacroDeckDevice GetMacroDeckDevice(string clientId)
         {
-            foreach (MacroDeckDevice macroDeckDevice in _macroDeckDevices)
+            foreach (var macroDeckDevice in _macroDeckDevices)
             {
                 if (macroDeckDevice.ClientId.Equals(clientId))
                 {
@@ -93,7 +90,7 @@ namespace SuchByte.MacroDeck.Device
 
         public static MacroDeckDevice GetMacroDeckDeviceByDisplayName(string displayName)
         {
-            foreach (MacroDeckDevice macroDeckDevice in _macroDeckDevices)
+            foreach (var macroDeckDevice in _macroDeckDevices)
             {
                 if (macroDeckDevice.DisplayName.Equals(displayName))
                 {
@@ -163,95 +160,86 @@ namespace SuchByte.MacroDeck.Device
             {
                 if (IsKnownDevice(macroDeckClient.ClientId))
                 {
-                    MacroDeckDevice macroDeckDevice = GetMacroDeckDevice(macroDeckClient.ClientId);
+                    var macroDeckDevice = GetMacroDeckDevice(macroDeckClient.ClientId);
                     if (macroDeckDevice.Blocked)
                     {
                         return false;
                     }
-                    else
+
+                    macroDeckDevice.ClientId = macroDeckClient.ClientId;
+                    macroDeckDevice.DeviceType = macroDeckClient.DeviceType;
+                    return true;
+                }
+
+                Form mainForm = null;
+                var dialogResult = false;
+                foreach (Form form in Application.OpenForms)
+                {
+                    if (form.Name.Equals("MainWindow"))
                     {
-                        macroDeckDevice.ClientId = macroDeckClient.ClientId;
-                        macroDeckDevice.DeviceType = macroDeckClient.DeviceType;
-                        return true;
+                        mainForm = form;
                     }
+                }
+                if (mainForm != null && mainForm.IsHandleCreated && !mainForm.IsDisposed)
+                {
+                    mainForm.Invoke(() =>
+                    {
+                        dialogResult = ShowConnectionDialog(macroDeckClient);
+                    });
                 }
                 else
                 {
-                    Form mainForm = null;
-                    bool dialogResult = false;
-                    foreach (Form form in Application.OpenForms)
-                    {
-                        if (form.Name.Equals("MainWindow"))
-                        {
-                            mainForm = form;
-                        }
-                    }
-                    if (mainForm != null && mainForm.IsHandleCreated && !mainForm.IsDisposed)
-                    {
-                        mainForm.Invoke(new Action(() =>
-                        {
-                            dialogResult = ShowConnectionDialog(macroDeckClient);
-                        }));
-                    }
-                    else
-                    {
-                        dialogResult = ShowConnectionDialog(macroDeckClient);
-                    }
-                    if (dialogResult == true)
-                    {
-                        MacroDeckDevice macroDeckDevice = new MacroDeckDevice
-                        {
-                            ClientId = macroDeckClient.ClientId,
-                            DisplayName = "Client " + macroDeckClient.ClientId,
-                            ProfileId = ProfileManager.Profiles.FirstOrDefault().ProfileId,
-                        };
-                        AddKnownDevice(macroDeckDevice);
-                        macroDeckDevice.ClientId = macroDeckClient.ClientId;
-                        macroDeckDevice.DeviceType = macroDeckClient.DeviceType;
-                    }
-                    return dialogResult;
+                    dialogResult = ShowConnectionDialog(macroDeckClient);
                 }
-            }
-            else
-            {
-                if (!IsKnownDevice(macroDeckClient.ClientId))
+                if (dialogResult)
                 {
-                    MacroDeckDevice macroDeckDevice = new MacroDeckDevice
+                    var macroDeckDevice = new MacroDeckDevice
                     {
                         ClientId = macroDeckClient.ClientId,
                         DisplayName = "Client " + macroDeckClient.ClientId,
-                        DeviceType = macroDeckClient.DeviceType
+                        ProfileId = ProfileManager.Profiles.FirstOrDefault().ProfileId,
                     };
                     AddKnownDevice(macroDeckDevice);
+                    macroDeckDevice.ClientId = macroDeckClient.ClientId;
+                    macroDeckDevice.DeviceType = macroDeckClient.DeviceType;
                 }
-                return true;
+                return dialogResult;
             }
+
+            if (!IsKnownDevice(macroDeckClient.ClientId))
+            {
+                var macroDeckDevice = new MacroDeckDevice
+                {
+                    ClientId = macroDeckClient.ClientId,
+                    DisplayName = "Client " + macroDeckClient.ClientId,
+                    DeviceType = macroDeckClient.DeviceType
+                };
+                AddKnownDevice(macroDeckDevice);
+            }
+            return true;
         }
 
         private static bool ShowConnectionDialog(MacroDeckClient macroDeckClient)
         {
-            System.Media.SystemSounds.Exclamation.Play();
+            SystemSounds.Exclamation.Play();
             using var newConnectionDialog = new NewConnectionDialog(macroDeckClient);
             if (newConnectionDialog.ShowDialog() == DialogResult.Yes)
             {
                 return true;
             }
-            else
-            {
-                macroDeckClient?.SocketConnection?.Close();
-                if (newConnectionDialog.Blocked)
-                {
-                    MacroDeckDevice macroDeckDevice = new MacroDeckDevice
-                    {
-                        ClientId = macroDeckClient.ClientId,
-                        DisplayName = "Client " + macroDeckClient.ClientId,
-                        Blocked = true
-                    };
-                    AddKnownDevice(macroDeckDevice);
-                }
-                return false;
 
+            macroDeckClient?.SocketConnection?.Close();
+            if (newConnectionDialog.Blocked)
+            {
+                var macroDeckDevice = new MacroDeckDevice
+                {
+                    ClientId = macroDeckClient.ClientId,
+                    DisplayName = "Client " + macroDeckClient.ClientId,
+                    Blocked = true
+                };
+                AddKnownDevice(macroDeckDevice);
             }
+            return false;
         }
 
     }

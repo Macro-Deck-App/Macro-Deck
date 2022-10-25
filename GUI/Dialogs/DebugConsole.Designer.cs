@@ -1,4 +1,8 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
     partial class DebugConsole
@@ -6,7 +10,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -355,19 +359,19 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         #endregion
 
-        private System.Windows.Forms.RichTextBox logOutput;
-        private CustomControls.ButtonPrimary btnClear;
-        private CustomControls.ButtonPrimary btnRestartMacroDeck;
-        private CustomControls.ButtonPrimary btnExit;
-        private CustomControls.ButtonPrimary btnOpenUser;
-        private System.Windows.Forms.Label label1;
-        private CustomControls.RoundedComboBox logLevel;
-        private CustomControls.ButtonPrimary btnExportOutput;
-        private System.Windows.Forms.Label label3;
-        private CustomControls.RoundedTextBox filter;
-        private CustomControls.ButtonPrimary btnAddFilter;
-        private System.Windows.Forms.ContextMenuStrip filtersList;
-        private CustomControls.ButtonPrimary btnRemoveFilters;
-        private CustomControls.ButtonPrimary btnTestNotification;
+        private RichTextBox logOutput;
+        private ButtonPrimary btnClear;
+        private ButtonPrimary btnRestartMacroDeck;
+        private ButtonPrimary btnExit;
+        private ButtonPrimary btnOpenUser;
+        private Label label1;
+        private RoundedComboBox logLevel;
+        private ButtonPrimary btnExportOutput;
+        private Label label3;
+        private RoundedTextBox filter;
+        private ButtonPrimary btnAddFilter;
+        private ContextMenuStrip filtersList;
+        private ButtonPrimary btnRemoveFilters;
+        private ButtonPrimary btnTestNotification;
     }
 }

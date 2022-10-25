@@ -1,4 +1,6 @@
 ﻿
+using System.ComponentModel;
+using System.Windows.Forms;
 using SuchByte.MacroDeck.GUI.CustomControls;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs
@@ -8,7 +10,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -221,14 +223,14 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
 
         #endregion
 
-        private System.Windows.Forms.FlowLayoutPanel imagesPanel;
+        private FlowLayoutPanel imagesPanel;
         private RoundedTextBox searchBox;
-        private CustomControls.ButtonPrimary btnSearch;
-        private CustomControls.ButtonPrimary btnTrending;
-        private CustomControls.ButtonPrimary btnOk;
-        private CustomControls.RoundedButton btnPreview;
-        private System.Windows.Forms.PictureBox pictureBox2;
-        private System.Windows.Forms.PictureBox pictureBox3;
-        private System.Windows.Forms.Label lblDownloading;
+        private ButtonPrimary btnSearch;
+        private ButtonPrimary btnTrending;
+        private ButtonPrimary btnOk;
+        private RoundedButton btnPreview;
+        private PictureBox pictureBox2;
+        private PictureBox pictureBox3;
+        private Label lblDownloading;
     }
 }

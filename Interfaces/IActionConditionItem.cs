@@ -1,7 +1,5 @@
-﻿using SuchByte.MacroDeck.Plugins;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
+using SuchByte.MacroDeck.Plugins;
 
 namespace SuchByte.MacroDeck.Interfaces
 {

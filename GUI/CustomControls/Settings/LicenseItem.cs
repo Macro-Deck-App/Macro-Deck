@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
@@ -16,19 +12,19 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void LicenseItem_Load(object sender, EventArgs e)
         {
-            this.lblName.Text = this._name;
-            this.lblAuthor.Text = this._author;
+            lblName.Text = _name;
+            lblAuthor.Text = _author;
 
-            this.MouseEnter += this.MouseEnterEvent;
-            this.MouseLeave += this.MouseLeaveEvent;
+            MouseEnter += MouseEnterEvent;
+            MouseLeave += MouseLeaveEvent;
         }
 
         public LicenseItem(string name, string license, string author, string repository)
         {
-            this._name = name;
-            this._license = license;
-            this._author = author;
-            this._repository = repository;
+            _name = name;
+            _license = license;
+            _author = author;
+            _repository = repository;
             InitializeComponent();
         }
 
@@ -36,7 +32,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             Process.Start(new ProcessStartInfo
             {
-                FileName = this._license,
+                FileName = _license,
                 UseShellExecute = true
             });
         }
@@ -45,21 +41,21 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             Process.Start(new ProcessStartInfo
             {
-                FileName = this._repository,
+                FileName = _repository,
                 UseShellExecute = true
             });
         }
 
         private void MouseEnterEvent(object sender, EventArgs e)
         {
-            this.BackColor = Color.FromArgb(65, 65, 65);
+            BackColor = Color.FromArgb(65, 65, 65);
         }
 
         private void MouseLeaveEvent(object sender, EventArgs e)
         {
-            if (!this.ClientRectangle.Contains(this.PointToClient(Cursor.Position)))
+            if (!ClientRectangle.Contains(PointToClient(Cursor.Position)))
             {
-                this.BackColor = Color.FromArgb(45, 45, 45);
+                BackColor = Color.FromArgb(45, 45, 45);
             }
 
         }

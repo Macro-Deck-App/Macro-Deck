@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
@@ -16,7 +12,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         string _placeHolderText;
         public string PlaceHolderText
         {
-            get { return _placeHolderText; }
+            get => _placeHolderText;
             set
             {
                 _placeHolderText = value;
@@ -26,9 +22,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         public new string Text
         {
-            get => (isPlaceHolder || base.Text == this._placeHolderText) ? string.Empty : base.Text;
+            get => (isPlaceHolder || base.Text == _placeHolderText) ? string.Empty : base.Text;
             set {
-                if (value != this._placeHolderText && value.Length > 0 && value != "")
+                if (value != _placeHolderText && value.Length > 0 && value != "")
                 {
                     RemovePlaceHolder();
                 } else if (value.Length == 0 || value != "")
@@ -48,8 +44,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             if (string.IsNullOrEmpty(base.Text))
             {
                 base.Text = PlaceHolderText;
-                this.ForeColor = Color.Gray;
-                this.Font = new Font(this.Font, FontStyle.Italic);
+                ForeColor = Color.Gray;
+                Font = new Font(Font, FontStyle.Italic);
                 isPlaceHolder = true;
             }
         }
@@ -60,8 +56,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             if (isPlaceHolder)
             {
                 base.Text = "";
-                this.ForeColor = Color.White;
-                this.Font = new Font(this.Font, FontStyle.Regular);
+                ForeColor = Color.White;
+                Font = new Font(Font, FontStyle.Regular);
                 isPlaceHolder = false;
             }
         }

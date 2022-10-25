@@ -1,11 +1,7 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
+﻿using System;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Language;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
@@ -17,43 +13,43 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         public IconImportQuality(bool gif = false)
         {
             InitializeComponent();
-            this.SuspendLayout();
-            this.lblInfo.Text = Language.LanguageManager.Strings.IconImportQualityInfo;
-            this.qualityOriginal.Text = Language.LanguageManager.Strings.Original;
-            this.qualityHigh.Text = Language.LanguageManager.Strings.High350px;
-            this.qualityNormal.Text = Language.LanguageManager.Strings.Normal200px;
-            this.qualityLow.Text = Language.LanguageManager.Strings.Low150px;
-            this.qualityLowest.Text = Language.LanguageManager.Strings.Lowest100px;
-            this.btnOk.Text = Language.LanguageManager.Strings.Ok;
+            SuspendLayout();
+            lblInfo.Text = LanguageManager.Strings.IconImportQualityInfo;
+            qualityOriginal.Text = LanguageManager.Strings.Original;
+            qualityHigh.Text = LanguageManager.Strings.High350px;
+            qualityNormal.Text = LanguageManager.Strings.Normal200px;
+            qualityLow.Text = LanguageManager.Strings.Low150px;
+            qualityLowest.Text = LanguageManager.Strings.Lowest100px;
+            btnOk.Text = LanguageManager.Strings.Ok;
             if (gif)
             {
-                this.qualityLowest.Checked = true;
+                qualityLowest.Checked = true;
             }
-            this.ResumeLayout();
+            ResumeLayout();
         }
 
         private void BtnOk_Click(object sender, EventArgs e)
         {
-            if (this.qualityOriginal.Checked)
+            if (qualityOriginal.Checked)
             {
-                this.Pixels = -1;
-            } else if (this.qualityHigh.Checked)
+                Pixels = -1;
+            } else if (qualityHigh.Checked)
             {
-                this.Pixels = 350;
+                Pixels = 350;
             }
-            else if (this.qualityNormal.Checked)
+            else if (qualityNormal.Checked)
             {
-                this.Pixels = 250;
+                Pixels = 250;
             }
-            else if (this.qualityLow.Checked)
+            else if (qualityLow.Checked)
             {
-                this.Pixels = 150;
+                Pixels = 150;
             }
-            else if (this.qualityLowest.Checked)
+            else if (qualityLowest.Checked)
             {
-                this.Pixels = 100;
+                Pixels = 100;
             }
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
     }
 }

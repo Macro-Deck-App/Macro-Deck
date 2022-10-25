@@ -1,11 +1,5 @@
 ﻿using Newtonsoft.Json;
-using SuchByte.MacroDeck.Model;
-using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
-using SuchByte.MacroDeck.Server.DeviceMessage;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SuchByte.MacroDeck.Device
 {
@@ -18,7 +12,7 @@ namespace SuchByte.MacroDeck.Device
 
         [JsonIgnore]
         public bool Available { get {
-                MacroDeckClient macroDeckClient = MacroDeckServer.GetMacroDeckClient(this.ClientId);
+                var macroDeckClient = MacroDeckServer.GetMacroDeckClient(ClientId);
                 if (macroDeckClient != null && macroDeckClient.SocketConnection != null && macroDeckClient.SocketConnection.IsAvailable)
                 {
                     return true;
@@ -31,7 +25,7 @@ namespace SuchByte.MacroDeck.Device
 
         public string ProfileId { get; set; }
 
-        public DeviceConfiguration Configuration { get; set; } = new DeviceConfiguration();
+        public DeviceConfiguration Configuration { get; set; } = new();
 
         public DeviceType DeviceType { get; set; }
 

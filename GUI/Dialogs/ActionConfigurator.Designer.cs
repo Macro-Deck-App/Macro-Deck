@@ -1,4 +1,6 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
 
 namespace SuchByte.MacroDeck.GUI
 {
@@ -7,7 +9,7 @@ namespace SuchByte.MacroDeck.GUI
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -186,14 +188,14 @@ namespace SuchByte.MacroDeck.GUI
         }
 
         #endregion
-        private CustomControls.ButtonPrimary btnApply;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label labelDescription;
-        private System.Windows.Forms.Panel configurationPanel;
-        private System.Windows.Forms.Label lblSelectToBegin;
+        private ButtonPrimary btnApply;
+        private Label label2;
+        private Label labelDescription;
+        private Panel configurationPanel;
+        private Label lblSelectToBegin;
         private RoundedTextBox pluginSearch;
-        private System.Windows.Forms.FlowLayoutPanel pluginsList;
-        private System.Windows.Forms.PictureBox selectedPluginIcon;
-        private System.Windows.Forms.Label lblSelectedActionName;
+        private FlowLayoutPanel pluginsList;
+        private PictureBox selectedPluginIcon;
+        private Label lblSelectedActionName;
     }
 }

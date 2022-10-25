@@ -1,15 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
-using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Model;
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System;
 using System.IO.Pipes;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
+using SuchByte.MacroDeck.Logging;
 
 namespace SuchByte.MacroDeck.Pipes
 {
@@ -27,10 +20,10 @@ namespace SuchByte.MacroDeck.Pipes
                 using (var pipeServer = (NamedPipeServerStream)iar.AsyncState)
                 {
                     pipeServer.EndWaitForConnection(iar);
-                    byte[] buffer = new byte[255];
+                    var buffer = new byte[255];
                     pipeServer.Read(buffer, 0, 255);
-                    string stringData = Encoding.ASCII.GetString(buffer).Trim('\0');
-                    Thread t = new Thread(new ThreadStart(() => PipeMessage.Invoke(stringData)));
+                    var stringData = Encoding.ASCII.GetString(buffer).Trim('\0');
+                    var t = new Thread(() => PipeMessage.Invoke(stringData));
                     t.SetApartmentState(ApartmentState.STA);
                     t.Start();
                     pipeServer.Close();
@@ -39,7 +32,6 @@ namespace SuchByte.MacroDeck.Pipes
             }
             catch
             {
-                return;
             }
         }
 
@@ -47,9 +39,9 @@ namespace SuchByte.MacroDeck.Pipes
         {
             try
             {
-                MacroDeckLogger.Trace(typeof(MacroDeckPipeServer), $"Spawning new server stream...");
-                NamedPipeServerStream pipeServer = new NamedPipeServerStream("macrodeck", PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
-                pipeServer.BeginWaitForConnection(new AsyncCallback(WaitForConnectionCallBack), pipeServer);
+                MacroDeckLogger.Trace(typeof(MacroDeckPipeServer), "Spawning new server stream...");
+                var pipeServer = new NamedPipeServerStream("macrodeck", PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+                pipeServer.BeginWaitForConnection(WaitForConnectionCallBack, pipeServer);
             }
             catch (Exception ex)
             {
@@ -59,9 +51,9 @@ namespace SuchByte.MacroDeck.Pipes
 
         public static void Initialize()
         {
-            MacroDeckLogger.Info(typeof(MacroDeckPipeServer), $"Initializing pipe server");
+            MacroDeckLogger.Info(typeof(MacroDeckPipeServer), "Initializing pipe server");
             SpawnServerStream();
-            MacroDeckLogger.Info(typeof(MacroDeckPipeServer), $"Initializing pipe server complete");
+            MacroDeckLogger.Info(typeof(MacroDeckPipeServer), "Initializing pipe server complete");
         }
     }
 }

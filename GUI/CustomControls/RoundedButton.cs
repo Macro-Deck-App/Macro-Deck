@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Reflection;
-using System.Text;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.Properties;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
@@ -14,14 +11,17 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         public int Row { get; set; }
         public int Column { get; set; }
         public int Radius { get; set; } = 40;
-        public Image ForegroundImage { get { return this._foregroundImage; } set { this._foregroundImage = value; this.Invalidate(); } }
-        private Image _foregroundImage = null;
+        public Image ForegroundImage { get => _foregroundImage;
+            set { _foregroundImage = value; Invalidate(); } }
+        private Image _foregroundImage;
 
-        public bool ShowGIFIndicator { get { return this._gifIndicator; } set { this._gifIndicator = value; this.Invalidate(); } }
-        private bool _gifIndicator = false;
+        public bool ShowGIFIndicator { get => _gifIndicator;
+            set { _gifIndicator = value; Invalidate(); } }
+        private bool _gifIndicator;
 
-        public bool ShowKeyboardHotkeyIndicator { get { return this._keyboardHotkeyIndicator; } set { this._keyboardHotkeyIndicator = value; this.Invalidate(); } }
-        private bool _keyboardHotkeyIndicator = false;
+        public bool ShowKeyboardHotkeyIndicator { get => _keyboardHotkeyIndicator;
+            set { _keyboardHotkeyIndicator = value; Invalidate(); } }
+        private bool _keyboardHotkeyIndicator;
 
         public string KeyboardHotkeyIndicatorText = "";
 
@@ -29,32 +29,32 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         public RoundedButton()
         {
-            this.SizeMode = PictureBoxSizeMode.StretchImage;
-            this.MouseEnter += this.OnMouseEnter;
-            this.MouseLeave += this.OnMouseLeave;
-            this.Padding = Padding.Empty;
+            SizeMode = PictureBoxSizeMode.StretchImage;
+            MouseEnter += OnMouseEnter;
+            MouseLeave += OnMouseLeave;
+            Padding = Padding.Empty;
         }
 
         private void OnMouseEnter(object sender, EventArgs e)
         {
-            this.Invalidate();
+            Invalidate();
             try
             {
-                this.Image = this.BackgroundImage;
+                Image = BackgroundImage;
             } catch { }
         }
 
         private void OnMouseLeave(object sender, EventArgs e)
         {
-            this.Invalidate();
-            this.Image = null;
+            Invalidate();
+            Image = null;
         }
 
 
         private GraphicsPath GetFigurePath(Rectangle rect, float radius)
         {
-            GraphicsPath path = new GraphicsPath();
-            float curveSize = radius;
+            var path = new GraphicsPath();
+            var curveSize = radius;
             path.StartFigure();
             path.AddArc(rect.X, rect.Y, curveSize, curveSize, 180, 90);
             path.AddArc(rect.Right - curveSize, rect.Y, curveSize, curveSize, 270, 90);
@@ -70,21 +70,21 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
             pe.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-            int radius = (int)(((float)this.Radius / 100.0f) * (float)this.Height);
+            var radius = (int)((Radius / 100.0f) * Height);
 
-            Color borderColor = Color.FromArgb(35, 35, 35);
-            int borderSize = 6;
-            int smoothSize = 4;
-            Rectangle rectSurface = this.ClientRectangle;
+            var borderColor = Color.FromArgb(35, 35, 35);
+            var borderSize = 6;
+            var smoothSize = 4;
+            var rectSurface = ClientRectangle;
 
             if (radius > 2) //Rounded button
             {
                 pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                using (GraphicsPath pathSurface = GetFigurePath(rectSurface, radius))
-                using (Pen penSurface = new Pen(this.Parent.BackColor, smoothSize))
+                using (var pathSurface = GetFigurePath(rectSurface, radius))
+                using (var penSurface = new Pen(Parent.BackColor, smoothSize))
                 {
                     pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                    this.Region = new Region(pathSurface);
+                    Region = new Region(pathSurface);
                     pe.Graphics.DrawPath(penSurface, pathSurface);
                     if (borderSize >= 1)
                         pe.Graphics.DrawPath(new Pen(borderColor, borderSize), pathSurface);
@@ -93,36 +93,36 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             else //Normal button
             {
                 pe.Graphics.SmoothingMode = SmoothingMode.None;
-                this.Region = new Region(rectSurface);
+                Region = new Region(rectSurface);
                 if (borderSize >= 1)
                 {
-                    using (Pen penBorder = new Pen(borderColor, borderSize))
+                    using (var penBorder = new Pen(borderColor, borderSize))
                     {
-                        pe.Graphics.DrawRectangle(penBorder, 0, 0, this.Width, this.Height);
+                        pe.Graphics.DrawRectangle(penBorder, 0, 0, Width, Height);
                     }
                 }
             }
 
-            Rectangle rect = new Rectangle(0, 0, this.Width, this.Height);
+            var rect = new Rectangle(0, 0, Width, Height);
 
-            if (this._foregroundImage != null)
+            if (_foregroundImage != null)
             {
-                pe.Graphics.DrawImage(this._foregroundImage, rect);
+                pe.Graphics.DrawImage(_foregroundImage, rect);
             }
 
-            if (this._gifIndicator)
+            if (_gifIndicator)
             {
-                Rectangle gifRect = new Rectangle(this.Width - radius / 2 - 27, 2, 25, 14);
-                pe.Graphics.DrawImage(Properties.Resources.gif, gifRect);
+                var gifRect = new Rectangle(Width - radius / 2 - 27, 2, 25, 14);
+                pe.Graphics.DrawImage(Resources.gif, gifRect);
             }
 
-            if (this._keyboardHotkeyIndicator)
+            if (_keyboardHotkeyIndicator)
             {
-                Rectangle hotkeyIndicatorBackground = new Rectangle(0, this.Height / 2 - 12, this.Width, 24);
-                SolidBrush hotkeyIndicatorBackgroundBrush = new SolidBrush(Color.FromArgb(128, 0, 89, 184));
+                var hotkeyIndicatorBackground = new Rectangle(0, Height / 2 - 12, Width, 24);
+                var hotkeyIndicatorBackgroundBrush = new SolidBrush(Color.FromArgb(128, 0, 89, 184));
                 pe.Graphics.FillRectangle(hotkeyIndicatorBackgroundBrush, hotkeyIndicatorBackground);
-                Rectangle keyboardRect = new Rectangle(5, this.Height / 2 - 10, 20, 20);
-                pe.Graphics.DrawImage(Properties.Resources.Keyboard, keyboardRect);
+                var keyboardRect = new Rectangle(5, Height / 2 - 10, 20, 20);
+                pe.Graphics.DrawImage(Resources.Keyboard, keyboardRect);
                 using (var gp = new GraphicsPath())
                 using (var sf = new StringFormat
                 {
@@ -132,12 +132,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
                 })
                 using (var font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point))
                 {
-                    Rectangle r = new Rectangle(30, this.Height / 2 - 12, this.Width - 35, 24);
-                    Pen p = new Pen(Color.Black, 1)
+                    var r = new Rectangle(30, Height / 2 - 12, Width - 35, 24);
+                    var p = new Pen(Color.Black, 1)
                     {
                         LineJoin = LineJoin.Round
                     };
-                    gp.AddString(this.KeyboardHotkeyIndicatorText, font.FontFamily, (int)font.Style, font.Size, r, sf);
+                    gp.AddString(KeyboardHotkeyIndicatorText, font.FontFamily, (int)font.Style, font.Size, r, sf);
                     pe.Graphics.DrawPath(p, gp);
                     pe.Graphics.FillPath(Brushes.White, gp);
                 }

@@ -1,14 +1,11 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
+﻿using System;
+using System.Drawing;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Enums;
 using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.ViewModels;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Views
 {
@@ -18,51 +15,51 @@ namespace SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Views
 
         public ActionButtonSetBackgroundColorActionConfigView(PluginAction pluginAction)
         {
-            this._viewModel = new ActionButtonSetBackgroundColorActionConfigViewModel(pluginAction);
+            _viewModel = new ActionButtonSetBackgroundColorActionConfigViewModel(pluginAction);
             InitializeComponent();
-            this.radioFixed.Text = LanguageManager.Strings.Fixed;
-            this.radioRandom.Text = LanguageManager.Strings.Random;
+            radioFixed.Text = LanguageManager.Strings.Fixed;
+            radioRandom.Text = LanguageManager.Strings.Random;
         }
 
         private void ActionButtonSetBackgroundColorActionConfigView_Load(object sender, EventArgs e)
         {
-            this.btnChangeColor.BackColor = this._viewModel.Color;
-            switch (this._viewModel.Method)
+            btnChangeColor.BackColor = _viewModel.Color;
+            switch (_viewModel.Method)
             {
-                case Enums.SetBackgroundColorMethod.Fixed:
-                    this.radioFixed.Checked = true;
+                case SetBackgroundColorMethod.Fixed:
+                    radioFixed.Checked = true;
                     break;
-                case Enums.SetBackgroundColorMethod.Random:
-                    this.radioRandom.Checked = true;
+                case SetBackgroundColorMethod.Random:
+                    radioRandom.Checked = true;
                     break;
             }
         }
 
         public override bool OnActionSave()
         {
-            this._viewModel.Color = this.btnChangeColor.BackColor;
-            if (this.radioFixed.Checked)
+            _viewModel.Color = btnChangeColor.BackColor;
+            if (radioFixed.Checked)
             {
-                this._viewModel.Method = Enums.SetBackgroundColorMethod.Fixed;
-            } else if (this.radioRandom.Checked)
+                _viewModel.Method = SetBackgroundColorMethod.Fixed;
+            } else if (radioRandom.Checked)
             {
-                this._viewModel.Method = Enums.SetBackgroundColorMethod.Random;
+                _viewModel.Method = SetBackgroundColorMethod.Random;
             }
-            return this._viewModel.SaveConfig();
+            return _viewModel.SaveConfig();
         }
 
         private void BtnChangeColor_Click(object sender, EventArgs e)
         {
-            using (var colorDialog = new ColorDialog()
-            {
-                Color = this.btnChangeColor.BackColor,
+            using (var colorDialog = new ColorDialog
+                   {
+                Color = btnChangeColor.BackColor,
                 FullOpen = true,
-                CustomColors = new int[] { ColorTranslator.ToOle(Color.FromArgb(35,35,35)) }
+                CustomColors = new[] { ColorTranslator.ToOle(Color.FromArgb(35,35,35)) }
             })
             {
                 if (colorDialog.ShowDialog() == DialogResult.OK)
                 {
-                    this.btnChangeColor.BackColor = colorDialog.Color;
+                    btnChangeColor.BackColor = colorDialog.Color;
                 }
             }
         }
@@ -74,7 +71,7 @@ namespace SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Views
 
         private void RadioFixed_CheckedChanged(object sender, EventArgs e)
         {
-            this.btnChangeColor.Visible = this.radioFixed.Checked;
+            btnChangeColor.Visible = radioFixed.Checked;
         }
     }
 }

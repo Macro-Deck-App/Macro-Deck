@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using System.Runtime.InteropServices;
-using SuchByte.MacroDeck.GUI.Dialogs;
-using SuchByte.MacroDeck.Language;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
@@ -30,10 +25,10 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             InitializeComponent();
             (new DropShadow()).ApplyShadows(this);
-            this.btnHelp.Text = LanguageManager.Strings.Help;
-            this.helpMenuDiscordSupport.Text = LanguageManager.Strings.DiscordSupport;
-            this.helpMenuWiki.Text = LanguageManager.Strings.Wiki;
-            this.helpMenuExportLog.Text = LanguageManager.Strings.ExportLatestLog;
+            btnHelp.Text = LanguageManager.Strings.Help;
+            helpMenuDiscordSupport.Text = LanguageManager.Strings.DiscordSupport;
+            helpMenuWiki.Text = LanguageManager.Strings.Wiki;
+            helpMenuExportLog.Text = LanguageManager.Strings.ExportLatestLog;
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -41,7 +36,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             switch (keyData)
             {
                 case Keys.Escape:
-                    this.Close();
+                    Close();
                     return true;
             }
             return base.ProcessCmdKey(ref msg, keyData);
@@ -51,9 +46,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         {
             if (m.Msg == 0x84)
             {  // Trap WM_NCHITTEST
-                Point pos = new Point(m.LParam.ToInt32());
-                pos = this.PointToClient(pos);
-                if (pos.X >= this.ClientSize.Width - cGrip && pos.Y >= this.ClientSize.Height - cGrip)
+                var pos = new Point(m.LParam.ToInt32());
+                pos = PointToClient(pos);
+                if (pos.X >= ClientSize.Width - cGrip && pos.Y >= ClientSize.Height - cGrip)
                 {
                     m.Result = (IntPtr)17; // HTBOTTOMRIGHT
                     return;
@@ -64,18 +59,18 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
 
         private void BtnClose_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void TitleBar_MouseDown(object sender, MouseEventArgs e)
         {
             ReleaseCapture();
-            SendMessage(this.Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+            SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
         }
 
         private void BtnHelp_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            this.helpMenu.Show(Cursor.Position);
+            helpMenu.Show(Cursor.Position);
         }
 
         private void HelpMenuDiscordSupport_Click(object sender, EventArgs e)

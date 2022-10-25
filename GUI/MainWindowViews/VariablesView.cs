@@ -1,17 +1,15 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.GUI.Dialogs;
-using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Models;
-using SuchByte.MacroDeck.Variables;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Models;
+using SuchByte.MacroDeck.Properties;
+using SuchByte.MacroDeck.Variables;
 
 namespace SuchByte.MacroDeck.GUI.MainWindowContents
 {
@@ -21,40 +19,40 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         public VariablesView()
         {
             InitializeComponent();
-            this.Dock = DockStyle.Fill;
-            this.UpdateTranslation();
+            Dock = DockStyle.Fill;
+            UpdateTranslation();
         }
 
         public void UpdateTranslation()
         {
-            this.SuspendLayout();
-            this.Name = Language.LanguageManager.Strings.VariablesTitle;
-            this.lblName.Text = Language.LanguageManager.Strings.Name;
-            this.lblType.Text = Language.LanguageManager.Strings.Type;
-            this.lblValue.Text = Language.LanguageManager.Strings.Value;
-            this.lblCreator.Text = Language.LanguageManager.Strings.Creator;
-            this.btnCreateVariable.Text = Language.LanguageManager.Strings.CreateVariable;
-            this.ResumeLayout();
+            SuspendLayout();
+            Name = LanguageManager.Strings.VariablesTitle;
+            lblName.Text = LanguageManager.Strings.Name;
+            lblType.Text = LanguageManager.Strings.Type;
+            lblValue.Text = LanguageManager.Strings.Value;
+            lblCreator.Text = LanguageManager.Strings.Creator;
+            btnCreateVariable.Text = LanguageManager.Strings.CreateVariable;
+            ResumeLayout();
         }
 
         private void LoadCreators()
         {
-            List<string> variableCreators = new List<string>();
-            foreach (Variable variable in VariableManager.ListVariables)
+            var variableCreators = new List<string>();
+            foreach (var variable in VariableManager.ListVariables)
             {
                 if (!variableCreators.Contains(variable.Creator)) {
                     variableCreators.Add(variable.Creator);
                 }
             }
 
-            var filterModel = VariableViewCreatorFilterModel.Deserialize(Properties.Settings.Default.VariableViewSelectedFilter);            
+            var filterModel = VariableViewCreatorFilterModel.Deserialize(Settings.Default.VariableViewSelectedFilter);            
 
-            foreach (string creator in variableCreators)
+            foreach (var creator in variableCreators)
             {
-                if (this.creatorFilter.Controls.OfType<CheckBox>().Where(x => x.Name.Equals(creator)).Count() > 0)
+                if (creatorFilter.Controls.OfType<CheckBox>().Where(x => x.Name.Equals(creator)).Count() > 0)
                     continue;
 
-                CheckBox creatorCheckBox = new CheckBox
+                var creatorCheckBox = new CheckBox
                 {
                     Checked = !filterModel.HiddenCreators.Contains(creator),
                     Text = creator,
@@ -62,69 +60,69 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
                     AutoSize = false,
                     Size = new Size(creatorFilter.Width - 30, 20),
                 };
-                this.creatorFilter.Controls.Add(creatorCheckBox);
+                creatorFilter.Controls.Add(creatorCheckBox);
                 creatorCheckBox.CheckedChanged += CreatorCheckBox_CheckedChanged;
             }
         }
 
         private void CreatorCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            CheckBox checkBox = sender as CheckBox;
-            Parallel.ForEach(this.variablesPanel.Controls.OfType<VariableItem>().Where(x => x.Variable.Creator == checkBox.Name).ToArray(),
+            var checkBox = sender as CheckBox;
+            Parallel.ForEach(variablesPanel.Controls.OfType<VariableItem>().Where(x => x.Variable.Creator == checkBox.Name).ToArray(),
                 variableItem =>
                 {
-                    if (this.IsDisposed) return;
-                    this.Invoke(new Action(() => variableItem.Visible = checkBox.Checked));
+                    if (IsDisposed) return;
+                    Invoke(new Action(() => variableItem.Visible = checkBox.Checked));
                 });
 
-            var filterModel = new VariableViewCreatorFilterModel()
+            var filterModel = new VariableViewCreatorFilterModel
             {
                 HiddenCreators = (from creator in creatorFilter.Controls.OfType<CheckBox>()
                                     where !creator.Checked
                                     select creator.Name).ToList()
             };
-            Properties.Settings.Default.VariableViewSelectedFilter = filterModel.Serialize();
-            Properties.Settings.Default.Save();
+            Settings.Default.VariableViewSelectedFilter = filterModel.Serialize();
+            Settings.Default.Save();
         }
 
         private void VariablesPage_Load(object sender, EventArgs e)
         {
             LoadCreators();
             LoadVariables();
-            VariableManager.OnVariableChanged += this.VariableChanged;
-            VariableManager.OnVariableRemoved += this.VariableRemoved;
+            VariableManager.OnVariableChanged += VariableChanged;
+            VariableManager.OnVariableRemoved += VariableRemoved;
         }
 
         private void VariableRemoved(object sender, EventArgs e)
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.Invoke(new Action(() => VariableRemoved(sender, e)));
+                Invoke(() => VariableRemoved(sender, e));
                 return;
             }
-            string variableName = sender as string;
-            var variableItemView = this.variablesPanel.Controls.OfType<VariableItem>().Where(x => x.Variable.Name.Equals(variableName)).FirstOrDefault();
+            var variableName = sender as string;
+            var variableItemView = variablesPanel.Controls.OfType<VariableItem>().Where(x => x.Variable.Name.Equals(variableName)).FirstOrDefault();
             if (variableItemView != null)
             {
-                this.variablesPanel.Controls.Remove(variableItemView);
+                variablesPanel.Controls.Remove(variableItemView);
             }
         }
 
         private void VariableChanged(object sender, EventArgs e)
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.Invoke(new Action(() => VariableChanged(sender, e)));
+                Invoke(() => VariableChanged(sender, e));
                 return;
             }
-            Variable variable = sender as Variable;
-            if (this.IsDisposed) return;
-            var variableItemView = this.variablesPanel.Controls.OfType<VariableItem>().Where(x => x.Variable.Name.Equals(variable.Name)).FirstOrDefault();
+            var variable = sender as Variable;
+            if (IsDisposed) return;
+            var variableItemView = variablesPanel.Controls.OfType<VariableItem>().Where(x => x.Variable.Name.Equals(variable.Name)).FirstOrDefault();
             if (variableItemView == null)
             {
-                VariableItem newVariableItem = new VariableItem(variable);
-                this.variablesPanel.Controls.Add(newVariableItem);
-                this.LoadCreators();
+                var newVariableItem = new VariableItem(variable);
+                variablesPanel.Controls.Add(newVariableItem);
+                LoadCreators();
             } else
             {
                 variableItemView.Variable = variable;
@@ -134,15 +132,15 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         private void LoadVariables()
         {
-            this.variablesPanel.Controls.Clear();
+            variablesPanel.Controls.Clear();
             foreach (var variable in VariableManager.ListVariables)
             {
-                if (this.IsDisposed) return;
-                VariableItem variableItem = new VariableItem(variable)
+                if (IsDisposed) return;
+                var variableItem = new VariableItem(variable)
                 {
-                    Visible = this.creatorFilter.Controls.OfType<CheckBox>().Where(x => variable.Creator == x.Name).FirstOrDefault().Checked
+                    Visible = creatorFilter.Controls.OfType<CheckBox>().Where(x => variable.Creator == x.Name).FirstOrDefault().Checked
                 };
-                this.variablesPanel.Controls.Add(variableItem);
+                variablesPanel.Controls.Add(variableItem);
             }
         }
 

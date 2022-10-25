@@ -1,12 +1,8 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.Icons;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
+﻿using System;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.Icons;
+using SuchByte.MacroDeck.Language;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
@@ -18,23 +14,23 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         public ExportIconPackDialog(IconPack iconPack)
         {
             InitializeComponent();
-            this.lblVersion.Text = Language.LanguageManager.Strings.Version;
-            this.btnOk.Text = Language.LanguageManager.Strings.Ok;
-            this.IconPack = iconPack;
+            lblVersion.Text = LanguageManager.Strings.Version;
+            btnOk.Text = LanguageManager.Strings.Ok;
+            IconPack = iconPack;
         }
 
         private void ExportIconPackDialog_Load(object sender, EventArgs e)
         {
-            this.version.Text = this.IconPack.Version;
+            version.Text = IconPack.Version;
         }
 
         private void BtnOk_Click(object sender, EventArgs e)
         {
-            if (this.version.Text.Length < 2) return;
+            if (version.Text.Length < 2) return;
 
-            this.IconPack.Version = this.version.Text;
+            IconPack.Version = version.Text;
 
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
     }
 }

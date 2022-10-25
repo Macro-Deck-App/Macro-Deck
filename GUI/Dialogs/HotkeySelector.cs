@@ -1,14 +1,8 @@
-﻿using SuchByte.MacroDeck.GUI.CustomControls;
+﻿using System;
+using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Hotkeys;
 using SuchByte.MacroDeck.Language;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs
 {
@@ -18,7 +12,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         {
             InitializeComponent();
 
-            this.lblPressKeysNow.Text = LanguageManager.Strings.PressTheKeysNow;
+            lblPressKeysNow.Text = LanguageManager.Strings.PressTheKeysNow;
         }
 
         public new Keys ModifierKeys;
@@ -27,28 +21,28 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         private void HotkeySelector_Load(object sender, EventArgs e)
         {
             HotkeyManager.Pause();
-            this.KeyDown += HotkeySelector_KeyDown;
-            this.KeyUp += HotkeySelector_KeyUp;
+            KeyDown += HotkeySelector_KeyDown;
+            KeyUp += HotkeySelector_KeyUp;
         }
 
         private void HotkeySelector_KeyUp(object sender, KeyEventArgs e)
         {
-            this.lblDetectedKeys.Text = string.Empty;
+            lblDetectedKeys.Text = string.Empty;
         }
 
         private void HotkeySelector_KeyDown(object sender, KeyEventArgs e)
         {
             if (!IsModifierKey(e.KeyCode))
             {
-                this.KeyUp -= HotkeySelector_KeyUp;
-                this.lblDetectedKeys.Text += ", " + e.KeyCode.ToString();
-                this.Key = e.KeyCode;
-                this.DialogResult = DialogResult.OK;
-                this.Close();
+                KeyUp -= HotkeySelector_KeyUp;
+                lblDetectedKeys.Text += ", " + e.KeyCode;
+                Key = e.KeyCode;
+                DialogResult = DialogResult.OK;
+                Close();
             } else
             {
-                this.lblDetectedKeys.Text = e.Modifiers.ToString();
-                this.ModifierKeys = e.Modifiers;
+                lblDetectedKeys.Text = e.Modifiers.ToString();
+                ModifierKeys = e.Modifiers;
             }
         }
 

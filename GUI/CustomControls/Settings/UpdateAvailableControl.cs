@@ -1,18 +1,10 @@
-﻿using Newtonsoft.Json.Linq;
-using SuchByte.MacroDeck.Backups;
-using SuchByte.MacroDeck.Language;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
+﻿using System;
 using System.Drawing;
-using System.IO;
-using System.Net;
-using System.Security.Cryptography;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+using SuchByte.MacroDeck.Backups;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Updater;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
 {
@@ -22,59 +14,59 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
         {
             InitializeComponent();
 
-            this.lblVersion.Text = String.Format(LanguageManager.Strings.VersionXIsNowAvailable, Updater.Updater.UpdateObject["version"], Updater.Updater.UpdateObject["channel"]);
-            this.btnInstall.Text = LanguageManager.Strings.DownloadAndInstall;
-            this.lblSize.Text = Updater.Updater.UpdateSizeMb.ToString("0.##") + "MB";
+            lblVersion.Text = string.Format(LanguageManager.Strings.VersionXIsNowAvailable, Updater.Updater.UpdateObject["version"], Updater.Updater.UpdateObject["channel"]);
+            btnInstall.Text = LanguageManager.Strings.DownloadAndInstall;
+            lblSize.Text = Updater.Updater.UpdateSizeMb.ToString("0.##") + "MB";
             //this.lblStatus.Text = Language.LanguageManager.Strings.ReadyToDownloadUpdate;
 
             Updater.Updater.OnProgressChanged += ProgressChanged;
             Updater.Updater.OnError += Error;
 
-            string changelogXml = Updater.Updater.UpdateObject["changelog"].ToString();
+            var changelogXml = Updater.Updater.UpdateObject["changelog"].ToString();
 
             if (!string.IsNullOrWhiteSpace(changelogXml))
             {
                 try
                 {
-                    XmlDocument doc = new XmlDocument();
+                    var doc = new XmlDocument();
                     doc.LoadXml(changelogXml);
                     foreach (XmlNode node in doc.DocumentElement.ChildNodes)
                     {
-                        if (node.HasChildNodes == true)
+                        if (node.HasChildNodes)
                         {
-                            Label title = new Label
+                            var title = new Label
                             {
                                 AutoSize = true,
                                 MinimumSize = new Size(880, 0),
                                 MaximumSize = new Size(880, 0),
                                 Font = new Font("Tahoma", 14F, FontStyle.Bold, GraphicsUnit.Point),
                                 ForeColor = Color.White,
-                                Text = node.Name.ToString()
+                                Text = node.Name
                             };
-                            this.changelogPanel.Controls.Add(title);
+                            changelogPanel.Controls.Add(title);
                             foreach (XmlNode childNode in node.ChildNodes)
                             {
-                                if (childNode.Name.ToString() == "Text")
+                                if (childNode.Name == "Text")
                                 {
-                                    Label text = new Label
+                                    var text = new Label
                                     {
                                         AutoSize = true,
                                         MinimumSize = new Size(880, 0),
                                         MaximumSize = new Size(880, 0),
                                         Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point),
                                         ForeColor = Color.White,
-                                        Text = "● " + childNode.InnerText.ToString()
+                                        Text = "● " + childNode.InnerText
                                     };
-                                    this.changelogPanel.Controls.Add(text);
+                                    changelogPanel.Controls.Add(text);
                                 }
                             }
-                            Panel spacer = new Panel
+                            var spacer = new Panel
                             {
                                 AutoSize = true,
                                 MinimumSize = new Size(880, 15),
                                 MaximumSize = new Size(880, 15)
                             };
-                            this.changelogPanel.Controls.Add(spacer);
+                            changelogPanel.Controls.Add(spacer);
                         }
                     }
                 } catch { }
@@ -84,8 +76,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
 
             if (Updater.Updater.Downloading)
             {
-                this.btnInstall.Enabled = false;
-                this.btnInstall.Progress = Updater.Updater.ProgressPercentage;
+                btnInstall.Enabled = false;
+                btnInstall.Progress = Updater.Updater.ProgressPercentage;
             }
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -94,9 +86,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
 
         private void BtnInstall_Click(object sender, EventArgs e)
         {
-            this.btnInstall.Enabled = false;
-            this.btnInstall.Spinner = true;
-            bool createBackup = false;
+            btnInstall.Enabled = false;
+            btnInstall.Spinner = true;
+            var createBackup = false;
             using (var msgBox = new MessageBox())
             {
                 if (msgBox.ShowDialog(LanguageManager.Strings.Backup, LanguageManager.Strings.CreateBackupBeforeUpdate, MessageBoxButtons.YesNo) == DialogResult.Yes)
@@ -106,25 +98,25 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Settings
             }
             if (createBackup)
             {
-                this.btnInstall.Text = LanguageManager.Strings.CreatingBackup;
+                btnInstall.Text = LanguageManager.Strings.CreatingBackup;
                 BackupManager.CreateBackup();
             }
             Updater.Updater.DownloadUpdate();
            
         }
 
-        private void ProgressChanged(object sender, Updater.ProgressChangedEventArgs e)
+        private void ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            this.btnInstall.Enabled = false;
-            this.btnInstall.Spinner = true;
-            this.btnInstall.Progress = e.ProgressPercentage;
+            btnInstall.Enabled = false;
+            btnInstall.Spinner = true;
+            btnInstall.Progress = e.ProgressPercentage;
         }
 
         private void Error(object sender, EventArgs e)
         {
-            this.btnInstall.Progress = 0;
-            this.btnInstall.Enabled = true;
-            this.btnInstall.Spinner = false;
+            btnInstall.Progress = 0;
+            btnInstall.Enabled = true;
+            btnInstall.Spinner = false;
         }
         
 

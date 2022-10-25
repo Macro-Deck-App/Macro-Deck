@@ -1,19 +1,20 @@
-﻿using SuchByte.MacroDeck.GUI.InitialSetupPages;
-using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.GUI.InitialSetupPages;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
 
 namespace SuchByte.MacroDeck.GUI
 {
-    public partial class InitialSetup : CustomControls.DialogForm
+    public partial class InitialSetup : DialogForm
     {
 
         public Configuration.Configuration configuration;
 
-        int currentPage = 0;
+        int currentPage;
         List<Control> pages;
 
         //List<JObject> objectsToInstall = new List<JObject>();
@@ -23,11 +24,11 @@ namespace SuchByte.MacroDeck.GUI
         {
             InitializeComponent();
 
-            this.UpdateLanguage();
+            UpdateLanguage();
 
-            this.LoadSetupPages();
+            LoadSetupPages();
 
-            this.configuration = new Configuration.Configuration
+            configuration = new Configuration.Configuration
             {
                 AutoUpdates = true,
                 Host_Address = "0.0.0.0",
@@ -35,17 +36,14 @@ namespace SuchByte.MacroDeck.GUI
             };
 
             LanguageManager.LanguageChanged += OnLanguageChanged;
-            this.SetSystemLanguage();
+            SetSystemLanguage();
         }
 
 
         private void LoadSetupPages()
         {
-            if (this.pages != null)
-            {
-                this.pages.Clear();
-            }
-            this.pages = new List<Control>
+            pages?.Clear();
+            pages = new List<Control>
             {
                 new SetupPage1(),
                 new SetupPage2(this),
@@ -54,20 +52,20 @@ namespace SuchByte.MacroDeck.GUI
                 //new SetupPage5(),
                 new SetupPage6(this),
             };
-            this.SetPage(0);
+            SetPage(0);
         }
 
         private void OnLanguageChanged(object sender, EventArgs e)
         {
-            this.configuration.Language = ((Strings)sender).__Language__;
-            this.UpdateLanguage();
-            this.LoadSetupPages();
+            configuration.Language = ((Strings)sender).__Language__;
+            UpdateLanguage();
+            LoadSetupPages();
         }
 
         private void UpdateLanguage()
         {
-            this.btnBack.Text = LanguageManager.Strings.InitialSetupButtonBack;
-            this.btnNext.Text = LanguageManager.Strings.InitialSetupButtonNext;
+            btnBack.Text = LanguageManager.Strings.InitialSetupButtonBack;
+            btnNext.Text = LanguageManager.Strings.InitialSetupButtonNext;
         }
 
         private void BtnNext_Click(object sender, EventArgs e)
@@ -84,10 +82,10 @@ namespace SuchByte.MacroDeck.GUI
             }*/
 
             // Next page
-            if (this.currentPage == this.pages.Count - 1)
+            if (currentPage == pages.Count - 1)
             {
-                this.DialogResult = DialogResult.OK;
-                this.Close();
+                DialogResult = DialogResult.OK;
+                Close();
                 /*if (this.objectsToInstall.Count == 0)
                 {
                 } else
@@ -106,58 +104,58 @@ namespace SuchByte.MacroDeck.GUI
 
             } else
             {
-                this.currentPage++;
-                if (this.currentPage > this.pages.Count - 1)
+                currentPage++;
+                if (currentPage > pages.Count - 1)
                 {
-                    this.currentPage = this.pages.Count - 1;
+                    currentPage = pages.Count - 1;
                 }
-                this.SetPage(currentPage);
+                SetPage(currentPage);
             }
             
         }
 
         private void BtnBack_Click(object sender, EventArgs e)
         {
-            this.currentPage--;
-            if (this.currentPage < 0)
+            currentPage--;
+            if (currentPage < 0)
             {
-                this.currentPage = 0;
+                currentPage = 0;
             }
-            this.SetPage(currentPage);
+            SetPage(currentPage);
         }
 
 
         void SetPage(int page)
         {
-            this.pagePanel.Controls.Clear();
-            if (page <= this.pages.Count - 1 && page >= 0)
+            pagePanel.Controls.Clear();
+            if (page <= pages.Count - 1 && page >= 0)
             {
-                this.pagePanel.Controls.Add(this.pages[page]);
+                pagePanel.Controls.Add(pages[page]);
             }
             if (page == 0)
             {
-                this.btnBack.Visible = false;
+                btnBack.Visible = false;
             } else
             {
-                this.btnBack.Visible = true;
+                btnBack.Visible = true;
             }
-            if (page == this.pages.Count - 1)
+            if (page == pages.Count - 1)
             {
-                this.btnNext.Text = LanguageManager.Strings.InitialSetupButtonFinish;
+                btnNext.Text = LanguageManager.Strings.InitialSetupButtonFinish;
             } else
             {
-                this.btnNext.Text = LanguageManager.Strings.InitialSetupButtonNext;
+                btnNext.Text = LanguageManager.Strings.InitialSetupButtonNext;
             }
-            this.lblPage.Text = String.Format(LanguageManager.Strings.InitialSetupPage, this.currentPage + 1, this.pages.Count);
+            lblPage.Text = string.Format(LanguageManager.Strings.InitialSetupPage, currentPage + 1, pages.Count);
         }
 
         private void SetSystemLanguage()
         {
             try
             {
-                CultureInfo cultureInfo = CultureInfo.InstalledUICulture;
-                string languageIso = cultureInfo.TwoLetterISOLanguageName;
-                Strings language = LanguageManager.Languages.Find(l => l.__LanguageCode__.ToLower().Equals(languageIso.ToLower()));
+                var cultureInfo = CultureInfo.InstalledUICulture;
+                var languageIso = cultureInfo.TwoLetterISOLanguageName;
+                var language = LanguageManager.Languages.Find(l => l.__LanguageCode__.ToLower().Equals(languageIso.ToLower()));
                 if (language != null)
                 {
                     LanguageManager.SetLanguage(language);
