@@ -17,7 +17,7 @@ using SuchByte.MacroDeck.Folders.Plugin;
 using SuchByte.MacroDeck.InternalPlugins.DevicePlugin;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Model;
+using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Utils;
 using SuchByte.MacroDeck.Variables.Plugin;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
@@ -26,7 +26,7 @@ namespace SuchByte.MacroDeck.Plugins;
 
 public static class PluginManager
 {
-    public static event EventHandler OnPluginsChange;
+    public static event EventHandler? OnPluginsChange;
 
 
     public static Dictionary<string, MacroDeckPlugin> Plugins = new();
@@ -62,7 +62,11 @@ public static class PluginManager
             try
             {
                 Directory.Delete(MacroDeck.ApplicationPaths.PluginsDirectoryPath + ".loaded", true);
-            } catch { }
+            }
+            catch
+            {
+                // ignored
+            }
         }
         else
         {
@@ -76,12 +80,20 @@ public static class PluginManager
                         var destinationDirectory = Path.Combine(MacroDeck.ApplicationPaths.PluginsDirectoryPath, new DirectoryInfo(directory).Name);
                         DirectoryCopy.Copy(directory, destinationDirectory, true);
                         Directory.Delete(directory, true);
-                    } catch { }
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
                 try
                 {
                     Directory.Delete(MacroDeck.ApplicationPaths.UpdatePluginsDirectoryPath, true);
-                } catch { }
+                }
+                catch
+                {
+                    // ignored
+                }
             }
 
             // Load the plugins
@@ -94,7 +106,12 @@ public static class PluginManager
                     {
                         File.Delete(Path.Combine(directory, DeleteMarkerFileName));
                         Directory.Delete(directory, true);
-                    } catch { }
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+
                     continue;
                 }
                 var manifestFile = Path.Combine(directory, ManifestFileName);

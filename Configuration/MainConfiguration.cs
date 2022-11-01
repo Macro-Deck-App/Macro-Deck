@@ -4,7 +4,6 @@ using System.IO;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Startup;
 
 namespace SuchByte.MacroDeck.Configuration;
 

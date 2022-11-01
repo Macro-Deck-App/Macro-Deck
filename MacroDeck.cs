@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -11,9 +10,6 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using CefSharp;
-using CefSharp.WinForms;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.Backups;
 using SuchByte.MacroDeck.Configuration;
@@ -34,15 +30,14 @@ using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.Server;
 using SuchByte.MacroDeck.Startup;
-using SuchByte.MacroDeck.Utils;
 using SuchByte.MacroDeck.Variables;
 
 namespace SuchByte.MacroDeck;
 
 public class MacroDeck : NativeWindow
 {
-    static readonly Assembly assembly = Assembly.GetExecutingAssembly();
-    public static readonly VersionModel Version = new(FileVersionInfo.GetVersionInfo(assembly.Location).FileVersion);
+    private static readonly Assembly Assembly = Assembly.GetExecutingAssembly();
+    public static readonly VersionModel Version = new(FileVersionInfo.GetVersionInfo(Assembly.Location).FileVersion ?? "2.0.0.0");
 
     public static readonly int ApiVersion = 20;
     public static readonly int PluginApiVersion = 40;
@@ -52,9 +47,6 @@ public class MacroDeck : NativeWindow
     public static MainConfiguration Configuration { get; private set; } = new();
     public static bool SafeMode { get; set; } = false;
     
-        
-    private static readonly Stopwatch StartUpTimeStopWatch = new();
-
     internal static SynchronizationContext? SyncContext { get; set; }
         
     public static event EventHandler? OnMainWindowLoad;
@@ -72,6 +64,9 @@ public class MacroDeck : NativeWindow
     private static MainWindow? _mainWindow;
     public static MainWindow? MainWindow => 
         _mainWindow is { IsDisposed: false, Visible: true } ? _mainWindow : null;
+
+
+    private static readonly Stopwatch StartUpTimeStopWatch = new();
 
     [STAThread]
     static void Main(string[] args)
@@ -115,6 +110,27 @@ public class MacroDeck : NativeWindow
         }
     }
 
+    private static void PrintNetworkInterfaces()
+    {
+        StringBuilder sb = new();
+        try
+        {
+            foreach (var adapter in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                var address = adapter.GetIPProperties().UnicastAddresses
+                    .FirstOrDefault(x => x.Address.AddressFamily == AddressFamily.InterNetwork)?.Address;
+                sb.AppendLine();
+                sb.Append($"{adapter.Name} - {address}");
+            }
+        }
+        catch
+        {
+            // ignored
+        }
+        MacroDeckLogger.Info($"Network interfaces: {sb}");
+        sb.Clear();
+    }
+
     private static void Start()
     {
         StartUpTimeStopWatch.Start();
@@ -150,27 +166,6 @@ public class MacroDeck : NativeWindow
         }
         
         Configuration = MainConfiguration.LoadFromFile(ApplicationPaths.MainConfigFilePath);
-
-        StringBuilder sb = new();
-        try
-        {
-            foreach (var adapter in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                var address = adapter.GetIPProperties().UnicastAddresses
-                    .FirstOrDefault(x => x.Address.AddressFamily == AddressFamily.InterNetwork)?.Address;
-                sb.AppendLine();
-                sb.Append($"{adapter.Name} - {address}");
-            }
-        }
-        catch
-        {
-            // ignored
-        }
-        MacroDeckLogger.Info($"Network interfaces: {sb}");
-        sb.Clear();
-        
-
-        var port = StartParameters.Port;
         LanguageManager.SetLanguage(Configuration.Language);
         Colors.Initialize();
         _ = new HotkeyManager();
@@ -180,7 +175,8 @@ public class MacroDeck : NativeWindow
         IconManager.Initialize();
         ProfileManager.Load();
 
-        MacroDeckServer.Start(Configuration.HostAddress, port == -1 ? Configuration.HostPort : port);
+        PrintNetworkInterfaces();
+        MacroDeckServer.Start(StartParameters.Port == -1 ? Configuration.HostPort : StartParameters.Port);
         BroadcastServer.Start();
         ADBServerHelper.Initialize();
 

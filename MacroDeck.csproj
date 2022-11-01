@@ -1,0 +1,395 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+	<PropertyGroup>
+		<IsBeta>true</IsBeta>
+		<BetaPatch>0</BetaPatch>
+
+		<VersionMajor>2</VersionMajor>
+		<VersionMinor>13</VersionMinor>
+		<VersionPatch>0</VersionPatch> <!-- Patch (Not Beta patch) -->
+
+		<VersionSuffix Condition="'$(IsBeta)' == 'true'">b$(BetaPatch)</VersionSuffix>
+		<VersionRevision Condition="'$(VersionRevision)' == ''">$([System.DateTime]::UtcNow.ToString("yy"))$([System.DateTime]::UtcNow.DayOfYear.ToString("000"))$([System.DateTime]::UtcNow.ToString("HHmm"))</VersionRevision>
+	</PropertyGroup>
+	
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows10.0.22000.0</TargetFramework>
+    <UseWPF>true</UseWPF>
+	  <RootNamespace>SuchByte.MacroDeck</RootNamespace>
+	  <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>appicon.ico</ApplicationIcon>
+    <StartupObject>SuchByte.MacroDeck.MacroDeck</StartupObject>
+    <Version>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(VersionRevision)</Version>
+    <Company>Macro Deck</Company>
+    <Authors>Manuel Mayer</Authors>
+    <SignAssembly>False</SignAssembly>
+    <AssemblyOriginatorKeyFile>Macro Deck.pfx</AssemblyOriginatorKeyFile>
+    <Product>Macro Deck</Product>
+    <AssemblyVersion>2.21.3110.100</AssemblyVersion>
+	<FileVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(VersionRevision)$(VersionSuffix)</FileVersion>
+    <AssemblyName>Macro Deck 2</AssemblyName>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/SuchByte/Macro-Deck</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SuchByte/Macro-Deck</RepositoryUrl>
+	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <Platforms>AnyCPU;x64</Platforms>
+	<SelfContained>true</SelfContained>
+	<OutputType>WinExe</OutputType>
+	<Nullable>enable</Nullable>  
+  </PropertyGroup>
+	
+	<ItemGroup>
+      <Content Update="Macro Deck 2.dll">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      </Content>
+    </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Licenses.xml" />
+    <None Remove="Resources\Languages\Bulgaria.json" />
+    <None Remove="Resources\Languages\Chinese.json" />
+    <None Remove="Resources\Languages\Dutch.json" />
+    <None Remove="Resources\Languages\English - Copy.json" />
+    <None Remove="Resources\Languages\English.json" />
+    <None Remove="Resources\Languages\Filipino.json" />
+    <None Remove="Resources\Languages\Finnish.json" />
+    <None Remove="Resources\Languages\French.json" />
+    <None Remove="Resources\Languages\German.json" />
+    <None Remove="Resources\Languages\Hungarian.json" />
+    <None Remove="Resources\Languages\Italian.json" />
+    <None Remove="Resources\Languages\Japanese.json" />
+    <None Remove="Resources\Languages\Korean.json" />
+    <None Remove="Resources\Languages\Polish.json" />
+    <None Remove="Resources\Languages\Portuguese.json" />
+    <None Remove="Resources\Languages\Russian.json" />
+    <None Remove="Resources\Languages\Spanish.json" />
+    <None Remove="Resources\Languages\Turkish.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <COMReference Include="NetFwTypeLib">
+      <VersionMinor>0</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <Guid>58fbcf7c-e7a9-467c-80b3-fc65e8fcca08</Guid>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>false</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Languages\Bulgaria.json" />
+    <EmbeddedResource Include="Resources\Languages\Chinese.json" />
+    <EmbeddedResource Include="Resources\Languages\Dutch.json" />
+    <EmbeddedResource Include="Resources\Languages\English.json" />
+    <EmbeddedResource Include="Resources\Languages\Filipino.json" />
+    <EmbeddedResource Include="Resources\Languages\Finnish.json" />
+    <EmbeddedResource Include="Resources\Languages\French.json" />
+    <EmbeddedResource Include="Resources\Languages\German.json" />
+    <EmbeddedResource Include="Resources\Languages\Hungarian.json" />
+    <EmbeddedResource Include="Resources\Languages\Italian.json" />
+    <EmbeddedResource Include="Resources\Languages\Japanese.json" />
+    <EmbeddedResource Include="Resources\Languages\Korean.json" />
+    <EmbeddedResource Include="Resources\Languages\Polish.json" />
+    <EmbeddedResource Include="Resources\Languages\Portuguese.json" />
+    <EmbeddedResource Include="Resources\Languages\Russian.json" />
+    <EmbeddedResource Include="Resources\Languages\Spanish.json" />
+    <EmbeddedResource Include="Resources\Languages\Turkish.json" />
+    <EmbeddedResource Include="Resources\Licenses.xml">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CefSharp.WinForms.NETCore" Version="106.0.290" />
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
+    <PackageReference Include="Cottle" Version="2.0.8" />
+    <PackageReference Include="FCTB" Version="2.16.24" />
+    <PackageReference Include="Fleck" Version="1.2.0" />
+    <PackageReference Include="GiphyDotNet" Version="2.0.0" />
+    <PackageReference Include="Magick.NET-Q16-x64" Version="8.3.1" />
+    <PackageReference Include="Magick.NET.Core" Version="8.3.1" />
+    <PackageReference Include="Magick.NET.SystemDrawing" Version="4.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="RestSharp" Version="106.12.0" />
+    <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="106.12.0" />
+    <PackageReference Include="sharpadbclient" Version="2.3.23" />
+    <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
+    <PackageReference Include="System.Collections" Version="4.3.0" />
+    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="GUI\CustomControls\ActionConfigControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ActionConfiguratorActionItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ActionConfiguratorPluginItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\BorderlessComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\BufferedPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ButtonEditor\ActionItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ButtonEditor\ActionSelectorOnPress.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ButtonEditor\ConditionItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ButtonEditor\DelayItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ButtonEditor\EventItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ButtonEditor\EventSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ButtonPrimary.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ButtonRadioButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ContentSelectorButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\DeviceInfo.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\DialogForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ExtensionStoreDownloader\ExtensionStoreDownloaderItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ExtensionsView\ExtensionItemView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ExtensionsView\ExtensionStoreView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ExtensionsView\ExtensionZipInstallerView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\ExtensionsView\InstalledExtensionsView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\HorizontalTabControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\InitialSetup\InitialSetupIconPackItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\InitialSetup\InitialSetupPluginItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\MessageBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\Notifications\NotificationButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\Notifications\NotificationItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\Notifications\NotificationsList.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\PictureButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\PlaceHolderTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\RoundedButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\RoundedComboBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\RoundedPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\RoundedTextBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\RoundedUserControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\Settings\BackupItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\Settings\LicenseItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\Settings\UpdateAvailableControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\TabRadioButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\Variables\VariableItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\CustomControls\VerticalTabControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\ActionConfigurator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\AddFolder.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\ButtonEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\CreateIconPack.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\CreateProfileDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\DebugConsole.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\DefenderFirewallAlert.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\DeviceConfigurator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\ExportIconPackDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\ExtensionStoreDownloader.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\GiphySelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\HotkeySelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\IconCreator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\IconImportQuality.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\IconSelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\JsonButtonEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\LicensesDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\NewConnectionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\RestoreBackupDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\TemplateEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\VariableDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\Dialogs\WaitDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\InitialSetup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\InitialSetupPages\SetupPage1.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\InitialSetupPages\SetupPage2.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\InitialSetupPages\SetupPage3.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\InitialSetupPages\SetupPage4.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\InitialSetupPages\SetupPage5.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\InitialSetupPages\SetupPage6.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\MainWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GUI\MainWindowViews\DeckView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\MainWindowViews\DeviceManagerView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\MainWindowViews\ExtensionsView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\MainWindowViews\LoadingView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\MainWindowViews\SettingsView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GUI\MainWindowViews\VariablesView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="InternalPlugins\FolderPlugin\GUI\FolderSwitcherConfigurator.cs" />
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <!--<Exec Command="copy /Y &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(ProjectDir)bin\Release\netcoreapp3.1\publish\$(TargetName).dll&quot;" />-->
+  </Target>
+
+
+</Project>

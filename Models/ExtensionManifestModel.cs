@@ -6,7 +6,7 @@ using System.Text;
 using Newtonsoft.Json;
 using SuchByte.MacroDeck.ExtensionStore;
 
-namespace SuchByte.MacroDeck.Model;
+namespace SuchByte.MacroDeck.Models;
 
 public class ExtensionManifestModel
 {
@@ -39,15 +39,13 @@ public class ExtensionManifestModel
         return JsonConvert.SerializeObject(extensionManifestModel);
     }
 
-    public static ExtensionManifestModel FromManifestFile(string path)
+    public static ExtensionManifestModel? FromManifestFile(string path)
     {
-        using (var s = File.OpenRead(path))
-        {
-            return FromJsonStream(s);
-        }
+        using var s = File.OpenRead(path);
+        return FromJsonStream(s);
     }
 
-    public static ExtensionManifestModel FromZipFilePath(string zipFilePath)
+    public static ExtensionManifestModel? FromZipFilePath(string zipFilePath)
     {
         var stream = new StreamReader(
             ZipFile.OpenRead(zipFilePath)
@@ -57,17 +55,16 @@ public class ExtensionManifestModel
         return FromJsonStream(stream);
     }
 
-    public static ExtensionManifestModel FromJsonStream(Stream stream)
+    public static ExtensionManifestModel? FromJsonStream(Stream stream)
     {
         var serializer = new JsonSerializer();
-        using (var sr = new StreamReader(stream))
-        using (var jsonReader = new JsonTextReader(sr))
+        using var sr = new StreamReader(stream);
+        using var jsonReader = new JsonTextReader(sr);
+        while (!sr.EndOfStream)
         {
-            while (!sr.EndOfStream)
-            {
-                return serializer.Deserialize<ExtensionManifestModel>(jsonReader);
-            }
+            return serializer.Deserialize<ExtensionManifestModel>(jsonReader);
         }
+
         return null;
     }
 }

@@ -246,14 +246,7 @@ public partial class SettingsView : UserControl
 
     private void NetworkAdapter_SelectedIndexChanged(object sender, EventArgs e)
     {
-        if (networkAdapter.SelectedItem.ToString().Equals("All"))
-        {
-            lblIpAddress.Text = "0.0.0.0";
-        }
-        else
-        {
-            lblIpAddress.Text = GetIPAddressFromAdapter(networkAdapter.SelectedItem.ToString());
-        }
+        lblIpAddress.Text = GetIPAddressFromAdapter(networkAdapter.SelectedItem.ToString());
         MacroDeck.Configuration.HostAddress = lblIpAddress.Text;
         MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
     }
@@ -263,7 +256,7 @@ public partial class SettingsView : UserControl
         if (port.Value == MacroDeck.Configuration.HostPort) return;
         MacroDeck.Configuration.HostPort = (int)port.Value;
         MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
-        MacroDeckServer.Start(MacroDeck.Configuration.HostAddress, MacroDeck.Configuration.HostPort);
+        MacroDeckServer.Start(MacroDeck.Configuration.HostPort);
     }
 
     private void CheckStartWindows_CheckedChanged(object sender, EventArgs e)

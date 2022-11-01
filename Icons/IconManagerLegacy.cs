@@ -9,7 +9,7 @@ using SQLite;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.JSON;
 using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Model;
+using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Utils;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 

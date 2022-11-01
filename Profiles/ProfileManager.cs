@@ -21,10 +21,10 @@ namespace SuchByte.MacroDeck.Profiles;
 
 public static class ProfileManager
 {
-    public static event EventHandler ProfilesSaved;
-    public static event EventHandler ProfileCreated;
-        
-    public static MacroDeckProfile CurrentProfile;
+    public static event EventHandler? ProfilesSaved;
+    public static event EventHandler? ProfileCreated;
+
+    public static MacroDeckProfile? CurrentProfile { get; set; } = new();
         
     public static List<MacroDeckProfile> Profiles { get; private set; } = new();
 

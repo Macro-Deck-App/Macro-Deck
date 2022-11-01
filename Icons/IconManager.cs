@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Model;
+using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Icons;

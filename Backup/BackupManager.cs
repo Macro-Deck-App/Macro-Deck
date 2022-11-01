@@ -7,7 +7,6 @@ using System.Windows.Forms;
 using Newtonsoft.Json;
 using SuchByte.MacroDeck.Backup;
 using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Utils;
 using SuchByte.MacroDeck.Variables;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
