@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Licenses>
+  <Fleck>
+    <License>https://www.nuget.org/packages/sqlite-net-pcl/1.7.335/license</License>
+    <Author>statenjason</Author>
+    <Repository>https://github.com/statianzo/Fleck</Repository>
+  </Fleck>
+  <GiphyDotNet>
+    <License>https://www.nuget.org/packages/sqlite-net-pcl/1.7.335/license</License>
+    <Author>Drastic Actions</Author>
+    <Repository>https://www.nuget.org/packages/GiphyDotNet/2.0.0/license</Repository>
+  </GiphyDotNet>
+  <Magick.NET>
+    <License>https://licenses.nuget.org/Apache-2.0</License>
+    <Author>Dirk Lemstra</Author>
+    <Repository>https://github.com/dlemstra/Magick.NET</Repository>
+  </Magick.NET>
+  <Newtonsoft.Json>
+    <License>https://licenses.nuget.org/MIT</License>
+    <Author>James Newton-King</Author>
+    <Repository>https://www.newtonsoft.com/json</Repository>
+  </Newtonsoft.Json>
+  <RestSharp>
+    <License>https://licenses.nuget.org/Apache-2.0</License>
+    <Author>John Sheehan, Andrew Young, Alexey Zimarev and RestSharp community</Author>
+    <Repository>https://restsharp.dev/</Repository>
+  </RestSharp>
+  <SQLiteNetExtensions>
+    <License>https://bitbucket.org/twincoders/sqlite-net-extensions/src/master/#markdown-header-license</License>
+    <Author>TwinCoders</Author>
+    <Repository>https://bitbucket.org/twincoders/sqlite-net-extensions/src/master/</Repository>
+  </SQLiteNetExtensions>
+  <sqlite-net-pcl>
+    <License>https://www.nuget.org/packages/sqlite-net-pcl/1.7.335/license</License>
+    <Author>SQLite-net</Author>
+    <Repository>https://github.com/praeclarum/sqlite-net</Repository>
+  </sqlite-net-pcl>
+	<Cottle>
+		<License>https://github.com/r3c/cottle/blob/master/license.md</License>
+		<Author>r3c</Author>
+		<Repository>http://r3c.github.io/cottle/</Repository>
+	</Cottle>
+	<CefSharp>
+		<License>https://www.nuget.org/packages/CefSharp.WinForms.NETCore/99.2.120/license</License>
+		<Author>The CefSharp Authors</Author>
+		<Repository>https://github.com/cefsharp/cefsharp</Repository>
+	</CefSharp>
+	<FCTB>
+		<License>https://github.com/PavelTorgashov/FastColoredTextBox/blob/master/license.txt</License>
+		<Author>Pavel Torgashov</Author>
+		<Repository>https://github.com/PavelTorgashov/FastColoredTextBox</Repository>
+	</FCTB>
+	<HidSharp>
+		<License>https://www.zer7.com/files/oss/hidsharp/LICENSE.txt</License>
+		<Author>James F. Bellinger</Author>
+		<Repository>https://www.zer7.com/software/hidsharp</Repository>
+	</HidSharp>
+	<Microsoft.Windows.SDK.Contracts>
+		<License>https://download.microsoft.com/download/0/F/F/0FF2B061-47DD-4F55-89B6-FD1D8C44F14D/sdk_license.rtf</License>
+		<Author>Microsoft</Author>
+		<Repository>https://www.nuget.org/packages/Microsoft.Windows.SDK.Contracts</Repository>
+	</Microsoft.Windows.SDK.Contracts>
+	<Microsoft.Win32.Registry>
+		<License>https://licenses.nuget.org/MIT</License>
+		<Author>Microsoft</Author>
+		<Repository>https://github.com/dotnet/runtime</Repository>
+	</Microsoft.Win32.Registry>
+</Licenses>
