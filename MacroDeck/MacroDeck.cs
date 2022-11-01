@@ -68,27 +68,6 @@ public class MacroDeck : NativeWindow
 
     private static readonly Stopwatch StartUpTimeStopWatch = new();
     
-    private static void PrintNetworkInterfaces()
-    {
-        StringBuilder sb = new();
-        try
-        {
-            foreach (var adapter in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                var address = adapter.GetIPProperties().UnicastAddresses
-                    .FirstOrDefault(x => x.Address.AddressFamily == AddressFamily.InterNetwork)?.Address;
-                sb.AppendLine();
-                sb.Append($"{adapter.Name} - {address}");
-            }
-        }
-        catch
-        {
-            // ignored
-        }
-        MacroDeckLogger.Info($"Network interfaces: {sb}");
-        sb.Clear();
-    }
-
     internal static void Start(StartParameters startParameters)
     {
         StartParameters = startParameters;
@@ -173,6 +152,26 @@ public class MacroDeck : NativeWindow
 
         Application.Run();
     }
+    private static void PrintNetworkInterfaces()
+    {
+        StringBuilder sb = new();
+        try
+        {
+            foreach (var adapter in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                var address = adapter.GetIPProperties().UnicastAddresses
+                    .FirstOrDefault(x => x.Address.AddressFamily == AddressFamily.InterNetwork)?.Address;
+                sb.AppendLine();
+                sb.Append($"{adapter.Name} - {address}");
+            }
+        }
+        catch
+        {
+            // ignored
+        }
+        MacroDeckLogger.Info($"Network interfaces: {sb}");
+        sb.Clear();
+    }
 
     private static void StartInitialSetup()
     {
@@ -184,10 +183,8 @@ public class MacroDeck : NativeWindow
         {
             Configuration = initialSetup.configuration;
             Configuration.Save(ApplicationPaths.MainConfigFilePath);
-            using (var defenderFirewallAlertInfo = new DefenderFirewallAlert())
-            {
-                defenderFirewallAlertInfo.ShowDialog();
-            }
+            using var defenderFirewallAlertInfo = new DefenderFirewallAlert();
+            defenderFirewallAlertInfo.ShowDialog();
             RestartMacroDeck("--show");
         }
         else
