@@ -2,23 +2,22 @@
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
 
-namespace SuchByte.MacroDeck.GUI.Dialogs
+namespace SuchByte.MacroDeck.GUI.Dialogs;
+
+public partial class DefenderFirewallAlert : DialogForm
 {
-    public partial class DefenderFirewallAlert : DialogForm
+    public DefenderFirewallAlert()
     {
-        public DefenderFirewallAlert()
-        {
-            InitializeComponent();
-            SetCloseIconVisible(false);
+        InitializeComponent();
+        SetCloseIconVisible(false);
 
-            lblImportant.Text = LanguageManager.Strings.Important;
-            lblInfo.Text = LanguageManager.Strings.FirewallAlertInfo;
-            btnGotIt.Text = LanguageManager.Strings.GotIt;
-        }
+        lblImportant.Text = LanguageManager.Strings.Important;
+        lblInfo.Text = LanguageManager.Strings.FirewallAlertInfo;
+        btnGotIt.Text = LanguageManager.Strings.GotIt;
+    }
 
-        private void BtnGotIt_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
+    private void BtnGotIt_Click(object sender, EventArgs e)
+    {
+        Close();
     }
 }

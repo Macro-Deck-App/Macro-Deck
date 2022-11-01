@@ -103,6 +103,7 @@
 
   <ItemGroup>
     <PackageReference Include="CefSharp.WinForms.NETCore" Version="106.0.290" />
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="Cottle" Version="2.0.8" />
     <PackageReference Include="FCTB" Version="2.16.24" />
     <PackageReference Include="Fleck" Version="1.2.0" />

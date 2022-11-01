@@ -1,14 +1,13 @@
-﻿namespace SuchByte.MacroDeck.Utils
+﻿namespace SuchByte.MacroDeck.Utils;
+
+public class StringSearch
 {
-    public class StringSearch
+
+    public static bool StringContains(string str, string search)
     {
+        return str.ToLower().Replace(" ", "").Contains(search.ToLower().Replace(" ", ""));
 
-        public static bool StringContains(string str, string search)
-        {
-            return str.ToLower().Replace(" ", "").Contains(search.ToLower().Replace(" ", ""));
-
-
-        }
 
     }
+
 }

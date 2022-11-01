@@ -1,13 +1,12 @@
 ﻿using System.Windows.Forms;
 
-namespace SuchByte.MacroDeck.GUI.MainWindowContents
+namespace SuchByte.MacroDeck.GUI.MainWindowContents;
+
+public partial class LoadingView : UserControl
 {
-    public partial class LoadingView : UserControl
+    public LoadingView()
     {
-        public LoadingView()
-        {
-            InitializeComponent();
-            Dock = DockStyle.Fill;
-        }
+        InitializeComponent();
+        Dock = DockStyle.Fill;
     }
 }

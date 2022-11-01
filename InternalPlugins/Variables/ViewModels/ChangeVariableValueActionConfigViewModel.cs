@@ -7,78 +7,77 @@ using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.ViewModels;
 
-namespace SuchByte.MacroDeck.Variables.Plugin.ViewModels
+namespace SuchByte.MacroDeck.Variables.Plugin.ViewModels;
+
+public class ChangeVariableValueActionConfigViewModel : ISerializableConfigViewModel
 {
-    public class ChangeVariableValueActionConfigViewModel : ISerializableConfigViewModel
+    private readonly PluginAction _pluginAction;
+
+    public ChangeVariableValueActionConfigModel Configuration { get; set; }
+
+    ISerializableConfiguration ISerializableConfigViewModel.SerializableConfiguration => Configuration;
+
+    public ChangeVariableMethod Method
     {
-        private readonly PluginAction _pluginAction;
+        get => Configuration.Method;
+        set => Configuration.Method = value;
+    }
 
-        public ChangeVariableValueActionConfigModel Configuration { get; set; }
+    public string Variable
+    {
+        get => Configuration.Variable;
+        set => Configuration.Variable = value;
+    }
 
-        ISerializableConfiguration ISerializableConfigViewModel.SerializableConfiguration => Configuration;
+    public string Value
+    {
+        get => Configuration.Value;
+        set => Configuration.Value = value;
+    }
 
-        public ChangeVariableMethod Method
+    public ChangeVariableValueActionConfigViewModel(PluginAction pluginAction)
+    {
+        _pluginAction = pluginAction;
+        Configuration = ChangeVariableValueActionConfigModel.Deserialize(pluginAction.Configuration);
+    }
+
+    public bool SaveConfig()
+    {
+        if (string.IsNullOrWhiteSpace(Variable))
         {
-            get => Configuration.Method;
-            set => Configuration.Method = value;
+            return false;
         }
-
-        public string Variable
+        try
         {
-            get => Configuration.Variable;
-            set => Configuration.Variable = value;
+            SetConfig();
+            MacroDeckLogger.Info(typeof(ChangeVariableValueActionConfigViewModel), "config saved");
         }
-
-        public string Value
+        catch (Exception ex)
         {
-            get => Configuration.Value;
-            set => Configuration.Value = value;
+            MacroDeckLogger.Error(typeof(ChangeVariableValueActionConfigViewModel), $"Error while saving config: { ex.Message + Environment.NewLine + ex.StackTrace }");
         }
+        return true;
+    }
 
-        public ChangeVariableValueActionConfigViewModel(PluginAction pluginAction)
-        {
-            _pluginAction = pluginAction;
-            Configuration = ChangeVariableValueActionConfigModel.Deserialize(pluginAction.Configuration);
-        }
+    public void SetConfig()
+    {
+        _pluginAction.ConfigurationSummary = Variable + " -> " + GetMethodName(Method) + (Method == ChangeVariableMethod.set ? " -> " + Value : "");
+        _pluginAction.Configuration = Configuration.Serialize();
+    }
 
-        public bool SaveConfig()
+    private string GetMethodName(ChangeVariableMethod method)
+    {
+        switch (method)
         {
-            if (string.IsNullOrWhiteSpace(Variable))
-            {
-                return false;
-            }
-            try
-            {
-                SetConfig();
-                MacroDeckLogger.Info(typeof(ChangeVariableValueActionConfigViewModel), "config saved");
-            }
-            catch (Exception ex)
-            {
-                MacroDeckLogger.Error(typeof(ChangeVariableValueActionConfigViewModel), $"Error while saving config: { ex.Message + Environment.NewLine + ex.StackTrace }");
-            }
-            return true;
+            case ChangeVariableMethod.countUp:
+                return LanguageManager.Strings.CountUp;
+            case ChangeVariableMethod.countDown:
+                return LanguageManager.Strings.CountDown;
+            case ChangeVariableMethod.set:
+                return LanguageManager.Strings.Set;
+            case ChangeVariableMethod.toggle:
+                return LanguageManager.Strings.Toggle;
         }
-
-        public void SetConfig()
-        {
-            _pluginAction.ConfigurationSummary = Variable + " -> " + GetMethodName(Method) + (Method == ChangeVariableMethod.set ? " -> " + Value : "");
-            _pluginAction.Configuration = Configuration.Serialize();
-        }
-
-        private string GetMethodName(ChangeVariableMethod method)
-        {
-            switch (method)
-            {
-                case ChangeVariableMethod.countUp:
-                    return LanguageManager.Strings.CountUp;
-                case ChangeVariableMethod.countDown:
-                    return LanguageManager.Strings.CountDown;
-                case ChangeVariableMethod.set:
-                    return LanguageManager.Strings.Set;
-                case ChangeVariableMethod.toggle:
-                    return LanguageManager.Strings.Toggle;
-            }
-            return "";
-        }
+        return "";
     }
 }

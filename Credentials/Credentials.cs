@@ -1,11 +1,10 @@
-namespace SuchByte.MacroDeck.Credentials
+namespace SuchByte.MacroDeck.Credentials;
+
+public static class Credentials
 {
-    public static class Credentials
-    {
 
-        public static string GiphyToken = "";
+    public static string GiphyToken = "";
 
 
 
-    }
 }

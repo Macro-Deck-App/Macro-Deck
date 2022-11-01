@@ -1,11 +1,10 @@
-﻿namespace SuchByte.MacroDeck.Device
+﻿namespace SuchByte.MacroDeck.Device;
+
+public enum DeviceType
 {
-    public enum DeviceType
-    {
-        Unknown,
-        Web,
-        Android,
-        iOS,
-        StreamDeck,
-    }
+    Unknown,
+    Web,
+    Android,
+    iOS,
+    StreamDeck,
 }

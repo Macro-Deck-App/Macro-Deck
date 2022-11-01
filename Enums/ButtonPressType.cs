@@ -1,10 +1,9 @@
-﻿namespace SuchByte.MacroDeck.Enums
+﻿namespace SuchByte.MacroDeck.Enums;
+
+public enum ButtonPressType
 {
-    public enum ButtonPressType
-    {
-        SHORT,
-        SHORT_RELEASE,
-        LONG,
-        LONG_RELEASE,
-    }
+    SHORT,
+    SHORT_RELEASE,
+    LONG,
+    LONG_RELEASE,
 }

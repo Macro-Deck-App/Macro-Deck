@@ -2,69 +2,68 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace SuchByte.MacroDeck.GUI.CustomControls
+namespace SuchByte.MacroDeck.GUI.CustomControls;
+
+public partial class ContentSelectorButton : PictureBox
 {
-    public partial class ContentSelectorButton : PictureBox
+
+    private bool _notification;
+    private bool _selected;
+
+    public void SetNotification(bool notification)
     {
+        _notification = notification;
+        Invalidate();
+    }
 
-        private bool _notification;
-        private bool _selected;
-
-        public void SetNotification(bool notification)
+    public bool Selected { 
+        get => _selected;
+        set
         {
-            _notification = notification;
+            _selected = value;
             Invalidate();
         }
+    }
 
-        public bool Selected { 
-            get => _selected;
-            set
-            {
-                _selected = value;
-                Invalidate();
-            }
-        }
+    public ContentSelectorButton()
+    {
+        BackColor = Color.Transparent;
+        BackgroundImageLayout = ImageLayout.Stretch;
+        ForeColor = Color.White;
+        Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        Text = "";
+        Height = 44;
+        Width = 44;
+        Margin = new Padding(left: 0, top: 3, right: 0, bottom: 3);
+        Cursor = Cursors.Hand;
+        MouseEnter += MouseEnterEvent;
+        MouseLeave += MouseLeaveEvent;
+    }
 
-        public ContentSelectorButton()
+    private void MouseEnterEvent(object sender, EventArgs e)
+    {
+        Invalidate();
+    }
+
+    private void MouseLeaveEvent(object sender, EventArgs e)
+    {
+        Invalidate();
+    }
+
+    protected override void OnPaint(PaintEventArgs pe)
+    {
+        base.OnPaint(pe);
+        if (_notification)
         {
-            BackColor = Color.Transparent;
-            BackgroundImageLayout = ImageLayout.Stretch;
-            ForeColor = Color.White;
-            Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            Text = "";
-            Height = 44;
-            Width = 44;
-            Margin = new Padding(left: 0, top: 3, right: 0, bottom: 3);
-            Cursor = Cursors.Hand;
-            MouseEnter += MouseEnterEvent;
-            MouseLeave += MouseLeaveEvent;
+            pe.Graphics.FillEllipse(Brushes.Red, Width - 12, 5, 10, 10);
         }
-
-        private void MouseEnterEvent(object sender, EventArgs e)
+        if (ClientRectangle.Contains(PointToClient(Cursor.Position)) && !_selected)
         {
-            Invalidate();
+            pe.Graphics.FillRectangle(Brushes.White, Width - 3, 8, 3, Height - 16);
         }
-
-        private void MouseLeaveEvent(object sender, EventArgs e)
+        if (_selected)
         {
-            Invalidate();
-        }
-
-        protected override void OnPaint(PaintEventArgs pe)
-        {
-            base.OnPaint(pe);
-            if (_notification)
-            {
-                pe.Graphics.FillEllipse(Brushes.Red, Width - 12, 5, 10, 10);
-            }
-            if (ClientRectangle.Contains(PointToClient(Cursor.Position)) && !_selected)
-            {
-                pe.Graphics.FillRectangle(Brushes.White, Width - 3, 8, 3, Height - 16);
-            }
-            if (_selected)
-            {
-                pe.Graphics.FillRectangle(new SolidBrush(Colors.WindowsAccentColor), Width - 3, 4, 3, Height - 8);
-            }
+            pe.Graphics.FillRectangle(new SolidBrush(Colors.WindowsAccentColor), Width - 3, 4, 3, Height - 8);
         }
     }
 }

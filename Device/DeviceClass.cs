@@ -1,8 +1,7 @@
-﻿namespace SuchByte.MacroDeck.Device
+﻿namespace SuchByte.MacroDeck.Device;
+
+public enum DeviceClass
 {
-    public enum DeviceClass
-    {
-        SoftwareClient,
-        Macro_Deck_DIY_OLED_6_V1,
-    }
+    SoftwareClient,
+    Macro_Deck_DIY_OLED_6_V1,
 }

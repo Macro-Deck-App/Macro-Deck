@@ -1,13 +1,12 @@
 ﻿using SuchByte.MacroDeck.Models;
 
-namespace SuchByte.MacroDeck.ViewModels
+namespace SuchByte.MacroDeck.ViewModels;
+
+public interface ISerializableConfigViewModel
 {
-    public interface ISerializableConfigViewModel
-    {
-        protected ISerializableConfiguration SerializableConfiguration { get; }
+    protected ISerializableConfiguration SerializableConfiguration { get; }
 
-        void SetConfig();
+    void SetConfig();
 
-        bool SaveConfig();
-    }
+    bool SaveConfig();
 }

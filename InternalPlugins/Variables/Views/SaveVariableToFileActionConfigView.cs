@@ -5,53 +5,52 @@ using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Variables.Plugin.ViewModels;
 
-namespace SuchByte.MacroDeck.Variables.Plugin.Views
+namespace SuchByte.MacroDeck.Variables.Plugin.Views;
+
+public partial class SaveVariableToFileActionConfigView : ActionConfigControl
 {
-    public partial class SaveVariableToFileActionConfigView : ActionConfigControl
+    private readonly SaveVariableToFileActionConfigViewModel _viewModel;
+
+
+    public SaveVariableToFileActionConfigView(PluginAction pluginAction)
     {
-        private readonly SaveVariableToFileActionConfigViewModel _viewModel;
+        InitializeComponent();
+        lblVariable.Text = LanguageManager.Strings.Variable;
+        lblPath.Text = LanguageManager.Strings.Path;
 
+        _viewModel = new SaveVariableToFileActionConfigViewModel(pluginAction);
+    }
 
-        public SaveVariableToFileActionConfigView(PluginAction pluginAction)
+    private void SaveVariableToFileActionConfigView_Load(object sender, EventArgs e)
+    {
+        foreach (var variable in VariableManager.ListVariables)
         {
-            InitializeComponent();
-            lblVariable.Text = LanguageManager.Strings.Variable;
-            lblPath.Text = LanguageManager.Strings.Path;
-
-            _viewModel = new SaveVariableToFileActionConfigViewModel(pluginAction);
+            this.variable.Items.Add(variable.Name);
         }
 
-        private void SaveVariableToFileActionConfigView_Load(object sender, EventArgs e)
+        this.variable.Text = _viewModel.Variable;
+        path.Text = _viewModel.FilePath;
+    }
+
+    public override bool OnActionSave()
+    {
+        _viewModel.Variable = variable.Text;
+        _viewModel.FilePath = path.Text;
+        return _viewModel.SaveConfig();
+    }
+
+    private void BtnChoosePath_Click(object sender, EventArgs e)
+    {
+        using (var saveFileDialog = new SaveFileDialog
+               {
+                   AddExtension = true,
+                   DefaultExt = ".txt",
+                   Filter = "Text file (*.txt)|*.txt|Any (*.*)|*.*",
+               })
         {
-            foreach (var variable in VariableManager.ListVariables)
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
-                this.variable.Items.Add(variable.Name);
-            }
-
-            this.variable.Text = _viewModel.Variable;
-            path.Text = _viewModel.FilePath;
-        }
-
-        public override bool OnActionSave()
-        {
-            _viewModel.Variable = variable.Text;
-            _viewModel.FilePath = path.Text;
-            return _viewModel.SaveConfig();
-        }
-
-        private void BtnChoosePath_Click(object sender, EventArgs e)
-        {
-            using (var saveFileDialog = new SaveFileDialog
-                   {
-                AddExtension = true,
-                DefaultExt = ".txt",
-                Filter = "Text file (*.txt)|*.txt|Any (*.*)|*.*",
-            })
-            {
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    path.Text = saveFileDialog.FileName;
-                }
+                path.Text = saveFileDialog.FileName;
             }
         }
     }

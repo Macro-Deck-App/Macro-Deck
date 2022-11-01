@@ -1,8 +1,7 @@
-﻿namespace SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Enums
+﻿namespace SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Enums;
+
+public enum SetBackgroundColorMethod
 {
-    public enum SetBackgroundColorMethod
-    {
-        Fixed,
-        Random
-    }
+    Fixed,
+    Random
 }

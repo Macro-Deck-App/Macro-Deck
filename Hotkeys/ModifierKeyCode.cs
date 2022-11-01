@@ -1,12 +1,11 @@
-﻿namespace SuchByte.MacroDeck.Hotkeys
+﻿namespace SuchByte.MacroDeck.Hotkeys;
+
+public enum ModifierKeyCode
 {
-    public enum ModifierKeyCode
-    {
 
-        ALT = 1,
-        CTRL = 2,
-        SHIFT = 4,
-        WIN = 8,
+    ALT = 1,
+    CTRL = 2,
+    SHIFT = 4,
+    WIN = 8,
 
-    }
 }

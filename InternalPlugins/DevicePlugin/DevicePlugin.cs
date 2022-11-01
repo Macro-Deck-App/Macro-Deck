@@ -4,22 +4,21 @@ using SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Actions;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Properties;
 
-namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin
+namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin;
+
+public class DevicePlugin : MacroDeckPlugin
 {
-    public class DevicePlugin : MacroDeckPlugin
+    internal override string Name => "Device";
+    internal override string Author => "Macro Deck";
+
+    internal override Image PluginIcon => Resources.device_manager;
+
+    public override void Enable()
     {
-        internal override string Name => "Device";
-        internal override string Author => "Macro Deck";
-
-        internal override Image PluginIcon => Resources.device_manager;
-
-        public override void Enable()
+        Actions = new List<PluginAction>
         {
-            Actions = new List<PluginAction>
-            {
-                new SetProfileAction(),
-                new SetBrightnessAction()
-            };
-        }
+            new SetProfileAction(),
+            new SetBrightnessAction()
+        };
     }
 }

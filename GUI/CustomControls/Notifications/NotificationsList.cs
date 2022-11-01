@@ -2,48 +2,47 @@
 using System.Linq;
 using SuchByte.MacroDeck.Notifications;
 
-namespace SuchByte.MacroDeck.GUI.CustomControls
+namespace SuchByte.MacroDeck.GUI.CustomControls;
+
+public partial class NotificationsList : RoundedUserControl
 {
-    public partial class NotificationsList : RoundedUserControl
+    public event EventHandler OnCloseRequested;
+
+    public NotificationsList()
     {
-        public event EventHandler OnCloseRequested;
+        InitializeComponent();
+        notificationList.HorizontalScroll.Visible = false;
+        notificationList.VerticalScroll.Visible = false;
 
-        public NotificationsList()
+        NotificationManager.OnNotification += NotificationAdded;
+        NotificationManager.OnNotificationRemoved += NotificationRemoved;
+
+        foreach (var notification in NotificationManager.Notifications)
         {
-            InitializeComponent();
-            notificationList.HorizontalScroll.Visible = false;
-            notificationList.VerticalScroll.Visible = false;
-
-            NotificationManager.OnNotification += NotificationAdded;
-            NotificationManager.OnNotificationRemoved += NotificationRemoved;
-
-            foreach (var notification in NotificationManager.Notifications)
-            {
-                var notificationItem = new NotificationItem(notification);
-                notificationList.Controls.Add(notificationItem);
-            }
+            var notificationItem = new NotificationItem(notification);
+            notificationList.Controls.Add(notificationItem);
         }
+    }
 
 
-        private void NotificationAdded(object sender, NotificationEventArgs e)
+    private void NotificationAdded(object sender, NotificationEventArgs e)
+    {
+        if (IsDisposed || !IsHandleCreated) return;
+        var notificationItem = new NotificationItem(e.Notification);
+        Invoke(() => notificationList.Controls.Add(notificationItem));
+    }
+
+    private void NotificationRemoved(object sender, NotificationRemovedEventArgs e)
+    {
+        var control = notificationList.Controls.OfType<NotificationItem>().Where(x => x.Id == e.Id).FirstOrDefault();
+        if (control != null)
         {
-            if (IsDisposed || !IsHandleCreated) return;
-            var notificationItem = new NotificationItem(e.Notification);
-            Invoke(() => notificationList.Controls.Add(notificationItem));
+            control.ClearAdditionalControls();
+            notificationList.Controls.Remove(control);
         }
-
-        private void NotificationRemoved(object sender, NotificationRemovedEventArgs e)
+        if (notificationList.Controls.Count == 0)
         {
-            var control = notificationList.Controls.OfType<NotificationItem>().Where(x => x.Id == e.Id).FirstOrDefault();
-            if (control != null)
-            {
-                control.ClearAdditionalControls();
-                notificationList.Controls.Remove(control);
-            }
-            if (notificationList.Controls.Count == 0)
-            {
-                OnCloseRequested?.Invoke(this, EventArgs.Empty);
-            }
+            OnCloseRequested?.Invoke(this, EventArgs.Empty);
         }
     }
 }

@@ -1,10 +1,9 @@
-﻿namespace SuchByte.MacroDeck.InternalPlugins.Variables.Enums
+﻿namespace SuchByte.MacroDeck.InternalPlugins.Variables.Enums;
+
+public enum ChangeVariableMethod
 {
-    public enum ChangeVariableMethod
-    {
-        countUp,
-        countDown,
-        set,
-        toggle
-    }
+    countUp,
+    countDown,
+    set,
+    toggle
 }

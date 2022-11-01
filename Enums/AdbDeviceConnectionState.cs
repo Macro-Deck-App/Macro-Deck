@@ -1,8 +1,7 @@
-﻿namespace SuchByte.MacroDeck.Enums
+﻿namespace SuchByte.MacroDeck.Enums;
+
+public enum AdbDeviceConnectionState
 {
-    public enum AdbDeviceConnectionState
-    {
-        CONNECTED,
-        DISCONNECTED
-    }
+    CONNECTED,
+    DISCONNECTED
 }

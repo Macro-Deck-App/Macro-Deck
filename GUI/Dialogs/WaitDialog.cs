@@ -2,39 +2,38 @@
 using SuchByte.MacroDeck.Language;
 using Form = System.Windows.Forms.Form;
 
-namespace SuchByte.MacroDeck.GUI.Dialogs
+namespace SuchByte.MacroDeck.GUI.Dialogs;
+
+internal partial class WaitDialog : DialogForm
 {
-    internal partial class WaitDialog : DialogForm
+    public WaitDialog()
     {
-        public WaitDialog()
-        {
-            InitializeComponent();
-            SetCloseIconVisible(false);
-            lblPleaseWait.Text = LanguageManager.Strings.PleaseWait;
-        }
+        InitializeComponent();
+        SetCloseIconVisible(false);
+        lblPleaseWait.Text = LanguageManager.Strings.PleaseWait;
     }
+}
 
-    public static class SpinnerDialog
+public static class SpinnerDialog
+{
+    private static WaitDialog waitDialog = new();
+
+    public static void SetVisisble(bool visible, Form owner)
     {
-        private static WaitDialog waitDialog = new();
-
-        public static void SetVisisble(bool visible, Form owner)
+        owner?.Invoke(() =>
         {
-            owner?.Invoke(() =>
+            if (visible)
             {
-                if (visible)
-                {
-                    if (waitDialog.Visible) return;
-                    waitDialog.ShowDialog();
-                }
-                else
-                {
-                    waitDialog.Hide();
-                }
-            });
-
-        }
-
+                if (waitDialog.Visible) return;
+                waitDialog.ShowDialog();
+            }
+            else
+            {
+                waitDialog.Hide();
+            }
+        });
 
     }
+
+
 }
