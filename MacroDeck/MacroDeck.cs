@@ -67,49 +67,7 @@ public class MacroDeck : NativeWindow
 
 
     private static readonly Stopwatch StartUpTimeStopWatch = new();
-
-    [STAThread]
-    static void Main(string[] args)
-    {
-        Application.EnableVisualStyles();
-        Application.SetCompatibleTextRenderingDefault(false);
-        
-        // Register exception event handlers
-        Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-        Application.ThreadException += ApplicationThreadException;
-        AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
-
-        CheckRunningInstance();
-        StartParameters = StartParameters.ParseParameters(args);
-
-        Start();
-    }
     
-    private static void CheckRunningInstance()
-    {
-        var proc = Process.GetCurrentProcess();
-        var processes = Process.GetProcessesByName(proc.ProcessName);
-        if (processes.Length <= 1) return;
-        if (MacroDeckPipeClient.SendShowMainWindowMessage())
-        {
-            Environment.Exit(0);
-            return;
-        }
-        
-        // Kill instance if no response
-        foreach (var p in processes.Where(x => x.Id != proc.Id))
-        {
-            try
-            {
-                p.Kill();
-            }
-            catch
-            {
-                // ignored
-            }
-        }
-    }
-
     private static void PrintNetworkInterfaces()
     {
         StringBuilder sb = new();
@@ -131,8 +89,9 @@ public class MacroDeck : NativeWindow
         sb.Clear();
     }
 
-    private static void Start()
+    internal static void Start(StartParameters startParameters)
     {
+        StartParameters = startParameters;
         StartUpTimeStopWatch.Start();
 
         MacroDeckLogger.LogLevel = (LogLevel)StartParameters.LogLevel;
@@ -347,16 +306,6 @@ public class MacroDeck : NativeWindow
         }
     }
     
-    private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
-    {
-        MacroDeckLogger.Error(typeof(MacroDeck), "CurrentDomainOnUnhandledException: " + e.ExceptionObject);
-    }
-
-    private static void ApplicationThreadException(object sender, ThreadExceptionEventArgs e)
-    {
-        MacroDeckLogger.Error(typeof(MacroDeck), "ApplicationThreadException: " + e.Exception.Message + Environment.NewLine + e.Exception.StackTrace);
-    }
-
     public static bool IsAdministrator()
     {
         return (new WindowsPrincipal(WindowsIdentity.GetCurrent())).IsInRole(WindowsBuiltInRole.Administrator);

@@ -18,7 +18,7 @@
 	  <RootNamespace>SuchByte.MacroDeck</RootNamespace>
 	  <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>appicon.ico</ApplicationIcon>
-    <StartupObject>SuchByte.MacroDeck.MacroDeck</StartupObject>
+    <StartupObject>SuchByte.MacroDeck.Program</StartupObject>
     <Version>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(VersionRevision)</Version>
     <Company>Macro Deck</Company>
     <Authors>Manuel Mayer</Authors>
