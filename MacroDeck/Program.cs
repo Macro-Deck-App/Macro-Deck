@@ -41,7 +41,7 @@ internal class Program
         }
 
         // Kill instance if no response
-        foreach (var p in processes.Where(x => x.Id != proc.Id))
+        foreach (var p in processes?.Where(x => x.Id != proc.Id) ?? Array.Empty<Process>())
         {
             try
             {
