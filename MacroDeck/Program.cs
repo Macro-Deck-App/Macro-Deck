@@ -23,16 +23,17 @@ internal class Program
         Application.ThreadException += ApplicationThreadException;
         AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
 
-        CheckRunningInstance();
-        var startParameters  = StartParameters.ParseParameters(args);
+
+        var startParameters = StartParameters.ParseParameters(args);
+        CheckRunningInstance(startParameters.IgnorePidCheck);
         MacroDeck.Start(startParameters);
     }
     
-    private static void CheckRunningInstance()
+    private static void CheckRunningInstance(int ignoredPid)
     {
         var proc = Process.GetCurrentProcess();
-        var processes = Process.GetProcessesByName(proc.ProcessName);
-        if (processes.Length <= 1) return;
+        var processes = Process.GetProcessesByName(proc.ProcessName).Where(x => ignoredPid == 0 || x.Id != ignoredPid).ToArray();
+        if (processes?.Length <= 1) return;
         if (MacroDeckPipeClient.SendShowMainWindowMessage())
         {
             Environment.Exit(0);

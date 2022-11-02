@@ -81,6 +81,10 @@ public class MacroDeck : NativeWindow
 
         ApplicationPaths = new ApplicationPaths(StartParameters.PortableMode);
 
+        MacroDeckLogger.Info($"Macro Deck {Version.VersionString}");
+        MacroDeckLogger.Info($"Path: {ApplicationPaths.ExecutablePath}");
+        MacroDeckLogger.Info($"Start parameters: {string.Join(" ", StartParameters.ToArray(StartParameters))}");
+
 
         MacroDeckLogger.CleanUpLogsDir();
 
@@ -126,7 +130,7 @@ public class MacroDeck : NativeWindow
 
         TrayIcon.SetupTrayIcon(TrayIconContextMenu,
             ShowMainWindow,
-            () => RestartMacroDeck(),
+            () => RestartMacroDeck(string.Join(" ", StartParameters)),
             () => Environment.Exit(0));
 
         using (_mainWindow = new MainWindow())
@@ -241,12 +245,14 @@ public class MacroDeck : NativeWindow
     public static void RestartMacroDeck(string parameters = "")
     {
         TrayIcon.Visible = false;
+        var arguments = (_mainWindow is { IsDisposed: false } ? "--show " : "") + parameters + $" --ignore-pid-check {Process.GetCurrentProcess().Id}";
+        MacroDeckLogger.Info($"Restart Macro Deck with arguments: {arguments}");
         var p = new Process
         {
             StartInfo = new ProcessStartInfo(ApplicationPaths.ExecutablePath)
             {
                 UseShellExecute = true,
-                Arguments = (_mainWindow is { IsDisposed: false } ? "--show " : "") + string.Join(" ", StartParameters),
+                Arguments = arguments,
             }
         };
         p.Start();
