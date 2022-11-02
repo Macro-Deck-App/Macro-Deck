@@ -114,7 +114,7 @@ public class MacroDeck : NativeWindow
         ProfileManager.Load();
 
         PrintNetworkInterfaces();
-        MacroDeckServer.Start(StartParameters.Port == -1 ? Configuration.HostPort : StartParameters.Port);
+        MacroDeckServer.Start(StartParameters.Port <= 0 ? Configuration.HostPort : StartParameters.Port);
         BroadcastServer.Start();
         ADBServerHelper.Initialize();
 
