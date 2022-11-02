@@ -6,7 +6,7 @@ namespace SuchByte.MacroDeck.Startup;
 public class StartParameters
 {
 
-    [Option(Default = -1, Required = false)]
+    [Option("port", Default = -1, Required = false)]
     public int Port { get; set; }
 
     [Option("force-update", Required = false)]
@@ -33,6 +33,9 @@ public class StartParameters
     [Option("debug-console", Required = false)]
     public bool DebugConsole { get; set; }
 
+    [Option("ignore-pid-check", Default = 0, Required = false)]
+    public int IgnorePidCheck { get; set; }
+
     public static StartParameters ParseParameters(string[] args)
     {
         var startParameters = new StartParameters();
@@ -52,5 +55,21 @@ public class StartParameters
             .WithParsed(sp => startParameters = sp);
 
         return startParameters;
+    }
+
+    public static string[] ToArray(StartParameters startParameters)
+    {
+        var parameters = new string[startParameters.GetType().GetProperties().Length];
+        var properties = startParameters.GetType().GetProperties();
+
+        for (var i = 0; i < properties.Length; i++)
+        {
+            var propertyInfo = properties[i];
+            var optionAttribute = Attribute.GetCustomAttribute(propertyInfo, typeof(OptionAttribute)) as OptionAttribute;
+            if (optionAttribute == null) continue;
+            parameters[i] = $"--{optionAttribute.LongName} " + propertyInfo.GetValue(startParameters);
+        }
+
+        return parameters;
     }
 }
