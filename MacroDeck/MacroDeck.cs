@@ -85,7 +85,6 @@ public class MacroDeck : NativeWindow
         MacroDeckLogger.Info($"Path: {ApplicationPaths.ExecutablePath}");
         MacroDeckLogger.Info($"Start parameters: {string.Join(" ", StartParameters.ToArray(StartParameters))}");
 
-
         MacroDeckLogger.CleanUpLogsDir();
 
         BackupManager.CheckRestoreDirectory();
