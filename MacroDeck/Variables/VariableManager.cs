@@ -13,6 +13,7 @@ namespace SuchByte.MacroDeck.Variables;
 
 public static class VariableManager
 {
+    internal const string TemplateTrimBlank = "_trimblank_";
 
     internal static event EventHandler OnVariableChanged;
     internal static event EventHandler OnVariableRemoved;
@@ -169,8 +170,8 @@ public static class VariableManager
         string result;
         try 
         {
-            templateConfiguration.Trimmer = template.StartsWith("_trimblank_", StringComparison.OrdinalIgnoreCase) ? DocumentConfiguration.TrimFirstAndLastBlankLines : DocumentConfiguration.TrimNothing;
-            template = template.Replace("_trimblank_", "", StringComparison.OrdinalIgnoreCase);
+            templateConfiguration.Trimmer = template.StartsWith(TemplateTrimBlank, StringComparison.OrdinalIgnoreCase) ? DocumentConfiguration.TrimFirstAndLastBlankLines : DocumentConfiguration.TrimNothing;
+            template = template.Replace(TemplateTrimBlank, "", StringComparison.OrdinalIgnoreCase);
             var document = Document.CreateDefault(template, templateConfiguration).DocumentOrThrow;
 
             var vars = new Dictionary<Value, Value>();
