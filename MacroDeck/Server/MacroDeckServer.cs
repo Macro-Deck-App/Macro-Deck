@@ -40,6 +40,7 @@ public class MacroDeckServer : IObservable<RpcAction>
     private List<IObserver<RpcAction>> Observers { get; }
 
     private IRpcHandler _rpcHandler;
+    private RCPHandlerFactoryHelper _factoryHelper;
     private IRpcHandlerFactory _rpcHandlerFactory;
     private RpcDispatcher _rcpDispatcher;
     
@@ -47,9 +48,9 @@ public class MacroDeckServer : IObservable<RpcAction>
     {
         // TODO: Add handler factory
 
-        
-        //_rpcHandlerFactory = new RpcHandlerFactory(handlers);
-        //_rcpDispatcher = new RpcDispatcher(_rpcHandlerFactory);
+        // _factoryHelper = new (/*Add IServices*/);
+        // _rpcHandlerFactory = new RpcHandlerFactory(_factoryHelper.GetHandlers);
+        // _rcpDispatcher = new RpcDispatcher(_rpcHandlerFactory);
     }
 
     public IDisposable Subscribe(IObserver<RpcAction> observer)
@@ -243,7 +244,7 @@ public class MacroDeckServer : IObservable<RpcAction>
         {
             if (responseObject["Method"] == null) return;
 
-            if (!Enum.TryParse(typeof(JsonMethod), responseObject["Method"].ToString(), out var method)) return;
+            if (!Enum.TryParse<JsonMethod>(responseObject["Method"].ToString(), out var method)) return;
 
             MacroDeckLogger.Trace("Received method: " + method);
 
