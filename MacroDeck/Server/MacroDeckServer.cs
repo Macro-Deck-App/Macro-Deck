@@ -47,10 +47,7 @@ public class MacroDeckServer : IObservable<RpcAction>
     {
         // TODO: Add handler factory
 
-        //Func<IRpcHandler> rpcHandlerFactory = () =>
-        //{
-
-        //}
+        
         //_rpcHandlerFactory = new RpcHandlerFactory(handlers);
         //_rcpDispatcher = new RpcDispatcher(_rpcHandlerFactory);
     }
