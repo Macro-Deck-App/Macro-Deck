@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using FastColoredTextBoxNS;
+using FastColoredTextBoxNS.Types;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Variables;
@@ -14,17 +15,17 @@ namespace SuchByte.MacroDeck.GUI.Dialogs;
 
 public partial class TemplateEditor : DialogForm
 {
-    private AutocompleteMenu autocompleteMenu;
+    private const string TrimBlankNewLine = VariableManager.TemplateTrimBlank + "\r\n";
 
-    private static readonly string[] operators = { "and", "cmp", "default", "defined", "eq", "ge", "gt", "has", "le", "lt", "ne", 
+    private static readonly string[] Operators = { "and", "cmp", "default", "defined", "eq", "ge", "gt", "has", "le", "lt", "ne", 
         "not", "or", "xor", "when", "declare", "as", "dump", "echo", "empty", "set", "to", 
         "return", "true", "false", "void"};
-    private static readonly string[] functions = { "abs", "add", "call", "cast", "cat", "ceil", "char", "cmp", "cos", "cross", "default", "defined", 
+    private static readonly string[] Functions = { "abs", "add", "call", "cast", "cat", "ceil", "char", "cmp", "cos", "cross", "default", "defined", 
         "div", "eq", "except", "filter", "find", "flip", "floor", "format", "ge", "gt", "has", "join", "lcase", 
         "le", "len", "lt", "map", "match", "max", "min", "mod", "mul", "ne", "ord", "pow", "rand", "range", "round", "sin", 
         "slice", "sort", "split", "sub", "token", "type", "ucase", "union", "when", "xor", "zip"};
-    private static readonly string[] commands = { "if", "elif", "else", "for", "while" };
-    private static readonly string[] special = { "_trimblank_" };
+    private static readonly string[] Commands = { "if", "elif", "else", "for", "while" };
+    private static readonly string[] Special = { VariableManager.TemplateTrimBlank };
 
     private readonly TextStyle functionStyle = new(Brushes.DarkKhaki, null, FontStyle.Regular);
     private readonly TextStyle commentStyle = new(Brushes.Green, null, FontStyle.Regular);
@@ -34,53 +35,49 @@ public partial class TemplateEditor : DialogForm
     private readonly TextStyle specialStyle = new(Brushes.Lime, null, FontStyle.Regular);
 
     private readonly Regex commentRegex = new(@"{\s*_\}", RegexOptions.Multiline | RegexOptions.Compiled);
-    private readonly Regex operatorRegex = new(@$"\b(?x: {string.Join(" | ", operators)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
-    private readonly Regex functionRegex = new(@$"\b(?x: {string.Join(" | ", functions)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
-    private readonly Regex commandRegex = new(@$"\b(?x: {string.Join(" | ", commands)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
-    private readonly Regex specialRegex = new(@$"\b(?x: {string.Join(" | ", special)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
+    private readonly Regex operatorRegex = new(@$"\b(?x: {string.Join(" | ", Operators)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
+    private readonly Regex functionRegex = new(@$"\b(?x: {string.Join(" | ", Functions)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
+    private readonly Regex commandRegex = new(@$"\b(?x: {string.Join(" | ", Commands)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
+    private readonly Regex specialRegex = new(@$"\b(?x: {string.Join(" | ", Special)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
 
-    private Regex variableRegex;
-
-    private string[] variablesArray;
+    private readonly Regex variableRegex;
+    private bool HasTrimBlank => Template.StartsWith(VariableManager.TemplateTrimBlank, StringComparison.OrdinalIgnoreCase);
 
     public string Template 
     { 
         get => template.Text;
         set => template.Text = value;
     }
+    
+    private List<Variable> Variables { get; }
 
     public TemplateEditor(string template = "")
     {
         InitializeComponent();
-        autocompleteMenu = new AutocompleteMenu(this.template);
+        var autocompleteMenu = new AutocompleteMenu(this.template);
         lblTemplateEngineInfo.Text = LanguageManager.Strings.MacroDeckUsesCottleTemplateEngine;
         lblResultLabel.Text = LanguageManager.Strings.Result;
         btnVariables.Text = LanguageManager.Strings.Variable;
         checkTrimBlankLines.Text = LanguageManager.Strings.TrimBlankLines;
+        
+        Variables = VariableManager.ListVariables.ToList();
+        var variablesList = VariableManager.ListVariables.Select(v => v.Name).ToArray();
+        
+        variableRegex = new Regex(@$"\b(?x: {string.Join(" | ", variablesList)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
 
-        var variablesList = new List<string>();
-        foreach (var v in VariableManager.ListVariables)
-        {
-            variablesList.Add(v.Name);
-        }
-        variablesArray = variablesList.ToArray();
-
-        variableRegex = new Regex(@$"\b(?x: {string.Join(" | ", variablesArray)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
-
-        autocompleteMenu.Items.SetAutocompleteItems(variablesArray.Concat(operators).Concat(functions).Concat(commands).Concat(special).ToArray());
-            
+        autocompleteMenu.Items.SetAutocompleteItems(variablesList.Concat(Operators).Concat(Functions).Concat(Commands).Concat(Special).ToArray());
 
         this.template.TextChanged += Template_TextChanged;
         Template = template;
     }
 
-    private void Template_TextChanged(object sender, TextChangedEventArgs e)
+    private void Template_TextChanged(object? sender, TextChangedEventArgs e)
     {
-        lblResult.Text = VariableManager.RenderTemplate(template.Text);
+        lblResult.Text = VariableManager.RenderTemplate(Template);
 
-        checkTrimBlankLines.Checked = template.Text.StartsWith("_trimblank_", StringComparison.OrdinalIgnoreCase);
+        checkTrimBlankLines.Checked = HasTrimBlank;
 
-        var range = (sender as FastColoredTextBox).Range;
+        var range = (sender as FastColoredTextBox)!.Range;
 
         //clear style of changed range
         range.ClearStyle(functionStyle);
@@ -101,18 +98,16 @@ public partial class TemplateEditor : DialogForm
     private void Insert(string str)
     {
         var selectionIndex = template.SelectionStart ;
-        template.Text = template.Text.Insert(selectionIndex, str);
-        template.SelectionStart = selectionIndex + str.Length;
+        Template = Template.Insert(selectionIndex, str);
+        template.SelectionStart = selectionIndex;
+        template.SelectionLength = str.Length;
     }
 
     private void BtnIf_Click(object sender, EventArgs e)
     {
-        var dummyVariable = VariableManager.ListVariables.ToList().Find(x => x.Type == VariableType.Bool.ToString());
-        var dummyVariableName = dummyVariable != null ? dummyVariable.Name : "VARIABLE";            
-        Insert("{if VARIABLE: " + Environment.NewLine + "true" + Environment.NewLine + " |else: " + Environment.NewLine + "false" + Environment.NewLine + "}");
+        Insert(string.Format("{{if VARIABLE: {0}true{0} |else: {0}false{0}}}", Environment.NewLine));
     }
 
-       
     private void BtnAnd_Click(object sender, EventArgs e)
     {
         Insert("{and(2 < 3, 5 > 1)}");
@@ -127,11 +122,11 @@ public partial class TemplateEditor : DialogForm
     {
         Insert("{not(1 = 2)}");
     }
-
+    
     private void BtnVariables_Click(object sender, EventArgs e)
     {
         variablesContextMenu.Items.Clear();
-        foreach (var variable in VariableManager.ListVariables)
+        foreach (var variable in Variables)
         {
             var item = new ToolStripMenuItem
             {
@@ -144,10 +139,10 @@ public partial class TemplateEditor : DialogForm
         variablesContextMenu.Show(PointToScreen(new Point(((ButtonPrimary)sender).Bounds.Left, ((ButtonPrimary)sender).Bounds.Bottom)));
     }
 
-    private void Item_Click(object sender, EventArgs e)
+    private void Item_Click(object? sender, EventArgs e)
     {
-        var item = (ToolStripMenuItem)sender;
-        Insert("{" + item.Text + "}");
+        var item = (ToolStripMenuItem)sender!;
+        Insert($"{{{item.Text}}}");
     }
 
     private void LblTemplateEngineInfo_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -167,12 +162,14 @@ public partial class TemplateEditor : DialogForm
 
     private void CheckTrimBlankLines_CheckedChanged(object sender, EventArgs e)
     {
-        if (checkTrimBlankLines.Checked && !template.Text.StartsWith("_trimblank_", StringComparison.OrdinalIgnoreCase))
+        var hasTrimBlank = HasTrimBlank; //evaluate once
+        if (checkTrimBlankLines.Checked && !hasTrimBlank)
         {
-            template.Text = template.Text.Insert(0, "_trimblank_\r\n");
-        } else if (!checkTrimBlankLines.Checked && template.Text.StartsWith("_trimblank_", StringComparison.OrdinalIgnoreCase))
+            Template = Template.Insert(0, TrimBlankNewLine);
+        }
+        else if (!checkTrimBlankLines.Checked && hasTrimBlank)
         {
-            template.Text = template.Text.Replace("_trimblank_\r\n", string.Empty).Replace("_trimblank_", string.Empty);
+            Template = Template.Replace(TrimBlankNewLine, string.Empty).Replace(VariableManager.TemplateTrimBlank, string.Empty);
         }
     }
 }
