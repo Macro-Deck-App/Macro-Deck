@@ -13,6 +13,6 @@ public class ActionButtonSetStateOffAction : PluginAction
     public override void Trigger(string clientId, ActionButton actionButton)
     {
         if (actionButton.State == false) return;
-        MacroDeckServer.SetState(actionButton, false);
+        MacroDeckServer.Instance.SetState(actionButton, false);
     }
 }

@@ -55,7 +55,7 @@ public partial class DeviceConfigurator : DialogForm
         if (_macroDeckDevice == null || !_macroDeckDevice.Available) return;
         _macroDeckDevice.Configuration.Brightness = brightness.Value / 10.0f;
         DeviceManager.SaveKnownDevices();
-        var macroDeckClient = MacroDeckServer.GetMacroDeckClient(_macroDeckDevice.ClientId);
+        var macroDeckClient = MacroDeckServer.Instance.GetMacroDeckClient(_macroDeckDevice.ClientId);
         macroDeckClient?.DeviceMessage.SendConfiguration(macroDeckClient);
     }
 
@@ -70,7 +70,7 @@ public partial class DeviceConfigurator : DialogForm
         if (_macroDeckDevice == null || !_macroDeckDevice.Available) return;
         _macroDeckDevice.Configuration.AutoConnect = checkAutoConnect.Checked;
         DeviceManager.SaveKnownDevices();
-        var macroDeckClient = MacroDeckServer.GetMacroDeckClient(_macroDeckDevice.ClientId);
+        var macroDeckClient = MacroDeckServer.Instance.GetMacroDeckClient(_macroDeckDevice.ClientId);
         macroDeckClient?.DeviceMessage.SendConfiguration(macroDeckClient);
     }
 
@@ -82,7 +82,7 @@ public partial class DeviceConfigurator : DialogForm
             if (_macroDeckDevice == null || !_macroDeckDevice.Available) return;
             _macroDeckDevice.Configuration.WakeLockMethod = WakeLockMethod.Never;
             DeviceManager.SaveKnownDevices();
-            var macroDeckClient = MacroDeckServer.GetMacroDeckClient(_macroDeckDevice.ClientId);
+            var macroDeckClient = MacroDeckServer.Instance.GetMacroDeckClient(_macroDeckDevice.ClientId);
             macroDeckClient?.DeviceMessage.SendConfiguration(macroDeckClient);
         }
     }
@@ -95,7 +95,7 @@ public partial class DeviceConfigurator : DialogForm
             if (_macroDeckDevice == null || !_macroDeckDevice.Available) return;
             _macroDeckDevice.Configuration.WakeLockMethod = WakeLockMethod.Connected;
             DeviceManager.SaveKnownDevices();
-            var macroDeckClient = MacroDeckServer.GetMacroDeckClient(_macroDeckDevice.ClientId);
+            var macroDeckClient = MacroDeckServer.Instance.GetMacroDeckClient(_macroDeckDevice.ClientId);
             macroDeckClient?.DeviceMessage.SendConfiguration(macroDeckClient);
         }
     }
@@ -108,7 +108,7 @@ public partial class DeviceConfigurator : DialogForm
             if (_macroDeckDevice == null || !_macroDeckDevice.Available) return;
             _macroDeckDevice.Configuration.WakeLockMethod = WakeLockMethod.Always;
             DeviceManager.SaveKnownDevices();
-            var macroDeckClient = MacroDeckServer.GetMacroDeckClient(_macroDeckDevice.ClientId);
+            var macroDeckClient = MacroDeckServer.Instance.GetMacroDeckClient(_macroDeckDevice.ClientId);
             macroDeckClient?.DeviceMessage.SendConfiguration(macroDeckClient);
         }
     }

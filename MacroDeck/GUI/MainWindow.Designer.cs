@@ -35,8 +35,8 @@ namespace SuchByte.MacroDeck.GUI
                 }
                 LanguageManager.LanguageChanged -= LanguageChanged;
                 Updater.Updater.OnUpdateAvailable -= UpdateAvailable;
-                MacroDeckServer.OnDeviceConnectionStateChanged -= this.OnClientsConnectedChanged;
-                MacroDeckServer.OnServerStateChanged -= this.OnServerStateChanged;
+                MacroDeckServer.Instance.OnDeviceConnectionStateChanged -= this.OnClientsConnectedChanged;
+                MacroDeckServer.Instance.OnServerStateChanged -= this.OnServerStateChanged;
                 PluginManager.OnPluginsChange -= this.OnPluginsChanged;
                 IconManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
                 NotificationManager.OnNotification -= NotificationsChanged;

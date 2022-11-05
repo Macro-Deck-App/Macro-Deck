@@ -130,7 +130,7 @@ public class ActionButton : IDisposable
         {
             if (_state == value) return;
             _state = value;
-            MacroDeckServer.UpdateState(this);
+            MacroDeckServer.Instance.UpdateState(this);
             StateChanged?.Invoke(this, EventArgs.Empty);
         }
     }
@@ -162,7 +162,7 @@ public class ActionButton : IDisposable
         {
             if (_backgroundColorOff == value) return;
             _backgroundColorOff = value;
-            MacroDeckServer.UpdateState(this);
+            MacroDeckServer.Instance.UpdateState(this);
             StateChanged?.Invoke(this, EventArgs.Empty);
         }
     }
@@ -174,7 +174,7 @@ public class ActionButton : IDisposable
         {
             if (_backgroundColorOn == value) return;
             _backgroundColorOn = value;
-            MacroDeckServer.UpdateState(this);
+            MacroDeckServer.Instance.UpdateState(this);
             StateChanged?.Invoke(this, EventArgs.Empty);
         }
     }

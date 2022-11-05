@@ -5,7 +5,9 @@ VisualStudioVersion = 17.3.32811.315
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MacroDeck", "MacroDeck\MacroDeck.csproj", "{119E86B4-9738-4684-AF88-CDBBF0315BBF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacroDeck.Tests", "MacroDeck.Tests\MacroDeck.Tests.csproj", "{49F1CAC2-158D-45AC-B07C-52394B10A7E2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MacroDeck.Tests", "MacroDeck.Tests\MacroDeck.Tests.csproj", "{49F1CAC2-158D-45AC-B07C-52394B10A7E2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MacroDeck.RPC", "MacroDeck.RPC\MacroDeck.RPC.csproj", "{631E6D72-C62C-46F3-8A8F-8C6329F50D2F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,14 @@ Global
 		{49F1CAC2-158D-45AC-B07C-52394B10A7E2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{49F1CAC2-158D-45AC-B07C-52394B10A7E2}.Release|x64.ActiveCfg = Release|Any CPU
 		{49F1CAC2-158D-45AC-B07C-52394B10A7E2}.Release|x64.Build.0 = Release|Any CPU
+		{631E6D72-C62C-46F3-8A8F-8C6329F50D2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{631E6D72-C62C-46F3-8A8F-8C6329F50D2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{631E6D72-C62C-46F3-8A8F-8C6329F50D2F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{631E6D72-C62C-46F3-8A8F-8C6329F50D2F}.Debug|x64.Build.0 = Debug|Any CPU
+		{631E6D72-C62C-46F3-8A8F-8C6329F50D2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{631E6D72-C62C-46F3-8A8F-8C6329F50D2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{631E6D72-C62C-46F3-8A8F-8C6329F50D2F}.Release|x64.ActiveCfg = Release|Any CPU
+		{631E6D72-C62C-46F3-8A8F-8C6329F50D2F}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

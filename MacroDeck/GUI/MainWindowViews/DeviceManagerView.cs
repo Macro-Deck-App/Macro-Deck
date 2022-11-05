@@ -25,7 +25,7 @@ public partial class DeviceManagerView : UserControl
     private void DeviceManagerPage_Load(object sender, EventArgs e)
     {
         LoadDevices();
-        MacroDeckServer.OnDeviceConnectionStateChanged += OnClientsChanged;
+        MacroDeckServer.Instance.OnDeviceConnectionStateChanged += OnClientsChanged;
         DeviceManager.OnDevicesChange += OnClientsChanged;
         radioAllowAll.CheckedChanged -= RadioBehaviour_CheckedChanged;
         radioAskNewConnections.CheckedChanged -= RadioBehaviour_CheckedChanged;

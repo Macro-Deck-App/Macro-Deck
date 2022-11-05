@@ -89,7 +89,7 @@ public class HotkeyManager : NativeWindow
                 {
                     try
                     {
-                        MacroDeckServer.Execute(actionButton, "", ButtonPressType.SHORT);
+                        MacroDeckServer.Instance.Execute(actionButton, "", ButtonPressType.SHORT);
                     }
                     catch { }
                 }

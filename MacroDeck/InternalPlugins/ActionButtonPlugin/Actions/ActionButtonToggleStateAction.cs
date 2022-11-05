@@ -12,6 +12,6 @@ public class ActionButtonToggleStateAction : PluginAction
     public override string Description => LanguageManager.Strings.ActionToggleActionButtonStateDescription;
     public override void Trigger(string clientId, ActionButton actionButton)
     {
-        MacroDeckServer.SetState(actionButton, !actionButton.State);
+        MacroDeckServer.Instance.SetState(actionButton, !actionButton.State);
     }
 }

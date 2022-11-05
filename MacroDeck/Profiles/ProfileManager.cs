@@ -57,9 +57,9 @@ public static class ProfileManager
                          {
                              if (DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId) == null) return false;
                              return DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId).Available && !string.IsNullOrWhiteSpace(DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId).ClientId);
-                         }).Select(macroDeckDevice => MacroDeckServer.GetMacroDeckClient(DeviceManager.GetMacroDeckDevice(macroDeckDevice).ClientId)).Where(macroDeckClient => macroDeckClient.Profile.Equals(macroDeckProfile) && !macroDeckClient.Folder.Equals(macroDeckFolder)))
+                         }).Select(macroDeckDevice => MacroDeckServer.Instance.GetMacroDeckClient(DeviceManager.GetMacroDeckDevice(macroDeckDevice).ClientId)).Where(macroDeckClient => macroDeckClient.Profile.Equals(macroDeckProfile) && !macroDeckClient.Folder.Equals(macroDeckFolder)))
                 {
-                    MacroDeckServer.SetFolder(macroDeckClient, macroDeckFolder);
+                    MacroDeckServer.Instance.SetFolder(macroDeckClient, macroDeckFolder);
                 }
             }
         }
@@ -101,9 +101,9 @@ public static class ProfileManager
 
                 actionButton.LabelOff.LabelBase64 = Base64.GetBase64FromImage(LabelGenerator.GetLabel(new Bitmap(250, 250), labelOffText, actionButton.LabelOff.LabelPosition, new Font(actionButton.LabelOff.FontFamily, actionButton.LabelOff.Size), actionButton.LabelOff.LabelColor, Color.Black, new SizeF(2.0f, 2.0f)));
                 actionButton.LabelOn.LabelBase64 = Base64.GetBase64FromImage(LabelGenerator.GetLabel(new Bitmap(250, 250), labelOnText, actionButton.LabelOn.LabelPosition, new Font(actionButton.LabelOn.FontFamily, actionButton.LabelOn.Size), actionButton.LabelOn.LabelColor, Color.Black, new SizeF(2.0f, 2.0f)));
-                foreach (var macroDeckClient in MacroDeckServer.Clients)
+                foreach (var macroDeckClient in MacroDeckServer.Instance.Clients)
                 {
-                    MacroDeckServer.SendButton(macroDeckClient, actionButton);
+                    MacroDeckServer.Instance.SendButton(macroDeckClient, actionButton);
                 }
             }
             catch
@@ -290,9 +290,9 @@ public static class ProfileManager
             }
         }
 
-        foreach (var macroDeckClient in MacroDeckServer.Clients.FindAll(macroDeckClient => macroDeckClient.Folder.FolderId.Equals(folder.FolderId)))
+        foreach (var macroDeckClient in MacroDeckServer.Instance.Clients.FindAll(macroDeckClient => macroDeckClient.Folder.FolderId.Equals(folder.FolderId)))
         {
-            MacroDeckServer.SetFolder(macroDeckClient, macroDeckProfile.Folders[0]);
+            MacroDeckServer.Instance.SetFolder(macroDeckClient, macroDeckProfile.Folders[0]);
         }
             
         foreach (var child in folder.Childs.Select(childId => FindFolderById(childId, macroDeckProfile)))

@@ -21,7 +21,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         /// <param name="disposing">True, wenn verwaltete Ressourcen gelöscht werden sollen; andernfalls False.</param>
         protected override void Dispose(bool disposing)
         {
-            MacroDeckServer.OnDeviceConnectionStateChanged -= this.OnClientsChanged;
+            MacroDeckServer.Instance.OnDeviceConnectionStateChanged -= this.OnClientsChanged;
             DeviceManager.OnDevicesChange -= this.OnClientsChanged;
             
             if (disposing && (components != null))

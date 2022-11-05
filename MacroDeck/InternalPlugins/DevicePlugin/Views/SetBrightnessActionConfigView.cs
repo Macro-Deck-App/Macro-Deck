@@ -88,7 +88,7 @@ public partial class SetBrightnessActionConfigView : ActionConfigControl
         var macroDeckDevice = DeviceManager.GetKnownDevices().Find(x => x.DisplayName.Equals(devicesList.Text));
         if (macroDeckDevice == null || !macroDeckDevice.Available) return;
         macroDeckDevice.Configuration.Brightness = brightness.Value / 10.0f;
-        var macroDeckClient = MacroDeckServer.GetMacroDeckClient(macroDeckDevice.ClientId);
+        var macroDeckClient = MacroDeckServer.Instance.GetMacroDeckClient(macroDeckDevice.ClientId);
         macroDeckClient?.DeviceMessage.SendConfiguration(macroDeckClient);
     }
 }

@@ -12,7 +12,7 @@ public class MacroDeckDevice
 
     [JsonIgnore]
     public bool Available { get {
-            var macroDeckClient = MacroDeckServer.GetMacroDeckClient(ClientId);
+            var macroDeckClient = MacroDeckServer.Instance.GetMacroDeckClient(ClientId);
             if (macroDeckClient != null && macroDeckClient.SocketConnection != null && macroDeckClient.SocketConnection.IsAvailable)
             {
                 return true;

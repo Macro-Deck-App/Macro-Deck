@@ -48,7 +48,7 @@ public class FolderSwitcher : PluginAction
                 break;
             // ClientId != -1 = Connected device
             default:
-                MacroDeckServer.SetFolder(MacroDeckServer.GetMacroDeckClient(clientId), ProfileManager.FindFolderById(Configuration, MacroDeckServer.GetMacroDeckClient(clientId).Profile));
+                MacroDeckServer.Instance.SetFolder(MacroDeckServer.Instance.GetMacroDeckClient(clientId), ProfileManager.FindFolderById(Configuration, MacroDeckServer.Instance.GetMacroDeckClient(clientId).Profile));
                 break;
         }
     }
@@ -79,9 +79,9 @@ public class GoToParentFolder : PluginAction
                     break;
                 // ClientId != -1 = Connected device
                 default:
-                    var macroDeckClient = MacroDeckServer.GetMacroDeckClient(clientId);
+                    var macroDeckClient = MacroDeckServer.Instance.GetMacroDeckClient(clientId);
                     var parentFolder = ProfileManager.FindParentFolder(macroDeckClient.Folder, macroDeckClient.Profile);
-                    MacroDeckServer.SetFolder(macroDeckClient, parentFolder);
+                    MacroDeckServer.Instance.SetFolder(macroDeckClient, parentFolder);
                     break;
             }
         } catch { }
@@ -113,9 +113,9 @@ public class GoToRootFolder : PluginAction
                     break;
                 // ClientId != -1 = Connected device
                 default:
-                    var macroDeckClient = MacroDeckServer.GetMacroDeckClient(clientId);
+                    var macroDeckClient = MacroDeckServer.Instance.GetMacroDeckClient(clientId);
                     var rootFolder = macroDeckClient.Profile.Folders.Find(folder => folder.IsRootFolder);
-                    MacroDeckServer.SetFolder(macroDeckClient, rootFolder);
+                    MacroDeckServer.Instance.SetFolder(macroDeckClient, rootFolder);
                     break;
             }
                 

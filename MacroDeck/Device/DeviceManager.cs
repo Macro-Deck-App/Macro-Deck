@@ -91,7 +91,7 @@ public class DeviceManager
         }
         if (macroDeckDevice.Available)
         {
-            MacroDeckServer.SetProfile(MacroDeckServer.GetMacroDeckClient(macroDeckDevice.ClientId), macroDeckProfile);
+            MacroDeckServer.Instance.SetProfile(MacroDeckServer.Instance.GetMacroDeckClient(macroDeckDevice.ClientId), macroDeckProfile);
         }
     }
 
@@ -104,7 +104,7 @@ public class DeviceManager
         }
         if (blocked && macroDeckDevice.Available)
         {
-            MacroDeckServer.GetMacroDeckClient(macroDeckDevice.ClientId).SocketConnection.Close();
+            MacroDeckServer.Instance.GetMacroDeckClient(macroDeckDevice.ClientId).SocketConnection.Close();
         }
     }
 

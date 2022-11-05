@@ -276,7 +276,7 @@ public partial class ButtonEditor : DialogForm
         }
         folder.ActionButtons.Add(this.actionButton);
         ProfileManager.Save();
-        MacroDeckServer.UpdateFolder(folder);
+        MacroDeckServer.Instance.UpdateFolder(folder);
         ProfileManager.UpdateVariableLabels(this.actionButton);
         this.actionButton.UpdateBindingState();
         this.actionButton.UpdateHotkey();

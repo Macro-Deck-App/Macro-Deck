@@ -351,7 +351,7 @@ public static class IconManagerLegacy
          iconPack.Icons = new List<Icon>();
          IconPacks.Add(iconPack);
          SaveIconPacks();
-         MacroDeckServer.SendAllIcons();
+         MacroDeckServer.Instance.SendAllIcons();
      }
 
      public static void EditIconPack(IconPackLegacy iconPack, string author, string version)
@@ -361,7 +361,7 @@ public static class IconManagerLegacy
          iconPack.Version = version;
          IconPacks.Add(iconPack);
          SaveIconPacks();
-         MacroDeckServer.SendAllIcons();
+         MacroDeckServer.Instance.SendAllIcons();
      }
 
      public static void DeleteIconPack(IconPackLegacy iconPack)
@@ -391,7 +391,7 @@ public static class IconManagerLegacy
              AddIconImage(newIconPack, Resources.Icon);
          }
          MacroDeckLogger.Info("Icon pack successfully deleted");
-         MacroDeckServer.SendAllIcons();
+         MacroDeckServer.Instance.SendAllIcons();
      }
 
      public static IconPackLegacy GetIconPackByName(string name)
@@ -417,7 +417,7 @@ public static class IconManagerLegacy
              SaveIconPack(iconPack);
              if (sendIconsToClients)
              {
-                 MacroDeckServer.SendAllIcons();
+                 MacroDeckServer.Instance.SendAllIcons();
              }
              return icon;
          }
@@ -437,7 +437,7 @@ public static class IconManagerLegacy
          MacroDeckLogger.Info("Deleted icon from " + iconPack.Name);
 
          SaveIconPack(iconPack);
-         MacroDeckServer.SendAllIcons();
+         MacroDeckServer.Instance.SendAllIcons();
      }
 
      */

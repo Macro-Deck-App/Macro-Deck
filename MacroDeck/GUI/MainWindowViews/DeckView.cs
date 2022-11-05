@@ -355,7 +355,7 @@ public partial class DeckView : UserControl
                 
             ProfileManager.Save();
             UpdateButtons();
-            MacroDeckServer.UpdateFolder(_currentFolder);
+            MacroDeckServer.Instance.UpdateFolder(_currentFolder);
         }
     }
     private void Button_DragEnter(object sender, DragEventArgs e)
@@ -411,7 +411,7 @@ public partial class DeckView : UserControl
             _currentFolder.ActionButtons.Remove(actionButton);
             ProfileManager.Save();
             UpdateButtons();
-            MacroDeckServer.UpdateFolder(_currentFolder);
+            MacroDeckServer.Instance.UpdateFolder(_currentFolder);
         }
     }
 
@@ -615,7 +615,7 @@ public partial class DeckView : UserControl
         ProfileManager.Save();
         UpdateButtons();
         UpdateButtonIcon(actionButtonNew);
-        MacroDeckServer.UpdateFolder(_currentFolder);
+        MacroDeckServer.Instance.UpdateFolder(_currentFolder);
     }
 
     private void BoxProfiles_SelectedIndexChanged(object sender, EventArgs e)
@@ -724,9 +724,9 @@ public partial class DeckView : UserControl
                                         string.Format("ButtonRadius: {0}", ProfileManager.CurrentProfile.ButtonRadius) + Environment.NewLine +
                                         string.Format("ButtonBackground: {0}", ProfileManager.CurrentProfile.ButtonBackground));
         UpdateButtons(true);
-        foreach (var macroDeckClient in MacroDeckServer.Clients.FindAll(macroDeckClient => macroDeckClient.Profile.ProfileId.Equals(ProfileManager.CurrentProfile.ProfileId)))
+        foreach (var macroDeckClient in MacroDeckServer.Instance.Clients.FindAll(macroDeckClient => macroDeckClient.Profile.ProfileId.Equals(ProfileManager.CurrentProfile.ProfileId)))
         {
-            MacroDeckServer.SetProfile(macroDeckClient, ProfileManager.CurrentProfile);
+            MacroDeckServer.Instance.SetProfile(macroDeckClient, ProfileManager.CurrentProfile);
         }
     }
 
@@ -755,7 +755,7 @@ public partial class DeckView : UserControl
         var row = ((RoundedButton)_buttonClicked).Row;
         var column = ((RoundedButton)_buttonClicked).Column;
         var actionButton = _currentFolder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
-        MacroDeckServer.Execute(actionButton, "", buttonPressType);
+        MacroDeckServer.Instance.Execute(actionButton, "", buttonPressType);
 
     }
 }

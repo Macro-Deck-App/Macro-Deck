@@ -120,8 +120,8 @@ public partial class MainWindow : Form
         IconManager.OnIconPacksChanged += OnPluginsChanged;
         IconManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
             
-        MacroDeckServer.OnDeviceConnectionStateChanged += OnClientsConnectedChanged;
-        MacroDeckServer.OnServerStateChanged += OnServerStateChanged;
+        MacroDeckServer.Instance.OnDeviceConnectionStateChanged += OnClientsConnectedChanged;
+        MacroDeckServer.Instance.OnServerStateChanged += OnServerStateChanged;
         OnClientsConnectedChanged(null, EventArgs.Empty);
         OnServerStateChanged(null, EventArgs.Empty);
         RefreshPluginsLabels();
@@ -199,7 +199,7 @@ public partial class MainWindow : Form
     {
         Invoke(() =>
         {
-            if (MacroDeckServer.WebSocketServer.ListenerSocket == null)
+            if (MacroDeckServer.Instance.WebSocketServer.ListenerSocket == null)
             {
                 lblServerStatus.Text = LanguageManager.Strings.ServerOffline;
             }
@@ -207,7 +207,7 @@ public partial class MainWindow : Form
             {
                 lblServerStatus.Text = LanguageManager.Strings.ServerRunning;
                 hosts.Text = MacroDeck.Configuration.HostAddress;
-                lblPort.Text = MacroDeckServer.WebSocketServer.Port.ToString();
+                lblPort.Text = MacroDeckServer.Instance.WebSocketServer.Port.ToString();
             }
         });
     }
@@ -215,7 +215,7 @@ public partial class MainWindow : Form
     private void OnClientsConnectedChanged(object sender, EventArgs e)
     {
         Invoke(new Action(() =>
-            lblNumClientsConnected.Text = string.Format(LanguageManager.Strings.XClientsConnected, MacroDeckServer.Clients.Count)
+            lblNumClientsConnected.Text = string.Format(LanguageManager.Strings.XClientsConnected, MacroDeckServer.Instance.Clients.Count)
         ));
     }
 

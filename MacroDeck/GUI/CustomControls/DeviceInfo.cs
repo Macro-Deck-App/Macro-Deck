@@ -93,7 +93,7 @@ public partial class DeviceInfo : RoundedUserControl
     {
         if (_macroDeckDevice.Available)
         {
-            MacroDeckServer.GetMacroDeckClient(_macroDeckDevice.ClientId).SocketConnection.Close();
+            MacroDeckServer.Instance.GetMacroDeckClient(_macroDeckDevice.ClientId).SocketConnection.Close();
         }
         DeviceManager.RemoveKnownDevice(_macroDeckDevice);
     }

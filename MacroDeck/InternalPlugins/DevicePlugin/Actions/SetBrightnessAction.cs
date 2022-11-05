@@ -34,7 +34,7 @@ public class SetBrightnessAction : PluginAction
         macroDeckDevice.Configuration.Brightness = configModel.Brightness;
 
         DeviceManager.SaveKnownDevices();
-        var macroDeckClient = MacroDeckServer.GetMacroDeckClient(macroDeckDevice.ClientId);
+        var macroDeckClient = MacroDeckServer.Instance.GetMacroDeckClient(macroDeckDevice.ClientId);
         macroDeckClient?.DeviceMessage.SendConfiguration(macroDeckClient);
     }
 

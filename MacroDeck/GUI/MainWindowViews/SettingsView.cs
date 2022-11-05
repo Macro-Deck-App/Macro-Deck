@@ -256,7 +256,7 @@ public partial class SettingsView : UserControl
         if (port.Value == MacroDeck.Configuration.HostPort) return;
         MacroDeck.Configuration.HostPort = (int)port.Value;
         MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
-        MacroDeckServer.Start(MacroDeck.Configuration.HostPort);
+        MacroDeckServer.Instance.Start(MacroDeck.Configuration.HostPort);
     }
 
     private void CheckStartWindows_CheckedChanged(object sender, EventArgs e)
