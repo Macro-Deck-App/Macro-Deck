@@ -20,19 +20,7 @@ public class PluginConfiguration
     {
         try
         {
-            Dictionary<string, string> pluginConfig;
-
-            if (!File.Exists(FilePath(plugin)))
-            {
-                pluginConfig = new Dictionary<string, string>();
-            }
-            else
-            {
-                pluginConfig = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(FilePath(plugin)), new JsonSerializerSettings
-                {
-                    TypeNameHandling = TypeNameHandling.Auto,
-                });
-            }
+            var pluginConfig = GetConfig(plugin);
 
             pluginConfig[key] = value;
 
@@ -48,6 +36,23 @@ public class PluginConfiguration
         } catch { }
     }
 
+    private static Dictionary<string, string>? GetConfig(MacroDeckPlugin plugin)
+    {
+        if (!File.Exists(FilePath(plugin)))
+        {
+            return new Dictionary<string, string>();
+        }
+        
+        return JsonConvert.DeserializeObject<Dictionary<string, string>>(
+            File.ReadAllText(FilePath(plugin)),
+            new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                NullValueHandling = NullValueHandling.Ignore,
+                Error = (sender, args) => { args.ErrorContext.Handled = true; }
+            });
+    }
+
 
     public static string GetValue(MacroDeckPlugin plugin = null, string key = "")
     {
@@ -56,20 +61,7 @@ public class PluginConfiguration
         {
             if (plugin == null || key == null) return value;
 
-            Dictionary<string, string> pluginConfig;
-            if (!File.Exists(FilePath(plugin)))
-            {
-                pluginConfig = new Dictionary<string, string>();
-            }
-            else
-            {
-                pluginConfig = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(FilePath(plugin)), new JsonSerializerSettings
-                {
-                    TypeNameHandling = TypeNameHandling.Auto,
-                    NullValueHandling = NullValueHandling.Ignore,
-                    Error = (sender, args) => { args.ErrorContext.Handled = true; }
-                });
-            }
+            Dictionary<string, string> pluginConfig = GetConfig(plugin);
 
             if (pluginConfig != null && !string.IsNullOrWhiteSpace(pluginConfig[key]))
             {
