@@ -9,6 +9,35 @@ namespace SuchByte.MacroDeck.Plugins;
 
 public class PluginCredentials
 {
+    private static string FileName(MacroDeckPlugin plugin)
+    {
+        return $"{plugin.Author.ToLower()}_{plugin.Name.ToLower()}";
+    }
+
+    private static string FilePath(MacroDeckPlugin plugin)
+    {
+        return Path.Combine(MacroDeck.ApplicationPaths.PluginCredentialsPath, FileName(plugin));
+    }
+
+    private static void Save(MacroDeckPlugin plugin, List<Dictionary<string, string>> pluginCredentials)
+    {
+        var serializer = new JsonSerializer
+        {
+            TypeNameHandling = TypeNameHandling.Auto,
+            NullValueHandling = NullValueHandling.Ignore,
+        };
+
+        try
+        {
+            using var sw = new StreamWriter(FilePath(plugin));
+            using JsonWriter writer = new JsonTextWriter(sw);
+            serializer.Serialize(writer, pluginCredentials);
+        }
+        catch (Exception ex)
+        {
+            MacroDeckLogger.Error(typeof(PluginCredentials), "Error while adding plugin credential: " + ex.Message);
+        }
+    }
 
     public static void AddCredentials(MacroDeckPlugin plugin, Dictionary<string, string> keyValuePairs)
     {
@@ -19,40 +48,11 @@ public class PluginCredentials
             keyValuePairsEncrypted[entry.Key] = StringCipher.Encrypt(entry.Value, StringCipher.GetMachineGuid());
         }
 
-        List<Dictionary<string, string>> pluginCredentials;
-
-        if (!File.Exists(MacroDeck.ApplicationPaths.PluginCredentialsPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower()))
-        {
-            pluginCredentials = new List<Dictionary<string, string>>();
-        } else
-        {
-            pluginCredentials = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(File.ReadAllText(Path.Combine(MacroDeck.ApplicationPaths.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())), new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-            });
-        }
+        var pluginCredentials = GetEncryptedCredentials(plugin);
 
         pluginCredentials.Add(keyValuePairsEncrypted);
 
-        var serializer = new JsonSerializer
-        {
-            TypeNameHandling = TypeNameHandling.Auto,
-            NullValueHandling = NullValueHandling.Ignore,
-        };
-
-        try
-        {
-            using (var sw = new StreamWriter(Path.Combine(MacroDeck.ApplicationPaths.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
-            using (JsonWriter writer = new JsonTextWriter(sw))
-            {
-                serializer.Serialize(writer, pluginCredentials);
-            }
-        }
-        catch (Exception ex)
-        {
-            MacroDeckLogger.Error("Error while adding plugin credential: " + ex.Message);
-        }
-
+        Save(plugin, pluginCredentials);
     }
 
     public static void SetCredentials(MacroDeckPlugin plugin, Dictionary<string, string> keyValuePairs)
@@ -64,53 +64,28 @@ public class PluginCredentials
             keyValuePairsEncrypted[entry.Key] = StringCipher.Encrypt(entry.Value, StringCipher.GetMachineGuid());
         }
 
-        List<Dictionary<string, string>> pluginCredentials;
-
-        pluginCredentials = new List<Dictionary<string, string>>();
+        List<Dictionary<string, string>> pluginCredentials = new();
         pluginCredentials.Add(keyValuePairsEncrypted);
-
-        var serializer = new JsonSerializer
-        {
-            TypeNameHandling = TypeNameHandling.Auto,
-            NullValueHandling = NullValueHandling.Ignore,
-        };
-
-        try
-        {
-            using (var sw = new StreamWriter(Path.Combine(MacroDeck.ApplicationPaths.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
-            using (JsonWriter writer = new JsonTextWriter(sw))
-            {
-                serializer.Serialize(writer, pluginCredentials);
-            }
-        }
-        catch (Exception ex)
-        {
-            MacroDeckLogger.Error("Error while setting plugin credential: " + ex.Message);
-        }
+        
+        Save(plugin, pluginCredentials);
     }
 
     public static void DeletePluginCredentials(MacroDeckPlugin plugin)
     {
-        File.Delete(Path.Combine(MacroDeck.ApplicationPaths.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower()));
+        File.Delete(FilePath(plugin));
     }
 
     public static List<Dictionary<string, string>> GetPluginCredentials(MacroDeckPlugin plugin)
     {
-        List<Dictionary<string, string>> pluginCredentialsEncrypted;
-        if (!File.Exists(Path.Combine(MacroDeck.ApplicationPaths.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
-        {
-            pluginCredentialsEncrypted = new List<Dictionary<string, string>>();
-        }
-        else
-        {
-            pluginCredentialsEncrypted = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(File.ReadAllText(Path.Combine(MacroDeck.ApplicationPaths.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())), new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-            });
-        }
+        var pluginCredentialsEncrypted = GetEncryptedCredentials(plugin);
 
         var pluginCredentialsDecrypted = new List<Dictionary<string, string>>();
 
+        if (pluginCredentialsEncrypted == null)
+        {
+            return pluginCredentialsDecrypted;
+        }
+        
         foreach (var pluginCredentialEncrypted in pluginCredentialsEncrypted)
         {
             var pluginCredentialDecrypted = new Dictionary<string, string>();
@@ -118,17 +93,34 @@ public class PluginCredentials
             {
                 try
                 {
-                    pluginCredentialDecrypted[entry.Key] = StringCipher.Decrypt(entry.Value, StringCipher.GetMachineGuid());
-                } catch
+                    pluginCredentialDecrypted[entry.Key] =
+                        StringCipher.Decrypt(entry.Value, StringCipher.GetMachineGuid());
+                }
+                catch
                 {
-                    MacroDeckLogger.Warning(typeof(PluginCredentials), $"Unable to decrypt credentials for {plugin.Name}. Perhaps the machine GUID changed?");
+                    MacroDeckLogger.Warning(typeof(PluginCredentials),
+                        $"Unable to decrypt credentials for {plugin.Name}. Perhaps the machine GUID changed?");
                 }
             }
+
             pluginCredentialsDecrypted.Add(pluginCredentialDecrypted);
         }
 
         return pluginCredentialsDecrypted;
     }
 
-
+    private static List<Dictionary<string, string>>? GetEncryptedCredentials(MacroDeckPlugin plugin)
+    {
+        if (!File.Exists(FilePath(plugin)))
+        {
+            return new();
+        }
+        
+        return  JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(
+            File.ReadAllText(FilePath(plugin)), 
+            new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.Auto,
+                });
+    }
 }

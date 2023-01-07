@@ -6,23 +6,21 @@ namespace SuchByte.MacroDeck.Plugins;
 
 public class PluginConfiguration
 {
+    private static string FileName(MacroDeckPlugin plugin)
+    {
+        return $"{plugin.Author.ToLower()}_{plugin.Name.ToLower()}.json";
+    }
+
+    private static string FilePath(MacroDeckPlugin plugin)
+    {
+        return Path.Combine(MacroDeck.ApplicationPaths.PluginConfigPath, FileName(plugin));
+    }
+    
     public static void SetValue(MacroDeckPlugin plugin, string key, string value)
     {
         try
         {
-            Dictionary<string, string> pluginConfig;
-
-            if (!File.Exists(Path.Combine(MacroDeck.ApplicationPaths.PluginConfigPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json")))
-            {
-                pluginConfig = new Dictionary<string, string>();
-            }
-            else
-            {
-                pluginConfig = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(MacroDeck.ApplicationPaths.PluginConfigPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json")), new JsonSerializerSettings
-                {
-                    TypeNameHandling = TypeNameHandling.Auto,
-                });
-            }
+            var pluginConfig = GetConfig(plugin);
 
             pluginConfig[key] = value;
 
@@ -32,12 +30,27 @@ public class PluginConfiguration
                 NullValueHandling = NullValueHandling.Ignore,
             };
 
-            using (var sw = new StreamWriter(Path.Combine(MacroDeck.ApplicationPaths.PluginConfigPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json")))
-            using (JsonWriter writer = new JsonTextWriter(sw))
-            {
-                serializer.Serialize(writer, pluginConfig);
-            }
+            using var sw = new StreamWriter(FilePath(plugin));
+            using JsonWriter writer = new JsonTextWriter(sw);
+            serializer.Serialize(writer, pluginConfig);
         } catch { }
+    }
+
+    private static Dictionary<string, string>? GetConfig(MacroDeckPlugin plugin)
+    {
+        if (!File.Exists(FilePath(plugin)))
+        {
+            return new Dictionary<string, string>();
+        }
+        
+        return JsonConvert.DeserializeObject<Dictionary<string, string>>(
+            File.ReadAllText(FilePath(plugin)),
+            new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                NullValueHandling = NullValueHandling.Ignore,
+                Error = (sender, args) => { args.ErrorContext.Handled = true; }
+            });
     }
 
 
@@ -48,20 +61,7 @@ public class PluginConfiguration
         {
             if (plugin == null || key == null) return value;
 
-            Dictionary<string, string> pluginConfig;
-            if (!File.Exists(Path.Combine(MacroDeck.ApplicationPaths.PluginConfigPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json")))
-            {
-                pluginConfig = new Dictionary<string, string>();
-            }
-            else
-            {
-                pluginConfig = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(MacroDeck.ApplicationPaths.PluginConfigPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json")), new JsonSerializerSettings
-                {
-                    TypeNameHandling = TypeNameHandling.Auto,
-                    NullValueHandling = NullValueHandling.Ignore,
-                    Error = (sender, args) => { args.ErrorContext.Handled = true; }
-                });
-            }
+            Dictionary<string, string> pluginConfig = GetConfig(plugin);
 
             if (pluginConfig != null && !string.IsNullOrWhiteSpace(pluginConfig[key]))
             {
@@ -76,7 +76,7 @@ public class PluginConfiguration
     {
         try
         {
-            File.Delete(Path.Combine(MacroDeck.ApplicationPaths.PluginConfigPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower() + ".json"));
+            File.Delete(FilePath(plugin));
         }catch { }
     }
 
