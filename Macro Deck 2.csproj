@@ -22,7 +22,7 @@
     <Version>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(VersionRevision)</Version>
     <Company>Macro Deck</Company>
     <Authors>Manuel Mayer</Authors>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>False</SignAssembly>
     <AssemblyOriginatorKeyFile>Macro Deck.pfx</AssemblyOriginatorKeyFile>
     <Product>Macro Deck</Product>
     <AssemblyVersion>2.21.3110.100</AssemblyVersion>
