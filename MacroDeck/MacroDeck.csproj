@@ -13,7 +13,7 @@
 	</PropertyGroup>
 	
   <PropertyGroup>
-    <TargetFramework>net6.0-windows10.0.22000.0</TargetFramework>
+    <TargetFramework>net7.0-windows10.0.22000.0</TargetFramework>
     <UseWPF>true</UseWPF>
 	  <RootNamespace>SuchByte.MacroDeck</RootNamespace>
 	  <UseWindowsForms>true</UseWindowsForms>
@@ -43,82 +43,31 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       </Content>
     </ItemGroup>
-
+	
   <ItemGroup>
-    <None Remove="Licenses.xml" />
-    <None Remove="Resources\Languages\Bulgaria.json" />
-    <None Remove="Resources\Languages\Chinese.json" />
-    <None Remove="Resources\Languages\Dutch.json" />
-    <None Remove="Resources\Languages\English - Copy.json" />
-    <None Remove="Resources\Languages\English.json" />
-    <None Remove="Resources\Languages\Filipino.json" />
-    <None Remove="Resources\Languages\Finnish.json" />
-    <None Remove="Resources\Languages\French.json" />
-    <None Remove="Resources\Languages\German.json" />
-    <None Remove="Resources\Languages\Hungarian.json" />
-    <None Remove="Resources\Languages\Italian.json" />
-    <None Remove="Resources\Languages\Japanese.json" />
-    <None Remove="Resources\Languages\Korean.json" />
-    <None Remove="Resources\Languages\Polish.json" />
-    <None Remove="Resources\Languages\Portuguese.json" />
-    <None Remove="Resources\Languages\Russian.json" />
-    <None Remove="Resources\Languages\Spanish.json" />
-    <None Remove="Resources\Languages\Turkish.json" />
+	  <EmbeddedResource Include="Resources\*">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
-    <COMReference Include="NetFwTypeLib">
-      <VersionMinor>0</VersionMinor>
-      <VersionMajor>1</VersionMajor>
-      <Guid>58fbcf7c-e7a9-467c-80b3-fc65e8fcca08</Guid>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>false</Isolated>
-      <EmbedInteropTypes>true</EmbedInteropTypes>
-    </COMReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Languages\Bulgaria.json" />
-    <EmbeddedResource Include="Resources\Languages\Chinese.json" />
-    <EmbeddedResource Include="Resources\Languages\Dutch.json" />
-    <EmbeddedResource Include="Resources\Languages\English.json" />
-    <EmbeddedResource Include="Resources\Languages\Filipino.json" />
-    <EmbeddedResource Include="Resources\Languages\Finnish.json" />
-    <EmbeddedResource Include="Resources\Languages\French.json" />
-    <EmbeddedResource Include="Resources\Languages\German.json" />
-    <EmbeddedResource Include="Resources\Languages\Hungarian.json" />
-    <EmbeddedResource Include="Resources\Languages\Italian.json" />
-    <EmbeddedResource Include="Resources\Languages\Japanese.json" />
-    <EmbeddedResource Include="Resources\Languages\Korean.json" />
-    <EmbeddedResource Include="Resources\Languages\Polish.json" />
-    <EmbeddedResource Include="Resources\Languages\Portuguese.json" />
-    <EmbeddedResource Include="Resources\Languages\Russian.json" />
-    <EmbeddedResource Include="Resources\Languages\Spanish.json" />
-    <EmbeddedResource Include="Resources\Languages\Turkish.json" />
-    <EmbeddedResource Include="Resources\Licenses.xml">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="CefSharp.WinForms.NETCore" Version="106.0.290" />
+    <PackageReference Include="CefSharp.WinForms.NETCore" Version="111.2.20" />
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
-    <PackageReference Include="Cottle" Version="2.0.8" />
+    <PackageReference Include="Cottle" Version="2.0.9" />
     <PackageReference Include="Dax-FCTB" Version="2.16.26.120" />
     <PackageReference Include="Fleck" Version="1.2.0" />
-    <PackageReference Include="GiphyDotNet" Version="2.0.0" />
-    <PackageReference Include="Magick.NET-Q16-x64" Version="12.2.2" />
-    <PackageReference Include="Magick.NET.SystemDrawing" Version="4.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2" />
+    <PackageReference Include="GiphyDotNet" Version="2.4.0" />
+    <PackageReference Include="Magick.NET-Q16-x64" Version="13.0.0" />
+    <PackageReference Include="Magick.NET.SystemDrawing" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="RestSharp" Version="106.12.0" />
-    <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="106.12.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="RestSharp" Version="109.0.1" />
+    <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="109.0.1" />
     <PackageReference Include="sharpadbclient" Version="2.3.23" />
     <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
     <PackageReference Include="System.Collections" Version="4.3.0" />
-    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>

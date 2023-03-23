@@ -63,7 +63,7 @@ public class MacroDeck : NativeWindow
 
     private static MainWindow? _mainWindow;
     public static MainWindow? MainWindow => 
-        _mainWindow is { IsDisposed: false, Visible: true } ? _mainWindow : null;
+        _mainWindow is { IsDisposed: false, Visible: true, IsHandleCreated: true } ? _mainWindow : null;
 
 
     private static readonly Stopwatch StartUpTimeStopWatch = new();
