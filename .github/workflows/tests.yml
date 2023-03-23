@@ -1,0 +1,50 @@
+name: Build and test
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - '**'
+      - '!develop'
+      - '!main'
+  push:
+    branches:
+      - '**'
+      - '!develop'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        configuration: [Release]
+    runs-on: windows-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    env:
+      Solution_Name: MacroDeck.sln                       # Replace with your solution name, i.e. MyWpfApp.sln.
+      Test_Project_Path: MacroDeck.Tests                 # Replace with the path to your test project, i.e. MyWpfApp.Tests\MyWpfApp.Tests.csproj.
+      Wap_Project_Directory: MacroDeck    # Replace with the Wap project directory relative to the solution, i.e. MyWpfApp.Package.
+      Wap_Project_Path: MacroDeck/MacroDeck.csproj                   # Replace with the path to your Wap project, i.e. MyWpf.App.Package\MyWpfApp.Package.wapproj.
+  
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    # Install the .NET Core workload
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 3.1.x
+
+    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.3.1
+      
+    # Execute all unit tests in the solution
+    - name: Execute unit tests
+      run: dotnet test
