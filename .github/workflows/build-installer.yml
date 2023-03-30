@@ -30,7 +30,7 @@ jobs:
       - name: Search for Installer
         id: search
         run: |
-          $installer = Get-ChildItem -Path .\Output -Filter *.exe | Select-Object -Last 1
+          $installer = Get-ChildItem -Path .MacroDeck.Setup\Output -Filter *.exe | Select-Object -Last 1
           Write-Output "##vso[task.setvariable variable=INSTALLER_NAME]$($installer.Name)"
 
       - name: Upload Installer Artifact
