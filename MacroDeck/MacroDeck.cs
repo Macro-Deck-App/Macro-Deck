@@ -36,8 +36,8 @@ namespace SuchByte.MacroDeck;
 
 public class MacroDeck : NativeWindow
 {
-    private static readonly Assembly Assembly = Assembly.GetExecutingAssembly();
-    public static readonly VersionModel Version = new(FileVersionInfo.GetVersionInfo(Assembly.Location).FileVersion ?? "2.0.0.0");
+    private static readonly Assembly? Assembly = Assembly.GetEntryAssembly();
+    public static readonly VersionModel Version = new(Assembly?.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version ?? "?.?.?.?");
 
     public static readonly int ApiVersion = 20;
     public static readonly int PluginApiVersion = 40;
