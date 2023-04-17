@@ -152,6 +152,18 @@ public static class VariableManager
         SetValue(name, value, type, suggestions, plugin.Name);
     }
 
+    [Obsolete("Remove save parameter")]
+    public static void SetValue(string name, object value, VariableType type, MacroDeckPlugin plugin, bool save = true)
+    {
+        SetValue(name, value, type, plugin.Name);
+    }
+
+
+    [Obsolete("Remove save parameter")]
+    public static void SetValue(string name, object value, VariableType type, MacroDeckPlugin plugin, string[] suggestions, bool save = true)
+    {
+        SetValue(name, value, type, suggestions, plugin.Name);
+    }
 
     /// <summary>
     /// Deletes a variable
