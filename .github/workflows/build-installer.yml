@@ -5,11 +5,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  tests:
-    uses: ./.github/workflows/tests.yml
-    name: Build and test
   build-installer:
-    needs: [tests]
     runs-on: windows-latest
     steps:
       - name: Checkout Code
@@ -20,7 +16,7 @@ jobs:
 
       - name: Install Inno Setup
         run: |
-          Invoke-WebRequest "http://files.jrsoftware.org/is/6/innosetup-6.2.0.exe" -OutFile "innosetup.exe"
+          Invoke-WebRequest -Uri "http://files.jrsoftware.org/is/6/innosetup-6.2.0.exe" -OutFile "innosetup.exe"
           Start-Process -FilePath .\innosetup.exe -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS" -Wait
 
       - name: Build Installer
