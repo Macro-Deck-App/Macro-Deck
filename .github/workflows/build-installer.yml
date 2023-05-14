@@ -1,18 +1,18 @@
-name: Inno Setup Installer
+name: Build Windows Installer
 
-on: 
+on:
   workflow_call:
   workflow_dispatch:
 
 jobs:
-  build-installer:
+  build-windows-installer:
     runs-on: windows-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
-        
+
       - name: Build
-        run: dotnet build
+        run: MacroDeck.Setup\build_macrodeck_executable.bat
 
       - name: Install Inno Setup
         run: |
@@ -26,7 +26,7 @@ jobs:
       - name: Search for Installer
         id: search
         run: |
-          $installer = Get-ChildItem -Path .MacroDeck.Setup\Output -Filter *.exe | Select-Object -Last 1
+          $installer = Get-ChildItem -Path .\Result -Filter *.exe | Select-Object -Last 1
           Write-Output "##vso[task.setvariable variable=INSTALLER_NAME]$($installer.Name)"
 
       - name: Upload Installer Artifact
