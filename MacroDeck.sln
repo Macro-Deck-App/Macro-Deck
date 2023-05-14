@@ -7,6 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MacroDeck", "MacroDeck\Macr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacroDeck.Tests", "MacroDeck.Tests\MacroDeck.Tests.csproj", "{49F1CAC2-158D-45AC-B07C-52394B10A7E2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{A87511C0-A46B-40E0-A47A-81AEE2097F5D}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build-installer.yml = .github\workflows\build-installer.yml
+		.github\workflows\tests.yml = .github\workflows\tests.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
