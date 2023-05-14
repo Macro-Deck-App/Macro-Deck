@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build
-        run: MacroDeck.Setup\build_macrodeck_executable.bat
+        script: MacroDeck.Setup\build_macrodeck_executable.bat
 
       - name: Install Inno Setup
         run: |
