@@ -13,6 +13,7 @@ using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Startup;
 using SuchByte.MacroDeck.Utils;
 using SuchByte.MacroDeck.Variables;
 using SuchByte.MacroDeck.WindowsFocus;
@@ -137,7 +138,7 @@ public static class ProfileManager
     {
         MacroDeckLogger.Info(typeof(ProfileManager), "Loading profiles...");
         Profiles = new List<MacroDeckProfile>();
-        var databasePath = MacroDeck.ApplicationPaths.ProfilesFilePath;
+        var databasePath = ApplicationPaths.ProfilesFilePath;
 
         var db = new SQLiteConnection(databasePath);
         db.CreateTable<ProfileJson>();
@@ -231,7 +232,7 @@ public static class ProfileManager
         {
             return;
         }
-        var databasePath = MacroDeck.ApplicationPaths.ProfilesFilePath;
+        var databasePath = ApplicationPaths.ProfilesFilePath;
 
         var db = new SQLiteConnection(databasePath);
         db.CreateTable<ProfileJson>();

@@ -36,13 +36,11 @@ namespace SuchByte.MacroDeck;
 
 public class MacroDeck : NativeWindow
 {
-    private static readonly Assembly Assembly = Assembly.GetExecutingAssembly();
-    public static readonly VersionModel Version = new(FileVersionInfo.GetVersionInfo(Assembly.Location).ProductVersion ?? "2.0.0.0");
+    public static VersionModel Version => new(FileVersionInfo.GetVersionInfo(ApplicationPaths.ExecutablePath).ProductVersion);
 
     public static readonly int ApiVersion = 20;
     public static readonly int PluginApiVersion = 40;
 
-    public static ApplicationPaths ApplicationPaths { get; private set; } = null!;
     public static StartParameters StartParameters { get; private set; } = new();
     public static MainConfiguration Configuration { get; private set; } = new();
     public static bool SafeMode { get; set; } = false;
@@ -79,8 +77,6 @@ public class MacroDeck : NativeWindow
             MacroDeckLogger.StartDebugConsole();
         }
 
-        ApplicationPaths = new ApplicationPaths(StartParameters.PortableMode);
-
         MacroDeckLogger.Info($"Macro Deck {Version.VersionString}");
         MacroDeckLogger.Info($"Path: {ApplicationPaths.ExecutablePath}");
         MacroDeckLogger.Info($"Start parameters: {string.Join(" ", StartParameters.ToArray(StartParameters))}");
@@ -90,9 +86,6 @@ public class MacroDeck : NativeWindow
         BackupManager.CheckRestoreDirectory();
 
         LanguageManager.Load(StartParameters.ExportDefaultStrings);
-
-        // Initializing Cef Browser
-        CefSetup.Initialize();
 
         // Check if config exists
         if (!File.Exists(ApplicationPaths.MainConfigFilePath))

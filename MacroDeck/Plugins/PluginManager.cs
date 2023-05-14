@@ -18,6 +18,7 @@ using SuchByte.MacroDeck.InternalPlugins.DevicePlugin;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
+using SuchByte.MacroDeck.Startup;
 using SuchByte.MacroDeck.Utils;
 using SuchByte.MacroDeck.Variables.Plugin;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
@@ -51,17 +52,17 @@ public static class PluginManager
         PluginsNotLoaded.Clear();
         ProtectedPlugins.Clear();
         PluginDirectories.Clear();
-        if (!Directory.Exists(MacroDeck.ApplicationPaths.PluginsDirectoryPath))
+        if (!Directory.Exists(ApplicationPaths.PluginsDirectoryPath))
         {
-            Directory.CreateDirectory(MacroDeck.ApplicationPaths.PluginsDirectoryPath);
+            Directory.CreateDirectory(ApplicationPaths.PluginsDirectoryPath);
         }
 
         // Delete the deprecated .loaded directory if it exists
-        if (Directory.Exists(MacroDeck.ApplicationPaths.PluginsDirectoryPath + ".loaded"))
+        if (Directory.Exists(ApplicationPaths.PluginsDirectoryPath + ".loaded"))
         {
             try
             {
-                Directory.Delete(MacroDeck.ApplicationPaths.PluginsDirectoryPath + ".loaded", true);
+                Directory.Delete(ApplicationPaths.PluginsDirectoryPath + ".loaded", true);
             }
             catch
             {
@@ -71,13 +72,13 @@ public static class PluginManager
         else
         {
             // Load updates from the .updates directory
-            if (Directory.Exists(MacroDeck.ApplicationPaths.UpdatePluginsDirectoryPath))
+            if (Directory.Exists(ApplicationPaths.UpdatePluginsDirectoryPath))
             {
-                foreach (var directory in Directory.GetDirectories(MacroDeck.ApplicationPaths.UpdatePluginsDirectoryPath))
+                foreach (var directory in Directory.GetDirectories(ApplicationPaths.UpdatePluginsDirectoryPath))
                 {
                     try
                     {
-                        var destinationDirectory = Path.Combine(MacroDeck.ApplicationPaths.PluginsDirectoryPath, new DirectoryInfo(directory).Name);
+                        var destinationDirectory = Path.Combine(ApplicationPaths.PluginsDirectoryPath, new DirectoryInfo(directory).Name);
                         DirectoryCopy.Copy(directory, destinationDirectory, true);
                         Directory.Delete(directory, true);
                     }
@@ -88,7 +89,7 @@ public static class PluginManager
                 }
                 try
                 {
-                    Directory.Delete(MacroDeck.ApplicationPaths.UpdatePluginsDirectoryPath, true);
+                    Directory.Delete(ApplicationPaths.UpdatePluginsDirectoryPath, true);
                 }
                 catch
                 {
@@ -97,7 +98,7 @@ public static class PluginManager
             }
 
             // Load the plugins
-            foreach (var directory in Directory.GetDirectories(MacroDeck.ApplicationPaths.PluginsDirectoryPath))
+            foreach (var directory in Directory.GetDirectories(ApplicationPaths.PluginsDirectoryPath))
             {
                 // Delete plugin if file ".delete" exists
                 if (File.Exists(Path.Combine(directory, DeleteMarkerFileName)))
@@ -272,25 +273,25 @@ public static class PluginManager
     internal static void InstallPluginFromZip(string zipFilePath)
     {
         var extensionManifest = ExtensionManifestModel.FromZipFilePath(zipFilePath);
-        var extractedDirectory = Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, extensionManifest.PackageId);
-        ZipFile.ExtractToDirectory(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, zipFilePath), extractedDirectory, true);
+        var extractedDirectory = Path.Combine(ApplicationPaths.TempDirectoryPath, extensionManifest.PackageId);
+        ZipFile.ExtractToDirectory(Path.Combine(ApplicationPaths.TempDirectoryPath, zipFilePath), extractedDirectory, true);
 
         InstallPlugin(extractedDirectory, extensionManifest.PackageId);
     }
 
     internal static void InstallPlugin(string directory, string packageName)
     {
-        var update = Directory.Exists(Path.Combine(MacroDeck.ApplicationPaths.PluginsDirectoryPath, packageName));
+        var update = Directory.Exists(Path.Combine(ApplicationPaths.PluginsDirectoryPath, packageName));
         MacroDeckLogger.Info(typeof(PluginManager), $"{(update ? "Updating" : "Installing")} " + packageName);
         Assembly asm = null;
         var error = false;
         var extensionManifest = new ExtensionManifestModel();
         try
         {
-            var installationDirectory = Path.Combine(MacroDeck.ApplicationPaths.PluginsDirectoryPath, packageName);
+            var installationDirectory = Path.Combine(ApplicationPaths.PluginsDirectoryPath, packageName);
             if (update)
             {
-                installationDirectory = Path.Combine(MacroDeck.ApplicationPaths.UpdatePluginsDirectoryPath, packageName);
+                installationDirectory = Path.Combine(ApplicationPaths.UpdatePluginsDirectoryPath, packageName);
             }
 
             DirectoryCopy.Copy(directory, installationDirectory, true);
@@ -343,7 +344,7 @@ public static class PluginManager
             }
             else
             {
-                UpdatedPlugins.Add(PluginDirectories.FirstOrDefault(x => x.Value == Path.Combine(MacroDeck.ApplicationPaths.PluginsDirectoryPath, packageName)).Key);
+                UpdatedPlugins.Add(PluginDirectories.FirstOrDefault(x => x.Value == Path.Combine(ApplicationPaths.PluginsDirectoryPath, packageName)).Key);
             }
 
             OnPluginsChange?.Invoke(null, EventArgs.Empty);

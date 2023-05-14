@@ -6,35 +6,39 @@ namespace SuchByte.MacroDeck.Startup;
 
 public class ApplicationPaths
 {
-    private readonly bool _portableMode = false;
+    private static bool _portableMode = false;
 
-    public string ExecutablePath { get; private set; } = null!;
-    public string MainDirectoryPath { get; private set; } = null!;
-    public string UserDirectoryPath { get; private set; } = null!;
-    public string PluginsDirectoryPath { get; private set; } = null!;
-    public string UpdatePluginsDirectoryPath { get; private set; } = null!;
-    public string TempDirectoryPath { get; private set; } = null!;
-    public string IconPackDirectoryPath { get; private set; } = null!;
-    public string PluginCredentialsPath { get; private set; } = null!;
-    public string PluginConfigPath { get; private set; } = null!;
-    public string BackupsDirectoryPath { get; private set; } = null!;
-    public string LogsDirectoryPath { get; private set; } = null!;
-    public string MainConfigFilePath { get; private set; } = null!;
-    public string DevicesFilePath { get; private set; } = null!;
-    public string VariablesFilePath { get; private set; } = null!;
-    public string ProfilesFilePath { get; private set; } = null!;
+    public static string ExecutablePath { get; private set; } = null!;
+    public static string MainDirectoryPath { get; private set; } = null!;
+    public static string UserDirectoryPath { get; private set; } = null!;
+    public static string PluginsDirectoryPath { get; private set; } = null!;
+    public static string UpdatePluginsDirectoryPath { get; private set; } = null!;
+    public static string TempDirectoryPath { get; private set; } = null!;
+    public static string IconPackDirectoryPath { get; private set; } = null!;
+    public static string PluginCredentialsPath { get; private set; } = null!;
+    public static string PluginConfigPath { get; private set; } = null!;
+    public static string BackupsDirectoryPath { get; private set; } = null!;
+    public static string LogsDirectoryPath { get; private set; } = null!;
+    public static string MainConfigFilePath { get; private set; } = null!;
+    public static string DevicesFilePath { get; private set; } = null!;
+    public static string VariablesFilePath { get; private set; } = null!;
+    public static string ProfilesFilePath { get; private set; } = null!;
 
-    public ApplicationPaths(bool portableMode)
+    static ApplicationPaths()
+    {
+        ExecutablePath = Environment.ProcessPath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory + "Macro Deck 2.exe");
+        MainDirectoryPath = AppDomain.CurrentDomain.BaseDirectory;
+    }
+    
+    public static void Initialize(bool portableMode)
     {
         _portableMode = portableMode;
         InitializePaths();
         CheckPaths();
     }
     
-    private void InitializePaths()
+    private static void InitializePaths()
     {
-        ExecutablePath = Environment.ProcessPath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory + "Macro Deck 2.exe");
-        MainDirectoryPath = AppDomain.CurrentDomain.BaseDirectory;
         UserDirectoryPath = _portableMode ?
             Path.Combine(MainDirectoryPath, "Data") :
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Macro Deck");
@@ -53,7 +57,7 @@ public class ApplicationPaths
     }
 
 
-    private void CheckPaths()
+    private static void CheckPaths()
     {
         MacroDeckLogger.Info("Checking paths...");
         bool CheckCreatePath(string? path)

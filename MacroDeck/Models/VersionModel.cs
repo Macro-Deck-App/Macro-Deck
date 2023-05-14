@@ -1,42 +1,49 @@
 ﻿using System.Diagnostics;
+using System;
+using System.Text.RegularExpressions;
 
 namespace SuchByte.MacroDeck.Models;
 
 public class VersionModel
 {
-    public string VersionString { get; private set; }
+    private const string PatternBeta = @"^(\d+)\.(\d+)\.(\d+)-preview(\d+)$";
+    private const string PatternRelease = @"^(\d+)\.(\d+)\.(\d+)$";
+    
+    public string VersionString { get; }
 
-    public int BetaPatch { get; private set; }
+    public int BetaPatch { get; }
 
-    public bool IsBeta { get; private set; }
+    public bool IsBeta { get; }
 
-    public int Build { get; private set; }
+    public int Build { get; set; }
 
-
-    public VersionModel(string versionString)
+    public VersionModel(string? versionString)
     {
-        var versionArray = versionString.Split(".");
-        IsBeta = versionString.Contains("b");
-        if (IsBeta)
+        if (string.IsNullOrWhiteSpace(versionString))
         {
-            if(int.TryParse(versionString.Substring(versionString.IndexOf("b") + 1), out var betaRevision))
-            {
-                BetaPatch = betaRevision;
-            }
-            if (int.TryParse(versionArray[3].Substring(0, versionArray[3].IndexOf("b")), out var build))
-            {
-                Build = build;
-            }
-        } else
-        {
-            if (int.TryParse(versionArray[3], out var build))
-            {
-                Build = build;
-            }
+            throw new ArgumentNullException();
         }
-        VersionString = $"{versionArray[0]}.{versionArray[1]}.{versionArray[2]}{(IsBeta ? $"b{BetaPatch}" : "")}{(Debugger.IsAttached ? " (debug)" : "")}";
-            
+        
+        var matchBeta = Regex.Match(versionString, PatternBeta);
+        var matchRelease = Regex.Match(versionString, PatternRelease);
+
+        if (matchBeta.Success)
+        {
+            IsBeta = true;
+            if (int.TryParse(matchBeta.Groups[4].Value, out var betaPatch))
+            {
+                BetaPatch = betaPatch;
+            }
+            VersionString = $"{matchBeta.Groups[1].Value}.{matchBeta.Groups[2].Value}.{matchBeta.Groups[3].Value}-preview{BetaPatch}" +
+                            $"{(Debugger.IsAttached ? " (debug)" : "")}";
+        } else if (matchRelease.Success)
+        {
+            VersionString = $"{matchBeta.Groups[1].Value}.{matchBeta.Groups[2].Value}.{matchBeta.Groups[3].Value} " +
+                            $"{(Debugger.IsAttached ? " (debug)" : "")}";
+        }
+        else
+        {
+            VersionString = "Unknown version";
+        }
     }
-
-
 }

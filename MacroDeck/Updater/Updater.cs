@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Startup;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.Updater;
@@ -144,7 +145,7 @@ public static class Updater
         using var webClient = new WebClient();
         webClient.DownloadProgressChanged += WebClient_DownloadProgressChanged;
         webClient.DownloadFileCompleted += WebClient_DownloadComplete;
-        webClient.DownloadFileAsync(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]), Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString()));
+        webClient.DownloadFileAsync(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]), Path.Combine(ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString()));
     }
 
 
@@ -153,7 +154,7 @@ public static class Updater
         _downloading = false;
         try
         {
-            if (!File.Exists(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString())))
+            if (!File.Exists(Path.Combine(ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString())))
             {
                 using (var msgBox = new MessageBox())
                 {
@@ -164,7 +165,7 @@ public static class Updater
                 return;
             }
 
-            using (var stream = File.OpenRead(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString())))
+            using (var stream = File.OpenRead(Path.Combine(ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString())))
             {
                 using (var md5 = MD5.Create())
                 {
@@ -185,7 +186,7 @@ public static class Updater
 
             var p = new Process
             {
-                StartInfo = new ProcessStartInfo(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString()))
+                StartInfo = new ProcessStartInfo(Path.Combine(ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString()))
                 {
                     UseShellExecute = true
                 }

@@ -9,6 +9,7 @@ using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Startup;
 
 namespace SuchByte.MacroDeck.Device;
 
@@ -21,9 +22,9 @@ public class DeviceManager
 
     public static void LoadKnownDevices()
     {
-        if (File.Exists(MacroDeck.ApplicationPaths.DevicesFilePath))
+        if (File.Exists(ApplicationPaths.DevicesFilePath))
         {
-            _macroDeckDevices = JsonConvert.DeserializeObject<List<MacroDeckDevice>>(File.ReadAllText(MacroDeck.ApplicationPaths.DevicesFilePath), new JsonSerializerSettings
+            _macroDeckDevices = JsonConvert.DeserializeObject<List<MacroDeckDevice>>(File.ReadAllText(ApplicationPaths.DevicesFilePath), new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.Auto,
                 NullValueHandling = NullValueHandling.Ignore,
@@ -41,7 +42,7 @@ public class DeviceManager
 
         try
         {
-            using (var sw = new StreamWriter(MacroDeck.ApplicationPaths.DevicesFilePath))
+            using (var sw = new StreamWriter(ApplicationPaths.DevicesFilePath))
             using (JsonWriter writer = new JsonTextWriter(sw))
             {
                 serializer.Serialize(writer, _macroDeckDevices);

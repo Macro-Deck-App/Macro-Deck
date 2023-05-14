@@ -12,6 +12,7 @@ using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Startup;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.GUI.MainWindowContents;
@@ -160,7 +161,7 @@ public partial class SettingsView : UserControl
             {
                 updaterPanel.Controls.Clear();
                 MacroDeck.Configuration.UpdateBetaVersions = true;
-                MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+                MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
                 Updater.Updater.CheckForUpdatesAsync();
             }
             else
@@ -172,7 +173,7 @@ public partial class SettingsView : UserControl
         {
             updaterPanel.Controls.Clear();
             MacroDeck.Configuration.UpdateBetaVersions = false;
-            MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+            MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
             Updater.Updater.CheckForUpdatesAsync();
         }
     }
@@ -246,27 +247,27 @@ public partial class SettingsView : UserControl
     {
         lblIpAddress.Text = GetIPAddressFromAdapter(networkAdapter.SelectedItem.ToString());
         MacroDeck.Configuration.HostAddress = lblIpAddress.Text;
-        MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
     }
 
     private void BtnChangePort_Click(object sender, EventArgs e)
     {
         if (port.Value == MacroDeck.Configuration.HostPort) return;
         MacroDeck.Configuration.HostPort = (int)port.Value;
-        MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
         MacroDeckServer.Start(MacroDeck.Configuration.HostPort);
     }
 
     private void CheckStartWindows_CheckedChanged(object sender, EventArgs e)
     {
         MacroDeck.Configuration.AutoStart = checkStartWindows.Checked;
-        MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
     }
 
     private void CheckAutoUpdate_CheckedChanged(object sender, EventArgs e)
     {
         MacroDeck.Configuration.AutoUpdates = checkAutoUpdate.Checked;
-        MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
     }
 
     private void BtnCheckUpdates_Click(object sender, EventArgs e)
@@ -324,7 +325,7 @@ public partial class SettingsView : UserControl
     private void Language_SelectedIndexChanged(object sender, EventArgs e)
     {
         MacroDeck.Configuration.Language = language.Text;
-        MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
         LanguageManager.SetLanguage(MacroDeck.Configuration.Language);
         UpdateTranslation();
     }
@@ -332,7 +333,7 @@ public partial class SettingsView : UserControl
     private void CheckIconCache_CheckedChanged(object sender, EventArgs e)
     {
         MacroDeck.Configuration.CacheIcons = checkIconCache.Checked;
-        MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
     }
 
     private void BackupManager_BackupFailed(object sender, BackupFailedEventArgs e)

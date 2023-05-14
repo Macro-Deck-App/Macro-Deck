@@ -15,6 +15,7 @@ using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Startup;
 using Form = SuchByte.MacroDeck.GUI.CustomControls.Form;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
@@ -292,6 +293,6 @@ public partial class MainWindow : Form
     private void Hosts_SelectedIndexChanged(object sender, EventArgs e)
     {
         MacroDeck.Configuration.HostAddress = hosts.Text;
-        MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
     }
 }

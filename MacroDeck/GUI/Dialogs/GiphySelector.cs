@@ -198,7 +198,7 @@ public partial class GiphySelector : DialogForm
         {
             DownloadedGifStream = new MemoryStream();
             e.Result.CopyTo(DownloadedGifStream);
-            /*using (FileStream fs = File.Create(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, "giphy")))
+            /*using (FileStream fs = File.Create(Path.Combine(ApplicationPaths.TempDirectoryPath, "giphy")))
             {
                 e.Result.CopyTo(fs);
             }*/

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using SuchByte.MacroDeck.Startup;
 
 namespace SuchByte.MacroDeck.Plugins;
 
@@ -13,7 +14,7 @@ public class PluginConfiguration
 
     private static string FilePath(MacroDeckPlugin plugin)
     {
-        return Path.Combine(MacroDeck.ApplicationPaths.PluginConfigPath, FileName(plugin));
+        return Path.Combine(ApplicationPaths.PluginConfigPath, FileName(plugin));
     }
     
     public static void SetValue(MacroDeckPlugin plugin, string key, string value)

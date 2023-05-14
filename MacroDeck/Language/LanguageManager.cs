@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Startup;
 
 namespace SuchByte.MacroDeck.Language;
 
@@ -57,7 +58,7 @@ public static class LanguageManager
 
     private static void SaveDefault()
     {
-        var path = Path.Combine(MacroDeck.ApplicationPaths.MainDirectoryPath, "Language", _strings.__Language__ + ".json");
+        var path = Path.Combine(ApplicationPaths.MainDirectoryPath, "Language", _strings.__Language__ + ".json");
         var serializer = new JsonSerializer
         {
             NullValueHandling = NullValueHandling.Ignore,

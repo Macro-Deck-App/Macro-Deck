@@ -15,6 +15,7 @@ using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Properties;
+using SuchByte.MacroDeck.Startup;
 using Icon = SuchByte.MacroDeck.Icons.Icon;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
@@ -444,9 +445,9 @@ public partial class IconSelector : DialogForm
                 }
                 else
                 {
-                    iconCreator.Image.Save(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, "iconcreator"));
+                    iconCreator.Image.Save(Path.Combine(ApplicationPaths.TempDirectoryPath, "iconcreator"));
 
-                    using var collection = new MagickImageCollection(new FileInfo(Path.GetFullPath(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, "iconcreator"))));
+                    using var collection = new MagickImageCollection(new FileInfo(Path.GetFullPath(Path.Combine(ApplicationPaths.TempDirectoryPath, "iconcreator"))));
                     Cursor.Current = Cursors.WaitCursor;
                     collection.Coalesce();
                     foreach (var image in collection)
@@ -457,8 +458,8 @@ public partial class IconSelector : DialogForm
                     }
                     try
                     {
-                        collection.Write(new FileInfo(Path.GetFullPath(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, "iconcreator.resized"))));
-                        var imageBytes = File.ReadAllBytes(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, "iconcreator.resized"));
+                        collection.Write(new FileInfo(Path.GetFullPath(Path.Combine(ApplicationPaths.TempDirectoryPath, "iconcreator.resized"))));
+                        var imageBytes = File.ReadAllBytes(Path.Combine(ApplicationPaths.TempDirectoryPath, "iconcreator.resized"));
                         using var ms = new MemoryStream(imageBytes);
                         icon = Image.FromStream(ms);
                     } catch {}

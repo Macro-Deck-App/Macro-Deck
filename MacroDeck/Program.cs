@@ -26,6 +26,10 @@ internal class Program
 
         var startParameters = StartParameters.ParseParameters(args);
         CheckRunningInstance(startParameters.IgnorePidCheck);
+        
+        ApplicationPaths.Initialize(startParameters.PortableMode);
+        CefSetup.Initialize();
+        
         MacroDeck.Start(startParameters);
     }
     
