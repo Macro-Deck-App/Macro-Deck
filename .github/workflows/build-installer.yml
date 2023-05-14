@@ -22,7 +22,7 @@ jobs:
         run: Invoke-WebRequest -Uri "http://files.jrsoftware.org/is/6/innosetup-6.2.0.exe" -OutFile "innosetup.exe"
 
       - name: Install Inno Setup
-        run: .\innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS
+        run: ".\innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS"
         shell: cmd
 
       - name: Build Installer
