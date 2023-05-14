@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-installer:
+  build-windows-installer:
     runs-on: windows-latest
     steps:
       - name: Checkout Code
