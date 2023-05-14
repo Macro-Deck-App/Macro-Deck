@@ -12,8 +12,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build
-        script: MacroDeck.Setup\build_macrodeck_executable.bat
-
+        run: MacroDeck.Setup\build_macrodeck_executable.bat
+        shell: cmd
+      
       - name: Install Inno Setup
         run: |
           Invoke-WebRequest -Uri "http://files.jrsoftware.org/is/6/innosetup-6.2.0.exe" -OutFile "innosetup.exe"
