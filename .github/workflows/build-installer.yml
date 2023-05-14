@@ -25,7 +25,7 @@ jobs:
 
       - name: Build Installer
         run: |
-          "& '$env:ISCC_PATH' 'MacroDeck.Setup\Macro Deck.iss"
+          "& 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' '.\MacroDeck.Setup\Macro Deck.iss'"
 
       - name: Search for Installer
         id: search
@@ -38,6 +38,3 @@ jobs:
         with:
           name: ${{ env.INSTALLER_NAME }}
           path: Output/${{ env.INSTALLER_NAME }}
-
-    env:
-      ISCC_PATH: 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
