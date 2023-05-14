@@ -1,4 +1,4 @@
-name: Inno Setup Installer
+name: Build Windows Installer
 
 on: 
   workflow_call:
