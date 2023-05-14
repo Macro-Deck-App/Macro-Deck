@@ -26,7 +26,8 @@ jobs:
         shell: cmd
 
       - name: Build Installer
-        run: "C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe" .\MacroDeck.Setup\Macro Deck.iss
+        run: |
+            "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" .\MacroDeck.Setup\Macro Deck.iss
         shell: cmd
 
       - name: Search for Installer
