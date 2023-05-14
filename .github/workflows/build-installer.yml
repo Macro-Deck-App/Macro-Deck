@@ -35,8 +35,10 @@ jobs:
           $installer = Get-ChildItem -Path .\MacroDeck.Setup\Result -Filter *.exe | Select-Object -Last 1
           Write-Output "##vso[task.setvariable variable=INSTALLER_NAME]$($installer.Name)"
 
-      - name: Upload Installer Artifact
-        uses: actions/upload-artifact@v2
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
         with:
-          name: ${{ env.INSTALLER_NAME }}
-          path: Output/${{ env.INSTALLER_NAME }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: .\MacroDeck.Setup\ResultOutput\${{ env.INSTALLER_NAME }}
+          asset_name: ${{ env.INSTALLER_NAME }}
+          tag: 2.13.0
