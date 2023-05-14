@@ -33,66 +33,62 @@ public class Base64
         }
         try
         {
-            using (var scaledBitmap = new Bitmap(originalBitmap, new Size(size.Width, size.Width)))
+            using var scaledBitmap = new Bitmap(originalBitmap, new Size(size.Width, size.Width));
+            using var bitmap = new Bitmap(section.Width, section.Height);
+            using (var g = Graphics.FromImage(bitmap))
             {
-                using (var bitmap = new Bitmap(section.Width, section.Height))
+                g.DrawImage(scaledBitmap, 0, 0, section, GraphicsUnit.Pixel);
+            }
+
+            var totalPixels = bitmap.Width * bitmap.Height;
+            var currentPixels = 0;
+            var colorByte = 0;
+            var bitInBlock = 7;
+
+            var result = new byte[totalPixels / 8];
+
+            var rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+            var bitmapData = bitmap.LockBits(rect, ImageLockMode.ReadWrite, bitmap.PixelFormat);
+
+            var ptr = bitmapData.Scan0;
+            var bytes = bitmapData.Stride * bitmap.Height;
+            var rgbValues = new byte[bytes];
+
+            Marshal.Copy(ptr, rgbValues, 0, bytes);
+
+            var pixelByte = 0;
+
+            for (var y = 0; y < bitmap.Height; y++)
+            {
+                for (var x = 0; x < bitmap.Width; x++)
                 {
-                    using (var g = Graphics.FromImage(bitmap))
+                    pixelByte = (y * bitmap.Width + x) * 4;
+
+                    if (rgbValues[pixelByte + 2] < 128 ||   // Red
+                        rgbValues[pixelByte + 1] < 128 ||   // Green
+                        rgbValues[pixelByte + 0] < 128) // Blue
                     {
-                        g.DrawImage(scaledBitmap, 0, 0, section, GraphicsUnit.Pixel);
+                        colorByte &= ~(1 << bitInBlock);    // White/remove
+                    }
+                    else
+                    {
+                        colorByte |= 1 << bitInBlock;       // Black/set
                     }
 
-                    var totalPixels = bitmap.Width * bitmap.Height;
-                    var currentPixels = 0;
-                    var colorByte = 0;
-                    var bitInBlock = 7;
-
-                    var result = new byte[totalPixels / 8];
-
-                    var rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
-                    var bitmapData = bitmap.LockBits(rect, ImageLockMode.ReadWrite, bitmap.PixelFormat);
-
-                    var ptr = bitmapData.Scan0;
-                    var bytes = bitmapData.Stride * bitmap.Height;
-                    var rgbValues = new byte[bytes];
-
-                    Marshal.Copy(ptr, rgbValues, 0, bytes);
-
-                    var pixelByte = 0;
-
-                    for (var y = 0; y < bitmap.Height; y++)
+                    if (bitInBlock == 0)
                     {
-                        for (var x = 0; x < bitmap.Width; x++)
-                        {
-                            pixelByte = (y * bitmap.Width + x) * 4;
-
-                            if (rgbValues[pixelByte + 2] < 128 ||   // Red
-                                rgbValues[pixelByte + 1] < 128 ||   // Green
-                                rgbValues[pixelByte + 0] < 128) // Blue
-                            {
-                                colorByte &= ~(1 << bitInBlock);    // White/remove
-                            }
-                            else
-                            {
-                                colorByte |= 1 << bitInBlock;       // Black/set
-                            }
-
-                            if (bitInBlock == 0)
-                            {
-                                result[currentPixels] = (byte)colorByte;
-                                currentPixels++;
-                                bitInBlock = 7;
-                                colorByte = 0;
-                            }
-                            else
-                            {
-                                bitInBlock--;
-                            }
-                        }
+                        result[currentPixels] = (byte)colorByte;
+                        currentPixels++;
+                        bitInBlock = 7;
+                        colorByte = 0;
                     }
-                    return Convert.ToBase64String(result);
+                    else
+                    {
+                        bitInBlock--;
+                    }
                 }
             }
+            return Convert.ToBase64String(result);
         }
         catch
         {
@@ -127,23 +123,21 @@ public class Base64
         if (image == null) return "";
         try
         {
-            using (var ms = new MemoryStream())
+            using var ms = new MemoryStream();
+            var format = image.RawFormat;
+            switch (format.ToString().ToLower())
             {
-                var format = image.RawFormat;
-                switch (format.ToString().ToLower())
-                {
-                    case "gif":
-                        break;
-                    default:
-                        image = new Bitmap(image); // Generating a new bitmap if the file format is not a gif because otherwise it causes a GDI+ error in some cases
-                        format = ImageFormat.Png;
-                        break;
-                }
-                image.Save(ms, format);
-                image.Dispose();
-
-                return Convert.ToBase64String(ms.ToArray());
+                case "gif":
+                    break;
+                default:
+                    image = new Bitmap(image); // Generating a new bitmap if the file format is not a gif because otherwise it causes a GDI+ error in some cases
+                    format = ImageFormat.Png;
+                    break;
             }
+            image.Save(ms, format);
+            image.Dispose();
+
+            return Convert.ToBase64String(ms.ToArray());
         } catch
         {
             return "";

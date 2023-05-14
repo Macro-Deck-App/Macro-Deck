@@ -89,7 +89,7 @@ public partial class Form : System.Windows.Forms.Form
     {
         var p = new Process
         {
-            StartInfo = new ProcessStartInfo("https://github.com/SuchByte/Macro-Deck/wiki")
+            StartInfo = new ProcessStartInfo("https://github.com/Macro-Deck-App/Macro-Deck/wiki")
             {
                 UseShellExecute = true,
             }
@@ -99,29 +99,27 @@ public partial class Form : System.Windows.Forms.Form
 
     private void HelpMenuExportLog_Click(object sender, EventArgs e)
     {
-        using (var saveFileDialog = new SaveFileDialog
-               {
-                   AddExtension = true,
-                   Filter = "*.log|*.log",
-                   DefaultExt = ".log",
-                   FileName = new FileInfo(MacroDeckLogger.CurrentFilename).Name,
-               })
+        using var saveFileDialog = new SaveFileDialog
         {
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                try
-                {
-                    File.Copy(MacroDeckLogger.CurrentFilename, saveFileDialog.FileName, true);
-                    MacroDeckLogger.Info(GetType(), $"Exported latest log to { saveFileDialog.FileName }");
-                    using (var msgBox = new MessageBox())
-                    {
-                        msgBox.ShowDialog(LanguageManager.Strings.ExportLatestLog, string.Format(LanguageManager.Strings.LogSuccessfullyExportedToX, saveFileDialog.FileName), MessageBoxButtons.OK);
-                    }
-                } catch (Exception ex)
-                {
-                    MacroDeckLogger.Error(GetType(), "Error while exporting latest log: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                }
-            }
+            AddExtension = true,
+            Filter = "*.log|*.log",
+            DefaultExt = ".log",
+            FileName = new FileInfo(MacroDeckLogger.CurrentFilename).Name,
+        };
+        if (saveFileDialog.ShowDialog() != DialogResult.OK)
+        {
+            return;
+        }
+        
+        try
+        {
+            File.Copy(MacroDeckLogger.CurrentFilename, saveFileDialog.FileName, true);
+            MacroDeckLogger.Info(GetType(), $"Exported latest log to { saveFileDialog.FileName }");
+            using var msgBox = new MessageBox();
+            msgBox.ShowDialog(LanguageManager.Strings.ExportLatestLog, string.Format(LanguageManager.Strings.LogSuccessfullyExportedToX, saveFileDialog.FileName), MessageBoxButtons.OK);
+        } catch (Exception ex)
+        {
+            MacroDeckLogger.Error(GetType(), "Error while exporting latest log: " + ex.Message + Environment.NewLine + ex.StackTrace);
         }
     }
 
@@ -129,7 +127,7 @@ public partial class Form : System.Windows.Forms.Form
     {
         var p = new Process
         {
-            StartInfo = new ProcessStartInfo("https://www.buymeacoffee.com/suchbyte")
+            StartInfo = new ProcessStartInfo("https://ko-fi.com/manuelmayer")
             {
                 UseShellExecute = true,
             }

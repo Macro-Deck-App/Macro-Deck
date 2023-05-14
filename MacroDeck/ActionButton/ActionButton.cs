@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Newtonsoft.Json;
@@ -70,12 +71,9 @@ public class ActionButton : IDisposable
         }
         if (EventListeners != null)
         {
-            foreach (var eventListeners in EventListeners)
+            foreach (var pluginAction in EventListeners.SelectMany(eventListeners => eventListeners.Actions))
             {
-                foreach (var pluginAction in eventListeners.Actions)
-                {
-                    pluginAction.OnActionButtonDelete();
-                }
+                pluginAction.OnActionButtonDelete();
             }
         }
 
@@ -103,12 +101,14 @@ public class ActionButton : IDisposable
 
     private void UpdateBindingState(Variable variable)
     {
-        if (variable != null && variable.Name.Equals(StateBindingVariable))
+        if (variable == null || !variable.Name.Equals(StateBindingVariable))
         {
-            bool.TryParse(variable.Value, out var newState);
-            if (variable.Value.ToLower().Equals("on")) newState = true;
-            State = newState;
+            return;
         }
+        
+        bool.TryParse(variable.Value, out var newState);
+        if (variable.Value.ToLower().Equals("on")) newState = true;
+        State = newState;
     }
 
     public string Guid { get; set; } = System.Guid.NewGuid().ToString();

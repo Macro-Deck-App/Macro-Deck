@@ -76,29 +76,27 @@ public partial class IconCreator : DialogForm
 
     private void BtnAddImage_Click(object sender, EventArgs e)
     {
-        using (var openFileDialog = new OpenFileDialog
-               {
-                   Title = "Import icon",
-                   CheckFileExists = true,
-                   CheckPathExists = true,
-                   DefaultExt = "png",
-                   Filter = "Image files (*.png;*.jpg;*.bmp;*.gif)|*.png;*.jpg;*.bmp;*.gif"
-               })
+        using var openFileDialog = new OpenFileDialog
         {
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                var bitmap = new Bitmap(Path.GetFullPath(openFileDialog.FileName));
-                bitmap = new Bitmap(bitmap, new Size(350, 350));
+            Title = "Import icon",
+            CheckFileExists = true,
+            CheckPathExists = true,
+            DefaultExt = "png",
+            Filter = "Image files (*.png;*.jpg;*.bmp;*.gif)|*.png;*.jpg;*.bmp;*.gif"
+        };
+        if (openFileDialog.ShowDialog() == DialogResult.OK)
+        {
+            var bitmap = new Bitmap(Path.GetFullPath(openFileDialog.FileName));
+            bitmap = new Bitmap(bitmap, new Size(350, 350));
                     
-                if (Layers.SelectedItem == null)
-                {
-                    Layers.SelectedIndex = 0;
-                }
-                _layers[Layers.SelectedItem.ToString()] = bitmap;
-                OnLayersChanged?.Invoke(bitmap, new EventArgs());
+            if (Layers.SelectedItem == null)
+            {
+                Layers.SelectedIndex = 0;
             }
-            openFileDialog.Dispose();
+            _layers[Layers.SelectedItem.ToString()] = bitmap;
+            OnLayersChanged?.Invoke(bitmap, new EventArgs());
         }
+        openFileDialog.Dispose();
     }
 
     private Image GetImageByName(string name)
@@ -125,26 +123,24 @@ public partial class IconCreator : DialogForm
 
     private void BtnBackgroundColor_Click(object sender, EventArgs e)
     {
-        using (var colorPicker = new ColorDialog())
+        using var colorPicker = new ColorDialog();
+        if (colorPicker.ShowDialog() == DialogResult.OK)
         {
-            if (colorPicker.ShowDialog() == DialogResult.OK)
+            var bitmap = new Bitmap(350, 350);
+            using (var gfx = Graphics.FromImage(bitmap))
             {
-                var bitmap = new Bitmap(350, 350);
-                using (var gfx = Graphics.FromImage(bitmap))
+                using (var brush = new SolidBrush(colorPicker.Color))
                 {
-                    using (var brush = new SolidBrush(colorPicker.Color))
-                    {
-                        gfx.FillRectangle(brush, 0, 0, 350, 350);
-                    }
+                    gfx.FillRectangle(brush, 0, 0, 350, 350);
                 }
-
-                if (Layers.SelectedItem == null)
-                {
-                    Layers.SelectedIndex = 0;
-                }
-                _layers[Layers.SelectedItem.ToString()] = bitmap;
-                OnLayersChanged?.Invoke(bitmap, new EventArgs());
             }
+
+            if (Layers.SelectedItem == null)
+            {
+                Layers.SelectedIndex = 0;
+            }
+            _layers[Layers.SelectedItem.ToString()] = bitmap;
+            OnLayersChanged?.Invoke(bitmap, new EventArgs());
         }
     }
 }

@@ -29,10 +29,8 @@ public partial class CreateProfileDialog : DialogForm
             {
                 if (profile.DisplayName.Equals(profileName.Text))
                 {
-                    using (var msgBox = new MessageBox())
-                    {
-                        msgBox.ShowDialog(LanguageManager.Strings.CantCreateProfile, string.Format(LanguageManager.Strings.ProfileCalledXAlreadyExists, profileName.Text), MessageBoxButtons.OK);
-                    }
+                    using var msgBox = new MessageBox();
+                    msgBox.ShowDialog(LanguageManager.Strings.CantCreateProfile, string.Format(LanguageManager.Strings.ProfileCalledXAlreadyExists, profileName.Text), MessageBoxButtons.OK);
                     return;
                 }
             }

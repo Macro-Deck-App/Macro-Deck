@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Cottle;
@@ -13,6 +14,8 @@ namespace SuchByte.MacroDeck.Variables;
 
 public static class VariableManager
 {
+    private static SQLiteConnection _database;
+    
     internal const string TemplateTrimBlank = "_trimblank_";
 
     internal static event EventHandler OnVariableChanged;
@@ -30,24 +33,21 @@ public static class VariableManager
 
     public static List<Variable> GetVariables(MacroDeckPlugin macroDeckPlugin)
     {
-        var variables = new ConcurrentBag<Variable>();
-        Parallel.ForEach(ListVariables.Where(x => x.Creator == macroDeckPlugin.Name), variable =>
-        {
-            variables.Add(variable);
-        });
+        var pluginVariables = ListVariables
+            .Where(x => x.Creator.Equals(macroDeckPlugin.Name, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(x => x.Name)
+            .ToList();
 
-        var vars = variables.ToList();
-        vars.Sort((Variable v1, Variable v2) => string.Compare(v1.Name, v2.Name, StringComparison.CurrentCultureIgnoreCase));
-
-        return vars;
+        return pluginVariables;
     }
 
     public static Variable GetVariable(MacroDeckPlugin macroDeckPlugin, string variableName)
     {
-        return ListVariables.FirstOrDefault(x => x.Creator == macroDeckPlugin.Name && string.Equals(x.Name, variableName, StringComparison.CurrentCultureIgnoreCase));
+        return ListVariables.FirstOrDefault(x =>
+            x.Creator == macroDeckPlugin.Name &&
+            string.Equals(x.Name, variableName, StringComparison.CurrentCultureIgnoreCase));
     }
 
-    private static SQLiteConnection _database;
 
     private static DocumentConfiguration templateConfiguration = new()
     {
@@ -56,7 +56,10 @@ public static class VariableManager
 
     internal static void InsertVariable(Variable variable)
     {
-        if (ListVariables.Where(x => x.Name.ToLower() == variable.Name.ToLower()).Count() > 0) return;
+        if (ListVariables.Any(x => string.Equals(x.Name, variable.Name, StringComparison.CurrentCultureIgnoreCase)))
+        {
+            return;
+        }
         _database.Insert(variable);
     }
 
@@ -65,7 +68,8 @@ public static class VariableManager
         if (string.IsNullOrWhiteSpace(name)) return null;
         name = ConvertNameString(name);
 
-        var variable = ListVariables.Where(v => v.Name.ToLower() == name.ToLower()).FirstOrDefault();
+        var variable =
+            ListVariables.FirstOrDefault(v => v.Name == name);
         if (variable == null)
         {
             variable = new Variable
@@ -180,9 +184,11 @@ public static class VariableManager
     public static string RenderTemplate(string template)
     {
         string result;
-        try 
+        try
         {
-            templateConfiguration.Trimmer = template.StartsWith(TemplateTrimBlank, StringComparison.OrdinalIgnoreCase) ? DocumentConfiguration.TrimFirstAndLastBlankLines : DocumentConfiguration.TrimNothing;
+            templateConfiguration.Trimmer = template.StartsWith(TemplateTrimBlank, StringComparison.OrdinalIgnoreCase)
+                ? DocumentConfiguration.TrimFirstAndLastBlankLines
+                : DocumentConfiguration.TrimNothing;
             template = template.Replace(TemplateTrimBlank, "", StringComparison.OrdinalIgnoreCase);
             var document = Document.CreateDefault(template, templateConfiguration).DocumentOrThrow;
 
@@ -196,18 +202,17 @@ public static class VariableManager
                 switch (v.Type)
                 {
                     case nameof(VariableType.Bool):
-                        var resultBool = false;
-                        bool.TryParse(v.Value.Replace("On", "True", StringComparison.CurrentCultureIgnoreCase).Replace("Off", "False", StringComparison.OrdinalIgnoreCase), out resultBool);
+                        bool.TryParse(
+                            v.Value.Replace("On", "True", StringComparison.CurrentCultureIgnoreCase)
+                                .Replace("Off", "False", StringComparison.OrdinalIgnoreCase), out var resultBool);
                         value = Value.FromBoolean(resultBool);
                         break;
                     case nameof(VariableType.Float):
-                        var resultFloat = 0.0f;
-                        float.TryParse(v.Value, out resultFloat);
+                        float.TryParse(v.Value, out var resultFloat);
                         value = Value.FromNumber(resultFloat);
                         break;
                     case nameof(VariableType.Integer):
-                        var resultInteger = 0;
-                        int.TryParse(v.Value, out resultInteger);
+                        int.TryParse(v.Value, out var resultInteger);
                         value = Value.FromNumber(resultInteger);
                         break;
                     case nameof(VariableType.String):
@@ -246,23 +251,28 @@ public static class VariableManager
 
     public static string ConvertNameString(string str)
     {
-        return str.ToLower()
-            .Replace(" ", "_", StringComparison.OrdinalIgnoreCase)
-            .Replace("|", "_", StringComparison.OrdinalIgnoreCase)
-            .Replace(".", "_", StringComparison.OrdinalIgnoreCase)
-            .Replace("-", "_", StringComparison.OrdinalIgnoreCase)
-            .Replace("/", "_", StringComparison.OrdinalIgnoreCase)
-            .Replace("ä", "ae", StringComparison.OrdinalIgnoreCase)
-            .Replace("ö", "oe", StringComparison.OrdinalIgnoreCase)
-            .Replace("ü", "ue", StringComparison.OrdinalIgnoreCase)
-            .Replace("ß", "ss", StringComparison.OrdinalIgnoreCase);
-    }
-}
+        str = str.ToLower();
 
-public enum VariableType
-{
-    Integer,
-    Float,
-    String,
-    Bool,
+        var regexSpecialChars = new Regex("[ |\\.\\-/]");
+        str = regexSpecialChars.Replace(str, "_");
+
+        var regexUmlauts = new Regex("[äöüß]");
+        var evaluator = new MatchEvaluator(UmlautsReplacer);
+        str = regexUmlauts.Replace(str, evaluator);
+
+        return str;
+    }
+    
+    
+    private static string UmlautsReplacer(Match m)
+    {
+        return m.Value switch
+        {
+            "ä" => "ae",
+            "ö" => "oe",
+            "ü" => "ue",
+            "ß" => "ss",
+            _ => m.Value
+        };
+    }
 }

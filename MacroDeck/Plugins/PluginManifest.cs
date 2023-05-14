@@ -18,10 +18,8 @@ public class PluginManifest
 
     public static PluginManifest FromManifestFile(string path)
     {
-        using (var s = File.OpenRead(path))
-        {
-            return FromXmlStream(s);
-        }
+        using var s = File.OpenRead(path);
+        return FromXmlStream(s);
     }
 
     public static PluginManifest FromZipFilePath(string zipFilePath)

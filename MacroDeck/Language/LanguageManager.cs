@@ -38,15 +38,13 @@ public static class LanguageManager
                 using var resourceStream = assembly.GetManifestResourceStream(manifestResource);
 
                 var serializer = new JsonSerializer();
-                using (var sr = new StreamReader(resourceStream))
-                using (var jsonReader = new JsonTextReader(sr))
+                using var sr = new StreamReader(resourceStream);
+                using var jsonReader = new JsonTextReader(sr);
+                while (!sr.EndOfStream)
                 {
-                    while (!sr.EndOfStream)
-                    {
-                        var language = serializer.Deserialize<Strings>(jsonReader);
-                        if (_languages.FindAll(l => l.__Language__.Equals(language.__Language__) && l.__LanguageCode__.Equals(language.__LanguageCode__) && l.__Author__.Equals(language.__Author__)).Count > 0) continue;
-                        _languages.Add(language);
-                    }
+                    var language = serializer.Deserialize<Strings>(jsonReader);
+                    if (_languages.FindAll(l => l.__Language__.Equals(language.__Language__) && l.__LanguageCode__.Equals(language.__LanguageCode__) && l.__Author__.Equals(language.__Author__)).Count > 0) continue;
+                    _languages.Add(language);
                 }
             } catch (Exception ex) {
 

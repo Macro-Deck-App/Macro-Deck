@@ -146,12 +146,10 @@ public partial class VariablesView : UserControl
 
     private void BtnCreateVariable_Click(object sender, EventArgs e)
     {
-        using (var variableDialog = new VariableDialog())
+        using var variableDialog = new VariableDialog();
+        if (variableDialog.ShowDialog() == DialogResult.OK)
         {
-            if (variableDialog.ShowDialog() == DialogResult.OK)
-            {
-                VariableManager.InsertVariable(variableDialog.Variable);
-            }
+            VariableManager.InsertVariable(variableDialog.Variable);
         }
     }
 }

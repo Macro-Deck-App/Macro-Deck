@@ -158,18 +158,15 @@ public partial class RoundedComboBox : UserControl
             var smoothSize = 2;
 
 
-            using (var pathBorderSmooth = GetFigurePath(rectBorderSmooth, borderRadius))
-            using (var penBorderSmooth = new Pen(Parent.BackColor, smoothSize))
+            using var pathBorderSmooth = GetFigurePath(rectBorderSmooth, borderRadius);
+            using var penBorderSmooth = new Pen(Parent.BackColor, smoothSize);
+            Region = new Region(pathBorderSmooth);
+            if (icon != null)
             {
-
-                Region = new Region(pathBorderSmooth);
-                if (icon != null)
-                {
-                    graph.DrawImage(icon, rectIcon);
-                }
-                graph.SmoothingMode = SmoothingMode.AntiAlias;
-                graph.DrawPath(penBorderSmooth, pathBorderSmooth);
+                graph.DrawImage(icon, rectIcon);
             }
+            graph.SmoothingMode = SmoothingMode.AntiAlias;
+            graph.DrawPath(penBorderSmooth, pathBorderSmooth);
         }
         else
         {

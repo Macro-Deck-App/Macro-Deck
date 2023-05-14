@@ -165,10 +165,8 @@ public class BackupManager
             }
         }
         MacroDeckLogger.Info("Backup successfully restored");
-        using (var msgBox = new MessageBox())
-        {
-            msgBox.ShowDialog("Backup restored", "Backup successfully restored", MessageBoxButtons.OK);
-        }
+        using var msgBox = new MessageBox();
+        msgBox.ShowDialog("Backup restored", "Backup successfully restored", MessageBoxButtons.OK);
     }
 
     public static void RestoreBackup(string backupFileName, RestoreBackupInfo restoreBackupInfo)

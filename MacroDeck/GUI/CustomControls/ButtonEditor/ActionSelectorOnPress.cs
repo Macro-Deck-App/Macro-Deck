@@ -111,18 +111,16 @@ public partial class ActionSelectorOnPress : RoundedUserControl
     private void EditClicked(object sender, EventArgs e)
     {
         var actionItem = sender as IActionConditionItem;
-        using (var configurator = new ActionConfigurator(actionItem.Action))
+        using var configurator = new ActionConfigurator(actionItem.Action);
+        if (configurator.ShowDialog() == DialogResult.OK)
         {
-            if (configurator.ShowDialog() == DialogResult.OK)
-            {
-                SuspendLayout();
-                if (configurator.Action.CanConfigure && configurator.Action.Configuration.Length == 0) return;
-                var index = _pluginActions.IndexOf(actionItem.Action);
-                _pluginActions.RemoveAt(index);
-                _pluginActions.Insert(index, configurator.Action);
-                RefreshActions();
-                ResumeLayout();
-            }
+            SuspendLayout();
+            if (configurator.Action.CanConfigure && configurator.Action.Configuration.Length == 0) return;
+            var index = _pluginActions.IndexOf(actionItem.Action);
+            _pluginActions.RemoveAt(index);
+            _pluginActions.Insert(index, configurator.Action);
+            RefreshActions();
+            ResumeLayout();
         }
     }
 
@@ -133,21 +131,17 @@ public partial class ActionSelectorOnPress : RoundedUserControl
 
     private void MenuItemAction_Click(object sender, EventArgs e)
     {
-        using (var actionConfigurator = new ActionConfigurator())
+        using var actionConfigurator = new ActionConfigurator();
+        if (actionConfigurator.ShowDialog() == DialogResult.OK)
         {
-            if (actionConfigurator.ShowDialog() == DialogResult.OK)
+            _pluginActions.Add(actionConfigurator.Action);
+            AddActionItem(actionConfigurator.Action);
+            if (!string.IsNullOrWhiteSpace(actionConfigurator.Action.BindableVariable))
             {
-                _pluginActions.Add(actionConfigurator.Action);
-                AddActionItem(actionConfigurator.Action);
-                if (!string.IsNullOrWhiteSpace(actionConfigurator.Action.BindableVariable))
+                using var msgBox = new MessageBox();
+                if (msgBox.ShowDialog(LanguageManager.Strings.BindableVariable, string.Format(LanguageManager.Strings.BindableVariableInfo, actionConfigurator.Action.BindableVariable), MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    using (var msgBox = new MessageBox())
-                    {
-                        if (msgBox.ShowDialog(LanguageManager.Strings.BindableVariable, string.Format(LanguageManager.Strings.BindableVariableInfo, actionConfigurator.Action.BindableVariable), MessageBoxButtons.YesNo) == DialogResult.Yes)
-                        {
-                            _buttonEditor.SetBindableVariable(actionConfigurator.Action.BindableVariable);
-                        }
-                    }
+                    _buttonEditor.SetBindableVariable(actionConfigurator.Action.BindableVariable);
                 }
             }
         }

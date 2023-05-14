@@ -47,30 +47,26 @@ public partial class ReadVariableFromFileActionConfigView : ActionConfigControl
 
     private void BtnChoosePath_Click(object sender, EventArgs e)
     {
-        using (var openFileDialog = new OpenFileDialog
-               {
-                   AddExtension = true,
-                   DefaultExt = ".txt",
-                   Filter = "Text file (*.txt)|*.txt|Any (*.*)|*.*",
-               })
+        using var openFileDialog = new OpenFileDialog
         {
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                path.Text = openFileDialog.FileName;
-            }
+            AddExtension = true,
+            DefaultExt = ".txt",
+            Filter = "Text file (*.txt)|*.txt|Any (*.*)|*.*",
+        };
+        if (openFileDialog.ShowDialog() == DialogResult.OK)
+        {
+            path.Text = openFileDialog.FileName;
         }
     }
 
     private void BtnCreateVariable_Click(object sender, EventArgs e)
     {
-        using (var variableDialog = new VariableDialog())
+        using var variableDialog = new VariableDialog();
+        if (variableDialog.ShowDialog() == DialogResult.OK)
         {
-            if (variableDialog.ShowDialog() == DialogResult.OK)
-            {
-                VariableManager.InsertVariable(variableDialog.Variable);
-                LoadVariables();
-                variable.Text = variableDialog.Variable.Name;
-            }
+            VariableManager.InsertVariable(variableDialog.Variable);
+            LoadVariables();
+            variable.Text = variableDialog.Variable.Name;
         }
     }
 

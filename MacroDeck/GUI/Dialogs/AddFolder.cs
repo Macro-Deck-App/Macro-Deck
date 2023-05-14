@@ -52,11 +52,9 @@ public partial class AddFolder : DialogForm
         {
             if (ProfileManager.CurrentProfile.Folders.Find(x => x.DisplayName.Equals(folderName.Text, StringComparison.OrdinalIgnoreCase)) != null)
             {
-                using (var msgBox = new MessageBox())
-                {
-                    msgBox.ShowDialog(LanguageManager.Strings.CantCreateFolder, string.Format(LanguageManager.Strings.FolderCalledXAlreadyExists, folderName.Text), MessageBoxButtons.OK);
-                    msgBox.Dispose();
-                }
+                using var msgBox = new MessageBox();
+                msgBox.ShowDialog(LanguageManager.Strings.CantCreateFolder, string.Format(LanguageManager.Strings.FolderCalledXAlreadyExists, folderName.Text), MessageBoxButtons.OK);
+                msgBox.Dispose();
                 return;
             }
 
@@ -71,11 +69,9 @@ public partial class AddFolder : DialogForm
         {
             if (ProfileManager.CurrentProfile.Folders.Find(x => x.DisplayName.Equals(folderName.Text, StringComparison.OrdinalIgnoreCase)) != null && ProfileManager.CurrentProfile.Folders.Find(x => x.DisplayName.Equals(folderName.Text, StringComparison.OrdinalIgnoreCase)) != Folder)
             {
-                using (var msgBox = new MessageBox())
-                {
-                    msgBox.ShowDialog(LanguageManager.Strings.CantCreateFolder, string.Format(LanguageManager.Strings.FolderCalledXAlreadyExists, folderName.Text), MessageBoxButtons.OK);
-                    msgBox.Dispose();
-                }
+                using var msgBox = new MessageBox();
+                msgBox.ShowDialog(LanguageManager.Strings.CantCreateFolder, string.Format(LanguageManager.Strings.FolderCalledXAlreadyExists, folderName.Text), MessageBoxButtons.OK);
+                msgBox.Dispose();
                 return;
             }
         }

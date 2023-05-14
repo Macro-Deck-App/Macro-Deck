@@ -315,10 +315,8 @@ public static class PluginManager
                         {
                             try
                             {
-                                using (var wc = new WebClient())
-                                {
-                                    wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=count-download&package-id={extensionManifest.PackageId}");
-                                }
+                                using var wc = new WebClient();
+                                wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=count-download&package-id={extensionManifest.PackageId}");
                             } catch { }
                               
                             var plugin = LoadPlugin(extensionManifest, installationDirectory, true);
@@ -327,12 +325,10 @@ public static class PluginManager
                             {
                                 if (plugin != null && plugin.CanConfigure)
                                 {
-                                    using (var msgBox = new MessageBox())
+                                    using var msgBox = new MessageBox();
+                                    if (msgBox.ShowDialog(LanguageManager.Strings.PluginNeedsConfiguration, string.Format(LanguageManager.Strings.ConfigureNow, plugin.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
                                     {
-                                        if (msgBox.ShowDialog(LanguageManager.Strings.PluginNeedsConfiguration, string.Format(LanguageManager.Strings.ConfigureNow, plugin.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
-                                        {
-                                            plugin.OpenConfigurator();
-                                        }
+                                        plugin.OpenConfigurator();
                                     }
                                 }
                             } catch { }
@@ -368,10 +364,8 @@ public static class PluginManager
 
                 PluginsNotLoaded[asm.GetName().Name] = disabledPlugin;
 
-                using (var msgBox = new MessageBox())
-                {
-                    msgBox.ShowDialog(LanguageManager.Strings.ErrorWhileInstallingPlugin, string.Format(LanguageManager.Strings.PluginXCouldNotBeInstalled, asm.GetName().Name), MessageBoxButtons.OK);
-                }
+                using var msgBox = new MessageBox();
+                msgBox.ShowDialog(LanguageManager.Strings.ErrorWhileInstallingPlugin, string.Format(LanguageManager.Strings.PluginXCouldNotBeInstalled, asm.GetName().Name), MessageBoxButtons.OK);
             }
         }
     }
@@ -421,25 +415,21 @@ public static class PluginManager
     {
         var action = plugin.Actions.Find(plugin => plugin.Name.Equals(name));
         if (action == null) return null;
-        using (var ms = new MemoryStream())
-        {
-            var serializer = new XmlSerializer(action.GetType());
-            serializer.Serialize(ms, action);
-            ms.Seek(0, SeekOrigin.Begin);
-            return (PluginAction)serializer.Deserialize(ms);
-        }
+        using var ms = new MemoryStream();
+        var serializer = new XmlSerializer(action.GetType());
+        serializer.Serialize(ms, action);
+        ms.Seek(0, SeekOrigin.Begin);
+        return (PluginAction)serializer.Deserialize(ms);
     }
 
     public static PluginAction GetNewActionInstance(PluginAction action)
     {
         if (action == null) return null;
-        using (var ms = new MemoryStream())
-        {
-            var serializer = new XmlSerializer(action.GetType());
-            serializer.Serialize(ms, action);
-            ms.Seek(0, SeekOrigin.Begin);
-            return (PluginAction)serializer.Deserialize(ms);
-        }
+        using var ms = new MemoryStream();
+        var serializer = new XmlSerializer(action.GetType());
+        serializer.Serialize(ms, action);
+        ms.Seek(0, SeekOrigin.Begin);
+        return (PluginAction)serializer.Deserialize(ms);
     }
         
     public static MacroDeckPlugin GetPluginByAction(PluginAction pluginAction)

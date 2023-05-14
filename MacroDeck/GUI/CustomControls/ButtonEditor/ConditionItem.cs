@@ -238,26 +238,24 @@ public partial class ConditionItem : UserControl, IActionConditionItem
     private void EditClicked(object sender, EventArgs e)
     {
         var actionItem = sender as IActionConditionItem;
-        using (var configurator = new ActionConfigurator(actionItem.Action))
+        using var configurator = new ActionConfigurator(actionItem.Action);
+        if (configurator.ShowDialog() == DialogResult.OK)
         {
-            if (configurator.ShowDialog() == DialogResult.OK)
+            if (configurator.Action.CanConfigure && configurator.Action.Configuration.Length == 0) return;
+            if (((ConditionAction)Action).Actions.Contains(actionItem.Action))
             {
-                if (configurator.Action.CanConfigure && configurator.Action.Configuration.Length == 0) return;
-                if (((ConditionAction)Action).Actions.Contains(actionItem.Action))
-                {
-                    var index = ((ConditionAction)Action).Actions.IndexOf(actionItem.Action);
-                    ((ConditionAction)Action).Actions.RemoveAt(index);
-                    ((ConditionAction)Action).Actions.Insert(index, configurator.Action);
-                }
-                else if (((ConditionAction)Action).ActionsElse.Contains(actionItem.Action))
-                {
-                    var index = ((ConditionAction)Action).ActionsElse.IndexOf(actionItem.Action);
-                    ((ConditionAction)Action).ActionsElse.RemoveAt(index);
-                    ((ConditionAction)Action).ActionsElse.Insert(index, configurator.Action);
-                }
-                    
-                RefreshActions();
+                var index = ((ConditionAction)Action).Actions.IndexOf(actionItem.Action);
+                ((ConditionAction)Action).Actions.RemoveAt(index);
+                ((ConditionAction)Action).Actions.Insert(index, configurator.Action);
             }
+            else if (((ConditionAction)Action).ActionsElse.Contains(actionItem.Action))
+            {
+                var index = ((ConditionAction)Action).ActionsElse.IndexOf(actionItem.Action);
+                ((ConditionAction)Action).ActionsElse.RemoveAt(index);
+                ((ConditionAction)Action).ActionsElse.Insert(index, configurator.Action);
+            }
+                    
+            RefreshActions();
         }
     }
 
@@ -398,23 +396,20 @@ public partial class ConditionItem : UserControl, IActionConditionItem
 
     private void MenuItemAction_Click(object sender, EventArgs e)
     {
-
-        using (var actionConfigurator = new ActionConfigurator())
+        using var actionConfigurator = new ActionConfigurator();
+        if (actionConfigurator.ShowDialog() == DialogResult.OK)
         {
-            if (actionConfigurator.ShowDialog() == DialogResult.OK)
+            if (addItemContextMenu.SourceControl.Equals(btnAddAction))
             {
-                if (addItemContextMenu.SourceControl.Equals(btnAddAction))
-                {
-                    ((ConditionAction)Action).Actions.Add(actionConfigurator.Action);
-                    AddActionItem(actionConfigurator.Action, actionsList);
-                } else if (addItemContextMenu.SourceControl.Equals(btnAddActionElse))
-                {
-                    ((ConditionAction)Action).ActionsElse.Add(actionConfigurator.Action);
-                    AddActionItem(actionConfigurator.Action, elseActionsList);
-                }
-
-                //this.RefreshActions();
+                ((ConditionAction)Action).Actions.Add(actionConfigurator.Action);
+                AddActionItem(actionConfigurator.Action, actionsList);
+            } else if (addItemContextMenu.SourceControl.Equals(btnAddActionElse))
+            {
+                ((ConditionAction)Action).ActionsElse.Add(actionConfigurator.Action);
+                AddActionItem(actionConfigurator.Action, elseActionsList);
             }
+
+            //this.RefreshActions();
         }
     }
 
@@ -442,15 +437,13 @@ public partial class ConditionItem : UserControl, IActionConditionItem
 
     private void BtnOpenTemplateEditor_Click(object sender, EventArgs e)
     {
-        using (var templateEditor = new TemplateEditor(template.Text))
+        using var templateEditor = new TemplateEditor(template.Text);
+        if (templateEditor.ShowDialog() == DialogResult.OK)
         {
-            if (templateEditor.ShowDialog() == DialogResult.OK)
+            template.Text = templateEditor.Template;
+            if (!string.IsNullOrWhiteSpace(template.Text))
             {
-                template.Text = templateEditor.Template;
-                if (!string.IsNullOrWhiteSpace(template.Text))
-                {
-                    ((ConditionAction)Action).ConditionValue1Source = template.Text;
-                }
+                ((ConditionAction)Action).ConditionValue1Source = template.Text;
             }
         }
     }

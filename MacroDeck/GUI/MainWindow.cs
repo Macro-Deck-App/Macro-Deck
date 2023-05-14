@@ -131,11 +131,8 @@ public partial class MainWindow : Form
         {
             BackColor = Color.FromArgb(99, 0, 0);
             lblSafeMode.Visible = true;
-            using (var msgBox = new MessageBox())
-            {
-                msgBox.ShowDialog("Safe mode", "Macro Deck was started in safe mode! This means no changes on the action buttons will be saved to prevent damage.", MessageBoxButtons.OK);
-
-            }
+            using var msgBox = new MessageBox();
+            msgBox.ShowDialog("Safe mode", "Macro Deck was started in safe mode! This means no changes on the action buttons will be saved to prevent damage.", MessageBoxButtons.OK);
         }
 
         btnExtensions.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);

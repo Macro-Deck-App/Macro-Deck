@@ -87,17 +87,15 @@ public class ComboBox : System.Windows.Forms.ComboBox
         var smoothSize = 2;
         if (_borderRadius > 2)
         {
-            using (var pathSurface = GetFigurePath(rectSurface, _borderRadius))
-            using (var penSurface = new Pen(Parent.BackColor, smoothSize))
+            using var pathSurface = GetFigurePath(rectSurface, _borderRadius);
+            using var penSurface = new Pen(Parent.BackColor, smoothSize);
+            pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            if (!_regionSet)
             {
-                pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                if (!_regionSet)
-                {
-                    Region = new Region(pathSurface);
-                    _regionSet = true; // Preventing future region changes because the event raises on every region change
-                }
-                pe.Graphics.DrawPath(penSurface, pathSurface);
+                Region = new Region(pathSurface);
+                _regionSet = true; // Preventing future region changes because the event raises on every region change
             }
+            pe.Graphics.DrawPath(penSurface, pathSurface);
         }
 
 
@@ -107,15 +105,12 @@ public class ComboBox : System.Windows.Forms.ComboBox
             LineAlignment = StringAlignment.Center
         };
 
-        using (var brush = new SolidBrush(Enabled ? (_hover ? Color.White : Color.Silver) : Color.FromArgb(95,95,95)))
+        using var brush = new SolidBrush(Enabled ? (_hover ? Color.White : Color.Silver) : Color.FromArgb(95,95,95));
+        pe.Graphics.DrawString(Text, Font, brush, rectText, stringFormat);
+        if (Enabled)
         {
-            pe.Graphics.DrawString(Text, Font, brush, rectText, stringFormat);
-            if (Enabled)
-            {
-                pe.Graphics.FillPolygon(brush, new Point[] { new(Width - 10, Height / 2 - 2), new(Width - 20, Height / 2 - 2), new(Width - 15, Height / 2 + 3) });
-            }
+            pe.Graphics.FillPolygon(brush, new Point[] { new(Width - 10, Height / 2 - 2), new(Width - 20, Height / 2 - 2), new(Width - 15, Height / 2 + 3) });
         }
-
     }
 
 }

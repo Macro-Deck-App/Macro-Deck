@@ -50,17 +50,15 @@ public partial class ActionButtonSetBackgroundColorActionConfigView : ActionConf
 
     private void BtnChangeColor_Click(object sender, EventArgs e)
     {
-        using (var colorDialog = new ColorDialog
-               {
-                   Color = btnChangeColor.BackColor,
-                   FullOpen = true,
-                   CustomColors = new[] { ColorTranslator.ToOle(Color.FromArgb(35,35,35)) }
-               })
+        using var colorDialog = new ColorDialog
         {
-            if (colorDialog.ShowDialog() == DialogResult.OK)
-            {
-                btnChangeColor.BackColor = colorDialog.Color;
-            }
+            Color = btnChangeColor.BackColor,
+            FullOpen = true,
+            CustomColors = new[] { ColorTranslator.ToOle(Color.FromArgb(35,35,35)) }
+        };
+        if (colorDialog.ShowDialog() == DialogResult.OK)
+        {
+            btnChangeColor.BackColor = colorDialog.Color;
         }
     }
 

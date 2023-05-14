@@ -41,17 +41,15 @@ public partial class SaveVariableToFileActionConfigView : ActionConfigControl
 
     private void BtnChoosePath_Click(object sender, EventArgs e)
     {
-        using (var saveFileDialog = new SaveFileDialog
-               {
-                   AddExtension = true,
-                   DefaultExt = ".txt",
-                   Filter = "Text file (*.txt)|*.txt|Any (*.*)|*.*",
-               })
+        using var saveFileDialog = new SaveFileDialog
         {
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                path.Text = saveFileDialog.FileName;
-            }
+            AddExtension = true,
+            DefaultExt = ".txt",
+            Filter = "Text file (*.txt)|*.txt|Any (*.*)|*.*",
+        };
+        if (saveFileDialog.ShowDialog() == DialogResult.OK)
+        {
+            path.Text = saveFileDialog.FileName;
         }
     }
 }

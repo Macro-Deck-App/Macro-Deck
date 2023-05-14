@@ -23,13 +23,11 @@ public class Icon
     {
         get
         {
-            using (var fs = new FileStream(_filePath, FileMode.Open, FileAccess.Read))
-            {
-                var ms = new MemoryStream();
-                fs.CopyTo(ms);
-                ms.Position = 0;
-                return Image.FromStream(ms);
-            }
+            using var fs = new FileStream(_filePath, FileMode.Open, FileAccess.Read);
+            var ms = new MemoryStream();
+            fs.CopyTo(ms);
+            ms.Position = 0;
+            return Image.FromStream(ms);
         }
     }
 

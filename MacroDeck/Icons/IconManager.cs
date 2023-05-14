@@ -209,13 +209,11 @@ public class IconManager
         try
         {
             iconPack.IconPackIcon?.Save(Path.Combine(iconPackDir, "ExtensionIcon.png"));
-            using (var archive = ZipFile.Open(Path.Combine(MacroDeck.ApplicationPaths.BackupsDirectoryPath, destination, $"{iconPack.Name}.macroDeckIconPack"), ZipArchiveMode.Create))
+            using var archive = ZipFile.Open(Path.Combine(MacroDeck.ApplicationPaths.BackupsDirectoryPath, destination, $"{iconPack.Name}.macroDeckIconPack"), ZipArchiveMode.Create);
+            if (!Directory.Exists(iconPackDir)) return;
+            foreach (var iconPackFile in new DirectoryInfo(iconPackDir).GetFiles())
             {
-                if (!Directory.Exists(iconPackDir)) return;
-                foreach (var iconPackFile in new DirectoryInfo(iconPackDir).GetFiles())
-                {
-                    archive.CreateEntryFromFile(Path.Combine(iconPackDir, iconPackFile.Name), iconPackFile.Name);
-                }
+                archive.CreateEntryFromFile(Path.Combine(iconPackDir, iconPackFile.Name), iconPackFile.Name);
             }
         } catch (Exception ex)
         {
@@ -332,10 +330,8 @@ public class IconManager
                 {
                     try
                     {
-                        using (var wc = new WebClient())
-                        {
-                            wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=count-download&package-id={extensionManifestModel.PackageId}");
-                        }
+                        using var wc = new WebClient();
+                        wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=count-download&package-id={extensionManifestModel.PackageId}");
                     }
                     catch { }
                 }

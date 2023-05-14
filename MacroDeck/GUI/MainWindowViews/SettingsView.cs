@@ -155,19 +155,17 @@ public partial class SettingsView : UserControl
     {
         if (checkInstallBetaVersions.Checked)
         {
-            using (var msgBox = new MessageBox())
+            using var msgBox = new MessageBox();
+            if (msgBox.ShowDialog(LanguageManager.Strings.Warning, LanguageManager.Strings.WarningBetaVersions, MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                if (msgBox.ShowDialog(LanguageManager.Strings.Warning, LanguageManager.Strings.WarningBetaVersions, MessageBoxButtons.YesNo) == DialogResult.Yes)
-                {
-                    updaterPanel.Controls.Clear();
-                    MacroDeck.Configuration.UpdateBetaVersions = true;
-                    MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
-                    Updater.Updater.CheckForUpdatesAsync();
-                }
-                else
-                {
-                    LoadUpdateChannel();
-                }
+                updaterPanel.Controls.Clear();
+                MacroDeck.Configuration.UpdateBetaVersions = true;
+                MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+                Updater.Updater.CheckForUpdatesAsync();
+            }
+            else
+            {
+                LoadUpdateChannel();
             }
         }
         else
@@ -289,10 +287,8 @@ public partial class SettingsView : UserControl
         {
             btnCheckUpdates.Enabled = true;
             btnCheckUpdates.Spinner = false;
-            using (var msgBox = new MessageBox())
-            {
-                msgBox.ShowDialog(LanguageManager.Strings.NoUpdatesAvailable, LanguageManager.Strings.LatestVersionInstalled, MessageBoxButtons.OK);
-            }
+            using var msgBox = new MessageBox();
+            msgBox.ShowDialog(LanguageManager.Strings.NoUpdatesAvailable, LanguageManager.Strings.LatestVersionInstalled, MessageBoxButtons.OK);
         });
 
             
@@ -321,10 +317,8 @@ public partial class SettingsView : UserControl
 
     private void BtnLicenses_Click(object sender, EventArgs e)
     {
-        using (var licensesDialog = new LicensesDialog())
-        {
-            licensesDialog.ShowDialog();
-        }
+        using var licensesDialog = new LicensesDialog();
+        licensesDialog.ShowDialog();
     }
 
     private void Language_SelectedIndexChanged(object sender, EventArgs e)
@@ -346,10 +340,8 @@ public partial class SettingsView : UserControl
         Invoke(() =>
         {
             btnCreateBackup.Spinner = false;
-            using (var msgBox = new MessageBox())
-            {
-                msgBox.ShowDialog(LanguageManager.Strings.Backup, LanguageManager.Strings.BackupFailed + ": " + Environment.NewLine + e.Message, MessageBoxButtons.OK);
-            }
+            using var msgBox = new MessageBox();
+            msgBox.ShowDialog(LanguageManager.Strings.Backup, LanguageManager.Strings.BackupFailed + ": " + Environment.NewLine + e.Message, MessageBoxButtons.OK);
         });
     }
 

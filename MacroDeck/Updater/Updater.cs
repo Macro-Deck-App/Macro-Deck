@@ -78,47 +78,44 @@ public static class Updater
         if (UpdateAvailable) return;
         try
         {
-            using (var wc = new WebClient())
+            using var wc = new WebClient();
+            var jsonString = "";
+
+            if (_testChannel)
             {
-                var jsonString = "";
+                jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest&channel=test");
+            }
 
-                if (_testChannel)
+            jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest" + (MacroDeck.Configuration.UpdateBetaVersions ? "&beta" : ""));
+
+            _jsonObject = JObject.Parse(jsonString);
+            if (_jsonObject["build"] != null)
+            {
+                if (int.TryParse(_jsonObject["build"].ToString(), out var build))
                 {
-                    jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest&channel=test");
-                }
-
-                jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest" + (MacroDeck.Configuration.UpdateBetaVersions ? "&beta" : ""));
-
-                _jsonObject = JObject.Parse(jsonString);
-                if (_jsonObject["build"] != null)
-                {
-                    if (int.TryParse(_jsonObject["build"].ToString(), out var build))
+                    if (build > MacroDeck.Version.Build || _forceUpdate)
                     {
-                        if (build > MacroDeck.Version.Build || _forceUpdate)
+                        MacroDeckLogger.Info("Macro Deck version " + _jsonObject["version"] + " available");
+                        try
                         {
-                            MacroDeckLogger.Info("Macro Deck version " + _jsonObject["version"] + " available");
-                            try
-                            {
-                                _updateSizeMb = GetFileSizeMb(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]));
-                            }
-                            catch { }
-                            if (OnUpdateAvailable != null)
-                            {
-                                UpdateAvailable = true;
-                                OnUpdateAvailable(_jsonObject, EventArgs.Empty);
-                            }
+                            _updateSizeMb = GetFileSizeMb(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]));
                         }
-                        else
+                        catch { }
+                        if (OnUpdateAvailable != null)
                         {
-                            if (OnLatestVersionInstalled != null)
-                            {
-                                UpdateAvailable = false;
-                                OnLatestVersionInstalled(_jsonObject, EventArgs.Empty);
-                            }
+                            UpdateAvailable = true;
+                            OnUpdateAvailable(_jsonObject, EventArgs.Empty);
+                        }
+                    }
+                    else
+                    {
+                        if (OnLatestVersionInstalled != null)
+                        {
+                            UpdateAvailable = false;
+                            OnLatestVersionInstalled(_jsonObject, EventArgs.Empty);
                         }
                     }
                 }
-                    
             }
         } catch (Exception ex)
         {
@@ -131,12 +128,10 @@ public static class Updater
         var webRequest = HttpWebRequest.Create(uriPath);
         webRequest.Method = "HEAD";
 
-        using (var webResponse = webRequest.GetResponse())
-        {
-            var fileSize = webResponse.Headers.Get("Content-Length");
-            var fileSizeInMegaByte = Math.Round(Convert.ToDouble(fileSize) / 1024.0 / 1024.0, 2);
-            return fileSizeInMegaByte;
-        }
+        using var webResponse = webRequest.GetResponse();
+        var fileSize = webResponse.Headers.Get("Content-Length");
+        var fileSizeInMegaByte = Math.Round(Convert.ToDouble(fileSize) / 1024.0 / 1024.0, 2);
+        return fileSizeInMegaByte;
     }
 
     public static void DownloadUpdate()
@@ -201,10 +196,8 @@ public static class Updater
         catch
         {
             OnError?.Invoke(null, EventArgs.Empty);
-            using (var msgBox = new MessageBox())
-            {
-                msgBox.ShowDialog(LanguageManager.Strings.Error, LanguageManager.Strings.TryAgainOrDownloadManually, MessageBoxButtons.OK);
-            }
+            using var msgBox = new MessageBox();
+            msgBox.ShowDialog(LanguageManager.Strings.Error, LanguageManager.Strings.TryAgainOrDownloadManually, MessageBoxButtons.OK);
         }
     }
 

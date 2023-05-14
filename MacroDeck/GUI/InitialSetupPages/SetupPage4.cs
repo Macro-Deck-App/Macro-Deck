@@ -29,29 +29,27 @@ public partial class SetupPage4 : UserControl
 
         try
         {
-            using (var wc = new WebClient())
+            using var wc = new WebClient();
+            var jsonString = wc.DownloadString("https://macrodeck.org/files/packagemanager/plugins.php?target-api=" + MacroDeck.PluginApiVersion);
+            var jsonArray = JArray.Parse(jsonString);
+            foreach (JObject jsonObject in jsonArray)
             {
-                var jsonString = wc.DownloadString("https://macrodeck.org/files/packagemanager/plugins.php?target-api=" + MacroDeck.PluginApiVersion);
-                var jsonArray = JArray.Parse(jsonString);
-                foreach (JObject jsonObject in jsonArray)
-                {
-                    jsonObject["type"] = "plugin";
-                    var initialSetupPluginItem = new InitialSetupPluginItem(jsonObject);
+                jsonObject["type"] = "plugin";
+                var initialSetupPluginItem = new InitialSetupPluginItem(jsonObject);
 
-                    Invoke(() =>
-                        plugins.Controls.Add(initialSetupPluginItem));
-
-                    if (autoInstall && (int)jsonObject["auto-install"] != 0)
-                    {
-                        Invoke(() =>
-                            initialSetupPluginItem.SetInstall(true));
-                    }
-                }
                 Invoke(() =>
+                    plugins.Controls.Add(initialSetupPluginItem));
+
+                if (autoInstall && (int)jsonObject["auto-install"] != 0)
                 {
-                    progressBar.Visible = false;
-                });
+                    Invoke(() =>
+                        initialSetupPluginItem.SetInstall(true));
+                }
             }
+            Invoke(() =>
+            {
+                progressBar.Visible = false;
+            });
         } catch
         {
             Invoke(() =>

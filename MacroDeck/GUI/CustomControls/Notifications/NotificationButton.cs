@@ -45,13 +45,10 @@ public class NotificationButton : ButtonPrimary
 
         var indicatorRectangle = new Rectangle(Width - 18 - Padding.Right, Padding.Top, 18, 18);
 
-        using (var indicatorBrush = new SolidBrush(Color.Red))
-        {
-            pe.Graphics.FillEllipse(indicatorBrush, indicatorRectangle);
-            var flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak;
-            TextRenderer.DrawText(pe.Graphics, _notificationCount.ToString(), Font, indicatorRectangle, ForeColor, flags);
-
-        }
+        using var indicatorBrush = new SolidBrush(Color.Red);
+        pe.Graphics.FillEllipse(indicatorBrush, indicatorRectangle);
+        var flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak;
+        TextRenderer.DrawText(pe.Graphics, _notificationCount.ToString(), Font, indicatorRectangle, ForeColor, flags);
     }
 
 }

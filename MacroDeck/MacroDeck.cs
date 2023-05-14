@@ -37,7 +37,7 @@ namespace SuchByte.MacroDeck;
 public class MacroDeck : NativeWindow
 {
     private static readonly Assembly Assembly = Assembly.GetExecutingAssembly();
-    public static readonly VersionModel Version = new(FileVersionInfo.GetVersionInfo(Assembly.Location).FileVersion ?? "2.0.0.0");
+    public static readonly VersionModel Version = new(FileVersionInfo.GetVersionInfo(Assembly.Location).ProductVersion ?? "2.0.0.0");
 
     public static readonly int ApiVersion = 20;
     public static readonly int PluginApiVersion = 40;
@@ -90,11 +90,6 @@ public class MacroDeck : NativeWindow
         BackupManager.CheckRestoreDirectory();
 
         LanguageManager.Load(StartParameters.ExportDefaultStrings);
-
-        if (IsAdministrator())
-        {
-            MacroDeckLogger.Info("Macro Deck started with administrator privileges");
-        }
 
         // Initializing Cef Browser
         CefSetup.Initialize();
@@ -274,7 +269,9 @@ public class MacroDeck : NativeWindow
 
     private static void CreateMainForm()
     {
-        if (Application.OpenForms.OfType<MainWindow>().Any() && _mainWindow is { IsDisposed: false })
+        if (Application.OpenForms.OfType<MainWindow>().Any()
+            && _mainWindow.IsDisposed == false
+            && _mainWindow.IsHandleCreated)
         {
             if (_mainWindow.InvokeRequired)
             {
@@ -307,10 +304,4 @@ public class MacroDeck : NativeWindow
             OnMainWindowLoad?.Invoke(window, EventArgs.Empty);
         }
     }
-    
-    public static bool IsAdministrator()
-    {
-        return (new WindowsPrincipal(WindowsIdentity.GetCurrent())).IsInRole(WindowsBuiltInRole.Administrator);
-    }
-
 }

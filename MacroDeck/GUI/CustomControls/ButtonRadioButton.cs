@@ -104,36 +104,32 @@ public partial class ButtonRadioButton : RadioButton
             
 
         var smoothSize = 2;
-        using (var pathSurface = GetFigurePath(rectSurface, _borderRadius))
-        using (var penSurface = new Pen(Parent.BackColor, smoothSize))
+        using var pathSurface = GetFigurePath(rectSurface, _borderRadius);
+        using var penSurface = new Pen(Parent.BackColor, smoothSize);
+        if (Checked)
         {
-            if (Checked)
+            pe.Graphics.FillRectangle(new SolidBrush(Colors.WindowsAccentColorDark), rectSurface);
+        }
+        else
+        {
+            if (_hover)
             {
-                pe.Graphics.FillRectangle(new SolidBrush(Colors.WindowsAccentColorDark), rectSurface);
+                pe.Graphics.FillRectangle(new SolidBrush(Colors.WindowsAccentColorLight), rectSurface);
             }
             else
             {
-                if (_hover)
-                {
-                    pe.Graphics.FillRectangle(new SolidBrush(Colors.WindowsAccentColorLight), rectSurface);
-                }
-                else
-                {
-                    pe.Graphics.FillRectangle(new SolidBrush(Colors.WindowsAccentColor), rectSurface);
-                }
+                pe.Graphics.FillRectangle(new SolidBrush(Colors.WindowsAccentColor), rectSurface);
             }
-
-            if (_icon != null)
-            {
-                pe.Graphics.DrawImage(_icon, iconSurface);
-            }
-            Region = new Region(pathSurface);
-            pe.Graphics.DrawPath(penSurface, pathSurface);
-
-            var flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak;
-            TextRenderer.DrawText(pe.Graphics, Text, Font, ClientRectangle, ForeColor, flags);
         }
 
+        if (_icon != null)
+        {
+            pe.Graphics.DrawImage(_icon, iconSurface);
+        }
+        Region = new Region(pathSurface);
+        pe.Graphics.DrawPath(penSurface, pathSurface);
 
+        var flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak;
+        TextRenderer.DrawText(pe.Graphics, Text, Font, ClientRectangle, ForeColor, flags);
     }
 }
