@@ -14,7 +14,7 @@ jobs:
       - name: Build
         run: |
             cd MacroDeck.Setup
-            .\build_macrodeck_executable.bat
+            .\build_macrodeck_executable.cmd
             cd ..
         shell: cmd
       
