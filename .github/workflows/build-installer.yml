@@ -39,6 +39,6 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: .\MacroDeck.Setup\ResultOutput\${{ env.INSTALLER_NAME }}
+          file: .\MacroDeck.Setup\Result\${{ env.INSTALLER_NAME }}
           asset_name: ${{ env.INSTALLER_NAME }}
-          tag: 2.13.0
+          tag: v2.13.0
