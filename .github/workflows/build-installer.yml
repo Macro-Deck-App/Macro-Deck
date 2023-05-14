@@ -22,15 +22,14 @@ jobs:
         run: Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.0.exe" -OutFile "innosetup.exe"
 
       - name: Install Inno Setup
-        run: ".\innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS /CURRENTUSER"
+        run: .\innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS /CURRENTUSER
         shell: cmd
 
       - name: Build Installer
-        run: "'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' '.\MacroDeck.Setup\Macro Deck.iss'"
+        run: 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' '.\MacroDeck.Setup\Macro Deck.iss'
         shell: cmd
 
       - name: Search for Installer
-        id: search
         run: |
           $installer = Get-ChildItem -Path .\Result -Filter *.exe | Select-Object -Last 1
           Write-Output "##vso[task.setvariable variable=INSTALLER_NAME]$($installer.Name)"
