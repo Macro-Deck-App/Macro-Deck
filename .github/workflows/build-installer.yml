@@ -14,7 +14,6 @@ jobs:
       - run: |
           echo "RELEASE_NAME=${{ github.event.release.name }}" >> $GITHUB_ENV
           echo "INSTALLER_FILENAME=macro-deck-${{ env.RELEASE_NAME }}-win" >> $GITHUB_ENV
-        shell: cmd
       
       - name: Build
         run: |
