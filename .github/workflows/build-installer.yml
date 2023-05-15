@@ -10,24 +10,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
-        
-      - name: Update version
-        run: |
-          $filePath = ".\MacroDeck\MacroDeck.csproj"
-          $xml=New-Object XML
-          $xml.Load($filePath)
-          $versionNode = $xml.Project.PropertyGroup.Version
-          if ($versionNode -eq $null) {
-            $versionNode = $xml.CreateElement("Version")
-            $xml.Project.PropertyGroup.AppendChild($versionNode)
-            Write-Host "Version XML tag added to the csproj"
-          }
-          $xml.Project.PropertyGroup.Version = ${GITHUB_REF##*/}
-          $xml.Save($filePath)
 
       - name: Build
         run: |
             cd MacroDeck.Setup
+            .\ChangeCsprojVersion.exe --p ..\MacroDeck\MacroDeck.csproj --v ${GITHUB_REF##*/}
             .\build_macrodeck_executable.cmd
             cd ..
         shell: cmd
