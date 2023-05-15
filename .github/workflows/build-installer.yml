@@ -16,7 +16,7 @@ jobs:
         
       - name: Update version
         run: |
-          .\MacroDeck.Setup\ChangeCsprojVersion.exe -p .\MacroDeck\MacroDeck.csproj -n %RELEASE_NAME%
+          .\MacroDeck.Setup\ChangeCsprojVersion.exe --projectpath .\MacroDeck\MacroDeck.csproj --newversion %RELEASE_NAME%
         shell: cmd
       
       - name: Build
