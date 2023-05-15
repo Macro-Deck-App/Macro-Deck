@@ -10,11 +10,14 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
-
+      
+      - name: Extract release name
+        run: echo "RELEASE_NAME=${{ github.event.release.name }}" >> $GITHUB_ENV
+      
       - name: Build
         run: |
             cd MacroDeck.Setup
-            .\ChangeCsprojVersion.exe --p ..\MacroDeck\MacroDeck.csproj --v ${GITHUB_REF##*/}
+            .\ChangeCsprojVersion.exe --p ..\MacroDeck\MacroDeck.csproj --v $RELEASE_NAME
             .\build_macrodeck_executable.cmd
             cd ..
         shell: cmd
@@ -28,7 +31,7 @@ jobs:
         
       - name: Build Installer
         run: |
-            "C:\Program Files (x86)\Inno Setup 6\ISCC.exe /dMyOutputName=macro-deck-${GITHUB_REF##*/}-win .\MacroDeck.Setup\Macro Deck.iss"
+            "C:\Program Files (x86)\Inno Setup 6\ISCC.exe /dMyOutputName=macro-deck-$RELEASE_NAME-win .\MacroDeck.Setup\Macro Deck.iss"
         shell: cmd
 
       - name: Upload binaries to release
@@ -36,5 +39,5 @@ jobs:
         if: ${{startsWith(github.ref, 'refs/tags/') }}
         with:
           files: |
-            .\MacroDeck.Setup\Result\macro-deck-${GITHUB_REF##*/}-win.exe
+            .\MacroDeck.Setup\Result\macro-deck-$RELEASE_NAME-win.exe
        
