@@ -11,13 +11,14 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
       
-      - run: echo "RELEASE_NAME=${{ github.event.release.name }}" >> $GITHUB_ENV
-      - run: echo "INSTALLER_FILENAME=macro-deck-%RELEASE_NAME%-win" >> $GITHUB_ENV
+      - run: |
+          echo "RELEASE_NAME=${{ github.event.release.name }}" >> $GITHUB_ENV
+          echo "INSTALLER_FILENAME=macro-deck-${{ github.event.release.name }}-win" >> $GITHUB_ENV
       
       - name: Build
         run: |
             cd MacroDeck.Setup
-            .\ChangeCsprojVersion.exe --p ..\MacroDeck\MacroDeck.csproj --v %RELEASE_NAME%
+            .\ChangeCsprojVersion.exe -p "..\MacroDeck\MacroDeck.csproj" -v "%RELEASE_NAME%"
             .\build_macrodeck_executable.cmd
             cd ..
         shell: cmd
