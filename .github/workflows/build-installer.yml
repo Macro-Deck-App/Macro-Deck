@@ -11,14 +11,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
       
-      - run: |
-          echo "RELEASE_NAME=${{ github.event.release.name }}" >> $GITHUB_ENV
-          echo "INSTALLER_FILENAME=macro-deck-${{ env.RELEASE_NAME }}-win" >> $GITHUB_ENV
+      - run: echo "RELEASE_NAME=${{ github.event.release.name }}" >> $GITHUB_ENV
+      - run: echo "INSTALLER_FILENAME=macro-deck-${{ env.RELEASE_NAME }}-win" >> $GITHUB_ENV
+        
+      - name: Update version
+        run: |
+          .\MacroDeck.Setup\ChangeCsprojVersion.exe -p ".\MacroDeck\MacroDeck.csproj" -v %RELEASE_NAME%
+        shell: cmd
       
       - name: Build
         run: |
             cd MacroDeck.Setup
-            .\ChangeCsprojVersion.exe -p "..\MacroDeck\MacroDeck.csproj" -v ${{ env.RELEASE_NAME }}
+            .\ChangeCsprojVersion.exe -p "..\MacroDeck\MacroDeck.csproj" -v %RELEASE_NAME%
             .\build_macrodeck_executable.cmd
             cd ..
         shell: cmd
@@ -32,7 +36,7 @@ jobs:
         
       - name: Build Installer
         run: |
-            "C:\Program Files (x86)\Inno Setup 6\ISCC.exe /dMyOutputName=${{ env.INSTALLER_FILENAME }} .\MacroDeck.Setup\Macro Deck.iss"
+            "C:\Program Files (x86)\Inno Setup 6\ISCC.exe /dMyOutputName=%INSTALLER_FILENAME% .\MacroDeck.Setup\Macro Deck.iss"
         shell: cmd
 
       - name: Upload binaries to release
@@ -40,5 +44,5 @@ jobs:
         if: ${{startsWith(github.ref, 'refs/tags/') }}
         with:
           files: |
-            .\MacroDeck.Setup\Result\${{ env.INSTALLER_FILENAME }}.exe
+            .\MacroDeck.Setup\Result\%INSTALLER_FILENAME%.exe
        
