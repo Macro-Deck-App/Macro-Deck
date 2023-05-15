@@ -7,6 +7,7 @@
 #define MyAppExeName "Macro Deck 2.exe"  
 #define ApplicationDirectory "..\MacroDeck\bin\Publish"
 #define ApplicationVersion GetStringFileInfo(ApplicationDirectory + '\' + MyAppExeName, "ProductVersion")     
+#define OutputFileName "macro-deck-{#ApplicationVersion}"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.

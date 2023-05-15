@@ -10,6 +10,20 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
+        
+      - name: Update version
+        run: |
+          $filePath = ".\MacroDeck\MacroDeck.csproj"
+          $xml=New-Object XML
+          $xml.Load($filePath)
+          $versionNode = $xml.Project.PropertyGroup.Version
+          if ($versionNode -eq $null) {
+            $versionNode = $xml.CreateElement("Version")
+            $xml.Project.PropertyGroup.AppendChild($versionNode)
+            Write-Host "Version XML tag added to the csproj"
+          }
+          $xml.Project.PropertyGroup.Version = ${GITHUB_REF##*/}
+          $xml.Save($filePath)
 
       - name: Build
         run: |
@@ -24,22 +38,16 @@ jobs:
       - name: Install Inno Setup
         run: .\innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS /CURRENTUSER
         shell: cmd
-
+        
       - name: Build Installer
         run: |
-            "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" ".\MacroDeck.Setup\Macro Deck.iss"
+            "C:\Program Files (x86)\Inno Setup 6\ISCC.exe /dMyOutputName=macro-deck-${GITHUB_REF##*/}-win .\MacroDeck.Setup\Macro Deck.iss"
         shell: cmd
-
-      - name: Search for Installer
-        id: search
-        run: |
-          $installer = Get-ChildItem -Path .\MacroDeck.Setup\Result -Filter *.exe | Select-Object -Last 1
-          Write-Output "##vso[task.setvariable variable=INSTALLER_NAME]$($installer.Name)"
 
       - name: Upload binaries to release
         uses: softprops/action-gh-release@v1
         if: ${{startsWith(github.ref, 'refs/tags/') }}
         with:
           files: |
-            ".\MacroDeck.Setup\Result\${{ env.INSTALLER_NAME }}"
+            .\MacroDeck.Setup\Result\macro-deck-${GITHUB_REF##*/}-win.exe
        
