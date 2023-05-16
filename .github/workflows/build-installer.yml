@@ -15,13 +15,14 @@ jobs:
       - run: echo "INSTALLER_FILENAME=macro-deck-${env.RELEASE_NAME}-win" >> $GITHUB_ENV
         
       - name: Update version
-        run: & .\MacroDeck.Setup\ChangeCsprojVersion.exe -p ".\MacroDeck\MacroDeck.csproj" -n "${env.RELEASE_NAME}"
+        run: |
+          & .\MacroDeck.Setup\ChangeCsprojVersion.exe -p ".\MacroDeck\MacroDeck.csproj" -n "${env.RELEASE_NAME}"
       
       - name: Build
         run: |
-            cd MacroDeck.Setup
-            .\build_macrodeck_executable.cmd
-            cd ..
+          cd MacroDeck.Setup
+          .\build_macrodeck_executable.cmd
+          cd ..
         shell: cmd
       
       - name: Download Inno Setup
