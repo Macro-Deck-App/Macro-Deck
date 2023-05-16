@@ -31,7 +31,7 @@ jobs:
         
       - name: Build Installer
         run: |
-            "C:\Program Files (x86)\Inno Setup 6\ISCC.exe /dMyOutputName=macro-deck-${{github.event.release.name}}-win .\MacroDeck.Setup\Macro Deck.iss"
+            "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /F"macro-deck-${{github.event.release.name}}-setup-win" ".\MacroDeck.Setup\Macro Deck.iss"
         shell: cmd
 
       - name: Upload binaries to release
@@ -39,5 +39,5 @@ jobs:
         if: ${{startsWith(github.ref, 'refs/tags/') }}
         with:
           files: |
-            .\MacroDeck.Setup\Result\macro-deck-${{github.event.release.name}}-win.exe
+            .\MacroDeck.Setup\Result\macro-deck-${{github.event.release.name}}-setup-win.exe
        
