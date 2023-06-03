@@ -1,7 +1,7 @@
 name: Push Version
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       platform:
         required: true
@@ -45,9 +45,7 @@ jobs:
           temp=$(mktemp)
           current_date=$(date +"%Y-%m-%d")
           channel_name=$(echo "${{ inputs.channel }}" | awk '{print toupper(substr($0,1,1))tolower(substr($0,2))}')
-
           jq ".[\"${{ inputs.platform }}\"].version = \"${{ inputs.version }}\" | .[\"${{ inputs.platform }}\"].date = \"$current_date\" | .[\"${{ inputs.platform }}\"].filename = \"${{ inputs.filename }}\"" "/tmp/versions/$channel_name.json" > "${temp}"
-
           mv "${temp}" "/tmp/versions/$channel_name.json"
         shell: bash
 
