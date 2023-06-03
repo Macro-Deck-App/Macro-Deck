@@ -31,7 +31,7 @@ jobs:
         run: |
             Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.0.exe" -OutFile "innosetup.exe"
             Write-Output "Executing Inno Setup Installer..."
-            & innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS /CURRENTUSER /DIR"${{ github.workspace }}\Inno Setup"
+            & .\innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS /CURRENTUSER /DIR"${{ github.workspace }}\Inno Setup"
             Write-Output "Inno Setup Installer finished"
     
             $timeout = New-TimeSpan -Minutes 1
