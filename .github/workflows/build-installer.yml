@@ -27,13 +27,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
         
-      - name: Download and install Inno Setup
+      - name: Download Inno Setup
+        run: Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.0.exe" -OutFile "innosetup.exe"
+        
+      - name: Install Inno Setup
+        run: .\innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS /CURRENTUSER /DIR"InnoSetup"
+        shell: cmd
+      
+      - name: Verify Inno Setup installation
         run: |
-            Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.0.exe" -OutFile "innosetup.exe"
-            Write-Output "Executing Inno Setup Installer..."
-            & .\innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS /CURRENTUSER /DIR"InnoSetup"
-            Write-Output "Inno Setup Installer finished"
-    
             $timeout = New-TimeSpan -Minutes 1
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
@@ -48,7 +50,6 @@ jobs:
               Write-Output "Inno Setup installation failed or timed out."
               exit 1
             }
-        shell: pwsh
             
       - name: Build Macro Deck for Windows
         run: |
