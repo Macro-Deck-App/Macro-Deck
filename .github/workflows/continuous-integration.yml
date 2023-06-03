@@ -1,0 +1,16 @@
+name: Continuous integration testing
+
+on:
+  workflow_call:
+  pull_request:
+    branches:
+      - '**'
+  push:
+    branches:
+      - '**'
+      
+jobs:
+  tests:
+    name: Execute Tests
+    uses: ./.github/workflows/tests.yml
+    secrets: inherit
