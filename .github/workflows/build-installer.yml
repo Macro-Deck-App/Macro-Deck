@@ -26,15 +26,14 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
-      
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
         
       - name: Download and install Inno Setup
         run: |
             Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.0.exe" -OutFile "innosetup.exe"
-            & .\innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS /CURRENTUSER /DIR"${{ github.workspace }}\Inno Setup"
-
+            Write-Output "Executing Inno Setup Installer..."
+            & innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS /CURRENTUSER /DIR"${{ github.workspace }}\Inno Setup"
+            Write-Output "Inno Setup Installer finished"
+    
             $timeout = New-TimeSpan -Minutes 1
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
