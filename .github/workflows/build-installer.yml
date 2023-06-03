@@ -26,6 +26,9 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
+      
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
         
       - name: Download and install Inno Setup
         run: |
@@ -40,7 +43,7 @@ jobs:
               Start-Sleep -Seconds 5
             }
 
-            if (Test-Path "Inno Setup\ISCC.exe") {
+            if (Test-Path "${{ github.workspace }}\Inno Setup\ISCC.exe") {
               Write-Output "Inno Setup installed successfully."
             } else {
               Write-Output "Inno Setup installation failed or timed out."
