@@ -14,7 +14,6 @@ on:
 jobs:
   build-windows-installer:
     runs-on: windows-latest
-    needs: check-release-name
     
     env:
       ISCC_PATH: 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
