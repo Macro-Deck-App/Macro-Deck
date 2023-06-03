@@ -32,6 +32,15 @@ jobs:
             Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.0.exe" -OutFile "innosetup.exe"
             & .\innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS /CURRENTUSER /DIR="Inno Setup"
             
+      - name: Verify Inno Setup Installation
+        run: |
+          if (Test-Path "Inno Setup\ISCC.exe") {
+            Write-Output "Inno Setup installed successfully."
+          } else {
+            Write-Output "Inno Setup installation failed."
+            exit 1
+          }
+            
       - name: Build Macro Deck for Windows
         run: |
           cd MacroDeck.Setup
@@ -41,7 +50,8 @@ jobs:
         
       - name: Build Macro Deck installer for Windows
         run: |
-            "Inno Setup\ISCC.exe" /F"macro-deck-${{github.event.release.name}}-win" "MacroDeck.Setup\Macro Deck.iss"
+            cd "Inno Setup"
+            .ISCC.exe /F"macro-deck-${{github.event.release.name}}-win" "..\MacroDeck.Setup\Macro Deck.iss"
         shell: cmd
 
       - name: Upload Windows installer to release
@@ -50,6 +60,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: .\macro-deck-${{github.event.release.name}}-win.exe
+          asset_path: .\Inno Setup\macro-deck-${{github.event.release.name}}-win.exe
           asset_name: macro-deck-${{github.event.release.name}}-win.exe
           asset_content_type: application/octet-stream
