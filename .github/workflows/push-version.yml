@@ -1,0 +1,59 @@
+name: Push Version
+
+on:
+  workflow_call:
+    inputs:
+      platform:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+      filename:
+        required: true
+        type: string
+      channel: 
+        required: false
+        default: 'Release'
+        type: string
+
+jobs:
+  push-version:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Validate Input
+        run: |
+            if [[ -z "${{ inputs.platform }}" ]];then
+              echo "::error::Missing required key 'platform' input!"
+              exit 1
+            elif [[ -z "${{ inputs.version }}" ]];then
+              echo "::error::Missing required key 'version' input!"
+              exit 1
+            elif [[ -z "${{ inputs.filename }}" ]];then
+              echo "::error::Missing required key 'filename' input!"
+              exit 1
+            fi
+        shell: bash
+
+      - name: Clone Versions Repository
+        run: git clone --depth 1 https://github.com/Macro-Deck-App/Versions.git /tmp/versions
+        shell: bash
+      
+      - name: Edit Version File
+        run: |
+          temp=$(mktemp)
+          current_date=$(date +"%Y-%m-%d")
+          channel_name=$(echo "${{ inputs.channel }}" | awk '{print toupper(substr($0,1,1))tolower(substr($0,2))}')
+          jq '.["${{ inputs.platform }}"].version |= "${{ inputs.version }}"' \
+          '.["${{ inputs.platform }}"].date |= "'"$current_date"'"' \
+          '.["${{ inputs.platform }}"].filename |= "${{ inputs.filename }}"' "/tmp/versions/$channel_name.json" > "${temp}"
+          mv "${temp}" "/tmp/versions/$channel_namechannel_name.json"
+        shell: bash
+
+      - name: Push to Versions Repository
+        run: |
+          cd /tmp/versions
+          git commit -am "Bump Macro Deck (${{ inputs.platform }}) to ${{ inputs.version }}"
+          git push
+        shell: bash
