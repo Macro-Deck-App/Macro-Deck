@@ -13,6 +13,7 @@ on:
 
 jobs:
   build-windows-installer:
+    name: Build Windows Installer
     runs-on: windows-latest
     
     env:
@@ -61,10 +62,11 @@ jobs:
           asset_name: macro-deck-${{ inputs.version }}-win.exe
           asset_content_type: application/octet-stream
 
-      - name: Push Version
-        uses: ./.github/workflows/push-version.yml
-        with:
-          platform: 'win-X64'
-          version: ${{ inputs.version }}
-          filename: macro-deck-${{ inputs.version }}-win.exe
-          channel: ${{ inputs.channel }}
+  push_version:
+    name: Push Version
+    uses: ./.github/workflows/push-version.yml
+    with:
+      platform: 'win-X64'
+      version: ${{ inputs.version }}
+      filename: macro-deck-${{ inputs.version }}-win.exe
+      channel: ${{ inputs.channel }}
