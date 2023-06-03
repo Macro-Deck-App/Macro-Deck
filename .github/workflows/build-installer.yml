@@ -35,7 +35,8 @@ jobs:
       
       - name: Verify Inno Setup installation
         run: |
-            if (Test-Path ${{ env.INNO_SETUP_PATH }}) {
+            Write-Output "Inno Setup path: '${{ env.ISCC_PATH }}'"
+            if (Test-Path ${{ env.ISCC_PATH }}) {
               Write-Output "Inno Setup is installed."
             } else {
               Write-Output "Inno Setup installation is not installed."
@@ -51,7 +52,7 @@ jobs:
         
       - name: Build Macro Deck installer for Windows
         run: |
-            & ${{ env.INNO_SETUP_PATH }} /F"macro-deck-${{github.event.release.name}}-win" "MacroDeck.Setup\Macro Deck.iss"
+            & ${{ env.ISCC_PATH }} /F"macro-deck-${{github.event.release.name}}-win" "MacroDeck.Setup\Macro Deck.iss"
 
       - name: Upload Windows installer to release
         uses: actions/upload-release-asset@v1
