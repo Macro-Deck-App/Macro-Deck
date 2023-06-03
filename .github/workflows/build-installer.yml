@@ -31,12 +31,21 @@ jobs:
         run: |
             Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.0.exe" -OutFile "innosetup.exe"
             & .\innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS /CURRENTUSER /DIR"${{ github.workspace }}\Inno Setup"
-            if (Test-Path "${{ github.workspace }}\Inno Setup\ISCC.exe") {
+
+            $timeout = New-TimeSpan -Minutes 1
+            $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+
+            while (!(Test-Path "${{ github.workspace }}\Inno Setup\ISCC.exe") -and $stopwatch.elapsed -lt $timeout) {
+              Write-Output "Waiting for Inno Setup installation to complete..."
+              Start-Sleep -Seconds 5
+            }
+
+            if (Test-Path "Inno Setup\ISCC.exe") {
               Write-Output "Inno Setup installed successfully."
             } else {
-              Write-Output "Inno Setup installation failed."
+              Write-Output "Inno Setup installation failed or timed out."
               exit 1
-            }
+            } 
             
       - name: Build Macro Deck for Windows
         run: |
