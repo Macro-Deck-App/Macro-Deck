@@ -6,20 +6,20 @@ on:
 
 jobs:
   check-release-name:
-      runs-on: ubuntu-latest
-      
-      steps:
-        - name: Check tag format
-          run: |
-            RELEASE_NAME="${{ github.event.release.name }}"
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check tag format
+        run: |
+          RELEASE_NAME="${{ github.event.release.name }}"
 
-            BASE_PATTERN='^[0-9]+\.[0-9]+\.[0-9]+$'
-            PREVIEW_PATTERN='^[0-9]+\.[0-9]+\.[0-9]+-preview[0-9]+$'
+          BASE_PATTERN='^[0-9]+\.[0-9]+\.[0-9]+$'
+          PREVIEW_PATTERN='^[0-9]+\.[0-9]+\.[0-9]+-preview[0-9]+$'
 
-            if [[ ! ${RELEASE_NAME} =~ ${BASE_PATTERN} ]] && [[ ! ${RELEASE_NAME} =~ ${PREVIEW_PATTERN} ]]; then
-              echo "Release name '${RELEASE_NAME}' doesn't match the expected format (X.X.X or X.X.X-previewX)"
-              exit 1
-            fi
+          if [[ ! ${RELEASE_NAME} =~ ${BASE_PATTERN} ]] && [[ ! ${RELEASE_NAME} =~ ${PREVIEW_PATTERN} ]]; then
+            echo "Release name '${RELEASE_NAME}' doesn't match the expected format (X.X.X or X.X.X-previewX)"
+            exit 1
+          fi
           
   build-windows-installer:
     runs-on: windows-latest
@@ -43,16 +43,23 @@ jobs:
               exit 1
             }
             
+      - name: Update project version
+        run: |
+            .\MacroDeck.Setup\ChangeCsprojVersion.exe -p "${{ github.workspace }}\MacroDeck\MacroDeck.csproj" -n "${{github.event.release.name}}"
+        shell: cmd
+            
       - name: Build Macro Deck for Windows
         run: |
-          cd MacroDeck.Setup
-          .\ChangeCsprojVersion.exe -p "${{ github.workspace }}\MacroDeck\MacroDeck.csproj" -n "${{github.event.release.name}}"
-          .\build_macrodeck_executable.cmd
+            dotnet restore ".\MacroDeck\MacroDeck.csproj"
+            dotnet build ".\MacroDeck\MacroDeck.csproj" -c Release -o ".\MacroDeck\bin\Release" -r win-x64
+            dotnet publish ".\MacroDeck\MacroDeck.csproj" -c Release -o ".\MacroDeck\bin\Publish" -r win-x64 --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true
+            copy ".\MacroDeck\bin\Release\Macro Deck 2.dll" ".\MacroDeck\bin\Publish"
         shell: cmd
         
       - name: Build Macro Deck installer for Windows
         run: |
-            & '${{ env.ISCC_PATH }}' /F"macro-deck-${{github.event.release.name}}-win" "MacroDeck.Setup\Macro Deck.iss"
+            "${{ env.ISCC_PATH }}" /F"macro-deck-${{github.event.release.name}}-win" "MacroDeck.Setup\Macro Deck.iss"
+        shell: cmd
 
       - name: Upload Windows installer to release
         uses: actions/upload-release-asset@v1
