@@ -2,13 +2,14 @@ name: Build and Release Windows Installer
 
 on:
   workflow_call:
-    version:
-      required: true
-      type: string
-    channel:
-      required: false
-      default: 'Release'
-      type: string
+    inputs:
+      version:
+        required: true
+        type: string
+      channel:
+        required: false
+        default: 'Release'
+        type: string
 
 jobs:
   build-windows-installer:
