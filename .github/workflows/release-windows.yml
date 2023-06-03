@@ -64,6 +64,7 @@ jobs:
 
   push_version:
     name: Push Version
+    needs: build-windows-installer
     uses: ./.github/workflows/push-version.yml
     with:
       platform: 'win-X64'
