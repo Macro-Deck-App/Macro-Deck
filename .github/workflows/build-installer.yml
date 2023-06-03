@@ -5,39 +5,48 @@ on:
     types: [published]
 
 jobs:
+  check-release-name:
+      runs-on: ubuntu-latest
+      steps:
+      - name: Check tag format
+        run: |
+          RELEASE_NAME="${{ github.event.release.name }}"
+
+          BASE_PATTERN='^[0-9]+\.[0-9]+\.[0-9]+$'
+          PREVIEW_PATTERN='^[0-9]+\.[0-9]+\.[0-9]+-preview[0-9]+$'
+
+          if [[ ! ${RELEASE_NAME} =~ ${BASE_PATTERN} ]] && [[ ! ${RELEASE_NAME} =~ ${PREVIEW_PATTERN} ]]; then
+            echo "Release name '${RELEASE_NAME}' doesn't match the expected format (X.X.X or X.X.X-previewX)"
+            exit 1
+          fi
+          
   build-windows-installer:
     runs-on: windows-latest
+    needs: check-release-name
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
-      
-      - name: Update version
+        
+      - name: Download and install Inno Setup
         run: |
-          & .\MacroDeck.Setup\ChangeCsprojVersion.exe -p ".\MacroDeck\MacroDeck.csproj" -n "${{github.event.release.name}}"
-      
+            Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.0.exe" -OutFile "innosetup.exe"
+            & .\innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS /CURRENTUSER /DIR="Inno Setup"
+            
       - name: Build
         run: |
           cd MacroDeck.Setup
+          .\ChangeCsprojVersion.exe -p "..\MacroDeck\MacroDeck.csproj" -n "${{github.event.release.name}}"
           .\build_macrodeck_executable.cmd
-          cd ..
-        shell: cmd
-      
-      - name: Download Inno Setup
-        run: Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.0.exe" -OutFile "innosetup.exe"
-
-      - name: Install Inno Setup
-        run: .\innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS /CURRENTUSER
-        shell: cmd
-        
-      - name: Build Installer
-        run: |
-            "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /F"macro-deck-${{github.event.release.name}}-setup-win" ".\MacroDeck.Setup\Macro Deck.iss"
+          "..\Inno Setup\ISCC.exe" /F"macro-deck-${{github.event.release.name}}-win" "Macro Deck.iss"
         shell: cmd
 
-      - name: Upload binaries to release
-        uses: softprops/action-gh-release@v1
-        if: ${{startsWith(github.ref, 'refs/tags/') }}
-        with:
-          files: |
-            .\MacroDeck.Setup\Result\macro-deck-${{github.event.release.name}}-setup-win.exe
-       
+
+      #- name: Upload Windows installer to release
+      #  uses: actions/upload-release-asset@v1
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #  with:
+      #    upload_url: ${{ github.event.release.upload_url }}
+      #    asset_path: .\macro-deck-${{github.event.release.name}}-win.exe
+      #    asset_name: macro-deck-${{github.event.release.name}}-win.exe
+      #    asset_content_type: application/octet-stream
