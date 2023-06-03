@@ -22,3 +22,4 @@ jobs:
     secrets: inherit
     with:
       version: ${{ github.event.release.name }}
+      channel: ${{ github.event.release.prerelease && 'Preview' || 'Release' }}

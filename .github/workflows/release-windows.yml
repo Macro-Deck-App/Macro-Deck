@@ -3,8 +3,11 @@ name: Build and Release Windows Installer
 on:
   workflow_call:
     version:
-      description: 'Version'     
       required: true
+      type: string
+    channel:
+      required: false
+      default: 'Release'
       type: string
 
 jobs:
@@ -57,3 +60,11 @@ jobs:
           asset_path: 'MacroDeck.Setup\Result\macro-deck-${{ inputs.version }}-win.exe'
           asset_name: macro-deck-${{ inputs.version }}-win.exe
           asset_content_type: application/octet-stream
+
+      - name: Push Version
+        uses: ./.github/workflows/push-version.yml
+        with:
+          platform: 'win-X64'
+          version: ${{ inputs.version }}
+          filename: macro-deck-${{ inputs.version }}-win.exe
+          channel: ${{ inputs.channel }}
