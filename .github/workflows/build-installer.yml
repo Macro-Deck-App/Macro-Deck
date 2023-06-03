@@ -31,23 +31,24 @@ jobs:
         run: |
             Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.0.exe" -OutFile "innosetup.exe"
             Write-Output "Executing Inno Setup Installer..."
-            & .\innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS /CURRENTUSER /DIR"${{ github.workspace }}\Inno Setup"
+            & .\innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /SP- /NOCANCEL /NOICONS /CURRENTUSER /DIR"InnoSetup"
             Write-Output "Inno Setup Installer finished"
     
             $timeout = New-TimeSpan -Minutes 1
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
-            while (!(Test-Path "${{ github.workspace }}\Inno Setup\ISCC.exe") -and $stopwatch.elapsed -lt $timeout) {
+            while (!(Test-Path "InnoSetup\ISCC.exe") -and $stopwatch.elapsed -lt $timeout) {
               Write-Output "Waiting for Inno Setup installation to complete..."
               Start-Sleep -Seconds 5
             }
 
-            if (Test-Path "${{ github.workspace }}\Inno Setup\ISCC.exe") {
+            if (Test-Path "InnoSetup\ISCC.exe") {
               Write-Output "Inno Setup installed successfully."
             } else {
               Write-Output "Inno Setup installation failed or timed out."
               exit 1
-            } 
+            }
+        shell: pwsh
             
       - name: Build Macro Deck for Windows
         run: |
@@ -57,10 +58,7 @@ jobs:
         shell: cmd
         
       - name: Build Macro Deck installer for Windows
-        run: > 
-              ${{ github.workspace }}\Inno Setup\ISCC.exe
-                /F"macro-deck-${{github.event.release.name}}-win"
-                "${{ github.workspace }}\MacroDeck.Setup\Macro Deck.iss"
+        run: .\InnoSetup\ISCC.exe /F"macro-deck-${{github.event.release.name}}-win" "MacroDeck.Setup\Macro Deck.iss"
         shell: cmd
 
       - name: Upload Windows installer to release
@@ -69,6 +67,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ${{ github.workspace }}\Inno Setup\macro-deck-${{github.event.release.name}}-win.exe
+          asset_path: Inno Setup\macro-deck-${{github.event.release.name}}-win.exe
           asset_name: macro-deck-${{github.event.release.name}}-win.exe
           asset_content_type: application/octet-stream
