@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SuchByte.MacroDeck.Icons;
+﻿namespace SuchByte.MacroDeck.Icons;
 
 [Obsolete]
 public class IconPackLegacy

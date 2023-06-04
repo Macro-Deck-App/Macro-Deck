@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Actions;
+﻿using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Actions;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 

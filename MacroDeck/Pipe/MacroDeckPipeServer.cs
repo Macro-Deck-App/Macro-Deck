@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO.Pipes;
-using System.Text;
+﻿using System.IO.Pipes;
 using System.Threading;
 using SuchByte.MacroDeck.Logging;
 

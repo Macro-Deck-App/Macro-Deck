@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Globalization;
 using System.IO;
-using System.Threading.Tasks;
 using System.Timers;
 using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.GUI;

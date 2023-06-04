@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using SuchByte.MacroDeck.Backup;

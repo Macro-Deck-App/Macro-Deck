@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using CefSharp;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Logging;

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using SuchByte.MacroDeck.Plugins;
+﻿using SuchByte.MacroDeck.Plugins;
 
 namespace SuchByte.MacroDeck.Events;
 

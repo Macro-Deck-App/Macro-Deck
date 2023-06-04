@@ -1,5 +1,4 @@
-﻿using System;
-using SuchByte.MacroDeck.GUI.Dialogs;
+﻿using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Variables;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls;
