@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using System.Timers;
+using SuchByte.MacroDeck.CottleIntegration;
 using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
@@ -129,7 +130,7 @@ public class ChangeVariableValueAction : PluginAction
     {
         if (string.IsNullOrWhiteSpace(Configuration)) return;
         var changeVariableActionConfigModel = ChangeVariableValueActionConfigModel.Deserialize(Configuration);
-        var variable = VariableManager.ListVariables.Where(v => v.Name == changeVariableActionConfigModel.Variable).FirstOrDefault();
+        var variable = VariableManager.ListVariables.FirstOrDefault(v => v.Name == changeVariableActionConfigModel.Variable);
         if (variable == null) return;
         switch (changeVariableActionConfigModel.Method)
         {
@@ -141,7 +142,7 @@ public class ChangeVariableValueAction : PluginAction
                 VariableManager.SetValue(variable.Name, float.Parse(variable.Value) - 1, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
                 break;
             case ChangeVariableMethod.set:
-                var value = VariableManager.RenderTemplate(changeVariableActionConfigModel.Value);
+                var value = TemplateManager.RenderTemplate(changeVariableActionConfigModel.Value);
                 VariableManager.SetValue(variable.Name, value, (VariableType)Enum.Parse(typeof(VariableType), variable.Type), variable.Creator);
                 break;
             case ChangeVariableMethod.toggle:
@@ -165,7 +166,7 @@ public class SaveVariableToFileAction : PluginAction
         var configurationModel = ReadVariableFromFileActionConfigModel.Deserialize(Configuration);
         if (configurationModel == null) return;
         var filePath = configurationModel.FilePath;
-        var variable = VariableManager.ListVariables.Where(x => x.Name == configurationModel.Variable).FirstOrDefault();
+        var variable = VariableManager.ListVariables.FirstOrDefault(x => x.Name == configurationModel.Variable);
         string variableValue;
         if (variable == null)
         {
@@ -205,7 +206,7 @@ public class ReadVariableFromFileAction : PluginAction
         var configurationModel = SaveVariableToFileActionConfigModel.Deserialize(Configuration);
         if (configurationModel == null) return;
         var filePath = configurationModel.FilePath;
-        var variable = VariableManager.ListVariables.Where(x => x.Name == configurationModel.Variable).FirstOrDefault();
+        var variable = VariableManager.ListVariables.FirstOrDefault(x => x.Name == configurationModel.Variable);
         try
         {
             Retry.Do(() =>

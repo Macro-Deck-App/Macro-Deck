@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using SQLite;
+using SuchByte.MacroDeck.CottleIntegration;
 using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.JSON;
@@ -113,8 +114,8 @@ public static class ProfileManager
                 var labelOffText = actionButton.LabelOff.LabelText;
                 var labelOnText = actionButton.LabelOn.LabelText;
 
-                labelOffText = VariableManager.RenderTemplate(labelOffText);
-                labelOnText = VariableManager.RenderTemplate(labelOnText);
+                labelOffText = TemplateManager.RenderTemplate(labelOffText);
+                labelOnText = TemplateManager.RenderTemplate(labelOnText);
 
                 actionButton.LabelOff.LabelBase64 = Base64.GetBase64FromImage(LabelGenerator.GetLabel(new Bitmap(250, 250), labelOffText, actionButton.LabelOff.LabelPosition, new Font(actionButton.LabelOff.FontFamily, actionButton.LabelOff.Size), actionButton.LabelOff.LabelColor, Color.Black, new SizeF(2.0f, 2.0f)));
                 actionButton.LabelOn.LabelBase64 = Base64.GetBase64FromImage(LabelGenerator.GetLabel(new Bitmap(250, 250), labelOnText, actionButton.LabelOn.LabelPosition, new Font(actionButton.LabelOn.FontFamily, actionButton.LabelOn.Size), actionButton.LabelOn.LabelColor, Color.Black, new SizeF(2.0f, 2.0f)));

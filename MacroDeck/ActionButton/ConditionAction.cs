@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SuchByte.MacroDeck.CottleIntegration;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Plugins;
@@ -151,7 +152,7 @@ public class ConditionAction : PluginAction
                 }
                 break;
             case ConditionType.Template:
-                if (bool.TryParse(VariableManager.RenderTemplate(_conditionValue1Source), out var boolResult))
+                if (bool.TryParse(TemplateManager.RenderTemplate(_conditionValue1Source), out var boolResult))
                 {
                     result = boolResult;
                 }

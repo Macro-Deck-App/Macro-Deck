@@ -3,6 +3,7 @@ using System.Drawing.Text;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using SuchByte.MacroDeck.ActionButton;
+using SuchByte.MacroDeck.CottleIntegration;
 using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.GUI.CustomControls;
@@ -129,7 +130,7 @@ public partial class ButtonEditor : DialogForm
                 btnForeColor.HoverColor = buttonLabel.LabelColor;
                 var labelBitmap = new Bitmap(250, 250);
                 var labelText = buttonLabel.LabelText;
-                labelText = VariableManager.RenderTemplate(labelText);
+                labelText = TemplateManager.RenderTemplate(labelText);
 
                 labelBitmap = (Bitmap)LabelGenerator.GetLabel(labelBitmap, labelText, buttonLabel.LabelPosition, new Font(buttonLabel.FontFamily, buttonLabel.Size), buttonLabel.LabelColor, Color.Black, new SizeF(2.0F, 2.0F));
                 buttonLabel.LabelBase64 = Base64.GetBase64FromImage(labelBitmap);

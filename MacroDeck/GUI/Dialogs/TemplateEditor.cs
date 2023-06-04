@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using FastColoredTextBoxNS;
 using FastColoredTextBoxNS.Types;
+using SuchByte.MacroDeck.CottleIntegration;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Variables;
@@ -12,18 +13,8 @@ namespace SuchByte.MacroDeck.GUI.Dialogs;
 
 public partial class TemplateEditor : DialogForm
 {
-    private const string TrimBlankNewLine = VariableManager.TemplateTrimBlank + "\r\n";
-
-    private static readonly string[] Operators = { "and", "cmp", "default", "defined", "eq", "ge", "gt", "has", "le", "lt", "ne", 
-        "not", "or", "xor", "when", "declare", "as", "dump", "echo", "empty", "set", "to", 
-        "return", "true", "false", "void"};
-    private static readonly string[] Functions = { "abs", "add", "call", "cast", "cat", "ceil", "char", "cmp", "cos", "cross", "default", "defined", 
-        "div", "eq", "except", "filter", "find", "flip", "floor", "format", "ge", "gt", "has", "join", "lcase", 
-        "le", "len", "lt", "map", "match", "max", "min", "mod", "mul", "ne", "ord", "pow", "rand", "range", "round", "sin", 
-        "slice", "sort", "split", "sub", "token", "type", "ucase", "union", "when", "xor", "zip"};
-    private static readonly string[] Commands = { "if", "elif", "else", "for", "while" };
-    private static readonly string[] Special = { VariableManager.TemplateTrimBlank };
-
+    private const string TrimBlankNewLine = TemplateManager.TemplateTrimBlank + "\r\n";
+    
     private readonly TextStyle functionStyle = new(Brushes.DarkKhaki, null, FontStyle.Regular);
     private readonly TextStyle commentStyle = new(Brushes.Green, null, FontStyle.Regular);
     private readonly TextStyle operatorStyle = new(Brushes.SteelBlue, null, FontStyle.Regular);
@@ -32,13 +23,13 @@ public partial class TemplateEditor : DialogForm
     private readonly TextStyle specialStyle = new(Brushes.Lime, null, FontStyle.Regular);
 
     private readonly Regex commentRegex = new(@"{\s*_\}", RegexOptions.Multiline | RegexOptions.Compiled);
-    private readonly Regex operatorRegex = new(@$"\b(?x: {string.Join(" | ", Operators)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
-    private readonly Regex functionRegex = new(@$"\b(?x: {string.Join(" | ", Functions)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
-    private readonly Regex commandRegex = new(@$"\b(?x: {string.Join(" | ", Commands)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
-    private readonly Regex specialRegex = new(@$"\b(?x: {string.Join(" | ", Special)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
+    private readonly Regex operatorRegex = new(@$"\b(?x: {string.Join(" | ", TemplateManager.Operators)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
+    private readonly Regex functionRegex = new(@$"\b(?x: {string.Join(" | ", TemplateManager.Functions)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
+    private readonly Regex commandRegex = new(@$"\b(?x: {string.Join(" | ", TemplateManager.Commands)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
+    private readonly Regex specialRegex = new(@$"\b(?x: {string.Join(" | ", TemplateManager.Special)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
 
     private readonly Regex variableRegex;
-    private bool HasTrimBlank => Template.StartsWith(VariableManager.TemplateTrimBlank, StringComparison.OrdinalIgnoreCase);
+    private bool HasTrimBlank => TemplateManager.HasTrimBlank(Template);
 
     public string Template 
     { 
@@ -62,7 +53,7 @@ public partial class TemplateEditor : DialogForm
         
         variableRegex = new Regex(@$"\b(?x: {string.Join(" | ", variablesList)})\b", RegexOptions.Singleline | RegexOptions.Compiled);
 
-        autocompleteMenu.Items.SetAutocompleteItems(variablesList.Concat(Operators).Concat(Functions).Concat(Commands).Concat(Special).ToArray());
+        autocompleteMenu.Items.SetAutocompleteItems(TemplateManager.AllKeywords.Concat(variablesList).ToArray());
 
         this.template.TextChanged += Template_TextChanged;
         Template = template;
@@ -70,7 +61,7 @@ public partial class TemplateEditor : DialogForm
 
     private void Template_TextChanged(object? sender, TextChangedEventArgs e)
     {
-        lblResult.Text = VariableManager.RenderTemplate(Template);
+        lblResult.Text = TemplateManager.RenderTemplate(Template);
 
         checkTrimBlankLines.Checked = HasTrimBlank;
 
@@ -166,7 +157,7 @@ public partial class TemplateEditor : DialogForm
         }
         else if (!checkTrimBlankLines.Checked && hasTrimBlank)
         {
-            Template = Template.Replace(TrimBlankNewLine, string.Empty).Replace(VariableManager.TemplateTrimBlank, string.Empty);
+            Template = Template.Replace(TrimBlankNewLine, string.Empty).Replace(TemplateManager.TemplateTrimBlank, string.Empty);
         }
     }
 }
