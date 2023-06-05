@@ -12,10 +12,12 @@ on:
       filename:
         required: true
         type: string
-      channel: 
-        required: false
-        default: 'Release'
+      filehash:
+        required: true
         type: string
+      filesize:
+        required: true
+        type: number
 
 jobs:
   push-version:
@@ -34,24 +36,26 @@ jobs:
               echo "::error::Missing required key 'filename' input!"
               exit 1
             fi
+            elif [[ -z "${{ inputs.filehash }}" ]];then
+              echo "::error::Missing required key 'filehash' input!"
+              exit 1
+            fi
+            elif [[ -z "${{ inputs.filesize }}" ]];then
+              echo "::error::Missing required key 'filesize' input!"
+              exit 1
+            fi
         shell: bash
 
-      - name: Clone Versions Repository
-        run: git clone --depth 1 https://github.com/Macro-Deck-App/Versions.git /tmp/versions
-        shell: bash
-      
-      - name: Edit Version File
-        run: |
-          temp=$(mktemp)
-          current_date=$(date +"%Y-%m-%d")
-          channel_name=$(echo "${{ inputs.channel }}" | awk '{print toupper(substr($0,1,1))tolower(substr($0,2))}')
-          jq ".[\"${{ inputs.platform }}\"].version = \"${{ inputs.version }}\" | .[\"${{ inputs.platform }}\"].date = \"$current_date\" | .[\"${{ inputs.platform }}\"].filename = \"${{ inputs.filename }}\"" "/tmp/versions/$channel_name.json" > "${temp}"
-          mv "${temp}" "/tmp/versions/$channel_name.json"
-        shell: bash
-
-      - name: Push to Versions Repository
-        run: |
-          cd /tmp/versions
-          git commit -am "Bump Macro Deck (${{ inputs.platform }}) to ${{ inputs.version }}"
-          git push
-        shell: bash
+      - name: Update version on the api
+        run: >
+            curl -X 'POST' \
+              'https://update.api.macro-deck.app/files/${{ inputs.version }}/${{ inputs.platform }}'
+              -H 'accept: */*'
+              -H 'x-admin-token: ${{ secrets.UPDATE_SERVICE_TOKEN }}'
+              -H 'Content-Type: application/json'
+              -d '{
+              "fileName": ${{ inputs.filename }},
+              "fileProvider": "GitHub",
+              "fileHash": ${{ inputs.filehash }},
+              "fileSize": ${{ inputs.filesize }}
+              }'
