@@ -51,6 +51,20 @@ jobs:
         run: |
             "${{ env.ISCC_PATH }}" /F"macro-deck-${{ inputs.version }}-win" "MacroDeck.Setup\Macro Deck.iss"
         shell: cmd
+      
+      - name: Calculate file hash
+        id: filehash
+        run: |
+          $filehash = Get-FileHash -Algorithm SHA256 -Path "MacroDeck.Setup\Result\macro-deck-${{ inputs.version }}-win.exe" | ForEach-Object Hash
+          echo "::set-output name=filehash::$filehash"
+        shell: pwsh
+      
+      - name: Calculate file size
+        id: filesize
+        run: |
+          $filesize = (Get-Item "MacroDeck.Setup\Result\macro-deck-${{ inputs.version }}-win.exe").Length
+          echo "::set-output name=filesize::$filesize"
+        shell: pwsh
 
       - name: Upload Windows installer to release
         uses: actions/upload-release-asset@v1
@@ -66,8 +80,11 @@ jobs:
     name: Push Version
     needs: build-windows-installer
     uses: ./.github/workflows/push-version.yml
+    secrets: inherit
     with:
-      platform: 'win-X64'
+      platform: 'WinX64'
       version: ${{ inputs.version }}
       filename: macro-deck-${{ inputs.version }}-win.exe
-      channel: ${{ inputs.channel }}
+      filehash: ${{ needs.build-windows-installer.outputs.filehash }}
+      filesize: ${{ needs.build-windows-installer.outputs.filesize }}
+
