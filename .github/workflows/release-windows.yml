@@ -36,9 +36,11 @@ jobs:
             
       - name: Update project version
         run: |
-            .\MacroDeck.Setup\ChangeCsprojVersion.exe -p "${{ github.workspace }}\MacroDeck\MacroDeck.csproj" -n "${{ inputs.version }}"
-        shell: cmd
-            
+          [xml]$csproj = Get-Content -Path "${{ github.workspace }}\MacroDeck\MacroDeck.csproj"
+          $csproj.Project.PropertyGroup.Version = "${{ inputs.version }}"
+          $csproj.OuterXml | Set-Content -Path "${{ github.workspace }}\MacroDeck\MacroDeck.csproj"
+        shell: pwsh
+
       - name: Build Macro Deck for Windows
         run: |
             dotnet restore ".\MacroDeck\MacroDeck.csproj"
