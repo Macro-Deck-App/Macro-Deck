@@ -1,5 +1,4 @@
-﻿using System;
-using SuchByte.MacroDeck.InternalPlugins.Variables.Enums;
+﻿using SuchByte.MacroDeck.InternalPlugins.Variables.Enums;
 using SuchByte.MacroDeck.InternalPlugins.Variables.Models;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;

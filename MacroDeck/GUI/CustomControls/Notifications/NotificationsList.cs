@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using SuchByte.MacroDeck.Notifications;
+﻿using SuchByte.MacroDeck.Notifications;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls;
 

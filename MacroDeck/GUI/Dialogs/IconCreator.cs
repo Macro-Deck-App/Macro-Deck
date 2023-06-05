@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.GUI.CustomControls;

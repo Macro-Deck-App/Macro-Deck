@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System;
 using System.Text.RegularExpressions;
 
 namespace SuchByte.MacroDeck.Models;

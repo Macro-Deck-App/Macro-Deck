@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Reflection;
 using Newtonsoft.Json;
 using SuchByte.MacroDeck.GUI;

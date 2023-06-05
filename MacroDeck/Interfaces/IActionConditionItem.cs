@@ -1,5 +1,4 @@
-﻿using System;
-using SuchByte.MacroDeck.Plugins;
+﻿using SuchByte.MacroDeck.Plugins;
 
 namespace SuchByte.MacroDeck.Interfaces;
 

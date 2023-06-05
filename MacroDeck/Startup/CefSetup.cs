@@ -1,7 +1,6 @@
 ﻿using CefSharp.WinForms;
 using CefSharp;
 using SuchByte.MacroDeck.Logging;
-using System;
 using System.IO;
 
 namespace SuchByte.MacroDeck.Startup;

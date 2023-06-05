@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SuchByte.MacroDeck.Events;
+﻿namespace SuchByte.MacroDeck.Events;
 
 public class MacroDeckEventArgs : EventArgs
 {

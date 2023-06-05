@@ -1,9 +1,7 @@
 ﻿using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Pipes;
 using SuchByte.MacroDeck.Startup;
-using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Enums;
 using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Models;
 using SuchByte.MacroDeck.Language;

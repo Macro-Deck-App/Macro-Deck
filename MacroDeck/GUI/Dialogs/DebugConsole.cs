@@ -1,7 +1,5 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Notifications;
