@@ -36,8 +36,9 @@ jobs:
         with:
           release-type: ${{ github.event.inputs.release-type }}
 
-      - name: "Create Tag"
+      - name: "Create Release"
         uses: Macro-Deck-App/Actions/create-github-release@main
+        id: create_release
         with:
           github-token: "${{secrets.GITHUB_TOKEN}}"
           is-beta: ${{ steps.fetch_version.outputs.is-beta }}
@@ -50,6 +51,7 @@ jobs:
     secrets: inherit
     with:
       version: ${{ needs.release-github.steps.fetch_version.version }}
+      upload-url: ${{ needs.release-github.steps.create_release.outputs.upload-url }}
             
   notify:
     name: "Notify"
