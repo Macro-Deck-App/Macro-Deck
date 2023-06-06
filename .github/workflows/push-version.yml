@@ -1,0 +1,61 @@
+name: Push Version
+
+on:
+  workflow_call:
+    inputs:
+      platform:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+      filename:
+        required: true
+        type: string
+      filehash:
+        required: true
+        type: string
+      filesize:
+        required: true
+        type: number
+
+jobs:
+  push-version:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Validate Input
+        run: |
+            if [[ -z "${{ inputs.platform }}" ]];then
+              echo "::error::Missing required key 'platform' input!"
+              exit 1
+            elif [[ -z "${{ inputs.version }}" ]];then
+              echo "::error::Missing required key 'version' input!"
+              exit 1
+            elif [[ -z "${{ inputs.filename }}" ]];then
+              echo "::error::Missing required key 'filename' input!"
+              exit 1
+            fi
+            elif [[ -z "${{ inputs.filehash }}" ]];then
+              echo "::error::Missing required key 'filehash' input!"
+              exit 1
+            fi
+            elif [[ -z "${{ inputs.filesize }}" ]];then
+              echo "::error::Missing required key 'filesize' input!"
+              exit 1
+            fi
+        shell: bash
+
+      - name: Update version on the api
+        run: >
+            curl -X 'POST' \
+              'https://update.api.macro-deck.app/files/${{ inputs.version }}/${{ inputs.platform }}'
+              -H 'accept: */*'
+              -H 'x-admin-token: ${{ secrets.UPDATE_SERVICE_TOKEN }}'
+              -H 'Content-Type: application/json'
+              -d '{
+              "fileName": ${{ inputs.filename }},
+              "fileProvider": "GitHub",
+              "fileHash": ${{ inputs.filehash }},
+              "fileSize": ${{ inputs.filesize }}
+              }'

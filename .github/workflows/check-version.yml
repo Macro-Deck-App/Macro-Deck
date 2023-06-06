@@ -1,0 +1,23 @@
+name: Build Windows Installer
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version'     
+        required: true
+        type: string
+
+jobs:
+  check-release-name:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check version on update API
+        run: |
+          VERSION_CHECK=$(curl -s "https://update.api.macro-deck.app/versionname/validate/${{ inputs.version }}")
+
+          if [[ "$VERSION_CHECK" != "true" ]]; then
+            echo "Version '${{ inputs.version }}' is not valid according to the update API."
+            exit 1
+          fi

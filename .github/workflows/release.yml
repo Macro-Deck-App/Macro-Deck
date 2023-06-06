@@ -1,0 +1,25 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  check_version:
+    name: Check Version Name
+    uses: ./.github/workflows/check-version.yml
+    with:
+      version: ${{ github.event.release.name }}
+  tests:
+    name: Execute Tests
+    needs: [check_version]
+    uses: ./.github/workflows/tests.yml
+    secrets: inherit
+  release-windows:
+    name: Release Windows
+    uses: ./.github/workflows/release-windows.yml
+    needs: [check_version, tests]
+    secrets: inherit
+    with:
+      version: ${{ github.event.release.name }}
+      channel: ${{ github.event.release.prerelease && 'Preview' || 'Release' }}
