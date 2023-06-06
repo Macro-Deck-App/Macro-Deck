@@ -18,8 +18,8 @@ jobs:
     secrets: inherit
     
   release-windows:
-    name: Release Windows
-    uses: ./.github/workflows/release-windows.yml
+    name: Build and Push Macro Deck for Windows
+    uses: ./.github/workflows/build-push-windows.yml
     needs: [check_version, tests]
     secrets: inherit
     with:
