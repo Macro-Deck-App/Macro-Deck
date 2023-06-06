@@ -39,8 +39,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        with:
-          github-token: "${{secrets.GITHUB_TOKEN}}"
           
       - name: Update CSProj Version
         run: |
