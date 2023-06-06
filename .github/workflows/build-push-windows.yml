@@ -3,6 +3,9 @@ name: Build and Release Windows Installer
 on:
   workflow_call:
     inputs:
+      upload-url:
+        required: true
+        type: string
       version:
         required: true
         type: string
@@ -69,7 +72,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
+          upload_url: ${{ inputs.upload-url }}
           asset_path: 'MacroDeck.Setup\Result\macro-deck-${{ inputs.version }}-win.exe'
           asset_name: macro-deck-${{ inputs.version }}-win.exe
           asset_content_type: application/octet-stream
