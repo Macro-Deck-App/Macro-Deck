@@ -31,16 +31,11 @@ jobs:
           releaseType: ${{ github.event.inputs.releaseType }}
 
       - name: "Create Tag And Release"
-        uses: "actions/github-script@v6.4.1"
+        uses: Macro-Deck-App/Actions/create-github-release@main
         with:
           github-token: "${{secrets.GITHUB_TOKEN}}"
-          script: |
-            await github.request('POST /repos/${{github.repository}}/releases', {
-              name: "${{steps.fetch_version.outputs.version}}",
-              tag_name: "v${{steps.fetch_version.outputs.version}}",
-              generate_release_notes: true,
-              prerelease: ${{steps.fetch_version.outputs.isBeta == 'true'}}
-            });
+          isBeta: ${{ steps.fetch_version.outputs.isBeta }}
+          version: ${{steps.fetch_version.outputs.version}}
             
       - name: "Notify Discord"
         uses: Macro-Deck-App/Actions/discord-notify-release@main
