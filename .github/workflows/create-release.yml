@@ -16,11 +16,8 @@ on:
 jobs:
   tests:
     name: Execute Tests
-    #uses: ./.github/workflows/tests.yml
-    #secrets: inherit
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo ""
+    uses: ./.github/workflows/tests.yml
+    secrets: inherit
     
   get-version:
     name: "Get Version"
