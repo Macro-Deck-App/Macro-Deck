@@ -51,7 +51,6 @@ jobs:
     secrets: inherit
     with:
       version: ${{ needs.release-github.steps.fetch_version.version }}
-      upload-url: ${{ needs.release-github.steps.create_release.outputs.upload-url }}
             
   notify:
     name: "Notify"
