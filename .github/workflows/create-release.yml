@@ -3,7 +3,7 @@ name: Create Release
 on:
   workflow_dispatch:
     inputs:
-      releaseType:
+      release-type:
         type: choice
         options:
           - minor_beta
@@ -28,18 +28,18 @@ jobs:
         uses: Macro-Deck-App/Actions/fetch-version@main
         id: fetch_version
         with:
-          releaseType: ${{ github.event.inputs.releaseType }}
+          release-type: ${{ github.event.inputs.release-type }}
 
       - name: "Create Tag And Release"
         uses: Macro-Deck-App/Actions/create-github-release@main
         with:
           github-token: "${{secrets.GITHUB_TOKEN}}"
-          isBeta: ${{ steps.fetch_version.outputs.isBeta }}
-          version: ${{steps.fetch_version.outputs.version}}
+          is-beta: ${{ steps.fetch_version.outputs.is-beta }}
+          version: ${{ steps.fetch_version.outputs.version }}
             
       - name: "Notify Discord"
         uses: Macro-Deck-App/Actions/discord-notify-release@main
         with:
           version: ${{ steps.fetch_version.outputs.version }}
-          isBeta: ${{ steps.fetch_version.outputs.isBeta }}
-          webhook_key: ${{ secrets.WEBHOOK_KEY }}
+          is-beta: ${{ steps.fetch_version.outputs.is-beta }}
+          webhook-token: ${{ secrets.WEBHOOK_KEY }}
