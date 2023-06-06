@@ -6,10 +6,6 @@ on:
       version:
         required: true
         type: string
-      channel:
-        required: false
-        default: 'Release'
-        type: string
 
 jobs:
   build-windows-installer:
