@@ -58,7 +58,7 @@ jobs:
       - name: Upload Windows installer to release
         uses: softprops/action-gh-release@v1
         with:
-          files: 'MacroDeck.Setup\Result\macro-deck-${{ inputs.version }}-win.exe'
+          files: './MacroDeck.Setup/Result/macro-deck-${{ inputs.version }}-win.exe'
           tag_name: "v${{ inputs.version }}"
       
       - name: Push Update to the API
