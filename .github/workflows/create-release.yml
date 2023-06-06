@@ -19,23 +19,42 @@ jobs:
     uses: ./.github/workflows/tests.yml
     secrets: inherit
     
-  release-github:
-    name: "Release GitHub"
+  get-version:
+    name: "Get Version"
     runs-on: ubuntu-latest
-    needs: tests
+    steps:
+      - name: Fetch Version From API
+        uses: Macro-Deck-App/Actions/fetch-version@main
+        id: fetch_version
+        with:
+          release-type: ${{ github.event.inputs.release-type }}
     
+  bump-version:
+    name: "Bump Version"
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
           github-token: "${{secrets.GITHUB_TOKEN}}"
           
-      - name: Fetch Version From API
-        uses: Macro-Deck-App/Actions/fetch-version@main
-        id: fetch_version
+      - name: Update CSProj Version
+        uses: Mudlet/xmlstarlet-action@v1
         with:
-          release-type: ${{ github.event.inputs.release-type }}
+          command: edit
+          args: --inplace --update "/Project/PropertyGroup/Version" --value ${{ jobs.get-version.steps.fetch_version.output.version }} ./MacroDeck/MacroDeck.csproj
 
+      - name: Commit Changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Bump Version to ${{ jobs.get-version.steps.fetch_version.output.version }}
+    
+  release-github:
+    name: "Release GitHub"
+    runs-on: ubuntu-latest
+    needs: tests
+    
+    steps:
       - name: "Create Release"
         uses: Macro-Deck-App/Actions/create-github-release@main
         id: create_release
