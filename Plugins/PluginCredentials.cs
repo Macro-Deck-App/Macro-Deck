@@ -21,7 +21,7 @@ namespace SuchByte.MacroDeck.Plugins
 
             List<Dictionary<string, string>> pluginCredentials;
 
-            if (!File.Exists(Path.Combine(MacroDeck.PluginCredentialsPath, plugin.Author.ToLower() + "_" + plugin.Name.ToLower())))
+            if (!File.Exists(MacroDeck.PluginCredentialsPath + plugin.Author.ToLower() + "_" + plugin.Name.ToLower()))
             {
                 pluginCredentials = new List<Dictionary<string, string>>();
             } else

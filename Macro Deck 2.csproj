@@ -5,7 +5,7 @@
 		<BetaPatch>0</BetaPatch>
 
 		<VersionMajor>2</VersionMajor>
-		<VersionMinor>13</VersionMinor>
+		<VersionMinor>12</VersionMinor>
 		<VersionPatch>0</VersionPatch> <!-- Patch (Not Beta patch) -->
 
 		<VersionSuffix Condition="'$(IsBeta)' == 'true'">b$(BetaPatch)</VersionSuffix>
