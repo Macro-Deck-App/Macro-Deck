@@ -1,4 +1,4 @@
-name: Release
+name: Release Created
 
 on:
   release:
@@ -10,11 +10,13 @@ jobs:
     uses: ./.github/workflows/check-version.yml
     with:
       version: ${{ github.event.release.name }}
+      
   tests:
     name: Execute Tests
     needs: [check_version]
     uses: ./.github/workflows/tests.yml
     secrets: inherit
+    
   release-windows:
     name: Release Windows
     uses: ./.github/workflows/release-windows.yml
