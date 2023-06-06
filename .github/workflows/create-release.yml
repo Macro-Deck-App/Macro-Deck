@@ -67,13 +67,25 @@ jobs:
           version: ${{ steps.fetch_version.outputs.version }}
     
   release-windows:
-    name: Build and Push Macro Deck for Windows
+    name: "Build and Push Macro Deck for Windows"
     uses: ./.github/workflows/build-push-windows.yml
     needs: release-github
     secrets: inherit
     with:
       version: ${{ needs.release-github.steps.fetch_version.outputs.version }}
       upload-url: ${{ needs.release-github.steps.create_release.outputs.upload-url }}
+      
+  create-pull-request:
+    name: "Create pull-request back to develop"
+    runs-on: ubuntu-latest
+    needs: [bump-version, release-windows, release-github]
+    steps: 
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          branch: main
+          title: Bump Macro Deck version to ${{ needs.release-github.steps.fetch_version.outputs.version }}
+          body: Bumps the version of Macro Deck to ${{ needs.release-github.steps.fetch_version.outputs.version }}
             
   notify:
     name: "Notify"
