@@ -6,129 +6,45 @@ on:
       releaseType:
         type: choice
         options:
-          - major
-          - minor
-          - patch
-          - major_beta
           - minor_beta
-        description: 'Release type (major, minor, patch, major_beta, minor_beta)'  
+          - major_beta
+          - patch
+          - minor
+          - major
         required: true
 
 jobs:
   release:
-    name: "Create Version"
+    name: "Release Version"
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Get Next Version From Update API
-        run: |
-          RELEASE_TYPE=${{ github.event.inputs.releaseType }}
-          BASE_URL="https://update.api.macro-deck.app/versionname/next"
-          case "${RELEASE_TYPE}" in
-            "major")
-              URL="${BASE_URL}/major"
-              ;;
-            "minor")
-              URL="${BASE_URL}/minor"
-              ;;
-            "patch")
-              URL="${BASE_URL}/patch"
-              ;;
-            "major_beta")
-              URL="${BASE_URL}/major/beta"
-              ;;
-            "minor_beta")
-              URL="${BASE_URL}/minor/beta"
-              ;;
-            *)
-              echo "Invalid release type: ${RELEASE_TYPE}"
-              exit 1
-              ;;
-          esac
-          RESPONSE=$(curl -s $URL)
-          VERSION_NAME=$(echo $RESPONSE | jq -r '.versionName')
-          echo "VERSION_NAME=${VERSION_NAME}" >> $GITHUB_ENV
-          IS_BETA=$(echo $RESPONSE | jq -r '.isBetaVersion')
-          echo "IS_BETA=${IS_BETA}" >> $GITHUB_ENV
+        with:
+          github-token: "${{secrets.GITHUB_TOKEN}}"
+          
+      - name: Fetch Version From API
+        uses: Macro-Deck-App/Actions/fetch-version@main
+        id: fetch_version
+        with:
+          releaseType: ${{ github.event.inputs.releaseType }}
 
       - name: "Create Tag And Release"
         uses: "actions/github-script@v6.4.1"
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: "${{secrets.GITHUB_TOKEN}}"
           script: |
             await github.request('POST /repos/${{github.repository}}/releases', {
-              name: process.env.VERSION_NAME,
-              tag_name: "v" + process.env.VERSION_NAME,
+              name: "${{steps.fetch_version.outputs.version}}",
+              tag_name: "v${{steps.fetch_version.outputs.version}}",
               generate_release_notes: true,
-              prerelease: process.env.IS_BETA === "true"
+              prerelease: ${{steps.fetch_version.outputs.isBeta == 'true'}}
             });
             
-      - name: Announce Release In Discord
-        uses: fjogeleit/http-request-action@v1
-        if: ${{ env.IS_BETA == 'false' }}
-        continue-on-error: true
+      - name: "Notify Discord"
+        uses: Macro-Deck-App/Actions/discord-notify-release@main
         with:
-          url: 'https://bot.api.macro-deck.app/webhook/macro-deck-release'
-          method: 'POST'
-          bearerToken: ${{ secrets.WEBHOOK_KEY }}
-          customHeaders: '{"Content-Type": "application/json"}'
-          data: |
-            {
-              "toEveryone": false,
-              "embed": {
-                "color": {
-                  "r": 0,
-                  "g": 1,
-                  "b": 0
-                },
-                "description": "**${{ env.VERSION_NAME }} is now released!**",
-                "fields": [
-                  {
-                    "name": "Channel",
-                    "value": "Release",
-                    "inline": false
-                  },
-                  {
-                    "name": "Changelog",
-                    "value": "https://github.com/Macro-Deck-App/Macro-Deck/releases/tag/v${{ env.VERSION_NAME }}",
-                    "inline": false
-                  }
-                ]
-              }
-            }
-            
-      - name: Announce Beta Release In Discord
-        uses: fjogeleit/http-request-action@v1
-        if: ${{ env.IS_BETA == 'true' }}
-        continue-on-error: true
-        with:
-          url: 'https://bot.api.macro-deck.app/webhook/macro-deck-beta-release'
-          method: 'POST'
-          bearerToken: ${{ secrets.WEBHOOK_KEY }}
-          customHeaders: '{"Content-Type": "application/json"}'
-          data: |
-            {
-              "toEveryone": false,
-              "embed": {
-                "color": {
-                  "r": 1,
-                  "g": 1,
-                  "b": 0
-                },
-                "description": "**${{ env.VERSION_NAME }} is now released!**",
-                "fields": [
-                  {
-                    "name": "Channel",
-                    "value": "Beta",
-                    "inline": false
-                  },
-                  {
-                    "name": "Changelog",
-                    "value": "https://github.com/Macro-Deck-App/Macro-Deck/releases/tag/v${{ env.VERSION_NAME }}",
-                    "inline": false
-                  }
-                ]
-              }
-            }
+          version: ${{ steps.fetch_version.outputs.version }}
+          isBeta: ${{ steps.fetch_version.outputs.isBeta }}
+          webhook_key: ${{ secrets.WEBHOOK_KEY }}
