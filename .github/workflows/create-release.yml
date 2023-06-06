@@ -60,7 +60,7 @@ jobs:
     outputs:
       upload-url: ${{ steps.create_release.outputs.upload-url }}
     runs-on: ubuntu-latest
-    needs: [tests, get-version, bump-version]
+    needs: [get-version, bump-version]
     
     steps:
       - name: "Create Release"
@@ -82,6 +82,7 @@ jobs:
       
   create-pull-request:
     name: "Create pull-request back to develop"
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     needs: [get-version, bump-version, release-windows, release-github]
     steps: 
