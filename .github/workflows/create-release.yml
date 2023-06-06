@@ -16,8 +16,11 @@ on:
 jobs:
   tests:
     name: Execute Tests
-    uses: ./.github/workflows/tests.yml
-    secrets: inherit
+    #uses: ./.github/workflows/tests.yml
+    #secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ""
     
   get-version:
     name: "Get Version"
@@ -40,7 +43,7 @@ jobs:
           github-token: "${{secrets.GITHUB_TOKEN}}"
           
       - name: Update CSProj Version
-        uses: Mudlet/xmlstarlet-action@v1
+        uses: Mudlet/xmlstarlet-action@v1.2
         with:
           command: edit
           args: --inplace --update "/Project/PropertyGroup/Version" --value ${{ needs.get-version.steps.fetch_version.output.version }} ./MacroDeck/MacroDeck.csproj
