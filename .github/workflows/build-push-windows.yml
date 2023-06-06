@@ -54,9 +54,9 @@ jobs:
         id: filehash
         run: |
           $filehash = Get-FileHash -Algorithm SHA256 -Path "MacroDeck.Setup\Result\macro-deck-${{ inputs.version }}-win.exe" | ForEach-Object Hash
-          echo "::set-output name=filehash::$filehash"
+          echo "FILE_HASH=$filehash" | Out-File -Append -FilePath $env:GITHUB_ENV -Encoding utf8
           $filesize = (Get-Item "MacroDeck.Setup\Result\macro-deck-${{ inputs.version }}-win.exe").Length
-          echo "::set-output name=filesize::$filesize"
+          echo "FILE_SIZE=$filesize" | Out-File -Append -FilePath $env:GITHUB_ENV -Encoding utf8
         shell: pwsh
 
       - name: Get Upload Url
@@ -77,15 +77,11 @@ jobs:
           asset_content_type: application/octet-stream
       
       - name: Push Update to the API
-        run: >
-            curl -X 'POST' \
-              'https://update.api.macro-deck.app/files/${{ inputs.version }}/${{ inputs.platform }}'
-              -H 'accept: */*'
-              -H 'x-admin-token: ${{ secrets.UPDATE_SERVICE_TOKEN }}'
-              -H 'Content-Type: application/json'
-              -d '{
-              "fileName": ${{ inputs.filename }},
-              "fileProvider": "GitHub",
-              "fileHash": ${{ inputs.filehash }},
-              "fileSize": ${{ inputs.filesize }}
-              }'
+        uses: Macro-Deck-App/Actions/push-to-update-api@main
+        with:
+          version: ${{ inputs.version }}
+          platform: "WinX64"
+          file-name: "macro-deck-${{ inputs.version }}-win.exe"
+          file-hash: ${{ env.FILE_HASH }}
+          file-size: ${{ env.FILE_SIZE }}
+          update-service-token: ${{ secrets.UPDATE_SERVICE_TOKEN }}
