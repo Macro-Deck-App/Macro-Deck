@@ -56,14 +56,10 @@ jobs:
         shell: pwsh
 
       - name: Upload Windows installer to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
-          upload_url: ${{inputs.upload-url}}
-          asset_path: 'MacroDeck.Setup\Result\macro-deck-${{ inputs.version }}-win.exe'
-          asset_name: macro-deck-${{ inputs.version }}-win.exe
-          asset_content_type: application/octet-stream
+          files: 'MacroDeck.Setup\Result\macro-deck-${{ inputs.version }}-win.exe'
+          tag_name: "v${{ inputs.version }}"
       
       - name: Push Update to the API
         uses: Macro-Deck-App/Actions/push-to-update-api@main
