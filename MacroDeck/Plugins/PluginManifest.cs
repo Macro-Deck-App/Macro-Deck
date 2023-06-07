@@ -1,8 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Text;
 using System.Xml.Serialization;
 
 namespace SuchByte.MacroDeck.Plugins;
@@ -18,10 +15,8 @@ public class PluginManifest
 
     public static PluginManifest FromManifestFile(string path)
     {
-        using (var s = File.OpenRead(path))
-        {
-            return FromXmlStream(s);
-        }
+        using var s = File.OpenRead(path);
+        return FromXmlStream(s);
     }
 
     public static PluginManifest FromZipFilePath(string zipFilePath)

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Actions;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Properties;

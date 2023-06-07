@@ -1,10 +1,7 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.Backups;
 using SuchByte.MacroDeck.GUI.CustomControls.Settings;
@@ -12,6 +9,7 @@ using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Startup;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.GUI.MainWindowContents;
@@ -155,26 +153,24 @@ public partial class SettingsView : UserControl
     {
         if (checkInstallBetaVersions.Checked)
         {
-            using (var msgBox = new MessageBox())
+            using var msgBox = new MessageBox();
+            if (msgBox.ShowDialog(LanguageManager.Strings.Warning, LanguageManager.Strings.WarningBetaVersions, MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                if (msgBox.ShowDialog(LanguageManager.Strings.Warning, LanguageManager.Strings.WarningBetaVersions, MessageBoxButtons.YesNo) == DialogResult.Yes)
-                {
-                    updaterPanel.Controls.Clear();
-                    MacroDeck.Configuration.UpdateBetaVersions = true;
-                    MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
-                    Updater.Updater.CheckForUpdatesAsync();
-                }
-                else
-                {
-                    LoadUpdateChannel();
-                }
+                updaterPanel.Controls.Clear();
+                MacroDeck.Configuration.UpdateBetaVersions = true;
+                MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
+                Updater.Updater.CheckForUpdatesAsync();
+            }
+            else
+            {
+                LoadUpdateChannel();
             }
         }
         else
         {
             updaterPanel.Controls.Clear();
             MacroDeck.Configuration.UpdateBetaVersions = false;
-            MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+            MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
             Updater.Updater.CheckForUpdatesAsync();
         }
     }
@@ -248,27 +244,27 @@ public partial class SettingsView : UserControl
     {
         lblIpAddress.Text = GetIPAddressFromAdapter(networkAdapter.SelectedItem.ToString());
         MacroDeck.Configuration.HostAddress = lblIpAddress.Text;
-        MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
     }
 
     private void BtnChangePort_Click(object sender, EventArgs e)
     {
         if (port.Value == MacroDeck.Configuration.HostPort) return;
         MacroDeck.Configuration.HostPort = (int)port.Value;
-        MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
         MacroDeckServer.Start(MacroDeck.Configuration.HostPort);
     }
 
     private void CheckStartWindows_CheckedChanged(object sender, EventArgs e)
     {
         MacroDeck.Configuration.AutoStart = checkStartWindows.Checked;
-        MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
     }
 
     private void CheckAutoUpdate_CheckedChanged(object sender, EventArgs e)
     {
         MacroDeck.Configuration.AutoUpdates = checkAutoUpdate.Checked;
-        MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
     }
 
     private void BtnCheckUpdates_Click(object sender, EventArgs e)
@@ -289,10 +285,8 @@ public partial class SettingsView : UserControl
         {
             btnCheckUpdates.Enabled = true;
             btnCheckUpdates.Spinner = false;
-            using (var msgBox = new MessageBox())
-            {
-                msgBox.ShowDialog(LanguageManager.Strings.NoUpdatesAvailable, LanguageManager.Strings.LatestVersionInstalled, MessageBoxButtons.OK);
-            }
+            using var msgBox = new MessageBox();
+            msgBox.ShowDialog(LanguageManager.Strings.NoUpdatesAvailable, LanguageManager.Strings.LatestVersionInstalled, MessageBoxButtons.OK);
         });
 
             
@@ -321,16 +315,14 @@ public partial class SettingsView : UserControl
 
     private void BtnLicenses_Click(object sender, EventArgs e)
     {
-        using (var licensesDialog = new LicensesDialog())
-        {
-            licensesDialog.ShowDialog();
-        }
+        using var licensesDialog = new LicensesDialog();
+        licensesDialog.ShowDialog();
     }
 
     private void Language_SelectedIndexChanged(object sender, EventArgs e)
     {
         MacroDeck.Configuration.Language = language.Text;
-        MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
         LanguageManager.SetLanguage(MacroDeck.Configuration.Language);
         UpdateTranslation();
     }
@@ -338,7 +330,7 @@ public partial class SettingsView : UserControl
     private void CheckIconCache_CheckedChanged(object sender, EventArgs e)
     {
         MacroDeck.Configuration.CacheIcons = checkIconCache.Checked;
-        MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
     }
 
     private void BackupManager_BackupFailed(object sender, BackupFailedEventArgs e)
@@ -346,10 +338,8 @@ public partial class SettingsView : UserControl
         Invoke(() =>
         {
             btnCreateBackup.Spinner = false;
-            using (var msgBox = new MessageBox())
-            {
-                msgBox.ShowDialog(LanguageManager.Strings.Backup, LanguageManager.Strings.BackupFailed + ": " + Environment.NewLine + e.Message, MessageBoxButtons.OK);
-            }
+            using var msgBox = new MessageBox();
+            msgBox.ShowDialog(LanguageManager.Strings.Backup, LanguageManager.Strings.BackupFailed + ": " + Environment.NewLine + e.Message, MessageBoxButtons.OK);
         });
     }
 

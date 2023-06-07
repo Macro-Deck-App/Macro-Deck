@@ -1,5 +1,4 @@
-﻿using System;
-using SuchByte.MacroDeck.Device;
+﻿using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Models;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;

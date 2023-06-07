@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
@@ -254,18 +253,15 @@ public partial class RoundedTextBox : UserControl
             var smoothSize = 2;
 
 
-            using (var pathBorderSmooth = GetFigurePath(rectBorderSmooth, borderRadius))
-            using (var penBorderSmooth = new Pen(Parent.BackColor, smoothSize))
+            using var pathBorderSmooth = GetFigurePath(rectBorderSmooth, borderRadius);
+            using var penBorderSmooth = new Pen(Parent.BackColor, smoothSize);
+            Region = new Region(pathBorderSmooth);
+            if (icon != null)
             {
-
-                Region = new Region(pathBorderSmooth);
-                if (icon != null)
-                {
-                    graph.DrawImage(icon, rectIcon);
-                }
-                graph.SmoothingMode = SmoothingMode.AntiAlias;
-                graph.DrawPath(penBorderSmooth, pathBorderSmooth);
+                graph.DrawImage(icon, rectIcon);
             }
+            graph.SmoothingMode = SmoothingMode.AntiAlias;
+            graph.DrawPath(penBorderSmooth, pathBorderSmooth);
         }
         else 
         {

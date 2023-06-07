@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.Properties;
@@ -224,40 +223,38 @@ public partial class ButtonPrimary : Button
         var smoothSize = 2;
         if (borderRadius > 2)
         {
-            using (var pathSurface = GetFigurePath(rectSurface, borderRadius))
-            using (var progressBrush = new SolidBrush(ProgressColor))
-            using (var penSurface = new Pen(Parent.BackColor, smoothSize))
+            using var pathSurface = GetFigurePath(rectSurface, borderRadius);
+            using var progressBrush = new SolidBrush(ProgressColor);
+            using var penSurface = new Pen(Parent.BackColor, smoothSize);
+            pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            if (_hover)
             {
-                pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                if (_hover)
-                {
-                    pe.Graphics.FillRectangle(new SolidBrush(HoverColor), rectSurface);
-                } else
-                {
-                    pe.Graphics.FillRectangle(new SolidBrush(BackColor), rectSurface);
-                }
-                pe.Graphics.FillRectangle(progressBrush, rectProgressSurface);
-                if (_icon != null)
-                {
-                    pe.Graphics.DrawImage(_icon, rectSurface);
-                }
-                Region = new Region(pathSurface);
-                pe.Graphics.DrawPath(penSurface, pathSurface);
-                var flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak;
-                if (progress > 0)
-                {
-                    TextRenderer.DrawText(pe.Graphics, string.Format("{0}%", progress), Font, ClientRectangle, ForeColor, flags);
-                } else
-                {
-                    TextRenderer.DrawText(pe.Graphics, text, Font, ClientRectangle, ForeColor, flags);
-                }
-                if (Spinner)
-                {
-                    AnimateImage();
-                    ImageAnimator.UpdateFrames();
-                    float spinnerSize = Height - 8;
-                    pe.Graphics.DrawImage(spinnerBitmap, 5, 4, spinnerSize, spinnerSize);
-                }
+                pe.Graphics.FillRectangle(new SolidBrush(HoverColor), rectSurface);
+            } else
+            {
+                pe.Graphics.FillRectangle(new SolidBrush(BackColor), rectSurface);
+            }
+            pe.Graphics.FillRectangle(progressBrush, rectProgressSurface);
+            if (_icon != null)
+            {
+                pe.Graphics.DrawImage(_icon, rectSurface);
+            }
+            Region = new Region(pathSurface);
+            pe.Graphics.DrawPath(penSurface, pathSurface);
+            var flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak;
+            if (progress > 0)
+            {
+                TextRenderer.DrawText(pe.Graphics, string.Format("{0}%", progress), Font, ClientRectangle, ForeColor, flags);
+            } else
+            {
+                TextRenderer.DrawText(pe.Graphics, text, Font, ClientRectangle, ForeColor, flags);
+            }
+            if (Spinner)
+            {
+                AnimateImage();
+                ImageAnimator.UpdateFrames();
+                float spinnerSize = Height - 8;
+                pe.Graphics.DrawImage(spinnerBitmap, 5, 4, spinnerSize, spinnerSize);
             }
         }
 

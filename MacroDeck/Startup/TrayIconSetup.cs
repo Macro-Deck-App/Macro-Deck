@@ -1,5 +1,4 @@
 ﻿using SuchByte.MacroDeck.Language;
-using System;
 using System.Drawing;
 using System.Windows.Forms;
 

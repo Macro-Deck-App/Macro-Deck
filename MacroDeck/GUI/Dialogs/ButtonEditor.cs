@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using SuchByte.MacroDeck.ActionButton;
+using SuchByte.MacroDeck.CottleIntegration;
 using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.GUI.CustomControls;
@@ -132,7 +130,7 @@ public partial class ButtonEditor : DialogForm
                 btnForeColor.HoverColor = buttonLabel.LabelColor;
                 var labelBitmap = new Bitmap(250, 250);
                 var labelText = buttonLabel.LabelText;
-                labelText = VariableManager.RenderTemplate(labelText);
+                labelText = TemplateManager.RenderTemplate(labelText);
 
                 labelBitmap = (Bitmap)LabelGenerator.GetLabel(labelBitmap, labelText, buttonLabel.LabelPosition, new Font(buttonLabel.FontFamily, buttonLabel.Size), buttonLabel.LabelColor, Color.Black, new SizeF(2.0F, 2.0F));
                 buttonLabel.LabelBase64 = Base64.GetBase64FromImage(labelBitmap);
@@ -301,22 +299,20 @@ public partial class ButtonEditor : DialogForm
 
     private void OpenIconSelector()
     {
-        using (var iconSelector = new IconSelector())
+        using var iconSelector = new IconSelector();
+        if (iconSelector.ShowDialog() == DialogResult.OK)
         {
-            if (iconSelector.ShowDialog() == DialogResult.OK)
+            if (iconSelector.SelectedIconPack != null && iconSelector.SelectedIcon != null)
             {
-                if (iconSelector.SelectedIconPack != null && iconSelector.SelectedIcon != null)
+                if (radioButtonOff.Checked && !radioButtonOn.Checked)
                 {
-                    if (radioButtonOff.Checked && !radioButtonOn.Checked)
-                    {
-                        actionButtonEdited.IconOff = iconSelector.SelectedIconPack.Name + "." + iconSelector.SelectedIcon.IconId;
-                    }
-                    else
-                    {
-                        actionButtonEdited.IconOn = iconSelector.SelectedIconPack.Name + "." + iconSelector.SelectedIcon.IconId;
-                    }
-                    RefreshIcon();
+                    actionButtonEdited.IconOff = iconSelector.SelectedIconPack.Name + "." + iconSelector.SelectedIcon.IconId;
                 }
+                else
+                {
+                    actionButtonEdited.IconOn = iconSelector.SelectedIconPack.Name + "." + iconSelector.SelectedIcon.IconId;
+                }
+                RefreshIcon();
             }
         }
     }
@@ -389,27 +385,24 @@ public partial class ButtonEditor : DialogForm
 
     private void BtnBackColor_Click(object sender, EventArgs e)
     {
-        using (var colorDialog = new ColorDialog
-               {
-                   Color = radioButtonOff.Checked && !radioButtonOn.Checked ? actionButtonEdited.BackColorOff : actionButtonEdited.BackColorOn,
-                   FullOpen = true,
-                   CustomColors = new[] { ColorTranslator.ToOle(Color.FromArgb(35, 35, 35)) }
-               })
+        using var colorDialog = new ColorDialog
         {
-            if (colorDialog.ShowDialog() == DialogResult.OK)
+            Color = radioButtonOff.Checked && !radioButtonOn.Checked ? actionButtonEdited.BackColorOff : actionButtonEdited.BackColorOn,
+            FullOpen = true,
+            CustomColors = new[] { ColorTranslator.ToOle(Color.FromArgb(35, 35, 35)) }
+        };
+        if (colorDialog.ShowDialog() == DialogResult.OK)
+        {
+            if (radioButtonOff.Checked && !radioButtonOn.Checked)
             {
-                if (radioButtonOff.Checked && !radioButtonOn.Checked)
-                {
-                    actionButtonEdited.BackColorOff = colorDialog.Color;
-                }
-                else
-                {
-                    actionButtonEdited.BackColorOn = colorDialog.Color;
-                }
-                RefreshIcon();
+                actionButtonEdited.BackColorOff = colorDialog.Color;
             }
+            else
+            {
+                actionButtonEdited.BackColorOn = colorDialog.Color;
+            }
+            RefreshIcon();
         }
-
     }
 
     private void BtnClearLabelText_Click(object sender, EventArgs e)
@@ -419,22 +412,19 @@ public partial class ButtonEditor : DialogForm
 
     private void BtnForeColor_Click(object sender, EventArgs e)
     {
-        using (var colorDialog = new ColorDialog())
+        using var colorDialog = new ColorDialog();
+        if (colorDialog.ShowDialog() == DialogResult.OK)
         {
-            if (colorDialog.ShowDialog() == DialogResult.OK)
+            if (radioButtonOff.Checked && !radioButtonOn.Checked)
             {
-                if (radioButtonOff.Checked && !radioButtonOn.Checked)
-                {
-                    actionButtonEdited.LabelOff.LabelColor = colorDialog.Color;
-                }
-                else
-                {
-                    actionButtonEdited.LabelOn.LabelColor = colorDialog.Color;
-                }
-                UpdateLabel();
+                actionButtonEdited.LabelOff.LabelColor = colorDialog.Color;
             }
+            else
+            {
+                actionButtonEdited.LabelOn.LabelColor = colorDialog.Color;
+            }
+            UpdateLabel();
         }
-            
     }
 
     private void BtnAddVariable_Click(object sender, EventArgs e)
@@ -519,12 +509,10 @@ public partial class ButtonEditor : DialogForm
 
     private void BtnOpenTemplateEditor_Click(object sender, EventArgs e)
     {
-        using (var templateEditor = new TemplateEditor(labelText.Text))
+        using var templateEditor = new TemplateEditor(labelText.Text);
+        if (templateEditor.ShowDialog() == DialogResult.OK)
         {
-            if (templateEditor.ShowDialog() == DialogResult.OK)
-            {
-                labelText.Text = templateEditor.Template;
-            }
+            labelText.Text = templateEditor.Template;
         }
     }
 
@@ -538,30 +526,26 @@ public partial class ButtonEditor : DialogForm
 
     private void Hotkey_Click(object sender, EventArgs e)
     {
-        using (var hotkeySelector = new HotkeySelector())
+        using var hotkeySelector = new HotkeySelector();
+        if (hotkeySelector.ShowDialog() == DialogResult.OK)
         {
-            if (hotkeySelector.ShowDialog() == DialogResult.OK)
-            {
-                hotkey.Text = hotkeySelector.ModifierKeys.ToString().Replace("Control", "CTRL").Replace("None", string.Empty).Replace(", ", " + ") + (!hotkeySelector.ModifierKeys.ToString().Equals("None") ? " + " : string.Empty) + hotkeySelector.Key;
-                actionButtonEdited.ModifierKeyCodes = hotkeySelector.ModifierKeys;
-                actionButtonEdited.KeyCode = hotkeySelector.Key;
-            }
+            hotkey.Text = hotkeySelector.ModifierKeys.ToString().Replace("Control", "CTRL").Replace("None", string.Empty).Replace(", ", " + ") + (!hotkeySelector.ModifierKeys.ToString().Equals("None") ? " + " : string.Empty) + hotkeySelector.Key;
+            actionButtonEdited.ModifierKeyCodes = hotkeySelector.ModifierKeys;
+            actionButtonEdited.KeyCode = hotkeySelector.Key;
         }
     }
 
     private void BtnEditJson_Click(object sender, EventArgs e)
     {
-        using (var jsonButtonEditor = new JsonButtonEditor(actionButtonEdited))
+        using var jsonButtonEditor = new JsonButtonEditor(actionButtonEdited);
+        if (jsonButtonEditor.ShowDialog() == DialogResult.OK)
         {
-            if (jsonButtonEditor.ShowDialog() == DialogResult.OK)
-            {
-                jsonButtonEditor.ActionButton.Position_X = actionButtonEdited.Position_X;
-                jsonButtonEditor.ActionButton.Position_Y = actionButtonEdited.Position_Y;
-                jsonButtonEditor.ActionButton.Guid = actionButtonEdited.Guid;
-                actionButton = jsonButtonEditor.ActionButton;
-                LoadButton();
-                UpdateLabel();
-            }
+            jsonButtonEditor.ActionButton.Position_X = actionButtonEdited.Position_X;
+            jsonButtonEditor.ActionButton.Position_Y = actionButtonEdited.Position_Y;
+            jsonButtonEditor.ActionButton.Guid = actionButtonEdited.Guid;
+            actionButton = jsonButtonEditor.ActionButton;
+            LoadButton();
+            UpdateLabel();
         }
     }
 

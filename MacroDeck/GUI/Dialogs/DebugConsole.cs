@@ -1,12 +1,11 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Properties;
+using SuchByte.MacroDeck.Startup;
 using Form = SuchByte.MacroDeck.GUI.CustomControls.Form;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs;
@@ -81,7 +80,7 @@ public partial class DebugConsole : Form
     {
         var p = new Process
         {
-            StartInfo = new ProcessStartInfo(MacroDeck.ApplicationPaths.UserDirectoryPath)
+            StartInfo = new ProcessStartInfo(ApplicationPaths.UserDirectoryPath)
             {
                 UseShellExecute = true
             }
@@ -99,23 +98,21 @@ public partial class DebugConsole : Form
 
     private void BtnExportOutput_Click(object sender, EventArgs e)
     {
-        using (var saveFileDialog = new SaveFileDialog
-               {
-                   AddExtension = true,
-                   Filter = ".log|*.log",
-                   FileName = string.Format("debug_output_{0}.log", DateTime.Now.ToString("yy-MM-dd_HH-mm-ss")),
-               })
+        using var saveFileDialog = new SaveFileDialog
         {
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            AddExtension = true,
+            Filter = ".log|*.log",
+            FileName = string.Format("debug_output_{0}.log", DateTime.Now.ToString("yy-MM-dd_HH-mm-ss")),
+        };
+        if (saveFileDialog.ShowDialog() == DialogResult.OK)
+        {
+            try
             {
-                try
-                {
-                    logOutput.SaveFile(saveFileDialog.FileName, RichTextBoxStreamType.PlainText);
-                    MacroDeckLogger.Info("Successfully exported debug console output to: " + saveFileDialog.FileName);
-                } catch (Exception ex)
-                {
-                    MacroDeckLogger.Error("Error while exporting debug console output: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                }
+                logOutput.SaveFile(saveFileDialog.FileName, RichTextBoxStreamType.PlainText);
+                MacroDeckLogger.Info("Successfully exported debug console output to: " + saveFileDialog.FileName);
+            } catch (Exception ex)
+            {
+                MacroDeckLogger.Error("Error while exporting debug console output: " + ex.Message + Environment.NewLine + ex.StackTrace);
             }
         }
     }

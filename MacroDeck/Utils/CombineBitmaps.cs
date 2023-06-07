@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 
@@ -11,13 +10,11 @@ public class CombineBitmaps
     {
         var combined = new Bitmap(350, 350);
 
-        using (var g = Graphics.FromImage(combined))
+        using var g = Graphics.FromImage(combined);
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        foreach(var bitmap in bitmaps)
         {
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            foreach(var bitmap in bitmaps)
-            {
-                g.DrawImage(bitmap, Point.Empty);
-            }
+            g.DrawImage(bitmap, Point.Empty);
         }
 
         return combined;

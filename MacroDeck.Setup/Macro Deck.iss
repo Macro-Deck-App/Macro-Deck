@@ -3,10 +3,11 @@
 
 #define MyAppName "Macro Deck"
 #define MyAppPublisher "Macro Deck"
-#define MyAppURL "https://macrodeck.org"
+#define MyAppURL "https://macro-deck.app"
 #define MyAppExeName "Macro Deck 2.exe"  
-#define ApplicationDirectory "E:\Repos\Macro-Deck-WinForms\Macro-Deck\bin\Release\netcoreapp3.1\publish"
+#define ApplicationDirectory "..\MacroDeck\bin\Publish"
 #define ApplicationVersion GetStringFileInfo(ApplicationDirectory + '\' + MyAppExeName, "ProductVersion")     
+#define OutputFileName "macro-deck-{#ApplicationVersion}"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -21,11 +22,11 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
-LicenseFile=E:\Repos\Macro-Deck-WinForms\Macro-Deck\LICENSE
+LicenseFile=..\LICENSE
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir=E:\Repos\Macro-Deck-WinForms\Inno Setup
+OutputDir=Result
 OutputBaseFilename=macro-deck-{#ApplicationVersion}
-SetupIconFile=E:\Repos\Macro-Deck-WinForms\Macro-Deck\appicon.ico
+SetupIconFile=..\MacroDeck\appicon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern 
@@ -92,8 +93,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; VC++ redistributable runtime. Extracted by VC2018RedistNeedsInstall(), if needed.
 Source: ".\Redist\VC_redist.x64.exe"; DestDir: {tmp}; Flags: dontcopy
 Source: ".\Android Debug Bridge\*"; DestDir: "{app}\Android Debug Bridge\"; Flags: ignoreversion
-Source: "{#ApplicationDirectory}\Macro Deck 2.exe"; DestDir: "{app}"; Flags: ignoreversion    
-Source: "{#ApplicationDirectory}\Macro Deck 2.dll"; DestDir: "{app}"; Flags: ignoreversion   
+Source: "{#ApplicationDirectory}\*"; DestDir: "{app}"; Flags: ignoreversion    
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

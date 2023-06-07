@@ -1,10 +1,9 @@
-﻿using System;
-using System.Linq;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Startup;
 
 namespace SuchByte.MacroDeck.GUI.MainWindowContents;
 
@@ -78,6 +77,6 @@ public partial class DeviceManagerView : UserControl
     {
         MacroDeck.Configuration.AskOnNewConnections = radioAskNewConnections.Checked;
         MacroDeck.Configuration.BlockNewConnections = radioBlockNew.Checked;
-        MacroDeck.Configuration.Save(MacroDeck.ApplicationPaths.MainConfigFilePath);
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
     }
 }

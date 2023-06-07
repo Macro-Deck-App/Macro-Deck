@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
+﻿using System.Drawing;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SQLite;
+using SuchByte.MacroDeck.CottleIntegration;
 using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.JSON;
@@ -13,6 +10,7 @@ using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Startup;
 using SuchByte.MacroDeck.Utils;
 using SuchByte.MacroDeck.Variables;
 using SuchByte.MacroDeck.WindowsFocus;
@@ -27,7 +25,8 @@ public static class ProfileManager
     public static MacroDeckProfile? CurrentProfile { get; set; }
         
     public static List<MacroDeckProfile> Profiles { get; private set; } = new();
-
+    
+    private static Dictionary<MacroDeckClient, (MacroDeckFolder PreviousFolder, string ProcessName)> history = new ();
 
     public static void AddVariableChangedListener()
     {
@@ -40,25 +39,44 @@ public static class ProfileManager
         windowsFocusDetection.OnWindowFocusChanged += OnWindowFocusChanged;
     }
 
-    private static void OnWindowFocusChanged(object sender, EventArgs e)
+    private static void OnWindowFocusChanged(object sender, WindowChangedEventArgs e)
     {
-        var process = (string)sender;
+        Task.Run(() => UpdateSetFolderForProcess(e.NewProcess, e.PreviousProcess));
+    }
 
-        var affectedMacroDeckProfiles = Profiles.FindAll(delegate (MacroDeckProfile macroDeckProfile)
+    private static void UpdateSetFolderForProcess(string newProcess, string oldProcess)
+    {
+        var affectedMacroDeckProfiles = Profiles
+            .Where(profile => profile.Folders.Any(folder => folder.ApplicationToTrigger.Equals(newProcess)))
+            .ToList();
+
+        var switchBack = history.Where(x => x.Value.ProcessName.Equals(oldProcess) 
+                                            && !x.Key.Folder.ApplicationToTrigger.Equals(newProcess)).ToList();
+
+        foreach (var pair in switchBack)
         {
-            return macroDeckProfile.Folders.FindAll(macroDeckFolder => macroDeckFolder.ApplicationToTrigger.Equals(process)).Count > 0;
-        });
+            MacroDeckServer.SetFolder(pair.Key, pair.Value.PreviousFolder);
+        }
 
         foreach (var macroDeckProfile in affectedMacroDeckProfiles)
         {
-            foreach (var macroDeckFolder in macroDeckProfile.Folders.FindAll(macroDeckFolder => macroDeckFolder.ApplicationToTrigger.Equals(process)))
+            var folders = macroDeckProfile.Folders
+                .Where(folder => folder.ApplicationToTrigger.Equals(newProcess));
+
+            foreach (var macroDeckFolder in folders)
             {
-                foreach (var macroDeckClient in macroDeckFolder.ApplicationsFocusDevices.FindAll(delegate (string macroDeckDeviceClientId)
-                         {
-                             if (DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId) == null) return false;
-                             return DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId).Available && !string.IsNullOrWhiteSpace(DeviceManager.GetMacroDeckDevice(macroDeckDeviceClientId).ClientId);
-                         }).Select(macroDeckDevice => MacroDeckServer.GetMacroDeckClient(DeviceManager.GetMacroDeckDevice(macroDeckDevice).ClientId)).Where(macroDeckClient => macroDeckClient.Profile.Equals(macroDeckProfile) && !macroDeckClient.Folder.Equals(macroDeckFolder)))
+                var devices = macroDeckFolder.ApplicationsFocusDevices
+                    .Select(DeviceManager.GetMacroDeckDevice)
+                    .Where(device => device != null && device.Available && !string.IsNullOrWhiteSpace(device.ClientId))
+                    .ToList();
+
+                var clients = devices
+                    .Select(device => MacroDeckServer.GetMacroDeckClient(device.ClientId))
+                    .Where(client => client != null && client.Profile.Equals(macroDeckProfile) && !client.Folder.Equals(macroDeckFolder));
+
+                foreach (var macroDeckClient in clients)
                 {
+                    history[macroDeckClient] = (macroDeckClient.Folder, newProcess);
                     MacroDeckServer.SetFolder(macroDeckClient, macroDeckFolder);
                 }
             }
@@ -96,8 +114,8 @@ public static class ProfileManager
                 var labelOffText = actionButton.LabelOff.LabelText;
                 var labelOnText = actionButton.LabelOn.LabelText;
 
-                labelOffText = VariableManager.RenderTemplate(labelOffText);
-                labelOnText = VariableManager.RenderTemplate(labelOnText);
+                labelOffText = TemplateManager.RenderTemplate(labelOffText);
+                labelOnText = TemplateManager.RenderTemplate(labelOnText);
 
                 actionButton.LabelOff.LabelBase64 = Base64.GetBase64FromImage(LabelGenerator.GetLabel(new Bitmap(250, 250), labelOffText, actionButton.LabelOff.LabelPosition, new Font(actionButton.LabelOff.FontFamily, actionButton.LabelOff.Size), actionButton.LabelOff.LabelColor, Color.Black, new SizeF(2.0f, 2.0f)));
                 actionButton.LabelOn.LabelBase64 = Base64.GetBase64FromImage(LabelGenerator.GetLabel(new Bitmap(250, 250), labelOnText, actionButton.LabelOn.LabelPosition, new Font(actionButton.LabelOn.FontFamily, actionButton.LabelOn.Size), actionButton.LabelOn.LabelColor, Color.Black, new SizeF(2.0f, 2.0f)));
@@ -117,7 +135,7 @@ public static class ProfileManager
     {
         MacroDeckLogger.Info(typeof(ProfileManager), "Loading profiles...");
         Profiles = new List<MacroDeckProfile>();
-        var databasePath = MacroDeck.ApplicationPaths.ProfilesFilePath;
+        var databasePath = ApplicationPaths.ProfilesFilePath;
 
         var db = new SQLiteConnection(databasePath);
         db.CreateTable<ProfileJson>();
@@ -211,7 +229,7 @@ public static class ProfileManager
         {
             return;
         }
-        var databasePath = MacroDeck.ApplicationPaths.ProfilesFilePath;
+        var databasePath = ApplicationPaths.ProfilesFilePath;
 
         var db = new SQLiteConnection(databasePath);
         db.CreateTable<ProfileJson>();

@@ -22,10 +22,8 @@ internal class BorderlessComboBox : System.Windows.Forms.ComboBox
                 }
                 if (!Enabled)
                 {
-                    using (var p = new Pen(Parent.BackColor, 5))
-                    {
-                        g.DrawRectangle(p, 0, 0, Width - 1, Height - 1);
-                    }
+                    using var p = new Pen(Parent.BackColor, 5);
+                    g.DrawRectangle(p, 0, 0, Width - 1, Height - 1);
                 }
 
 

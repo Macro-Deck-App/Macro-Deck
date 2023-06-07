@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.GUI.Dialogs;
@@ -105,10 +104,8 @@ public partial class DeviceInfo : RoundedUserControl
             DeviceManager.RenameMacroDeckDevice(_macroDeckDevice, displayName.Text);
         } else
         {
-            using (var msgBox = new MessageBox())
-            {
-                msgBox.ShowDialog(LanguageManager.Strings.CantChangeName, string.Format(LanguageManager.Strings.DeviceCalledXAlreadyExists, displayName.Text), MessageBoxButtons.OK);
-            }
+            using var msgBox = new MessageBox();
+            msgBox.ShowDialog(LanguageManager.Strings.CantChangeName, string.Format(LanguageManager.Strings.DeviceCalledXAlreadyExists, displayName.Text), MessageBoxButtons.OK);
         }
     }
 
@@ -129,9 +126,7 @@ public partial class DeviceInfo : RoundedUserControl
 
     private void BtnConfigure_Click(object sender, EventArgs e)
     {
-        using (var deviceConfigurator = new DeviceConfigurator(_macroDeckDevice))
-        {
-            deviceConfigurator.ShowDialog();
-        }
+        using var deviceConfigurator = new DeviceConfigurator(_macroDeckDevice);
+        deviceConfigurator.ShowDialog();
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using Newtonsoft.Json;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Logging;

@@ -1,9 +1,7 @@
 ﻿using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Pipes;
 using SuchByte.MacroDeck.Startup;
-using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -26,6 +24,10 @@ internal class Program
 
         var startParameters = StartParameters.ParseParameters(args);
         CheckRunningInstance(startParameters.IgnorePidCheck);
+        
+        ApplicationPaths.Initialize(startParameters.PortableMode);
+        CefSetup.Initialize();
+        
         MacroDeck.Start(startParameters);
     }
     

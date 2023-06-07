@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using System.IO;
 using System.Net;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using GiphyDotNet.Manager;
 using GiphyDotNet.Model.Parameters;
@@ -198,7 +195,7 @@ public partial class GiphySelector : DialogForm
         {
             DownloadedGifStream = new MemoryStream();
             e.Result.CopyTo(DownloadedGifStream);
-            /*using (FileStream fs = File.Create(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, "giphy")))
+            /*using (FileStream fs = File.Create(Path.Combine(ApplicationPaths.TempDirectoryPath, "giphy")))
             {
                 e.Result.CopyTo(fs);
             }*/

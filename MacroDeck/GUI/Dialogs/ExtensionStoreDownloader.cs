@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
+﻿using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader;
@@ -78,12 +75,10 @@ public partial class ExtensionStoreDownloader : DialogForm
     {
         if (PluginManager.UpdatedPlugins.Count > 0)
         {
-            using (var msgBox = new MessageBox())
+            using var msgBox = new MessageBox();
+            if (msgBox.ShowDialog(LanguageManager.Strings.MacroDeckNeedsARestart, LanguageManager.Strings.MacroDeckMustBeRestartedForTheChanges, MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                if (msgBox.ShowDialog(LanguageManager.Strings.MacroDeckNeedsARestart, LanguageManager.Strings.MacroDeckMustBeRestartedForTheChanges, MessageBoxButtons.YesNo) == DialogResult.Yes)
-                {
-                    MacroDeck.RestartMacroDeck();
-                }
+                MacroDeck.RestartMacroDeck();
             }
         }
         Close();

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Reflection;
 using Newtonsoft.Json;
 using SuchByte.MacroDeck.GUI;
@@ -12,13 +9,12 @@ namespace SuchByte.MacroDeck.Plugins;
 
 public abstract class MacroDeckPlugin
 {
-    private Assembly executingAssembly;
-
     public MacroDeckPlugin()
     {
-        executingAssembly = GetType().Assembly;
-        Name = executingAssembly.GetName().Name;
-        Version = executingAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+        var executingAssembly = GetType().Assembly;
+        Name = executingAssembly.GetName().Name ?? throw new InvalidOperationException();
+        Version = executingAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion 
+                  ?? throw new InvalidOperationException();
     }
 
     /// <summary>

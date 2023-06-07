@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
@@ -39,12 +38,10 @@ public partial class CreateIconPack : DialogForm
         if (iconPackName.Text.Length < 2) return;
         if (IconManager.GetIconPackByName(iconPackName.Text) != null)
         {
-            using (var messageBox = new MessageBox())
-            {
-                messageBox.ShowDialog(LanguageManager.Strings.CantCreateIconPack, string.Format(LanguageManager.Strings.IconPackCalledXAlreadyExists, iconPackName.Text), MessageBoxButtons.OK);
-                messageBox.Dispose();
-                return;
-            }
+            using var messageBox = new MessageBox();
+            messageBox.ShowDialog(LanguageManager.Strings.CantCreateIconPack, string.Format(LanguageManager.Strings.IconPackCalledXAlreadyExists, iconPackName.Text), MessageBoxButtons.OK);
+            messageBox.Dispose();
+            return;
         }
 
         _iconPackName = iconPackName.Text;

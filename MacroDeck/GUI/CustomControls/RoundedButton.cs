@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.Properties;
@@ -80,15 +79,13 @@ public class RoundedButton : PictureBox
         if (radius > 2) //Rounded button
         {
             pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            using (var pathSurface = GetFigurePath(rectSurface, radius))
-            using (var penSurface = new Pen(Parent.BackColor, smoothSize))
-            {
-                pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                Region = new Region(pathSurface);
-                pe.Graphics.DrawPath(penSurface, pathSurface);
-                if (borderSize >= 1)
-                    pe.Graphics.DrawPath(new Pen(borderColor, borderSize), pathSurface);
-            }
+            using var pathSurface = GetFigurePath(rectSurface, radius);
+            using var penSurface = new Pen(Parent.BackColor, smoothSize);
+            pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            Region = new Region(pathSurface);
+            pe.Graphics.DrawPath(penSurface, pathSurface);
+            if (borderSize >= 1)
+                pe.Graphics.DrawPath(new Pen(borderColor, borderSize), pathSurface);
         }
         else //Normal button
         {
@@ -96,10 +93,8 @@ public class RoundedButton : PictureBox
             Region = new Region(rectSurface);
             if (borderSize >= 1)
             {
-                using (var penBorder = new Pen(borderColor, borderSize))
-                {
-                    pe.Graphics.DrawRectangle(penBorder, 0, 0, Width, Height);
-                }
+                using var penBorder = new Pen(borderColor, borderSize);
+                pe.Graphics.DrawRectangle(penBorder, 0, 0, Width, Height);
             }
         }
 
@@ -123,24 +118,22 @@ public class RoundedButton : PictureBox
             pe.Graphics.FillRectangle(hotkeyIndicatorBackgroundBrush, hotkeyIndicatorBackground);
             var keyboardRect = new Rectangle(5, Height / 2 - 10, 20, 20);
             pe.Graphics.DrawImage(Resources.Keyboard, keyboardRect);
-            using (var gp = new GraphicsPath())
-            using (var sf = new StringFormat
-                   {
-
-                       Alignment = StringAlignment.Near,
-                       LineAlignment = StringAlignment.Center,
-                   })
-            using (var font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point))
+            using var gp = new GraphicsPath();
+            using var sf = new StringFormat
             {
-                var r = new Rectangle(30, Height / 2 - 12, Width - 35, 24);
-                var p = new Pen(Color.Black, 1)
-                {
-                    LineJoin = LineJoin.Round
-                };
-                gp.AddString(KeyboardHotkeyIndicatorText, font.FontFamily, (int)font.Style, font.Size, r, sf);
-                pe.Graphics.DrawPath(p, gp);
-                pe.Graphics.FillPath(Brushes.White, gp);
-            }
+
+                Alignment = StringAlignment.Near,
+                LineAlignment = StringAlignment.Center,
+            };
+            using var font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            var r = new Rectangle(30, Height / 2 - 12, Width - 35, 24);
+            var p = new Pen(Color.Black, 1)
+            {
+                LineJoin = LineJoin.Round
+            };
+            gp.AddString(KeyboardHotkeyIndicatorText, font.FontFamily, (int)font.Style, font.Size, r, sf);
+            pe.Graphics.DrawPath(p, gp);
+            pe.Graphics.FillPath(Brushes.White, gp);
         }
     }
 

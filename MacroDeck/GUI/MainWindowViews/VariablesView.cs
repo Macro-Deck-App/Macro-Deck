@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Drawing;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
@@ -146,12 +142,10 @@ public partial class VariablesView : UserControl
 
     private void BtnCreateVariable_Click(object sender, EventArgs e)
     {
-        using (var variableDialog = new VariableDialog())
+        using var variableDialog = new VariableDialog();
+        if (variableDialog.ShowDialog() == DialogResult.OK)
         {
-            if (variableDialog.ShowDialog() == DialogResult.OK)
-            {
-                VariableManager.InsertVariable(variableDialog.Variable);
-            }
+            VariableManager.InsertVariable(variableDialog.Variable);
         }
     }
 }

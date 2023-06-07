@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;

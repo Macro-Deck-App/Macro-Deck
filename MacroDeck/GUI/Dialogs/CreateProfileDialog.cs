@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Profiles;
@@ -29,10 +28,8 @@ public partial class CreateProfileDialog : DialogForm
             {
                 if (profile.DisplayName.Equals(profileName.Text))
                 {
-                    using (var msgBox = new MessageBox())
-                    {
-                        msgBox.ShowDialog(LanguageManager.Strings.CantCreateProfile, string.Format(LanguageManager.Strings.ProfileCalledXAlreadyExists, profileName.Text), MessageBoxButtons.OK);
-                    }
+                    using var msgBox = new MessageBox();
+                    msgBox.ShowDialog(LanguageManager.Strings.CantCreateProfile, string.Format(LanguageManager.Strings.ProfileCalledXAlreadyExists, profileName.Text), MessageBoxButtons.OK);
                     return;
                 }
             }

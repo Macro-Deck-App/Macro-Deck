@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Enums;
@@ -50,17 +49,15 @@ public partial class ActionButtonSetBackgroundColorActionConfigView : ActionConf
 
     private void BtnChangeColor_Click(object sender, EventArgs e)
     {
-        using (var colorDialog = new ColorDialog
-               {
-                   Color = btnChangeColor.BackColor,
-                   FullOpen = true,
-                   CustomColors = new[] { ColorTranslator.ToOle(Color.FromArgb(35,35,35)) }
-               })
+        using var colorDialog = new ColorDialog
         {
-            if (colorDialog.ShowDialog() == DialogResult.OK)
-            {
-                btnChangeColor.BackColor = colorDialog.Color;
-            }
+            Color = btnChangeColor.BackColor,
+            FullOpen = true,
+            CustomColors = new[] { ColorTranslator.ToOle(Color.FromArgb(35,35,35)) }
+        };
+        if (colorDialog.ShowDialog() == DialogResult.OK)
+        {
+            btnChangeColor.BackColor = colorDialog.Color;
         }
     }
 

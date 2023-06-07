@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Variables;
@@ -107,14 +106,12 @@ public partial class VariableDialog : DialogForm
 
     private void BtnDelete_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
     {
-        using (var msgBox = new MessageBox())
+        using var msgBox = new MessageBox();
+        if(msgBox.ShowDialog(LanguageManager.Strings.AreYouSure, string.Format(LanguageManager.Strings.VariableXGetsDeleted, Variable.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
         {
-            if(msgBox.ShowDialog(LanguageManager.Strings.AreYouSure, string.Format(LanguageManager.Strings.VariableXGetsDeleted, Variable.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
-            {
-                VariableManager.DeleteVariable(Variable.Name);
-                DialogResult = DialogResult.Cancel;
-                Close();
-            }
+            VariableManager.DeleteVariable(Variable.Name);
+            DialogResult = DialogResult.Cancel;
+            Close();
         }
     }
 

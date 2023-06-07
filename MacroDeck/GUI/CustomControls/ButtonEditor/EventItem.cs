@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.ActionButton;
 using SuchByte.MacroDeck.ActionButton.Plugin;
@@ -177,20 +176,18 @@ public partial class EventItem : UserControl
     private void EditClicked(object sender, EventArgs e)
     {
         var actionItem = sender as IActionConditionItem;
-        using (var configurator = new ActionConfigurator(actionItem.Action))
+        using var configurator = new ActionConfigurator(actionItem.Action);
+        if (configurator.ShowDialog() == DialogResult.OK)
         {
-            if (configurator.ShowDialog() == DialogResult.OK)
+            if (configurator.Action.CanConfigure && configurator.Action.Configuration.Length == 0) return;
+            if (EventListener.Actions.Contains(actionItem.Action))
             {
-                if (configurator.Action.CanConfigure && configurator.Action.Configuration.Length == 0) return;
-                if (EventListener.Actions.Contains(actionItem.Action))
-                {
-                    var index = EventListener.Actions.IndexOf(actionItem.Action);
-                    EventListener.Actions.RemoveAt(index);
-                    EventListener.Actions.Insert(index, configurator.Action);
-                }
-
-                RefreshActions();
+                var index = EventListener.Actions.IndexOf(actionItem.Action);
+                EventListener.Actions.RemoveAt(index);
+                EventListener.Actions.Insert(index, configurator.Action);
             }
+
+            RefreshActions();
         }
     }
 
@@ -204,13 +201,11 @@ public partial class EventItem : UserControl
 
     private void MenuItemAction_Click(object sender, EventArgs e)
     {
-        using (var actionConfigurator = new ActionConfigurator())
+        using var actionConfigurator = new ActionConfigurator();
+        if (actionConfigurator.ShowDialog() == DialogResult.OK)
         {
-            if (actionConfigurator.ShowDialog() == DialogResult.OK)
-            {
-                EventListener.Actions.Add(actionConfigurator.Action);
-                AddActionItem(actionConfigurator.Action);
-            }
+            EventListener.Actions.Add(actionConfigurator.Action);
+            AddActionItem(actionConfigurator.Action);
         }
     }
 

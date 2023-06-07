@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using Newtonsoft.Json;
 using SuchByte.MacroDeck.Utils;
 
@@ -48,16 +47,12 @@ public class ButtonLabel
 
     private void UpdateLabelHex128_64()
     {
-        var contentAlignment = ContentAlignment.MiddleCenter;
-        switch (LabelPosition)
+        var contentAlignment = LabelPosition switch
         {
-            case ButtonLabelPosition.TOP:
-                contentAlignment = ContentAlignment.TopCenter;
-                break;
-            case ButtonLabelPosition.BOTTOM:
-                contentAlignment = ContentAlignment.BottomCenter;
-                break;
-        }
+            ButtonLabelPosition.TOP => ContentAlignment.TopCenter,
+            ButtonLabelPosition.BOTTOM => ContentAlignment.BottomCenter,
+            _ => ContentAlignment.MiddleCenter
+        };
         _labelHex128_64Base64 = Base64.GetBase64ByteArray((Bitmap)Base64.GetImageFromBase64(_labelBase64), new Size(128, 64), contentAlignment);
     }
 }

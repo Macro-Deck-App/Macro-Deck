@@ -1,5 +1,4 @@
-﻿using System;
-using SuchByte.MacroDeck.GUI.Dialogs;
+﻿using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Variables;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls;
@@ -28,10 +27,8 @@ public partial class VariableItem : RoundedUserControl
 
     private void BtnEdit_Click(object sender, EventArgs e)
     {
-        using (var variableDialog = new VariableDialog(Variable))
-        {
-            variableDialog.ShowDialog();
-        }
+        using var variableDialog = new VariableDialog(Variable);
+        variableDialog.ShowDialog();
     }
 
     private void VariableItem_Load(object sender, EventArgs e)

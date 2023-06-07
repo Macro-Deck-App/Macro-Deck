@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using SuchByte.MacroDeck.Folders.Plugin.GUI;
+﻿using SuchByte.MacroDeck.Folders.Plugin.GUI;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;

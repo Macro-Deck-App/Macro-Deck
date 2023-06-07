@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SuchByte.MacroDeck.Backups;
+﻿namespace SuchByte.MacroDeck.Backups;
 
 public class MacroDeckBackupInfo
 {

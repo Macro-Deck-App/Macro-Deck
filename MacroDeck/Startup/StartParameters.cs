@@ -1,5 +1,4 @@
-﻿using System;
-using CommandLine;
+﻿using CommandLine;
 
 namespace SuchByte.MacroDeck.Startup;
 

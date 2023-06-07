@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.InternalPlugins.Variables.Enums;
@@ -156,12 +155,10 @@ public partial class ChangeVariableValueActionConfigView : ActionConfigControl
 
     private void BtnTemplateEditor_Click(object sender, EventArgs e)
     {
-        using (var templateEditor = new TemplateEditor(value.Text))
+        using var templateEditor = new TemplateEditor(value.Text);
+        if (templateEditor.ShowDialog() == DialogResult.OK)
         {
-            if (templateEditor.ShowDialog() == DialogResult.OK)
-            {
-                value.Text = templateEditor.Template;
-            }
+            value.Text = templateEditor.Template;
         }
     }
 }

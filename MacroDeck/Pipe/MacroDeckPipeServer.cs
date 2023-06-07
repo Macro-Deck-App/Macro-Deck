@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO.Pipes;
-using System.Text;
+﻿using System.IO.Pipes;
 using System.Threading;
 using SuchByte.MacroDeck.Logging;
 
@@ -16,18 +14,16 @@ public class MacroDeckPipeServer
     {
         try
         {
-            using (var pipeServer = (NamedPipeServerStream)iar.AsyncState)
-            {
-                pipeServer.EndWaitForConnection(iar);
-                var buffer = new byte[255];
-                pipeServer.Read(buffer, 0, 255);
-                var stringData = Encoding.ASCII.GetString(buffer).Trim('\0');
-                var t = new Thread(() => PipeMessage.Invoke(stringData));
-                t.SetApartmentState(ApartmentState.STA);
-                t.Start();
-                pipeServer.Close();
-                SpawnServerStream();
-            }
+            using var pipeServer = (NamedPipeServerStream)iar.AsyncState;
+            pipeServer.EndWaitForConnection(iar);
+            var buffer = new byte[255];
+            pipeServer.Read(buffer, 0, 255);
+            var stringData = Encoding.ASCII.GetString(buffer).Trim('\0');
+            var t = new Thread(() => PipeMessage.Invoke(stringData));
+            t.SetApartmentState(ApartmentState.STA);
+            t.Start();
+            pipeServer.Close();
+            SpawnServerStream();
         }
         catch
         {

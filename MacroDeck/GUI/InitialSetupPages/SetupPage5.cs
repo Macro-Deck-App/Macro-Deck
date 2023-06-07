@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Threading.Tasks;
+﻿using System.Net;
 using System.Windows.Forms;
 using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.GUI.CustomControls;
@@ -27,29 +24,27 @@ public partial class SetupPage5 : UserControl
 
         try
         {
-            using (var wc = new WebClient())
+            using var wc = new WebClient();
+            var jsonString = wc.DownloadString("https://macrodeck.org/files/packagemanager/iconpacks.php?target-api=" + MacroDeck.PluginApiVersion);
+            var jsonArray = JArray.Parse(jsonString);
+            foreach (JObject jsonObject in jsonArray)
             {
-                var jsonString = wc.DownloadString("https://macrodeck.org/files/packagemanager/iconpacks.php?target-api=" + MacroDeck.PluginApiVersion);
-                var jsonArray = JArray.Parse(jsonString);
-                foreach (JObject jsonObject in jsonArray)
-                {
-                    jsonObject["type"] = "icon-pack";
-                    var initialSetupIconPackItem = new InitialSetupIconPackItem(jsonObject);
+                jsonObject["type"] = "icon-pack";
+                var initialSetupIconPackItem = new InitialSetupIconPackItem(jsonObject);
 
-                    Invoke(() =>
-                        iconPacks.Controls.Add(initialSetupIconPackItem));
-
-                    if (autoInstall && (int)jsonObject["auto-install"] != 0)
-                    {
-                        Invoke(() =>
-                            initialSetupIconPackItem.SetInstall(true));
-                    }
-                }
                 Invoke(() =>
+                    iconPacks.Controls.Add(initialSetupIconPackItem));
+
+                if (autoInstall && (int)jsonObject["auto-install"] != 0)
                 {
-                    progressBar.Visible = false;
-                });
+                    Invoke(() =>
+                        initialSetupIconPackItem.SetInstall(true));
+                }
             }
+            Invoke(() =>
+            {
+                progressBar.Visible = false;
+            });
         } catch
         {
             Invoke(() =>

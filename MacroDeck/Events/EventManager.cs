@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace SuchByte.MacroDeck.Events;
+﻿namespace SuchByte.MacroDeck.Events;
 
 public static class EventManager
 {
@@ -31,12 +28,14 @@ public static class EventManager
             var macroDeckEvent = (IMacroDeckEvent)sender;
             var actionButton = e.ActionButton;
 
-            foreach (var eventListener in actionButton.EventListeners.FindAll(x => x.EventToListen.Equals(macroDeckEvent.Name) && x.Parameter.ToLower().Equals(e.Parameter.ToString().ToLower())))
+            foreach (var action in actionButton.EventListeners.FindAll(x =>
+                             x.EventToListen.Equals(macroDeckEvent.Name) &&
+                             x.Parameter.ToLower()
+                                 .Equals(e.Parameter.ToString()
+                                     .ToLower()))
+                         .SelectMany(eventListener => eventListener.Actions))
             {
-                foreach (var action in eventListener.Actions)
-                {
-                    action.Trigger("-1", e.ActionButton);
-                }
+                action.Trigger("-1", e.ActionButton);
             }
         });
     }

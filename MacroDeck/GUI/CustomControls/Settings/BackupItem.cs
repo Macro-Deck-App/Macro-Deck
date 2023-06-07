@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System.IO;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.Backups;
 using SuchByte.MacroDeck.GUI.Dialogs;
@@ -27,34 +25,28 @@ public partial class BackupItem : RoundedUserControl
 
     private void BtnRestore_Click(object sender, EventArgs e)
     {
-        using (var restoreBackupDialog = new RestoreBackupDialog())
+        using var restoreBackupDialog = new RestoreBackupDialog();
+        if (restoreBackupDialog.ShowDialog() == DialogResult.OK)
         {
-            if (restoreBackupDialog.ShowDialog() == DialogResult.OK)
+            using var msgBox = new MessageBox();
+            if (msgBox.ShowDialog(LanguageManager.Strings.AreYouSure, LanguageManager.Strings.ActionCannotBeReversed, MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                using (var msgBox = new MessageBox())
+                Task.Run(() =>
                 {
-                    if (msgBox.ShowDialog(LanguageManager.Strings.AreYouSure, LanguageManager.Strings.ActionCannotBeReversed, MessageBoxButtons.YesNo) == DialogResult.Yes)
-                    {
-                        Task.Run(() =>
-                        {
-                            BackupManager.RestoreBackup(macroDeckBackupInfo.FileName, restoreBackupDialog.RestoreBackupInfo);
-                            SpinnerDialog.SetVisisble(false, ParentForm);
-                        });
-                        SpinnerDialog.SetVisisble(true, ParentForm);
-                    }
-                }
+                    BackupManager.RestoreBackup(macroDeckBackupInfo.FileName, restoreBackupDialog.RestoreBackupInfo);
+                    SpinnerDialog.SetVisisble(false, ParentForm);
+                });
+                SpinnerDialog.SetVisisble(true, ParentForm);
             }
         }
     }
 
     private void btnDelete_Click(object sender, EventArgs e)
     {
-        using (var msgBox = new MessageBox())
+        using var msgBox = new MessageBox();
+        if (msgBox.ShowDialog(LanguageManager.Strings.AreYouSure, LanguageManager.Strings.ThisWillDeleteBackupPermanently, MessageBoxButtons.YesNo) == DialogResult.Yes)
         {
-            if (msgBox.ShowDialog(LanguageManager.Strings.AreYouSure, LanguageManager.Strings.ThisWillDeleteBackupPermanently, MessageBoxButtons.YesNo) == DialogResult.Yes)
-            {
-                BackupManager.DeleteBackup(macroDeckBackupInfo.FileName);
-            }
+            BackupManager.DeleteBackup(macroDeckBackupInfo.FileName);
         }
     }
 }

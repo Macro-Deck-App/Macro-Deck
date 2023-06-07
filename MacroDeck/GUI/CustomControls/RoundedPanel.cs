@@ -38,14 +38,11 @@ public class RoundedPanel : Panel
         {
             var rectBorderSmooth = ClientRectangle;
             var smoothSize = 2;
-            using (var pathBorderSmooth = GetFigurePath(rectBorderSmooth, borderRadius))
-            using (var penBorderSmooth = new Pen(Parent.BackColor, smoothSize))
-            {
-
-                Region = new Region(pathBorderSmooth);
-                graph.SmoothingMode = SmoothingMode.AntiAlias;
-                graph.DrawPath(penBorderSmooth, pathBorderSmooth);
-            }
+            using var pathBorderSmooth = GetFigurePath(rectBorderSmooth, borderRadius);
+            using var penBorderSmooth = new Pen(Parent.BackColor, smoothSize);
+            Region = new Region(pathBorderSmooth);
+            graph.SmoothingMode = SmoothingMode.AntiAlias;
+            graph.DrawPath(penBorderSmooth, pathBorderSmooth);
         }
         else
         {

@@ -1,14 +1,13 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Startup;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.Updater;
@@ -78,47 +77,44 @@ public static class Updater
         if (UpdateAvailable) return;
         try
         {
-            using (var wc = new WebClient())
+            using var wc = new WebClient();
+            var jsonString = "";
+
+            if (_testChannel)
             {
-                var jsonString = "";
+                jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest&channel=test");
+            }
 
-                if (_testChannel)
+            jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest" + (MacroDeck.Configuration.UpdateBetaVersions ? "&beta" : ""));
+
+            _jsonObject = JObject.Parse(jsonString);
+            if (_jsonObject["build"] != null)
+            {
+                if (int.TryParse(_jsonObject["build"].ToString(), out var build))
                 {
-                    jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest&channel=test");
-                }
-
-                jsonString = wc.DownloadString("https://macrodeck.org/files/versions.php?latest" + (MacroDeck.Configuration.UpdateBetaVersions ? "&beta" : ""));
-
-                _jsonObject = JObject.Parse(jsonString);
-                if (_jsonObject["build"] != null)
-                {
-                    if (int.TryParse(_jsonObject["build"].ToString(), out var build))
+                    if (build > MacroDeck.Version.Build || _forceUpdate)
                     {
-                        if (build > MacroDeck.Version.Build || _forceUpdate)
+                        MacroDeckLogger.Info("Macro Deck version " + _jsonObject["version"] + " available");
+                        try
                         {
-                            MacroDeckLogger.Info("Macro Deck version " + _jsonObject["version"] + " available");
-                            try
-                            {
-                                _updateSizeMb = GetFileSizeMb(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]));
-                            }
-                            catch { }
-                            if (OnUpdateAvailable != null)
-                            {
-                                UpdateAvailable = true;
-                                OnUpdateAvailable(_jsonObject, EventArgs.Empty);
-                            }
+                            _updateSizeMb = GetFileSizeMb(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]));
                         }
-                        else
+                        catch { }
+                        if (OnUpdateAvailable != null)
                         {
-                            if (OnLatestVersionInstalled != null)
-                            {
-                                UpdateAvailable = false;
-                                OnLatestVersionInstalled(_jsonObject, EventArgs.Empty);
-                            }
+                            UpdateAvailable = true;
+                            OnUpdateAvailable(_jsonObject, EventArgs.Empty);
+                        }
+                    }
+                    else
+                    {
+                        if (OnLatestVersionInstalled != null)
+                        {
+                            UpdateAvailable = false;
+                            OnLatestVersionInstalled(_jsonObject, EventArgs.Empty);
                         }
                     }
                 }
-                    
             }
         } catch (Exception ex)
         {
@@ -131,12 +127,10 @@ public static class Updater
         var webRequest = HttpWebRequest.Create(uriPath);
         webRequest.Method = "HEAD";
 
-        using (var webResponse = webRequest.GetResponse())
-        {
-            var fileSize = webResponse.Headers.Get("Content-Length");
-            var fileSizeInMegaByte = Math.Round(Convert.ToDouble(fileSize) / 1024.0 / 1024.0, 2);
-            return fileSizeInMegaByte;
-        }
+        using var webResponse = webRequest.GetResponse();
+        var fileSize = webResponse.Headers.Get("Content-Length");
+        var fileSizeInMegaByte = Math.Round(Convert.ToDouble(fileSize) / 1024.0 / 1024.0, 2);
+        return fileSizeInMegaByte;
     }
 
     public static void DownloadUpdate()
@@ -149,7 +143,7 @@ public static class Updater
         using var webClient = new WebClient();
         webClient.DownloadProgressChanged += WebClient_DownloadProgressChanged;
         webClient.DownloadFileCompleted += WebClient_DownloadComplete;
-        webClient.DownloadFileAsync(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]), Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString()));
+        webClient.DownloadFileAsync(new Uri("https://macrodeck.org/files/installer/" + _jsonObject["filename"]), Path.Combine(ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString()));
     }
 
 
@@ -158,7 +152,7 @@ public static class Updater
         _downloading = false;
         try
         {
-            if (!File.Exists(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString())))
+            if (!File.Exists(Path.Combine(ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString())))
             {
                 using (var msgBox = new MessageBox())
                 {
@@ -169,7 +163,7 @@ public static class Updater
                 return;
             }
 
-            using (var stream = File.OpenRead(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString())))
+            using (var stream = File.OpenRead(Path.Combine(ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString())))
             {
                 using (var md5 = MD5.Create())
                 {
@@ -190,7 +184,7 @@ public static class Updater
 
             var p = new Process
             {
-                StartInfo = new ProcessStartInfo(Path.Combine(MacroDeck.ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString()))
+                StartInfo = new ProcessStartInfo(Path.Combine(ApplicationPaths.TempDirectoryPath, _jsonObject["filename"].ToString()))
                 {
                     UseShellExecute = true
                 }
@@ -201,10 +195,8 @@ public static class Updater
         catch
         {
             OnError?.Invoke(null, EventArgs.Empty);
-            using (var msgBox = new MessageBox())
-            {
-                msgBox.ShowDialog(LanguageManager.Strings.Error, LanguageManager.Strings.TryAgainOrDownloadManually, MessageBoxButtons.OK);
-            }
+            using var msgBox = new MessageBox();
+            msgBox.ShowDialog(LanguageManager.Strings.Error, LanguageManager.Strings.TryAgainOrDownloadManually, MessageBoxButtons.OK);
         }
     }
 
