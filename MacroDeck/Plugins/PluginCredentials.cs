@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using Newtonsoft.Json;
 using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Startup;
 using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Plugins;
@@ -16,7 +15,7 @@ public class PluginCredentials
 
     private static string FilePath(MacroDeckPlugin plugin)
     {
-        return Path.Combine(MacroDeck.ApplicationPaths.PluginCredentialsPath, FileName(plugin));
+        return Path.Combine(ApplicationPaths.PluginCredentialsPath, FileName(plugin));
     }
 
     private static void Save(MacroDeckPlugin plugin, List<Dictionary<string, string>> pluginCredentials)

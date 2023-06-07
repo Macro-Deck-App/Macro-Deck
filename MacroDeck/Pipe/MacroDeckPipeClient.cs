@@ -1,5 +1,4 @@
 ﻿using System.IO.Pipes;
-using System.Text;
 
 namespace SuchByte.MacroDeck.Pipes;
 

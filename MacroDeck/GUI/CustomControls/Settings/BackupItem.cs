@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System.IO;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.Backups;
 using SuchByte.MacroDeck.GUI.Dialogs;

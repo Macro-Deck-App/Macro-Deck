@@ -1,5 +1,4 @@
-﻿using System;
-using SuchByte.MacroDeck.Logging;
+﻿using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Variables.Plugin.Models;

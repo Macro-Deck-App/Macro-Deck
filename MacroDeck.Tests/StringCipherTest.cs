@@ -2,6 +2,7 @@ using SuchByte.MacroDeck.Utils;
 
 namespace MacroDeck.Tests;
 
+[TestFixture]
 public class StringCipherTests
 {
     private string machineId;

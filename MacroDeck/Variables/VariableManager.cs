@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using Cottle;
 using SQLite;
+using SuchByte.MacroDeck.CottleIntegration;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Startup;
 
 namespace SuchByte.MacroDeck.Variables;
 
@@ -16,8 +13,6 @@ public static class VariableManager
 {
     private static SQLiteConnection _database;
     
-    internal const string TemplateTrimBlank = "_trimblank_";
-
     internal static event EventHandler OnVariableChanged;
     internal static event EventHandler OnVariableRemoved;
 
@@ -47,13 +42,7 @@ public static class VariableManager
             x.Creator == macroDeckPlugin.Name &&
             string.Equals(x.Name, variableName, StringComparison.CurrentCultureIgnoreCase));
     }
-
-
-    private static DocumentConfiguration templateConfiguration = new()
-    {
-        Trimmer = DocumentConfiguration.TrimFirstAndLastBlankLines,
-    };
-
+    
     internal static void InsertVariable(Variable variable)
     {
         if (ListVariables.Any(x => string.Equals(x.Name, variable.Name, StringComparison.CurrentCultureIgnoreCase)))
@@ -180,61 +169,16 @@ public static class VariableManager
         MacroDeckLogger.Info("Deleted variable " + name);
     }
 
-
+    [Obsolete("Use TemplateManager.RenderTemplate")]
     public static string RenderTemplate(string template)
     {
-        string result;
-        try
-        {
-            templateConfiguration.Trimmer = template.StartsWith(TemplateTrimBlank, StringComparison.OrdinalIgnoreCase)
-                ? DocumentConfiguration.TrimFirstAndLastBlankLines
-                : DocumentConfiguration.TrimNothing;
-            template = template.Replace(TemplateTrimBlank, "", StringComparison.OrdinalIgnoreCase);
-            var document = Document.CreateDefault(template, templateConfiguration).DocumentOrThrow;
-
-            var vars = new Dictionary<Value, Value>();
-
-            foreach (var v in ListVariables)
-            {
-                if (vars.ContainsKey(v.Name)) continue;
-                Value value = "";
-
-                switch (v.Type)
-                {
-                    case nameof(VariableType.Bool):
-                        bool.TryParse(
-                            v.Value.Replace("On", "True", StringComparison.CurrentCultureIgnoreCase)
-                                .Replace("Off", "False", StringComparison.OrdinalIgnoreCase), out var resultBool);
-                        value = Value.FromBoolean(resultBool);
-                        break;
-                    case nameof(VariableType.Float):
-                        float.TryParse(v.Value, out var resultFloat);
-                        value = Value.FromNumber(resultFloat);
-                        break;
-                    case nameof(VariableType.Integer):
-                        int.TryParse(v.Value, out var resultInteger);
-                        value = Value.FromNumber(resultInteger);
-                        break;
-                    case nameof(VariableType.String):
-                        value = Value.FromString(v.Value);
-                        break;
-                }
-
-                vars.Add(v.Name, value);
-            }
-            result = document.Render(Context.CreateBuiltin(vars));
-        } catch (Exception e)
-        {
-            result = "Error: " + e.Message;
-        }
-
-        return result;
+        return TemplateManager.RenderTemplate(template);
     }
 
     internal static void Initialize()
     {
         MacroDeckLogger.Info(typeof(VariableManager), "Initialize variables database...");
-        _database = new SQLiteConnection(MacroDeck.ApplicationPaths.VariablesFilePath);
+        _database = new SQLiteConnection(ApplicationPaths.VariablesFilePath);
             
         _database.CreateTable<Variable>();
         _database.Execute("delete from Variable where 'Name'='';");

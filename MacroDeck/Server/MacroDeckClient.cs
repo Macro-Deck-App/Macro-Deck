@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Fleck;
 using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.Folders;

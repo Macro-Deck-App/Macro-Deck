@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SuchByte.MacroDeck.Utils;
+﻿namespace SuchByte.MacroDeck.Utils;
 
 public static class OperatingSystemInformation
 {

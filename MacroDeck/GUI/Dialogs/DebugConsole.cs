@@ -1,12 +1,11 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Properties;
+using SuchByte.MacroDeck.Startup;
 using Form = SuchByte.MacroDeck.GUI.CustomControls.Form;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs;
@@ -81,7 +80,7 @@ public partial class DebugConsole : Form
     {
         var p = new Process
         {
-            StartInfo = new ProcessStartInfo(MacroDeck.ApplicationPaths.UserDirectoryPath)
+            StartInfo = new ProcessStartInfo(ApplicationPaths.UserDirectoryPath)
             {
                 UseShellExecute = true
             }

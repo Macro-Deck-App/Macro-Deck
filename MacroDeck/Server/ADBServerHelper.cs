@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Net;
-using System.Threading.Tasks;
 using SharpAdbClient;
 using SuchByte.MacroDeck.Enums;
 using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Startup;
 
 namespace SuchByte.MacroDeck.Server;
 
@@ -26,7 +24,7 @@ public class ADBServerHelper
 
     private static string _adbFolderName = "Android Debug Bridge";
 
-    private static string _adbPath = Path.Combine(MacroDeck.ApplicationPaths.MainDirectoryPath, _adbFolderName, "adb.exe");
+    private static string _adbPath = Path.Combine(ApplicationPaths.MainDirectoryPath, _adbFolderName, "adb.exe");
 
     public static EventHandler<AdbDeviceConnectionStateChangedEventArgs> OnDeviceConnectionStateChanged;
 

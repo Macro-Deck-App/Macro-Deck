@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq;
 using SuchByte.MacroDeck.Icons;
 
 namespace SuchByte.MacroDeck.Utils;

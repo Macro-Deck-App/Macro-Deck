@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Reflection;
 using Newtonsoft.Json;
 using SuchByte.MacroDeck.GUI;
@@ -12,43 +9,29 @@ namespace SuchByte.MacroDeck.Plugins;
 
 public abstract class MacroDeckPlugin
 {
-    Assembly executingAssembly = Assembly.GetCallingAssembly();
-    FileVersionInfo versionInfo;
-
-    private string _name = "", _version = "", _author = "";
-
     public MacroDeckPlugin()
     {
-        versionInfo = FileVersionInfo.GetVersionInfo(executingAssembly.Location);
-        _name = executingAssembly.GetName().Name;
-        _version = versionInfo.ProductVersion;
+        var executingAssembly = GetType().Assembly;
+        Name = executingAssembly.GetName().Name ?? throw new InvalidOperationException();
+        Version = executingAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion 
+                  ?? throw new InvalidOperationException();
     }
 
     /// <summary>
     /// Name of the plugin
     /// </summary>
-    internal virtual string Name
-    {
-        get => _name;
-        set => _name = value;
-    }
+    internal virtual string Name { get; set; }
 
     /// <summary>
     /// Version of the plugin
     /// </summary>
-    internal virtual string Version
-    {
-        get => _version;
-        set => _version = value;
-    }
+    internal virtual string Version { get; set; }
 
     /// <summary>
     /// Author of the plugin
     /// </summary>
-    internal virtual string Author { 
-        get => _author;
-        set => _author = value;
-    }
+    internal virtual string Author { get; set; }
+
 
     /// <summary>
     /// This list contains all the actions of the plugin. If your plugin does not contain any actions, you can delete this.

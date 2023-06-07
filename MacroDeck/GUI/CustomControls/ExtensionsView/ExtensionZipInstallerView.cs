@@ -1,10 +1,8 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
 

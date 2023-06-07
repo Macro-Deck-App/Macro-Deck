@@ -1,24 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
-
-	<PropertyGroup>
-		<IsBeta>true</IsBeta>
-		<BetaVersion>1</BetaVersion>
-
-		<VersionMajor>2</VersionMajor>
-		<VersionMinor>13</VersionMinor>
-		<VersionPatch>0</VersionPatch>
-
-		<VersionSuffix Condition="'$(IsBeta)' == 'true'">-preview$(BetaVersion)</VersionSuffix>
-	</PropertyGroup>
 	
   <PropertyGroup>
     <TargetFramework>net7.0-windows10.0.22000.0</TargetFramework>
     <UseWPF>true</UseWPF>
-	  <RootNamespace>SuchByte.MacroDeck</RootNamespace>
-	  <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>SuchByte.MacroDeck</RootNamespace>
+    <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>appicon.ico</ApplicationIcon>
     <StartupObject>SuchByte.MacroDeck.Program</StartupObject>
-    <Version>$(VersionMajor).$(VersionMinor).$(VersionPatch)$(VersionSuffix)</Version>
+    <Version>2.13.0-b1</Version>
     <Company>Macro Deck</Company>
     <Authors>Manuel Mayer</Authors>
     <SignAssembly>False</SignAssembly>
@@ -29,23 +18,23 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/SuchByte/Macro-Deck</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SuchByte/Macro-Deck</RepositoryUrl>
-	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Platforms>AnyCPU;x64</Platforms>
-	<SelfContained>true</SelfContained>
-	<OutputType>WinExe</OutputType>
-	<Nullable>enable</Nullable>  
+    <SelfContained>true</SelfContained>
+    <OutputType>WinExe</OutputType>
+    <Nullable>enable</Nullable>  
   </PropertyGroup>
 	
-	<ItemGroup>
-      <Content Update="Macro Deck 2.dll">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </Content>
-    </ItemGroup>
+  <ItemGroup>
+    <Content Update="Macro Deck 2.dll">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+  </ItemGroup>
 	
   <ItemGroup>
-	  <EmbeddedResource Include="Resources\*">
-		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	  </EmbeddedResource>
+    <EmbeddedResource Include="Resources\*">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
@@ -332,10 +321,5 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <!--<Exec Command="copy /Y &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(ProjectDir)bin\Release\netcoreapp3.1\publish\$(TargetName).dll&quot;" />-->
-  </Target>
-
 
 </Project>
