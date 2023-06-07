@@ -40,7 +40,7 @@ public class MacroDeck : NativeWindow
     public static readonly VersionModel Version = new(Assembly?.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version ?? "?.?.?.?");
 
     public static readonly int ApiVersion = 20;
-    public static readonly int PluginApiVersion = 40;
+    public static readonly int PluginApiVersion = 35;
 
     public static ApplicationPaths ApplicationPaths { get; private set; } = null!;
     public static StartParameters StartParameters { get; private set; } = new();
