@@ -1,0 +1,20 @@
+changelog:
+  categories:
+    - title: 🎉 Exciting New Features
+      labels:
+        - feature
+    - title: 🚀 Improvements
+      labels:
+        - improvement
+    - title: 🛠 Breaking Changes
+      labels:
+        - breaking-change
+    - title: 🐞 Bug Fixes
+      labels:
+        - bugfix
+    - title: 👒 Dependencies
+      labels:
+        - dependencies
+    - title: 🚀 Other Changes
+      labels:
+        - "*"
