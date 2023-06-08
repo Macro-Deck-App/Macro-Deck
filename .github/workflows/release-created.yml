@@ -2,7 +2,7 @@ name: Create Release
 
 on:
   release:
-    published:
+    types: [published]
 
 jobs:
   tests:
@@ -16,21 +16,7 @@ jobs:
     needs: [release-github, get-version]
     secrets: inherit
     with:
-      version: ${{ needs.get-version.outputs.version }}
-      upload-url: ${{ needs.release-github.outputs.upload-url }}
-      
-  create-pull-request:
-    name: "Create pull-request back to develop"
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    needs: [get-version, bump-version, release-windows, release-github]
-    steps: 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
-        with:
-          branch: main
-          title: Bump Macro Deck version to ${{ needs.get-version.outputs.version }}
-          body: Bumps the version of Macro Deck to ${{ needs.get-version.outputs.version }}
+      version: ${{ github.event.release.name }}
             
   notify:
     name: "Notify"
@@ -39,6 +25,6 @@ jobs:
     steps:
       - uses: Macro-Deck-App/Actions/discord-notify-release@main
         with:
-          version: ${{ needs.get-version.outputs.version }}
-          is-beta: ${{ needs.get-version.outputs.is-beta }}
+          version: ${{ github.event.release.name }}
+          is-beta: ${{ github.event.release.prerelease }}
           webhook-token: ${{ secrets.WEBHOOK_KEY }}

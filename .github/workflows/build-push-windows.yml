@@ -3,9 +3,6 @@ name: Build and Release Windows Installer
 on:
   workflow_call:
     inputs:
-      upload-url:
-        required: true
-        type: string
       version:
         required: true
         type: string
