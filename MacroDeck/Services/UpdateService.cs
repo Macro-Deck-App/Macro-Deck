@@ -114,7 +114,7 @@ public class UpdateService : IDisposable
                 Arguments = "/SILENT /SUPPRESSMSGBOXES /CLOSEAPPLICATIONS"
             }
         }.Start();
-        Environment.Exit(0);
+        MacroDeck.Exit();
     }
 
     private async ValueTask DoWork(CancellationToken cancellationToken)

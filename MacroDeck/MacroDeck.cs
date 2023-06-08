@@ -116,7 +116,7 @@ public class MacroDeck : NativeWindow
         TrayIcon.SetupTrayIcon(TrayIconContextMenu,
             ShowMainWindow,
             () => RestartMacroDeck(string.Join(" ", StartParameters)),
-            () => Environment.Exit(0));
+            Exit);
 
         using (_mainWindow = new MainWindow())
         {
@@ -293,5 +293,11 @@ public class MacroDeck : NativeWindow
         {
             OnMainWindowLoad?.Invoke(window, EventArgs.Empty);
         }
+    }
+
+    public static void Exit()
+    {
+        ADBServerHelper.Kill();
+        Environment.Exit(0);
     }
 }
