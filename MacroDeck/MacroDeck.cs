@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.Backups;
 using SuchByte.MacroDeck.Configuration;
+using SuchByte.MacroDeck.DataTypes.Updater;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
@@ -23,14 +24,17 @@ using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Services;
 using SuchByte.MacroDeck.Startup;
 using SuchByte.MacroDeck.Variables;
+using Version = SuchByte.MacroDeck.DataTypes.Core.Version;
 
 namespace SuchByte.MacroDeck;
 
 public class MacroDeck : NativeWindow
 {
-    public static VersionModel Version => new(FileVersionInfo.GetVersionInfo(ApplicationPaths.ExecutablePath).ProductVersion);
+    public static Version Version = 
+        Version.Parse(FileVersionInfo.GetVersionInfo(ApplicationPaths.ExecutablePath).ProductVersion);
 
     public static readonly int ApiVersion = 20;
     public static readonly int PluginApiVersion = 40;
@@ -48,7 +52,7 @@ public class MacroDeck : NativeWindow
     private static readonly NotifyIcon TrayIcon = new()
     {
         Icon = Resources.appicon,
-        Text = @"Macro Deck " + Version.VersionString,
+        Text = @"Macro Deck " + Version.ToString(),
         Visible = false,
         ContextMenuStrip = TrayIconContextMenu
     };
@@ -71,7 +75,7 @@ public class MacroDeck : NativeWindow
             MacroDeckLogger.StartDebugConsole();
         }
 
-        MacroDeckLogger.Info($"Macro Deck {Version.VersionString}");
+        MacroDeckLogger.Info($"Macro Deck {Version.ToString()}");
         MacroDeckLogger.Info($"Path: {ApplicationPaths.ExecutablePath}");
         MacroDeckLogger.Info($"Start parameters: {string.Join(" ", StartParameters.ToArray(StartParameters))}");
 
@@ -126,8 +130,9 @@ public class MacroDeck : NativeWindow
 
         OnMacroDeckLoaded?.Invoke(null, EventArgs.Empty);
 
-        Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
-        Updater.Updater.Initialize(StartParameters.ForceUpdate, StartParameters.TestUpdateChannel);
+        UpdateService.Instance().StartPeriodicalUpdateCheck();
+        UpdateService.Instance().UpdateAvailable += OnUpdateAvailable;
+        
         ExtensionStoreHelper.SearchUpdatesAsync();
 
         if (StartParameters.ShowMainWindow)
@@ -137,6 +142,27 @@ public class MacroDeck : NativeWindow
 
         Application.Run();
     }
+
+    private static void OnUpdateAvailable(object? sender, UpdateApiVersionInfo e)
+    {
+        var btnOpenSettings = new ButtonPrimary
+        {
+            AutoSize = true,
+            Text = LanguageManager.Strings.OpenSettings,
+        };
+        btnOpenSettings.Click += (o, args) =>
+        {
+            MainWindow?.SetView(new SettingsView(2));
+        };
+        
+        NotificationManager.SystemNotification(
+            "Macro Deck Updater",
+            string.Format(LanguageManager.Strings.VersionXIsNowAvailable, e.Version, e.IsBeta == true ? "Beta" : "Release"), 
+            true, 
+            new List<Control> { btnOpenSettings }, Resources.Macro_Deck_2021_update);
+
+    }
+
     private static void PrintNetworkInterfaces()
     {
         StringBuilder sb = new();
@@ -185,29 +211,6 @@ public class MacroDeck : NativeWindow
             case "show":
                 ShowMainWindow();
                 break;
-        }
-    }
-
-    private static void OnUpdateAvailable(object? sender, EventArgs e)
-    {
-        Updater.Updater.OnUpdateAvailable -= OnUpdateAvailable;
-        var versionObject = sender as JObject;
-        try
-        {
-            var btnOpenSettings = new ButtonPrimary
-            {
-                AutoSize = true,
-                Text = LanguageManager.Strings.OpenSettings,
-            };
-            btnOpenSettings.Click += (o, args) =>
-            {
-                MainWindow?.SetView(new SettingsView(2));
-            };
-            NotificationManager.SystemNotification("Macro Deck Updater", string.Format(LanguageManager.Strings.VersionXIsNowAvailable, versionObject["version"], versionObject["channel"]), true, new List<Control> { btnOpenSettings }, Resources.Macro_Deck_2021_update);
-        }
-        catch
-        {
-            // ignored
         }
     }
 

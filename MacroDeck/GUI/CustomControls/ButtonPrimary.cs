@@ -35,6 +35,8 @@ public partial class ButtonPrimary : Button
 
     public bool Spinner = false;
 
+    public bool WriteProgress { get; set; } = true;
+
 
     //This method begins the animation.
     public void AnimateImage()
@@ -242,13 +244,14 @@ public partial class ButtonPrimary : Button
             Region = new Region(pathSurface);
             pe.Graphics.DrawPath(penSurface, pathSurface);
             var flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak;
-            if (progress > 0)
+            if (progress > 0 && WriteProgress)
             {
                 TextRenderer.DrawText(pe.Graphics, string.Format("{0}%", progress), Font, ClientRectangle, ForeColor, flags);
             } else
             {
                 TextRenderer.DrawText(pe.Graphics, text, Font, ClientRectangle, ForeColor, flags);
             }
+            
             if (Spinner)
             {
                 AnimateImage();
