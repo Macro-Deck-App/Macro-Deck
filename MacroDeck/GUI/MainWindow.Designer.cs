@@ -7,6 +7,7 @@ using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Services;
 
 namespace SuchByte.MacroDeck.GUI
 {
@@ -34,7 +35,7 @@ namespace SuchByte.MacroDeck.GUI
                     this.Controls.Remove(this.notificationsList);
                 }
                 LanguageManager.LanguageChanged -= LanguageChanged;
-                Updater.Updater.OnUpdateAvailable -= UpdateAvailable;
+                UpdateService.Instance().UpdateAvailable -= UpdateAvailable;
                 MacroDeckServer.OnDeviceConnectionStateChanged -= this.OnClientsConnectedChanged;
                 MacroDeckServer.OnServerStateChanged -= this.OnServerStateChanged;
                 PluginManager.OnPluginsChange -= this.OnPluginsChanged;

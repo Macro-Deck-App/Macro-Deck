@@ -1,18 +1,19 @@
-﻿using System.Diagnostics;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.DataTypes.Updater;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowContents;
 using SuchByte.MacroDeck.GUI.MainWindowViews;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Services;
 using SuchByte.MacroDeck.Startup;
 using Form = SuchByte.MacroDeck.GUI.CustomControls.Form;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
@@ -43,10 +44,15 @@ public partial class MainWindow : Form
         btnNotifications.BackColor = Color.Transparent;
         UpdateTranslation();
         LanguageManager.LanguageChanged += LanguageChanged;
-        Updater.Updater.OnUpdateAvailable += UpdateAvailable;
+        UpdateService.Instance().UpdateAvailable += UpdateAvailable;
         _deckView ??= new DeckView();
     }
 
+    private void UpdateAvailable(object? sender, UpdateApiVersionInfo e)
+    {
+        using var updateAvailableDialog = new UpdateAvailableDialog(e);
+        updateAvailableDialog.ShowDialog();
+    }
 
     private void UpdateTranslation()
     {
@@ -57,12 +63,6 @@ public partial class MainWindow : Form
     {
         UpdateTranslation();
         DeckView?.UpdateTranslation();
-    }
-
-
-    private void UpdateAvailable(object sender, EventArgs e)
-    {
-        btnSettings.SetNotification(Updater.Updater.UpdateAvailable);
     }
 
     public void SelectContentButton(Control control)
@@ -109,12 +109,10 @@ public partial class MainWindow : Form
         }
     }
 
-
     private void MainWindow_Load(object sender, EventArgs e)
     {
-
-        lblVersion.Text = "Macro Deck " + MacroDeck.Version.VersionString;
-            
+        lblVersion.Text = $"Macro Deck {MacroDeck.Version}";
+        
         PluginManager.OnPluginsChange += OnPluginsChanged;
         IconManager.OnIconPacksChanged += OnPluginsChanged;
         IconManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
@@ -137,7 +135,7 @@ public partial class MainWindow : Form
         btnExtensions.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);
 
         navigation.Visible = true;
-        btnSettings.SetNotification(Updater.Updater.UpdateAvailable);
+        btnSettings.SetNotification(UpdateService.Instance().VersionInfo != null);
 
 
         SetView(DeckView);
@@ -147,6 +145,13 @@ public partial class MainWindow : Form
         ExtensionStoreHelper.OnInstallationFinished += ExtensionStoreHelper_OnInstallationFinished;
         CenterToScreen();
         btnNotifications.NotificationCount = NotificationManager.Notifications.Count;
+
+        var updateApiVersionInfo = UpdateService.Instance().VersionInfo;
+        if (updateApiVersionInfo != null)
+        {
+            using var updateAvailableDialog = new UpdateAvailableDialog(updateApiVersionInfo);
+            updateAvailableDialog.ShowDialog();
+        }
     }
 
     private void LoadHosts()
@@ -188,7 +193,6 @@ public partial class MainWindow : Form
         {
             btnExtensions.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);
         });
-            
     }
 
     private void OnServerStateChanged(object sender, EventArgs e)
@@ -249,19 +253,6 @@ public partial class MainWindow : Form
         SetView(new VariablesView());
     }
 
-    private void LblErrorsWarnings_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-    {
-        var p = new Process
-        {
-            StartInfo = new ProcessStartInfo(MacroDeckLogger.CurrentFilename)
-            {
-                UseShellExecute = true,
-            }
-        };
-        p.Start();
-    }
-
-
     private void BtnNotifications_Click(object sender, EventArgs e)
     {
         if (notificationsList == null || notificationsList.IsDisposed)
@@ -284,8 +275,6 @@ public partial class MainWindow : Form
             Controls.Add(notificationsList);
             notificationsList.BringToFront();
         }
-
-
     }
 
     private void Hosts_SelectedIndexChanged(object sender, EventArgs e)

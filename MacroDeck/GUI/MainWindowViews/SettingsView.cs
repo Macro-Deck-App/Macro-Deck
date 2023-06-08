@@ -2,13 +2,17 @@
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Threading;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.Backups;
+using SuchByte.MacroDeck.DataTypes.Updater;
 using SuchByte.MacroDeck.GUI.CustomControls.Settings;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Services;
 using SuchByte.MacroDeck.Startup;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
@@ -26,7 +30,6 @@ public partial class SettingsView : UserControl
         }
         Dock = DockStyle.Fill;
         UpdateTranslation();
-        Updater.Updater.OnUpdateAvailable += UpdateAvailable;
         BackupManager.BackupSaved += BackupManager_BackupSaved;
         BackupManager.BackupFailed += BackupManager_BackupFailed;
         BackupManager.DeleteSuccess += BackupManager_DeleteSuccess;
@@ -34,7 +37,7 @@ public partial class SettingsView : UserControl
 
     private void UpdateAvailable(object sender, EventArgs e)
     {
-        verticalTabControl.SetNotification(2, Updater.Updater.UpdateAvailable);
+        verticalTabControl.SetNotification(2, UpdateService.Instance().VersionInfo != null);
     }
 
     private void UpdateTranslation()
@@ -64,13 +67,10 @@ public partial class SettingsView : UserControl
         btnCreateBackup.Text = LanguageManager.Strings.CreateBackup;
         checkInstallBetaVersions.Text = LanguageManager.Strings.InstallBetaVersions;
         btnCheckUpdates.Text = LanguageManager.Strings.CheckForUpdatesNow;
-        lblBuildLabel.Text = LanguageManager.Strings.VersionBuild;
-        lblBuild.Text = MacroDeck.Version.Build.ToString();
         lblWebSocketAPILabel.Text = LanguageManager.Strings.WebSocketAPIVersion;
         lblPluginAPILabel.Text = LanguageManager.Strings.PluginAPIVersion;
         lblInstalledPluginsLabel.Text = LanguageManager.Strings.InstalledPlugins;
         lblTranslationBy.Text = string.Format(LanguageManager.Strings.XTranslationByX, LanguageManager.Strings.__Language__, LanguageManager.Strings.__Author__);
-        Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
     }
 
     private void Settings_Load(object sender, EventArgs e)
@@ -83,19 +83,11 @@ public partial class SettingsView : UserControl
         LoadIconCache();
         LoadBackups();
 
-        lblInstalledVersion.Text = MacroDeck.Version.VersionString;
+        lblInstalledVersion.Text = MacroDeck.Version.ToString();
         lblWebsocketAPIVersion.Text = MacroDeck.ApiVersion.ToString();
         lblPluginAPIVersion.Text = MacroDeck.PluginApiVersion.ToString();
-        lblMacroDeck.Text = "Macro Deck " + MacroDeck.Version.VersionString;
+        lblMacroDeck.Text = "Macro Deck " + MacroDeck.Version.ToString();
         lblInstalledPlugins.Text = PluginManager.Plugins.Count.ToString();
-
-        verticalTabControl.SetNotification(2, Updater.Updater.UpdateAvailable);
-
-        if (Updater.Updater.UpdateAvailable)
-        {
-            AddUpdateAvailableControl();
-        }
-
     }
 
     private void LoadLanguage()
@@ -156,10 +148,8 @@ public partial class SettingsView : UserControl
             using var msgBox = new MessageBox();
             if (msgBox.ShowDialog(LanguageManager.Strings.Warning, LanguageManager.Strings.WarningBetaVersions, MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                updaterPanel.Controls.Clear();
                 MacroDeck.Configuration.UpdateBetaVersions = true;
                 MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
-                Updater.Updater.CheckForUpdatesAsync();
             }
             else
             {
@@ -168,10 +158,8 @@ public partial class SettingsView : UserControl
         }
         else
         {
-            updaterPanel.Controls.Clear();
             MacroDeck.Configuration.UpdateBetaVersions = false;
             MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
-            Updater.Updater.CheckForUpdatesAsync();
         }
     }
 
@@ -267,50 +255,47 @@ public partial class SettingsView : UserControl
         MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
     }
 
-    private void BtnCheckUpdates_Click(object sender, EventArgs e)
+    private async void BtnCheckUpdates_Click(object sender, EventArgs e)
     {
-        Invoke(() => {
-            btnCheckUpdates.Enabled = false;
-            btnCheckUpdates.Spinner = true;
-        });
-        Updater.Updater.OnLatestVersionInstalled += OnLatestVersion;
-        Updater.Updater.OnUpdateAvailable += OnUpdateAvailable;
-        Updater.Updater.CheckForUpdatesAsync();
-    }
+        btnCheckUpdates.Enabled = false;
+        btnCheckUpdates.Spinner = true;
 
-    private void OnLatestVersion(object sender, EventArgs e)
-    {
-        Updater.Updater.OnLatestVersionInstalled -= OnLatestVersion;
-        Invoke(() =>
+        try
         {
-            btnCheckUpdates.Enabled = true;
-            btnCheckUpdates.Spinner = false;
+            var availableUpdate = await UpdateService.Instance().CheckForUpdatesAsync(CancellationToken.None);
+            if (availableUpdate == null)
+            {
+                using var msgBox = new MessageBox();
+                msgBox.ShowDialog(
+                    LanguageManager.Strings.NoUpdatesAvailable,
+                    LanguageManager.Strings.LatestVersionInstalled,
+                    MessageBoxButtons.OK);
+
+                return;
+            }
+
+            using var updateAvailableDialog = new UpdateAvailableDialog(availableUpdate);
+            updateAvailableDialog.ShowDialog();
+        }
+        catch (Exception ex)
+        {
             using var msgBox = new MessageBox();
-            msgBox.ShowDialog(LanguageManager.Strings.NoUpdatesAvailable, LanguageManager.Strings.LatestVersionInstalled, MessageBoxButtons.OK);
-        });
+            msgBox.ShowDialog(
+                "Check for updates failed",
+                "Make sure you have a internet connection",
+                MessageBoxButtons.OK);
 
-            
-    }
-
-    private void OnUpdateAvailable(object sender, EventArgs e)
-    {
-        Updater.Updater.OnUpdateAvailable -= OnUpdateAvailable;
-        Invoke(() =>
+            MacroDeckLogger.Error($"Failed to check for updates\n{ex}");
+        }
+        finally
         {
-            AddUpdateAvailableControl();
-        });
-    }
-
-    private void AddUpdateAvailableControl()
-    {
-        btnCheckUpdates.Enabled = true;
-        btnCheckUpdates.Spinner = false;
-        if (updaterPanel.Controls.Count != 0)
-        {
-            updaterPanel.Controls.Clear();
+            Invoke(() =>
+            {
+                btnCheckUpdates.Enabled = true;
+                btnCheckUpdates.Spinner = false;
+            });
         }
 
-        updaterPanel.Controls.Add(new UpdateAvailableControl());
     }
 
     private void BtnLicenses_Click(object sender, EventArgs e)
@@ -374,7 +359,7 @@ public partial class SettingsView : UserControl
     {
         var p = new Process
         {
-            StartInfo = new ProcessStartInfo("https://github.com/Macro-Deck-org/Macro-Deck")
+            StartInfo = new ProcessStartInfo("https://github.com/Macro-Deck-App/Macro-Deck")
             {
                 UseShellExecute = true,
             }
