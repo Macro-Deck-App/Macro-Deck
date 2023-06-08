@@ -21,7 +21,7 @@ jobs:
       
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       
       - name: Verify Inno Setup installation
         run: |
@@ -43,7 +43,7 @@ jobs:
         
       - name: Build Macro Deck installer for Windows
         run: |
-            "${{ env.ISCC_PATH }}" /F"macro-deck-${{ inputs.version }}-win" "MacroDeck.Setup\Macro Deck.iss"
+            "${{ env.ISCC_PATH }}" /DApplicationVersion=${{ inputs.version }} /F"macro-deck-${{ inputs.version }}-win" "MacroDeck.Setup\Macro Deck.iss"
         shell: cmd
       
       - name: Calculate File Size and Hash
