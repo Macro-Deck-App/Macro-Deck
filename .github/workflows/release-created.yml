@@ -1,4 +1,4 @@
-name: Create Release
+name: Release Created
 
 on:
   release:
