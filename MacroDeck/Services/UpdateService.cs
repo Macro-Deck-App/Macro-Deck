@@ -106,15 +106,14 @@ public class UpdateService : IDisposable
 
     private static void StartInstallation(string path)
     {
-        var installerProcess = new Process
+        new Process
         {
             StartInfo = new ProcessStartInfo(path)
             {
                 UseShellExecute = true,
                 Arguments = "/SILENT /SUPPRESSMSGBOXES /CLOSEAPPLICATIONS"
             }
-        };
-        installerProcess.Start();
+        }.Start();
         Environment.Exit(0);
     }
 

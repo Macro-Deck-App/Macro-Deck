@@ -81,13 +81,12 @@ public partial class UpdateAvailableDialog : DialogForm
             return;
         }
 
-        var installerProcess = new Process
+        new Process
         {
             StartInfo = new ProcessStartInfo(changeNotesUrl)
             {
                 UseShellExecute = true
             }
-        };
-        installerProcess.Start();
+        }.Start();
     }
 }
