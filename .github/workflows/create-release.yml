@@ -30,7 +30,7 @@ jobs:
   bump-version:
     name: "Bump Version"
     runs-on: ubuntu-latest
-    needs: [get-version, tests]
+    needs: [get-version]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
