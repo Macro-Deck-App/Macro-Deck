@@ -13,7 +13,7 @@ jobs:
   release-windows:
     name: "Build and Push Macro Deck for Windows"
     uses: ./.github/workflows/build-push-windows.yml
-    needs: [test]
+    needs: [tests]
     secrets: inherit
     with:
       version: ${{ github.event.release.name }}
@@ -21,7 +21,7 @@ jobs:
   notify:
     name: "Notify"
     runs-on: ubuntu-latest
-    needs: [test,release-windows]
+    needs: [release-windows]
     steps:
       - uses: Macro-Deck-App/Actions/discord-notify-release@main
         with:
