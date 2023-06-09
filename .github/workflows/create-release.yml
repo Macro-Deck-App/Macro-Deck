@@ -25,14 +25,16 @@ jobs:
         uses: Macro-Deck-App/Actions/fetch-version@main
         id: fetch_version
         with:
-          release-type: ${{ github.event.inputs.release-type }}
+          release-type: ${{ inputs.release-type }}
   
       - name: Set branch name
         run: |
             if [[ "${{ steps.fetch_version.outputs.is-beta }}" == "true" ]]; then
               echo "BRANCH=develop" >> $GITHUB_ENV
+              echo "Using develop branch"
             else
               echo "BRANCH=main" >> $GITHUB_ENV
+              echo "Using main branch"
             fi
     
   bump-version:
@@ -54,7 +56,6 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Bump Version to ${{ needs.get-version.outputs.version }}
-          github-token: ${{ secrets.PAT }}
     
   release-github:
     name: "Release GitHub"
