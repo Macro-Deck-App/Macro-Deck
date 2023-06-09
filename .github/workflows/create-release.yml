@@ -29,7 +29,7 @@ jobs:
   
       - name: Set branch name
         run: |
-            if [[ "${{ needs.get-version.outputs.version }}" == "minor_beta" || "${{ needs.get-version.outputs.version }}" == "major_beta" ]]; then
+            if [[ "${{ steps.fetch_version.outputs.is-beta }}" == "true" ]]; then
               echo "BRANCH=develop" >> $GITHUB_ENV
             else
               echo "BRANCH=main" >> $GITHUB_ENV
@@ -54,7 +54,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Bump Version to ${{ needs.get-version.outputs.version }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PAT }}
     
   release-github:
     name: "Release GitHub"
