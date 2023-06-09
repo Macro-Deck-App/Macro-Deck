@@ -26,6 +26,9 @@ jobs:
         id: fetch_version
         with:
           release-type: ${{ github.event.inputs.release-type }}
+      - name: Get branch name
+        run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+   
     
   bump-version:
     name: "Bump Version"
@@ -36,6 +39,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           github-token: ${{ secrets.PAT }}
+          ref: ${{ env.BRANCH }}
           
       - name: Update CSProj Version
         run: |
@@ -61,7 +65,7 @@ jobs:
           github-token: "${{ secrets.PAT }}"
           is-beta: ${{ needs.get-version.outputs.is-beta }}
           version: ${{ needs.get-version.outputs.version }}
-          target-commitish: ${{ github.ref }}
+          target-commitish: ${{ env.BRANCH }}
 
   create-pull-request:
     name: "Create pull-request back to develop"
