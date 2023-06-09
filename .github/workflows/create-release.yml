@@ -74,13 +74,14 @@ jobs:
 
   create-pull-request:
     name: "Create pull-request back to develop"
-    if: ${{ env.BRANCH == 'main' }}
     runs-on: ubuntu-latest
     needs: [get-version, bump-version, release-github]
     steps: 
       - name: Create Pull Request
+        if: ${{ env.BRANCH == 'main' }}
         uses: peter-evans/create-pull-request@v5
         with:
+          base: develop
           branch: main
           title: Bump Macro Deck version to ${{ needs.get-version.outputs.version }}
           body: Bumps the version of Macro Deck to ${{ needs.get-version.outputs.version }}
