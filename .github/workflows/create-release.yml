@@ -44,7 +44,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ env.BRANCH }}
-          token: $ {{ secrets.PAT }}
+          token: $ {{ secrets.GITHUB_TOKEN }}
           
       - name: Update CSProj Version
         run: |
@@ -55,7 +55,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Bump Version to ${{ needs.get-version.outputs.version }}
-          github-token: ${{ secrets.PAT }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
     
   release-github:
     name: "Release GitHub"
