@@ -5,6 +5,19 @@ on:
     types: [published]
 
 jobs:
+  validate-version:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Validate version using the API
+      shell: bash
+      run: |
+        RESULT=$(curl -s "https://update.api.macro-deck.app/versionname/validate/${{ github.event.release.name }}")
+
+        if [[ "$RESULT" != "true" ]]; then
+          echo "Version '${{ github.event.release.name }}' is not valid according to the update API."
+          exit 1
+        fi
+
   tests:
     name: Execute Tests
     uses: ./.github/workflows/tests.yml
