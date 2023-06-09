@@ -5,15 +5,15 @@ on:
     types: [published]
 
 jobs:
-  #tests:
-  #  name: Execute Tests
-  #  uses: ./.github/workflows/tests.yml
-  #  secrets: inherit
+  tests:
+    name: Execute Tests
+    uses: ./.github/workflows/tests.yml
+    secrets: inherit
     
   release-windows:
     name: "Build and Push Macro Deck for Windows"
     uses: ./.github/workflows/build-push-windows.yml
-    #needs: [tests]
+    needs: [tests]
     secrets: inherit
     with:
       version: ${{ github.event.release.name }}
