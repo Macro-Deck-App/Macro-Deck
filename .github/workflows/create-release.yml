@@ -2,9 +2,6 @@ name: Create Release
 
 on:
   workflow_dispatch:
-    branches:
-      - main
-      - develop
     inputs:
       release-type:
         type: choice
