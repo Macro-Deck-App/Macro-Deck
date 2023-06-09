@@ -12,9 +12,9 @@ changelog:
     - title: 🐞 Bug Fixes
       labels:
         - bugfix
-    - title: 👒 Dependencies
+    - title: ⬆️ Dependencies
       labels:
         - dependencies
-    - title: 🚀 Other Changes
+    - title: 🛠️ Other Changes
       labels:
         - "*"
