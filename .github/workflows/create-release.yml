@@ -32,9 +32,9 @@ jobs:
         id: set_branch
         run: |
             if [[ "${{ steps.fetch_version.outputs.is-beta }}" == "true" ]]; then
-              echo "develop"
+              echo "::set-output name=result::develop"
             else
-              echo "main"
+              echo "::set-output name=result::main"
             fi
     
   bump-version:
