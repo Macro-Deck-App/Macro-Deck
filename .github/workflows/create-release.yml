@@ -20,6 +20,7 @@ jobs:
     outputs:
       version: ${{ steps.fetch_version.outputs.version }}
       is-beta: ${{ steps.fetch_version.outputs.is-beta }}
+      branch: ${{ steps.set_branch.outputs.result }}
     steps:
       - name: Fetch Version From API
         uses: Macro-Deck-App/Actions/fetch-version@main
@@ -28,13 +29,12 @@ jobs:
           release-type: ${{ inputs.release-type }}
   
       - name: Set branch name
+        id: set_branch
         run: |
             if [[ "${{ steps.fetch_version.outputs.is-beta }}" == "true" ]]; then
-              echo "BRANCH=develop" >> $GITHUB_ENV
-              echo "Using develop branch"
+              return "develop"
             else
-              echo "BRANCH=main" >> $GITHUB_ENV
-              echo "Using main branch"
+              return "main"
             fi
     
   bump-version:
@@ -45,7 +45,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: ${{ env.BRANCH }}
+          ref: ${{ needs.get-version.outputs.branch }}
           
       - name: Update CSProj Version
         run: |
@@ -70,7 +70,7 @@ jobs:
           github-token: "${{ secrets.PAT }}"
           is-beta: ${{ needs.get-version.outputs.is-beta }}
           version: ${{ needs.get-version.outputs.version }}
-          target-commitish: ${{ env.BRANCH }}
+          target-commitish: ${{ needs.get-version.outputs.branch }}
 
   create-pull-request:
     name: "Create pull-request back to develop"
@@ -78,7 +78,7 @@ jobs:
     needs: [get-version, bump-version, release-github]
     steps: 
       - name: Create Pull Request
-        if: ${{ env.BRANCH == 'main' }}
+        if: ${{ needs.get-version.outputs.branch == 'main' }}
         uses: peter-evans/create-pull-request@v5
         with:
           base: develop
