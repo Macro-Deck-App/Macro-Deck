@@ -28,7 +28,7 @@ jobs:
           release-type: ${{ github.event.inputs.release-type }}
   
       - name: Set branch name
-          run: |
+        run: |
             if [[ "${{ needs.get-version.outputs.version }}" == "minor_beta" || "${{ needs.get-version.outputs.version }}" == "major_beta" ]]; then
               echo "BRANCH=develop" >> $GITHUB_ENV
             else
