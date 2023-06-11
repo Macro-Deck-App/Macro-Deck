@@ -23,7 +23,7 @@ namespace SuchByte.MacroDeck.GUI;
 public partial class MainWindow : Form
 {
     private DeckView _deckView { get; set; }
-        
+
     public DeckView DeckView
     {
         get
@@ -112,11 +112,11 @@ public partial class MainWindow : Form
     private void MainWindow_Load(object sender, EventArgs e)
     {
         lblVersion.Text = $"Macro Deck {MacroDeck.Version}";
-        
+
         PluginManager.OnPluginsChange += OnPluginsChanged;
         IconManager.OnIconPacksChanged += OnPluginsChanged;
         IconManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
-            
+
         MacroDeckServer.OnDeviceConnectionStateChanged += OnClientsConnectedChanged;
         MacroDeckServer.OnServerStateChanged += OnServerStateChanged;
         OnClientsConnectedChanged(null, EventArgs.Empty);
@@ -183,7 +183,7 @@ public partial class MainWindow : Form
     private void OnPluginsChanged(object sender, EventArgs e)
     {
         RefreshPluginsLabels();
-            
+
     }
 
     private void RefreshPluginsLabels()
@@ -270,7 +270,8 @@ public partial class MainWindow : Form
         if (Controls.Contains(notificationsList))
         {
             Controls.Remove(notificationsList);
-        } else
+        }
+        else
         {
             Controls.Add(notificationsList);
             notificationsList.BringToFront();
