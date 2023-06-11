@@ -11,7 +11,7 @@ changelog:
         - breaking-change
     - title: 🐞 Bug Fixes
       labels:
-        - bugfix
+        - bug
     - title: ⬆️ Dependencies
       labels:
         - dependencies
