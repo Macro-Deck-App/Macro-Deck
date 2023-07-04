@@ -28,7 +28,7 @@ public static class VariableManager
 
     public static List<Variable> GetVariables(MacroDeckPlugin macroDeckPlugin)
     {
-        var pluginVariables = ListVariables
+        var pluginVariables = Variables
             .Where(x => x.Creator.Equals(macroDeckPlugin.Name, StringComparison.OrdinalIgnoreCase))
             .OrderBy(x => x.Name)
             .ToList();
