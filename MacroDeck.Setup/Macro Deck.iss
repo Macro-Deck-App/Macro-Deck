@@ -102,6 +102,6 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 
 [Run]
 Filename: "{tmp}\VC_redist.x64.exe"; StatusMsg: "Installing VC2019 redist..."; Parameters: "/quiet"; Check: VC2019RedistNeedsInstall ; Flags: waituntilterminated
-Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""Macro Deck In"" program=""{app}\{#MyAppExeName}"" dir=in action=allow enable=yes"; Flags: runhidden;
-Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""Macro Deck Out"" program=""{app}\{#MyAppExeName}"" dir=out action=allow enable=yes"; Flags: runhidden;
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""Macro Deck"" program=""{app}\{#MyAppExeName}"" dir=in action=allow enable=yes"; Flags: runhidden;
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""Macro Deck"" program=""{app}\{#MyAppExeName}"" dir=out action=allow enable=yes"; Flags: runhidden;
 Filename: "{app}\{#MyAppExeName}"; Parameters: "--show"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall
