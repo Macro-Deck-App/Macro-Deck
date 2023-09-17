@@ -36,7 +36,7 @@ public class ActionButton : IDisposable
     {
         if (!string.IsNullOrWhiteSpace(StateBindingVariable))
         {
-            var variable = VariableManager.ListVariables.ToList().Find(v => v.Name.Equals(StateBindingVariable));
+            var variable = VariableManager.ListVariables.FirstOrDefault(v => v.Name == StateBindingVariable);
             if (variable != null)
             {
                 UpdateBindingState(variable);

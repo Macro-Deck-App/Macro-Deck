@@ -39,7 +39,7 @@ public partial class ChangeVariableValueActionConfigView : ActionConfigControl
     {
         try
         {
-            var variable = VariableManager.ListVariables.Where(v => v.Name == variables.Text).FirstOrDefault();
+            var variable = VariableManager.ListVariables.FirstOrDefault(v => v.Name == variables.Text);
             if (variable != null)
             {
                 switch (variable.Type)
@@ -119,7 +119,7 @@ public partial class ChangeVariableValueActionConfigView : ActionConfigControl
     private void LoadVariables()
     {
         variables.Items.Clear();
-        foreach (var variable in VariableManager.ListVariables.Where(v => v.Creator.Equals("User")))
+        foreach (var variable in VariableManager.ListVariables.Where(v => v.Creator == "User"))
         {
             variables.Items.Add(variable.Name);
         }
