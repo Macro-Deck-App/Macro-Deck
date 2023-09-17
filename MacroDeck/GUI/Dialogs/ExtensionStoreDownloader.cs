@@ -65,10 +65,7 @@ public partial class ExtensionStoreDownloader : DialogForm
     {
         CenterToScreen();
         PUtils.SetNativeEnabled(Owner.Handle, false);
-        Task.Run(() =>
-        {
-            DownloadAndInstall();
-        });
+        Task.Run(DownloadAndInstall);
     }
 
     private void BtnDone_Click(object sender, EventArgs e)

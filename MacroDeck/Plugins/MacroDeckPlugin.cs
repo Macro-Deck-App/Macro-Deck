@@ -32,7 +32,6 @@ public abstract class MacroDeckPlugin
     /// </summary>
     internal virtual string Author { get; set; }
 
-
     /// <summary>
     /// This list contains all the actions of the plugin. If your plugin does not contain any actions, you can delete this.
     /// </summary>

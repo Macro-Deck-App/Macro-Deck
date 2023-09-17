@@ -38,7 +38,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CefSharp.WinForms.NETCore" Version="111.2.20" />
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="Cottle" Version="2.0.9" />
     <PackageReference Include="Dax-FCTB" Version="2.16.26.120" />

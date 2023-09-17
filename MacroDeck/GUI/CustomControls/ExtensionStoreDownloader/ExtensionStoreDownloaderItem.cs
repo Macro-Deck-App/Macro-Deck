@@ -1,9 +1,10 @@
-﻿using System.ComponentModel;
-using System.Drawing;
+﻿using System.Drawing;
 using System.IO;
-using System.Net;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Security.Cryptography;
-using Newtonsoft.Json;
+using System.Threading;
+using SuchByte.MacroDeck.DataTypes.FileDownloader;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
@@ -11,7 +12,6 @@ using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
-using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.Startup;
 using SuchByte.MacroDeck.Utils;
 
@@ -21,32 +21,13 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
 {
     public ExtensionStoreDownloaderPackageInfoModel PackageInfo { get; private set; }
 
-    public ExtensionStoreExtensionModel ExtensionModel { get; private set; }
+    public ApiV2Extension ApiV2Extension { get; private set; }
 
     public event EventHandler OnInstallationCompleted;
 
+    private CancellationTokenSource _cancellationTokenSource = new();
 
-    private WebClient _webClient;
-
-    private bool _cancel;
-
-    public bool Cancel
-    {
-        get => _cancel;
-        private set
-        {
-            _cancel = true;
-            _webClient?.CancelAsync();
-            Invoke(() =>
-            {
-                lblStatus.Text = LanguageManager.Strings.Cancelled;
-                progressBar.Visible = false;
-                btnAbort.Visible = false;
-            });
-
-            OnInstallationCompleted?.Invoke(this, EventArgs.Empty);
-        }
-    }
+    private string _destinationFileName = "";
 
     public ExtensionStoreDownloaderItem(ExtensionStoreDownloaderPackageInfoModel extensionStoreDownloaderPackageInfoModel)
     {
@@ -54,11 +35,11 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
         PackageInfo = extensionStoreDownloaderPackageInfoModel;
     }
 
-    private void ExtensionStoreDownloaderItem_Load(object sender, EventArgs e)
+    private async void ExtensionStoreDownloaderItem_Load(object sender, EventArgs e)
     {
         try
         {
-            DownloadAndInstallPackage();
+            await DownloadAndInstallPackage();
         }
         catch (Exception ex)
         {
@@ -67,133 +48,121 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
             {
                 lblStatus.Text = LanguageManager.Strings.Error;
             });
+            Cancel();
         }
     }
 
-    private void DownloadAndInstallPackage()
+    public void Cancel()
     {
+        _cancellationTokenSource.Cancel();
+        Invoke(() =>
+        {
+            lblStatus.Text = LanguageManager.Strings.Cancelled;
+            progressBar.Visible = false;
+            btnAbort.Visible = false;
+        });
+
+        OnInstallationCompleted?.Invoke(this, EventArgs.Empty);
+    }
+
+    private async Task DownloadAndInstallPackage()
+    {
+        var cancellationToken = _cancellationTokenSource.Token;
         Invoke(() =>
         {
             lblStatus.Text = LanguageManager.Strings.Preparing;
         });
-        using (_webClient = new WebClient())
+
+        var extensionUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/extensions/{PackageInfo.PackageId}?apiVersion={MacroDeck.PluginApiVersion}";
+        var fileUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/files/{PackageInfo.PackageId}?apiVersion={MacroDeck.PluginApiVersion}";
+        using var httpClient = new HttpClient();
+        var file = await httpClient.GetFromJsonAsync<ApiV2ExtensionFile>(fileUrl, cancellationToken);
+        if (file == null)
         {
-            ExtensionModel = JsonConvert.DeserializeObject<ExtensionStoreExtensionModel>(_webClient.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=info&package-id={PackageInfo.PackageId}"), new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-                NullValueHandling = NullValueHandling.Ignore,
-                Error = (sender, args) => {
-                    MacroDeckLogger.Error(typeof(ExtensionStoreDownloaderItem), "Error while deserializing the ExtensionStoreModel file: " + args.ErrorContext.Error.Message);
-                    args.ErrorContext.Handled = true;
-                },
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            });
-            _webClient.DownloadProgressChanged += Wc_DownloadProgressChanged;
-            _webClient.DownloadFileCompleted += Wc_DownloadFileCompleted;
-            var url = $"https://macrodeck.org/files/extensionstore/{ExtensionModel.PackageId}/{ExtensionModel.Filename}";
-
-            var iconBitmap = Resources.Macro_Deck_2021_update;
-            try
-            {
-                iconBitmap = (Bitmap)Base64.GetImageFromBase64(ExtensionModel.IconBase64);
-            } catch { }
-
-            Invoke(() =>
-            {
-                extensionIcon.BackgroundImage = iconBitmap;
-                lblPackageName.Text = string.Format(LanguageManager.Strings.ExtensionStoreDownloaderPackageIdVersion, PackageInfo.PackageId, ExtensionModel.Version);
-            });
-
-            MacroDeckLogger.Trace(typeof(ExtensionStoreDownloaderItem), $"Download {url}");
-            _webClient.DownloadFileAsync(new Uri(url), Path.Combine(ApplicationPaths.TempDirectoryPath, ExtensionModel.Filename));
-
-        }
-    }
-
-    private void Wc_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
-    {
-        if (e.Cancelled)
-        {
+            lblStatus.Text = LanguageManager.Strings.Error;
             return;
         }
+        var downloadUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/files/download/{PackageInfo.PackageId}?fileVersion={file.Version}";
+        var iconUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/extensions/icon/{PackageInfo.PackageId}";
+        ApiV2Extension = await httpClient.GetFromJsonAsync<ApiV2Extension>(extensionUrl, cancellationToken) ??
+                         throw new InvalidOperationException();
+        
+        _destinationFileName = Path.Combine(ApplicationPaths.TempDirectoryPath, $"{ApiV2Extension.PackageId}.zip");
+
+        using var iconStream = await FileDownloader.DownloadImageAsync(iconUrl, CancellationToken.None);
+        var icon = Image.FromStream(iconStream);
+
+        Invoke(() =>
+        {
+            extensionIcon.BackgroundImage = icon;
+            lblPackageName.Text = string.Format(LanguageManager.Strings.ExtensionStoreDownloaderPackageIdVersion, PackageInfo.PackageId, "latest");
+        });
+        
+        await FileDownloader.DownloadFileAsync(downloadUrl, 
+            _destinationFileName,
+            new Progress<DownloadProgressInfo>(UpdateProgress), 
+            cancellationToken);
+        
         Invoke(() =>
         {
             progressBar.Visible = false;
             lblStatus.Text = LanguageManager.Strings.Installing;
         });
-        try
-        {
-            Install();
-        }
-        catch (Exception ex)
-        {
-            
-        }
+        
+        await Install(file.FileHash, cancellationToken);
     }
-
-    private void Wc_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+    
+    private void UpdateProgress(DownloadProgressInfo progressInfo)
     {
-        if (Cancel)
+        if (InvokeRequired)
         {
+            Invoke(new Action<DownloadProgressInfo>(UpdateProgress), progressInfo);
             return;
         }
-        Invoke(() =>
-        {
-            progressBar.Visible = true;
-            lblStatus.Text = $"{LanguageManager.Strings.Downloading} {(e.BytesReceived / 1024f / 1024f).ToString("0.00")} MB / {(e.TotalBytesToReceive / 1024f / 1024f).ToString("0.00")} MB";
-            progressBar.Progress = e.ProgressPercentage;
-        });
+
+        progressBar.Visible = true;
+        lblStatus.Text =
+            $@"{(progressInfo.DownloadedBytes / (1024.0 * 1024.0)):0.00} MB "
+            + $@"/ {(progressInfo.TotalBytes / (1024.0 * 1024.0)):0.00} MB "
+            + $@"@ {(progressInfo.DownloadSpeed / (1024.0 * 1024.0)):0.00} MB/s";
+        progressBar.Progress = (int)(progressInfo.DownloadedBytes * 100L / progressInfo.TotalBytes);
     }
 
-    private void Install()
+    private async Task Install(string expectedFileHash, CancellationToken cancellationToken)
     {
-        if (!File.Exists(Path.Combine(ApplicationPaths.TempDirectoryPath, ExtensionModel.Filename)))
+        if (!File.Exists(_destinationFileName))
         {
             Finished();
-            MacroDeckLogger.Error(GetType(), $"Download of {ExtensionModel.Name} failed: {ExtensionModel.Filename} not found");
+            MacroDeckLogger.Error(GetType(), $"Download of {ApiV2Extension.Name} failed: {ApiV2Extension.PackageId ?? "unknown.zip"} not found");
             return;
         }
 
-        using (var stream = File.OpenRead(Path.Combine(ApplicationPaths.TempDirectoryPath, ExtensionModel.Filename)))
+        var hash = await Sha256Utils.CalculateSha256Hash(_destinationFileName);
+        if (!expectedFileHash.Equals(hash))
         {
-            using (var md5 = MD5.Create())
-            {
-                var hash = md5.ComputeHash(stream);
-                var checksumString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                if (!checksumString.Equals(ExtensionModel.Md5Checksum))
-                {
-                    Finished();
-                    MacroDeckLogger.Error(GetType(), $"md5 checksum of {ExtensionModel.Name} not matching!" + Environment.NewLine +
-                                                     $"md5 checksum on server: {ExtensionModel.Md5Checksum}" + Environment.NewLine +
-                                                     $"md5 checksum of downloaded file: {checksumString}");
-                    return;
-                }
-            }
+            Finished();
+            MacroDeckLogger.Error(GetType(), $"Checksum of {ApiV2Extension.Name} not matching!" + Environment.NewLine +
+                                             $"Checksum on server: {expectedFileHash}" + Environment.NewLine +
+                                             $"Checksum of downloaded file: {hash}");
+            return;
         }
 
-        MacroDeckLogger.Info(GetType(), $"Start installation of {ExtensionModel.Name} version {ExtensionModel.Version}");
+        MacroDeckLogger.Info(GetType(), $"Start installation of {ApiV2Extension.Name} version latest");
 
 
         ExtensionManifestModel extensionManifestModel;
         try
         {
-            extensionManifestModel = ExtensionManifestModel.FromZipFilePath(Path.Combine(ApplicationPaths.TempDirectoryPath, ExtensionModel.Filename));
+            extensionManifestModel = ExtensionManifestModel.FromZipFilePath(_destinationFileName) ?? throw new InvalidOperationException();
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(GetType(), $"Error while deserializing ExtensionManifest for {ExtensionModel.Name}: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            MacroDeckLogger.Error(GetType(), $"Error while deserializing ExtensionManifest for {ApiV2Extension.Name}: " + ex.Message + Environment.NewLine + ex.StackTrace);
             Finished();
             return;
         }
 
-        if (extensionManifestModel == null)
-        {
-            MacroDeckLogger.Error(GetType(), $"ExtensionManifest for {ExtensionModel.Name} not found. Installation aborted!");
-            Finished();
-            return;
-        }
-
-        if (Cancel)
+        if (cancellationToken.IsCancellationRequested)
         {
             return;
         }
@@ -202,11 +171,11 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
             case ExtensionType.Plugin:
                 try
                 {
-                    PluginManager.InstallPluginFromZip(Path.Combine(ApplicationPaths.TempDirectoryPath, ExtensionModel.Filename));
+                    PluginManager.InstallPluginFromZip(_destinationFileName);
                 }
                 catch (Exception ex)
                 {
-                    MacroDeckLogger.Error(GetType(), $"Error while installing {ExtensionModel.Name}: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                    MacroDeckLogger.Error(GetType(), $"Error while installing {ApiV2Extension.Name}: " + ex.Message + Environment.NewLine + ex.StackTrace);
                     Finished();
                     return;
                 }
@@ -214,11 +183,11 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
             case ExtensionType.IconPack:
                 try
                 {
-                    IconManager.InstallIconPackZip(Path.Combine(ApplicationPaths.TempDirectoryPath, ExtensionModel.Filename), true);
+                    IconManager.InstallIconPackZip(_destinationFileName, true);
                 }
                 catch (Exception ex)
                 {
-                    MacroDeckLogger.Error(GetType(), $"Error while installing {ExtensionModel.Name}: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                    MacroDeckLogger.Error(GetType(), $"Error while installing {ApiV2Extension.Name}: " + ex.Message + Environment.NewLine + ex.StackTrace);
                     Finished();
                     return;
                 }
@@ -227,13 +196,13 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
 
         try
         {
-            if (Directory.Exists(Path.Combine(ApplicationPaths.TempDirectoryPath, ExtensionModel.PackageId)))
+            if (Directory.Exists(Path.Combine(ApplicationPaths.TempDirectoryPath, ApiV2Extension.PackageId ?? "unknown")))
             {
-                Directory.Delete(Path.Combine(ApplicationPaths.TempDirectoryPath, ExtensionModel.PackageId), true);
+                Directory.Delete(Path.Combine(ApplicationPaths.TempDirectoryPath, ApiV2Extension.PackageId ?? "unknown"), true);
             }
-            if (File.Exists(Path.Combine(ApplicationPaths.TempDirectoryPath, ExtensionModel.Filename)))
+            if (File.Exists(_destinationFileName))
             {
-                File.Delete(Path.Combine(ApplicationPaths.TempDirectoryPath, ExtensionModel.Filename));
+                File.Delete(_destinationFileName);
             }
         }
         catch { }
@@ -253,9 +222,6 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
 
     private void BtnAbort_Click(object sender, EventArgs e)
     {
-        if (!Cancel)
-        {
-            Cancel = true;
-        }
+        Cancel();
     }
 }
