@@ -185,7 +185,7 @@ public static class VariableManager
         _database = new SQLiteConnection(ApplicationPaths.VariablesFilePath);
             
         _database.CreateTable<Variable>();
-        _database.Table<Variable>().Where(x => x.Name.Length < 1).Delete();
+        _database.Table<Variable>().Where(x => x.Name == "").Delete();
         MacroDeckLogger.Info(typeof(VariableManager), ListVariables.Count() + " variables found");
     }
 
