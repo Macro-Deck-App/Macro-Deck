@@ -74,10 +74,16 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
         });
 
         var extensionUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/extensions/{PackageInfo.PackageId}?apiVersion={MacroDeck.PluginApiVersion}";
-        var downloadUrl =
-            $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/files/download/{PackageInfo.PackageId}";
-        var iconUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/extensions/icon/{PackageInfo.PackageId}";
+        var fileUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/files/{PackageInfo.PackageId}?apiVersion={MacroDeck.PluginApiVersion}";
         using var httpClient = new HttpClient();
+        var file = await httpClient.GetFromJsonAsync<ApiV2ExtensionFile>(fileUrl, cancellationToken);
+        if (file == null)
+        {
+            lblStatus.Text = LanguageManager.Strings.Error;
+            return;
+        }
+        var downloadUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/files/download/{PackageInfo.PackageId}?fileVersion={file.Version}";
+        var iconUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/extensions/icon/{PackageInfo.PackageId}";
         ApiV2Extension = await httpClient.GetFromJsonAsync<ApiV2Extension>(extensionUrl, cancellationToken) ??
                          throw new InvalidOperationException();
         
@@ -103,7 +109,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
             lblStatus.Text = LanguageManager.Strings.Installing;
         });
         
-        Install(cancellationToken);
+        await Install(file.FileHash, cancellationToken);
     }
     
     private void UpdateProgress(DownloadProgressInfo progressInfo)
@@ -116,13 +122,13 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
 
         progressBar.Visible = true;
         lblStatus.Text =
-            $@"{(progressInfo.DownloadedBytes / (1024.0 * 1024.0)).ToString("0.00")} MB "
-            + $@"/ {(progressInfo.TotalBytes / (1024.0 * 1024.0)).ToString("0.00")} MB "
-            + $@"@ {(progressInfo.DownloadSpeed / (1024.0 * 1024.0)).ToString("0.00")} MB/s";
+            $@"{(progressInfo.DownloadedBytes / (1024.0 * 1024.0)):0.00} MB "
+            + $@"/ {(progressInfo.TotalBytes / (1024.0 * 1024.0)):0.00} MB "
+            + $@"@ {(progressInfo.DownloadSpeed / (1024.0 * 1024.0)):0.00} MB/s";
         progressBar.Progress = (int)(progressInfo.DownloadedBytes * 100L / progressInfo.TotalBytes);
     }
 
-    private void Install(CancellationToken cancellationToken)
+    private async Task Install(string expectedFileHash, CancellationToken cancellationToken)
     {
         if (!File.Exists(_destinationFileName))
         {
@@ -131,21 +137,14 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
             return;
         }
 
-        using (var stream = File.OpenRead(_destinationFileName))
+        var hash = await Sha256Utils.CalculateSha256Hash(_destinationFileName);
+        if (!expectedFileHash.Equals(hash))
         {
-            using (var md5 = MD5.Create())
-            {
-                var hash = md5.ComputeHash(stream);
-                var checksumString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                /*if (!checksumString.Equals(ExtensionModel.Md5Checksum))
-                {
-                    Finished();
-                    MacroDeckLogger.Error(GetType(), $"md5 checksum of {ApiV2Extension.Name} not matching!" + Environment.NewLine +
-                                                     $"md5 checksum on server: {ExtensionModel.Md5Checksum}" + Environment.NewLine +
-                                                     $"md5 checksum of downloaded file: {checksumString}");
-                    return;
-                }*/
-            }
+            Finished();
+            MacroDeckLogger.Error(GetType(), $"Checksum of {ApiV2Extension.Name} not matching!" + Environment.NewLine +
+                                             $"Checksum on server: {expectedFileHash}" + Environment.NewLine +
+                                             $"Checksum of downloaded file: {hash}");
+            return;
         }
 
         MacroDeckLogger.Info(GetType(), $"Start installation of {ApiV2Extension.Name} version latest");

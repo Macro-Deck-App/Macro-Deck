@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using System.Threading;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Properties;
 
@@ -54,8 +55,9 @@ public partial class ExtensionStoreView : UserControl
             UpdatePagination(cancellationToken);
             await AddExtensions(pagedList.Items ?? new List<ApiV2ExtensionSummary>(), cancellationToken);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            MacroDeckLogger.Error($"Error while loading extensions from the extension store:\n{ex.Message}");
         }
         finally
         {
