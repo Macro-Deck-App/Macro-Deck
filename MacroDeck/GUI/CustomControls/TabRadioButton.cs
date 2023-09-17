@@ -46,7 +46,7 @@ public partial class TabRadioButton : RadioButton
             Y = rectSurface.Height - 3,
         };
         using (var backgroundBrush = new SolidBrush(Parent.BackColor))
-        using (var selectedBrush = new SolidBrush(!DesignMode ? Colors.WindowsAccentColor : Colors.DefaultAccentColor))
+        using (var selectedBrush = new SolidBrush(!DesignMode ? Colors.AccentColor : Colors.AccentColor))
         using (var hoverBrush = new SolidBrush(Color.White))
         {
             pe.Graphics.FillRectangle(backgroundBrush, rectSurface);

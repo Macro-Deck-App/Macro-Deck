@@ -107,17 +107,17 @@ public partial class ButtonRadioButton : RadioButton
         using var penSurface = new Pen(Parent.BackColor, smoothSize);
         if (Checked)
         {
-            pe.Graphics.FillRectangle(new SolidBrush(Colors.WindowsAccentColorDark), rectSurface);
+            pe.Graphics.FillRectangle(new SolidBrush(Colors.AccentColorDark), rectSurface);
         }
         else
         {
             if (_hover)
             {
-                pe.Graphics.FillRectangle(new SolidBrush(Colors.WindowsAccentColorLight), rectSurface);
+                pe.Graphics.FillRectangle(new SolidBrush(Colors.AccentColorLight), rectSurface);
             }
             else
             {
-                pe.Graphics.FillRectangle(new SolidBrush(Colors.WindowsAccentColor), rectSurface);
+                pe.Graphics.FillRectangle(new SolidBrush(Colors.AccentColor), rectSurface);
             }
         }
 

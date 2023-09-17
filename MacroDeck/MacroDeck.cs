@@ -94,7 +94,6 @@ public class MacroDeck : NativeWindow
         
         Configuration = MainConfiguration.LoadFromFile(ApplicationPaths.MainConfigFilePath);
         LanguageManager.SetLanguage(Configuration.Language);
-        Colors.Initialize();
         _ = new HotkeyManager();
         VariableManager.Initialize();
         PluginManager.Load();

@@ -62,7 +62,7 @@ public partial class ContentSelectorButton : PictureBox
         }
         if (_selected)
         {
-            pe.Graphics.FillRectangle(new SolidBrush(Colors.WindowsAccentColor), Width - 3, 4, 3, Height - 8);
+            pe.Graphics.FillRectangle(new SolidBrush(Colors.AccentColor), Width - 3, 4, 3, Height - 8);
         }
     }
 }
