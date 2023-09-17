@@ -20,7 +20,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         /// <param name="disposing">True, wenn verwaltete Ressourcen gelöscht werden sollen; andernfalls False.</param>
         protected override void Dispose(bool disposing)
         {
-            Updater.Updater.OnUpdateAvailable -= UpdateAvailable;
             if (disposing && (components != null))
             {
                 components.Dispose();
@@ -36,744 +35,709 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new Container();
+            components = new Container();
             ComponentResourceManager resources = new ComponentResourceManager(typeof(SettingsView));
-            this.verticalTabControl = new VerticalTabControl();
-            this.tabGeneral = new TabPage();
-            this.checkIconCache = new CheckBox();
-            this.language = new RoundedComboBox();
-            this.lblLanguage = new Label();
-            this.checkStartWindows = new CheckBox();
-            this.lblBehaviour = new Label();
-            this.lblGeneral = new Label();
-            this.tabConnection = new TabPage();
-            this.btnChangePort = new ButtonPrimary();
-            this.groupConnectionInfo = new GroupBox();
-            this.lblConnectionInfo = new Label();
-            this.port = new NumericUpDown();
-            this.lblPort = new Label();
-            this.lblIpAddessLabel = new Label();
-            this.lblIpAddress = new Label();
-            this.networkAdapter = new RoundedComboBox();
-            this.lblNetworkAdapter = new Label();
-            this.lblConnection = new Label();
-            this.tabUpdater = new TabPage();
-            this.checkAutoUpdate = new CheckBox();
-            this.checkInstallBetaVersions = new CheckBox();
-            this.updaterPanel = new Panel();
-            this.btnCheckUpdates = new ButtonPrimary();
-            this.lblInstalledVersion = new Label();
-            this.lblInstalledVersionLabel = new Label();
-            this.lblUpdates = new Label();
-            this.tabBackups = new TabPage();
-            this.btnCreateBackup = new ButtonPrimary();
-            this.backupsPanel = new FlowLayoutPanel();
-            this.lblBackups = new Label();
-            this.tabAbout = new TabPage();
-            this.btnGitHub = new PictureButton();
-            this.lblBuild = new Label();
-            this.lblBuildLabel = new Label();
-            this.label1 = new Label();
-            this.lblTranslationBy = new Label();
-            this.btnLicenses = new ButtonPrimary();
-            this.lblPluginAPIVersion = new Label();
-            this.lblWebsocketAPIVersion = new Label();
-            this.lblPluginAPILabel = new Label();
-            this.lblWebSocketAPILabel = new Label();
-            this.lblInstalledPlugins = new Label();
-            this.lblInstalledPluginsLabel = new Label();
-            this.lblDeveloped = new Label();
-            this.lblMacroDeck = new Label();
-            this.pictureBox1 = new PictureBox();
-            this.tabIcons = new ImageList(this.components);
-            this.verticalTabControl.SuspendLayout();
-            this.tabGeneral.SuspendLayout();
-            this.tabConnection.SuspendLayout();
-            this.groupConnectionInfo.SuspendLayout();
-            ((ISupportInitialize)(this.port)).BeginInit();
-            this.tabUpdater.SuspendLayout();
-            this.tabBackups.SuspendLayout();
-            this.tabAbout.SuspendLayout();
-            ((ISupportInitialize)(this.btnGitHub)).BeginInit();
-            ((ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.SuspendLayout();
+            verticalTabControl = new VerticalTabControl();
+            tabGeneral = new TabPage();
+            checkIconCache = new CheckBox();
+            language = new RoundedComboBox();
+            lblLanguage = new Label();
+            checkStartWindows = new CheckBox();
+            lblBehaviour = new Label();
+            lblGeneral = new Label();
+            tabConnection = new TabPage();
+            btnChangePort = new ButtonPrimary();
+            groupConnectionInfo = new GroupBox();
+            lblConnectionInfo = new Label();
+            port = new NumericUpDown();
+            lblPort = new Label();
+            lblIpAddessLabel = new Label();
+            lblIpAddress = new Label();
+            networkAdapter = new RoundedComboBox();
+            lblNetworkAdapter = new Label();
+            lblConnection = new Label();
+            tabUpdater = new TabPage();
+            label2 = new Label();
+            checkAutoUpdate = new CheckBox();
+            checkInstallBetaVersions = new CheckBox();
+            btnCheckUpdates = new ButtonPrimary();
+            lblInstalledVersion = new Label();
+            lblInstalledVersionLabel = new Label();
+            lblUpdates = new Label();
+            tabBackups = new TabPage();
+            btnCreateBackup = new ButtonPrimary();
+            backupsPanel = new FlowLayoutPanel();
+            lblBackups = new Label();
+            tabAbout = new TabPage();
+            btnGitHub = new PictureButton();
+            label1 = new Label();
+            lblTranslationBy = new Label();
+            btnLicenses = new ButtonPrimary();
+            lblPluginAPIVersion = new Label();
+            lblWebsocketAPIVersion = new Label();
+            lblPluginAPILabel = new Label();
+            lblWebSocketAPILabel = new Label();
+            lblInstalledPlugins = new Label();
+            lblInstalledPluginsLabel = new Label();
+            lblDeveloped = new Label();
+            lblMacroDeck = new Label();
+            pictureBox1 = new PictureBox();
+            tabIcons = new ImageList(components);
+            verticalTabControl.SuspendLayout();
+            tabGeneral.SuspendLayout();
+            tabConnection.SuspendLayout();
+            groupConnectionInfo.SuspendLayout();
+            ((ISupportInitialize)port).BeginInit();
+            tabUpdater.SuspendLayout();
+            tabBackups.SuspendLayout();
+            tabAbout.SuspendLayout();
+            ((ISupportInitialize)btnGitHub).BeginInit();
+            ((ISupportInitialize)pictureBox1).BeginInit();
+            SuspendLayout();
             // 
             // verticalTabControl
             // 
-            this.verticalTabControl.Alignment = TabAlignment.Left;
-            this.verticalTabControl.Anchor = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom) 
-                                                               | AnchorStyles.Left) 
-                                                              | AnchorStyles.Right)));
-            this.verticalTabControl.Controls.Add(this.tabGeneral);
-            this.verticalTabControl.Controls.Add(this.tabConnection);
-            this.verticalTabControl.Controls.Add(this.tabUpdater);
-            this.verticalTabControl.Controls.Add(this.tabBackups);
-            this.verticalTabControl.Controls.Add(this.tabAbout);
-            this.verticalTabControl.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
-            this.verticalTabControl.ImageList = this.tabIcons;
-            this.verticalTabControl.ItemSize = new Size(44, 200);
-            this.verticalTabControl.Location = new Point(3, 3);
-            this.verticalTabControl.Multiline = true;
-            this.verticalTabControl.Name = "verticalTabControl";
-            this.verticalTabControl.SelectedIndex = 0;
-            this.verticalTabControl.SelectedTabColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(225)))));
-            this.verticalTabControl.Size = new Size(1131, 534);
-            this.verticalTabControl.SizeMode = TabSizeMode.Fixed;
-            this.verticalTabControl.TabIndex = 12;
+            verticalTabControl.Alignment = TabAlignment.Left;
+            verticalTabControl.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            verticalTabControl.Controls.Add(tabGeneral);
+            verticalTabControl.Controls.Add(tabConnection);
+            verticalTabControl.Controls.Add(tabUpdater);
+            verticalTabControl.Controls.Add(tabBackups);
+            verticalTabControl.Controls.Add(tabAbout);
+            verticalTabControl.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            verticalTabControl.ImageList = tabIcons;
+            verticalTabControl.ItemSize = new Size(44, 200);
+            verticalTabControl.Location = new Point(3, 3);
+            verticalTabControl.Multiline = true;
+            verticalTabControl.Name = "verticalTabControl";
+            verticalTabControl.SelectedIndex = 0;
+            verticalTabControl.SelectedTabColor = Color.FromArgb(0, 103, 225);
+            verticalTabControl.Size = new Size(1131, 534);
+            verticalTabControl.SizeMode = TabSizeMode.Fixed;
+            verticalTabControl.TabIndex = 12;
             // 
             // tabGeneral
             // 
-            this.tabGeneral.BackColor = Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.tabGeneral.Controls.Add(this.checkIconCache);
-            this.tabGeneral.Controls.Add(this.language);
-            this.tabGeneral.Controls.Add(this.lblLanguage);
-            this.tabGeneral.Controls.Add(this.checkStartWindows);
-            this.tabGeneral.Controls.Add(this.lblBehaviour);
-            this.tabGeneral.Controls.Add(this.lblGeneral);
-            this.tabGeneral.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
-            this.tabGeneral.ForeColor = Color.White;
-            this.tabGeneral.Location = new Point(204, 4);
-            this.tabGeneral.Name = "tabGeneral";
-            this.tabGeneral.Padding = new Padding(3);
-            this.tabGeneral.Size = new Size(923, 526);
-            this.tabGeneral.TabIndex = 0;
-            this.tabGeneral.Text = "General";
+            tabGeneral.BackColor = Color.FromArgb(45, 45, 45);
+            tabGeneral.Controls.Add(checkIconCache);
+            tabGeneral.Controls.Add(language);
+            tabGeneral.Controls.Add(lblLanguage);
+            tabGeneral.Controls.Add(checkStartWindows);
+            tabGeneral.Controls.Add(lblBehaviour);
+            tabGeneral.Controls.Add(lblGeneral);
+            tabGeneral.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            tabGeneral.ForeColor = Color.White;
+            tabGeneral.Location = new Point(204, 4);
+            tabGeneral.Name = "tabGeneral";
+            tabGeneral.Padding = new Padding(3);
+            tabGeneral.Size = new Size(923, 526);
+            tabGeneral.TabIndex = 0;
+            tabGeneral.Text = "General";
             // 
             // checkIconCache
             // 
-            this.checkIconCache.AutoSize = true;
-            this.checkIconCache.Location = new Point(13, 112);
-            this.checkIconCache.Name = "checkIconCache";
-            this.checkIconCache.Size = new Size(375, 23);
-            this.checkIconCache.TabIndex = 14;
-            this.checkIconCache.Text = "Enable icon cache (faster; higher memory usage)";
-            this.checkIconCache.UseMnemonic = false;
-            this.checkIconCache.UseVisualStyleBackColor = true;
-            this.checkIconCache.CheckedChanged += new EventHandler(this.CheckIconCache_CheckedChanged);
+            checkIconCache.AutoSize = true;
+            checkIconCache.Location = new Point(13, 112);
+            checkIconCache.Name = "checkIconCache";
+            checkIconCache.Size = new Size(375, 23);
+            checkIconCache.TabIndex = 14;
+            checkIconCache.Text = "Enable icon cache (faster; higher memory usage)";
+            checkIconCache.UseMnemonic = false;
+            checkIconCache.UseVisualStyleBackColor = true;
+            checkIconCache.CheckedChanged += CheckIconCache_CheckedChanged;
             // 
             // language
             // 
-            this.language.BackColor = Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.language.Cursor = Cursors.Hand;
-            this.language.DropDownStyle = ComboBoxStyle.DropDownList;
-            this.language.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
-            this.language.ForeColor = Color.White;
-            this.language.Icon = null;
-            this.language.Location = new Point(12, 222);
-            this.language.Name = "language";
-            this.language.Padding = new Padding(8, 2, 8, 2);
-            this.language.SelectedIndex = -1;
-            this.language.SelectedItem = null;
-            this.language.Size = new Size(253, 31);
-            this.language.TabIndex = 4;
-            this.language.SelectedIndexChanged += new EventHandler(this.Language_SelectedIndexChanged);
+            language.BackColor = Color.FromArgb(65, 65, 65);
+            language.Cursor = Cursors.Hand;
+            language.DropDownStyle = ComboBoxStyle.DropDownList;
+            language.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            language.ForeColor = Color.White;
+            language.Icon = null;
+            language.Location = new Point(12, 222);
+            language.Name = "language";
+            language.Padding = new Padding(8, 2, 8, 2);
+            language.SelectedIndex = -1;
+            language.SelectedItem = null;
+            language.Size = new Size(253, 31);
+            language.TabIndex = 4;
+            language.SelectedIndexChanged += Language_SelectedIndexChanged;
             // 
             // lblLanguage
             // 
-            this.lblLanguage.AutoSize = true;
-            this.lblLanguage.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblLanguage.ForeColor = Color.Gray;
-            this.lblLanguage.Location = new Point(3, 198);
-            this.lblLanguage.Name = "lblLanguage";
-            this.lblLanguage.Size = new Size(93, 23);
-            this.lblLanguage.TabIndex = 3;
-            this.lblLanguage.Text = "Language";
-            this.lblLanguage.UseMnemonic = false;
+            lblLanguage.AutoSize = true;
+            lblLanguage.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblLanguage.ForeColor = Color.Gray;
+            lblLanguage.Location = new Point(3, 198);
+            lblLanguage.Name = "lblLanguage";
+            lblLanguage.Size = new Size(93, 23);
+            lblLanguage.TabIndex = 3;
+            lblLanguage.Text = "Language";
+            lblLanguage.UseMnemonic = false;
             // 
             // checkStartWindows
             // 
-            this.checkStartWindows.AutoSize = true;
-            this.checkStartWindows.Location = new Point(13, 89);
-            this.checkStartWindows.Name = "checkStartWindows";
-            this.checkStartWindows.Size = new Size(165, 23);
-            this.checkStartWindows.TabIndex = 2;
-            this.checkStartWindows.Text = "Start with Windows";
-            this.checkStartWindows.UseMnemonic = false;
-            this.checkStartWindows.UseVisualStyleBackColor = true;
-            this.checkStartWindows.CheckedChanged += new EventHandler(this.CheckStartWindows_CheckedChanged);
+            checkStartWindows.AutoSize = true;
+            checkStartWindows.Location = new Point(13, 89);
+            checkStartWindows.Name = "checkStartWindows";
+            checkStartWindows.Size = new Size(165, 23);
+            checkStartWindows.TabIndex = 2;
+            checkStartWindows.Text = "Start with Windows";
+            checkStartWindows.UseMnemonic = false;
+            checkStartWindows.UseVisualStyleBackColor = true;
+            checkStartWindows.CheckedChanged += CheckStartWindows_CheckedChanged;
             // 
             // lblBehaviour
             // 
-            this.lblBehaviour.AutoSize = true;
-            this.lblBehaviour.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblBehaviour.ForeColor = Color.Gray;
-            this.lblBehaviour.Location = new Point(3, 63);
-            this.lblBehaviour.Name = "lblBehaviour";
-            this.lblBehaviour.Size = new Size(82, 23);
-            this.lblBehaviour.TabIndex = 1;
-            this.lblBehaviour.Text = "Behavior";
-            this.lblBehaviour.UseMnemonic = false;
+            lblBehaviour.AutoSize = true;
+            lblBehaviour.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblBehaviour.ForeColor = Color.Gray;
+            lblBehaviour.Location = new Point(3, 63);
+            lblBehaviour.Name = "lblBehaviour";
+            lblBehaviour.Size = new Size(82, 23);
+            lblBehaviour.TabIndex = 1;
+            lblBehaviour.Text = "Behavior";
+            lblBehaviour.UseMnemonic = false;
             // 
             // lblGeneral
             // 
-            this.lblGeneral.AutoSize = true;
-            this.lblGeneral.Font = new Font("Tahoma", 15.75F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblGeneral.Location = new Point(3, 0);
-            this.lblGeneral.Name = "lblGeneral";
-            this.lblGeneral.Size = new Size(84, 25);
-            this.lblGeneral.TabIndex = 0;
-            this.lblGeneral.Text = "General";
-            this.lblGeneral.UseMnemonic = false;
+            lblGeneral.AutoSize = true;
+            lblGeneral.Font = new Font("Tahoma", 15.75F, FontStyle.Regular, GraphicsUnit.Point);
+            lblGeneral.Location = new Point(3, 0);
+            lblGeneral.Name = "lblGeneral";
+            lblGeneral.Size = new Size(84, 25);
+            lblGeneral.TabIndex = 0;
+            lblGeneral.Text = "General";
+            lblGeneral.UseMnemonic = false;
             // 
             // tabConnection
             // 
-            this.tabConnection.BackColor = Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.tabConnection.Controls.Add(this.btnChangePort);
-            this.tabConnection.Controls.Add(this.groupConnectionInfo);
-            this.tabConnection.Controls.Add(this.port);
-            this.tabConnection.Controls.Add(this.lblPort);
-            this.tabConnection.Controls.Add(this.lblIpAddessLabel);
-            this.tabConnection.Controls.Add(this.lblIpAddress);
-            this.tabConnection.Controls.Add(this.networkAdapter);
-            this.tabConnection.Controls.Add(this.lblNetworkAdapter);
-            this.tabConnection.Controls.Add(this.lblConnection);
-            this.tabConnection.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            this.tabConnection.ForeColor = Color.White;
-            this.tabConnection.Location = new Point(204, 4);
-            this.tabConnection.Name = "tabConnection";
-            this.tabConnection.Size = new Size(923, 526);
-            this.tabConnection.TabIndex = 3;
-            this.tabConnection.Text = "Connection";
+            tabConnection.BackColor = Color.FromArgb(45, 45, 45);
+            tabConnection.Controls.Add(btnChangePort);
+            tabConnection.Controls.Add(groupConnectionInfo);
+            tabConnection.Controls.Add(port);
+            tabConnection.Controls.Add(lblPort);
+            tabConnection.Controls.Add(lblIpAddessLabel);
+            tabConnection.Controls.Add(lblIpAddress);
+            tabConnection.Controls.Add(networkAdapter);
+            tabConnection.Controls.Add(lblNetworkAdapter);
+            tabConnection.Controls.Add(lblConnection);
+            tabConnection.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            tabConnection.ForeColor = Color.White;
+            tabConnection.Location = new Point(204, 4);
+            tabConnection.Name = "tabConnection";
+            tabConnection.Size = new Size(923, 526);
+            tabConnection.TabIndex = 3;
+            tabConnection.Text = "Connection";
             // 
             // btnChangePort
             // 
-            this.btnChangePort.BorderRadius = 8;
-            this.btnChangePort.Cursor = Cursors.Hand;
-            this.btnChangePort.FlatAppearance.BorderSize = 0;
-            this.btnChangePort.FlatStyle = FlatStyle.Flat;
-            this.btnChangePort.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
-            this.btnChangePort.ForeColor = Color.White;
-            this.btnChangePort.HoverColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
-            this.btnChangePort.Icon = null;
-            this.btnChangePort.Location = new Point(126, 89);
-            this.btnChangePort.Name = "btnChangePort";
-            this.btnChangePort.Progress = 0;
-            this.btnChangePort.ProgressColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
-            this.btnChangePort.Size = new Size(46, 24);
-            this.btnChangePort.TabIndex = 12;
-            this.btnChangePort.Text = "Ok";
-            this.btnChangePort.UseMnemonic = false;
-            this.btnChangePort.UseVisualStyleBackColor = false;
-            this.btnChangePort.UseWindowsAccentColor = true;
-            this.btnChangePort.Click += new EventHandler(this.BtnChangePort_Click);
+            btnChangePort.BorderRadius = 8;
+            btnChangePort.Cursor = Cursors.Hand;
+            btnChangePort.FlatAppearance.BorderSize = 0;
+            btnChangePort.FlatStyle = FlatStyle.Flat;
+            btnChangePort.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnChangePort.ForeColor = Color.White;
+            btnChangePort.HoverColor = Color.FromArgb(0, 89, 184);
+            btnChangePort.Icon = null;
+            btnChangePort.Location = new Point(126, 89);
+            btnChangePort.Name = "btnChangePort";
+            btnChangePort.Progress = 0;
+            btnChangePort.ProgressColor = Color.FromArgb(0, 46, 94);
+            btnChangePort.Size = new Size(46, 24);
+            btnChangePort.TabIndex = 12;
+            btnChangePort.Text = "Ok";
+            btnChangePort.UseMnemonic = false;
+            btnChangePort.UseVisualStyleBackColor = false;
+            btnChangePort.UseWindowsAccentColor = true;
+            btnChangePort.Click += BtnChangePort_Click;
             // 
             // groupConnectionInfo
             // 
-            this.groupConnectionInfo.Anchor = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom) 
-                                                                | AnchorStyles.Left) 
-                                                               | AnchorStyles.Right)));
-            this.groupConnectionInfo.Controls.Add(this.lblConnectionInfo);
-            this.groupConnectionInfo.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.groupConnectionInfo.ForeColor = Color.White;
-            this.groupConnectionInfo.Location = new Point(12, 342);
-            this.groupConnectionInfo.Name = "groupConnectionInfo";
-            this.groupConnectionInfo.Size = new Size(896, 173);
-            this.groupConnectionInfo.TabIndex = 11;
-            this.groupConnectionInfo.TabStop = false;
-            this.groupConnectionInfo.Text = "Info";
+            groupConnectionInfo.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupConnectionInfo.Controls.Add(lblConnectionInfo);
+            groupConnectionInfo.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
+            groupConnectionInfo.ForeColor = Color.White;
+            groupConnectionInfo.Location = new Point(12, 342);
+            groupConnectionInfo.Name = "groupConnectionInfo";
+            groupConnectionInfo.Size = new Size(896, 173);
+            groupConnectionInfo.TabIndex = 11;
+            groupConnectionInfo.TabStop = false;
+            groupConnectionInfo.Text = "Info";
             // 
             // lblConnectionInfo
             // 
-            this.lblConnectionInfo.Dock = DockStyle.Fill;
-            this.lblConnectionInfo.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblConnectionInfo.Location = new Point(3, 26);
-            this.lblConnectionInfo.Name = "lblConnectionInfo";
-            this.lblConnectionInfo.Size = new Size(890, 144);
-            this.lblConnectionInfo.TabIndex = 0;
-            this.lblConnectionInfo.Text = resources.GetString("lblConnectionInfo.Text");
-            this.lblConnectionInfo.UseMnemonic = false;
+            lblConnectionInfo.Dock = DockStyle.Fill;
+            lblConnectionInfo.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblConnectionInfo.Location = new Point(3, 26);
+            lblConnectionInfo.Name = "lblConnectionInfo";
+            lblConnectionInfo.Size = new Size(890, 144);
+            lblConnectionInfo.TabIndex = 0;
+            lblConnectionInfo.Text = resources.GetString("lblConnectionInfo.Text");
+            lblConnectionInfo.UseMnemonic = false;
             // 
             // port
             // 
-            this.port.BackColor = Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.port.BorderStyle = BorderStyle.FixedSingle;
-            this.port.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.port.ForeColor = Color.White;
-            this.port.Location = new Point(13, 89);
-            this.port.Maximum = new decimal(new int[] {
-            65535,
-            0,
-            0,
-            0});
-            this.port.Name = "port";
-            this.port.Size = new Size(107, 26);
-            this.port.TabIndex = 9;
-            this.port.Value = new decimal(new int[] {
-            8191,
-            0,
-            0,
-            0});
+            port.BackColor = Color.FromArgb(65, 65, 65);
+            port.BorderStyle = BorderStyle.FixedSingle;
+            port.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            port.ForeColor = Color.White;
+            port.Location = new Point(13, 89);
+            port.Maximum = new decimal(new int[] { 65535, 0, 0, 0 });
+            port.Name = "port";
+            port.Size = new Size(107, 26);
+            port.TabIndex = 9;
+            port.Value = new decimal(new int[] { 8191, 0, 0, 0 });
             // 
             // lblPort
             // 
-            this.lblPort.AutoSize = true;
-            this.lblPort.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblPort.ForeColor = Color.Gray;
-            this.lblPort.Location = new Point(3, 63);
-            this.lblPort.Name = "lblPort";
-            this.lblPort.Size = new Size(43, 23);
-            this.lblPort.TabIndex = 8;
-            this.lblPort.Text = "Port";
-            this.lblPort.UseMnemonic = false;
+            lblPort.AutoSize = true;
+            lblPort.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblPort.ForeColor = Color.Gray;
+            lblPort.Location = new Point(3, 63);
+            lblPort.Name = "lblPort";
+            lblPort.Size = new Size(43, 23);
+            lblPort.TabIndex = 8;
+            lblPort.Text = "Port";
+            lblPort.UseMnemonic = false;
             // 
             // lblIpAddessLabel
             // 
-            this.lblIpAddessLabel.AutoSize = true;
-            this.lblIpAddessLabel.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblIpAddessLabel.Location = new Point(18, 280);
-            this.lblIpAddessLabel.Name = "lblIpAddessLabel";
-            this.lblIpAddessLabel.Size = new Size(83, 18);
-            this.lblIpAddessLabel.TabIndex = 7;
-            this.lblIpAddessLabel.Text = "IP address:";
-            this.lblIpAddessLabel.UseMnemonic = false;
-            this.lblIpAddessLabel.Visible = false;
+            lblIpAddessLabel.AutoSize = true;
+            lblIpAddessLabel.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblIpAddessLabel.Location = new Point(18, 280);
+            lblIpAddessLabel.Name = "lblIpAddessLabel";
+            lblIpAddessLabel.Size = new Size(83, 18);
+            lblIpAddessLabel.TabIndex = 7;
+            lblIpAddessLabel.Text = "IP address:";
+            lblIpAddessLabel.UseMnemonic = false;
+            lblIpAddessLabel.Visible = false;
             // 
             // lblIpAddress
             // 
-            this.lblIpAddress.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblIpAddress.Location = new Point(107, 280);
-            this.lblIpAddress.Name = "lblIpAddress";
-            this.lblIpAddress.Size = new Size(187, 17);
-            this.lblIpAddress.TabIndex = 6;
-            this.lblIpAddress.Text = "0.0.0.0";
-            this.lblIpAddress.UseMnemonic = false;
-            this.lblIpAddress.Visible = false;
+            lblIpAddress.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblIpAddress.Location = new Point(107, 280);
+            lblIpAddress.Name = "lblIpAddress";
+            lblIpAddress.Size = new Size(187, 17);
+            lblIpAddress.TabIndex = 6;
+            lblIpAddress.Text = "0.0.0.0";
+            lblIpAddress.UseMnemonic = false;
+            lblIpAddress.Visible = false;
             // 
             // networkAdapter
             // 
-            this.networkAdapter.BackColor = Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.networkAdapter.Cursor = Cursors.Hand;
-            this.networkAdapter.DropDownStyle = ComboBoxStyle.DropDownList;
-            this.networkAdapter.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
-            this.networkAdapter.ForeColor = Color.White;
-            this.networkAdapter.Icon = null;
-            this.networkAdapter.Location = new Point(18, 245);
-            this.networkAdapter.Margin = new Padding(4);
-            this.networkAdapter.Name = "networkAdapter";
-            this.networkAdapter.Padding = new Padding(8, 2, 8, 2);
-            this.networkAdapter.SelectedIndex = -1;
-            this.networkAdapter.SelectedItem = null;
-            this.networkAdapter.Size = new Size(276, 31);
-            this.networkAdapter.TabIndex = 5;
-            this.networkAdapter.Visible = false;
-            this.networkAdapter.SelectedIndexChanged += new EventHandler(this.NetworkAdapter_SelectedIndexChanged);
+            networkAdapter.BackColor = Color.FromArgb(65, 65, 65);
+            networkAdapter.Cursor = Cursors.Hand;
+            networkAdapter.DropDownStyle = ComboBoxStyle.DropDownList;
+            networkAdapter.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            networkAdapter.ForeColor = Color.White;
+            networkAdapter.Icon = null;
+            networkAdapter.Location = new Point(18, 245);
+            networkAdapter.Margin = new Padding(4);
+            networkAdapter.Name = "networkAdapter";
+            networkAdapter.Padding = new Padding(8, 2, 8, 2);
+            networkAdapter.SelectedIndex = -1;
+            networkAdapter.SelectedItem = null;
+            networkAdapter.Size = new Size(276, 31);
+            networkAdapter.TabIndex = 5;
+            networkAdapter.Visible = false;
+            networkAdapter.SelectedIndexChanged += NetworkAdapter_SelectedIndexChanged;
             // 
             // lblNetworkAdapter
             // 
-            this.lblNetworkAdapter.AutoSize = true;
-            this.lblNetworkAdapter.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblNetworkAdapter.ForeColor = Color.Gray;
-            this.lblNetworkAdapter.Location = new Point(9, 221);
-            this.lblNetworkAdapter.Name = "lblNetworkAdapter";
-            this.lblNetworkAdapter.Size = new Size(150, 23);
-            this.lblNetworkAdapter.TabIndex = 2;
-            this.lblNetworkAdapter.Text = "Network adapter";
-            this.lblNetworkAdapter.UseMnemonic = false;
-            this.lblNetworkAdapter.Visible = false;
+            lblNetworkAdapter.AutoSize = true;
+            lblNetworkAdapter.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblNetworkAdapter.ForeColor = Color.Gray;
+            lblNetworkAdapter.Location = new Point(9, 221);
+            lblNetworkAdapter.Name = "lblNetworkAdapter";
+            lblNetworkAdapter.Size = new Size(150, 23);
+            lblNetworkAdapter.TabIndex = 2;
+            lblNetworkAdapter.Text = "Network adapter";
+            lblNetworkAdapter.UseMnemonic = false;
+            lblNetworkAdapter.Visible = false;
             // 
             // lblConnection
             // 
-            this.lblConnection.AutoSize = true;
-            this.lblConnection.Font = new Font("Tahoma", 15.75F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblConnection.Location = new Point(3, 0);
-            this.lblConnection.Name = "lblConnection";
-            this.lblConnection.Size = new Size(116, 25);
-            this.lblConnection.TabIndex = 1;
-            this.lblConnection.Text = "Connection";
-            this.lblConnection.UseMnemonic = false;
+            lblConnection.AutoSize = true;
+            lblConnection.Font = new Font("Tahoma", 15.75F, FontStyle.Regular, GraphicsUnit.Point);
+            lblConnection.Location = new Point(3, 0);
+            lblConnection.Name = "lblConnection";
+            lblConnection.Size = new Size(116, 25);
+            lblConnection.TabIndex = 1;
+            lblConnection.Text = "Connection";
+            lblConnection.UseMnemonic = false;
             // 
             // tabUpdater
             // 
-            this.tabUpdater.BackColor = Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.tabUpdater.Controls.Add(this.checkAutoUpdate);
-            this.tabUpdater.Controls.Add(this.checkInstallBetaVersions);
-            this.tabUpdater.Controls.Add(this.updaterPanel);
-            this.tabUpdater.Controls.Add(this.btnCheckUpdates);
-            this.tabUpdater.Controls.Add(this.lblInstalledVersion);
-            this.tabUpdater.Controls.Add(this.lblInstalledVersionLabel);
-            this.tabUpdater.Controls.Add(this.lblUpdates);
-            this.tabUpdater.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
-            this.tabUpdater.ForeColor = Color.White;
-            this.tabUpdater.Location = new Point(204, 4);
-            this.tabUpdater.Name = "tabUpdater";
-            this.tabUpdater.Size = new Size(923, 526);
-            this.tabUpdater.TabIndex = 1;
-            this.tabUpdater.Text = "Updates";
+            tabUpdater.BackColor = Color.FromArgb(45, 45, 45);
+            tabUpdater.Controls.Add(label2);
+            tabUpdater.Controls.Add(checkAutoUpdate);
+            tabUpdater.Controls.Add(checkInstallBetaVersions);
+            tabUpdater.Controls.Add(btnCheckUpdates);
+            tabUpdater.Controls.Add(lblInstalledVersion);
+            tabUpdater.Controls.Add(lblInstalledVersionLabel);
+            tabUpdater.Controls.Add(lblUpdates);
+            tabUpdater.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            tabUpdater.ForeColor = Color.White;
+            tabUpdater.Location = new Point(204, 4);
+            tabUpdater.Name = "tabUpdater";
+            tabUpdater.Size = new Size(923, 526);
+            tabUpdater.TabIndex = 1;
+            tabUpdater.Text = "Updates";
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
+            label2.ForeColor = Color.Gray;
+            label2.Location = new Point(3, 63);
+            label2.Name = "label2";
+            label2.Size = new Size(82, 23);
+            label2.TabIndex = 18;
+            label2.Text = "Behavior";
+            label2.UseMnemonic = false;
             // 
             // checkAutoUpdate
             // 
-            this.checkAutoUpdate.AutoSize = true;
-            this.checkAutoUpdate.Location = new Point(13, 28);
-            this.checkAutoUpdate.Name = "checkAutoUpdate";
-            this.checkAutoUpdate.Size = new Size(253, 23);
-            this.checkAutoUpdate.TabIndex = 17;
-            this.checkAutoUpdate.Text = "Automatically check for updates";
-            this.checkAutoUpdate.UseMnemonic = false;
-            this.checkAutoUpdate.UseVisualStyleBackColor = true;
+            checkAutoUpdate.AutoSize = true;
+            checkAutoUpdate.Location = new Point(13, 89);
+            checkAutoUpdate.Name = "checkAutoUpdate";
+            checkAutoUpdate.Size = new Size(253, 23);
+            checkAutoUpdate.TabIndex = 17;
+            checkAutoUpdate.Text = "Automatically check for updates";
+            checkAutoUpdate.UseMnemonic = false;
+            checkAutoUpdate.UseVisualStyleBackColor = true;
             // 
             // checkInstallBetaVersions
             // 
-            this.checkInstallBetaVersions.AutoSize = true;
-            this.checkInstallBetaVersions.Location = new Point(13, 57);
-            this.checkInstallBetaVersions.Name = "checkInstallBetaVersions";
-            this.checkInstallBetaVersions.Size = new Size(169, 23);
-            this.checkInstallBetaVersions.TabIndex = 16;
-            this.checkInstallBetaVersions.Text = "Install Beta versions";
-            this.checkInstallBetaVersions.UseMnemonic = false;
-            this.checkInstallBetaVersions.UseVisualStyleBackColor = true;
-            // 
-            // updaterPanel
-            // 
-            this.updaterPanel.Anchor = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom) 
-                                                         | AnchorStyles.Left) 
-                                                        | AnchorStyles.Right)));
-            this.updaterPanel.Location = new Point(3, 103);
-            this.updaterPanel.Name = "updaterPanel";
-            this.updaterPanel.Size = new Size(920, 420);
-            this.updaterPanel.TabIndex = 14;
+            checkInstallBetaVersions.AutoSize = true;
+            checkInstallBetaVersions.Location = new Point(13, 118);
+            checkInstallBetaVersions.Name = "checkInstallBetaVersions";
+            checkInstallBetaVersions.Size = new Size(169, 23);
+            checkInstallBetaVersions.TabIndex = 16;
+            checkInstallBetaVersions.Text = "Install Beta versions";
+            checkInstallBetaVersions.UseMnemonic = false;
+            checkInstallBetaVersions.UseVisualStyleBackColor = true;
             // 
             // btnCheckUpdates
             // 
-            this.btnCheckUpdates.BorderRadius = 8;
-            this.btnCheckUpdates.Cursor = Cursors.Hand;
-            this.btnCheckUpdates.FlatAppearance.BorderSize = 0;
-            this.btnCheckUpdates.FlatStyle = FlatStyle.Flat;
-            this.btnCheckUpdates.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
-            this.btnCheckUpdates.ForeColor = Color.White;
-            this.btnCheckUpdates.HoverColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
-            this.btnCheckUpdates.Icon = null;
-            this.btnCheckUpdates.Location = new Point(354, 65);
-            this.btnCheckUpdates.Name = "btnCheckUpdates";
-            this.btnCheckUpdates.Progress = 0;
-            this.btnCheckUpdates.ProgressColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
-            this.btnCheckUpdates.Size = new Size(215, 32);
-            this.btnCheckUpdates.TabIndex = 9;
-            this.btnCheckUpdates.Text = "Check for updates now";
-            this.btnCheckUpdates.UseMnemonic = false;
-            this.btnCheckUpdates.UseVisualStyleBackColor = false;
-            this.btnCheckUpdates.UseWindowsAccentColor = true;
-            this.btnCheckUpdates.Click += new EventHandler(this.BtnCheckUpdates_Click);
+            btnCheckUpdates.BorderRadius = 8;
+            btnCheckUpdates.Cursor = Cursors.Hand;
+            btnCheckUpdates.FlatAppearance.BorderSize = 0;
+            btnCheckUpdates.FlatStyle = FlatStyle.Flat;
+            btnCheckUpdates.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnCheckUpdates.ForeColor = Color.White;
+            btnCheckUpdates.HoverColor = Color.FromArgb(0, 89, 184);
+            btnCheckUpdates.Icon = null;
+            btnCheckUpdates.Location = new Point(354, 265);
+            btnCheckUpdates.Name = "btnCheckUpdates";
+            btnCheckUpdates.Progress = 0;
+            btnCheckUpdates.ProgressColor = Color.FromArgb(0, 46, 94);
+            btnCheckUpdates.Size = new Size(215, 32);
+            btnCheckUpdates.TabIndex = 9;
+            btnCheckUpdates.Text = "Check for updates now";
+            btnCheckUpdates.UseMnemonic = false;
+            btnCheckUpdates.UseVisualStyleBackColor = false;
+            btnCheckUpdates.UseWindowsAccentColor = true;
+            btnCheckUpdates.Click += BtnCheckUpdates_Click;
             // 
             // lblInstalledVersion
             // 
-            this.lblInstalledVersion.Location = new Point(769, 29);
-            this.lblInstalledVersion.Name = "lblInstalledVersion";
-            this.lblInstalledVersion.Size = new Size(151, 19);
-            this.lblInstalledVersion.TabIndex = 8;
-            this.lblInstalledVersion.Text = "2.0.0";
-            this.lblInstalledVersion.TextAlign = ContentAlignment.MiddleRight;
-            this.lblInstalledVersion.UseMnemonic = false;
+            lblInstalledVersion.Location = new Point(501, 243);
+            lblInstalledVersion.Name = "lblInstalledVersion";
+            lblInstalledVersion.Size = new Size(229, 19);
+            lblInstalledVersion.TabIndex = 8;
+            lblInstalledVersion.Text = "2.0.0";
+            lblInstalledVersion.TextAlign = ContentAlignment.MiddleLeft;
+            lblInstalledVersion.UseMnemonic = false;
             // 
             // lblInstalledVersionLabel
             // 
-            this.lblInstalledVersionLabel.Location = new Point(534, 29);
-            this.lblInstalledVersionLabel.Name = "lblInstalledVersionLabel";
-            this.lblInstalledVersionLabel.Size = new Size(229, 19);
-            this.lblInstalledVersionLabel.TabIndex = 7;
-            this.lblInstalledVersionLabel.Text = "Installed Version:";
-            this.lblInstalledVersionLabel.TextAlign = ContentAlignment.MiddleRight;
-            this.lblInstalledVersionLabel.UseMnemonic = false;
+            lblInstalledVersionLabel.Location = new Point(266, 243);
+            lblInstalledVersionLabel.Name = "lblInstalledVersionLabel";
+            lblInstalledVersionLabel.Size = new Size(229, 19);
+            lblInstalledVersionLabel.TabIndex = 7;
+            lblInstalledVersionLabel.Text = "Installed Version:";
+            lblInstalledVersionLabel.TextAlign = ContentAlignment.MiddleRight;
+            lblInstalledVersionLabel.UseMnemonic = false;
             // 
             // lblUpdates
             // 
-            this.lblUpdates.AutoSize = true;
-            this.lblUpdates.Font = new Font("Tahoma", 15.75F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblUpdates.Location = new Point(3, 0);
-            this.lblUpdates.Name = "lblUpdates";
-            this.lblUpdates.Size = new Size(88, 25);
-            this.lblUpdates.TabIndex = 2;
-            this.lblUpdates.Text = "Updates";
-            this.lblUpdates.UseMnemonic = false;
+            lblUpdates.AutoSize = true;
+            lblUpdates.Font = new Font("Tahoma", 15.75F, FontStyle.Regular, GraphicsUnit.Point);
+            lblUpdates.Location = new Point(3, 0);
+            lblUpdates.Name = "lblUpdates";
+            lblUpdates.Size = new Size(88, 25);
+            lblUpdates.TabIndex = 2;
+            lblUpdates.Text = "Updates";
+            lblUpdates.UseMnemonic = false;
             // 
             // tabBackups
             // 
-            this.tabBackups.BackColor = Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.tabBackups.Controls.Add(this.btnCreateBackup);
-            this.tabBackups.Controls.Add(this.backupsPanel);
-            this.tabBackups.Controls.Add(this.lblBackups);
-            this.tabBackups.ForeColor = Color.White;
-            this.tabBackups.Location = new Point(204, 4);
-            this.tabBackups.Name = "tabBackups";
-            this.tabBackups.Size = new Size(923, 526);
-            this.tabBackups.TabIndex = 4;
-            this.tabBackups.Text = "Backups";
+            tabBackups.BackColor = Color.FromArgb(45, 45, 45);
+            tabBackups.Controls.Add(btnCreateBackup);
+            tabBackups.Controls.Add(backupsPanel);
+            tabBackups.Controls.Add(lblBackups);
+            tabBackups.ForeColor = Color.White;
+            tabBackups.Location = new Point(204, 4);
+            tabBackups.Name = "tabBackups";
+            tabBackups.Size = new Size(923, 526);
+            tabBackups.TabIndex = 4;
+            tabBackups.Text = "Backups";
             // 
             // btnCreateBackup
             // 
-            this.btnCreateBackup.BorderRadius = 8;
-            this.btnCreateBackup.Cursor = Cursors.Hand;
-            this.btnCreateBackup.FlatAppearance.BorderSize = 0;
-            this.btnCreateBackup.FlatStyle = FlatStyle.Flat;
-            this.btnCreateBackup.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
-            this.btnCreateBackup.ForeColor = Color.White;
-            this.btnCreateBackup.HoverColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
-            this.btnCreateBackup.Icon = null;
-            this.btnCreateBackup.Location = new Point(770, 493);
-            this.btnCreateBackup.Name = "btnCreateBackup";
-            this.btnCreateBackup.Progress = 0;
-            this.btnCreateBackup.ProgressColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
-            this.btnCreateBackup.Size = new Size(150, 30);
-            this.btnCreateBackup.TabIndex = 5;
-            this.btnCreateBackup.Text = "Create backup";
-            this.btnCreateBackup.UseMnemonic = false;
-            this.btnCreateBackup.UseVisualStyleBackColor = false;
-            this.btnCreateBackup.UseWindowsAccentColor = true;
-            this.btnCreateBackup.Click += new EventHandler(this.BtnCreateBackup_Click);
+            btnCreateBackup.BorderRadius = 8;
+            btnCreateBackup.Cursor = Cursors.Hand;
+            btnCreateBackup.FlatAppearance.BorderSize = 0;
+            btnCreateBackup.FlatStyle = FlatStyle.Flat;
+            btnCreateBackup.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnCreateBackup.ForeColor = Color.White;
+            btnCreateBackup.HoverColor = Color.FromArgb(0, 89, 184);
+            btnCreateBackup.Icon = null;
+            btnCreateBackup.Location = new Point(770, 493);
+            btnCreateBackup.Name = "btnCreateBackup";
+            btnCreateBackup.Progress = 0;
+            btnCreateBackup.ProgressColor = Color.FromArgb(0, 46, 94);
+            btnCreateBackup.Size = new Size(150, 30);
+            btnCreateBackup.TabIndex = 5;
+            btnCreateBackup.Text = "Create backup";
+            btnCreateBackup.UseMnemonic = false;
+            btnCreateBackup.UseVisualStyleBackColor = false;
+            btnCreateBackup.UseWindowsAccentColor = true;
+            btnCreateBackup.Click += BtnCreateBackup_Click;
             // 
             // backupsPanel
             // 
-            this.backupsPanel.AutoScroll = true;
-            this.backupsPanel.Location = new Point(3, 28);
-            this.backupsPanel.Name = "backupsPanel";
-            this.backupsPanel.Size = new Size(917, 459);
-            this.backupsPanel.TabIndex = 4;
+            backupsPanel.AutoScroll = true;
+            backupsPanel.Location = new Point(3, 28);
+            backupsPanel.Name = "backupsPanel";
+            backupsPanel.Size = new Size(917, 459);
+            backupsPanel.TabIndex = 4;
             // 
             // lblBackups
             // 
-            this.lblBackups.AutoSize = true;
-            this.lblBackups.Font = new Font("Tahoma", 15.75F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblBackups.Location = new Point(3, 0);
-            this.lblBackups.Name = "lblBackups";
-            this.lblBackups.Size = new Size(89, 25);
-            this.lblBackups.TabIndex = 3;
-            this.lblBackups.Text = "Backups";
-            this.lblBackups.UseMnemonic = false;
+            lblBackups.AutoSize = true;
+            lblBackups.Font = new Font("Tahoma", 15.75F, FontStyle.Regular, GraphicsUnit.Point);
+            lblBackups.Location = new Point(3, 0);
+            lblBackups.Name = "lblBackups";
+            lblBackups.Size = new Size(89, 25);
+            lblBackups.TabIndex = 3;
+            lblBackups.Text = "Backups";
+            lblBackups.UseMnemonic = false;
             // 
             // tabAbout
             // 
-            this.tabAbout.BackColor = Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.tabAbout.Controls.Add(this.btnGitHub);
-            this.tabAbout.Controls.Add(this.lblBuild);
-            this.tabAbout.Controls.Add(this.lblBuildLabel);
-            this.tabAbout.Controls.Add(this.label1);
-            this.tabAbout.Controls.Add(this.lblTranslationBy);
-            this.tabAbout.Controls.Add(this.btnLicenses);
-            this.tabAbout.Controls.Add(this.lblPluginAPIVersion);
-            this.tabAbout.Controls.Add(this.lblWebsocketAPIVersion);
-            this.tabAbout.Controls.Add(this.lblPluginAPILabel);
-            this.tabAbout.Controls.Add(this.lblWebSocketAPILabel);
-            this.tabAbout.Controls.Add(this.lblInstalledPlugins);
-            this.tabAbout.Controls.Add(this.lblInstalledPluginsLabel);
-            this.tabAbout.Controls.Add(this.lblDeveloped);
-            this.tabAbout.Controls.Add(this.lblMacroDeck);
-            this.tabAbout.Controls.Add(this.pictureBox1);
-            this.tabAbout.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
-            this.tabAbout.ForeColor = Color.White;
-            this.tabAbout.Location = new Point(204, 4);
-            this.tabAbout.Name = "tabAbout";
-            this.tabAbout.Size = new Size(923, 526);
-            this.tabAbout.TabIndex = 2;
-            this.tabAbout.Text = "About";
+            tabAbout.BackColor = Color.FromArgb(45, 45, 45);
+            tabAbout.Controls.Add(btnGitHub);
+            tabAbout.Controls.Add(label1);
+            tabAbout.Controls.Add(lblTranslationBy);
+            tabAbout.Controls.Add(btnLicenses);
+            tabAbout.Controls.Add(lblPluginAPIVersion);
+            tabAbout.Controls.Add(lblWebsocketAPIVersion);
+            tabAbout.Controls.Add(lblPluginAPILabel);
+            tabAbout.Controls.Add(lblWebSocketAPILabel);
+            tabAbout.Controls.Add(lblInstalledPlugins);
+            tabAbout.Controls.Add(lblInstalledPluginsLabel);
+            tabAbout.Controls.Add(lblDeveloped);
+            tabAbout.Controls.Add(lblMacroDeck);
+            tabAbout.Controls.Add(pictureBox1);
+            tabAbout.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            tabAbout.ForeColor = Color.White;
+            tabAbout.Location = new Point(204, 4);
+            tabAbout.Name = "tabAbout";
+            tabAbout.Size = new Size(923, 526);
+            tabAbout.TabIndex = 2;
+            tabAbout.Text = "About";
             // 
             // btnGitHub
             // 
-            this.btnGitHub.BackColor = Color.Transparent;
-            this.btnGitHub.BackgroundImage = Resources.GitHub_Mark_Light;
-            this.btnGitHub.BackgroundImageLayout = ImageLayout.Stretch;
-            this.btnGitHub.Cursor = Cursors.Hand;
-            this.btnGitHub.HoverImage = null;
-            this.btnGitHub.Location = new Point(436, 63);
-            this.btnGitHub.Name = "btnGitHub";
-            this.btnGitHub.Size = new Size(50, 50);
-            this.btnGitHub.TabIndex = 18;
-            this.btnGitHub.TabStop = false;
-            this.btnGitHub.Click += new EventHandler(this.BtnGitHub_Click);
-            // 
-            // lblBuild
-            // 
-            this.lblBuild.AutoSize = true;
-            this.lblBuild.Location = new Point(564, 380);
-            this.lblBuild.Name = "lblBuild";
-            this.lblBuild.Size = new Size(27, 19);
-            this.lblBuild.TabIndex = 17;
-            this.lblBuild.Text = "13";
-            this.lblBuild.UseMnemonic = false;
-            // 
-            // lblBuildLabel
-            // 
-            this.lblBuildLabel.AutoSize = true;
-            this.lblBuildLabel.Location = new Point(332, 380);
-            this.lblBuildLabel.Name = "lblBuildLabel";
-            this.lblBuildLabel.Size = new Size(44, 19);
-            this.lblBuildLabel.TabIndex = 16;
-            this.lblBuildLabel.Text = "Build";
-            this.lblBuildLabel.UseMnemonic = false;
+            btnGitHub.BackColor = Color.Transparent;
+            btnGitHub.BackgroundImage = Resources.GitHub_Mark_Light;
+            btnGitHub.BackgroundImageLayout = ImageLayout.Stretch;
+            btnGitHub.Cursor = Cursors.Hand;
+            btnGitHub.HoverImage = null;
+            btnGitHub.Location = new Point(436, 63);
+            btnGitHub.Name = "btnGitHub";
+            btnGitHub.Size = new Size(50, 50);
+            btnGitHub.TabIndex = 18;
+            btnGitHub.TabStop = false;
+            btnGitHub.Click += BtnGitHub_Click;
             // 
             // label1
             // 
-            this.label1.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.label1.Location = new Point(219, 226);
-            this.label1.Name = "label1";
-            this.label1.Size = new Size(485, 18);
-            this.label1.TabIndex = 15;
-            this.label1.Text = "Licensed under Apache-2.0";
-            this.label1.TextAlign = ContentAlignment.MiddleCenter;
-            this.label1.UseMnemonic = false;
+            label1.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            label1.Location = new Point(219, 226);
+            label1.Name = "label1";
+            label1.Size = new Size(485, 18);
+            label1.TabIndex = 15;
+            label1.Text = "Licensed under Apache-2.0";
+            label1.TextAlign = ContentAlignment.MiddleCenter;
+            label1.UseMnemonic = false;
             // 
             // lblTranslationBy
             // 
-            this.lblTranslationBy.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblTranslationBy.Location = new Point(219, 164);
-            this.lblTranslationBy.Name = "lblTranslationBy";
-            this.lblTranslationBy.Size = new Size(485, 18);
-            this.lblTranslationBy.TabIndex = 14;
-            this.lblTranslationBy.Text = "English translation by Macro Deck";
-            this.lblTranslationBy.TextAlign = ContentAlignment.MiddleCenter;
-            this.lblTranslationBy.UseMnemonic = false;
+            lblTranslationBy.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblTranslationBy.Location = new Point(219, 164);
+            lblTranslationBy.Name = "lblTranslationBy";
+            lblTranslationBy.Size = new Size(485, 18);
+            lblTranslationBy.TabIndex = 14;
+            lblTranslationBy.Text = "English translation by Macro Deck";
+            lblTranslationBy.TextAlign = ContentAlignment.MiddleCenter;
+            lblTranslationBy.UseMnemonic = false;
             // 
             // btnLicenses
             // 
-            this.btnLicenses.BorderRadius = 8;
-            this.btnLicenses.Cursor = Cursors.Hand;
-            this.btnLicenses.FlatAppearance.BorderSize = 0;
-            this.btnLicenses.FlatStyle = FlatStyle.Flat;
-            this.btnLicenses.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
-            this.btnLicenses.ForeColor = Color.White;
-            this.btnLicenses.HoverColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
-            this.btnLicenses.Icon = null;
-            this.btnLicenses.Location = new Point(361, 297);
-            this.btnLicenses.Name = "btnLicenses";
-            this.btnLicenses.Progress = 0;
-            this.btnLicenses.ProgressColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
-            this.btnLicenses.Size = new Size(200, 27);
-            this.btnLicenses.TabIndex = 13;
-            this.btnLicenses.Text = "3rd party licenses";
-            this.btnLicenses.UseMnemonic = false;
-            this.btnLicenses.UseVisualStyleBackColor = false;
-            this.btnLicenses.UseWindowsAccentColor = true;
-            this.btnLicenses.Click += new EventHandler(this.BtnLicenses_Click);
+            btnLicenses.BorderRadius = 8;
+            btnLicenses.Cursor = Cursors.Hand;
+            btnLicenses.FlatAppearance.BorderSize = 0;
+            btnLicenses.FlatStyle = FlatStyle.Flat;
+            btnLicenses.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnLicenses.ForeColor = Color.White;
+            btnLicenses.HoverColor = Color.FromArgb(0, 89, 184);
+            btnLicenses.Icon = null;
+            btnLicenses.Location = new Point(361, 297);
+            btnLicenses.Name = "btnLicenses";
+            btnLicenses.Progress = 0;
+            btnLicenses.ProgressColor = Color.FromArgb(0, 46, 94);
+            btnLicenses.Size = new Size(200, 27);
+            btnLicenses.TabIndex = 13;
+            btnLicenses.Text = "3rd party licenses";
+            btnLicenses.UseMnemonic = false;
+            btnLicenses.UseVisualStyleBackColor = false;
+            btnLicenses.UseWindowsAccentColor = true;
+            btnLicenses.Click += BtnLicenses_Click;
             // 
             // lblPluginAPIVersion
             // 
-            this.lblPluginAPIVersion.AutoSize = true;
-            this.lblPluginAPIVersion.Location = new Point(564, 434);
-            this.lblPluginAPIVersion.Name = "lblPluginAPIVersion";
-            this.lblPluginAPIVersion.Size = new Size(27, 19);
-            this.lblPluginAPIVersion.TabIndex = 12;
-            this.lblPluginAPIVersion.Text = "20";
-            this.lblPluginAPIVersion.UseMnemonic = false;
+            lblPluginAPIVersion.AutoSize = true;
+            lblPluginAPIVersion.Location = new Point(564, 434);
+            lblPluginAPIVersion.Name = "lblPluginAPIVersion";
+            lblPluginAPIVersion.Size = new Size(27, 19);
+            lblPluginAPIVersion.TabIndex = 12;
+            lblPluginAPIVersion.Text = "20";
+            lblPluginAPIVersion.UseMnemonic = false;
             // 
             // lblWebsocketAPIVersion
             // 
-            this.lblWebsocketAPIVersion.AutoSize = true;
-            this.lblWebsocketAPIVersion.Location = new Point(564, 407);
-            this.lblWebsocketAPIVersion.Name = "lblWebsocketAPIVersion";
-            this.lblWebsocketAPIVersion.Size = new Size(27, 19);
-            this.lblWebsocketAPIVersion.TabIndex = 11;
-            this.lblWebsocketAPIVersion.Text = "20";
-            this.lblWebsocketAPIVersion.UseMnemonic = false;
+            lblWebsocketAPIVersion.AutoSize = true;
+            lblWebsocketAPIVersion.Location = new Point(564, 407);
+            lblWebsocketAPIVersion.Name = "lblWebsocketAPIVersion";
+            lblWebsocketAPIVersion.Size = new Size(27, 19);
+            lblWebsocketAPIVersion.TabIndex = 11;
+            lblWebsocketAPIVersion.Text = "20";
+            lblWebsocketAPIVersion.UseMnemonic = false;
             // 
             // lblPluginAPILabel
             // 
-            this.lblPluginAPILabel.AutoSize = true;
-            this.lblPluginAPILabel.Location = new Point(332, 434);
-            this.lblPluginAPILabel.Name = "lblPluginAPILabel";
-            this.lblPluginAPILabel.Size = new Size(146, 19);
-            this.lblPluginAPILabel.TabIndex = 10;
-            this.lblPluginAPILabel.Text = "Plugin API version:";
-            this.lblPluginAPILabel.UseMnemonic = false;
+            lblPluginAPILabel.AutoSize = true;
+            lblPluginAPILabel.Location = new Point(332, 434);
+            lblPluginAPILabel.Name = "lblPluginAPILabel";
+            lblPluginAPILabel.Size = new Size(146, 19);
+            lblPluginAPILabel.TabIndex = 10;
+            lblPluginAPILabel.Text = "Plugin API version:";
+            lblPluginAPILabel.UseMnemonic = false;
             // 
             // lblWebSocketAPILabel
             // 
-            this.lblWebSocketAPILabel.AutoSize = true;
-            this.lblWebSocketAPILabel.Location = new Point(332, 407);
-            this.lblWebSocketAPILabel.Name = "lblWebSocketAPILabel";
-            this.lblWebSocketAPILabel.Size = new Size(177, 19);
-            this.lblWebSocketAPILabel.TabIndex = 9;
-            this.lblWebSocketAPILabel.Text = "Websocket API version:";
-            this.lblWebSocketAPILabel.UseMnemonic = false;
+            lblWebSocketAPILabel.AutoSize = true;
+            lblWebSocketAPILabel.Location = new Point(332, 407);
+            lblWebSocketAPILabel.Name = "lblWebSocketAPILabel";
+            lblWebSocketAPILabel.Size = new Size(177, 19);
+            lblWebSocketAPILabel.TabIndex = 9;
+            lblWebSocketAPILabel.Text = "Websocket API version:";
+            lblWebSocketAPILabel.UseMnemonic = false;
             // 
             // lblInstalledPlugins
             // 
-            this.lblInstalledPlugins.AutoSize = true;
-            this.lblInstalledPlugins.Location = new Point(564, 461);
-            this.lblInstalledPlugins.Name = "lblInstalledPlugins";
-            this.lblInstalledPlugins.Size = new Size(18, 19);
-            this.lblInstalledPlugins.TabIndex = 7;
-            this.lblInstalledPlugins.Text = "0";
-            this.lblInstalledPlugins.UseMnemonic = false;
+            lblInstalledPlugins.AutoSize = true;
+            lblInstalledPlugins.Location = new Point(564, 461);
+            lblInstalledPlugins.Name = "lblInstalledPlugins";
+            lblInstalledPlugins.Size = new Size(18, 19);
+            lblInstalledPlugins.TabIndex = 7;
+            lblInstalledPlugins.Text = "0";
+            lblInstalledPlugins.UseMnemonic = false;
             // 
             // lblInstalledPluginsLabel
             // 
-            this.lblInstalledPluginsLabel.AutoSize = true;
-            this.lblInstalledPluginsLabel.Location = new Point(332, 461);
-            this.lblInstalledPluginsLabel.Name = "lblInstalledPluginsLabel";
-            this.lblInstalledPluginsLabel.Size = new Size(131, 19);
-            this.lblInstalledPluginsLabel.TabIndex = 4;
-            this.lblInstalledPluginsLabel.Text = "Installed plugins:";
-            this.lblInstalledPluginsLabel.UseMnemonic = false;
+            lblInstalledPluginsLabel.AutoSize = true;
+            lblInstalledPluginsLabel.Location = new Point(332, 461);
+            lblInstalledPluginsLabel.Name = "lblInstalledPluginsLabel";
+            lblInstalledPluginsLabel.Size = new Size(131, 19);
+            lblInstalledPluginsLabel.TabIndex = 4;
+            lblInstalledPluginsLabel.Text = "Installed plugins:";
+            lblInstalledPluginsLabel.UseMnemonic = false;
             // 
             // lblDeveloped
             // 
-            this.lblDeveloped.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblDeveloped.Location = new Point(219, 206);
-            this.lblDeveloped.Name = "lblDeveloped";
-            this.lblDeveloped.Size = new Size(485, 18);
-            this.lblDeveloped.TabIndex = 2;
-            this.lblDeveloped.Text = "Developed by Manuel Mayer (SuchByte) in Germany";
-            this.lblDeveloped.TextAlign = ContentAlignment.MiddleCenter;
-            this.lblDeveloped.UseMnemonic = false;
+            lblDeveloped.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblDeveloped.Location = new Point(219, 206);
+            lblDeveloped.Name = "lblDeveloped";
+            lblDeveloped.Size = new Size(485, 18);
+            lblDeveloped.TabIndex = 2;
+            lblDeveloped.Text = "Developed by Manuel Mayer (SuchByte) in Germany";
+            lblDeveloped.TextAlign = ContentAlignment.MiddleCenter;
+            lblDeveloped.UseMnemonic = false;
             // 
             // lblMacroDeck
             // 
-            this.lblMacroDeck.Font = new Font("Tahoma", 21.75F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblMacroDeck.ForeColor = Color.LightGray;
-            this.lblMacroDeck.Location = new Point(3, 3);
-            this.lblMacroDeck.Name = "lblMacroDeck";
-            this.lblMacroDeck.Size = new Size(917, 41);
-            this.lblMacroDeck.TabIndex = 1;
-            this.lblMacroDeck.Text = "Macro Deck";
-            this.lblMacroDeck.TextAlign = ContentAlignment.MiddleCenter;
-            this.lblMacroDeck.UseMnemonic = false;
+            lblMacroDeck.Font = new Font("Tahoma", 21.75F, FontStyle.Regular, GraphicsUnit.Point);
+            lblMacroDeck.ForeColor = Color.LightGray;
+            lblMacroDeck.Location = new Point(3, 3);
+            lblMacroDeck.Name = "lblMacroDeck";
+            lblMacroDeck.Size = new Size(917, 41);
+            lblMacroDeck.TabIndex = 1;
+            lblMacroDeck.Text = "Macro Deck";
+            lblMacroDeck.TextAlign = ContentAlignment.MiddleCenter;
+            lblMacroDeck.UseMnemonic = false;
             // 
             // pictureBox1
             // 
-            this.pictureBox1.BackgroundImage = Resources.Icon;
-            this.pictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
-            this.pictureBox1.Location = new Point(3, 47);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new Size(200, 187);
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
+            pictureBox1.BackgroundImage = Resources.Icon;
+            pictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
+            pictureBox1.Location = new Point(3, 47);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(200, 187);
+            pictureBox1.TabIndex = 0;
+            pictureBox1.TabStop = false;
             // 
             // tabIcons
             // 
-            this.tabIcons.ColorDepth = ColorDepth.Depth4Bit;
-            this.tabIcons.ImageStream = ((ImageListStreamer)(resources.GetObject("tabIcons.ImageStream")));
-            this.tabIcons.TransparentColor = Color.Transparent;
-            this.tabIcons.Images.SetKeyName(0, "Cog.png");
-            this.tabIcons.Images.SetKeyName(1, "Ethernet.png");
-            this.tabIcons.Images.SetKeyName(2, "Update.png");
-            this.tabIcons.Images.SetKeyName(3, "Backup-Restore.png");
-            this.tabIcons.Images.SetKeyName(4, "Informationpng.png");
+            tabIcons.ColorDepth = ColorDepth.Depth4Bit;
+            tabIcons.ImageStream = (ImageListStreamer)resources.GetObject("tabIcons.ImageStream");
+            tabIcons.TransparentColor = Color.Transparent;
+            tabIcons.Images.SetKeyName(0, "Cog.png");
+            tabIcons.Images.SetKeyName(1, "Ethernet.png");
+            tabIcons.Images.SetKeyName(2, "Update.png");
+            tabIcons.Images.SetKeyName(3, "Backup-Restore.png");
+            tabIcons.Images.SetKeyName(4, "Informationpng.png");
             // 
             // SettingsView
             // 
-            this.AutoScaleDimensions = new SizeF(96F, 96F);
-            this.AutoScaleMode = AutoScaleMode.Dpi;
-            this.BackColor = Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.Controls.Add(this.verticalTabControl);
-            this.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            this.Name = "SettingsView";
-            this.Size = new Size(1137, 540);
-            this.Load += new EventHandler(this.Settings_Load);
-            this.verticalTabControl.ResumeLayout(false);
-            this.tabGeneral.ResumeLayout(false);
-            this.tabGeneral.PerformLayout();
-            this.tabConnection.ResumeLayout(false);
-            this.tabConnection.PerformLayout();
-            this.groupConnectionInfo.ResumeLayout(false);
-            ((ISupportInitialize)(this.port)).EndInit();
-            this.tabUpdater.ResumeLayout(false);
-            this.tabUpdater.PerformLayout();
-            this.tabBackups.ResumeLayout(false);
-            this.tabBackups.PerformLayout();
-            this.tabAbout.ResumeLayout(false);
-            this.tabAbout.PerformLayout();
-            ((ISupportInitialize)(this.btnGitHub)).EndInit();
-            ((ISupportInitialize)(this.pictureBox1)).EndInit();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            BackColor = Color.FromArgb(45, 45, 45);
+            Controls.Add(verticalTabControl);
+            Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            Name = "SettingsView";
+            Size = new Size(1137, 540);
+            Load += Settings_Load;
+            verticalTabControl.ResumeLayout(false);
+            tabGeneral.ResumeLayout(false);
+            tabGeneral.PerformLayout();
+            tabConnection.ResumeLayout(false);
+            tabConnection.PerformLayout();
+            groupConnectionInfo.ResumeLayout(false);
+            ((ISupportInitialize)port).EndInit();
+            tabUpdater.ResumeLayout(false);
+            tabUpdater.PerformLayout();
+            tabBackups.ResumeLayout(false);
+            tabBackups.PerformLayout();
+            tabAbout.ResumeLayout(false);
+            tabAbout.PerformLayout();
+            ((ISupportInitialize)btnGitHub).EndInit();
+            ((ISupportInitialize)pictureBox1).EndInit();
+            ResumeLayout(false);
         }
 
         #endregion
@@ -812,7 +776,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private Label lblWebSocketAPILabel;
         private ButtonPrimary btnLicenses;
         private Label lblTranslationBy;
-        private Panel updaterPanel;
         private CheckBox checkIconCache;
         private ImageList tabIcons;
         private Label label1;
@@ -822,8 +785,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private Label lblBackups;
         private FlowLayoutPanel backupsPanel;
         private ButtonPrimary btnCreateBackup;
-        private Label lblBuild;
-        private Label lblBuildLabel;
         private PictureButton btnGitHub;
+        private Label label2;
     }
 }

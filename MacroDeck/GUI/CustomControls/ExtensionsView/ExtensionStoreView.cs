@@ -99,10 +99,10 @@ public partial class ExtensionStoreView : UserControl
 
     private void ClearExtensionsList()
     {
-        Invoke((Delegate)(() =>
+        Invoke(() =>
         {
             extensionsList.Controls.Clear();
-        }));
+        });
     }
 
     private void SetLoading(bool state)

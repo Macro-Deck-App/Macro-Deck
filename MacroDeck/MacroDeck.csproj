@@ -174,9 +174,6 @@
     <Compile Update="GUI\CustomControls\Settings\LicenseItem.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="GUI\CustomControls\Settings\UpdateAvailableControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
     <Compile Update="GUI\CustomControls\TabRadioButton.cs">
       <SubType>Component</SubType>
     </Compile>

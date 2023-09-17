@@ -7,6 +7,7 @@ using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Services;
 
 namespace SuchByte.MacroDeck.GUI
 {
@@ -34,7 +35,7 @@ namespace SuchByte.MacroDeck.GUI
                     this.Controls.Remove(this.notificationsList);
                 }
                 LanguageManager.LanguageChanged -= LanguageChanged;
-                Updater.Updater.OnUpdateAvailable -= UpdateAvailable;
+                UpdateService.Instance().UpdateAvailable -= UpdateAvailable;
                 MacroDeckServer.OnDeviceConnectionStateChanged -= this.OnClientsConnectedChanged;
                 MacroDeckServer.OnServerStateChanged -= this.OnServerStateChanged;
                 PluginManager.OnPluginsChange -= this.OnPluginsChanged;
@@ -55,352 +56,350 @@ namespace SuchByte.MacroDeck.GUI
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
-            this.lblVersion = new System.Windows.Forms.Label();
-            this.contentPanel = new SuchByte.MacroDeck.GUI.CustomControls.BufferedPanel();
-            this.contentButtonPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.btnDeck = new SuchByte.MacroDeck.GUI.CustomControls.ContentSelectorButton();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.btnExtensions = new SuchByte.MacroDeck.GUI.CustomControls.ContentSelectorButton();
-            this.btnDeviceManager = new SuchByte.MacroDeck.GUI.CustomControls.ContentSelectorButton();
-            this.btnVariables = new SuchByte.MacroDeck.GUI.CustomControls.ContentSelectorButton();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.btnSettings = new SuchByte.MacroDeck.GUI.CustomControls.ContentSelectorButton();
-            this.lblNumClientsConnected = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.lblPort = new System.Windows.Forms.Label();
-            this.lblServerStatus = new System.Windows.Forms.Label();
-            this.lblIpAddressHostname = new System.Windows.Forms.Label();
-            this.navigation = new SuchByte.MacroDeck.GUI.CustomControls.RoundedPanel();
-            this.btnNotifications = new SuchByte.MacroDeck.GUI.CustomControls.Notifications.NotificationButton();
-            this.hosts = new SuchByte.MacroDeck.GUI.CustomControls.RoundedComboBox();
-            this.contentButtonPanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.btnDeck)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.btnExtensions)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.btnDeviceManager)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.btnVariables)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.btnSettings)).BeginInit();
-            this.navigation.SuspendLayout();
-            this.SuspendLayout();
+            ComponentResourceManager resources = new ComponentResourceManager(typeof(MainWindow));
+            lblVersion = new Label();
+            contentPanel = new BufferedPanel();
+            contentButtonPanel = new FlowLayoutPanel();
+            btnDeck = new ContentSelectorButton();
+            panel1 = new Panel();
+            btnExtensions = new ContentSelectorButton();
+            btnDeviceManager = new ContentSelectorButton();
+            btnVariables = new ContentSelectorButton();
+            panel2 = new Panel();
+            btnSettings = new ContentSelectorButton();
+            lblNumClientsConnected = new Label();
+            label1 = new Label();
+            lblPort = new Label();
+            lblServerStatus = new Label();
+            lblIpAddressHostname = new Label();
+            navigation = new RoundedPanel();
+            btnNotifications = new NotificationButton();
+            hosts = new RoundedComboBox();
+            contentButtonPanel.SuspendLayout();
+            ((ISupportInitialize)btnDeck).BeginInit();
+            ((ISupportInitialize)btnExtensions).BeginInit();
+            ((ISupportInitialize)btnDeviceManager).BeginInit();
+            ((ISupportInitialize)btnVariables).BeginInit();
+            ((ISupportInitialize)btnSettings).BeginInit();
+            navigation.SuspendLayout();
+            SuspendLayout();
             // 
             // lblSafeMode
             // 
-            this.lblSafeMode.Margin = new System.Windows.Forms.Padding(7, 0, 7, 0);
-            this.lblSafeMode.Size = new System.Drawing.Size(222, 28);
+            lblSafeMode.Margin = new Padding(10, 0, 10, 0);
+            lblSafeMode.Size = new System.Drawing.Size(333, 42);
             // 
             // lblVersion
             // 
-            this.lblVersion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblVersion.ForeColor = System.Drawing.Color.White;
-            this.lblVersion.Location = new System.Drawing.Point(4, 613);
-            this.lblVersion.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.lblVersion.Name = "lblVersion";
-            this.lblVersion.Size = new System.Drawing.Size(219, 20);
-            this.lblVersion.TabIndex = 3;
-            this.lblVersion.Text = "2.0.0";
-            this.lblVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.lblVersion.UseMnemonic = false;
+            lblVersion.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            lblVersion.ForeColor = System.Drawing.Color.White;
+            lblVersion.Location = new System.Drawing.Point(6, 920);
+            lblVersion.Margin = new Padding(9, 0, 9, 0);
+            lblVersion.Name = "lblVersion";
+            lblVersion.Size = new System.Drawing.Size(328, 30);
+            lblVersion.TabIndex = 3;
+            lblVersion.Text = "2.0.0";
+            lblVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lblVersion.UseMnemonic = false;
             // 
             // contentPanel
             // 
-            this.contentPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.contentPanel.Location = new System.Drawing.Point(62, 90);
-            this.contentPanel.Margin = new System.Windows.Forms.Padding(6, 3, 6, 3);
-            this.contentPanel.Name = "contentPanel";
-            this.contentPanel.Size = new System.Drawing.Size(1134, 522);
-            this.contentPanel.TabIndex = 4;
+            contentPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            contentPanel.Location = new System.Drawing.Point(93, 135);
+            contentPanel.Margin = new Padding(9, 4, 9, 4);
+            contentPanel.Name = "contentPanel";
+            contentPanel.Size = new System.Drawing.Size(1701, 783);
+            contentPanel.TabIndex = 4;
             // 
             // contentButtonPanel
             // 
-            this.contentButtonPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.contentButtonPanel.Controls.Add(this.btnDeck);
-            this.contentButtonPanel.Controls.Add(this.panel1);
-            this.contentButtonPanel.Controls.Add(this.btnExtensions);
-            this.contentButtonPanel.Controls.Add(this.btnDeviceManager);
-            this.contentButtonPanel.Controls.Add(this.btnVariables);
-            this.contentButtonPanel.Controls.Add(this.panel2);
-            this.contentButtonPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.contentButtonPanel.Location = new System.Drawing.Point(5, 6);
-            this.contentButtonPanel.Margin = new System.Windows.Forms.Padding(0);
-            this.contentButtonPanel.Name = "contentButtonPanel";
-            this.contentButtonPanel.Size = new System.Drawing.Size(44, 502);
-            this.contentButtonPanel.TabIndex = 5;
+            contentButtonPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            contentButtonPanel.Controls.Add(btnDeck);
+            contentButtonPanel.Controls.Add(panel1);
+            contentButtonPanel.Controls.Add(btnExtensions);
+            contentButtonPanel.Controls.Add(btnDeviceManager);
+            contentButtonPanel.Controls.Add(btnVariables);
+            contentButtonPanel.Controls.Add(panel2);
+            contentButtonPanel.FlowDirection = FlowDirection.TopDown;
+            contentButtonPanel.Location = new System.Drawing.Point(8, 9);
+            contentButtonPanel.Margin = new Padding(0);
+            contentButtonPanel.Name = "contentButtonPanel";
+            contentButtonPanel.Size = new System.Drawing.Size(66, 753);
+            contentButtonPanel.TabIndex = 5;
             // 
             // btnDeck
             // 
-            this.btnDeck.BackColor = System.Drawing.Color.Transparent;
-            this.btnDeck.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.deck;
-            this.btnDeck.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnDeck.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnDeck.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnDeck.ForeColor = System.Drawing.Color.White;
-            this.btnDeck.Location = new System.Drawing.Point(0, 0);
-            this.btnDeck.Margin = new System.Windows.Forms.Padding(0, 0, 0, 4);
-            this.btnDeck.Name = "btnDeck";
-            this.btnDeck.Selected = false;
-            this.btnDeck.Size = new System.Drawing.Size(44, 44);
-            this.btnDeck.TabIndex = 0;
-            this.btnDeck.TabStop = false;
-            this.btnDeck.Click += new System.EventHandler(this.BtnDeck_Click);
+            btnDeck.BackColor = System.Drawing.Color.Transparent;
+            btnDeck.BackgroundImage = Properties.Resources.deck;
+            btnDeck.BackgroundImageLayout = ImageLayout.Stretch;
+            btnDeck.Cursor = Cursors.Hand;
+            btnDeck.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            btnDeck.ForeColor = System.Drawing.Color.White;
+            btnDeck.Location = new System.Drawing.Point(0, 0);
+            btnDeck.Margin = new Padding(0, 0, 0, 6);
+            btnDeck.Name = "btnDeck";
+            btnDeck.Selected = false;
+            btnDeck.Size = new System.Drawing.Size(66, 66);
+            btnDeck.TabIndex = 0;
+            btnDeck.TabStop = false;
+            btnDeck.Click += BtnDeck_Click;
             // 
             // panel1
             // 
-            this.panel1.BackColor = System.Drawing.Color.Silver;
-            this.panel1.Location = new System.Drawing.Point(0, 51);
-            this.panel1.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(44, 2);
-            this.panel1.TabIndex = 4;
+            panel1.BackColor = System.Drawing.Color.Silver;
+            panel1.Location = new System.Drawing.Point(0, 76);
+            panel1.Margin = new Padding(0, 4, 0, 4);
+            panel1.Name = "panel1";
+            panel1.Size = new System.Drawing.Size(66, 3);
+            panel1.TabIndex = 4;
             // 
             // btnExtensions
             // 
-            this.btnExtensions.BackColor = System.Drawing.Color.Transparent;
-            this.btnExtensions.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.Package_Manager_icon;
-            this.btnExtensions.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnExtensions.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnExtensions.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnExtensions.ForeColor = System.Drawing.Color.White;
-            this.btnExtensions.Location = new System.Drawing.Point(0, 60);
-            this.btnExtensions.Margin = new System.Windows.Forms.Padding(0, 4, 0, 4);
-            this.btnExtensions.Name = "btnExtensions";
-            this.btnExtensions.Selected = false;
-            this.btnExtensions.Size = new System.Drawing.Size(44, 44);
-            this.btnExtensions.TabIndex = 1;
-            this.btnExtensions.TabStop = false;
-            this.btnExtensions.Click += new System.EventHandler(this.BtnExtensions_Click);
+            btnExtensions.BackColor = System.Drawing.Color.Transparent;
+            btnExtensions.BackgroundImage = Properties.Resources.Package_Manager_icon;
+            btnExtensions.BackgroundImageLayout = ImageLayout.Stretch;
+            btnExtensions.Cursor = Cursors.Hand;
+            btnExtensions.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            btnExtensions.ForeColor = System.Drawing.Color.White;
+            btnExtensions.Location = new System.Drawing.Point(0, 89);
+            btnExtensions.Margin = new Padding(0, 6, 0, 6);
+            btnExtensions.Name = "btnExtensions";
+            btnExtensions.Selected = false;
+            btnExtensions.Size = new System.Drawing.Size(66, 66);
+            btnExtensions.TabIndex = 1;
+            btnExtensions.TabStop = false;
+            btnExtensions.Click += BtnExtensions_Click;
             // 
             // btnDeviceManager
             // 
-            this.btnDeviceManager.BackColor = System.Drawing.Color.Transparent;
-            this.btnDeviceManager.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.device_manager;
-            this.btnDeviceManager.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnDeviceManager.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnDeviceManager.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnDeviceManager.ForeColor = System.Drawing.Color.White;
-            this.btnDeviceManager.Location = new System.Drawing.Point(0, 112);
-            this.btnDeviceManager.Margin = new System.Windows.Forms.Padding(0, 4, 0, 4);
-            this.btnDeviceManager.Name = "btnDeviceManager";
-            this.btnDeviceManager.Selected = false;
-            this.btnDeviceManager.Size = new System.Drawing.Size(44, 44);
-            this.btnDeviceManager.TabIndex = 2;
-            this.btnDeviceManager.TabStop = false;
-            this.btnDeviceManager.Click += new System.EventHandler(this.BtnDeviceManager_Click);
+            btnDeviceManager.BackColor = System.Drawing.Color.Transparent;
+            btnDeviceManager.BackgroundImage = Properties.Resources.device_manager;
+            btnDeviceManager.BackgroundImageLayout = ImageLayout.Stretch;
+            btnDeviceManager.Cursor = Cursors.Hand;
+            btnDeviceManager.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            btnDeviceManager.ForeColor = System.Drawing.Color.White;
+            btnDeviceManager.Location = new System.Drawing.Point(0, 167);
+            btnDeviceManager.Margin = new Padding(0, 6, 0, 6);
+            btnDeviceManager.Name = "btnDeviceManager";
+            btnDeviceManager.Selected = false;
+            btnDeviceManager.Size = new System.Drawing.Size(66, 66);
+            btnDeviceManager.TabIndex = 2;
+            btnDeviceManager.TabStop = false;
+            btnDeviceManager.Click += BtnDeviceManager_Click;
             // 
             // btnVariables
             // 
-            this.btnVariables.BackColor = System.Drawing.Color.Transparent;
-            this.btnVariables.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.variables;
-            this.btnVariables.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnVariables.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnVariables.Font = new System.Drawing.Font("Tahoma", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnVariables.ForeColor = System.Drawing.Color.White;
-            this.btnVariables.Location = new System.Drawing.Point(0, 164);
-            this.btnVariables.Margin = new System.Windows.Forms.Padding(0, 4, 0, 4);
-            this.btnVariables.Name = "btnVariables";
-            this.btnVariables.Selected = false;
-            this.btnVariables.Size = new System.Drawing.Size(44, 44);
-            this.btnVariables.TabIndex = 3;
-            this.btnVariables.TabStop = false;
-            this.btnVariables.Text = "{x}";
-            this.btnVariables.Click += new System.EventHandler(this.BtnVariables_Click);
+            btnVariables.BackColor = System.Drawing.Color.Transparent;
+            btnVariables.BackgroundImage = Properties.Resources.variables;
+            btnVariables.BackgroundImageLayout = ImageLayout.Stretch;
+            btnVariables.Cursor = Cursors.Hand;
+            btnVariables.Font = new System.Drawing.Font("Tahoma", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            btnVariables.ForeColor = System.Drawing.Color.White;
+            btnVariables.Location = new System.Drawing.Point(0, 245);
+            btnVariables.Margin = new Padding(0, 6, 0, 6);
+            btnVariables.Name = "btnVariables";
+            btnVariables.Selected = false;
+            btnVariables.Size = new System.Drawing.Size(66, 66);
+            btnVariables.TabIndex = 3;
+            btnVariables.TabStop = false;
+            btnVariables.Text = "{x}";
+            btnVariables.Click += BtnVariables_Click;
             // 
             // panel2
             // 
-            this.panel2.BackColor = System.Drawing.Color.Silver;
-            this.panel2.Location = new System.Drawing.Point(0, 215);
-            this.panel2.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(44, 2);
-            this.panel2.TabIndex = 5;
+            panel2.BackColor = System.Drawing.Color.Silver;
+            panel2.Location = new System.Drawing.Point(0, 321);
+            panel2.Margin = new Padding(0, 4, 0, 4);
+            panel2.Name = "panel2";
+            panel2.Size = new System.Drawing.Size(66, 3);
+            panel2.TabIndex = 5;
             // 
             // btnSettings
             // 
-            this.btnSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnSettings.BackColor = System.Drawing.Color.Transparent;
-            this.btnSettings.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.settings;
-            this.btnSettings.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnSettings.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnSettings.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnSettings.ForeColor = System.Drawing.Color.White;
-            this.btnSettings.Location = new System.Drawing.Point(5, 512);
-            this.btnSettings.Margin = new System.Windows.Forms.Padding(8, 4, 8, 4);
-            this.btnSettings.Name = "btnSettings";
-            this.btnSettings.Selected = false;
-            this.btnSettings.Size = new System.Drawing.Size(44, 44);
-            this.btnSettings.TabIndex = 1;
-            this.btnSettings.TabStop = false;
-            this.btnSettings.Click += new System.EventHandler(this.BtnSettings_Click);
+            btnSettings.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btnSettings.BackColor = System.Drawing.Color.Transparent;
+            btnSettings.BackgroundImage = Properties.Resources.settings;
+            btnSettings.BackgroundImageLayout = ImageLayout.Stretch;
+            btnSettings.Cursor = Cursors.Hand;
+            btnSettings.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            btnSettings.ForeColor = System.Drawing.Color.White;
+            btnSettings.Location = new System.Drawing.Point(8, 768);
+            btnSettings.Margin = new Padding(12, 6, 12, 6);
+            btnSettings.Name = "btnSettings";
+            btnSettings.Selected = false;
+            btnSettings.Size = new System.Drawing.Size(66, 66);
+            btnSettings.TabIndex = 1;
+            btnSettings.TabStop = false;
+            btnSettings.Click += BtnSettings_Click;
             // 
             // lblNumClientsConnected
             // 
-            this.lblNumClientsConnected.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblNumClientsConnected.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblNumClientsConnected.ForeColor = System.Drawing.Color.White;
-            this.lblNumClientsConnected.Location = new System.Drawing.Point(844, 64);
-            this.lblNumClientsConnected.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.lblNumClientsConnected.Name = "lblNumClientsConnected";
-            this.lblNumClientsConnected.Size = new System.Drawing.Size(252, 18);
-            this.lblNumClientsConnected.TabIndex = 8;
-            this.lblNumClientsConnected.Text = "0 clients connected";
-            this.lblNumClientsConnected.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.lblNumClientsConnected.UseMnemonic = false;
+            lblNumClientsConnected.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblNumClientsConnected.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            lblNumClientsConnected.ForeColor = System.Drawing.Color.White;
+            lblNumClientsConnected.Location = new System.Drawing.Point(1266, 96);
+            lblNumClientsConnected.Margin = new Padding(9, 0, 9, 0);
+            lblNumClientsConnected.Name = "lblNumClientsConnected";
+            lblNumClientsConnected.Size = new System.Drawing.Size(378, 27);
+            lblNumClientsConnected.TabIndex = 8;
+            lblNumClientsConnected.Text = "0 clients connected";
+            lblNumClientsConnected.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lblNumClientsConnected.UseMnemonic = false;
             // 
             // label1
             // 
-            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(1096, 41);
-            this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(15, 19);
-            this.label1.TabIndex = 10;
-            this.label1.Text = ":";
-            this.label1.UseMnemonic = false;
+            label1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            label1.AutoSize = true;
+            label1.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            label1.Location = new System.Drawing.Point(1644, 62);
+            label1.Margin = new Padding(9, 0, 9, 0);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(21, 29);
+            label1.TabIndex = 10;
+            label1.Text = ":";
+            label1.UseMnemonic = false;
             // 
             // lblPort
             // 
-            this.lblPort.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblPort.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.lblPort.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblPort.ForeColor = System.Drawing.Color.White;
-            this.lblPort.Location = new System.Drawing.Point(1113, 40);
-            this.lblPort.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.lblPort.Name = "lblPort";
-            this.lblPort.Size = new System.Drawing.Size(80, 21);
-            this.lblPort.TabIndex = 11;
-            this.lblPort.Text = "8191";
-            this.lblPort.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.lblPort.UseMnemonic = false;
+            lblPort.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblPort.BackColor = System.Drawing.Color.FromArgb(45, 45, 45);
+            lblPort.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            lblPort.ForeColor = System.Drawing.Color.White;
+            lblPort.Location = new System.Drawing.Point(1670, 60);
+            lblPort.Margin = new Padding(9, 0, 9, 0);
+            lblPort.Name = "lblPort";
+            lblPort.Size = new System.Drawing.Size(120, 32);
+            lblPort.TabIndex = 11;
+            lblPort.Text = "8191";
+            lblPort.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lblPort.UseMnemonic = false;
             // 
             // lblServerStatus
             // 
-            this.lblServerStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblServerStatus.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblServerStatus.ForeColor = System.Drawing.Color.White;
-            this.lblServerStatus.Location = new System.Drawing.Point(614, 64);
-            this.lblServerStatus.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.lblServerStatus.Name = "lblServerStatus";
-            this.lblServerStatus.Size = new System.Drawing.Size(218, 18);
-            this.lblServerStatus.TabIndex = 12;
-            this.lblServerStatus.Text = "Server offline";
-            this.lblServerStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.lblServerStatus.UseMnemonic = false;
+            lblServerStatus.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblServerStatus.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            lblServerStatus.ForeColor = System.Drawing.Color.White;
+            lblServerStatus.Location = new System.Drawing.Point(921, 96);
+            lblServerStatus.Margin = new Padding(9, 0, 9, 0);
+            lblServerStatus.Name = "lblServerStatus";
+            lblServerStatus.Size = new System.Drawing.Size(327, 27);
+            lblServerStatus.TabIndex = 12;
+            lblServerStatus.Text = "Server offline";
+            lblServerStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            lblServerStatus.UseMnemonic = false;
             // 
             // lblIpAddressHostname
             // 
-            this.lblIpAddressHostname.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblIpAddressHostname.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblIpAddressHostname.ForeColor = System.Drawing.Color.White;
-            this.lblIpAddressHostname.Location = new System.Drawing.Point(520, 43);
-            this.lblIpAddressHostname.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.lblIpAddressHostname.Name = "lblIpAddressHostname";
-            this.lblIpAddressHostname.Size = new System.Drawing.Size(312, 18);
-            this.lblIpAddressHostname.TabIndex = 13;
-            this.lblIpAddressHostname.Text = "IP address/hostname : Port";
-            this.lblIpAddressHostname.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.lblIpAddressHostname.UseMnemonic = false;
+            lblIpAddressHostname.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblIpAddressHostname.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            lblIpAddressHostname.ForeColor = System.Drawing.Color.White;
+            lblIpAddressHostname.Location = new System.Drawing.Point(780, 64);
+            lblIpAddressHostname.Margin = new Padding(9, 0, 9, 0);
+            lblIpAddressHostname.Name = "lblIpAddressHostname";
+            lblIpAddressHostname.Size = new System.Drawing.Size(468, 27);
+            lblIpAddressHostname.TabIndex = 13;
+            lblIpAddressHostname.Text = "IP address/hostname : Port";
+            lblIpAddressHostname.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            lblIpAddressHostname.UseMnemonic = false;
             // 
             // navigation
             // 
-            this.navigation.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.navigation.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(32)))), ((int)(((byte)(32)))));
-            this.navigation.Controls.Add(this.contentButtonPanel);
-            this.navigation.Controls.Add(this.btnSettings);
-            this.navigation.Location = new System.Drawing.Point(0, 41);
-            this.navigation.Margin = new System.Windows.Forms.Padding(0);
-            this.navigation.Name = "navigation";
-            this.navigation.Size = new System.Drawing.Size(54, 563);
-            this.navigation.TabIndex = 15;
-            this.navigation.Visible = false;
+            navigation.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            navigation.BackColor = System.Drawing.Color.FromArgb(32, 32, 32);
+            navigation.Controls.Add(contentButtonPanel);
+            navigation.Controls.Add(btnSettings);
+            navigation.Location = new System.Drawing.Point(0, 62);
+            navigation.Margin = new Padding(0);
+            navigation.Name = "navigation";
+            navigation.Size = new System.Drawing.Size(81, 844);
+            navigation.TabIndex = 15;
+            navigation.Visible = false;
             // 
             // btnNotifications
             // 
-            this.btnNotifications.BorderRadius = 8;
-            this.btnNotifications.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnNotifications.FlatAppearance.BorderSize = 0;
-            this.btnNotifications.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnNotifications.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnNotifications.ForeColor = System.Drawing.Color.White;
-            this.btnNotifications.HoverColor = System.Drawing.Color.Empty;
-            this.btnNotifications.Icon = global::SuchByte.MacroDeck.Properties.Resources.Bell;
-            this.btnNotifications.Location = new System.Drawing.Point(62, 41);
-            this.btnNotifications.Name = "btnNotifications";
-            this.btnNotifications.NotificationCount = 0;
-            this.btnNotifications.Padding = new System.Windows.Forms.Padding(0, 3, 3, 0);
-            this.btnNotifications.Progress = 0;
-            this.btnNotifications.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(205)))));
-            this.btnNotifications.Size = new System.Drawing.Size(41, 41);
-            this.btnNotifications.TabIndex = 16;
-            this.btnNotifications.UseVisualStyleBackColor = true;
-            this.btnNotifications.UseWindowsAccentColor = false;
-            this.btnNotifications.Visible = false;
-            this.btnNotifications.Click += new System.EventHandler(this.BtnNotifications_Click);
+            btnNotifications.BorderRadius = 8;
+            btnNotifications.Cursor = Cursors.Hand;
+            btnNotifications.FlatAppearance.BorderSize = 0;
+            btnNotifications.FlatStyle = FlatStyle.Flat;
+            btnNotifications.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            btnNotifications.ForeColor = System.Drawing.Color.White;
+            btnNotifications.HoverColor = System.Drawing.Color.Empty;
+            btnNotifications.Icon = Properties.Resources.Bell;
+            btnNotifications.Location = new System.Drawing.Point(93, 62);
+            btnNotifications.Margin = new Padding(4);
+            btnNotifications.Name = "btnNotifications";
+            btnNotifications.NotificationCount = 0;
+            btnNotifications.Padding = new Padding(0, 4, 4, 0);
+            btnNotifications.Progress = 0;
+            btnNotifications.ProgressColor = System.Drawing.Color.FromArgb(0, 103, 205);
+            btnNotifications.Size = new System.Drawing.Size(62, 62);
+            btnNotifications.TabIndex = 16;
+            btnNotifications.UseVisualStyleBackColor = true;
+            btnNotifications.UseWindowsAccentColor = false;
+            btnNotifications.Visible = false;
+            btnNotifications.WriteProgress = true;
+            btnNotifications.Click += BtnNotifications_Click;
             // 
             // hosts
             // 
-            this.hosts.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.hosts.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.hosts.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.hosts.Icon = null;
-            this.hosts.Location = new System.Drawing.Point(841, 38);
-            this.hosts.Name = "hosts";
-            this.hosts.Padding = new System.Windows.Forms.Padding(8, 2, 8, 2);
-            this.hosts.SelectedIndex = -1;
-            this.hosts.SelectedItem = null;
-            this.hosts.Size = new System.Drawing.Size(250, 26);
-            this.hosts.TabIndex = 17;
-            this.hosts.SelectedIndexChanged += new System.EventHandler(this.Hosts_SelectedIndexChanged);
+            hosts.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            hosts.BackColor = System.Drawing.Color.FromArgb(65, 65, 65);
+            hosts.DropDownStyle = ComboBoxStyle.DropDownList;
+            hosts.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            hosts.Icon = null;
+            hosts.Location = new System.Drawing.Point(1262, 57);
+            hosts.Margin = new Padding(4);
+            hosts.Name = "hosts";
+            hosts.Padding = new Padding(12, 3, 12, 3);
+            hosts.SelectedIndex = -1;
+            hosts.SelectedItem = null;
+            hosts.Size = new System.Drawing.Size(375, 36);
+            hosts.TabIndex = 17;
+            hosts.SelectedIndexChanged += Hosts_SelectedIndexChanged;
             // 
             // MainWindow
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.ClientSize = new System.Drawing.Size(1200, 635);
-            this.Controls.Add(this.hosts);
-            this.Controls.Add(this.btnNotifications);
-            this.Controls.Add(this.navigation);
-            this.Controls.Add(this.lblIpAddressHostname);
-            this.Controls.Add(this.lblServerStatus);
-            this.Controls.Add(this.lblPort);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.lblNumClientsConnected);
-            this.Controls.Add(this.contentPanel);
-            this.Controls.Add(this.lblVersion);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Location = new System.Drawing.Point(0, 0);
-            this.Margin = new System.Windows.Forms.Padding(7, 3, 7, 3);
-            this.MinimumSize = new System.Drawing.Size(1200, 635);
-            this.Name = "MainWindow";
-            this.Text = "Macro Deck 2";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
-            this.Load += new System.EventHandler(this.MainWindow_Load);
-            this.Controls.SetChildIndex(this.lblVersion, 0);
-            this.Controls.SetChildIndex(this.contentPanel, 0);
-            this.Controls.SetChildIndex(this.lblNumClientsConnected, 0);
-            this.Controls.SetChildIndex(this.label1, 0);
-            this.Controls.SetChildIndex(this.lblPort, 0);
-            this.Controls.SetChildIndex(this.lblServerStatus, 0);
-            this.Controls.SetChildIndex(this.lblIpAddressHostname, 0);
-            this.Controls.SetChildIndex(this.navigation, 0);
-            this.Controls.SetChildIndex(this.btnNotifications, 0);
-            this.Controls.SetChildIndex(this.hosts, 0);
-            this.contentButtonPanel.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.btnDeck)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.btnExtensions)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.btnDeviceManager)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.btnVariables)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.btnSettings)).EndInit();
-            this.navigation.ResumeLayout(false);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(144F, 144F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            BackColor = System.Drawing.Color.FromArgb(45, 45, 45);
+            ClientSize = new System.Drawing.Size(1800, 952);
+            Controls.Add(hosts);
+            Controls.Add(btnNotifications);
+            Controls.Add(navigation);
+            Controls.Add(lblIpAddressHostname);
+            Controls.Add(lblServerStatus);
+            Controls.Add(lblPort);
+            Controls.Add(label1);
+            Controls.Add(lblNumClientsConnected);
+            Controls.Add(contentPanel);
+            Controls.Add(lblVersion);
+            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
+            Location = new System.Drawing.Point(0, 0);
+            Margin = new Padding(10, 4, 10, 4);
+            MinimumSize = new System.Drawing.Size(1800, 952);
+            Name = "MainWindow";
+            Text = "Macro Deck 2";
+            FormClosing += OnFormClosing;
+            Load += MainWindow_Load;
+            Controls.SetChildIndex(lblVersion, 0);
+            Controls.SetChildIndex(contentPanel, 0);
+            Controls.SetChildIndex(lblNumClientsConnected, 0);
+            Controls.SetChildIndex(label1, 0);
+            Controls.SetChildIndex(lblPort, 0);
+            Controls.SetChildIndex(lblServerStatus, 0);
+            Controls.SetChildIndex(lblIpAddressHostname, 0);
+            Controls.SetChildIndex(navigation, 0);
+            Controls.SetChildIndex(btnNotifications, 0);
+            Controls.SetChildIndex(hosts, 0);
+            contentButtonPanel.ResumeLayout(false);
+            ((ISupportInitialize)btnDeck).EndInit();
+            ((ISupportInitialize)btnExtensions).EndInit();
+            ((ISupportInitialize)btnDeviceManager).EndInit();
+            ((ISupportInitialize)btnVariables).EndInit();
+            ((ISupportInitialize)btnSettings).EndInit();
+            navigation.ResumeLayout(false);
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

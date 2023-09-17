@@ -1,13 +1,10 @@
-﻿using System.ComponentModel;
-using System.Drawing;
+﻿using System.Drawing;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Threading;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+using SuchByte.MacroDeck.DataTypes.FileDownloader;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
@@ -15,7 +12,6 @@ using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
-using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.Startup;
 using SuchByte.MacroDeck.Utils;
 

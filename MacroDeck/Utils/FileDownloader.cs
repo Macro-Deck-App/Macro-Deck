@@ -1,8 +1,8 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
+using SuchByte.MacroDeck.DataTypes.FileDownloader;
 using System.Threading.Tasks;
 using SuchByte.MacroDeck.Models;
 
@@ -55,7 +55,8 @@ public class FileDownloader
             {
                 TotalBytes = totalBytes,
                 DownloadedBytes = bytesDownloaded,
-                DownloadSpeed = downloadSpeed
+                DownloadSpeed = downloadSpeed,
+                Percentage = (int)Math.Round((double)bytesDownloaded / totalBytes * 100)
             });
         }
         stopwatch.Stop();
