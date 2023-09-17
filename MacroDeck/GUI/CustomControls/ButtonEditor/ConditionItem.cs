@@ -331,7 +331,7 @@ public partial class ConditionItem : UserControl, IActionConditionItem
         {
             try
             {
-                var variable = VariableManager.ListVariables.ToList().Find(v => v.Name.Equals(source.Text));
+                var variable = VariableManager.ListVariables.FirstOrDefault(v => v.Name == source.Text);
                 if (variable != null)
                 {
                     valueToCompare.Text = variable.Value;
@@ -356,7 +356,7 @@ public partial class ConditionItem : UserControl, IActionConditionItem
 
         ((ConditionAction)Action).ConditionValue1Source = source.Text;
 
-        var variable = VariableManager.ListVariables.ToList().Find(v => v.Name.Equals(source.Text));
+        var variable = VariableManager.ListVariables.FirstOrDefault(v => v.Name == source.Text);
 
         valueToCompare.Items.Clear();
 

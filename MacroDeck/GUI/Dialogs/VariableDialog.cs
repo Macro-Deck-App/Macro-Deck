@@ -59,7 +59,8 @@ public partial class VariableDialog : DialogForm
             {
                 variableName.Text = "new_variable";
             }
-            var variableCount = VariableManager.ListVariables.ToList().FindAll(v => v.Name.Equals(variableName.Text)).Count;
+
+            var variableCount = VariableManager.ListVariables.Count(v => v.Name == variableName.Text);
             if (variableCount > 0)
             {
                 variableName.Text = string.Format(variableName.Text + " _{0}", variableCount);

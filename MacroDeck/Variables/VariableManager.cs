@@ -28,37 +28,37 @@ public static class VariableManager
 
     public static List<Variable> GetVariables(MacroDeckPlugin macroDeckPlugin)
     {
-        var pluginVariables = ListVariables
-            .Where(x => x.Creator.Equals(macroDeckPlugin.Name, StringComparison.OrdinalIgnoreCase))
+        return _database.Table<Variable>()
+            .Where(x => x.Creator.ToLower() == macroDeckPlugin.Name.ToLower())
             .OrderBy(x => x.Name)
             .ToList();
-
-        return pluginVariables;
     }
 
     public static Variable GetVariable(MacroDeckPlugin macroDeckPlugin, string variableName)
     {
         return ListVariables.FirstOrDefault(x =>
             x.Creator == macroDeckPlugin.Name &&
-            string.Equals(x.Name, variableName, StringComparison.CurrentCultureIgnoreCase));
+            x.Name.ToLower() == variableName.ToLower());
     }
     
     internal static void InsertVariable(Variable variable)
     {
-        if (ListVariables.Any(x => string.Equals(x.Name, variable.Name, StringComparison.CurrentCultureIgnoreCase)))
+        if (ListVariables.Any(x => x.Name.ToLower() == variable.Name.ToLower()))
         {
             return;
         }
         _database.Insert(variable);
     }
 
-    internal static Variable SetValue(string name, object value, VariableType type, string creator = "User")
+    internal static Variable? SetValue(string name, object value, VariableType type, string creator = "User")
     {
-        if (string.IsNullOrWhiteSpace(name)) return null;
         name = ConvertNameString(name);
-
-        var variable =
-            ListVariables.FirstOrDefault(v => v.Name == name);
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return null;
+        }
+        
+        var variable = _database.Table<Variable>().FirstOrDefault(v => v.Name == name);
         if (variable == null)
         {
             variable = new Variable
@@ -119,7 +119,11 @@ public static class VariableManager
         try
         {
             _database.Update(variable);
-        } catch { }
+        }
+        catch (Exception ex)
+        {
+            MacroDeckLogger.Error($"Error while updating variable {variable.Name}:\n{ex.Message}");
+        }
             
         return variable;
     }
@@ -181,7 +185,7 @@ public static class VariableManager
         _database = new SQLiteConnection(ApplicationPaths.VariablesFilePath);
             
         _database.CreateTable<Variable>();
-        _database.Execute("delete from Variable where 'Name'='';");
+        _database.Table<Variable>().Where(x => x.Name == "").Delete();
         MacroDeckLogger.Info(typeof(VariableManager), ListVariables.Count() + " variables found");
     }
 
@@ -202,9 +206,7 @@ public static class VariableManager
 
         var regexUmlauts = new Regex("[äöüß]");
         var evaluator = new MatchEvaluator(UmlautsReplacer);
-        str = regexUmlauts.Replace(str, evaluator);
-
-        return str;
+        return regexUmlauts.Replace(str, evaluator);
     }
     
     

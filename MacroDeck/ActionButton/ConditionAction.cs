@@ -96,7 +96,7 @@ public class ConditionAction : PluginAction
     public override void Trigger(string clientId, ActionButton actionButton) {
         var result = false;
         var conditionValue2 = ConditionValue2;
-        var variable = VariableManager.ListVariables.ToList().Find(v => v.Name.Equals(_conditionValue1Source));
+        var variable = VariableManager.ListVariables.FirstOrDefault(v => v.Name == _conditionValue1Source);
 
         foreach (var v in VariableManager.ListVariables)
         {
