@@ -77,9 +77,9 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
             lblStatus.Text = LanguageManager.Strings.Preparing;
         });
 
-        var extensionUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/extensions/{PackageInfo.PackageId}";
+        var extensionUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/extensions/{PackageInfo.PackageId}?apiVersion={MacroDeck.PluginApiVersion}";
         var downloadUrl =
-            $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/files/Download/{PackageInfo.PackageId}@latest";
+            $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/files/download/{PackageInfo.PackageId}";
         var iconUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/extensions/icon/{PackageInfo.PackageId}";
         using var httpClient = new HttpClient();
         ApiV2Extension = await httpClient.GetFromJsonAsync<ApiV2Extension>(extensionUrl, cancellationToken) ??
@@ -87,7 +87,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
         
         _destinationFileName = Path.Combine(ApplicationPaths.TempDirectoryPath, $"{ApiV2Extension.PackageId}.zip");
 
-        using var iconStream = await FileDownloader.DownloadImageAsync(iconUrl);
+        using var iconStream = await FileDownloader.DownloadImageAsync(iconUrl, CancellationToken.None);
         var icon = Image.FromStream(iconStream);
 
         Invoke(() =>

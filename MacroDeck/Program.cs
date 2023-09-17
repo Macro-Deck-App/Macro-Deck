@@ -26,7 +26,6 @@ internal class Program
         CheckRunningInstance(startParameters.IgnorePidCheck);
         
         ApplicationPaths.Initialize(startParameters.PortableMode);
-        CefSetup.Initialize();
         
         MacroDeck.Start(startParameters);
     }

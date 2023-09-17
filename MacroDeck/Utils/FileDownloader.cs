@@ -61,14 +61,14 @@ public class FileDownloader
         stopwatch.Stop();
     }
     
-    public static async Task<MemoryStream> DownloadImageAsync(string url)
+    public static async Task<MemoryStream> DownloadImageAsync(string url, CancellationToken cancellationToken)
     {
         using var httpClient = new HttpClient();
-        using var response = await httpClient.GetAsync(url);
+        using var response = await httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var imageStream = new MemoryStream();
-        await response.Content.CopyToAsync(imageStream);
+        await response.Content.CopyToAsync(imageStream, cancellationToken);
         imageStream.Position = 0;
         
         return imageStream;

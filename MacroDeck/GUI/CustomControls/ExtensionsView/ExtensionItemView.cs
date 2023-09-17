@@ -33,7 +33,7 @@ public partial class ExtensionItemView : RoundedUserControl
 
         btnUpdate.Visible = updateAvailable;
         btnUpdate.BackColor = Color.FromArgb(20, 153, 0);
-        BackColor = updateAvailable ? Color.FromArgb(222, 170, 27) : Color.FromArgb(65,65,65);
+        BackColor = updateAvailable ? Color.FromArgb(222, 170, 27) : Color.FromArgb(65, 65, 65);
 
         switch (macroDeckExtension.ExtensionType)
         {
@@ -45,23 +45,26 @@ public partial class ExtensionItemView : RoundedUserControl
                     lblStatus.Text = LanguageManager.Strings.Disabled;
                     lblStatus.ForeColor = Color.White;
                     lblStatus.BackColor = Color.Firebrick;
-                } else if (PluginManager.UpdatedPlugins.Contains(macroDeckPlugin))
+                }
+                else if (PluginManager.UpdatedPlugins.Contains(macroDeckPlugin))
                 {
                     lblStatus.Text = LanguageManager.Strings.PendingRestart;
                     lblStatus.ForeColor = Color.Yellow;
                     lblStatus.BackColor = Color.Transparent;
-                } else if (PluginManager.PluginsUpdateAvailable.Contains(macroDeckPlugin) && !PluginManager.UpdatedPlugins.Contains(macroDeckPlugin))
+                }
+                else if (PluginManager.PluginsUpdateAvailable.Contains(macroDeckPlugin) && !PluginManager.UpdatedPlugins.Contains(macroDeckPlugin))
                 {
                     lblStatus.Text = LanguageManager.Strings.UpdateAvailable;
                     lblStatus.ForeColor = Color.White;
                     lblStatus.BackColor = Color.Transparent;
-                } else
+                }
+                else
                 {
                     lblStatus.Text = LanguageManager.Strings.Enabled;
-                    lblStatus.ForeColor = Color.FromArgb(0,192,0);
+                    lblStatus.ForeColor = Color.FromArgb(0, 192, 0);
                     lblStatus.BackColor = Color.Transparent;
                 }
-                    
+
                 extensionIcon.BackgroundImage = macroDeckPlugin.PluginIcon == null ? Resources.Icon : macroDeckPlugin.PluginIcon;
                 lblExtensionName.Text = macroDeckPlugin.Name;
                 lblVersion.Text = $"{LanguageManager.Strings.InstalledVersion}: {macroDeckPlugin.Version}";
@@ -74,7 +77,8 @@ public partial class ExtensionItemView : RoundedUserControl
                     lblStatus.Text = LanguageManager.Strings.UpdateAvailable;
                     lblStatus.ForeColor = Color.White;
                     lblStatus.BackColor = Color.Transparent;
-                } else
+                }
+                else
                 {
                     lblStatus.Text = LanguageManager.Strings.Enabled;
                     lblStatus.ForeColor = Color.FromArgb(0, 192, 0);

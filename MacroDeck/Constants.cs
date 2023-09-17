@@ -2,5 +2,5 @@
 
 public class Constants
 {
-    public const string ExtensionStoreApiBaseUrl = "https://test.extensionstore.api.macro-deck.app";
+    public const string ExtensionStoreApiBaseUrl = "https://extensionstore.api.macro-deck.app";
 }

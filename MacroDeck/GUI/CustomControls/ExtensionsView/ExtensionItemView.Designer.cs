@@ -34,154 +34,153 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
         /// </summary>
         private void InitializeComponent()
         {
-            this.lblExtensionType = new Label();
-            this.extensionIcon = new PictureBox();
-            this.lblExtensionName = new Label();
-            this.lblVersion = new Label();
-            this.btnConfigure = new ButtonPrimary();
-            this.lblStatus = new Label();
-            this.btnUninstall = new LinkLabel();
-            this.btnUpdate = new ButtonPrimary();
-            ((ISupportInitialize)(this.extensionIcon)).BeginInit();
-            this.SuspendLayout();
+            lblExtensionType = new Label();
+            extensionIcon = new PictureBox();
+            lblExtensionName = new Label();
+            lblVersion = new Label();
+            btnConfigure = new ButtonPrimary();
+            lblStatus = new Label();
+            btnUninstall = new LinkLabel();
+            btnUpdate = new ButtonPrimary();
+            ((ISupportInitialize)extensionIcon).BeginInit();
+            SuspendLayout();
             // 
             // lblExtensionType
             // 
-            this.lblExtensionType.ForeColor = Color.White;
-            this.lblExtensionType.Location = new Point(182, 5);
-            this.lblExtensionType.Name = "lblExtensionType";
-            this.lblExtensionType.Size = new Size(111, 21);
-            this.lblExtensionType.TabIndex = 0;
-            this.lblExtensionType.Text = "label1";
-            this.lblExtensionType.TextAlign = ContentAlignment.MiddleCenter;
-            this.lblExtensionType.UseMnemonic = false;
+            lblExtensionType.ForeColor = Color.White;
+            lblExtensionType.Location = new Point(182, 5);
+            lblExtensionType.Name = "lblExtensionType";
+            lblExtensionType.Size = new Size(111, 21);
+            lblExtensionType.TabIndex = 0;
+            lblExtensionType.Text = "label1";
+            lblExtensionType.TextAlign = ContentAlignment.MiddleCenter;
+            lblExtensionType.UseMnemonic = false;
             // 
             // extensionIcon
             // 
-            this.extensionIcon.BackgroundImageLayout = ImageLayout.Stretch;
-            this.extensionIcon.Location = new Point(8, 26);
-            this.extensionIcon.Name = "extensionIcon";
-            this.extensionIcon.Size = new Size(50, 50);
-            this.extensionIcon.TabIndex = 1;
-            this.extensionIcon.TabStop = false;
+            extensionIcon.BackgroundImageLayout = ImageLayout.Stretch;
+            extensionIcon.Location = new Point(8, 26);
+            extensionIcon.Name = "extensionIcon";
+            extensionIcon.Size = new Size(50, 50);
+            extensionIcon.TabIndex = 1;
+            extensionIcon.TabStop = false;
             // 
             // lblExtensionName
             // 
-            this.lblExtensionName.Font = new Font("Tahoma", 11.25F, FontStyle.Bold, GraphicsUnit.Point);
-            this.lblExtensionName.ForeColor = Color.White;
-            this.lblExtensionName.Location = new Point(64, 26);
-            this.lblExtensionName.Name = "lblExtensionName";
-            this.lblExtensionName.Size = new Size(229, 23);
-            this.lblExtensionName.TabIndex = 2;
-            this.lblExtensionName.Text = "label1";
-            this.lblExtensionName.UseMnemonic = false;
+            lblExtensionName.Font = new Font("Tahoma", 11.25F, FontStyle.Bold, GraphicsUnit.Point);
+            lblExtensionName.ForeColor = Color.White;
+            lblExtensionName.Location = new Point(64, 26);
+            lblExtensionName.Name = "lblExtensionName";
+            lblExtensionName.Size = new Size(229, 23);
+            lblExtensionName.TabIndex = 2;
+            lblExtensionName.Text = "label1";
+            lblExtensionName.UseMnemonic = false;
             // 
             // lblVersion
             // 
-            this.lblVersion.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblVersion.ForeColor = Color.White;
-            this.lblVersion.Location = new Point(64, 52);
-            this.lblVersion.Name = "lblVersion";
-            this.lblVersion.Size = new Size(229, 27);
-            this.lblVersion.TabIndex = 3;
-            this.lblVersion.Text = "label1";
-            this.lblVersion.TextAlign = ContentAlignment.MiddleLeft;
-            this.lblVersion.UseMnemonic = false;
+            lblVersion.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            lblVersion.ForeColor = Color.White;
+            lblVersion.Location = new Point(64, 52);
+            lblVersion.Name = "lblVersion";
+            lblVersion.Size = new Size(229, 27);
+            lblVersion.TabIndex = 3;
+            lblVersion.Text = "label1";
+            lblVersion.TextAlign = ContentAlignment.MiddleLeft;
+            lblVersion.UseMnemonic = false;
             // 
             // btnConfigure
             // 
-            this.btnConfigure.BorderRadius = 8;
-            this.btnConfigure.Cursor = Cursors.Hand;
-            this.btnConfigure.FlatAppearance.BorderSize = 0;
-            this.btnConfigure.FlatStyle = FlatStyle.Flat;
-            this.btnConfigure.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
-            this.btnConfigure.ForeColor = Color.White;
-            this.btnConfigure.HoverColor = Color.Empty;
-            this.btnConfigure.Icon = null;
-            this.btnConfigure.Location = new Point(8, 114);
-            this.btnConfigure.Name = "btnConfigure";
-            this.btnConfigure.Progress = 0;
-            this.btnConfigure.ProgressColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(225)))));
-            this.btnConfigure.Size = new Size(139, 40);
-            this.btnConfigure.TabIndex = 4;
-            this.btnConfigure.Text = "Configure";
-            this.btnConfigure.UseVisualStyleBackColor = true;
-            this.btnConfigure.UseWindowsAccentColor = true;
-            this.btnConfigure.UseMnemonic = false;
-            this.btnConfigure.Click += new EventHandler(this.BtnConfigure_Click);
+            btnConfigure.BorderRadius = 8;
+            btnConfigure.Cursor = Cursors.Hand;
+            btnConfigure.FlatAppearance.BorderSize = 0;
+            btnConfigure.FlatStyle = FlatStyle.Flat;
+            btnConfigure.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnConfigure.ForeColor = Color.White;
+            btnConfigure.HoverColor = Color.Empty;
+            btnConfigure.Icon = null;
+            btnConfigure.Location = new Point(8, 114);
+            btnConfigure.Name = "btnConfigure";
+            btnConfigure.Progress = 0;
+            btnConfigure.ProgressColor = Color.FromArgb(0, 103, 225);
+            btnConfigure.Size = new Size(139, 40);
+            btnConfigure.TabIndex = 4;
+            btnConfigure.Text = "Configure";
+            btnConfigure.UseMnemonic = false;
+            btnConfigure.UseVisualStyleBackColor = true;
+            btnConfigure.UseWindowsAccentColor = true;
+            btnConfigure.Click += BtnConfigure_Click;
             // 
             // lblStatus
             // 
-            this.lblStatus.BackColor = Color.Transparent;
-            this.lblStatus.Font = new Font("Tahoma", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
-            this.lblStatus.ForeColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
-            this.lblStatus.Location = new Point(8, 4);
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new Size(168, 21);
-            this.lblStatus.TabIndex = 6;
-            this.lblStatus.Text = "Active";
-            this.lblStatus.TextAlign = ContentAlignment.MiddleLeft;
-            this.lblStatus.UseMnemonic = false;
+            lblStatus.BackColor = Color.Transparent;
+            lblStatus.Font = new Font("Tahoma", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
+            lblStatus.ForeColor = Color.FromArgb(0, 192, 0);
+            lblStatus.Location = new Point(8, 4);
+            lblStatus.Name = "lblStatus";
+            lblStatus.Size = new Size(168, 21);
+            lblStatus.TabIndex = 6;
+            lblStatus.Text = "Active";
+            lblStatus.TextAlign = ContentAlignment.MiddleLeft;
+            lblStatus.UseMnemonic = false;
             // 
             // btnUninstall
             // 
-            this.btnUninstall.ActiveLinkColor = Color.DarkGray;
-            this.btnUninstall.Font = new Font("Tahoma", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
-            this.btnUninstall.ForeColor = Color.Silver;
-            this.btnUninstall.LinkColor = Color.Silver;
-            this.btnUninstall.Location = new Point(153, 122);
-            this.btnUninstall.Name = "btnUninstall";
-            this.btnUninstall.Size = new Size(140, 25);
-            this.btnUninstall.TabIndex = 7;
-            this.btnUninstall.TabStop = true;
-            this.btnUninstall.Text = "Uninstall";
-            this.btnUninstall.TextAlign = ContentAlignment.MiddleCenter;
-            this.btnUninstall.UseMnemonic = false;
-            this.btnUninstall.VisitedLinkColor = Color.Silver;
-            this.btnUninstall.LinkClicked += new LinkLabelLinkClickedEventHandler(this.BtnUninstall_LinkClicked);
+            btnUninstall.ActiveLinkColor = Color.DarkGray;
+            btnUninstall.Font = new Font("Tahoma", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
+            btnUninstall.ForeColor = Color.Silver;
+            btnUninstall.LinkColor = Color.Silver;
+            btnUninstall.Location = new Point(153, 122);
+            btnUninstall.Name = "btnUninstall";
+            btnUninstall.Size = new Size(140, 25);
+            btnUninstall.TabIndex = 7;
+            btnUninstall.TabStop = true;
+            btnUninstall.Text = "Uninstall";
+            btnUninstall.TextAlign = ContentAlignment.MiddleCenter;
+            btnUninstall.UseMnemonic = false;
+            btnUninstall.VisitedLinkColor = Color.Silver;
+            btnUninstall.LinkClicked += BtnUninstall_LinkClicked;
             // 
             // btnUpdate
             // 
-            this.btnUpdate.BorderRadius = 8;
-            this.btnUpdate.Cursor = Cursors.Hand;
-            this.btnUpdate.FlatAppearance.BorderSize = 0;
-            this.btnUpdate.FlatStyle = FlatStyle.Flat;
-            this.btnUpdate.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
-            this.btnUpdate.ForeColor = Color.White;
-            this.btnUpdate.HoverColor = Color.Empty;
-            this.btnUpdate.Icon = null;
-            this.btnUpdate.Location = new Point(153, 82);
-            this.btnUpdate.Name = "btnUpdate";
-            this.btnUpdate.Progress = 0;
-            this.btnUpdate.ProgressColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(225)))));
-            this.btnUpdate.Size = new Size(140, 27);
-            this.btnUpdate.TabIndex = 8;
-            this.btnUpdate.Text = "Update";
-            this.btnUpdate.UseMnemonic = false;
-            this.btnUpdate.UseVisualStyleBackColor = true;
-            this.btnUpdate.UseWindowsAccentColor = false;
-            this.btnUpdate.Visible = false;
-            this.btnUpdate.Click += new EventHandler(this.BtnUpdate_Click);
+            btnUpdate.BorderRadius = 8;
+            btnUpdate.Cursor = Cursors.Hand;
+            btnUpdate.FlatAppearance.BorderSize = 0;
+            btnUpdate.FlatStyle = FlatStyle.Flat;
+            btnUpdate.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnUpdate.ForeColor = Color.White;
+            btnUpdate.HoverColor = Color.Empty;
+            btnUpdate.Icon = null;
+            btnUpdate.Location = new Point(153, 82);
+            btnUpdate.Name = "btnUpdate";
+            btnUpdate.Progress = 0;
+            btnUpdate.ProgressColor = Color.FromArgb(0, 103, 225);
+            btnUpdate.Size = new Size(140, 27);
+            btnUpdate.TabIndex = 8;
+            btnUpdate.Text = "Update";
+            btnUpdate.UseMnemonic = false;
+            btnUpdate.UseVisualStyleBackColor = true;
+            btnUpdate.UseWindowsAccentColor = false;
+            btnUpdate.Visible = false;
+            btnUpdate.Click += BtnUpdate_Click;
             // 
             // ExtensionItemView
             // 
-            
-            this.AutoScaleMode = AutoScaleMode.Dpi;
-            this.BackColor = Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.Controls.Add(this.btnUpdate);
-            this.Controls.Add(this.btnUninstall);
-            this.Controls.Add(this.lblStatus);
-            this.Controls.Add(this.btnConfigure);
-            this.Controls.Add(this.lblVersion);
-            this.Controls.Add(this.lblExtensionName);
-            this.Controls.Add(this.extensionIcon);
-            this.Controls.Add(this.lblExtensionType);
-            this.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            this.Name = "ExtensionItemView";
-            this.Size = new Size(301, 164);
-            ((ISupportInitialize)(this.extensionIcon)).EndInit();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            BackColor = Color.FromArgb(65, 65, 65);
+            Controls.Add(btnUpdate);
+            Controls.Add(btnUninstall);
+            Controls.Add(lblStatus);
+            Controls.Add(btnConfigure);
+            Controls.Add(lblVersion);
+            Controls.Add(lblExtensionName);
+            Controls.Add(extensionIcon);
+            Controls.Add(lblExtensionType);
+            Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            Name = "ExtensionItemView";
+            Size = new Size(301, 164);
+            ((ISupportInitialize)extensionIcon).EndInit();
+            ResumeLayout(false);
         }
 
         #endregion

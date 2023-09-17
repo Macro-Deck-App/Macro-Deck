@@ -6,6 +6,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls;
 
 public partial class RoundedTextBox : UserControl
 {
+    public EventHandler<string>? InputChanged;
+
     private int borderRadius = 8;
     private Color placeHolderColor = Color.Gray;
     private string placeHolderText = "";
@@ -36,11 +38,12 @@ public partial class RoundedTextBox : UserControl
         set => textBox1.ReadOnly = value;
     }
 
-    public HorizontalAlignment TextAlignment {
+    public HorizontalAlignment TextAlignment
+    {
         get => textBox1.TextAlign;
         set => textBox1.TextAlign = value;
     }
-        
+
     public bool PasswordChar
     {
         get => isPasswordChar;
@@ -79,7 +82,7 @@ public partial class RoundedTextBox : UserControl
         set => textBox1.Multiline = value;
     }
 
-        
+
     public override Color BackColor
     {
         get => base.BackColor;
@@ -90,7 +93,7 @@ public partial class RoundedTextBox : UserControl
         }
     }
 
-        
+
     public override Color ForeColor
     {
         get => base.ForeColor;
@@ -101,7 +104,7 @@ public partial class RoundedTextBox : UserControl
         }
     }
 
-        
+
     public override Font Font
     {
         get => base.Font;
@@ -116,7 +119,7 @@ public partial class RoundedTextBox : UserControl
         }
     }
 
-        
+
     public override string Text
     {
 
@@ -136,7 +139,7 @@ public partial class RoundedTextBox : UserControl
         }
     }
 
-        
+
     public Color PlaceHolderColor
     {
         get => placeHolderColor;
@@ -146,11 +149,11 @@ public partial class RoundedTextBox : UserControl
             if (isPlaceHolder)
             {
                 textBox1.ForeColor = value;
-            }   
+            }
         }
     }
 
-        
+
     public string PlaceHolderText
     {
         get => placeHolderText;
@@ -263,7 +266,7 @@ public partial class RoundedTextBox : UserControl
             graph.SmoothingMode = SmoothingMode.AntiAlias;
             graph.DrawPath(penBorderSmooth, pathBorderSmooth);
         }
-        else 
+        else
         {
             Region = new Region(ClientRectangle);
         }
@@ -303,6 +306,7 @@ public partial class RoundedTextBox : UserControl
     {
         if (isPlaceHolder) return;
         OnTextChanged(e);
+        InputChanged?.Invoke(this, Text);
     }
 
     private void TextBox1_Click(object sender, EventArgs e)

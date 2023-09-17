@@ -34,45 +34,44 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// </summary>
         private void InitializeComponent()
         {
-            this.textBox1 = new TextBox();
-            this.SuspendLayout();
+            textBox1 = new TextBox();
+            SuspendLayout();
             // 
             // textBox1
             // 
-            this.textBox1.BackColor = Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.textBox1.BorderStyle = BorderStyle.None;
-            this.textBox1.Dock = DockStyle.Fill;
-            this.textBox1.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.textBox1.ForeColor = Color.White;
-            this.textBox1.Location = new Point(8, 5);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new Size(234, 19);
-            this.textBox1.TabIndex = 0;
-            this.textBox1.Click += new EventHandler(this.TextBox1_Click);
-            this.textBox1.TextChanged += new EventHandler(this.TextBox1_TextChanged);
-            this.textBox1.Enter += new EventHandler(this.TextBox1_Enter);
-            this.textBox1.GotFocus += new EventHandler(this.TextBox1_GotFocus);
-            this.textBox1.KeyPress += new KeyPressEventHandler(this.TextBox1_KeyPress);
-            this.textBox1.LostFocus += new EventHandler(this.TextBox1_LostFocus);
-            this.textBox1.MouseEnter += new EventHandler(this.TextBox1_MouseEnter);
-            this.textBox1.MouseLeave += new EventHandler(this.TextBox1_MouseLeave);
+            textBox1.BackColor = Color.FromArgb(65, 65, 65);
+            textBox1.BorderStyle = BorderStyle.None;
+            textBox1.Dock = DockStyle.Fill;
+            textBox1.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            textBox1.ForeColor = Color.White;
+            textBox1.Location = new Point(8, 5);
+            textBox1.Name = "textBox1";
+            textBox1.Size = new Size(234, 19);
+            textBox1.TabIndex = 0;
+            textBox1.Click += TextBox1_Click;
+            textBox1.TextChanged += TextBox1_TextChanged;
+            textBox1.Enter += TextBox1_Enter;
+            textBox1.GotFocus += TextBox1_GotFocus;
+            textBox1.KeyPress += TextBox1_KeyPress;
+            textBox1.LostFocus += TextBox1_LostFocus;
+            textBox1.MouseEnter += TextBox1_MouseEnter;
+            textBox1.MouseLeave += TextBox1_MouseLeave;
             // 
             // RoundedTextBox
             // 
-            this.AutoScaleMode = AutoScaleMode.None;
-            this.BackColor = Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.Controls.Add(this.textBox1);
-            this.Cursor = Cursors.Hand;
-            this.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            this.Name = "RoundedTextBox";
-            this.Padding = new Padding(8, 5, 8, 5);
-            this.Size = new Size(250, 30);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleMode = AutoScaleMode.None;
+            BackColor = Color.FromArgb(65, 65, 65);
+            Controls.Add(textBox1);
+            Cursor = Cursors.Hand;
+            Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            Name = "RoundedTextBox";
+            Padding = new Padding(8, 5, 8, 5);
+            Size = new Size(250, 30);
+            ResumeLayout(false);
+            PerformLayout();
         }
 
-        
+
 
         #endregion
 
