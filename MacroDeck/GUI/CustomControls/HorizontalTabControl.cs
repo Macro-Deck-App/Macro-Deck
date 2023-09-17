@@ -38,7 +38,7 @@ public class HorizontalTabControl : TabControl
             var buttonSurface = new Rectangle(new Point(GetTabRect(i).Location.X + 6, GetTabRect(i).Location.Y - 2), new Size(GetTabRect(i).Width - 5, GetTabRect(i).Height - 1));
                 
             using (var backgroundBrush = new SolidBrush(Parent.BackColor))
-            using (var selectedBrush = new SolidBrush(Colors.WindowsAccentColorDark))
+            using (var selectedBrush = new SolidBrush(Colors.AccentColorDark))
             {
                 switch (i == SelectedIndex)
                 {

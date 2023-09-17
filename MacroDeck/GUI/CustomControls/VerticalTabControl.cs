@@ -8,7 +8,7 @@ public class VerticalTabControl : TabControl
 {
     private List<int> _notificationIndexes = new();
 
-    public Color SelectedTabColor { get; set; } = Colors.DefaultAccentColorDark;
+    public Color SelectedTabColor { get; set; } = Colors.AccentColorDark;
 
 
     public VerticalTabControl()

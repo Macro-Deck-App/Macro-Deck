@@ -14,7 +14,7 @@ public partial class ButtonPrimary : Button
     private int borderRadius = 8;
     private int progress;
     private Color backColor;
-    private Color progressColor = Colors.DefaultAccentColorDark;
+    private Color progressColor = Colors.AccentColorDark;
     private Color hoverColor;
     private string text = "";
     private Image _icon;
@@ -65,7 +65,7 @@ public partial class ButtonPrimary : Button
             switch (UseWindowsAccentColor)
             {
                 case true:
-                    return Colors.WindowsAccentColor;
+                    return Colors.AccentColor;
                 case false:
                     return backColor;
             }
@@ -88,7 +88,7 @@ public partial class ButtonPrimary : Button
             switch (UseWindowsAccentColor)
             {
                 case true:
-                    return Colors.WindowsAccentColorLight;
+                    return Colors.AccentColorLight;
                 case false:
                     return hoverColor;
             }
@@ -111,7 +111,7 @@ public partial class ButtonPrimary : Button
             switch (UseWindowsAccentColor)
             {
                 case true:
-                    return Colors.WindowsAccentColorDark;
+                    return Colors.AccentColorDark;
                 case false:
                     return progressColor;
             }

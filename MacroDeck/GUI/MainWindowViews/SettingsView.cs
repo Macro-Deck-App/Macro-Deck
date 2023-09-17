@@ -26,7 +26,7 @@ public partial class SettingsView : UserControl
         verticalTabControl.SelectTab(page);
         if (!DesignMode)
         {
-            verticalTabControl.SelectedTabColor = Colors.WindowsAccentColor;
+            verticalTabControl.SelectedTabColor = Colors.AccentColor;
         }
         Dock = DockStyle.Fill;
         UpdateTranslation();
