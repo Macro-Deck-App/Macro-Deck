@@ -31,8 +31,8 @@ public partial class ContentSelectorButton : PictureBox
         ForeColor = Color.White;
         Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
         Text = "";
-        Height = 66;
-        Width = 66;
+        Height = 44;
+        Width = 44;
         Margin = new Padding(left: 0, top: 3, right: 0, bottom: 3);
         Cursor = Cursors.Hand;
         MouseEnter += MouseEnterEvent;

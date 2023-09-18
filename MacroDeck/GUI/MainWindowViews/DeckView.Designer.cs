@@ -573,7 +573,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // DeckView
             // 
-            this.AutoScaleDimensions = new SizeF(96F, 96F);
             this.AutoScaleMode = AutoScaleMode.Dpi;
             this.BackColor = Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.Controls.Add(this.roundedPanel2);
