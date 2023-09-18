@@ -22,13 +22,14 @@ namespace SuchByte.MacroDeck.GUI;
 
 public partial class MainWindow : Form
 {
-    private DeckView _deckView { get; set; }
+    private NotificationsList? _notificationsList;
 
+    private DeckView? _deckView;
     public DeckView DeckView
     {
         get
         {
-            if (_deckView == null || _deckView.IsDisposed)
+            if (_deckView is null || _deckView.IsDisposed || !_deckView.IsHandleCreated)
             {
                 _deckView = new DeckView();
             }
@@ -36,7 +37,6 @@ public partial class MainWindow : Form
         }
     }
 
-    private NotificationsList notificationsList;
 
     public MainWindow()
     {
@@ -59,7 +59,7 @@ public partial class MainWindow : Form
         lblIpAddressHostname.Text = LanguageManager.Strings.IpAddressHostNamePort;
     }
 
-    private void LanguageChanged(object sender, EventArgs e)
+    private void LanguageChanged(object? sender, EventArgs e)
     {
         UpdateTranslation();
         DeckView?.UpdateTranslation();
@@ -91,27 +91,27 @@ public partial class MainWindow : Form
 
         switch (view)
         {
-            case DeckView deck:
+            case DeckView _:
                 SelectContentButton(btnDeck);
                 break;
-            case DeviceManagerView deviceManager:
+            case DeviceManagerView:
                 SelectContentButton(btnDeviceManager);
                 break;
-            case ExtensionsView extensions:
+            case ExtensionsView:
                 SelectContentButton(btnExtensions);
                 break;
-            case SettingsView settings:
+            case SettingsView:
                 SelectContentButton(btnSettings);
                 break;
-            case VariablesView variables:
+            case VariablesView:
                 SelectContentButton(btnVariables);
                 break;
         }
     }
 
-    private void MainWindow_Load(object sender, EventArgs e)
+    private void MainWindow_Load(object? sender, EventArgs e)
     {
-        lblVersion.Text = $"Macro Deck {MacroDeck.Version}";
+        lblVersion.Text = $@"Macro Deck {MacroDeck.Version}";
 
         PluginManager.OnPluginsChange += OnPluginsChanged;
         IconManager.OnIconPacksChanged += OnPluginsChanged;
@@ -159,28 +159,37 @@ public partial class MainWindow : Form
         hosts.SelectedIndexChanged -= Hosts_SelectedIndexChanged;
         foreach (var networkInterface in NetworkInterface.GetAllNetworkInterfaces())
         {
-            hosts.Items.Add(networkInterface.GetIPProperties().UnicastAddresses.Where(x => x.Address.AddressFamily == AddressFamily.InterNetwork).FirstOrDefault().Address.ToString());
+            var ipAddress = networkInterface
+                .GetIPProperties()
+                .UnicastAddresses
+                .FirstOrDefault(x => x.Address.AddressFamily == AddressFamily.InterNetwork)
+                ?.Address
+                .ToString();
+            if (!string.IsNullOrWhiteSpace(ipAddress))
+            {
+                hosts.Items.Add(ipAddress);
+            }
         }
         hosts.Text = MacroDeck.Configuration.HostAddress;
         hosts.SelectedIndexChanged += Hosts_SelectedIndexChanged;
     }
 
-    private void NotificationsChanged(object sender, EventArgs e)
+    private void NotificationsChanged(object? sender, EventArgs e)
     {
         btnNotifications.NotificationCount = NotificationManager.Notifications.Count;
     }
 
-    private void ExtensionStoreHelper_OnInstallationFinished(object sender, EventArgs e)
+    private void ExtensionStoreHelper_OnInstallationFinished(object? sender, EventArgs e)
     {
         RefreshPluginsLabels();
     }
 
-    private void OnPackageManagerUpdateCheckFinished(object sender, EventArgs e)
+    private void OnPackageManagerUpdateCheckFinished(object? sender, EventArgs e)
     {
         RefreshPluginsLabels();
     }
 
-    private void OnPluginsChanged(object sender, EventArgs e)
+    private void OnPluginsChanged(object? sender, EventArgs e)
     {
         RefreshPluginsLabels();
 
@@ -195,11 +204,11 @@ public partial class MainWindow : Form
         });
     }
 
-    private void OnServerStateChanged(object sender, EventArgs e)
+    private void OnServerStateChanged(object? sender, EventArgs e)
     {
         Invoke(() =>
         {
-            if (MacroDeckServer.WebSocketServer.ListenerSocket == null)
+            if (MacroDeckServer.WebSocketServer?.ListenerSocket == null)
             {
                 lblServerStatus.Text = LanguageManager.Strings.ServerOffline;
             }
@@ -212,35 +221,35 @@ public partial class MainWindow : Form
         });
     }
 
-    private void OnClientsConnectedChanged(object sender, EventArgs e)
+    private void OnClientsConnectedChanged(object? sender, EventArgs e)
     {
         Invoke(new Action(() =>
             lblNumClientsConnected.Text = string.Format(LanguageManager.Strings.XClientsConnected, MacroDeckServer.Clients.Count)
         ));
     }
 
-    private void BtnDeck_Click(object sender, EventArgs e)
+    private void BtnDeck_Click(object? sender, EventArgs e)
     {
         SetView(DeckView);
         DeckView.UpdateButtons();
     }
 
-    private void BtnExtensions_Click(object sender, EventArgs e)
+    private void BtnExtensions_Click(object? sender, EventArgs e)
     {
         SetView(new ExtensionsView());
     }
 
-    private void BtnSettings_Click(object sender, EventArgs e)
+    private void BtnSettings_Click(object? sender, EventArgs e)
     {
         SetView(new SettingsView());
     }
 
-    private void BtnDeviceManager_Click(object sender, EventArgs e)
+    private void BtnDeviceManager_Click(object? sender, EventArgs e)
     {
         SetView(new DeviceManagerView());
     }
 
-    public void OnFormClosing(object sender, EventArgs e)
+    public void OnFormClosing(object? sender, EventArgs e)
     {
         foreach (Control control in contentPanel.Controls)
         {
@@ -248,37 +257,37 @@ public partial class MainWindow : Form
         }
     }
 
-    private void BtnVariables_Click(object sender, EventArgs e)
+    private void BtnVariables_Click(object? sender, EventArgs e)
     {
         SetView(new VariablesView());
     }
 
-    private void BtnNotifications_Click(object sender, EventArgs e)
+    private void BtnNotifications_Click(object? sender, EventArgs e)
     {
-        if (notificationsList == null || notificationsList.IsDisposed)
+        if (_notificationsList == null || _notificationsList.IsDisposed)
         {
-            notificationsList = new NotificationsList
+            _notificationsList = new NotificationsList
             {
-                Location = new Point(btnNotifications.Location.X, btnNotifications.Location.Y + btnNotifications.Height)
+                Location = btnNotifications.Location with { Y = btnNotifications.Location.Y + btnNotifications.Height }
             };
-            notificationsList.OnCloseRequested += (sender, e) =>
+            _notificationsList.OnCloseRequested += (_, _) =>
             {
-                Controls.Remove(notificationsList);
+                Controls.Remove(_notificationsList);
             };
         }
 
-        if (Controls.Contains(notificationsList))
+        if (Controls.Contains(_notificationsList))
         {
-            Controls.Remove(notificationsList);
+            Controls.Remove(_notificationsList);
         }
         else
         {
-            Controls.Add(notificationsList);
-            notificationsList.BringToFront();
+            Controls.Add(_notificationsList);
+            _notificationsList.BringToFront();
         }
     }
 
-    private void Hosts_SelectedIndexChanged(object sender, EventArgs e)
+    private void Hosts_SelectedIndexChanged(object? sender, EventArgs e)
     {
         MacroDeck.Configuration.HostAddress = hosts.Text;
         MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);

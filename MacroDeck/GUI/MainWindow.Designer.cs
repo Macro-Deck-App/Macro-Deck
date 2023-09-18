@@ -30,9 +30,9 @@ namespace SuchByte.MacroDeck.GUI
             }
             try
             {
-                if (this.notificationsList != null && this.Controls.Contains(this.notificationsList))
+                if (this._notificationsList != null && this.Controls.Contains(this._notificationsList))
                 {
-                    this.Controls.Remove(this.notificationsList);
+                    this.Controls.Remove(this._notificationsList);
                 }
                 LanguageManager.LanguageChanged -= LanguageChanged;
                 UpdateService.Instance().UpdateAvailable -= UpdateAvailable;

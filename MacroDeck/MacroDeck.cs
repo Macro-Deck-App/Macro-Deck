@@ -101,7 +101,7 @@ public class MacroDeck : NativeWindow
         IconManager.Initialize();
         ProfileManager.Load();
 
-        PrintNetworkInterfaces();
+        SearchNetworkInterfaces();
         MacroDeckServer.Start(StartParameters.Port <= 0 ? Configuration.HostPort : StartParameters.Port);
         BroadcastServer.Start();
         ADBServerHelper.Initialize();
@@ -162,25 +162,39 @@ public class MacroDeck : NativeWindow
 
     }
 
-    private static void PrintNetworkInterfaces()
+    private static void SearchNetworkInterfaces()
     {
         StringBuilder sb = new();
+        var foundNetworkInterfaces = 0;
         try
         {
             foreach (var adapter in NetworkInterface.GetAllNetworkInterfaces())
             {
-                var address = adapter.GetIPProperties().UnicastAddresses
-                    .FirstOrDefault(x => x.Address.AddressFamily == AddressFamily.InterNetwork)?.Address;
-                sb.AppendLine();
-                sb.Append($"{adapter.Name} - {address}");
+                var address = adapter
+                    .GetIPProperties()
+                    .UnicastAddresses
+                    .FirstOrDefault(x => x.Address.AddressFamily == AddressFamily.InterNetwork)?
+                    .Address?
+                    .ToString();
+                if (!string.IsNullOrWhiteSpace(address))
+                {
+                    sb.AppendLine($"{adapter.Name} - {address}");
+                    foundNetworkInterfaces++;
+                }
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // ignored
+            MacroDeckLogger.Warning($"Error while searching for network interfaces\n{ex.Message}");
         }
-        MacroDeckLogger.Info($"Network interfaces: {sb}");
-        sb.Clear();
+
+        if (foundNetworkInterfaces == 0)
+        {
+            MacroDeckLogger.Error("No network interfaces were found");
+        } else
+        {
+            MacroDeckLogger.Info($"Found network interfaces:\n{sb}");
+        }
     }
 
     private static void StartInitialSetup()
