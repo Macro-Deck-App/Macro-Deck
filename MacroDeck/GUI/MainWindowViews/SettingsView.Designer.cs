@@ -250,6 +250,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnChangePort.UseMnemonic = false;
             btnChangePort.UseVisualStyleBackColor = false;
             btnChangePort.UseWindowsAccentColor = true;
+            btnChangePort.WriteProgress = true;
             btnChangePort.Click += BtnChangePort_Click;
             // 
             // groupConnectionInfo
@@ -439,6 +440,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnCheckUpdates.UseMnemonic = false;
             btnCheckUpdates.UseVisualStyleBackColor = false;
             btnCheckUpdates.UseWindowsAccentColor = true;
+            btnCheckUpdates.WriteProgress = true;
             btnCheckUpdates.Click += BtnCheckUpdates_Click;
             // 
             // lblInstalledVersion
@@ -487,6 +489,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // btnCreateBackup
             // 
+            btnCreateBackup.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             btnCreateBackup.BorderRadius = 8;
             btnCreateBackup.Cursor = Cursors.Hand;
             btnCreateBackup.FlatAppearance.BorderSize = 0;
@@ -505,6 +508,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnCreateBackup.UseMnemonic = false;
             btnCreateBackup.UseVisualStyleBackColor = false;
             btnCreateBackup.UseWindowsAccentColor = true;
+            btnCreateBackup.WriteProgress = true;
             btnCreateBackup.Click += BtnCreateBackup_Click;
             // 
             // backupsPanel
@@ -606,6 +610,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnLicenses.UseMnemonic = false;
             btnLicenses.UseVisualStyleBackColor = false;
             btnLicenses.UseWindowsAccentColor = true;
+            btnLicenses.WriteProgress = true;
             btnLicenses.Click += BtnLicenses_Click;
             // 
             // lblPluginAPIVersion
