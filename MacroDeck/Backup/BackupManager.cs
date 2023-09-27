@@ -1,12 +1,11 @@
 ﻿using System.IO;
 using System.IO.Compression;
+using System.Text.Json;
 using System.Windows.Forms;
-using Newtonsoft.Json;
 using SuchByte.MacroDeck.Backup;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Startup;
 using SuchByte.MacroDeck.Utils;
-using SuchByte.MacroDeck.Variables;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.Backups;
@@ -46,17 +45,15 @@ public class BackupManager
         var restoreDirectory = Path.Combine(ApplicationPaths.TempDirectoryPath, "backup_restore");
         if (!Directory.Exists(restoreDirectory)) return;
         if (!File.Exists(Path.Combine(restoreDirectory, ".restore"))) return;
-        RestoreBackupInfo restoreBackupInfo;
-        try
+
+        var restoreBackupInfoJson = File.ReadAllText(Path.Combine(restoreDirectory, ".restore"));
+        var restoreBackupInfo = JsonSerializer.Deserialize<RestoreBackupInfo>(restoreBackupInfoJson);
+
+        if (restoreBackupInfo == null)
         {
-            restoreBackupInfo = JsonConvert.DeserializeObject<RestoreBackupInfo>(File.ReadAllText(Path.Combine(restoreDirectory, ".restore")), new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-                NullValueHandling = NullValueHandling.Ignore,
-                Error = (sender, args) => { args.ErrorContext.Handled = true; }
-            });
-            File.Delete(Path.Combine(restoreDirectory, ".restore"));
-        } catch { return; }
+            return;
+        }
+
 
         if (restoreBackupInfo.RestoreConfig && File.Exists(Path.Combine(restoreDirectory, Path.GetFileName(ApplicationPaths.MainConfigFilePath))))
         {
@@ -182,23 +179,18 @@ public class BackupManager
                 foreach (var file in directory.GetFiles()) file.Delete();
                 foreach (var subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
             }
-        } catch { return; }
+        }
+        catch (Exception ex)
+        {
+            MacroDeckLogger.Error("Backup restoration failed: " + ex.Message + Environment.NewLine + ex.StackTrace);
+        }
 
         try
         {
             ZipFile.ExtractToDirectory(Path.Combine(ApplicationPaths.BackupsDirectoryPath, backupFileName), restoreDirectory, true);
 
-            var serializer = new JsonSerializer
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-                NullValueHandling = NullValueHandling.Ignore,
-            };
-
-            using (var sw = new StreamWriter(Path.Combine(restoreDirectory, ".restore")))
-            using (JsonWriter writer = new JsonTextWriter(sw))
-            {
-                serializer.Serialize(writer, restoreBackupInfo);
-            }
+            var backupInfoSerialized = JsonSerializer.Serialize(restoreBackupInfo);
+            File.WriteAllText(Path.Combine(restoreDirectory, ".restore"), backupInfoSerialized);
 
             MacroDeck.RestartMacroDeck("--show");
         } catch (Exception ex) {
@@ -212,17 +204,24 @@ public class BackupManager
     {
         if (BackupInProgress) return;
         BackupInProgress = true;
-        VariableManager.Close();
         var backupFileName = $"backup_{DateTime.Now:yy-MM-dd_HH-mm-ss}.zip";
         MacroDeckLogger.Info("Starting creation of backup: " + backupFileName);
 
+        var tempBackupPath = Path.Combine(ApplicationPaths.TempDirectoryPath, backupFileName);
         try
         {
+            Directory.CreateDirectory(tempBackupPath);
+            File.Copy(ApplicationPaths.MainConfigFilePath, Path.Combine(tempBackupPath, Path.GetFileName(ApplicationPaths.MainConfigFilePath)));
+            File.Copy(ApplicationPaths.ProfilesFilePath, Path.Combine(tempBackupPath, Path.GetFileName(ApplicationPaths.ProfilesFilePath)));
+            File.Copy(ApplicationPaths.DevicesFilePath, Path.Combine(tempBackupPath, Path.GetFileName(ApplicationPaths.DevicesFilePath)));
+            File.Copy(ApplicationPaths.VariablesFilePath, Path.Combine(tempBackupPath, Path.GetFileName(ApplicationPaths.VariablesFilePath)));
+
             using var archive = ZipFile.Open(Path.Combine(ApplicationPaths.BackupsDirectoryPath, backupFileName), ZipArchiveMode.Create);
-            archive.CreateEntryFromFile(ApplicationPaths.MainConfigFilePath, Path.GetFileName(ApplicationPaths.MainConfigFilePath));
-            archive.CreateEntryFromFile(ApplicationPaths.ProfilesFilePath, Path.GetFileName(ApplicationPaths.ProfilesFilePath));
-            archive.CreateEntryFromFile(ApplicationPaths.DevicesFilePath, Path.GetFileName(ApplicationPaths.DevicesFilePath));
-            archive.CreateEntryFromFile(ApplicationPaths.VariablesFilePath, Path.GetFileName(ApplicationPaths.VariablesFilePath));
+            foreach (var file in Directory.GetFiles(tempBackupPath))
+            {
+                archive.CreateEntryFromFile(file, Path.GetFileName(file));
+            }
+
             foreach (var directory in Directory.GetDirectories(ApplicationPaths.PluginsDirectoryPath))
             {
                 var pluginDirectoryInfo = new DirectoryInfo(directory);
@@ -231,16 +230,19 @@ public class BackupManager
                     archive.CreateEntryFromFile(Path.Combine(ApplicationPaths.PluginsDirectoryPath, pluginDirectoryInfo.Name, file.Name), Path.Combine(new DirectoryInfo(ApplicationPaths.PluginsDirectoryPath).Name, pluginDirectoryInfo.Name, file.Name));
                 }
             }
+
             var pluginConfigDirectoryInfo = new DirectoryInfo(ApplicationPaths.PluginConfigPath);
             foreach (var file in pluginConfigDirectoryInfo.GetFiles("*"))
             {
                 archive.CreateEntryFromFile(Path.Combine(ApplicationPaths.PluginConfigPath, file.Name), Path.Combine(pluginConfigDirectoryInfo.Name, file.Name));
             }
+
             var pluginCredentialsDirectoryInfo = new DirectoryInfo(ApplicationPaths.PluginCredentialsPath);
             foreach (var file in pluginCredentialsDirectoryInfo.GetFiles("*"))
             {
                 archive.CreateEntryFromFile(Path.Combine(ApplicationPaths.PluginCredentialsPath, file.Name), Path.Combine(pluginCredentialsDirectoryInfo.Name, file.Name));
             }
+
             var iconPackDirectoryInfo = new DirectoryInfo(ApplicationPaths.IconPackDirectoryPath);
             foreach (var dir in iconPackDirectoryInfo.GetDirectories())
             {
@@ -258,7 +260,6 @@ public class BackupManager
             BackupFailed?.Invoke(null, new BackupFailedEventArgs { Message = ex.Message });
         } finally
         {
-            VariableManager.Initialize();
             BackupInProgress = false;
         }
     }
