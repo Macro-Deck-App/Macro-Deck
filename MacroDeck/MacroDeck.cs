@@ -83,6 +83,8 @@ public class MacroDeck : NativeWindow
 
         BackupManager.CheckRestoreDirectory();
 
+        ApplicationPaths.CleanUpTempDirectory();
+
         LanguageManager.Load(StartParameters.ExportDefaultStrings);
 
         // Check if config exists

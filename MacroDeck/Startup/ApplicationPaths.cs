@@ -85,16 +85,16 @@ public class ApplicationPaths
         CheckCreatePath(PluginsDirectoryPath);
         CheckCreatePath(BackupsDirectoryPath);
         CheckCreatePath(IconPackDirectoryPath);
-
-
-        if (!CheckCreatePath(TempDirectoryPath)) return;
-        {
-            // Clean up temp directory
-            DirectoryInfo di = new(TempDirectoryPath);
-            CleanupTempDir(di);
-        }
+        CheckCreatePath(TempDirectoryPath);
 
         MacroDeckLogger.Info("Checking paths done");
+    }
+
+    public static void CleanUpTempDirectory()
+    {
+        DirectoryInfo di = new(TempDirectoryPath);
+        CleanupTempDir(di);
+
 
         void CleanupTempDir(DirectoryInfo directoryInfo)
         {
