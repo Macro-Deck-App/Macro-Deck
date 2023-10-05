@@ -82,7 +82,16 @@ public partial class ExtensionStoreView : UserControl
                     extensionsList.Controls.Add(extensionView);
                 }
             });
-            await extensionView.LoadIcon(cancellationToken);
+        }
+
+        foreach (var control in extensionsList.Controls)
+        {
+            if (control is not ExtensionStoreItemView extensionStoreItemView)
+            {
+                continue;
+            }
+
+            await extensionStoreItemView.LoadIcon(cancellationToken);
         }
     }
 
