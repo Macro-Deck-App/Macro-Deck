@@ -1,11 +1,16 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowViews;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Model;
+using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Properties;
@@ -64,19 +69,19 @@ public class ExtensionStoreHelper
         _updateCheckRunning = true;
         PluginManager.PluginsUpdateAvailable.Clear();
         IconManager.IconPacksUpdateAvailable.Clear();
-        Task.Run(() =>
+        Task.Run(async () =>
         {
             foreach (var plugin in PluginManager.Plugins.Values)
             {
-                PluginManager.SearchUpdate(plugin);
+                await PluginManager.SearchUpdate(plugin);
             }
             foreach (var plugin in PluginManager.PluginsNotLoaded.Values)
             {
-                PluginManager.SearchUpdate(plugin);
+                await PluginManager.SearchUpdate(plugin);
             }
             foreach (var iconPack in IconManager.IconPacks.FindAll(iP => iP.ExtensionStoreManaged && !iP.Hidden))
             {
-                IconManager.SearchUpdate(iconPack);
+                await IconManager.SearchUpdate(iconPack);
             }
 
             if (NotificationManager.GetNotification(_updateNotification) == null && (PluginManager.PluginsUpdateAvailable.Count + IconManager.IconPacksUpdateAvailable.Count) > 0)
@@ -132,32 +137,31 @@ public class ExtensionStoreHelper
         InstallPackages(packages);
     }
 
-    public static string InstalledIconPacksAsString
+    public static async Task<bool> CheckForAvailableUpdate(string packageId, string installedVersion)
     {
-        get
+        try
         {
-            var installedPlugins = "";
-            foreach (var iconPack in IconManager.IconPacks.FindAll(x => x.ExtensionStoreManaged))
+            using var httpClient = new HttpClient();
+            var latestFile = await httpClient.GetFromJsonAsync<ApiV2ExtensionFile>(
+                $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/files" +
+                $"/{packageId}" +
+                $"?apiVersion={MacroDeck.PluginApiVersion}" +
+                $"&macroDeckVersion={MacroDeck.Version}");
+
+            if (latestFile?.Version is null || latestFile.Version.Equals(installedVersion))
             {
-                installedPlugins += $"{iconPack.PackageId.ToLower()}%20";
+                return false;
             }
-
-            return installedPlugins;
-        }
-    }
-
-    public static string InstalledPluginsAsString
-    {
-        get
+            
+            MacroDeckLogger.Info("Update available for " + packageId);
+            return true;
+        } 
+        catch (Exception ex)
         {
-            var installedPlugins = "";
-            foreach (var path in PluginManager.PluginDirectories.Values)
-            {
-                installedPlugins += $"{new DirectoryInfo(path).Name.ToLower()}%20";
-            }
-
-            return installedPlugins;
+            MacroDeckLogger.Error($"Failed to check for updates for {packageId}\n{ex}");
         }
+
+        return false;
     }
 }
 

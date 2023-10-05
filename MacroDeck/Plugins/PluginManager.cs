@@ -3,6 +3,8 @@ using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Reflection;
 using System.Windows.Forms;
 using System.Xml.Serialization;
@@ -156,8 +158,8 @@ public static class PluginManager
                         var plugin = Activator.CreateInstance(type) as MacroDeckPlugin;
                         AddPlugin(plugin);
                         PluginDirectories[plugin] = pluginDirectory;
-                        Task.Run(() =>
-                            SearchUpdate(plugin)
+                        Task.Run(async () =>
+                            await SearchUpdate(plugin)
                         );
                         if (File.Exists(Path.Combine(pluginDirectory, "ExtensionIcon.png")))
                         {
@@ -196,28 +198,22 @@ public static class PluginManager
         return null;
     }
        
-    internal static void SearchUpdate(MacroDeckPlugin plugin)
+    internal static async Task SearchUpdate(MacroDeckPlugin plugin)
     {
         if (UpdatedPlugins.Contains(plugin) || ProtectedPlugins.Contains(plugin)) return;
-        try
+        var updateAvailable =
+            await ExtensionStoreHelper.CheckForAvailableUpdate(ExtensionStoreHelper.GetPackageId(plugin),
+                plugin.Version);
+        if (updateAvailable)
         {
-            using var wc = new WebClient();
-            var jsonString = wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=check-update&package-id={ExtensionStoreHelper.GetPackageId(plugin)}&installed-version={plugin.Version}&target-api={MacroDeck.PluginApiVersion}");
-            var jsonObject = JObject.Parse(jsonString);
-            var update = (bool)jsonObject["update-available"];
-            if (!update) return;
-            MacroDeckLogger.Info("Update available for " + plugin.Name);
             PluginsUpdateAvailable.Add(plugin);
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex);
         }
     }
 
-    public static bool IsInstalled(string name)
+    public static bool IsInstalled(string packageId)
     {
-        return Plugins.ContainsKey(name);
+        var pluginName = packageId.Split(".")[1];
+        return Plugins.ContainsKey(pluginName);
     }
 
     public static void DeletePlugin(string name)
