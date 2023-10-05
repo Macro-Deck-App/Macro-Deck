@@ -73,8 +73,12 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
             lblStatus.Text = LanguageManager.Strings.Preparing;
         });
 
-        var extensionUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/extensions/{PackageInfo.PackageId}?apiVersion={MacroDeck.PluginApiVersion}";
-        var fileUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/files/{PackageInfo.PackageId}?apiVersion={MacroDeck.PluginApiVersion}";
+        var extensionUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/extensions/{PackageInfo.PackageId}" +
+                           $"?apiVersion={MacroDeck.PluginApiVersion}" +
+                           $"&macroDeckVersion={MacroDeck.Version}";
+        var fileUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/files/{PackageInfo.PackageId}" +
+                      $"?apiVersion={MacroDeck.PluginApiVersion}" +
+                      $"&macroDeckVersion={MacroDeck.Version}";
         using var httpClient = new HttpClient();
         var file = await httpClient.GetFromJsonAsync<ApiV2ExtensionFile>(fileUrl, cancellationToken);
         if (file == null)
@@ -82,7 +86,8 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
             lblStatus.Text = LanguageManager.Strings.Error;
             return;
         }
-        var downloadUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/files/download/{PackageInfo.PackageId}?fileVersion={file.Version}";
+        var downloadUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/files/download/{PackageInfo.PackageId}" +
+                          $"?fileVersion={file.Version}";
         var iconUrl = $"{Constants.ExtensionStoreApiBaseUrl}/rest/v2/extensions/icon/{PackageInfo.PackageId}";
         ApiV2Extension = await httpClient.GetFromJsonAsync<ApiV2Extension>(extensionUrl, cancellationToken) ??
                          throw new InvalidOperationException();

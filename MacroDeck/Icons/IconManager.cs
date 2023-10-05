@@ -4,6 +4,8 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.ExtensionStore;
@@ -100,57 +102,26 @@ public class IconManager
         return true;
     }
 
-
-    public static void ScanUpdatesAsync()
+    internal static async Task SearchUpdate(IconPack iconPack)
     {
-        IconPacksUpdateAvailable.Clear();
-        Task.Run(() =>
+        var updateAvailable = await ExtensionStoreHelper.CheckForAvailableUpdate(iconPack.PackageId, iconPack.Version);
+        if (updateAvailable)
         {
-            foreach (var iconPack in IconPacks.FindAll(iP => iP.ExtensionStoreManaged && !iP.Hidden))
-            {
-                SearchUpdate(iconPack);
-            }
-
-            OnUpdateCheckFinished?.Invoke(null, EventArgs.Empty);
-        });
-    }
-
-    internal static void SearchUpdate(IconPack iconPack)
-    {
-        try
-        {
-            using (var wc = new WebClient())
-            {
-                var jsonString = wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=check-update&package-id={iconPack.PackageId}&installed-version={iconPack.Version}&target-api={MacroDeck.PluginApiVersion}");
-                var jsonObject = JObject.Parse(jsonString);
-                var update = (bool)jsonObject["update-available"];
-                if (update)
-                {
-                    MacroDeckLogger.Info("Update available for " + iconPack.Name);
-                    IconPacksUpdateAvailable.Add(iconPack);
-                }
-            }
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
-        } 
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex);
+            IconPacksUpdateAvailable.Add(iconPack);
         }
     }
 
-    public static IconPack GetIconPackByName(string name)
+    public static IconPack? GetIconPackByName(string name)
     {
         return IconPacks.Find(iconPack => iconPack.Name == name);
     }
 
-    public static Icon GetIcon(IconPack iconPack, string iconId)
+    public static Icon? GetIcon(IconPack iconPack, string iconId)
     {
         return iconPack?.Icons.Find(icon => icon.IconId == iconId);
     }
 
-    public static Icon GetIconByString(string s)
+    public static Icon? GetIconByString(string s)
     {
         var iconPack = GetIconPackByName(s.Substring(0, s.IndexOf(".")));
         if (iconPack == null) return null;
