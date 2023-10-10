@@ -40,10 +40,8 @@ Please help me with the translation of Macro Deck on [POEditor](https://poeditor
 # Third party licenses
 Macro Deck uses some awesome 3rd party libraries:
 - [Fleck (MIT license)](https://github.com/statianzo/Fleck)
-- [GiphyDotNet (MIT license)](https://github.com/drasticactions/GiphyDotNet)
 - [Magick.NET (Apache-2.0)](https://github.com/dlemstra/Magick.NET)
 - [Newtonsoft.Json (MIT license)](https://www.newtonsoft.com/json)
-- [RestSharp (Apache-2.0)](https://restsharp.dev/)
 - [SQLiteNetExtensions (MIT license)](https://bitbucket.org/twincoders/sqlite-net-extensions/src/master/)
 - [sqlite-net-pcl (MIT license)](https://github.com/praeclarum/sqlite-net)
 - [Cottle (MIT license)](https://github.com/r3c/cottle)
