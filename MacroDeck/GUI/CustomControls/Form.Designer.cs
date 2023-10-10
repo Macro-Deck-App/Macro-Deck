@@ -52,6 +52,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             ((ISupportInitialize)(this.btnClose)).BeginInit();
             this.helpMenu.SuspendLayout();
             this.SuspendLayout();
+            this.DoubleBuffered = true;
             // 
             // header
             // 

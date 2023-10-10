@@ -170,7 +170,7 @@ public static class VariableManager
     {
         _database.Delete(new Variable() { Name = name });
         OnVariableRemoved?.Invoke(name, EventArgs.Empty);
-        MacroDeckLogger.Info("Deleted variable " + name);
+        MacroDeckLogger.Trace("Deleted variable " + name);
     }
 
     [Obsolete("Use TemplateManager.RenderTemplate")]
@@ -208,7 +208,6 @@ public static class VariableManager
         var evaluator = new MatchEvaluator(UmlautsReplacer);
         return regexUmlauts.Replace(str, evaluator);
     }
-    
     
     private static string UmlautsReplacer(Match m)
     {

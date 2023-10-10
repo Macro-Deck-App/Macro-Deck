@@ -63,7 +63,7 @@ public partial class DeviceManagerView : UserControl
 
         foreach (var macroDeckDevice in DeviceManager.GetKnownDevices().ToArray())
         {
-            if (devicesList.Controls.OfType<DeviceInfo>().Where(x => x.MacroDeckDevice.Equals(macroDeckDevice)).FirstOrDefault() != null)
+            if (devicesList.Controls.OfType<DeviceInfo>().FirstOrDefault(x => x.MacroDeckDevice.Equals(macroDeckDevice)) != null)
             {
                 continue;
             }

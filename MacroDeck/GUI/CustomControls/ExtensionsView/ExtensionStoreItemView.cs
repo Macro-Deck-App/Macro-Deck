@@ -44,7 +44,7 @@ public partial class ExtensionStoreItemView : RoundedUserControl
         switch (_extension.ExtensionType)
         {
             case ExtensionType.Plugin:
-                _installed = _extension.PackageId != null && PluginManager.IsInstalled(_extension.PackageId);
+                _installed = _extension.PackageId != null && PluginManager.IsInstalled(_extension.Name);
                 break;
             case ExtensionType.IconPack:
                 _installed = IconManager.IconPacks.Exists(x => x.PackageId == _extension.PackageId && x.ExtensionStoreManaged);

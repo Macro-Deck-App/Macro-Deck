@@ -42,35 +42,34 @@ public partial class IconSelector : DialogForm
     private void LoadIcons(IconPack iconPack, bool scrollDown = false)
     {
         iconList.Controls.Clear();
-        SuspendLayout();
         foreach (var icon in iconPack.Icons)
         {
-            var button = new RoundedButton
+            Task.Run(() =>
             {
-                Width = 100,
-                Height = 100,
-                BackColor = Color.FromArgb(35,35,35),
-                Radius = ProfileManager.CurrentProfile.ButtonRadius,
-                BackgroundImageLayout = ImageLayout.Stretch,
-                BackgroundImage = icon.IconImage
-            };
-            if (button.BackgroundImage.RawFormat.ToString().ToLower() == "gif")
-            {
-                button.ShowGIFIndicator = true;
-            }
-            button.Tag = icon;
-            button.Click += IconButton_Click;
-            button.Cursor = Cursors.Hand;
-            iconList.Controls.Add(button);
+                var button = new RoundedButton
+                {
+                    Width = 100,
+                    Height = 100,
+                    BackColor = Color.FromArgb(35,35,35),
+                    Radius = ProfileManager.CurrentProfile.ButtonRadius,
+                    BackgroundImageLayout = ImageLayout.Stretch,
+                    BackgroundImage = icon.IconImage
+                };
+                if (button.BackgroundImage.RawFormat.ToString().ToLower() == "gif")
+                {
+                    button.ShowGIFIndicator = true;
+                }
+                button.Tag = icon;
+                button.Click += IconButton_Click;
+                button.Cursor = Cursors.Hand;
+                Invoke(() => iconList.Controls.Add(button));
+            });
         }
-        ResumeLayout();
+        
         if (scrollDown)
         {
-            iconList.ScrollControlIntoView(iconList.Controls[iconList.Controls.Count - 1]);
+            iconList.ScrollControlIntoView(iconList.Controls[^1]);
         }
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
     }
 
     private void IconButton_Click(object sender, EventArgs e)
@@ -196,9 +195,6 @@ public partial class IconSelector : DialogForm
                             IconManager.AddIconImage(iconPack, iconStatic);
                         }
                         icon.Dispose();
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                        GC.Collect();
                     }
 
                     Invoke(() => LoadIcons(iconPack, true));
@@ -283,12 +279,10 @@ public partial class IconSelector : DialogForm
         Close();
     }
 
-    private void IconSelector_Load(object sender, EventArgs e)
+    private void IconSelector_Shown(object sender, EventArgs e)
     {
-        Task.Run(() =>
-        {
-            LoadIconPacks();
-        });
+        Application.DoEvents();
+        LoadIconPacks();
     }
 
     private void LoadIconPacks()
@@ -349,10 +343,7 @@ public partial class IconSelector : DialogForm
             SelectedIcon = null;
             lblSize.Text = "";
             lblType.Text = "";
-            Task.Run(() =>
-            {
-                LoadIconPacks();
-            });
+            Task.Run(LoadIconPacks);
         }
     }
 
@@ -362,10 +353,7 @@ public partial class IconSelector : DialogForm
         if (createIconPackDialog.ShowDialog() == DialogResult.OK)
         {
                     
-            Task.Run(() =>
-            {
-                LoadIconPacks();
-            });
+            Task.Run(LoadIconPacks);
             iconPacksBox.SelectedItem = createIconPackDialog.IconPackName;
         }
     }

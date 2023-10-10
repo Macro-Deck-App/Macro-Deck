@@ -10,44 +10,43 @@ namespace SuchByte.MacroDeck.GUI;
 
 public partial class ActionConfigurator : DialogForm
 {
-    public PluginAction Action => _action;
+    public PluginAction? Action { get; private set; }
 
-    private PluginAction _action;
-
-    public ActionConfigurator()
+    public ActionConfigurator(PluginAction? action = null)
     {
+        Action = action;
         InitializeComponent();
         lblSelectToBegin.Text = LanguageManager.Strings.SelectAPluginAndActionToBegin;
         btnApply.Text = LanguageManager.Strings.Ok;
         pluginSearch.PlaceHolderText = LanguageManager.Strings.Search;
-        AddPlugins();
+        Shown += OnShown;
     }
 
-       
-
-    public ActionConfigurator(PluginAction action)
+    private void OnShown(object? sender, EventArgs e)
     {
-        _action = action;
-        InitializeComponent();
-
+        Application.DoEvents();
         AddPlugins();
-
-
-        foreach (var plugin in PluginManager.Plugins.Values)
+        if (Action is null)
         {
-            foreach (var macroDeckAction in plugin.Actions)
+            
+            return;
+        }
+        foreach (var plugin in from plugin in PluginManager.Plugins.Values
+                 from macroDeckAction in plugin.Actions.Where(macroDeckAction =>
+                     macroDeckAction.GetType() == Action.GetType())
+                 select plugin)
+        {
+            SetExpand(plugin, true);
+            foreach (Control item in pluginsList.Controls)
             {
-                if (macroDeckAction.GetType().Equals(_action.GetType()))
+                if (item is not ActionConfiguratorActionItem actionItem)
                 {
-                    SetExpand(plugin, true);
-                    foreach (Control item in pluginsList.Controls)
-                    {
-                        if (!(item is ActionConfiguratorActionItem)) continue;
-                        if ((item as ActionConfiguratorActionItem).PluginAction.GetType() == _action.GetType())
-                        {
-                            ActionConfiguratorActionItem_MouseClick(item, new MouseEventArgs(MouseButtons.Left, 1, 0, 0, 0));
-                        }
-                    }
+                    continue;
+                }
+                    
+                if (actionItem.PluginAction.GetType() == Action.GetType())
+                {
+                    ActionConfiguratorActionItem_MouseClick(actionItem, new MouseEventArgs(MouseButtons.Left, 1, 0, 0, 0));
                 }
             }
         }
@@ -84,7 +83,6 @@ public partial class ActionConfigurator : DialogForm
         
     private void AddPlugins()
     {
-        SuspendLayout();
         foreach (Control item in pluginsList.Controls)
         {
             if (item is ActionConfiguratorActionItem)
@@ -116,7 +114,6 @@ public partial class ActionConfigurator : DialogForm
                 }
             }
         }
-        ResumeLayout();
     }
 
     private void ActionConfiguratorActionItem_MouseClick(object sender, MouseEventArgs e)
@@ -124,22 +121,22 @@ public partial class ActionConfigurator : DialogForm
         var actionConfiguratorActionItem = sender as ActionConfiguratorActionItem;
 
         if (actionConfiguratorActionItem.PluginAction == null) return;
-        if (_action == null || _action.GetType() != actionConfiguratorActionItem.PluginAction.GetType())
+        if (Action == null || Action.GetType() != actionConfiguratorActionItem.PluginAction.GetType())
         {
-            _action = actionConfiguratorActionItem.PluginAction;
+            Action = actionConfiguratorActionItem.PluginAction;
         }
 
         selectedPluginIcon.BackgroundImage = actionConfiguratorActionItem.Plugin.PluginIcon ?? Resources.Icon;
-        lblSelectedActionName.Text = _action.Name;
-        labelDescription.Text = _action.Description;
+        lblSelectedActionName.Text = Action.Name;
+        labelDescription.Text = Action.Description;
         foreach (Control control in configurationPanel.Controls)
         {
             control.Dispose();
         }
         configurationPanel.Controls.Clear();
-        if (_action.CanConfigure)
+        if (Action.CanConfigure)
         {
-            configurationPanel.Controls.Add(_action.GetActionConfigControl(this));
+            configurationPanel.Controls.Add(Action.GetActionConfigControl(this));
         }
         else
         {
@@ -192,17 +189,17 @@ public partial class ActionConfigurator : DialogForm
 
     private void BtnApply_Click(object sender, EventArgs e)
     {
-        if (_action != null)
+        if (Action != null)
         {
             var actionConfigControl = configurationPanel.Controls[0] as ActionConfigControl;
-            if (_action.CanConfigure && actionConfigControl != null)
+            if (Action.CanConfigure && actionConfigControl != null)
             {
                 if (!actionConfigControl.OnActionSave())
                 {
                     return;
                 }
             }
-            if (_action.CanConfigure && _action.Configuration == null && string.IsNullOrWhiteSpace(_action.Configuration)) return;
+            if (Action.CanConfigure && Action.Configuration == null && string.IsNullOrWhiteSpace(Action.Configuration)) return;
             DialogResult = DialogResult.OK;
         }
         Close();

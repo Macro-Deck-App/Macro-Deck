@@ -181,10 +181,10 @@ public class ActionButton : IDisposable
     public int Position_X { get; set; } = -1;
     public int Position_Y { get; set; } = -1;
     public string StateBindingVariable { get; set; } = string.Empty;
-    public List<PluginAction> Actions { get; set; } = new();
-    public List<PluginAction> ActionsRelease { get; set; } = new();
-    public List<PluginAction> ActionsLongPress { get; set; } = new();
-    public List<PluginAction> ActionsLongPressRelease { get; set; } = new();
+    public List<PluginAction?> Actions { get; set; } = new();
+    public List<PluginAction?> ActionsRelease { get; set; } = new();
+    public List<PluginAction?> ActionsLongPress { get; set; } = new();
+    public List<PluginAction?> ActionsLongPressRelease { get; set; } = new();
     public List<EventListener> EventListeners { get; set; } = new();
     public Keys ModifierKeyCodes { get; set; } = Keys.None;
     public Keys KeyCode { get; set; } = Keys.None;

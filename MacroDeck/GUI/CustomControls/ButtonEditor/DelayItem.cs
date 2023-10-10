@@ -7,14 +7,14 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor;
 
 public partial class DelayItem : UserControl, IActionConditionItem
 {
-    public PluginAction Action { get; set; }
+    public PluginAction? Action { get; set; }
 
     public event EventHandler OnRemoveClick;
     public event EventHandler OnEditClick;
     public event EventHandler OnMoveUpClick;
     public event EventHandler OnMoveDownClick;
 
-    public DelayItem(PluginAction macroDeckAction = null)
+    public DelayItem(PluginAction? macroDeckAction = null)
     {
         Action = macroDeckAction;
         InitializeComponent();

@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls;
 
-public partial class ContentSelectorButton : PictureBox
+public sealed partial class ContentSelectorButton : PictureBox
 {
 
     private bool _notification;
@@ -26,6 +26,7 @@ public partial class ContentSelectorButton : PictureBox
 
     public ContentSelectorButton()
     {
+        DoubleBuffered = true;
         BackColor = Color.Transparent;
         BackgroundImageLayout = ImageLayout.Stretch;
         ForeColor = Color.White;

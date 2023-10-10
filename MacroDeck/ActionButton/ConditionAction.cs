@@ -12,15 +12,15 @@ public class ConditionAction : PluginAction
 {
     public override string Name => "Condition";
 
-    private List<PluginAction> _actions;
-    private List<PluginAction> _actionsElse;
+    private List<PluginAction?> _actions;
+    private List<PluginAction?> _actionsElse;
     private string _conditionValue1Source = "";
     private ConditionType _conditionType = ConditionType.Variable;
     private ConditionMethod _conditionMethod = ConditionMethod.Equals;
     private string _conditionValue2 = "";
-    public List<PluginAction> Actions { get => _actions;
+    public List<PluginAction?> Actions { get => _actions;
         set { _actions = value; UpdateConfiguration(); } }
-    public List<PluginAction> ActionsElse { get => _actionsElse;
+    public List<PluginAction?> ActionsElse { get => _actionsElse;
         set { _actionsElse = value; UpdateConfiguration(); } }
     public string ConditionValue1Source { get => _conditionValue1Source;
         set { _conditionValue1Source = value; UpdateConfiguration(); } }
@@ -52,11 +52,11 @@ public class ConditionAction : PluginAction
         }
         if (_actions == null)
         {
-            _actions = new List<PluginAction>();
+            _actions = new List<PluginAction?>();
         }
         if (_actionsElse == null)
         {
-            _actionsElse = new List<PluginAction>();
+            _actionsElse = new List<PluginAction?>();
         }
     }
 

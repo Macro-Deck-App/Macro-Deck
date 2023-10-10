@@ -4,7 +4,6 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Forms;
-using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.Backups;
 using SuchByte.MacroDeck.Configuration;
 using SuchByte.MacroDeck.DataTypes.Updater;
@@ -17,7 +16,6 @@ using SuchByte.MacroDeck.Hotkeys;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Pipes;
 using SuchByte.MacroDeck.Plugins;
@@ -52,7 +50,7 @@ public class MacroDeck : NativeWindow
     private static readonly NotifyIcon TrayIcon = new()
     {
         Icon = Resources.appicon,
-        Text = @"Macro Deck " + Version.ToString(),
+        Text = @$"Macro Deck {Version}",
         Visible = false,
         ContextMenuStrip = TrayIconContextMenu
     };
@@ -99,7 +97,6 @@ public class MacroDeck : NativeWindow
         _ = new HotkeyManager();
         VariableManager.Initialize();
         PluginManager.Load();
-        PluginManager.EnablePlugins();
         IconManager.Initialize();
         ProfileManager.Load();
 

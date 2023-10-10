@@ -28,12 +28,12 @@ public static class PluginManager
     public static event EventHandler? OnPluginsChange;
 
 
-    public static Dictionary<string, MacroDeckPlugin> Plugins = new();
-    public static List<MacroDeckPlugin> ProtectedPlugins = new();
-    public static List<MacroDeckPlugin> UpdatedPlugins = new();
-    public static Dictionary<string, MacroDeckPlugin> PluginsNotLoaded = new();
-    public static List<MacroDeckPlugin> PluginsUpdateAvailable = new();
-    public static Dictionary<MacroDeckPlugin, string> PluginDirectories = new();
+    public static Dictionary<string, MacroDeckPlugin> Plugins { get; } = new();
+    public static List<MacroDeckPlugin> ProtectedPlugins { get; } = new();
+    public static List<MacroDeckPlugin> UpdatedPlugins { get; } = new();
+    public static Dictionary<string, MacroDeckPlugin> PluginsNotLoaded { get; } = new();
+    public static List<MacroDeckPlugin> PluginsUpdateAvailable { get; } = new();
+    public static Dictionary<MacroDeckPlugin, string> PluginDirectories { get; } = new();
 
     private const string ManifestFileName = "ExtensionManifest.json";
     private const string DeleteMarkerFileName = ".delete";
@@ -55,39 +55,17 @@ public static class PluginManager
             Directory.CreateDirectory(ApplicationPaths.PluginsDirectoryPath);
         }
 
-        // Delete the deprecated .loaded directory if it exists
-        if (Directory.Exists(ApplicationPaths.PluginsDirectoryPath + ".loaded"))
+        // Load updates from the .updates directory
+        if (Directory.Exists(ApplicationPaths.UpdatePluginsDirectoryPath))
         {
-            try
+            foreach (var directory in Directory.GetDirectories(ApplicationPaths.UpdatePluginsDirectoryPath))
             {
-                Directory.Delete(ApplicationPaths.PluginsDirectoryPath + ".loaded", true);
-            }
-            catch
-            {
-                // ignored
-            }
-        }
-        else
-        {
-            // Load updates from the .updates directory
-            if (Directory.Exists(ApplicationPaths.UpdatePluginsDirectoryPath))
-            {
-                foreach (var directory in Directory.GetDirectories(ApplicationPaths.UpdatePluginsDirectoryPath))
-                {
-                    try
-                    {
-                        var destinationDirectory = Path.Combine(ApplicationPaths.PluginsDirectoryPath, new DirectoryInfo(directory).Name);
-                        DirectoryCopy.Copy(directory, destinationDirectory, true);
-                        Directory.Delete(directory, true);
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
-                }
                 try
                 {
-                    Directory.Delete(ApplicationPaths.UpdatePluginsDirectoryPath, true);
+                    var destinationDirectory = Path.Combine(ApplicationPaths.PluginsDirectoryPath,
+                        new DirectoryInfo(directory).Name);
+                    DirectoryCopy.Copy(directory, destinationDirectory, true);
+                    Directory.Delete(directory, true);
                 }
                 catch
                 {
@@ -95,43 +73,57 @@ public static class PluginManager
                 }
             }
 
-            // Load the plugins
-            foreach (var directory in Directory.GetDirectories(ApplicationPaths.PluginsDirectoryPath))
+            try
             {
-                // Delete plugin if file ".delete" exists
-                if (File.Exists(Path.Combine(directory, DeleteMarkerFileName)))
-                {
-                    try
-                    {
-                        File.Delete(Path.Combine(directory, DeleteMarkerFileName));
-                        Directory.Delete(directory, true);
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
+                Directory.Delete(ApplicationPaths.UpdatePluginsDirectoryPath, true);
+            }
+            catch
+            {
+                // ignored
+            }
+        }
 
-                    continue;
-                }
-                var manifestFile = Path.Combine(directory, ManifestFileName);
-                if (!File.Exists(manifestFile))
-                {
-                    continue;
-                }
-
+        // Load the plugins
+        foreach (var directory in Directory.GetDirectories(ApplicationPaths.PluginsDirectoryPath))
+        {
+            // Delete plugin if file ".delete" exists
+            if (File.Exists(Path.Combine(directory, DeleteMarkerFileName)))
+            {
                 try
                 {
-                    var extensionManifest = ExtensionManifestModel.FromManifestFile(manifestFile);
-                    if (extensionManifest == null) continue;
-                    var plugin = LoadPlugin(extensionManifest, directory);
-                    plugin.Author = extensionManifest.Author;
+                    File.Delete(Path.Combine(directory, DeleteMarkerFileName));
+                    Directory.Delete(directory, true);
                 }
-                catch (Exception ex)
+                catch
                 {
-                    MacroDeckLogger.Error(typeof(PluginManager), $"Error while deserializing manifest for {directory}: {ex.Message}");
+                    // ignored
                 }
+
+                continue;
             }
 
+            var manifestFile = Path.Combine(directory, ManifestFileName);
+            if (!File.Exists(manifestFile))
+            {
+                continue;
+            }
+
+            try
+            {
+                var extensionManifest = ExtensionManifestModel.FromManifestFile(manifestFile);
+                if (extensionManifest == null)
+                {
+                    continue;
+                }
+
+                var plugin = LoadPlugin(extensionManifest, directory);
+                plugin.Author = extensionManifest.Author;
+            }
+            catch (Exception ex)
+            {
+                MacroDeckLogger.Error(typeof(PluginManager),
+                    $"Error while deserializing manifest for {directory}: {ex.Message}");
+            }
         }
 
         // Add internal plugins
@@ -141,9 +133,9 @@ public static class PluginManager
         AddPlugin(new DevicePlugin(), true);
     }
 
-    private static MacroDeckPlugin LoadPlugin(ExtensionManifestModel extensionManifest, string pluginDirectory, bool enable = false)
+    private static MacroDeckPlugin? LoadPlugin(ExtensionManifestModel extensionManifest, string pluginDirectory)
     {
-        Assembly asm = null;
+        Assembly? asm = null;
         try
         {
             asm = Assembly.LoadFrom(Path.Combine(pluginDirectory, extensionManifest.Dll));
@@ -153,22 +145,26 @@ public static class PluginManager
             {
                 try
                 {
-                    if (type.IsClass && type.IsSubclassOf(typeof(MacroDeckPlugin)))
+                    if (!type.IsClass
+                        || !type.IsSubclassOf(typeof(MacroDeckPlugin))
+                        || Activator.CreateInstance(type) is not MacroDeckPlugin plugin)
                     {
-                        var plugin = Activator.CreateInstance(type) as MacroDeckPlugin;
-                        AddPlugin(plugin);
-                        PluginDirectories[plugin] = pluginDirectory;
-                        Task.Run(async () =>
-                            await SearchUpdate(plugin)
-                        );
-                        if (File.Exists(Path.Combine(pluginDirectory, "ExtensionIcon.png")))
-                        {
-                            plugin.PluginIcon = (Image)Image.FromFile(Path.Combine(pluginDirectory, "ExtensionIcon.png")).Clone();
-                        }
-                        plugin.Author = extensionManifest.Author;
-                        if (enable) plugin.Enable();
-                        return plugin;
+                        continue;
                     }
+                        
+                    AddPlugin(plugin);
+                    PluginDirectories[plugin] = pluginDirectory;
+                    Task.Run(async () =>
+                        await SearchUpdate(plugin)
+                    );
+                    if (File.Exists(Path.Combine(pluginDirectory, "ExtensionIcon.png")))
+                    {
+                        plugin.PluginIcon =
+                            (Image)Image.FromFile(Path.Combine(pluginDirectory, "ExtensionIcon.png")).Clone();
+                    }
+
+                    Task.Run(plugin.Enable);
+                    return plugin;
                 }
                 catch (Exception ex)
                 {
@@ -191,13 +187,15 @@ public static class PluginManager
                 PluginDirectories[disabledPlugin] = pluginDirectory;
 
                 MacroDeck.SafeMode = true;
-                MacroDeckLogger.Warning($"Cannot load {disabledPlugin.Name} version {disabledPlugin.Version}. Macro Deck was started in safe mode.");
+                MacroDeckLogger.Warning(
+                    $"Cannot load {disabledPlugin.Name} version {disabledPlugin.Version}. Macro Deck was started in safe mode.");
                 return disabledPlugin;
             }
         }
+
         return null;
     }
-       
+
     internal static async Task SearchUpdate(MacroDeckPlugin plugin)
     {
         if (UpdatedPlugins.Contains(plugin) || ProtectedPlugins.Contains(plugin)) return;
@@ -210,10 +208,10 @@ public static class PluginManager
         }
     }
 
-    public static bool IsInstalled(string packageId)
+    public static bool IsInstalled(string name)
     {
-        var pluginName = packageId.Split(".")[1];
-        return Plugins.ContainsKey(pluginName);
+        return Plugins.Any(x => x.Key.Replace(" ", string.Empty).Trim().Equals(name.Replace(" ", string.Empty).Trim(),
+            StringComparison.InvariantCultureIgnoreCase));
     }
 
     public static void DeletePlugin(string name)
@@ -223,10 +221,12 @@ public static class PluginManager
         if (Plugins.ContainsKey(name))
         {
             plugin = Plugins[name];
-        } else if (PluginsNotLoaded.ContainsKey(name))
+        }
+        else if (PluginsNotLoaded.ContainsKey(name))
         {
             plugin = PluginsNotLoaded[name];
         }
+
         if (plugin == null) return;
         if (ProtectedPlugins.Contains(plugin)) return;
         if (PluginDirectories.ContainsKey(plugin))
@@ -237,18 +237,22 @@ public static class PluginManager
                 {
                     UpdatedPlugins.Remove(plugin);
                 }
+
                 if (PluginsNotLoaded.ContainsKey(name))
                 {
                     PluginsNotLoaded.Remove(name);
                 }
+
                 if (PluginsUpdateAvailable.Contains(plugin))
                 {
                     PluginsUpdateAvailable.Remove(plugin);
                 }
+
                 if (Plugins.ContainsKey(name))
                 {
                     Plugins.Remove(name);
                 }
+
                 var deleteMarkerFile = Path.Combine(PluginDirectories[plugin], DeleteMarkerFileName);
                 File.Create(deleteMarkerFile);
                 MacroDeckLogger.Info(name + " deleted");
@@ -266,7 +270,8 @@ public static class PluginManager
     {
         var extensionManifest = ExtensionManifestModel.FromZipFilePath(zipFilePath);
         var extractedDirectory = Path.Combine(ApplicationPaths.TempDirectoryPath, extensionManifest.PackageId);
-        ZipFile.ExtractToDirectory(Path.Combine(ApplicationPaths.TempDirectoryPath, zipFilePath), extractedDirectory, true);
+        ZipFile.ExtractToDirectory(Path.Combine(ApplicationPaths.TempDirectoryPath, zipFilePath), extractedDirectory,
+            true);
 
         InstallPlugin(extractedDirectory, extensionManifest.PackageId);
     }
@@ -306,26 +311,26 @@ public static class PluginManager
                         }
                         else
                         {
-                            try
-                            {
-                                using var wc = new WebClient();
-                                wc.DownloadString($"https://macrodeck.org/extensionstore/extensionstore.php?action=count-download&package-id={extensionManifest.PackageId}");
-                            } catch { }
-                              
-                            var plugin = LoadPlugin(extensionManifest, installationDirectory, true);
 
+                            var plugin = LoadPlugin(extensionManifest, installationDirectory);
+                            plugin.Author = extensionManifest.Author;
+                            
                             try
                             {
                                 if (plugin != null && plugin.CanConfigure)
                                 {
                                     using var msgBox = new MessageBox();
-                                    if (msgBox.ShowDialog(LanguageManager.Strings.PluginNeedsConfiguration, string.Format(LanguageManager.Strings.ConfigureNow, plugin.Name), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                                    if (msgBox.ShowDialog(LanguageManager.Strings.PluginNeedsConfiguration,
+                                            string.Format(LanguageManager.Strings.ConfigureNow, plugin.Name),
+                                            MessageBoxButtons.YesNo) == DialogResult.Yes)
                                     {
                                         plugin.OpenConfigurator();
                                     }
                                 }
-                            } catch { }
-                                
+                            }
+                            catch
+                            {
+                            }
                         }
                     }
                     catch
@@ -336,14 +341,17 @@ public static class PluginManager
             }
             else
             {
-                UpdatedPlugins.Add(PluginDirectories.FirstOrDefault(x => x.Value == Path.Combine(ApplicationPaths.PluginsDirectoryPath, packageName)).Key);
+                UpdatedPlugins.Add(PluginDirectories.FirstOrDefault(x =>
+                    x.Value == Path.Combine(ApplicationPaths.PluginsDirectoryPath, packageName)).Key);
             }
 
             OnPluginsChange?.Invoke(null, EventArgs.Empty);
-        } catch
+        }
+        catch
         {
             error = true;
         }
+
         if (error)
         {
             if (asm != null && extensionManifest != null)
@@ -358,7 +366,9 @@ public static class PluginManager
                 PluginsNotLoaded[asm.GetName().Name] = disabledPlugin;
 
                 using var msgBox = new MessageBox();
-                msgBox.ShowDialog(LanguageManager.Strings.ErrorWhileInstallingPlugin, string.Format(LanguageManager.Strings.PluginXCouldNotBeInstalled, asm.GetName().Name), MessageBoxButtons.OK);
+                msgBox.ShowDialog(LanguageManager.Strings.ErrorWhileInstallingPlugin,
+                    string.Format(LanguageManager.Strings.PluginXCouldNotBeInstalled, asm.GetName().Name),
+                    MessageBoxButtons.OK);
             }
         }
     }
@@ -378,30 +388,8 @@ public static class PluginManager
                 ProtectedPlugins.Add(macroDeckPlugin);
             }
         }
-        OnPluginsChange?.Invoke(macroDeckPlugin, EventArgs.Empty);
-    }
 
-    internal static void EnablePlugins()
-    {
-        MacroDeckLogger.Info(typeof(PluginManager), "Enabling plugins...");
-        foreach (var plugin in Plugins.Values)
-        {
-            if (plugin == null) continue;
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
-            try
-            {
-                plugin.Enable();
-            }
-            catch (Exception ex)
-            {
-                MacroDeckLogger.Warning($"Error while enabling {plugin.Name}: {ex.Message}");
-            }
-            stopWatch.Stop();
-            var enablingTook = stopWatch.Elapsed.TotalMilliseconds;
-            MacroDeckLogger.Info($"{plugin.Name} version {plugin.Version} enabled (took {enablingTook}ms)");
-        }
-        MacroDeckLogger.Info(typeof(PluginManager), "Plugins enabled");
+        OnPluginsChange?.Invoke(macroDeckPlugin, EventArgs.Empty);
     }
 
     public static PluginAction GetActionByName(MacroDeckPlugin plugin, string name)
@@ -424,17 +412,19 @@ public static class PluginManager
         ms.Seek(0, SeekOrigin.Begin);
         return (PluginAction)serializer.Deserialize(ms);
     }
-        
-    public static MacroDeckPlugin GetPluginByAction(PluginAction pluginAction)
+
+    public static MacroDeckPlugin GetPluginByAction(PluginAction? pluginAction)
     {
         foreach (var macroDeckPlugin in Plugins.Values)
         {
-            if (macroDeckPlugin.Actions.Find(mdp => mdp.GetType().FullName.Equals(pluginAction.GetType().FullName)) != null)
+            if (macroDeckPlugin.Actions.Find(mdp => mdp.GetType().FullName.Equals(pluginAction.GetType().FullName)) !=
+                null)
             {
                 return macroDeckPlugin;
             }
         }
-        return  new DisabledPlugin
+
+        return new DisabledPlugin
         {
             Name = "Plugin not available",
         };
@@ -449,10 +439,10 @@ public static class PluginManager
                 return macroDeckPlugin;
             }
         }
+
         return new DisabledPlugin
         {
             Name = "Plugin not available",
         };
     }
-
 }

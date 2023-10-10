@@ -395,7 +395,7 @@ namespace SuchByte.MacroDeck.GUI
             this.MinimizeBox = false;
             this.Name = "IconSelector";
             this.Text = "Macro Deck :: Icon selector";
-            this.Load += new System.EventHandler(this.IconSelector_Load);
+            this.Shown += new System.EventHandler(this.IconSelector_Shown);
             this.Controls.SetChildIndex(this.iconList, 0);
             this.Controls.SetChildIndex(this.btnPreview, 0);
             this.Controls.SetChildIndex(this.btnOk, 0);

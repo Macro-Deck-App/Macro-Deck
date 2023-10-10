@@ -313,7 +313,6 @@ namespace SuchByte.MacroDeck.GUI
             navigation.Name = "navigation";
             navigation.Size = new System.Drawing.Size(60, 561);
             navigation.TabIndex = 15;
-            navigation.Visible = false;
             // 
             // btnNotifications
             // 

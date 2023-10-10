@@ -6,7 +6,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls;
 
 public partial class ActionItem : UserControl, IActionConditionItem
 {
-    public PluginAction Action { get; set; }
+    public PluginAction? Action { get; set; }
 
     public event EventHandler OnRemoveClick;
     public event EventHandler OnEditClick;
@@ -14,7 +14,7 @@ public partial class ActionItem : UserControl, IActionConditionItem
     public event EventHandler OnMoveDownClick;
 
 
-    public ActionItem(PluginAction macroDeckAction)
+    public ActionItem(PluginAction? macroDeckAction)
     {
         Action = macroDeckAction;
         InitializeComponent();

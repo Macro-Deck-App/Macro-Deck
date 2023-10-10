@@ -45,7 +45,9 @@ public partial class MainWindow : Form
         UpdateTranslation();
         LanguageManager.LanguageChanged += LanguageChanged;
         UpdateService.Instance().UpdateAvailable += UpdateAvailable;
-        _deckView ??= new DeckView();
+        Shown += MainWindowShown;
+
+        _deckView = new DeckView();
     }
 
     private void UpdateAvailable(object? sender, UpdateApiVersionInfo e)
@@ -109,6 +111,35 @@ public partial class MainWindow : Form
         }
     }
 
+    private void MainWindowShown(object? sender, EventArgs e)
+    {
+        Application.DoEvents();
+        RefreshPluginsLabels();
+        LoadHosts();
+
+        if (MacroDeck.SafeMode)
+        {
+            BackColor = Color.FromArgb(99, 0, 0);
+            lblSafeMode.Visible = true;
+            using var msgBox = new MessageBox();
+            msgBox.ShowDialog("Safe mode", "Macro Deck was started in safe mode! This means no changes on the action buttons will be saved to prevent damage.", MessageBoxButtons.OK);
+        }
+
+        SetView(DeckView);
+
+        btnSettings.SetNotification(UpdateService.Instance().VersionInfo != null);
+        ExtensionStoreHelper.SearchUpdatesAsync();
+        
+        btnNotifications.NotificationCount = NotificationManager.Notifications.Count;
+
+        var updateApiVersionInfo = UpdateService.Instance().VersionInfo;
+        if (updateApiVersionInfo != null)
+        {
+            using var updateAvailableDialog = new UpdateAvailableDialog(updateApiVersionInfo);
+            updateAvailableDialog.ShowDialog();
+        }
+    }
+
     private void MainWindow_Load(object? sender, EventArgs e)
     {
         lblVersion.Text = $@"Macro Deck {MacroDeck.Version}";
@@ -121,37 +152,12 @@ public partial class MainWindow : Form
         MacroDeckServer.OnServerStateChanged += OnServerStateChanged;
         OnClientsConnectedChanged(null, EventArgs.Empty);
         OnServerStateChanged(null, EventArgs.Empty);
-        RefreshPluginsLabels();
-        LoadHosts();
-
-        if (MacroDeck.SafeMode)
-        {
-            BackColor = Color.FromArgb(99, 0, 0);
-            lblSafeMode.Visible = true;
-            using var msgBox = new MessageBox();
-            msgBox.ShowDialog("Safe mode", "Macro Deck was started in safe mode! This means no changes on the action buttons will be saved to prevent damage.", MessageBoxButtons.OK);
-        }
-
-        btnExtensions.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);
-
-        navigation.Visible = true;
-        btnSettings.SetNotification(UpdateService.Instance().VersionInfo != null);
-
-
-        SetView(DeckView);
+       
         NotificationManager.OnNotification += NotificationsChanged;
         NotificationManager.OnNotificationRemoved += NotificationsChanged;
-        ExtensionStoreHelper.SearchUpdatesAsync();
         ExtensionStoreHelper.OnInstallationFinished += ExtensionStoreHelper_OnInstallationFinished;
+        
         CenterToScreen();
-        btnNotifications.NotificationCount = NotificationManager.Notifications.Count;
-
-        var updateApiVersionInfo = UpdateService.Instance().VersionInfo;
-        if (updateApiVersionInfo != null)
-        {
-            using var updateAvailableDialog = new UpdateAvailableDialog(updateApiVersionInfo);
-            updateAvailableDialog.ShowDialog();
-        }
     }
 
     private void LoadHosts()
@@ -192,7 +198,6 @@ public partial class MainWindow : Form
     private void OnPluginsChanged(object? sender, EventArgs e)
     {
         RefreshPluginsLabels();
-
     }
 
     private void RefreshPluginsLabels()

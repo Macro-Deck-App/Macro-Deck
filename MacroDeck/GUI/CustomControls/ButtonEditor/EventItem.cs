@@ -84,7 +84,7 @@ public partial class EventItem : UserControl
         EventChanged?.Invoke(EventListener.EventToListen, EventArgs.Empty);
     }
 
-    private void AddActionItem(PluginAction action)
+    private void AddActionItem(PluginAction? action)
     {
         if (action.GetType() == typeof(ConditionAction))
         {
