@@ -302,29 +302,6 @@ namespace SuchByte.MacroDeck.GUI
             this.btnCreateIcon.UseWindowsAccentColor = true;
             this.btnCreateIcon.Click += new System.EventHandler(this.BtnCreateIcon_Click);
             // 
-            // btnGiphy
-            // 
-            this.btnGiphy.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnGiphy.BorderRadius = 8;
-            this.btnGiphy.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnGiphy.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnGiphy.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnGiphy.ForeColor = System.Drawing.Color.White;
-            this.btnGiphy.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
-            this.btnGiphy.Icon = global::SuchByte.MacroDeck.Properties.Resources.giphy1;
-            this.btnGiphy.Location = new System.Drawing.Point(245, 3);
-            this.btnGiphy.Name = "btnGiphy";
-            this.btnGiphy.Progress = 0;
-            this.btnGiphy.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
-            this.btnGiphy.Size = new System.Drawing.Size(78, 25);
-            this.btnGiphy.TabIndex = 20;
-            this.btnGiphy.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.btnGiphy.UseMnemonic = false;
-            this.btnGiphy.UseVisualStyleBackColor = true;
-            this.btnGiphy.UseWindowsAccentColor = true;
-            this.btnGiphy.Visible = false;
-            this.btnGiphy.Click += new System.EventHandler(this.BtnGiphy_Click);
-            // 
             // panelCreateIcon
             // 
             this.panelCreateIcon.Controls.Add(this.btnImport);
