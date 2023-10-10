@@ -79,10 +79,11 @@ public partial class ButtonEditor : DialogForm
         hotkey.Click += Hotkey_Click;
     }
 
-    private void ButtonEditor_Load(object sender, EventArgs e)
+    private void ButtonEditor_Shown(object sender, EventArgs e)
     {
+        Application.DoEvents();
         LoadButton();
-        btnPreview.Radius = ProfileManager.CurrentProfile.ButtonRadius;
+        btnPreview.Radius = ProfileManager.CurrentProfile?.ButtonRadius ?? 0;
         UpdateLabel();
     }
 

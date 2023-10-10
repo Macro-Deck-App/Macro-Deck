@@ -42,35 +42,34 @@ public partial class IconSelector : DialogForm
     private void LoadIcons(IconPack iconPack, bool scrollDown = false)
     {
         iconList.Controls.Clear();
-        SuspendLayout();
         foreach (var icon in iconPack.Icons)
         {
-            var button = new RoundedButton
+            Task.Run(() =>
             {
-                Width = 100,
-                Height = 100,
-                BackColor = Color.FromArgb(35,35,35),
-                Radius = ProfileManager.CurrentProfile.ButtonRadius,
-                BackgroundImageLayout = ImageLayout.Stretch,
-                BackgroundImage = icon.IconImage
-            };
-            if (button.BackgroundImage.RawFormat.ToString().ToLower() == "gif")
-            {
-                button.ShowGIFIndicator = true;
-            }
-            button.Tag = icon;
-            button.Click += IconButton_Click;
-            button.Cursor = Cursors.Hand;
-            iconList.Controls.Add(button);
+                var button = new RoundedButton
+                {
+                    Width = 100,
+                    Height = 100,
+                    BackColor = Color.FromArgb(35,35,35),
+                    Radius = ProfileManager.CurrentProfile.ButtonRadius,
+                    BackgroundImageLayout = ImageLayout.Stretch,
+                    BackgroundImage = icon.IconImage
+                };
+                if (button.BackgroundImage.RawFormat.ToString().ToLower() == "gif")
+                {
+                    button.ShowGIFIndicator = true;
+                }
+                button.Tag = icon;
+                button.Click += IconButton_Click;
+                button.Cursor = Cursors.Hand;
+                Invoke(() => iconList.Controls.Add(button));
+            });
         }
-        ResumeLayout();
+        
         if (scrollDown)
         {
-            iconList.ScrollControlIntoView(iconList.Controls[iconList.Controls.Count - 1]);
+            iconList.ScrollControlIntoView(iconList.Controls[^1]);
         }
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
     }
 
     private void IconButton_Click(object sender, EventArgs e)
@@ -196,80 +195,12 @@ public partial class IconSelector : DialogForm
                             IconManager.AddIconImage(iconPack, iconStatic);
                         }
                         icon.Dispose();
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                        GC.Collect();
                     }
 
                     Invoke(() => LoadIcons(iconPack, true));
                     MacroDeckLogger.Info(GetType(), "Icons successfully imported");
                     SpinnerDialog.SetVisisble(false, this);
                 });
-            }
-        }
-    }
-
-    private void BtnGiphy_Click(object sender, EventArgs e)
-    {
-        using var giphySelector = new GiphySelector();
-        if (giphySelector.ShowDialog() == DialogResult.OK)
-        {
-            var iconPack = IconManager.GetIconPackByName(iconPacksBox.Text);
-            using var iconImportQuality = new IconImportQuality(true);
-            if (iconImportQuality.ShowDialog() == DialogResult.OK)
-            {
-                Image icon = null;
-                if (giphySelector.DownloadedGifStream == null) return;
-                if (iconImportQuality.Pixels == -1)
-                {
-                    icon = Image.FromStream(giphySelector.DownloadedGifStream);
-                    MacroDeckLogger.Trace("Original GIPHY image loaded");
-                }
-                else
-                {
-                    MacroDeckLogger.Trace("Using Magick to resize GIPHY image");
-                    giphySelector.DownloadedGifStream.Seek(0, SeekOrigin.Begin);
-                    using var collection = new MagickImageCollection(giphySelector.DownloadedGifStream);
-                    collection.Coalesce();
-                    foreach (var image in collection)
-                    {
-                        image.Resize(iconImportQuality.Pixels, iconImportQuality.Pixels);
-                        image.Crop(iconImportQuality.Pixels, iconImportQuality.Pixels);
-                    }
-                    try
-                    {
-                        using (var ms = new MemoryStream())
-                        {
-                            collection.Write(ms);
-                            icon = Image.FromStream(ms);
-                        }
-                        MacroDeckLogger.Trace("GIPHY Image successfully resized");
-                    }
-                    catch (Exception ex)
-                    {
-                        MacroDeckLogger.Error("Failed to resize GIPHY image: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                    }
-                }
-                IconManager.AddIconImage(iconPack, icon);
-                using (var msgBox = new MessageBox())
-                {
-                    if (msgBox.ShowDialog(LanguageManager.Strings.AnimatedGifImported, LanguageManager.Strings.GenerateStaticIcon, MessageBoxButtons.YesNo) == DialogResult.Yes)
-                    {
-                        if (icon.RawFormat.ToString().ToLower() == "gif")
-                        {
-                            using var ms = new MemoryStream();
-                            icon.Save(ms, ImageFormat.Png);
-                            var iconStatic = Image.FromStream(ms);
-                            IconManager.AddIconImage(iconPack, iconStatic);
-                        }
-                    }
-                }
-                icon.Dispose();
-                giphySelector.DownloadedGifStream.Close();
-                giphySelector.DownloadedGifStream.Dispose();
-
-                Invoke(() => LoadIcons(iconPack, true));
-                MacroDeckLogger.Info("GIPHY icon successfully imported");
             }
         }
     }
@@ -283,12 +214,10 @@ public partial class IconSelector : DialogForm
         Close();
     }
 
-    private void IconSelector_Load(object sender, EventArgs e)
+    private void IconSelector_Shown(object sender, EventArgs e)
     {
-        Task.Run(() =>
-        {
-            LoadIconPacks();
-        });
+        Application.DoEvents();
+        LoadIconPacks();
     }
 
     private void LoadIconPacks()
@@ -349,10 +278,7 @@ public partial class IconSelector : DialogForm
             SelectedIcon = null;
             lblSize.Text = "";
             lblType.Text = "";
-            Task.Run(() =>
-            {
-                LoadIconPacks();
-            });
+            Task.Run(LoadIconPacks);
         }
     }
 
@@ -362,10 +288,7 @@ public partial class IconSelector : DialogForm
         if (createIconPackDialog.ShowDialog() == DialogResult.OK)
         {
                     
-            Task.Run(() =>
-            {
-                LoadIconPacks();
-            });
+            Task.Run(LoadIconPacks);
             iconPacksBox.SelectedItem = createIconPackDialog.IconPackName;
         }
     }

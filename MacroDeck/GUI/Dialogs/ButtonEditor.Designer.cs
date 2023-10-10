@@ -912,7 +912,7 @@ namespace SuchByte.MacroDeck.GUI
             this.MinimizeBox = false;
             this.Name = "ButtonEditor";
             this.Text = "Macro Deck :: Edit button";
-            this.Load += new System.EventHandler(this.ButtonEditor_Load);
+            this.Shown += new System.EventHandler(this.ButtonEditor_Shown);
             this.Controls.SetChildIndex(this.btnPreview, 0);
             this.Controls.SetChildIndex(this.fontSize, 0);
             this.Controls.SetChildIndex(this.btnApply, 0);

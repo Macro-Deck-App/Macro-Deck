@@ -257,7 +257,7 @@ public static class ProfileManager
         }
 
         db.Close();
-        MacroDeckLogger.Info("Saved " + Profiles.Count + " profiles");
+        MacroDeckLogger.Trace("Saved " + Profiles.Count + " profiles");
         ProfilesSaved?.Invoke(Profiles, EventArgs.Empty);
     }
     public static MacroDeckFolder CreateFolder(string displayName, MacroDeckFolder parent, MacroDeckProfile macroDeckProfile)

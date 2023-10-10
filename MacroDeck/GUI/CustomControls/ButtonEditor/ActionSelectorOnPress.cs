@@ -10,11 +10,11 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor;
 
 public partial class ActionSelectorOnPress : RoundedUserControl
 {
-    private List<PluginAction> _pluginActions;
+    private List<PluginAction?> _pluginActions;
 
     private GUI.ButtonEditor _buttonEditor;
 
-    public ActionSelectorOnPress(List<PluginAction> pluginActions, GUI.ButtonEditor buttonEditor)
+    public ActionSelectorOnPress(List<PluginAction?> pluginActions, GUI.ButtonEditor buttonEditor)
     {
         _pluginActions = pluginActions;
         _buttonEditor = buttonEditor;
@@ -25,7 +25,7 @@ public partial class ActionSelectorOnPress : RoundedUserControl
         menuItemDelay.Text = LanguageManager.Strings.Delay;
     }
 
-    private void AddActionItem(PluginAction action)
+    private void AddActionItem(PluginAction? action)
     {
         if (action.GetType() == typeof(ConditionAction))
         {

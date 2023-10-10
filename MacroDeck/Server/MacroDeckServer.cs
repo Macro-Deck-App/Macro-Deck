@@ -8,6 +8,7 @@ using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.JSON;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
@@ -217,6 +218,10 @@ public static class MacroDeckServer
         {
             foreach (var action in actions)
             {
+                if (action is null)
+                {
+                    continue;
+                }
                 try
                 {
                     action.Trigger(clientId, actionButton);

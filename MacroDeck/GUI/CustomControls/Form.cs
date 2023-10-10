@@ -29,7 +29,7 @@ public partial class Form : System.Windows.Forms.Form
         helpMenuWiki.Text = LanguageManager.Strings.Wiki;
         helpMenuExportLog.Text = LanguageManager.Strings.ExportLatestLog;
     }
-
+    
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
         switch (keyData)
@@ -76,7 +76,7 @@ public partial class Form : System.Windows.Forms.Form
     {
         var p = new Process
         {
-            StartInfo = new ProcessStartInfo("https://discord.gg/yr7TRaXum8")
+            StartInfo = new ProcessStartInfo("https://discord.macro-deck.app")
             {
                 UseShellExecute = true,
             }

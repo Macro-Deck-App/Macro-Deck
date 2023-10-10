@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls
 {
-    partial class ContentSelectorButton
+    sealed partial class ContentSelectorButton
     {
         /// <summary>
         /// Erforderliche Designervariable.

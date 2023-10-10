@@ -153,6 +153,6 @@ public abstract class PluginAction
         };
 
         // Create a copy of the action button instance
-        return JsonConvert.DeserializeObject<PluginAction>(JsonConvert.SerializeObject(pluginAction, jsonSerializerSettings), jsonSerializerSettings);
+        return PluginManager.GetNewActionInstance(pluginAction);
     }
 }

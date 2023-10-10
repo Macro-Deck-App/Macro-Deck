@@ -13,7 +13,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls;
 
 public partial class ConditionItem : UserControl, IActionConditionItem
 {
-    public PluginAction Action { get; set; } = new ConditionAction();
+    public PluginAction? Action { get; set; } = new ConditionAction();
 
     public event EventHandler OnRemoveClick;
     public event EventHandler OnEditClick;
@@ -30,7 +30,7 @@ public partial class ConditionItem : UserControl, IActionConditionItem
         "Off"
     };
 
-    public ConditionItem(PluginAction macroDeckAction = null)
+    public ConditionItem(PluginAction? macroDeckAction = null)
     {
         InitializeComponent();
         menuItemAction.Text = LanguageManager.Strings.Action;
@@ -68,7 +68,7 @@ public partial class ConditionItem : UserControl, IActionConditionItem
         addItemContextMenu.Show(btnAddActionElse, new Point(0, 0 + btnAddActionElse.Height));
     }
 
-    private void AddActionItem(PluginAction action, FlowLayoutPanel container)
+    private void AddActionItem(PluginAction? action, FlowLayoutPanel container)
     {
         IActionConditionItem actionItem = null;
         if (action.GetType() != typeof(DelayAction))

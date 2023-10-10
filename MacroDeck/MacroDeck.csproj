@@ -42,14 +42,11 @@
     <PackageReference Include="Cottle" Version="2.0.9" />
     <PackageReference Include="Dax-FCTB" Version="2.16.26.120" />
     <PackageReference Include="Fleck" Version="1.2.0" />
-    <PackageReference Include="GiphyDotNet" Version="2.4.0" />
     <PackageReference Include="Magick.NET-Q16-x64" Version="13.0.0" />
     <PackageReference Include="Magick.NET.SystemDrawing" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="RestSharp" Version="109.0.1" />
-    <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="109.0.1" />
     <PackageReference Include="sharpadbclient" Version="2.3.23" />
     <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
     <PackageReference Include="System.Collections" Version="4.3.0" />
@@ -211,9 +208,6 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="GUI\Dialogs\ExtensionStoreDownloader.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="GUI\Dialogs\GiphySelector.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="GUI\Dialogs\HotkeySelector.cs">
