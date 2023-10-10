@@ -13,6 +13,6 @@ jobs:
       
     - name: Execute unit tests
       run: |
-          dotnet restore "MacroDeck.Tests\MacroDeck.Tests.csproj"
-          dotnet test "MacroDeck.Tests\MacroDeck.Tests.csproj"
+          dotnet restore -property:EnableWindowsTargeting=true "MacroDeck.Tests\MacroDeck.Tests.csproj"
+          dotnet test -property:EnableWindowsTargeting=true "MacroDeck.Tests\MacroDeck.Tests.csproj"
       shell: bash
