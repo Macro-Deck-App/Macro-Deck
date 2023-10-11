@@ -51,7 +51,6 @@ namespace SuchByte.MacroDeck.GUI
             this.lblType = new System.Windows.Forms.Label();
             this.lblTypeLabel = new System.Windows.Forms.Label();
             this.btnCreateIcon = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
-            this.btnGiphy = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.panelCreateIcon = new System.Windows.Forms.FlowLayoutPanel();
             this.lblManaged = new System.Windows.Forms.Label();
             this.btnGenerateStatic = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
@@ -306,7 +305,6 @@ namespace SuchByte.MacroDeck.GUI
             // 
             this.panelCreateIcon.Controls.Add(this.btnImport);
             this.panelCreateIcon.Controls.Add(this.btnCreateIcon);
-            this.panelCreateIcon.Controls.Add(this.btnGiphy);
             this.panelCreateIcon.Controls.Add(this.lblManaged);
             this.panelCreateIcon.Location = new System.Drawing.Point(168, 443);
             this.panelCreateIcon.Name = "panelCreateIcon";
@@ -416,7 +414,6 @@ namespace SuchByte.MacroDeck.GUI
         private Label lblType;
         private Label lblTypeLabel;
         private ButtonPrimary btnCreateIcon;
-        private ButtonPrimary btnGiphy;
         private FlowLayoutPanel panelCreateIcon;
         private Label lblManaged;
         private ButtonPrimary btnGenerateStatic;
