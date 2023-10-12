@@ -313,7 +313,7 @@ public static class ProfileManager
             MacroDeckServer.SetFolder(macroDeckClient, macroDeckProfile.Folders[0]);
         }
             
-        foreach (var child in folder.Childs.Select(childId => FindFolderById(childId, macroDeckProfile)))
+        foreach (var child in folder.Childs.Select(childId => FindFolderById(childId, macroDeckProfile)).ToArray())
         {
             DeleteFolder(child, macroDeckProfile);
         }
