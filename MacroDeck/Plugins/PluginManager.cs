@@ -127,10 +127,16 @@ public static class PluginManager
         }
 
         // Add internal plugins
-        AddPlugin(new ActionButtonPlugin(), true);
-        AddPlugin(new VariablesPlugin(), true);
-        AddPlugin(new FolderPlugin(), true);
-        AddPlugin(new DevicePlugin(), true);
+        AddAndEnablePlugin(new ActionButtonPlugin(), true);
+        AddAndEnablePlugin(new VariablesPlugin(), true);
+        AddAndEnablePlugin(new FolderPlugin(), true);
+        AddAndEnablePlugin(new DevicePlugin(), true);
+    }
+
+    private static void AddAndEnablePlugin(MacroDeckPlugin macroDeckPlugin, bool protect = false)
+    {
+        AddPlugin(macroDeckPlugin, protect);
+        macroDeckPlugin.Enable();
     }
 
     private static MacroDeckPlugin? LoadPlugin(ExtensionManifestModel extensionManifest, string pluginDirectory)
@@ -378,7 +384,7 @@ public static class PluginManager
     /// </summary>
     /// <param name="macroDeckPlugin">Instance of the plugin</param>
     /// <param name="protect">true = plugin cannot be uninstalled by the user</param>
-    internal static void AddPlugin(MacroDeckPlugin macroDeckPlugin, bool protect = false)
+    private static void AddPlugin(MacroDeckPlugin macroDeckPlugin, bool protect = false)
     {
         if (!Plugins.ContainsKey(macroDeckPlugin.Name))
         {
