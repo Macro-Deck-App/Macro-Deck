@@ -19,9 +19,9 @@ public class AdbDeviceConnectionStateChangedEventArgs : EventArgs
 public class ADBServerHelper
 {
 
-    private static AdbServer? _adbServer;
+    private static IAdbServer? _adbServer;
 
-    private static AdbClient? _adbClient;
+    private static IAdbClient? _adbClient;
 
     private static string _adbFolderName = "Android Debug Bridge";
 
@@ -59,14 +59,14 @@ public class ADBServerHelper
         }
         
         MacroDeckLogger.Info(typeof(ADBServerHelper), $"Starting ADB server using {_adbPath}");
-        _adbServer = new AdbServer();
+
+        _adbClient = new AdbClient();
+        _adbServer = new AdbServer(_adbClient, Factories.AdbCommandLineClientFactory);
         var result = _adbServer.StartServer(_adbPath, true);
         if (result != StartServerResult.Started)
         {
             MacroDeckLogger.Info(typeof(ADBServerHelper), "Unable to start ADB server");
         }
-
-        _adbClient = new AdbClient();
 
         Task.Run(() =>
         {
