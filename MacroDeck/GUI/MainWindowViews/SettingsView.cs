@@ -5,7 +5,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.Backups;
-using SuchByte.MacroDeck.DataTypes.Updater;
 using SuchByte.MacroDeck.GUI.CustomControls.Settings;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Language;
@@ -235,12 +234,12 @@ public partial class SettingsView : UserControl
         MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
     }
 
-    private void BtnChangePort_Click(object sender, EventArgs e)
+    private async void BtnChangePort_Click(object sender, EventArgs e)
     {
         if (port.Value == MacroDeck.Configuration.HostPort) return;
         MacroDeck.Configuration.HostPort = (int)port.Value;
         MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
-        MacroDeckServer.Start(MacroDeck.Configuration.HostPort);
+        await MacroDeckServer.Start(MacroDeck.Configuration.HostPort);
     }
 
     private void CheckStartWindows_CheckedChanged(object sender, EventArgs e)

@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
+using MacroDeck.Server;
 using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Language;
@@ -92,7 +93,11 @@ public partial class DeviceInfo : RoundedUserControl
     {
         if (_macroDeckDevice.Available)
         {
-            MacroDeckServer.GetMacroDeckClient(_macroDeckDevice.ClientId).SocketConnection.Close();
+            var macroDeckClient = MacroDeckServer.GetMacroDeckClient(_macroDeckDevice.ClientId);
+            if (macroDeckClient is not null)
+            {
+                Task.Run(async () => await WebSocketHandler.Close(macroDeckClient.SessionId));
+            }
         }
         DeviceManager.RemoveKnownDevice(_macroDeckDevice);
     }

@@ -3,11 +3,9 @@ using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
-using SuchByte.MacroDeck.Startup;
 using SuchByte.MacroDeck.Utils;
 using System.Diagnostics;
 using System.Drawing;
-using System.Net.Http;
 using System.Threading;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView;

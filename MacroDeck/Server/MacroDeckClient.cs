@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using Fleck;
 using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.Model;
@@ -14,9 +13,10 @@ public class MacroDeckClient : IDisposable
     private int BUFFER_SIZE = 1024 * 1024; // 1 MB
     private bool _disposed;
 
-    public MacroDeckClient()
+    public MacroDeckClient(string sessionId)
     {
         _bufferPtr = Marshal.AllocHGlobal(BUFFER_SIZE);
+        SessionId = sessionId;
     }
 
     protected virtual void Dispose(bool disposing)
@@ -45,27 +45,18 @@ public class MacroDeckClient : IDisposable
         Dispose(false);
     }
 
-    private IWebSocketConnection _socketConnection;
-    private string _clientId;
-
     private DeviceType _deviceType;
-
-    public MacroDeckClient(IWebSocketConnection socket)
-    {
-        _socketConnection = socket;
-    }
 
     public void SetClientId(string clientId)
     {
-        _clientId = clientId;
+        ClientId = clientId;
     }
-
-    public IWebSocketConnection SocketConnection => _socketConnection;
-
+    
     public MacroDeckFolder Folder { get; set; }
 
     public MacroDeckProfile Profile { get; set; }
-    public string ClientId => _clientId;
+    public string ClientId { get; private set; }
+    public string SessionId { get; private set; }
 
     public DeviceClass DeviceClass { get; set; } = DeviceClass.SoftwareClient;
 

@@ -1,13 +1,9 @@
-﻿using System.Diagnostics;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;

@@ -211,7 +211,7 @@ public partial class MainWindow : Form
 
     private void OnServerStateChanged(object? sender, EventArgs e)
     {
-        Invoke(() =>
+       /* Invoke(() =>
         {
             if (MacroDeckServer.WebSocketServer?.ListenerSocket == null)
             {
@@ -223,7 +223,7 @@ public partial class MainWindow : Form
                 hosts.Text = MacroDeck.Configuration.HostAddress;
                 lblPort.Text = MacroDeckServer.WebSocketServer.Port.ToString();
             }
-        });
+        });*/
     }
 
     private void OnClientsConnectedChanged(object? sender, EventArgs e)

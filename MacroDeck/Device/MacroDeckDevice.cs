@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using MacroDeck.Server;
+using Newtonsoft.Json;
 using SuchByte.MacroDeck.Server;
 
 namespace SuchByte.MacroDeck.Device;
@@ -13,7 +14,7 @@ public class MacroDeckDevice
     [JsonIgnore]
     public bool Available { get {
             var macroDeckClient = MacroDeckServer.GetMacroDeckClient(ClientId);
-            if (macroDeckClient != null && macroDeckClient.SocketConnection != null && macroDeckClient.SocketConnection.IsAvailable)
+            if (macroDeckClient != null && WebSocketHandler.IsAvailable(macroDeckClient.SessionId))
             {
                 return true;
             }

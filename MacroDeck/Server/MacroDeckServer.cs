@@ -1,16 +1,13 @@
 ﻿using System.Net;
-using System.Windows.Forms;
-using Fleck;
+using MacroDeck.Server;
+using MacroDeck.Server.DataTypes;
 using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.Enums;
 using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.JSON;
-using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
-using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.Server;
 
@@ -20,19 +17,22 @@ public static class MacroDeckServer
     public static event EventHandler? OnServerStateChanged;
     public static event EventHandler? OnFolderChanged;
 
-    public static WebSocketServer? WebSocketServer { get; private set; }
-
     public static List<MacroDeckClient> Clients { get; } = new();
     
-    public static void Start(int port)
+    public static async Task Start(int port)
     {
         DeviceManager.LoadKnownDevices();
-        StartWebSocketServer(IPAddress.Any.ToString(), port);
+        await StartWebSocketServer(IPAddress.Any.ToString(), port);
     }
 
-    private static void StartWebSocketServer(string ipAddress, int port)
+    private static async Task StartWebSocketServer(string ipAddress, int port)
     {
-        if (WebSocketServer != null)
+        Clients.Clear();
+        WebSocketHandler.SessionDisconnected += WebSocketHandlerOnSessionDisconnected;
+        WebSocketHandler.SessionConnected += WebSocketHandlerOnSessionConnected;
+        WebSocketHandler.MessageReceived += WebSocketHandlerOnMessageReceived;
+        await MacroDeckServerHelper.Setup(port);
+        /*if (WebSocketServer != null)
         {
             MacroDeckLogger.Info("Stopping websocket server...");
             foreach (var macroDeckClient in Clients.Where(macroDeckClient => macroDeckClient.SocketConnection is { IsAvailable: true }))
@@ -67,11 +67,34 @@ public static class MacroDeckServer
 
             using var msgBox = new MessageBox();
             msgBox.ShowDialog(LanguageManager.Strings.Error, LanguageManager.Strings.FailedToStartServer + Environment.NewLine + ex.Message, MessageBoxButtons.OK);
-        }
+        }*/
     }
 
-    private static void OnOpen(MacroDeckClient macroDeckClient)
+    private static void WebSocketHandlerOnMessageReceived(object? sender, string message)
     {
+        if (sender is not WebSocketSession session)
+        {
+            return;
+        }
+
+        var sessionId = session.Id;
+        var macroDeckClient = Clients.FirstOrDefault(x => x.SessionId == sessionId);
+        if (macroDeckClient is null)
+        {
+            return;
+        }
+        
+        OnMessage(macroDeckClient, message);
+    }
+
+    private static void WebSocketHandlerOnSessionConnected(object? sender, EventArgs e)
+    {
+        if (sender is not WebSocketSession session)
+        {
+            return;
+        }
+        
+        var macroDeckClient = new MacroDeckClient(session.Id);
         if (MacroDeck.Configuration.BlockNewConnections ||
             Clients.Count >= 10 ||
             ProfileManager.CurrentProfile?.Folders.Count < 1)
@@ -83,8 +106,20 @@ public static class MacroDeckServer
         Clients.Add(macroDeckClient);
     }
 
-    private static void OnClose(MacroDeckClient macroDeckClient)
+    private static void WebSocketHandlerOnSessionDisconnected(object? sender, EventArgs e)
     {
+        if (sender is not WebSocketSession session)
+        {
+            return;
+        }
+
+        var sessionId = session.Id;
+        var macroDeckClient = Clients.FirstOrDefault(x => x.SessionId == sessionId);
+        if (macroDeckClient is null)
+        {
+            return;
+        }
+        
         macroDeckClient.Dispose();
         Clients.Remove(macroDeckClient);
         MacroDeckLogger.Info(macroDeckClient.ClientId + " connection closed");
@@ -97,10 +132,8 @@ public static class MacroDeckServer
     /// <param name="macroDeckClient"></param>
     public static void CloseClient(MacroDeckClient macroDeckClient)
     {
-        if (macroDeckClient?.SocketConnection == null ||
-            !macroDeckClient.SocketConnection.IsAvailable) return;
         MacroDeckLogger.Info("Close connection to " + macroDeckClient.ClientId);
-        macroDeckClient.SocketConnection.Close();
+        Task.Run(async () => await WebSocketHandler.Close(macroDeckClient.SessionId));
     }
         
 
@@ -137,7 +170,7 @@ public static class MacroDeckServer
                     return;
                 }
                     
-                if (!macroDeckClient.SocketConnection.IsAvailable || DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId) == null)
+                if (DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId) == null)
                 {
                     return;
                 }
@@ -319,10 +352,10 @@ public static class MacroDeckServer
     /// <summary>
     /// Raw send function
     /// </summary>
-    /// <param name="socketConnection"></param>
+    /// <param name="macroDeckClient"></param>
     /// <param name="jObject"></param>
-    internal static void Send(IWebSocketConnection socketConnection, JObject jObject)
+    internal static void Send(MacroDeckClient macroDeckClient, JObject jObject)
     {
-        socketConnection.Send(jObject.ToString());
+        Task.Run(async () => await WebSocketHandler.SendMessageToClient(macroDeckClient.SessionId, jObject.ToString()));
     }
 }

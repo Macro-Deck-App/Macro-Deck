@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Cottle;
 using SuchByte.MacroDeck.Variables;
 

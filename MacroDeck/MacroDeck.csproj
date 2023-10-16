@@ -41,7 +41,6 @@
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="Cottle" Version="2.0.9" />
     <PackageReference Include="Dax-FCTB" Version="2.16.26.120" />
-    <PackageReference Include="Fleck" Version="1.2.0" />
     <PackageReference Include="Magick.NET-Q16-x64" Version="13.0.0" />
     <PackageReference Include="Magick.NET.SystemDrawing" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
@@ -310,6 +309,9 @@
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Update="wwwroot\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -347,6 +349,10 @@
     <EmbeddedResource Include="Resources\Languages\Spanish.json" />
     <None Remove="Resources\Languages\Turkish.json" />
     <EmbeddedResource Include="Resources\Languages\Turkish.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MacroDeck.Server\MacroDeck.Server.csproj" />
   </ItemGroup>
 
 </Project>

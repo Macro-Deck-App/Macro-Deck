@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SuchByte.MacroDeck.Models;
+﻿namespace SuchByte.MacroDeck.Models;
 
 public class ApiV2ExtensionFile
 {

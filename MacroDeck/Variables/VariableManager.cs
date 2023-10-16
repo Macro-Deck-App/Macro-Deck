@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using System.Threading;
-using Cottle;
 using SQLite;
 using SuchByte.MacroDeck.CottleIntegration;
 using SuchByte.MacroDeck.Logging;

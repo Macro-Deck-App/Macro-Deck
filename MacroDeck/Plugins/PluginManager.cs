@@ -2,13 +2,9 @@
 using System.Drawing;
 using System.IO;
 using System.IO.Compression;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Reflection;
 using System.Windows.Forms;
 using System.Xml.Serialization;
-using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.ActionButton;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Folders.Plugin;
