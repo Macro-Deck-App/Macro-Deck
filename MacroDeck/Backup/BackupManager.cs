@@ -215,52 +215,58 @@ public class BackupManager
             File.Copy(ApplicationPaths.ProfilesFilePath, Path.Combine(tempBackupPath, Path.GetFileName(ApplicationPaths.ProfilesFilePath)));
             File.Copy(ApplicationPaths.DevicesFilePath, Path.Combine(tempBackupPath, Path.GetFileName(ApplicationPaths.DevicesFilePath)));
             File.Copy(ApplicationPaths.VariablesFilePath, Path.Combine(tempBackupPath, Path.GetFileName(ApplicationPaths.VariablesFilePath)));
-
-            using var archive = ZipFile.Open(Path.Combine(ApplicationPaths.BackupsDirectoryPath, backupFileName), ZipArchiveMode.Create);
-            foreach (var file in Directory.GetFiles(tempBackupPath))
-            {
-                archive.CreateEntryFromFile(file, Path.GetFileName(file));
-            }
-
-            foreach (var directory in Directory.GetDirectories(ApplicationPaths.PluginsDirectoryPath))
-            {
-                var pluginDirectoryInfo = new DirectoryInfo(directory);
-                foreach (var file in pluginDirectoryInfo.GetFiles("*"))
-                {
-                    archive.CreateEntryFromFile(Path.Combine(ApplicationPaths.PluginsDirectoryPath, pluginDirectoryInfo.Name, file.Name), Path.Combine(new DirectoryInfo(ApplicationPaths.PluginsDirectoryPath).Name, pluginDirectoryInfo.Name, file.Name));
-                }
-            }
-
-            var pluginConfigDirectoryInfo = new DirectoryInfo(ApplicationPaths.PluginConfigPath);
-            foreach (var file in pluginConfigDirectoryInfo.GetFiles("*"))
-            {
-                archive.CreateEntryFromFile(Path.Combine(ApplicationPaths.PluginConfigPath, file.Name), Path.Combine(pluginConfigDirectoryInfo.Name, file.Name));
-            }
-
-            var pluginCredentialsDirectoryInfo = new DirectoryInfo(ApplicationPaths.PluginCredentialsPath);
-            foreach (var file in pluginCredentialsDirectoryInfo.GetFiles("*"))
-            {
-                archive.CreateEntryFromFile(Path.Combine(ApplicationPaths.PluginCredentialsPath, file.Name), Path.Combine(pluginCredentialsDirectoryInfo.Name, file.Name));
-            }
-
-            var iconPackDirectoryInfo = new DirectoryInfo(ApplicationPaths.IconPackDirectoryPath);
-            foreach (var dir in iconPackDirectoryInfo.GetDirectories())
-            {
-                foreach (var iconPackFile in dir.GetFiles())
-                {
-                    archive.CreateEntryFromFile(Path.Combine(ApplicationPaths.IconPackDirectoryPath, dir.Name, iconPackFile.Name), Path.Combine(iconPackDirectoryInfo.Name, dir.Name, iconPackFile.Name));
-                }
-            }
+            CreateBackup(backupFileName, tempBackupPath);
 
             MacroDeckLogger.Info("Backup successfully created: " + backupFileName);
             BackupSaved?.Invoke(null, EventArgs.Empty);
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             MacroDeckLogger.Error("Backup creation failed: " + ex.Message + Environment.NewLine + ex.StackTrace);
             BackupFailed?.Invoke(null, new BackupFailedEventArgs { Message = ex.Message });
-        } finally
+        } 
+        finally
         {
             BackupInProgress = false;
+        }
+    }
+
+    private static void CreateBackup(string backupFileName, string tempBackupPath)
+    {
+        using var archive = ZipFile.Open(Path.Combine(ApplicationPaths.BackupsDirectoryPath, backupFileName), ZipArchiveMode.Create);
+        foreach (var file in Directory.GetFiles(tempBackupPath))
+        {
+            archive.CreateEntryFromFile(file, Path.GetFileName(file));
+        }
+
+        foreach (var directory in Directory.GetDirectories(ApplicationPaths.PluginsDirectoryPath))
+        {
+            var pluginDirectoryInfo = new DirectoryInfo(directory);
+            foreach (var file in pluginDirectoryInfo.GetFiles("*"))
+            {
+                archive.CreateEntryFromFile(Path.Combine(ApplicationPaths.PluginsDirectoryPath, pluginDirectoryInfo.Name, file.Name), Path.Combine(new DirectoryInfo(ApplicationPaths.PluginsDirectoryPath).Name, pluginDirectoryInfo.Name, file.Name));
+            }
+        }
+
+        var pluginConfigDirectoryInfo = new DirectoryInfo(ApplicationPaths.PluginConfigPath);
+        foreach (var file in pluginConfigDirectoryInfo.GetFiles("*"))
+        {
+            archive.CreateEntryFromFile(Path.Combine(ApplicationPaths.PluginConfigPath, file.Name), Path.Combine(pluginConfigDirectoryInfo.Name, file.Name));
+        }
+
+        var pluginCredentialsDirectoryInfo = new DirectoryInfo(ApplicationPaths.PluginCredentialsPath);
+        foreach (var file in pluginCredentialsDirectoryInfo.GetFiles("*"))
+        {
+            archive.CreateEntryFromFile(Path.Combine(ApplicationPaths.PluginCredentialsPath, file.Name), Path.Combine(pluginCredentialsDirectoryInfo.Name, file.Name));
+        }
+
+        var iconPackDirectoryInfo = new DirectoryInfo(ApplicationPaths.IconPackDirectoryPath);
+        foreach (var dir in iconPackDirectoryInfo.GetDirectories())
+        {
+            foreach (var iconPackFile in dir.GetFiles())
+            {
+                archive.CreateEntryFromFile(Path.Combine(ApplicationPaths.IconPackDirectoryPath, dir.Name, iconPackFile.Name), Path.Combine(iconPackDirectoryInfo.Name, dir.Name, iconPackFile.Name));
+            }
         }
     }
 
