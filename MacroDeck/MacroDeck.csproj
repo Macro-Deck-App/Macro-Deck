@@ -15,8 +15,8 @@
     <AssemblyVersion>13</AssemblyVersion>
     <AssemblyName>Macro Deck 2</AssemblyName>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/SuchByte/Macro-Deck</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/SuchByte/Macro-Deck</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Macro-Deck-App/Macro-Deck</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Macro-Deck-App/Macro-Deck</RepositoryUrl>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Platforms>AnyCPU;x64</Platforms>
     <SelfContained>true</SelfContained>
