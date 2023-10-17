@@ -82,12 +82,12 @@ public class SoftwareClientMessage : IDeviceMessage
             Buttons = buttons
         });
 
-        MacroDeckServer.Send(macroDeckClient.SocketConnection, buttonsObject);
+        MacroDeckServer.Send(macroDeckClient, buttonsObject);
     }
 
     public void SendConfiguration(MacroDeckClient macroDeckClient)
     {
-        if (macroDeckClient == null || macroDeckClient.SocketConnection == null || !macroDeckClient.SocketConnection.IsAvailable) return;
+        if (macroDeckClient == null) return;
         var configurationObject = JObject.FromObject(new
         {
             Method = JsonMethod.GET_CONFIG.ToString(),
@@ -102,7 +102,7 @@ public class SoftwareClientMessage : IDeviceMessage
             SupportButtonReleaseLongPress = true,
         });
         MacroDeckLogger.Trace(GetType(), configurationObject.ToString());
-        MacroDeckServer.Send(macroDeckClient.SocketConnection, configurationObject);
+        MacroDeckServer.Send(macroDeckClient, configurationObject);
     }
 
     public void UpdateButton(MacroDeckClient macroDeckClient, ActionButton.ActionButton actionButton)
@@ -162,6 +162,6 @@ public class SoftwareClientMessage : IDeviceMessage
             },
         });
 
-        MacroDeckServer.Send(macroDeckClient.SocketConnection, updateObject);
+        MacroDeckServer.Send(macroDeckClient, updateObject);
     }
 }

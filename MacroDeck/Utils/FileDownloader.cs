@@ -3,8 +3,6 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using SuchByte.MacroDeck.DataTypes.FileDownloader;
-using System.Threading.Tasks;
-using SuchByte.MacroDeck.Models;
 
 namespace SuchByte.MacroDeck.Utils;
 

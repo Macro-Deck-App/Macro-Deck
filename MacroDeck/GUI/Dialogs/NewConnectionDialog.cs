@@ -27,7 +27,6 @@ public partial class NewConnectionDialog : DialogForm
         btnDeny.BackColor = Color.FromArgb(192, 0, 0);
         lblNewConnectionRequest.Text = LanguageManager.Strings.NewConnectionRequest;
         lblClientId.Text = LanguageManager.Strings.ClientId;
-        lblIPAddress.Text = LanguageManager.Strings.IPAddress;
         lblType.Text = LanguageManager.Strings.Type;
         btnAccept.Text = LanguageManager.Strings.Accept;
         btnDeny.Text = $"{LanguageManager.Strings.Deny} ({_denyTimeout})";
@@ -39,7 +38,6 @@ public partial class NewConnectionDialog : DialogForm
         CenterToParent();
         TopMost = true;
         clientId.Text = _macroDeckClient?.ClientId;
-        ipAddress.Text = _macroDeckClient?.SocketConnection?.ConnectionInfo?.ClientIpAddress;
         type.Text = _macroDeckClient?.DeviceType.ToString();
 
         _denyTimer = new Timer

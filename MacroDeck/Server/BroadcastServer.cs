@@ -1,6 +1,7 @@
 ﻿using System.Net.Sockets;
 using System.Timers;
 using Newtonsoft.Json.Linq;
+using Timer = System.Timers.Timer;
 
 namespace SuchByte.MacroDeck.Server;
 

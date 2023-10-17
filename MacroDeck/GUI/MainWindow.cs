@@ -129,7 +129,7 @@ public partial class MainWindow : Form
 
         btnSettings.SetNotification(UpdateService.Instance().VersionInfo != null);
         ExtensionStoreHelper.SearchUpdatesAsync();
-        
+
         btnNotifications.NotificationCount = NotificationManager.Notifications.Count;
 
         var updateApiVersionInfo = UpdateService.Instance().VersionInfo;
@@ -149,14 +149,12 @@ public partial class MainWindow : Form
         IconManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
 
         MacroDeckServer.OnDeviceConnectionStateChanged += OnClientsConnectedChanged;
-        MacroDeckServer.OnServerStateChanged += OnServerStateChanged;
         OnClientsConnectedChanged(null, EventArgs.Empty);
-        OnServerStateChanged(null, EventArgs.Empty);
-       
+
         NotificationManager.OnNotification += NotificationsChanged;
         NotificationManager.OnNotificationRemoved += NotificationsChanged;
         ExtensionStoreHelper.OnInstallationFinished += ExtensionStoreHelper_OnInstallationFinished;
-        
+
         CenterToScreen();
     }
 
@@ -206,23 +204,6 @@ public partial class MainWindow : Form
         Invoke(() =>
         {
             btnExtensions.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);
-        });
-    }
-
-    private void OnServerStateChanged(object? sender, EventArgs e)
-    {
-        Invoke(() =>
-        {
-            if (MacroDeckServer.WebSocketServer?.ListenerSocket == null)
-            {
-                lblServerStatus.Text = LanguageManager.Strings.ServerOffline;
-            }
-            else
-            {
-                lblServerStatus.Text = LanguageManager.Strings.ServerRunning;
-                hosts.Text = MacroDeck.Configuration.HostAddress;
-                lblPort.Text = MacroDeckServer.WebSocketServer.Port.ToString();
-            }
         });
     }
 

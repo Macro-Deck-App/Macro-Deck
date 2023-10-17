@@ -101,7 +101,8 @@ public class MacroDeck : NativeWindow
         ProfileManager.Load();
 
         SearchNetworkInterfaces();
-        MacroDeckServer.Start(StartParameters.Port <= 0 ? Configuration.HostPort : StartParameters.Port);
+        Task.Run(async () =>
+            await MacroDeckServer.Start(StartParameters.Port <= 0 ? Configuration.HostPort : StartParameters.Port));
         BroadcastServer.Start();
         ADBServerHelper.Initialize();
 

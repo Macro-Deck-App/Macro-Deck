@@ -17,6 +17,7 @@ using SuchByte.MacroDeck.Utils;
 using SuchByte.MacroDeck.Variables.Plugin.GUI;
 using SuchByte.MacroDeck.Variables.Plugin.Models;
 using SuchByte.MacroDeck.Variables.Plugin.Views;
+using Timer = System.Timers.Timer;
 
 namespace SuchByte.MacroDeck.Variables.Plugin; // Don't change because of backwards compatibility!
 

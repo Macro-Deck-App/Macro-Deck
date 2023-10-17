@@ -37,7 +37,6 @@ namespace SuchByte.MacroDeck.GUI
                 LanguageManager.LanguageChanged -= LanguageChanged;
                 UpdateService.Instance().UpdateAvailable -= UpdateAvailable;
                 MacroDeckServer.OnDeviceConnectionStateChanged -= this.OnClientsConnectedChanged;
-                MacroDeckServer.OnServerStateChanged -= this.OnServerStateChanged;
                 PluginManager.OnPluginsChange -= this.OnPluginsChanged;
                 IconManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
                 NotificationManager.OnNotification -= NotificationsChanged;
@@ -70,7 +69,6 @@ namespace SuchByte.MacroDeck.GUI
             lblNumClientsConnected = new Label();
             label1 = new Label();
             lblPort = new Label();
-            lblServerStatus = new Label();
             lblIpAddressHostname = new Label();
             navigation = new RoundedPanel();
             btnNotifications = new NotificationButton();
@@ -87,28 +85,28 @@ namespace SuchByte.MacroDeck.GUI
             // lblSafeMode
             // 
             lblSafeMode.Margin = new Padding(10, 0, 10, 0);
-            lblSafeMode.Size = new System.Drawing.Size(333, 42);
+            lblSafeMode.Size = new Size(333, 42);
             // 
             // lblVersion
             // 
             lblVersion.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            lblVersion.ForeColor = System.Drawing.Color.White;
-            lblVersion.Location = new System.Drawing.Point(2, 603);
+            lblVersion.ForeColor = Color.White;
+            lblVersion.Location = new Point(2, 603);
             lblVersion.Margin = new Padding(9, 0, 9, 0);
             lblVersion.Name = "lblVersion";
-            lblVersion.Size = new System.Drawing.Size(328, 30);
+            lblVersion.Size = new Size(328, 30);
             lblVersion.TabIndex = 3;
             lblVersion.Text = "2.0.0";
-            lblVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lblVersion.TextAlign = ContentAlignment.MiddleLeft;
             lblVersion.UseMnemonic = false;
             // 
             // contentPanel
             // 
             contentPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            contentPanel.Location = new System.Drawing.Point(69, 94);
+            contentPanel.Location = new Point(69, 94);
             contentPanel.Margin = new Padding(9, 4, 9, 4);
             contentPanel.Name = "contentPanel";
-            contentPanel.Size = new System.Drawing.Size(1131, 509);
+            contentPanel.Size = new Size(1131, 509);
             contentPanel.TabIndex = 4;
             // 
             // contentButtonPanel
@@ -121,85 +119,85 @@ namespace SuchByte.MacroDeck.GUI
             contentButtonPanel.Controls.Add(btnVariables);
             contentButtonPanel.Controls.Add(panel2);
             contentButtonPanel.FlowDirection = FlowDirection.TopDown;
-            contentButtonPanel.Location = new System.Drawing.Point(8, 9);
+            contentButtonPanel.Location = new Point(8, 9);
             contentButtonPanel.Margin = new Padding(0);
             contentButtonPanel.Name = "contentButtonPanel";
-            contentButtonPanel.Size = new System.Drawing.Size(45, 470);
+            contentButtonPanel.Size = new Size(45, 470);
             contentButtonPanel.TabIndex = 5;
             // 
             // btnDeck
             // 
-            btnDeck.BackColor = System.Drawing.Color.Transparent;
+            btnDeck.BackColor = Color.Transparent;
             btnDeck.BackgroundImage = Properties.Resources.deck;
             btnDeck.BackgroundImageLayout = ImageLayout.Stretch;
             btnDeck.Cursor = Cursors.Hand;
-            btnDeck.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            btnDeck.ForeColor = System.Drawing.Color.White;
-            btnDeck.Location = new System.Drawing.Point(0, 0);
+            btnDeck.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnDeck.ForeColor = Color.White;
+            btnDeck.Location = new Point(0, 0);
             btnDeck.Margin = new Padding(0, 0, 0, 6);
             btnDeck.Name = "btnDeck";
             btnDeck.Selected = false;
-            btnDeck.Size = new System.Drawing.Size(44, 44);
+            btnDeck.Size = new Size(44, 44);
             btnDeck.TabIndex = 0;
             btnDeck.TabStop = false;
             btnDeck.Click += BtnDeck_Click;
             // 
             // panel1
             // 
-            panel1.BackColor = System.Drawing.Color.Silver;
-            panel1.Location = new System.Drawing.Point(0, 54);
+            panel1.BackColor = Color.Silver;
+            panel1.Location = new Point(0, 54);
             panel1.Margin = new Padding(0, 4, 0, 4);
             panel1.Name = "panel1";
-            panel1.Size = new System.Drawing.Size(66, 3);
+            panel1.Size = new Size(66, 3);
             panel1.TabIndex = 4;
             // 
             // btnExtensions
             // 
-            btnExtensions.BackColor = System.Drawing.Color.Transparent;
+            btnExtensions.BackColor = Color.Transparent;
             btnExtensions.BackgroundImage = Properties.Resources.Package_Manager_icon;
             btnExtensions.BackgroundImageLayout = ImageLayout.Stretch;
             btnExtensions.Cursor = Cursors.Hand;
-            btnExtensions.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            btnExtensions.ForeColor = System.Drawing.Color.White;
-            btnExtensions.Location = new System.Drawing.Point(0, 67);
+            btnExtensions.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnExtensions.ForeColor = Color.White;
+            btnExtensions.Location = new Point(0, 67);
             btnExtensions.Margin = new Padding(0, 6, 0, 6);
             btnExtensions.Name = "btnExtensions";
             btnExtensions.Selected = false;
-            btnExtensions.Size = new System.Drawing.Size(44, 44);
+            btnExtensions.Size = new Size(44, 44);
             btnExtensions.TabIndex = 1;
             btnExtensions.TabStop = false;
             btnExtensions.Click += BtnExtensions_Click;
             // 
             // btnDeviceManager
             // 
-            btnDeviceManager.BackColor = System.Drawing.Color.Transparent;
+            btnDeviceManager.BackColor = Color.Transparent;
             btnDeviceManager.BackgroundImage = Properties.Resources.device_manager;
             btnDeviceManager.BackgroundImageLayout = ImageLayout.Stretch;
             btnDeviceManager.Cursor = Cursors.Hand;
-            btnDeviceManager.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            btnDeviceManager.ForeColor = System.Drawing.Color.White;
-            btnDeviceManager.Location = new System.Drawing.Point(0, 123);
+            btnDeviceManager.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnDeviceManager.ForeColor = Color.White;
+            btnDeviceManager.Location = new Point(0, 123);
             btnDeviceManager.Margin = new Padding(0, 6, 0, 6);
             btnDeviceManager.Name = "btnDeviceManager";
             btnDeviceManager.Selected = false;
-            btnDeviceManager.Size = new System.Drawing.Size(44, 44);
+            btnDeviceManager.Size = new Size(44, 44);
             btnDeviceManager.TabIndex = 2;
             btnDeviceManager.TabStop = false;
             btnDeviceManager.Click += BtnDeviceManager_Click;
             // 
             // btnVariables
             // 
-            btnVariables.BackColor = System.Drawing.Color.Transparent;
+            btnVariables.BackColor = Color.Transparent;
             btnVariables.BackgroundImage = Properties.Resources.variables;
             btnVariables.BackgroundImageLayout = ImageLayout.Stretch;
             btnVariables.Cursor = Cursors.Hand;
-            btnVariables.Font = new System.Drawing.Font("Tahoma", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            btnVariables.ForeColor = System.Drawing.Color.White;
-            btnVariables.Location = new System.Drawing.Point(0, 179);
+            btnVariables.Font = new Font("Tahoma", 12.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnVariables.ForeColor = Color.White;
+            btnVariables.Location = new Point(0, 179);
             btnVariables.Margin = new Padding(0, 6, 0, 6);
             btnVariables.Name = "btnVariables";
             btnVariables.Selected = false;
-            btnVariables.Size = new System.Drawing.Size(44, 44);
+            btnVariables.Size = new Size(44, 44);
             btnVariables.TabIndex = 3;
             btnVariables.TabStop = false;
             btnVariables.Text = "{x}";
@@ -207,27 +205,27 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // panel2
             // 
-            panel2.BackColor = System.Drawing.Color.Silver;
-            panel2.Location = new System.Drawing.Point(0, 233);
+            panel2.BackColor = Color.Silver;
+            panel2.Location = new Point(0, 233);
             panel2.Margin = new Padding(0, 4, 0, 4);
             panel2.Name = "panel2";
-            panel2.Size = new System.Drawing.Size(66, 3);
+            panel2.Size = new Size(66, 3);
             panel2.TabIndex = 5;
             // 
             // btnSettings
             // 
             btnSettings.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            btnSettings.BackColor = System.Drawing.Color.Transparent;
+            btnSettings.BackColor = Color.Transparent;
             btnSettings.BackgroundImage = Properties.Resources.settings;
             btnSettings.BackgroundImageLayout = ImageLayout.Stretch;
             btnSettings.Cursor = Cursors.Hand;
-            btnSettings.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            btnSettings.ForeColor = System.Drawing.Color.White;
-            btnSettings.Location = new System.Drawing.Point(8, 511);
+            btnSettings.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnSettings.ForeColor = Color.White;
+            btnSettings.Location = new Point(8, 511);
             btnSettings.Margin = new Padding(12, 6, 12, 6);
             btnSettings.Name = "btnSettings";
             btnSettings.Selected = false;
-            btnSettings.Size = new System.Drawing.Size(44, 44);
+            btnSettings.Size = new Size(44, 44);
             btnSettings.TabIndex = 1;
             btnSettings.TabStop = false;
             btnSettings.Click += BtnSettings_Click;
@@ -235,26 +233,26 @@ namespace SuchByte.MacroDeck.GUI
             // lblNumClientsConnected
             // 
             lblNumClientsConnected.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            lblNumClientsConnected.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            lblNumClientsConnected.ForeColor = System.Drawing.Color.White;
-            lblNumClientsConnected.Location = new System.Drawing.Point(936, 606);
+            lblNumClientsConnected.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            lblNumClientsConnected.ForeColor = Color.White;
+            lblNumClientsConnected.Location = new Point(936, 606);
             lblNumClientsConnected.Margin = new Padding(9, 0, 9, 0);
             lblNumClientsConnected.Name = "lblNumClientsConnected";
-            lblNumClientsConnected.Size = new System.Drawing.Size(264, 27);
+            lblNumClientsConnected.Size = new Size(264, 27);
             lblNumClientsConnected.TabIndex = 8;
             lblNumClientsConnected.Text = "0 clients connected";
-            lblNumClientsConnected.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            lblNumClientsConnected.TextAlign = ContentAlignment.MiddleRight;
             lblNumClientsConnected.UseMnemonic = false;
             // 
             // label1
             // 
             label1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             label1.AutoSize = true;
-            label1.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            label1.Location = new System.Drawing.Point(1094, 44);
+            label1.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            label1.Location = new Point(1094, 44);
             label1.Margin = new Padding(9, 0, 9, 0);
             label1.Name = "label1";
-            label1.Size = new System.Drawing.Size(15, 19);
+            label1.Size = new Size(15, 19);
             label1.TabIndex = 10;
             label1.Text = ":";
             label1.UseMnemonic = false;
@@ -262,56 +260,42 @@ namespace SuchByte.MacroDeck.GUI
             // lblPort
             // 
             lblPort.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            lblPort.BackColor = System.Drawing.Color.FromArgb(45, 45, 45);
-            lblPort.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            lblPort.ForeColor = System.Drawing.Color.White;
-            lblPort.Location = new System.Drawing.Point(1127, 37);
+            lblPort.BackColor = Color.FromArgb(45, 45, 45);
+            lblPort.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            lblPort.ForeColor = Color.White;
+            lblPort.Location = new Point(1127, 37);
             lblPort.Margin = new Padding(9, 0, 9, 0);
             lblPort.Name = "lblPort";
-            lblPort.Size = new System.Drawing.Size(69, 32);
+            lblPort.Size = new Size(69, 32);
             lblPort.TabIndex = 11;
             lblPort.Text = "8191";
-            lblPort.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lblPort.TextAlign = ContentAlignment.MiddleLeft;
             lblPort.UseMnemonic = false;
-            // 
-            // lblServerStatus
-            // 
-            lblServerStatus.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            lblServerStatus.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            lblServerStatus.ForeColor = System.Drawing.Color.White;
-            lblServerStatus.Location = new System.Drawing.Point(591, 606);
-            lblServerStatus.Margin = new Padding(9, 0, 9, 0);
-            lblServerStatus.Name = "lblServerStatus";
-            lblServerStatus.Size = new System.Drawing.Size(327, 27);
-            lblServerStatus.TabIndex = 12;
-            lblServerStatus.Text = "Server offline";
-            lblServerStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            lblServerStatus.UseMnemonic = false;
             // 
             // lblIpAddressHostname
             // 
             lblIpAddressHostname.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            lblIpAddressHostname.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            lblIpAddressHostname.ForeColor = System.Drawing.Color.White;
-            lblIpAddressHostname.Location = new System.Drawing.Point(225, 42);
+            lblIpAddressHostname.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            lblIpAddressHostname.ForeColor = Color.White;
+            lblIpAddressHostname.Location = new Point(225, 42);
             lblIpAddressHostname.Margin = new Padding(9, 0, 9, 0);
             lblIpAddressHostname.Name = "lblIpAddressHostname";
-            lblIpAddressHostname.Size = new System.Drawing.Size(468, 27);
+            lblIpAddressHostname.Size = new Size(468, 27);
             lblIpAddressHostname.TabIndex = 13;
             lblIpAddressHostname.Text = "IP address/hostname : Port";
-            lblIpAddressHostname.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            lblIpAddressHostname.TextAlign = ContentAlignment.MiddleRight;
             lblIpAddressHostname.UseMnemonic = false;
             // 
             // navigation
             // 
             navigation.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
-            navigation.BackColor = System.Drawing.Color.FromArgb(32, 32, 32);
+            navigation.BackColor = Color.FromArgb(32, 32, 32);
             navigation.Controls.Add(contentButtonPanel);
             navigation.Controls.Add(btnSettings);
-            navigation.Location = new System.Drawing.Point(0, 42);
+            navigation.Location = new Point(0, 42);
             navigation.Margin = new Padding(0);
             navigation.Name = "navigation";
-            navigation.Size = new System.Drawing.Size(60, 561);
+            navigation.Size = new Size(60, 561);
             navigation.TabIndex = 15;
             // 
             // btnNotifications
@@ -320,18 +304,18 @@ namespace SuchByte.MacroDeck.GUI
             btnNotifications.Cursor = Cursors.Hand;
             btnNotifications.FlatAppearance.BorderSize = 0;
             btnNotifications.FlatStyle = FlatStyle.Flat;
-            btnNotifications.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            btnNotifications.ForeColor = System.Drawing.Color.White;
-            btnNotifications.HoverColor = System.Drawing.Color.Empty;
+            btnNotifications.Font = new Font("Tahoma", 8F, FontStyle.Regular, GraphicsUnit.Point);
+            btnNotifications.ForeColor = Color.White;
+            btnNotifications.HoverColor = Color.Empty;
             btnNotifications.Icon = Properties.Resources.Bell;
-            btnNotifications.Location = new System.Drawing.Point(69, 42);
+            btnNotifications.Location = new Point(69, 42);
             btnNotifications.Margin = new Padding(4);
             btnNotifications.Name = "btnNotifications";
             btnNotifications.NotificationCount = 0;
             btnNotifications.Padding = new Padding(0, 4, 4, 0);
             btnNotifications.Progress = 0;
-            btnNotifications.ProgressColor = System.Drawing.Color.FromArgb(0, 103, 205);
-            btnNotifications.Size = new System.Drawing.Size(44, 44);
+            btnNotifications.ProgressColor = Color.FromArgb(0, 103, 205);
+            btnNotifications.Size = new Size(44, 44);
             btnNotifications.TabIndex = 16;
             btnNotifications.UseVisualStyleBackColor = true;
             btnNotifications.UseWindowsAccentColor = false;
@@ -342,40 +326,39 @@ namespace SuchByte.MacroDeck.GUI
             // hosts
             // 
             hosts.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            hosts.BackColor = System.Drawing.Color.FromArgb(65, 65, 65);
+            hosts.BackColor = Color.FromArgb(65, 65, 65);
             hosts.DropDownStyle = ComboBoxStyle.DropDownList;
-            hosts.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            hosts.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
             hosts.Icon = null;
-            hosts.Location = new System.Drawing.Point(706, 41);
+            hosts.Location = new Point(706, 41);
             hosts.Margin = new Padding(4);
             hosts.Name = "hosts";
             hosts.Padding = new Padding(12, 3, 12, 3);
             hosts.SelectedIndex = -1;
             hosts.SelectedItem = null;
-            hosts.Size = new System.Drawing.Size(375, 28);
+            hosts.Size = new Size(375, 28);
             hosts.TabIndex = 17;
             hosts.SelectedIndexChanged += Hosts_SelectedIndexChanged;
             // 
             // MainWindow
             // 
-            AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
-            BackColor = System.Drawing.Color.FromArgb(45, 45, 45);
-            ClientSize = new System.Drawing.Size(1200, 635);
+            BackColor = Color.FromArgb(45, 45, 45);
+            ClientSize = new Size(1200, 635);
             Controls.Add(hosts);
             Controls.Add(btnNotifications);
             Controls.Add(navigation);
             Controls.Add(lblIpAddressHostname);
-            Controls.Add(lblServerStatus);
             Controls.Add(lblPort);
             Controls.Add(label1);
             Controls.Add(lblNumClientsConnected);
             Controls.Add(contentPanel);
             Controls.Add(lblVersion);
             Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
-            Location = new System.Drawing.Point(0, 0);
+            Location = new Point(0, 0);
             Margin = new Padding(10, 4, 10, 4);
-            MinimumSize = new System.Drawing.Size(1200, 635);
+            MinimumSize = new Size(1200, 635);
             Name = "MainWindow";
             Text = "Macro Deck 2";
             FormClosing += OnFormClosing;
@@ -385,7 +368,6 @@ namespace SuchByte.MacroDeck.GUI
             Controls.SetChildIndex(lblNumClientsConnected, 0);
             Controls.SetChildIndex(label1, 0);
             Controls.SetChildIndex(lblPort, 0);
-            Controls.SetChildIndex(lblServerStatus, 0);
             Controls.SetChildIndex(lblIpAddressHostname, 0);
             Controls.SetChildIndex(navigation, 0);
             Controls.SetChildIndex(btnNotifications, 0);
@@ -413,7 +395,6 @@ namespace SuchByte.MacroDeck.GUI
         private ContentSelectorButton btnVariables;
         private Label label1;
         private Label lblPort;
-        private Label lblServerStatus;
         private Label lblIpAddressHostname;
         private Panel panel1;
         private Panel panel2;

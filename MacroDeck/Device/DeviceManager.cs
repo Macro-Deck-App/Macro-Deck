@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Media;
 using System.Windows.Forms;
+using MacroDeck.Server;
 using Newtonsoft.Json;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Logging;
@@ -100,9 +101,15 @@ public class DeviceManager
             macroDeckDevice.Blocked = blocked;
             SaveKnownDevices();
         }
-        if (blocked && macroDeckDevice.Available)
+
+        if (!blocked || !macroDeckDevice.Available)
         {
-            MacroDeckServer.GetMacroDeckClient(macroDeckDevice.ClientId).SocketConnection.Close();
+            return;
+        }
+        var macroDeckClient = MacroDeckServer.GetMacroDeckClient(macroDeckDevice.ClientId);
+        if (macroDeckClient is not null)
+        {
+            Task.Run(async () => await WebSocketHandler.Close(macroDeckClient.SessionId));
         }
     }
 
@@ -200,7 +207,8 @@ public class DeviceManager
             return true;
         }
 
-        macroDeckClient?.SocketConnection?.Close();
+        Task.Run(async () => await WebSocketHandler.Close(macroDeckClient.SessionId));
+        
         if (newConnectionDialog.Blocked)
         {
             var macroDeckDevice = new MacroDeckDevice

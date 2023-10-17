@@ -39,10 +39,8 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.lblNewConnectionRequest = new System.Windows.Forms.Label();
             this.lblClientId = new System.Windows.Forms.Label();
-            this.lblIPAddress = new System.Windows.Forms.Label();
             this.lblType = new System.Windows.Forms.Label();
             this.type = new System.Windows.Forms.Label();
-            this.ipAddress = new System.Windows.Forms.Label();
             this.clientId = new System.Windows.Forms.Label();
             this.btnAccept = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.btnDeny = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
@@ -81,16 +79,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.lblClientId.Text = "Client Id";
             this.lblClientId.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // lblIPAddress
-            // 
-            this.lblIPAddress.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblIPAddress.Location = new System.Drawing.Point(32, 154);
-            this.lblIPAddress.Name = "lblIPAddress";
-            this.lblIPAddress.Size = new System.Drawing.Size(165, 27);
-            this.lblIPAddress.TabIndex = 5;
-            this.lblIPAddress.Text = "IP Address";
-            this.lblIPAddress.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
             // lblType
             // 
             this.lblType.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
@@ -109,15 +97,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.type.Size = new System.Drawing.Size(307, 27);
             this.type.TabIndex = 9;
             this.type.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // ipAddress
-            // 
-            this.ipAddress.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ipAddress.Location = new System.Drawing.Point(203, 154);
-            this.ipAddress.Name = "ipAddress";
-            this.ipAddress.Size = new System.Drawing.Size(307, 27);
-            this.ipAddress.TabIndex = 8;
-            this.ipAddress.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // clientId
             // 
@@ -190,10 +169,8 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.Controls.Add(this.btnDeny);
             this.Controls.Add(this.btnAccept);
             this.Controls.Add(this.type);
-            this.Controls.Add(this.ipAddress);
             this.Controls.Add(this.clientId);
             this.Controls.Add(this.lblType);
-            this.Controls.Add(this.lblIPAddress);
             this.Controls.Add(this.lblClientId);
             this.Controls.Add(this.lblNewConnectionRequest);
             this.Controls.Add(this.pictureBox1);
@@ -206,10 +183,8 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.Controls.SetChildIndex(this.pictureBox1, 0);
             this.Controls.SetChildIndex(this.lblNewConnectionRequest, 0);
             this.Controls.SetChildIndex(this.lblClientId, 0);
-            this.Controls.SetChildIndex(this.lblIPAddress, 0);
             this.Controls.SetChildIndex(this.lblType, 0);
             this.Controls.SetChildIndex(this.clientId, 0);
-            this.Controls.SetChildIndex(this.ipAddress, 0);
             this.Controls.SetChildIndex(this.type, 0);
             this.Controls.SetChildIndex(this.btnAccept, 0);
             this.Controls.SetChildIndex(this.btnDeny, 0);
@@ -224,10 +199,8 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         private PictureBox pictureBox1;
         private Label lblNewConnectionRequest;
         private Label lblClientId;
-        private Label lblIPAddress;
         private Label lblType;
         private Label type;
-        private Label ipAddress;
         private Label clientId;
         private ButtonPrimary btnAccept;
         private ButtonPrimary btnDeny;

@@ -18,6 +18,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MacroDeck.Setup", "MacroDec
 		MacroDeck.Setup\Macro Deck.iss = MacroDeck.Setup\Macro Deck.iss
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacroDeck.Server", "MacroDeck.Server\MacroDeck.Server.csproj", "{FE95B83C-1BB5-45C2-8F91-A3CD1B8B6D97}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{4B7E0868-7875-41AA-8670-479175ADBEAC}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +49,14 @@ Global
 		{49F1CAC2-158D-45AC-B07C-52394B10A7E2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{49F1CAC2-158D-45AC-B07C-52394B10A7E2}.Release|x64.ActiveCfg = Release|Any CPU
 		{49F1CAC2-158D-45AC-B07C-52394B10A7E2}.Release|x64.Build.0 = Release|Any CPU
+		{FE95B83C-1BB5-45C2-8F91-A3CD1B8B6D97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE95B83C-1BB5-45C2-8F91-A3CD1B8B6D97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE95B83C-1BB5-45C2-8F91-A3CD1B8B6D97}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FE95B83C-1BB5-45C2-8F91-A3CD1B8B6D97}.Debug|x64.Build.0 = Debug|Any CPU
+		{FE95B83C-1BB5-45C2-8F91-A3CD1B8B6D97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE95B83C-1BB5-45C2-8F91-A3CD1B8B6D97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE95B83C-1BB5-45C2-8F91-A3CD1B8B6D97}.Release|x64.ActiveCfg = Release|Any CPU
+		{FE95B83C-1BB5-45C2-8F91-A3CD1B8B6D97}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
