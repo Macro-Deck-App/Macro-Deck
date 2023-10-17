@@ -33,14 +33,21 @@ public class MainConfiguration
             }
         }
     }
-    [JsonProperty("Icons.Cache")]
-    public bool CacheIcons { get; set; } = true;
 
     [JsonProperty("Update.Auto")]
     public bool AutoUpdates { get; set; } = true;
 
     [JsonProperty("Update.InstallBeta")]
     public bool UpdateBetaVersions { get; set; }
+
+    [JsonProperty("Connection.Ssl.Enabled")]
+    public bool EnableSsl { get; set; }
+
+    [JsonProperty("Connection.Ssl.Certificate.Path")]
+    public string? SslCertificatePath { get; set; }
+
+    [JsonProperty("Connection.Ssl.Certificate.Password")]
+    public string? SslCertificatePassword { get; set; }
 
     [JsonProperty("Connection.Host.Address")]
     public string HostAddress { get; set; } = "127.0.0.1";
@@ -53,6 +60,7 @@ public class MainConfiguration
 
     [JsonProperty("Connection.BlockNewConnections")]
     public bool BlockNewConnections { get; set; }
+
     [JsonProperty("Language")]
     public string Language { get; set; } = "English";
 

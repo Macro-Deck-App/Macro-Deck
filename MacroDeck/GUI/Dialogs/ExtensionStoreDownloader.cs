@@ -72,11 +72,7 @@ public partial class ExtensionStoreDownloader : DialogForm
     {
         if (PluginManager.UpdatedPlugins.Count > 0)
         {
-            using var msgBox = new MessageBox();
-            if (msgBox.ShowDialog(LanguageManager.Strings.MacroDeckNeedsARestart, LanguageManager.Strings.MacroDeckMustBeRestartedForTheChanges, MessageBoxButtons.YesNo) == DialogResult.Yes)
-            {
-                MacroDeck.RestartMacroDeck();
-            }
+            MacroDeck.RequestRestart();
         }
         Close();
     }

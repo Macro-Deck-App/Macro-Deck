@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using System.Security.Cryptography.X509Certificates;
 
 namespace MacroDeck.Server;
 
@@ -7,7 +8,7 @@ public static class MacroDeckServerHelper
 {
     private static IHost? _host;
     
-    public static async Task Setup(int port)
+    public static async Task Setup(int port, bool enableSsl, string? certificatePath, string? certificatePassword)
     {
         if (_host is not null)
         {
@@ -20,7 +21,16 @@ public static class MacroDeckServerHelper
                 hostBuilder.UseStartup<Startup>();
                 hostBuilder.ConfigureKestrel(options =>
                 {
-                    options.ListenAnyIP(port);
+                    if (enableSsl && !string.IsNullOrWhiteSpace(certificatePath))
+                    {
+                        options.ListenAnyIP(port, listenOptions =>
+                        {
+                            listenOptions.UseHttps(new X509Certificate2(certificatePath, certificatePassword));
+                        });
+                    } else
+                    {
+                        options.ListenAnyIP(port);
+                    }
                 });
             }).Build();
 

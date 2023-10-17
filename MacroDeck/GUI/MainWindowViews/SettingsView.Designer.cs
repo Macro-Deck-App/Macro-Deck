@@ -39,22 +39,23 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             ComponentResourceManager resources = new ComponentResourceManager(typeof(SettingsView));
             verticalTabControl = new VerticalTabControl();
             tabGeneral = new TabPage();
-            checkIconCache = new CheckBox();
             language = new RoundedComboBox();
             lblLanguage = new Label();
             checkStartWindows = new CheckBox();
             lblBehaviour = new Label();
             lblGeneral = new Label();
             tabConnection = new TabPage();
+            btnApplySslConfiguration = new ButtonPrimary();
+            btnBrowseCertificatePath = new ButtonPrimary();
+            label4 = new Label();
+            certificatePassword = new RoundedTextBox();
+            label3 = new Label();
+            certificatePath = new RoundedTextBox();
+            checkEnableSsl = new CheckBox();
+            labelSsl = new Label();
             btnChangePort = new ButtonPrimary();
-            groupConnectionInfo = new GroupBox();
-            lblConnectionInfo = new Label();
             port = new NumericUpDown();
             lblPort = new Label();
-            lblIpAddessLabel = new Label();
-            lblIpAddress = new Label();
-            networkAdapter = new RoundedComboBox();
-            lblNetworkAdapter = new Label();
             lblConnection = new Label();
             tabUpdater = new TabPage();
             label2 = new Label();
@@ -86,7 +87,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             verticalTabControl.SuspendLayout();
             tabGeneral.SuspendLayout();
             tabConnection.SuspendLayout();
-            groupConnectionInfo.SuspendLayout();
             ((ISupportInitialize)port).BeginInit();
             tabUpdater.SuspendLayout();
             tabBackups.SuspendLayout();
@@ -119,7 +119,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // tabGeneral
             // 
             tabGeneral.BackColor = Color.FromArgb(45, 45, 45);
-            tabGeneral.Controls.Add(checkIconCache);
             tabGeneral.Controls.Add(language);
             tabGeneral.Controls.Add(lblLanguage);
             tabGeneral.Controls.Add(checkStartWindows);
@@ -133,18 +132,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             tabGeneral.Size = new Size(923, 526);
             tabGeneral.TabIndex = 0;
             tabGeneral.Text = "General";
-            // 
-            // checkIconCache
-            // 
-            checkIconCache.AutoSize = true;
-            checkIconCache.Location = new Point(13, 112);
-            checkIconCache.Name = "checkIconCache";
-            checkIconCache.Size = new Size(375, 23);
-            checkIconCache.TabIndex = 14;
-            checkIconCache.Text = "Enable icon cache (faster; higher memory usage)";
-            checkIconCache.UseMnemonic = false;
-            checkIconCache.UseVisualStyleBackColor = true;
-            checkIconCache.CheckedChanged += CheckIconCache_CheckedChanged;
             // 
             // language
             // 
@@ -213,14 +200,17 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // tabConnection
             // 
             tabConnection.BackColor = Color.FromArgb(45, 45, 45);
+            tabConnection.Controls.Add(btnApplySslConfiguration);
+            tabConnection.Controls.Add(btnBrowseCertificatePath);
+            tabConnection.Controls.Add(label4);
+            tabConnection.Controls.Add(certificatePassword);
+            tabConnection.Controls.Add(label3);
+            tabConnection.Controls.Add(certificatePath);
+            tabConnection.Controls.Add(checkEnableSsl);
+            tabConnection.Controls.Add(labelSsl);
             tabConnection.Controls.Add(btnChangePort);
-            tabConnection.Controls.Add(groupConnectionInfo);
             tabConnection.Controls.Add(port);
             tabConnection.Controls.Add(lblPort);
-            tabConnection.Controls.Add(lblIpAddessLabel);
-            tabConnection.Controls.Add(lblIpAddress);
-            tabConnection.Controls.Add(networkAdapter);
-            tabConnection.Controls.Add(lblNetworkAdapter);
             tabConnection.Controls.Add(lblConnection);
             tabConnection.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
             tabConnection.ForeColor = Color.White;
@@ -229,6 +219,138 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             tabConnection.Size = new Size(923, 526);
             tabConnection.TabIndex = 3;
             tabConnection.Text = "Connection";
+            // 
+            // btnApplySslConfiguration
+            // 
+            btnApplySslConfiguration.BorderRadius = 8;
+            btnApplySslConfiguration.Cursor = Cursors.Hand;
+            btnApplySslConfiguration.FlatAppearance.BorderSize = 0;
+            btnApplySslConfiguration.FlatStyle = FlatStyle.Flat;
+            btnApplySslConfiguration.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnApplySslConfiguration.ForeColor = Color.White;
+            btnApplySslConfiguration.HoverColor = Color.FromArgb(0, 89, 184);
+            btnApplySslConfiguration.Icon = null;
+            btnApplySslConfiguration.Location = new Point(410, 294);
+            btnApplySslConfiguration.Name = "btnApplySslConfiguration";
+            btnApplySslConfiguration.Progress = 0;
+            btnApplySslConfiguration.ProgressColor = Color.FromArgb(0, 46, 94);
+            btnApplySslConfiguration.Size = new Size(206, 30);
+            btnApplySslConfiguration.TabIndex = 24;
+            btnApplySslConfiguration.Text = "Apply SSL configuration";
+            btnApplySslConfiguration.UseMnemonic = false;
+            btnApplySslConfiguration.UseVisualStyleBackColor = false;
+            btnApplySslConfiguration.UseWindowsAccentColor = true;
+            btnApplySslConfiguration.WriteProgress = true;
+            btnApplySslConfiguration.Click += BtnApplySslConfiguration_Click;
+            // 
+            // btnBrowseCertificatePath
+            // 
+            btnBrowseCertificatePath.BorderRadius = 8;
+            btnBrowseCertificatePath.Cursor = Cursors.Hand;
+            btnBrowseCertificatePath.FlatAppearance.BorderSize = 0;
+            btnBrowseCertificatePath.FlatStyle = FlatStyle.Flat;
+            btnBrowseCertificatePath.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnBrowseCertificatePath.ForeColor = Color.White;
+            btnBrowseCertificatePath.HoverColor = Color.FromArgb(0, 89, 184);
+            btnBrowseCertificatePath.Icon = null;
+            btnBrowseCertificatePath.Location = new Point(570, 222);
+            btnBrowseCertificatePath.Name = "btnBrowseCertificatePath";
+            btnBrowseCertificatePath.Progress = 0;
+            btnBrowseCertificatePath.ProgressColor = Color.FromArgb(0, 46, 94);
+            btnBrowseCertificatePath.Size = new Size(46, 30);
+            btnBrowseCertificatePath.TabIndex = 23;
+            btnBrowseCertificatePath.Text = "...";
+            btnBrowseCertificatePath.UseMnemonic = false;
+            btnBrowseCertificatePath.UseVisualStyleBackColor = false;
+            btnBrowseCertificatePath.UseWindowsAccentColor = true;
+            btnBrowseCertificatePath.WriteProgress = true;
+            btnBrowseCertificatePath.Click += BtnBrowseCertificatePath_Click;
+            // 
+            // label4
+            // 
+            label4.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            label4.Location = new Point(17, 258);
+            label4.Name = "label4";
+            label4.Size = new Size(159, 30);
+            label4.TabIndex = 22;
+            label4.Text = "Certificate password:";
+            label4.TextAlign = ContentAlignment.MiddleLeft;
+            label4.UseMnemonic = false;
+            // 
+            // certificatePassword
+            // 
+            certificatePassword.BackColor = Color.FromArgb(65, 65, 65);
+            certificatePassword.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            certificatePassword.Icon = null;
+            certificatePassword.Location = new Point(182, 258);
+            certificatePassword.MaxCharacters = 32767;
+            certificatePassword.Multiline = false;
+            certificatePassword.Name = "certificatePassword";
+            certificatePassword.Padding = new Padding(8, 5, 8, 5);
+            certificatePassword.PasswordChar = true;
+            certificatePassword.PlaceHolderColor = Color.Gray;
+            certificatePassword.PlaceHolderText = "";
+            certificatePassword.ReadOnly = false;
+            certificatePassword.ScrollBars = ScrollBars.None;
+            certificatePassword.SelectionStart = 0;
+            certificatePassword.Size = new Size(382, 30);
+            certificatePassword.TabIndex = 21;
+            certificatePassword.TextAlignment = HorizontalAlignment.Left;
+            // 
+            // label3
+            // 
+            label3.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            label3.Location = new Point(17, 222);
+            label3.Name = "label3";
+            label3.Size = new Size(159, 30);
+            label3.TabIndex = 20;
+            label3.Text = "Certificate path:";
+            label3.TextAlign = ContentAlignment.MiddleLeft;
+            label3.UseMnemonic = false;
+            // 
+            // certificatePath
+            // 
+            certificatePath.BackColor = Color.FromArgb(65, 65, 65);
+            certificatePath.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            certificatePath.Icon = null;
+            certificatePath.Location = new Point(182, 222);
+            certificatePath.MaxCharacters = 32767;
+            certificatePath.Multiline = false;
+            certificatePath.Name = "certificatePath";
+            certificatePath.Padding = new Padding(8, 5, 8, 5);
+            certificatePath.PasswordChar = false;
+            certificatePath.PlaceHolderColor = Color.Gray;
+            certificatePath.PlaceHolderText = "";
+            certificatePath.ReadOnly = false;
+            certificatePath.ScrollBars = ScrollBars.None;
+            certificatePath.SelectionStart = 0;
+            certificatePath.Size = new Size(382, 30);
+            certificatePath.TabIndex = 19;
+            certificatePath.TextAlignment = HorizontalAlignment.Left;
+            // 
+            // checkEnableSsl
+            // 
+            checkEnableSsl.AutoSize = true;
+            checkEnableSsl.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            checkEnableSsl.Location = new Point(12, 193);
+            checkEnableSsl.Name = "checkEnableSsl";
+            checkEnableSsl.Size = new Size(106, 23);
+            checkEnableSsl.TabIndex = 18;
+            checkEnableSsl.Text = "Enable SSL";
+            checkEnableSsl.UseMnemonic = false;
+            checkEnableSsl.UseVisualStyleBackColor = true;
+            // 
+            // labelSsl
+            // 
+            labelSsl.AutoSize = true;
+            labelSsl.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
+            labelSsl.ForeColor = Color.Gray;
+            labelSsl.Location = new Point(3, 167);
+            labelSsl.Name = "labelSsl";
+            labelSsl.Size = new Size(41, 23);
+            labelSsl.TabIndex = 13;
+            labelSsl.Text = "SSL";
+            labelSsl.UseMnemonic = false;
             // 
             // btnChangePort
             // 
@@ -252,30 +374,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnChangePort.UseWindowsAccentColor = true;
             btnChangePort.WriteProgress = true;
             btnChangePort.Click += BtnChangePort_Click;
-            // 
-            // groupConnectionInfo
-            // 
-            groupConnectionInfo.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            groupConnectionInfo.Controls.Add(lblConnectionInfo);
-            groupConnectionInfo.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
-            groupConnectionInfo.ForeColor = Color.White;
-            groupConnectionInfo.Location = new Point(12, 342);
-            groupConnectionInfo.Name = "groupConnectionInfo";
-            groupConnectionInfo.Size = new Size(896, 173);
-            groupConnectionInfo.TabIndex = 11;
-            groupConnectionInfo.TabStop = false;
-            groupConnectionInfo.Text = "Info";
-            // 
-            // lblConnectionInfo
-            // 
-            lblConnectionInfo.Dock = DockStyle.Fill;
-            lblConnectionInfo.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            lblConnectionInfo.Location = new Point(3, 26);
-            lblConnectionInfo.Name = "lblConnectionInfo";
-            lblConnectionInfo.Size = new Size(890, 144);
-            lblConnectionInfo.TabIndex = 0;
-            lblConnectionInfo.Text = resources.GetString("lblConnectionInfo.Text");
-            lblConnectionInfo.UseMnemonic = false;
             // 
             // port
             // 
@@ -301,61 +399,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             lblPort.TabIndex = 8;
             lblPort.Text = "Port";
             lblPort.UseMnemonic = false;
-            // 
-            // lblIpAddessLabel
-            // 
-            lblIpAddessLabel.AutoSize = true;
-            lblIpAddessLabel.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            lblIpAddessLabel.Location = new Point(18, 280);
-            lblIpAddessLabel.Name = "lblIpAddessLabel";
-            lblIpAddessLabel.Size = new Size(83, 18);
-            lblIpAddessLabel.TabIndex = 7;
-            lblIpAddessLabel.Text = "IP address:";
-            lblIpAddessLabel.UseMnemonic = false;
-            lblIpAddessLabel.Visible = false;
-            // 
-            // lblIpAddress
-            // 
-            lblIpAddress.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            lblIpAddress.Location = new Point(107, 280);
-            lblIpAddress.Name = "lblIpAddress";
-            lblIpAddress.Size = new Size(187, 17);
-            lblIpAddress.TabIndex = 6;
-            lblIpAddress.Text = "0.0.0.0";
-            lblIpAddress.UseMnemonic = false;
-            lblIpAddress.Visible = false;
-            // 
-            // networkAdapter
-            // 
-            networkAdapter.BackColor = Color.FromArgb(65, 65, 65);
-            networkAdapter.Cursor = Cursors.Hand;
-            networkAdapter.DropDownStyle = ComboBoxStyle.DropDownList;
-            networkAdapter.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
-            networkAdapter.ForeColor = Color.White;
-            networkAdapter.Icon = null;
-            networkAdapter.Location = new Point(18, 245);
-            networkAdapter.Margin = new Padding(4);
-            networkAdapter.Name = "networkAdapter";
-            networkAdapter.Padding = new Padding(8, 2, 8, 2);
-            networkAdapter.SelectedIndex = -1;
-            networkAdapter.SelectedItem = null;
-            networkAdapter.Size = new Size(276, 31);
-            networkAdapter.TabIndex = 5;
-            networkAdapter.Visible = false;
-            networkAdapter.SelectedIndexChanged += NetworkAdapter_SelectedIndexChanged;
-            // 
-            // lblNetworkAdapter
-            // 
-            lblNetworkAdapter.AutoSize = true;
-            lblNetworkAdapter.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
-            lblNetworkAdapter.ForeColor = Color.Gray;
-            lblNetworkAdapter.Location = new Point(9, 221);
-            lblNetworkAdapter.Name = "lblNetworkAdapter";
-            lblNetworkAdapter.Size = new Size(150, 23);
-            lblNetworkAdapter.TabIndex = 2;
-            lblNetworkAdapter.Text = "Network adapter";
-            lblNetworkAdapter.UseMnemonic = false;
-            lblNetworkAdapter.Visible = false;
             // 
             // lblConnection
             // 
@@ -732,7 +775,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             tabGeneral.PerformLayout();
             tabConnection.ResumeLayout(false);
             tabConnection.PerformLayout();
-            groupConnectionInfo.ResumeLayout(false);
             ((ISupportInitialize)port).EndInit();
             tabUpdater.ResumeLayout(false);
             tabUpdater.PerformLayout();
@@ -763,14 +805,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private CheckBox checkStartWindows;
         private Label lblLanguage;
         private RoundedComboBox language;
-        private RoundedComboBox networkAdapter;
-        private Label lblNetworkAdapter;
-        private Label lblIpAddress;
-        private Label lblIpAddessLabel;
         private Label lblPort;
         private NumericUpDown port;
-        private GroupBox groupConnectionInfo;
-        private Label lblConnectionInfo;
         private ButtonPrimary btnChangePort;
         private ButtonPrimary btnCheckUpdates;
         private Label lblInstalledVersion;
@@ -781,7 +817,6 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private Label lblWebSocketAPILabel;
         private ButtonPrimary btnLicenses;
         private Label lblTranslationBy;
-        private CheckBox checkIconCache;
         private ImageList tabIcons;
         private Label label1;
         private CheckBox checkInstallBetaVersions;
@@ -792,5 +827,13 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private ButtonPrimary btnCreateBackup;
         private PictureButton btnGitHub;
         private Label label2;
+        private ButtonPrimary btnApplySslConfiguration;
+        private ButtonPrimary btnBrowseCertificatePath;
+        private Label label4;
+        private RoundedTextBox certificatePassword;
+        private Label label3;
+        private RoundedTextBox certificatePath;
+        private CheckBox checkEnableSsl;
+        private Label labelSsl;
     }
 }

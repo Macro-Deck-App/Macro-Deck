@@ -101,8 +101,7 @@ public class MacroDeck : NativeWindow
         ProfileManager.Load();
 
         SearchNetworkInterfaces();
-        Task.Run(async () =>
-            await MacroDeckServer.Start(StartParameters.Port <= 0 ? Configuration.HostPort : StartParameters.Port));
+        MacroDeckServer.Start(StartParameters.Port <= 0 ? Configuration.HostPort : StartParameters.Port);
         BroadcastServer.Start();
         ADBServerHelper.Initialize();
 
@@ -236,6 +235,15 @@ public class MacroDeck : NativeWindow
         catch
         {
             // ignored
+        }
+    }
+
+    public static void RequestRestart()
+    {
+        using var msgBox = new GUI.CustomControls.MessageBox();
+        if (msgBox.ShowDialog(LanguageManager.Strings.MacroDeckNeedsARestart, LanguageManager.Strings.MacroDeckMustBeRestartedForTheChanges, MessageBoxButtons.YesNo) == DialogResult.Yes)
+        {
+            MacroDeck.RestartMacroDeck();
         }
     }
 
