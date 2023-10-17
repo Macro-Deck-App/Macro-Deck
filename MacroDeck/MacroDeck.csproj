@@ -21,7 +21,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <SelfContained>true</SelfContained>
     <OutputType>WinExe</OutputType>
-    <Nullable>false</Nullable>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 	
   <ItemGroup>
