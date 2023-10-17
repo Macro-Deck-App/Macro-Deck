@@ -15,7 +15,7 @@ public class Startup
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app.UseCors("AllowAny");
-        app.UseStaticFiles();
+        app.UseFileServer();
         app.UseWebSockets(new WebSocketOptions
         {
             KeepAliveInterval = TimeSpan.FromMinutes(2)

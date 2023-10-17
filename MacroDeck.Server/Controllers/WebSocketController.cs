@@ -12,16 +12,15 @@ public class WebSocketController : ControllerBase
 
     [Route("/")]
     [HttpGet]
-    public async Task Get()
+    public async Task<ActionResult> Get()
     {
-        if (HttpContext.WebSockets.IsWebSocketRequest)
+        if (!HttpContext.WebSockets.IsWebSocketRequest)
         {
-            using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-            await WebSocketHandler.HandleWebSocket(webSocket);
+            return Redirect("client");
         }
-        else
-        {
-            HttpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-        }
+        
+        using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+        await WebSocketHandler.HandleWebSocket(webSocket);
+        return Ok();
     }
 }
