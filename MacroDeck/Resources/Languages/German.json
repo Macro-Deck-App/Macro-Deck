@@ -155,7 +155,7 @@
   "NewConnection": "Neue Verbindung",
   "XIsAnUnknownDevice": "{0} ist ein unbekanntes Gerät. Verbindung erlauben?",
   "ShouldMacroDeckBlockConnectionsFromX": "Sollen Verbindungsversuche von {0} immer blockiert werden?",
-  "FailedToStartServer": "Server konnte nicht gestartet werden. Möglicherweise wird der Port schon benutzt oder der falsche Netzwerkadapter ist eingestellt.",
+  "FailedToStartServer": "Server konnte nicht gestartet werden. Möglicherweise wird der Port schon benutzt.",
   "ErrorWhileLoadingPlugins": "Fehler beim Laden von Plugins",
   "PluginXCouldNotBeLoaded": "{0} Version {1} konnte nicht geladen werden. Möglicherweise ist die Version nicht kompatibel. Tasten, welche dieses Plugin nutzen, funktionieren möglicherweise nicht.",
   "InstallationSuccessfull": "Installation erfolgreich",

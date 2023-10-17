@@ -155,7 +155,7 @@
   "NewConnection": "New connection",
   "XIsAnUnknownDevice": "{0} is an unknown device and wants to connect to Macro Deck. Allow connection?",
   "ShouldMacroDeckBlockConnectionsFromX": "Should Macro Deck automatically block future connections from {0}?",
-  "FailedToStartServer": "Failed to start the server. Perhaps the configured port is already in use or you set the incorrect network adapter. Confirm you set the correct network adapter in the settings and try to change the port.",
+  "FailedToStartServer": "Failed to start the server. Perhaps the configured port is already in use.",
   "ErrorWhileLoadingPlugins": "Error while loading plugins",
   "PluginXCouldNotBeLoaded": "{0} version {1} could not be loaded.Perhaps it is not compatible with this version of Macro Deck. Actions that uses this plugin, will not work until the plugin is updated.",
   "InstallationSuccessfull": "Installation successfull",

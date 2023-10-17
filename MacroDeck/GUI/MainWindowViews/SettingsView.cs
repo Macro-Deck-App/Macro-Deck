@@ -1,9 +1,5 @@
 ﻿using System.Diagnostics;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Threading;
-using System.Windows.Forms;
+using System.IO;
 using SuchByte.MacroDeck.Backups;
 using SuchByte.MacroDeck.GUI.CustomControls.Settings;
 using SuchByte.MacroDeck.GUI.Dialogs;
@@ -49,15 +45,10 @@ public partial class SettingsView : UserControl
         lblGeneral.Text = LanguageManager.Strings.General;
         lblBehaviour.Text = LanguageManager.Strings.Behaviour;
         checkStartWindows.Text = LanguageManager.Strings.AutomaticallyStartWithWindows;
-        checkIconCache.Text = LanguageManager.Strings.EnableIconCache;
         lblLanguage.Text = LanguageManager.Strings.Language;
         lblConnection.Text = LanguageManager.Strings.Connection;
-        lblNetworkAdapter.Text = LanguageManager.Strings.NetworkAdapter;
-        lblIpAddessLabel.Text = LanguageManager.Strings.IPAddress;
         lblPort.Text = LanguageManager.Strings.Port;
         btnChangePort.Text = LanguageManager.Strings.Ok;
-        groupConnectionInfo.Text = LanguageManager.Strings.Info;
-        lblConnectionInfo.Text = LanguageManager.Strings.ConfigureNetworkInfo;
         lblUpdates.Text = LanguageManager.Strings.Updates;
         checkAutoUpdate.Text = LanguageManager.Strings.AutomaticallyCheckUpdates;
         lblInstalledVersionLabel.Text = LanguageManager.Strings.InstalledVersion;
@@ -76,10 +67,9 @@ public partial class SettingsView : UserControl
     {
         LoadAutoStart();
         LoadLanguage();
-        LoadNetworkAdapters();
         LoadUpdateChannel();
+        LoadNetworkConfiguration();
         LoadAutoUpdate();
-        LoadIconCache();
         LoadBackups();
 
         lblInstalledVersion.Text = MacroDeck.Version.ToString();
@@ -108,19 +98,19 @@ public partial class SettingsView : UserControl
         checkAutoUpdate.CheckedChanged += CheckAutoUpdate_CheckedChanged;
     }
 
+    private void LoadNetworkConfiguration()
+    {
+        port.Value = MacroDeck.Configuration.HostPort;
+        checkEnableSsl.Checked = MacroDeck.Configuration.EnableSsl;
+        certificatePath.Text = MacroDeck.Configuration.SslCertificatePath;
+        certificatePassword.Text = MacroDeck.Configuration.SslCertificatePassword;
+    }
+
     private void LoadAutoStart()
     {
         checkStartWindows.CheckedChanged -= CheckStartWindows_CheckedChanged;
         checkStartWindows.Checked = MacroDeck.Configuration.AutoStart;
         checkStartWindows.CheckedChanged += CheckStartWindows_CheckedChanged;
-    }
-
-    private void LoadIconCache()
-    {
-        checkIconCache.CheckedChanged -= CheckIconCache_CheckedChanged;
-        checkIconCache.Checked = MacroDeck.Configuration.CacheIcons;
-        checkIconCache.CheckedChanged += CheckIconCache_CheckedChanged;
-
     }
 
     private void LoadUpdateChannel()
@@ -162,84 +152,12 @@ public partial class SettingsView : UserControl
         }
     }
 
-    private void LoadNetworkAdapters()
-    {
-        networkAdapter.SelectedIndexChanged -= NetworkAdapter_SelectedIndexChanged;
-        networkAdapter.Items.Clear();
-        try
-        {
-            var adapters = NetworkInterface.GetAllNetworkInterfaces();
-            foreach (var adapter in adapters)
-            {
-                networkAdapter.Items.Add(adapter.Name);
-            }
-        }
-        catch { }
-        networkAdapter.Text = GetAdapterFromIPAddress(MacroDeck.Configuration.HostAddress);
-        lblIpAddress.Text = MacroDeck.Configuration.HostAddress;
-        networkAdapter.SelectedIndexChanged += NetworkAdapter_SelectedIndexChanged;
-    }
-
-    private string GetAdapterFromIPAddress(string address)
-    {
-        var adapters = NetworkInterface.GetAllNetworkInterfaces();
-        foreach (var adapter in adapters)
-        {
-            foreach (var ip in adapter.GetIPProperties().UnicastAddresses)
-            {
-                if (ip.Address.AddressFamily == AddressFamily.InterNetwork && ip.Address.ToString().Equals(address))
-                {
-                    return adapter.Name;
-                }
-            }
-        }
-
-        return "";
-    }
-
-    public IPAddress GetDefaultIPAddress()
-    {
-        if (!NetworkInterface.GetIsNetworkAvailable())
-        {
-            return null;
-        }
-        var host = Dns.GetHostEntry(Dns.GetHostName());
-
-        return host
-            .AddressList
-            .FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork);
-    }
-
-    public string GetIPAddressFromAdapter(string adapterName)
-    {
-        var adapters = NetworkInterface.GetAllNetworkInterfaces();
-        foreach (var adapter in adapters)
-        {
-            if (adapter.Name.Equals(adapterName))
-            {
-                foreach (var ip in adapter.GetIPProperties().UnicastAddresses)
-                {
-                    if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
-                        return ip.Address.ToString();
-                }
-            }
-        }
-        return "0.0.0.0";
-    }
-
-    private void NetworkAdapter_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        lblIpAddress.Text = GetIPAddressFromAdapter(networkAdapter.SelectedItem.ToString());
-        MacroDeck.Configuration.HostAddress = lblIpAddress.Text;
-        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
-    }
-
-    private async void BtnChangePort_Click(object sender, EventArgs e)
+    private void BtnChangePort_Click(object sender, EventArgs e)
     {
         if (port.Value == MacroDeck.Configuration.HostPort) return;
         MacroDeck.Configuration.HostPort = (int)port.Value;
         MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
-        await MacroDeckServer.Start(MacroDeck.Configuration.HostPort);
+        MacroDeck.RequestRestart();
     }
 
     private void CheckStartWindows_CheckedChanged(object sender, EventArgs e)
@@ -311,12 +229,6 @@ public partial class SettingsView : UserControl
         UpdateTranslation();
     }
 
-    private void CheckIconCache_CheckedChanged(object sender, EventArgs e)
-    {
-        MacroDeck.Configuration.CacheIcons = checkIconCache.Checked;
-        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
-    }
-
     private void BackupManager_BackupFailed(object sender, BackupFailedEventArgs e)
     {
         Invoke(() =>
@@ -364,5 +276,41 @@ public partial class SettingsView : UserControl
             }
         };
         p.Start();
+    }
+
+    private void BtnApplySslConfiguration_Click(object sender, EventArgs e)
+    {
+        if (checkEnableSsl.Checked
+            && (string.IsNullOrWhiteSpace(certificatePath.Text) || !File.Exists(certificatePath.Text)))
+        {
+            var messageBox = new MessageBox();
+            messageBox.ShowDialog(
+                "SSL Certificate not found",
+                "You enabled SSL but don't provide a valid certificate path.",
+                MessageBoxButtons.OK);
+            return;
+        }
+
+        MacroDeck.Configuration.EnableSsl = checkEnableSsl.Checked;
+        MacroDeck.Configuration.SslCertificatePath = certificatePath.Text;
+        MacroDeck.Configuration.SslCertificatePassword = certificatePassword.Text;
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
+        MacroDeck.RequestRestart();
+    }
+
+    private void BtnBrowseCertificatePath_Click(object sender, EventArgs e)
+    {
+        using var openFileDialog = new OpenFileDialog
+        {
+            Title = "Select certificate",
+            CheckFileExists = true,
+            CheckPathExists = true,
+            DefaultExt = ".pfx",
+            Filter = "Personal Information Exchange File (*.pfx)|*.pfx",
+        };
+        if (openFileDialog.ShowDialog() == DialogResult.OK)
+        {
+            certificatePath.Text = openFileDialog.FileName;
+        }
     }
 }

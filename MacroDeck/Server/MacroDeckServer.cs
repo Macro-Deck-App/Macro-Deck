@@ -2,10 +2,12 @@
 using MacroDeck.Server;
 using MacroDeck.Server.DataTypes;
 using Newtonsoft.Json.Linq;
+using SuchByte.MacroDeck.Configuration;
 using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.Enums;
 using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.JSON;
+using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Profiles;
 
@@ -19,55 +21,33 @@ public static class MacroDeckServer
 
     public static List<MacroDeckClient> Clients { get; } = new();
     
-    public static async Task Start(int port)
+    public static void Start(int port)
     {
         DeviceManager.LoadKnownDevices();
-        await StartWebSocketServer(IPAddress.Any.ToString(), port);
+        Task.Run(async () => await StartWebSocketServer(port));
     }
 
-    private static async Task StartWebSocketServer(string ipAddress, int port)
+    private static async Task StartWebSocketServer(int port)
     {
         Clients.Clear();
         WebSocketHandler.SessionDisconnected += WebSocketHandlerOnSessionDisconnected;
         WebSocketHandler.SessionConnected += WebSocketHandlerOnSessionConnected;
         WebSocketHandler.MessageReceived += WebSocketHandlerOnMessageReceived;
-        await MacroDeckServerHelper.Setup(port);
-        /*if (WebSocketServer != null)
-        {
-            MacroDeckLogger.Info("Stopping websocket server...");
-            foreach (var macroDeckClient in Clients.Where(macroDeckClient => macroDeckClient.SocketConnection is { IsAvailable: true }))
-            {
-                macroDeckClient.SocketConnection.Close();
-            }
-            WebSocketServer.Dispose();
-            Clients.Clear();
-            MacroDeckLogger.Info("Websocket server stopped");
-            OnServerStateChanged?.Invoke(WebSocketServer, EventArgs.Empty);
-        }
-        MacroDeckLogger.Info($"Starting websocket server @ {ipAddress}:{port}");
-        WebSocketServer = new WebSocketServer("ws://" + ipAddress + ":" + port);
-        WebSocketServer.ListenerSocket.NoDelay = true;
+        var enableSsl = MacroDeck.Configuration.EnableSsl;
+        var certificatePath = MacroDeck.Configuration.SslCertificatePath;
+        var certificatePassword = MacroDeck.Configuration.SslCertificatePassword;
         try
         {
-            WebSocketServer.Start(socket =>
-            {
-                var macroDeckClient = new MacroDeckClient(socket);
-                socket.OnOpen = () => OnOpen(macroDeckClient);
-                socket.OnClose = () => OnClose(macroDeckClient);
-                socket.OnError = delegate { OnClose(macroDeckClient); };
-                socket.OnMessage = message => OnMessage(macroDeckClient, message);
-            });
-            OnServerStateChanged?.Invoke(WebSocketServer, EventArgs.Empty);
+            await MacroDeckServerHelper.Setup(port, enableSsl, certificatePath, certificatePassword);
         }
         catch (Exception ex)
         {
-            OnServerStateChanged?.Invoke(WebSocketServer, EventArgs.Empty);
-
             MacroDeckLogger.Error("Failed to start server: " + ex.Message + Environment.NewLine + ex.StackTrace);
 
-            using var msgBox = new MessageBox();
+            using var msgBox = new GUI.CustomControls.MessageBox();
             msgBox.ShowDialog(LanguageManager.Strings.Error, LanguageManager.Strings.FailedToStartServer + Environment.NewLine + ex.Message, MessageBoxButtons.OK);
-        }*/
+        }
+        
     }
 
     private static void WebSocketHandlerOnMessageReceived(object? sender, string message)
