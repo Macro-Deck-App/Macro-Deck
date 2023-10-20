@@ -1,0 +1,63 @@
+name: Update Web Client
+
+on:
+  workflow_dispatch:
+    inputs:
+      web-client-version:
+        description: 'Version (tag/branch/commit)'
+        type: string
+        required: true
+      destination-branch:
+        type: choice
+        options:
+          - develop
+          - main
+        required: false
+        default: develop
+
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Macro Deck repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{inputs.destination-branch}}
+
+      - name: Checkout Web Client repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{inputs.web-client-version}}
+          path: 'MacroDeck.WebClient'
+          repository: 'Macro-Deck-App/Macro-Deck-Client-App'
+
+      - name: Build web client
+        run: |
+          cd MacroDeck.WebClient
+          docker build . --file Dockerfile --tag macro-deck-client
+
+      - name: Copy files
+        run: |
+          mkdir -p MacroDeck/wwwroot/client || true
+          web_client_container=docker create macro-deck-client
+          docker cp $web_client_container:/dist/. MacroDeck/wwwroot/client
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        id: create-pr
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'Bump Web Client to ${{inputs.web-client-version}}'
+          title: 'Bump Web Client to ${{inputs.web-client-version}}'
+          branch: feature/web-client-${{inputs.web-client-version}}
+          base: ${{inputs.destination-branch}}
+          body: ''
+          labels: dependencies
+          delete-branch: true
+
+      - name: Merge Pull Request
+        uses: "pascalgn/automerge-action@v0.15.6"
+        env:
+          MERGE_LABELS: ""
+          PULL_REQUEST: ${{ steps.create-pr.outputs.pull-request-number}}
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
