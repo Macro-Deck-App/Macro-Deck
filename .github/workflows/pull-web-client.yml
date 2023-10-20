@@ -41,7 +41,7 @@ jobs:
       - name: Copy files
         run: |
           mkdir -p MacroDeck/wwwroot/client || true
-          web_client_container=docker create macro-deck-client
+          web_client_container=$(docker create macro-deck-client)
           docker cp $web_client_container:/dist/. MacroDeck/wwwroot/client
 
       - name: Create Pull Request
