@@ -16,7 +16,8 @@ on:
         default: develop
 
 jobs:
-  get-version:
+  update-web-client:
+    name: "Update Web Client"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Macro Deck repository
@@ -27,6 +28,7 @@ jobs:
       - name: Checkout Web Client repository
         uses: actions/checkout@v4
         with:
+          token: ${{secrets.PRIVATE_REPO_PAT}}
           ref: ${{inputs.web-client-version}}
           path: 'MacroDeck.WebClient'
           repository: 'Macro-Deck-App/Macro-Deck-Client-App'
