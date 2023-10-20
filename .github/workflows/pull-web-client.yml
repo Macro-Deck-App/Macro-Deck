@@ -37,6 +37,7 @@ jobs:
         run: |
           cd MacroDeck.WebClient
           docker build . --file Dockerfile --tag macro-deck-client
+          cd .. && rm -rf MacroDeck.WebClient
 
       - name: Copy files
         run: |
