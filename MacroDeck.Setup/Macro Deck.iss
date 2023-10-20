@@ -93,7 +93,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; VC++ redistributable runtime. Extracted by VC2018RedistNeedsInstall(), if needed.
 Source: ".\Redist\VC_redist.x64.exe"; DestDir: {tmp}; Flags: dontcopy
 Source: ".\Android Debug Bridge\*"; DestDir: "{app}\Android Debug Bridge\"; Flags: ignoreversion
-Source: "{#ApplicationDirectory}\*"; DestDir: "{app}"; Flags: ignoreversion    
+Source: "{#ApplicationDirectory}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs  
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

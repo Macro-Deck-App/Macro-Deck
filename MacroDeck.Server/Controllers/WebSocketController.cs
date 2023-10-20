@@ -5,18 +5,13 @@ namespace MacroDeck.Server.Controllers;
 
 public class WebSocketController : ControllerBase
 {
-
-    public WebSocketController()
-    {
-    }
-
     [Route("/")]
     [HttpGet]
     public async Task<ActionResult> Get()
     {
         if (!HttpContext.WebSockets.IsWebSocketRequest)
         {
-            return Redirect("client");
+            return Redirect("client/?auto-connect=true");
         }
         
         using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();

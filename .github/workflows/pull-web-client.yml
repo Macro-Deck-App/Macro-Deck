@@ -8,6 +8,7 @@ on:
         type: string
         required: true
       destination-branch:
+        description: 'Destination branch for the pull-request'
         type: choice
         options:
           - develop

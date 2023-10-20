@@ -9,8 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MacroDeck.Tests", "MacroDec
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{A87511C0-A46B-40E0-A47A-81AEE2097F5D}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\build-installer.yml = .github\workflows\build-installer.yml
 		.github\workflows\tests.yml = .github\workflows\tests.yml
+		.github\workflows\build-push-windows.yml = .github\workflows\build-push-windows.yml
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+		.github\workflows\create-release.yml = .github\workflows\create-release.yml
+		.github\workflows\release-created.yml = .github\workflows\release-created.yml
+		.github\workflows\pull-web-client.yml = .github\workflows\pull-web-client.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MacroDeck.Setup", "MacroDeck.Setup", "{8C1FC7A7-364F-4CE5-B59D-9A7EFC88CFDC}"
