@@ -15,6 +15,10 @@ public class Startup
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app.UseCors("AllowAny");
+        if (MacroDeckServerHelper.UseHttps)
+        {
+            app.UseHttpsRedirection();
+        }
         app.UseFileServer();
         app.UseWebSockets(new WebSocketOptions
         {
