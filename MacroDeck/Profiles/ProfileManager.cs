@@ -256,6 +256,7 @@ public static class ProfileManager
             db.InsertOrReplace(profileJson);
         }
 
+        db.Execute("VACUUM");
         db.Close();
         MacroDeckLogger.Trace("Saved " + Profiles.Count + " profiles");
         ProfilesSaved?.Invoke(Profiles, EventArgs.Empty);
