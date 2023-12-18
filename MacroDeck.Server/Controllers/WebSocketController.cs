@@ -11,7 +11,7 @@ public class WebSocketController : ControllerBase
     {
         if (!HttpContext.WebSockets.IsWebSocketRequest)
         {
-            return Redirect("client/?auto-connect=true");
+            return Redirect("client");
         }
         
         using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
