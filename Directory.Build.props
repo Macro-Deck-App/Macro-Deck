@@ -1,9 +1,10 @@
 <Project>
 
     <PropertyGroup>
-        <TargetFramework>net7.0-windows10.0.22000.0</TargetFramework>
+        <TargetFramework>net8.0-windows10.0.22000.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     </PropertyGroup>
 
 </Project>
