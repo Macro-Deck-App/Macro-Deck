@@ -31,33 +31,33 @@ namespace SuchByte.MacroDeck.Folders.Plugin.GUI
         /// </summary>
         private void InitializeComponent()
         {
-            this.foldersView = new System.Windows.Forms.TreeView();
-            this.SuspendLayout();
+            foldersView = new TreeView();
+            SuspendLayout();
             // 
             // foldersView
             // 
-            this.foldersView.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.foldersView.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.foldersView.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.foldersView.ForeColor = System.Drawing.Color.White;
-            this.foldersView.ItemHeight = 26;
-            this.foldersView.Location = new System.Drawing.Point(4, 4);
-            this.foldersView.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.foldersView.Name = "foldersView";
-            this.foldersView.PathSeparator = "/";
-            this.foldersView.Size = new System.Drawing.Size(707, 262);
-            this.foldersView.TabIndex = 0;
+            foldersView.BackColor = Color.FromArgb(65, 65, 65);
+            foldersView.BorderStyle = BorderStyle.FixedSingle;
+            foldersView.Dock = DockStyle.Fill;
+            foldersView.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
+            foldersView.ForeColor = Color.White;
+            foldersView.ItemHeight = 26;
+            foldersView.Location = new Point(0, 0);
+            foldersView.Margin = new Padding(4);
+            foldersView.Name = "foldersView";
+            foldersView.PathSeparator = "/";
+            foldersView.Size = new Size(857, 424);
+            foldersView.TabIndex = 0;
             // 
             // FolderSwitcherConfigurator
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 23F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.Controls.Add(this.foldersView);
-            this.Margin = new System.Windows.Forms.Padding(6, 7, 6, 7);
-            this.Name = "FolderSwitcherConfigurator";
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            BackColor = Color.FromArgb(45, 45, 45);
+            Controls.Add(foldersView);
+            Margin = new Padding(6, 7, 6, 7);
+            Name = "FolderSwitcherConfigurator";
+            ResumeLayout(false);
         }
 
         #endregion
