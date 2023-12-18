@@ -1,26 +1,29 @@
 <Project>
-    <PropertyGroup>
-        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageVersion Include="CommandLineParser" Version="2.9.1" />
-        <PackageVersion Include="Cottle" Version="2.0.9" />
-        <PackageVersion Include="Dax-FCTB" Version="2.16.26.120" />
-        <PackageVersion Include="Magick.NET-Q16-x64" Version="13.0.0" />
-        <PackageVersion Include="Magick.NET.SystemDrawing" Version="7.0.0" />
-        <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
-        <PackageVersion Include="Microsoft.Win32.Registry" Version="5.0.0" />
-        <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageVersion Include="sharpadbclient" Version="2.3.23" />
-        <PackageVersion Include="sqlite-net-pcl" Version="1.8.116" />
-        <PackageVersion Include="System.Collections" Version="4.3.0" />
-        <PackageVersion Include="System.Drawing.Common" Version="7.0.0" />
-        <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-        <PackageVersion Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.6.1" />
-        <PackageVersion Include="NUnit" Version="3.13.3" />
-        <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0" />
-        <PackageVersion Include="NUnit.Analyzers" Version="3.6.1" />
-        <PackageVersion Include="coverlet.collector" Version="6.0.0" />
-    </ItemGroup>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="CommandLineParser" Version="2.9.1" />
+    <PackageVersion Include="Cottle" Version="2.0.10" />
+    <PackageVersion Include="Dax-FCTB" Version="2.16.26.120" />
+    <PackageVersion Include="Magick.NET-Q16-x64" Version="13.5.0" />
+    <PackageVersion Include="Magick.NET.SystemDrawing" Version="7.2.1" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Win32.Registry" Version="5.0.0" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageVersion Include="sharpadbclient" Version="2.3.23" />
+    <PackageVersion Include="sqlite-net-pcl" Version="1.8.116" />
+    <PackageVersion Include="System.Collections" Version="4.3.0" />
+    <PackageVersion Include="System.Drawing.Common" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageVersion Include="NUnit" Version="4.0.1" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0" />
+    <PackageVersion Include="NUnit.Analyzers" Version="3.10.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
+    <PackageVersion Include="coverlet.collector" Version="6.0.0" />
+  </ItemGroup>
 </Project>
