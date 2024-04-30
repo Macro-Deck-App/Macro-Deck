@@ -38,6 +38,6 @@ Learn how to create your own plugins in the wiki: https://github.com/SuchByte/Ma
 Please help me with the translation of Macro Deck on [POEditor](https://poeditor.com/join/project/3y5UBkJvQD)
 
 # Special thanks
-- This project is tested with [BrowserStack](https://www.browserstack.com/)
+- This project is tested with BrowserStack
 - Licenses for JetBrains products are kindly provided by [JetBrains](https://www.jetbrains.com/)
 - Macro Deck also uses free icons from [Material Design Icons](https://materialdesignicons.com/)
