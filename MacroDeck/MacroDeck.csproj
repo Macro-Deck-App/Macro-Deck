@@ -6,7 +6,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>appicon.ico</ApplicationIcon>
     <StartupObject>SuchByte.MacroDeck.Program</StartupObject>
-    <Version>2.13.1</Version>
+    <Version>2.13.2</Version>
     <Company>Macro Deck</Company>
     <Authors>Manuel Mayer</Authors>
     <SignAssembly>False</SignAssembly>
