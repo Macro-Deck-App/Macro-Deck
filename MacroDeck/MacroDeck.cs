@@ -103,7 +103,7 @@ public class MacroDeck : NativeWindow
         SearchNetworkInterfaces();
         MacroDeckServer.Start(StartParameters.Port <= 0 ? Configuration.HostPort : StartParameters.Port);
         BroadcastServer.Start();
-        ADBServerHelper.Initialize();
+        AdbServerHelper.Initialize();
 
         ProfileManager.AddVariableChangedListener();
         ProfileManager.AddWindowFocusChangedListener();
@@ -318,7 +318,7 @@ public class MacroDeck : NativeWindow
 
     public static void Exit()
     {
-        ADBServerHelper.Kill();
+        AdbServerHelper.Kill();
         Environment.Exit(0);
     }
 }

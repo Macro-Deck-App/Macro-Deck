@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Net;
-using SharpAdbClient;
+using AdvancedSharpAdbClient;
+using AdvancedSharpAdbClient.Models;
 using SuchByte.MacroDeck.Enums;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Startup;
@@ -15,24 +16,16 @@ public class AdbDeviceConnectionStateChangedEventArgs : EventArgs
     public AdbDeviceConnectionState ConnectionState { get; set; }
 }
 
-
-public class ADBServerHelper
+public class AdbServerHelper
 {
+    private static AdbServer? _adbServer;
 
-    private static IAdbServer? _adbServer;
+    private static AdbClient? _adbClient;
 
-    private static IAdbClient? _adbClient;
+    private const string AdbFolderName = "Android Debug Bridge";
 
-    private static string _adbFolderName = "Android Debug Bridge";
-
-    private static string _adbPath = Path.Combine(ApplicationPaths.MainDirectoryPath, _adbFolderName, "adb.exe");
-
-    public static EventHandler<AdbDeviceConnectionStateChangedEventArgs>? OnDeviceConnectionStateChanged;
-
-    public static bool ServerRunning => _adbServer != null && _adbClient != null && _adbServer.GetStatus().IsRunning;
-
-    public static List<DeviceData> Devices => _adbClient?.GetDevices() ?? new List<DeviceData>();
-
+    private static readonly string AdbPath = Path.Combine(ApplicationPaths.MainDirectoryPath, AdbFolderName, "adb.exe");
+    
     public static void Kill()
     {
         try
@@ -52,56 +45,51 @@ public class ADBServerHelper
 
     public static void Initialize()
     {
-        if (!File.Exists(_adbPath))
+        if (!File.Exists(AdbPath))
         {
-            MacroDeckLogger.Warning(typeof(ADBServerHelper), $"Cannot start adb server at {_adbPath}: File not found");
+            MacroDeckLogger.Warning(typeof(AdbServerHelper), $"Cannot start adb server at {AdbPath}: File not found");
             return;
         }
         
-        MacroDeckLogger.Info(typeof(ADBServerHelper), $"Starting ADB server using {_adbPath}");
+        MacroDeckLogger.Info(typeof(AdbServerHelper), $"Starting ADB server using {AdbPath}");
 
-        _adbClient = new AdbClient();
-        _adbServer = new AdbServer(_adbClient, Factories.AdbCommandLineClientFactory);
-        var result = _adbServer.StartServer(_adbPath, true);
+        _adbServer = new AdbServer();
+        var result = _adbServer.StartServer(AdbPath, true);
         if (result != StartServerResult.Started)
         {
-            MacroDeckLogger.Info(typeof(ADBServerHelper), "Unable to start ADB server");
+            MacroDeckLogger.Info(typeof(AdbServerHelper), "Unable to start ADB server");
         }
 
-        Task.Run(() =>
+        var adbServerEndpoint = _adbServer.EndPoint.ToString();
+        if (adbServerEndpoint is null)
         {
-            var monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
-            monitor.DeviceConnected += Monitor_DeviceConnected;
-            monitor.DeviceDisconnected += Monitor_DeviceDisconnected;
-            monitor.Start();
-        });
-
-            
+            MacroDeckLogger.Info(typeof(AdbServerHelper), "Endpoint was null");
+            return;
+        }
+        
+        _adbClient = new AdbClient();
+        _adbClient.Connect(adbServerEndpoint);
+        
         foreach (var device in _adbClient.GetDevices())
         {
-            MacroDeckLogger.Info(typeof(ADBServerHelper), $"Found {device.Name}");
+            MacroDeckLogger.Info(typeof(AdbServerHelper), $"Found {device.Name}");
             StartReverseForward(device);
         }
+        
+        var monitor = new DeviceMonitor(new AdbSocket(AdbClient.AdbServerEndPoint));
+        monitor.DeviceConnected += Monitor_DeviceConnected;
+        monitor.DeviceDisconnected += Monitor_DeviceDisconnected;
+        Task.Run(async () => await monitor.StartAsync());
     }
 
     private static void Monitor_DeviceDisconnected(object sender, DeviceDataEventArgs e)
     {
-        MacroDeckLogger.Info(typeof(ADBServerHelper), $"{e.Device.Name} disconnected");
-        OnDeviceConnectionStateChanged?.Invoke(null, new AdbDeviceConnectionStateChangedEventArgs
-        {
-            Device = e.Device,
-            ConnectionState = AdbDeviceConnectionState.DISCONNECTED
-        });
+        MacroDeckLogger.Info(typeof(AdbServerHelper), $"{e.Device.Name} disconnected");
     }
 
     private static void Monitor_DeviceConnected(object sender, DeviceDataEventArgs e)
     {
-        MacroDeckLogger.Info(typeof(ADBServerHelper), $"{e.Device.Name} connected");
-        OnDeviceConnectionStateChanged?.Invoke(null, new AdbDeviceConnectionStateChangedEventArgs
-        {
-            Device = e.Device,
-            ConnectionState = AdbDeviceConnectionState.CONNECTED
-        });
+        MacroDeckLogger.Info(typeof(AdbServerHelper), $"{e.Device.Name} connected");
         StartReverseForward(e.Device);
     }
 
@@ -109,12 +97,18 @@ public class ADBServerHelper
     {
         try
         {
-            _adbClient?.CreateReverseForward(device, $"tcp:{MacroDeck.Configuration.HostPort}", $"tcp:{MacroDeck.Configuration.HostPort}", true);
+            _adbClient?.CreateReverseForward(
+                device,
+                $"tcp:{MacroDeck.Configuration.HostPort}",
+                $"tcp:{MacroDeck.Configuration.HostPort}",
+                true);
+            
+            MacroDeckLogger.Info(typeof(AdbServerHelper), $"Started reverse forward on {device.Name}");
         } catch (Exception ex)
         {
-            MacroDeckLogger.Warning(typeof(ADBServerHelper), $"Unable to start reverse forward on {device?.Name}: {ex.Message}");
+            MacroDeckLogger.Warning(typeof(AdbServerHelper),
+                $"Unable to start reverse forward on {device.Name}: {ex.Message}");
         }
-        MacroDeckLogger.Info(typeof(ADBServerHelper), $"Started reverse forward on {device?.Name}");
     }
 
 }
