@@ -19,7 +19,7 @@
   };
   var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
 
-  // bazel-out/darwin_arm64-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/named-cache-storage.mjs
+  // bazel-out/k8-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/named-cache-storage.mjs
   var NamedCacheStorage = class {
     constructor(original, cacheNamePrefix) {
       this.original = original;
@@ -46,7 +46,7 @@
     }
   };
 
-  // bazel-out/darwin_arm64-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/adapter.mjs
+  // bazel-out/k8-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/adapter.mjs
   var Adapter = class {
     constructor(scopeUrl, caches) {
       this.scopeUrl = scopeUrl;
@@ -84,7 +84,7 @@
     }
   };
 
-  // bazel-out/darwin_arm64-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/database.mjs
+  // bazel-out/k8-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/database.mjs
   var NotFound = class {
     constructor(table, key) {
       this.table = table;
@@ -92,7 +92,7 @@
     }
   };
 
-  // bazel-out/darwin_arm64-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/db-cache.mjs
+  // bazel-out/k8-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/db-cache.mjs
   var CacheDatabase = class {
     constructor(adapter2) {
       this.adapter = adapter2;
@@ -150,7 +150,7 @@
     }
   };
 
-  // bazel-out/darwin_arm64-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/api.mjs
+  // bazel-out/k8-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/api.mjs
   var UpdateCacheStatus;
   (function(UpdateCacheStatus2) {
     UpdateCacheStatus2[UpdateCacheStatus2["NOT_CACHED"] = 0] = "NOT_CACHED";
@@ -158,7 +158,7 @@
     UpdateCacheStatus2[UpdateCacheStatus2["CACHED"] = 2] = "CACHED";
   })(UpdateCacheStatus || (UpdateCacheStatus = {}));
 
-  // bazel-out/darwin_arm64-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/error.mjs
+  // bazel-out/k8-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/error.mjs
   var SwCriticalError = class extends Error {
     constructor() {
       super(...arguments);
@@ -180,7 +180,7 @@ ${error.stack}`;
     }
   };
 
-  // bazel-out/darwin_arm64-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/sha1.mjs
+  // bazel-out/k8-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/sha1.mjs
   function sha1(str) {
     const utf8 = str;
     const words32 = stringToWords32(utf8, Endian.Big);
@@ -295,7 +295,7 @@ ${error.stack}`;
     return hex.toLowerCase();
   }
 
-  // bazel-out/darwin_arm64-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/assets.mjs
+  // bazel-out/k8-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/assets.mjs
   var AssetGroup = class {
     constructor(scope2, adapter2, idle, config, hashes, db, cacheNamePrefix) {
       this.scope = scope2;
@@ -331,10 +331,7 @@ ${error.stack}`;
       return UpdateCacheStatus.CACHED;
     }
     async getCacheNames() {
-      const [cache, metadata] = await Promise.all([
-        this.cache,
-        this.metadata
-      ]);
+      const [cache, metadata] = await Promise.all([this.cache, this.metadata]);
       return [cache.name, metadata.cacheName];
     }
     async handleFetch(req, _event) {
@@ -586,7 +583,7 @@ ${error.stack}`;
     }
   };
 
-  // bazel-out/darwin_arm64-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/data.mjs
+  // bazel-out/k8-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/data.mjs
   var LruList = class {
     constructor(state) {
       if (state === void 0) {
@@ -880,7 +877,7 @@ ${error.stack}`;
     }
   };
 
-  // bazel-out/darwin_arm64-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/app-version.mjs
+  // bazel-out/k8-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/app-version.mjs
   var BACKWARDS_COMPATIBILITY_NAVIGATION_URLS = [
     { positive: true, regex: "^/.*$" },
     { positive: false, regex: "^/.*\\.[^/]*$" },
@@ -1031,8 +1028,8 @@ ${error.stack}`;
     }
   };
 
-  // bazel-out/darwin_arm64-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/debug.mjs
-  var SW_VERSION = "16.2.12";
+  // bazel-out/k8-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/debug.mjs
+  var SW_VERSION = "17.3.6";
   var DEBUG_LOG_BUFFER_SIZE = 100;
   var DebugHandler = class {
     constructor(driver, adapter2) {
@@ -1105,7 +1102,7 @@ ${msgIdle}`, { headers: this.adapter.newHeaders({ "Content-Type": "text/plain" }
     }
   };
 
-  // bazel-out/darwin_arm64-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/idle.mjs
+  // bazel-out/k8-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/idle.mjs
   var IdleScheduler = class {
     constructor(adapter2, delay, maxDelay, debug) {
       this.adapter = adapter2;
@@ -1183,12 +1180,12 @@ ${msgIdle}`, { headers: this.adapter.newHeaders({ "Content-Type": "text/plain" }
     }
   };
 
-  // bazel-out/darwin_arm64-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/manifest.mjs
+  // bazel-out/k8-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/manifest.mjs
   function hashManifest(manifest) {
     return sha1(JSON.stringify(manifest));
   }
 
-  // bazel-out/darwin_arm64-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/msg.mjs
+  // bazel-out/k8-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/msg.mjs
   function isMsgCheckForUpdates(msg) {
     return msg.action === "CHECK_FOR_UPDATES";
   }
@@ -1196,7 +1193,7 @@ ${msgIdle}`, { headers: this.adapter.newHeaders({ "Content-Type": "text/plain" }
     return msg.action === "ACTIVATE_UPDATE";
   }
 
-  // bazel-out/darwin_arm64-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/driver.mjs
+  // bazel-out/k8-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/src/driver.mjs
   var IDLE_DELAY = 5e3;
   var MAX_IDLE_DELAY = 3e4;
   var SUPPORTED_CONFIG_VERSION = 1;
@@ -1429,12 +1426,6 @@ ${msgIdle}`, { headers: this.adapter.newHeaders({ "Content-Type": "text/plain" }
       this.clientVersionMap.set(client.id, this.latestHash);
       await this.sync();
       const current = this.versions.get(this.latestHash);
-      const notice = {
-        type: "UPDATE_ACTIVATED",
-        previous,
-        current: this.mergeHashWithAppData(current.manifest, this.latestHash)
-      };
-      client.postMessage(notice);
       return true;
     }
     async handleFetch(event) {
@@ -1531,7 +1522,6 @@ ${msgIdle}`, { headers: this.adapter.newHeaders({ "Content-Type": "text/plain" }
           await this.scheduleInitialization(this.versions.get(hash));
         } catch (err) {
           this.debugger.log(err, `initialize: schedule init of ${hash}`);
-          return false;
         }
       }));
     }
@@ -1767,7 +1757,10 @@ ${msgIdle}`, { headers: this.adapter.newHeaders({ "Content-Type": "text/plain" }
       await this.initialized;
       const clients = await this.scope.clients.matchAll();
       await Promise.all(clients.map(async (client) => {
-        client.postMessage({ type: "NO_NEW_VERSION_DETECTED", version: this.mergeHashWithAppData(manifest, hash) });
+        client.postMessage({
+          type: "NO_NEW_VERSION_DETECTED",
+          version: this.mergeHashWithAppData(manifest, hash)
+        });
       }));
     }
     async notifyClientsAboutVersionDetected(manifest, hash) {
@@ -1778,7 +1771,10 @@ ${msgIdle}`, { headers: this.adapter.newHeaders({ "Content-Type": "text/plain" }
         if (version === void 0) {
           return;
         }
-        client.postMessage({ type: "VERSION_DETECTED", version: this.mergeHashWithAppData(manifest, hash) });
+        client.postMessage({
+          type: "VERSION_DETECTED",
+          version: this.mergeHashWithAppData(manifest, hash)
+        });
       }));
     }
     async notifyClientsAboutVersionReady(manifest, hash) {
@@ -1853,7 +1849,7 @@ ${msgIdle}`, { headers: this.adapter.newHeaders({ "Content-Type": "text/plain" }
     }
   };
 
-  // bazel-out/darwin_arm64-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/main.mjs
+  // bazel-out/k8-fastbuild-ST-2e5f3376adb5/bin/packages/service-worker/worker/main.mjs
   var scope = self;
   var adapter = new Adapter(scope.registration.scope, self.caches);
   new Driver(scope, adapter, new CacheDatabase(adapter));
