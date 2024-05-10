@@ -1,50 +1,29 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
 using System.IO;
-using System.Net;
 using AdvancedSharpAdbClient;
+using AdvancedSharpAdbClient.DeviceCommands;
 using AdvancedSharpAdbClient.Models;
-using SuchByte.MacroDeck.Enums;
+using AdvancedSharpAdbClient.Receivers;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Startup;
 
 namespace SuchByte.MacroDeck.Server;
 
-public class AdbDeviceConnectionStateChangedEventArgs : EventArgs
-{
-    public DeviceData Device { get; set; }
-
-    public AdbDeviceConnectionState ConnectionState { get; set; }
-}
-
 public class AdbServerHelper
 {
     private static AdbServer? _adbServer;
-
-    private static AdbClient? _adbClient;
 
     private const string AdbFolderName = "Android Debug Bridge";
 
     private static readonly string AdbPath = Path.Combine(ApplicationPaths.MainDirectoryPath, AdbFolderName, "adb.exe");
     
-    public static void Kill()
+    public static async Task Initialize()
     {
-        try
+        if (!MacroDeck.Configuration.EnableAdbServer)
         {
-            _adbClient?.KillAdb();
-            var processes = Process.GetProcessesByName("adb").ToArray();
-            foreach (var process in processes)
-            {
-                process.Kill();
-            }
+            return;
         }
-        catch (Exception ex)
-        {
-            MacroDeckLogger.Warning($"Failed to kill adb\n{ex}");
-        }
-    }
-
-    public static void Initialize()
-    {
+        
         if (!File.Exists(AdbPath))
         {
             MacroDeckLogger.Warning(typeof(AdbServerHelper), $"Cannot start adb server at {AdbPath}: File not found");
@@ -54,32 +33,100 @@ public class AdbServerHelper
         MacroDeckLogger.Info(typeof(AdbServerHelper), $"Starting ADB server using {AdbPath}");
 
         _adbServer = new AdbServer();
-        var result = _adbServer.StartServer(AdbPath, true);
+        var result = await _adbServer.StartServerAsync(AdbPath, true);
         if (result != StartServerResult.Started)
         {
             MacroDeckLogger.Info(typeof(AdbServerHelper), "Unable to start ADB server");
         }
-
-        var adbServerEndpoint = _adbServer.EndPoint.ToString();
-        if (adbServerEndpoint is null)
+        
+        var adbClient = await GetAdbClient();
+        if (adbClient is null)
         {
-            MacroDeckLogger.Info(typeof(AdbServerHelper), "Endpoint was null");
             return;
         }
-        
-        _adbClient = new AdbClient();
-        _adbClient.Connect(adbServerEndpoint);
-        
-        foreach (var device in _adbClient.GetDevices())
+
+        var devices = await adbClient.GetDevicesAsync();
+        var onlineDevices = devices.Where(x => x.State == DeviceState.Online);
+        foreach (var device in onlineDevices)
         {
-            MacroDeckLogger.Info(typeof(AdbServerHelper), $"Found {device.Name}");
-            StartReverseForward(device);
+            await RunForDevice(device.Serial, async (adbDeviceClient, deviceData) =>
+                {
+                    await StartMacroDeckClient(adbDeviceClient, deviceData);
+                    await StartReverseForward(adbDeviceClient, deviceData);
+                });
         }
         
         var monitor = new DeviceMonitor(new AdbSocket(AdbClient.AdbServerEndPoint));
         monitor.DeviceConnected += Monitor_DeviceConnected;
         monitor.DeviceDisconnected += Monitor_DeviceDisconnected;
-        Task.Run(async () => await monitor.StartAsync());
+        await monitor.StartAsync();
+    }
+
+    public static async Task Exit()
+    {
+        var adbClient = await GetAdbClient();
+        if (adbClient is null)
+        {
+            return;
+        }
+        
+        var devices = await adbClient.GetDevicesAsync();
+        var onlineDevices = devices.Where(x => x.State == DeviceState.Online);
+        foreach (var device in onlineDevices)
+        {
+            await RunForDevice(device.Serial, async (adbDeviceClient, deviceData) =>
+            {
+                await ExitMacroDeckClient(adbDeviceClient, deviceData);
+            });
+        }
+    }
+
+    private static async Task RunForDevice(string serial, Func<AdbClient, DeviceData, Task> action)
+    {
+        var adbDeviceClient = await GetAdbClient();
+        if (adbDeviceClient is null)
+        {
+            return;
+        }
+        var deviceData = await GetDevice(adbDeviceClient, serial);
+        if (!deviceData.HasValue)
+        {
+            return;
+        }
+
+        await action(adbDeviceClient, deviceData.Value);
+    }
+
+    private static async Task<DeviceData?> GetDevice(AdbClient adbDeviceClient, string serial)
+    {
+        var devices = await adbDeviceClient.GetDevicesAsync();
+        return devices.FirstOrDefault(x => x.Serial.Equals(serial));
+    }
+
+    private static async Task<AdbClient?> GetAdbClient()
+    {
+        var serverEndpoint = GetAdbServerEndpoint();
+        if (serverEndpoint is null)
+        {
+            return null;
+        }
+        
+        var adbClient = new AdbClient();
+        await adbClient.ConnectAsync(serverEndpoint);
+        return adbClient;
+    }
+
+    private static string? GetAdbServerEndpoint()
+    {
+        var adbServerEndpoint = _adbServer?.EndPoint.ToString();
+        if (adbServerEndpoint is not null)
+        {
+            return adbServerEndpoint;
+        }
+        
+        MacroDeckLogger.Info(typeof(AdbServerHelper), "Endpoint was null");
+        return null;
+
     }
 
     private static void Monitor_DeviceDisconnected(object sender, DeviceDataEventArgs e)
@@ -87,17 +134,89 @@ public class AdbServerHelper
         MacroDeckLogger.Info(typeof(AdbServerHelper), $"{e.Device.Name} disconnected");
     }
 
-    private static void Monitor_DeviceConnected(object sender, DeviceDataEventArgs e)
+    private static async void Monitor_DeviceConnected(object sender, DeviceDataEventArgs e)
     {
+        if (e.Device.Serial.StartsWith("127.0.0.1"))
+        {
+            return;
+        }
+        
+        await Task.Delay(TimeSpan.FromSeconds(1));
         MacroDeckLogger.Info(typeof(AdbServerHelper), $"{e.Device.Name} connected");
-        StartReverseForward(e.Device);
+        await RunForDevice(e.Device.Serial, async (adbDeviceClient, deviceData) =>
+        {
+            await StartMacroDeckClient(adbDeviceClient, deviceData);
+            await StartReverseForward(adbDeviceClient, deviceData);
+        });
     }
 
-    private static void StartReverseForward(DeviceData device)
+    private static async Task<bool> IsDeviceOnline(DeviceData device)
     {
+        var timeoutTask = Task.Delay(TimeSpan.FromSeconds(20));
+
+        await Task.WhenAny([timeoutTask, WaitForDeviceOnline()]);
+
+        if (device.State == DeviceState.Online)
+        {
+            return true;
+        }
+        
+        MacroDeckLogger.Info(typeof(AdbServerHelper), $"Device {device.Serial} is still not online - {device.State}");
+        return false;
+
+        async Task WaitForDeviceOnline()
+        {
+            while (device.State != DeviceState.Online)
+            {
+                await Task.Delay(100);
+            }
+        }
+    }
+    
+    private static async Task ExitMacroDeckClient(AdbClient adbDeviceClient, DeviceData device)
+    {
+        var deviceIsOnline = await IsDeviceOnline(device);
+        if (!deviceIsOnline)
+        {
+            return;
+        }
+        
+        await adbDeviceClient.ExecuteRemoteCommandAsync("am force-stop com.suchbyte.macrodeck",
+            device,
+            new ConsoleOutputReceiver());
+        await adbDeviceClient.SendKeyEventAsync(device, "KEYCODE_SLEEP");
+    }
+
+    private static async Task StartMacroDeckClient(AdbClient adbDeviceClient, DeviceData device)
+    {
+        if (!MacroDeck.Configuration.EnableAdbAutoStartApp)
+        {
+            return;
+        }
+        
+        var deviceIsOnline = await IsDeviceOnline(device);
+        if (!deviceIsOnline)
+        {
+            return;
+        }
+        
+        await adbDeviceClient.SendKeyEventAsync(device, "KEYCODE_WAKEUP");
+        await adbDeviceClient.ExecuteRemoteCommandAsync("am start -n com.suchbyte.macrodeck/.MainActivity",
+            device,
+            new ConsoleOutputReceiver());
+    }
+
+    private static async Task StartReverseForward(AdbClient adbDeviceClient, DeviceData device)
+    {
+        var deviceIsOnline = await IsDeviceOnline(device);
+        if (!deviceIsOnline)
+        {
+            return;
+        }
+        
         try
         {
-            _adbClient?.CreateReverseForward(
+            await adbDeviceClient.CreateReverseForwardAsync(
                 device,
                 $"tcp:{MacroDeck.Configuration.HostPort}",
                 $"tcp:{MacroDeck.Configuration.HostPort}",
