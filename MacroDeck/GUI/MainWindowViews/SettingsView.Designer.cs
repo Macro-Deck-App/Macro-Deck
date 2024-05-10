@@ -45,6 +45,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             lblBehaviour = new Label();
             lblGeneral = new Label();
             tabConnection = new TabPage();
+            checkAutoStartUsb = new CheckBox();
+            checkEnableAdb = new CheckBox();
+            label5 = new Label();
             btnApplySslConfiguration = new ButtonPrimary();
             btnBrowseCertificatePath = new ButtonPrimary();
             label4 = new Label();
@@ -104,7 +107,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             verticalTabControl.Controls.Add(tabUpdater);
             verticalTabControl.Controls.Add(tabBackups);
             verticalTabControl.Controls.Add(tabAbout);
-            verticalTabControl.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            verticalTabControl.Font = new Font("Tahoma", 12F);
             verticalTabControl.ImageList = tabIcons;
             verticalTabControl.ItemSize = new Size(44, 200);
             verticalTabControl.Location = new Point(3, 3);
@@ -124,7 +127,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             tabGeneral.Controls.Add(checkStartWindows);
             tabGeneral.Controls.Add(lblBehaviour);
             tabGeneral.Controls.Add(lblGeneral);
-            tabGeneral.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            tabGeneral.Font = new Font("Tahoma", 12F);
             tabGeneral.ForeColor = Color.White;
             tabGeneral.Location = new Point(204, 4);
             tabGeneral.Name = "tabGeneral";
@@ -138,7 +141,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             language.BackColor = Color.FromArgb(65, 65, 65);
             language.Cursor = Cursors.Hand;
             language.DropDownStyle = ComboBoxStyle.DropDownList;
-            language.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            language.Font = new Font("Tahoma", 12F);
             language.ForeColor = Color.White;
             language.Icon = null;
             language.Location = new Point(12, 222);
@@ -153,7 +156,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblLanguage
             // 
             lblLanguage.AutoSize = true;
-            lblLanguage.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblLanguage.Font = new Font("Tahoma", 14.25F);
             lblLanguage.ForeColor = Color.Gray;
             lblLanguage.Location = new Point(3, 198);
             lblLanguage.Name = "lblLanguage";
@@ -177,7 +180,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblBehaviour
             // 
             lblBehaviour.AutoSize = true;
-            lblBehaviour.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblBehaviour.Font = new Font("Tahoma", 14.25F);
             lblBehaviour.ForeColor = Color.Gray;
             lblBehaviour.Location = new Point(3, 63);
             lblBehaviour.Name = "lblBehaviour";
@@ -189,7 +192,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblGeneral
             // 
             lblGeneral.AutoSize = true;
-            lblGeneral.Font = new Font("Tahoma", 15.75F, FontStyle.Regular, GraphicsUnit.Point);
+            lblGeneral.Font = new Font("Tahoma", 15.75F);
             lblGeneral.Location = new Point(3, 0);
             lblGeneral.Name = "lblGeneral";
             lblGeneral.Size = new Size(84, 25);
@@ -200,6 +203,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // tabConnection
             // 
             tabConnection.BackColor = Color.FromArgb(45, 45, 45);
+            tabConnection.Controls.Add(checkAutoStartUsb);
+            tabConnection.Controls.Add(checkEnableAdb);
+            tabConnection.Controls.Add(label5);
             tabConnection.Controls.Add(btnApplySslConfiguration);
             tabConnection.Controls.Add(btnBrowseCertificatePath);
             tabConnection.Controls.Add(label4);
@@ -212,7 +218,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             tabConnection.Controls.Add(port);
             tabConnection.Controls.Add(lblPort);
             tabConnection.Controls.Add(lblConnection);
-            tabConnection.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            tabConnection.Font = new Font("Tahoma", 9F);
             tabConnection.ForeColor = Color.White;
             tabConnection.Location = new Point(204, 4);
             tabConnection.Name = "tabConnection";
@@ -220,13 +226,49 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             tabConnection.TabIndex = 3;
             tabConnection.Text = "Connection";
             // 
+            // checkAutoStartUsb
+            // 
+            checkAutoStartUsb.AutoSize = true;
+            checkAutoStartUsb.Font = new Font("Tahoma", 12F);
+            checkAutoStartUsb.Location = new Point(14, 395);
+            checkAutoStartUsb.Name = "checkAutoStartUsb";
+            checkAutoStartUsb.Size = new Size(532, 23);
+            checkAutoStartUsb.TabIndex = 27;
+            checkAutoStartUsb.Text = "Automatically wake screen and start Macro Deck Client when connected";
+            checkAutoStartUsb.UseMnemonic = false;
+            checkAutoStartUsb.UseVisualStyleBackColor = true;
+            // 
+            // checkEnableAdb
+            // 
+            checkEnableAdb.AutoSize = true;
+            checkEnableAdb.Font = new Font("Tahoma", 12F);
+            checkEnableAdb.Location = new Point(14, 366);
+            checkEnableAdb.Name = "checkEnableAdb";
+            checkEnableAdb.Size = new Size(520, 23);
+            checkEnableAdb.TabIndex = 26;
+            checkEnableAdb.Text = "Enable Android Debug Bridge (Required for Android USB connection)";
+            checkEnableAdb.UseMnemonic = false;
+            checkEnableAdb.UseVisualStyleBackColor = true;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Font = new Font("Tahoma", 14.25F);
+            label5.ForeColor = Color.Gray;
+            label5.Location = new Point(5, 340);
+            label5.Name = "label5";
+            label5.Size = new Size(44, 23);
+            label5.TabIndex = 25;
+            label5.Text = "USB";
+            label5.UseMnemonic = false;
+            // 
             // btnApplySslConfiguration
             // 
             btnApplySslConfiguration.BorderRadius = 8;
             btnApplySslConfiguration.Cursor = Cursors.Hand;
             btnApplySslConfiguration.FlatAppearance.BorderSize = 0;
             btnApplySslConfiguration.FlatStyle = FlatStyle.Flat;
-            btnApplySslConfiguration.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnApplySslConfiguration.Font = new Font("Tahoma", 9.75F);
             btnApplySslConfiguration.ForeColor = Color.White;
             btnApplySslConfiguration.HoverColor = Color.FromArgb(0, 89, 184);
             btnApplySslConfiguration.Icon = null;
@@ -249,7 +291,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnBrowseCertificatePath.Cursor = Cursors.Hand;
             btnBrowseCertificatePath.FlatAppearance.BorderSize = 0;
             btnBrowseCertificatePath.FlatStyle = FlatStyle.Flat;
-            btnBrowseCertificatePath.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnBrowseCertificatePath.Font = new Font("Tahoma", 9.75F);
             btnBrowseCertificatePath.ForeColor = Color.White;
             btnBrowseCertificatePath.HoverColor = Color.FromArgb(0, 89, 184);
             btnBrowseCertificatePath.Icon = null;
@@ -268,7 +310,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // label4
             // 
-            label4.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            label4.Font = new Font("Tahoma", 11.25F);
             label4.Location = new Point(17, 258);
             label4.Name = "label4";
             label4.Size = new Size(159, 30);
@@ -280,7 +322,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // certificatePassword
             // 
             certificatePassword.BackColor = Color.FromArgb(65, 65, 65);
-            certificatePassword.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            certificatePassword.Font = new Font("Tahoma", 12F);
             certificatePassword.Icon = null;
             certificatePassword.Location = new Point(182, 258);
             certificatePassword.MaxCharacters = 32767;
@@ -299,7 +341,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // label3
             // 
-            label3.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            label3.Font = new Font("Tahoma", 11.25F);
             label3.Location = new Point(17, 222);
             label3.Name = "label3";
             label3.Size = new Size(159, 30);
@@ -311,7 +353,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // certificatePath
             // 
             certificatePath.BackColor = Color.FromArgb(65, 65, 65);
-            certificatePath.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            certificatePath.Font = new Font("Tahoma", 12F);
             certificatePath.Icon = null;
             certificatePath.Location = new Point(182, 222);
             certificatePath.MaxCharacters = 32767;
@@ -331,7 +373,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // checkEnableSsl
             // 
             checkEnableSsl.AutoSize = true;
-            checkEnableSsl.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            checkEnableSsl.Font = new Font("Tahoma", 12F);
             checkEnableSsl.Location = new Point(12, 193);
             checkEnableSsl.Name = "checkEnableSsl";
             checkEnableSsl.Size = new Size(106, 23);
@@ -343,7 +385,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // labelSsl
             // 
             labelSsl.AutoSize = true;
-            labelSsl.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
+            labelSsl.Font = new Font("Tahoma", 14.25F);
             labelSsl.ForeColor = Color.Gray;
             labelSsl.Location = new Point(3, 167);
             labelSsl.Name = "labelSsl";
@@ -358,7 +400,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnChangePort.Cursor = Cursors.Hand;
             btnChangePort.FlatAppearance.BorderSize = 0;
             btnChangePort.FlatStyle = FlatStyle.Flat;
-            btnChangePort.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnChangePort.Font = new Font("Tahoma", 9.75F);
             btnChangePort.ForeColor = Color.White;
             btnChangePort.HoverColor = Color.FromArgb(0, 89, 184);
             btnChangePort.Icon = null;
@@ -379,7 +421,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             port.BackColor = Color.FromArgb(65, 65, 65);
             port.BorderStyle = BorderStyle.FixedSingle;
-            port.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            port.Font = new Font("Tahoma", 11.25F);
             port.ForeColor = Color.White;
             port.Location = new Point(13, 89);
             port.Maximum = new decimal(new int[] { 65535, 0, 0, 0 });
@@ -391,7 +433,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblPort
             // 
             lblPort.AutoSize = true;
-            lblPort.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblPort.Font = new Font("Tahoma", 14.25F);
             lblPort.ForeColor = Color.Gray;
             lblPort.Location = new Point(3, 63);
             lblPort.Name = "lblPort";
@@ -403,7 +445,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblConnection
             // 
             lblConnection.AutoSize = true;
-            lblConnection.Font = new Font("Tahoma", 15.75F, FontStyle.Regular, GraphicsUnit.Point);
+            lblConnection.Font = new Font("Tahoma", 15.75F);
             lblConnection.Location = new Point(3, 0);
             lblConnection.Name = "lblConnection";
             lblConnection.Size = new Size(116, 25);
@@ -421,7 +463,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             tabUpdater.Controls.Add(lblInstalledVersion);
             tabUpdater.Controls.Add(lblInstalledVersionLabel);
             tabUpdater.Controls.Add(lblUpdates);
-            tabUpdater.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            tabUpdater.Font = new Font("Tahoma", 12F);
             tabUpdater.ForeColor = Color.White;
             tabUpdater.Location = new Point(204, 4);
             tabUpdater.Name = "tabUpdater";
@@ -432,7 +474,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // label2
             // 
             label2.AutoSize = true;
-            label2.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
+            label2.Font = new Font("Tahoma", 14.25F);
             label2.ForeColor = Color.Gray;
             label2.Location = new Point(3, 63);
             label2.Name = "label2";
@@ -469,7 +511,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnCheckUpdates.Cursor = Cursors.Hand;
             btnCheckUpdates.FlatAppearance.BorderSize = 0;
             btnCheckUpdates.FlatStyle = FlatStyle.Flat;
-            btnCheckUpdates.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnCheckUpdates.Font = new Font("Tahoma", 9.75F);
             btnCheckUpdates.ForeColor = Color.White;
             btnCheckUpdates.HoverColor = Color.FromArgb(0, 89, 184);
             btnCheckUpdates.Icon = null;
@@ -509,7 +551,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblUpdates
             // 
             lblUpdates.AutoSize = true;
-            lblUpdates.Font = new Font("Tahoma", 15.75F, FontStyle.Regular, GraphicsUnit.Point);
+            lblUpdates.Font = new Font("Tahoma", 15.75F);
             lblUpdates.Location = new Point(3, 0);
             lblUpdates.Name = "lblUpdates";
             lblUpdates.Size = new Size(88, 25);
@@ -537,7 +579,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnCreateBackup.Cursor = Cursors.Hand;
             btnCreateBackup.FlatAppearance.BorderSize = 0;
             btnCreateBackup.FlatStyle = FlatStyle.Flat;
-            btnCreateBackup.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnCreateBackup.Font = new Font("Tahoma", 9.75F);
             btnCreateBackup.ForeColor = Color.White;
             btnCreateBackup.HoverColor = Color.FromArgb(0, 89, 184);
             btnCreateBackup.Icon = null;
@@ -565,7 +607,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // lblBackups
             // 
             lblBackups.AutoSize = true;
-            lblBackups.Font = new Font("Tahoma", 15.75F, FontStyle.Regular, GraphicsUnit.Point);
+            lblBackups.Font = new Font("Tahoma", 15.75F);
             lblBackups.Location = new Point(3, 0);
             lblBackups.Name = "lblBackups";
             lblBackups.Size = new Size(89, 25);
@@ -589,7 +631,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             tabAbout.Controls.Add(lblDeveloped);
             tabAbout.Controls.Add(lblMacroDeck);
             tabAbout.Controls.Add(pictureBox1);
-            tabAbout.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            tabAbout.Font = new Font("Tahoma", 12F);
             tabAbout.ForeColor = Color.White;
             tabAbout.Location = new Point(204, 4);
             tabAbout.Name = "tabAbout";
@@ -613,7 +655,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // label1
             // 
-            label1.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            label1.Font = new Font("Tahoma", 11.25F);
             label1.Location = new Point(219, 226);
             label1.Name = "label1";
             label1.Size = new Size(485, 18);
@@ -624,7 +666,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // lblTranslationBy
             // 
-            lblTranslationBy.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblTranslationBy.Font = new Font("Tahoma", 11.25F);
             lblTranslationBy.Location = new Point(219, 164);
             lblTranslationBy.Name = "lblTranslationBy";
             lblTranslationBy.Size = new Size(485, 18);
@@ -639,7 +681,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnLicenses.Cursor = Cursors.Hand;
             btnLicenses.FlatAppearance.BorderSize = 0;
             btnLicenses.FlatStyle = FlatStyle.Flat;
-            btnLicenses.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnLicenses.Font = new Font("Tahoma", 9.75F);
             btnLicenses.ForeColor = Color.White;
             btnLicenses.HoverColor = Color.FromArgb(0, 89, 184);
             btnLicenses.Icon = null;
@@ -718,7 +760,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // lblDeveloped
             // 
-            lblDeveloped.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            lblDeveloped.Font = new Font("Tahoma", 11.25F);
             lblDeveloped.Location = new Point(219, 206);
             lblDeveloped.Name = "lblDeveloped";
             lblDeveloped.Size = new Size(485, 18);
@@ -729,7 +771,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // lblMacroDeck
             // 
-            lblMacroDeck.Font = new Font("Tahoma", 21.75F, FontStyle.Regular, GraphicsUnit.Point);
+            lblMacroDeck.Font = new Font("Tahoma", 21.75F);
             lblMacroDeck.ForeColor = Color.LightGray;
             lblMacroDeck.Location = new Point(3, 3);
             lblMacroDeck.Name = "lblMacroDeck";
@@ -766,7 +808,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             AutoScaleMode = AutoScaleMode.Dpi;
             BackColor = Color.FromArgb(45, 45, 45);
             Controls.Add(verticalTabControl);
-            Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            Font = new Font("Tahoma", 9F);
             Name = "SettingsView";
             Size = new Size(1137, 540);
             Load += Settings_Load;
@@ -835,5 +877,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private RoundedTextBox certificatePath;
         private CheckBox checkEnableSsl;
         private Label labelSsl;
+        private CheckBox checkEnableAdb;
+        private Label label5;
+        private CheckBox checkAutoStartUsb;
     }
 }

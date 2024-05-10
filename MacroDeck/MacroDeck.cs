@@ -318,6 +318,6 @@ public class MacroDeck : NativeWindow
 
     public static void Exit()
     {
-        Environment.Exit(0);
+        Application.Exit();
     }
 }

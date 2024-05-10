@@ -20,7 +20,7 @@ internal class Program
         // Register exception event handlers
         Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
         Application.ThreadException += ApplicationThreadException;
-        AppDomain.CurrentDomain.ProcessExit += CurrentDomainOnProcessExit;
+
         AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
 
 
@@ -30,10 +30,6 @@ internal class Program
         ApplicationPaths.Initialize(startParameters.PortableMode);
         
         MacroDeck.Start(startParameters);
-    }
-
-    private static async void CurrentDomainOnProcessExit(object? sender, EventArgs e)
-    {
     }
 
     private static void CheckRunningInstance(int ignoredPid)

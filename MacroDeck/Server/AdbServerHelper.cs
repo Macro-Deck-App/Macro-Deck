@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.IO;
+﻿using System.IO;
 using AdvancedSharpAdbClient;
 using AdvancedSharpAdbClient.DeviceCommands;
 using AdvancedSharpAdbClient.Models;
@@ -39,62 +38,26 @@ public class AdbServerHelper
             MacroDeckLogger.Info(typeof(AdbServerHelper), "Unable to start ADB server");
         }
         
-        var adbClient = await GetAdbClient();
-        if (adbClient is null)
-        {
-            return;
-        }
-
-        var devices = await adbClient.GetDevicesAsync();
-        var onlineDevices = devices.Where(x => x.State == DeviceState.Online);
-        foreach (var device in onlineDevices)
-        {
-            await RunForDevice(device.Serial, async (adbDeviceClient, deviceData) =>
-                {
-                    await StartMacroDeckClient(adbDeviceClient, deviceData);
-                    await StartReverseForward(adbDeviceClient, deviceData);
-                });
-        }
-        
         var monitor = new DeviceMonitor(new AdbSocket(AdbClient.AdbServerEndPoint));
         monitor.DeviceConnected += Monitor_DeviceConnected;
         monitor.DeviceDisconnected += Monitor_DeviceDisconnected;
         await monitor.StartAsync();
     }
 
-    public static async Task Exit()
+    private static async Task RunForDevice(string serial, Func<AdbClient, DeviceData, Task> action)
     {
         var adbClient = await GetAdbClient();
         if (adbClient is null)
         {
             return;
         }
-        
-        var devices = await adbClient.GetDevicesAsync();
-        var onlineDevices = devices.Where(x => x.State == DeviceState.Online);
-        foreach (var device in onlineDevices)
-        {
-            await RunForDevice(device.Serial, async (adbDeviceClient, deviceData) =>
-            {
-                await ExitMacroDeckClient(adbDeviceClient, deviceData);
-            });
-        }
-    }
-
-    private static async Task RunForDevice(string serial, Func<AdbClient, DeviceData, Task> action)
-    {
-        var adbDeviceClient = await GetAdbClient();
-        if (adbDeviceClient is null)
-        {
-            return;
-        }
-        var deviceData = await GetDevice(adbDeviceClient, serial);
-        if (!deviceData.HasValue)
+        var device = await GetDevice(adbClient, serial);
+        if (!device.HasValue)
         {
             return;
         }
 
-        await action(adbDeviceClient, deviceData.Value);
+        await action(adbClient, device.Value);
     }
 
     private static async Task<DeviceData?> GetDevice(AdbClient adbDeviceClient, string serial)
@@ -141,7 +104,6 @@ public class AdbServerHelper
             return;
         }
         
-        await Task.Delay(TimeSpan.FromSeconds(1));
         MacroDeckLogger.Info(typeof(AdbServerHelper), $"{e.Device.Name} connected");
         await RunForDevice(e.Device.Serial, async (adbDeviceClient, deviceData) =>
         {
