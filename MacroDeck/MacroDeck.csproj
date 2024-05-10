@@ -49,6 +49,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.Win32.Registry" />
     <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="QRCoder" />
     <PackageReference Include="sqlite-net-pcl" />
     <PackageReference Include="System.Collections" />
     <PackageReference Include="System.Drawing.Common" />
