@@ -58,7 +58,6 @@ public partial class MainWindow : Form
 
     private void UpdateTranslation()
     {
-        lblIpAddressHostname.Text = LanguageManager.Strings.IpAddressHostNamePort;
     }
 
     private void LanguageChanged(object? sender, EventArgs e)
@@ -115,7 +114,6 @@ public partial class MainWindow : Form
     {
         Application.DoEvents();
         RefreshPluginsLabels();
-        LoadHosts();
 
         if (MacroDeck.SafeMode)
         {
@@ -138,6 +136,8 @@ public partial class MainWindow : Form
             using var updateAvailableDialog = new UpdateAvailableDialog(updateApiVersionInfo);
             updateAvailableDialog.ShowDialog();
         }
+
+        this.qrCodeBox.BackgroundImage = QrCodeService.Instance.GetQuickSetupQrCode();
     }
 
     private void MainWindow_Load(object? sender, EventArgs e)
@@ -156,26 +156,6 @@ public partial class MainWindow : Form
         ExtensionStoreHelper.OnInstallationFinished += ExtensionStoreHelper_OnInstallationFinished;
 
         CenterToScreen();
-    }
-
-    private void LoadHosts()
-    {
-        hosts.SelectedIndexChanged -= Hosts_SelectedIndexChanged;
-        foreach (var networkInterface in NetworkInterface.GetAllNetworkInterfaces())
-        {
-            var ipAddress = networkInterface
-                .GetIPProperties()
-                .UnicastAddresses
-                .FirstOrDefault(x => x.Address.AddressFamily == AddressFamily.InterNetwork)
-                ?.Address
-                .ToString();
-            if (!string.IsNullOrWhiteSpace(ipAddress))
-            {
-                hosts.Items.Add(ipAddress);
-            }
-        }
-        hosts.Text = MacroDeck.Configuration.HostAddress;
-        hosts.SelectedIndexChanged += Hosts_SelectedIndexChanged;
     }
 
     private void NotificationsChanged(object? sender, EventArgs e)
@@ -254,7 +234,7 @@ public partial class MainWindow : Form
         {
             _notificationsList = new NotificationsList
             {
-                Location = btnNotifications.Location with { Y = btnNotifications.Location.Y + btnNotifications.Height }
+                Location = btnNotifications.Location with { Y = btnNotifications.Location.Y + btnNotifications.Height, X = btnNotifications.Location.X + btnNotifications.Size.Width + 20 }
             };
             _notificationsList.OnCloseRequested += (_, _) =>
             {
@@ -271,11 +251,5 @@ public partial class MainWindow : Form
             Controls.Add(_notificationsList);
             _notificationsList.BringToFront();
         }
-    }
-
-    private void Hosts_SelectedIndexChanged(object? sender, EventArgs e)
-    {
-        MacroDeck.Configuration.HostAddress = hosts.Text;
-        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
     }
 }
