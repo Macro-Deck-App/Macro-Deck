@@ -104,6 +104,22 @@ public partial class SettingsView : UserControl
         checkEnableSsl.Checked = MacroDeck.Configuration.EnableSsl;
         certificatePath.Text = MacroDeck.Configuration.SslCertificatePath;
         certificatePassword.Text = MacroDeck.Configuration.SslCertificatePassword;
+        checkEnableAdb.Checked = MacroDeck.Configuration.EnableAdbServer;
+        checkAutoStartUsb.Checked = MacroDeck.Configuration.EnableAdbAutoStartApp;
+        checkEnableAdb.CheckedChanged += CheckEnableAdb_CheckedChanged;
+        checkAutoStartUsb.CheckedChanged += CheckAutoStartUsb_CheckedChanged;
+    }
+
+    private void CheckAutoStartUsb_CheckedChanged(object? sender, EventArgs e)
+    {
+        MacroDeck.Configuration.EnableAdbAutoStartApp = checkAutoStartUsb.Checked;
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
+    }
+
+    private void CheckEnableAdb_CheckedChanged(object? sender, EventArgs e)
+    {
+        MacroDeck.Configuration.EnableAdbServer = checkEnableAdb.Checked;
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
     }
 
     private void LoadAutoStart()

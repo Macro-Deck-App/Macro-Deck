@@ -4,6 +4,7 @@ using SuchByte.MacroDeck.Startup;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
+using SuchByte.MacroDeck.Server;
 
 namespace SuchByte.MacroDeck;
 
@@ -19,6 +20,7 @@ internal class Program
         // Register exception event handlers
         Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
         Application.ThreadException += ApplicationThreadException;
+
         AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
 
 
@@ -29,7 +31,7 @@ internal class Program
         
         MacroDeck.Start(startParameters);
     }
-    
+
     private static void CheckRunningInstance(int ignoredPid)
     {
         var proc = Process.GetCurrentProcess();

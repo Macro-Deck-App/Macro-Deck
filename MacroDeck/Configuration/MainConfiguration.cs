@@ -40,6 +40,12 @@ public class MainConfiguration
     [JsonProperty("Update.InstallBeta")]
     public bool UpdateBetaVersions { get; set; }
 
+    [JsonProperty("Connection.Adb.Enabled")]
+    public bool EnableAdbServer { get; set; } = true;
+
+    [JsonProperty("Connection.Adb.AutoStartApp")]
+    public bool EnableAdbAutoStartApp { get; set; } = true;
+
     [JsonProperty("Connection.Ssl.Enabled")]
     public bool EnableSsl { get; set; }
 
