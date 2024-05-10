@@ -3,6 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="AdvancedSharpAdbClient" Version="3.3.12" />
     <PackageVersion Include="CommandLineParser" Version="2.9.1" />
     <PackageVersion Include="Cottle" Version="2.0.10" />
     <PackageVersion Include="Dax-FCTB" Version="2.16.26.120" />
@@ -11,10 +12,10 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="sharpadbclient" Version="2.3.23" />
+    <PackageVersion Include="QRCoder" Version="1.5.1" />
     <PackageVersion Include="sqlite-net-pcl" Version="1.8.116" />
     <PackageVersion Include="System.Collections" Version="4.3.0" />
-    <PackageVersion Include="System.Drawing.Common" Version="8.0.0" />
+    <PackageVersion Include="System.Drawing.Common" Version="8.0.4" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />

@@ -103,7 +103,7 @@ public class MacroDeck : NativeWindow
         SearchNetworkInterfaces();
         MacroDeckServer.Start(StartParameters.Port <= 0 ? Configuration.HostPort : StartParameters.Port);
         BroadcastServer.Start();
-        ADBServerHelper.Initialize();
+        Task.Run(async () => await AdbServerHelper.Initialize());
 
         ProfileManager.AddVariableChangedListener();
         ProfileManager.AddWindowFocusChangedListener();
@@ -114,7 +114,7 @@ public class MacroDeck : NativeWindow
         TrayIcon.SetupTrayIcon(TrayIconContextMenu,
             ShowMainWindow,
             () => RestartMacroDeck(string.Join(" ", StartParameters)),
-            Exit);
+             Exit);
 
         using (_mainWindow = new MainWindow())
         {
@@ -243,7 +243,7 @@ public class MacroDeck : NativeWindow
         using var msgBox = new GUI.CustomControls.MessageBox();
         if (msgBox.ShowDialog(LanguageManager.Strings.MacroDeckNeedsARestart, LanguageManager.Strings.MacroDeckMustBeRestartedForTheChanges, MessageBoxButtons.YesNo) == DialogResult.Yes)
         {
-            MacroDeck.RestartMacroDeck();
+            RestartMacroDeck();
         }
     }
 
@@ -318,7 +318,6 @@ public class MacroDeck : NativeWindow
 
     public static void Exit()
     {
-        ADBServerHelper.Kill();
-        Environment.Exit(0);
+        Application.Exit();
     }
 }

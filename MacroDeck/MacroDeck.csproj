@@ -21,7 +21,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <SelfContained>true</SelfContained>
     <OutputType>WinExe</OutputType>
-    <Nullable>disable</Nullable>
+    <Nullable>annotations</Nullable>
   </PropertyGroup>
 	
   <ItemGroup>
@@ -40,6 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AdvancedSharpAdbClient" />
     <PackageReference Include="CommandLineParser" />
     <PackageReference Include="Cottle" />
     <PackageReference Include="Dax-FCTB" />
@@ -48,7 +49,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.Win32.Registry" />
     <PackageReference Include="Newtonsoft.Json" />
-    <PackageReference Include="sharpadbclient" />
+    <PackageReference Include="QRCoder" />
     <PackageReference Include="sqlite-net-pcl" />
     <PackageReference Include="System.Collections" />
     <PackageReference Include="System.Drawing.Common" />
