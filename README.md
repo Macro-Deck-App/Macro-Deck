@@ -37,14 +37,10 @@ Learn how to create your own plugins in the wiki: https://github.com/SuchByte/Ma
 # Helping with the translation
 Please help me with the translation of Macro Deck on [POEditor](https://poeditor.com/join/project/3y5UBkJvQD)
 
-# Third party licenses
-Macro Deck uses some awesome 3rd party libraries:
-- [Fleck (MIT license)](https://github.com/statianzo/Fleck)
-- [Magick.NET (Apache-2.0)](https://github.com/dlemstra/Magick.NET)
-- [Newtonsoft.Json (MIT license)](https://www.newtonsoft.com/json)
-- [SQLiteNetExtensions (MIT license)](https://bitbucket.org/twincoders/sqlite-net-extensions/src/master/)
-- [sqlite-net-pcl (MIT license)](https://github.com/praeclarum/sqlite-net)
-- [Cottle (MIT license)](https://github.com/r3c/cottle)
+# Special thanks
 
-Macro Deck also uses free icons from:
-- [Material Design Icons](https://materialdesignicons.com/)
+This project is tested with BrowserStack
+
+Licenses for JetBrains products are kindly provided by [JetBrains](https://www.jetbrains.com/)
+
+Macro Deck also uses free icons from [Material Design Icons](https://materialdesignicons.com/)
