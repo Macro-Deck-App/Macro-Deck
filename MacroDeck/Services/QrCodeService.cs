@@ -40,7 +40,10 @@ public class QrCodeService
             MacroDeck.Configuration.HostPort,
             MacroDeck.Configuration.EnableSsl);
 
-        var dataJson = JsonSerializer.Serialize(data);
+        var dataJson = JsonSerializer.Serialize(data, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
         var dataBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(dataJson));
         var qrCodeLink = $"https://macro-deck.app/quick-setup/{dataBase64}";
         
