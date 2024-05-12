@@ -69,7 +69,7 @@ namespace SuchByte.MacroDeck.GUI
             btnSettings = new ContentSelectorButton();
             lblNumClientsConnected = new Label();
             navigation = new RoundedPanel();
-            qrCodeBox = new PictureBox();
+            qrCodeBox = new RoundedPanel();
             label1 = new Label();
             contentButtonPanel.SuspendLayout();
             ((ISupportInitialize)btnDeck).BeginInit();
@@ -78,7 +78,6 @@ namespace SuchByte.MacroDeck.GUI
             ((ISupportInitialize)btnVariables).BeginInit();
             ((ISupportInitialize)btnSettings).BeginInit();
             navigation.SuspendLayout();
-            ((ISupportInitialize)qrCodeBox).BeginInit();
             SuspendLayout();
             // 
             // lblSafeMode
@@ -106,7 +105,7 @@ namespace SuchByte.MacroDeck.GUI
             contentPanel.Location = new Point(65, 42);
             contentPanel.Margin = new Padding(9, 4, 9, 4);
             contentPanel.Name = "contentPanel";
-            contentPanel.Size = new Size(981, 591);
+            contentPanel.Size = new Size(896, 591);
             contentPanel.TabIndex = 4;
             // 
             // contentButtonPanel
@@ -285,21 +284,20 @@ namespace SuchByte.MacroDeck.GUI
             // 
             qrCodeBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             qrCodeBox.BackgroundImageLayout = ImageLayout.Stretch;
-            qrCodeBox.Location = new Point(1058, 66);
+            qrCodeBox.Location = new Point(973, 65);
             qrCodeBox.Name = "qrCodeBox";
-            qrCodeBox.Size = new Size(130, 130);
+            qrCodeBox.Size = new Size(215, 215);
             qrCodeBox.TabIndex = 17;
-            qrCodeBox.TabStop = false;
             // 
             // label1
             // 
             label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             label1.Font = new Font("Tahoma", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label1.ForeColor = Color.White;
-            label1.Location = new Point(1046, 42);
+            label1.Location = new Point(973, 42);
             label1.Margin = new Padding(9, 0, 9, 0);
             label1.Name = "label1";
-            label1.Size = new Size(154, 20);
+            label1.Size = new Size(215, 20);
             label1.TabIndex = 18;
             label1.Text = "Quick Setup";
             label1.TextAlign = ContentAlignment.MiddleCenter;
@@ -338,7 +336,6 @@ namespace SuchByte.MacroDeck.GUI
             ((ISupportInitialize)btnVariables).EndInit();
             ((ISupportInitialize)btnSettings).EndInit();
             navigation.ResumeLayout(false);
-            ((ISupportInitialize)qrCodeBox).EndInit();
             ResumeLayout(false);
         }
 
@@ -356,7 +353,7 @@ namespace SuchByte.MacroDeck.GUI
         private Panel panel2;
         private RoundedPanel navigation;
         private NotificationButton btnNotifications;
-        private PictureBox qrCodeBox;
+        private RoundedPanel qrCodeBox;
         private Label label1;
     }
 }
