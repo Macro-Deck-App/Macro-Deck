@@ -35,195 +35,190 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new Container();
+            components = new Container();
             ComponentResourceManager resources = new ComponentResourceManager(typeof(Form));
-            this.header = new BufferedPanel();
-            this.btnClose = new PictureButton();
-            this.btnHelp = new LinkLabel();
-            this.lblSafeMode = new Label();
-            this.label2 = new Label();
-            this.helpMenu = new ContextMenuStrip(this.components);
-            this.helpMenuDiscordSupport = new ToolStripMenuItem();
-            this.helpMenuWiki = new ToolStripMenuItem();
-            this.toolStripSeparator1 = new ToolStripSeparator();
-            this.helpMenuExportLog = new ToolStripMenuItem();
-            this.btnDonate = new LinkLabel();
-            this.header.SuspendLayout();
-            ((ISupportInitialize)(this.btnClose)).BeginInit();
-            this.helpMenu.SuspendLayout();
-            this.SuspendLayout();
-            this.DoubleBuffered = true;
+            header = new BufferedPanel();
+            btnDonate = new LinkLabel();
+            btnClose = new PictureButton();
+            btnHelp = new LinkLabel();
+            lblSafeMode = new Label();
+            lblTitle = new Label();
+            helpMenu = new ContextMenuStrip(components);
+            helpMenuDiscordSupport = new ToolStripMenuItem();
+            helpMenuWiki = new ToolStripMenuItem();
+            toolStripSeparator1 = new ToolStripSeparator();
+            helpMenuExportLog = new ToolStripMenuItem();
+            header.SuspendLayout();
+            ((ISupportInitialize)btnClose).BeginInit();
+            helpMenu.SuspendLayout();
+            SuspendLayout();
             // 
             // header
             // 
-            this.header.BackColor = Color.Transparent;
-            this.header.Controls.Add(this.btnDonate);
-            this.header.Controls.Add(this.btnClose);
-            this.header.Controls.Add(this.btnHelp);
-            this.header.Controls.Add(this.lblSafeMode);
-            this.header.Controls.Add(this.label2);
-            this.header.Dock = DockStyle.Top;
-            this.header.Location = new Point(0, 0);
-            this.header.Margin = new Padding(4, 3, 4, 3);
-            this.header.Name = "header";
-            this.header.Size = new Size(1400, 34);
-            this.header.TabIndex = 0;
-            this.header.MouseDown += new MouseEventHandler(this.TitleBar_MouseDown);
-            // 
-            // btnClose
-            // 
-            this.btnClose.Anchor = ((AnchorStyles)((AnchorStyles.Top | AnchorStyles.Right)));
-            this.btnClose.BackColor = Color.Transparent;
-            this.btnClose.BackgroundImage = Resources.Close_Normal;
-            this.btnClose.BackgroundImageLayout = ImageLayout.Stretch;
-            this.btnClose.Cursor = Cursors.Hand;
-            this.btnClose.Font = new Font("Tahoma", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
-            this.btnClose.ForeColor = Color.White;
-            this.btnClose.HoverImage = Resources.Close_Hover;
-            this.btnClose.Location = new Point(1367, 3);
-            this.btnClose.Margin = new Padding(4);
-            this.btnClose.Name = "btnClose";
-            this.btnClose.Size = new Size(29, 27);
-            this.btnClose.TabIndex = 2;
-            this.btnClose.TabStop = false;
-            this.btnClose.Click += new EventHandler(this.BtnClose_Click);
-            // 
-            // btnHelp
-            // 
-            this.btnHelp.ActiveLinkColor = Color.White;
-            this.btnHelp.Anchor = ((AnchorStyles)((AnchorStyles.Top | AnchorStyles.Right)));
-            this.btnHelp.AutoSize = true;
-            this.btnHelp.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.btnHelp.LinkColor = Color.Silver;
-            this.btnHelp.Location = new Point(1281, 8);
-            this.btnHelp.Margin = new Padding(4, 0, 4, 0);
-            this.btnHelp.Name = "btnHelp";
-            this.btnHelp.Size = new Size(36, 18);
-            this.btnHelp.TabIndex = 9;
-            this.btnHelp.TabStop = true;
-            this.btnHelp.Text = "Help";
-            this.btnHelp.UseMnemonic = false;
-            this.btnHelp.VisitedLinkColor = Color.Silver;
-            this.btnHelp.LinkClicked += new LinkLabelLinkClickedEventHandler(this.BtnHelp_LinkClicked);
-            // 
-            // lblSafeMode
-            // 
-            this.lblSafeMode.Font = new Font("Tahoma", 18F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblSafeMode.ForeColor = Color.Silver;
-            this.lblSafeMode.Location = new Point(13, 3);
-            this.lblSafeMode.Margin = new Padding(4, 0, 4, 0);
-            this.lblSafeMode.Name = "lblSafeMode";
-            this.lblSafeMode.Size = new Size(163, 29);
-            this.lblSafeMode.TabIndex = 8;
-            this.lblSafeMode.Text = "Safe Mode";
-            this.lblSafeMode.TextAlign = ContentAlignment.MiddleCenter;
-            this.lblSafeMode.UseMnemonic = false;
-            this.lblSafeMode.Visible = false;
-            // 
-            // label2
-            // 
-            this.label2.Anchor = AnchorStyles.Top;
-            this.label2.Font = new Font("Tahoma", 12F, FontStyle.Bold, GraphicsUnit.Point);
-            this.label2.ForeColor = Color.Silver;
-            this.label2.Location = new Point(619, 5);
-            this.label2.Margin = new Padding(4, 0, 4, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new Size(163, 25);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "Macro Deck";
-            this.label2.TextAlign = ContentAlignment.MiddleCenter;
-            this.label2.UseMnemonic = false;
-            // 
-            // helpMenu
-            // 
-            this.helpMenu.BackColor = Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
-            this.helpMenu.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.helpMenu.Items.AddRange(new ToolStripItem[] {
-            this.helpMenuDiscordSupport,
-            this.helpMenuWiki,
-            this.toolStripSeparator1,
-            this.helpMenuExportLog});
-            this.helpMenu.Name = "helpMenu";
-            this.helpMenu.ShowImageMargin = false;
-            this.helpMenu.ShowItemToolTips = false;
-            this.helpMenu.Size = new Size(191, 94);
-            // 
-            // helpMenuDiscordSupport
-            // 
-            this.helpMenuDiscordSupport.ForeColor = Color.White;
-            this.helpMenuDiscordSupport.Name = "helpMenuDiscordSupport";
-            this.helpMenuDiscordSupport.Size = new Size(190, 28);
-            this.helpMenuDiscordSupport.Text = "Discord support";
-            this.helpMenuDiscordSupport.Click += new EventHandler(this.HelpMenuDiscordSupport_Click);
-            // 
-            // helpMenuWiki
-            // 
-            this.helpMenuWiki.ForeColor = Color.White;
-            this.helpMenuWiki.Name = "helpMenuWiki";
-            this.helpMenuWiki.Size = new Size(190, 28);
-            this.helpMenuWiki.Text = "Wiki";
-            this.helpMenuWiki.Click += new EventHandler(this.HelpMenuWiki_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new Size(187, 6);
-            // 
-            // helpMenuExportLog
-            // 
-            this.helpMenuExportLog.ForeColor = Color.White;
-            this.helpMenuExportLog.Name = "helpMenuExportLog";
-            this.helpMenuExportLog.Size = new Size(190, 28);
-            this.helpMenuExportLog.Text = "Export latest log";
-            this.helpMenuExportLog.Click += new EventHandler(this.HelpMenuExportLog_Click);
+            header.BackColor = Color.Transparent;
+            header.Controls.Add(btnDonate);
+            header.Controls.Add(btnClose);
+            header.Controls.Add(btnHelp);
+            header.Controls.Add(lblSafeMode);
+            header.Controls.Add(lblTitle);
+            header.Dock = DockStyle.Top;
+            header.Location = new Point(0, 0);
+            header.Margin = new Padding(4, 3, 4, 3);
+            header.Name = "header";
+            header.Size = new Size(1400, 34);
+            header.TabIndex = 0;
+            header.MouseDown += TitleBar_MouseDown;
             // 
             // btnDonate
             // 
-            this.btnDonate.ActiveLinkColor = Color.White;
-            this.btnDonate.Anchor = ((AnchorStyles)((AnchorStyles.Top | AnchorStyles.Right)));
-            this.btnDonate.AutoSize = true;
-            this.btnDonate.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.btnDonate.LinkColor = Color.Silver;
-            this.btnDonate.Location = new Point(1190, 8);
-            this.btnDonate.Margin = new Padding(4, 0, 4, 0);
-            this.btnDonate.Name = "btnDonate";
-            this.btnDonate.Size = new Size(55, 18);
-            this.btnDonate.TabIndex = 10;
-            this.btnDonate.TabStop = true;
-            this.btnDonate.Text = "Donate";
-            this.btnDonate.UseMnemonic = false;
-            this.btnDonate.VisitedLinkColor = Color.Silver;
-            this.btnDonate.LinkClicked += new LinkLabelLinkClickedEventHandler(this.btnDonate_LinkClicked);
+            btnDonate.ActiveLinkColor = Color.White;
+            btnDonate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnDonate.AutoSize = true;
+            btnDonate.Font = new Font("Tahoma", 11.25F);
+            btnDonate.LinkColor = Color.Silver;
+            btnDonate.Location = new Point(1190, 8);
+            btnDonate.Margin = new Padding(4, 0, 4, 0);
+            btnDonate.Name = "btnDonate";
+            btnDonate.Size = new Size(55, 18);
+            btnDonate.TabIndex = 10;
+            btnDonate.TabStop = true;
+            btnDonate.Text = "Donate";
+            btnDonate.UseMnemonic = false;
+            btnDonate.VisitedLinkColor = Color.Silver;
+            btnDonate.LinkClicked += btnDonate_LinkClicked;
+            // 
+            // btnClose
+            // 
+            btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnClose.BackColor = Color.Transparent;
+            btnClose.BackgroundImage = Resources.Close_Normal;
+            btnClose.BackgroundImageLayout = ImageLayout.Stretch;
+            btnClose.Cursor = Cursors.Hand;
+            btnClose.Font = new Font("Tahoma", 9.75F, FontStyle.Bold);
+            btnClose.ForeColor = Color.White;
+            btnClose.HoverImage = Resources.Close_Hover;
+            btnClose.Location = new Point(1367, 3);
+            btnClose.Margin = new Padding(4);
+            btnClose.Name = "btnClose";
+            btnClose.Size = new Size(29, 27);
+            btnClose.TabIndex = 2;
+            btnClose.TabStop = false;
+            btnClose.Click += BtnClose_Click;
+            // 
+            // btnHelp
+            // 
+            btnHelp.ActiveLinkColor = Color.White;
+            btnHelp.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnHelp.AutoSize = true;
+            btnHelp.Font = new Font("Tahoma", 11.25F);
+            btnHelp.LinkColor = Color.Silver;
+            btnHelp.Location = new Point(1281, 8);
+            btnHelp.Margin = new Padding(4, 0, 4, 0);
+            btnHelp.Name = "btnHelp";
+            btnHelp.Size = new Size(36, 18);
+            btnHelp.TabIndex = 9;
+            btnHelp.TabStop = true;
+            btnHelp.Text = "Help";
+            btnHelp.UseMnemonic = false;
+            btnHelp.VisitedLinkColor = Color.Silver;
+            btnHelp.LinkClicked += BtnHelp_LinkClicked;
+            // 
+            // lblSafeMode
+            // 
+            lblSafeMode.Font = new Font("Tahoma", 18F);
+            lblSafeMode.ForeColor = Color.Silver;
+            lblSafeMode.Location = new Point(13, 3);
+            lblSafeMode.Margin = new Padding(4, 0, 4, 0);
+            lblSafeMode.Name = "lblSafeMode";
+            lblSafeMode.Size = new Size(163, 29);
+            lblSafeMode.TabIndex = 8;
+            lblSafeMode.Text = "Safe Mode";
+            lblSafeMode.TextAlign = ContentAlignment.MiddleCenter;
+            lblSafeMode.UseMnemonic = false;
+            lblSafeMode.Visible = false;
+            // 
+            // lblTitle
+            // 
+            lblTitle.Anchor = AnchorStyles.Top;
+            lblTitle.Font = new Font("Tahoma", 12F, FontStyle.Bold);
+            lblTitle.ForeColor = Color.Silver;
+            lblTitle.Location = new Point(619, 5);
+            lblTitle.Margin = new Padding(4, 0, 4, 0);
+            lblTitle.Name = "lblTitle";
+            lblTitle.Size = new Size(163, 25);
+            lblTitle.TabIndex = 4;
+            lblTitle.Text = "Macro Deck";
+            lblTitle.TextAlign = ContentAlignment.MiddleCenter;
+            lblTitle.UseMnemonic = false;
+            // 
+            // helpMenu
+            // 
+            helpMenu.BackColor = Color.FromArgb(55, 55, 55);
+            helpMenu.Font = new Font("Tahoma", 14.25F);
+            helpMenu.Items.AddRange(new ToolStripItem[] { helpMenuDiscordSupport, helpMenuWiki, toolStripSeparator1, helpMenuExportLog });
+            helpMenu.Name = "helpMenu";
+            helpMenu.ShowImageMargin = false;
+            helpMenu.ShowItemToolTips = false;
+            helpMenu.Size = new Size(191, 94);
+            // 
+            // helpMenuDiscordSupport
+            // 
+            helpMenuDiscordSupport.ForeColor = Color.White;
+            helpMenuDiscordSupport.Name = "helpMenuDiscordSupport";
+            helpMenuDiscordSupport.Size = new Size(190, 28);
+            helpMenuDiscordSupport.Text = "Discord support";
+            helpMenuDiscordSupport.Click += HelpMenuDiscordSupport_Click;
+            // 
+            // helpMenuWiki
+            // 
+            helpMenuWiki.ForeColor = Color.White;
+            helpMenuWiki.Name = "helpMenuWiki";
+            helpMenuWiki.Size = new Size(190, 28);
+            helpMenuWiki.Text = "Wiki";
+            helpMenuWiki.Click += HelpMenuWiki_Click;
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new Size(187, 6);
+            // 
+            // helpMenuExportLog
+            // 
+            helpMenuExportLog.ForeColor = Color.White;
+            helpMenuExportLog.Name = "helpMenuExportLog";
+            helpMenuExportLog.Size = new Size(190, 28);
+            helpMenuExportLog.Text = "Export latest log";
+            helpMenuExportLog.Click += HelpMenuExportLog_Click;
             // 
             // Form
             // 
-            this.AutoScaleDimensions = new SizeF(96F, 96F);
-            this.AutoScaleMode = AutoScaleMode.Dpi;
-            this.BackColor = Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.ClientSize = new Size(1400, 700);
-            this.ControlBox = false;
-            this.Controls.Add(this.header);
-            this.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            this.ForeColor = Color.White;
-            this.FormBorderStyle = FormBorderStyle.None;
-            this.Icon = ((Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new Padding(4, 3, 4, 3);
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "Form";
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.header.ResumeLayout(false);
-            this.header.PerformLayout();
-            ((ISupportInitialize)(this.btnClose)).EndInit();
-            this.helpMenu.ResumeLayout(false);
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            BackColor = Color.FromArgb(45, 45, 45);
+            ClientSize = new Size(1400, 700);
+            ControlBox = false;
+            Controls.Add(header);
+            DoubleBuffered = true;
+            Font = new Font("Tahoma", 9F);
+            ForeColor = Color.White;
+            FormBorderStyle = FormBorderStyle.None;
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            Margin = new Padding(4, 3, 4, 3);
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "Form";
+            StartPosition = FormStartPosition.CenterScreen;
+            header.ResumeLayout(false);
+            header.PerformLayout();
+            ((ISupportInitialize)btnClose).EndInit();
+            helpMenu.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         #endregion
 
         private BufferedPanel header;
-        private Label label2;
+        private Label lblTitle;
         public Label lblSafeMode;
         private LinkLabel btnHelp;
         private ContextMenuStrip helpMenu;

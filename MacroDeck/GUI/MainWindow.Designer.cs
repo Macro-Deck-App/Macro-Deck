@@ -103,7 +103,7 @@ namespace SuchByte.MacroDeck.GUI
             // 
             contentPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             contentPanel.Location = new Point(65, 42);
-            contentPanel.Margin = new Padding(9, 4, 9, 4);
+            contentPanel.Margin = new Padding(0);
             contentPanel.Name = "contentPanel";
             contentPanel.Size = new Size(896, 591);
             contentPanel.TabIndex = 4;
@@ -284,20 +284,20 @@ namespace SuchByte.MacroDeck.GUI
             // 
             qrCodeBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             qrCodeBox.BackgroundImageLayout = ImageLayout.Stretch;
-            qrCodeBox.Location = new Point(973, 65);
+            qrCodeBox.Location = new Point(964, 65);
             qrCodeBox.Name = "qrCodeBox";
-            qrCodeBox.Size = new Size(215, 215);
+            qrCodeBox.Size = new Size(232, 232);
             qrCodeBox.TabIndex = 17;
             // 
             // label1
             // 
-            label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            label1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             label1.Font = new Font("Tahoma", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label1.ForeColor = Color.White;
-            label1.Location = new Point(973, 42);
+            label1.Location = new Point(964, 42);
             label1.Margin = new Padding(9, 0, 9, 0);
             label1.Name = "label1";
-            label1.Size = new Size(215, 20);
+            label1.Size = new Size(232, 20);
             label1.TabIndex = 18;
             label1.Text = "Quick Setup";
             label1.TextAlign = ContentAlignment.MiddleCenter;

@@ -54,560 +54,516 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new Container();
-            this.foldersView = new TreeView();
-            this.buttonPanel = new BufferedPanel();
-            this.actionButtonContextMenuItemEdit = new ToolStripMenuItem();
-            this.actionButtonContextMenuItemDelete = new ToolStripMenuItem();
-            this.foldersContextMenuNew = new ToolStripMenuItem();
-            this.foldersContextMenuEdit = new ToolStripMenuItem();
-            this.foldersContextMenuDelete = new ToolStripMenuItem();
-            this.foldersContextMenu = new ContextMenuStrip(this.components);
-            this.actionButtonContextMenu = new ContextMenuStrip(this.components);
-            this.toolStripSeparator2 = new ToolStripSeparator();
-            this.actionButtonContextMenuItemSimulatePress = new ToolStripMenuItem();
-            this.actionButtonContextMenuItemSimulateRelease = new ToolStripMenuItem();
-            this.actionButtonContextMenuItemSimulateLongPress = new ToolStripMenuItem();
-            this.actionButtonContextMenuItemSimulateLongPressRelease = new ToolStripMenuItem();
-            this.toolStripSeparator3 = new ToolStripSeparator();
-            this.actionButtonContextMenuItemCopy = new ToolStripMenuItem();
-            this.actionButtonContextMenuItemPaste = new ToolStripMenuItem();
-            this.toolStripSeparator1 = new ToolStripSeparator();
-            this.boxProfiles = new RoundedComboBox();
-            this.btnAddProfile = new PictureButton();
-            this.btnDeleteProfile = new PictureButton();
-            this.buttonColumns = new NumericUpDown();
-            this.buttonRows = new NumericUpDown();
-            this.lblColumns = new Label();
-            this.lblRows = new Label();
-            this.lblSpacing = new Label();
-            this.buttonSpacing = new NumericUpDown();
-            this.lblCornerRadius = new Label();
-            this.cornerRadius = new NumericUpDown();
-            this.checkButtonBackground = new CheckBox();
-            this.btnEditProfile = new PictureButton();
-            this.panel1 = new Panel();
-            this.lblFolders = new Label();
-            this.lblGrid = new Label();
-            this.roundedPanel1 = new RoundedPanel();
-            this.roundedPanel2 = new RoundedPanel();
-            this.label1 = new Label();
-            this.foldersContextMenu.SuspendLayout();
-            this.actionButtonContextMenu.SuspendLayout();
-            ((ISupportInitialize)(this.btnAddProfile)).BeginInit();
-            ((ISupportInitialize)(this.btnDeleteProfile)).BeginInit();
-            ((ISupportInitialize)(this.buttonColumns)).BeginInit();
-            ((ISupportInitialize)(this.buttonRows)).BeginInit();
-            ((ISupportInitialize)(this.buttonSpacing)).BeginInit();
-            ((ISupportInitialize)(this.cornerRadius)).BeginInit();
-            ((ISupportInitialize)(this.btnEditProfile)).BeginInit();
-            this.panel1.SuspendLayout();
-            this.roundedPanel1.SuspendLayout();
-            this.roundedPanel2.SuspendLayout();
-            this.SuspendLayout();
+            components = new Container();
+            foldersView = new TreeView();
+            buttonPanel = new BufferedPanel();
+            actionButtonContextMenuItemEdit = new ToolStripMenuItem();
+            actionButtonContextMenuItemDelete = new ToolStripMenuItem();
+            foldersContextMenuNew = new ToolStripMenuItem();
+            foldersContextMenuEdit = new ToolStripMenuItem();
+            foldersContextMenuDelete = new ToolStripMenuItem();
+            foldersContextMenu = new ContextMenuStrip(components);
+            actionButtonContextMenu = new ContextMenuStrip(components);
+            toolStripSeparator2 = new ToolStripSeparator();
+            actionButtonContextMenuItemSimulatePress = new ToolStripMenuItem();
+            actionButtonContextMenuItemSimulateRelease = new ToolStripMenuItem();
+            actionButtonContextMenuItemSimulateLongPress = new ToolStripMenuItem();
+            actionButtonContextMenuItemSimulateLongPressRelease = new ToolStripMenuItem();
+            toolStripSeparator3 = new ToolStripSeparator();
+            actionButtonContextMenuItemCopy = new ToolStripMenuItem();
+            actionButtonContextMenuItemPaste = new ToolStripMenuItem();
+            toolStripSeparator1 = new ToolStripSeparator();
+            boxProfiles = new RoundedComboBox();
+            btnAddProfile = new PictureButton();
+            btnDeleteProfile = new PictureButton();
+            buttonColumns = new NumericUpDown();
+            buttonRows = new NumericUpDown();
+            lblColumns = new Label();
+            lblRows = new Label();
+            lblSpacing = new Label();
+            buttonSpacing = new NumericUpDown();
+            lblCornerRadius = new Label();
+            cornerRadius = new NumericUpDown();
+            checkButtonBackground = new CheckBox();
+            btnEditProfile = new PictureButton();
+            panel1 = new Panel();
+            lblFolders = new Label();
+            lblGrid = new Label();
+            roundedPanel1 = new RoundedPanel();
+            roundedPanel2 = new RoundedPanel();
+            label1 = new Label();
+            foldersContextMenu.SuspendLayout();
+            actionButtonContextMenu.SuspendLayout();
+            ((ISupportInitialize)btnAddProfile).BeginInit();
+            ((ISupportInitialize)btnDeleteProfile).BeginInit();
+            ((ISupportInitialize)buttonColumns).BeginInit();
+            ((ISupportInitialize)buttonRows).BeginInit();
+            ((ISupportInitialize)buttonSpacing).BeginInit();
+            ((ISupportInitialize)cornerRadius).BeginInit();
+            ((ISupportInitialize)btnEditProfile).BeginInit();
+            panel1.SuspendLayout();
+            roundedPanel1.SuspendLayout();
+            roundedPanel2.SuspendLayout();
+            SuspendLayout();
             // 
             // foldersView
             // 
-            this.foldersView.Anchor = ((AnchorStyles)(((AnchorStyles.Top | AnchorStyles.Bottom) 
-                                                       | AnchorStyles.Right)));
-            this.foldersView.BackColor = Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.foldersView.BorderStyle = BorderStyle.None;
-            this.foldersView.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.foldersView.ForeColor = Color.White;
-            this.foldersView.FullRowSelect = true;
-            this.foldersView.ItemHeight = 26;
-            this.foldersView.LineColor = Color.White;
-            this.foldersView.Location = new Point(854, 45);
-            this.foldersView.Name = "foldersView";
-            this.foldersView.PathSeparator = "/";
-            this.foldersView.Size = new Size(272, 339);
-            this.foldersView.TabIndex = 6;
-            this.foldersView.AfterSelect += new TreeViewEventHandler(this.FoldersView_AfterSelect);
-            this.foldersView.MouseDown += new MouseEventHandler(this.FoldersView_MouseDown);
+            foldersView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            foldersView.BackColor = Color.FromArgb(45, 45, 45);
+            foldersView.BorderStyle = BorderStyle.None;
+            foldersView.Font = new Font("Tahoma", 11.25F);
+            foldersView.ForeColor = Color.White;
+            foldersView.FullRowSelect = true;
+            foldersView.ItemHeight = 26;
+            foldersView.LineColor = Color.White;
+            foldersView.Location = new Point(0, 41);
+            foldersView.Name = "foldersView";
+            foldersView.PathSeparator = "/";
+            foldersView.Size = new Size(227, 302);
+            foldersView.TabIndex = 6;
+            foldersView.AfterSelect += FoldersView_AfterSelect;
+            foldersView.MouseDown += FoldersView_MouseDown;
             // 
             // buttonPanel
             // 
-            this.buttonPanel.Anchor = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom) 
-                                                        | AnchorStyles.Left) 
-                                                       | AnchorStyles.Right)));
-            this.buttonPanel.Location = new Point(6, 45);
-            this.buttonPanel.Name = "buttonPanel";
-            this.buttonPanel.Size = new Size(841, 500);
-            this.buttonPanel.TabIndex = 5;
+            buttonPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            buttonPanel.Location = new Point(236, 45);
+            buttonPanel.Name = "buttonPanel";
+            buttonPanel.Size = new Size(887, 500);
+            buttonPanel.TabIndex = 5;
             // 
             // actionButtonContextMenuItemEdit
             // 
-            this.actionButtonContextMenuItemEdit.ForeColor = Color.White;
-            this.actionButtonContextMenuItemEdit.Name = "actionButtonContextMenuItemEdit";
-            this.actionButtonContextMenuItemEdit.Size = new Size(330, 28);
-            this.actionButtonContextMenuItemEdit.Text = "Edit";
-            this.actionButtonContextMenuItemEdit.Click += new EventHandler(this.ContextMenuEditItemClick);
+            actionButtonContextMenuItemEdit.ForeColor = Color.White;
+            actionButtonContextMenuItemEdit.Name = "actionButtonContextMenuItemEdit";
+            actionButtonContextMenuItemEdit.Size = new Size(330, 28);
+            actionButtonContextMenuItemEdit.Text = "Edit";
+            actionButtonContextMenuItemEdit.Click += ContextMenuEditItemClick;
             // 
             // actionButtonContextMenuItemDelete
             // 
-            this.actionButtonContextMenuItemDelete.ForeColor = Color.White;
-            this.actionButtonContextMenuItemDelete.Name = "actionButtonContextMenuItemDelete";
-            this.actionButtonContextMenuItemDelete.Size = new Size(330, 28);
-            this.actionButtonContextMenuItemDelete.Text = "Delete";
-            this.actionButtonContextMenuItemDelete.Click += new EventHandler(this.ContextMenuDeleteItemClick);
+            actionButtonContextMenuItemDelete.ForeColor = Color.White;
+            actionButtonContextMenuItemDelete.Name = "actionButtonContextMenuItemDelete";
+            actionButtonContextMenuItemDelete.Size = new Size(330, 28);
+            actionButtonContextMenuItemDelete.Text = "Delete";
+            actionButtonContextMenuItemDelete.Click += ContextMenuDeleteItemClick;
             // 
             // foldersContextMenuNew
             // 
-            this.foldersContextMenuNew.ForeColor = Color.White;
-            this.foldersContextMenuNew.Name = "foldersContextMenuNew";
-            this.foldersContextMenuNew.Size = new Size(146, 28);
-            this.foldersContextMenuNew.Text = "New folder";
-            this.foldersContextMenuNew.Click += new EventHandler(this.BtnCreateFolder_Click);
+            foldersContextMenuNew.ForeColor = Color.White;
+            foldersContextMenuNew.Name = "foldersContextMenuNew";
+            foldersContextMenuNew.Size = new Size(146, 28);
+            foldersContextMenuNew.Text = "New folder";
+            foldersContextMenuNew.Click += BtnCreateFolder_Click;
             // 
             // foldersContextMenuEdit
             // 
-            this.foldersContextMenuEdit.ForeColor = Color.White;
-            this.foldersContextMenuEdit.Name = "foldersContextMenuEdit";
-            this.foldersContextMenuEdit.Size = new Size(146, 28);
-            this.foldersContextMenuEdit.Text = "Edit";
-            this.foldersContextMenuEdit.Click += new EventHandler(this.BtnRenameFolder_Click);
+            foldersContextMenuEdit.ForeColor = Color.White;
+            foldersContextMenuEdit.Name = "foldersContextMenuEdit";
+            foldersContextMenuEdit.Size = new Size(146, 28);
+            foldersContextMenuEdit.Text = "Edit";
+            foldersContextMenuEdit.Click += BtnRenameFolder_Click;
             // 
             // foldersContextMenuDelete
             // 
-            this.foldersContextMenuDelete.ForeColor = Color.White;
-            this.foldersContextMenuDelete.Name = "foldersContextMenuDelete";
-            this.foldersContextMenuDelete.Size = new Size(146, 28);
-            this.foldersContextMenuDelete.Text = "Delete";
-            this.foldersContextMenuDelete.Click += new EventHandler(this.BtnDeleteFolder_Click);
+            foldersContextMenuDelete.ForeColor = Color.White;
+            foldersContextMenuDelete.Name = "foldersContextMenuDelete";
+            foldersContextMenuDelete.Size = new Size(146, 28);
+            foldersContextMenuDelete.Text = "Delete";
+            foldersContextMenuDelete.Click += BtnDeleteFolder_Click;
             // 
             // foldersContextMenu
             // 
-            this.foldersContextMenu.BackColor = Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
-            this.foldersContextMenu.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.foldersContextMenu.Items.AddRange(new ToolStripItem[] {
-            this.foldersContextMenuNew,
-            this.foldersContextMenuEdit,
-            this.foldersContextMenuDelete});
-            this.foldersContextMenu.Name = "foldersContextMenu";
-            this.foldersContextMenu.ShowImageMargin = false;
-            this.foldersContextMenu.Size = new Size(147, 88);
+            foldersContextMenu.BackColor = Color.FromArgb(55, 55, 55);
+            foldersContextMenu.Font = new Font("Tahoma", 14.25F);
+            foldersContextMenu.Items.AddRange(new ToolStripItem[] { foldersContextMenuNew, foldersContextMenuEdit, foldersContextMenuDelete });
+            foldersContextMenu.Name = "foldersContextMenu";
+            foldersContextMenu.ShowImageMargin = false;
+            foldersContextMenu.Size = new Size(147, 88);
             // 
             // actionButtonContextMenu
             // 
-            this.actionButtonContextMenu.BackColor = Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
-            this.actionButtonContextMenu.Font = new Font("Tahoma", 14.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.actionButtonContextMenu.Items.AddRange(new ToolStripItem[] {
-            this.actionButtonContextMenuItemEdit,
-            this.toolStripSeparator2,
-            this.actionButtonContextMenuItemSimulatePress,
-            this.actionButtonContextMenuItemSimulateRelease,
-            this.actionButtonContextMenuItemSimulateLongPress,
-            this.actionButtonContextMenuItemSimulateLongPressRelease,
-            this.toolStripSeparator3,
-            this.actionButtonContextMenuItemCopy,
-            this.actionButtonContextMenuItemPaste,
-            this.toolStripSeparator1,
-            this.actionButtonContextMenuItemDelete});
-            this.actionButtonContextMenu.Name = "actionButtonContextMenu";
-            this.actionButtonContextMenu.ShowImageMargin = false;
-            this.actionButtonContextMenu.Size = new Size(331, 246);
-            this.actionButtonContextMenu.Opening += new CancelEventHandler(this.ActionButtonContextMenuOpened);
+            actionButtonContextMenu.BackColor = Color.FromArgb(55, 55, 55);
+            actionButtonContextMenu.Font = new Font("Tahoma", 14.25F);
+            actionButtonContextMenu.Items.AddRange(new ToolStripItem[] { actionButtonContextMenuItemEdit, toolStripSeparator2, actionButtonContextMenuItemSimulatePress, actionButtonContextMenuItemSimulateRelease, actionButtonContextMenuItemSimulateLongPress, actionButtonContextMenuItemSimulateLongPressRelease, toolStripSeparator3, actionButtonContextMenuItemCopy, actionButtonContextMenuItemPaste, toolStripSeparator1, actionButtonContextMenuItemDelete });
+            actionButtonContextMenu.Name = "actionButtonContextMenu";
+            actionButtonContextMenu.ShowImageMargin = false;
+            actionButtonContextMenu.Size = new Size(331, 246);
+            actionButtonContextMenu.Opening += ActionButtonContextMenuOpened;
             // 
             // toolStripSeparator2
             // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new Size(327, 6);
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new Size(327, 6);
             // 
             // actionButtonContextMenuItemSimulatePress
             // 
-            this.actionButtonContextMenuItemSimulatePress.ForeColor = Color.White;
-            this.actionButtonContextMenuItemSimulatePress.Name = "actionButtonContextMenuItemSimulatePress";
-            this.actionButtonContextMenuItemSimulatePress.Size = new Size(330, 28);
-            this.actionButtonContextMenuItemSimulatePress.Text = "Simulate \"On press\"";
-            this.actionButtonContextMenuItemSimulatePress.Click += new EventHandler(this.ActionButtonContextMenuItemSimulatePress_Click);
+            actionButtonContextMenuItemSimulatePress.ForeColor = Color.White;
+            actionButtonContextMenuItemSimulatePress.Name = "actionButtonContextMenuItemSimulatePress";
+            actionButtonContextMenuItemSimulatePress.Size = new Size(330, 28);
+            actionButtonContextMenuItemSimulatePress.Text = "Simulate \"On press\"";
+            actionButtonContextMenuItemSimulatePress.Click += ActionButtonContextMenuItemSimulatePress_Click;
             // 
             // actionButtonContextMenuItemSimulateRelease
             // 
-            this.actionButtonContextMenuItemSimulateRelease.ForeColor = Color.White;
-            this.actionButtonContextMenuItemSimulateRelease.Name = "actionButtonContextMenuItemSimulateRelease";
-            this.actionButtonContextMenuItemSimulateRelease.Size = new Size(330, 28);
-            this.actionButtonContextMenuItemSimulateRelease.Text = "Simulate \"On release\"";
-            this.actionButtonContextMenuItemSimulateRelease.Click += new EventHandler(this.ActionButtonContextMenuItemSimulateRelease_Click);
+            actionButtonContextMenuItemSimulateRelease.ForeColor = Color.White;
+            actionButtonContextMenuItemSimulateRelease.Name = "actionButtonContextMenuItemSimulateRelease";
+            actionButtonContextMenuItemSimulateRelease.Size = new Size(330, 28);
+            actionButtonContextMenuItemSimulateRelease.Text = "Simulate \"On release\"";
+            actionButtonContextMenuItemSimulateRelease.Click += ActionButtonContextMenuItemSimulateRelease_Click;
             // 
             // actionButtonContextMenuItemSimulateLongPress
             // 
-            this.actionButtonContextMenuItemSimulateLongPress.ForeColor = Color.White;
-            this.actionButtonContextMenuItemSimulateLongPress.Name = "actionButtonContextMenuItemSimulateLongPress";
-            this.actionButtonContextMenuItemSimulateLongPress.Size = new Size(330, 28);
-            this.actionButtonContextMenuItemSimulateLongPress.Text = "Simulate \"On long press\"";
-            this.actionButtonContextMenuItemSimulateLongPress.Click += new EventHandler(this.ActionButtonContextMenuItemSimulateLongPress_Click);
+            actionButtonContextMenuItemSimulateLongPress.ForeColor = Color.White;
+            actionButtonContextMenuItemSimulateLongPress.Name = "actionButtonContextMenuItemSimulateLongPress";
+            actionButtonContextMenuItemSimulateLongPress.Size = new Size(330, 28);
+            actionButtonContextMenuItemSimulateLongPress.Text = "Simulate \"On long press\"";
+            actionButtonContextMenuItemSimulateLongPress.Click += ActionButtonContextMenuItemSimulateLongPress_Click;
             // 
             // actionButtonContextMenuItemSimulateLongPressRelease
             // 
-            this.actionButtonContextMenuItemSimulateLongPressRelease.ForeColor = Color.White;
-            this.actionButtonContextMenuItemSimulateLongPressRelease.Name = "actionButtonContextMenuItemSimulateLongPressRelease";
-            this.actionButtonContextMenuItemSimulateLongPressRelease.Size = new Size(330, 28);
-            this.actionButtonContextMenuItemSimulateLongPressRelease.Text = "Simulate \"On long press release\"";
-            this.actionButtonContextMenuItemSimulateLongPressRelease.Click += new EventHandler(this.ActionButtonContextMenuItemSimulateLongPressRelease_Click);
+            actionButtonContextMenuItemSimulateLongPressRelease.ForeColor = Color.White;
+            actionButtonContextMenuItemSimulateLongPressRelease.Name = "actionButtonContextMenuItemSimulateLongPressRelease";
+            actionButtonContextMenuItemSimulateLongPressRelease.Size = new Size(330, 28);
+            actionButtonContextMenuItemSimulateLongPressRelease.Text = "Simulate \"On long press release\"";
+            actionButtonContextMenuItemSimulateLongPressRelease.Click += ActionButtonContextMenuItemSimulateLongPressRelease_Click;
             // 
             // toolStripSeparator3
             // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new Size(327, 6);
+            toolStripSeparator3.Name = "toolStripSeparator3";
+            toolStripSeparator3.Size = new Size(327, 6);
             // 
             // actionButtonContextMenuItemCopy
             // 
-            this.actionButtonContextMenuItemCopy.ForeColor = Color.White;
-            this.actionButtonContextMenuItemCopy.Name = "actionButtonContextMenuItemCopy";
-            this.actionButtonContextMenuItemCopy.Size = new Size(330, 28);
-            this.actionButtonContextMenuItemCopy.Text = "Copy";
-            this.actionButtonContextMenuItemCopy.Click += new EventHandler(this.ActionButtonContextMenuItemCopy_Click);
+            actionButtonContextMenuItemCopy.ForeColor = Color.White;
+            actionButtonContextMenuItemCopy.Name = "actionButtonContextMenuItemCopy";
+            actionButtonContextMenuItemCopy.Size = new Size(330, 28);
+            actionButtonContextMenuItemCopy.Text = "Copy";
+            actionButtonContextMenuItemCopy.Click += ActionButtonContextMenuItemCopy_Click;
             // 
             // actionButtonContextMenuItemPaste
             // 
-            this.actionButtonContextMenuItemPaste.Enabled = false;
-            this.actionButtonContextMenuItemPaste.ForeColor = Color.White;
-            this.actionButtonContextMenuItemPaste.Name = "actionButtonContextMenuItemPaste";
-            this.actionButtonContextMenuItemPaste.Size = new Size(330, 28);
-            this.actionButtonContextMenuItemPaste.Text = "Paste";
-            this.actionButtonContextMenuItemPaste.Click += new EventHandler(this.ActionButtonContextMenuItemPaste_Click);
+            actionButtonContextMenuItemPaste.Enabled = false;
+            actionButtonContextMenuItemPaste.ForeColor = Color.White;
+            actionButtonContextMenuItemPaste.Name = "actionButtonContextMenuItemPaste";
+            actionButtonContextMenuItemPaste.Size = new Size(330, 28);
+            actionButtonContextMenuItemPaste.Text = "Paste";
+            actionButtonContextMenuItemPaste.Click += ActionButtonContextMenuItemPaste_Click;
             // 
             // toolStripSeparator1
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new Size(327, 6);
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new Size(327, 6);
             // 
             // boxProfiles
             // 
-            this.boxProfiles.BackColor = Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.boxProfiles.Cursor = Cursors.Hand;
-            this.boxProfiles.DropDownStyle = ComboBoxStyle.DropDownList;
-            this.boxProfiles.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.boxProfiles.ForeColor = Color.White;
-            this.boxProfiles.Icon = null;
-            this.boxProfiles.Location = new Point(239, 3);
-            this.boxProfiles.Name = "boxProfiles";
-            this.boxProfiles.Padding = new Padding(8, 2, 8, 2);
-            this.boxProfiles.SelectedIndex = -1;
-            this.boxProfiles.SelectedItem = null;
-            this.boxProfiles.Size = new Size(285, 30);
-            this.boxProfiles.TabIndex = 10;
-            this.boxProfiles.SelectedIndexChanged += new EventHandler(this.BoxProfiles_SelectedIndexChanged);
+            boxProfiles.Anchor = AnchorStyles.Top;
+            boxProfiles.BackColor = Color.FromArgb(65, 65, 65);
+            boxProfiles.Cursor = Cursors.Hand;
+            boxProfiles.DropDownStyle = ComboBoxStyle.DropDownList;
+            boxProfiles.Font = new Font("Tahoma", 11.25F);
+            boxProfiles.ForeColor = Color.White;
+            boxProfiles.Icon = null;
+            boxProfiles.Location = new Point(260, 3);
+            boxProfiles.Name = "boxProfiles";
+            boxProfiles.Padding = new Padding(8, 2, 8, 2);
+            boxProfiles.SelectedIndex = -1;
+            boxProfiles.SelectedItem = null;
+            boxProfiles.Size = new Size(285, 30);
+            boxProfiles.TabIndex = 10;
+            boxProfiles.SelectedIndexChanged += BoxProfiles_SelectedIndexChanged;
             // 
             // btnAddProfile
             // 
-            this.btnAddProfile.BackColor = Color.Transparent;
-            this.btnAddProfile.BackgroundImage = Resources.Create_Normal;
-            this.btnAddProfile.BackgroundImageLayout = ImageLayout.Stretch;
-            this.btnAddProfile.Cursor = Cursors.Hand;
-            this.btnAddProfile.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
-            this.btnAddProfile.ForeColor = Color.White;
-            this.btnAddProfile.HoverImage = Resources.Create_Hover;
-            this.btnAddProfile.Location = new Point(530, 6);
-            this.btnAddProfile.Name = "btnAddProfile";
-            this.btnAddProfile.Size = new Size(25, 25);
-            this.btnAddProfile.TabIndex = 12;
-            this.btnAddProfile.TabStop = false;
-            this.btnAddProfile.Text = "+";
-            this.btnAddProfile.Click += new EventHandler(this.BtnAddProfile_Click);
+            btnAddProfile.Anchor = AnchorStyles.Top;
+            btnAddProfile.BackColor = Color.Transparent;
+            btnAddProfile.BackgroundImage = Resources.Create_Normal;
+            btnAddProfile.BackgroundImageLayout = ImageLayout.Stretch;
+            btnAddProfile.Cursor = Cursors.Hand;
+            btnAddProfile.Font = new Font("Tahoma", 9.75F);
+            btnAddProfile.ForeColor = Color.White;
+            btnAddProfile.HoverImage = Resources.Create_Hover;
+            btnAddProfile.Location = new Point(551, 6);
+            btnAddProfile.Name = "btnAddProfile";
+            btnAddProfile.Size = new Size(25, 25);
+            btnAddProfile.TabIndex = 12;
+            btnAddProfile.TabStop = false;
+            btnAddProfile.Text = "+";
+            btnAddProfile.Click += BtnAddProfile_Click;
             // 
             // btnDeleteProfile
             // 
-            this.btnDeleteProfile.BackColor = Color.Transparent;
-            this.btnDeleteProfile.BackgroundImage = Resources.Delete_Normal;
-            this.btnDeleteProfile.BackgroundImageLayout = ImageLayout.Stretch;
-            this.btnDeleteProfile.Cursor = Cursors.Hand;
-            this.btnDeleteProfile.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
-            this.btnDeleteProfile.ForeColor = Color.White;
-            this.btnDeleteProfile.HoverImage = Resources.Delete_Hover;
-            this.btnDeleteProfile.Location = new Point(588, 6);
-            this.btnDeleteProfile.Name = "btnDeleteProfile";
-            this.btnDeleteProfile.Size = new Size(25, 25);
-            this.btnDeleteProfile.TabIndex = 13;
-            this.btnDeleteProfile.TabStop = false;
-            this.btnDeleteProfile.Click += new EventHandler(this.BtnDeleteProfile_Click);
+            btnDeleteProfile.Anchor = AnchorStyles.Top;
+            btnDeleteProfile.BackColor = Color.Transparent;
+            btnDeleteProfile.BackgroundImage = Resources.Delete_Normal;
+            btnDeleteProfile.BackgroundImageLayout = ImageLayout.Stretch;
+            btnDeleteProfile.Cursor = Cursors.Hand;
+            btnDeleteProfile.Font = new Font("Tahoma", 9.75F);
+            btnDeleteProfile.ForeColor = Color.White;
+            btnDeleteProfile.HoverImage = Resources.Delete_Hover;
+            btnDeleteProfile.Location = new Point(609, 6);
+            btnDeleteProfile.Name = "btnDeleteProfile";
+            btnDeleteProfile.Size = new Size(25, 25);
+            btnDeleteProfile.TabIndex = 13;
+            btnDeleteProfile.TabStop = false;
+            btnDeleteProfile.Click += BtnDeleteProfile_Click;
             // 
             // buttonColumns
             // 
-            this.buttonColumns.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
-            this.buttonColumns.BackColor = Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
-            this.buttonColumns.BorderStyle = BorderStyle.FixedSingle;
-            this.buttonColumns.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.buttonColumns.ForeColor = Color.White;
-            this.buttonColumns.Location = new Point(930, 425);
-            this.buttonColumns.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.buttonColumns.Name = "buttonColumns";
-            this.buttonColumns.Size = new Size(55, 26);
-            this.buttonColumns.TabIndex = 14;
-            this.buttonColumns.Value = new decimal(new int[] {
-            5,
-            0,
-            0,
-            0});
-            this.buttonColumns.ValueChanged += new EventHandler(this.ButtonSettingsChanged);
+            buttonColumns.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            buttonColumns.BackColor = Color.FromArgb(55, 55, 55);
+            buttonColumns.BorderStyle = BorderStyle.FixedSingle;
+            buttonColumns.Font = new Font("Tahoma", 11.25F);
+            buttonColumns.ForeColor = Color.White;
+            buttonColumns.Location = new Point(9, 424);
+            buttonColumns.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            buttonColumns.Name = "buttonColumns";
+            buttonColumns.Size = new Size(55, 26);
+            buttonColumns.TabIndex = 14;
+            buttonColumns.Value = new decimal(new int[] { 5, 0, 0, 0 });
+            buttonColumns.ValueChanged += ButtonSettingsChanged;
             // 
             // buttonRows
             // 
-            this.buttonRows.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
-            this.buttonRows.BackColor = Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
-            this.buttonRows.BorderStyle = BorderStyle.FixedSingle;
-            this.buttonRows.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.buttonRows.ForeColor = Color.White;
-            this.buttonRows.Location = new Point(1068, 425);
-            this.buttonRows.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.buttonRows.Name = "buttonRows";
-            this.buttonRows.Size = new Size(55, 26);
-            this.buttonRows.TabIndex = 15;
-            this.buttonRows.Value = new decimal(new int[] {
-            3,
-            0,
-            0,
-            0});
-            this.buttonRows.ValueChanged += new EventHandler(this.ButtonSettingsChanged);
+            buttonRows.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            buttonRows.BackColor = Color.FromArgb(55, 55, 55);
+            buttonRows.BorderStyle = BorderStyle.FixedSingle;
+            buttonRows.Font = new Font("Tahoma", 11.25F);
+            buttonRows.ForeColor = Color.White;
+            buttonRows.Location = new Point(9, 392);
+            buttonRows.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            buttonRows.Name = "buttonRows";
+            buttonRows.Size = new Size(55, 26);
+            buttonRows.TabIndex = 15;
+            buttonRows.Value = new decimal(new int[] { 3, 0, 0, 0 });
+            buttonRows.ValueChanged += ButtonSettingsChanged;
             // 
             // lblColumns
             // 
-            this.lblColumns.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
-            this.lblColumns.BackColor = Color.Transparent;
-            this.lblColumns.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblColumns.ForeColor = Color.White;
-            this.lblColumns.Location = new Point(854, 425);
-            this.lblColumns.Name = "lblColumns";
-            this.lblColumns.Size = new Size(72, 26);
-            this.lblColumns.TabIndex = 16;
-            this.lblColumns.Text = "Columns";
-            this.lblColumns.TextAlign = ContentAlignment.MiddleRight;
-            this.lblColumns.UseMnemonic = false;
+            lblColumns.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            lblColumns.BackColor = Color.Transparent;
+            lblColumns.Font = new Font("Tahoma", 11.25F);
+            lblColumns.ForeColor = Color.White;
+            lblColumns.Location = new Point(70, 422);
+            lblColumns.Name = "lblColumns";
+            lblColumns.Size = new Size(154, 26);
+            lblColumns.TabIndex = 16;
+            lblColumns.Text = "Columns";
+            lblColumns.TextAlign = ContentAlignment.MiddleLeft;
+            lblColumns.UseMnemonic = false;
             // 
             // lblRows
             // 
-            this.lblRows.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
-            this.lblRows.BackColor = Color.Transparent;
-            this.lblRows.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblRows.ForeColor = Color.White;
-            this.lblRows.Location = new Point(990, 425);
-            this.lblRows.Name = "lblRows";
-            this.lblRows.Size = new Size(72, 26);
-            this.lblRows.TabIndex = 17;
-            this.lblRows.Text = "Rows";
-            this.lblRows.TextAlign = ContentAlignment.MiddleRight;
-            this.lblRows.UseMnemonic = false;
+            lblRows.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            lblRows.BackColor = Color.Transparent;
+            lblRows.Font = new Font("Tahoma", 11.25F);
+            lblRows.ForeColor = Color.White;
+            lblRows.Location = new Point(70, 392);
+            lblRows.Name = "lblRows";
+            lblRows.Size = new Size(157, 26);
+            lblRows.TabIndex = 17;
+            lblRows.Text = "Rows";
+            lblRows.TextAlign = ContentAlignment.MiddleLeft;
+            lblRows.UseMnemonic = false;
             // 
             // lblSpacing
             // 
-            this.lblSpacing.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
-            this.lblSpacing.BackColor = Color.Transparent;
-            this.lblSpacing.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblSpacing.ForeColor = Color.White;
-            this.lblSpacing.Location = new Point(930, 457);
-            this.lblSpacing.Name = "lblSpacing";
-            this.lblSpacing.Size = new Size(132, 26);
-            this.lblSpacing.TabIndex = 19;
-            this.lblSpacing.Text = "Spacing";
-            this.lblSpacing.TextAlign = ContentAlignment.MiddleRight;
-            this.lblSpacing.UseMnemonic = false;
+            lblSpacing.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            lblSpacing.BackColor = Color.Transparent;
+            lblSpacing.Font = new Font("Tahoma", 11.25F);
+            lblSpacing.ForeColor = Color.White;
+            lblSpacing.Location = new Point(70, 454);
+            lblSpacing.Name = "lblSpacing";
+            lblSpacing.Size = new Size(157, 26);
+            lblSpacing.TabIndex = 19;
+            lblSpacing.Text = "Spacing";
+            lblSpacing.TextAlign = ContentAlignment.MiddleLeft;
+            lblSpacing.UseMnemonic = false;
             // 
             // buttonSpacing
             // 
-            this.buttonSpacing.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
-            this.buttonSpacing.BackColor = Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
-            this.buttonSpacing.BorderStyle = BorderStyle.FixedSingle;
-            this.buttonSpacing.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.buttonSpacing.ForeColor = Color.White;
-            this.buttonSpacing.Location = new Point(1068, 457);
-            this.buttonSpacing.Maximum = new decimal(new int[] {
-            25,
-            0,
-            0,
-            0});
-            this.buttonSpacing.Name = "buttonSpacing";
-            this.buttonSpacing.Size = new Size(55, 26);
-            this.buttonSpacing.TabIndex = 18;
-            this.buttonSpacing.Value = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-            this.buttonSpacing.ValueChanged += new EventHandler(this.ButtonSettingsChanged);
+            buttonSpacing.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            buttonSpacing.BackColor = Color.FromArgb(55, 55, 55);
+            buttonSpacing.BorderStyle = BorderStyle.FixedSingle;
+            buttonSpacing.Font = new Font("Tahoma", 11.25F);
+            buttonSpacing.ForeColor = Color.White;
+            buttonSpacing.Location = new Point(9, 456);
+            buttonSpacing.Maximum = new decimal(new int[] { 25, 0, 0, 0 });
+            buttonSpacing.Name = "buttonSpacing";
+            buttonSpacing.Size = new Size(55, 26);
+            buttonSpacing.TabIndex = 18;
+            buttonSpacing.Value = new decimal(new int[] { 10, 0, 0, 0 });
+            buttonSpacing.ValueChanged += ButtonSettingsChanged;
             // 
             // lblCornerRadius
             // 
-            this.lblCornerRadius.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
-            this.lblCornerRadius.BackColor = Color.Transparent;
-            this.lblCornerRadius.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblCornerRadius.ForeColor = Color.White;
-            this.lblCornerRadius.Location = new Point(930, 489);
-            this.lblCornerRadius.Name = "lblCornerRadius";
-            this.lblCornerRadius.Size = new Size(132, 26);
-            this.lblCornerRadius.TabIndex = 21;
-            this.lblCornerRadius.Text = "Corner radius";
-            this.lblCornerRadius.TextAlign = ContentAlignment.MiddleRight;
-            this.lblCornerRadius.UseMnemonic = false;
+            lblCornerRadius.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            lblCornerRadius.BackColor = Color.Transparent;
+            lblCornerRadius.Font = new Font("Tahoma", 11.25F);
+            lblCornerRadius.ForeColor = Color.White;
+            lblCornerRadius.Location = new Point(70, 488);
+            lblCornerRadius.Name = "lblCornerRadius";
+            lblCornerRadius.Size = new Size(154, 26);
+            lblCornerRadius.TabIndex = 21;
+            lblCornerRadius.Text = "Corner radius";
+            lblCornerRadius.TextAlign = ContentAlignment.MiddleLeft;
+            lblCornerRadius.UseMnemonic = false;
             // 
             // cornerRadius
             // 
-            this.cornerRadius.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
-            this.cornerRadius.BackColor = Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
-            this.cornerRadius.BorderStyle = BorderStyle.FixedSingle;
-            this.cornerRadius.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.cornerRadius.ForeColor = Color.White;
-            this.cornerRadius.Location = new Point(1068, 489);
-            this.cornerRadius.Name = "cornerRadius";
-            this.cornerRadius.Size = new Size(55, 26);
-            this.cornerRadius.TabIndex = 20;
-            this.cornerRadius.Value = new decimal(new int[] {
-            40,
-            0,
-            0,
-            0});
-            this.cornerRadius.ValueChanged += new EventHandler(this.ButtonSettingsChanged);
+            cornerRadius.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            cornerRadius.BackColor = Color.FromArgb(55, 55, 55);
+            cornerRadius.BorderStyle = BorderStyle.FixedSingle;
+            cornerRadius.Font = new Font("Tahoma", 11.25F);
+            cornerRadius.ForeColor = Color.White;
+            cornerRadius.Location = new Point(9, 488);
+            cornerRadius.Name = "cornerRadius";
+            cornerRadius.Size = new Size(55, 26);
+            cornerRadius.TabIndex = 20;
+            cornerRadius.Value = new decimal(new int[] { 40, 0, 0, 0 });
+            cornerRadius.ValueChanged += ButtonSettingsChanged;
             // 
             // checkButtonBackground
             // 
-            this.checkButtonBackground.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
-            this.checkButtonBackground.AutoSize = true;
-            this.checkButtonBackground.BackColor = Color.Transparent;
-            this.checkButtonBackground.CheckAlign = ContentAlignment.MiddleRight;
-            this.checkButtonBackground.Checked = true;
-            this.checkButtonBackground.CheckState = CheckState.Checked;
-            this.checkButtonBackground.Font = new Font("Tahoma", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
-            this.checkButtonBackground.ForeColor = Color.White;
-            this.checkButtonBackground.Location = new Point(972, 518);
-            this.checkButtonBackground.Name = "checkButtonBackground";
-            this.checkButtonBackground.Size = new Size(151, 22);
-            this.checkButtonBackground.TabIndex = 22;
-            this.checkButtonBackground.Text = "Button Background";
-            this.checkButtonBackground.UseMnemonic = false;
-            this.checkButtonBackground.UseVisualStyleBackColor = false;
-            this.checkButtonBackground.CheckedChanged += new EventHandler(this.ButtonSettingsChanged);
+            checkButtonBackground.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            checkButtonBackground.AutoSize = true;
+            checkButtonBackground.BackColor = Color.Transparent;
+            checkButtonBackground.Checked = true;
+            checkButtonBackground.CheckState = CheckState.Checked;
+            checkButtonBackground.Font = new Font("Tahoma", 11.25F);
+            checkButtonBackground.ForeColor = Color.White;
+            checkButtonBackground.Location = new Point(9, 520);
+            checkButtonBackground.Name = "checkButtonBackground";
+            checkButtonBackground.Size = new Size(151, 22);
+            checkButtonBackground.TabIndex = 22;
+            checkButtonBackground.Text = "Button Background";
+            checkButtonBackground.UseMnemonic = false;
+            checkButtonBackground.UseVisualStyleBackColor = false;
+            checkButtonBackground.CheckedChanged += ButtonSettingsChanged;
             // 
             // btnEditProfile
             // 
-            this.btnEditProfile.BackColor = Color.Transparent;
-            this.btnEditProfile.BackgroundImage = Resources.Edit_Normal;
-            this.btnEditProfile.BackgroundImageLayout = ImageLayout.Stretch;
-            this.btnEditProfile.Cursor = Cursors.Hand;
-            this.btnEditProfile.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
-            this.btnEditProfile.ForeColor = Color.White;
-            this.btnEditProfile.HoverImage = Resources.Edit_Hover;
-            this.btnEditProfile.Location = new Point(559, 6);
-            this.btnEditProfile.Name = "btnEditProfile";
-            this.btnEditProfile.Size = new Size(25, 25);
-            this.btnEditProfile.TabIndex = 23;
-            this.btnEditProfile.TabStop = false;
-            this.btnEditProfile.Click += new EventHandler(this.BtnEditProfile_Click);
+            btnEditProfile.Anchor = AnchorStyles.Top;
+            btnEditProfile.BackColor = Color.Transparent;
+            btnEditProfile.BackgroundImage = Resources.Edit_Normal;
+            btnEditProfile.BackgroundImageLayout = ImageLayout.Stretch;
+            btnEditProfile.Cursor = Cursors.Hand;
+            btnEditProfile.Font = new Font("Tahoma", 9.75F);
+            btnEditProfile.ForeColor = Color.White;
+            btnEditProfile.HoverImage = Resources.Edit_Hover;
+            btnEditProfile.Location = new Point(580, 6);
+            btnEditProfile.Name = "btnEditProfile";
+            btnEditProfile.Size = new Size(25, 25);
+            btnEditProfile.TabIndex = 23;
+            btnEditProfile.TabStop = false;
+            btnEditProfile.Click += BtnEditProfile_Click;
             // 
             // panel1
             // 
-            this.panel1.Anchor = ((AnchorStyles)(((AnchorStyles.Top | AnchorStyles.Left) 
-                                                  | AnchorStyles.Right)));
-            this.panel1.Controls.Add(this.boxProfiles);
-            this.panel1.Controls.Add(this.btnAddProfile);
-            this.panel1.Controls.Add(this.btnDeleteProfile);
-            this.panel1.Controls.Add(this.btnEditProfile);
-            this.panel1.Location = new Point(6, 3);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new Size(841, 36);
-            this.panel1.TabIndex = 24;
+            panel1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            panel1.Controls.Add(boxProfiles);
+            panel1.Controls.Add(btnAddProfile);
+            panel1.Controls.Add(btnDeleteProfile);
+            panel1.Controls.Add(btnEditProfile);
+            panel1.Location = new Point(236, 3);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(887, 36);
+            panel1.TabIndex = 24;
             // 
             // lblFolders
             // 
-            this.lblFolders.BackColor = Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
-            this.lblFolders.Font = new Font("Tahoma", 11.25F, FontStyle.Bold, GraphicsUnit.Point);
-            this.lblFolders.ForeColor = Color.White;
-            this.lblFolders.Location = new Point(9, 6);
-            this.lblFolders.Name = "lblFolders";
-            this.lblFolders.Size = new Size(250, 22);
-            this.lblFolders.TabIndex = 40;
-            this.lblFolders.Text = "Folders";
-            this.lblFolders.TextAlign = ContentAlignment.MiddleLeft;
+            lblFolders.BackColor = Color.FromArgb(35, 35, 35);
+            lblFolders.Font = new Font("Tahoma", 11.25F, FontStyle.Bold);
+            lblFolders.ForeColor = Color.White;
+            lblFolders.Location = new Point(9, 6);
+            lblFolders.Name = "lblFolders";
+            lblFolders.Size = new Size(215, 22);
+            lblFolders.TabIndex = 40;
+            lblFolders.Text = "Folders";
+            lblFolders.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // lblGrid
             // 
-            this.lblGrid.BackColor = Color.Transparent;
-            this.lblGrid.Font = new Font("Tahoma", 11.25F, FontStyle.Bold, GraphicsUnit.Point);
-            this.lblGrid.ForeColor = Color.White;
-            this.lblGrid.Location = new Point(9, 6);
-            this.lblGrid.Name = "lblGrid";
-            this.lblGrid.Size = new Size(250, 22);
-            this.lblGrid.TabIndex = 41;
-            this.lblGrid.Text = "Grid";
-            this.lblGrid.TextAlign = ContentAlignment.MiddleLeft;
+            lblGrid.BackColor = Color.Transparent;
+            lblGrid.Font = new Font("Tahoma", 11.25F, FontStyle.Bold);
+            lblGrid.ForeColor = Color.White;
+            lblGrid.Location = new Point(9, 6);
+            lblGrid.Name = "lblGrid";
+            lblGrid.Size = new Size(215, 22);
+            lblGrid.TabIndex = 41;
+            lblGrid.Text = "Grid";
+            lblGrid.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // roundedPanel1
             // 
-            this.roundedPanel1.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
-            this.roundedPanel1.BackColor = Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
-            this.roundedPanel1.Controls.Add(this.lblGrid);
-            this.roundedPanel1.Location = new Point(857, 384);
-            this.roundedPanel1.Name = "roundedPanel1";
-            this.roundedPanel1.Size = new Size(269, 35);
-            this.roundedPanel1.TabIndex = 42;
+            roundedPanel1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            roundedPanel1.BackColor = Color.FromArgb(35, 35, 35);
+            roundedPanel1.Controls.Add(lblGrid);
+            roundedPanel1.Location = new Point(0, 349);
+            roundedPanel1.Name = "roundedPanel1";
+            roundedPanel1.Size = new Size(227, 35);
+            roundedPanel1.TabIndex = 42;
             // 
             // roundedPanel2
             // 
-            this.roundedPanel2.Anchor = ((AnchorStyles)((AnchorStyles.Top | AnchorStyles.Right)));
-            this.roundedPanel2.BackColor = Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
-            this.roundedPanel2.Controls.Add(this.label1);
-            this.roundedPanel2.Controls.Add(this.lblFolders);
-            this.roundedPanel2.Location = new Point(857, 4);
-            this.roundedPanel2.Name = "roundedPanel2";
-            this.roundedPanel2.Size = new Size(269, 35);
-            this.roundedPanel2.TabIndex = 43;
+            roundedPanel2.BackColor = Color.FromArgb(35, 35, 35);
+            roundedPanel2.Controls.Add(label1);
+            roundedPanel2.Controls.Add(lblFolders);
+            roundedPanel2.Location = new Point(0, 0);
+            roundedPanel2.Name = "roundedPanel2";
+            roundedPanel2.Size = new Size(227, 35);
+            roundedPanel2.TabIndex = 43;
             // 
             // label1
             // 
-            this.label1.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
-            this.label1.BackColor = Color.Transparent;
-            this.label1.Font = new Font("Tahoma", 11.25F, FontStyle.Bold, GraphicsUnit.Point);
-            this.label1.ForeColor = Color.White;
-            this.label1.Location = new Point(78, -59);
-            this.label1.Name = "label1";
-            this.label1.Size = new Size(250, 22);
-            this.label1.TabIndex = 41;
-            this.label1.Text = "Grid";
-            this.label1.TextAlign = ContentAlignment.MiddleLeft;
+            label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            label1.BackColor = Color.Transparent;
+            label1.Font = new Font("Tahoma", 11.25F, FontStyle.Bold);
+            label1.ForeColor = Color.White;
+            label1.Location = new Point(36, -59);
+            label1.Name = "label1";
+            label1.Size = new Size(250, 22);
+            label1.TabIndex = 41;
+            label1.Text = "Grid";
+            label1.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // DeckView
             // 
-            this.AutoScaleMode = AutoScaleMode.Dpi;
-            this.BackColor = Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.Controls.Add(this.roundedPanel2);
-            this.Controls.Add(this.roundedPanel1);
-            this.Controls.Add(this.panel1);
-            this.Controls.Add(this.checkButtonBackground);
-            this.Controls.Add(this.lblCornerRadius);
-            this.Controls.Add(this.cornerRadius);
-            this.Controls.Add(this.lblSpacing);
-            this.Controls.Add(this.buttonSpacing);
-            this.Controls.Add(this.lblRows);
-            this.Controls.Add(this.lblColumns);
-            this.Controls.Add(this.buttonRows);
-            this.Controls.Add(this.buttonColumns);
-            this.Controls.Add(this.foldersView);
-            this.Controls.Add(this.buttonPanel);
-            this.Font = new Font("Tahoma", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            this.Name = "DeckView";
-            this.Size = new Size(1126, 545);
-            this.Load += new EventHandler(this.Deck_Load);
-            this.foldersContextMenu.ResumeLayout(false);
-            this.actionButtonContextMenu.ResumeLayout(false);
-            ((ISupportInitialize)(this.btnAddProfile)).EndInit();
-            ((ISupportInitialize)(this.btnDeleteProfile)).EndInit();
-            ((ISupportInitialize)(this.buttonColumns)).EndInit();
-            ((ISupportInitialize)(this.buttonRows)).EndInit();
-            ((ISupportInitialize)(this.buttonSpacing)).EndInit();
-            ((ISupportInitialize)(this.cornerRadius)).EndInit();
-            ((ISupportInitialize)(this.btnEditProfile)).EndInit();
-            this.panel1.ResumeLayout(false);
-            this.roundedPanel1.ResumeLayout(false);
-            this.roundedPanel2.ResumeLayout(false);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            BackColor = Color.FromArgb(45, 45, 45);
+            Controls.Add(roundedPanel2);
+            Controls.Add(roundedPanel1);
+            Controls.Add(panel1);
+            Controls.Add(checkButtonBackground);
+            Controls.Add(lblCornerRadius);
+            Controls.Add(cornerRadius);
+            Controls.Add(lblSpacing);
+            Controls.Add(buttonSpacing);
+            Controls.Add(lblRows);
+            Controls.Add(lblColumns);
+            Controls.Add(buttonRows);
+            Controls.Add(buttonColumns);
+            Controls.Add(foldersView);
+            Controls.Add(buttonPanel);
+            Font = new Font("Tahoma", 9F);
+            Name = "DeckView";
+            Size = new Size(1126, 545);
+            Load += Deck_Load;
+            foldersContextMenu.ResumeLayout(false);
+            actionButtonContextMenu.ResumeLayout(false);
+            ((ISupportInitialize)btnAddProfile).EndInit();
+            ((ISupportInitialize)btnDeleteProfile).EndInit();
+            ((ISupportInitialize)buttonColumns).EndInit();
+            ((ISupportInitialize)buttonRows).EndInit();
+            ((ISupportInitialize)buttonSpacing).EndInit();
+            ((ISupportInitialize)cornerRadius).EndInit();
+            ((ISupportInitialize)btnEditProfile).EndInit();
+            panel1.ResumeLayout(false);
+            roundedPanel1.ResumeLayout(false);
+            roundedPanel2.ResumeLayout(false);
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

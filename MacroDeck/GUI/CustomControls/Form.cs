@@ -24,6 +24,7 @@ public partial class Form : System.Windows.Forms.Form
     {
         InitializeComponent();
         (new DropShadow()).ApplyShadows(this);
+        lblTitle.MouseDown += TitleBar_MouseDown;
         btnHelp.Text = LanguageManager.Strings.Help;
         helpMenuDiscordSupport.Text = LanguageManager.Strings.DiscordSupport;
         helpMenuWiki.Text = LanguageManager.Strings.Wiki;
