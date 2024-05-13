@@ -5,11 +5,13 @@ using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.Configuration;
 using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.Enums;
+using SuchByte.MacroDeck.Extension;
 using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.JSON;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Profiles;
+using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Server;
 
@@ -20,6 +22,8 @@ public static class MacroDeckServer
     public static event EventHandler? OnFolderChanged;
 
     public static List<MacroDeckClient> Clients { get; } = new();
+
+    public static string QuickSetupToken { get; } = RandomStringGenerator.RandomString(8);
     
     public static void Start(int port)
     {
@@ -130,7 +134,9 @@ public static class MacroDeckServer
         switch (method)
         {
             case JsonMethod.CONNECTED:
-                if (responseObject["API"] == null || responseObject["Client-Id"] == null || responseObject["Device-Type"] == null || responseObject["API"].ToObject<int>() < MacroDeck.ApiVersion)
+                if (responseObject["API"] == null || responseObject["Client-Id"] == null ||
+                    responseObject["Device-Type"] == null ||
+                    responseObject["API"].ToObject<int>() < MacroDeck.ApiVersion)
                 {
                     CloseClient(macroDeckClient);
                     return;
@@ -140,16 +146,22 @@ public static class MacroDeckServer
 
                 MacroDeckLogger.Info("Connection request from " + macroDeckClient.ClientId);
 
-                var deviceType = DeviceType.Unknown;
-                Enum.TryParse(responseObject["Device-Type"].ToString(), out deviceType);
+                Enum.TryParse(responseObject["Device-Type"].ToString(), out DeviceType deviceType);
                 macroDeckClient.DeviceType = deviceType;
 
-                if (!DeviceManager.RequestConnection(macroDeckClient))
+                if (responseObject["Token"]?.ToString() is { } token && token.EqualsCryptographically(QuickSetupToken))
                 {
-                    CloseClient(macroDeckClient);
-                    return;
+                    DeviceManager.AddKnownDevice(macroDeckClient);
                 }
-                    
+                else
+                {
+                    if (!DeviceManager.RequestConnection(macroDeckClient))
+                    {
+                        CloseClient(macroDeckClient);
+                        return;
+                    }
+                }
+                
                 if (DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId) == null)
                 {
                     return;

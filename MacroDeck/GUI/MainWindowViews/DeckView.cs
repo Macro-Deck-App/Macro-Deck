@@ -13,6 +13,7 @@ using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Services;
 using SuchByte.MacroDeck.Utils;
 using Clipboard = SuchByte.MacroDeck.Utils.Clipboard;
 using Form = SuchByte.MacroDeck.GUI.CustomControls.Form;
@@ -34,7 +35,7 @@ public partial class DeckView : UserControl
         Dock = DockStyle.Fill;
         UpdateTranslation();
         _currentFolder = ProfileManager.CurrentProfile.Folders.FirstOrDefault();
-
+        qrCodeBox.BackgroundImage = QrCodeService.Instance.GetQuickSetupQrCode();
     }
 
     private void MainWindow_ResizeEnd(object sender, EventArgs e)

@@ -42,19 +42,15 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.btnRemove = new PictureButton();
             this.lblIdLabel = new Label();
             this.lblId = new Label();
-            this.printDocument1 = new PrintDocument();
             this.checkBlockConnection = new CheckBox();
             this.lblStatusLabel = new Label();
             this.lblStatus = new Label();
             this.btnChangeDisplayName = new PictureButton();
             this.profiles = new RoundedComboBox();
             this.lblProfile = new Label();
-            this.lblDeviceType = new Label();
-            this.iconDeviceType = new PictureBox();
             this.btnConfigure = new ButtonPrimary();
             ((ISupportInitialize)(this.btnRemove)).BeginInit();
             ((ISupportInitialize)(this.btnChangeDisplayName)).BeginInit();
-            ((ISupportInitialize)(this.iconDeviceType)).BeginInit();
             this.SuspendLayout();
             // 
             // lblDisplayName
@@ -212,26 +208,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.lblProfile.Text = "Profile:";
             this.lblProfile.UseMnemonic = false;
             // 
-            // lblDeviceType
-            // 
-            this.lblDeviceType.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblDeviceType.ForeColor = Color.White;
-            this.lblDeviceType.Location = new Point(34, 4);
-            this.lblDeviceType.Name = "lblDeviceType";
-            this.lblDeviceType.Size = new Size(154, 23);
-            this.lblDeviceType.TabIndex = 11;
-            this.lblDeviceType.Text = "Web client";
-            this.lblDeviceType.TextAlign = ContentAlignment.MiddleLeft;
-            this.lblDeviceType.UseMnemonic = false;
-            // 
-            // iconDeviceType
-            // 
-            this.iconDeviceType.Location = new Point(5, 4);
-            this.iconDeviceType.Name = "iconDeviceType";
-            this.iconDeviceType.Size = new Size(23, 23);
-            this.iconDeviceType.TabIndex = 12;
-            this.iconDeviceType.TabStop = false;
-            // 
             // btnConfigure
             // 
             this.btnConfigure.BackColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
@@ -260,8 +236,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.AutoScaleMode = AutoScaleMode.Dpi;
             this.BackColor = Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
             this.Controls.Add(this.btnConfigure);
-            this.Controls.Add(this.iconDeviceType);
-            this.Controls.Add(this.lblDeviceType);
             this.Controls.Add(this.lblProfile);
             this.Controls.Add(this.profiles);
             this.Controls.Add(this.btnChangeDisplayName);
@@ -279,7 +253,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
             this.Load += new EventHandler(this.DeviceInfo_Load);
             ((ISupportInitialize)(this.btnRemove)).EndInit();
             ((ISupportInitialize)(this.btnChangeDisplayName)).EndInit();
-            ((ISupportInitialize)(this.iconDeviceType)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -292,15 +265,12 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         private PictureButton btnRemove;
         private Label lblIdLabel;
         private Label lblId;
-        private PrintDocument printDocument1;
         private CheckBox checkBlockConnection;
         private Label lblStatusLabel;
         private Label lblStatus;
         private PictureButton btnChangeDisplayName;
         private RoundedComboBox profiles;
         private Label lblProfile;
-        private Label lblDeviceType;
-        private PictureBox iconDeviceType;
         private ButtonPrimary btnConfigure;
     }
 }

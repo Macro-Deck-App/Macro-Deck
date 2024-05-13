@@ -172,30 +172,29 @@ public class DeviceManager
 
             if (!dialogResult) return dialogResult;
             {
-                var macroDeckDevice = new MacroDeckDevice
-                {
-                    ClientId = macroDeckClient.ClientId,
-                    DisplayName = "Client " + macroDeckClient.ClientId,
-                    ProfileId = ProfileManager.Profiles.FirstOrDefault()?.ProfileId ?? "0",
-                };
-                AddKnownDevice(macroDeckDevice);
-                macroDeckDevice.ClientId = macroDeckClient.ClientId;
-                macroDeckDevice.DeviceType = macroDeckClient.DeviceType;
+                AddKnownDevice(macroDeckClient);
             }
             return dialogResult;
         }
 
         if (!IsKnownDevice(macroDeckClient.ClientId))
         {
-            var macroDeckDevice = new MacroDeckDevice
-            {
-                ClientId = macroDeckClient.ClientId,
-                DisplayName = "Client " + macroDeckClient.ClientId,
-                DeviceType = macroDeckClient.DeviceType
-            };
-            AddKnownDevice(macroDeckDevice);
+            AddKnownDevice(macroDeckClient);
         }
         return true;
+    }
+
+    public static void AddKnownDevice(MacroDeckClient macroDeckClient)
+    {
+        var macroDeckDevice = new MacroDeckDevice
+        {
+            ClientId = macroDeckClient.ClientId,
+            DisplayName = "Client " + macroDeckClient.ClientId,
+            ProfileId = ProfileManager.Profiles.FirstOrDefault()?.ProfileId ?? "0",
+        };
+        AddKnownDevice(macroDeckDevice);
+        macroDeckDevice.ClientId = macroDeckClient.ClientId;
+        macroDeckDevice.DeviceType = macroDeckClient.DeviceType;
     }
 
     private static bool ShowConnectionDialog(MacroDeckClient macroDeckClient)

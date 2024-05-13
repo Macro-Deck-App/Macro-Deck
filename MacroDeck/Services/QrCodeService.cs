@@ -5,6 +5,7 @@ using System.Text.Json;
 using QRCoder;
 using SuchByte.MacroDeck.DataTypes.QrCode;
 using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Server;
 
 namespace SuchByte.MacroDeck.Services;
 
@@ -31,7 +32,8 @@ public class QrCodeService
         var data = new QuickConnectQrCodeData(Environment.MachineName,
             networkInterfaces,
             MacroDeck.Configuration.HostPort,
-            MacroDeck.Configuration.EnableSsl);
+            MacroDeck.Configuration.EnableSsl,
+            MacroDeckServer.QuickSetupToken);
 
         var dataJson = JsonSerializer.Serialize(data, new JsonSerializerOptions
         {
@@ -44,7 +46,7 @@ public class QrCodeService
         using var qrCodeData = qrGenerator.CreateQrCode(qrCodeLink, QRCodeGenerator.ECCLevel.L);
         using var qrCode = new BitmapByteQRCode(qrCodeData);
 
-        var quickSetupQrCode = qrCode.GetGraphic(40);
+        var quickSetupQrCode = qrCode.GetGraphic(15);
         using var ms = new MemoryStream(quickSetupQrCode);
         return Image.FromStream(ms);
     }
