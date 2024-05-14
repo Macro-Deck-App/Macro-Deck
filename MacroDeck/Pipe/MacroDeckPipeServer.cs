@@ -1,53 +1,43 @@
-﻿using System.IO.Pipes;
-using System.Threading;
+﻿using System.IO;
+using System.IO.Pipes;
 using SuchByte.MacroDeck.Logging;
 
-namespace SuchByte.MacroDeck.Pipes;
+namespace SuchByte.MacroDeck.Pipe;
 
-public delegate void DelegateMessage(string message);
 public class MacroDeckPipeServer
 {
-    public static event DelegateMessage PipeMessage;
-
-
-    private static void WaitForConnectionCallBack(IAsyncResult iar)
-    {
-        try
-        {
-            using var pipeServer = (NamedPipeServerStream)iar.AsyncState;
-            pipeServer.EndWaitForConnection(iar);
-            var buffer = new byte[255];
-            pipeServer.Read(buffer, 0, 255);
-            var stringData = Encoding.ASCII.GetString(buffer).Trim('\0');
-            var t = new Thread(() => PipeMessage.Invoke(stringData));
-            t.SetApartmentState(ApartmentState.STA);
-            t.Start();
-            pipeServer.Close();
-            SpawnServerStream();
-        }
-        catch
-        {
-        }
-    }
-
-    private static void SpawnServerStream()
-    {
-        try
-        {
-            MacroDeckLogger.Trace(typeof(MacroDeckPipeServer), "Spawning new server stream...");
-            var pipeServer = new NamedPipeServerStream("macrodeck", PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
-            pipeServer.BeginWaitForConnection(WaitForConnectionCallBack, pipeServer);
-        }
-        catch (Exception ex)
-        {
-            MacroDeckLogger.Error(typeof(MacroDeckPipeServer), $"Failed: {ex.Message}");
-        }
-    }
+    public static event Action<string>? PipeMessage;
 
     public static void Initialize()
     {
         MacroDeckLogger.Info(typeof(MacroDeckPipeServer), "Initializing pipe server");
-        SpawnServerStream();
-        MacroDeckLogger.Info(typeof(MacroDeckPipeServer), "Initializing pipe server complete");
+        Task.Run(async () => await HandleConnections().ConfigureAwait(false));
+    }
+
+    private static async Task HandleConnections()
+    {
+        do
+        {
+            await using var pipeServer = new NamedPipeServerStream("macrodeck", PipeDirection.InOut, 1);
+            using var sr = new StreamReader(pipeServer);
+            try
+            {
+                await pipeServer.WaitForConnectionAsync();
+                pipeServer.WaitForPipeDrain();
+                var result = await sr.ReadLineAsync();
+                PipeMessage?.Invoke(result);
+            }
+            catch (Exception ex)
+            {
+                MacroDeckLogger.Error(typeof(MacroDeckPipeServer), $"Failed: {ex.Message}");
+            }
+            finally
+            {
+                if (pipeServer.IsConnected)
+                {
+                    pipeServer.Disconnect();
+                }
+            }
+        } while (true);
     }
 }

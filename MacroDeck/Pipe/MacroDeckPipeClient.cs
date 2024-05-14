@@ -1,29 +1,33 @@
 ﻿using System.IO.Pipes;
 
-namespace SuchByte.MacroDeck.Pipes;
+namespace SuchByte.MacroDeck.Pipe;
 
-public class MacroDeckPipeClient
+public static class MacroDeckPipeClient
 {
 
-    internal static bool SendShowMainWindowMessage()
+    internal static Task<bool> SendShowMainWindowMessage()
     {
         return SendPipeMessage("show");
     }
 
-
-    internal static bool SendPipeMessage(string message)
+    private static async Task<bool> SendPipeMessage(string message)
     {
-        var client = new NamedPipeClientStream("macrodeck");
-        client.Connect(2000);
-        if (client.IsConnected)
+        try
         {
-            var buffer = Encoding.ASCII.GetBytes(message);
-            client.Write(buffer, 0, buffer.Length);
-            client.Close();
-            client.Dispose();
-            return true;
+            await using var client = new NamedPipeClientStream("macrodeck");
+            await client.ConnectAsync(2000);
+            if (client.IsConnected)
+            {
+                var bytes = Encoding.ASCII.GetBytes(message);
+                client.Write(bytes, 0, bytes.Length);
+                return true;
+            }
         }
-
+        catch (TimeoutException)
+        {
+            // Ignore   
+        }
+        
         return false;
     }
 
