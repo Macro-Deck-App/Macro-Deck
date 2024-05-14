@@ -32,58 +32,53 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// </summary>
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.licensesPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.SuspendLayout();
+            label1 = new Label();
+            label3 = new Label();
+            licensesPanel = new FlowLayoutPanel();
+            SuspendLayout();
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(12, 10);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(174, 23);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "Third-party licenses";
-            this.label1.UseMnemonic = false;
+            label1.AutoSize = true;
+            label1.Font = new Font("Tahoma", 14.25F);
+            label1.Location = new Point(12, 10);
+            label1.Name = "label1";
+            label1.Size = new Size(174, 23);
+            label1.TabIndex = 3;
+            label1.Text = "Third-party licenses";
+            label1.UseMnemonic = false;
             // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(12, 37);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(537, 41);
-            this.label3.TabIndex = 4;
-            this.label3.Text = "Macro Deck uses some awesome free and open-source software. Some of them require " +
-    "their licenses to be included. Thank you all who created this awesome software!\r" +
-    "\n";
-            this.label3.UseMnemonic = false;
-            this.label3.Click += new System.EventHandler(this.label3_Click);
+            label3.Location = new Point(12, 37);
+            label3.Name = "label3";
+            label3.Size = new Size(537, 41);
+            label3.TabIndex = 4;
+            label3.Text = "Macro Deck uses some awesome free and open-source software. Some of them require their licenses to be included. Thank you all who created this awesome software!\r\n";
+            label3.UseMnemonic = false;
+            label3.Click += label3_Click;
             // 
             // licensesPanel
             // 
-            this.licensesPanel.AutoScroll = true;
-            this.licensesPanel.Location = new System.Drawing.Point(12, 81);
-            this.licensesPanel.Name = "licensesPanel";
-            this.licensesPanel.Size = new System.Drawing.Size(537, 538);
-            this.licensesPanel.TabIndex = 5;
+            licensesPanel.AutoScroll = true;
+            licensesPanel.Location = new Point(12, 81);
+            licensesPanel.Name = "licensesPanel";
+            licensesPanel.Size = new Size(537, 538);
+            licensesPanel.TabIndex = 5;
             // 
             // LicensesDialog
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(563, 632);
-            this.Controls.Add(this.licensesPanel);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.label1);
-            this.Name = "LicensesDialog";
-            this.Text = "LicensesDialog";
-            this.Load += new System.EventHandler(this.LicensesDialog_Load);
-            this.Controls.SetChildIndex(this.label1, 0);
-            this.Controls.SetChildIndex(this.label3, 0);
-            this.Controls.SetChildIndex(this.licensesPanel, 0);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            ClientSize = new Size(563, 632);
+            Controls.Add(licensesPanel);
+            Controls.Add(label3);
+            Controls.Add(label1);
+            Name = "LicensesDialog";
+            Text = "Licenses";
+            Load += LicensesDialog_Load;
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

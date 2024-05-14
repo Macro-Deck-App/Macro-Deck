@@ -33,138 +33,132 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// </summary>
         private void InitializeComponent()
         {
-            this.btnOk = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
-            this.qualityLowest = new System.Windows.Forms.RadioButton();
-            this.label1 = new System.Windows.Forms.Label();
-            this.qualityLow = new System.Windows.Forms.RadioButton();
-            this.qualityNormal = new System.Windows.Forms.RadioButton();
-            this.qualityHigh = new System.Windows.Forms.RadioButton();
-            this.qualityOriginal = new System.Windows.Forms.RadioButton();
-            this.lblInfo = new System.Windows.Forms.Label();
-            this.SuspendLayout();
+            btnOk = new ButtonPrimary();
+            qualityLowest = new RadioButton();
+            label1 = new Label();
+            qualityLow = new RadioButton();
+            qualityNormal = new RadioButton();
+            qualityHigh = new RadioButton();
+            qualityOriginal = new RadioButton();
+            lblInfo = new Label();
+            SuspendLayout();
             // 
             // btnOk
             // 
-            this.btnOk.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
-            this.btnOk.BorderRadius = 8;
-            this.btnOk.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnOk.FlatAppearance.BorderSize = 0;
-            this.btnOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnOk.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnOk.ForeColor = System.Drawing.Color.White;
-            this.btnOk.Location = new System.Drawing.Point(288, 188);
-            this.btnOk.Name = "btnOk";
-            this.btnOk.Size = new System.Drawing.Size(75, 25);
-            this.btnOk.TabIndex = 3;
-            this.btnOk.Text = "Ok";
-            this.btnOk.UseMnemonic = false;
-            this.btnOk.UseVisualStyleBackColor = false;
-            this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
+            btnOk.BorderRadius = 8;
+            btnOk.Cursor = Cursors.Hand;
+            btnOk.FlatAppearance.BorderSize = 0;
+            btnOk.FlatStyle = FlatStyle.Flat;
+            btnOk.Font = new Font("Tahoma", 9.75F);
+            btnOk.ForeColor = Color.White;
+            btnOk.HoverColor = Color.Empty;
+            btnOk.Icon = null;
+            btnOk.Location = new Point(288, 188);
+            btnOk.Name = "btnOk";
+            btnOk.Progress = 0;
+            btnOk.ProgressColor = Color.FromArgb(0, 103, 205);
+            btnOk.Size = new Size(75, 25);
+            btnOk.TabIndex = 3;
+            btnOk.Text = "Ok";
+            btnOk.UseMnemonic = false;
+            btnOk.UseVisualStyleBackColor = false;
+            btnOk.UseWindowsAccentColor = true;
+            btnOk.WriteProgress = true;
+            btnOk.Click += BtnOk_Click;
             // 
             // qualityLowest
             // 
-            this.qualityLowest.AutoSize = true;
-            this.qualityLowest.Location = new System.Drawing.Point(12, 144);
-            this.qualityLowest.Name = "qualityLowest";
-            this.qualityLowest.Size = new System.Drawing.Size(113, 20);
-            this.qualityLowest.TabIndex = 4;
-            this.qualityLowest.Text = "Lowest (100px)";
-            this.qualityLowest.UseMnemonic = false;
-            this.qualityLowest.UseVisualStyleBackColor = true;
+            qualityLowest.AutoSize = true;
+            qualityLowest.Location = new Point(12, 144);
+            qualityLowest.Name = "qualityLowest";
+            qualityLowest.Size = new Size(113, 20);
+            qualityLowest.TabIndex = 4;
+            qualityLowest.Text = "Lowest (100px)";
+            qualityLowest.UseMnemonic = false;
+            qualityLowest.UseVisualStyleBackColor = true;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(44, 12);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(59, 19);
-            this.label1.TabIndex = 5;
-            this.label1.Text = "Quality";
-            this.label1.UseMnemonic = false;
+            label1.AutoSize = true;
+            label1.Font = new Font("Tahoma", 12F);
+            label1.Location = new Point(44, 12);
+            label1.Name = "label1";
+            label1.Size = new Size(59, 19);
+            label1.TabIndex = 5;
+            label1.Text = "Quality";
+            label1.UseMnemonic = false;
             // 
             // qualityLow
             // 
-            this.qualityLow.AutoSize = true;
-            this.qualityLow.Location = new System.Drawing.Point(12, 118);
-            this.qualityLow.Name = "qualityLow";
-            this.qualityLow.Size = new System.Drawing.Size(96, 20);
-            this.qualityLow.TabIndex = 6;
-            this.qualityLow.Text = "Low (150px)";
-            this.qualityLow.UseMnemonic = false;
-            this.qualityLow.UseVisualStyleBackColor = true;
+            qualityLow.AutoSize = true;
+            qualityLow.Location = new Point(12, 118);
+            qualityLow.Name = "qualityLow";
+            qualityLow.Size = new Size(96, 20);
+            qualityLow.TabIndex = 6;
+            qualityLow.Text = "Low (150px)";
+            qualityLow.UseMnemonic = false;
+            qualityLow.UseVisualStyleBackColor = true;
             // 
             // qualityNormal
             // 
-            this.qualityNormal.AutoSize = true;
-            this.qualityNormal.Checked = true;
-            this.qualityNormal.Location = new System.Drawing.Point(12, 92);
-            this.qualityNormal.Name = "qualityNormal";
-            this.qualityNormal.Size = new System.Drawing.Size(114, 20);
-            this.qualityNormal.TabIndex = 7;
-            this.qualityNormal.TabStop = true;
-            this.qualityNormal.Text = "Normal (200px)";
-            this.qualityLowest.UseMnemonic = false;
-            this.qualityNormal.UseVisualStyleBackColor = true;
+            qualityNormal.AutoSize = true;
+            qualityNormal.Checked = true;
+            qualityNormal.Location = new Point(12, 92);
+            qualityNormal.Name = "qualityNormal";
+            qualityNormal.Size = new Size(114, 20);
+            qualityNormal.TabIndex = 7;
+            qualityNormal.TabStop = true;
+            qualityNormal.Text = "Normal (200px)";
+            qualityNormal.UseVisualStyleBackColor = true;
             // 
             // qualityHigh
             // 
-            this.qualityHigh.AutoSize = true;
-            this.qualityHigh.Location = new System.Drawing.Point(12, 66);
-            this.qualityHigh.Name = "qualityHigh";
-            this.qualityHigh.Size = new System.Drawing.Size(98, 20);
-            this.qualityHigh.TabIndex = 8;
-            this.qualityHigh.Text = "High (350px)";
-            this.qualityHigh.UseMnemonic = false;
-            this.qualityHigh.UseVisualStyleBackColor = true;
+            qualityHigh.AutoSize = true;
+            qualityHigh.Location = new Point(12, 66);
+            qualityHigh.Name = "qualityHigh";
+            qualityHigh.Size = new Size(98, 20);
+            qualityHigh.TabIndex = 8;
+            qualityHigh.Text = "High (350px)";
+            qualityHigh.UseMnemonic = false;
+            qualityHigh.UseVisualStyleBackColor = true;
             // 
             // qualityOriginal
             // 
-            this.qualityOriginal.AutoSize = true;
-            this.qualityOriginal.Location = new System.Drawing.Point(12, 40);
-            this.qualityOriginal.Name = "qualityOriginal";
-            this.qualityOriginal.Size = new System.Drawing.Size(69, 20);
-            this.qualityOriginal.TabIndex = 9;
-            this.qualityOriginal.Text = "Original";
-            this.qualityOriginal.UseMnemonic = false;
-            this.qualityOriginal.UseVisualStyleBackColor = true;
+            qualityOriginal.AutoSize = true;
+            qualityOriginal.Location = new Point(12, 40);
+            qualityOriginal.Name = "qualityOriginal";
+            qualityOriginal.Size = new Size(69, 20);
+            qualityOriginal.TabIndex = 9;
+            qualityOriginal.Text = "Original";
+            qualityOriginal.UseMnemonic = false;
+            qualityOriginal.UseVisualStyleBackColor = true;
             // 
             // lblInfo
             // 
-            this.lblInfo.Location = new System.Drawing.Point(148, 40);
-            this.lblInfo.Name = "lblInfo";
-            this.lblInfo.Size = new System.Drawing.Size(215, 145);
-            this.lblInfo.TabIndex = 10;
-            this.lblInfo.Text = "High quality icons can lead to an increase of memory usage and loading times espe" +
-    "cially when using many big animated gifs.\r\n\r\nFor gifs it is recommended to use t" +
-    "he low or the lowest preset.";
-            this.lblInfo.UseMnemonic = false;
+            lblInfo.Location = new Point(148, 40);
+            lblInfo.Name = "lblInfo";
+            lblInfo.Size = new Size(215, 145);
+            lblInfo.TabIndex = 10;
+            lblInfo.Text = "High quality icons can lead to an increase of memory usage and loading times especially when using many big animated gifs.\r\n\r\nFor gifs it is recommended to use the low or the lowest preset.";
+            lblInfo.UseMnemonic = false;
             // 
             // IconImportQuality
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(376, 224);
-            this.Controls.Add(this.lblInfo);
-            this.Controls.Add(this.qualityOriginal);
-            this.Controls.Add(this.qualityHigh);
-            this.Controls.Add(this.qualityNormal);
-            this.Controls.Add(this.qualityLow);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.qualityLowest);
-            this.Controls.Add(this.btnOk);
-            this.Name = "IconImportQuality";
-            this.Text = "IconImportQuality";
-            this.Controls.SetChildIndex(this.btnOk, 0);
-            this.Controls.SetChildIndex(this.qualityLowest, 0);
-            this.Controls.SetChildIndex(this.label1, 0);
-            this.Controls.SetChildIndex(this.qualityLow, 0);
-            this.Controls.SetChildIndex(this.qualityNormal, 0);
-            this.Controls.SetChildIndex(this.qualityHigh, 0);
-            this.Controls.SetChildIndex(this.qualityOriginal, 0);
-            this.Controls.SetChildIndex(this.lblInfo, 0);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            ClientSize = new Size(376, 224);
+            Controls.Add(lblInfo);
+            Controls.Add(qualityOriginal);
+            Controls.Add(qualityHigh);
+            Controls.Add(qualityNormal);
+            Controls.Add(qualityLow);
+            Controls.Add(label1);
+            Controls.Add(qualityLowest);
+            Controls.Add(btnOk);
+            Name = "IconImportQuality";
+            Text = "Icon import";
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

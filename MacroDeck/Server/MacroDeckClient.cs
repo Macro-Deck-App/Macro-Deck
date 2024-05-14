@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using SuchByte.MacroDeck.Device;
+﻿using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.Model;
 using SuchByte.MacroDeck.Profiles;
@@ -7,42 +6,11 @@ using SuchByte.MacroDeck.Server.DeviceMessage;
 
 namespace SuchByte.MacroDeck.Server;
 
-public class MacroDeckClient : IDisposable
+public class MacroDeckClient
 {
-    private IntPtr _bufferPtr;
-    private int BUFFER_SIZE = 1024 * 1024; // 1 MB
-    private bool _disposed;
-
     public MacroDeckClient(string sessionId)
     {
-        _bufferPtr = Marshal.AllocHGlobal(BUFFER_SIZE);
         SessionId = sessionId;
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (_disposed)
-            return;
-
-        if (disposing)
-        {
-            // Free any other managed objects here.
-        }
-
-        // Free any unmanaged objects here.
-        Marshal.FreeHGlobal(_bufferPtr);
-        _disposed = true;
-    }
-
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    ~MacroDeckClient()
-    {
-        Dispose(false);
     }
 
     private DeviceType _deviceType;

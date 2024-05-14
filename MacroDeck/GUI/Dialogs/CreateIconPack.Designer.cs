@@ -33,113 +33,150 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// </summary>
         private void InitializeComponent()
         {
-            this.btnOk = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
-            this.lblName = new System.Windows.Forms.Label();
-            this.iconPackName = new RoundedTextBox();
-            this.lblAuthor = new System.Windows.Forms.Label();
-            this.author = new RoundedTextBox();
-            this.version = new RoundedTextBox();
-            this.lblVersion = new System.Windows.Forms.Label();
-            this.SuspendLayout();
+            btnOk = new ButtonPrimary();
+            lblName = new Label();
+            iconPackName = new RoundedTextBox();
+            lblAuthor = new Label();
+            author = new RoundedTextBox();
+            version = new RoundedTextBox();
+            lblVersion = new Label();
+            SuspendLayout();
             // 
             // btnOk
             // 
-            this.btnOk.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
-            this.btnOk.BorderRadius = 8;
-            this.btnOk.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnOk.FlatAppearance.BorderSize = 0;
-            this.btnOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnOk.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnOk.ForeColor = System.Drawing.Color.White;
-            this.btnOk.Location = new System.Drawing.Point(212, 99);
-            this.btnOk.Name = "btnOk";
-            this.btnOk.Size = new System.Drawing.Size(75, 25);
-            this.btnOk.TabIndex = 5;
-            this.btnOk.Text = "Ok";
-            this.btnOk.UseMnemonic = false;
-            this.btnOk.UseVisualStyleBackColor = false;
-            this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
+            btnOk.BorderRadius = 8;
+            btnOk.Cursor = Cursors.Hand;
+            btnOk.FlatAppearance.BorderSize = 0;
+            btnOk.FlatStyle = FlatStyle.Flat;
+            btnOk.Font = new Font("Tahoma", 9.75F);
+            btnOk.ForeColor = Color.White;
+            btnOk.HoverColor = Color.Empty;
+            btnOk.Icon = null;
+            btnOk.Location = new Point(212, 99);
+            btnOk.Name = "btnOk";
+            btnOk.Progress = 0;
+            btnOk.ProgressColor = Color.FromArgb(0, 103, 205);
+            btnOk.Size = new Size(75, 25);
+            btnOk.TabIndex = 5;
+            btnOk.Text = "Ok";
+            btnOk.UseMnemonic = false;
+            btnOk.UseVisualStyleBackColor = false;
+            btnOk.UseWindowsAccentColor = true;
+            btnOk.WriteProgress = true;
+            btnOk.Click += BtnOk_Click;
             // 
             // lblName
             // 
-            this.lblName.AutoSize = true;
-            this.lblName.ForeColor = System.Drawing.Color.White;
-            this.lblName.Location = new System.Drawing.Point(12, 28);
-            this.lblName.Name = "lblName";
-            this.lblName.Size = new System.Drawing.Size(45, 16);
-            this.lblName.TabIndex = 4;
-            this.lblName.Text = "Name:";
-            this.lblName.UseMnemonic = false;
+            lblName.AutoSize = true;
+            lblName.ForeColor = Color.White;
+            lblName.Location = new Point(12, 28);
+            lblName.Name = "lblName";
+            lblName.Size = new Size(45, 16);
+            lblName.TabIndex = 4;
+            lblName.Text = "Name:";
+            lblName.UseMnemonic = false;
             // 
             // iconPackName
             // 
-            this.iconPackName.ForeColor = System.Drawing.Color.White;
-            this.iconPackName.Location = new System.Drawing.Point(80, 26);
-            this.iconPackName.Name = "iconPackName";
-            this.iconPackName.Size = new System.Drawing.Size(180, 23);
-            this.iconPackName.TabIndex = 3;
+            iconPackName.BackColor = Color.FromArgb(65, 65, 65);
+            iconPackName.Font = new Font("Tahoma", 9F);
+            iconPackName.ForeColor = Color.White;
+            iconPackName.Icon = null;
+            iconPackName.Location = new Point(80, 26);
+            iconPackName.MaxCharacters = 32767;
+            iconPackName.Multiline = false;
+            iconPackName.Name = "iconPackName";
+            iconPackName.Padding = new Padding(8, 5, 8, 5);
+            iconPackName.PasswordChar = false;
+            iconPackName.PlaceHolderColor = Color.Gray;
+            iconPackName.PlaceHolderText = "";
+            iconPackName.ReadOnly = false;
+            iconPackName.ScrollBars = ScrollBars.None;
+            iconPackName.SelectionStart = 0;
+            iconPackName.Size = new Size(180, 25);
+            iconPackName.TabIndex = 3;
+            iconPackName.TextAlignment = HorizontalAlignment.Left;
             // 
             // lblAuthor
             // 
-            this.lblAuthor.AutoSize = true;
-            this.lblAuthor.ForeColor = System.Drawing.Color.White;
-            this.lblAuthor.Location = new System.Drawing.Point(12, 57);
-            this.lblAuthor.Name = "lblAuthor";
-            this.lblAuthor.Size = new System.Drawing.Size(50, 16);
-            this.lblAuthor.TabIndex = 7;
-            this.lblAuthor.Text = "Author:";
-            this.lblAuthor.UseMnemonic = false;
+            lblAuthor.AutoSize = true;
+            lblAuthor.ForeColor = Color.White;
+            lblAuthor.Location = new Point(12, 57);
+            lblAuthor.Name = "lblAuthor";
+            lblAuthor.Size = new Size(50, 16);
+            lblAuthor.TabIndex = 7;
+            lblAuthor.Text = "Author:";
+            lblAuthor.UseMnemonic = false;
             // 
             // author
             // 
-            this.author.ForeColor = System.Drawing.Color.White;
-            this.author.Location = new System.Drawing.Point(80, 55);
-            this.author.Name = "author";
-            this.author.Size = new System.Drawing.Size(180, 23);
-            this.author.TabIndex = 6;
+            author.BackColor = Color.FromArgb(65, 65, 65);
+            author.Font = new Font("Tahoma", 9F);
+            author.ForeColor = Color.White;
+            author.Icon = null;
+            author.Location = new Point(80, 55);
+            author.MaxCharacters = 32767;
+            author.Multiline = false;
+            author.Name = "author";
+            author.Padding = new Padding(8, 5, 8, 5);
+            author.PasswordChar = false;
+            author.PlaceHolderColor = Color.Gray;
+            author.PlaceHolderText = "";
+            author.ReadOnly = false;
+            author.ScrollBars = ScrollBars.None;
+            author.SelectionStart = 0;
+            author.Size = new Size(180, 25);
+            author.TabIndex = 6;
+            author.TextAlignment = HorizontalAlignment.Left;
             // 
             // version
             // 
-            this.version.ForeColor = System.Drawing.Color.White;
-            this.version.Location = new System.Drawing.Point(80, 84);
-            this.version.Name = "version";
-            this.version.Size = new System.Drawing.Size(89, 23);
-            this.version.TabIndex = 8;
+            version.BackColor = Color.FromArgb(65, 65, 65);
+            version.Font = new Font("Tahoma", 9F);
+            version.ForeColor = Color.White;
+            version.Icon = null;
+            version.Location = new Point(80, 84);
+            version.MaxCharacters = 32767;
+            version.Multiline = false;
+            version.Name = "version";
+            version.Padding = new Padding(8, 5, 8, 5);
+            version.PasswordChar = false;
+            version.PlaceHolderColor = Color.Gray;
+            version.PlaceHolderText = "";
+            version.ReadOnly = false;
+            version.ScrollBars = ScrollBars.None;
+            version.SelectionStart = 0;
+            version.Size = new Size(89, 25);
+            version.TabIndex = 8;
+            version.TextAlignment = HorizontalAlignment.Left;
             // 
             // lblVersion
             // 
-            this.lblVersion.AutoSize = true;
-            this.lblVersion.ForeColor = System.Drawing.Color.White;
-            this.lblVersion.Location = new System.Drawing.Point(12, 86);
-            this.lblVersion.Name = "lblVersion";
-            this.lblVersion.Size = new System.Drawing.Size(55, 16);
-            this.lblVersion.TabIndex = 9;
-            this.lblVersion.Text = "Version:";
-            this.lblVersion.UseMnemonic = false;
+            lblVersion.AutoSize = true;
+            lblVersion.ForeColor = Color.White;
+            lblVersion.Location = new Point(12, 86);
+            lblVersion.Name = "lblVersion";
+            lblVersion.Size = new Size(55, 16);
+            lblVersion.TabIndex = 9;
+            lblVersion.Text = "Version:";
+            lblVersion.UseMnemonic = false;
             // 
             // CreateIconPack
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(299, 133);
-            this.Controls.Add(this.lblVersion);
-            this.Controls.Add(this.version);
-            this.Controls.Add(this.lblAuthor);
-            this.Controls.Add(this.author);
-            this.Controls.Add(this.btnOk);
-            this.Controls.Add(this.lblName);
-            this.Controls.Add(this.iconPackName);
-            this.Name = "CreateIconPack";
-            this.Text = "CreateIconPack";
-            this.Controls.SetChildIndex(this.iconPackName, 0);
-            this.Controls.SetChildIndex(this.lblName, 0);
-            this.Controls.SetChildIndex(this.btnOk, 0);
-            this.Controls.SetChildIndex(this.author, 0);
-            this.Controls.SetChildIndex(this.lblAuthor, 0);
-            this.Controls.SetChildIndex(this.version, 0);
-            this.Controls.SetChildIndex(this.lblVersion, 0);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            ClientSize = new Size(299, 133);
+            Controls.Add(lblVersion);
+            Controls.Add(version);
+            Controls.Add(lblAuthor);
+            Controls.Add(author);
+            Controls.Add(btnOk);
+            Controls.Add(lblName);
+            Controls.Add(iconPackName);
+            Name = "CreateIconPack";
+            Text = "Create icon pack";
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

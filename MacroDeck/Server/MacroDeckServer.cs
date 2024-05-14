@@ -104,7 +104,6 @@ public static class MacroDeckServer
             return;
         }
         
-        macroDeckClient.Dispose();
         Clients.Remove(macroDeckClient);
         MacroDeckLogger.Info(macroDeckClient.ClientId + " connection closed");
         OnDeviceConnectionStateChanged?.Invoke(macroDeckClient, EventArgs.Empty);
