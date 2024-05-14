@@ -17,7 +17,7 @@ using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Notifications;
-using SuchByte.MacroDeck.Pipes;
+using SuchByte.MacroDeck.Pipe;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Properties;
@@ -266,23 +266,22 @@ public class MacroDeck : NativeWindow
 
     public static void ShowMainWindow()
     {
-        if (SyncContext == null)
+        if (SyncContext is null)
         {
             CreateMainForm();
-        } else
+            return;
+        } 
+        
+        SyncContext.Send(_ =>
         {
-            SyncContext.Send(o =>
-            {
-                CreateMainForm();
-            }, null);
-        }
+            CreateMainForm();
+        }, null);
     }
 
     private static void CreateMainForm()
     {
         if (Application.OpenForms.OfType<MainWindow>().Any()
-            && _mainWindow.IsDisposed == false
-            && _mainWindow.IsHandleCreated)
+            && _mainWindow is { IsDisposed: false, IsHandleCreated: true })
         {
             if (_mainWindow.InvokeRequired)
             {

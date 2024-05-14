@@ -1,10 +1,7 @@
 ﻿using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Pipes;
 using SuchByte.MacroDeck.Startup;
 using System.Diagnostics;
-using System.Threading;
-using System.Windows.Forms;
-using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Pipe;
 
 namespace SuchByte.MacroDeck;
 
@@ -25,26 +22,32 @@ internal class Program
 
 
         var startParameters = StartParameters.ParseParameters(args);
-        CheckRunningInstance(startParameters.IgnorePidCheck);
+        CheckRunningInstance(startParameters.IgnorePidCheck).Wait();
         
         ApplicationPaths.Initialize(startParameters.PortableMode);
         
         MacroDeck.Start(startParameters);
     }
 
-    private static void CheckRunningInstance(int ignoredPid)
+    private static async Task CheckRunningInstance(int ignoredPid)
     {
         var proc = Process.GetCurrentProcess();
-        var processes = Process.GetProcessesByName(proc.ProcessName).Where(x => ignoredPid == 0 || x.Id != ignoredPid).ToArray();
-        if (processes?.Length <= 1) return;
-        if (MacroDeckPipeClient.SendShowMainWindowMessage())
+        var processes = Process.GetProcessesByName(proc.ProcessName)
+            .Where(x => ignoredPid == 0 || x.Id != ignoredPid)
+            .ToArray();
+        if (processes.Length <= 1)
+        {
+            return;
+        }
+        
+        if (await MacroDeckPipeClient.SendShowMainWindowMessage())
         {
             Environment.Exit(0);
             return;
         }
 
         // Kill instance if no response
-        foreach (var p in processes?.Where(x => x.Id != proc.Id) ?? Array.Empty<Process>())
+        foreach (var p in processes.Where(x => x.Id != proc.Id))
         {
             try
             {
