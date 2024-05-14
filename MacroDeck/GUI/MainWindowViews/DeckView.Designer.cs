@@ -96,6 +96,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             roundedPanel3 = new RoundedPanel();
             label2 = new Label();
             label3 = new Label();
+            flowLayoutPanel1 = new FlowLayoutPanel();
+            btnDiscord = new ButtonPrimary();
+            btnDonate = new ButtonPrimary();
             foldersContextMenu.SuspendLayout();
             actionButtonContextMenu.SuspendLayout();
             ((ISupportInitialize)btnAddProfile).BeginInit();
@@ -109,6 +112,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             roundedPanel1.SuspendLayout();
             roundedPanel2.SuspendLayout();
             roundedPanel3.SuspendLayout();
+            flowLayoutPanel1.SuspendLayout();
             SuspendLayout();
             // 
             // foldersView
@@ -132,9 +136,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // buttonPanel
             // 
             buttonPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            buttonPanel.Location = new Point(230, 45);
+            buttonPanel.Location = new Point(233, 45);
             buttonPanel.Name = "buttonPanel";
-            buttonPanel.Size = new Size(721, 514);
+            buttonPanel.Size = new Size(712, 514);
             buttonPanel.TabIndex = 5;
             // 
             // actionButtonContextMenuItemEdit
@@ -269,7 +273,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             boxProfiles.Font = new Font("Tahoma", 11.25F);
             boxProfiles.ForeColor = Color.White;
             boxProfiles.Icon = null;
-            boxProfiles.Location = new Point(177, 3);
+            boxProfiles.Location = new Point(173, 3);
             boxProfiles.Name = "boxProfiles";
             boxProfiles.Padding = new Padding(8, 2, 8, 2);
             boxProfiles.SelectedIndex = -1;
@@ -288,7 +292,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnAddProfile.Font = new Font("Tahoma", 9.75F);
             btnAddProfile.ForeColor = Color.White;
             btnAddProfile.HoverImage = Resources.Create_Hover;
-            btnAddProfile.Location = new Point(468, 6);
+            btnAddProfile.Location = new Point(464, 6);
             btnAddProfile.Name = "btnAddProfile";
             btnAddProfile.Size = new Size(25, 25);
             btnAddProfile.TabIndex = 12;
@@ -306,7 +310,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnDeleteProfile.Font = new Font("Tahoma", 9.75F);
             btnDeleteProfile.ForeColor = Color.White;
             btnDeleteProfile.HoverImage = Resources.Delete_Hover;
-            btnDeleteProfile.Location = new Point(526, 6);
+            btnDeleteProfile.Location = new Point(522, 6);
             btnDeleteProfile.Name = "btnDeleteProfile";
             btnDeleteProfile.Size = new Size(25, 25);
             btnDeleteProfile.TabIndex = 13;
@@ -456,7 +460,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnEditProfile.Font = new Font("Tahoma", 9.75F);
             btnEditProfile.ForeColor = Color.White;
             btnEditProfile.HoverImage = Resources.Edit_Hover;
-            btnEditProfile.Location = new Point(497, 6);
+            btnEditProfile.Location = new Point(493, 6);
             btnEditProfile.Name = "btnEditProfile";
             btnEditProfile.Size = new Size(25, 25);
             btnEditProfile.TabIndex = 23;
@@ -470,9 +474,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             panel1.Controls.Add(btnAddProfile);
             panel1.Controls.Add(btnDeleteProfile);
             panel1.Controls.Add(btnEditProfile);
-            panel1.Location = new Point(230, 3);
+            panel1.Location = new Point(233, 3);
             panel1.Name = "panel1";
-            panel1.Size = new Size(721, 36);
+            panel1.Size = new Size(712, 36);
             panel1.TabIndex = 24;
             // 
             // lblFolders
@@ -577,11 +581,65 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             label3.Text = "Quick Setup";
             label3.TextAlign = ContentAlignment.MiddleLeft;
             // 
+            // flowLayoutPanel1
+            // 
+            flowLayoutPanel1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            flowLayoutPanel1.Controls.Add(btnDiscord);
+            flowLayoutPanel1.Controls.Add(btnDonate);
+            flowLayoutPanel1.FlowDirection = FlowDirection.BottomUp;
+            flowLayoutPanel1.Location = new Point(951, 363);
+            flowLayoutPanel1.Name = "flowLayoutPanel1";
+            flowLayoutPanel1.Size = new Size(180, 196);
+            flowLayoutPanel1.TabIndex = 45;
+            // 
+            // btnDiscord
+            // 
+            btnDiscord.BorderRadius = 8;
+            btnDiscord.FlatAppearance.BorderSize = 0;
+            btnDiscord.FlatStyle = FlatStyle.Flat;
+            btnDiscord.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnDiscord.ForeColor = Color.White;
+            btnDiscord.HoverColor = Color.FromArgb(94, 111, 184);
+            btnDiscord.Icon = null;
+            btnDiscord.Location = new Point(3, 153);
+            btnDiscord.Name = "btnDiscord";
+            btnDiscord.Progress = 0;
+            btnDiscord.ProgressColor = Color.FromArgb(0, 103, 205);
+            btnDiscord.Size = new Size(174, 40);
+            btnDiscord.TabIndex = 2;
+            btnDiscord.Text = "Join our Discord server";
+            btnDiscord.UseVisualStyleBackColor = true;
+            btnDiscord.UseWindowsAccentColor = true;
+            btnDiscord.WriteProgress = true;
+            btnDiscord.Click += btnDiscord_Click;
+            // 
+            // btnDonate
+            // 
+            btnDonate.BorderRadius = 8;
+            btnDonate.FlatAppearance.BorderSize = 0;
+            btnDonate.FlatStyle = FlatStyle.Flat;
+            btnDonate.Font = new Font("Tahoma", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnDonate.ForeColor = Color.White;
+            btnDonate.HoverColor = Color.FromArgb(181, 136, 2);
+            btnDonate.Icon = null;
+            btnDonate.Location = new Point(3, 107);
+            btnDonate.Name = "btnDonate";
+            btnDonate.Progress = 0;
+            btnDonate.ProgressColor = Color.FromArgb(0, 103, 205);
+            btnDonate.Size = new Size(174, 40);
+            btnDonate.TabIndex = 3;
+            btnDonate.Text = "Donate";
+            btnDonate.UseVisualStyleBackColor = true;
+            btnDonate.UseWindowsAccentColor = true;
+            btnDonate.WriteProgress = true;
+            btnDonate.Click += btnDonate_Click;
+            // 
             // DeckView
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
             BackColor = Color.FromArgb(45, 45, 45);
+            Controls.Add(flowLayoutPanel1);
             Controls.Add(roundedPanel3);
             Controls.Add(qrCodeBox);
             Controls.Add(roundedPanel2);
@@ -615,6 +673,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             roundedPanel1.ResumeLayout(false);
             roundedPanel2.ResumeLayout(false);
             roundedPanel3.ResumeLayout(false);
+            flowLayoutPanel1.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -661,5 +720,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private RoundedPanel roundedPanel3;
         private Label label2;
         private Label label3;
+        private FlowLayoutPanel flowLayoutPanel1;
+        private ButtonPrimary buttonPrimary1;
+        private ButtonPrimary buttonPrimary2;
+        private ButtonPrimary buttonPrimary3;
+        private ButtonPrimary btnDonate;
+        private ButtonPrimary btnDiscord;
     }
 }

@@ -33,82 +33,79 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// </summary>
         private void InitializeComponent()
         {
-            this.lblVersion = new System.Windows.Forms.Label();
-            this.version = new SuchByte.MacroDeck.GUI.CustomControls.RoundedTextBox();
-            this.btnOk = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
-            this.SuspendLayout();
+            lblVersion = new Label();
+            version = new RoundedTextBox();
+            btnOk = new ButtonPrimary();
+            SuspendLayout();
             // 
             // lblVersion
             // 
-            this.lblVersion.ForeColor = System.Drawing.Color.White;
-            this.lblVersion.Location = new System.Drawing.Point(14, 15);
-            this.lblVersion.Name = "lblVersion";
-            this.lblVersion.Size = new System.Drawing.Size(75, 25);
-            this.lblVersion.TabIndex = 14;
-            this.lblVersion.Text = "Version:";
-            this.lblVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.lblVersion.UseMnemonic = false;
+            lblVersion.ForeColor = Color.White;
+            lblVersion.Location = new Point(14, 15);
+            lblVersion.Name = "lblVersion";
+            lblVersion.Size = new Size(75, 25);
+            lblVersion.TabIndex = 14;
+            lblVersion.Text = "Version:";
+            lblVersion.TextAlign = ContentAlignment.MiddleLeft;
+            lblVersion.UseMnemonic = false;
             // 
             // version
             // 
-            this.version.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.version.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.version.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.version.ForeColor = System.Drawing.Color.White;
-            this.version.Icon = null;
-            this.version.Location = new System.Drawing.Point(95, 15);
-            this.version.MaxCharacters = 32767;
-            this.version.Multiline = false;
-            this.version.Name = "version";
-            this.version.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
-            this.version.PasswordChar = false;
-            this.version.PlaceHolderColor = System.Drawing.Color.Gray;
-            this.version.PlaceHolderText = "";
-            this.version.ReadOnly = false;
-            this.version.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.version.SelectionStart = 0;
-            this.version.Size = new System.Drawing.Size(89, 25);
-            this.version.TabIndex = 13;
-            this.version.TextAlignment = System.Windows.Forms.HorizontalAlignment.Left;
+            version.BackColor = Color.FromArgb(65, 65, 65);
+            version.Cursor = Cursors.Hand;
+            version.Font = new Font("Tahoma", 9F);
+            version.ForeColor = Color.White;
+            version.Icon = null;
+            version.Location = new Point(95, 15);
+            version.MaxCharacters = 32767;
+            version.Multiline = false;
+            version.Name = "version";
+            version.Padding = new Padding(8, 5, 8, 5);
+            version.PasswordChar = false;
+            version.PlaceHolderColor = Color.Gray;
+            version.PlaceHolderText = "";
+            version.ReadOnly = false;
+            version.ScrollBars = ScrollBars.None;
+            version.SelectionStart = 0;
+            version.Size = new Size(89, 25);
+            version.TabIndex = 13;
+            version.TextAlignment = HorizontalAlignment.Left;
             // 
             // btnOk
             // 
-            this.btnOk.BorderRadius = 8;
-            this.btnOk.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnOk.FlatAppearance.BorderSize = 0;
-            this.btnOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnOk.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnOk.ForeColor = System.Drawing.Color.White;
-            this.btnOk.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
-            this.btnOk.Icon = null;
-            this.btnOk.Location = new System.Drawing.Point(141, 46);
-            this.btnOk.Name = "btnOk";
-            this.btnOk.Progress = 0;
-            this.btnOk.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
-            this.btnOk.Size = new System.Drawing.Size(75, 25);
-            this.btnOk.TabIndex = 10;
-            this.btnOk.Text = "Ok";
-            this.btnOk.UseMnemonic = false;
-            this.btnOk.UseVisualStyleBackColor = false;
-            this.btnOk.UseWindowsAccentColor = true;
-            this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
+            btnOk.BorderRadius = 8;
+            btnOk.Cursor = Cursors.Hand;
+            btnOk.FlatAppearance.BorderSize = 0;
+            btnOk.FlatStyle = FlatStyle.Flat;
+            btnOk.Font = new Font("Tahoma", 9.75F);
+            btnOk.ForeColor = Color.White;
+            btnOk.HoverColor = Color.FromArgb(0, 89, 184);
+            btnOk.Icon = null;
+            btnOk.Location = new Point(141, 46);
+            btnOk.Name = "btnOk";
+            btnOk.Progress = 0;
+            btnOk.ProgressColor = Color.FromArgb(0, 46, 94);
+            btnOk.Size = new Size(75, 25);
+            btnOk.TabIndex = 10;
+            btnOk.Text = "Ok";
+            btnOk.UseMnemonic = false;
+            btnOk.UseVisualStyleBackColor = false;
+            btnOk.UseWindowsAccentColor = true;
+            btnOk.WriteProgress = true;
+            btnOk.Click += BtnOk_Click;
             // 
             // ExportIconPackDialog
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(220, 84);
-            this.Controls.Add(this.lblVersion);
-            this.Controls.Add(this.version);
-            this.Controls.Add(this.btnOk);
-            this.Location = new System.Drawing.Point(0, 0);
-            this.Name = "ExportIconPackDialog";
-            this.Text = "ExportIconPackDialog";
-            this.Load += new System.EventHandler(this.ExportIconPackDialog_Load);
-            this.Controls.SetChildIndex(this.btnOk, 0);
-            this.Controls.SetChildIndex(this.version, 0);
-            this.Controls.SetChildIndex(this.lblVersion, 0);
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            ClientSize = new Size(220, 84);
+            Controls.Add(lblVersion);
+            Controls.Add(version);
+            Controls.Add(btnOk);
+            Name = "ExportIconPackDialog";
+            Text = "Export icon pack";
+            Load += ExportIconPackDialog_Load;
+            ResumeLayout(false);
         }
 
         #endregion

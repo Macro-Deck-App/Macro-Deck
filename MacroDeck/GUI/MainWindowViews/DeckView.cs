@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics;
+using System.Drawing;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.ActionButton;
 using SuchByte.MacroDeck.Enums;
@@ -27,15 +28,37 @@ public partial class DeckView : UserControl
 
     private Control _buttonClicked;
 
+    private readonly MainWindow _mainWindow;
+
     public MacroDeckFolder CurrentFolder => _currentFolder;
 
-    public DeckView()
+    public DeckView(MainWindow mainWindow)
     {
         InitializeComponent();
         Dock = DockStyle.Fill;
         UpdateTranslation();
         _currentFolder = ProfileManager.CurrentProfile.Folders.FirstOrDefault();
         qrCodeBox.BackgroundImage = QrCodeService.Instance.GetQuickSetupQrCode();
+        _mainWindow = mainWindow;
+        HandleCreated += DeckView_HandleCreated;
+        HandleDestroyed += DeckView_HandleDestroyed;
+    }
+
+    private void DeckView_HandleDestroyed(object? sender, EventArgs e)
+    {
+        _mainWindow.ResizeEnd -= MainWindow_ResizeEnd;
+        _mainWindow.FormWindowStateChanged -= MainWindow_FormWindowStateChanged;
+    }
+
+    private void DeckView_HandleCreated(object? sender, EventArgs e)
+    {
+        _mainWindow.ResizeEnd += MainWindow_ResizeEnd;
+        _mainWindow.FormWindowStateChanged += MainWindow_FormWindowStateChanged;
+    }
+
+    private void MainWindow_FormWindowStateChanged(object? sender, EventArgs e)
+    {
+        UpdateButtons();
     }
 
     private void MainWindow_ResizeEnd(object sender, EventArgs e)
@@ -88,7 +111,8 @@ public partial class DeckView : UserControl
                     var childDirectoryNode = new TreeNode(directory.DisplayName) { Tag = directory };
                     Invoke(new Action(() => currentNode.Nodes.Add(childDirectoryNode)));
                     stack.Push(childDirectoryNode);
-                } catch { }
+                }
+                catch { }
             }
         }
         foldersView.Nodes.Add(node);
@@ -180,7 +204,8 @@ public partial class DeckView : UserControl
             }
 
             button.BackColor = ProfileManager.CurrentProfile.ButtonBackground ? actionButton.BackColorOn : Color.Transparent;
-        } else
+        }
+        else
         {
             if (actionButton.LabelOff != null && !string.IsNullOrWhiteSpace(actionButton.LabelOff.LabelBase64))
             {
@@ -349,7 +374,7 @@ public partial class DeckView : UserControl
                     }
                 }
             });
-                
+
             ProfileManager.Save();
             UpdateButtons();
             MacroDeckServer.UpdateFolder(_currentFolder);
@@ -372,7 +397,7 @@ public partial class DeckView : UserControl
     private void ActionButton_Down(object sender, MouseEventArgs e)
     {
         var button = (RoundedButton)sender;
-            
+
         _buttonClicked = button;
         switch (e.Button)
         {
@@ -471,8 +496,6 @@ public partial class DeckView : UserControl
             LoadProfileSettings();
             UpdateButtons();
         });
-        var mainWindow = (Form)Parent.Parent;
-        mainWindow.ResizeEnd += MainWindow_ResizeEnd;
     }
 
     private void LoadProfiles()
@@ -628,7 +651,8 @@ public partial class DeckView : UserControl
         ProfileManager.CurrentProfile = profile;
         _currentFolder = profile.Folders.FirstOrDefault();
         UpdateButtons(true);
-        Invoke(() => {
+        Invoke(() =>
+        {
             boxProfiles.Text = profile.DisplayName;
             UpdateFolders();
             LoadProfileSettings();
@@ -754,5 +778,29 @@ public partial class DeckView : UserControl
         var actionButton = _currentFolder.ActionButtons.Find(aB => aB.Position_X == column && aB.Position_Y == row);
         MacroDeckServer.Execute(actionButton, "", buttonPressType);
 
+    }
+
+    private void btnDonate_Click(object sender, EventArgs e)
+    {
+        var p = new Process
+        {
+            StartInfo = new ProcessStartInfo("https://ko-fi.com/manuelmayer")
+            {
+                UseShellExecute = true,
+            }
+        };
+        p.Start();
+    }
+
+    private void btnDiscord_Click(object sender, EventArgs e)
+    {
+        var p = new Process
+        {
+            StartInfo = new ProcessStartInfo("https://discord.macro-deck.app")
+            {
+                UseShellExecute = true,
+            }
+        };
+        p.Start();
     }
 }

@@ -32,71 +32,67 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// </summary>
         private void InitializeComponent()
         {
-            this.jsonTextBox = new SuchByte.MacroDeck.GUI.CustomControls.RoundedTextBox();
-            this.btnApply = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
-            this.SuspendLayout();
+            jsonTextBox = new RoundedTextBox();
+            btnApply = new ButtonPrimary();
+            SuspendLayout();
             // 
             // jsonTextBox
             // 
-            this.jsonTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.jsonTextBox.AutoScroll = true;
-            this.jsonTextBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.jsonTextBox.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.jsonTextBox.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.jsonTextBox.Icon = null;
-            this.jsonTextBox.Location = new System.Drawing.Point(10, 46);
-            this.jsonTextBox.MaxCharacters = 32767;
-            this.jsonTextBox.Multiline = true;
-            this.jsonTextBox.Name = "jsonTextBox";
-            this.jsonTextBox.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
-            this.jsonTextBox.PasswordChar = false;
-            this.jsonTextBox.PlaceHolderColor = System.Drawing.Color.Gray;
-            this.jsonTextBox.PlaceHolderText = "";
-            this.jsonTextBox.ReadOnly = false;
-            this.jsonTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.jsonTextBox.SelectionStart = 0;
-            this.jsonTextBox.Size = new System.Drawing.Size(1050, 493);
-            this.jsonTextBox.TabIndex = 2;
-            this.jsonTextBox.TextAlignment = System.Windows.Forms.HorizontalAlignment.Left;
+            jsonTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            jsonTextBox.AutoScroll = true;
+            jsonTextBox.BackColor = Color.FromArgb(65, 65, 65);
+            jsonTextBox.Cursor = Cursors.Hand;
+            jsonTextBox.Font = new Font("Tahoma", 9F);
+            jsonTextBox.Icon = null;
+            jsonTextBox.Location = new Point(10, 46);
+            jsonTextBox.MaxCharacters = 32767;
+            jsonTextBox.Multiline = true;
+            jsonTextBox.Name = "jsonTextBox";
+            jsonTextBox.Padding = new Padding(8, 5, 8, 5);
+            jsonTextBox.PasswordChar = false;
+            jsonTextBox.PlaceHolderColor = Color.Gray;
+            jsonTextBox.PlaceHolderText = "";
+            jsonTextBox.ReadOnly = false;
+            jsonTextBox.ScrollBars = ScrollBars.Vertical;
+            jsonTextBox.SelectionStart = 0;
+            jsonTextBox.Size = new Size(1050, 493);
+            jsonTextBox.TabIndex = 2;
+            jsonTextBox.TextAlignment = HorizontalAlignment.Left;
             // 
             // btnApply
             // 
-            this.btnApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnApply.BorderRadius = 8;
-            this.btnApply.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnApply.FlatAppearance.BorderSize = 0;
-            this.btnApply.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnApply.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnApply.ForeColor = System.Drawing.Color.White;
-            this.btnApply.HoverColor = System.Drawing.Color.Empty;
-            this.btnApply.Icon = null;
-            this.btnApply.Location = new System.Drawing.Point(960, 545);
-            this.btnApply.Name = "btnApply";
-            this.btnApply.Progress = 0;
-            this.btnApply.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(225)))));
-            this.btnApply.Size = new System.Drawing.Size(100, 25);
-            this.btnApply.TabIndex = 3;
-            this.btnApply.Text = "Apply";
-            this.btnApply.UseMnemonic = false;
-            this.btnApply.UseVisualStyleBackColor = true;
-            this.btnApply.UseWindowsAccentColor = true;
-            this.btnApply.Click += new System.EventHandler(this.BtnApply_Click);
+            btnApply.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnApply.BorderRadius = 8;
+            btnApply.Cursor = Cursors.Hand;
+            btnApply.FlatAppearance.BorderSize = 0;
+            btnApply.FlatStyle = FlatStyle.Flat;
+            btnApply.Font = new Font("Tahoma", 9.75F);
+            btnApply.ForeColor = Color.White;
+            btnApply.HoverColor = Color.Empty;
+            btnApply.Icon = null;
+            btnApply.Location = new Point(960, 545);
+            btnApply.Name = "btnApply";
+            btnApply.Progress = 0;
+            btnApply.ProgressColor = Color.FromArgb(0, 103, 225);
+            btnApply.Size = new Size(100, 25);
+            btnApply.TabIndex = 3;
+            btnApply.Text = "Apply";
+            btnApply.UseMnemonic = false;
+            btnApply.UseVisualStyleBackColor = true;
+            btnApply.UseWindowsAccentColor = true;
+            btnApply.WriteProgress = true;
+            btnApply.Click += BtnApply_Click;
             // 
             // JsonButtonEditor
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(1070, 577);
-            this.Controls.Add(this.btnApply);
-            this.Controls.Add(this.jsonTextBox);
-            this.Location = new System.Drawing.Point(0, 0);
-            this.Name = "JsonButtonEditor";
-            this.Text = "JsonButtonEditor";
-            this.Controls.SetChildIndex(this.jsonTextBox, 0);
-            this.Controls.SetChildIndex(this.btnApply, 0);
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            ClientSize = new Size(1070, 577);
+            Controls.Add(btnApply);
+            Controls.Add(jsonTextBox);
+            Name = "JsonButtonEditor";
+            Text = "Json editor";
+            ResumeLayout(false);
         }
 
         #endregion
