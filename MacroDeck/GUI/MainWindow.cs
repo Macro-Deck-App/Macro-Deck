@@ -1,8 +1,4 @@
-﻿using System.Drawing;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Windows.Forms;
-using SuchByte.MacroDeck.DataTypes.Updater;
+﻿using SuchByte.MacroDeck.DataTypes.Updater;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
@@ -14,7 +10,6 @@ using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
 using SuchByte.MacroDeck.Services;
-using SuchByte.MacroDeck.Startup;
 using Form = SuchByte.MacroDeck.GUI.CustomControls.Form;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
@@ -31,7 +26,7 @@ public partial class MainWindow : Form
         {
             if (_deckView is null || _deckView.IsDisposed || !_deckView.IsHandleCreated)
             {
-                _deckView = new DeckView();
+                _deckView = new DeckView(this);
             }
             return _deckView;
         }
@@ -47,7 +42,7 @@ public partial class MainWindow : Form
         UpdateService.Instance().UpdateAvailable += UpdateAvailable;
         Shown += MainWindowShown;
 
-        _deckView = new DeckView();
+        _deckView = new DeckView(this);
     }
 
     private void UpdateAvailable(object? sender, UpdateApiVersionInfo e)
@@ -118,7 +113,6 @@ public partial class MainWindow : Form
         if (MacroDeck.SafeMode)
         {
             BackColor = Color.FromArgb(99, 0, 0);
-            lblSafeMode.Visible = true;
             using var msgBox = new MessageBox();
             msgBox.ShowDialog("Safe mode", "Macro Deck was started in safe mode! This means no changes on the action buttons will be saved to prevent damage.", MessageBoxButtons.OK);
         }
@@ -136,8 +130,6 @@ public partial class MainWindow : Form
             using var updateAvailableDialog = new UpdateAvailableDialog(updateApiVersionInfo);
             updateAvailableDialog.ShowDialog();
         }
-
-        this.qrCodeBox.BackgroundImage = QrCodeService.Instance.GetQuickSetupQrCode();
     }
 
     private void MainWindow_Load(object? sender, EventArgs e)

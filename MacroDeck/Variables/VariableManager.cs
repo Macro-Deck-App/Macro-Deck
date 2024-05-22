@@ -69,50 +69,50 @@ public static class VariableManager
         variable.Type = type.ToString();
         variable.Creator = creator;
 
-        if (!variable.Value.Equals(value))
+        if (variable.Value.Equals(value))
         {
-            switch (type)
-            {
-                case VariableType.Bool:
-                    if (bool.TryParse(value.ToString(), out var boolResult))
-                    {
-                        value = boolResult;
-                    }
-                    else
-                    {
-                        value = false;
-                    }
-                    variable.Value = value.ToString();
-                    break;
-                case VariableType.Float:
-                    if (float.TryParse(value.ToString().Replace(".", Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator), out var floatResult))
-                    {
-                        value = floatResult;
-                    }
-                    else
-                    {
-                        value = 0.0f;
-                    }
-                    variable.Value = ((float)value).ToString();
-                    break;
-                case VariableType.Integer:
-                    if (int.TryParse(value.ToString(), out var intResult))
-                    {
-                        value = intResult;
-                    }
-                    else
-                    {
-                        value = 0;
-                    }
-                    variable.Value = value.ToString();
-                    break;
-                case VariableType.String:
-                default:
-                    variable.Value = value.ToString();
-                    break;
-            }
+            return variable;
+        }
 
-            OnVariableChanged?.Invoke(variable, EventArgs.Empty);
+        switch (type)
+        {
+            case VariableType.Bool:
+                if (bool.TryParse(value.ToString(), out var boolResult))
+                {
+                    value = boolResult;
+                }
+                else
+                {
+                    value = false;
+                }
+                variable.Value = value.ToString();
+                break;
+            case VariableType.Float:
+                if (float.TryParse(value.ToString().Replace(".", Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator), out var floatResult))
+                {
+                    value = floatResult;
+                }
+                else
+                {
+                    value = 0.0f;
+                }
+                variable.Value = ((float)value).ToString();
+                break;
+            case VariableType.Integer:
+                if (int.TryParse(value.ToString(), out var intResult))
+                {
+                    value = intResult;
+                }
+                else
+                {
+                    value = 0;
+                }
+                variable.Value = value.ToString();
+                break;
+            case VariableType.String:
+            default:
+                variable.Value = value.ToString();
+                break;
         }
 
         try
@@ -123,7 +123,9 @@ public static class VariableManager
         {
             MacroDeckLogger.Error($"Error while updating variable {variable.Name}:\n{ex.Message}");
         }
-            
+
+        OnVariableChanged?.Invoke(variable, EventArgs.Empty);
+
         return variable;
     }
 

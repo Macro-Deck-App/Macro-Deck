@@ -69,8 +69,6 @@ namespace SuchByte.MacroDeck.GUI
             btnSettings = new ContentSelectorButton();
             lblNumClientsConnected = new Label();
             navigation = new RoundedPanel();
-            qrCodeBox = new RoundedPanel();
-            label1 = new Label();
             contentButtonPanel.SuspendLayout();
             ((ISupportInitialize)btnDeck).BeginInit();
             ((ISupportInitialize)btnExtensions).BeginInit();
@@ -80,32 +78,27 @@ namespace SuchByte.MacroDeck.GUI
             navigation.SuspendLayout();
             SuspendLayout();
             // 
-            // lblSafeMode
-            // 
-            lblSafeMode.Margin = new Padding(10, 0, 10, 0);
-            lblSafeMode.Size = new Size(333, 42);
-            // 
             // lblVersion
             // 
-            lblVersion.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            lblVersion.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             lblVersion.Font = new Font("Tahoma", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblVersion.ForeColor = Color.White;
-            lblVersion.Location = new Point(1046, 613);
+            lblVersion.Location = new Point(60, 615);
             lblVersion.Margin = new Padding(9, 0, 9, 0);
             lblVersion.Name = "lblVersion";
             lblVersion.Size = new Size(154, 20);
             lblVersion.TabIndex = 3;
             lblVersion.Text = "2.0.0";
-            lblVersion.TextAlign = ContentAlignment.MiddleRight;
+            lblVersion.TextAlign = ContentAlignment.MiddleLeft;
             lblVersion.UseMnemonic = false;
             // 
             // contentPanel
             // 
             contentPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            contentPanel.Location = new Point(65, 42);
-            contentPanel.Margin = new Padding(9, 4, 9, 4);
+            contentPanel.Location = new Point(64, 0);
+            contentPanel.Margin = new Padding(0);
             contentPanel.Name = "contentPanel";
-            contentPanel.Size = new Size(896, 591);
+            contentPanel.Size = new Size(1136, 615);
             contentPanel.TabIndex = 4;
             // 
             // contentButtonPanel
@@ -122,7 +115,7 @@ namespace SuchByte.MacroDeck.GUI
             contentButtonPanel.Location = new Point(8, 7);
             contentButtonPanel.Margin = new Padding(0);
             contentButtonPanel.Name = "contentButtonPanel";
-            contentButtonPanel.Size = new Size(45, 528);
+            contentButtonPanel.Size = new Size(45, 572);
             contentButtonPanel.TabIndex = 5;
             // 
             // btnNotifications
@@ -245,7 +238,7 @@ namespace SuchByte.MacroDeck.GUI
             btnSettings.Cursor = Cursors.Hand;
             btnSettings.Font = new Font("Tahoma", 9.75F);
             btnSettings.ForeColor = Color.White;
-            btnSettings.Location = new Point(8, 541);
+            btnSettings.Location = new Point(8, 585);
             btnSettings.Margin = new Padding(12, 6, 12, 6);
             btnSettings.Name = "btnSettings";
             btnSettings.Selected = false;
@@ -259,7 +252,7 @@ namespace SuchByte.MacroDeck.GUI
             lblNumClientsConnected.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             lblNumClientsConnected.Font = new Font("Tahoma", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblNumClientsConnected.ForeColor = Color.White;
-            lblNumClientsConnected.Location = new Point(1046, 593);
+            lblNumClientsConnected.Location = new Point(1046, 615);
             lblNumClientsConnected.Margin = new Padding(9, 0, 9, 0);
             lblNumClientsConnected.Name = "lblNumClientsConnected";
             lblNumClientsConnected.Size = new Size(154, 20);
@@ -270,38 +263,15 @@ namespace SuchByte.MacroDeck.GUI
             // 
             // navigation
             // 
-            navigation.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             navigation.BackColor = Color.FromArgb(32, 32, 32);
             navigation.Controls.Add(contentButtonPanel);
             navigation.Controls.Add(btnSettings);
-            navigation.Location = new Point(0, 42);
+            navigation.Dock = DockStyle.Left;
+            navigation.Location = new Point(0, 0);
             navigation.Margin = new Padding(0);
             navigation.Name = "navigation";
-            navigation.Size = new Size(60, 591);
+            navigation.Size = new Size(60, 635);
             navigation.TabIndex = 15;
-            // 
-            // qrCodeBox
-            // 
-            qrCodeBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            qrCodeBox.BackgroundImageLayout = ImageLayout.Stretch;
-            qrCodeBox.Location = new Point(973, 65);
-            qrCodeBox.Name = "qrCodeBox";
-            qrCodeBox.Size = new Size(215, 215);
-            qrCodeBox.TabIndex = 17;
-            // 
-            // label1
-            // 
-            label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            label1.Font = new Font("Tahoma", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.ForeColor = Color.White;
-            label1.Location = new Point(973, 42);
-            label1.Margin = new Padding(9, 0, 9, 0);
-            label1.Name = "label1";
-            label1.Size = new Size(215, 20);
-            label1.TabIndex = 18;
-            label1.Text = "Quick Setup";
-            label1.TextAlign = ContentAlignment.MiddleCenter;
-            label1.UseMnemonic = false;
             // 
             // MainWindow
             // 
@@ -309,26 +279,17 @@ namespace SuchByte.MacroDeck.GUI
             AutoScaleMode = AutoScaleMode.Dpi;
             BackColor = Color.FromArgb(45, 45, 45);
             ClientSize = new Size(1200, 635);
-            Controls.Add(label1);
-            Controls.Add(qrCodeBox);
             Controls.Add(navigation);
             Controls.Add(lblNumClientsConnected);
             Controls.Add(contentPanel);
             Controls.Add(lblVersion);
             Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
-            Location = new Point(0, 0);
             Margin = new Padding(10, 4, 10, 4);
             MinimumSize = new Size(1200, 635);
             Name = "MainWindow";
             Text = "Macro Deck 2";
             FormClosing += OnFormClosing;
             Load += MainWindow_Load;
-            Controls.SetChildIndex(lblVersion, 0);
-            Controls.SetChildIndex(contentPanel, 0);
-            Controls.SetChildIndex(lblNumClientsConnected, 0);
-            Controls.SetChildIndex(navigation, 0);
-            Controls.SetChildIndex(qrCodeBox, 0);
-            Controls.SetChildIndex(label1, 0);
             contentButtonPanel.ResumeLayout(false);
             ((ISupportInitialize)btnDeck).EndInit();
             ((ISupportInitialize)btnExtensions).EndInit();
@@ -353,7 +314,5 @@ namespace SuchByte.MacroDeck.GUI
         private Panel panel2;
         private RoundedPanel navigation;
         private NotificationButton btnNotifications;
-        private RoundedPanel qrCodeBox;
-        private Label label1;
     }
 }

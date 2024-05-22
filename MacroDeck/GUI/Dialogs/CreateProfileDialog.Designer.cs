@@ -33,78 +33,80 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// </summary>
         private void InitializeComponent()
         {
-            this.lblName = new System.Windows.Forms.Label();
-            this.profileName = new SuchByte.MacroDeck.GUI.CustomControls.RoundedTextBox();
-            this.btnOk = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
-            this.SuspendLayout();
+            lblName = new Label();
+            profileName = new RoundedTextBox();
+            btnOk = new ButtonPrimary();
+            SuspendLayout();
             // 
             // lblName
             // 
-            this.lblName.AutoSize = true;
-            this.lblName.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblName.ForeColor = System.Drawing.Color.White;
-            this.lblName.Location = new System.Drawing.Point(12, 32);
-            this.lblName.Name = "lblName";
-            this.lblName.Size = new System.Drawing.Size(52, 18);
-            this.lblName.TabIndex = 4;
-            this.lblName.Text = "Name:";
-            this.lblName.UseMnemonic = false;
+            lblName.AutoSize = true;
+            lblName.Font = new Font("Tahoma", 11.25F);
+            lblName.ForeColor = Color.White;
+            lblName.Location = new Point(12, 32);
+            lblName.Name = "lblName";
+            lblName.Size = new Size(52, 18);
+            lblName.TabIndex = 4;
+            lblName.Text = "Name:";
+            lblName.UseMnemonic = false;
             // 
             // profileName
             // 
-            this.profileName.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.profileName.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.profileName.ForeColor = System.Drawing.Color.White;
-            this.profileName.Icon = null;
-            this.profileName.Location = new System.Drawing.Point(84, 30);
-            this.profileName.Multiline = false;
-            this.profileName.Name = "profileName";
-            this.profileName.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
-            this.profileName.PasswordChar = false;
-            this.profileName.PlaceHolderText = "";
-            this.profileName.SelectionStart = 0;
-            this.profileName.Size = new System.Drawing.Size(217, 25);
-            this.profileName.TabIndex = 3;
-            this.profileName.TextAlignment = System.Windows.Forms.HorizontalAlignment.Left;
+            profileName.BackColor = Color.FromArgb(65, 65, 65);
+            profileName.Font = new Font("Tahoma", 9F);
+            profileName.ForeColor = Color.White;
+            profileName.Icon = null;
+            profileName.Location = new Point(84, 30);
+            profileName.MaxCharacters = 32767;
+            profileName.Multiline = false;
+            profileName.Name = "profileName";
+            profileName.Padding = new Padding(8, 5, 8, 5);
+            profileName.PasswordChar = false;
+            profileName.PlaceHolderColor = Color.Gray;
+            profileName.PlaceHolderText = "";
+            profileName.ReadOnly = false;
+            profileName.ScrollBars = ScrollBars.None;
+            profileName.SelectionStart = 0;
+            profileName.Size = new Size(217, 25);
+            profileName.TabIndex = 3;
+            profileName.TextAlignment = HorizontalAlignment.Left;
             // 
             // btnOk
             // 
-            this.btnOk.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
-            this.btnOk.BorderRadius = 8;
-            this.btnOk.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnOk.FlatAppearance.BorderSize = 0;
-            this.btnOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnOk.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnOk.ForeColor = System.Drawing.Color.White;
-            this.btnOk.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
-            this.btnOk.Icon = null;
-            this.btnOk.Location = new System.Drawing.Point(226, 61);
-            this.btnOk.Name = "btnOk";
-            this.btnOk.Progress = 0;
-            this.btnOk.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
-            this.btnOk.Size = new System.Drawing.Size(75, 25);
-            this.btnOk.TabIndex = 5;
-            this.btnOk.Text = "Ok";
-            this.btnOk.UseMnemonic = false;
-            this.btnOk.UseVisualStyleBackColor = false;
-            this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
+            btnOk.BorderRadius = 8;
+            btnOk.Cursor = Cursors.Hand;
+            btnOk.FlatAppearance.BorderSize = 0;
+            btnOk.FlatStyle = FlatStyle.Flat;
+            btnOk.Font = new Font("Tahoma", 9.75F);
+            btnOk.ForeColor = Color.White;
+            btnOk.HoverColor = Color.FromArgb(0, 89, 184);
+            btnOk.Icon = null;
+            btnOk.Location = new Point(226, 61);
+            btnOk.Name = "btnOk";
+            btnOk.Progress = 0;
+            btnOk.ProgressColor = Color.FromArgb(0, 46, 94);
+            btnOk.Size = new Size(75, 25);
+            btnOk.TabIndex = 5;
+            btnOk.Text = "Ok";
+            btnOk.UseMnemonic = false;
+            btnOk.UseVisualStyleBackColor = false;
+            btnOk.UseWindowsAccentColor = true;
+            btnOk.WriteProgress = true;
+            btnOk.Click += BtnOk_Click;
             // 
             // CreateProfileDialog
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(316, 99);
-            this.Controls.Add(this.btnOk);
-            this.Controls.Add(this.lblName);
-            this.Controls.Add(this.profileName);
-            this.Name = "CreateProfileDialog";
-            this.Text = "CreateProfileDialog";
-            this.Load += new System.EventHandler(this.CreateProfileDialog_Load);
-            this.Controls.SetChildIndex(this.profileName, 0);
-            this.Controls.SetChildIndex(this.lblName, 0);
-            this.Controls.SetChildIndex(this.btnOk, 0);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            ClientSize = new Size(316, 99);
+            Controls.Add(btnOk);
+            Controls.Add(lblName);
+            Controls.Add(profileName);
+            Name = "CreateProfileDialog";
+            Text = "Create profile";
+            Load += CreateProfileDialog_Load;
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

@@ -32,59 +32,53 @@ namespace SuchByte.MacroDeck.GUI.CustomControls
         /// </summary>
         private void InitializeComponent()
         {
-            this.lblMessage = new System.Windows.Forms.Label();
-            this.buttonMessageBoxPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.lblTitle = new System.Windows.Forms.Label();
-            this.SuspendLayout();
+            lblMessage = new Label();
+            buttonMessageBoxPanel = new FlowLayoutPanel();
+            lblTitle = new Label();
+            SuspendLayout();
             // 
             // lblMessage
             // 
-            this.lblMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblMessage.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblMessage.Location = new System.Drawing.Point(12, 41);
-            this.lblMessage.Name = "lblMessage";
-            this.lblMessage.Size = new System.Drawing.Size(439, 112);
-            this.lblMessage.TabIndex = 3;
-            this.lblMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblMessage.UseMnemonic = false;
+            lblMessage.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            lblMessage.Font = new Font("Tahoma", 12F);
+            lblMessage.Location = new Point(12, 41);
+            lblMessage.Name = "lblMessage";
+            lblMessage.Size = new Size(439, 112);
+            lblMessage.TabIndex = 3;
+            lblMessage.TextAlign = ContentAlignment.MiddleCenter;
+            lblMessage.UseMnemonic = false;
             // 
             // buttonMessageBoxPanel
             // 
-            this.buttonMessageBoxPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonMessageBoxPanel.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.buttonMessageBoxPanel.Location = new System.Drawing.Point(12, 167);
-            this.buttonMessageBoxPanel.Name = "buttonMessageBoxPanel";
-            this.buttonMessageBoxPanel.Size = new System.Drawing.Size(439, 29);
-            this.buttonMessageBoxPanel.TabIndex = 4;
+            buttonMessageBoxPanel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            buttonMessageBoxPanel.FlowDirection = FlowDirection.RightToLeft;
+            buttonMessageBoxPanel.Location = new Point(12, 167);
+            buttonMessageBoxPanel.Name = "buttonMessageBoxPanel";
+            buttonMessageBoxPanel.Size = new Size(439, 29);
+            buttonMessageBoxPanel.TabIndex = 4;
             // 
             // lblTitle
             // 
-            this.lblTitle.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblTitle.ForeColor = System.Drawing.Color.Silver;
-            this.lblTitle.Location = new System.Drawing.Point(12, 9);
-            this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(439, 32);
-            this.lblTitle.TabIndex = 5;
-            this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.lblTitle.UseMnemonic = false;
+            lblTitle.Font = new Font("Tahoma", 14.25F);
+            lblTitle.ForeColor = Color.Silver;
+            lblTitle.Location = new Point(12, 9);
+            lblTitle.Name = "lblTitle";
+            lblTitle.Size = new Size(439, 32);
+            lblTitle.TabIndex = 5;
+            lblTitle.TextAlign = ContentAlignment.MiddleLeft;
+            lblTitle.UseMnemonic = false;
             // 
             // MessageBox
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(463, 204);
-            this.Controls.Add(this.lblTitle);
-            this.Controls.Add(this.buttonMessageBoxPanel);
-            this.Controls.Add(this.lblMessage);
-            this.Name = "MessageBox";
-            this.Text = "MessageBox";
-            this.Controls.SetChildIndex(this.lblMessage, 0);
-            this.Controls.SetChildIndex(this.buttonMessageBoxPanel, 0);
-            this.Controls.SetChildIndex(this.lblTitle, 0);
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            ClientSize = new Size(463, 204);
+            Controls.Add(lblTitle);
+            Controls.Add(buttonMessageBoxPanel);
+            Controls.Add(lblMessage);
+            Name = "MessageBox";
+            Text = "Macro Deck";
+            ResumeLayout(false);
         }
 
         #endregion

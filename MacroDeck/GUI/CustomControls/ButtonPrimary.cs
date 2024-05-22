@@ -57,19 +57,7 @@ public partial class ButtonPrimary : Button
 
     public new Color BackColor
     {
-        get {
-            if (DesignMode)
-            {
-                return backColor;
-            }
-            switch (UseWindowsAccentColor)
-            {
-                case true:
-                    return Colors.AccentColor;
-                case false:
-                    return backColor;
-            }
-        }
+        get => backColor;
         set
         {
             backColor = value;
@@ -79,20 +67,7 @@ public partial class ButtonPrimary : Button
 
     public Color HoverColor
     {
-        get
-        {
-            if (DesignMode)
-            {
-                return hoverColor;
-            }
-            switch (UseWindowsAccentColor)
-            {
-                case true:
-                    return Colors.AccentColorLight;
-                case false:
-                    return hoverColor;
-            }
-        }
+        get => hoverColor;
         set
         {
             hoverColor = value;
@@ -102,20 +77,7 @@ public partial class ButtonPrimary : Button
 
     public Color ProgressColor
     {
-        get
-        {
-            if (DesignMode)
-            {
-                return progressColor;
-            }
-            switch (UseWindowsAccentColor)
-            {
-                case true:
-                    return Colors.AccentColorDark;
-                case false:
-                    return progressColor;
-            }
-        }
+        get => progressColor;
         set
         {
             progressColor = value;
@@ -152,8 +114,6 @@ public partial class ButtonPrimary : Button
             Invalidate();
         }
     }
-        
-
 
     public ButtonPrimary()
     {
@@ -260,7 +220,5 @@ public partial class ButtonPrimary : Button
                 pe.Graphics.DrawImage(spinnerBitmap, 5, 4, spinnerSize, spinnerSize);
             }
         }
-
-           
     }
 }

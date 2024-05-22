@@ -33,85 +33,82 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DefenderFirewallAlert));
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.lblImportant = new System.Windows.Forms.Label();
-            this.lblInfo = new System.Windows.Forms.Label();
-            this.btnGotIt = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.SuspendLayout();
+            ComponentResourceManager resources = new ComponentResourceManager(typeof(DefenderFirewallAlert));
+            pictureBox1 = new PictureBox();
+            lblImportant = new Label();
+            lblInfo = new Label();
+            btnGotIt = new ButtonPrimary();
+            ((ISupportInitialize)pictureBox1).BeginInit();
+            SuspendLayout();
             // 
             // pictureBox1
             // 
-            this.pictureBox1.BackgroundImage = global::SuchByte.MacroDeck.Properties.Resources.WindowsDefenderSecurityAlert;
-            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.pictureBox1.Location = new System.Drawing.Point(53, 58);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(480, 343);
-            this.pictureBox1.TabIndex = 2;
-            this.pictureBox1.TabStop = false;
+            pictureBox1.BackgroundImage = Properties.Resources.WindowsDefenderSecurityAlert;
+            pictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
+            pictureBox1.Location = new Point(53, 58);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(480, 343);
+            pictureBox1.TabIndex = 2;
+            pictureBox1.TabStop = false;
             // 
             // lblImportant
             // 
-            this.lblImportant.Font = new System.Drawing.Font("Tahoma", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblImportant.Location = new System.Drawing.Point(36, 12);
-            this.lblImportant.Name = "lblImportant";
-            this.lblImportant.Size = new System.Drawing.Size(514, 43);
-            this.lblImportant.TabIndex = 3;
-            this.lblImportant.Text = "Important!";
-            this.lblImportant.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblImportant.UseMnemonic = false;
+            lblImportant.Font = new Font("Tahoma", 24F);
+            lblImportant.Location = new Point(36, 12);
+            lblImportant.Name = "lblImportant";
+            lblImportant.Size = new Size(514, 43);
+            lblImportant.TabIndex = 3;
+            lblImportant.Text = "Important!";
+            lblImportant.TextAlign = ContentAlignment.MiddleCenter;
+            lblImportant.UseMnemonic = false;
             // 
             // lblInfo
             // 
-            this.lblInfo.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblInfo.Location = new System.Drawing.Point(29, 414);
-            this.lblInfo.Name = "lblInfo";
-            this.lblInfo.Size = new System.Drawing.Size(529, 187);
-            this.lblInfo.TabIndex = 4;
-            this.lblInfo.Text = resources.GetString("lblInfo.Text");
-            this.lblInfo.UseMnemonic = false;
+            lblInfo.Font = new Font("Tahoma", 12F);
+            lblInfo.Location = new Point(29, 414);
+            lblInfo.Name = "lblInfo";
+            lblInfo.Size = new Size(529, 187);
+            lblInfo.TabIndex = 4;
+            lblInfo.Text = resources.GetString("lblInfo.Text");
+            lblInfo.UseMnemonic = false;
             // 
             // btnGotIt
             // 
-            this.btnGotIt.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
-            this.btnGotIt.BorderRadius = 8;
-            this.btnGotIt.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnGotIt.FlatAppearance.BorderSize = 0;
-            this.btnGotIt.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnGotIt.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnGotIt.ForeColor = System.Drawing.Color.White;
-            this.btnGotIt.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
-            this.btnGotIt.Icon = null;
-            this.btnGotIt.Location = new System.Drawing.Point(218, 604);
-            this.btnGotIt.Name = "btnGotIt";
-            this.btnGotIt.Progress = 0;
-            this.btnGotIt.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
-            this.btnGotIt.Size = new System.Drawing.Size(150, 40);
-            this.btnGotIt.TabIndex = 5;
-            this.btnGotIt.Text = "Got it!";
-            this.btnGotIt.UseMnemonic = false;
-            this.btnGotIt.UseVisualStyleBackColor = false;
-            this.btnGotIt.Click += new System.EventHandler(this.BtnGotIt_Click);
+            btnGotIt.BorderRadius = 8;
+            btnGotIt.Cursor = Cursors.Hand;
+            btnGotIt.FlatAppearance.BorderSize = 0;
+            btnGotIt.FlatStyle = FlatStyle.Flat;
+            btnGotIt.Font = new Font("Tahoma", 9.75F);
+            btnGotIt.ForeColor = Color.White;
+            btnGotIt.HoverColor = Color.FromArgb(0, 89, 184);
+            btnGotIt.Icon = null;
+            btnGotIt.Location = new Point(218, 604);
+            btnGotIt.Name = "btnGotIt";
+            btnGotIt.Progress = 0;
+            btnGotIt.ProgressColor = Color.FromArgb(0, 46, 94);
+            btnGotIt.Size = new Size(150, 40);
+            btnGotIt.TabIndex = 5;
+            btnGotIt.Text = "Got it!";
+            btnGotIt.UseMnemonic = false;
+            btnGotIt.UseVisualStyleBackColor = false;
+            btnGotIt.UseWindowsAccentColor = true;
+            btnGotIt.WriteProgress = true;
+            btnGotIt.Click += BtnGotIt_Click;
             // 
             // DefenderFirewallAlert
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(586, 655);
-            this.Controls.Add(this.btnGotIt);
-            this.Controls.Add(this.lblInfo);
-            this.Controls.Add(this.lblImportant);
-            this.Controls.Add(this.pictureBox1);
-            this.Name = "DefenderFirewallAlert";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "DefenderFirewallAlert";
-            this.Controls.SetChildIndex(this.pictureBox1, 0);
-            this.Controls.SetChildIndex(this.lblImportant, 0);
-            this.Controls.SetChildIndex(this.lblInfo, 0);
-            this.Controls.SetChildIndex(this.btnGotIt, 0);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            ClientSize = new Size(586, 655);
+            Controls.Add(btnGotIt);
+            Controls.Add(lblInfo);
+            Controls.Add(lblImportant);
+            Controls.Add(pictureBox1);
+            Name = "DefenderFirewallAlert";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Macro Deck";
+            ((ISupportInitialize)pictureBox1).EndInit();
+            ResumeLayout(false);
         }
 
         #endregion

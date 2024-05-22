@@ -12,15 +12,11 @@ namespace SuchByte.MacroDeck.ActionButton;
 
 public class ActionButton : IDisposable
 {
-
-    private IntPtr _bufferPtr;
-    private int BUFFER_SIZE = 1024 * 1024;
     private bool _disposed;
 
 
     public ActionButton()
     {
-        _bufferPtr = Marshal.AllocHGlobal(BUFFER_SIZE);
         VariableManager.OnVariableChanged += VariableChanged;
     }
 
@@ -74,7 +70,6 @@ public class ActionButton : IDisposable
             }
         }
 
-        Marshal.FreeHGlobal(_bufferPtr);
         _disposed = true;
     }
 

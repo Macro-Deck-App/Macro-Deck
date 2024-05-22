@@ -62,27 +62,11 @@ public partial class DeviceInfo : RoundedUserControl
 
         switch (_macroDeckDevice.DeviceType)
         {
-            case DeviceType.Web:
-                lblDeviceType.Text = LanguageManager.Strings.WebClient;
-                iconDeviceType.Image = Resources.Web;
-                btnConfigure.Visible = false;
-                profiles.Enabled = true;
-                break;
             case DeviceType.Android:
-                lblDeviceType.Text = LanguageManager.Strings.AndroidApp;
-                iconDeviceType.Image = Resources.Android;
                 btnConfigure.Visible = _macroDeckDevice.Available;
                 profiles.Enabled = true;
                 break;
-            case DeviceType.iOS:
-                lblDeviceType.Text = LanguageManager.Strings.IOSApp;
-                iconDeviceType.Image = Resources.iOS;
-                btnConfigure.Visible = false; //TODO
-                profiles.Enabled = true;
-                break;
             default:
-                lblDeviceType.Text = LanguageManager.Strings.WebClient;
-                iconDeviceType.Image = Resources.Web;
                 btnConfigure.Visible = false;
                 profiles.Enabled = true;
                 break;

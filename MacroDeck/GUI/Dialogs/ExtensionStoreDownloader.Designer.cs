@@ -33,91 +33,71 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         /// </summary>
         private void InitializeComponent()
         {
-            this.btnDone = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
-            this.label2 = new System.Windows.Forms.Label();
-            this.downloadList = new System.Windows.Forms.FlowLayoutPanel();
-            this.lblPackagesToDownload = new System.Windows.Forms.Label();
-            this.SuspendLayout();
+            btnDone = new ButtonPrimary();
+            downloadList = new FlowLayoutPanel();
+            lblPackagesToDownload = new Label();
+            SuspendLayout();
             // 
             // btnDone
             // 
-            this.btnDone.BorderRadius = 8;
-            this.btnDone.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnDone.FlatAppearance.BorderSize = 0;
-            this.btnDone.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnDone.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnDone.ForeColor = System.Drawing.Color.White;
-            this.btnDone.HoverColor = System.Drawing.Color.Empty;
-            this.btnDone.Icon = null;
-            this.btnDone.Location = new System.Drawing.Point(183, 358);
-            this.btnDone.Name = "btnDone";
-            this.btnDone.Progress = 0;
-            this.btnDone.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(103)))), ((int)(((byte)(225)))));
-            this.btnDone.Size = new System.Drawing.Size(231, 30);
-            this.btnDone.TabIndex = 3;
-            this.btnDone.Text = "Done";
-            this.btnDone.UseMnemonic = false;
-            this.btnDone.UseVisualStyleBackColor = true;
-            this.btnDone.UseWindowsAccentColor = true;
-            this.btnDone.Visible = false;
-            this.btnDone.Click += new System.EventHandler(this.BtnDone_Click);
-            // 
-            // label2
-            // 
-            this.label2.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label2.ForeColor = System.Drawing.Color.Silver;
-            this.label2.Location = new System.Drawing.Point(10, 5);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(245, 23);
-            this.label2.TabIndex = 5;
-            this.label2.Text = "Extension Store Downloader";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.label2.UseMnemonic = false;
+            btnDone.BorderRadius = 8;
+            btnDone.Cursor = Cursors.Hand;
+            btnDone.FlatAppearance.BorderSize = 0;
+            btnDone.FlatStyle = FlatStyle.Flat;
+            btnDone.Font = new Font("Tahoma", 9.75F);
+            btnDone.ForeColor = Color.White;
+            btnDone.HoverColor = Color.Empty;
+            btnDone.Icon = null;
+            btnDone.Location = new Point(183, 358);
+            btnDone.Name = "btnDone";
+            btnDone.Progress = 0;
+            btnDone.ProgressColor = Color.FromArgb(0, 103, 225);
+            btnDone.Size = new Size(231, 30);
+            btnDone.TabIndex = 3;
+            btnDone.Text = "Done";
+            btnDone.UseMnemonic = false;
+            btnDone.UseVisualStyleBackColor = true;
+            btnDone.UseWindowsAccentColor = true;
+            btnDone.Visible = false;
+            btnDone.WriteProgress = true;
+            btnDone.Click += BtnDone_Click;
             // 
             // downloadList
             // 
-            this.downloadList.AutoScroll = true;
-            this.downloadList.Location = new System.Drawing.Point(6, 54);
-            this.downloadList.Name = "downloadList";
-            this.downloadList.Size = new System.Drawing.Size(607, 298);
-            this.downloadList.TabIndex = 6;
+            downloadList.AutoScroll = true;
+            downloadList.Location = new Point(6, 27);
+            downloadList.Name = "downloadList";
+            downloadList.Size = new Size(607, 325);
+            downloadList.TabIndex = 6;
             // 
             // lblPackagesToDownload
             // 
-            this.lblPackagesToDownload.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblPackagesToDownload.ForeColor = System.Drawing.Color.Silver;
-            this.lblPackagesToDownload.Location = new System.Drawing.Point(10, 28);
-            this.lblPackagesToDownload.Name = "lblPackagesToDownload";
-            this.lblPackagesToDownload.Size = new System.Drawing.Size(245, 23);
-            this.lblPackagesToDownload.TabIndex = 7;
-            this.lblPackagesToDownload.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.lblPackagesToDownload.UseMnemonic = false;
+            lblPackagesToDownload.Font = new Font("Tahoma", 9.75F);
+            lblPackagesToDownload.ForeColor = Color.Silver;
+            lblPackagesToDownload.Location = new Point(6, 1);
+            lblPackagesToDownload.Name = "lblPackagesToDownload";
+            lblPackagesToDownload.Size = new Size(245, 23);
+            lblPackagesToDownload.TabIndex = 7;
+            lblPackagesToDownload.TextAlign = ContentAlignment.MiddleLeft;
+            lblPackagesToDownload.UseMnemonic = false;
             // 
             // ExtensionStoreDownloader
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(618, 392);
-            this.Controls.Add(this.lblPackagesToDownload);
-            this.Controls.Add(this.downloadList);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.btnDone);
-            this.Location = new System.Drawing.Point(0, 0);
-            this.Name = "ExtensionStoreDownloader";
-            this.ShowIcon = true;
-            this.Text = "Extension Store Downloader";
-            this.Load += new System.EventHandler(this.ExtensionStoreDownloader_Load);
-            this.Controls.SetChildIndex(this.btnDone, 0);
-            this.Controls.SetChildIndex(this.label2, 0);
-            this.Controls.SetChildIndex(this.downloadList, 0);
-            this.Controls.SetChildIndex(this.lblPackagesToDownload, 0);
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            ClientSize = new Size(618, 392);
+            Controls.Add(lblPackagesToDownload);
+            Controls.Add(downloadList);
+            Controls.Add(btnDone);
+            Name = "ExtensionStoreDownloader";
+            ShowIcon = true;
+            Text = "Extension Store Downloader";
+            Load += ExtensionStoreDownloader_Load;
+            ResumeLayout(false);
         }
 
         #endregion
         private ButtonPrimary btnDone;
-        private Label label2;
         private FlowLayoutPanel downloadList;
         private Label lblPackagesToDownload;
     }

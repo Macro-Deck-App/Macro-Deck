@@ -9,12 +9,15 @@ public class QuickConnectQrCodeData
     public int Port { get; set; }
 
     public bool Ssl { get; set; }
+    
+    public string Token { get; set; }
 
-    public QuickConnectQrCodeData(string instanceName, List<string> networkInterfaces, int port, bool ssl)
+    public QuickConnectQrCodeData(string instanceName, List<string> networkInterfaces, int port, bool ssl, string token)
     {
         InstanceName = instanceName;
         NetworkInterfaces = networkInterfaces;
         Port = port;
         Ssl = ssl;
+        Token = token;
     }
 }
