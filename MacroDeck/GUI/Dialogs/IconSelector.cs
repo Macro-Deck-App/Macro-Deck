@@ -231,7 +231,7 @@ public partial class IconSelector : DialogForm
         {
             Invoke(new Action(() => iconPacksBox.Items.Add(iconPack.Name)));
         }
-        if (Settings.Default.IconSelectorLastIconPack != null)
+        if (Settings.Default.IconSelectorLastIconPack != null && IconManager.IconPacks.Count > 0)
         {
             Invoke(() =>
             {
@@ -243,14 +243,10 @@ public partial class IconSelector : DialogForm
                         return;
                     }
                 }
-                if (iconPacksBox.Items.Contains(Settings.Default.IconSelectorLastIconPack))
-                {
-                    iconPacksBox.SelectedIndex = iconPacksBox.FindStringExact(Settings.Default.IconSelectorLastIconPack);
-                }
-                else
-                {
-                    iconPacksBox.SelectedIndex = 0;
-                }
+
+                iconPacksBox.SelectedIndex = iconPacksBox.Items.Contains(Settings.Default.IconSelectorLastIconPack)
+                    ? iconPacksBox.FindStringExact(Settings.Default.IconSelectorLastIconPack)
+                    : 0;
             });
         }
     }
