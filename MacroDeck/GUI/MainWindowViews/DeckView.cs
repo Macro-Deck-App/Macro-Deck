@@ -39,9 +39,24 @@ public partial class DeckView : UserControl
         UpdateTranslation();
         _currentFolder = ProfileManager.CurrentProfile.Folders.FirstOrDefault();
         qrCodeBox.BackgroundImage = QrCodeService.Instance.GetQuickSetupQrCode();
+        checkQrAndNetwork.Checked = Settings.Default.ShowQrCodeAndNetwork;
+        lblNetworkInterfaces.Text = GetNetworkInterfacesString();
+        lblPort.Text = $"Port: {MacroDeck.Configuration.HostPort}";
+        checkQrAndNetwork_CheckedChanged(null, EventArgs.Empty);
         _mainWindow = mainWindow;
         HandleCreated += DeckView_HandleCreated;
         HandleDestroyed += DeckView_HandleDestroyed;
+    }
+
+    private string GetNetworkInterfacesString()
+    {
+        var stringBuilder = new StringBuilder();
+        stringBuilder.AppendLine("Network interfaces:");
+        foreach (var networkInterface in NetworkUtils.GetNetworkInterfaces())
+        {
+            stringBuilder.AppendLine($"- {networkInterface}");
+        }
+        return stringBuilder.ToString();
     }
 
     private void DeckView_HandleDestroyed(object? sender, EventArgs e)
@@ -802,5 +817,14 @@ public partial class DeckView : UserControl
             }
         };
         p.Start();
+    }
+
+    private void checkQrAndNetwork_CheckedChanged(object sender, EventArgs e)
+    {
+        qrCodeBox.Visible = checkQrAndNetwork.Checked;
+        lblNetworkInterfaces.Visible = checkQrAndNetwork.Checked;
+        lblPort.Visible = checkQrAndNetwork.Checked;
+        Settings.Default.ShowQrCodeAndNetwork = checkQrAndNetwork.Checked;
+        Settings.Default.Save();
     }
 }

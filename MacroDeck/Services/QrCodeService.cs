@@ -6,6 +6,7 @@ using QRCoder;
 using SuchByte.MacroDeck.DataTypes.QrCode;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Server;
+using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Services;
 
@@ -15,19 +16,7 @@ public class QrCodeService
 
     public Image GetQuickSetupQrCode()
     {
-        var networkInterfaces = new List<string>();
-        try
-        {
-            networkInterfaces.AddRange(NetworkInterface.GetAllNetworkInterfaces()
-                .Select(adapter => adapter.GetIPProperties()
-                    .UnicastAddresses.FirstOrDefault(x => x.Address.AddressFamily == AddressFamily.InterNetwork)
-                    ?.Address.ToString())
-                .Where(address => !string.IsNullOrWhiteSpace(address) && address != "127.0.0.1"));
-        }
-        catch (Exception ex)
-        {
-            MacroDeckLogger.Warning($"Error while searching for network interfaces\n{ex.Message}");
-        }
+        var networkInterfaces = NetworkUtils.GetNetworkInterfaces();
 
         var data = new QuickConnectQrCodeData(Environment.MachineName,
             networkInterfaces,

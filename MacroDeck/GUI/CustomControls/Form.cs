@@ -23,7 +23,7 @@ public partial class Form : System.Windows.Forms.Form
         base.WndProc(ref m);
         if (this.WindowState == originalState)
         {
-
+            return;
         }
         
         FormWindowStateChanged?.Invoke(this, EventArgs.Empty);

@@ -4,7 +4,7 @@ public class QuickConnectQrCodeData
 {
     public string InstanceName { get; set; }
     
-    public List<string> NetworkInterfaces { get; set; }
+    public string[] NetworkInterfaces { get; set; }
 
     public int Port { get; set; }
 
@@ -12,7 +12,7 @@ public class QuickConnectQrCodeData
     
     public string Token { get; set; }
 
-    public QuickConnectQrCodeData(string instanceName, List<string> networkInterfaces, int port, bool ssl, string token)
+    public QuickConnectQrCodeData(string instanceName, string[] networkInterfaces, int port, bool ssl, string token)
     {
         InstanceName = instanceName;
         NetworkInterfaces = networkInterfaces;
