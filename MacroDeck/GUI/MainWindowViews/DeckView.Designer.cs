@@ -93,12 +93,13 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             roundedPanel2 = new RoundedPanel();
             label1 = new Label();
             qrCodeBox = new RoundedPanel();
-            roundedPanel3 = new RoundedPanel();
-            label2 = new Label();
-            label3 = new Label();
             flowLayoutPanel1 = new FlowLayoutPanel();
             btnDiscord = new ButtonPrimary();
             btnDonate = new ButtonPrimary();
+            flowLayoutPanel2 = new FlowLayoutPanel();
+            lblNetworkInterfaces = new Label();
+            lblPort = new Label();
+            checkQrAndNetwork = new CheckBox();
             foldersContextMenu.SuspendLayout();
             actionButtonContextMenu.SuspendLayout();
             ((ISupportInitialize)btnAddProfile).BeginInit();
@@ -111,8 +112,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             panel1.SuspendLayout();
             roundedPanel1.SuspendLayout();
             roundedPanel2.SuspendLayout();
-            roundedPanel3.SuspendLayout();
             flowLayoutPanel1.SuspendLayout();
+            flowLayoutPanel2.SuspendLayout();
             SuspendLayout();
             // 
             // foldersView
@@ -540,46 +541,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             qrCodeBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             qrCodeBox.BackgroundImageLayout = ImageLayout.Stretch;
-            qrCodeBox.Location = new Point(951, 45);
+            qrCodeBox.Location = new Point(0, 0);
+            qrCodeBox.Margin = new Padding(0);
             qrCodeBox.Name = "qrCodeBox";
             qrCodeBox.Size = new Size(180, 180);
             qrCodeBox.TabIndex = 44;
-            // 
-            // roundedPanel3
-            // 
-            roundedPanel3.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            roundedPanel3.BackColor = Color.FromArgb(35, 35, 35);
-            roundedPanel3.Controls.Add(label2);
-            roundedPanel3.Controls.Add(label3);
-            roundedPanel3.Location = new Point(951, 0);
-            roundedPanel3.Name = "roundedPanel3";
-            roundedPanel3.Size = new Size(180, 35);
-            roundedPanel3.TabIndex = 44;
-            // 
-            // label2
-            // 
-            label2.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            label2.BackColor = Color.Transparent;
-            label2.Font = new Font("Tahoma", 11.25F, FontStyle.Bold);
-            label2.ForeColor = Color.White;
-            label2.Location = new Point(16, -124);
-            label2.Name = "label2";
-            label2.Size = new Size(250, 22);
-            label2.TabIndex = 41;
-            label2.Text = "Grid";
-            label2.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // label3
-            // 
-            label3.BackColor = Color.FromArgb(35, 35, 35);
-            label3.Font = new Font("Tahoma", 11.25F, FontStyle.Bold);
-            label3.ForeColor = Color.White;
-            label3.Location = new Point(9, 6);
-            label3.Name = "label3";
-            label3.Size = new Size(215, 22);
-            label3.TabIndex = 40;
-            label3.Text = "Quick Setup";
-            label3.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // flowLayoutPanel1
             // 
@@ -587,9 +553,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             flowLayoutPanel1.Controls.Add(btnDiscord);
             flowLayoutPanel1.Controls.Add(btnDonate);
             flowLayoutPanel1.FlowDirection = FlowDirection.BottomUp;
-            flowLayoutPanel1.Location = new Point(951, 363);
+            flowLayoutPanel1.Location = new Point(951, 459);
             flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(180, 196);
+            flowLayoutPanel1.Size = new Size(180, 100);
             flowLayoutPanel1.TabIndex = 45;
             // 
             // btnDiscord
@@ -601,7 +567,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnDiscord.ForeColor = Color.White;
             btnDiscord.HoverColor = Color.FromArgb(94, 111, 184);
             btnDiscord.Icon = null;
-            btnDiscord.Location = new Point(3, 153);
+            btnDiscord.Location = new Point(3, 57);
             btnDiscord.Name = "btnDiscord";
             btnDiscord.Progress = 0;
             btnDiscord.ProgressColor = Color.FromArgb(0, 103, 205);
@@ -622,7 +588,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnDonate.ForeColor = Color.White;
             btnDonate.HoverColor = Color.FromArgb(181, 136, 2);
             btnDonate.Icon = null;
-            btnDonate.Location = new Point(3, 107);
+            btnDonate.Location = new Point(3, 11);
             btnDonate.Name = "btnDonate";
             btnDonate.Progress = 0;
             btnDonate.ProgressColor = Color.FromArgb(0, 103, 205);
@@ -634,14 +600,60 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnDonate.WriteProgress = true;
             btnDonate.Click += btnDonate_Click;
             // 
+            // flowLayoutPanel2
+            // 
+            flowLayoutPanel2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            flowLayoutPanel2.Controls.Add(qrCodeBox);
+            flowLayoutPanel2.Controls.Add(lblNetworkInterfaces);
+            flowLayoutPanel2.Controls.Add(lblPort);
+            flowLayoutPanel2.Controls.Add(checkQrAndNetwork);
+            flowLayoutPanel2.FlowDirection = FlowDirection.TopDown;
+            flowLayoutPanel2.Location = new Point(951, 3);
+            flowLayoutPanel2.Margin = new Padding(0);
+            flowLayoutPanel2.Name = "flowLayoutPanel2";
+            flowLayoutPanel2.Size = new Size(180, 453);
+            flowLayoutPanel2.TabIndex = 46;
+            // 
+            // lblNetworkInterfaces
+            // 
+            lblNetworkInterfaces.AutoSize = true;
+            lblNetworkInterfaces.ForeColor = Color.White;
+            lblNetworkInterfaces.Location = new Point(3, 180);
+            lblNetworkInterfaces.Name = "lblNetworkInterfaces";
+            lblNetworkInterfaces.Padding = new Padding(0, 5, 0, 5);
+            lblNetworkInterfaces.Size = new Size(115, 38);
+            lblNetworkInterfaces.TabIndex = 46;
+            lblNetworkInterfaces.Text = "Network interfaces:\r\n- 127.0.0.1";
+            // 
+            // lblPort
+            // 
+            lblPort.AutoSize = true;
+            lblPort.ForeColor = Color.White;
+            lblPort.Location = new Point(3, 218);
+            lblPort.Name = "lblPort";
+            lblPort.Padding = new Padding(0, 5, 0, 5);
+            lblPort.Size = new Size(66, 24);
+            lblPort.TabIndex = 47;
+            lblPort.Text = "Port: 8191";
+            // 
+            // checkQrAndNetwork
+            // 
+            checkQrAndNetwork.ForeColor = Color.White;
+            checkQrAndNetwork.Location = new Point(3, 245);
+            checkQrAndNetwork.Name = "checkQrAndNetwork";
+            checkQrAndNetwork.Size = new Size(174, 39);
+            checkQrAndNetwork.TabIndex = 45;
+            checkQrAndNetwork.Text = "Show Quick Setup QR code and network informations";
+            checkQrAndNetwork.UseVisualStyleBackColor = true;
+            checkQrAndNetwork.CheckedChanged += checkQrAndNetwork_CheckedChanged;
+            // 
             // DeckView
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
             BackColor = Color.FromArgb(45, 45, 45);
+            Controls.Add(flowLayoutPanel2);
             Controls.Add(flowLayoutPanel1);
-            Controls.Add(roundedPanel3);
-            Controls.Add(qrCodeBox);
             Controls.Add(roundedPanel2);
             Controls.Add(roundedPanel1);
             Controls.Add(panel1);
@@ -672,8 +684,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             panel1.ResumeLayout(false);
             roundedPanel1.ResumeLayout(false);
             roundedPanel2.ResumeLayout(false);
-            roundedPanel3.ResumeLayout(false);
             flowLayoutPanel1.ResumeLayout(false);
+            flowLayoutPanel2.ResumeLayout(false);
+            flowLayoutPanel2.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -717,14 +730,15 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private RoundedPanel roundedPanel2;
         private Label label1;
         private RoundedPanel qrCodeBox;
-        private RoundedPanel roundedPanel3;
-        private Label label2;
-        private Label label3;
         private FlowLayoutPanel flowLayoutPanel1;
         private ButtonPrimary buttonPrimary1;
         private ButtonPrimary buttonPrimary2;
         private ButtonPrimary buttonPrimary3;
         private ButtonPrimary btnDonate;
         private ButtonPrimary btnDiscord;
+        private FlowLayoutPanel flowLayoutPanel2;
+        private CheckBox checkQrAndNetwork;
+        private Label lblNetworkInterfaces;
+        private Label lblPort;
     }
 }
