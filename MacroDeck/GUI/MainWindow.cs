@@ -10,6 +10,7 @@ using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
 using SuchByte.MacroDeck.Services;
+using System.Diagnostics;
 using Form = SuchByte.MacroDeck.GUI.CustomControls.Form;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
@@ -243,5 +244,29 @@ public partial class MainWindow : Form
             Controls.Add(_notificationsList);
             _notificationsList.BringToFront();
         }
+    }
+
+    private void btnDonate_Click(object sender, EventArgs e)
+    {
+        var p = new Process
+        {
+            StartInfo = new ProcessStartInfo("https://ko-fi.com/manuelmayer")
+            {
+                UseShellExecute = true,
+            }
+        };
+        p.Start();
+    }
+
+    private void btnDiscord_Click(object sender, EventArgs e)
+    {
+        var p = new Process
+        {
+            StartInfo = new ProcessStartInfo("https://discord.macro-deck.app")
+            {
+                UseShellExecute = true,
+            }
+        };
+        p.Start();
     }
 }

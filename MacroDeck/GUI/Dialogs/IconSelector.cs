@@ -1,7 +1,5 @@
-﻿using System.Drawing;
-using System.Drawing.Imaging;
+﻿using System.Drawing.Imaging;
 using System.IO;
-using System.Windows.Forms;
 using ImageMagick;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
@@ -227,10 +225,12 @@ public partial class IconSelector : DialogForm
     private void LoadIconPacks()
     {
         Invoke(() => iconPacksBox.Items.Clear());
+
         foreach (var iconPack in IconManager.IconPacks)
         {
             Invoke(new Action(() => iconPacksBox.Items.Add(iconPack.Name)));
         }
+
         if (Settings.Default.IconSelectorLastIconPack != null && IconManager.IconPacks.Count > 0)
         {
             Invoke(() =>
@@ -249,11 +249,28 @@ public partial class IconSelector : DialogForm
                     : 0;
             });
         }
+
+        IconPacksBox_SelectedIndexChanged(null, EventArgs.Empty);
     }
 
     private void IconPacksBox_SelectedIndexChanged(object sender, EventArgs e)
     {
+        if (InvokeRequired)
+        {
+            Invoke(() => IconPacksBox_SelectedIndexChanged(sender, e));
+            return;
+        }
+
         var iconPack = IconManager.GetIconPackByName(iconPacksBox.Text);
+        if (iconPack == null)
+        {
+            btnImport.Visible = false;
+            btnCreateIcon.Visible = false;
+            btnDeleteIcon.Visible = false;
+            btnExportIconPack.Visible = false;
+            lblManaged.Visible = false;
+            return;
+        }
         Settings.Default.IconSelectorLastIconPack = iconPack.Name;
         Settings.Default.Save();
         SelectedIconPack = iconPack;

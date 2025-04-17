@@ -17,7 +17,6 @@ using SuchByte.MacroDeck.Server;
 using SuchByte.MacroDeck.Services;
 using SuchByte.MacroDeck.Utils;
 using Clipboard = SuchByte.MacroDeck.Utils.Clipboard;
-using Form = SuchByte.MacroDeck.GUI.CustomControls.Form;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.GUI.MainWindowContents;
@@ -42,7 +41,6 @@ public partial class DeckView : UserControl
         checkQrAndNetwork.Checked = Settings.Default.ShowQrCodeAndNetwork;
         lblNetworkInterfaces.Text = GetNetworkInterfacesString();
         lblPort.Text = $"Port: {MacroDeck.Configuration.HostPort}";
-        checkQrAndNetwork_CheckedChanged(null, EventArgs.Empty);
         _mainWindow = mainWindow;
         HandleCreated += DeckView_HandleCreated;
         HandleDestroyed += DeckView_HandleDestroyed;
@@ -100,8 +98,6 @@ public partial class DeckView : UserControl
         actionButtonContextMenuItemSimulateRelease.Text = LanguageManager.Strings.SimulateOnRelease;
         actionButtonContextMenuItemSimulateLongPress.Text = LanguageManager.Strings.SimulateOnLongPress;
         actionButtonContextMenuItemSimulateLongPressRelease.Text = LanguageManager.Strings.SimulateOnLongPressRelease;
-        lblFolders.Text = LanguageManager.Strings.Folders;
-        lblGrid.Text = LanguageManager.Strings.Grid;
     }
 
 
@@ -137,6 +133,11 @@ public partial class DeckView : UserControl
 
     public void UpdateButtons(bool clear = false)
     {
+        if (!IsHandleCreated)
+        {
+            return;
+        }
+
         if (clear)
         {
             foreach (RoundedButton roundedButton in buttonPanel.Controls)
@@ -153,10 +154,10 @@ public partial class DeckView : UserControl
                 roundedButton.MouseDown -= ActionButton_Down;
                 roundedButton.DragDrop -= Button_DragDrop;
                 roundedButton.DragEnter -= Button_DragEnter;
-                Invoke(() => roundedButton.Dispose());
+                Invoke(roundedButton.Dispose);
 
             }
-            Invoke(() => buttonPanel.Controls.Clear());
+            Invoke(buttonPanel.Controls.Clear);
         }
 
         var buttonSize = 100;
@@ -269,7 +270,7 @@ public partial class DeckView : UserControl
         button.Height = buttonSize;
         button.Radius = ProfileManager.CurrentProfile.ButtonRadius;
         button.Location = new Point((column * buttonSize) + (column * ProfileManager.CurrentProfile.ButtonSpacing), (row * buttonSize) + (row * ProfileManager.CurrentProfile.ButtonSpacing));
-        button.BackColor = ProfileManager.CurrentProfile.ButtonBackground ? Color.FromArgb(35, 35, 35) : Color.Transparent;
+        button.BackColor = ProfileManager.CurrentProfile.ButtonBackground ? Color.FromArgb(65, 65, 65) : Color.Transparent;
 
         if (button.BackgroundImage != null)
         {
@@ -821,10 +822,18 @@ public partial class DeckView : UserControl
 
     private void checkQrAndNetwork_CheckedChanged(object sender, EventArgs e)
     {
-        qrCodeBox.Visible = checkQrAndNetwork.Checked;
-        lblNetworkInterfaces.Visible = checkQrAndNetwork.Checked;
-        lblPort.Visible = checkQrAndNetwork.Checked;
+        if (networkInformationPanel.Visible)
+        {
+            buttonPanel.Size = new Size(buttonPanel.Width + networkInformationPanel.Width, buttonPanel.Height);
+        } else
+        {
+            buttonPanel.Size = new Size(buttonPanel.Width - networkInformationPanel.Width, buttonPanel.Height);
+        }
+        
+        networkInformationPanel.Visible = checkQrAndNetwork.Checked;
         Settings.Default.ShowQrCodeAndNetwork = checkQrAndNetwork.Checked;
         Settings.Default.Save();
+
+        UpdateButtons();
     }
 }

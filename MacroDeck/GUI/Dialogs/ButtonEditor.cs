@@ -390,7 +390,7 @@ public partial class ButtonEditor : DialogForm
         {
             Color = radioButtonOff.Checked && !radioButtonOn.Checked ? actionButtonEdited.BackColorOff : actionButtonEdited.BackColorOn,
             FullOpen = true,
-            CustomColors = new[] { ColorTranslator.ToOle(Color.FromArgb(35, 35, 35)) }
+            CustomColors = new[] { ColorTranslator.ToOle(Color.FromArgb(65, 65, 65)) }
         };
         if (colorDialog.ShowDialog() == DialogResult.OK)
         {

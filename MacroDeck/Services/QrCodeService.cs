@@ -33,9 +33,9 @@ public class QrCodeService
 
         using var qrGenerator = new QRCodeGenerator();
         using var qrCodeData = qrGenerator.CreateQrCode(qrCodeLink, QRCodeGenerator.ECCLevel.L);
-        using var qrCode = new BitmapByteQRCode(qrCodeData);
+        using var qrCode = new PngByteQRCode(qrCodeData);
 
-        var quickSetupQrCode = qrCode.GetGraphic(15);
+        var quickSetupQrCode = qrCode.GetGraphic(20, Color.White, Color.Transparent, false);
         using var ms = new MemoryStream(quickSetupQrCode);
         return Image.FromStream(ms);
     }
