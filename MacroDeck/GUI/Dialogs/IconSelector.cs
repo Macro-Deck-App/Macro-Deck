@@ -148,8 +148,8 @@ public partial class IconSelector : DialogForm
                             collection.Coalesce();
                             Parallel.ForEach(collection, image =>
                             {
-                                image.Resize(iconImportQuality.Pixels, iconImportQuality.Pixels);
-                                image.Crop(iconImportQuality.Pixels, iconImportQuality.Pixels);
+                                image.Resize((uint)iconImportQuality.Pixels, (uint)iconImportQuality.Pixels);
+                                image.Crop((uint)iconImportQuality.Pixels, (uint)iconImportQuality.Pixels);
                             });
                                                 
                             using (var ms = new MemoryStream())
@@ -369,9 +369,9 @@ public partial class IconSelector : DialogForm
                     collection.Coalesce();
                     foreach (var image in collection)
                     {
-                        image.Resize(iconImportQuality.Pixels, iconImportQuality.Pixels);
+                        image.Resize((uint)iconImportQuality.Pixels, (uint)iconImportQuality.Pixels);
                         image.Quality = 50;
-                        image.Crop(iconImportQuality.Pixels, iconImportQuality.Pixels);
+                        image.Crop((uint)iconImportQuality.Pixels, (uint)iconImportQuality.Pixels);
                     }
                     try
                     {

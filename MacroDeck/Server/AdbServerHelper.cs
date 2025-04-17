@@ -15,6 +15,11 @@ public class AdbServerHelper
     private const string AdbFolderName = "Android Debug Bridge";
 
     private static readonly string AdbPath = Path.Combine(ApplicationPaths.MainDirectoryPath, AdbFolderName, "adb.exe");
+
+    public static async Task Stop()
+    {
+        await _adbServer.StopServerAsync();
+    }
     
     public static async Task Initialize()
     {
@@ -32,12 +37,12 @@ public class AdbServerHelper
         MacroDeckLogger.Info(typeof(AdbServerHelper), $"Starting ADB server using {AdbPath}");
 
         _adbServer = new AdbServer();
-        var result = await _adbServer.StartServerAsync(AdbPath, true);
-        if (result != StartServerResult.Started)
+        var result = await _adbServer.StartServerAsync(AdbPath, false);
+        if (result != StartServerResult.Started && result != StartServerResult.AlreadyRunning)
         {
             MacroDeckLogger.Info(typeof(AdbServerHelper), "Unable to start ADB server");
         }
-        
+
         var monitor = new DeviceMonitor(new AdbSocket(AdbClient.AdbServerEndPoint));
         monitor.DeviceConnected += Monitor_DeviceConnected;
         monitor.DeviceDisconnected += Monitor_DeviceDisconnected;
@@ -51,6 +56,7 @@ public class AdbServerHelper
         {
             return;
         }
+
         var device = await GetDevice(adbClient, serial);
         if (!device.HasValue)
         {
@@ -142,11 +148,17 @@ public class AdbServerHelper
         {
             return;
         }
-        
-        await adbDeviceClient.ExecuteRemoteCommandAsync("am force-stop com.suchbyte.macrodeck",
-            device,
-            new ConsoleOutputReceiver());
-        await adbDeviceClient.SendKeyEventAsync(device, "KEYCODE_SLEEP");
+
+        try
+        {
+            await adbDeviceClient.ExecuteRemoteCommandAsync("am force-stop com.suchbyte.macrodeck",
+                device,
+                new ConsoleOutputReceiver());
+            await adbDeviceClient.SendKeyEventAsync(device, "KEYCODE_SLEEP");
+        } catch
+        {
+            // ignore
+        }
     }
 
     private static async Task StartMacroDeckClient(AdbClient adbDeviceClient, DeviceData device)
@@ -162,10 +174,16 @@ public class AdbServerHelper
             return;
         }
         
-        await adbDeviceClient.SendKeyEventAsync(device, "KEYCODE_WAKEUP");
-        await adbDeviceClient.ExecuteRemoteCommandAsync("am start -n com.suchbyte.macrodeck/.MainActivity",
-            device,
-            new ConsoleOutputReceiver());
+        try
+        {
+            await adbDeviceClient.SendKeyEventAsync(device, "KEYCODE_WAKEUP");
+            await adbDeviceClient.ExecuteRemoteCommandAsync("am start -n com.suchbyte.macrodeck/.MainActivity",
+                device,
+                new ConsoleOutputReceiver());
+        } catch
+        {
+            // ignore
+        }
     }
 
     private static async Task StartReverseForward(AdbClient adbDeviceClient, DeviceData device)

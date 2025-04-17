@@ -73,6 +73,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             backupsPanel = new FlowLayoutPanel();
             lblBackups = new Label();
             tabAbout = new TabPage();
+            lblDotnetVersion = new Label();
+            label6 = new Label();
             btnGitHub = new PictureButton();
             label1 = new Label();
             lblTranslationBy = new Label();
@@ -618,6 +620,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // tabAbout
             // 
             tabAbout.BackColor = Color.FromArgb(45, 45, 45);
+            tabAbout.Controls.Add(lblDotnetVersion);
+            tabAbout.Controls.Add(label6);
             tabAbout.Controls.Add(btnGitHub);
             tabAbout.Controls.Add(label1);
             tabAbout.Controls.Add(lblTranslationBy);
@@ -638,6 +642,26 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             tabAbout.Size = new Size(923, 526);
             tabAbout.TabIndex = 2;
             tabAbout.Text = "About";
+            // 
+            // lblDotnetVersion
+            // 
+            lblDotnetVersion.AutoSize = true;
+            lblDotnetVersion.Location = new Point(564, 491);
+            lblDotnetVersion.Name = "lblDotnetVersion";
+            lblDotnetVersion.Size = new Size(18, 19);
+            lblDotnetVersion.TabIndex = 20;
+            lblDotnetVersion.Text = "0";
+            lblDotnetVersion.UseMnemonic = false;
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new Point(332, 491);
+            label6.Name = "label6";
+            label6.Size = new Size(74, 19);
+            label6.TabIndex = 19;
+            label6.Text = "Runtime:";
+            label6.UseMnemonic = false;
             // 
             // btnGitHub
             // 
@@ -880,5 +904,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private CheckBox checkEnableAdb;
         private Label label5;
         private CheckBox checkAutoStartUsb;
+        private Label lblDotnetVersion;
+        private Label label6;
     }
 }

@@ -3,19 +3,19 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="AdvancedSharpAdbClient" Version="3.3.12" />
+    <PackageVersion Include="AdvancedSharpAdbClient" Version="3.4.14" />
     <PackageVersion Include="CommandLineParser" Version="2.9.1" />
-    <PackageVersion Include="Cottle" Version="2.0.10" />
+    <PackageVersion Include="Cottle" Version="2.1.0" />
     <PackageVersion Include="Dax-FCTB" Version="2.16.26.120" />
-    <PackageVersion Include="Magick.NET-Q16-x64" Version="13.5.0" />
-    <PackageVersion Include="Magick.NET.SystemDrawing" Version="7.2.1" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    <PackageVersion Include="Magick.NET-Q16-x64" Version="14.6.0" />
+    <PackageVersion Include="Magick.NET.SystemDrawing" Version="8.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.4" />
     <PackageVersion Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="QRCoder" Version="1.5.1" />
-    <PackageVersion Include="sqlite-net-pcl" Version="1.8.116" />
+    <PackageVersion Include="QRCoder" Version="1.6.0" />
+    <PackageVersion Include="sqlite-net-pcl" Version="1.9.172" />
     <PackageVersion Include="System.Collections" Version="4.3.0" />
-    <PackageVersion Include="System.Drawing.Common" Version="8.0.4" />
+    <PackageVersion Include="System.Drawing.Common" Version="9.0.4" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
