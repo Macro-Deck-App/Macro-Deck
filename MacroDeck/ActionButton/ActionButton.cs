@@ -111,8 +111,8 @@ public class ActionButton : IDisposable
     private bool _state;
     private string _iconOff = string.Empty;
     private string _iconOn = string.Empty;
-    private Color _backgroundColorOff = Color.FromArgb(35, 35, 35);
-    private Color _backgroundColorOn = Color.FromArgb(35, 35, 35);
+    private Color _backgroundColorOff = Color.FromArgb(65, 65, 65);
+    private Color _backgroundColorOn = Color.FromArgb(65, 65, 65);
 
 
     public bool State

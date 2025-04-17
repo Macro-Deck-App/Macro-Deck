@@ -43,6 +43,10 @@ public class IconManager
             LoadIconPack(iconPackDir);
         }
 
+        if (IconPacks.Count == 0)
+        {
+            CreateIconPack("My Icons", Environment.UserName, "1.0.0");
+        }
         MacroDeckLogger.Info(typeof(IconManager), $"Loaded {IconPacks.Count} icon packs");
     }
 
@@ -109,12 +113,12 @@ public class IconManager
 
     public static IconPack? GetIconPackByName(string name)
     {
-        return IconPacks.Find(iconPack => iconPack.Name == name);
+        return IconPacks.FirstOrDefault(iconPack => iconPack.Name == name);
     }
 
     public static Icon? GetIcon(IconPack iconPack, string iconId)
     {
-        return iconPack?.Icons.Find(icon => icon.IconId == iconId);
+        return iconPack?.Icons.FirstOrDefault(icon => icon.IconId == iconId);
     }
 
     public static Icon? GetIconByString(string s)
@@ -192,7 +196,7 @@ public class IconManager
         if (IconPacks.Contains(iconPack))
         {
             IconPacks.Remove(iconPack);
-        }
+        }      
         OnIconPacksChanged?.Invoke(null, EventArgs.Empty);
         try
         {
