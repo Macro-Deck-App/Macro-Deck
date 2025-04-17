@@ -364,3 +364,4 @@ FodyWeavers.xsd
 
 # Inno Setup files
 MacroDeck.Setup/*.exe
+/.idea/.idea.MacroDeck/.idea

@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using SuchByte.MacroDeck.Backups;
 using SuchByte.MacroDeck.GUI.CustomControls.Settings;
 using SuchByte.MacroDeck.GUI.Dialogs;
@@ -77,6 +79,7 @@ public partial class SettingsView : UserControl
         lblPluginAPIVersion.Text = MacroDeck.PluginApiVersion.ToString();
         lblMacroDeck.Text = "Macro Deck " + MacroDeck.Version.ToString();
         lblInstalledPlugins.Text = PluginManager.Plugins.Count.ToString();
+        lblDotnetVersion.Text = RuntimeInformation.FrameworkDescription;
     }
 
     private void LoadLanguage()
