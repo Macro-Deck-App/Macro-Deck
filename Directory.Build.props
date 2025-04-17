@@ -4,6 +4,7 @@
         <TargetFramework>net9.0-windows10.0.22000.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+		<NoWarn>$(NoWarn);WFO1000</NoWarn>
         <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     </PropertyGroup>
 
