@@ -11,10 +11,18 @@ public class LabelGenerator
 {
     public static Image GetLabel(Image img, string text, ButtonLabelPosition buttonLabelPosition, Font font, Color textColor, Color shadowColor, SizeF shadowOffset)
     {
-        if (img == null) return img;
+        if (img == null)
+        {
+            font.Dispose();
+            return img;
+        }
 
         text = SanitizeLabelText(text);
-        if (string.IsNullOrEmpty(text)) return img;
+        if (string.IsNullOrEmpty(text))
+        {
+            font.Dispose();
+            return img;
+        }
 
         if (NeedsUnicodeFallback(text))
         {
@@ -100,7 +108,7 @@ public class LabelGenerator
         {
             return new Font("Segoe UI Emoji", targetSize, originalFont.Style, GraphicsUnit.Pixel);
         }
-        catch
+        catch (ArgumentException)
         {
             return new Font("Segoe UI", targetSize, originalFont.Style, GraphicsUnit.Pixel);
         }
@@ -113,7 +121,7 @@ public class LabelGenerator
             if (rune.Value > 0x7F)
             {
                 var category = Rune.GetUnicodeCategory(rune);
-                if (category == UnicodeCategory.OtherSymbol || category == UnicodeCategory.Surrogate || rune.Value >= 0x1F000)
+                if (category == UnicodeCategory.OtherSymbol || rune.Value >= 0x1F000)
                 {
                     return true;
                 }
