@@ -8,18 +8,18 @@ namespace MacroDeck.Server;
 public static class MacroDeckServerHelper
 {
     private static IHost? _host;
-    
+
     internal static bool UseHttps { get; private set; }
-    
-    public static async Task Setup(int port, bool enableSsl, string? certificatePath, string? certificatePassword)
+
+    public static async Task Setup(int port, X509Certificate2? certificate)
     {
         if (_host is not null)
         {
             await _host.StopAsync();
         }
 
-        UseHttps = enableSsl && !string.IsNullOrWhiteSpace(certificatePath);
-        
+        UseHttps = certificate is not null;
+
         _host = Host.CreateDefaultBuilder()
             .ConfigureWebHostDefaults(hostBuilder =>
             {
@@ -30,10 +30,11 @@ public static class MacroDeckServerHelper
                     {
                         options.ListenAnyIP(port, listenOptions =>
                         {
-                            listenOptions.UseHttps(new X509Certificate2(certificatePath, certificatePassword));
+                            listenOptions.UseHttps(certificate!);
                             listenOptions.Protocols = HttpProtocols.Http1;
                         });
-                    } else
+                    }
+                    else
                     {
                         options.ListenAnyIP(port);
                     }

@@ -11,6 +11,7 @@ using SuchByte.MacroDeck.JSON;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Profiles;
+using SuchByte.MacroDeck.Services;
 using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Server;
@@ -37,12 +38,11 @@ public static class MacroDeckServer
         WebSocketHandler.SessionDisconnected += WebSocketHandlerOnSessionDisconnected;
         WebSocketHandler.SessionConnected += WebSocketHandlerOnSessionConnected;
         WebSocketHandler.MessageReceived += WebSocketHandlerOnMessageReceived;
-        var enableSsl = MacroDeck.Configuration.EnableSsl;
-        var certificatePath = MacroDeck.Configuration.SslCertificatePath;
-        var certificatePassword = MacroDeck.Configuration.SslCertificatePassword;
+        SslCertificateService.EnsureValidCertificate();
+        var certificate = MacroDeck.Configuration.EnableSsl ? SslCertificateService.GetX509Certificate() : null;
         try
         {
-            await MacroDeckServerHelper.Setup(port, enableSsl, certificatePath, certificatePassword);
+            await MacroDeckServerHelper.Setup(port, certificate);
         }
         catch (Exception ex)
         {

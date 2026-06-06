@@ -49,11 +49,11 @@ public class MainConfiguration
     [JsonProperty("Connection.Ssl.Enabled")]
     public bool EnableSsl { get; set; }
 
-    [JsonProperty("Connection.Ssl.Certificate.Path")]
-    public string? SslCertificatePath { get; set; }
+    [JsonProperty("Connection.Ssl.Certificate.Pem")]
+    public string? SslCertificatePem { get; set; }
 
-    [JsonProperty("Connection.Ssl.Certificate.Password")]
-    public string? SslCertificatePassword { get; set; }
+    [JsonProperty("Connection.Ssl.Certificate.KeyEncrypted")]
+    public string? SslCertificateKeyPemEncrypted { get; set; }
 
     [JsonProperty("Connection.Host.Address")]
     public string HostAddress { get; set; } = "127.0.0.1";
