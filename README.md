@@ -19,7 +19,7 @@
 
 
 # Companion App
-[Repository]([https://github.com/SuchByte/Macro-Deck-Client](https://github.com/Macro-Deck-App/Macro-Deck-Client-App))
+[Repository](https://github.com/Macro-Deck-App/Macro-Deck-Client-App)
 
 [Google Play](https://play.google.com/store/apps/details?id=com.suchbyte.macrodeck)
 
