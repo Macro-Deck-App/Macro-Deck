@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
@@ -19,9 +20,11 @@ public static class LoggingConfig
                 .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Information)
                 .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
                 .MinimumLevel.Override("System", LogEventLevel.Warning)
-                .MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Warning);
-
-            configuration.WriteTo.Console(theme: AnsiConsoleTheme.Code);
+                .MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Warning)
+                .WriteTo.Console(theme: AnsiConsoleTheme.Code)
+                .WriteTo.File(Path.Combine(ApplicationPaths.LogsDirectoryPath, "log.txt"),
+                    rollingInterval: RollingInterval.Day,
+                    fileSizeLimitBytes: 53477376); // 50 MB
         });
     }
 }
