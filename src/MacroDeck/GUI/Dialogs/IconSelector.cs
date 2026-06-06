@@ -7,7 +7,7 @@ using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Properties;
-using SuchByte.MacroDeck.Startup;
+using SuchByte.MacroDeck.StartupConfig;
 using Icon = SuchByte.MacroDeck.Icons.Icon;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 

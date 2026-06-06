@@ -1,6 +1,6 @@
 ﻿using SuchByte.MacroDeck.Language;
 
-namespace SuchByte.MacroDeck.Startup;
+namespace SuchByte.MacroDeck.StartupConfig;
 
 public static class TrayIconSetup
 {

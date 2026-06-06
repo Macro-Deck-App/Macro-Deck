@@ -1,7 +1,7 @@
 ﻿using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Startup;
 using System.Diagnostics;
 using SuchByte.MacroDeck.Pipe;
+using SuchByte.MacroDeck.StartupConfig;
 
 namespace SuchByte.MacroDeck;
 

@@ -1,6 +1,6 @@
 using System.Security.Cryptography.X509Certificates;
 using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Startup;
+using SuchByte.MacroDeck.StartupConfig;
 using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Services;

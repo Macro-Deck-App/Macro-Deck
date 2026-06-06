@@ -7,7 +7,7 @@ using SuchByte.MacroDeck.DataTypes.Updater;
 using SuchByte.MacroDeck.Enums;
 using SuchByte.MacroDeck.Extension;
 using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Startup;
+using SuchByte.MacroDeck.StartupConfig;
 using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Services;

@@ -21,7 +21,7 @@ using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.Server;
 using SuchByte.MacroDeck.Services;
-using SuchByte.MacroDeck.Startup;
+using SuchByte.MacroDeck.StartupConfig;
 using SuchByte.MacroDeck.Variables;
 using Version = SuchByte.MacroDeck.DataTypes.Core.Version;
 

@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using Newtonsoft.Json;
-using SuchByte.MacroDeck.Startup;
+using SuchByte.MacroDeck.StartupConfig;
 
 namespace SuchByte.MacroDeck.Plugins;
 

@@ -11,7 +11,7 @@ using SuchByte.MacroDeck.InternalPlugins.Variables;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
-using SuchByte.MacroDeck.Startup;
+using SuchByte.MacroDeck.StartupConfig;
 using SuchByte.MacroDeck.Utils;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 

@@ -4,7 +4,7 @@ using AdvancedSharpAdbClient.DeviceCommands;
 using AdvancedSharpAdbClient.Models;
 using AdvancedSharpAdbClient.Receivers;
 using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Startup;
+using SuchByte.MacroDeck.StartupConfig;
 
 namespace SuchByte.MacroDeck.Server;
 

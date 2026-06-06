@@ -8,7 +8,7 @@ using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
-using SuchByte.MacroDeck.Startup;
+using SuchByte.MacroDeck.StartupConfig;
 using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader;

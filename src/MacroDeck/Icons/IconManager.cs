@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
-using SuchByte.MacroDeck.Startup;
+using SuchByte.MacroDeck.StartupConfig;
 using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Icons;

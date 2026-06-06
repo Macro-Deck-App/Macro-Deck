@@ -2,7 +2,7 @@
 using System.IO.Compression;
 using System.Text.Json;
 using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Startup;
+using SuchByte.MacroDeck.StartupConfig;
 using SuchByte.MacroDeck.Utils;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
