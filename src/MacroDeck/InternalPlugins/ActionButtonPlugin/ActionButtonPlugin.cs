@@ -2,7 +2,8 @@
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 
-namespace SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin;
+// ReSharper disable once CheckNamespace
+namespace SuchByte.MacroDeck.ActionButton;
 // Don't change because of backwards compatibility!
 
 public class ActionButtonPlugin : MacroDeckPlugin

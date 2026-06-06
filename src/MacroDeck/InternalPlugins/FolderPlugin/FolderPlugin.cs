@@ -7,7 +7,8 @@ using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
 
-namespace SuchByte.MacroDeck.InternalPlugins.FolderPlugin;
+// ReSharper disable once CheckNamespace
+namespace SuchByte.MacroDeck.Folders.Plugin;
 // Don't change because of backwards compatibility!
 
 public class FolderPlugin : MacroDeckPlugin

@@ -2,7 +2,8 @@
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
 
-namespace SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Actions;
+// ReSharper disable once CheckNamespace
+namespace SuchByte.MacroDeck.ActionButton;
 // Don't change because of backwards compatibility!
 
 public class ActionButtonSetStateOnAction : PluginAction
@@ -11,7 +12,7 @@ public class ActionButtonSetStateOnAction : PluginAction
     public override string Description => LanguageManager.Strings.ActionSetActionButtonStateOnDescription;
     public override bool CanConfigure => false;
 
-    public override void Trigger(string clientId, ActionButton.ActionButton actionButton)
+    public override void Trigger(string clientId, ActionButton actionButton)
     {
         if (actionButton.State)
         {

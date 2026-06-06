@@ -1,8 +1,8 @@
 ﻿using SuchByte.MacroDeck.ActionButton;
+using SuchByte.MacroDeck.ActionButton.Plugin;
 using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Interfaces;
-using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Actions;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 

@@ -13,10 +13,10 @@ using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.Utils;
-using SuchByte.MacroDeck.Variables;
 using Timer = System.Timers.Timer;
 
-namespace SuchByte.MacroDeck.InternalPlugins.Variables;
+// ReSharper disable once CheckNamespace
+namespace SuchByte.MacroDeck.Variables.Plugin;
 // Don't change because of backwards compatibility!
 
 public class VariablesPlugin : MacroDeckPlugin
