@@ -4,11 +4,11 @@ namespace SuchByte.MacroDeck.Models;
 
 public interface ISerializableConfiguration
 {
-	public string Serialize();
+    public string Serialize();
 
-	protected static T Deserialize<T>(string configuration)
-		where T : ISerializableConfiguration, new()
-	{
-		return !string.IsNullOrWhiteSpace(configuration) ? JsonSerializer.Deserialize<T>(configuration) : new T();
-	}
+    protected static T Deserialize<T>(string configuration)
+        where T : ISerializableConfiguration, new()
+    {
+        return !string.IsNullOrWhiteSpace(configuration) ? JsonSerializer.Deserialize<T>(configuration) : new T();
+    }
 }

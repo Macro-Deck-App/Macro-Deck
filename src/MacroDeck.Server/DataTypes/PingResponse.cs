@@ -2,10 +2,10 @@
 
 public class PingResponse
 {
-	public string MachineName { get; set; }
+    public string MachineName { get; set; }
 
-	public PingResponse()
-	{
-		MachineName = Environment.MachineName;
-	}
+    public PingResponse()
+    {
+        MachineName = Environment.MachineName;
+    }
 }

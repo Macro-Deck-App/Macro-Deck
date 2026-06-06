@@ -4,26 +4,26 @@ namespace SuchByte.MacroDeck.GUI.InitialSetupPages;
 
 public partial class SetupPage3 : UserControl
 {
-	private InitialSetup initialSetup;
+    private InitialSetup initialSetup;
 
-	public SetupPage3(InitialSetup initialSetup)
-	{
-		InitializeComponent();
-		this.initialSetup = initialSetup;
-		lblConfigureGridPreferences.Text = LanguageManager.Strings.InitialSetupConfigureGridPreferences;
-	}
+    public SetupPage3(InitialSetup initialSetup)
+    {
+        InitializeComponent();
+        this.initialSetup = initialSetup;
+        lblConfigureGridPreferences.Text = LanguageManager.Strings.InitialSetupConfigureGridPreferences;
+    }
 
-	private void SetupPage3_Load(object sender, EventArgs e)
-	{
-	}
+    private void SetupPage3_Load(object sender, EventArgs e)
+    {
+    }
 
-	private void Columns_ValueChanged(object sender, EventArgs e)
-	{
-		//this.initialSetup.Columns = (int)columns.Value;
-	}
+    private void Columns_ValueChanged(object sender, EventArgs e)
+    {
+        //this.initialSetup.Columns = (int)columns.Value;
+    }
 
-	private void Rows_ValueChanged(object sender, EventArgs e)
-	{
-		//this.initialSetup.Rows = (int)rows.Value;
-	}
+    private void Rows_ValueChanged(object sender, EventArgs e)
+    {
+        //this.initialSetup.Rows = (int)rows.Value;
+    }
 }

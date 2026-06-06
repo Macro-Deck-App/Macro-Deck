@@ -9,198 +9,198 @@ namespace SuchByte.MacroDeck.ActionButton;
 
 public class ActionButton : IDisposable
 {
-	private bool _disposed;
+    private bool _disposed;
 
 
-	public ActionButton()
-	{
-		VariableManager.OnVariableChanged += VariableChanged;
-	}
+    public ActionButton()
+    {
+        VariableManager.OnVariableChanged += VariableChanged;
+    }
 
-	public void UpdateHotkey()
-	{
-		if (KeyCode != Keys.None)
-		{
-			HotkeyManager.AddHotkey(this, ModifierKeyCodes, KeyCode);
-		}
-	}
+    public void UpdateHotkey()
+    {
+        if (KeyCode != Keys.None)
+        {
+            HotkeyManager.AddHotkey(this, ModifierKeyCodes, KeyCode);
+        }
+    }
 
-	public void UpdateBindingState()
-	{
-		if (!string.IsNullOrWhiteSpace(StateBindingVariable))
-		{
-			var variable = VariableManager.ListVariables.FirstOrDefault(v => v.Name == StateBindingVariable);
-			if (variable != null)
-			{
-				UpdateBindingState(variable);
-			}
-		}
-	}
+    public void UpdateBindingState()
+    {
+        if (!string.IsNullOrWhiteSpace(StateBindingVariable))
+        {
+            var variable = VariableManager.ListVariables.FirstOrDefault(v => v.Name == StateBindingVariable);
+            if (variable != null)
+            {
+                UpdateBindingState(variable);
+            }
+        }
+    }
 
-	[JsonIgnore] public bool IsDisposed => _disposed;
-
-
-	protected virtual void Dispose(bool disposing)
-	{
-		if (_disposed)
-		{
-			return;
-		}
-
-		if (disposing)
-		{
-		}
-
-		HotkeyManager.RemoveHotkey(this);
-		VariableManager.OnVariableChanged -= VariableChanged;
-		if (Actions != null)
-		{
-			foreach (var pluginAction in Actions)
-			{
-				pluginAction.OnActionButtonDelete();
-			}
-		}
-
-		if (EventListeners != null)
-		{
-			foreach (var pluginAction in EventListeners.SelectMany(eventListeners => eventListeners.Actions))
-			{
-				pluginAction.OnActionButtonDelete();
-			}
-		}
-
-		_disposed = true;
-	}
-
-	public void Dispose()
-	{
-		Dispose(true);
-		GC.SuppressFinalize(this);
-	}
-
-	~ActionButton()
-	{
-		Dispose(false);
-	}
-
-	private void VariableChanged(object sender, EventArgs e)
-	{
-		if (string.IsNullOrWhiteSpace(StateBindingVariable))
-		{
-			return;
-		}
-
-		var variable = sender as Variable;
-		UpdateBindingState(variable);
-	}
-
-	private void UpdateBindingState(Variable variable)
-	{
-		if (variable == null || !variable.Name.Equals(StateBindingVariable))
-		{
-			return;
-		}
-
-		bool.TryParse(variable.Value, out var newState);
-		if (variable.Value.ToLower().Equals("on"))
-		{
-			newState = true;
-		}
-
-		State = newState;
-	}
-
-	public string Guid { get; set; } = System.Guid.NewGuid().ToString();
-
-	public event EventHandler StateChanged;
-	public event EventHandler IconChanged;
-
-	private bool _state;
-	private string _iconOff = string.Empty;
-	private string _iconOn = string.Empty;
-	private Color _backgroundColorOff = Color.FromArgb(65, 65, 65);
-	private Color _backgroundColorOn = Color.FromArgb(65, 65, 65);
+    [JsonIgnore] public bool IsDisposed => _disposed;
 
 
-	public bool State
-	{
-		get => _state;
-		set
-		{
-			if (_state == value)
-			{
-				return;
-			}
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
+        {
+            return;
+        }
 
-			_state = value;
-			MacroDeckServer.UpdateState(this);
-			StateChanged?.Invoke(this, EventArgs.Empty);
-		}
-	}
+        if (disposing)
+        {
+        }
 
-	public string IconOff
-	{
-		get => _iconOff;
+        HotkeyManager.RemoveHotkey(this);
+        VariableManager.OnVariableChanged -= VariableChanged;
+        if (Actions != null)
+        {
+            foreach (var pluginAction in Actions)
+            {
+                pluginAction.OnActionButtonDelete();
+            }
+        }
 
-		set
-		{
-			_iconOff = value;
-			IconChanged?.Invoke(this, EventArgs.Empty);
-		}
-	}
+        if (EventListeners != null)
+        {
+            foreach (var pluginAction in EventListeners.SelectMany(eventListeners => eventListeners.Actions))
+            {
+                pluginAction.OnActionButtonDelete();
+            }
+        }
 
-	public string IconOn
-	{
-		get => _iconOn;
-		set
-		{
-			_iconOn = value;
-			IconChanged?.Invoke(this, EventArgs.Empty);
-		}
-	}
+        _disposed = true;
+    }
 
-	public Color BackColorOff
-	{
-		get => _backgroundColorOff;
-		set
-		{
-			if (_backgroundColorOff == value)
-			{
-				return;
-			}
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
-			_backgroundColorOff = value;
-			MacroDeckServer.UpdateState(this);
-			StateChanged?.Invoke(this, EventArgs.Empty);
-		}
-	}
+    ~ActionButton()
+    {
+        Dispose(false);
+    }
 
-	public Color BackColorOn
-	{
-		get => _backgroundColorOn;
-		set
-		{
-			if (_backgroundColorOn == value)
-			{
-				return;
-			}
+    private void VariableChanged(object sender, EventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(StateBindingVariable))
+        {
+            return;
+        }
 
-			_backgroundColorOn = value;
-			MacroDeckServer.UpdateState(this);
-			StateChanged?.Invoke(this, EventArgs.Empty);
-		}
-	}
+        var variable = sender as Variable;
+        UpdateBindingState(variable);
+    }
 
-	public ButtonLabel LabelOff { get; set; } = new();
-	public ButtonLabel LabelOn { get; set; } = new();
-	public int Position_X { get; set; } = -1;
-	public int Position_Y { get; set; } = -1;
-	public string StateBindingVariable { get; set; } = string.Empty;
-	public List<PluginAction?> Actions { get; set; } = new();
-	public List<PluginAction?> ActionsRelease { get; set; } = new();
-	public List<PluginAction?> ActionsLongPress { get; set; } = new();
-	public List<PluginAction?> ActionsLongPressRelease { get; set; } = new();
-	public List<EventListener> EventListeners { get; set; } = new();
-	public Keys ModifierKeyCodes { get; set; } = Keys.None;
-	public Keys KeyCode { get; set; } = Keys.None;
+    private void UpdateBindingState(Variable variable)
+    {
+        if (variable == null || !variable.Name.Equals(StateBindingVariable))
+        {
+            return;
+        }
+
+        bool.TryParse(variable.Value, out var newState);
+        if (variable.Value.ToLower().Equals("on"))
+        {
+            newState = true;
+        }
+
+        State = newState;
+    }
+
+    public string Guid { get; set; } = System.Guid.NewGuid().ToString();
+
+    public event EventHandler StateChanged;
+    public event EventHandler IconChanged;
+
+    private bool _state;
+    private string _iconOff = string.Empty;
+    private string _iconOn = string.Empty;
+    private Color _backgroundColorOff = Color.FromArgb(65, 65, 65);
+    private Color _backgroundColorOn = Color.FromArgb(65, 65, 65);
+
+
+    public bool State
+    {
+        get => _state;
+        set
+        {
+            if (_state == value)
+            {
+                return;
+            }
+
+            _state = value;
+            MacroDeckServer.UpdateState(this);
+            StateChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public string IconOff
+    {
+        get => _iconOff;
+
+        set
+        {
+            _iconOff = value;
+            IconChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public string IconOn
+    {
+        get => _iconOn;
+        set
+        {
+            _iconOn = value;
+            IconChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public Color BackColorOff
+    {
+        get => _backgroundColorOff;
+        set
+        {
+            if (_backgroundColorOff == value)
+            {
+                return;
+            }
+
+            _backgroundColorOff = value;
+            MacroDeckServer.UpdateState(this);
+            StateChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public Color BackColorOn
+    {
+        get => _backgroundColorOn;
+        set
+        {
+            if (_backgroundColorOn == value)
+            {
+                return;
+            }
+
+            _backgroundColorOn = value;
+            MacroDeckServer.UpdateState(this);
+            StateChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public ButtonLabel LabelOff { get; set; } = new();
+    public ButtonLabel LabelOn { get; set; } = new();
+    public int Position_X { get; set; } = -1;
+    public int Position_Y { get; set; } = -1;
+    public string StateBindingVariable { get; set; } = string.Empty;
+    public List<PluginAction?> Actions { get; set; } = new();
+    public List<PluginAction?> ActionsRelease { get; set; } = new();
+    public List<PluginAction?> ActionsLongPress { get; set; } = new();
+    public List<PluginAction?> ActionsLongPressRelease { get; set; } = new();
+    public List<EventListener> EventListeners { get; set; } = new();
+    public Keys ModifierKeyCodes { get; set; } = Keys.None;
+    public Keys KeyCode { get; set; } = Keys.None;
 }

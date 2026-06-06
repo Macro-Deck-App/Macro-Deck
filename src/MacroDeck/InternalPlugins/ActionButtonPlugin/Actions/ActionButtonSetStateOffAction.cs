@@ -7,16 +7,16 @@ namespace SuchByte.MacroDeck.ActionButton;
 
 public class ActionButtonSetStateOffAction : PluginAction
 {
-	public override string Name => LanguageManager.Strings.ActionSetActionButtonStateOff;
-	public override string Description => LanguageManager.Strings.ActionSetActionButtonStateOffDescription;
+    public override string Name => LanguageManager.Strings.ActionSetActionButtonStateOff;
+    public override string Description => LanguageManager.Strings.ActionSetActionButtonStateOffDescription;
 
-	public override void Trigger(string clientId, ActionButton actionButton)
-	{
-		if (actionButton.State == false)
-		{
-			return;
-		}
+    public override void Trigger(string clientId, ActionButton actionButton)
+    {
+        if (actionButton.State == false)
+        {
+            return;
+        }
 
-		MacroDeckServer.SetState(actionButton, false);
-	}
+        MacroDeckServer.SetState(actionButton, false);
+    }
 }

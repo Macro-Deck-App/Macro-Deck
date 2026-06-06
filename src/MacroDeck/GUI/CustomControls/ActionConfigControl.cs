@@ -2,18 +2,18 @@
 
 public partial class ActionConfigControl : UserControl
 {
-	/// <summary>
-	/// Gets called when the user clicks the "Ok" button in the ActionConfigurator.
-	/// Replaces the ActionSave event.
-	/// </summary>
-	/// <returns>return true = the user comnfigured the action; false = the user didn't configured</returns>
-	public virtual bool OnActionSave()
-	{
-		return true;
-	}
+    /// <summary>
+    /// Gets called when the user clicks the "Ok" button in the ActionConfigurator.
+    /// Replaces the ActionSave event.
+    /// </summary>
+    /// <returns>return true = the user comnfigured the action; false = the user didn't configured</returns>
+    public virtual bool OnActionSave()
+    {
+        return true;
+    }
 
-	public ActionConfigControl()
-	{
-		InitializeComponent();
-	}
+    public ActionConfigControl()
+    {
+        InitializeComponent();
+    }
 }

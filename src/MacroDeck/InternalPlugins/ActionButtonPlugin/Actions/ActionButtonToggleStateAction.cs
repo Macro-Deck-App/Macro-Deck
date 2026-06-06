@@ -7,11 +7,11 @@ namespace SuchByte.MacroDeck.ActionButton;
 
 public class ActionButtonToggleStateAction : PluginAction
 {
-	public override string Name => LanguageManager.Strings.ActionToggleActionButtonState;
-	public override string Description => LanguageManager.Strings.ActionToggleActionButtonStateDescription;
+    public override string Name => LanguageManager.Strings.ActionToggleActionButtonState;
+    public override string Description => LanguageManager.Strings.ActionToggleActionButtonStateDescription;
 
-	public override void Trigger(string clientId, ActionButton actionButton)
-	{
-		MacroDeckServer.SetState(actionButton, !actionButton.State);
-	}
+    public override void Trigger(string clientId, ActionButton actionButton)
+    {
+        MacroDeckServer.SetState(actionButton, !actionButton.State);
+    }
 }

@@ -2,7 +2,7 @@
 
 public class UpdateApiVersionFileInfo
 {
-	public string? DownloadUrl { get; set; }
-	public string? FileHash { get; set; }
-	public long FileSize { get; set; }
+    public string? DownloadUrl { get; set; }
+    public string? FileHash { get; set; }
+    public long FileSize { get; set; }
 }

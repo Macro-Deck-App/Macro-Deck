@@ -2,9 +2,9 @@
 
 public partial class LoadingView : UserControl
 {
-	public LoadingView()
-	{
-		InitializeComponent();
-		Dock = DockStyle.Fill;
-	}
+    public LoadingView()
+    {
+        InitializeComponent();
+        Dock = DockStyle.Fill;
+    }
 }

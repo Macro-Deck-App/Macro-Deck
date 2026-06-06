@@ -4,9 +4,9 @@ namespace SuchByte.MacroDeck.ViewModels;
 
 public interface ISerializableConfigViewModel
 {
-	protected ISerializableConfiguration SerializableConfiguration { get; }
+    protected ISerializableConfiguration SerializableConfiguration { get; }
 
-	void SetConfig();
+    void SetConfig();
 
-	bool SaveConfig();
+    bool SaveConfig();
 }

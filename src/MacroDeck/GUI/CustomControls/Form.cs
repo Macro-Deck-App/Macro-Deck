@@ -6,64 +6,64 @@ namespace SuchByte.MacroDeck.GUI.CustomControls;
 
 public partial class Form : System.Windows.Forms.Form
 {
-	public event EventHandler FormWindowStateChanged;
+    public event EventHandler FormWindowStateChanged;
 
-	public Form()
-	{
-		InitializeComponent();
-	}
+    public Form()
+    {
+        InitializeComponent();
+    }
 
-	protected override void WndProc(ref Message m)
-	{
-		var originalState = WindowState;
-		base.WndProc(ref m);
-		if (WindowState == originalState)
-		{
-			return;
-		}
+    protected override void WndProc(ref Message m)
+    {
+        var originalState = WindowState;
+        base.WndProc(ref m);
+        if (WindowState == originalState)
+        {
+            return;
+        }
 
-		FormWindowStateChanged?.Invoke(this, EventArgs.Empty);
-	}
+        FormWindowStateChanged?.Invoke(this, EventArgs.Empty);
+    }
 
-	protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-	{
-		switch (keyData)
-		{
-			case Keys.Escape:
-				Close();
-				return true;
-		}
+    protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+    {
+        switch (keyData)
+        {
+            case Keys.Escape:
+                Close();
+                return true;
+        }
 
-		return base.ProcessCmdKey(ref msg, keyData);
-	}
+        return base.ProcessCmdKey(ref msg, keyData);
+    }
 
-	private void HelpMenuExportLog_Click(object sender, EventArgs e)
-	{
-		using var saveFileDialog = new SaveFileDialog
-		{
-			AddExtension = true,
-			Filter = "*.log|*.log",
-			DefaultExt = ".log",
-			FileName = new FileInfo(MacroDeckLogger.CurrentFilename).Name
-		};
-		if (saveFileDialog.ShowDialog() != DialogResult.OK)
-		{
-			return;
-		}
+    private void HelpMenuExportLog_Click(object sender, EventArgs e)
+    {
+        using var saveFileDialog = new SaveFileDialog
+        {
+            AddExtension = true,
+            Filter = "*.log|*.log",
+            DefaultExt = ".log",
+            FileName = new FileInfo(MacroDeckLogger.CurrentFilename).Name
+        };
+        if (saveFileDialog.ShowDialog() != DialogResult.OK)
+        {
+            return;
+        }
 
-		try
-		{
-			File.Copy(MacroDeckLogger.CurrentFilename, saveFileDialog.FileName, true);
-			MacroDeckLogger.Info(GetType(), $"Exported latest log to {saveFileDialog.FileName}");
-			using var msgBox = new MessageBox();
-			msgBox.ShowDialog(LanguageManager.Strings.ExportLatestLog,
-				string.Format(LanguageManager.Strings.LogSuccessfullyExportedToX, saveFileDialog.FileName),
-				MessageBoxButtons.OK);
-		}
-		catch (Exception ex)
-		{
-			MacroDeckLogger.Error(GetType(),
-				"Error while exporting latest log: " + ex.Message + Environment.NewLine + ex.StackTrace);
-		}
-	}
+        try
+        {
+            File.Copy(MacroDeckLogger.CurrentFilename, saveFileDialog.FileName, true);
+            MacroDeckLogger.Info(GetType(), $"Exported latest log to {saveFileDialog.FileName}");
+            using var msgBox = new MessageBox();
+            msgBox.ShowDialog(LanguageManager.Strings.ExportLatestLog,
+                string.Format(LanguageManager.Strings.LogSuccessfullyExportedToX, saveFileDialog.FileName),
+                MessageBoxButtons.OK);
+        }
+        catch (Exception ex)
+        {
+            MacroDeckLogger.Error(GetType(),
+                "Error while exporting latest log: " + ex.Message + Environment.NewLine + ex.StackTrace);
+        }
+    }
 }

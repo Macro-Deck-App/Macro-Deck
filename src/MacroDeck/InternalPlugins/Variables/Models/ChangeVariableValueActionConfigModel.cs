@@ -7,23 +7,23 @@ namespace SuchByte.MacroDeck.InternalPlugins.Variables.Models;
 
 public class ChangeVariableValueActionConfigModel : ISerializableConfiguration
 {
-	[JsonPropertyName("method")]
-	[JsonConverter(typeof(JsonStringEnumConverter))]
-	public ChangeVariableMethod Method { get; set; } = ChangeVariableMethod.countUp;
+    [JsonPropertyName("method")]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public ChangeVariableMethod Method { get; set; } = ChangeVariableMethod.countUp;
 
 
-	[JsonPropertyName("variable")] public string Variable { get; set; }
+    [JsonPropertyName("variable")] public string Variable { get; set; }
 
-	[JsonPropertyName("value")] public string Value { get; set; } = "";
+    [JsonPropertyName("value")] public string Value { get; set; } = "";
 
 
-	public string Serialize()
-	{
-		return JsonSerializer.Serialize(this);
-	}
+    public string Serialize()
+    {
+        return JsonSerializer.Serialize(this);
+    }
 
-	public static ChangeVariableValueActionConfigModel Deserialize(string config)
-	{
-		return ISerializableConfiguration.Deserialize<ChangeVariableValueActionConfigModel>(config);
-	}
+    public static ChangeVariableValueActionConfigModel Deserialize(string config)
+    {
+        return ISerializableConfiguration.Deserialize<ChangeVariableValueActionConfigModel>(config);
+    }
 }

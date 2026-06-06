@@ -2,6 +2,6 @@
 
 public enum DeviceClass
 {
-	SoftwareClient,
-	Macro_Deck_DIY_OLED_6_V1
+    SoftwareClient,
+    Macro_Deck_DIY_OLED_6_V1
 }

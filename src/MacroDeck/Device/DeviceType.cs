@@ -2,9 +2,9 @@
 
 public enum DeviceType
 {
-	Unknown,
-	Web,
-	Android,
-	iOS,
-	StreamDeck
+    Unknown,
+    Web,
+    Android,
+    iOS,
+    StreamDeck
 }

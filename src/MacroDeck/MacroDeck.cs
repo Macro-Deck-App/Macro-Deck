@@ -29,302 +29,302 @@ namespace SuchByte.MacroDeck;
 
 public class MacroDeck : NativeWindow
 {
-	public static Version Version =
-		Version.Parse(FileVersionInfo.GetVersionInfo(ApplicationPaths.ExecutablePath).ProductVersion);
+    public static Version Version =
+        Version.Parse(FileVersionInfo.GetVersionInfo(ApplicationPaths.ExecutablePath).ProductVersion);
 
-	public static readonly int ApiVersion = 20;
-	public static readonly int PluginApiVersion = 40;
+    public static readonly int ApiVersion = 20;
+    public static readonly int PluginApiVersion = 40;
 
-	public static StartParameters StartParameters { get; private set; } = new();
-	public static MainConfiguration Configuration { get; private set; } = new();
-	public static bool SafeMode { get; set; } = false;
+    public static StartParameters StartParameters { get; private set; } = new();
+    public static MainConfiguration Configuration { get; private set; } = new();
+    public static bool SafeMode { get; set; } = false;
 
-	internal static SynchronizationContext? SyncContext { get; set; }
+    internal static SynchronizationContext? SyncContext { get; set; }
 
-	public static event EventHandler? OnMainWindowLoad;
-	public static event EventHandler? OnMacroDeckLoaded;
+    public static event EventHandler? OnMainWindowLoad;
+    public static event EventHandler? OnMacroDeckLoaded;
 
-	private static readonly ContextMenuStrip TrayIconContextMenu = new();
+    private static readonly ContextMenuStrip TrayIconContextMenu = new();
 
-	private static readonly NotifyIcon TrayIcon = new()
-	{
-		Icon = Resources.appicon,
-		Text = @$"Macro Deck {Version}",
-		Visible = false,
-		ContextMenuStrip = TrayIconContextMenu
-	};
+    private static readonly NotifyIcon TrayIcon = new()
+    {
+        Icon = Resources.appicon,
+        Text = @$"Macro Deck {Version}",
+        Visible = false,
+        ContextMenuStrip = TrayIconContextMenu
+    };
 
-	private static MainWindow? _mainWindow;
+    private static MainWindow? _mainWindow;
 
-	public static MainWindow? MainWindow =>
-		_mainWindow is { IsDisposed: false, Visible: true, IsHandleCreated: true } ? _mainWindow : null;
+    public static MainWindow? MainWindow =>
+        _mainWindow is { IsDisposed: false, Visible: true, IsHandleCreated: true } ? _mainWindow : null;
 
 
-	private static readonly Stopwatch StartUpTimeStopWatch = new();
+    private static readonly Stopwatch StartUpTimeStopWatch = new();
 
-	internal static void Start(StartParameters startParameters)
-	{
-		StartParameters = startParameters;
-		StartUpTimeStopWatch.Start();
+    internal static void Start(StartParameters startParameters)
+    {
+        StartParameters = startParameters;
+        StartUpTimeStopWatch.Start();
 
-		MacroDeckLogger.LogLevel = (LogLevel)StartParameters.LogLevel;
-		if (StartParameters.DebugConsole)
-		{
-			MacroDeckLogger.StartDebugConsole();
-		}
+        MacroDeckLogger.LogLevel = (LogLevel)StartParameters.LogLevel;
+        if (StartParameters.DebugConsole)
+        {
+            MacroDeckLogger.StartDebugConsole();
+        }
 
-		MacroDeckLogger.Info($"Macro Deck {Version.ToString()}");
-		MacroDeckLogger.Info($"Path: {ApplicationPaths.ExecutablePath}");
-		MacroDeckLogger.Info($"Start parameters: {string.Join(" ", StartParameters.ToArray(StartParameters))}");
+        MacroDeckLogger.Info($"Macro Deck {Version.ToString()}");
+        MacroDeckLogger.Info($"Path: {ApplicationPaths.ExecutablePath}");
+        MacroDeckLogger.Info($"Start parameters: {string.Join(" ", StartParameters.ToArray(StartParameters))}");
 
-		MacroDeckLogger.CleanUpLogsDir();
+        MacroDeckLogger.CleanUpLogsDir();
 
-		BackupManager.CheckRestoreDirectory();
+        BackupManager.CheckRestoreDirectory();
 
-		ApplicationPaths.CleanUpTempDirectory();
+        ApplicationPaths.CleanUpTempDirectory();
 
-		LanguageManager.Load(StartParameters.ExportDefaultStrings);
+        LanguageManager.Load(StartParameters.ExportDefaultStrings);
 
-		// Check if config exists
-		if (!File.Exists(ApplicationPaths.MainConfigFilePath))
-		{
-			StartInitialSetup();
-			return;
-		}
+        // Check if config exists
+        if (!File.Exists(ApplicationPaths.MainConfigFilePath))
+        {
+            StartInitialSetup();
+            return;
+        }
 
-		Configuration = MainConfiguration.LoadFromFile(ApplicationPaths.MainConfigFilePath);
-		LanguageManager.SetLanguage(Configuration.Language);
-		_ = new HotkeyManager();
-		VariableManager.Initialize();
-		PluginManager.Load();
-		IconManager.Initialize();
-		ProfileManager.Load();
+        Configuration = MainConfiguration.LoadFromFile(ApplicationPaths.MainConfigFilePath);
+        LanguageManager.SetLanguage(Configuration.Language);
+        _ = new HotkeyManager();
+        VariableManager.Initialize();
+        PluginManager.Load();
+        IconManager.Initialize();
+        ProfileManager.Load();
 
-		SearchNetworkInterfaces();
-		MacroDeckServer.Start(StartParameters.Port <= 0 ? Configuration.HostPort : StartParameters.Port);
-		BroadcastServer.Start();
-		Task.Run(async () => await AdbServerHelper.Initialize());
+        SearchNetworkInterfaces();
+        MacroDeckServer.Start(StartParameters.Port <= 0 ? Configuration.HostPort : StartParameters.Port);
+        BroadcastServer.Start();
+        Task.Run(async () => await AdbServerHelper.Initialize());
 
-		ProfileManager.AddVariableChangedListener();
-		ProfileManager.AddWindowFocusChangedListener();
+        ProfileManager.AddVariableChangedListener();
+        ProfileManager.AddWindowFocusChangedListener();
 
-		MacroDeckPipeServer.Initialize();
-		MacroDeckPipeServer.PipeMessage += MacroDeckPipeServer_PipeMessage;
+        MacroDeckPipeServer.Initialize();
+        MacroDeckPipeServer.PipeMessage += MacroDeckPipeServer_PipeMessage;
 
-		TrayIcon.SetupTrayIcon(TrayIconContextMenu,
-			ShowMainWindow,
-			() => RestartMacroDeck(string.Join(" ", StartParameters)),
-			Exit);
+        TrayIcon.SetupTrayIcon(TrayIconContextMenu,
+            ShowMainWindow,
+            () => RestartMacroDeck(string.Join(" ", StartParameters)),
+            Exit);
 
-		using (_mainWindow = new MainWindow())
-		{
-			SyncContext = SynchronizationContext.Current;
-		}
+        using (_mainWindow = new MainWindow())
+        {
+            SyncContext = SynchronizationContext.Current;
+        }
 
-		StartUpTimeStopWatch.Stop();
+        StartUpTimeStopWatch.Stop();
 
-		var startTook = StartUpTimeStopWatch.Elapsed.TotalMilliseconds;
-		MacroDeckLogger.Info($"Macro Deck startup finished (took {startTook}ms)");
+        var startTook = StartUpTimeStopWatch.Elapsed.TotalMilliseconds;
+        MacroDeckLogger.Info($"Macro Deck startup finished (took {startTook}ms)");
 
-		OnMacroDeckLoaded?.Invoke(null, EventArgs.Empty);
+        OnMacroDeckLoaded?.Invoke(null, EventArgs.Empty);
 
-		UpdateService.Instance().StartPeriodicalUpdateCheck();
-		UpdateService.Instance().UpdateAvailable += OnUpdateAvailable;
+        UpdateService.Instance().StartPeriodicalUpdateCheck();
+        UpdateService.Instance().UpdateAvailable += OnUpdateAvailable;
 
-		ExtensionStoreHelper.SearchUpdatesAsync();
+        ExtensionStoreHelper.SearchUpdatesAsync();
 
-		if (StartParameters.ShowMainWindow)
-		{
-			ShowMainWindow();
-		}
+        if (StartParameters.ShowMainWindow)
+        {
+            ShowMainWindow();
+        }
 
-		Application.Run();
-	}
+        Application.Run();
+    }
 
-	private static void OnUpdateAvailable(object? sender, UpdateApiVersionInfo e)
-	{
-		var btnOpenSettings = new ButtonPrimary
-		{
-			AutoSize = true,
-			Text = LanguageManager.Strings.OpenSettings
-		};
-		btnOpenSettings.Click += (o, args) => { MainWindow?.SetView(new SettingsView(2)); };
+    private static void OnUpdateAvailable(object? sender, UpdateApiVersionInfo e)
+    {
+        var btnOpenSettings = new ButtonPrimary
+        {
+            AutoSize = true,
+            Text = LanguageManager.Strings.OpenSettings
+        };
+        btnOpenSettings.Click += (o, args) => { MainWindow?.SetView(new SettingsView(2)); };
 
-		NotificationManager.SystemNotification("Macro Deck Updater",
-			string.Format(LanguageManager.Strings.VersionXIsNowAvailable,
-				e.Version,
-				e.IsBeta == true ? "Beta" : "Release"),
-			true,
-			new List<Control> { btnOpenSettings },
-			Resources.Macro_Deck_2021_update);
-	}
+        NotificationManager.SystemNotification("Macro Deck Updater",
+            string.Format(LanguageManager.Strings.VersionXIsNowAvailable,
+                e.Version,
+                e.IsBeta == true ? "Beta" : "Release"),
+            true,
+            new List<Control> { btnOpenSettings },
+            Resources.Macro_Deck_2021_update);
+    }
 
-	private static void SearchNetworkInterfaces()
-	{
-		StringBuilder sb = new();
-		var foundNetworkInterfaces = 0;
-		try
-		{
-			foreach (var adapter in NetworkInterface.GetAllNetworkInterfaces())
-			{
-				var address = adapter
-					.GetIPProperties()
-					.UnicastAddresses
-					.FirstOrDefault(x => x.Address.AddressFamily == AddressFamily.InterNetwork)?
-					.Address?
-					.ToString();
-				if (!string.IsNullOrWhiteSpace(address))
-				{
-					sb.AppendLine($"{adapter.Name} - {address}");
-					foundNetworkInterfaces++;
-				}
-			}
-		}
-		catch (Exception ex)
-		{
-			MacroDeckLogger.Warning($"Error while searching for network interfaces\n{ex.Message}");
-		}
+    private static void SearchNetworkInterfaces()
+    {
+        StringBuilder sb = new();
+        var foundNetworkInterfaces = 0;
+        try
+        {
+            foreach (var adapter in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                var address = adapter
+                    .GetIPProperties()
+                    .UnicastAddresses
+                    .FirstOrDefault(x => x.Address.AddressFamily == AddressFamily.InterNetwork)?
+                    .Address?
+                    .ToString();
+                if (!string.IsNullOrWhiteSpace(address))
+                {
+                    sb.AppendLine($"{adapter.Name} - {address}");
+                    foundNetworkInterfaces++;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            MacroDeckLogger.Warning($"Error while searching for network interfaces\n{ex.Message}");
+        }
 
-		if (foundNetworkInterfaces == 0)
-		{
-			MacroDeckLogger.Error("No network interfaces were found");
-		}
-		else
-		{
-			MacroDeckLogger.Info($"Found network interfaces:\n{sb}");
-		}
-	}
+        if (foundNetworkInterfaces == 0)
+        {
+            MacroDeckLogger.Error("No network interfaces were found");
+        }
+        else
+        {
+            MacroDeckLogger.Info($"Found network interfaces:\n{sb}");
+        }
+    }
 
-	private static void StartInitialSetup()
-	{
-		MacroDeckLogger.Info("Entering initial setup wizard...");
-		// Start initial setup
-		using var initialSetup = new InitialSetup();
-		Application.Run(initialSetup);
-		if (initialSetup.DialogResult == DialogResult.OK)
-		{
-			Configuration = initialSetup.configuration;
-			Configuration.Save(ApplicationPaths.MainConfigFilePath);
-			using var defenderFirewallAlertInfo = new DefenderFirewallAlert();
-			defenderFirewallAlertInfo.ShowDialog();
-			RestartMacroDeck("--show");
-		}
-		else
-		{
-			Environment.Exit(0);
-		}
-	}
+    private static void StartInitialSetup()
+    {
+        MacroDeckLogger.Info("Entering initial setup wizard...");
+        // Start initial setup
+        using var initialSetup = new InitialSetup();
+        Application.Run(initialSetup);
+        if (initialSetup.DialogResult == DialogResult.OK)
+        {
+            Configuration = initialSetup.configuration;
+            Configuration.Save(ApplicationPaths.MainConfigFilePath);
+            using var defenderFirewallAlertInfo = new DefenderFirewallAlert();
+            defenderFirewallAlertInfo.ShowDialog();
+            RestartMacroDeck("--show");
+        }
+        else
+        {
+            Environment.Exit(0);
+        }
+    }
 
-	private static void MacroDeckPipeServer_PipeMessage(string message)
-	{
-		switch (message)
-		{
-			case "show":
-				ShowMainWindow();
-				break;
-		}
-	}
+    private static void MacroDeckPipeServer_PipeMessage(string message)
+    {
+        switch (message)
+        {
+            case "show":
+                ShowMainWindow();
+                break;
+        }
+    }
 
-	internal static void ShowBalloonTip(string title, string message)
-	{
-		try
-		{
-			TrayIcon?.ShowBalloonTip(5000, title, message, ToolTipIcon.Info);
-		}
-		catch
-		{
-			// ignored
-		}
-	}
+    internal static void ShowBalloonTip(string title, string message)
+    {
+        try
+        {
+            TrayIcon?.ShowBalloonTip(5000, title, message, ToolTipIcon.Info);
+        }
+        catch
+        {
+            // ignored
+        }
+    }
 
-	public static void RequestRestart()
-	{
-		using var msgBox = new GUI.CustomControls.MessageBox();
-		if (msgBox.ShowDialog(LanguageManager.Strings.MacroDeckNeedsARestart,
-				LanguageManager.Strings.MacroDeckMustBeRestartedForTheChanges,
-				MessageBoxButtons.YesNo) ==
-			DialogResult.Yes)
-		{
-			RestartMacroDeck();
-		}
-	}
+    public static void RequestRestart()
+    {
+        using var msgBox = new GUI.CustomControls.MessageBox();
+        if (msgBox.ShowDialog(LanguageManager.Strings.MacroDeckNeedsARestart,
+                LanguageManager.Strings.MacroDeckMustBeRestartedForTheChanges,
+                MessageBoxButtons.YesNo) ==
+            DialogResult.Yes)
+        {
+            RestartMacroDeck();
+        }
+    }
 
-	public static void RestartMacroDeck(string parameters = "")
-	{
-		TrayIcon.Visible = false;
-		var arguments = (_mainWindow is { IsDisposed: false } ? "--show " : "") +
-			parameters +
-			$" --ignore-pid-check {Process.GetCurrentProcess().Id}";
-		MacroDeckLogger.Info($"Restart Macro Deck with arguments: {arguments}");
-		var p = new Process
-		{
-			StartInfo = new ProcessStartInfo(ApplicationPaths.ExecutablePath)
-			{
-				UseShellExecute = true,
-				Arguments = arguments
-			}
-		};
-		p.Start();
-		Environment.Exit(0);
-	}
+    public static void RestartMacroDeck(string parameters = "")
+    {
+        TrayIcon.Visible = false;
+        var arguments = (_mainWindow is { IsDisposed: false } ? "--show " : "") +
+            parameters +
+            $" --ignore-pid-check {Process.GetCurrentProcess().Id}";
+        MacroDeckLogger.Info($"Restart Macro Deck with arguments: {arguments}");
+        var p = new Process
+        {
+            StartInfo = new ProcessStartInfo(ApplicationPaths.ExecutablePath)
+            {
+                UseShellExecute = true,
+                Arguments = arguments
+            }
+        };
+        p.Start();
+        Environment.Exit(0);
+    }
 
-	public static void ShowMainWindow()
-	{
-		if (SyncContext is null)
-		{
-			CreateMainForm();
-			return;
-		}
+    public static void ShowMainWindow()
+    {
+        if (SyncContext is null)
+        {
+            CreateMainForm();
+            return;
+        }
 
-		SyncContext.Send(_ => { CreateMainForm(); }, null);
-	}
+        SyncContext.Send(_ => { CreateMainForm(); }, null);
+    }
 
-	private static void CreateMainForm()
-	{
-		if (Application.OpenForms.OfType<MainWindow>().Any() &&
-			_mainWindow is { IsDisposed: false, IsHandleCreated: true })
-		{
-			if (_mainWindow.InvokeRequired)
-			{
-				_mainWindow.Invoke(ShowMainWindow);
-				return;
-			}
+    private static void CreateMainForm()
+    {
+        if (Application.OpenForms.OfType<MainWindow>().Any() &&
+            _mainWindow is { IsDisposed: false, IsHandleCreated: true })
+        {
+            if (_mainWindow.InvokeRequired)
+            {
+                _mainWindow.Invoke(ShowMainWindow);
+                return;
+            }
 
-			_mainWindow.WindowState = FormWindowState.Minimized;
-			_mainWindow.Show();
-			_mainWindow.WindowState = FormWindowState.Normal;
-			return;
-		}
+            _mainWindow.WindowState = FormWindowState.Minimized;
+            _mainWindow.Show();
+            _mainWindow.WindowState = FormWindowState.Normal;
+            return;
+        }
 
-		_mainWindow = new MainWindow();
-		_mainWindow.Load += MainWindowLoadEvent;
-		_mainWindow.FormClosed += MainWindow_FormClosed;
-		_mainWindow.Show();
-	}
+        _mainWindow = new MainWindow();
+        _mainWindow.Load += MainWindowLoadEvent;
+        _mainWindow.FormClosed += MainWindow_FormClosed;
+        _mainWindow.Show();
+    }
 
-	private static void MainWindow_FormClosed(object? sender, FormClosedEventArgs e)
-	{
-		if (_mainWindow == null)
-		{
-			return;
-		}
+    private static void MainWindow_FormClosed(object? sender, FormClosedEventArgs e)
+    {
+        if (_mainWindow == null)
+        {
+            return;
+        }
 
-		_mainWindow.Load -= MainWindowLoadEvent;
-		_mainWindow.FormClosed -= MainWindow_FormClosed;
-		_mainWindow.Dispose();
-	}
+        _mainWindow.Load -= MainWindowLoadEvent;
+        _mainWindow.FormClosed -= MainWindow_FormClosed;
+        _mainWindow.Dispose();
+    }
 
-	private static void MainWindowLoadEvent(object? sender, EventArgs e)
-	{
-		if (sender is MainWindow window)
-		{
-			OnMainWindowLoad?.Invoke(window, EventArgs.Empty);
-		}
-	}
+    private static void MainWindowLoadEvent(object? sender, EventArgs e)
+    {
+        if (sender is MainWindow window)
+        {
+            OnMainWindowLoad?.Invoke(window, EventArgs.Empty);
+        }
+    }
 
-	public static void Exit()
-	{
-		AdbServerHelper.Stop().GetAwaiter().GetResult();
-		Application.Exit();
-	}
+    public static void Exit()
+    {
+        AdbServerHelper.Stop().GetAwaiter().GetResult();
+        Application.Exit();
+    }
 }

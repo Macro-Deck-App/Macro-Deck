@@ -2,6 +2,6 @@
 
 public enum AdbDeviceConnectionState
 {
-	CONNECTED,
-	DISCONNECTED
+    CONNECTED,
+    DISCONNECTED
 }

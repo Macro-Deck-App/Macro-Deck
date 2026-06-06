@@ -2,11 +2,11 @@
 
 public class DisabledPlugin : MacroDeckPlugin
 {
-	internal override string Name { get; set; }
-	internal override string Version { get; set; }
-	internal override string Author { get; set; }
+    internal override string Name { get; set; }
+    internal override string Version { get; set; }
+    internal override string Author { get; set; }
 
-	public override void Enable()
-	{
-	}
+    public override void Enable()
+    {
+    }
 }

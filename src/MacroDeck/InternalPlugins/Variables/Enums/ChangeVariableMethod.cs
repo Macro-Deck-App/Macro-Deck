@@ -2,8 +2,8 @@
 
 public enum ChangeVariableMethod
 {
-	countUp,
-	countDown,
-	set,
-	toggle
+    countUp,
+    countDown,
+    set,
+    toggle
 }

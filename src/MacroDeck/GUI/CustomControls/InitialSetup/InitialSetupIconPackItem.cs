@@ -5,26 +5,26 @@ namespace SuchByte.MacroDeck.GUI.CustomControls;
 
 public partial class InitialSetupIconPackItem : RoundedUserControl
 {
-	private JObject _jsonObject;
+    private JObject _jsonObject;
 
-	public JObject JsonObject => _jsonObject;
+    public JObject JsonObject => _jsonObject;
 
-	public bool Install => checkInstall.Checked;
+    public bool Install => checkInstall.Checked;
 
-	public void SetInstall(bool install)
-	{
-		checkInstall.Checked = install;
-		checkInstall.Enabled = !install;
-	}
+    public void SetInstall(bool install)
+    {
+        checkInstall.Checked = install;
+        checkInstall.Enabled = !install;
+    }
 
-	public InitialSetupIconPackItem(JObject jsonObject)
-	{
-		InitializeComponent();
+    public InitialSetupIconPackItem(JObject jsonObject)
+    {
+        InitializeComponent();
 
-		_jsonObject = jsonObject;
+        _jsonObject = jsonObject;
 
-		lblName.Text = jsonObject["name"].ToString();
-		lblDescription.Text = jsonObject["description"].ToString();
-		preview.BackgroundImage = Base64.GetImageFromBase64(jsonObject["preview"].ToString());
-	}
+        lblName.Text = jsonObject["name"].ToString();
+        lblDescription.Text = jsonObject["description"].ToString();
+        preview.BackgroundImage = Base64.GetImageFromBase64(jsonObject["preview"].ToString());
+    }
 }
