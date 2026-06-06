@@ -109,7 +109,6 @@ public partial class DeviceInfo : RoundedUserControl
         if (macroDeckProfile != null)
         {
             DeviceManager.SetProfile(_macroDeckDevice, macroDeckProfile);
-            DeviceManager.SaveKnownDevices();
         }
     }
 
