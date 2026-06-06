@@ -1,13 +1,8 @@
 # Macro Deck
-![Macro Deck](https://macrodeck.org/images/Macro%20Deck%20Mockup.png)
 ![VersionBadge](https://img.shields.io/github/v/release/Macro-Deck-org/Macro-Deck)
 ![LicenseBadge](https://img.shields.io/github/license/Macro-Deck-org/Macro-Deck)
 ![PlatformBadge](https://img.shields.io/badge/platform-windows-blue)
 ![ExtensionStoreBadge](https://img.shields.io/website?down_message=offline&label=Extension%20Store&up_message=online&url=https%3A%2F%2Fmacrodeck.org%2Fextensionstore%2Fextensionstore.php)
-
-
-![Screenshot_2](https://user-images.githubusercontent.com/45011179/149414436-60e0ab75-e9ef-4ab8-a62e-b61ac9ae3f49.png)
-
 
 ## More than just a macro pad!
 
@@ -24,22 +19,17 @@
 
 
 # Companion App
-[Repository](https://github.com/SuchByte/Macro-Deck-Client)
+[Repository](https://github.com/Macro-Deck-App/Macro-Deck-Client-App)
 
 [Google Play](https://play.google.com/store/apps/details?id=com.suchbyte.macrodeck)
 
+[App Store](https://apps.apple.com/de/app/macro-deck-client/id6475241728)
+
 # Download
-https://macrodeck.org/download
-
-# Create own plugins
-Learn how to create your own plugins in the wiki: https://github.com/SuchByte/Macro-Deck/wiki/Plugin-API
-
-# Helping with the translation
-Please help me with the translation of Macro Deck on [POEditor](https://poeditor.com/join/project/3y5UBkJvQD)
+[Website](https://macro-deck.app)
+[GitHub Releases](https://github.com/Macro-Deck-App/Macro-Deck/releases)
 
 # Special thanks
-
-This project is tested with BrowserStack
 
 Licenses for JetBrains products are kindly provided by [JetBrains](https://www.jetbrains.com/)
 
