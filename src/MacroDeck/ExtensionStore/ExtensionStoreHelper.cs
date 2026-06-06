@@ -7,7 +7,6 @@ using SuchByte.MacroDeck.GUI.MainWindowViews;
 using SuchByte.MacroDeck.Icons;
 using Serilog;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;

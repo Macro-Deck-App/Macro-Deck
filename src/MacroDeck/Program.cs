@@ -1,4 +1,3 @@
-using SuchByte.MacroDeck.Logging;
 using System.Diagnostics;
 using Serilog;
 using SuchByte.MacroDeck.Pipe;

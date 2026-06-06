@@ -1,7 +1,5 @@
 ﻿using Serilog;
 using SuchByte.MacroDeck.InternalPlugins.Variables.Models;
-using SuchByte.MacroDeck.InternalPlugins.Variables.Models;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.ViewModels;
