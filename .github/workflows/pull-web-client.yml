@@ -11,10 +11,10 @@ on:
         description: 'Destination branch for the pull-request'
         type: choice
         options:
-          - develop
           - main
+          - production
         required: false
-        default: develop
+        default: main
 
 jobs:
   update-web-client:

@@ -4,12 +4,12 @@ on:
   workflow_call:
   pull_request:
     branches:
+      - 'production'
       - 'main'
-      - 'develop'
   push:
     branches:
+      - '!production'
       - '!main'
-      - '!develop'
       
 jobs:
   tests:
