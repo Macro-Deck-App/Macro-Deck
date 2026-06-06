@@ -9,6 +9,17 @@ on:
       version:
         required: true
         type: string
+  workflow_dispatch:
+    inputs:
+      branch:
+        required: true
+        type: string
+        description: 'The branch to build'
+        default: 'main'
+      version:
+        required: true
+        type: string
+        description: 'The version to build'
 
 jobs:
   build-windows-installer:
