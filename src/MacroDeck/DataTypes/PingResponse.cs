@@ -1,4 +1,4 @@
-﻿namespace MacroDeck.Server.DataTypes;
+﻿namespace SuchByte.MacroDeck.DataTypes;
 
 public class PingResponse
 {

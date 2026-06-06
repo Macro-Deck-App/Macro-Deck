@@ -1,7 +1,7 @@
-﻿using MacroDeck.Server.DataTypes;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using SuchByte.MacroDeck.DataTypes;
 
-namespace MacroDeck.Server.Controllers;
+namespace SuchByte.MacroDeck.Controllers;
 
 [Route("ping")]
 public class PingController : ControllerBase

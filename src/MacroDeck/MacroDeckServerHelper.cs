@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
-using System.Security.Cryptography.X509Certificates;
+﻿using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Hosting;
 
-namespace MacroDeck.Server;
+namespace SuchByte.MacroDeck;
 
 public static class MacroDeckServerHelper
 {
@@ -23,7 +23,7 @@ public static class MacroDeckServerHelper
         _host = Host.CreateDefaultBuilder()
             .ConfigureWebHostDefaults(hostBuilder =>
             {
-                hostBuilder.UseStartup<Startup>();
+                hostBuilder.UseStartup<ServerStartup>();
                 hostBuilder.ConfigureKestrel(options =>
                 {
                     if (UseHttps)

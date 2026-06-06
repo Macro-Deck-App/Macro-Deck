@@ -1,0 +1,122 @@
+﻿using SuchByte.MacroDeck.Device;
+using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Profiles;
+using SuchByte.MacroDeck.Server;
+
+namespace SuchByte.MacroDeck.GUI.CustomControls;
+
+public partial class DeviceInfo : RoundedUserControl
+{
+    private MacroDeckDevice _macroDeckDevice;
+    public MacroDeckDevice MacroDeckDevice => _macroDeckDevice;
+
+    public DeviceInfo(MacroDeckDevice macroDeckDevice)
+    {
+        _macroDeckDevice = macroDeckDevice;
+        InitializeComponent();
+        btnConfigure.Text = LanguageManager.Strings.DeviceSettings;
+        lblIdLabel.Text = LanguageManager.Strings.Id;
+        lblStatusLabel.Text = LanguageManager.Strings.Status;
+        lblDisplayName.Text = LanguageManager.Strings.Name;
+        lblProfile.Text = LanguageManager.Strings.Profile;
+        checkBlockConnection.Text = LanguageManager.Strings.BlockConnection;
+    }
+
+    private void DeviceInfo_Load(object sender, EventArgs e)
+    {
+        LoadDevice();
+    }
+
+    public void LoadDevice()
+    {
+        profiles.SelectedIndexChanged -= Profiles_SelectedIndexChanged;
+        profiles.Items.Clear();
+        foreach (var macroDeckProfile in ProfileManager.Profiles)
+        {
+            profiles.Items.Add(macroDeckProfile.DisplayName);
+        }
+
+        if (_macroDeckDevice.ProfileId != null && _macroDeckDevice.ProfileId.Length > 0)
+        {
+            var macroDeckProfile = ProfileManager.FindProfileById(_macroDeckDevice.ProfileId);
+            if (macroDeckProfile != null)
+            {
+                profiles.Text = macroDeckProfile.DisplayName;
+            }
+        }
+
+        profiles.SelectedIndexChanged += Profiles_SelectedIndexChanged;
+
+        lblId.Text = _macroDeckDevice.ClientId;
+        checkBlockConnection.CheckedChanged -= CheckBlockConnection_CheckedChanged;
+        checkBlockConnection.Checked = _macroDeckDevice.Blocked;
+        checkBlockConnection.CheckedChanged += CheckBlockConnection_CheckedChanged;
+        displayName.Text = _macroDeckDevice.DisplayName;
+        lblStatus.Text = _macroDeckDevice.Available
+            ? LanguageManager.Strings.Connected
+            : LanguageManager.Strings.Disconnected;
+        lblStatus.ForeColor = _macroDeckDevice.Available ? Color.Green : Color.Red;
+
+        switch (_macroDeckDevice.DeviceType)
+        {
+            case DeviceType.Android:
+                btnConfigure.Visible = _macroDeckDevice.Available;
+                profiles.Enabled = true;
+                break;
+            default:
+                btnConfigure.Visible = false;
+                profiles.Enabled = true;
+                break;
+        }
+    }
+
+    private void BtnRemove_Click(object sender, EventArgs e)
+    {
+        if (_macroDeckDevice.Available)
+        {
+            var macroDeckClient = MacroDeckServer.GetMacroDeckClient(_macroDeckDevice.ClientId);
+            if (macroDeckClient is not null)
+            {
+                Task.Run(async () => await WebSocketHandler.Close(macroDeckClient.SessionId));
+            }
+        }
+
+        DeviceManager.RemoveKnownDevice(_macroDeckDevice);
+    }
+
+    private void BtnChangeDisplayName_Click(object sender, EventArgs e)
+    {
+        if (DeviceManager.IsDisplayNameAvailable(displayName.Text))
+        {
+            DeviceManager.RenameMacroDeckDevice(_macroDeckDevice, displayName.Text);
+        }
+        else
+        {
+            using var msgBox = new MessageBox();
+            msgBox.ShowDialog(LanguageManager.Strings.CantChangeName,
+                string.Format(LanguageManager.Strings.DeviceCalledXAlreadyExists, displayName.Text),
+                MessageBoxButtons.OK);
+        }
+    }
+
+    private void CheckBlockConnection_CheckedChanged(object sender, EventArgs e)
+    {
+        DeviceManager.SetBlocked(_macroDeckDevice, checkBlockConnection.Checked);
+    }
+
+    private void Profiles_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        var macroDeckProfile = ProfileManager.FindProfileByDisplayName(profiles.Text);
+        if (macroDeckProfile != null)
+        {
+            DeviceManager.SetProfile(_macroDeckDevice, macroDeckProfile);
+        }
+    }
+
+    private void BtnConfigure_Click(object sender, EventArgs e)
+    {
+        using var deviceConfigurator = new DeviceConfigurator(_macroDeckDevice);
+        deviceConfigurator.ShowDialog();
+    }
+}

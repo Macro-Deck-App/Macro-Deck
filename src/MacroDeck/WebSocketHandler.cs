@@ -1,7 +1,7 @@
 ﻿using System.Net.WebSockets;
-using MacroDeck.Server.DataTypes;
+using SuchByte.MacroDeck.DataTypes;
 
-namespace MacroDeck.Server;
+namespace SuchByte.MacroDeck;
 
 public class WebSocketHandler
 {

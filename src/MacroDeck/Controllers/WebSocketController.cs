@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace MacroDeck.Server.Controllers;
+namespace SuchByte.MacroDeck.Controllers;
 
 public class WebSocketController : ControllerBase
 {
