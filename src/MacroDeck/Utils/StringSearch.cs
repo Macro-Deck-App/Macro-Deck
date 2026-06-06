@@ -2,12 +2,8 @@
 
 public class StringSearch
 {
-
-    public static bool StringContains(string str, string search)
-    {
-        return str.ToLower().Replace(" ", "").Contains(search.ToLower().Replace(" ", ""));
-
-
-    }
-
+	public static bool StringContains(string str, string search)
+	{
+		return str.ToLower().Replace(" ", "").Contains(search.ToLower().Replace(" ", ""));
+	}
 }

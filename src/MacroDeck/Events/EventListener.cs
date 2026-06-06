@@ -4,9 +4,8 @@ namespace SuchByte.MacroDeck.Events;
 
 public class EventListener
 {
-    public string EventToListen { get; set; }
-    public string Parameter { get; set; } = "";
+	public string EventToListen { get; set; }
+	public string Parameter { get; set; } = "";
 
-    public List<PluginAction?> Actions = new();
-
+	public List<PluginAction?> Actions = new();
 }

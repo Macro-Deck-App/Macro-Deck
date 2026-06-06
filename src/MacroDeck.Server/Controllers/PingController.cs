@@ -6,9 +6,9 @@ namespace MacroDeck.Server.Controllers;
 [Route("ping")]
 public class PingController : ControllerBase
 {
-    [HttpGet]
-    public ActionResult<PingResponse> Ping()
-    {
-        return new PingResponse();
-    }
+	[HttpGet]
+	public ActionResult<PingResponse> Ping()
+	{
+		return new PingResponse();
+	}
 }

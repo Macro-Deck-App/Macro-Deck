@@ -7,40 +7,41 @@ namespace MacroDeck.Server;
 
 public static class MacroDeckServerHelper
 {
-    private static IHost? _host;
+	private static IHost? _host;
 
-    internal static bool UseHttps { get; private set; }
+	internal static bool UseHttps { get; private set; }
 
-    public static async Task Setup(int port, X509Certificate2? certificate)
-    {
-        if (_host is not null)
-        {
-            await _host.StopAsync();
-        }
+	public static async Task Setup(int port, X509Certificate2? certificate)
+	{
+		if (_host is not null)
+		{
+			await _host.StopAsync();
+		}
 
-        UseHttps = certificate is not null;
+		UseHttps = certificate is not null;
 
-        _host = Host.CreateDefaultBuilder()
-            .ConfigureWebHostDefaults(hostBuilder =>
-            {
-                hostBuilder.UseStartup<Startup>();
-                hostBuilder.ConfigureKestrel(options =>
-                {
-                    if (UseHttps)
-                    {
-                        options.ListenAnyIP(port, listenOptions =>
-                        {
-                            listenOptions.UseHttps(certificate!);
-                            listenOptions.Protocols = HttpProtocols.Http1;
-                        });
-                    }
-                    else
-                    {
-                        options.ListenAnyIP(port);
-                    }
-                });
-            }).Build();
+		_host = Host.CreateDefaultBuilder()
+			.ConfigureWebHostDefaults(hostBuilder =>
+			{
+				hostBuilder.UseStartup<Startup>();
+				hostBuilder.ConfigureKestrel(options =>
+				{
+					if (UseHttps)
+					{
+						options.ListenAnyIP(port,
+							listenOptions =>
+							{
+								listenOptions.UseHttps(certificate!);
+								listenOptions.Protocols = HttpProtocols.Http1;
+							});
+					}
+					else
+					{
+						options.ListenAnyIP(port);
+					}
+				});
+			}).Build();
 
-        await _host.RunAsync();
-    }
+		await _host.RunAsync();
+	}
 }

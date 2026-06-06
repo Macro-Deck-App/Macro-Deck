@@ -2,10 +2,7 @@
 
 public class MacroDeckBackupInfo
 {
-
-    public DateTime BackupCreated;
-    public string FileName;
-    public float SizeMb;
-
-
+	public DateTime BackupCreated;
+	public string FileName;
+	public float SizeMb;
 }

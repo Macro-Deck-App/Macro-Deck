@@ -6,18 +6,17 @@ namespace SuchByte.MacroDeck.Extension;
 
 public class IconPackExtension : IMacroDeckExtension
 {
-    public ExtensionType ExtensionType => ExtensionType.IconPack;
-    public string ExtensionTypeDisplayName => LanguageManager.Strings.IconPack;
-    public object ExtensionObject { get; set; }
-    public bool Configurable => false;
+	public ExtensionType ExtensionType => ExtensionType.IconPack;
+	public string ExtensionTypeDisplayName => LanguageManager.Strings.IconPack;
+	public object ExtensionObject { get; set; }
+	public bool Configurable => false;
 
-    public IconPackExtension(IconPack iconPack)
-    {
-        ExtensionObject = iconPack;
-    }
+	public IconPackExtension(IconPack iconPack)
+	{
+		ExtensionObject = iconPack;
+	}
 
-    public void Uninstall()
-    {
-
-    }
+	public void Uninstall()
+	{
+	}
 }

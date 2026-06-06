@@ -2,6 +2,6 @@
 
 public class UpdateApiCheckResult
 {
-    public bool? NewerVersionAvailable { get; set; }
-    public UpdateApiVersionInfo? Version { get; set; }
+	public bool? NewerVersionAvailable { get; set; }
+	public UpdateApiVersionInfo? Version { get; set; }
 }

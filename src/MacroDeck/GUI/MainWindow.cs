@@ -18,255 +18,272 @@ namespace SuchByte.MacroDeck.GUI;
 
 public partial class MainWindow : Form
 {
-    private NotificationsList? _notificationsList;
+	private NotificationsList? _notificationsList;
 
-    private DeckView? _deckView;
-    public DeckView DeckView
-    {
-        get
-        {
-            if (_deckView is null || _deckView.IsDisposed || !_deckView.IsHandleCreated)
-            {
-                _deckView = new DeckView(this);
-            }
-            return _deckView;
-        }
-    }
+	private DeckView? _deckView;
+
+	public DeckView DeckView
+	{
+		get
+		{
+			if (_deckView is null || _deckView.IsDisposed || !_deckView.IsHandleCreated)
+			{
+				_deckView = new DeckView(this);
+			}
+
+			return _deckView;
+		}
+	}
 
 
-    public MainWindow()
-    {
-        InitializeComponent();
-        btnNotifications.BackColor = Color.Transparent;
-        UpdateTranslation();
-        LanguageManager.LanguageChanged += LanguageChanged;
-        UpdateService.Instance().UpdateAvailable += UpdateAvailable;
-        Shown += MainWindowShown;
+	public MainWindow()
+	{
+		InitializeComponent();
+		btnNotifications.BackColor = Color.Transparent;
+		UpdateTranslation();
+		LanguageManager.LanguageChanged += LanguageChanged;
+		UpdateService.Instance().UpdateAvailable += UpdateAvailable;
+		Shown += MainWindowShown;
 
-        _deckView = new DeckView(this);
-    }
+		_deckView = new DeckView(this);
+	}
 
-    private void UpdateAvailable(object? sender, UpdateApiVersionInfo e)
-    {
-        using var updateAvailableDialog = new UpdateAvailableDialog(e);
-        updateAvailableDialog.ShowDialog();
-    }
+	private void UpdateAvailable(object? sender, UpdateApiVersionInfo e)
+	{
+		using var updateAvailableDialog = new UpdateAvailableDialog(e);
+		updateAvailableDialog.ShowDialog();
+	}
 
-    private void UpdateTranslation()
-    {
-    }
+	private void UpdateTranslation()
+	{
+	}
 
-    private void LanguageChanged(object? sender, EventArgs e)
-    {
-        UpdateTranslation();
-        DeckView?.UpdateTranslation();
-    }
+	private void LanguageChanged(object? sender, EventArgs e)
+	{
+		UpdateTranslation();
+		DeckView?.UpdateTranslation();
+	}
 
-    public void SelectContentButton(Control control)
-    {
-        foreach (var contentButton in contentButtonPanel.Controls.OfType<ContentSelectorButton>().Where(x => x != control && x.Selected))
-        {
-            contentButton.Selected = false;
-        }
-        btnSettings.Selected = false;
-        ((ContentSelectorButton)control).Selected = true;
-    }
+	public void SelectContentButton(Control control)
+	{
+		foreach (var contentButton in contentButtonPanel.Controls.OfType<ContentSelectorButton>()
+			.Where(x => x != control && x.Selected))
+		{
+			contentButton.Selected = false;
+		}
 
-    public void SetView(Control view)
-    {
-        if (contentPanel.Controls.Contains(view)) return;
+		btnSettings.Selected = false;
+		((ContentSelectorButton)control).Selected = true;
+	}
 
-        foreach (var control in contentPanel.Controls.OfType<Control>().Where(x => x != view && x != DeckView))
-        {
-            control.Dispose();
-        }
-        foreach (var control in contentPanel.Controls.OfType<Control>().Where(x => x != view))
-        {
-            contentPanel.Controls.Remove(control);
-        }
-        contentPanel.Controls.Add(view);
+	public void SetView(Control view)
+	{
+		if (contentPanel.Controls.Contains(view))
+		{
+			return;
+		}
 
-        switch (view)
-        {
-            case DeckView _:
-                SelectContentButton(btnDeck);
-                break;
-            case DeviceManagerView:
-                SelectContentButton(btnDeviceManager);
-                break;
-            case ExtensionsView:
-                SelectContentButton(btnExtensions);
-                break;
-            case SettingsView:
-                SelectContentButton(btnSettings);
-                break;
-            case VariablesView:
-                SelectContentButton(btnVariables);
-                break;
-        }
-    }
+		foreach (var control in contentPanel.Controls.OfType<Control>().Where(x => x != view && x != DeckView))
+		{
+			control.Dispose();
+		}
 
-    private void MainWindowShown(object? sender, EventArgs e)
-    {
-        Application.DoEvents();
-        RefreshPluginsLabels();
+		foreach (var control in contentPanel.Controls.OfType<Control>().Where(x => x != view))
+		{
+			contentPanel.Controls.Remove(control);
+		}
 
-        if (MacroDeck.SafeMode)
-        {
-            BackColor = Color.FromArgb(99, 0, 0);
-            using var msgBox = new MessageBox();
-            msgBox.ShowDialog("Safe mode", "Macro Deck was started in safe mode! This means no changes on the action buttons will be saved to prevent damage.", MessageBoxButtons.OK);
-        }
+		contentPanel.Controls.Add(view);
 
-        SetView(DeckView);
+		switch (view)
+		{
+			case DeckView _:
+				SelectContentButton(btnDeck);
+				break;
+			case DeviceManagerView:
+				SelectContentButton(btnDeviceManager);
+				break;
+			case ExtensionsView:
+				SelectContentButton(btnExtensions);
+				break;
+			case SettingsView:
+				SelectContentButton(btnSettings);
+				break;
+			case VariablesView:
+				SelectContentButton(btnVariables);
+				break;
+		}
+	}
 
-        btnSettings.SetNotification(UpdateService.Instance().VersionInfo != null);
-        ExtensionStoreHelper.SearchUpdatesAsync();
+	private void MainWindowShown(object? sender, EventArgs e)
+	{
+		Application.DoEvents();
+		RefreshPluginsLabels();
 
-        btnNotifications.NotificationCount = NotificationManager.Notifications.Count;
+		if (MacroDeck.SafeMode)
+		{
+			BackColor = Color.FromArgb(99, 0, 0);
+			using var msgBox = new MessageBox();
+			msgBox.ShowDialog("Safe mode",
+				"Macro Deck was started in safe mode! This means no changes on the action buttons will be saved to prevent damage.",
+				MessageBoxButtons.OK);
+		}
 
-        var updateApiVersionInfo = UpdateService.Instance().VersionInfo;
-        if (updateApiVersionInfo != null)
-        {
-            using var updateAvailableDialog = new UpdateAvailableDialog(updateApiVersionInfo);
-            updateAvailableDialog.ShowDialog();
-        }
-    }
+		SetView(DeckView);
 
-    private void MainWindow_Load(object? sender, EventArgs e)
-    {
-        lblVersion.Text = $@"Macro Deck {MacroDeck.Version}";
+		btnSettings.SetNotification(UpdateService.Instance().VersionInfo != null);
+		ExtensionStoreHelper.SearchUpdatesAsync();
 
-        PluginManager.OnPluginsChange += OnPluginsChanged;
-        IconManager.OnIconPacksChanged += OnPluginsChanged;
-        IconManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
+		btnNotifications.NotificationCount = NotificationManager.Notifications.Count;
 
-        MacroDeckServer.OnDeviceConnectionStateChanged += OnClientsConnectedChanged;
-        OnClientsConnectedChanged(null, EventArgs.Empty);
+		var updateApiVersionInfo = UpdateService.Instance().VersionInfo;
+		if (updateApiVersionInfo != null)
+		{
+			using var updateAvailableDialog = new UpdateAvailableDialog(updateApiVersionInfo);
+			updateAvailableDialog.ShowDialog();
+		}
+	}
 
-        NotificationManager.OnNotification += NotificationsChanged;
-        NotificationManager.OnNotificationRemoved += NotificationsChanged;
-        ExtensionStoreHelper.OnInstallationFinished += ExtensionStoreHelper_OnInstallationFinished;
+	private void MainWindow_Load(object? sender, EventArgs e)
+	{
+		lblVersion.Text = $@"Macro Deck {MacroDeck.Version}";
 
-        CenterToScreen();
-    }
+		PluginManager.OnPluginsChange += OnPluginsChanged;
+		IconManager.OnIconPacksChanged += OnPluginsChanged;
+		IconManager.OnUpdateCheckFinished += OnPackageManagerUpdateCheckFinished;
 
-    private void NotificationsChanged(object? sender, EventArgs e)
-    {
-        btnNotifications.NotificationCount = NotificationManager.Notifications.Count;
-    }
+		MacroDeckServer.OnDeviceConnectionStateChanged += OnClientsConnectedChanged;
+		OnClientsConnectedChanged(null, EventArgs.Empty);
 
-    private void ExtensionStoreHelper_OnInstallationFinished(object? sender, EventArgs e)
-    {
-        RefreshPluginsLabels();
-    }
+		NotificationManager.OnNotification += NotificationsChanged;
+		NotificationManager.OnNotificationRemoved += NotificationsChanged;
+		ExtensionStoreHelper.OnInstallationFinished += ExtensionStoreHelper_OnInstallationFinished;
 
-    private void OnPackageManagerUpdateCheckFinished(object? sender, EventArgs e)
-    {
-        RefreshPluginsLabels();
-    }
+		CenterToScreen();
+	}
 
-    private void OnPluginsChanged(object? sender, EventArgs e)
-    {
-        RefreshPluginsLabels();
-    }
+	private void NotificationsChanged(object? sender, EventArgs e)
+	{
+		btnNotifications.NotificationCount = NotificationManager.Notifications.Count;
+	}
 
-    private void RefreshPluginsLabels()
-    {
-        if (!IsHandleCreated || IsDisposed) return;
-        Invoke(() =>
-        {
-            btnExtensions.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 || IconManager.IconPacksUpdateAvailable.Count > 0);
-        });
-    }
+	private void ExtensionStoreHelper_OnInstallationFinished(object? sender, EventArgs e)
+	{
+		RefreshPluginsLabels();
+	}
 
-    private void OnClientsConnectedChanged(object? sender, EventArgs e)
-    {
-        Invoke(new Action(() =>
-            lblNumClientsConnected.Text = string.Format(LanguageManager.Strings.XClientsConnected, MacroDeckServer.Clients.Count)
-        ));
-    }
+	private void OnPackageManagerUpdateCheckFinished(object? sender, EventArgs e)
+	{
+		RefreshPluginsLabels();
+	}
 
-    private void BtnDeck_Click(object? sender, EventArgs e)
-    {
-        SetView(DeckView);
-        DeckView.UpdateButtons();
-    }
+	private void OnPluginsChanged(object? sender, EventArgs e)
+	{
+		RefreshPluginsLabels();
+	}
 
-    private void BtnExtensions_Click(object? sender, EventArgs e)
-    {
-        SetView(new ExtensionsView());
-    }
+	private void RefreshPluginsLabels()
+	{
+		if (!IsHandleCreated || IsDisposed)
+		{
+			return;
+		}
 
-    private void BtnSettings_Click(object? sender, EventArgs e)
-    {
-        SetView(new SettingsView());
-    }
+		Invoke(() =>
+		{
+			btnExtensions.SetNotification(PluginManager.PluginsUpdateAvailable.Count > 0 ||
+				IconManager.IconPacksUpdateAvailable.Count > 0);
+		});
+	}
 
-    private void BtnDeviceManager_Click(object? sender, EventArgs e)
-    {
-        SetView(new DeviceManagerView());
-    }
+	private void OnClientsConnectedChanged(object? sender, EventArgs e)
+	{
+		Invoke(new Action(() =>
+			lblNumClientsConnected.Text
+				= string.Format(LanguageManager.Strings.XClientsConnected, MacroDeckServer.Clients.Count)));
+	}
 
-    public void OnFormClosing(object? sender, EventArgs e)
-    {
-        foreach (Control control in contentPanel.Controls)
-        {
-            control.Dispose();
-        }
-    }
+	private void BtnDeck_Click(object? sender, EventArgs e)
+	{
+		SetView(DeckView);
+		DeckView.UpdateButtons();
+	}
 
-    private void BtnVariables_Click(object? sender, EventArgs e)
-    {
-        SetView(new VariablesView());
-    }
+	private void BtnExtensions_Click(object? sender, EventArgs e)
+	{
+		SetView(new ExtensionsView());
+	}
 
-    private void BtnNotifications_Click(object? sender, EventArgs e)
-    {
-        if (_notificationsList == null || _notificationsList.IsDisposed)
-        {
-            _notificationsList = new NotificationsList
-            {
-                Location = btnNotifications.Location with { Y = btnNotifications.Location.Y + btnNotifications.Height, X = btnNotifications.Location.X + btnNotifications.Size.Width + 20 }
-            };
-            _notificationsList.OnCloseRequested += (_, _) =>
-            {
-                Controls.Remove(_notificationsList);
-            };
-        }
+	private void BtnSettings_Click(object? sender, EventArgs e)
+	{
+		SetView(new SettingsView());
+	}
 
-        if (Controls.Contains(_notificationsList))
-        {
-            Controls.Remove(_notificationsList);
-        }
-        else
-        {
-            Controls.Add(_notificationsList);
-            _notificationsList.BringToFront();
-        }
-    }
+	private void BtnDeviceManager_Click(object? sender, EventArgs e)
+	{
+		SetView(new DeviceManagerView());
+	}
 
-    private void btnDonate_Click(object sender, EventArgs e)
-    {
-        var p = new Process
-        {
-            StartInfo = new ProcessStartInfo("https://ko-fi.com/manuelmayer")
-            {
-                UseShellExecute = true,
-            }
-        };
-        p.Start();
-    }
+	public void OnFormClosing(object? sender, EventArgs e)
+	{
+		foreach (Control control in contentPanel.Controls)
+		{
+			control.Dispose();
+		}
+	}
 
-    private void btnDiscord_Click(object sender, EventArgs e)
-    {
-        var p = new Process
-        {
-            StartInfo = new ProcessStartInfo("https://discord.macro-deck.app")
-            {
-                UseShellExecute = true,
-            }
-        };
-        p.Start();
-    }
+	private void BtnVariables_Click(object? sender, EventArgs e)
+	{
+		SetView(new VariablesView());
+	}
+
+	private void BtnNotifications_Click(object? sender, EventArgs e)
+	{
+		if (_notificationsList == null || _notificationsList.IsDisposed)
+		{
+			_notificationsList = new NotificationsList
+			{
+				Location = btnNotifications.Location with
+				{
+					Y = btnNotifications.Location.Y + btnNotifications.Height,
+					X = btnNotifications.Location.X + btnNotifications.Size.Width + 20
+				}
+			};
+			_notificationsList.OnCloseRequested += (_, _) => { Controls.Remove(_notificationsList); };
+		}
+
+		if (Controls.Contains(_notificationsList))
+		{
+			Controls.Remove(_notificationsList);
+		}
+		else
+		{
+			Controls.Add(_notificationsList);
+			_notificationsList.BringToFront();
+		}
+	}
+
+	private void btnDonate_Click(object sender, EventArgs e)
+	{
+		var p = new Process
+		{
+			StartInfo = new ProcessStartInfo("https://ko-fi.com/manuelmayer")
+			{
+				UseShellExecute = true
+			}
+		};
+		p.Start();
+	}
+
+	private void btnDiscord_Click(object sender, EventArgs e)
+	{
+		var p = new Process
+		{
+			StartInfo = new ProcessStartInfo("https://discord.macro-deck.app")
+			{
+				UseShellExecute = true
+			}
+		};
+		p.Start();
+	}
 }

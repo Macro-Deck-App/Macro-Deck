@@ -2,6 +2,6 @@
 
 public enum SetBackgroundColorMethod
 {
-    Fixed,
-    Random
+	Fixed,
+	Random
 }
