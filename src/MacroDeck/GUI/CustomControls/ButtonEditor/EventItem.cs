@@ -1,8 +1,8 @@
 ﻿using SuchByte.MacroDeck.ActionButton;
+using SuchByte.MacroDeck.ActionButton.Plugin;
 using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Interfaces;
-using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Actions;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 
@@ -89,13 +89,13 @@ public partial class EventItem : UserControl
 
     private void AddActionItem(PluginAction? action)
     {
-        if (action.GetType() == typeof(ConditionAction))
+        if (action?.GetType() == typeof(ConditionAction))
         {
             var conditionItem = new ConditionItem(action);
             actionsList.Controls.Add(conditionItem);
             conditionItem.OnRemoveClick += RemoveClicked;
         }
-        else if (action.GetType() == typeof(DelayAction))
+        else if (action?.GetType() == typeof(DelayAction))
         {
             var delayItem = new DelayItem(action);
             actionsList.Controls.Add(delayItem);

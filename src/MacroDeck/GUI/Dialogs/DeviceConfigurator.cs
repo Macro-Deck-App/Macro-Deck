@@ -1,13 +1,15 @@
 ﻿using SuchByte.MacroDeck.Device;
+using Serilog;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Server;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs;
 
 public partial class DeviceConfigurator : DialogForm
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(DeviceConfigurator));
+
     private MacroDeckDevice _macroDeckDevice;
 
     public DeviceConfigurator(MacroDeckDevice macroDeckDevice)
@@ -68,7 +70,7 @@ public partial class DeviceConfigurator : DialogForm
 
     private void CheckAutoConnect_CheckedChanged(object sender, EventArgs e)
     {
-        MacroDeckLogger.Trace(GetType(), $"Set auto connect to {checkAutoConnect.Checked}");
+        logger.Debug($"Set auto connect to {checkAutoConnect.Checked}");
         if (_macroDeckDevice == null || !_macroDeckDevice.Available)
         {
             return;
@@ -84,7 +86,7 @@ public partial class DeviceConfigurator : DialogForm
     {
         if (radioKeepAwakeNever.Checked)
         {
-            MacroDeckLogger.Trace(GetType(), "Set keepWake to never");
+            logger.Debug("Set keepWake to never");
             if (_macroDeckDevice == null || !_macroDeckDevice.Available)
             {
                 return;
@@ -101,7 +103,7 @@ public partial class DeviceConfigurator : DialogForm
     {
         if (radioKeepAwakeConnected.Checked)
         {
-            MacroDeckLogger.Trace(GetType(), "Set keepWake to connected");
+            logger.Debug("Set keepWake to connected");
             if (_macroDeckDevice == null || !_macroDeckDevice.Available)
             {
                 return;
@@ -118,7 +120,7 @@ public partial class DeviceConfigurator : DialogForm
     {
         if (radioKeepAwakeAlways.Checked)
         {
-            MacroDeckLogger.Trace(GetType(), "Set keepWake to always");
+            logger.Debug("Set keepWake to always");
             if (_macroDeckDevice == null || !_macroDeckDevice.Available)
             {
                 return;

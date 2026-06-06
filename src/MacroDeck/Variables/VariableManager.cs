@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
+using Serilog;
 using SQLite;
 using SuchByte.MacroDeck.CottleIntegration;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.StartupConfig;
 
@@ -9,6 +9,8 @@ namespace SuchByte.MacroDeck.Variables;
 
 public static class VariableManager
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(VariableManager));
+
     private static SQLiteConnection _database;
 
     internal static event EventHandler OnVariableChanged;
@@ -127,7 +129,7 @@ public static class VariableManager
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error($"Error while updating variable {variable.Name}:\n{ex.Message}");
+            logger.Error(ex, "Error while updating variable {VariableName}", variable.Name);
         }
 
         OnVariableChanged?.Invoke(variable, EventArgs.Empty);
@@ -190,7 +192,7 @@ public static class VariableManager
     {
         _database.Delete(new Variable { Name = name });
         OnVariableRemoved?.Invoke(name, EventArgs.Empty);
-        MacroDeckLogger.Trace("Deleted variable " + name);
+        logger.Debug("Deleted variable {VariableName}", name);
     }
 
     [Obsolete("Use TemplateManager.RenderTemplate")]
@@ -201,12 +203,12 @@ public static class VariableManager
 
     internal static void Initialize()
     {
-        MacroDeckLogger.Info(typeof(VariableManager), "Initialize variables database...");
+        logger.Information("Initialize variables database...");
         _database = new SQLiteConnection(ApplicationPaths.VariablesFilePath);
 
         _database.CreateTable<Variable>();
         _database.Table<Variable>().Where(x => x.Name == "").Delete();
-        MacroDeckLogger.Info(typeof(VariableManager), ListVariables.Count() + " variables found");
+        logger.Information("{VariableCount} variables found", ListVariables.Count());
     }
 
     internal static void Close()

@@ -3,13 +3,15 @@ using AdvancedSharpAdbClient;
 using AdvancedSharpAdbClient.DeviceCommands;
 using AdvancedSharpAdbClient.Models;
 using AdvancedSharpAdbClient.Receivers;
-using SuchByte.MacroDeck.Logging;
+using Serilog;
 using SuchByte.MacroDeck.StartupConfig;
 
 namespace SuchByte.MacroDeck.Server;
 
 public class AdbServerHelper
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(AdbServerHelper));
+
     private static AdbServer? _adbServer;
 
     private const string AdbFolderName = "Android Debug Bridge";
@@ -35,17 +37,17 @@ public class AdbServerHelper
 
         if (!File.Exists(AdbPath))
         {
-            MacroDeckLogger.Warning(typeof(AdbServerHelper), $"Cannot start adb server at {AdbPath}: File not found");
+            logger.Warning("Cannot start adb server at {AdbPath}: File not found", AdbPath);
             return;
         }
 
-        MacroDeckLogger.Info(typeof(AdbServerHelper), $"Starting ADB server using {AdbPath}");
+        logger.Information("Starting ADB server using {AdbPath}", AdbPath);
 
         _adbServer = new AdbServer();
         var result = await _adbServer.StartServerAsync(AdbPath, false);
         if (result != StartServerResult.Started && result != StartServerResult.AlreadyRunning)
         {
-            MacroDeckLogger.Info(typeof(AdbServerHelper), "Unable to start ADB server");
+            logger.Information("Unable to start ADB server");
         }
 
         var monitor = new DeviceMonitor(new AdbSocket(AdbClient.AdbServerEndPoint));
@@ -98,13 +100,13 @@ public class AdbServerHelper
             return adbServerEndpoint;
         }
 
-        MacroDeckLogger.Info(typeof(AdbServerHelper), "Endpoint was null");
+        logger.Information("Endpoint was null");
         return null;
     }
 
     private static void Monitor_DeviceDisconnected(object sender, DeviceDataEventArgs e)
     {
-        MacroDeckLogger.Info(typeof(AdbServerHelper), $"{e.Device.Name} disconnected");
+        logger.Information("{DeviceName} disconnected", e.Device.Name);
     }
 
     private static async void Monitor_DeviceConnected(object sender, DeviceDataEventArgs e)
@@ -114,7 +116,7 @@ public class AdbServerHelper
             return;
         }
 
-        MacroDeckLogger.Info(typeof(AdbServerHelper), $"{e.Device.Name} connected");
+        logger.Information("{DeviceName} connected", e.Device.Name);
         await RunForDevice(e.Device.Serial,
             async (adbDeviceClient, deviceData) =>
             {
@@ -134,7 +136,7 @@ public class AdbServerHelper
             return true;
         }
 
-        MacroDeckLogger.Info(typeof(AdbServerHelper), $"Device {device.Serial} is still not online - {device.State}");
+        logger.Information("Device {DeviceSerial} is still not online - {DeviceState}", device.Serial, device.State);
         return false;
 
         async Task WaitForDeviceOnline()
@@ -208,12 +210,11 @@ public class AdbServerHelper
                 $"tcp:{MacroDeck.Configuration.HostPort}",
                 true);
 
-            MacroDeckLogger.Info(typeof(AdbServerHelper), $"Started reverse forward on {device.Name}");
+            logger.Information("Started reverse forward on {DeviceName}", device.Name);
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Warning(typeof(AdbServerHelper),
-                $"Unable to start reverse forward on {device.Name}: {ex.Message}");
+            logger.Warning(ex, "Unable to start reverse forward on {DeviceName}", device.Name);
         }
     }
 }

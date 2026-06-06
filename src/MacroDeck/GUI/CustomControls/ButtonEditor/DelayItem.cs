@@ -1,5 +1,5 @@
-﻿using SuchByte.MacroDeck.Interfaces;
-using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Actions;
+﻿using SuchByte.MacroDeck.ActionButton.Plugin;
+using SuchByte.MacroDeck.Interfaces;
 using SuchByte.MacroDeck.Plugins;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor;

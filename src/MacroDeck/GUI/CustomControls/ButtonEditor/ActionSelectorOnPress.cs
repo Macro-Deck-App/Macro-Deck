@@ -1,7 +1,7 @@
 ﻿using SuchByte.MacroDeck.ActionButton;
+using SuchByte.MacroDeck.ActionButton.Plugin;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Interfaces;
-using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Actions;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 
@@ -26,7 +26,7 @@ public partial class ActionSelectorOnPress : RoundedUserControl
 
     private void AddActionItem(PluginAction? action)
     {
-        if (action.GetType() == typeof(ConditionAction))
+        if (action?.GetType() == typeof(ConditionAction))
         {
             var conditionItem = new ConditionItem(action);
             actionsOnPress.Controls.Add(conditionItem);
@@ -34,7 +34,7 @@ public partial class ActionSelectorOnPress : RoundedUserControl
             conditionItem.OnMoveUpClick += MoveUpClicked;
             conditionItem.OnMoveDownClick += MoveDownClicked;
         }
-        else if (action.GetType() == typeof(DelayAction))
+        else if (action?.GetType() == typeof(DelayAction))
         {
             var delayItem = new DelayItem(action);
             actionsOnPress.Controls.Add(delayItem);

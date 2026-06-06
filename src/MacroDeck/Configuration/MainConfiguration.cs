@@ -2,12 +2,14 @@
 using System.IO;
 using Microsoft.Win32;
 using Newtonsoft.Json;
-using SuchByte.MacroDeck.Logging;
+using Serilog;
 
 namespace SuchByte.MacroDeck.Configuration;
 
 public class MainConfiguration
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(MainConfiguration));
+
     private bool _autoStart = true;
 
     [JsonProperty("AutoStart")]
@@ -84,11 +86,11 @@ public class MainConfiguration
             using JsonWriter writer = new JsonTextWriter(sw);
             serializer.Serialize(writer, this);
 
-            MacroDeckLogger.Info("Configuration saved");
+            logger.Information("Configuration saved");
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error("Failed to save configuration: " + ex.Message);
+            logger.Error(ex, "Failed to save configuration");
         }
     }
 

@@ -1,8 +1,8 @@
 ﻿using System.Runtime.InteropServices;
 using SuchByte.MacroDeck.GUI.CustomControls;
+using Serilog;
 using SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
 
@@ -10,6 +10,8 @@ namespace SuchByte.MacroDeck.GUI.Dialogs;
 
 public partial class ExtensionStoreDownloader : DialogForm
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(ExtensionStoreDownloader));
+
     private int _pluginsToInstall;
     private int _pluginsInstalled;
 
@@ -55,7 +57,7 @@ public partial class ExtensionStoreDownloader : DialogForm
                             _pluginsToInstall);
                         btnDone.Visible = true;
                     });
-                    MacroDeckLogger.Info(typeof(ExtensionStoreDownloader),
+                    logger.Information(
                         $"*** Installation of {_pluginsToInstall} package(s) done ***");
                 }
             };

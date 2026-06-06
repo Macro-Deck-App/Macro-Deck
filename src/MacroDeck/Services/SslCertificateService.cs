@@ -1,5 +1,5 @@
 using System.Security.Cryptography.X509Certificates;
-using SuchByte.MacroDeck.Logging;
+using Serilog;
 using SuchByte.MacroDeck.StartupConfig;
 using SuchByte.MacroDeck.Utils;
 
@@ -7,6 +7,8 @@ namespace SuchByte.MacroDeck.Services;
 
 public static class SslCertificateService
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(SslCertificateService));
+
     public static void EnsureValidCertificate()
     {
         if (!MacroDeck.Configuration.EnableSsl)
@@ -20,10 +22,10 @@ public static class SslCertificateService
             return;
         }
 
-        MacroDeckLogger.Info("No SSL certificate configured – generating self-signed certificate");
+        logger.Information("No SSL certificate configured – generating self-signed certificate");
         var (certPem, keyPem) = SelfSignedCertificateGenerator.Generate();
         SaveCertificate(certPem, keyPem);
-        MacroDeckLogger.Info("Self-signed certificate generated and saved");
+        logger.Information("Self-signed certificate generated and saved");
     }
 
     public static X509Certificate2? GetX509Certificate()
@@ -46,7 +48,7 @@ public static class SslCertificateService
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error("Failed to load SSL certificate: " + ex.Message);
+            logger.Error(ex, "Failed to load SSL certificate");
             return null;
         }
     }

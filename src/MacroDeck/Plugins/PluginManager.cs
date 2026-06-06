@@ -6,19 +6,21 @@ using System.Xml.Serialization;
 using SuchByte.MacroDeck.ExtensionStore;
 using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin;
 using SuchByte.MacroDeck.InternalPlugins.DevicePlugin;
-using SuchByte.MacroDeck.InternalPlugins.FolderPlugin;
-using SuchByte.MacroDeck.InternalPlugins.Variables;
+using Serilog;
+using SuchByte.MacroDeck.Folders.Plugin;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.StartupConfig;
 using SuchByte.MacroDeck.Utils;
+using SuchByte.MacroDeck.Variables.Plugin;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.Plugins;
 
 public static class PluginManager
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(PluginManager));
+
     public static event EventHandler? OnPluginsChange;
 
 
@@ -41,7 +43,7 @@ public static class PluginManager
             return;
         }
 
-        MacroDeckLogger.Info(typeof(PluginManager), "Loading plugins...");
+        logger.Information("Loading plugins...");
         _loaded = true;
         Plugins.Clear();
         PluginsUpdateAvailable.Clear();
@@ -119,8 +121,7 @@ public static class PluginManager
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error(typeof(PluginManager),
-                    $"Error while deserializing manifest for {directory}: {ex.Message}");
+                logger.Error(ex, "Error while deserializing manifest for {Directory}", directory);
             }
         }
 
@@ -143,7 +144,7 @@ public static class PluginManager
         try
         {
             asm = Assembly.LoadFrom(Path.Combine(pluginDirectory, extensionManifest.Dll));
-            MacroDeckLogger.Info("Loading plugin " + asm.GetName().Name);
+            logger.Information("Loading plugin {PluginName}", asm.GetName().Name);
 
             foreach (var type in asm.GetTypes())
             {
@@ -171,7 +172,7 @@ public static class PluginManager
                 }
                 catch (Exception ex)
                 {
-                    MacroDeckLogger.Error("Error while loading plugin: " + ex.Message);
+                    logger.Error(ex, "Error while loading plugin");
                 }
             }
         }
@@ -190,8 +191,10 @@ public static class PluginManager
                 PluginDirectories[disabledPlugin] = pluginDirectory;
 
                 MacroDeck.SafeMode = true;
-                MacroDeckLogger.Warning(
-                    $"Cannot load {disabledPlugin.Name} version {disabledPlugin.Version}. Macro Deck was started in safe mode.");
+                logger.Warning(
+                    "Cannot load {PluginName} version {PluginVersion}. Macro Deck was started in safe mode.",
+                    disabledPlugin.Name,
+                    disabledPlugin.Version);
                 return disabledPlugin;
             }
         }
@@ -274,7 +277,7 @@ public static class PluginManager
 
                 var deleteMarkerFile = Path.Combine(PluginDirectories[plugin], DeleteMarkerFileName);
                 File.Create(deleteMarkerFile);
-                MacroDeckLogger.Info(name + " deleted");
+                logger.Information("{PluginName} deleted", name);
             }
             catch (Exception ex)
             {
@@ -299,7 +302,7 @@ public static class PluginManager
     internal static void InstallPlugin(string directory, string packageName)
     {
         var update = Directory.Exists(Path.Combine(ApplicationPaths.PluginsDirectoryPath, packageName));
-        MacroDeckLogger.Info(typeof(PluginManager), $"{(update ? "Updating" : "Installing")} " + packageName);
+        logger.Information("{InstallAction} {PackageName}", update ? "Updating" : "Installing", packageName);
         Assembly asm = null;
         var error = false;
         var extensionManifest = new ExtensionManifestModel();

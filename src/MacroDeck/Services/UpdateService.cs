@@ -5,8 +5,8 @@ using System.Net.Http.Json;
 using SuchByte.MacroDeck.DataTypes.FileDownloader;
 using SuchByte.MacroDeck.DataTypes.Updater;
 using SuchByte.MacroDeck.Enums;
+using Serilog;
 using SuchByte.MacroDeck.Extension;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.StartupConfig;
 using SuchByte.MacroDeck.Utils;
 
@@ -14,6 +14,8 @@ namespace SuchByte.MacroDeck.Services;
 
 public class UpdateService : IDisposable
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(UpdateService));
+
     // Make UpdateService singleton
     private static UpdateService? _instance;
 
@@ -126,7 +128,7 @@ public class UpdateService : IDisposable
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error($"Failed to automatically check for updates\n{ex}");
+                logger.Error(ex, "Failed to automatically check for updates");
             }
 
             Thread.Sleep(TimeSpan.FromMinutes(30));

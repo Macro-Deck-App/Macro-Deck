@@ -1,7 +1,7 @@
 ﻿using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Enums;
+using Serilog;
 using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Models;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.ViewModels;
@@ -10,6 +10,8 @@ namespace SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.ViewModels;
 
 public class ActionButtonSetBackgroundColorActionConfigViewModel : ISerializableConfigViewModel
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(ActionButtonSetBackgroundColorActionConfigViewModel));
+
     private readonly PluginAction _pluginAction;
 
     public ActionButtonSetBackgroundColorActionConfigModel Configuration { get; set; }
@@ -40,12 +42,11 @@ public class ActionButtonSetBackgroundColorActionConfigViewModel : ISerializable
         try
         {
             SetConfig();
-            MacroDeckLogger.Info(typeof(ActionButtonSetBackgroundColorActionConfigViewModel), "config saved");
+            logger.Information("config saved");
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(typeof(ActionButtonSetBackgroundColorActionConfigViewModel),
-                $"Error while saving config: {ex.Message + Environment.NewLine + ex.StackTrace}");
+            logger.Error(ex, "Error while saving config");
         }
 
         return true;

@@ -1,4 +1,4 @@
-﻿using SuchByte.MacroDeck.Logging;
+﻿using Serilog;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Notifications;
 
@@ -6,13 +6,15 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Notifications;
 
 public partial class NotificationItem : RoundedUserControl
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(NotificationItem));
+
     public string Id { get; private set; }
 
     private NotificationModel _notificationModel;
 
     public void ClearAdditionalControls()
     {
-        MacroDeckLogger.Trace("Clear");
+        logger.Debug("Clear");
         if (InvokeRequired)
         {
             Invoke(() => ClearAdditionalControls());

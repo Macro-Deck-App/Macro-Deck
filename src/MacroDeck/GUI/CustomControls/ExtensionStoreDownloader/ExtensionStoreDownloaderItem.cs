@@ -3,9 +3,9 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using SuchByte.MacroDeck.DataTypes.FileDownloader;
 using SuchByte.MacroDeck.ExtensionStore;
+using Serilog;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.StartupConfig;
@@ -15,6 +15,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader;
 
 public partial class ExtensionStoreDownloaderItem : RoundedUserControl
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(ExtensionStoreDownloaderItem));
+
     public ExtensionStoreDownloaderPackageInfoModel PackageInfo { get; }
 
     public ApiV2Extension ApiV2Extension { get; private set; }
@@ -40,7 +42,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(GetType(), ex.Message);
+            logger.Error(ex.Message);
             Invoke(() => { lblStatus.Text = LanguageManager.Strings.Error; });
             Cancel();
         }
@@ -132,7 +134,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
         if (!File.Exists(_destinationFileName))
         {
             Finished();
-            MacroDeckLogger.Error(GetType(),
+            logger.Error(
                 $"Download of {ApiV2Extension.Name} failed: {ApiV2Extension.PackageId ?? "unknown.zip"} not found");
             return;
         }
@@ -141,7 +143,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
         if (!expectedFileHash.Equals(hash))
         {
             Finished();
-            MacroDeckLogger.Error(GetType(),
+            logger.Error(
                 $"Checksum of {ApiV2Extension.Name} not matching!" +
                 Environment.NewLine +
                 $"Checksum on server: {expectedFileHash}" +
@@ -150,7 +152,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
             return;
         }
 
-        MacroDeckLogger.Info(GetType(), $"Start installation of {ApiV2Extension.Name} version latest");
+        logger.Information($"Start installation of {ApiV2Extension.Name} version latest");
 
 
         ExtensionManifestModel extensionManifestModel;
@@ -161,7 +163,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(GetType(),
+            logger.Error(
                 $"Error while deserializing ExtensionManifest for {ApiV2Extension.Name}: " +
                 ex.Message +
                 Environment.NewLine +
@@ -184,7 +186,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
                 }
                 catch (Exception ex)
                 {
-                    MacroDeckLogger.Error(GetType(),
+                    logger.Error(
                         $"Error while installing {ApiV2Extension.Name}: " +
                         ex.Message +
                         Environment.NewLine +
@@ -201,7 +203,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
                 }
                 catch (Exception ex)
                 {
-                    MacroDeckLogger.Error(GetType(),
+                    logger.Error(
                         $"Error while installing {ApiV2Extension.Name}: " +
                         ex.Message +
                         Environment.NewLine +

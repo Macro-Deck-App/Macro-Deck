@@ -1,16 +1,18 @@
 ﻿using SuchByte.MacroDeck.DataTypes.FileDownloader;
 using SuchByte.MacroDeck.DataTypes.Updater;
 using SuchByte.MacroDeck.Extension;
+using System.Diagnostics;
+using Serilog;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Services;
-using System.Diagnostics;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs;
 
 public partial class UpdateAvailableDialog : DialogForm
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(UpdateAvailableDialog));
+
     private readonly UpdateApiVersionInfo _availableUpdate;
     private readonly UpdateApiVersionFileInfo? _updateApiVersionFileInfo;
 
@@ -43,7 +45,7 @@ public partial class UpdateAvailableDialog : DialogForm
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error($"Failed to download and install update\n{ex}");
+            logger.Error($"Failed to download and install update\n{ex}");
 
             using var msgBox = new CustomControls.MessageBox();
             msgBox.ShowDialog(LanguageManager.Strings.Error,

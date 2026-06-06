@@ -4,9 +4,9 @@ using SuchByte.MacroDeck.Device;
 using SuchByte.MacroDeck.Enums;
 using SuchByte.MacroDeck.Extension;
 using SuchByte.MacroDeck.Folders;
+using Serilog;
 using SuchByte.MacroDeck.JSON;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Services;
 using SuchByte.MacroDeck.Utils;
@@ -15,6 +15,8 @@ namespace SuchByte.MacroDeck.Server;
 
 public static class MacroDeckServer
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(MacroDeckServer));
+
     public static event EventHandler? OnDeviceConnectionStateChanged;
     public static event EventHandler? OnServerStateChanged;
     public static event EventHandler? OnFolderChanged;
@@ -43,7 +45,7 @@ public static class MacroDeckServer
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error("Failed to start server: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            logger.Error(ex, "Failed to start server");
 
             using var msgBox = new GUI.CustomControls.MessageBox();
             msgBox.ShowDialog(LanguageManager.Strings.Error,
@@ -103,7 +105,7 @@ public static class MacroDeckServer
         }
 
         Clients.Remove(macroDeckClient);
-        MacroDeckLogger.Info(macroDeckClient.ClientId + " connection closed");
+        logger.Information("{ClientId} connection closed", macroDeckClient.ClientId);
         OnDeviceConnectionStateChanged?.Invoke(macroDeckClient, EventArgs.Empty);
     }
 
@@ -113,7 +115,7 @@ public static class MacroDeckServer
     /// <param name="macroDeckClient"></param>
     public static void CloseClient(MacroDeckClient macroDeckClient)
     {
-        MacroDeckLogger.Info("Close connection to " + macroDeckClient.ClientId);
+        logger.Information("Close connection to {ClientId}", macroDeckClient.ClientId);
         Task.Run(async () => await WebSocketHandler.Close(macroDeckClient.SessionId));
     }
 
@@ -132,7 +134,7 @@ public static class MacroDeckServer
             return;
         }
 
-        MacroDeckLogger.Trace("Received method: " + method);
+        logger.Debug("Received method: {Method}", method);
 
         switch (method)
         {
@@ -148,7 +150,7 @@ public static class MacroDeckServer
 
                 macroDeckClient.SetClientId(responseObject["Client-Id"].ToString());
 
-                MacroDeckLogger.Info("Connection request from " + macroDeckClient.ClientId);
+                logger.Information("Connection request from {ClientId}", macroDeckClient.ClientId);
 
                 Enum.TryParse(responseObject["Device-Type"].ToString(), out DeviceType deviceType);
                 macroDeckClient.DeviceType = deviceType;
@@ -194,7 +196,7 @@ public static class MacroDeckServer
 
 
                 OnDeviceConnectionStateChanged?.Invoke(macroDeckClient, EventArgs.Empty);
-                MacroDeckLogger.Info(macroDeckClient.ClientId + " connected");
+                logger.Information("{ClientId} connected", macroDeckClient.ClientId);
                 break;
             case JsonMethod.BUTTON_PRESS:
             case JsonMethod.BUTTON_RELEASE:
@@ -231,7 +233,7 @@ public static class MacroDeckServer
                 }
                 catch (Exception ex)
                 {
-                    MacroDeckLogger.Warning("Action button long press release caused an exception: " + ex.Message);
+                    logger.Warning(ex, "Action button long press release caused an exception");
                 }
 
                 break;

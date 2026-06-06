@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using Newtonsoft.Json;
-using SuchByte.MacroDeck.Logging;
+using Serilog;
 using SuchByte.MacroDeck.StartupConfig;
 using SuchByte.MacroDeck.Utils;
 
@@ -8,6 +8,8 @@ namespace SuchByte.MacroDeck.Plugins;
 
 public class PluginCredentials
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(PluginCredentials));
+
     private static string FileName(MacroDeckPlugin plugin)
     {
         return $"{plugin.Author.ToLower()}_{plugin.Name.ToLower()}";
@@ -34,7 +36,7 @@ public class PluginCredentials
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(typeof(PluginCredentials), "Error while adding plugin credential: " + ex.Message);
+            logger.Error(ex, "Error while adding plugin credential");
         }
     }
 
@@ -97,8 +99,9 @@ public class PluginCredentials
                 }
                 catch
                 {
-                    MacroDeckLogger.Warning(typeof(PluginCredentials),
-                        $"Unable to decrypt credentials for {plugin.Name}. Perhaps the machine GUID changed?");
+                    logger.Warning(
+                        "Unable to decrypt credentials for {PluginName}. Perhaps the machine GUID changed?",
+                        plugin.Name);
                 }
             }
 

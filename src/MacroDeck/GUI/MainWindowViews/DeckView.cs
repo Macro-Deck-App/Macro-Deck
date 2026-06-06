@@ -7,9 +7,9 @@ using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.Folders;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
+using Serilog;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Properties;
@@ -23,6 +23,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews;
 
 public partial class DeckView : UserControl
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(DeckView));
+
     private MacroDeckFolder _currentFolder;
 
     private Control _buttonClicked;
@@ -908,7 +910,7 @@ public partial class DeckView : UserControl
         ProfileManager.CurrentProfile.ButtonRadius = (int)cornerRadius.Value;
         ProfileManager.CurrentProfile.ButtonBackground = checkButtonBackground.Checked;
         ProfileManager.Save();
-        MacroDeckLogger.Info(GetType(),
+        logger.Information(
             string.Format("Updated profile settings of {0}:", ProfileManager.CurrentProfile.DisplayName) +
             Environment.NewLine +
             string.Format("Rows: {0}", ProfileManager.CurrentProfile.Rows) +

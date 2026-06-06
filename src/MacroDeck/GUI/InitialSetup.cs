@@ -3,12 +3,14 @@ using SuchByte.MacroDeck.Configuration;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.InitialSetupPages;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
+using Serilog;
 
 namespace SuchByte.MacroDeck.GUI;
 
 public partial class InitialSetup : DialogForm
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(InitialSetup));
+
     public MainConfiguration configuration;
 
     private int currentPage;
@@ -167,7 +169,7 @@ public partial class InitialSetup : DialogForm
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Warning("Not able to set system language: " +
+            logger.Warning("Not able to set system language: " +
                 ex.Message +
                 Environment.NewLine +
                 ex.StackTrace);

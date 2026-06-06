@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Serilog;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 
@@ -6,10 +7,15 @@ namespace SuchByte.MacroDeck.GUI.CustomControls;
 
 public partial class Form : System.Windows.Forms.Form
 {
+    // Base class of all dialogs/forms: resolve the contextual logger from the runtime type
+    // so log entries carry the concrete derived form name as their SourceContext.
+    private readonly ILogger logger;
+
     public event EventHandler FormWindowStateChanged;
 
     public Form()
     {
+        logger = Log.ForContext(GetType());
         InitializeComponent();
     }
 
@@ -54,7 +60,7 @@ public partial class Form : System.Windows.Forms.Form
         try
         {
             File.Copy(MacroDeckLogger.CurrentFilename, saveFileDialog.FileName, true);
-            MacroDeckLogger.Info(GetType(), $"Exported latest log to {saveFileDialog.FileName}");
+            logger.Information($"Exported latest log to {saveFileDialog.FileName}");
             using var msgBox = new MessageBox();
             msgBox.ShowDialog(LanguageManager.Strings.ExportLatestLog,
                 string.Format(LanguageManager.Strings.LogSuccessfullyExportedToX, saveFileDialog.FileName),
@@ -62,7 +68,7 @@ public partial class Form : System.Windows.Forms.Form
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(GetType(),
+            logger.Error(
                 "Error while exporting latest log: " + ex.Message + Environment.NewLine + ex.StackTrace);
         }
     }

@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using System.Media;
 using Newtonsoft.Json;
+using Serilog;
 using SuchByte.MacroDeck.GUI.Dialogs;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
 using SuchByte.MacroDeck.StartupConfig;
@@ -11,6 +11,8 @@ namespace SuchByte.MacroDeck.Device;
 
 public class DeviceManager
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(DeviceManager));
+
     private static List<MacroDeckDevice> _macroDeckDevices = new();
     private static readonly object _saveLock = new();
 
@@ -35,7 +37,7 @@ public class DeviceManager
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error("devices.json is corrupted and will be reset: " + ex.Message);
+            logger.Error(ex, "devices.json is corrupted and will be reset");
             try
             {
                 File.Delete(ApplicationPaths.DevicesFilePath);
@@ -74,7 +76,7 @@ public class DeviceManager
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error("Error while saving known devices: " + ex.Message);
+            logger.Error(ex, "Error while saving known devices");
         }
     }
 

@@ -2,9 +2,9 @@
 using System.Runtime.InteropServices;
 using SuchByte.MacroDeck.Backup;
 using SuchByte.MacroDeck.GUI.CustomControls.Settings;
+using Serilog;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Services;
 using SuchByte.MacroDeck.StartupConfig;
@@ -15,6 +15,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews;
 
 public partial class SettingsView : UserControl
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(SettingsView));
+
     public SettingsView(int page = 0)
     {
         InitializeComponent();
@@ -230,7 +232,7 @@ public partial class SettingsView : UserControl
                 "Make sure you have a internet connection",
                 MessageBoxButtons.OK);
 
-            MacroDeckLogger.Error($"Failed to check for updates\n{ex}");
+            logger.Error($"Failed to check for updates\n{ex}");
         }
         finally
         {

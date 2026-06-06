@@ -1,12 +1,14 @@
 ﻿using System.IO;
 using Newtonsoft.Json;
-using SuchByte.MacroDeck.Logging;
+using Serilog;
 using SuchByte.MacroDeck.StartupConfig;
 
 namespace SuchByte.MacroDeck.Language;
 
 public static class LanguageManager
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(LanguageManager));
+
     public static event EventHandler LanguageChanged;
     public static List<Strings> Languages => _languages;
     private static List<Strings> _languages = new();
@@ -25,7 +27,7 @@ public static class LanguageManager
         }
 
         // Loading languages from resources
-        MacroDeckLogger.Info("Loading language files...");
+        logger.Information("Loading language files...");
         var assembly = typeof(Strings).Assembly;
         foreach (var manifestResource in assembly.GetManifestResourceNames())
         {
@@ -37,7 +39,7 @@ public static class LanguageManager
                     continue;
                 }
 
-                MacroDeckLogger.Info(typeof(LanguageManager), $"Loading ${manifestResource}...");
+                logger.Information("Loading ${ManifestResource}...", manifestResource);
                 using var resourceStream = assembly.GetManifestResourceStream(manifestResource);
 
                 var serializer = new JsonSerializer();
@@ -60,7 +62,7 @@ public static class LanguageManager
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Warning("Failed to load language resource: " + ex.Message);
+                logger.Warning(ex, "Failed to load language resource");
             }
         }
 
@@ -82,11 +84,11 @@ public static class LanguageManager
             using JsonWriter writer = new JsonTextWriter(sw);
             serializer.Serialize(writer, _strings);
 
-            MacroDeckLogger.Info(typeof(LanguageManager), $"{_strings.__Language__} saved");
+            logger.Information("{Language} saved", _strings.__Language__);
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(typeof(LanguageManager), $"Failed to save {_strings.__Language__}: {ex.Message}");
+            logger.Error(ex, "Failed to save {Language}", _strings.__Language__);
         }
     }
 
@@ -101,7 +103,7 @@ public static class LanguageManager
 
     public static void SetLanguage(Strings language)
     {
-        MacroDeckLogger.Info("Set language to " + language.__Language__);
+        logger.Information("Set language to {Language}", language.__Language__);
         _strings = language;
         LanguageChanged?.Invoke(language, EventArgs.Empty);
     }

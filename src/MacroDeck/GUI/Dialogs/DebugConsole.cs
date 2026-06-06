@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Serilog;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
@@ -10,6 +11,8 @@ namespace SuchByte.MacroDeck.GUI.Dialogs;
 
 public partial class DebugConsole : Form
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(DebugConsole));
+
     public DebugConsole()
     {
         InitializeComponent();
@@ -112,11 +115,11 @@ public partial class DebugConsole : Form
             try
             {
                 logOutput.SaveFile(saveFileDialog.FileName, RichTextBoxStreamType.PlainText);
-                MacroDeckLogger.Info("Successfully exported debug console output to: " + saveFileDialog.FileName);
+                logger.Information("Successfully exported debug console output to: " + saveFileDialog.FileName);
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error("Error while exporting debug console output: " +
+                logger.Error("Error while exporting debug console output: " +
                     ex.Message +
                     Environment.NewLine +
                     ex.StackTrace);

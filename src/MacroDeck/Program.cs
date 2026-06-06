@@ -1,5 +1,5 @@
-﻿using SuchByte.MacroDeck.Logging;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using Serilog;
 using SuchByte.MacroDeck.Pipe;
 using SuchByte.MacroDeck.StartupConfig;
 
@@ -7,6 +7,8 @@ namespace SuchByte.MacroDeck;
 
 internal class Program
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(Program));
+
     [STAThread]
     private static void Main(string[] args)
     {
@@ -61,12 +63,11 @@ internal class Program
 
     private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        MacroDeckLogger.Error(typeof(MacroDeck), "CurrentDomainOnUnhandledException: " + e.ExceptionObject);
+        logger.Error(e.ExceptionObject as Exception, "Unhandled domain exception: {ExceptionObject}", e.ExceptionObject);
     }
 
     private static void ApplicationThreadException(object sender, ThreadExceptionEventArgs e)
     {
-        MacroDeckLogger.Error(typeof(MacroDeck),
-            "ApplicationThreadException: " + e.Exception.Message + Environment.NewLine + e.Exception.StackTrace);
+        logger.Error(e.Exception, "Unhandled thread exception");
     }
 }

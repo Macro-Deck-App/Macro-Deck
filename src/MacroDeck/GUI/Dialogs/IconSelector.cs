@@ -2,9 +2,9 @@
 using System.IO;
 using ImageMagick;
 using SuchByte.MacroDeck.GUI.CustomControls;
+using Serilog;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.StartupConfig;
@@ -15,6 +15,8 @@ namespace SuchByte.MacroDeck.GUI.Dialogs;
 
 public partial class IconSelector : DialogForm
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(IconSelector));
+
     public Icon SelectedIcon;
     public IconPack SelectedIconPack;
 
@@ -115,7 +117,7 @@ public partial class IconSelector : DialogForm
 
         Task.Run(() =>
         {
-            MacroDeckLogger.Info(GetType(), $"Starting importing {openFileDialog.FileNames.Length} icon(s)");
+            logger.Information($"Starting importing {openFileDialog.FileNames.Length} icon(s)");
             if (iconImportQuality.Pixels == -1)
             {
                 foreach (var file in openFileDialog.FileNames)
@@ -123,11 +125,11 @@ public partial class IconSelector : DialogForm
                     try
                     {
                         icons.Add(Image.FromFile(file));
-                        MacroDeckLogger.Trace(GetType(), "Original image loaded");
+                        logger.Debug("Original image loaded");
                     }
                     catch (Exception ex)
                     {
-                        MacroDeckLogger.Error(GetType(),
+                        logger.Error(
                             "Error while loading original image: " + ex.Message + Environment.NewLine + ex.StackTrace);
                     }
                 }
@@ -138,7 +140,7 @@ public partial class IconSelector : DialogForm
                 {
                     try
                     {
-                        MacroDeckLogger.Trace(GetType(), "Using Magick to resize image");
+                        logger.Debug("Using Magick to resize image");
                         using (var collection = new MagickImageCollection(new FileInfo(file)))
                         {
                             collection.Coalesce();
@@ -156,11 +158,11 @@ public partial class IconSelector : DialogForm
                             }
                         }
 
-                        MacroDeckLogger.Trace(GetType(), "Image successfully resized");
+                        logger.Debug("Image successfully resized");
                     }
                     catch (Exception ex)
                     {
-                        MacroDeckLogger.Error(GetType(),
+                        logger.Error(
                             "Failed to resize image: " + ex.Message + Environment.NewLine + ex.StackTrace);
                     }
                 }
@@ -171,12 +173,12 @@ public partial class IconSelector : DialogForm
 
             if (iconPack == null)
             {
-                MacroDeckLogger.Error(GetType(), "Icon pack was null");
+                logger.Error("Icon pack was null");
                 SpinnerDialog.SetVisisble(false, this);
                 return;
             }
 
-            MacroDeckLogger.Info(GetType(), $"Adding {icons.Count} icons to {iconPack.Name}");
+            logger.Information($"Adding {icons.Count} icons to {iconPack.Name}");
             var gifIcons = new List<Image>();
             gifIcons.AddRange(icons.FindAll(x => x.RawFormat.ToString().ToLower() == "gif").ToArray());
             var convertGifToStatic = false;
@@ -190,7 +192,7 @@ public partial class IconSelector : DialogForm
                             MessageBoxButtons.YesNo) ==
                         DialogResult.Yes;
                 });
-                MacroDeckLogger.Info(GetType(), "Convert gif to static? " + convertGifToStatic);
+                logger.Information("Convert gif to static? " + convertGifToStatic);
             }
 
             foreach (var icon in icons)
@@ -208,7 +210,7 @@ public partial class IconSelector : DialogForm
             }
 
             Invoke(() => LoadIcons(iconPack, true));
-            MacroDeckLogger.Info(GetType(), "Icons successfully imported");
+            logger.Information("Icons successfully imported");
             SpinnerDialog.SetVisisble(false, this);
         });
     }

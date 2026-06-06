@@ -1,4 +1,5 @@
-﻿using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Actions;
+﻿using SuchByte.MacroDeck.ActionButton;
+using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Actions;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 
@@ -12,12 +13,12 @@ public class ActionButtonPlugin : MacroDeckPlugin
 
     public override void Enable()
     {
-        Actions = new List<PluginAction>
-        {
+        Actions =
+        [
             new ActionButtonToggleStateAction(),
             new ActionButtonSetStateOffAction(),
             new ActionButtonSetStateOnAction(),
             new ActionButtonSetBackgroundColorAction()
-        };
+        ];
     }
 }

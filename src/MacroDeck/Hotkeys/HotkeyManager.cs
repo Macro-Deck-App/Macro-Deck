@@ -1,12 +1,14 @@
 ﻿using System.Runtime.InteropServices;
+using Serilog;
 using SuchByte.MacroDeck.Enums;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Server;
 
 namespace SuchByte.MacroDeck.Hotkeys;
 
 public class HotkeyManager : NativeWindow
 {
+    private static readonly ILogger logger = Log.ForContext(typeof(HotkeyManager));
+
     // DLL libraries used to manage hotkeys
     [DllImport("user32.dll")]
     public static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vlc);
@@ -57,10 +59,10 @@ public class HotkeyManager : NativeWindow
         }
 
         RegisterHotKey(formHandle, hotkeyId, modifierKeyCode, (int)key);
-        MacroDeckLogger.Info(string.Format("Registered hotkey #{0} ({1}) with modifier(s): {2}",
+        logger.Information("Registered hotkey #{HotkeyId} ({Key}) with modifier(s): {Modifiers}",
             hotkeyId,
             key.ToString(),
-            modifierKeys.ToString()));
+            modifierKeys.ToString());
     }
 
     public static void Pause()
@@ -83,7 +85,7 @@ public class HotkeyManager : NativeWindow
         var hotkeyId = Hotkeys[actionButton];
         UnregisterHotKey(formHandle, hotkeyId);
         Hotkeys.Remove(actionButton);
-        MacroDeckLogger.Info(string.Format("Unregistered hotkey #{0}", hotkeyId));
+        logger.Information("Unregistered hotkey #{HotkeyId}", hotkeyId);
     }
 
 
