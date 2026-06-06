@@ -27,6 +27,7 @@
 
 # Download
 [Website](https://macro-deck.app)
+
 [GitHub Releases](https://github.com/Macro-Deck-App/Macro-Deck/releases)
 
 # Special thanks
