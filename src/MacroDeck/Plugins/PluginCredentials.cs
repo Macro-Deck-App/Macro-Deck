@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using Newtonsoft.Json;
 using SuchByte.MacroDeck.Logging;
-using SuchByte.MacroDeck.Startup;
+using SuchByte.MacroDeck.StartupConfig;
 using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Plugins;

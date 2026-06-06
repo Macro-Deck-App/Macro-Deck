@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace SuchByte.MacroDeck.Startup;
+namespace SuchByte.MacroDeck.StartupConfig;
 
 public class StartParameters
 {

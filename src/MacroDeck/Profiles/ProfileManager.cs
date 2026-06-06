@@ -9,7 +9,7 @@ using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.Server;
-using SuchByte.MacroDeck.Startup;
+using SuchByte.MacroDeck.StartupConfig;
 using SuchByte.MacroDeck.Utils;
 using SuchByte.MacroDeck.Variables;
 using SuchByte.MacroDeck.WindowFocus;

@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using SuchByte.MacroDeck.Logging;
 
-namespace SuchByte.MacroDeck.Startup;
+namespace SuchByte.MacroDeck.StartupConfig;
 
 public class ApplicationPaths
 {

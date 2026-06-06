@@ -3,7 +3,7 @@ using SQLite;
 using SuchByte.MacroDeck.CottleIntegration;
 using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
-using SuchByte.MacroDeck.Startup;
+using SuchByte.MacroDeck.StartupConfig;
 
 namespace SuchByte.MacroDeck.Variables;
 
