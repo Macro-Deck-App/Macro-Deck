@@ -19,7 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\MacroDeck\MacroDeck.csproj" />
+      <ProjectReference Include="..\..\src\MacroDeck\MacroDeck.csproj" />
     </ItemGroup>
 
 </Project>

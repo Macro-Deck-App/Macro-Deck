@@ -42,10 +42,10 @@ jobs:
 
       - name: Copy files
         run: |
-          mkdir -p MacroDeck/wwwroot/client || true
-          rm -rf MacroDeck/wwwroot/client/* || true
+          mkdir -p src/MacroDeck/wwwroot/client || true
+          rm -rf src/MacroDeck/wwwroot/client/* || true
           web_client_container=$(docker create macro-deck-client)
-          docker cp $web_client_container:/dist/. MacroDeck/wwwroot/client
+          docker cp $web_client_container:/dist/. src/MacroDeck/wwwroot/client
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4

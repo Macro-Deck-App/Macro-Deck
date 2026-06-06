@@ -1,0 +1,30 @@
+﻿<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/ci/">
+    <File Path=".github/workflows/build-push-windows.yml" />
+    <File Path=".github/workflows/ci.yml" />
+    <File Path=".github/workflows/create-release.yml" />
+    <File Path=".github/workflows/pull-web-client.yml" />
+    <File Path=".github/workflows/release-created.yml" />
+    <File Path=".github/workflows/tests.yml" />
+  </Folder>
+  <Folder Name="/setup/">
+    <File Path="setup/Macro Deck.iss" />
+  </Folder>
+  <Folder Name="/solution/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/MacroDeck.Server/MacroDeck.Server.csproj" />
+    <Project Path="src/MacroDeck/MacroDeck.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MacroDeck.Tests/MacroDeck.Tests.csproj" />
+  </Folder>
+</Solution>

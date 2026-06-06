@@ -5,7 +5,7 @@
 #define MyAppPublisher "Macro Deck"
 #define MyAppURL "https://macro-deck.app"
 #define MyAppExeName "Macro Deck 2.exe"  
-#define ApplicationDirectory "..\MacroDeck\bin\Publish"
+#define ApplicationDirectory "..\src\MacroDeck\bin\Publish"
 #define ApplicationVersion GetStringFileInfo(ApplicationDirectory + '\' + MyAppExeName, "ProductVersion")     
 #define OutputFileName "macro-deck-{#ApplicationVersion}"
 
@@ -26,7 +26,7 @@ LicenseFile=..\LICENSE
 PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=Result
 OutputBaseFilename=macro-deck-{#ApplicationVersion}
-SetupIconFile=..\MacroDeck\appicon.ico
+SetupIconFile=..\src\MacroDeck\appicon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern 

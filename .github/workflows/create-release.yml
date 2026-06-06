@@ -49,8 +49,8 @@ jobs:
           
       - name: Update CSProj Version
         run: |
-          sed -i 's/<Version>.*<\/Version>/<Version>${{ needs.get-version.outputs.version }}<\/Version>/' ./MacroDeck/MacroDeck.csproj
-          git add ./MacroDeck/MacroDeck.csproj
+          sed -i 's/<Version>.*<\/Version>/<Version>${{ needs.get-version.outputs.version }}<\/Version>/' ./src/MacroDeck/MacroDeck.csproj
+          git add ./src/MacroDeck/MacroDeck.csproj
           
       - name: Commit Changes
         uses: stefanzweifel/git-auto-commit-action@v4

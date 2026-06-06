@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MacroDeck", "MacroDeck\Macr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MacroDeck.Tests", "MacroDeck.Tests\MacroDeck.Tests.csproj", "{49F1CAC2-158D-45AC-B07C-52394B10A7E2}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{A87511C0-A46B-40E0-A47A-81AEE2097F5D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ci", "ci", "{A87511C0-A46B-40E0-A47A-81AEE2097F5D}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\tests.yml = .github\workflows\tests.yml
 		.github\workflows\build-push-windows.yml = .github\workflows\build-push-windows.yml
@@ -17,18 +17,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\pull-web-client.yml = .github\workflows\pull-web-client.yml
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MacroDeck.Setup", "MacroDeck.Setup", "{8C1FC7A7-364F-4CE5-B59D-9A7EFC88CFDC}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "setup", "setup", "{8C1FC7A7-364F-4CE5-B59D-9A7EFC88CFDC}"
 	ProjectSection(SolutionItems) = preProject
 		MacroDeck.Setup\Macro Deck.iss = MacroDeck.Setup\Macro Deck.iss
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacroDeck.Server", "MacroDeck.Server\MacroDeck.Server.csproj", "{FE95B83C-1BB5-45C2-8F91-A3CD1B8B6D97}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{4B7E0868-7875-41AA-8670-479175ADBEAC}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution", "solution", "{4B7E0868-7875-41AA-8670-479175ADBEAC}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
 		Directory.Packages.props = Directory.Packages.props
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FAB2BFA8-18EF-4366-B7CF-993E920E2D18}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{07B517F6-8961-41C5-831B-FDAD92A07A0F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,5 +72,10 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2EB0C8AF-0FBE-4388-9537-9EC35DC349FD}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{119E86B4-9738-4684-AF88-CDBBF0315BBF} = {FAB2BFA8-18EF-4366-B7CF-993E920E2D18}
+		{FE95B83C-1BB5-45C2-8F91-A3CD1B8B6D97} = {FAB2BFA8-18EF-4366-B7CF-993E920E2D18}
+		{49F1CAC2-158D-45AC-B07C-52394B10A7E2} = {07B517F6-8961-41C5-831B-FDAD92A07A0F}
 	EndGlobalSection
 EndGlobal
