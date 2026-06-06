@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
 using SuchByte.MacroDeck.StartupConfig;
+using Microsoft.Extensions.Hosting;
 
 namespace SuchByte.MacroDeck;
 

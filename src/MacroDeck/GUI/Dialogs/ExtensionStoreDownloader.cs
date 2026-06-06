@@ -4,6 +4,8 @@ using Serilog;
 using SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Models;
+using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs;

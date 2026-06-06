@@ -1,6 +1,8 @@
 ﻿using System.IO;
 using System.IO.Compression;
 using System.Text.Json;
+using SuchByte.MacroDeck.Logging;
+using SuchByte.MacroDeck.StartupConfig;
 using Serilog;
 using SuchByte.MacroDeck.StartupConfig;
 using SuchByte.MacroDeck.Utils;

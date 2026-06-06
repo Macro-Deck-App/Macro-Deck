@@ -4,6 +4,7 @@ using SuchByte.MacroDeck.Device;
 using Serilog;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.JSON;
+using SuchByte.MacroDeck.Logging;
 
 namespace SuchByte.MacroDeck.Server.DeviceMessage;
 

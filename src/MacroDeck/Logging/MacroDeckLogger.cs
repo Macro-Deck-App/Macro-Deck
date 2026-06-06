@@ -1,8 +1,13 @@
-﻿using System.IO;
+using System.Diagnostics;
+using System.IO;
+using SuchByte.MacroDeck.GUI.CustomControls;
 using Serilog;
 using SuchByte.MacroDeck.GUI.Dialogs;
+using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
+using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.StartupConfig;
+using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Logging;
 
@@ -39,6 +44,8 @@ public static class MacroDeckLogger
             logger.Information("Set log level to {LogLevel}", _logLevel);
         }
     }
+
+    internal static bool FileLogging = true;
 
     /// <summary>
     /// Debug trace messages for internal debugging
@@ -158,6 +165,26 @@ public static class MacroDeckLogger
             {
             }
         }
+    }
+
+    private static string TruncateForDisplay(this string value, int length)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return string.Empty;
+        }
+
+        var returnValue = value;
+        if (value.Length > length)
+        {
+            var tmp = value.Substring(0, length);
+            if (tmp.LastIndexOf(' ') > 0)
+            {
+                returnValue = tmp.Substring(0, tmp.LastIndexOf(' ')) + " ...";
+            }
+        }
+
+        return returnValue;
     }
 
     internal static string CurrentFilename =>
