@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
+using SuchByte.MacroDeck.StartupConfig;
 
 namespace SuchByte.MacroDeck;
 
@@ -21,6 +22,7 @@ public static class MacroDeckServerHelper
         UseHttps = certificate is not null;
 
         _host = Host.CreateDefaultBuilder()
+            .ConfigureSerilog()
             .ConfigureWebHostDefaults(hostBuilder =>
             {
                 hostBuilder.UseStartup<ServerStartup>();

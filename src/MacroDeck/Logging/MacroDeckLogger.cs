@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using Serilog;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Notifications;
@@ -50,9 +51,12 @@ public static class MacroDeckLogger
     /// <param name="macroDeckPlugin"></param>
     /// <param name="classType"></param>
     /// <param name="message"></param>
+    [Obsolete("Use Serilog instead")]
     public static void Trace(MacroDeckPlugin macroDeckPlugin, Type classType, string message)
     {
-        Trace(macroDeckPlugin, string.Format("{0}: {1}", classType.Name, message));
+        Log.ForContext("Plugin", macroDeckPlugin.Name)
+            .ForContext(Serilog.Core.Constants.SourceContextPropertyName, classType.FullName)
+            .Debug("{LogMessage}", message);
     }
 
     /// <summary>
@@ -61,9 +65,12 @@ public static class MacroDeckLogger
     /// <param name="macroDeckPlugin"></param>
     /// <param name="classType"></param>
     /// <param name="message"></param>
+    [Obsolete("Use Serilog instead")]
     public static void Info(MacroDeckPlugin macroDeckPlugin, Type classType, string message)
     {
-        Info(macroDeckPlugin, string.Format("{0}: {1}", classType.Name, message));
+        Log.ForContext("Plugin", macroDeckPlugin.Name)
+            .ForContext(Serilog.Core.Constants.SourceContextPropertyName, classType.FullName)
+            .Information("{LogMessage}", message);
     }
 
     /// <summary>
@@ -72,9 +79,12 @@ public static class MacroDeckLogger
     /// <param name="macroDeckPlugin"></param>
     /// <param name="classType"></param>
     /// <param name="message"></param>
+    [Obsolete("Use Serilog instead")]
     public static void Warning(MacroDeckPlugin macroDeckPlugin, Type classType, string message)
     {
-        Warning(macroDeckPlugin, string.Format("{0}: {1}", classType.Name, message));
+        Log.ForContext("Plugin", macroDeckPlugin.Name)
+            .ForContext(Serilog.Core.Constants.SourceContextPropertyName, classType.FullName)
+            .Warning("{LogMessage}", message);
     }
 
     /// <summary>
@@ -83,9 +93,12 @@ public static class MacroDeckLogger
     /// <param name="macroDeckPlugin"></param>
     /// <param name="classType"></param>
     /// <param name="message"></param>
+    [Obsolete("Use Serilog instead")]
     public static void Error(MacroDeckPlugin macroDeckPlugin, Type classType, string message)
     {
-        Error(macroDeckPlugin, string.Format("{0}: {1}", classType.Name, message));
+        Log.ForContext("Plugin", macroDeckPlugin.Name)
+            .ForContext(Serilog.Core.Constants.SourceContextPropertyName, classType.FullName)
+            .Error("{LogMessage}", message);
     }
 
 
@@ -94,15 +107,11 @@ public static class MacroDeckLogger
     /// </summary>
     /// <param name="macroDeckPlugin"></param>
     /// <param name="message"></param>
+    [Obsolete("Use Serilog instead")]
     public static void Trace(MacroDeckPlugin macroDeckPlugin, string message)
     {
-        if (macroDeckPlugin == null)
-        {
-            Log("Macro Deck", LogLevel.Error, "Plugin logging failed: plugin instance was null");
-            return;
-        }
-
-        Log(macroDeckPlugin.Name, LogLevel.Trace, message);
+        Log.ForContext("Plugin", macroDeckPlugin.Name)
+            .Debug("{LogMessage}", message);
     }
 
     /// <summary>
@@ -110,15 +119,11 @@ public static class MacroDeckLogger
     /// </summary>
     /// <param name="macroDeckPlugin"></param>
     /// <param name="message"></param>
+    [Obsolete("Use Serilog instead")]
     public static void Info(MacroDeckPlugin macroDeckPlugin, string message)
     {
-        if (macroDeckPlugin == null)
-        {
-            Log("Macro Deck", LogLevel.Error, "Plugin logging failed: plugin instance was null");
-            return;
-        }
-
-        Log(macroDeckPlugin.Name, LogLevel.Info, message);
+        Log.ForContext("Plugin", macroDeckPlugin.Name)
+            .Information("{LogMessage}", message);
     }
 
     /// <summary>
@@ -126,15 +131,11 @@ public static class MacroDeckLogger
     /// </summary>
     /// <param name="macroDeckPlugin"></param>
     /// <param name="message"></param>
+    [Obsolete("Use Serilog instead")]
     public static void Warning(MacroDeckPlugin macroDeckPlugin, string message)
     {
-        if (macroDeckPlugin == null)
-        {
-            Log("Macro Deck", LogLevel.Error, "Plugin logging failed: plugin instance was null");
-            return;
-        }
-
-        Log(macroDeckPlugin.Name, LogLevel.Warning, message);
+        Log.ForContext("Plugin", macroDeckPlugin.Name)
+            .Warning("{LogMessage}", message);
     }
 
     /// <summary>
@@ -142,56 +143,56 @@ public static class MacroDeckLogger
     /// </summary>
     /// <param name="macroDeckPlugin"></param>
     /// <param name="message"></param>
+    [Obsolete("Use Serilog instead")]
     public static void Error(MacroDeckPlugin macroDeckPlugin, string message)
     {
-        if (macroDeckPlugin == null)
-        {
-            Log("Macro Deck", LogLevel.Error, "Plugin logging failed: plugin instance was null");
-            return;
-        }
-
-        Log(macroDeckPlugin.Name, LogLevel.Error, message);
+        Log.ForContext("Plugin", macroDeckPlugin.Name)
+            .Error("{LogMessage}", message);
     }
 
     internal static void Trace(Type classType, string message)
     {
-        Trace(string.Format("{0}: {1}", classType.Name, message));
+        Log.ForContext(Serilog.Core.Constants.SourceContextPropertyName, classType.FullName)
+            .Debug("{LogMessage}", message);
     }
 
     internal static void Info(Type classType, string message)
     {
-        Info(string.Format("{0}: {1}", classType.Name, message));
+        Log.ForContext(Serilog.Core.Constants.SourceContextPropertyName, classType.FullName)
+            .Information("{LogMessage}", message);
     }
 
     internal static void Warning(Type classType, string message)
     {
-        Warning(string.Format("{0}: {1}", classType.Name, message));
+        Log.ForContext(Serilog.Core.Constants.SourceContextPropertyName, classType.FullName)
+            .Warning("{LogMessage}", message);
     }
 
     internal static void Error(Type classType, string message)
     {
-        Error(string.Format("{0}: {1}", classType.Name, message));
+        Log.ForContext(Serilog.Core.Constants.SourceContextPropertyName, classType.FullName)
+            .Error("{LogMessage}", message);
     }
 
 
     internal static void Trace(string message)
     {
-        Log("Macro Deck", LogLevel.Trace, message);
+        Log.Debug("{LogMessage}", message);
     }
 
     internal static void Info(string message)
     {
-        Log("Macro Deck", LogLevel.Info, message);
+        Log.Information("{LogMessage}", message);
     }
 
     internal static void Warning(string message)
     {
-        Log("Macro Deck", LogLevel.Warning, message);
+        Log.Warning("{LogMessage}", message);
     }
 
     internal static void Error(string message)
     {
-        Log("Macro Deck", LogLevel.Error, message);
+        Log.Error("{LogMessage}", message);
     }
 
     private static void OpenLatestLog()
@@ -206,7 +207,7 @@ public static class MacroDeckLogger
         p.Start();
     }
 
-    private static void Log(string sender, LogLevel logLevel, string message)
+    private static void LogInternal(string sender, LogLevel logLevel, string message)
     {
         if (logLevel == LogLevel.Error)
         {
@@ -271,7 +272,7 @@ public static class MacroDeckLogger
             catch (Exception ex)
             {
                 FileLogging = false;
-                Log(sender, LogLevel.Error, "File logging failed: " + ex.Message);
+                LogInternal(sender, LogLevel.Error, "File logging failed: " + ex.Message);
                 FileLogging = true;
             }
         }

@@ -51,6 +51,8 @@
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="QRCoder" />
     <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="sqlite-net-pcl" />
     <PackageReference Include="System.Collections" />
     <PackageReference Include="System.Drawing.Common" />
