@@ -19,10 +19,9 @@
     <File Path="Directory.Packages.props" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/MacroDeck.Core/MacroDeck.Core.csproj">
+    <Project Path="src/MacroDeck/MacroDeck.csproj">
       <Platform Solution="*|x64" Project="x64" />
     </Project>
-    <Project Path="src/MacroDeck/MacroDeck.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/MacroDeck.Tests/MacroDeck.Tests.csproj" />

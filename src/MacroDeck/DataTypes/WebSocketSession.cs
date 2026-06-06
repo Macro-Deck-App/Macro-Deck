@@ -1,7 +1,6 @@
 ﻿using System.Net.WebSockets;
-using System.Text;
 
-namespace MacroDeck.Server.DataTypes;
+namespace SuchByte.MacroDeck.DataTypes;
 
 public class WebSocketSession : IDisposable
 {

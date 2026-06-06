@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MacroDeck.Server.StartupConfig;
+namespace SuchByte.MacroDeck.StartupConfig;
 
 public static class ApiControllerConfig
 {

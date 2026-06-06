@@ -1,6 +1,6 @@
 ﻿using System.Net.WebSockets;
 
-namespace MacroDeck.Server.DataTypes;
+namespace SuchByte.MacroDeck.DataTypes;
 
 public class WebSocketNormalClose : WebSocketCloseReason
 {
