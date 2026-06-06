@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using System.ComponentModel;
 using System.Drawing;
@@ -10,12 +10,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 {
     partial class DeckView
     {
-        /// <summary> 
+        /// <summary>
         /// Erforderliche Designervariable.
         /// </summary>
         private IContainer components = null;
 
-        /// <summary> 
+        /// <summary>
         /// Verwendete Ressourcen bereinigen.
         /// </summary>
         /// <param name="disposing">True, wenn verwaltete Ressourcen gelöscht werden sollen; andernfalls False.</param>
@@ -48,8 +48,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
 
         #region Vom Komponenten-Designer generierter Code
 
-        /// <summary> 
-        /// Erforderliche Methode für die Designerunterstützung. 
+        /// <summary>
+        /// Erforderliche Methode für die Designerunterstützung.
         /// Der Inhalt der Methode darf nicht mit dem Code-Editor geändert werden.
         /// </summary>
         private void InitializeComponent()
@@ -92,6 +92,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             networkInformationPanel = new FlowLayoutPanel();
             lblNetworkInterfaces = new Label();
             lblPort = new Label();
+            folderHeader = new Panel();
+            lblFolders = new Label();
+            btnCreateFolderHeader = new PictureButton();
             foldersContextMenu.SuspendLayout();
             actionButtonContextMenu.SuspendLayout();
             ((ISupportInitialize)btnAddProfile).BeginInit();
@@ -101,165 +104,172 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             ((ISupportInitialize)buttonSpacing).BeginInit();
             ((ISupportInitialize)cornerRadius).BeginInit();
             ((ISupportInitialize)btnEditProfile).BeginInit();
+            ((ISupportInitialize)btnCreateFolderHeader).BeginInit();
             panel1.SuspendLayout();
             networkInformationPanel.SuspendLayout();
+            folderHeader.SuspendLayout();
             SuspendLayout();
-            // 
+            //
             // foldersView
-            // 
+            //
             foldersView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
-            foldersView.BackColor = Color.FromArgb(45, 45, 45);
+            foldersView.BackColor = Colors.Surface;
             foldersView.BorderStyle = BorderStyle.None;
+            foldersView.DrawMode = TreeViewDrawMode.OwnerDrawAll;
             foldersView.Font = new Font("Tahoma", 11.25F);
-            foldersView.ForeColor = Color.White;
+            foldersView.ForeColor = Color.FromArgb(220, 220, 220);
             foldersView.FullRowSelect = true;
-            foldersView.ItemHeight = 26;
-            foldersView.LineColor = Color.White;
-            foldersView.Location = new Point(0, 0);
+            foldersView.HotTracking = true;
+            foldersView.ItemHeight = 30;
+            foldersView.Location = new Point(0, 36);
             foldersView.Margin = new Padding(0);
             foldersView.Name = "foldersView";
             foldersView.PathSeparator = "/";
-            foldersView.Size = new Size(227, 390);
+            foldersView.ShowLines = false;
+            foldersView.ShowPlusMinus = false;
+            foldersView.ShowRootLines = false;
+            foldersView.Size = new Size(227, 354);
             foldersView.TabIndex = 6;
             foldersView.AfterSelect += FoldersView_AfterSelect;
+            foldersView.DrawNode += FoldersView_DrawNode;
             foldersView.MouseDown += FoldersView_MouseDown;
-            // 
+            //
             // buttonPanel
-            // 
+            //
             buttonPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             buttonPanel.Location = new Point(237, 49);
             buttonPanel.Margin = new Padding(10);
             buttonPanel.Name = "buttonPanel";
             buttonPanel.Size = new Size(734, 507);
             buttonPanel.TabIndex = 5;
-            // 
+            //
             // actionButtonContextMenuItemEdit
-            // 
+            //
             actionButtonContextMenuItemEdit.ForeColor = Color.White;
             actionButtonContextMenuItemEdit.Name = "actionButtonContextMenuItemEdit";
             actionButtonContextMenuItemEdit.Size = new Size(330, 28);
             actionButtonContextMenuItemEdit.Text = "Edit";
             actionButtonContextMenuItemEdit.Click += ContextMenuEditItemClick;
-            // 
+            //
             // actionButtonContextMenuItemDelete
-            // 
+            //
             actionButtonContextMenuItemDelete.ForeColor = Color.White;
             actionButtonContextMenuItemDelete.Name = "actionButtonContextMenuItemDelete";
             actionButtonContextMenuItemDelete.Size = new Size(330, 28);
             actionButtonContextMenuItemDelete.Text = "Delete";
             actionButtonContextMenuItemDelete.Click += ContextMenuDeleteItemClick;
-            // 
+            //
             // foldersContextMenuNew
-            // 
+            //
             foldersContextMenuNew.ForeColor = Color.White;
             foldersContextMenuNew.Name = "foldersContextMenuNew";
             foldersContextMenuNew.Size = new Size(146, 28);
             foldersContextMenuNew.Text = "New folder";
             foldersContextMenuNew.Click += BtnCreateFolder_Click;
-            // 
+            //
             // foldersContextMenuEdit
-            // 
+            //
             foldersContextMenuEdit.ForeColor = Color.White;
             foldersContextMenuEdit.Name = "foldersContextMenuEdit";
             foldersContextMenuEdit.Size = new Size(146, 28);
             foldersContextMenuEdit.Text = "Edit";
             foldersContextMenuEdit.Click += BtnRenameFolder_Click;
-            // 
+            //
             // foldersContextMenuDelete
-            // 
+            //
             foldersContextMenuDelete.ForeColor = Color.White;
             foldersContextMenuDelete.Name = "foldersContextMenuDelete";
             foldersContextMenuDelete.Size = new Size(146, 28);
             foldersContextMenuDelete.Text = "Delete";
             foldersContextMenuDelete.Click += BtnDeleteFolder_Click;
-            // 
+            //
             // foldersContextMenu
-            // 
-            foldersContextMenu.BackColor = Color.FromArgb(55, 55, 55);
+            //
+            foldersContextMenu.BackColor = Colors.Surface2;
             foldersContextMenu.Font = new Font("Tahoma", 14.25F);
             foldersContextMenu.Items.AddRange(new ToolStripItem[] { foldersContextMenuNew, foldersContextMenuEdit, foldersContextMenuDelete });
             foldersContextMenu.Name = "foldersContextMenu";
             foldersContextMenu.ShowImageMargin = false;
             foldersContextMenu.Size = new Size(147, 88);
-            // 
+            //
             // actionButtonContextMenu
-            // 
-            actionButtonContextMenu.BackColor = Color.FromArgb(55, 55, 55);
+            //
+            actionButtonContextMenu.BackColor = Colors.Surface2;
             actionButtonContextMenu.Font = new Font("Tahoma", 14.25F);
             actionButtonContextMenu.Items.AddRange(new ToolStripItem[] { actionButtonContextMenuItemEdit, toolStripSeparator2, actionButtonContextMenuItemSimulatePress, actionButtonContextMenuItemSimulateRelease, actionButtonContextMenuItemSimulateLongPress, actionButtonContextMenuItemSimulateLongPressRelease, toolStripSeparator3, actionButtonContextMenuItemCopy, actionButtonContextMenuItemPaste, toolStripSeparator1, actionButtonContextMenuItemDelete });
             actionButtonContextMenu.Name = "actionButtonContextMenu";
             actionButtonContextMenu.ShowImageMargin = false;
             actionButtonContextMenu.Size = new Size(331, 246);
             actionButtonContextMenu.Opening += ActionButtonContextMenuOpened;
-            // 
+            //
             // toolStripSeparator2
-            // 
+            //
             toolStripSeparator2.Name = "toolStripSeparator2";
             toolStripSeparator2.Size = new Size(327, 6);
-            // 
+            //
             // actionButtonContextMenuItemSimulatePress
-            // 
+            //
             actionButtonContextMenuItemSimulatePress.ForeColor = Color.White;
             actionButtonContextMenuItemSimulatePress.Name = "actionButtonContextMenuItemSimulatePress";
             actionButtonContextMenuItemSimulatePress.Size = new Size(330, 28);
             actionButtonContextMenuItemSimulatePress.Text = "Simulate \"On press\"";
             actionButtonContextMenuItemSimulatePress.Click += ActionButtonContextMenuItemSimulatePress_Click;
-            // 
+            //
             // actionButtonContextMenuItemSimulateRelease
-            // 
+            //
             actionButtonContextMenuItemSimulateRelease.ForeColor = Color.White;
             actionButtonContextMenuItemSimulateRelease.Name = "actionButtonContextMenuItemSimulateRelease";
             actionButtonContextMenuItemSimulateRelease.Size = new Size(330, 28);
             actionButtonContextMenuItemSimulateRelease.Text = "Simulate \"On release\"";
             actionButtonContextMenuItemSimulateRelease.Click += ActionButtonContextMenuItemSimulateRelease_Click;
-            // 
+            //
             // actionButtonContextMenuItemSimulateLongPress
-            // 
+            //
             actionButtonContextMenuItemSimulateLongPress.ForeColor = Color.White;
             actionButtonContextMenuItemSimulateLongPress.Name = "actionButtonContextMenuItemSimulateLongPress";
             actionButtonContextMenuItemSimulateLongPress.Size = new Size(330, 28);
             actionButtonContextMenuItemSimulateLongPress.Text = "Simulate \"On long press\"";
             actionButtonContextMenuItemSimulateLongPress.Click += ActionButtonContextMenuItemSimulateLongPress_Click;
-            // 
+            //
             // actionButtonContextMenuItemSimulateLongPressRelease
-            // 
+            //
             actionButtonContextMenuItemSimulateLongPressRelease.ForeColor = Color.White;
             actionButtonContextMenuItemSimulateLongPressRelease.Name = "actionButtonContextMenuItemSimulateLongPressRelease";
             actionButtonContextMenuItemSimulateLongPressRelease.Size = new Size(330, 28);
             actionButtonContextMenuItemSimulateLongPressRelease.Text = "Simulate \"On long press release\"";
             actionButtonContextMenuItemSimulateLongPressRelease.Click += ActionButtonContextMenuItemSimulateLongPressRelease_Click;
-            // 
+            //
             // toolStripSeparator3
-            // 
+            //
             toolStripSeparator3.Name = "toolStripSeparator3";
             toolStripSeparator3.Size = new Size(327, 6);
-            // 
+            //
             // actionButtonContextMenuItemCopy
-            // 
+            //
             actionButtonContextMenuItemCopy.ForeColor = Color.White;
             actionButtonContextMenuItemCopy.Name = "actionButtonContextMenuItemCopy";
             actionButtonContextMenuItemCopy.Size = new Size(330, 28);
             actionButtonContextMenuItemCopy.Text = "Copy";
             actionButtonContextMenuItemCopy.Click += ActionButtonContextMenuItemCopy_Click;
-            // 
+            //
             // actionButtonContextMenuItemPaste
-            // 
+            //
             actionButtonContextMenuItemPaste.Enabled = false;
             actionButtonContextMenuItemPaste.ForeColor = Color.White;
             actionButtonContextMenuItemPaste.Name = "actionButtonContextMenuItemPaste";
             actionButtonContextMenuItemPaste.Size = new Size(330, 28);
             actionButtonContextMenuItemPaste.Text = "Paste";
             actionButtonContextMenuItemPaste.Click += ActionButtonContextMenuItemPaste_Click;
-            // 
+            //
             // toolStripSeparator1
-            // 
+            //
             toolStripSeparator1.Name = "toolStripSeparator1";
             toolStripSeparator1.Size = new Size(327, 6);
-            // 
+            //
             // boxProfiles
-            // 
+            //
             boxProfiles.Anchor = AnchorStyles.Top;
-            boxProfiles.BackColor = Color.FromArgb(65, 65, 65);
+            boxProfiles.BackColor = Colors.Surface3;
             boxProfiles.Cursor = Cursors.Hand;
             boxProfiles.DropDownStyle = ComboBoxStyle.DropDownList;
             boxProfiles.Font = new Font("Tahoma", 11.25F);
@@ -273,9 +283,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             boxProfiles.Size = new Size(285, 30);
             boxProfiles.TabIndex = 10;
             boxProfiles.SelectedIndexChanged += BoxProfiles_SelectedIndexChanged;
-            // 
+            //
             // btnAddProfile
-            // 
+            //
             btnAddProfile.Anchor = AnchorStyles.Top;
             btnAddProfile.BackColor = Color.Transparent;
             btnAddProfile.BackgroundImage = Resources.Create_Normal;
@@ -291,9 +301,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnAddProfile.TabStop = false;
             btnAddProfile.Text = "+";
             btnAddProfile.Click += BtnAddProfile_Click;
-            // 
+            //
             // btnDeleteProfile
-            // 
+            //
             btnDeleteProfile.Anchor = AnchorStyles.Top;
             btnDeleteProfile.BackColor = Color.Transparent;
             btnDeleteProfile.BackgroundImage = Resources.Delete_Normal;
@@ -308,12 +318,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnDeleteProfile.TabIndex = 13;
             btnDeleteProfile.TabStop = false;
             btnDeleteProfile.Click += BtnDeleteProfile_Click;
-            // 
+            //
             // buttonColumns
-            // 
+            //
             buttonColumns.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            buttonColumns.BackColor = Color.FromArgb(55, 55, 55);
-            buttonColumns.BorderStyle = BorderStyle.FixedSingle;
+            buttonColumns.BackColor = Colors.Surface2;
+            buttonColumns.BorderStyle = BorderStyle.None;
             buttonColumns.Font = new Font("Tahoma", 11.25F);
             buttonColumns.ForeColor = Color.White;
             buttonColumns.Location = new Point(9, 438);
@@ -323,12 +333,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             buttonColumns.TabIndex = 14;
             buttonColumns.Value = new decimal(new int[] { 5, 0, 0, 0 });
             buttonColumns.ValueChanged += ButtonSettingsChanged;
-            // 
+            //
             // buttonRows
-            // 
+            //
             buttonRows.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            buttonRows.BackColor = Color.FromArgb(55, 55, 55);
-            buttonRows.BorderStyle = BorderStyle.FixedSingle;
+            buttonRows.BackColor = Colors.Surface2;
+            buttonRows.BorderStyle = BorderStyle.None;
             buttonRows.Font = new Font("Tahoma", 11.25F);
             buttonRows.ForeColor = Color.White;
             buttonRows.Location = new Point(9, 406);
@@ -338,9 +348,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             buttonRows.TabIndex = 15;
             buttonRows.Value = new decimal(new int[] { 3, 0, 0, 0 });
             buttonRows.ValueChanged += ButtonSettingsChanged;
-            // 
+            //
             // lblColumns
-            // 
+            //
             lblColumns.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             lblColumns.BackColor = Color.Transparent;
             lblColumns.Font = new Font("Tahoma", 11.25F);
@@ -352,9 +362,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             lblColumns.Text = "Columns";
             lblColumns.TextAlign = ContentAlignment.MiddleLeft;
             lblColumns.UseMnemonic = false;
-            // 
+            //
             // lblRows
-            // 
+            //
             lblRows.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             lblRows.BackColor = Color.Transparent;
             lblRows.Font = new Font("Tahoma", 11.25F);
@@ -366,9 +376,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             lblRows.Text = "Rows";
             lblRows.TextAlign = ContentAlignment.MiddleLeft;
             lblRows.UseMnemonic = false;
-            // 
+            //
             // lblSpacing
-            // 
+            //
             lblSpacing.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             lblSpacing.BackColor = Color.Transparent;
             lblSpacing.Font = new Font("Tahoma", 11.25F);
@@ -380,12 +390,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             lblSpacing.Text = "Spacing";
             lblSpacing.TextAlign = ContentAlignment.MiddleLeft;
             lblSpacing.UseMnemonic = false;
-            // 
+            //
             // buttonSpacing
-            // 
+            //
             buttonSpacing.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            buttonSpacing.BackColor = Color.FromArgb(55, 55, 55);
-            buttonSpacing.BorderStyle = BorderStyle.FixedSingle;
+            buttonSpacing.BackColor = Colors.Surface2;
+            buttonSpacing.BorderStyle = BorderStyle.None;
             buttonSpacing.Font = new Font("Tahoma", 11.25F);
             buttonSpacing.ForeColor = Color.White;
             buttonSpacing.Location = new Point(9, 470);
@@ -395,9 +405,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             buttonSpacing.TabIndex = 18;
             buttonSpacing.Value = new decimal(new int[] { 10, 0, 0, 0 });
             buttonSpacing.ValueChanged += ButtonSettingsChanged;
-            // 
+            //
             // lblCornerRadius
-            // 
+            //
             lblCornerRadius.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             lblCornerRadius.BackColor = Color.Transparent;
             lblCornerRadius.Font = new Font("Tahoma", 11.25F);
@@ -409,12 +419,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             lblCornerRadius.Text = "Corner radius";
             lblCornerRadius.TextAlign = ContentAlignment.MiddleLeft;
             lblCornerRadius.UseMnemonic = false;
-            // 
+            //
             // cornerRadius
-            // 
+            //
             cornerRadius.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            cornerRadius.BackColor = Color.FromArgb(55, 55, 55);
-            cornerRadius.BorderStyle = BorderStyle.FixedSingle;
+            cornerRadius.BackColor = Colors.Surface2;
+            cornerRadius.BorderStyle = BorderStyle.None;
             cornerRadius.Font = new Font("Tahoma", 11.25F);
             cornerRadius.ForeColor = Color.White;
             cornerRadius.Location = new Point(9, 502);
@@ -423,9 +433,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             cornerRadius.TabIndex = 20;
             cornerRadius.Value = new decimal(new int[] { 40, 0, 0, 0 });
             cornerRadius.ValueChanged += ButtonSettingsChanged;
-            // 
+            //
             // checkButtonBackground
-            // 
+            //
             checkButtonBackground.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             checkButtonBackground.AutoSize = true;
             checkButtonBackground.BackColor = Color.Transparent;
@@ -441,9 +451,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             checkButtonBackground.UseMnemonic = false;
             checkButtonBackground.UseVisualStyleBackColor = false;
             checkButtonBackground.CheckedChanged += ButtonSettingsChanged;
-            // 
+            //
             // btnEditProfile
-            // 
+            //
             btnEditProfile.Anchor = AnchorStyles.Top;
             btnEditProfile.BackColor = Color.Transparent;
             btnEditProfile.BackgroundImage = Resources.Edit_Normal;
@@ -458,11 +468,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnEditProfile.TabIndex = 23;
             btnEditProfile.TabStop = false;
             btnEditProfile.Click += BtnEditProfile_Click;
-            // 
+            //
             // panel1
-            // 
+            //
             panel1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            panel1.BackColor = Color.FromArgb(45, 45, 45);
+            panel1.BackColor = Colors.Surface;
             panel1.Controls.Add(checkQrAndNetwork);
             panel1.Controls.Add(boxProfiles);
             panel1.Controls.Add(btnAddProfile);
@@ -473,9 +483,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             panel1.Name = "panel1";
             panel1.Size = new Size(904, 42);
             panel1.TabIndex = 24;
-            // 
+            //
             // checkQrAndNetwork
-            // 
+            //
             checkQrAndNetwork.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             checkQrAndNetwork.Appearance = Appearance.Button;
             checkQrAndNetwork.BackgroundImage = Resources.qrcode_custom;
@@ -495,20 +505,20 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             checkQrAndNetwork.Text = "\r\n";
             checkQrAndNetwork.UseVisualStyleBackColor = true;
             checkQrAndNetwork.CheckedChanged += checkQrAndNetwork_CheckedChanged;
-            // 
+            //
             // qrCodeBox
-            // 
+            //
             qrCodeBox.BackgroundImageLayout = ImageLayout.Stretch;
             qrCodeBox.Location = new Point(5, 5);
             qrCodeBox.Margin = new Padding(5);
             qrCodeBox.Name = "qrCodeBox";
             qrCodeBox.Size = new Size(140, 140);
             qrCodeBox.TabIndex = 44;
-            // 
+            //
             // networkInformationPanel
-            // 
+            //
             networkInformationPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
-            networkInformationPanel.BackColor = Color.FromArgb(45, 45, 45);
+            networkInformationPanel.BackColor = Colors.Surface;
             networkInformationPanel.Controls.Add(qrCodeBox);
             networkInformationPanel.Controls.Add(lblNetworkInterfaces);
             networkInformationPanel.Controls.Add(lblPort);
@@ -518,9 +528,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             networkInformationPanel.Name = "networkInformationPanel";
             networkInformationPanel.Size = new Size(150, 517);
             networkInformationPanel.TabIndex = 46;
-            // 
+            //
             // lblNetworkInterfaces
-            // 
+            //
             lblNetworkInterfaces.AutoSize = true;
             lblNetworkInterfaces.ForeColor = Color.White;
             lblNetworkInterfaces.Location = new Point(5, 155);
@@ -530,9 +540,9 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             lblNetworkInterfaces.Size = new Size(115, 38);
             lblNetworkInterfaces.TabIndex = 46;
             lblNetworkInterfaces.Text = "Network interfaces:\r\n- 127.0.0.1";
-            // 
+            //
             // lblPort
-            // 
+            //
             lblPort.AutoSize = true;
             lblPort.ForeColor = Color.White;
             lblPort.Location = new Point(5, 203);
@@ -542,12 +552,53 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             lblPort.Size = new Size(66, 24);
             lblPort.TabIndex = 47;
             lblPort.Text = "Port: 8191";
-            // 
+            //
+            // folderHeader
+            //
+            folderHeader.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            folderHeader.BackColor = Colors.Surface;
+            folderHeader.Controls.Add(lblFolders);
+            folderHeader.Controls.Add(btnCreateFolderHeader);
+            folderHeader.Location = new Point(0, 0);
+            folderHeader.Margin = new Padding(0);
+            folderHeader.Name = "folderHeader";
+            folderHeader.Size = new Size(227, 36);
+            folderHeader.TabIndex = 50;
+            //
+            // lblFolders
+            //
+            lblFolders.BackColor = Color.Transparent;
+            lblFolders.Font = new Font("Tahoma", 9F);
+            lblFolders.ForeColor = Color.FromArgb(160, 160, 160);
+            lblFolders.Location = new Point(12, 0);
+            lblFolders.Name = "lblFolders";
+            lblFolders.Size = new Size(160, 36);
+            lblFolders.TabIndex = 0;
+            lblFolders.Text = "Folders";
+            lblFolders.TextAlign = ContentAlignment.MiddleLeft;
+            lblFolders.UseMnemonic = false;
+            //
+            // btnCreateFolderHeader
+            //
+            btnCreateFolderHeader.BackColor = Color.Transparent;
+            btnCreateFolderHeader.BackgroundImage = Resources.Create_Normal;
+            btnCreateFolderHeader.BackgroundImageLayout = ImageLayout.Stretch;
+            btnCreateFolderHeader.Cursor = Cursors.Hand;
+            btnCreateFolderHeader.Font = new Font("Tahoma", 9.75F);
+            btnCreateFolderHeader.ForeColor = Color.White;
+            btnCreateFolderHeader.HoverImage = Resources.Create_Hover;
+            btnCreateFolderHeader.Location = new Point(196, 6);
+            btnCreateFolderHeader.Name = "btnCreateFolderHeader";
+            btnCreateFolderHeader.Size = new Size(24, 24);
+            btnCreateFolderHeader.TabIndex = 1;
+            btnCreateFolderHeader.TabStop = false;
+            btnCreateFolderHeader.Click += BtnCreateFolder_Click;
+            //
             // DeckView
-            // 
+            //
             AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
-            BackColor = Color.FromArgb(34, 34, 34);
+            BackColor = Colors.Background;
             Controls.Add(networkInformationPanel);
             Controls.Add(panel1);
             Controls.Add(checkButtonBackground);
@@ -559,6 +610,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             Controls.Add(lblColumns);
             Controls.Add(buttonRows);
             Controls.Add(buttonColumns);
+            Controls.Add(folderHeader);
             Controls.Add(foldersView);
             Controls.Add(buttonPanel);
             Font = new Font("Tahoma", 9F);
@@ -574,9 +626,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             ((ISupportInitialize)buttonSpacing).EndInit();
             ((ISupportInitialize)cornerRadius).EndInit();
             ((ISupportInitialize)btnEditProfile).EndInit();
+            ((ISupportInitialize)btnCreateFolderHeader).EndInit();
             panel1.ResumeLayout(false);
             networkInformationPanel.ResumeLayout(false);
             networkInformationPanel.PerformLayout();
+            folderHeader.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -622,5 +676,8 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private CheckBox checkQrAndNetwork;
         private Label lblNetworkInterfaces;
         private Label lblPort;
+        private Panel folderHeader;
+        private Label lblFolders;
+        private PictureButton btnCreateFolderHeader;
     }
 }
