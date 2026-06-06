@@ -15,18 +15,30 @@ public class DeviceManager
 {
 
     private static List<MacroDeckDevice> _macroDeckDevices = new();
+    private static readonly object _saveLock = new();
 
     public static event EventHandler OnDevicesChange;
 
     public static void LoadKnownDevices()
     {
-        if (File.Exists(ApplicationPaths.DevicesFilePath))
+        if (!File.Exists(ApplicationPaths.DevicesFilePath))
+            return;
+
+        try
         {
-            _macroDeckDevices = JsonConvert.DeserializeObject<List<MacroDeckDevice>>(File.ReadAllText(ApplicationPaths.DevicesFilePath), new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-                NullValueHandling = NullValueHandling.Ignore,
-            })!;
+            _macroDeckDevices = JsonConvert.DeserializeObject<List<MacroDeckDevice>>(
+                File.ReadAllText(ApplicationPaths.DevicesFilePath),
+                new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.Auto,
+                    NullValueHandling = NullValueHandling.Ignore,
+                })!;
+        }
+        catch (Exception ex)
+        {
+            MacroDeckLogger.Error("devices.json is corrupted and will be reset: " + ex.Message);
+            try { File.Delete(ApplicationPaths.DevicesFilePath); } catch { }
+            _macroDeckDevices = new();
         }
     }
 
@@ -40,10 +52,15 @@ public class DeviceManager
 
         try
         {
-            using (var sw = new StreamWriter(ApplicationPaths.DevicesFilePath))
-            using (JsonWriter writer = new JsonTextWriter(sw))
+            var tempPath = ApplicationPaths.DevicesFilePath + ".tmp";
+            lock (_saveLock)
             {
-                serializer.Serialize(writer, _macroDeckDevices);
+                using (var sw = new StreamWriter(tempPath))
+                using (JsonWriter writer = new JsonTextWriter(sw))
+                {
+                    serializer.Serialize(writer, _macroDeckDevices);
+                }
+                File.Move(tempPath, ApplicationPaths.DevicesFilePath, overwrite: true);
             }
 
             OnDevicesChange?.Invoke(null, EventArgs.Empty);
