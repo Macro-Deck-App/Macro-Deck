@@ -49,11 +49,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             checkEnableAdb = new CheckBox();
             label5 = new Label();
             btnApplySslConfiguration = new ButtonPrimary();
-            btnBrowseCertificatePath = new ButtonPrimary();
+            btnGenerateCertificate = new ButtonPrimary();
             label4 = new Label();
-            certificatePassword = new RoundedTextBox();
+            keyPemTextBox = new RoundedTextBox();
             label3 = new Label();
-            certificatePath = new RoundedTextBox();
+            certPemTextBox = new RoundedTextBox();
             checkEnableSsl = new CheckBox();
             labelSsl = new Label();
             btnChangePort = new ButtonPrimary();
@@ -204,16 +204,17 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             // tabConnection
             // 
+            tabConnection.AutoScroll = true;
             tabConnection.BackColor = Color.FromArgb(45, 45, 45);
             tabConnection.Controls.Add(checkAutoStartUsb);
             tabConnection.Controls.Add(checkEnableAdb);
             tabConnection.Controls.Add(label5);
             tabConnection.Controls.Add(btnApplySslConfiguration);
-            tabConnection.Controls.Add(btnBrowseCertificatePath);
+            tabConnection.Controls.Add(btnGenerateCertificate);
             tabConnection.Controls.Add(label4);
-            tabConnection.Controls.Add(certificatePassword);
+            tabConnection.Controls.Add(keyPemTextBox);
             tabConnection.Controls.Add(label3);
-            tabConnection.Controls.Add(certificatePath);
+            tabConnection.Controls.Add(certPemTextBox);
             tabConnection.Controls.Add(checkEnableSsl);
             tabConnection.Controls.Add(labelSsl);
             tabConnection.Controls.Add(btnChangePort);
@@ -232,7 +233,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             checkAutoStartUsb.AutoSize = true;
             checkAutoStartUsb.Font = new Font("Tahoma", 12F);
-            checkAutoStartUsb.Location = new Point(14, 395);
+            checkAutoStartUsb.Location = new Point(14, 560);
             checkAutoStartUsb.Name = "checkAutoStartUsb";
             checkAutoStartUsb.Size = new Size(532, 23);
             checkAutoStartUsb.TabIndex = 27;
@@ -244,7 +245,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             // 
             checkEnableAdb.AutoSize = true;
             checkEnableAdb.Font = new Font("Tahoma", 12F);
-            checkEnableAdb.Location = new Point(14, 366);
+            checkEnableAdb.Location = new Point(14, 534);
             checkEnableAdb.Name = "checkEnableAdb";
             checkEnableAdb.Size = new Size(520, 23);
             checkEnableAdb.TabIndex = 26;
@@ -257,7 +258,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             label5.AutoSize = true;
             label5.Font = new Font("Tahoma", 14.25F);
             label5.ForeColor = Color.Gray;
-            label5.Location = new Point(5, 340);
+            label5.Location = new Point(5, 510);
             label5.Name = "label5";
             label5.Size = new Size(44, 23);
             label5.TabIndex = 25;
@@ -274,7 +275,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnApplySslConfiguration.ForeColor = Color.White;
             btnApplySslConfiguration.HoverColor = Color.FromArgb(0, 89, 184);
             btnApplySslConfiguration.Icon = null;
-            btnApplySslConfiguration.Location = new Point(410, 294);
+            btnApplySslConfiguration.Location = new Point(12, 464);
             btnApplySslConfiguration.Name = "btnApplySslConfiguration";
             btnApplySslConfiguration.Progress = 0;
             btnApplySslConfiguration.ProgressColor = Color.FromArgb(0, 46, 94);
@@ -286,91 +287,91 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
             btnApplySslConfiguration.UseWindowsAccentColor = true;
             btnApplySslConfiguration.WriteProgress = true;
             btnApplySslConfiguration.Click += BtnApplySslConfiguration_Click;
-            // 
-            // btnBrowseCertificatePath
-            // 
-            btnBrowseCertificatePath.BorderRadius = 8;
-            btnBrowseCertificatePath.Cursor = Cursors.Hand;
-            btnBrowseCertificatePath.FlatAppearance.BorderSize = 0;
-            btnBrowseCertificatePath.FlatStyle = FlatStyle.Flat;
-            btnBrowseCertificatePath.Font = new Font("Tahoma", 9.75F);
-            btnBrowseCertificatePath.ForeColor = Color.White;
-            btnBrowseCertificatePath.HoverColor = Color.FromArgb(0, 89, 184);
-            btnBrowseCertificatePath.Icon = null;
-            btnBrowseCertificatePath.Location = new Point(570, 222);
-            btnBrowseCertificatePath.Name = "btnBrowseCertificatePath";
-            btnBrowseCertificatePath.Progress = 0;
-            btnBrowseCertificatePath.ProgressColor = Color.FromArgb(0, 46, 94);
-            btnBrowseCertificatePath.Size = new Size(46, 30);
-            btnBrowseCertificatePath.TabIndex = 23;
-            btnBrowseCertificatePath.Text = "...";
-            btnBrowseCertificatePath.UseMnemonic = false;
-            btnBrowseCertificatePath.UseVisualStyleBackColor = false;
-            btnBrowseCertificatePath.UseWindowsAccentColor = true;
-            btnBrowseCertificatePath.WriteProgress = true;
-            btnBrowseCertificatePath.Click += BtnBrowseCertificatePath_Click;
+            //
+            // btnGenerateCertificate
+            //
+            btnGenerateCertificate.BorderRadius = 8;
+            btnGenerateCertificate.Cursor = Cursors.Hand;
+            btnGenerateCertificate.FlatAppearance.BorderSize = 0;
+            btnGenerateCertificate.FlatStyle = FlatStyle.Flat;
+            btnGenerateCertificate.Font = new Font("Tahoma", 9.75F);
+            btnGenerateCertificate.ForeColor = Color.White;
+            btnGenerateCertificate.HoverColor = Color.FromArgb(0, 89, 184);
+            btnGenerateCertificate.Icon = null;
+            btnGenerateCertificate.Location = new Point(200, 190);
+            btnGenerateCertificate.Name = "btnGenerateCertificate";
+            btnGenerateCertificate.Progress = 0;
+            btnGenerateCertificate.ProgressColor = Color.FromArgb(0, 46, 94);
+            btnGenerateCertificate.Size = new Size(220, 28);
+            btnGenerateCertificate.TabIndex = 23;
+            btnGenerateCertificate.Text = "Generate new certificate";
+            btnGenerateCertificate.UseMnemonic = false;
+            btnGenerateCertificate.UseVisualStyleBackColor = false;
+            btnGenerateCertificate.UseWindowsAccentColor = true;
+            btnGenerateCertificate.WriteProgress = true;
+            btnGenerateCertificate.Click += BtnGenerateCertificate_Click;
             // 
             // label4
             // 
             label4.Font = new Font("Tahoma", 11.25F);
-            label4.Location = new Point(17, 258);
+            label4.Location = new Point(12, 344);
             label4.Name = "label4";
-            label4.Size = new Size(159, 30);
+            label4.Size = new Size(159, 23);
             label4.TabIndex = 22;
-            label4.Text = "Certificate password:";
+            label4.Text = "Private Key (PEM):";
             label4.TextAlign = ContentAlignment.MiddleLeft;
             label4.UseMnemonic = false;
-            // 
-            // certificatePassword
-            // 
-            certificatePassword.BackColor = Color.FromArgb(65, 65, 65);
-            certificatePassword.Font = new Font("Tahoma", 12F);
-            certificatePassword.Icon = null;
-            certificatePassword.Location = new Point(182, 258);
-            certificatePassword.MaxCharacters = 32767;
-            certificatePassword.Multiline = false;
-            certificatePassword.Name = "certificatePassword";
-            certificatePassword.Padding = new Padding(8, 5, 8, 5);
-            certificatePassword.PasswordChar = true;
-            certificatePassword.PlaceHolderColor = Color.Gray;
-            certificatePassword.PlaceHolderText = "";
-            certificatePassword.ReadOnly = false;
-            certificatePassword.ScrollBars = ScrollBars.None;
-            certificatePassword.SelectionStart = 0;
-            certificatePassword.Size = new Size(382, 30);
-            certificatePassword.TabIndex = 21;
-            certificatePassword.TextAlignment = HorizontalAlignment.Left;
+            //
+            // keyPemTextBox
+            //
+            keyPemTextBox.BackColor = Color.FromArgb(65, 65, 65);
+            keyPemTextBox.Font = new Font("Tahoma", 9F);
+            keyPemTextBox.Icon = null;
+            keyPemTextBox.Location = new Point(12, 368);
+            keyPemTextBox.MaxCharacters = 0;
+            keyPemTextBox.Multiline = true;
+            keyPemTextBox.Name = "keyPemTextBox";
+            keyPemTextBox.Padding = new Padding(6, 4, 6, 4);
+            keyPemTextBox.PasswordChar = false;
+            keyPemTextBox.PlaceHolderColor = Color.Gray;
+            keyPemTextBox.PlaceHolderText = "-----BEGIN PRIVATE KEY-----";
+            keyPemTextBox.ReadOnly = false;
+            keyPemTextBox.ScrollBars = ScrollBars.Vertical;
+            keyPemTextBox.SelectionStart = 0;
+            keyPemTextBox.Size = new Size(600, 90);
+            keyPemTextBox.TabIndex = 21;
+            keyPemTextBox.TextAlignment = HorizontalAlignment.Left;
             // 
             // label3
             // 
             label3.Font = new Font("Tahoma", 11.25F);
-            label3.Location = new Point(17, 222);
+            label3.Location = new Point(12, 224);
             label3.Name = "label3";
-            label3.Size = new Size(159, 30);
+            label3.Size = new Size(159, 23);
             label3.TabIndex = 20;
-            label3.Text = "Certificate path:";
+            label3.Text = "Certificate (PEM):";
             label3.TextAlign = ContentAlignment.MiddleLeft;
             label3.UseMnemonic = false;
-            // 
-            // certificatePath
-            // 
-            certificatePath.BackColor = Color.FromArgb(65, 65, 65);
-            certificatePath.Font = new Font("Tahoma", 12F);
-            certificatePath.Icon = null;
-            certificatePath.Location = new Point(182, 222);
-            certificatePath.MaxCharacters = 32767;
-            certificatePath.Multiline = false;
-            certificatePath.Name = "certificatePath";
-            certificatePath.Padding = new Padding(8, 5, 8, 5);
-            certificatePath.PasswordChar = false;
-            certificatePath.PlaceHolderColor = Color.Gray;
-            certificatePath.PlaceHolderText = "";
-            certificatePath.ReadOnly = false;
-            certificatePath.ScrollBars = ScrollBars.None;
-            certificatePath.SelectionStart = 0;
-            certificatePath.Size = new Size(382, 30);
-            certificatePath.TabIndex = 19;
-            certificatePath.TextAlignment = HorizontalAlignment.Left;
+            //
+            // certPemTextBox
+            //
+            certPemTextBox.BackColor = Color.FromArgb(65, 65, 65);
+            certPemTextBox.Font = new Font("Tahoma", 9F);
+            certPemTextBox.Icon = null;
+            certPemTextBox.Location = new Point(12, 248);
+            certPemTextBox.MaxCharacters = 0;
+            certPemTextBox.Multiline = true;
+            certPemTextBox.Name = "certPemTextBox";
+            certPemTextBox.Padding = new Padding(6, 4, 6, 4);
+            certPemTextBox.PasswordChar = false;
+            certPemTextBox.PlaceHolderColor = Color.Gray;
+            certPemTextBox.PlaceHolderText = "-----BEGIN CERTIFICATE-----";
+            certPemTextBox.ReadOnly = false;
+            certPemTextBox.ScrollBars = ScrollBars.Vertical;
+            certPemTextBox.SelectionStart = 0;
+            certPemTextBox.Size = new Size(600, 90);
+            certPemTextBox.TabIndex = 19;
+            certPemTextBox.TextAlignment = HorizontalAlignment.Left;
             // 
             // checkEnableSsl
             // 
@@ -894,11 +895,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowContents
         private PictureButton btnGitHub;
         private Label label2;
         private ButtonPrimary btnApplySslConfiguration;
-        private ButtonPrimary btnBrowseCertificatePath;
+        private ButtonPrimary btnGenerateCertificate;
         private Label label4;
-        private RoundedTextBox certificatePassword;
+        private RoundedTextBox keyPemTextBox;
         private Label label3;
-        private RoundedTextBox certificatePath;
+        private RoundedTextBox certPemTextBox;
         private CheckBox checkEnableSsl;
         private Label labelSsl;
         private CheckBox checkEnableAdb;

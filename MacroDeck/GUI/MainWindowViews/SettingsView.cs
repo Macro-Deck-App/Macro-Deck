@@ -11,6 +11,7 @@ using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
 using SuchByte.MacroDeck.Services;
 using SuchByte.MacroDeck.Startup;
+using SuchByte.MacroDeck.Utils;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
 namespace SuchByte.MacroDeck.GUI.MainWindowContents;
@@ -105,8 +106,10 @@ public partial class SettingsView : UserControl
     {
         port.Value = MacroDeck.Configuration.HostPort;
         checkEnableSsl.Checked = MacroDeck.Configuration.EnableSsl;
-        certificatePath.Text = MacroDeck.Configuration.SslCertificatePath;
-        certificatePassword.Text = MacroDeck.Configuration.SslCertificatePassword;
+        certPemTextBox.Text = MacroDeck.Configuration.SslCertificatePem ?? string.Empty;
+        keyPemTextBox.Text = string.IsNullOrEmpty(MacroDeck.Configuration.SslCertificateKeyPemEncrypted)
+            ? string.Empty
+            : "(Key saved – paste new key to replace)";
         checkEnableAdb.Checked = MacroDeck.Configuration.EnableAdbServer;
         checkAutoStartUsb.Checked = MacroDeck.Configuration.EnableAdbAutoStartApp;
         checkEnableAdb.CheckedChanged += CheckEnableAdb_CheckedChanged;
@@ -299,37 +302,55 @@ public partial class SettingsView : UserControl
 
     private void BtnApplySslConfiguration_Click(object sender, EventArgs e)
     {
-        if (checkEnableSsl.Checked
-            && (string.IsNullOrWhiteSpace(certificatePath.Text) || !File.Exists(certificatePath.Text)))
+        if (checkEnableSsl.Checked)
         {
-            var messageBox = new MessageBox();
-            messageBox.ShowDialog(
-                "SSL Certificate not found",
-                "You enabled SSL but don't provide a valid certificate path.",
-                MessageBoxButtons.OK);
-            return;
+            var certPem = certPemTextBox.Text.Trim();
+            var keyPemInput = keyPemTextBox.Text.Trim();
+            var isKeyPlaceholder = keyPemInput.StartsWith("(Key saved");
+
+            if (string.IsNullOrWhiteSpace(certPem))
+            {
+                using var msgBox = new MessageBox();
+                msgBox.ShowDialog("SSL Configuration", "Please provide a certificate in PEM format.", MessageBoxButtons.OK);
+                return;
+            }
+
+            if (!isKeyPlaceholder)
+            {
+                if (!SslCertificateService.TryValidate(certPem, keyPemInput, out var validationError))
+                {
+                    using var msgBox = new MessageBox();
+                    msgBox.ShowDialog("Invalid SSL Certificate", validationError ?? "Certificate and key do not match.", MessageBoxButtons.OK);
+                    return;
+                }
+                SslCertificateService.SaveCertificate(certPem, keyPemInput);
+            }
+            else
+            {
+                MacroDeck.Configuration.SslCertificatePem = certPem;
+                MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
+            }
         }
 
         MacroDeck.Configuration.EnableSsl = checkEnableSsl.Checked;
-        MacroDeck.Configuration.SslCertificatePath = certificatePath.Text;
-        MacroDeck.Configuration.SslCertificatePassword = certificatePassword.Text;
         MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
         MacroDeck.RequestRestart();
     }
 
-    private void BtnBrowseCertificatePath_Click(object sender, EventArgs e)
+    private void BtnGenerateCertificate_Click(object sender, EventArgs e)
     {
-        using var openFileDialog = new OpenFileDialog
+        btnGenerateCertificate.Spinner = true;
+        btnGenerateCertificate.Enabled = false;
+        Task.Run(() =>
         {
-            Title = "Select certificate",
-            CheckFileExists = true,
-            CheckPathExists = true,
-            DefaultExt = ".pfx",
-            Filter = "Personal Information Exchange File (*.pfx)|*.pfx",
-        };
-        if (openFileDialog.ShowDialog() == DialogResult.OK)
-        {
-            certificatePath.Text = openFileDialog.FileName;
-        }
+            var (certPem, keyPem) = SelfSignedCertificateGenerator.Generate();
+            Invoke(() =>
+            {
+                certPemTextBox.Text = certPem;
+                keyPemTextBox.Text = keyPem;
+                btnGenerateCertificate.Spinner = false;
+                btnGenerateCertificate.Enabled = true;
+            });
+        });
     }
 }
