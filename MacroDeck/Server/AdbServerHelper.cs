@@ -58,12 +58,12 @@ public class AdbServerHelper
         }
 
         var device = await GetDevice(adbClient, serial);
-        if (!device.HasValue)
+        if (device is null)
         {
             return;
         }
 
-        await action(adbClient, device.Value);
+        await action(adbClient, device);
     }
 
     private static async Task<DeviceData?> GetDevice(AdbClient adbDeviceClient, string serial)
