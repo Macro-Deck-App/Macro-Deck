@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Reflection;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.ActionButton;
 using SuchByte.MacroDeck.Enums;
@@ -42,6 +44,9 @@ public partial class DeckView : UserControl
         lblNetworkInterfaces.Text = GetNetworkInterfacesString();
         lblPort.Text = $"Port: {MacroDeck.Configuration.HostPort}";
         _mainWindow = mainWindow;
+        typeof(TreeView)
+            .GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?.SetValue(foldersView, true);
         HandleCreated += DeckView_HandleCreated;
         HandleDestroyed += DeckView_HandleDestroyed;
     }
@@ -493,7 +498,6 @@ public partial class DeckView : UserControl
 
     private void FoldersView_MouseDown(object sender, MouseEventArgs e)
     {
-
         switch (e.Button)
         {
             case MouseButtons.Right:
@@ -501,6 +505,70 @@ public partial class DeckView : UserControl
                 if (foldersView.SelectedNode == null) foldersView.SelectedNode = foldersView.Nodes[0];
                 foldersContextMenu.Show(foldersView, foldersView.PointToClient(MousePosition));
                 break;
+            case MouseButtons.Left:
+                var node = foldersView.GetNodeAt(e.X, e.Y);
+                if (node != null && node.Nodes.Count > 0)
+                {
+                    int triangleStart = node.Level * foldersView.Indent + 6;
+                    if (e.X >= triangleStart && e.X <= triangleStart + 16)
+                        node.Toggle();
+                }
+                break;
+        }
+    }
+
+    private void FoldersView_DrawNode(object sender, DrawTreeNodeEventArgs e)
+    {
+        if (e.Bounds.Width == 0 || e.Bounds.Height == 0)
+        {
+            e.DrawDefault = true;
+            return;
+        }
+
+        e.DrawDefault = false;
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+
+        bool selected = (e.State & TreeNodeStates.Selected) != 0;
+        bool hot = (e.State & TreeNodeStates.Hot) != 0;
+
+        var rowRect = new Rectangle(0, e.Bounds.Y, foldersView.Width, e.Bounds.Height);
+        var rowBg = selected ? Colors.AccentColor : hot ? Colors.Surface3 : Colors.Surface;
+        using (var bgBrush = new SolidBrush(rowBg))
+            g.FillRectangle(bgBrush, rowRect);
+
+        int indentX = e.Node.Level * foldersView.Indent + 6;
+        if (e.Node.Nodes.Count > 0)
+        {
+            var triColor = selected ? Color.White : Color.FromArgb(160, 160, 160);
+            DrawExpandTriangle(g, indentX, e.Bounds.Y, e.Bounds.Height, e.Node.IsExpanded, triColor);
+        }
+
+        var textColor = selected ? Color.White : Color.FromArgb(220, 220, 220);
+        var textRect = new Rectangle(indentX + 20, e.Bounds.Y, foldersView.Width - indentX - 24, e.Bounds.Height);
+        TextRenderer.DrawText(g, e.Node.Text, foldersView.Font, textRect, textColor,
+            TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.EndEllipsis);
+    }
+
+    private static void DrawExpandTriangle(Graphics g, int x, int nodeY, int nodeH, bool expanded, Color color)
+    {
+        int cx = x + 6, cy = nodeY + nodeH / 2;
+        using var brush = new SolidBrush(color);
+        if (expanded)
+        {
+            g.FillPolygon(brush, new Point[] {
+                new Point(cx - 5, cy - 2),
+                new Point(cx + 5, cy - 2),
+                new Point(cx, cy + 4)
+            });
+        }
+        else
+        {
+            g.FillPolygon(brush, new Point[] {
+                new Point(cx - 2, cy - 5),
+                new Point(cx + 4, cy),
+                new Point(cx - 2, cy + 5)
+            });
         }
     }
 
