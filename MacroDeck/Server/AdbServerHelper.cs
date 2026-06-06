@@ -18,6 +18,11 @@ public class AdbServerHelper
 
     public static async Task Stop()
     {
+        if (_adbServer is null)
+        {
+            return;
+        }
+        
         await _adbServer.StopServerAsync();
     }
     

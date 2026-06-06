@@ -317,7 +317,7 @@ public class MacroDeck : NativeWindow
 
     public static void Exit()
     {
-        AdbServerHelper.Stop().Wait();
+        AdbServerHelper.Stop().GetAwaiter().GetResult();
         Application.Exit();
     }
 }
