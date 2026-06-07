@@ -39,6 +39,8 @@ namespace SuchByte.MacroDeck.GUI
                 MacroDeckServer.OnDeviceConnectionStateChanged -= this.OnClientsConnectedChanged;
                 PluginManager.OnPluginsChange -= this.OnPluginsChanged;
                 IconManager.OnUpdateCheckFinished -= OnPackageManagerUpdateCheckFinished;
+                IconManager.OnIconPacksChanged -= this.OnPluginsChanged;
+                SuchByte.MacroDeck.ExtensionStore.ExtensionStoreHelper.OnInstallationFinished -= ExtensionStoreHelper_OnInstallationFinished;
                 NotificationManager.OnNotification -= NotificationsChanged;
                 NotificationManager.OnNotificationRemoved -= NotificationsChanged;
                 DeckView?.Dispose();

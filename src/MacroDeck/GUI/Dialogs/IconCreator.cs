@@ -74,6 +74,7 @@ public partial class IconCreator : DialogForm
         var layers = new List<Bitmap>();
         layers.AddRange(_layers.Values);
 
+        preview.BackgroundImage?.Dispose();
         preview.BackgroundImage = CombineBitmaps.CombineAll(layers);
     }
 

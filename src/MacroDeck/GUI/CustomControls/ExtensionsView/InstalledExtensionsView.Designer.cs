@@ -19,6 +19,9 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
         /// <param name="disposing">True, wenn verwaltete Ressourcen gelöscht werden sollen; andernfalls False.</param>
         protected override void Dispose(bool disposing)
         {
+            ExtensionStore.ExtensionStoreHelper.OnUpdateCheckFinished -= UpdateCheckFinished;
+            ExtensionStore.ExtensionStoreHelper.OnInstallationFinished -= ExtensionStoreHelper_OnInstallationFinished;
+
             if (disposing && (components != null))
             {
                 components.Dispose();

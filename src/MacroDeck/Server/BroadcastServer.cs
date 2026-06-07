@@ -8,6 +8,7 @@ namespace SuchByte.MacroDeck.Server;
 public static class BroadcastServer
 {
     private static UdpClient _udpClient;
+    private static Timer _broadcastTimer;
 
     public static void Start()
     {
@@ -15,11 +16,39 @@ public static class BroadcastServer
         {
             _udpClient = new UdpClient();
 
-            var broadcastTimer = new Timer(1000 * 5)
+            _broadcastTimer = new Timer(1000 * 5)
             {
                 Enabled = true
             };
-            broadcastTimer.Elapsed += BroadcastTimer_Elapsed;
+            _broadcastTimer.Elapsed += BroadcastTimer_Elapsed;
+
+            Application.ApplicationExit += OnApplicationExit;
+        }
+        catch
+        {
+        }
+    }
+
+    private static void OnApplicationExit(object sender, EventArgs e)
+    {
+        Application.ApplicationExit -= OnApplicationExit;
+        Stop();
+    }
+
+    public static void Stop()
+    {
+        try
+        {
+            if (_broadcastTimer != null)
+            {
+                _broadcastTimer.Stop();
+                _broadcastTimer.Elapsed -= BroadcastTimer_Elapsed;
+                _broadcastTimer.Dispose();
+                _broadcastTimer = null;
+            }
+
+            _udpClient?.Dispose();
+            _udpClient = null;
         }
         catch
         {

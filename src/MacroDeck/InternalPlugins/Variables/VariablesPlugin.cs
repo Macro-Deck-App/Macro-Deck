@@ -47,6 +47,22 @@ public class VariablesPlugin : MacroDeckPlugin
         };
         timeDateTimer.Elapsed += OnTimerTick;
         timeDateTimer.Start();
+
+        Application.ApplicationExit += OnApplicationExit;
+    }
+
+    private void OnApplicationExit(object sender, EventArgs e)
+    {
+        Application.ApplicationExit -= OnApplicationExit;
+        VariableManager.OnVariableChanged -= VariableChanged;
+
+        if (timeDateTimer != null)
+        {
+            timeDateTimer.Stop();
+            timeDateTimer.Elapsed -= OnTimerTick;
+            timeDateTimer.Dispose();
+            timeDateTimer = null;
+        }
     }
 
     private void OnTimerTick(object sender, EventArgs e)
