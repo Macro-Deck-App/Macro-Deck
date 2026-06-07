@@ -130,8 +130,7 @@ public partial class IconSelector : DialogForm
                     }
                     catch (Exception ex)
                     {
-                        logger.Error(
-                            "Error while loading original image: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                        logger.Error(ex, "Error while loading original image");
                     }
                 }
             }
@@ -163,8 +162,7 @@ public partial class IconSelector : DialogForm
                     }
                     catch (Exception ex)
                     {
-                        logger.Error(
-                            "Failed to resize image: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                        logger.Error(ex, "Failed to resize image");
                     }
                 }
             }

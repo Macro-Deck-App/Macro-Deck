@@ -119,10 +119,7 @@ public partial class DebugConsole : Form
             }
             catch (Exception ex)
             {
-                logger.Error("Error while exporting debug console output: " +
-                    ex.Message +
-                    Environment.NewLine +
-                    ex.StackTrace);
+                logger.Error(ex, "Error while exporting debug console output");
             }
         }
     }

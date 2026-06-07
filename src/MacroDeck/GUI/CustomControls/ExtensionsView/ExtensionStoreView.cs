@@ -59,7 +59,7 @@ public partial class ExtensionStoreView : UserControl
         }
         catch (Exception ex)
         {
-            logger.Error($"Error while loading extensions from the extension store:\n{ex.Message}");
+            logger.Error(ex, "Error while loading extensions from the extension store");
         }
         finally
         {

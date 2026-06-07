@@ -1,6 +1,5 @@
 ﻿using SuchByte.MacroDeck.Extension;
 using SuchByte.MacroDeck.ExtensionStore;
-using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Notifications;

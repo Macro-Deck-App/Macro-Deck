@@ -1,6 +1,5 @@
 ﻿using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.InternalPlugins.FolderPlugin.GUI;
 using Serilog;
 using SuchByte.MacroDeck.Language;

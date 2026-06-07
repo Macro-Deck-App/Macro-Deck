@@ -232,7 +232,7 @@ public partial class SettingsView : UserControl
                 "Make sure you have a internet connection",
                 MessageBoxButtons.OK);
 
-            logger.Error($"Failed to check for updates\n{ex}");
+            logger.Error(ex, "Failed to check for updates");
         }
         finally
         {

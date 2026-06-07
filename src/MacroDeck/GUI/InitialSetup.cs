@@ -169,10 +169,7 @@ public partial class InitialSetup : DialogForm
         }
         catch (Exception ex)
         {
-            logger.Warning("Not able to set system language: " +
-                ex.Message +
-                Environment.NewLine +
-                ex.StackTrace);
+            logger.Warning(ex, "Not able to set system language");
         }
     }
 

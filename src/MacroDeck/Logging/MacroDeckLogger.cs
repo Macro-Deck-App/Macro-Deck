@@ -1,5 +1,6 @@
 using System.IO;
 using Serilog;
+using Serilog.Events;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.StartupConfig;
@@ -42,17 +43,114 @@ public static class MacroDeckLogger
 
     internal static bool FileLogging = true;
 
+    // -------------------------------------------------------------------------
+    //  Logging API
+    //
+    //  Use these methods for all new logging. They accept Serilog message
+    //  templates with structured properties, an optional exception and an
+    //  optional originating plugin, e.g.:
+    //
+    //      MacroDeckLogger.Error(ex, "Error in {SomeParameter}", parameter);
+    //      MacroDeckLogger.Information(plugin, "Connected to {Host}", host);
+    //
+    //  When no plugin is supplied the event is attributed to Macro Deck itself.
+    // -------------------------------------------------------------------------
+
+    private static void Write(
+        LogEventLevel level,
+        MacroDeckPlugin? plugin,
+        Exception? exception,
+        string messageTemplate,
+        object[] propertyValues)
+    {
+        var contextLogger = plugin is null
+            ? Log.Logger
+            : Log.ForContext("Plugin", plugin.Name);
+        contextLogger.Write(level, exception, messageTemplate, propertyValues);
+    }
+
+    public static void Verbose(string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Verbose, null, null, messageTemplate, propertyValues);
+
+    public static void Verbose(Exception exception, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Verbose, null, exception, messageTemplate, propertyValues);
+
+    public static void Verbose(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Verbose, plugin, null, messageTemplate, propertyValues);
+
+    public static void Verbose(MacroDeckPlugin plugin, Exception exception, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Verbose, plugin, exception, messageTemplate, propertyValues);
+
+    public static void Debug(string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Debug, null, null, messageTemplate, propertyValues);
+
+    public static void Debug(Exception exception, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Debug, null, exception, messageTemplate, propertyValues);
+
+    public static void Debug(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Debug, plugin, null, messageTemplate, propertyValues);
+
+    public static void Debug(MacroDeckPlugin plugin, Exception exception, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Debug, plugin, exception, messageTemplate, propertyValues);
+
+    public static void Information(string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Information, null, null, messageTemplate, propertyValues);
+
+    public static void Information(Exception exception, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Information, null, exception, messageTemplate, propertyValues);
+
+    public static void Information(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Information, plugin, null, messageTemplate, propertyValues);
+
+    public static void Information(MacroDeckPlugin plugin, Exception exception, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Information, plugin, exception, messageTemplate, propertyValues);
+
+    public static void Warning(string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Warning, null, null, messageTemplate, propertyValues);
+
+    public static void Warning(Exception exception, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Warning, null, exception, messageTemplate, propertyValues);
+
+    public static void Warning(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Warning, plugin, null, messageTemplate, propertyValues);
+
+    public static void Warning(MacroDeckPlugin plugin, Exception exception, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Warning, plugin, exception, messageTemplate, propertyValues);
+
+    public static void Error(string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Error, null, null, messageTemplate, propertyValues);
+
+    public static void Error(Exception exception, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Error, null, exception, messageTemplate, propertyValues);
+
+    public static void Error(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Error, plugin, null, messageTemplate, propertyValues);
+
+    public static void Error(MacroDeckPlugin plugin, Exception exception, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Error, plugin, exception, messageTemplate, propertyValues);
+
+    public static void Fatal(string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Fatal, null, null, messageTemplate, propertyValues);
+
+    public static void Fatal(Exception exception, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Fatal, null, exception, messageTemplate, propertyValues);
+
+    public static void Fatal(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Fatal, plugin, null, messageTemplate, propertyValues);
+
+    public static void Fatal(MacroDeckPlugin plugin, Exception exception, string messageTemplate, params object[] propertyValues)
+        => Write(LogEventLevel.Fatal, plugin, exception, messageTemplate, propertyValues);
+
     /// <summary>
     /// Debug trace messages for internal debugging
     /// </summary>
     /// <param name="macroDeckPlugin"></param>
     /// <param name="classType"></param>
     /// <param name="message"></param>
-    [Obsolete("Use Serilog instead")]
+    [Obsolete("Use MacroDeckLogger.Debug(MacroDeckPlugin, string, params object[]) instead")]
     public static void Trace(MacroDeckPlugin macroDeckPlugin, Type classType, string message)
     {
         Log.ForContext("Plugin", macroDeckPlugin.Name)
-            .ForContext(Serilog.Core.Constants.SourceContextPropertyName, classType.FullName)
             .Debug("{LogMessage}", message);
     }
 
@@ -62,11 +160,10 @@ public static class MacroDeckLogger
     /// <param name="macroDeckPlugin"></param>
     /// <param name="classType"></param>
     /// <param name="message"></param>
-    [Obsolete("Use Serilog instead")]
+    [Obsolete("Use MacroDeckLogger.Information(MacroDeckPlugin, string, params object[]) instead")]
     public static void Info(MacroDeckPlugin macroDeckPlugin, Type classType, string message)
     {
         Log.ForContext("Plugin", macroDeckPlugin.Name)
-            .ForContext(Serilog.Core.Constants.SourceContextPropertyName, classType.FullName)
             .Information("{LogMessage}", message);
     }
 
@@ -76,11 +173,10 @@ public static class MacroDeckLogger
     /// <param name="macroDeckPlugin"></param>
     /// <param name="classType"></param>
     /// <param name="message"></param>
-    [Obsolete("Use Serilog instead")]
+    [Obsolete("Use MacroDeckLogger.Warning(MacroDeckPlugin, string, params object[]) instead")]
     public static void Warning(MacroDeckPlugin macroDeckPlugin, Type classType, string message)
     {
         Log.ForContext("Plugin", macroDeckPlugin.Name)
-            .ForContext(Serilog.Core.Constants.SourceContextPropertyName, classType.FullName)
             .Warning("{LogMessage}", message);
     }
 
@@ -90,11 +186,10 @@ public static class MacroDeckLogger
     /// <param name="macroDeckPlugin"></param>
     /// <param name="classType"></param>
     /// <param name="message"></param>
-    [Obsolete("Use Serilog instead")]
+    [Obsolete("Use MacroDeckLogger.Error(MacroDeckPlugin, string, params object[]) instead")]
     public static void Error(MacroDeckPlugin macroDeckPlugin, Type classType, string message)
     {
         Log.ForContext("Plugin", macroDeckPlugin.Name)
-            .ForContext(Serilog.Core.Constants.SourceContextPropertyName, classType.FullName)
             .Error("{LogMessage}", message);
     }
 
@@ -104,7 +199,7 @@ public static class MacroDeckLogger
     /// </summary>
     /// <param name="macroDeckPlugin"></param>
     /// <param name="message"></param>
-    [Obsolete("Use Serilog instead")]
+    [Obsolete("Use MacroDeckLogger.Debug(MacroDeckPlugin, string, params object[]) instead")]
     public static void Trace(MacroDeckPlugin macroDeckPlugin, string message)
     {
         Log.ForContext("Plugin", macroDeckPlugin.Name)
@@ -116,7 +211,7 @@ public static class MacroDeckLogger
     /// </summary>
     /// <param name="macroDeckPlugin"></param>
     /// <param name="message"></param>
-    [Obsolete("Use Serilog instead")]
+    [Obsolete("Use MacroDeckLogger.Information(MacroDeckPlugin, string, params object[]) instead")]
     public static void Info(MacroDeckPlugin macroDeckPlugin, string message)
     {
         Log.ForContext("Plugin", macroDeckPlugin.Name)
@@ -128,7 +223,7 @@ public static class MacroDeckLogger
     /// </summary>
     /// <param name="macroDeckPlugin"></param>
     /// <param name="message"></param>
-    [Obsolete("Use Serilog instead")]
+    [Obsolete("Use MacroDeckLogger.Warning(MacroDeckPlugin, string, params object[]) instead")]
     public static void Warning(MacroDeckPlugin macroDeckPlugin, string message)
     {
         Log.ForContext("Plugin", macroDeckPlugin.Name)
@@ -140,7 +235,7 @@ public static class MacroDeckLogger
     /// </summary>
     /// <param name="macroDeckPlugin"></param>
     /// <param name="message"></param>
-    [Obsolete("Use Serilog instead")]
+    [Obsolete("Use MacroDeckLogger.Error(MacroDeckPlugin, string, params object[]) instead")]
     public static void Error(MacroDeckPlugin macroDeckPlugin, string message)
     {
         Log.ForContext("Plugin", macroDeckPlugin.Name)

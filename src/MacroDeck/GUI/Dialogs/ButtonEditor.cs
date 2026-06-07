@@ -160,8 +160,7 @@ public partial class ButtonEditor : DialogForm
         }
         catch (Exception ex)
         {
-            logger.Error(
-                "Error while updating label: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            logger.Error(ex, "Error while updating label");
         }
     }
 
@@ -204,8 +203,7 @@ public partial class ButtonEditor : DialogForm
         }
         catch (Exception ex)
         {
-            logger.Error(
-                "Error while refreshing label: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            logger.Error(ex, "Error while refreshing label");
         }
 
         labelText.TextChanged += LabelChanged;
@@ -266,8 +264,7 @@ public partial class ButtonEditor : DialogForm
         }
         catch (Exception ex)
         {
-            logger.Error(
-                "Error while refreshing icon: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            logger.Error(ex, "Error while refreshing icon");
         }
     }
 

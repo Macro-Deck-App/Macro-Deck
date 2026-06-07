@@ -163,11 +163,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
         }
         catch (Exception ex)
         {
-            logger.Error(
-                $"Error while deserializing ExtensionManifest for {ApiV2Extension.Name}: " +
-                ex.Message +
-                Environment.NewLine +
-                ex.StackTrace);
+            logger.Error(ex, "Error while deserializing ExtensionManifest for {ExtensionName}", ApiV2Extension.Name);
             Finished();
             return;
         }
@@ -186,11 +182,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(
-                        $"Error while installing {ApiV2Extension.Name}: " +
-                        ex.Message +
-                        Environment.NewLine +
-                        ex.StackTrace);
+                    logger.Error(ex, "Error while installing {ExtensionName}", ApiV2Extension.Name);
                     Finished();
                     return;
                 }
@@ -203,11 +195,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(
-                        $"Error while installing {ApiV2Extension.Name}: " +
-                        ex.Message +
-                        Environment.NewLine +
-                        ex.StackTrace);
+                    logger.Error(ex, "Error while installing {ExtensionName}", ApiV2Extension.Name);
                     Finished();
                     return;
                 }

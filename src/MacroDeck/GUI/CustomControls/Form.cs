@@ -68,8 +68,7 @@ public partial class Form : System.Windows.Forms.Form
         }
         catch (Exception ex)
         {
-            logger.Error(
-                "Error while exporting latest log: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            logger.Error(ex, "Error while exporting latest log");
         }
     }
 }

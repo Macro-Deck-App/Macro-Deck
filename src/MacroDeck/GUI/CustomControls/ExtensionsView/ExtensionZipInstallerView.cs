@@ -66,9 +66,9 @@ public partial class ExtensionZipInstallerView : UserControl
 
             RequestClose(this, EventArgs.Empty);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            logger.Error($"Failed to install archived plugin {txtZipPath.Text}.");
+            logger.Error(ex, "Failed to install archived plugin {ZipPath}", txtZipPath.Text);
         }
     }
 
