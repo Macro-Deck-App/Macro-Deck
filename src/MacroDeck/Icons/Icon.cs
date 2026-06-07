@@ -7,8 +7,6 @@ public class Icon
 {
     private string _filePath;
 
-    private string _iconBase64 = "";
-
     public string FilePath
     {
         get => _filePath;
@@ -17,6 +15,10 @@ public class Icon
 
     public string IconId { get; set; } = Guid.NewGuid().ToString();
 
+    /// <summary>
+    /// Loads the icon from disk on every access. The returned <see cref="Image"/> is a fresh
+    /// instance and is NOT cached; the caller takes ownership and MUST dispose it.
+    /// </summary>
     public Image IconImage
     {
         get
@@ -29,18 +31,25 @@ public class Icon
         }
     }
 
+    /// <summary>
+    /// Computes the base64 representation on demand. Nothing is cached, so the icon data
+    /// is never kept in memory permanently.
+    /// </summary>
     public string IconBase64
     {
         get
         {
-            if (string.IsNullOrWhiteSpace(_iconBase64))
-            {
-                _iconBase64 = Base64.GetBase64FromImage(IconImage);
-            }
-
-            return _iconBase64;
+            using var image = IconImage;
+            return Base64.GetBase64FromImage(image);
         }
     }
 
-    public string IconHex128_64Base64 => Base64.GetBase64ByteArray((Bitmap)IconImage, new Size(128, 64));
+    public string IconHex128_64Base64
+    {
+        get
+        {
+            using var image = IconImage;
+            return Base64.GetBase64ByteArray((Bitmap)image, new Size(128, 64));
+        }
+    }
 }

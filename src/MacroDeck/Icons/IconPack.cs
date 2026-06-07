@@ -25,7 +25,9 @@ public class IconPack
     public List<Icon> Icons;
 
     /// <summary>
-    /// Icon displayed in the extension manager
+    /// Icon displayed in the extension manager. Not populated permanently to avoid keeping a
+    /// bitmap per icon pack in memory; consumers generate it on demand via
+    /// <see cref="SuchByte.MacroDeck.Utils.IconPackPreview.GeneratePreviewImage"/> and dispose it.
     /// </summary>
     public Image IconPackIcon { get; set; }
 

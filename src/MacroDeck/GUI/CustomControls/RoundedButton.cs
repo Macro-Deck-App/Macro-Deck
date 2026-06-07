@@ -14,6 +14,13 @@ public class RoundedButton : PictureBox
         get => _foregroundImage;
         set
         {
+            // The foreground image only ever holds freshly generated label bitmaps, so the
+            // previous one can safely be disposed to avoid leaking GDI bitmaps.
+            if (_foregroundImage != null && !ReferenceEquals(_foregroundImage, value))
+            {
+                _foregroundImage.Dispose();
+            }
+
             _foregroundImage = value;
             Invalidate();
         }
@@ -54,6 +61,19 @@ public class RoundedButton : PictureBox
         MouseEnter += OnMouseEnter;
         MouseLeave += OnMouseLeave;
         Padding = Padding.Empty;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            // Dispose the foreground (label) image. The background image is NOT disposed here
+            // because some RoundedButtons display shared Properties.Resources.* bitmaps.
+            _foregroundImage?.Dispose();
+            _foregroundImage = null;
+        }
+
+        base.Dispose(disposing);
     }
 
     private void OnMouseEnter(object sender, EventArgs e)

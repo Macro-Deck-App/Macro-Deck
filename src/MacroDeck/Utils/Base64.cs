@@ -133,29 +133,36 @@ public class Base64
             return "";
         }
 
+        // Does NOT dispose the passed image; the caller retains ownership.
+        Bitmap tempBitmap = null;
         try
         {
             using var ms = new MemoryStream();
             var format = image.RawFormat;
+            var imageToSave = image;
             switch (format.ToString().ToLower())
             {
                 case "gif":
                     break;
                 default:
-                    image = new Bitmap(
-                        image); // Generating a new bitmap if the file format is not a gif because otherwise it causes a GDI+ error in some cases
+                    // Generating a new bitmap if the file format is not a gif because otherwise it causes a GDI+ error in some cases
+                    tempBitmap = new Bitmap(image);
+                    imageToSave = tempBitmap;
                     format = ImageFormat.Png;
                     break;
             }
 
-            image.Save(ms, format);
-            image.Dispose();
+            imageToSave.Save(ms, format);
 
             return Convert.ToBase64String(ms.ToArray());
         }
         catch
         {
             return "";
+        }
+        finally
+        {
+            tempBitmap?.Dispose();
         }
     }
 }

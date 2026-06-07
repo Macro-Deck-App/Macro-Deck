@@ -135,22 +135,29 @@ public static class ProfileManager
                 labelOffText = TemplateManager.RenderTemplate(labelOffText);
                 labelOnText = TemplateManager.RenderTemplate(labelOnText);
 
-                actionButton.LabelOff.LabelBase64 = Base64.GetBase64FromImage(LabelGenerator.GetLabel(
+                using (var labelOffImage = LabelGenerator.GetLabel(
                     new Bitmap(250, 250),
                     labelOffText,
                     actionButton.LabelOff.LabelPosition,
                     new Font(actionButton.LabelOff.FontFamily, actionButton.LabelOff.Size),
                     actionButton.LabelOff.LabelColor,
                     Color.Black,
-                    new SizeF(2.0f, 2.0f)));
-                actionButton.LabelOn.LabelBase64 = Base64.GetBase64FromImage(LabelGenerator.GetLabel(
+                    new SizeF(2.0f, 2.0f)))
+                {
+                    actionButton.LabelOff.LabelBase64 = Base64.GetBase64FromImage(labelOffImage);
+                }
+
+                using (var labelOnImage = LabelGenerator.GetLabel(
                     new Bitmap(250, 250),
                     labelOnText,
                     actionButton.LabelOn.LabelPosition,
                     new Font(actionButton.LabelOn.FontFamily, actionButton.LabelOn.Size),
                     actionButton.LabelOn.LabelColor,
                     Color.Black,
-                    new SizeF(2.0f, 2.0f)));
+                    new SizeF(2.0f, 2.0f)))
+                {
+                    actionButton.LabelOn.LabelBase64 = Base64.GetBase64FromImage(labelOnImage);
+                }
                 foreach (var macroDeckClient in MacroDeckServer.Clients)
                 {
                     MacroDeckServer.SendButton(macroDeckClient, actionButton);

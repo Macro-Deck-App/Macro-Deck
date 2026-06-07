@@ -16,10 +16,14 @@ public partial class ExtensionItemView : RoundedUserControl
 
     public event EventHandler ExtensionRemoved;
 
+    // Icon pack preview generated on demand for this item; disposed when the control is disposed.
+    private Image _generatedPreview;
+
 
     public ExtensionItemView(IMacroDeckExtension macroDeckExtension, bool updateAvailable)
     {
         this.macroDeckExtension = macroDeckExtension;
+        Disposed += (_, _) => _generatedPreview?.Dispose();
         InitializeComponent();
 
         btnUpdate.Text = LanguageManager.Strings.Update;
@@ -88,9 +92,8 @@ public partial class ExtensionItemView : RoundedUserControl
                     lblStatus.BackColor = Color.Transparent;
                 }
 
-                extensionIcon.BackgroundImage = iconPack.IconPackIcon == null
-                    ? IconPackPreview.GeneratePreviewImage(iconPack)
-                    : iconPack.IconPackIcon;
+                _generatedPreview = iconPack.IconPackIcon ?? IconPackPreview.GeneratePreviewImage(iconPack);
+                extensionIcon.BackgroundImage = _generatedPreview;
                 lblExtensionName.Text = iconPack.Name;
                 lblVersion.Text = $"{LanguageManager.Strings.InstalledVersion}: {iconPack.Version}";
                 break;
