@@ -7,7 +7,7 @@ namespace SuchByte.MacroDeck.Language;
 
 public static class LanguageManager
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(LanguageManager));
+    private static readonly ILogger Logger = Log.ForContext(typeof(LanguageManager));
 
     public static event EventHandler LanguageChanged;
     public static List<Strings> Languages => _languages;
@@ -27,7 +27,7 @@ public static class LanguageManager
         }
 
         // Loading languages from resources
-        logger.Information("Loading language files...");
+        Logger.Information("Loading language files...");
         var assembly = typeof(Strings).Assembly;
         foreach (var manifestResource in assembly.GetManifestResourceNames())
         {
@@ -39,7 +39,7 @@ public static class LanguageManager
                     continue;
                 }
 
-                logger.Information("Loading ${ManifestResource}...", manifestResource);
+                Logger.Information("Loading ${ManifestResource}...", manifestResource);
                 using var resourceStream = assembly.GetManifestResourceStream(manifestResource);
 
                 var serializer = new JsonSerializer();
@@ -62,7 +62,7 @@ public static class LanguageManager
             }
             catch (Exception ex)
             {
-                logger.Warning(ex, "Failed to load language resource");
+                Logger.Warning(ex, "Failed to load language resource");
             }
         }
 
@@ -84,11 +84,11 @@ public static class LanguageManager
             using JsonWriter writer = new JsonTextWriter(sw);
             serializer.Serialize(writer, _strings);
 
-            logger.Information("{Language} saved", _strings.__Language__);
+            Logger.Information("{Language} saved", _strings.__Language__);
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Failed to save {Language}", _strings.__Language__);
+            Logger.Error(ex, "Failed to save {Language}", _strings.__Language__);
         }
     }
 
@@ -103,7 +103,7 @@ public static class LanguageManager
 
     public static void SetLanguage(Strings language)
     {
-        logger.Information("Set language to {Language}", language.__Language__);
+        Logger.Information("Set language to {Language}", language.__Language__);
         _strings = language;
         LanguageChanged?.Invoke(language, EventArgs.Empty);
     }

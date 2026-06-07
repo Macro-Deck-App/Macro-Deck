@@ -13,7 +13,7 @@ namespace SuchByte.MacroDeck.Icons;
 
 public class IconManager
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(IconManager));
+    private static readonly ILogger Logger = Log.ForContext(typeof(IconManager));
 
     public static List<IconPack> IconPacks = new();
     public static List<IconPack> IconPacksUpdateAvailable = new();
@@ -39,7 +39,7 @@ public class IconManager
     private static void LoadIconPacks()
     {
         IconPacks.Clear();
-        logger.Information("Loading icon packs...");
+        Logger.Information("Loading icon packs...");
         foreach (var iconPackDir in Directory.GetDirectories(ApplicationPaths.IconPackDirectoryPath))
         {
             LoadIconPack(iconPackDir);
@@ -50,7 +50,7 @@ public class IconManager
             CreateIconPack("My Icons", Environment.UserName, "1.0.0");
         }
 
-        logger.Information("Loaded {IconPackCount} icon packs", IconPacks.Count);
+        Logger.Information("Loaded {IconPackCount} icon packs", IconPacks.Count);
     }
 
     public static bool LoadIconPack(string path)
@@ -108,7 +108,7 @@ public class IconManager
             }
             catch (Exception ex)
             {
-                logger.Warning(ex, "Failed to load icon");
+                Logger.Warning(ex, "Failed to load icon");
             }
         }
 
@@ -189,7 +189,7 @@ public class IconManager
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Failed to add icon to icon pack");
+            Logger.Error(ex, "Failed to add icon to icon pack");
         }
 
         return null;
@@ -217,7 +217,7 @@ public class IconManager
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error while exporting icon pack");
+            Logger.Error(ex, "Error while exporting icon pack");
         }
     }
 
@@ -240,7 +240,7 @@ public class IconManager
         }
         catch (Exception ex)
         {
-            logger.Warning(ex, "Unable to delete icon pack");
+            Logger.Warning(ex, "Unable to delete icon pack");
         }
     }
 
@@ -296,11 +296,11 @@ public class IconManager
             using JsonWriter writer = new JsonTextWriter(sw);
             serializer.Serialize(writer, extensionManifestModel);
 
-            logger.Information("ExtensionManifest saved");
+            Logger.Information("ExtensionManifest saved");
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Failed to save ExtensionManifest");
+            Logger.Error(ex, "Failed to save ExtensionManifest");
         }
     }
 
@@ -327,13 +327,13 @@ public class IconManager
             var extensionManifestModel = ExtensionManifestModel.FromZipFilePath(location);
             if (extensionManifestModel == null)
             {
-                logger.Error("{Location} does not contain a manifest file!", location);
+                Logger.Error("{Location} does not contain a manifest file!", location);
                 return null;
             }
 
             if (extensionManifestModel.Type != ExtensionType.IconPack)
             {
-                logger.Error("{PackageId} is not a icon pack!", extensionManifestModel.PackageId);
+                Logger.Error("{PackageId} is not a icon pack!", extensionManifestModel.PackageId);
                 return null;
             }
 
@@ -380,18 +380,18 @@ public class IconManager
                         x.PackageId.Equals(extensionManifestModel.PackageId)));
                 }
 
-                logger.Information("Successfully installed {PackageId}", extensionManifestModel.PackageId);
+                Logger.Information("Successfully installed {PackageId}", extensionManifestModel.PackageId);
                 var iconPack = GetIconPackByName(extensionManifestModel.Name);
                 InstallationFinished?.Invoke(iconPack, EventArgs.Empty);
                 return iconPack;
             }
 
-            logger.Error("{PackageId} is maybe corruped", extensionManifestModel.PackageId);
+            Logger.Error("{PackageId} is maybe corruped", extensionManifestModel.PackageId);
             return null;
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error while installing icon pack from zip");
+            Logger.Error(ex, "Error while installing icon pack from zip");
         }
 
         return null;

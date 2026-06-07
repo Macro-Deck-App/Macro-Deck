@@ -23,7 +23,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews;
 
 public partial class DeckView : UserControl
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(DeckView));
+    private static readonly ILogger Logger = Log.ForContext(typeof(DeckView));
 
     private MacroDeckFolder _currentFolder;
 
@@ -910,7 +910,7 @@ public partial class DeckView : UserControl
         ProfileManager.CurrentProfile.ButtonRadius = (int)cornerRadius.Value;
         ProfileManager.CurrentProfile.ButtonBackground = checkButtonBackground.Checked;
         ProfileManager.Save();
-        logger.Information(
+        Logger.Information(
             string.Format("Updated profile settings of {0}:", ProfileManager.CurrentProfile.DisplayName) +
             Environment.NewLine +
             string.Format("Rows: {0}", ProfileManager.CurrentProfile.Rows) +

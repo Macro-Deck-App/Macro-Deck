@@ -19,7 +19,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs;
 
 public partial class ButtonEditor : DialogForm
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(ButtonEditor));
+    private static readonly ILogger Logger = Log.ForContext(typeof(ButtonEditor));
 
     private static JsonSerializerSettings jsonSerializerSettings = new()
     {
@@ -160,7 +160,7 @@ public partial class ButtonEditor : DialogForm
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error while updating label");
+            Logger.Error(ex, "Error while updating label");
         }
     }
 
@@ -203,7 +203,7 @@ public partial class ButtonEditor : DialogForm
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error while refreshing label");
+            Logger.Error(ex, "Error while refreshing label");
         }
 
         labelText.TextChanged += LabelChanged;
@@ -264,7 +264,7 @@ public partial class ButtonEditor : DialogForm
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error while refreshing icon");
+            Logger.Error(ex, "Error while refreshing icon");
         }
     }
 

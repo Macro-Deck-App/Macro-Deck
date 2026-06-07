@@ -7,7 +7,7 @@ namespace SuchByte.MacroDeck.Hotkeys;
 
 public class HotkeyManager : NativeWindow
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(HotkeyManager));
+    private static readonly ILogger Logger = Log.ForContext(typeof(HotkeyManager));
 
     // DLL libraries used to manage hotkeys
     [DllImport("user32.dll")]
@@ -59,7 +59,7 @@ public class HotkeyManager : NativeWindow
         }
 
         RegisterHotKey(formHandle, hotkeyId, modifierKeyCode, (int)key);
-        logger.Information("Registered hotkey #{HotkeyId} ({Key}) with modifier(s): {Modifiers}",
+        Logger.Information("Registered hotkey #{HotkeyId} ({Key}) with modifier(s): {Modifiers}",
             hotkeyId,
             key.ToString(),
             modifierKeys.ToString());
@@ -85,7 +85,7 @@ public class HotkeyManager : NativeWindow
         var hotkeyId = Hotkeys[actionButton];
         UnregisterHotKey(formHandle, hotkeyId);
         Hotkeys.Remove(actionButton);
-        logger.Information("Unregistered hotkey #{HotkeyId}", hotkeyId);
+        Logger.Information("Unregistered hotkey #{HotkeyId}", hotkeyId);
     }
 
 

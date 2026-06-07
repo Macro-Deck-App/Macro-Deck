@@ -10,7 +10,7 @@ namespace SuchByte.MacroDeck.InternalPlugins.Variables.ViewModels;
 
 public class ChangeVariableValueActionConfigViewModel : ISerializableConfigViewModel
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(ChangeVariableValueActionConfigViewModel));
+    private static readonly ILogger Logger = Log.ForContext(typeof(ChangeVariableValueActionConfigViewModel));
 
     private readonly PluginAction _pluginAction;
 
@@ -52,11 +52,11 @@ public class ChangeVariableValueActionConfigViewModel : ISerializableConfigViewM
         try
         {
             SetConfig();
-            logger.Information("config saved");
+            Logger.Information("config saved");
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error while saving config");
+            Logger.Error(ex, "Error while saving config");
         }
 
         return true;

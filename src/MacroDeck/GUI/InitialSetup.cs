@@ -9,7 +9,7 @@ namespace SuchByte.MacroDeck.GUI;
 
 public partial class InitialSetup : DialogForm
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(InitialSetup));
+    private static readonly ILogger Logger = Log.ForContext(typeof(InitialSetup));
 
     public MainConfiguration configuration;
 
@@ -169,7 +169,7 @@ public partial class InitialSetup : DialogForm
         }
         catch (Exception ex)
         {
-            logger.Warning(ex, "Not able to set system language");
+            Logger.Warning(ex, "Not able to set system language");
         }
     }
 

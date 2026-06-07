@@ -11,7 +11,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs;
 
 public partial class UpdateAvailableDialog : DialogForm
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(UpdateAvailableDialog));
+    private static readonly ILogger Logger = Log.ForContext(typeof(UpdateAvailableDialog));
 
     private readonly UpdateApiVersionInfo _availableUpdate;
     private readonly UpdateApiVersionFileInfo? _updateApiVersionFileInfo;
@@ -45,7 +45,7 @@ public partial class UpdateAvailableDialog : DialogForm
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Failed to download and install update");
+            Logger.Error(ex, "Failed to download and install update");
 
             using var msgBox = new CustomControls.MessageBox();
             msgBox.ShowDialog(LanguageManager.Strings.Error,

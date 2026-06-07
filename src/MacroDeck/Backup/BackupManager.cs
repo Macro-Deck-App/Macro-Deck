@@ -15,7 +15,7 @@ public class BackupFailedEventArgs : EventArgs
 
 public class BackupManager
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(BackupManager));
+    private static readonly ILogger Logger = Log.ForContext(typeof(BackupManager));
 
     private static bool BackupInProgress;
 
@@ -73,7 +73,7 @@ public class BackupManager
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Backup (config) restore failed");
+                Logger.Error(ex, "Backup (config) restore failed");
             }
         }
 
@@ -88,7 +88,7 @@ public class BackupManager
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Backup (profiles) restore failed");
+                Logger.Error(ex, "Backup (profiles) restore failed");
             }
         }
 
@@ -103,7 +103,7 @@ public class BackupManager
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Backup (devices) restore failed");
+                Logger.Error(ex, "Backup (devices) restore failed");
             }
         }
 
@@ -118,7 +118,7 @@ public class BackupManager
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Backup (variables) restore failed");
+                Logger.Error(ex, "Backup (variables) restore failed");
             }
         }
 
@@ -140,7 +140,7 @@ public class BackupManager
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Backup (plugins) restore failed");
+                Logger.Error(ex, "Backup (plugins) restore failed");
             }
         }
 
@@ -161,7 +161,7 @@ public class BackupManager
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Backup (plugin configs) restore failed");
+                Logger.Error(ex, "Backup (plugin configs) restore failed");
             }
         }
 
@@ -183,7 +183,7 @@ public class BackupManager
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Backup (plugin credentials) restore failed");
+                Logger.Error(ex, "Backup (plugin credentials) restore failed");
             }
         }
 
@@ -205,11 +205,11 @@ public class BackupManager
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Backup (icon packs) restore failed");
+                Logger.Error(ex, "Backup (icon packs) restore failed");
             }
         }
 
-        logger.Information("Backup successfully restored");
+        Logger.Information("Backup successfully restored");
         using var msgBox = new MessageBox();
         msgBox.ShowDialog("Backup restored", "Backup successfully restored", MessageBoxButtons.OK);
     }
@@ -239,7 +239,7 @@ public class BackupManager
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Backup restoration failed");
+            Logger.Error(ex, "Backup restoration failed");
         }
 
         try
@@ -255,7 +255,7 @@ public class BackupManager
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Backup restoration failed");
+            Logger.Error(ex, "Backup restoration failed");
         }
     }
 
@@ -269,7 +269,7 @@ public class BackupManager
 
         BackupInProgress = true;
         var backupFileName = $"backup_{DateTime.Now:yy-MM-dd_HH-mm-ss}.zip";
-        logger.Information("Starting creation of backup: {BackupFileName}", backupFileName);
+        Logger.Information("Starting creation of backup: {BackupFileName}", backupFileName);
 
         var tempBackupPath = Path.Combine(ApplicationPaths.TempDirectoryPath, backupFileName);
         try
@@ -285,12 +285,12 @@ public class BackupManager
                 Path.Combine(tempBackupPath, Path.GetFileName((string?)ApplicationPaths.VariablesFilePath)));
             CreateBackup(backupFileName, tempBackupPath);
 
-            logger.Information("Backup successfully created: {BackupFileName}", backupFileName);
+            Logger.Information("Backup successfully created: {BackupFileName}", backupFileName);
             BackupSaved?.Invoke(null, EventArgs.Empty);
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Backup creation failed");
+            Logger.Error(ex, "Backup creation failed");
             BackupFailed?.Invoke(null, new BackupFailedEventArgs { Message = ex.Message });
         }
         finally
@@ -354,12 +354,12 @@ public class BackupManager
             try
             {
                 File.Delete(fileName);
-                logger.Information("Backup successfully deleted: {FileName}", fileName);
+                Logger.Information("Backup successfully deleted: {FileName}", fileName);
                 DeleteSuccess?.Invoke(null, EventArgs.Empty);
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Backup deletion failed");
+                Logger.Error(ex, "Backup deletion failed");
             }
         }
     }

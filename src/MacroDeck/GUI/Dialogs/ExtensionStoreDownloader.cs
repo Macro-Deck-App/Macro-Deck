@@ -10,7 +10,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs;
 
 public partial class ExtensionStoreDownloader : DialogForm
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(ExtensionStoreDownloader));
+    private static readonly ILogger Logger = Log.ForContext(typeof(ExtensionStoreDownloader));
 
     private int _pluginsToInstall;
     private int _pluginsInstalled;
@@ -57,7 +57,7 @@ public partial class ExtensionStoreDownloader : DialogForm
                             _pluginsToInstall);
                         btnDone.Visible = true;
                     });
-                    logger.Information(
+                    Logger.Information(
                         $"*** Installation of {_pluginsToInstall} package(s) done ***");
                 }
             };

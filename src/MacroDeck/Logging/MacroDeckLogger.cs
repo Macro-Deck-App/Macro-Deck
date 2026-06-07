@@ -10,7 +10,7 @@ namespace SuchByte.MacroDeck.Logging;
 
 public static class MacroDeckLogger
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(MacroDeckLogger));
+    private static readonly ILogger Logger = Log.ForContext(typeof(MacroDeckLogger));
 
     private static LogLevel _logLevel = Debugger.IsAttached ? LogLevel.Trace : LogLevel.Info;
 
@@ -30,7 +30,7 @@ public static class MacroDeckLogger
         {
             _logLevel = value;
             LevelSwitch.MinimumLevel = ToLogEventLevel(value);
-            logger.Information("Set log level to {LogLevel}", _logLevel);
+            Logger.Information("Set log level to {LogLevel}", _logLevel);
         }
     }
 

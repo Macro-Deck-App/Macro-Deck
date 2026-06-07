@@ -29,7 +29,7 @@ public class FolderPlugin : MacroDeckPlugin
 
 public class FolderSwitcher : PluginAction
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(FolderSwitcher));
+    private static readonly ILogger Logger = Log.ForContext(typeof(FolderSwitcher));
     
     public override string Name => LanguageManager.Strings.ActionChangeFolder;
     public override bool CanConfigure => true;
@@ -37,7 +37,7 @@ public class FolderSwitcher : PluginAction
 
     public override void Trigger(string clientId, ActionButton.ActionButton actionButton)
     {
-        logger.Debug("Switch folder triggered by {ClientId}", clientId);
+        Logger.Debug("Switch folder triggered by {ClientId}", clientId);
         switch (clientId)
         {
             // ClientID -1 or "" = Macro Deck software itself
@@ -66,7 +66,7 @@ public class FolderSwitcher : PluginAction
 
 public class GoToParentFolder : PluginAction
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(GoToParentFolder));
+    private static readonly ILogger Logger = Log.ForContext(typeof(GoToParentFolder));
     
     public override string Name => LanguageManager.Strings.ActionGoToParentFolder;
     public override string Description => LanguageManager.Strings.ActionGoToParentFolderDescription;
@@ -75,7 +75,7 @@ public class GoToParentFolder : PluginAction
     {
         try
         {
-            logger.Debug("Go to parent folder triggered by {ClientId}", clientId);
+            Logger.Debug("Go to parent folder triggered by {ClientId}", clientId);
             switch (clientId)
             {
                 // ClientID -1 or "" = Macro Deck software itself
@@ -110,7 +110,7 @@ public class GoToParentFolder : PluginAction
 
 public class GoToRootFolder : PluginAction
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(GoToRootFolder));
+    private static readonly ILogger Logger = Log.ForContext(typeof(GoToRootFolder));
     
     public override string Name => LanguageManager.Strings.ActionGoToRootFolder;
     public override string Description => LanguageManager.Strings.ActionGoToRootFolderDescription;
@@ -119,7 +119,7 @@ public class GoToRootFolder : PluginAction
     {
         try
         {
-            logger.Debug("Go to root folder triggered by {ClientId}", clientId);
+            Logger.Debug("Go to root folder triggered by {ClientId}", clientId);
             switch (clientId)
             {
                 // ClientID -1 or "" = Macro Deck software itself

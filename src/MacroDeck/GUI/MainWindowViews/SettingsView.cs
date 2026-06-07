@@ -15,7 +15,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews;
 
 public partial class SettingsView : UserControl
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(SettingsView));
+    private static readonly ILogger Logger = Log.ForContext(typeof(SettingsView));
 
     public SettingsView(int page = 0)
     {
@@ -232,7 +232,7 @@ public partial class SettingsView : UserControl
                 "Make sure you have a internet connection",
                 MessageBoxButtons.OK);
 
-            logger.Error(ex, "Failed to check for updates");
+            Logger.Error(ex, "Failed to check for updates");
         }
         finally
         {

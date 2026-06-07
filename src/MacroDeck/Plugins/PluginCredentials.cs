@@ -8,7 +8,7 @@ namespace SuchByte.MacroDeck.Plugins;
 
 public class PluginCredentials
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(PluginCredentials));
+    private static readonly ILogger Logger = Log.ForContext(typeof(PluginCredentials));
 
     private static string FileName(MacroDeckPlugin plugin)
     {
@@ -36,7 +36,7 @@ public class PluginCredentials
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error while adding plugin credential");
+            Logger.Error(ex, "Error while adding plugin credential");
         }
     }
 
@@ -99,7 +99,7 @@ public class PluginCredentials
                 }
                 catch
                 {
-                    logger.Warning(
+                    Logger.Warning(
                         "Unable to decrypt credentials for {PluginName}. Perhaps the machine GUID changed?",
                         plugin.Name);
                 }

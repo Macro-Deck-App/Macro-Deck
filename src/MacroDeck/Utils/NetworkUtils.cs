@@ -6,7 +6,7 @@ namespace SuchByte.MacroDeck.Utils;
 
 internal class NetworkUtils
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(NetworkUtils));
+    private static readonly ILogger Logger = Log.ForContext(typeof(NetworkUtils));
 
     public static string[] GetNetworkInterfaces()
     {
@@ -21,7 +21,7 @@ internal class NetworkUtils
         }
         catch (Exception ex)
         {
-            logger.Warning(ex, "Error while searching for network interfaces");
+            Logger.Warning(ex, "Error while searching for network interfaces");
         }
 
         return networkInterfaces.ToArray();

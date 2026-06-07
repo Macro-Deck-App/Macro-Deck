@@ -191,7 +191,7 @@ public class ChangeVariableValueAction : PluginAction
 
 public class SaveVariableToFileAction : PluginAction
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(SaveVariableToFileAction));
+    private static readonly ILogger Logger = Log.ForContext(typeof(SaveVariableToFileAction));
 
     public override string Name => LanguageManager.Strings.ActionSaveVariableToFile;
 
@@ -225,7 +225,7 @@ public class SaveVariableToFileAction : PluginAction
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Failed to save variable value to file");
+            Logger.Error(ex, "Failed to save variable value to file");
         }
     }
 
@@ -237,7 +237,7 @@ public class SaveVariableToFileAction : PluginAction
 
 public class ReadVariableFromFileAction : PluginAction
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(ReadVariableFromFileAction));
+    private static readonly ILogger Logger = Log.ForContext(typeof(ReadVariableFromFileAction));
 
     public override string Name => LanguageManager.Strings.ActionReadVariableFromFile;
 
@@ -291,7 +291,7 @@ public class ReadVariableFromFileAction : PluginAction
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Failed to read variable value from file");
+            Logger.Error(ex, "Failed to read variable value from file");
         }
     }
 

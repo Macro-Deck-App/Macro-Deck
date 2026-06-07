@@ -16,7 +16,7 @@ namespace SuchByte.MacroDeck.GUI;
 
 public partial class IconSelector : DialogForm
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(IconSelector));
+    private static readonly ILogger Logger = Log.ForContext(typeof(IconSelector));
 
     public Icon SelectedIcon;
     public IconPack SelectedIconPack;
@@ -118,7 +118,7 @@ public partial class IconSelector : DialogForm
 
         Task.Run(() =>
         {
-            logger.Information($"Starting importing {openFileDialog.FileNames.Length} icon(s)");
+            Logger.Information($"Starting importing {openFileDialog.FileNames.Length} icon(s)");
             if (iconImportQuality.Pixels == -1)
             {
                 foreach (var file in openFileDialog.FileNames)
@@ -126,11 +126,11 @@ public partial class IconSelector : DialogForm
                     try
                     {
                         icons.Add(Image.FromFile(file));
-                        logger.Debug("Original image loaded");
+                        Logger.Debug("Original image loaded");
                     }
                     catch (Exception ex)
                     {
-                        logger.Error(ex, "Error while loading original image");
+                        Logger.Error(ex, "Error while loading original image");
                     }
                 }
             }
@@ -140,7 +140,7 @@ public partial class IconSelector : DialogForm
                 {
                     try
                     {
-                        logger.Debug("Using Magick to resize image");
+                        Logger.Debug("Using Magick to resize image");
                         using (var collection = new MagickImageCollection(new FileInfo(file)))
                         {
                             collection.Coalesce();
@@ -158,11 +158,11 @@ public partial class IconSelector : DialogForm
                             }
                         }
 
-                        logger.Debug("Image successfully resized");
+                        Logger.Debug("Image successfully resized");
                     }
                     catch (Exception ex)
                     {
-                        logger.Error(ex, "Failed to resize image");
+                        Logger.Error(ex, "Failed to resize image");
                     }
                 }
             }
@@ -172,12 +172,12 @@ public partial class IconSelector : DialogForm
 
             if (iconPack == null)
             {
-                logger.Error("Icon pack was null");
+                Logger.Error("Icon pack was null");
                 SpinnerDialog.SetVisisble(false, this);
                 return;
             }
 
-            logger.Information($"Adding {icons.Count} icons to {iconPack.Name}");
+            Logger.Information($"Adding {icons.Count} icons to {iconPack.Name}");
             var gifIcons = new List<Image>();
             gifIcons.AddRange(icons.FindAll(x => x.RawFormat.ToString().ToLower() == "gif").ToArray());
             var convertGifToStatic = false;
@@ -191,7 +191,7 @@ public partial class IconSelector : DialogForm
                             MessageBoxButtons.YesNo) ==
                         DialogResult.Yes;
                 });
-                logger.Information("Convert gif to static? " + convertGifToStatic);
+                Logger.Information("Convert gif to static? " + convertGifToStatic);
             }
 
             foreach (var icon in icons)
@@ -209,7 +209,7 @@ public partial class IconSelector : DialogForm
             }
 
             Invoke(() => LoadIcons(iconPack, true));
-            logger.Information("Icons successfully imported");
+            Logger.Information("Icons successfully imported");
             SpinnerDialog.SetVisisble(false, this);
         });
     }

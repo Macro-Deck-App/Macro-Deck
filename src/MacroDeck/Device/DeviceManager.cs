@@ -11,7 +11,7 @@ namespace SuchByte.MacroDeck.Device;
 
 public class DeviceManager
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(DeviceManager));
+    private static readonly ILogger Logger = Log.ForContext(typeof(DeviceManager));
 
     private static List<MacroDeckDevice> _macroDeckDevices = new();
     private static readonly object _saveLock = new();
@@ -37,7 +37,7 @@ public class DeviceManager
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "devices.json is corrupted and will be reset");
+            Logger.Error(ex, "devices.json is corrupted and will be reset");
             try
             {
                 File.Delete(ApplicationPaths.DevicesFilePath);
@@ -76,7 +76,7 @@ public class DeviceManager
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error while saving known devices");
+            Logger.Error(ex, "Error while saving known devices");
         }
     }
 

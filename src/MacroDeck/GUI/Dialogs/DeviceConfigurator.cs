@@ -8,7 +8,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs;
 
 public partial class DeviceConfigurator : DialogForm
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(DeviceConfigurator));
+    private static readonly ILogger Logger = Log.ForContext(typeof(DeviceConfigurator));
 
     private MacroDeckDevice _macroDeckDevice;
 
@@ -70,7 +70,7 @@ public partial class DeviceConfigurator : DialogForm
 
     private void CheckAutoConnect_CheckedChanged(object sender, EventArgs e)
     {
-        logger.Debug($"Set auto connect to {checkAutoConnect.Checked}");
+        Logger.Debug($"Set auto connect to {checkAutoConnect.Checked}");
         if (_macroDeckDevice == null || !_macroDeckDevice.Available)
         {
             return;
@@ -86,7 +86,7 @@ public partial class DeviceConfigurator : DialogForm
     {
         if (radioKeepAwakeNever.Checked)
         {
-            logger.Debug("Set keepWake to never");
+            Logger.Debug("Set keepWake to never");
             if (_macroDeckDevice == null || !_macroDeckDevice.Available)
             {
                 return;
@@ -103,7 +103,7 @@ public partial class DeviceConfigurator : DialogForm
     {
         if (radioKeepAwakeConnected.Checked)
         {
-            logger.Debug("Set keepWake to connected");
+            Logger.Debug("Set keepWake to connected");
             if (_macroDeckDevice == null || !_macroDeckDevice.Available)
             {
                 return;
@@ -120,7 +120,7 @@ public partial class DeviceConfigurator : DialogForm
     {
         if (radioKeepAwakeAlways.Checked)
         {
-            logger.Debug("Set keepWake to always");
+            Logger.Debug("Set keepWake to always");
             if (_macroDeckDevice == null || !_macroDeckDevice.Available)
             {
                 return;

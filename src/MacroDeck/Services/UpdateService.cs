@@ -14,7 +14,7 @@ namespace SuchByte.MacroDeck.Services;
 
 public class UpdateService : IDisposable
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(UpdateService));
+    private static readonly ILogger Logger = Log.ForContext(typeof(UpdateService));
 
     // Make UpdateService singleton
     private static UpdateService? _instance;
@@ -128,7 +128,7 @@ public class UpdateService : IDisposable
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Failed to automatically check for updates");
+                Logger.Error(ex, "Failed to automatically check for updates");
             }
 
             Thread.Sleep(TimeSpan.FromMinutes(30));

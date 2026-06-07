@@ -7,7 +7,7 @@ namespace SuchByte.MacroDeck;
 
 internal class Program
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(Program));
+    private static readonly ILogger Logger = Log.ForContext(typeof(Program));
 
     [STAThread]
     private static void Main(string[] args)
@@ -27,8 +27,8 @@ internal class Program
 
         ApplicationPaths.Initialize(startParameters.PortableMode);
 
-        // Build the Serilog logger up-front so logging is live from the very start of the
-        // application; the ASP.NET host later reuses this same static logger.
+        // Build the Serilog Logger.up-front so logging is live from the very start of the
+        // application; the ASP.NET host later reuses this same static Logger.
         Log.Logger = LoggingConfig.CreateLogger();
 
         MacroDeck.Start(startParameters);
@@ -67,11 +67,11 @@ internal class Program
 
     private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        logger.Error(e.ExceptionObject as Exception, "Unhandled domain exception: {ExceptionObject}", e.ExceptionObject);
+        Logger.Error(e.ExceptionObject as Exception, "Unhandled domain exception: {ExceptionObject}", e.ExceptionObject);
     }
 
     private static void ApplicationThreadException(object sender, ThreadExceptionEventArgs e)
     {
-        logger.Error(e.Exception, "Unhandled thread exception");
+        Logger.Error(e.Exception, "Unhandled thread exception");
     }
 }

@@ -6,7 +6,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.Notifications;
 
 public partial class NotificationItem : RoundedUserControl
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(NotificationItem));
+    private static readonly ILogger Logger = Log.ForContext(typeof(NotificationItem));
 
     public string Id { get; private set; }
 
@@ -14,7 +14,7 @@ public partial class NotificationItem : RoundedUserControl
 
     public void ClearAdditionalControls()
     {
-        logger.Debug("Clear");
+        Logger.Debug("Clear");
         if (InvokeRequired)
         {
             Invoke(() => ClearAdditionalControls());

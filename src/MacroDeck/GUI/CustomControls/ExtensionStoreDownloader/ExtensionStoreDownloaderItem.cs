@@ -15,7 +15,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionStoreDownloader;
 
 public partial class ExtensionStoreDownloaderItem : RoundedUserControl
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(ExtensionStoreDownloaderItem));
+    private static readonly ILogger Logger = Log.ForContext(typeof(ExtensionStoreDownloaderItem));
 
     public ExtensionStoreDownloaderPackageInfoModel PackageInfo { get; }
 
@@ -42,7 +42,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
         }
         catch (Exception ex)
         {
-            logger.Error(ex.Message);
+            Logger.Error(ex.Message);
             Invoke(() => { lblStatus.Text = LanguageManager.Strings.Error; });
             Cancel();
         }
@@ -134,7 +134,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
         if (!File.Exists(_destinationFileName))
         {
             Finished();
-            logger.Error(
+            Logger.Error(
                 $"Download of {ApiV2Extension.Name} failed: {ApiV2Extension.PackageId ?? "unknown.zip"} not found");
             return;
         }
@@ -143,7 +143,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
         if (!expectedFileHash.Equals(hash))
         {
             Finished();
-            logger.Error(
+            Logger.Error(
                 $"Checksum of {ApiV2Extension.Name} not matching!" +
                 Environment.NewLine +
                 $"Checksum on server: {expectedFileHash}" +
@@ -152,7 +152,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
             return;
         }
 
-        logger.Information($"Start installation of {ApiV2Extension.Name} version latest");
+        Logger.Information($"Start installation of {ApiV2Extension.Name} version latest");
 
 
         ExtensionManifestModel extensionManifestModel;
@@ -163,7 +163,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error while deserializing ExtensionManifest for {ExtensionName}", ApiV2Extension.Name);
+            Logger.Error(ex, "Error while deserializing ExtensionManifest for {ExtensionName}", ApiV2Extension.Name);
             Finished();
             return;
         }
@@ -182,7 +182,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex, "Error while installing {ExtensionName}", ApiV2Extension.Name);
+                    Logger.Error(ex, "Error while installing {ExtensionName}", ApiV2Extension.Name);
                     Finished();
                     return;
                 }
@@ -195,7 +195,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex, "Error while installing {ExtensionName}", ApiV2Extension.Name);
+                    Logger.Error(ex, "Error while installing {ExtensionName}", ApiV2Extension.Name);
                     Finished();
                     return;
                 }

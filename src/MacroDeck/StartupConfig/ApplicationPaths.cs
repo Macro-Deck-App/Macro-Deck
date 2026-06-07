@@ -5,7 +5,7 @@ namespace SuchByte.MacroDeck.StartupConfig;
 
 public class ApplicationPaths
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(ApplicationPaths));
+    private static readonly ILogger Logger = Log.ForContext(typeof(ApplicationPaths));
 
     private static bool _portableMode;
 
@@ -61,7 +61,7 @@ public class ApplicationPaths
 
     private static void CheckPaths()
     {
-        logger.Information("Checking paths...");
+        Logger.Information("Checking paths...");
 
         void CheckCreatePath(string? path)
         {
@@ -78,11 +78,11 @@ public class ApplicationPaths
             try
             {
                 Directory.CreateDirectory(path);
-                logger.Information("Created {Path}", path);
+                Logger.Information("Created {Path}", path);
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Failed to create {Path}", path);
+                Logger.Error(ex, "Failed to create {Path}", path);
             }
         }
 
@@ -95,7 +95,7 @@ public class ApplicationPaths
         CheckCreatePath(IconPackDirectoryPath);
         CheckCreatePath(TempDirectoryPath);
 
-        logger.Information("Checking paths done");
+        Logger.Information("Checking paths done");
     }
 
     public static void CleanUpTempDirectory()
@@ -119,7 +119,7 @@ public class ApplicationPaths
                 }
                 catch (Exception ex)
                 {
-                    logger.Warning(ex, "Failed to delete temp file");
+                    Logger.Warning(ex, "Failed to delete temp file");
                 }
             }
 
@@ -131,7 +131,7 @@ public class ApplicationPaths
                 }
                 catch (Exception ex)
                 {
-                    logger.Warning(ex, "Failed to delete temp dir");
+                    Logger.Warning(ex, "Failed to delete temp dir");
                 }
             }
         }

@@ -14,9 +14,9 @@ public static class LoggingConfig
         "[{Timestamp:HH:mm:ss} {Level:u3}] [{Source}] {Message:lj}{NewLine}{Exception}";
 
     /// <summary>
-    /// Builds the application-wide Serilog logger. It is assigned to <see cref="Log.Logger"/>
+    /// Builds the application-wide Serilog Logger. It is assigned to <see cref="Log.Logger"/>
     /// early during startup so logging is live from the beginning; the ASP.NET host reuses the
-    /// same static logger through <see cref="ConfigureSerilog"/>.
+    /// same static Logger.through <see cref="ConfigureSerilog"/>.
     /// </summary>
     public static ILogger CreateLogger()
     {

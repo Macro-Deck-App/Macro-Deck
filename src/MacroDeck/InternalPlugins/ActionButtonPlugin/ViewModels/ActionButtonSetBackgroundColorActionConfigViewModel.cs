@@ -10,7 +10,7 @@ namespace SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.ViewModels;
 
 public class ActionButtonSetBackgroundColorActionConfigViewModel : ISerializableConfigViewModel
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(ActionButtonSetBackgroundColorActionConfigViewModel));
+    private static readonly ILogger Logger = Log.ForContext(typeof(ActionButtonSetBackgroundColorActionConfigViewModel));
 
     private readonly PluginAction _pluginAction;
 
@@ -42,11 +42,11 @@ public class ActionButtonSetBackgroundColorActionConfigViewModel : ISerializable
         try
         {
             SetConfig();
-            logger.Information("config saved");
+            Logger.Information("config saved");
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error while saving config");
+            Logger.Error(ex, "Error while saving config");
         }
 
         return true;

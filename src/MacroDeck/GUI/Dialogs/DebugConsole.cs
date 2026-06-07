@@ -12,7 +12,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs;
 
 public partial class DebugConsole : Form
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(DebugConsole));
+    private static readonly ILogger Logger = Log.ForContext(typeof(DebugConsole));
 
     /// <summary>
     /// The currently open debug console, or null. Used by <see cref="Logging.DebugConsoleSink"/>
@@ -165,7 +165,7 @@ public partial class DebugConsole : Form
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Could not determine the newest log file");
+            Logger.Error(ex, "Could not determine the newest log file");
         }
 
         try
@@ -181,7 +181,7 @@ public partial class DebugConsole : Form
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Could not open logs");
+            Logger.Error(ex, "Could not open logs");
         }
     }
 
@@ -206,11 +206,11 @@ public partial class DebugConsole : Form
             try
             {
                 logOutput.SaveFile(saveFileDialog.FileName, RichTextBoxStreamType.PlainText);
-                logger.Information("Successfully exported debug console output to: " + saveFileDialog.FileName);
+                Logger.Information("Successfully exported debug console output to: " + saveFileDialog.FileName);
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Error while exporting debug console output");
+                Logger.Error(ex, "Error while exporting debug console output");
             }
         }
     }

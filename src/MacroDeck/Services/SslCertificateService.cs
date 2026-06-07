@@ -7,7 +7,7 @@ namespace SuchByte.MacroDeck.Services;
 
 public static class SslCertificateService
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(SslCertificateService));
+    private static readonly ILogger Logger = Log.ForContext(typeof(SslCertificateService));
 
     public static void EnsureValidCertificate()
     {
@@ -22,10 +22,10 @@ public static class SslCertificateService
             return;
         }
 
-        logger.Information("No SSL certificate configured – generating self-signed certificate");
+        Logger.Information("No SSL certificate configured – generating self-signed certificate");
         var (certPem, keyPem) = SelfSignedCertificateGenerator.Generate();
         SaveCertificate(certPem, keyPem);
-        logger.Information("Self-signed certificate generated and saved");
+        Logger.Information("Self-signed certificate generated and saved");
     }
 
     public static X509Certificate2? GetX509Certificate()
@@ -48,7 +48,7 @@ public static class SslCertificateService
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Failed to load SSL certificate");
+            Logger.Error(ex, "Failed to load SSL certificate");
             return null;
         }
     }

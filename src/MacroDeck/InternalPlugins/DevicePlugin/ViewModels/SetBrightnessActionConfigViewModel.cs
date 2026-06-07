@@ -10,7 +10,7 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.ViewModels;
 
 public class SetBrightnessActionConfigViewModel : ISerializableConfigViewModel
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(SetBrightnessActionConfigViewModel));
+    private static readonly ILogger Logger = Log.ForContext(typeof(SetBrightnessActionConfigViewModel));
 
     private readonly PluginAction _action;
 
@@ -41,11 +41,11 @@ public class SetBrightnessActionConfigViewModel : ISerializableConfigViewModel
         try
         {
             SetConfig();
-            logger.Information("config saved");
+            Logger.Information("config saved");
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error while saving config");
+            Logger.Error(ex, "Error while saving config");
             return false;
         }
 

@@ -9,7 +9,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView;
 
 public partial class ExtensionZipInstallerView : UserControl
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(ExtensionZipInstallerView));
+    private static readonly ILogger Logger = Log.ForContext(typeof(ExtensionZipInstallerView));
 
     public event EventHandler RequestClose;
 
@@ -43,7 +43,7 @@ public partial class ExtensionZipInstallerView : UserControl
         catch (Exception)
         {
             btnInstall.Enabled = false;
-            logger.Error("Invalid or corrupt zip archive provided for installation");
+            Logger.Error("Invalid or corrupt zip archive provided for installation");
         }
     }
 
@@ -68,7 +68,7 @@ public partial class ExtensionZipInstallerView : UserControl
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Failed to install archived plugin {ZipPath}", txtZipPath.Text);
+            Logger.Error(ex, "Failed to install archived plugin {ZipPath}", txtZipPath.Text);
         }
     }
 

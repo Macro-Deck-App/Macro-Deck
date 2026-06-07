@@ -8,7 +8,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView;
 
 public partial class ExtensionStoreView : UserControl
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(ExtensionStoreView));
+    private static readonly ILogger Logger = Log.ForContext(typeof(ExtensionStoreView));
 
     private int _pages;
     private int _currentPage = 1;
@@ -59,7 +59,7 @@ public partial class ExtensionStoreView : UserControl
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error while loading extensions from the extension store");
+            Logger.Error(ex, "Error while loading extensions from the extension store");
         }
         finally
         {

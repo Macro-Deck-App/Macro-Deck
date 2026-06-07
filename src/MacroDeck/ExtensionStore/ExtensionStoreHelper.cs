@@ -16,7 +16,7 @@ namespace SuchByte.MacroDeck.ExtensionStore;
 
 public class ExtensionStoreHelper
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(ExtensionStoreHelper));
+    private static readonly ILogger Logger = Log.ForContext(typeof(ExtensionStoreHelper));
 
     public static event EventHandler OnUpdateCheckFinished;
 
@@ -175,12 +175,12 @@ public class ExtensionStoreHelper
                 return false;
             }
 
-            logger.Information("Update available for {PackageId}", packageId);
+            Logger.Information("Update available for {PackageId}", packageId);
             return true;
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Failed to check for updates for {PackageId}", packageId);
+            Logger.Error(ex, "Failed to check for updates for {PackageId}", packageId);
         }
 
         return false;

@@ -6,7 +6,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs;
 
 public partial class JsonButtonEditor : DialogForm
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(JsonButtonEditor));
+    private static readonly ILogger Logger = Log.ForContext(typeof(JsonButtonEditor));
 
     private static JsonSerializerSettings jsonSerializerSettings = new()
     {
@@ -15,7 +15,7 @@ public partial class JsonButtonEditor : DialogForm
         Formatting = Formatting.Indented,
         Error = (sender, args) =>
         {
-            logger.Warning(args.ErrorContext.Error.Message);
+            Logger.Warning(args.ErrorContext.Error.Message);
             args.ErrorContext.Handled = true;
         }
     };

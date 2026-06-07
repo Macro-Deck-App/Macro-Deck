@@ -9,7 +9,7 @@ namespace SuchByte.MacroDeck.Server.DeviceMessage;
 
 public class SoftwareClientMessage : IDeviceMessage
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(SoftwareClientMessage));
+    private static readonly ILogger Logger = Log.ForContext(typeof(SoftwareClientMessage));
 
     public void Connected(MacroDeckClient macroDeckClient)
     {
@@ -117,7 +117,7 @@ public class SoftwareClientMessage : IDeviceMessage
                 DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).Configuration.WakeLockMethod),
             SupportButtonReleaseLongPress = true
         });
-        logger.Debug("{Configuration}", configurationObject.ToString());
+        Logger.Debug("{Configuration}", configurationObject.ToString());
         MacroDeckServer.Send(macroDeckClient, configurationObject);
     }
 

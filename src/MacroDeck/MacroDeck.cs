@@ -30,7 +30,7 @@ namespace SuchByte.MacroDeck;
 
 public class MacroDeck : NativeWindow
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(MacroDeck));
+    private static readonly ILogger Logger = Log.ForContext(typeof(MacroDeck));
 
     public static Version Version =
         Version.Parse(FileVersionInfo.GetVersionInfo(ApplicationPaths.ExecutablePath).ProductVersion);
@@ -80,9 +80,9 @@ public class MacroDeck : NativeWindow
             DebugConsole.Launch();
         }
 
-        logger.Information("Macro Deck {Version}", Version);
-        logger.Information("Path: {ExecutablePath}", ApplicationPaths.ExecutablePath);
-        logger.Information("Start parameters: {StartParameters}", string.Join(" ", StartParameters.ToArray(StartParameters)));
+        Logger.Information("Macro Deck {Version}", Version);
+        Logger.Information("Path: {ExecutablePath}", ApplicationPaths.ExecutablePath);
+        Logger.Information("Start parameters: {StartParameters}", string.Join(" ", StartParameters.ToArray(StartParameters)));
 
         MacroDeckLogger.CleanUpLogsDir();
 
@@ -131,7 +131,7 @@ public class MacroDeck : NativeWindow
         StartUpTimeStopWatch.Stop();
 
         var startTook = StartUpTimeStopWatch.Elapsed.TotalMilliseconds;
-        logger.Information("Macro Deck startup finished (took {StartupDurationMs}ms)", startTook);
+        Logger.Information("Macro Deck startup finished (took {StartupDurationMs}ms)", startTook);
 
         OnMacroDeckLoaded?.Invoke(null, EventArgs.Empty);
 
@@ -189,22 +189,22 @@ public class MacroDeck : NativeWindow
         }
         catch (Exception ex)
         {
-            logger.Warning(ex, "Error while searching for network interfaces");
+            Logger.Warning(ex, "Error while searching for network interfaces");
         }
 
         if (foundNetworkInterfaces == 0)
         {
-            logger.Error("No network interfaces were found");
+            Logger.Error("No network interfaces were found");
         }
         else
         {
-            logger.Information("Found network interfaces:\n{NetworkInterfaces}", sb);
+            Logger.Information("Found network interfaces:\n{NetworkInterfaces}", sb);
         }
     }
 
     private static void StartInitialSetup()
     {
-        logger.Information("Entering initial setup wizard...");
+        Logger.Information("Entering initial setup wizard...");
         // Start initial setup
         using var initialSetup = new InitialSetup();
         Application.Run(initialSetup);
@@ -262,7 +262,7 @@ public class MacroDeck : NativeWindow
         var arguments = (_mainWindow is { IsDisposed: false } ? "--show " : "") +
             parameters +
             $" --ignore-pid-check {Process.GetCurrentProcess().Id}";
-        logger.Information("Restart Macro Deck with arguments: {Arguments}", arguments);
+        Logger.Information("Restart Macro Deck with arguments: {Arguments}", arguments);
         var p = new Process
         {
             StartInfo = new ProcessStartInfo(ApplicationPaths.ExecutablePath)

@@ -18,7 +18,7 @@ namespace SuchByte.MacroDeck.Profiles;
 
 public static class ProfileManager
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(ProfileManager));
+    private static readonly ILogger Logger = Log.ForContext(typeof(ProfileManager));
 
     public static event EventHandler? ProfilesSaved;
     public static event EventHandler? ProfileCreated;
@@ -165,7 +165,7 @@ public static class ProfileManager
 
     internal static void Load()
     {
-        logger.Information("Loading profiles...");
+        Logger.Information("Loading profiles...");
         Profiles = new List<MacroDeckProfile>();
         var databasePath = ApplicationPaths.ProfilesFilePath;
 
@@ -185,7 +185,7 @@ public static class ProfileManager
                     NullValueHandling = NullValueHandling.Ignore,
                     Error = (sender, args) =>
                     {
-                        logger.Error(args.ErrorContext.Error, "Error while deserializing the profiles file");
+                        Logger.Error(args.ErrorContext.Error, "Error while deserializing the profiles file");
                         args.ErrorContext.Handled = true;
                     },
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
@@ -262,7 +262,7 @@ public static class ProfileManager
             }
         }
 
-        logger.Information("Loaded {ProfileCount} profiles", Profiles.Count);
+        Logger.Information("Loaded {ProfileCount} profiles", Profiles.Count);
     }
 
     public static void Save()
@@ -287,7 +287,7 @@ public static class ProfileManager
                     NullValueHandling = NullValueHandling.Ignore,
                     Error = (sender, args) =>
                     {
-                        logger.Error(args.ErrorContext.Error, "Error while serializing the profiles");
+                        Logger.Error(args.ErrorContext.Error, "Error while serializing the profiles");
                         args.ErrorContext.Handled = true;
                     },
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
@@ -303,7 +303,7 @@ public static class ProfileManager
 
         db.Execute("VACUUM");
         db.Close();
-        logger.Debug("Saved {ProfileCount} profiles", Profiles.Count);
+        Logger.Debug("Saved {ProfileCount} profiles", Profiles.Count);
         ProfilesSaved?.Invoke(Profiles, EventArgs.Empty);
     }
 
@@ -329,7 +329,7 @@ public static class ProfileManager
 
         macroDeckProfile.Folders.Add(newFolder);
 
-        logger.Information("Created folder {FolderName} in {ProfileName}", displayName, macroDeckProfile.DisplayName);
+        Logger.Information("Created folder {FolderName} in {ProfileName}", displayName, macroDeckProfile.DisplayName);
 
         Save();
 
@@ -381,7 +381,7 @@ public static class ProfileManager
             folders.Childs.Remove(folder.FolderId);
         }
 
-        logger.Information("Delete {FolderName} in {ProfileName}", folder.DisplayName, macroDeckProfile.DisplayName);
+        Logger.Information("Delete {FolderName} in {ProfileName}", folder.DisplayName, macroDeckProfile.DisplayName);
 
         macroDeckProfile.Folders.Remove(folder);
         Save();
@@ -424,7 +424,7 @@ public static class ProfileManager
 
         ProfileCreated?.Invoke(newProfile, EventArgs.Empty);
 
-        logger.Information("Created profile {ProfileName}", displayName);
+        Logger.Information("Created profile {ProfileName}", displayName);
 
         return newProfile;
     }
@@ -452,7 +452,7 @@ public static class ProfileManager
             DeviceManager.SetProfile(macroDeckDevice, Profiles[0]);
         }
 
-        logger.Information("Delete profile {ProfileName}", macroDeckProfile.DisplayName);
+        Logger.Information("Delete profile {ProfileName}", macroDeckProfile.DisplayName);
 
         macroDeckProfile.Dispose();
 

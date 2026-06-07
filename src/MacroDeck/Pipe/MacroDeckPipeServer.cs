@@ -6,13 +6,13 @@ namespace SuchByte.MacroDeck.Pipe;
 
 public class MacroDeckPipeServer
 {
-    private static readonly ILogger logger = Log.ForContext(typeof(MacroDeckPipeServer));
+    private static readonly ILogger Logger = Log.ForContext(typeof(MacroDeckPipeServer));
 
     public static event Action<string>? PipeMessage;
 
     public static void Initialize()
     {
-        logger.Information("Initializing pipe server");
+        Logger.Information("Initializing pipe server");
         Task.Run(async () => await HandleConnections().ConfigureAwait(false));
     }
 
@@ -31,7 +31,7 @@ public class MacroDeckPipeServer
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Failed to handle pipe connection");
+                Logger.Error(ex, "Failed to handle pipe connection");
             }
             finally
             {
