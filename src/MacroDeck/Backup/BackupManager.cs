@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using System.IO.Compression;
 using System.Text.Json;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.StartupConfig;
+using Serilog;
 using SuchByte.MacroDeck.Utils;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
@@ -15,6 +15,8 @@ public class BackupFailedEventArgs : EventArgs
 
 public class BackupManager
 {
+    private static readonly ILogger Logger = Log.ForContext(typeof(BackupManager));
+
     private static bool BackupInProgress;
 
     public static event EventHandler BackupSaved;
@@ -65,13 +67,14 @@ public class BackupManager
         {
             try
             {
-                File.Copy(Path.Combine(restoreDirectory, Path.GetFileName((string?)ApplicationPaths.MainConfigFilePath)),
+                File.Copy(
+                    Path.Combine(restoreDirectory, Path.GetFileName((string?)ApplicationPaths.MainConfigFilePath)),
                     ApplicationPaths.MainConfigFilePath,
                     true);
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error("Backup (config) restore failed: " + ex.Message);
+                Logger.Error(ex, "Backup (config) restore failed");
             }
         }
 
@@ -86,7 +89,7 @@ public class BackupManager
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error("Backup (profiles) restore failed: " + ex.Message);
+                Logger.Error(ex, "Backup (profiles) restore failed");
             }
         }
 
@@ -101,7 +104,7 @@ public class BackupManager
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error("Backup (devices) restore failed: " + ex.Message);
+                Logger.Error(ex, "Backup (devices) restore failed");
             }
         }
 
@@ -116,7 +119,7 @@ public class BackupManager
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error("Backup (variables) restore failed: " + ex.Message);
+                Logger.Error(ex, "Backup (variables) restore failed");
             }
         }
 
@@ -138,7 +141,7 @@ public class BackupManager
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error("Backup (plugins) restore failed: " + ex.Message);
+                Logger.Error(ex, "Backup (plugins) restore failed");
             }
         }
 
@@ -159,7 +162,7 @@ public class BackupManager
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error("Backup (plugin configs) restore failed: " + ex.Message);
+                Logger.Error(ex, "Backup (plugin configs) restore failed");
             }
         }
 
@@ -181,7 +184,7 @@ public class BackupManager
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error("Backup (plugin credentials) restore failed: " + ex.Message);
+                Logger.Error(ex, "Backup (plugin credentials) restore failed");
             }
         }
 
@@ -203,11 +206,11 @@ public class BackupManager
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error("Backup (icon packs) restore failed: " + ex.Message);
+                Logger.Error(ex, "Backup (icon packs) restore failed");
             }
         }
 
-        MacroDeckLogger.Info("Backup successfully restored");
+        Logger.Information("Backup successfully restored");
         using var msgBox = new MessageBox();
         msgBox.ShowDialog("Backup restored", "Backup successfully restored", MessageBoxButtons.OK);
     }
@@ -237,7 +240,7 @@ public class BackupManager
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error("Backup restoration failed: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            Logger.Error(ex, "Backup restoration failed");
         }
 
         try
@@ -253,7 +256,7 @@ public class BackupManager
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error("Backup restoration failed: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            Logger.Error(ex, "Backup restoration failed");
         }
     }
 
@@ -267,7 +270,7 @@ public class BackupManager
 
         BackupInProgress = true;
         var backupFileName = $"backup_{DateTime.Now:yy-MM-dd_HH-mm-ss}.zip";
-        MacroDeckLogger.Info("Starting creation of backup: " + backupFileName);
+        Logger.Information("Starting creation of backup: {BackupFileName}", backupFileName);
 
         var tempBackupPath = Path.Combine(ApplicationPaths.TempDirectoryPath, backupFileName);
         try
@@ -283,12 +286,12 @@ public class BackupManager
                 Path.Combine(tempBackupPath, Path.GetFileName((string?)ApplicationPaths.VariablesFilePath)));
             CreateBackup(backupFileName, tempBackupPath);
 
-            MacroDeckLogger.Info("Backup successfully created: " + backupFileName);
+            Logger.Information("Backup successfully created: {BackupFileName}", backupFileName);
             BackupSaved?.Invoke(null, EventArgs.Empty);
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error("Backup creation failed: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            Logger.Error(ex, "Backup creation failed");
             BackupFailed?.Invoke(null, new BackupFailedEventArgs { Message = ex.Message });
         }
         finally
@@ -352,12 +355,12 @@ public class BackupManager
             try
             {
                 File.Delete(fileName);
-                MacroDeckLogger.Info("Backup successfully deleted: " + fileName);
+                Logger.Information("Backup successfully deleted: {FileName}", fileName);
                 DeleteSuccess?.Invoke(null, EventArgs.Empty);
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error("Backup deletion failed: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                Logger.Error(ex, "Backup deletion failed");
             }
         }
     }

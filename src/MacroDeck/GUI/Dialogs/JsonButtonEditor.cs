@@ -1,11 +1,13 @@
 ﻿using Newtonsoft.Json;
+using Serilog;
 using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.Logging;
 
 namespace SuchByte.MacroDeck.GUI.Dialogs;
 
 public partial class JsonButtonEditor : DialogForm
 {
+    private static readonly ILogger Logger = Log.ForContext(typeof(JsonButtonEditor));
+
     private static JsonSerializerSettings jsonSerializerSettings = new()
     {
         TypeNameHandling = TypeNameHandling.Auto,
@@ -13,7 +15,7 @@ public partial class JsonButtonEditor : DialogForm
         Formatting = Formatting.Indented,
         Error = (sender, args) =>
         {
-            MacroDeckLogger.Warning(typeof(JsonButtonEditor), args.ErrorContext.Error.Message);
+            Logger.Warning(args.ErrorContext.Error.Message);
             args.ErrorContext.Handled = true;
         }
     };

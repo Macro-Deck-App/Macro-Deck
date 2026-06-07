@@ -1,8 +1,4 @@
-﻿using System.IO;
-using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
-
-namespace SuchByte.MacroDeck.GUI.CustomControls;
+﻿namespace SuchByte.MacroDeck.GUI.CustomControls;
 
 public partial class Form : System.Windows.Forms.Form
 {
@@ -35,35 +31,5 @@ public partial class Form : System.Windows.Forms.Form
         }
 
         return base.ProcessCmdKey(ref msg, keyData);
-    }
-
-    private void HelpMenuExportLog_Click(object sender, EventArgs e)
-    {
-        using var saveFileDialog = new SaveFileDialog
-        {
-            AddExtension = true,
-            Filter = "*.log|*.log",
-            DefaultExt = ".log",
-            FileName = new FileInfo(MacroDeckLogger.CurrentFilename).Name
-        };
-        if (saveFileDialog.ShowDialog() != DialogResult.OK)
-        {
-            return;
-        }
-
-        try
-        {
-            File.Copy(MacroDeckLogger.CurrentFilename, saveFileDialog.FileName, true);
-            MacroDeckLogger.Info(GetType(), $"Exported latest log to {saveFileDialog.FileName}");
-            using var msgBox = new MessageBox();
-            msgBox.ShowDialog(LanguageManager.Strings.ExportLatestLog,
-                string.Format(LanguageManager.Strings.LogSuccessfullyExportedToX, saveFileDialog.FileName),
-                MessageBoxButtons.OK);
-        }
-        catch (Exception ex)
-        {
-            MacroDeckLogger.Error(GetType(),
-                "Error while exporting latest log: " + ex.Message + Environment.NewLine + ex.StackTrace);
-        }
     }
 }

@@ -3,8 +3,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using Newtonsoft.Json;
+using Serilog;
 using SuchByte.MacroDeck.ExtensionStore;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.StartupConfig;
 using SuchByte.MacroDeck.Utils;
@@ -13,6 +13,8 @@ namespace SuchByte.MacroDeck.Icons;
 
 public class IconManager
 {
+    private static readonly ILogger Logger = Log.ForContext(typeof(IconManager));
+
     public static List<IconPack> IconPacks = new();
     public static List<IconPack> IconPacksUpdateAvailable = new();
 
@@ -37,7 +39,7 @@ public class IconManager
     private static void LoadIconPacks()
     {
         IconPacks.Clear();
-        MacroDeckLogger.Info(typeof(IconManager), "Loading icon packs...");
+        Logger.Information("Loading icon packs...");
         foreach (var iconPackDir in Directory.GetDirectories(ApplicationPaths.IconPackDirectoryPath))
         {
             LoadIconPack(iconPackDir);
@@ -48,7 +50,7 @@ public class IconManager
             CreateIconPack("My Icons", Environment.UserName, "1.0.0");
         }
 
-        MacroDeckLogger.Info(typeof(IconManager), $"Loaded {IconPacks.Count} icon packs");
+        Logger.Information("Loaded {IconPackCount} icon packs", IconPacks.Count);
     }
 
     public static bool LoadIconPack(string path)
@@ -106,7 +108,7 @@ public class IconManager
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Warning(typeof(IconManager), $"Failed to load icon: {ex.Message}");
+                Logger.Warning(ex, "Failed to load icon");
             }
         }
 
@@ -187,8 +189,7 @@ public class IconManager
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(
-                "Failed to add icon to icon pack: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            Logger.Error(ex, "Failed to add icon to icon pack");
         }
 
         return null;
@@ -216,7 +217,7 @@ public class IconManager
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(typeof(IconManager), $"Error while exporting icon pack: {ex.Message}");
+            Logger.Error(ex, "Error while exporting icon pack");
         }
     }
 
@@ -239,7 +240,7 @@ public class IconManager
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Warning(typeof(IconManager), $"Unable to delete icon pack: {ex.Message}");
+            Logger.Warning(ex, "Unable to delete icon pack");
         }
     }
 
@@ -295,11 +296,11 @@ public class IconManager
             using JsonWriter writer = new JsonTextWriter(sw);
             serializer.Serialize(writer, extensionManifestModel);
 
-            MacroDeckLogger.Info(typeof(IconManager), "ExtensionManifest saved");
+            Logger.Information("ExtensionManifest saved");
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(typeof(IconManager), $"Failed to save ExtensionManifest: {ex.Message}");
+            Logger.Error(ex, "Failed to save ExtensionManifest");
         }
     }
 
@@ -326,13 +327,13 @@ public class IconManager
             var extensionManifestModel = ExtensionManifestModel.FromZipFilePath(location);
             if (extensionManifestModel == null)
             {
-                MacroDeckLogger.Error(typeof(IconManager), $"{location} does not contain a manifest file!");
+                Logger.Error("{Location} does not contain a manifest file!", location);
                 return null;
             }
 
             if (extensionManifestModel.Type != ExtensionType.IconPack)
             {
-                MacroDeckLogger.Error(typeof(IconManager), $"{extensionManifestModel.PackageId} is not a icon pack!");
+                Logger.Error("{PackageId} is not a icon pack!", extensionManifestModel.PackageId);
                 return null;
             }
 
@@ -379,18 +380,18 @@ public class IconManager
                         x.PackageId.Equals(extensionManifestModel.PackageId)));
                 }
 
-                MacroDeckLogger.Info(typeof(IconManager), $"Successfully installed {extensionManifestModel.PackageId}");
+                Logger.Information("Successfully installed {PackageId}", extensionManifestModel.PackageId);
                 var iconPack = GetIconPackByName(extensionManifestModel.Name);
                 InstallationFinished?.Invoke(iconPack, EventArgs.Empty);
                 return iconPack;
             }
 
-            MacroDeckLogger.Error(typeof(IconManager), $"{extensionManifestModel.PackageId} is maybe corruped");
+            Logger.Error("{PackageId} is maybe corruped", extensionManifestModel.PackageId);
             return null;
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(typeof(IconManager), $"Error while installing icon pack from zip: {ex.Message}");
+            Logger.Error(ex, "Error while installing icon pack from zip");
         }
 
         return null;

@@ -5,8 +5,8 @@ using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowViews;
 using SuchByte.MacroDeck.Icons;
+using Serilog;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Notifications;
 using SuchByte.MacroDeck.Plugins;
@@ -16,6 +16,8 @@ namespace SuchByte.MacroDeck.ExtensionStore;
 
 public class ExtensionStoreHelper
 {
+    private static readonly ILogger Logger = Log.ForContext(typeof(ExtensionStoreHelper));
+
     public static event EventHandler OnUpdateCheckFinished;
 
     private static ExtensionStoreDownloader extensionStoreDownloader;
@@ -173,12 +175,12 @@ public class ExtensionStoreHelper
                 return false;
             }
 
-            MacroDeckLogger.Info("Update available for " + packageId);
+            Logger.Information("Update available for {PackageId}", packageId);
             return true;
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error($"Failed to check for updates for {packageId}\n{ex}");
+            Logger.Error(ex, "Failed to check for updates for {PackageId}", packageId);
         }
 
         return false;

@@ -71,7 +71,7 @@ public partial class ConditionItem : UserControl, IActionConditionItem
     private void AddActionItem(PluginAction? action, FlowLayoutPanel container)
     {
         IActionConditionItem actionItem = null;
-        if (action.GetType() != typeof(DelayAction))
+        if (action?.GetType() != typeof(DelayAction))
         {
             actionItem = new ActionItem(action);
         }

@@ -1,5 +1,5 @@
-﻿using SuchByte.MacroDeck.InternalPlugins.Variables.Models;
-using SuchByte.MacroDeck.Logging;
+﻿using Serilog;
+using SuchByte.MacroDeck.InternalPlugins.Variables.Models;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.ViewModels;
@@ -8,6 +8,8 @@ namespace SuchByte.MacroDeck.InternalPlugins.Variables.ViewModels;
 
 public class ReadVariableFromFileActionConfigViewModel : ISerializableConfigViewModel
 {
+    private static readonly ILogger Logger = Log.ForContext(typeof(ReadVariableFromFileActionConfigViewModel));
+
     private readonly PluginAction _pluginAction;
 
     public ReadVariableFromFileActionConfigModel Configuration { get; set; }
@@ -42,12 +44,11 @@ public class ReadVariableFromFileActionConfigViewModel : ISerializableConfigView
         try
         {
             SetConfig();
-            MacroDeckLogger.Info(typeof(ReadVariableFromFileActionConfigModel), "config saved");
+            Logger.Information("config saved");
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(typeof(ReadVariableFromFileActionConfigModel),
-                $"Error while saving config: {ex.Message + Environment.NewLine + ex.StackTrace}");
+            Logger.Error(ex, "Error while saving config");
         }
 
         return true;

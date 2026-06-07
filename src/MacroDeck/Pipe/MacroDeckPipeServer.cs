@@ -1,16 +1,18 @@
 ﻿using System.IO;
 using System.IO.Pipes;
-using SuchByte.MacroDeck.Logging;
+using Serilog;
 
 namespace SuchByte.MacroDeck.Pipe;
 
 public class MacroDeckPipeServer
 {
+    private static readonly ILogger Logger = Log.ForContext(typeof(MacroDeckPipeServer));
+
     public static event Action<string>? PipeMessage;
 
     public static void Initialize()
     {
-        MacroDeckLogger.Info(typeof(MacroDeckPipeServer), "Initializing pipe server");
+        Logger.Information("Initializing pipe server");
         Task.Run(async () => await HandleConnections().ConfigureAwait(false));
     }
 
@@ -29,7 +31,7 @@ public class MacroDeckPipeServer
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error(typeof(MacroDeckPipeServer), $"Failed: {ex.Message}");
+                Logger.Error(ex, "Failed to handle pipe connection");
             }
             finally
             {

@@ -1,6 +1,6 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Json;
-using SuchByte.MacroDeck.Logging;
+using Serilog;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Properties;
 
@@ -8,6 +8,8 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView;
 
 public partial class ExtensionStoreView : UserControl
 {
+    private static readonly ILogger Logger = Log.ForContext(typeof(ExtensionStoreView));
+
     private int _pages;
     private int _currentPage = 1;
 
@@ -57,7 +59,7 @@ public partial class ExtensionStoreView : UserControl
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error($"Error while loading extensions from the extension store:\n{ex.Message}");
+            Logger.Error(ex, "Error while loading extensions from the extension store");
         }
         finally
         {

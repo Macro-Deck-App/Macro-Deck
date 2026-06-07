@@ -8,8 +8,8 @@ using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.CustomControls.ButtonEditor;
 using SuchByte.MacroDeck.Hotkeys;
 using SuchByte.MacroDeck.Icons;
+using Serilog;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Server;
 using SuchByte.MacroDeck.Utils;
@@ -19,6 +19,8 @@ namespace SuchByte.MacroDeck.GUI.Dialogs;
 
 public partial class ButtonEditor : DialogForm
 {
+    private static readonly ILogger Logger = Log.ForContext(typeof(ButtonEditor));
+
     private static JsonSerializerSettings jsonSerializerSettings = new()
     {
         TypeNameHandling = TypeNameHandling.Auto,
@@ -158,8 +160,7 @@ public partial class ButtonEditor : DialogForm
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(GetType(),
-                "Error while updating label: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            Logger.Error(ex, "Error while updating label");
         }
     }
 
@@ -202,8 +203,7 @@ public partial class ButtonEditor : DialogForm
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(GetType(),
-                "Error while refreshing label: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            Logger.Error(ex, "Error while refreshing label");
         }
 
         labelText.TextChanged += LabelChanged;
@@ -264,8 +264,7 @@ public partial class ButtonEditor : DialogForm
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(GetType(),
-                "Error while refreshing icon: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            Logger.Error(ex, "Error while refreshing icon");
         }
     }
 

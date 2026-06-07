@@ -1,10 +1,12 @@
 ﻿using System.IO;
-using SuchByte.MacroDeck.Logging;
+using Serilog;
 
 namespace SuchByte.MacroDeck.StartupConfig;
 
 public class ApplicationPaths
 {
+    private static readonly ILogger Logger = Log.ForContext(typeof(ApplicationPaths));
+
     private static bool _portableMode;
 
     public static string ExecutablePath { get; private set; }
@@ -59,7 +61,7 @@ public class ApplicationPaths
 
     private static void CheckPaths()
     {
-        MacroDeckLogger.Info("Checking paths...");
+        Logger.Information("Checking paths...");
 
         void CheckCreatePath(string? path)
         {
@@ -76,11 +78,11 @@ public class ApplicationPaths
             try
             {
                 Directory.CreateDirectory(path);
-                MacroDeckLogger.Info($"Created {path}");
+                Logger.Information("Created {Path}", path);
             }
             catch (Exception ex)
             {
-                MacroDeckLogger.Error($"Failed to create {path}: {ex.Message}");
+                Logger.Error(ex, "Failed to create {Path}", path);
             }
         }
 
@@ -93,7 +95,7 @@ public class ApplicationPaths
         CheckCreatePath(IconPackDirectoryPath);
         CheckCreatePath(TempDirectoryPath);
 
-        MacroDeckLogger.Info("Checking paths done");
+        Logger.Information("Checking paths done");
     }
 
     public static void CleanUpTempDirectory()
@@ -117,7 +119,7 @@ public class ApplicationPaths
                 }
                 catch (Exception ex)
                 {
-                    MacroDeckLogger.Warning($"Failed to delete temp file: {ex.Message}");
+                    Logger.Warning(ex, "Failed to delete temp file");
                 }
             }
 
@@ -129,7 +131,7 @@ public class ApplicationPaths
                 }
                 catch (Exception ex)
                 {
-                    MacroDeckLogger.Warning($"Failed to delete temp dir: {ex.Message}");
+                    Logger.Warning(ex, "Failed to delete temp dir");
                 }
             }
         }

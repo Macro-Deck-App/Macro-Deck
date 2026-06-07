@@ -11,6 +11,7 @@ using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.GUI.MainWindowViews;
 using SuchByte.MacroDeck.Hotkeys;
+using Serilog;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Logging;
@@ -29,6 +30,8 @@ namespace SuchByte.MacroDeck;
 
 public class MacroDeck : NativeWindow
 {
+    private static readonly ILogger Logger = Log.ForContext(typeof(MacroDeck));
+
     public static Version Version =
         Version.Parse(FileVersionInfo.GetVersionInfo(ApplicationPaths.ExecutablePath).ProductVersion);
 
@@ -67,15 +70,20 @@ public class MacroDeck : NativeWindow
         StartParameters = startParameters;
         StartUpTimeStopWatch.Start();
 
-        MacroDeckLogger.LogLevel = (LogLevel)StartParameters.LogLevel;
-        if (StartParameters.DebugConsole)
+        if (StartParameters.LogLevel > 0)
         {
-            MacroDeckLogger.StartDebugConsole();
+            MacroDeckLogger.LogLevel = (LogLevel)StartParameters.LogLevel;
         }
 
-        MacroDeckLogger.Info($"Macro Deck {Version.ToString()}");
-        MacroDeckLogger.Info($"Path: {ApplicationPaths.ExecutablePath}");
-        MacroDeckLogger.Info($"Start parameters: {string.Join(" ", StartParameters.ToArray(StartParameters))}");
+        if (StartParameters.DebugConsole)
+        {
+            DebugConsole.Launch();
+        }
+
+        Logger.Information("Macro Deck {Version}", Version);
+        Logger.Information("Path: {ExecutablePath}", ApplicationPaths.ExecutablePath);
+        Logger.Information("Start parameters: {StartParameters}",
+            string.Join(" ", StartParameters.ToArray(StartParameters)));
 
         MacroDeckLogger.CleanUpLogsDir();
 
@@ -124,7 +132,7 @@ public class MacroDeck : NativeWindow
         StartUpTimeStopWatch.Stop();
 
         var startTook = StartUpTimeStopWatch.Elapsed.TotalMilliseconds;
-        MacroDeckLogger.Info($"Macro Deck startup finished (took {startTook}ms)");
+        Logger.Information("Macro Deck startup finished (took {StartupDurationMs}ms)", startTook);
 
         OnMacroDeckLoaded?.Invoke(null, EventArgs.Empty);
 
@@ -182,22 +190,22 @@ public class MacroDeck : NativeWindow
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Warning($"Error while searching for network interfaces\n{ex.Message}");
+            Logger.Warning(ex, "Error while searching for network interfaces");
         }
 
         if (foundNetworkInterfaces == 0)
         {
-            MacroDeckLogger.Error("No network interfaces were found");
+            Logger.Error("No network interfaces were found");
         }
         else
         {
-            MacroDeckLogger.Info($"Found network interfaces:\n{sb}");
+            Logger.Information("Found network interfaces:\n{NetworkInterfaces}", sb);
         }
     }
 
     private static void StartInitialSetup()
     {
-        MacroDeckLogger.Info("Entering initial setup wizard...");
+        Logger.Information("Entering initial setup wizard...");
         // Start initial setup
         using var initialSetup = new InitialSetup();
         Application.Run(initialSetup);
@@ -255,7 +263,7 @@ public class MacroDeck : NativeWindow
         var arguments = (_mainWindow is { IsDisposed: false } ? "--show " : "") +
             parameters +
             $" --ignore-pid-check {Process.GetCurrentProcess().Id}";
-        MacroDeckLogger.Info($"Restart Macro Deck with arguments: {arguments}");
+        Logger.Information("Restart Macro Deck with arguments: {Arguments}", arguments);
         var p = new Process
         {
             StartInfo = new ProcessStartInfo(ApplicationPaths.ExecutablePath)

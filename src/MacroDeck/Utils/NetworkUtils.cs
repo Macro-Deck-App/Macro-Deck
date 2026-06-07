@@ -1,11 +1,13 @@
-﻿using SuchByte.MacroDeck.Logging;
-using System.Net.NetworkInformation;
+﻿using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using Serilog;
 
 namespace SuchByte.MacroDeck.Utils;
 
 internal class NetworkUtils
 {
+    private static readonly ILogger Logger = Log.ForContext(typeof(NetworkUtils));
+
     public static string[] GetNetworkInterfaces()
     {
         var networkInterfaces = new List<string>();
@@ -19,7 +21,7 @@ internal class NetworkUtils
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Warning($"Error while searching for network interfaces\n{ex.Message}");
+            Logger.Warning(ex, "Error while searching for network interfaces");
         }
 
         return networkInterfaces.ToArray();

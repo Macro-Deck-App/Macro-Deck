@@ -1,33 +1,24 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
-using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.GUI.Dialogs;
-using SuchByte.MacroDeck.Notifications;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 using SuchByte.MacroDeck.Plugins;
-using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.StartupConfig;
-using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Logging;
 
 public static class MacroDeckLogger
 {
-    private static LogLevel _logLevel = LogLevel.Info;
+    private static readonly ILogger Logger = Log.ForContext(typeof(MacroDeckLogger));
 
-    private static DebugConsole _debugConsole;
+    private static LogLevel _logLevel = Debugger.IsAttached ? LogLevel.Trace : LogLevel.Info;
 
-
-    public static void StartDebugConsole()
-    {
-        if (_debugConsole != null && !_debugConsole.IsDisposed)
-        {
-            _debugConsole.Dispose();
-            _debugConsole.Close();
-        }
-
-        _debugConsole = new DebugConsole();
-        _debugConsole.Show();
-    }
+    /// <summary>
+    /// Runtime-adjustable Serilog minimum level. Referenced by the logging configuration
+    /// (<see cref="StartupConfig.LoggingConfig"/>) and updated through <see cref="LogLevel"/>.
+    /// </summary>
+    public static readonly LoggingLevelSwitch LevelSwitch = new(ToLogEventLevel(_logLevel));
 
     /// <summary>
     /// Level of what should be logged.
@@ -38,11 +29,188 @@ public static class MacroDeckLogger
         set
         {
             _logLevel = value;
-            Info("Set log level to " + _logLevel);
+            LevelSwitch.MinimumLevel = ToLogEventLevel(value);
+            Logger.Information("Set log level to {LogLevel}", _logLevel);
         }
     }
 
-    internal static bool FileLogging = true;
+    private static LogEventLevel ToLogEventLevel(LogLevel level)
+    {
+        return level switch
+        {
+            LogLevel.Trace => LogEventLevel.Verbose,
+            LogLevel.Info => LogEventLevel.Information,
+            LogLevel.Warning => LogEventLevel.Warning,
+            LogLevel.Error => LogEventLevel.Error,
+            // No dedicated "off" level exists; a value above Fatal filters everything out.
+            LogLevel.Nothing => LogEventLevel.Fatal + 1,
+            _ => LogEventLevel.Information
+        };
+    }
+
+    // -------------------------------------------------------------------------
+    //  Logging API
+    //
+    //  Use these methods for all new logging. They accept Serilog message
+    //  templates with structured properties, an optional exception and an
+    //  optional originating plugin, e.g.:
+    //
+    //      MacroDeckLogger.Error(ex, "Error in {SomeParameter}", parameter);
+    //      MacroDeckLogger.Information(plugin, "Connected to {Host}", host);
+    //
+    //  When no plugin is supplied the event is attributed to Macro Deck itself.
+    // -------------------------------------------------------------------------
+
+    private static void Write(
+        LogEventLevel level,
+        MacroDeckPlugin? plugin,
+        Exception? exception,
+        string messageTemplate,
+        object[] propertyValues)
+    {
+        var contextLogger = plugin is null
+            ? Log.Logger
+            : Log.ForContext("Plugin", plugin.Name);
+        contextLogger.Write(level, exception, messageTemplate, propertyValues);
+    }
+
+    public static void Verbose(string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Verbose, null, null, messageTemplate, propertyValues);
+    }
+
+    public static void Verbose(Exception exception, string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Verbose, null, exception, messageTemplate, propertyValues);
+    }
+
+    public static void Verbose(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Verbose, plugin, null, messageTemplate, propertyValues);
+    }
+
+    public static void Verbose(MacroDeckPlugin plugin,
+        Exception exception,
+        string messageTemplate,
+        params object[] propertyValues)
+    {
+        Write(LogEventLevel.Verbose, plugin, exception, messageTemplate, propertyValues);
+    }
+
+    public static void Debug(string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Debug, null, null, messageTemplate, propertyValues);
+    }
+
+    public static void Debug(Exception exception, string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Debug, null, exception, messageTemplate, propertyValues);
+    }
+
+    public static void Debug(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Debug, plugin, null, messageTemplate, propertyValues);
+    }
+
+    public static void Debug(MacroDeckPlugin plugin,
+        Exception exception,
+        string messageTemplate,
+        params object[] propertyValues)
+    {
+        Write(LogEventLevel.Debug, plugin, exception, messageTemplate, propertyValues);
+    }
+
+    public static void Information(string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Information, null, null, messageTemplate, propertyValues);
+    }
+
+    public static void Information(Exception exception, string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Information, null, exception, messageTemplate, propertyValues);
+    }
+
+    public static void Information(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Information, plugin, null, messageTemplate, propertyValues);
+    }
+
+    public static void Information(MacroDeckPlugin plugin,
+        Exception exception,
+        string messageTemplate,
+        params object[] propertyValues)
+    {
+        Write(LogEventLevel.Information, plugin, exception, messageTemplate, propertyValues);
+    }
+
+    public static void Warning(string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Warning, null, null, messageTemplate, propertyValues);
+    }
+
+    public static void Warning(Exception exception, string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Warning, null, exception, messageTemplate, propertyValues);
+    }
+
+    public static void Warning(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Warning, plugin, null, messageTemplate, propertyValues);
+    }
+
+    public static void Warning(MacroDeckPlugin plugin,
+        Exception exception,
+        string messageTemplate,
+        params object[] propertyValues)
+    {
+        Write(LogEventLevel.Warning, plugin, exception, messageTemplate, propertyValues);
+    }
+
+    public static void Error(string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Error, null, null, messageTemplate, propertyValues);
+    }
+
+    public static void Error(Exception exception, string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Error, null, exception, messageTemplate, propertyValues);
+    }
+
+    public static void Error(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Error, plugin, null, messageTemplate, propertyValues);
+    }
+
+    public static void Error(MacroDeckPlugin plugin,
+        Exception exception,
+        string messageTemplate,
+        params object[] propertyValues)
+    {
+        Write(LogEventLevel.Error, plugin, exception, messageTemplate, propertyValues);
+    }
+
+    public static void Fatal(string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Fatal, null, null, messageTemplate, propertyValues);
+    }
+
+    public static void Fatal(Exception exception, string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Fatal, null, exception, messageTemplate, propertyValues);
+    }
+
+    public static void Fatal(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
+    {
+        Write(LogEventLevel.Fatal, plugin, null, messageTemplate, propertyValues);
+    }
+
+    public static void Fatal(MacroDeckPlugin plugin,
+        Exception exception,
+        string messageTemplate,
+        params object[] propertyValues)
+    {
+        Write(LogEventLevel.Fatal, plugin, exception, messageTemplate, propertyValues);
+    }
 
     /// <summary>
     /// Debug trace messages for internal debugging
@@ -50,9 +218,11 @@ public static class MacroDeckLogger
     /// <param name="macroDeckPlugin"></param>
     /// <param name="classType"></param>
     /// <param name="message"></param>
+    [Obsolete("Use MacroDeckLogger.Debug(MacroDeckPlugin, string, params object[]) instead")]
     public static void Trace(MacroDeckPlugin macroDeckPlugin, Type classType, string message)
     {
-        Trace(macroDeckPlugin, string.Format("{0}: {1}", classType.Name, message));
+        Log.ForContext("Plugin", macroDeckPlugin.Name)
+            .Debug("{LogMessage}", message);
     }
 
     /// <summary>
@@ -61,9 +231,11 @@ public static class MacroDeckLogger
     /// <param name="macroDeckPlugin"></param>
     /// <param name="classType"></param>
     /// <param name="message"></param>
+    [Obsolete("Use MacroDeckLogger.Information(MacroDeckPlugin, string, params object[]) instead")]
     public static void Info(MacroDeckPlugin macroDeckPlugin, Type classType, string message)
     {
-        Info(macroDeckPlugin, string.Format("{0}: {1}", classType.Name, message));
+        Log.ForContext("Plugin", macroDeckPlugin.Name)
+            .Information("{LogMessage}", message);
     }
 
     /// <summary>
@@ -72,9 +244,11 @@ public static class MacroDeckLogger
     /// <param name="macroDeckPlugin"></param>
     /// <param name="classType"></param>
     /// <param name="message"></param>
+    [Obsolete("Use MacroDeckLogger.Warning(MacroDeckPlugin, string, params object[]) instead")]
     public static void Warning(MacroDeckPlugin macroDeckPlugin, Type classType, string message)
     {
-        Warning(macroDeckPlugin, string.Format("{0}: {1}", classType.Name, message));
+        Log.ForContext("Plugin", macroDeckPlugin.Name)
+            .Warning("{LogMessage}", message);
     }
 
     /// <summary>
@@ -83,9 +257,11 @@ public static class MacroDeckLogger
     /// <param name="macroDeckPlugin"></param>
     /// <param name="classType"></param>
     /// <param name="message"></param>
+    [Obsolete("Use MacroDeckLogger.Error(MacroDeckPlugin, string, params object[]) instead")]
     public static void Error(MacroDeckPlugin macroDeckPlugin, Type classType, string message)
     {
-        Error(macroDeckPlugin, string.Format("{0}: {1}", classType.Name, message));
+        Log.ForContext("Plugin", macroDeckPlugin.Name)
+            .Error("{LogMessage}", message);
     }
 
 
@@ -94,15 +270,11 @@ public static class MacroDeckLogger
     /// </summary>
     /// <param name="macroDeckPlugin"></param>
     /// <param name="message"></param>
+    [Obsolete("Use MacroDeckLogger.Debug(MacroDeckPlugin, string, params object[]) instead")]
     public static void Trace(MacroDeckPlugin macroDeckPlugin, string message)
     {
-        if (macroDeckPlugin == null)
-        {
-            Log("Macro Deck", LogLevel.Error, "Plugin logging failed: plugin instance was null");
-            return;
-        }
-
-        Log(macroDeckPlugin.Name, LogLevel.Trace, message);
+        Log.ForContext("Plugin", macroDeckPlugin.Name)
+            .Debug("{LogMessage}", message);
     }
 
     /// <summary>
@@ -110,15 +282,11 @@ public static class MacroDeckLogger
     /// </summary>
     /// <param name="macroDeckPlugin"></param>
     /// <param name="message"></param>
+    [Obsolete("Use MacroDeckLogger.Information(MacroDeckPlugin, string, params object[]) instead")]
     public static void Info(MacroDeckPlugin macroDeckPlugin, string message)
     {
-        if (macroDeckPlugin == null)
-        {
-            Log("Macro Deck", LogLevel.Error, "Plugin logging failed: plugin instance was null");
-            return;
-        }
-
-        Log(macroDeckPlugin.Name, LogLevel.Info, message);
+        Log.ForContext("Plugin", macroDeckPlugin.Name)
+            .Information("{LogMessage}", message);
     }
 
     /// <summary>
@@ -126,15 +294,11 @@ public static class MacroDeckLogger
     /// </summary>
     /// <param name="macroDeckPlugin"></param>
     /// <param name="message"></param>
+    [Obsolete("Use MacroDeckLogger.Warning(MacroDeckPlugin, string, params object[]) instead")]
     public static void Warning(MacroDeckPlugin macroDeckPlugin, string message)
     {
-        if (macroDeckPlugin == null)
-        {
-            Log("Macro Deck", LogLevel.Error, "Plugin logging failed: plugin instance was null");
-            return;
-        }
-
-        Log(macroDeckPlugin.Name, LogLevel.Warning, message);
+        Log.ForContext("Plugin", macroDeckPlugin.Name)
+            .Warning("{LogMessage}", message);
     }
 
     /// <summary>
@@ -142,139 +306,11 @@ public static class MacroDeckLogger
     /// </summary>
     /// <param name="macroDeckPlugin"></param>
     /// <param name="message"></param>
+    [Obsolete("Use MacroDeckLogger.Error(MacroDeckPlugin, string, params object[]) instead")]
     public static void Error(MacroDeckPlugin macroDeckPlugin, string message)
     {
-        if (macroDeckPlugin == null)
-        {
-            Log("Macro Deck", LogLevel.Error, "Plugin logging failed: plugin instance was null");
-            return;
-        }
-
-        Log(macroDeckPlugin.Name, LogLevel.Error, message);
-    }
-
-    internal static void Trace(Type classType, string message)
-    {
-        Trace(string.Format("{0}: {1}", classType.Name, message));
-    }
-
-    internal static void Info(Type classType, string message)
-    {
-        Info(string.Format("{0}: {1}", classType.Name, message));
-    }
-
-    internal static void Warning(Type classType, string message)
-    {
-        Warning(string.Format("{0}: {1}", classType.Name, message));
-    }
-
-    internal static void Error(Type classType, string message)
-    {
-        Error(string.Format("{0}: {1}", classType.Name, message));
-    }
-
-
-    internal static void Trace(string message)
-    {
-        Log("Macro Deck", LogLevel.Trace, message);
-    }
-
-    internal static void Info(string message)
-    {
-        Log("Macro Deck", LogLevel.Info, message);
-    }
-
-    internal static void Warning(string message)
-    {
-        Log("Macro Deck", LogLevel.Warning, message);
-    }
-
-    internal static void Error(string message)
-    {
-        Log("Macro Deck", LogLevel.Error, message);
-    }
-
-    private static void OpenLatestLog()
-    {
-        var p = new Process
-        {
-            StartInfo = new ProcessStartInfo(CurrentFilename)
-            {
-                UseShellExecute = true
-            }
-        };
-        p.Start();
-    }
-
-    private static void Log(string sender, LogLevel logLevel, string message)
-    {
-        if (logLevel == LogLevel.Error)
-        {
-            var btnShowLog = new ButtonPrimary
-            {
-                Size = new Size(75, 25),
-                AutoSize = true,
-                Text = "Show log"
-            };
-            btnShowLog.Click += (sender, e) => { OpenLatestLog(); };
-
-            NotificationManager.SystemNotification("Error",
-                $"{sender} caused an error: {TruncateForDisplay(message, 250)}",
-                controls: new List<Control> { btnShowLog },
-                icon: Resources.Macro_Deck_error);
-        }
-
-        if ((!Debugger.IsAttached && !FileLogging) || logLevel < LogLevel)
-        {
-            return;
-        }
-
-        var formattedLog = string.Format("{0} [{1}] [{2}] >> {3}",
-            DateTime.Now.ToString("T"),
-            sender,
-            logLevel.ToString(),
-            message);
-        if (Debugger.IsAttached)
-        {
-            Debug.WriteLine(formattedLog);
-        }
-
-        if (_debugConsole != null && !_debugConsole.IsDisposed && _debugConsole.Visible)
-        {
-            var logColor = Color.White;
-            switch (logLevel)
-            {
-                case LogLevel.Info:
-                    logColor = Color.Aqua;
-                    break;
-                case LogLevel.Warning:
-                    logColor = Color.Orange;
-                    break;
-                case LogLevel.Error:
-                    logColor = Color.Red;
-                    break;
-            }
-
-            _debugConsole.AppendText(formattedLog + Environment.NewLine, sender, logColor);
-        }
-
-        if (FileLogging && Directory.Exists(ApplicationPaths.LogsDirectoryPath) && CurrentFilename != null)
-        {
-            try
-            {
-                Retry.Do(() =>
-                    {
-                        File.AppendAllText(CurrentFilename, Environment.NewLine + formattedLog, Encoding.UTF8);
-                    },
-                    TimeSpan.FromMilliseconds(10));
-            }
-            catch (Exception ex)
-            {
-                FileLogging = false;
-                Log(sender, LogLevel.Error, "File logging failed: " + ex.Message);
-                FileLogging = true;
-            }
-        }
+        Log.ForContext("Plugin", macroDeckPlugin.Name)
+            .Error("{LogMessage}", message);
     }
 
     internal static void CleanUpLogsDir()
@@ -291,29 +327,6 @@ public static class MacroDeckLogger
             }
         }
     }
-
-    private static string TruncateForDisplay(this string value, int length)
-    {
-        if (string.IsNullOrEmpty(value))
-        {
-            return string.Empty;
-        }
-
-        var returnValue = value;
-        if (value.Length > length)
-        {
-            var tmp = value.Substring(0, length);
-            if (tmp.LastIndexOf(' ') > 0)
-            {
-                returnValue = tmp.Substring(0, tmp.LastIndexOf(' ')) + " ...";
-            }
-        }
-
-        return returnValue;
-    }
-
-    internal static string CurrentFilename =>
-        Path.Combine(ApplicationPaths.LogsDirectoryPath, DateTime.Now.ToString("yyyy-MM-dd") + ".log");
 }
 
 public enum LogLevel

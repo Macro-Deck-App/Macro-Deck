@@ -1,15 +1,14 @@
 ﻿using System.Globalization;
 using System.IO;
+using Serilog;
 using SuchByte.MacroDeck.CottleIntegration;
 using SuchByte.MacroDeck.Events;
 using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.InternalPlugins.Variables.Enums;
 using SuchByte.MacroDeck.InternalPlugins.Variables.Models;
 using SuchByte.MacroDeck.InternalPlugins.Variables.Views;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Profiles;
 using SuchByte.MacroDeck.Properties;
@@ -192,6 +191,8 @@ public class ChangeVariableValueAction : PluginAction
 
 public class SaveVariableToFileAction : PluginAction
 {
+    private static readonly ILogger Logger = Log.ForContext(typeof(SaveVariableToFileAction));
+
     public override string Name => LanguageManager.Strings.ActionSaveVariableToFile;
 
     public override string Description => LanguageManager.Strings.ActionSaveVariableToFileDescription;
@@ -224,7 +225,7 @@ public class SaveVariableToFileAction : PluginAction
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(typeof(VariablesPlugin), $"Failed to save variable value to file: {ex.Message}");
+            Logger.Error(ex, "Failed to save variable value to file");
         }
     }
 
@@ -236,6 +237,8 @@ public class SaveVariableToFileAction : PluginAction
 
 public class ReadVariableFromFileAction : PluginAction
 {
+    private static readonly ILogger Logger = Log.ForContext(typeof(ReadVariableFromFileAction));
+
     public override string Name => LanguageManager.Strings.ActionReadVariableFromFile;
 
     public override string Description => LanguageManager.Strings.ActionReadVariableFromFileDescription;
@@ -288,7 +291,7 @@ public class ReadVariableFromFileAction : PluginAction
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(typeof(VariablesPlugin), $"Failed to read variable value from file: {ex.Message}");
+            Logger.Error(ex, "Failed to read variable value from file");
         }
     }
 

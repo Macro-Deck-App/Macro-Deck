@@ -1,14 +1,16 @@
 ﻿using System.Collections.Concurrent;
 using Newtonsoft.Json.Linq;
 using SuchByte.MacroDeck.Device;
+using Serilog;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.JSON;
-using SuchByte.MacroDeck.Logging;
 
 namespace SuchByte.MacroDeck.Server.DeviceMessage;
 
 public class SoftwareClientMessage : IDeviceMessage
 {
+    private static readonly ILogger Logger = Log.ForContext(typeof(SoftwareClientMessage));
+
     public void Connected(MacroDeckClient macroDeckClient)
     {
         SendConfiguration(macroDeckClient);
@@ -115,7 +117,7 @@ public class SoftwareClientMessage : IDeviceMessage
                 DeviceManager.GetMacroDeckDevice(macroDeckClient.ClientId).Configuration.WakeLockMethod),
             SupportButtonReleaseLongPress = true
         });
-        MacroDeckLogger.Trace(GetType(), configurationObject.ToString());
+        Logger.Debug("{Configuration}", configurationObject.ToString());
         MacroDeckServer.Send(macroDeckClient, configurationObject);
     }
 

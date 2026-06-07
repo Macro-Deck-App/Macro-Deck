@@ -48,6 +48,7 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.filtersList = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.btnRemoveFilters = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.btnTestNotification = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
+            this.btnOpenLogs = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.SuspendLayout();
             // 
             // logOutput
@@ -315,12 +316,35 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
             this.btnTestNotification.UseVisualStyleBackColor = false;
             this.btnTestNotification.UseWindowsAccentColor = true;
             this.btnTestNotification.Click += new System.EventHandler(this.btnTestNotification_Click);
-            // 
+            //
+            // btnOpenLogs
+            //
+            this.btnOpenLogs.BorderRadius = 8;
+            this.btnOpenLogs.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnOpenLogs.FlatAppearance.BorderSize = 0;
+            this.btnOpenLogs.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnOpenLogs.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnOpenLogs.ForeColor = System.Drawing.Color.White;
+            this.btnOpenLogs.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(89)))), ((int)(((byte)(184)))));
+            this.btnOpenLogs.Icon = null;
+            this.btnOpenLogs.Location = new System.Drawing.Point(283, 36);
+            this.btnOpenLogs.Name = "btnOpenLogs";
+            this.btnOpenLogs.Progress = 0;
+            this.btnOpenLogs.ProgressColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(46)))), ((int)(((byte)(94)))));
+            this.btnOpenLogs.Size = new System.Drawing.Size(80, 27);
+            this.btnOpenLogs.TabIndex = 14;
+            this.btnOpenLogs.Text = "Open logs";
+            this.btnOpenLogs.UseMnemonic = false;
+            this.btnOpenLogs.UseVisualStyleBackColor = false;
+            this.btnOpenLogs.UseWindowsAccentColor = true;
+            this.btnOpenLogs.Click += new System.EventHandler(this.BtnOpenLogs_Click);
+            //
             // DebugConsole
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.btnOpenLogs);
             this.Controls.Add(this.btnTestNotification);
             this.Controls.Add(this.btnRemoveFilters);
             this.Controls.Add(this.btnAddFilter);
@@ -373,5 +397,6 @@ namespace SuchByte.MacroDeck.GUI.Dialogs
         private ContextMenuStrip filtersList;
         private ButtonPrimary btnRemoveFilters;
         private ButtonPrimary btnTestNotification;
+        private ButtonPrimary btnOpenLogs;
     }
 }

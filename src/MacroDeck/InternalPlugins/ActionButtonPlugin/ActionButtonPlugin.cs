@@ -1,9 +1,10 @@
-﻿using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Actions;
+﻿using SuchByte.MacroDeck.ActionButton;
+using SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.Actions;
 using SuchByte.MacroDeck.Language;
 using SuchByte.MacroDeck.Plugins;
 
 // ReSharper disable once CheckNamespace
-namespace SuchByte.MacroDeck.ActionButton;
+namespace SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin;
 // Don't change because of backwards compatibility!
 
 public class ActionButtonPlugin : MacroDeckPlugin
@@ -13,12 +14,12 @@ public class ActionButtonPlugin : MacroDeckPlugin
 
     public override void Enable()
     {
-        Actions = new List<PluginAction>
-        {
+        Actions =
+        [
             new ActionButtonToggleStateAction(),
             new ActionButtonSetStateOffAction(),
             new ActionButtonSetStateOnAction(),
             new ActionButtonSetBackgroundColorAction()
-        };
+        ];
     }
 }

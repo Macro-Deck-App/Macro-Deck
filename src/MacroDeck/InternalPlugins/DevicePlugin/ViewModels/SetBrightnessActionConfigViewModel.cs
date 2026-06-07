@@ -1,7 +1,7 @@
 ﻿using SuchByte.MacroDeck.Device;
+using Serilog;
 using SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Models;
 using SuchByte.MacroDeck.Language;
-using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Models;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.ViewModels;
@@ -10,6 +10,8 @@ namespace SuchByte.MacroDeck.InternalPlugins.DevicePlugin.ViewModels;
 
 public class SetBrightnessActionConfigViewModel : ISerializableConfigViewModel
 {
+    private static readonly ILogger Logger = Log.ForContext(typeof(SetBrightnessActionConfigViewModel));
+
     private readonly PluginAction _action;
 
     public SetBrightnessActionConfigModel Configuration { get; set; }
@@ -39,12 +41,11 @@ public class SetBrightnessActionConfigViewModel : ISerializableConfigViewModel
         try
         {
             SetConfig();
-            MacroDeckLogger.Info($"{GetType().Name}: config saved");
+            Logger.Information("config saved");
         }
         catch (Exception ex)
         {
-            MacroDeckLogger.Error(
-                $"{GetType().Name}: Error while saving config: {ex.Message + Environment.NewLine + ex.StackTrace}");
+            Logger.Error(ex, "Error while saving config");
             return false;
         }
 

@@ -23,7 +23,8 @@ public class StartParameters
     [Option("disable-file-logging", Required = false)]
     public bool DisableFileLogging { get; set; }
 
-    [Option("log-level", Default = 1, Required = false)]
+    // 0 = not specified; falls back to the debugger-based default in MacroDeckLogger.
+    [Option("log-level", Default = 0, Required = false)]
     public int LogLevel { get; set; }
 
     [Option("debug-console", Required = false)]
