@@ -147,6 +147,14 @@ public partial class DeckView : UserControl
             return;
         }
 
+        // While the window is minimized the button panel collapses to a zero size, which would make
+        // the computed button size negative and render the deck empty. Skip the layout in that case;
+        // it runs again once the window is restored to a usable size.
+        if (buttonPanel.Width <= 0 || buttonPanel.Height <= 0)
+        {
+            return;
+        }
+
         if (clear)
         {
             foreach (RoundedButton roundedButton in buttonPanel.Controls)
