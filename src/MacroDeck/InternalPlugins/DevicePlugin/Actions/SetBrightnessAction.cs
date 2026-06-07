@@ -1,4 +1,5 @@
 ﻿using SuchByte.MacroDeck.Device;
+using SuchByte.MacroDeck.GUI;
 using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.InternalPlugins.DevicePlugin.Models;

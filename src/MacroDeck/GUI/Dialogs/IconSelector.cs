@@ -2,6 +2,7 @@
 using System.IO;
 using ImageMagick;
 using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.GUI.Dialogs;
 using Serilog;
 using SuchByte.MacroDeck.Icons;
 using SuchByte.MacroDeck.Language;
@@ -11,7 +12,7 @@ using SuchByte.MacroDeck.StartupConfig;
 using Icon = SuchByte.MacroDeck.Icons.Icon;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
 
-namespace SuchByte.MacroDeck.GUI.Dialogs;
+namespace SuchByte.MacroDeck.GUI;
 
 public partial class IconSelector : DialogForm
 {

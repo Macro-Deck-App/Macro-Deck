@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using SuchByte.MacroDeck.GUI.CustomControls;
 
-namespace SuchByte.MacroDeck.GUI.Dialogs
+namespace SuchByte.MacroDeck.GUI
 {
     partial class IconSelector
     {
