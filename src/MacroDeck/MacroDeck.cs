@@ -70,10 +70,14 @@ public class MacroDeck : NativeWindow
         StartParameters = startParameters;
         StartUpTimeStopWatch.Start();
 
-        MacroDeckLogger.LogLevel = (LogLevel)StartParameters.LogLevel;
+        if (StartParameters.LogLevel > 0)
+        {
+            MacroDeckLogger.LogLevel = (LogLevel)StartParameters.LogLevel;
+        }
+
         if (StartParameters.DebugConsole)
         {
-            MacroDeckLogger.StartDebugConsole();
+            DebugConsole.Launch();
         }
 
         logger.Information("Macro Deck {Version}", Version);

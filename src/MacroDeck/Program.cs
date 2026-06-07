@@ -27,6 +27,10 @@ internal class Program
 
         ApplicationPaths.Initialize(startParameters.PortableMode);
 
+        // Build the Serilog logger up-front so logging is live from the very start of the
+        // application; the ASP.NET host later reuses this same static logger.
+        Log.Logger = LoggingConfig.CreateLogger();
+
         MacroDeck.Start(startParameters);
     }
 

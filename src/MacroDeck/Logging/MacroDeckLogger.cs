@@ -1,7 +1,8 @@
+using System.Diagnostics;
 using System.IO;
 using Serilog;
+using Serilog.Core;
 using Serilog.Events;
-using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.StartupConfig;
 
@@ -11,22 +12,13 @@ public static class MacroDeckLogger
 {
     private static readonly ILogger logger = Log.ForContext(typeof(MacroDeckLogger));
 
-    private static LogLevel _logLevel = LogLevel.Info;
+    private static LogLevel _logLevel = Debugger.IsAttached ? LogLevel.Trace : LogLevel.Info;
 
-    private static DebugConsole _debugConsole;
-
-
-    public static void StartDebugConsole()
-    {
-        if (_debugConsole != null && !_debugConsole.IsDisposed)
-        {
-            _debugConsole.Dispose();
-            _debugConsole.Close();
-        }
-
-        _debugConsole = new DebugConsole();
-        _debugConsole.Show();
-    }
+    /// <summary>
+    /// Runtime-adjustable Serilog minimum level. Referenced by the logging configuration
+    /// (<see cref="StartupConfig.LoggingConfig"/>) and updated through <see cref="LogLevel"/>.
+    /// </summary>
+    public static readonly LoggingLevelSwitch LevelSwitch = new(ToLogEventLevel(_logLevel));
 
     /// <summary>
     /// Level of what should be logged.
@@ -37,11 +29,21 @@ public static class MacroDeckLogger
         set
         {
             _logLevel = value;
+            LevelSwitch.MinimumLevel = ToLogEventLevel(value);
             logger.Information("Set log level to {LogLevel}", _logLevel);
         }
     }
 
-    internal static bool FileLogging = true;
+    private static LogEventLevel ToLogEventLevel(LogLevel level) => level switch
+    {
+        LogLevel.Trace => LogEventLevel.Verbose,
+        LogLevel.Info => LogEventLevel.Information,
+        LogLevel.Warning => LogEventLevel.Warning,
+        LogLevel.Error => LogEventLevel.Error,
+        // No dedicated "off" level exists; a value above Fatal filters everything out.
+        LogLevel.Nothing => LogEventLevel.Fatal + 1,
+        _ => LogEventLevel.Information
+    };
 
     // -------------------------------------------------------------------------
     //  Logging API
@@ -257,28 +259,6 @@ public static class MacroDeckLogger
         }
     }
 
-    private static string TruncateForDisplay(this string value, int length)
-    {
-        if (string.IsNullOrEmpty(value))
-        {
-            return string.Empty;
-        }
-
-        var returnValue = value;
-        if (value.Length > length)
-        {
-            var tmp = value.Substring(0, length);
-            if (tmp.LastIndexOf(' ') > 0)
-            {
-                returnValue = tmp.Substring(0, tmp.LastIndexOf(' ')) + " ...";
-            }
-        }
-
-        return returnValue;
-    }
-
-    internal static string CurrentFilename =>
-        Path.Combine(ApplicationPaths.LogsDirectoryPath, DateTime.Now.ToString("yyyy-MM-dd") + ".log");
 }
 
 public enum LogLevel
