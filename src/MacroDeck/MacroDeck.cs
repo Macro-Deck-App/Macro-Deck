@@ -101,6 +101,7 @@ public class MacroDeck : NativeWindow
         }
 
         Configuration = MainConfiguration.LoadFromFile(ApplicationPaths.MainConfigFilePath);
+        SentryConfiguration.Enabled = Configuration.SendAnonymousErrorReports;
         LanguageManager.SetLanguage(Configuration.Language);
         _ = new HotkeyManager();
         VariableManager.Initialize();

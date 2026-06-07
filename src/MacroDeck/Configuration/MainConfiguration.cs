@@ -71,6 +71,9 @@ public class MainConfiguration
 
     [JsonProperty("Language")] public string Language { get; set; } = "English";
 
+    [JsonProperty("Privacy.SendAnonymousErrorReports")]
+    public bool SendAnonymousErrorReports { get; set; } = true;
+
     public void Save(string path)
     {
         var serializer = new JsonSerializer

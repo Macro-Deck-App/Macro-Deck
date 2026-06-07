@@ -68,8 +68,10 @@ public static class MacroDeckLogger
         string messageTemplate,
         object[] propertyValues)
     {
+        // Host events get a SuchByte.MacroDeck SourceContext so they pass Sentry's source whitelist;
+        // plugin events carry the "Plugin" property and are excluded from Sentry.
         var contextLogger = plugin is null
-            ? Log.Logger
+            ? Log.ForContext(Serilog.Core.Constants.SourceContextPropertyName, "SuchByte.MacroDeck")
             : Log.ForContext("Plugin", plugin.Name);
         contextLogger.Write(level, exception, messageTemplate, propertyValues);
     }

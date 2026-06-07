@@ -20,7 +20,7 @@ public static class LoggingConfig
     /// </summary>
     public static ILogger CreateLogger()
     {
-        return new LoggerConfiguration()
+        var loggerConfiguration = new LoggerConfiguration()
             .Enrich.With<PluginSourceEnricher>()
             .MinimumLevel.ControlledBy(MacroDeckLogger.LevelSwitch)
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
@@ -35,8 +35,17 @@ public static class LoggingConfig
                 rollingInterval: RollingInterval.Day,
                 fileSizeLimitBytes: 53477376, // 50 MB
                 outputTemplate: OutputTemplate)
-            .WriteTo.Sink(new DebugConsoleSink(new MessageTemplateTextFormatter(OutputTemplate, null)))
-            .CreateLogger();
+            .WriteTo.Sink(new DebugConsoleSink(new MessageTemplateTextFormatter(OutputTemplate, null)));
+
+        // Anonymous error reporting. Only registered when a real DSN was injected in CI/CD; the
+        // conditional routes only Macro Deck's own events (not plugins) and honours the opt-out.
+        if (SentryConfiguration.IsDsnConfigured)
+        {
+            loggerConfiguration.WriteTo.Conditional(SentryConfiguration.ShouldSend,
+                wt => wt.Sentry(SentryConfiguration.Configure));
+        }
+
+        return loggerConfiguration.CreateLogger();
     }
 
     public static IHostBuilder ConfigureSerilog(this IHostBuilder hostBuilder)

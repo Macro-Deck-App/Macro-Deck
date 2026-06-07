@@ -18,6 +18,7 @@ public class Strings
 
     public string AutomaticallyCheckUpdates = "Automatically check for updates";
     public string AutomaticallyStartWithWindows = "Automatically start with Windows";
+    public string SendAnonymousErrorReports = "Send anonymous error reports";
     public string Show = "Configure Macro Deck";
     public string Exit = "Exit Macro Deck";
     public string XUpdatesAvailable = "{0} updates available";
