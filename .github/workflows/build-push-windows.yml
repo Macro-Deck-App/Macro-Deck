@@ -46,6 +46,12 @@ jobs:
               exit 1
             }
 
+      - name: Inject Sentry DSN
+        shell: pwsh
+        run: |
+            $f = "src\MacroDeck\Logging\SentryConfiguration.cs"
+            (Get-Content $f) -replace '__SENTRY_DSN__', '${{ secrets.SENTRY_DSN }}' | Set-Content $f
+
       - name: Build Macro Deck for Windows
         run: |
             dotnet restore "src\MacroDeck\MacroDeck.csproj"

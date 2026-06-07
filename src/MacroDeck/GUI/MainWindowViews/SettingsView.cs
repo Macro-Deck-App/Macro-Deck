@@ -5,6 +5,7 @@ using SuchByte.MacroDeck.GUI.CustomControls.Settings;
 using Serilog;
 using SuchByte.MacroDeck.GUI.Dialogs;
 using SuchByte.MacroDeck.Language;
+using SuchByte.MacroDeck.Logging;
 using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Services;
 using SuchByte.MacroDeck.StartupConfig;
@@ -48,6 +49,7 @@ public partial class SettingsView : UserControl
         lblGeneral.Text = LanguageManager.Strings.General;
         lblBehaviour.Text = LanguageManager.Strings.Behaviour;
         checkStartWindows.Text = LanguageManager.Strings.AutomaticallyStartWithWindows;
+        checkSendErrorReports.Text = LanguageManager.Strings.SendAnonymousErrorReports;
         lblLanguage.Text = LanguageManager.Strings.Language;
         lblConnection.Text = LanguageManager.Strings.Connection;
         lblPort.Text = LanguageManager.Strings.Port;
@@ -71,6 +73,7 @@ public partial class SettingsView : UserControl
     private void Settings_Load(object sender, EventArgs e)
     {
         LoadAutoStart();
+        LoadErrorReporting();
         LoadLanguage();
         LoadUpdateChannel();
         LoadNetworkConfiguration();
@@ -136,6 +139,20 @@ public partial class SettingsView : UserControl
         checkStartWindows.CheckedChanged -= CheckStartWindows_CheckedChanged;
         checkStartWindows.Checked = MacroDeck.Configuration.AutoStart;
         checkStartWindows.CheckedChanged += CheckStartWindows_CheckedChanged;
+    }
+
+    private void LoadErrorReporting()
+    {
+        checkSendErrorReports.CheckedChanged -= CheckSendErrorReports_CheckedChanged;
+        checkSendErrorReports.Checked = MacroDeck.Configuration.SendAnonymousErrorReports;
+        checkSendErrorReports.CheckedChanged += CheckSendErrorReports_CheckedChanged;
+    }
+
+    private void CheckSendErrorReports_CheckedChanged(object sender, EventArgs e)
+    {
+        MacroDeck.Configuration.SendAnonymousErrorReports = checkSendErrorReports.Checked;
+        SentryConfiguration.Enabled = checkSendErrorReports.Checked;
+        MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
     }
 
     private void LoadUpdateChannel()

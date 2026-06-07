@@ -39,6 +39,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
             language = new RoundedComboBox();
             lblLanguage = new Label();
             checkStartWindows = new CheckBox();
+            checkSendErrorReports = new CheckBox();
             lblBehaviour = new Label();
             lblGeneral = new Label();
             tabConnection = new TabPage();
@@ -124,6 +125,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
             tabGeneral.Controls.Add(language);
             tabGeneral.Controls.Add(lblLanguage);
             tabGeneral.Controls.Add(checkStartWindows);
+            tabGeneral.Controls.Add(checkSendErrorReports);
             tabGeneral.Controls.Add(lblBehaviour);
             tabGeneral.Controls.Add(lblGeneral);
             tabGeneral.Font = new Font("Tahoma", 12F);
@@ -175,7 +177,19 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
             checkStartWindows.UseMnemonic = false;
             checkStartWindows.UseVisualStyleBackColor = true;
             checkStartWindows.CheckedChanged += CheckStartWindows_CheckedChanged;
-            // 
+            //
+            // checkSendErrorReports
+            //
+            checkSendErrorReports.AutoSize = true;
+            checkSendErrorReports.Location = new Point(13, 118);
+            checkSendErrorReports.Name = "checkSendErrorReports";
+            checkSendErrorReports.Size = new Size(165, 23);
+            checkSendErrorReports.TabIndex = 3;
+            checkSendErrorReports.Text = "Send anonymous error reports";
+            checkSendErrorReports.UseMnemonic = false;
+            checkSendErrorReports.UseVisualStyleBackColor = true;
+            checkSendErrorReports.CheckedChanged += CheckSendErrorReports_CheckedChanged;
+            //
             // lblBehaviour
             // 
             lblBehaviour.AutoSize = true;
@@ -867,6 +881,7 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
         private Label lblUpdates;
         private Label lblBehaviour;
         private CheckBox checkStartWindows;
+        private CheckBox checkSendErrorReports;
         private Label lblLanguage;
         private RoundedComboBox language;
         private Label lblPort;
