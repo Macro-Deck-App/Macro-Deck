@@ -4,7 +4,7 @@ using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Properties;
 using SuchByte.MacroDeck.Utils;
 
-namespace SuchByte.MacroDeck.GUI.Dialogs;
+namespace SuchByte.MacroDeck.GUI;
 
 public partial class ActionConfigurator : DialogForm
 {
