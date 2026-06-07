@@ -143,8 +143,7 @@ public partial class ExtensionStoreDownloaderItem : RoundedUserControl
         if (!expectedFileHash.Equals(hash))
         {
             Finished();
-            Logger.Error(
-                $"Checksum of {ApiV2Extension.Name} not matching!" +
+            Logger.Error($"Checksum of {ApiV2Extension.Name} not matching!" +
                 Environment.NewLine +
                 $"Checksum on server: {expectedFileHash}" +
                 Environment.NewLine +

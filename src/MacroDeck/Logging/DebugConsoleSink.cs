@@ -15,7 +15,10 @@ public class DebugConsoleSink : ILogEventSink
 {
     private readonly ITextFormatter _formatter;
 
-    public DebugConsoleSink(ITextFormatter formatter) => _formatter = formatter;
+    public DebugConsoleSink(ITextFormatter formatter)
+    {
+        _formatter = formatter;
+    }
 
     public void Emit(LogEvent logEvent)
     {
@@ -36,14 +39,17 @@ public class DebugConsoleSink : ILogEventSink
         console.AppendText(writer.ToString(), source, ColorForLevel(logEvent.Level));
     }
 
-    private static Color ColorForLevel(LogEventLevel level) => level switch
+    private static Color ColorForLevel(LogEventLevel level)
     {
-        LogEventLevel.Fatal => Color.FromArgb(255, 99, 99),
-        LogEventLevel.Error => Color.FromArgb(255, 99, 99),
-        LogEventLevel.Warning => Color.Orange,
-        LogEventLevel.Information => Color.White,
-        LogEventLevel.Debug => Color.Gray,
-        LogEventLevel.Verbose => Color.DarkGray,
-        _ => Color.White
-    };
+        return level switch
+        {
+            LogEventLevel.Fatal => Color.FromArgb(255, 99, 99),
+            LogEventLevel.Error => Color.FromArgb(255, 99, 99),
+            LogEventLevel.Warning => Color.Orange,
+            LogEventLevel.Information => Color.White,
+            LogEventLevel.Debug => Color.Gray,
+            LogEventLevel.Verbose => Color.DarkGray,
+            _ => Color.White
+        };
+    }
 }

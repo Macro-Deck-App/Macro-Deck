@@ -191,8 +191,7 @@ public static class PluginManager
                 PluginDirectories[disabledPlugin] = pluginDirectory;
 
                 MacroDeck.SafeMode = true;
-                Logger.Warning(
-                    "Cannot load {PluginName} version {PluginVersion}. Macro Deck was started in safe mode.",
+                Logger.Warning("Cannot load {PluginName} version {PluginVersion}. Macro Deck was started in safe mode.",
                     disabledPlugin.Name,
                     disabledPlugin.Version);
                 return disabledPlugin;

@@ -67,7 +67,8 @@ public class BackupManager
         {
             try
             {
-                File.Copy(Path.Combine(restoreDirectory, Path.GetFileName((string?)ApplicationPaths.MainConfigFilePath)),
+                File.Copy(
+                    Path.Combine(restoreDirectory, Path.GetFileName((string?)ApplicationPaths.MainConfigFilePath)),
                     ApplicationPaths.MainConfigFilePath,
                     true);
             }

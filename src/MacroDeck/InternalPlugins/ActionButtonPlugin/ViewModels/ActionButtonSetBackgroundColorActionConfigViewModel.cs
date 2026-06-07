@@ -10,7 +10,8 @@ namespace SuchByte.MacroDeck.InternalPlugins.ActionButtonPlugin.ViewModels;
 
 public class ActionButtonSetBackgroundColorActionConfigViewModel : ISerializableConfigViewModel
 {
-    private static readonly ILogger Logger = Log.ForContext(typeof(ActionButtonSetBackgroundColorActionConfigViewModel));
+    private static readonly ILogger
+        Logger = Log.ForContext(typeof(ActionButtonSetBackgroundColorActionConfigViewModel));
 
     private readonly PluginAction _pluginAction;
 

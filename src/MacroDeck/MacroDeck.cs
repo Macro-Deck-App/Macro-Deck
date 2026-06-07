@@ -82,7 +82,8 @@ public class MacroDeck : NativeWindow
 
         Logger.Information("Macro Deck {Version}", Version);
         Logger.Information("Path: {ExecutablePath}", ApplicationPaths.ExecutablePath);
-        Logger.Information("Start parameters: {StartParameters}", string.Join(" ", StartParameters.ToArray(StartParameters)));
+        Logger.Information("Start parameters: {StartParameters}",
+            string.Join(" ", StartParameters.ToArray(StartParameters)));
 
         MacroDeckLogger.CleanUpLogsDir();
 

@@ -40,5 +40,7 @@ public static class LoggingConfig
     }
 
     public static IHostBuilder ConfigureSerilog(this IHostBuilder hostBuilder)
-        => hostBuilder.UseSerilog();
+    {
+        return hostBuilder.UseSerilog();
+    }
 }

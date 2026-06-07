@@ -67,7 +67,9 @@ internal class Program
 
     private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        Logger.Error(e.ExceptionObject as Exception, "Unhandled domain exception: {ExceptionObject}", e.ExceptionObject);
+        Logger.Error(e.ExceptionObject as Exception,
+            "Unhandled domain exception: {ExceptionObject}",
+            e.ExceptionObject);
     }
 
     private static void ApplicationThreadException(object sender, ThreadExceptionEventArgs e)

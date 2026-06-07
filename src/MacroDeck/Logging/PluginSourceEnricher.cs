@@ -19,9 +19,9 @@ public class PluginSourceEnricher : ILogEventEnricher
     public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
         var source = MacroDeckSource;
-        if (logEvent.Properties.TryGetValue(PluginPropertyName, out var pluginValue)
-            && pluginValue is ScalarValue { Value: string pluginName }
-            && !string.IsNullOrWhiteSpace(pluginName))
+        if (logEvent.Properties.TryGetValue(PluginPropertyName, out var pluginValue) &&
+            pluginValue is ScalarValue { Value: string pluginName } &&
+            !string.IsNullOrWhiteSpace(pluginName))
         {
             source = pluginName;
         }

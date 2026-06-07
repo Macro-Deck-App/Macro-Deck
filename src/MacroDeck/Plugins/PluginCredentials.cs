@@ -99,8 +99,7 @@ public class PluginCredentials
                 }
                 catch
                 {
-                    Logger.Warning(
-                        "Unable to decrypt credentials for {PluginName}. Perhaps the machine GUID changed?",
+                    Logger.Warning("Unable to decrypt credentials for {PluginName}. Perhaps the machine GUID changed?",
                         plugin.Name);
                 }
             }

@@ -34,16 +34,19 @@ public static class MacroDeckLogger
         }
     }
 
-    private static LogEventLevel ToLogEventLevel(LogLevel level) => level switch
+    private static LogEventLevel ToLogEventLevel(LogLevel level)
     {
-        LogLevel.Trace => LogEventLevel.Verbose,
-        LogLevel.Info => LogEventLevel.Information,
-        LogLevel.Warning => LogEventLevel.Warning,
-        LogLevel.Error => LogEventLevel.Error,
-        // No dedicated "off" level exists; a value above Fatal filters everything out.
-        LogLevel.Nothing => LogEventLevel.Fatal + 1,
-        _ => LogEventLevel.Information
-    };
+        return level switch
+        {
+            LogLevel.Trace => LogEventLevel.Verbose,
+            LogLevel.Info => LogEventLevel.Information,
+            LogLevel.Warning => LogEventLevel.Warning,
+            LogLevel.Error => LogEventLevel.Error,
+            // No dedicated "off" level exists; a value above Fatal filters everything out.
+            LogLevel.Nothing => LogEventLevel.Fatal + 1,
+            _ => LogEventLevel.Information
+        };
+    }
 
     // -------------------------------------------------------------------------
     //  Logging API
@@ -72,76 +75,142 @@ public static class MacroDeckLogger
     }
 
     public static void Verbose(string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Verbose, null, null, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Verbose, null, null, messageTemplate, propertyValues);
+    }
 
     public static void Verbose(Exception exception, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Verbose, null, exception, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Verbose, null, exception, messageTemplate, propertyValues);
+    }
 
     public static void Verbose(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Verbose, plugin, null, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Verbose, plugin, null, messageTemplate, propertyValues);
+    }
 
-    public static void Verbose(MacroDeckPlugin plugin, Exception exception, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Verbose, plugin, exception, messageTemplate, propertyValues);
+    public static void Verbose(MacroDeckPlugin plugin,
+        Exception exception,
+        string messageTemplate,
+        params object[] propertyValues)
+    {
+        Write(LogEventLevel.Verbose, plugin, exception, messageTemplate, propertyValues);
+    }
 
     public static void Debug(string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Debug, null, null, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Debug, null, null, messageTemplate, propertyValues);
+    }
 
     public static void Debug(Exception exception, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Debug, null, exception, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Debug, null, exception, messageTemplate, propertyValues);
+    }
 
     public static void Debug(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Debug, plugin, null, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Debug, plugin, null, messageTemplate, propertyValues);
+    }
 
-    public static void Debug(MacroDeckPlugin plugin, Exception exception, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Debug, plugin, exception, messageTemplate, propertyValues);
+    public static void Debug(MacroDeckPlugin plugin,
+        Exception exception,
+        string messageTemplate,
+        params object[] propertyValues)
+    {
+        Write(LogEventLevel.Debug, plugin, exception, messageTemplate, propertyValues);
+    }
 
     public static void Information(string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Information, null, null, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Information, null, null, messageTemplate, propertyValues);
+    }
 
     public static void Information(Exception exception, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Information, null, exception, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Information, null, exception, messageTemplate, propertyValues);
+    }
 
     public static void Information(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Information, plugin, null, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Information, plugin, null, messageTemplate, propertyValues);
+    }
 
-    public static void Information(MacroDeckPlugin plugin, Exception exception, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Information, plugin, exception, messageTemplate, propertyValues);
+    public static void Information(MacroDeckPlugin plugin,
+        Exception exception,
+        string messageTemplate,
+        params object[] propertyValues)
+    {
+        Write(LogEventLevel.Information, plugin, exception, messageTemplate, propertyValues);
+    }
 
     public static void Warning(string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Warning, null, null, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Warning, null, null, messageTemplate, propertyValues);
+    }
 
     public static void Warning(Exception exception, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Warning, null, exception, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Warning, null, exception, messageTemplate, propertyValues);
+    }
 
     public static void Warning(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Warning, plugin, null, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Warning, plugin, null, messageTemplate, propertyValues);
+    }
 
-    public static void Warning(MacroDeckPlugin plugin, Exception exception, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Warning, plugin, exception, messageTemplate, propertyValues);
+    public static void Warning(MacroDeckPlugin plugin,
+        Exception exception,
+        string messageTemplate,
+        params object[] propertyValues)
+    {
+        Write(LogEventLevel.Warning, plugin, exception, messageTemplate, propertyValues);
+    }
 
     public static void Error(string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Error, null, null, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Error, null, null, messageTemplate, propertyValues);
+    }
 
     public static void Error(Exception exception, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Error, null, exception, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Error, null, exception, messageTemplate, propertyValues);
+    }
 
     public static void Error(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Error, plugin, null, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Error, plugin, null, messageTemplate, propertyValues);
+    }
 
-    public static void Error(MacroDeckPlugin plugin, Exception exception, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Error, plugin, exception, messageTemplate, propertyValues);
+    public static void Error(MacroDeckPlugin plugin,
+        Exception exception,
+        string messageTemplate,
+        params object[] propertyValues)
+    {
+        Write(LogEventLevel.Error, plugin, exception, messageTemplate, propertyValues);
+    }
 
     public static void Fatal(string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Fatal, null, null, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Fatal, null, null, messageTemplate, propertyValues);
+    }
 
     public static void Fatal(Exception exception, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Fatal, null, exception, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Fatal, null, exception, messageTemplate, propertyValues);
+    }
 
     public static void Fatal(MacroDeckPlugin plugin, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Fatal, plugin, null, messageTemplate, propertyValues);
+    {
+        Write(LogEventLevel.Fatal, plugin, null, messageTemplate, propertyValues);
+    }
 
-    public static void Fatal(MacroDeckPlugin plugin, Exception exception, string messageTemplate, params object[] propertyValues)
-        => Write(LogEventLevel.Fatal, plugin, exception, messageTemplate, propertyValues);
+    public static void Fatal(MacroDeckPlugin plugin,
+        Exception exception,
+        string messageTemplate,
+        params object[] propertyValues)
+    {
+        Write(LogEventLevel.Fatal, plugin, exception, messageTemplate, propertyValues);
+    }
 
     /// <summary>
     /// Debug trace messages for internal debugging
@@ -258,7 +327,6 @@ public static class MacroDeckLogger
             }
         }
     }
-
 }
 
 public enum LogLevel
