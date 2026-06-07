@@ -53,7 +53,8 @@ public class ButtonLabel
             ButtonLabelPosition.BOTTOM => ContentAlignment.BottomCenter,
             _ => ContentAlignment.MiddleCenter
         };
-        _labelHex128_64Base64 = Base64.GetBase64ByteArray((Bitmap)Base64.GetImageFromBase64(_labelBase64),
+        using var labelImage = Base64.GetImageFromBase64(_labelBase64);
+        _labelHex128_64Base64 = Base64.GetBase64ByteArray((Bitmap)labelImage,
             new Size(128, 64),
             contentAlignment);
     }

@@ -39,9 +39,31 @@ public partial class IconSelector : DialogForm
         btnGenerateStatic.Text = LanguageManager.Strings.GenerateStatic;
     }
 
+    protected override void OnFormClosed(FormClosedEventArgs e)
+    {
+        // Release all icon bitmaps held by the grid buttons and the preview when the dialog closes.
+        ClearIconList();
+        btnPreview.BackgroundImage?.Dispose();
+        btnPreview.BackgroundImage = null;
+        base.OnFormClosed(e);
+    }
+
+    private void ClearIconList()
+    {
+        foreach (Control control in iconList.Controls)
+        {
+            // Each grid button's background image is a freshly loaded icon image; dispose it
+            // along with the control to release the GDI bitmaps.
+            control.BackgroundImage?.Dispose();
+            control.Dispose();
+        }
+
+        iconList.Controls.Clear();
+    }
+
     private void LoadIcons(IconPack iconPack, bool scrollDown = false)
     {
-        iconList.Controls.Clear();
+        ClearIconList();
         foreach (var icon in iconPack.Icons)
         {
             Task.Run(() =>
@@ -77,8 +99,9 @@ public partial class IconSelector : DialogForm
     {
         var previewImage = icon.IconImage;
 
-        btnGenerateStatic.Visible = icon.IconImage.RawFormat.ToString().ToLower() == "gif";
+        btnGenerateStatic.Visible = previewImage.RawFormat.ToString().ToLower() == "gif";
 
+        btnPreview.BackgroundImage?.Dispose();
         btnPreview.BackgroundImage = previewImage;
         lblSize.Text = $@"{Encoding.Unicode.GetByteCount(icon.IconBase64) / 1000:n0} kByte";
         lblType.Text = previewImage.RawFormat.ToString().ToUpper();
@@ -201,7 +224,7 @@ public partial class IconSelector : DialogForm
                 {
                     using var ms = new MemoryStream();
                     icon.Save(ms, ImageFormat.Png);
-                    var iconStatic = Image.FromStream(ms);
+                    using var iconStatic = Image.FromStream(ms);
                     IconManager.AddIconImage(iconPack, iconStatic);
                 }
 
@@ -302,6 +325,7 @@ public partial class IconSelector : DialogForm
             DialogResult.Yes)
         {
             IconManager.DeleteIconPack(iconPack);
+            btnPreview.BackgroundImage?.Dispose();
             btnPreview.BackgroundImage = null;
             SelectedIcon = null;
             lblSize.Text = "";
@@ -377,6 +401,7 @@ public partial class IconSelector : DialogForm
             DialogResult.Yes)
         {
             IconManager.DeleteIcon(SelectedIconPack, SelectedIcon);
+            btnPreview.BackgroundImage?.Dispose();
             btnPreview.BackgroundImage = null;
             btnPreview.Image = null;
             SelectedIcon = null;
@@ -446,14 +471,11 @@ public partial class IconSelector : DialogForm
     private void BtnGenerateStatic_Click(object sender, EventArgs e)
     {
         var iconPack = IconManager.GetIconPackByName(iconPacksBox.Text);
-        var icon = SelectedIcon.IconImage;
-        var ms = new MemoryStream();
+        using var icon = SelectedIcon.IconImage;
+        using var ms = new MemoryStream();
         icon.Save(ms, ImageFormat.Png);
-        var bmpBytes = ms.GetBuffer();
-        ms = new MemoryStream(bmpBytes);
-        var iconStatic = Image.FromStream(ms);
-        ms.Close();
-        ms.Dispose();
+        ms.Position = 0;
+        using var iconStatic = Image.FromStream(ms);
         var addedIcon = IconManager.AddIconImage(iconPack, iconStatic);
         SelectIcon(addedIcon);
         LoadIcons(iconPack, true);

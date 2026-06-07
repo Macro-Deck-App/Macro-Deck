@@ -40,6 +40,15 @@ public partial class ButtonEditor : DialogForm
 
     public ActionButton.ActionButton ActionButton => actionButton;
 
+    protected override void OnFormClosed(FormClosedEventArgs e)
+    {
+        // btnPreview.BackgroundImage only ever holds a freshly loaded icon image, so dispose
+        // it on close to release the GDI bitmap.
+        btnPreview.BackgroundImage?.Dispose();
+        btnPreview.BackgroundImage = null;
+        base.OnFormClosed(e);
+    }
+
     public ButtonEditor(ActionButton.ActionButton actionButton, MacroDeckFolder folder)
     {
         InitializeComponent();
@@ -227,11 +236,13 @@ public partial class ButtonEditor : DialogForm
                 var icon = IconManager.GetIconByString(iconString);
                 if (icon != null)
                 {
+                    btnPreview.BackgroundImage?.Dispose();
                     btnPreview.BackgroundImage = icon.IconImage;
                 }
             }
             else
             {
+                btnPreview.BackgroundImage?.Dispose();
                 btnPreview.BackgroundImage = null;
             }
 

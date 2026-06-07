@@ -112,7 +112,8 @@ public class IconManager
             }
         }
 
-        iconPack.IconPackIcon = IconPackPreview.GeneratePreviewImage(iconPack);
+        // The preview image is intentionally not generated here to avoid keeping a bitmap
+        // per icon pack permanently in memory. Consumers generate it on demand and dispose it.
         return true;
     }
 
@@ -200,7 +201,10 @@ public class IconManager
         var iconPackDir = Path.Combine(ApplicationPaths.IconPackDirectoryPath, iconPack.PackageId);
         try
         {
-            iconPack.IconPackIcon?.Save(Path.Combine(iconPackDir, "ExtensionIcon.png"));
+            using (var preview = iconPack.IconPackIcon ?? IconPackPreview.GeneratePreviewImage(iconPack))
+            {
+                preview?.Save(Path.Combine(iconPackDir, "ExtensionIcon.png"));
+            }
             using var archive = ZipFile.Open(Path.Combine(ApplicationPaths.BackupsDirectoryPath,
                     destination,
                     $"{iconPack.Name}.macroDeckIconPack"),

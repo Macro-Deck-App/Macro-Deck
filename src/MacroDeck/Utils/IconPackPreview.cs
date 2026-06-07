@@ -20,7 +20,7 @@ public static class IconPackPreview
             g.Clear(Color.FromArgb(32, 32, 32));
         }
 
-        var canvas = Graphics.FromImage(bitmap);
+        using var canvas = Graphics.FromImage(bitmap);
         canvas.InterpolationMode = InterpolationMode.Bicubic;
         foreach (var icon in iconPack.Icons.Take(4))
         {
@@ -33,7 +33,11 @@ public static class IconPackPreview
                     X = column * (iconSize + column * padding),
                     Y = row * (iconSize + row * padding)
                 };
-                canvas.DrawImage(new Bitmap(icon.IconImage), iconRectangle);
+                using (var iconImage = icon.IconImage)
+                {
+                    canvas.DrawImage(iconImage, iconRectangle);
+                }
+
                 column++;
                 if (column >= 2)
                 {

@@ -234,6 +234,7 @@ public partial class DeckView : UserControl
                 var icon = IconManager.GetIconByString(actionButton.IconOn);
                 if (icon != null)
                 {
+                    button.BackgroundImage?.Dispose();
                     button.BackgroundImage = icon.IconImage;
                 }
             }
@@ -255,6 +256,7 @@ public partial class DeckView : UserControl
                 var icon = IconManager.GetIconByString(actionButton.IconOff);
                 if (icon != null)
                 {
+                    button.BackgroundImage?.Dispose();
                     button.BackgroundImage = icon.IconImage;
                 }
             }
