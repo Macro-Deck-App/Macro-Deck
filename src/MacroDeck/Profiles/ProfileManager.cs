@@ -34,10 +34,25 @@ public static class ProfileManager
         VariableManager.OnVariableChanged += VariableChanged;
     }
 
+    private static WindowFocusDetection? _windowFocusDetection;
+
     public static void AddWindowFocusChangedListener()
     {
-        var windowsFocusDetection = new WindowFocusDetection();
-        windowsFocusDetection.OnWindowFocusChanged += OnWindowFocusChanged;
+        _windowFocusDetection = new WindowFocusDetection();
+        _windowFocusDetection.OnWindowFocusChanged += OnWindowFocusChanged;
+
+        Application.ApplicationExit += OnApplicationExit;
+    }
+
+    private static void OnApplicationExit(object? sender, EventArgs e)
+    {
+        Application.ApplicationExit -= OnApplicationExit;
+        if (_windowFocusDetection != null)
+        {
+            _windowFocusDetection.OnWindowFocusChanged -= OnWindowFocusChanged;
+            _windowFocusDetection.Dispose();
+            _windowFocusDetection = null;
+        }
     }
 
     private static void OnWindowFocusChanged(object sender, WindowChangedEventArgs e)

@@ -35,9 +35,13 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
 
                 }
             } catch { }
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                qrCodeBox.BackgroundImage?.Dispose();
+                if (components != null)
+                {
+                    components.Dispose();
+                }
             }
             base.Dispose(disposing);
         }

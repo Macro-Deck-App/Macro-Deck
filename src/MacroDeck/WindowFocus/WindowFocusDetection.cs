@@ -4,7 +4,7 @@ using SuchByte.MacroDeck.Variables;
 
 namespace SuchByte.MacroDeck.WindowFocus;
 
-public class WindowFocusDetection
+public class WindowFocusDetection : IDisposable
 {
     private delegate void WinEventDelegate(IntPtr hWinEventHook,
         uint eventType,
@@ -23,6 +23,9 @@ public class WindowFocusDetection
         uint idThread,
         uint dwFlags);
 
+    [DllImport("user32.dll")]
+    private static extern bool UnhookWinEvent(IntPtr hWinEventHook);
+
     private const uint WINEVENT_OUTOFCONTEXT = 0;
     private const uint EVENT_SYSTEM_FOREGROUND = 3;
 
@@ -33,18 +36,29 @@ public class WindowFocusDetection
     public event EventHandler<WindowChangedEventArgs>? OnWindowFocusChanged;
     private string _focusedApplication = "";
 
-    private static WinEventDelegate dele;
+    // Kept as an instance field so the delegate is not garbage collected while the hook is active.
+    private readonly WinEventDelegate _winEventDelegate;
+    private IntPtr _hookHandle;
 
     public WindowFocusDetection()
     {
-        dele = WinEventProc;
-        var m_hhook = SetWinEventHook(EVENT_SYSTEM_FOREGROUND,
+        _winEventDelegate = WinEventProc;
+        _hookHandle = SetWinEventHook(EVENT_SYSTEM_FOREGROUND,
             EVENT_SYSTEM_FOREGROUND,
             IntPtr.Zero,
-            dele,
+            _winEventDelegate,
             0,
             0,
             WINEVENT_OUTOFCONTEXT);
+    }
+
+    public void Dispose()
+    {
+        if (_hookHandle != IntPtr.Zero)
+        {
+            UnhookWinEvent(_hookHandle);
+            _hookHandle = IntPtr.Zero;
+        }
     }
 
     private uint GetActiveWindowProcessId(IntPtr hwnd)

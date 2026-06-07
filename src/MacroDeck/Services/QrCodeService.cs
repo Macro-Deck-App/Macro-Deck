@@ -35,6 +35,8 @@ public class QrCodeService
 
         var quickSetupQrCode = qrCode.GetGraphic(20, Color.White, Color.Transparent, false);
         using var ms = new MemoryStream(quickSetupQrCode);
-        return Image.FromStream(ms);
+        using var image = Image.FromStream(ms);
+        // Return a copy that does not depend on the (disposed) stream
+        return new Bitmap(image);
     }
 }

@@ -33,8 +33,9 @@ public class CombineBitmaps
             iconBitmap = new Bitmap(px, px);
         }
 
-        Image background = new Bitmap(backgroundBitmap.Width, backgroundBitmap.Height, PixelFormat.Format32bppArgb);
-        Image icon = new Bitmap(background.Width, background.Height, PixelFormat.Format32bppArgb);
+        using Image background =
+            new Bitmap(backgroundBitmap.Width, backgroundBitmap.Height, PixelFormat.Format32bppArgb);
+        using Image icon = new Bitmap(background.Width, background.Height, PixelFormat.Format32bppArgb);
         using (var g = Graphics.FromImage(background))
         {
             g.Clear(Color.Transparent);
@@ -47,24 +48,26 @@ public class CombineBitmaps
 
 
         var bitmap = new Bitmap(px, px);
-        var canvas = Graphics.FromImage(bitmap);
-        canvas.InterpolationMode = InterpolationMode.Bicubic;
-        canvas.DrawImage(background,
-            new Rectangle(0,
-                0,
-                background.Width,
-                background.Height),
-            new Rectangle(0,
-                0,
-                background.Width,
-                background.Height),
-            GraphicsUnit.Pixel);
-        canvas.DrawImage(icon,
-            bitmap.Width / 2 - icon.Width / 2,
-            bitmap.Height / 2 - icon.Height / 2);
+        using (var canvas = Graphics.FromImage(bitmap))
+        {
+            canvas.InterpolationMode = InterpolationMode.Bicubic;
+            canvas.DrawImage(background,
+                new Rectangle(0,
+                    0,
+                    background.Width,
+                    background.Height),
+                new Rectangle(0,
+                    0,
+                    background.Width,
+                    background.Height),
+                GraphicsUnit.Pixel);
+            canvas.DrawImage(icon,
+                bitmap.Width / 2 - icon.Width / 2,
+                bitmap.Height / 2 - icon.Height / 2);
 
 
-        canvas.Save();
+            canvas.Save();
+        }
 
         return bitmap;
     }

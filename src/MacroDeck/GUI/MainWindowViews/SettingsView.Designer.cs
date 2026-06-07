@@ -17,6 +17,10 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
         /// <param name="disposing">True, wenn verwaltete Ressourcen gelöscht werden sollen; andernfalls False.</param>
         protected override void Dispose(bool disposing)
         {
+            Backup.BackupManager.BackupSaved -= BackupManager_BackupSaved;
+            Backup.BackupManager.BackupFailed -= BackupManager_BackupFailed;
+            Backup.BackupManager.DeleteSuccess -= BackupManager_DeleteSuccess;
+
             if (disposing && (components != null))
             {
                 components.Dispose();
