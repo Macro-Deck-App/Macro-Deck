@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.IO;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using SQLite;
 using SuchByte.MacroDeck.CottleIntegration;
@@ -26,6 +27,15 @@ public static class ProfileManager
     public static MacroDeckProfile? CurrentProfile { get; set; }
 
     public static List<MacroDeckProfile> Profiles { get; private set; } = new();
+
+    private static readonly object _saveLock = new();
+
+    private static readonly JsonSerializerSettings _jsonSettings = new()
+    {
+        TypeNameHandling = TypeNameHandling.Auto,
+        NullValueHandling = NullValueHandling.Ignore,
+        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+    };
 
     private static Dictionary<MacroDeckClient, (MacroDeckFolder PreviousFolder, string ProcessName)> history = new();
 
@@ -189,38 +199,44 @@ public static class ProfileManager
     {
         Logger.Information("Loading profiles...");
         Profiles = new List<MacroDeckProfile>();
-        var databasePath = ApplicationPaths.ProfilesFilePath;
 
-        var db = new SQLiteConnection(databasePath);
-        db.CreateTable<ProfileJson>();
+        MigrateLegacyDatabase();
 
-        var query = db.Table<ProfileJson>();
-
-
-        foreach (var folderJson in query)
+        var profilesDir = ApplicationPaths.ProfilesDirectoryPath;
+        foreach (var file in Directory.GetFiles(profilesDir, "*.json"))
         {
-            var jsonString = folderJson.JsonString;
-            var profile = JsonConvert.DeserializeObject<MacroDeckProfile>(jsonString,
-                new JsonSerializerSettings
+            try
+            {
+                var jsonString = File.ReadAllText(file);
+                var settings = new JsonSerializerSettings
                 {
                     TypeNameHandling = TypeNameHandling.Auto,
                     NullValueHandling = NullValueHandling.Ignore,
                     Error = (sender, args) =>
                     {
-                        Logger.Error(args.ErrorContext.Error, "Error while deserializing the profiles file");
+                        Logger.Error(args.ErrorContext.Error, "Error while deserializing profile {File}", file);
                         args.ErrorContext.Handled = true;
                     },
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                });
-            if (profile is { ProfileId: "" })
-            {
-                profile.ProfileId = Profiles.Count.ToString();
+                };
+                var profile = JsonConvert.DeserializeObject<MacroDeckProfile>(jsonString, settings);
+                if (profile is null)
+                {
+                    continue;
+                }
+
+                if (profile.ProfileId == "")
+                {
+                    profile.ProfileId = Profiles.Count.ToString();
+                }
+
+                Profiles.Add(profile);
             }
-
-            Profiles.Add(profile);
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "Failed to load profile from {File}", file);
+            }
         }
-
-        db.Close();
 
         if (Profiles.Count == 0)
         {
@@ -294,39 +310,129 @@ public static class ProfileManager
             return;
         }
 
-        var databasePath = ApplicationPaths.ProfilesFilePath;
-
-        var db = new SQLiteConnection(databasePath);
-        db.CreateTable<ProfileJson>();
-        db.DeleteAll<ProfileJson>();
-
-        foreach (var profile in Profiles)
+        lock (_saveLock)
         {
-            var jsonString = JsonConvert.SerializeObject(profile,
-                new JsonSerializerSettings
-                {
-                    TypeNameHandling = TypeNameHandling.Auto,
-                    NullValueHandling = NullValueHandling.Ignore,
-                    Error = (sender, args) =>
-                    {
-                        Logger.Error(args.ErrorContext.Error, "Error while serializing the profiles");
-                        args.ErrorContext.Handled = true;
-                    },
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                });
+            var profilesDir = ApplicationPaths.ProfilesDirectoryPath;
+            var activeIds = new HashSet<string>();
 
-            var profileJson = new ProfileJson
+            foreach (var profile in Profiles)
             {
-                JsonString = jsonString
-            };
+                var profileId = profile.ProfileId;
+                activeIds.Add(profileId);
 
-            db.InsertOrReplace(profileJson);
+                string jsonString;
+                try
+                {
+                    jsonString = JsonConvert.SerializeObject(profile, new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.Auto,
+                        NullValueHandling = NullValueHandling.Ignore,
+                        Error = (sender, args) =>
+                        {
+                            Logger.Error(args.ErrorContext.Error, "Error while serializing profile {ProfileId}", profileId);
+                            args.ErrorContext.Handled = true;
+                        },
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "Failed to serialize profile {ProfileId}", profileId);
+                    continue;
+                }
+
+                var finalPath = Path.Combine(profilesDir, $"{profileId}.json");
+                var tmpPath = finalPath + ".tmp";
+                File.WriteAllText(tmpPath, jsonString);
+                File.Move(tmpPath, finalPath, overwrite: true);
+            }
+
+            foreach (var file in Directory.GetFiles(profilesDir, "*.json"))
+            {
+                var id = Path.GetFileNameWithoutExtension(file);
+                if (!activeIds.Contains(id))
+                {
+                    try { File.Delete(file); }
+                    catch (Exception ex) { Logger.Warning(ex, "Failed to delete orphaned profile file {File}", file); }
+                }
+            }
         }
 
-        db.Execute("VACUUM");
-        db.Close();
         Logger.Debug("Saved {ProfileCount} profiles", Profiles.Count);
         ProfilesSaved?.Invoke(Profiles, EventArgs.Empty);
+    }
+
+    private static void MigrateLegacyDatabase()
+    {
+        var legacyPath = ApplicationPaths.ProfilesLegacyFilePath;
+        var profilesDir = ApplicationPaths.ProfilesDirectoryPath;
+
+        if (!File.Exists(legacyPath))
+        {
+            return;
+        }
+
+        if (Directory.GetFiles(profilesDir, "*.json").Length > 0)
+        {
+            return;
+        }
+
+        Logger.Information("Migrating profiles from legacy SQLite database...");
+
+        try
+        {
+            var db = new SQLiteConnection(legacyPath);
+            db.CreateTable<ProfileJson>();
+            var entries = db.Table<ProfileJson>().ToList();
+            db.Close();
+
+            var migrated = 0;
+            foreach (var entry in entries)
+            {
+                try
+                {
+                    var settings = new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.Auto,
+                        NullValueHandling = NullValueHandling.Ignore,
+                        Error = (sender, args) =>
+                        {
+                            Logger.Error(args.ErrorContext.Error, "Error while deserializing legacy profile entry");
+                            args.ErrorContext.Handled = true;
+                        },
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                    };
+                    var profile = JsonConvert.DeserializeObject<MacroDeckProfile>(entry.JsonString, settings);
+                    if (profile is null)
+                    {
+                        continue;
+                    }
+
+                    if (string.IsNullOrEmpty(profile.ProfileId))
+                    {
+                        profile.ProfileId = migrated.ToString();
+                    }
+
+                    var finalPath = Path.Combine(profilesDir, $"{profile.ProfileId}.json");
+                    var tmpPath = finalPath + ".tmp";
+                    File.WriteAllText(tmpPath, entry.JsonString);
+                    File.Move(tmpPath, finalPath, overwrite: true);
+                    migrated++;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "Failed to migrate legacy profile entry");
+                }
+            }
+
+            var migratedDbPath = legacyPath + ".migrated";
+            File.Move(legacyPath, migratedDbPath, overwrite: true);
+            Logger.Information("Migrated {Count} profiles from SQLite to JSON files. Legacy database renamed to {MigratedPath}", migrated, migratedDbPath);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Failed to migrate legacy profiles database");
+        }
     }
 
     public static MacroDeckFolder CreateFolder(string displayName,

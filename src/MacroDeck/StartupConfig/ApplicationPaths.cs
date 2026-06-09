@@ -23,7 +23,8 @@ public class ApplicationPaths
     public static string MainConfigFilePath { get; private set; } = null!;
     public static string DevicesFilePath { get; private set; } = null!;
     public static string VariablesFilePath { get; private set; } = null!;
-    public static string ProfilesFilePath { get; private set; } = null!;
+    public static string ProfilesLegacyFilePath { get; private set; } = null!;
+    public static string ProfilesDirectoryPath { get; private set; } = null!;
 
     static ApplicationPaths()
     {
@@ -55,7 +56,8 @@ public class ApplicationPaths
         MainConfigFilePath = Path.Combine(UserDirectoryPath, "config.json");
         DevicesFilePath = Path.Combine(UserDirectoryPath, "devices.json");
         VariablesFilePath = Path.Combine(UserDirectoryPath, "variables.db");
-        ProfilesFilePath = Path.Combine(UserDirectoryPath, "profiles.db");
+        ProfilesLegacyFilePath = Path.Combine(UserDirectoryPath, "profiles.db");
+        ProfilesDirectoryPath = Path.Combine(UserDirectoryPath, "profiles");
     }
 
 
@@ -94,6 +96,7 @@ public class ApplicationPaths
         CheckCreatePath(BackupsDirectoryPath);
         CheckCreatePath(IconPackDirectoryPath);
         CheckCreatePath(TempDirectoryPath);
+        CheckCreatePath(ProfilesDirectoryPath);
 
         Logger.Information("Checking paths done");
     }

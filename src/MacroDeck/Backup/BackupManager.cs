@@ -79,12 +79,18 @@ public class BackupManager
         }
 
         if (restoreBackupInfo.RestoreProfiles &&
-            File.Exists(Path.Combine(restoreDirectory, Path.GetFileName((string?)ApplicationPaths.ProfilesFilePath))))
+            Directory.Exists(Path.Combine(restoreDirectory, new DirectoryInfo(ApplicationPaths.ProfilesDirectoryPath).Name)))
         {
             try
             {
-                File.Copy(Path.Combine(restoreDirectory, Path.GetFileName((string?)ApplicationPaths.ProfilesFilePath)),
-                    ApplicationPaths.ProfilesFilePath,
+                if (Directory.Exists(ApplicationPaths.ProfilesDirectoryPath))
+                {
+                    Directory.Delete(ApplicationPaths.ProfilesDirectoryPath, true);
+                }
+
+                DirectoryCopy.Copy(
+                    Path.Combine(restoreDirectory, new DirectoryInfo(ApplicationPaths.ProfilesDirectoryPath).Name),
+                    ApplicationPaths.ProfilesDirectoryPath,
                     true);
             }
             catch (Exception ex)
@@ -278,8 +284,6 @@ public class BackupManager
             Directory.CreateDirectory(tempBackupPath);
             File.Copy(ApplicationPaths.MainConfigFilePath,
                 Path.Combine(tempBackupPath, Path.GetFileName((string?)ApplicationPaths.MainConfigFilePath)));
-            File.Copy(ApplicationPaths.ProfilesFilePath,
-                Path.Combine(tempBackupPath, Path.GetFileName((string?)ApplicationPaths.ProfilesFilePath)));
             File.Copy(ApplicationPaths.DevicesFilePath,
                 Path.Combine(tempBackupPath, Path.GetFileName((string?)ApplicationPaths.DevicesFilePath)));
             File.Copy(ApplicationPaths.VariablesFilePath,
@@ -307,6 +311,14 @@ public class BackupManager
         foreach (var file in Directory.GetFiles(tempBackupPath))
         {
             archive.CreateEntryFromFile(file, Path.GetFileName(file));
+        }
+
+        var profilesDirectoryInfo = new DirectoryInfo(ApplicationPaths.ProfilesDirectoryPath);
+        foreach (var profileFile in profilesDirectoryInfo.GetFiles("*.json"))
+        {
+            archive.CreateEntryFromFile(
+                profileFile.FullName,
+                Path.Combine(profilesDirectoryInfo.Name, profileFile.Name));
         }
 
         foreach (var directory in Directory.GetDirectories(ApplicationPaths.PluginsDirectoryPath))
