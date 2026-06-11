@@ -53,20 +53,14 @@ public class ActionButton : IDisposable
 
         HotkeyManager.RemoveHotkey(this);
         VariableManager.OnVariableChanged -= VariableChanged;
-        if (Actions != null)
+        foreach (var pluginAction in Actions)
         {
-            foreach (var pluginAction in Actions)
-            {
-                pluginAction.OnActionButtonDelete();
-            }
+            pluginAction?.OnActionButtonDelete();
         }
-
-        if (EventListeners != null)
+        
+        foreach (var pluginAction in EventListeners.SelectMany(eventListeners => eventListeners.Actions))
         {
-            foreach (var pluginAction in EventListeners.SelectMany(eventListeners => eventListeners.Actions))
-            {
-                pluginAction.OnActionButtonDelete();
-            }
+            pluginAction.OnActionButtonDelete();
         }
 
         _disposed = true;
@@ -90,18 +84,20 @@ public class ActionButton : IDisposable
             return;
         }
 
-        var variable = sender as Variable;
-        UpdateBindingState(variable);
+        if (sender is Variable variable)
+        {
+            UpdateBindingState(variable);
+        }
     }
 
     private void UpdateBindingState(Variable variable)
     {
-        if (variable == null || !variable.Name.Equals(StateBindingVariable))
+        if (!variable.Name.Equals(StateBindingVariable))
         {
             return;
         }
 
-        bool.TryParse(variable.Value, out var newState);
+        _ = bool.TryParse(variable.Value, out var newState);
         if (variable.Value.ToLower().Equals("on"))
         {
             newState = true;
@@ -110,29 +106,22 @@ public class ActionButton : IDisposable
         State = newState;
     }
 
-    public string Guid { get; set; } = System.Guid.NewGuid().ToString();
+    public string Guid { get; set; } = System.Guid.CreateVersion7().ToString();
 
-    public event EventHandler StateChanged;
-    public event EventHandler IconChanged;
-
-    private bool _state;
-    private string _iconOff = string.Empty;
-    private string _iconOn = string.Empty;
-    private Color _backgroundColorOff = Color.FromArgb(65, 65, 65);
-    private Color _backgroundColorOn = Color.FromArgb(65, 65, 65);
-
+    public event EventHandler? StateChanged;
+    public event EventHandler? IconChanged;
 
     public bool State
     {
-        get => _state;
+        get;
         set
         {
-            if (_state == value)
+            if (field == value)
             {
                 return;
             }
 
-            _state = value;
+            field = value;
             MacroDeckServer.UpdateState(this);
             StateChanged?.Invoke(this, EventArgs.Empty);
         }
@@ -140,60 +129,62 @@ public class ActionButton : IDisposable
 
     public string IconOff
     {
-        get => _iconOff;
+        get;
 
         set
         {
-            _iconOff = value;
+            field = value;
             IconChanged?.Invoke(this, EventArgs.Empty);
         }
-    }
+    } = string.Empty;
 
     public string IconOn
     {
-        get => _iconOn;
+        get;
         set
         {
-            _iconOn = value;
+            field = value;
             IconChanged?.Invoke(this, EventArgs.Empty);
         }
-    }
+    } = string.Empty;
 
     public Color BackColorOff
     {
-        get => _backgroundColorOff;
+        get;
         set
         {
-            if (_backgroundColorOff == value)
+            if (field == value)
             {
                 return;
             }
 
-            _backgroundColorOff = value;
+            field = value;
             MacroDeckServer.UpdateState(this);
             StateChanged?.Invoke(this, EventArgs.Empty);
         }
-    }
+    } = Color.FromArgb(65, 65, 65);
 
     public Color BackColorOn
     {
-        get => _backgroundColorOn;
+        get;
         set
         {
-            if (_backgroundColorOn == value)
+            if (field == value)
             {
                 return;
             }
 
-            _backgroundColorOn = value;
+            field = value;
             MacroDeckServer.UpdateState(this);
             StateChanged?.Invoke(this, EventArgs.Empty);
         }
-    }
+    } = Color.FromArgb(65, 65, 65);
 
-    public ButtonLabel LabelOff { get; set; } = new();
-    public ButtonLabel LabelOn { get; set; } = new();
+    public ButtonLabel? LabelOff { get; set; } = new();
+    public ButtonLabel? LabelOn { get; set; } = new();
+    // ReSharper disable once InconsistentNaming
     public int Position_X { get; set; } = -1;
+    // ReSharper disable once InconsistentNaming
     public int Position_Y { get; set; } = -1;
     public string StateBindingVariable { get; set; } = string.Empty;
     public List<PluginAction?> Actions { get; set; } = new();
