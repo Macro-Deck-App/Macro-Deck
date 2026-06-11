@@ -25,7 +25,7 @@ public class MacroDeckDevice
 
     public bool Blocked { get; set; } = false;
 
-    public string ProfileId { get; set; }
+    public string? ProfileId { get; set; }
 
     public DeviceConfiguration Configuration { get; set; } = new();
 
