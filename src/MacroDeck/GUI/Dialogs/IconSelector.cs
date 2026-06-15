@@ -1,4 +1,5 @@
-﻿using System.Drawing.Imaging;
+﻿using System.Collections.Concurrent;
+using System.Drawing.Imaging;
 using System.IO;
 using ImageMagick;
 using SuchByte.MacroDeck.GUI.CustomControls;
@@ -37,61 +38,25 @@ public partial class IconSelector : DialogForm
         lblTypeLabel.Text = LanguageManager.Strings.Type;
         btnPreview.Radius = ProfileManager.CurrentProfile?.ButtonRadius ?? 0;
         btnGenerateStatic.Text = LanguageManager.Strings.GenerateStatic;
+        iconList.IconSelected += (_, icon) => SelectIcon(icon);
     }
 
     protected override void OnFormClosed(FormClosedEventArgs e)
     {
-        // Release all icon bitmaps held by the grid buttons and the preview when the dialog closes.
-        ClearIconList();
+        // Release the icon bitmaps held by the grid and the preview when the dialog closes.
+        iconList.SetIcons(null);
         btnPreview.BackgroundImage?.Dispose();
         btnPreview.BackgroundImage = null;
         base.OnFormClosed(e);
     }
 
-    private void ClearIconList()
-    {
-        foreach (Control control in iconList.Controls)
-        {
-            // Each grid button's background image is a freshly loaded icon image; dispose it
-            // along with the control to release the GDI bitmaps.
-            control.BackgroundImage?.Dispose();
-            control.Dispose();
-        }
-
-        iconList.Controls.Clear();
-    }
-
     private void LoadIcons(IconPack iconPack, bool scrollDown = false)
     {
-        ClearIconList();
-        foreach (var icon in iconPack.Icons)
+        iconList.Radius = ProfileManager.CurrentProfile?.ButtonRadius ?? 0;
+        iconList.SetIcons(iconPack.Icons);
+        if (scrollDown)
         {
-            Task.Run(() =>
-            {
-                var button = new RoundedButton
-                {
-                    Width = 100,
-                    Height = 100,
-                    BackColor = Color.FromArgb(35, 35, 35),
-                    Radius = ProfileManager.CurrentProfile?.ButtonRadius ?? 0,
-                    BackgroundImageLayout = ImageLayout.Stretch,
-                    BackgroundImage = icon.IconImage
-                };
-                if (button.BackgroundImage.RawFormat.ToString().ToLower() == "gif")
-                {
-                    button.ShowGIFIndicator = true;
-                }
-
-                button.Tag = icon;
-                button.Click += (_, _) => { SelectIcon(icon); };
-                button.Cursor = Cursors.Hand;
-                Invoke(() => iconList.Controls.Add(button));
-            });
-        }
-
-        if (scrollDown && iconList.Controls.Count > 1)
-        {
-            iconList.ScrollControlIntoView(iconList.Controls[^1]);
+            iconList.ScrollToBottom();
         }
     }
 
@@ -108,6 +73,7 @@ public partial class IconSelector : DialogForm
 
         SelectedIconPack = IconManager.GetIconPackByName(iconPacksBox.Text);
         SelectedIcon = icon;
+        iconList.SelectedIcon = icon;
     }
 
     private void BtnImport_Click(object sender, EventArgs e)
@@ -119,7 +85,8 @@ public partial class IconSelector : DialogForm
             CheckPathExists = true,
             DefaultExt = "png",
             Multiselect = true,
-            Filter = "Image files (*.png;*.jpg;*.bmp;*.gif)|*.png;*.jpg;*.bmp;*.gif"
+            Filter =
+                "Image files|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.webp;*.tiff;*.tif;*.ico;*.heic;*.heif;*.avif;*.svg|All files|*.*"
         };
         if (openFileDialog.ShowDialog() != DialogResult.OK)
         {
@@ -142,53 +109,25 @@ public partial class IconSelector : DialogForm
         Task.Run(() =>
         {
             Logger.Information($"Starting importing {openFileDialog.FileNames.Length} icon(s)");
-            if (iconImportQuality.Pixels == -1)
-            {
-                foreach (var file in openFileDialog.FileNames)
-                {
-                    try
-                    {
-                        icons.Add(Image.FromFile(file));
-                        Logger.Debug("Original image loaded");
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Error(ex, "Error while loading original image");
-                    }
-                }
-            }
-            else
-            {
-                foreach (var file in openFileDialog.FileNames)
-                {
-                    try
-                    {
-                        Logger.Debug("Using Magick to resize image");
-                        using (var collection = new MagickImageCollection(new FileInfo(file)))
-                        {
-                            collection.Coalesce();
-                            Parallel.ForEach(collection,
-                                image =>
-                                {
-                                    image.Resize((uint)iconImportQuality.Pixels, (uint)iconImportQuality.Pixels);
-                                    image.Crop((uint)iconImportQuality.Pixels, (uint)iconImportQuality.Pixels);
-                                });
 
-                            using (var ms = new MemoryStream())
-                            {
-                                collection.Write(ms);
-                                icons.Add(Image.FromStream(ms));
-                            }
-                        }
-
-                        Logger.Debug("Image successfully resized");
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Error(ex, "Failed to resize image");
-                    }
+            // Decoding and resizing are CPU-bound and independent per file, so process the files
+            // in parallel. The results are collected thread-safely and added below on this thread.
+            var pixels = iconImportQuality.Pixels;
+            var loaded = new ConcurrentBag<Image>();
+            Parallel.ForEach(openFileDialog.FileNames, file =>
+            {
+                try
+                {
+                    loaded.Add(LoadImportImage(file, pixels));
+                    Logger.Debug("Image loaded");
                 }
-            }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "Failed to load image {File}", file);
+                }
+            });
+
+            icons.AddRange(loaded);
 
             openFileDialog.Dispose();
             iconImportQuality.Dispose();
@@ -235,6 +174,63 @@ public partial class IconSelector : DialogForm
             Logger.Information("Icons successfully imported");
             SpinnerDialog.SetVisisble(false, this);
         });
+    }
+
+    /// <summary>
+    /// Loads an icon for import as a GDI+ <see cref="Image"/>, optionally resizing it to a square
+    /// of <paramref name="pixels"/>. ImageMagick handles decoding so a wide range of formats
+    /// (WebP, TIFF, ICO, HEIC/HEIF, AVIF, SVG, ...) is supported; the result is re-encoded to a
+    /// format GDI+ can read (GIF preserves animation, PNG for stills).
+    /// </summary>
+    private static Image LoadImportImage(string file, int pixels)
+    {
+        // Unmodified imports of the common formats can be read directly by GDI+ (this also keeps
+        // animated GIFs intact). Anything GDI+ cannot read falls through to ImageMagick below.
+        if (pixels == -1)
+        {
+            try
+            {
+                return Image.FromFile(file);
+            }
+            catch
+            {
+                // Not a GDI+-supported format; decode via ImageMagick instead.
+            }
+        }
+
+        using var collection = new MagickImageCollection(new FileInfo(file));
+
+        // Coalesce only matters for multi-frame images (it flattens frame disposal); skipping it
+        // for stills avoids needless work.
+        if (collection.Count > 1)
+        {
+            collection.Coalesce();
+        }
+
+        if (pixels != -1)
+        {
+            foreach (var image in collection)
+            {
+                image.Resize((uint)pixels, (uint)pixels);
+                image.Crop((uint)pixels, (uint)pixels);
+            }
+        }
+
+        // The stream is intentionally not disposed: GDI+ keeps a reference to it for the lifetime
+        // of the returned image. It is released when the caller disposes the image.
+        var ms = new MemoryStream();
+        if (collection.Count > 1)
+        {
+            collection.Write(ms, MagickFormat.Gif);
+        }
+        else
+        {
+            collection[0].Format = MagickFormat.Png;
+            collection[0].Write(ms);
+        }
+
+        ms.Position = 0;
+        return Image.FromStream(ms);
     }
 
     private void BtnOk_Click(object sender, EventArgs e)

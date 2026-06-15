@@ -16,10 +16,6 @@ namespace SuchByte.MacroDeck.GUI
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            foreach (RoundedButton roundedButton in this.iconList.Controls)
-            {
-                roundedButton.Dispose();
-            }
             if (disposing && (components != null))
             {
                 components.Dispose();
@@ -35,7 +31,7 @@ namespace SuchByte.MacroDeck.GUI
         /// </summary>
         private void InitializeComponent()
         {
-            this.iconList = new System.Windows.Forms.FlowLayoutPanel();
+            this.iconList = new SuchByte.MacroDeck.GUI.CustomControls.IconGrid();
             this.btnImport = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
             this.btnPreview = new SuchByte.MacroDeck.GUI.CustomControls.RoundedButton();
             this.btnOk = new SuchByte.MacroDeck.GUI.CustomControls.ButtonPrimary();
@@ -397,7 +393,7 @@ namespace SuchByte.MacroDeck.GUI
 
         #endregion
 
-        private FlowLayoutPanel iconList;
+        private IconGrid iconList;
         private ButtonPrimary btnImport;
         private RoundedButton btnPreview;
         private ButtonPrimary btnOk;

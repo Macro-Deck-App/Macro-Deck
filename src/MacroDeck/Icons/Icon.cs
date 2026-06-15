@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Drawing.Drawing2D;
+using System.IO;
 using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.Icons;
@@ -29,6 +30,23 @@ public class Icon
             ms.Position = 0;
             return Image.FromStream(ms);
         }
+    }
+
+    /// <summary>
+    /// Loads the icon downscaled to the requested size. Only the small thumbnail bitmap is
+    /// retained, which keeps memory usage low when displaying many icons in a grid. The
+    /// returned <see cref="Image"/> is a fresh instance; the caller takes ownership and MUST
+    /// dispose it.
+    /// </summary>
+    public Image GetThumbnail(int width, int height)
+    {
+        using var fs = new FileStream(_filePath, FileMode.Open, FileAccess.Read);
+        using var source = Image.FromStream(fs);
+        var thumbnail = new Bitmap(width, height);
+        using var g = Graphics.FromImage(thumbnail);
+        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+        g.DrawImage(source, 0, 0, width, height);
+        return thumbnail;
     }
 
     /// <summary>
