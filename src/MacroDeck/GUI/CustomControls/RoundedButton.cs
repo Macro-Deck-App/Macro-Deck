@@ -1,5 +1,6 @@
 ﻿using System.Drawing.Drawing2D;
 using SuchByte.MacroDeck.Properties;
+using SuchByte.MacroDeck.Utils;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls;
 
@@ -8,6 +9,34 @@ public class RoundedButton : PictureBox
     public int Row { get; set; }
     public int Column { get; set; }
     public int Radius { get; set; } = 40;
+
+    /// <summary>
+    /// Animated GIFs assigned to the background are played via <see cref="GifAnimator"/> so they
+    /// run at the correct speed. Registration is keyed on the image instance.
+    /// </summary>
+    public override Image BackgroundImage
+    {
+        get => base.BackgroundImage;
+        set
+        {
+            if (ReferenceEquals(base.BackgroundImage, value))
+            {
+                return;
+            }
+
+            if (base.BackgroundImage != null)
+            {
+                GifAnimator.Unregister(base.BackgroundImage);
+            }
+
+            base.BackgroundImage = value;
+
+            if (value != null && GifAnimator.IsAnimated(value))
+            {
+                GifAnimator.Register(value, Invalidate);
+            }
+        }
+    }
 
     public Image ForegroundImage
     {
@@ -58,6 +87,7 @@ public class RoundedButton : PictureBox
     public RoundedButton()
     {
         SizeMode = PictureBoxSizeMode.StretchImage;
+        DoubleBuffered = true;
         MouseEnter += OnMouseEnter;
         MouseLeave += OnMouseLeave;
         Padding = Padding.Empty;
@@ -71,6 +101,14 @@ public class RoundedButton : PictureBox
             // because some RoundedButtons display shared Properties.Resources.* bitmaps.
             _foregroundImage?.Dispose();
             _foregroundImage = null;
+
+            if (base.BackgroundImage != null)
+            {
+                GifAnimator.Unregister(base.BackgroundImage);
+            }
+
+            _region?.Dispose();
+            _region = null;
         }
 
         base.Dispose(disposing);
@@ -81,7 +119,12 @@ public class RoundedButton : PictureBox
         Invalidate();
         try
         {
-            Image = BackgroundImage;
+            // Animated GIFs are drawn (and animated) via the background image; mirroring them onto
+            // the foreground Image would start a second, conflicting animation, so skip it.
+            if (!GifAnimator.IsAnimated(BackgroundImage))
+            {
+                Image = BackgroundImage;
+            }
         }
         catch
         {
@@ -94,6 +137,40 @@ public class RoundedButton : PictureBox
         Image = null;
     }
 
+
+    private Region _region;
+    private int _regionRadius = int.MinValue;
+    private Size _regionSize = Size.Empty;
+
+    /// <summary>
+    /// Applies the rounded (or rectangular) clip region, rebuilding it only when the size or
+    /// radius actually changes. Recreating it on every paint would leak GDI regions, which
+    /// matters now that animated buttons repaint many times per second.
+    /// </summary>
+    private void UpdateRegion(int radius)
+    {
+        if (_regionRadius == radius && _regionSize == Size)
+        {
+            return;
+        }
+
+        Region newRegion;
+        if (radius > 2)
+        {
+            using var path = GetFigurePath(ClientRectangle, radius);
+            newRegion = new Region(path);
+        }
+        else
+        {
+            newRegion = new Region(ClientRectangle);
+        }
+
+        Region = newRegion;
+        _region?.Dispose();
+        _region = newRegion;
+        _regionRadius = radius;
+        _regionSize = Size;
+    }
 
     private GraphicsPath GetFigurePath(Rectangle rect, float radius)
     {
@@ -126,18 +203,18 @@ public class RoundedButton : PictureBox
             pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             using var pathSurface = GetFigurePath(rectSurface, radius);
             using var penSurface = new Pen(Parent.BackColor, smoothSize);
-            pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            Region = new Region(pathSurface);
+            UpdateRegion(radius);
             pe.Graphics.DrawPath(penSurface, pathSurface);
             if (borderSize >= 1)
             {
-                pe.Graphics.DrawPath(new Pen(borderColor, borderSize), pathSurface);
+                using var penBorder = new Pen(borderColor, borderSize);
+                pe.Graphics.DrawPath(penBorder, pathSurface);
             }
         }
         else //Normal button
         {
             pe.Graphics.SmoothingMode = SmoothingMode.None;
-            Region = new Region(rectSurface);
+            UpdateRegion(radius);
             if (borderSize >= 1)
             {
                 using var penBorder = new Pen(borderColor, borderSize);
