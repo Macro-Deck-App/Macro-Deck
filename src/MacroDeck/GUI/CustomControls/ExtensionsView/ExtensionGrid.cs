@@ -1,4 +1,5 @@
 using System.Drawing.Drawing2D;
+using System.ComponentModel;
 
 namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView;
 
@@ -70,6 +71,7 @@ public class ExtensionGrid : Panel
     }
 
     /// <summary>When true a centered "Loading…" message is drawn over the grid.</summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool Loading
     {
         get => _loading;
