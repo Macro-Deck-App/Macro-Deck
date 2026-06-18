@@ -36,7 +36,7 @@ public class MacroDeck : NativeWindow
         Version.Parse(FileVersionInfo.GetVersionInfo(ApplicationPaths.ExecutablePath).ProductVersion);
 
     public static readonly int ApiVersion = 20;
-    public static readonly int PluginApiVersion = 40;
+    public static readonly int PluginApiVersion = 41;
 
     public static StartParameters StartParameters { get; private set; } = new();
     public static MainConfiguration Configuration { get; private set; } = new();
