@@ -19,6 +19,6 @@
   </metadata>
   <files>
     <file src="README.md" target="" />
-    <file src="obj\Release\net10.0-windows\win-x64\ref\Macro Deck 2.dll" target="ref\net10.0-windows10.0.19041.0" />
+    <file src="obj\Release\net10.0-windows10.0.19041.0\win-x64\ref\Macro Deck 2.dll" target="ref\net10.0-windows10.0.19041.0" />
   </files>
 </package>
