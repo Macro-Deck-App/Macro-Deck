@@ -121,9 +121,6 @@
     <Compile Update="GUI\CustomControls\ExtensionStoreDownloader\ExtensionStoreDownloaderItem.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="GUI\CustomControls\ExtensionsView\ExtensionItemView.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
     <Compile Update="GUI\CustomControls\ExtensionsView\ExtensionStoreView.cs">
       <SubType>UserControl</SubType>
     </Compile>
