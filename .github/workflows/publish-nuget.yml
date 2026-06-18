@@ -1,0 +1,52 @@
+name: Publish NuGet Package
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      branch:
+        required: true
+        type: string
+        description: 'The branch to build'
+        default: 'main'
+      version:
+        required: true
+        type: string
+        description: 'The version to publish'
+
+jobs:
+  publish-nuget:
+    name: Build and Publish NuGet Package
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Build Macro Deck assembly
+        run: |
+            dotnet restore "src\MacroDeck\MacroDeck.csproj"
+            dotnet build "src\MacroDeck\MacroDeck.csproj" -c Release -o "src\MacroDeck\bin\Release" -r win-x64
+        shell: cmd
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Pack NuGet package
+        run: |
+            nuget pack "src\MacroDeck\MacroDeck.nuspec" -BasePath "src\MacroDeck" -Version "${{ inputs.version }}" -OutputDirectory nupkg
+        shell: cmd
+
+      - name: Push to NuGet.org
+        run: |
+            dotnet nuget push "nupkg\*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        shell: cmd
