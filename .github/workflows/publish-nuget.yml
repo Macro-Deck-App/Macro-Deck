@@ -25,6 +25,8 @@ jobs:
   publish-nuget:
     name: Build and Publish NuGet Package
     runs-on: windows-latest
+    permissions:
+      id-token: write 
 
     steps:
       - name: Checkout Code
@@ -46,7 +48,13 @@ jobs:
             nuget pack "src\MacroDeck\MacroDeck.nuspec" -BasePath "src\MacroDeck" -Version "${{ inputs.version }}" -OutputDirectory nupkg
         shell: cmd
 
+      - name: NuGet login (OIDC → temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Push to NuGet.org
         run: |
-            dotnet nuget push "nupkg\*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+            dotnet nuget push "nupkg\*.nupkg" --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
         shell: cmd
