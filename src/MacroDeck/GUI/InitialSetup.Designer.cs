@@ -113,7 +113,7 @@ namespace SuchByte.MacroDeck.GUI
             Controls.Add(btnNext);
             Name = "InitialSetup";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "Welchome to Macro Deck";
+            Text = "Welcome to Macro Deck";
             Load += InitialSetup_Load;
             ResumeLayout(false);
         }
