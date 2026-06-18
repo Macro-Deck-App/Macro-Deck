@@ -14,14 +14,11 @@
     <repository type="git" url="https://github.com/Macro-Deck-App/Macro-Deck" />
     <!-- No runtime dependencies: the host provides everything the plugin needs. -->
     <dependencies>
-      <group targetFramework="net10.0-windows" />
+      <group targetFramework="net10.0-windows10.0.19041.0" />
     </dependencies>
   </metadata>
   <files>
     <file src="README.md" target="" />
-    <!-- Shipped under ref/ only: plugins compile against the API, but the
-         assembly is NOT copied to the plugin output. The Macro Deck host
-         already has "Macro Deck 2.dll" loaded at runtime. -->
-    <file src="bin\Release\Macro Deck 2.dll" target="ref\net10.0-windows" />
+    <file src="obj\Release\net10.0-windows\win-x64\ref\Macro Deck 2.dll" target="ref\net10.0-windows10.0.19041.0" />
   </files>
 </package>
