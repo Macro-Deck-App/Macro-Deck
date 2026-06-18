@@ -18,6 +18,19 @@
 - [Discord community](https://discord.gg/yr7TRaXum8)
 
 
+# Developing Plugins
+
+The Macro Deck API is published to NuGet as
+[`SuchByte.MacroDeck`](https://www.nuget.org/packages/SuchByte.MacroDeck). Add it
+to your plugin project instead of referencing `Macro Deck 2.dll` by file:
+
+```
+dotnet add package SuchByte.MacroDeck
+```
+
+This is a compile-time reference package only — the assembly is provided by the
+Macro Deck host at runtime, so it is not copied to your plugin's output.
+
 # Companion App
 [Repository](https://github.com/Macro-Deck-App/Macro-Deck-Client-App)
 

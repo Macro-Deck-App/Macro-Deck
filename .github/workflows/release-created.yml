@@ -31,7 +31,16 @@ jobs:
     with:
       version: ${{ github.event.release.name }}
       branch: ${{ github.event.release.target_commitish }}
-            
+
+  publish-nuget:
+    name: "Publish NuGet package"
+    uses: ./.github/workflows/publish-nuget.yml
+    needs: [tests]
+    secrets: inherit
+    with:
+      version: ${{ github.event.release.name }}
+      branch: ${{ github.event.release.target_commitish }}
+
   notify:
     name: "Notify"
     runs-on: ubuntu-latest
