@@ -14,11 +14,11 @@
     <repository type="git" url="https://github.com/Macro-Deck-App/Macro-Deck" />
     <!-- No runtime dependencies: the host provides everything the plugin needs. -->
     <dependencies>
-      <group targetFramework="net10.0-windows10.0.19041.0" />
+      <group targetFramework="net10.0-windows10.0.22000.0" />
     </dependencies>
   </metadata>
   <files>
     <file src="README.md" target="" />
-    <file src="obj\Release\net10.0-windows10.0.19041.0\win-x64\ref\Macro Deck 2.dll" target="ref\net10.0-windows10.0.19041.0" />
+    <file src="obj\Release\net10.0-windows10.0.22000.0\win-x64\ref\Macro Deck 2.dll" target="ref\net10.0-windows10.0.22000.0" />
   </files>
 </package>
