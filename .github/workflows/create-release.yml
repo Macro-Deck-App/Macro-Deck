@@ -23,7 +23,7 @@ jobs:
       branch: ${{ steps.set_branch.outputs.result }}
     steps:
       - name: Fetch Version From API
-        uses: Macro-Deck-App/Actions/fetch-version@main
+        uses: Macro-Deck-App/Actions/fetch-version@c998023b25eb64f93f0b8a5644e6887d6ef075ad
         id: fetch_version
         with:
           release-type: ${{ inputs.release-type }}
@@ -43,7 +43,7 @@ jobs:
     needs: [get-version]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
         with:
           ref: ${{ needs.get-version.outputs.branch }}
           
@@ -53,7 +53,7 @@ jobs:
           git add ./src/MacroDeck/MacroDeck.csproj
           
       - name: Commit Changes
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@3ea6ae190baf489ba007f7c92608f33ce20ef04a
         with:
           commit_message: Bump Version to ${{ needs.get-version.outputs.version }}
     
@@ -64,7 +64,7 @@ jobs:
     
     steps:
       - name: "Create Release"
-        uses: Macro-Deck-App/Actions/create-github-release@main
+        uses: Macro-Deck-App/Actions/create-github-release@c998023b25eb64f93f0b8a5644e6887d6ef075ad
         id: create_release
         with:
           github-token: "${{ secrets.PAT }}"
