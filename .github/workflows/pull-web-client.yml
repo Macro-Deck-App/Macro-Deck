@@ -22,12 +22,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Macro Deck repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           ref: ${{inputs.destination-branch}}
 
       - name: Checkout Web Client repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           token: ${{secrets.PRIVATE_REPO_PAT}}
           ref: ${{inputs.web-client-version}}
@@ -48,7 +48,7 @@ jobs:
           docker cp $web_client_container:/dist/. src/MacroDeck/wwwroot/client
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@38e0b6e68b4c852a5500a94740f0e535e0d7ba54
         id: create-pr
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
