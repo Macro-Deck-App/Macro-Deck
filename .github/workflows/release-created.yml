@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [release-windows]
     steps:
-      - uses: Macro-Deck-App/Actions/discord-notify-release@main
+      - uses: Macro-Deck-App/Actions/discord-notify-release@c998023b25eb64f93f0b8a5644e6887d6ef075ad
         with:
           version: ${{ github.event.release.name }}
           is-beta: ${{ github.event.release.prerelease }}

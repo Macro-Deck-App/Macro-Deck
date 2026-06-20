@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
         with:
           ref: ${{ inputs.branch }}
 
@@ -41,7 +41,7 @@ jobs:
         shell: cmd
 
       - name: Setup NuGet
-        uses: NuGet/setup-nuget@v2
+        uses: NuGet/setup-nuget@d105a947828025cd7a980103c35ba2bfae586d0f
 
       - name: Pack NuGet package
         run: |
@@ -49,7 +49,7 @@ jobs:
         shell: cmd
 
       - name: NuGet login (OIDC → temp API key)
-        uses: NuGet/login@v1
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841
         id: login
         with:
           user: ${{ secrets.NUGET_USER }}

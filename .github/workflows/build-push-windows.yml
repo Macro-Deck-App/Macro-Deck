@@ -32,7 +32,7 @@ jobs:
       
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
         with:
           ref: ${{ inputs.branch }}
       
@@ -75,13 +75,13 @@ jobs:
         shell: pwsh
 
       - name: Upload Windows installer to release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844
         with:
           files: './setup/Result/macro-deck-${{ inputs.version }}-win.exe'
           tag_name: "v${{ inputs.version }}"
       
       - name: Push Update to the API
-        uses: Macro-Deck-App/Actions/push-to-update-api@main
+        uses: Macro-Deck-App/Actions/push-to-update-api@c998023b25eb64f93f0b8a5644e6887d6ef075ad
         with:
           version: ${{ inputs.version }}
           platform: "WinX64"
