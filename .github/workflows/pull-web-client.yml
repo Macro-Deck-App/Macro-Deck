@@ -26,10 +26,20 @@ jobs:
         with:
           ref: ${{inputs.destination-branch}}
 
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            Macro-Deck-Client-App
+          permission-contents: write
+          permission-pull-requests: write
       - name: Checkout Web Client repository
         uses: actions/checkout@v4
         with:
-          token: ${{secrets.PRIVATE_REPO_PAT}}
+          token: ${{ steps.app-token.outputs.token }}
           ref: ${{inputs.web-client-version}}
           path: 'MacroDeck.WebClient'
           repository: 'Macro-Deck-App/Macro-Deck-Client-App'
