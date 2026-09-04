@@ -18,6 +18,9 @@ public partial class SettingsView : UserControl
 {
     private static readonly ILogger Logger = Log.ForContext(typeof(SettingsView));
 
+    private string _encryptionKey = string.Empty;
+    private bool _encryptionKeyVisible;
+
     public SettingsView(int page = 0)
     {
         InitializeComponent();
@@ -50,6 +53,13 @@ public partial class SettingsView : UserControl
         lblBehaviour.Text = LanguageManager.Strings.Behaviour;
         checkStartWindows.Text = LanguageManager.Strings.AutomaticallyStartWithWindows;
         checkSendErrorReports.Text = LanguageManager.Strings.SendAnonymousErrorReports;
+        lblSecurity.Text = LanguageManager.Strings.Security;
+        lblEncryptionKeyDescription.Text = LanguageManager.Strings.EncryptionKeyDescription;
+        lblEncryptionKey.Text = LanguageManager.Strings.EncryptionKey;
+        btnToggleEncryptionKey.Text = _encryptionKeyVisible
+            ? LanguageManager.Strings.HideEncryptionKey
+            : LanguageManager.Strings.ShowEncryptionKey;
+        btnCopyEncryptionKey.Text = LanguageManager.Strings.Copy;
         lblLanguage.Text = LanguageManager.Strings.Language;
         lblConnection.Text = LanguageManager.Strings.Connection;
         lblPort.Text = LanguageManager.Strings.Port;
@@ -79,6 +89,7 @@ public partial class SettingsView : UserControl
         LoadNetworkConfiguration();
         LoadAutoUpdate();
         LoadBackups();
+        LoadEncryptionKey();
 
         lblInstalledVersion.Text = MacroDeck.Version.ToString();
         lblWebsocketAPIVersion.Text = MacroDeck.ApiVersion.ToString();
@@ -170,6 +181,76 @@ public partial class SettingsView : UserControl
             var backupItem = new BackupItem(macroDeckBackupInfo);
             backupsPanel.Controls.Add(backupItem);
         }
+    }
+
+    private void LoadEncryptionKey()
+    {
+        try
+        {
+            _encryptionKey = StringCipher.GetMachineGuid();
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Unable to read the encryption key used for the secrets");
+            _encryptionKey = string.Empty;
+        }
+
+        _encryptionKeyVisible = false;
+
+        if (string.IsNullOrEmpty(_encryptionKey))
+        {
+            encryptionKeyTextBox.PasswordChar = false;
+            encryptionKeyTextBox.Text = LanguageManager.Strings.EncryptionKeyUnavailable;
+            btnToggleEncryptionKey.Enabled = false;
+            btnCopyEncryptionKey.Enabled = false;
+            return;
+        }
+
+        encryptionKeyTextBox.PasswordChar = true;
+        encryptionKeyTextBox.Text = _encryptionKey;
+        btnToggleEncryptionKey.Enabled = true;
+        btnCopyEncryptionKey.Enabled = true;
+        btnToggleEncryptionKey.Text = LanguageManager.Strings.ShowEncryptionKey;
+    }
+
+    private void BtnToggleEncryptionKey_Click(object sender, EventArgs e)
+    {
+        _encryptionKeyVisible = !_encryptionKeyVisible;
+        encryptionKeyTextBox.PasswordChar = !_encryptionKeyVisible;
+        btnToggleEncryptionKey.Text = _encryptionKeyVisible
+            ? LanguageManager.Strings.HideEncryptionKey
+            : LanguageManager.Strings.ShowEncryptionKey;
+    }
+
+    private async void BtnCopyEncryptionKey_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(_encryptionKey))
+        {
+            return;
+        }
+
+        try
+        {
+            System.Windows.Forms.Clipboard.SetText(_encryptionKey);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Unable to copy the encryption key to the clipboard");
+            return;
+        }
+
+        btnCopyEncryptionKey.Enabled = false;
+        btnCopyEncryptionKey.Text = LanguageManager.Strings.CopiedToClipboard;
+
+        await Task.Delay(1500);
+
+        if (IsDisposed || Disposing)
+        {
+            return;
+        }
+
+        btnCopyEncryptionKey.Text = LanguageManager.Strings.Copy;
+        btnCopyEncryptionKey.Enabled = true;
     }
 
     private void CheckInstallBetaVersions_CheckedChanged(object sender, EventArgs e)
@@ -312,6 +393,7 @@ public partial class SettingsView : UserControl
     private void BackupManager_DeleteSuccess(object sender, EventArgs e)
     {
         LoadBackups();
+        LoadEncryptionKey();
     }
 
     private void BtnGitHub_Click(object sender, EventArgs e)

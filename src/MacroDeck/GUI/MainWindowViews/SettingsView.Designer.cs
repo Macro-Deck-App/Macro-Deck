@@ -46,6 +46,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
             checkSendErrorReports = new CheckBox();
             lblBehaviour = new Label();
             lblGeneral = new Label();
+            lblSecurity = new Label();
+            lblEncryptionKeyDescription = new Label();
+            lblEncryptionKey = new Label();
+            encryptionKeyTextBox = new RoundedTextBox();
+            btnToggleEncryptionKey = new ButtonPrimary();
+            btnCopyEncryptionKey = new ButtonPrimary();
             tabConnection = new TabPage();
             checkAutoStartUsb = new CheckBox();
             checkEnableAdb = new CheckBox();
@@ -127,6 +133,12 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
             // 
             tabGeneral.BackColor = Color.FromArgb(45, 45, 45);
             tabGeneral.Controls.Add(language);
+            tabGeneral.Controls.Add(lblSecurity);
+            tabGeneral.Controls.Add(lblEncryptionKeyDescription);
+            tabGeneral.Controls.Add(lblEncryptionKey);
+            tabGeneral.Controls.Add(encryptionKeyTextBox);
+            tabGeneral.Controls.Add(btnToggleEncryptionKey);
+            tabGeneral.Controls.Add(btnCopyEncryptionKey);
             tabGeneral.Controls.Add(lblLanguage);
             tabGeneral.Controls.Add(checkStartWindows);
             tabGeneral.Controls.Add(checkSendErrorReports);
@@ -140,6 +152,105 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
             tabGeneral.Size = new Size(923, 526);
             tabGeneral.TabIndex = 0;
             tabGeneral.Text = "General";
+            // 
+            // lblSecurity
+            // 
+            lblSecurity.AutoSize = true;
+            lblSecurity.Font = new Font("Tahoma", 14.25F);
+            lblSecurity.ForeColor = Color.Gray;
+            lblSecurity.Location = new Point(3, 280);
+            lblSecurity.Name = "lblSecurity";
+            lblSecurity.Size = new Size(78, 23);
+            lblSecurity.TabIndex = 5;
+            lblSecurity.Text = "Security";
+            lblSecurity.UseMnemonic = false;
+            // 
+            // lblEncryptionKeyDescription
+            // 
+            lblEncryptionKeyDescription.Font = new Font("Tahoma", 9.75F);
+            lblEncryptionKeyDescription.ForeColor = Color.Gray;
+            lblEncryptionKeyDescription.Location = new Point(13, 308);
+            lblEncryptionKeyDescription.Name = "lblEncryptionKeyDescription";
+            lblEncryptionKeyDescription.Size = new Size(700, 56);
+            lblEncryptionKeyDescription.TabIndex = 6;
+            lblEncryptionKeyDescription.Text = "This key is used to encrypt your secrets.";
+            lblEncryptionKeyDescription.UseMnemonic = false;
+            // 
+            // lblEncryptionKey
+            // 
+            lblEncryptionKey.AutoSize = true;
+            lblEncryptionKey.Font = new Font("Tahoma", 11.25F);
+            lblEncryptionKey.Location = new Point(12, 372);
+            lblEncryptionKey.Name = "lblEncryptionKey";
+            lblEncryptionKey.Size = new Size(120, 18);
+            lblEncryptionKey.TabIndex = 7;
+            lblEncryptionKey.Text = "Encryption key";
+            lblEncryptionKey.UseMnemonic = false;
+            // 
+            // encryptionKeyTextBox
+            // 
+            encryptionKeyTextBox.BackColor = Color.FromArgb(65, 65, 65);
+            encryptionKeyTextBox.Font = new Font("Tahoma", 11.25F);
+            encryptionKeyTextBox.Icon = null;
+            encryptionKeyTextBox.Location = new Point(12, 396);
+            encryptionKeyTextBox.MaxCharacters = 0;
+            encryptionKeyTextBox.Multiline = false;
+            encryptionKeyTextBox.Name = "encryptionKeyTextBox";
+            encryptionKeyTextBox.Padding = new Padding(8, 5, 8, 5);
+            encryptionKeyTextBox.PasswordChar = true;
+            encryptionKeyTextBox.PlaceHolderColor = Color.Gray;
+            encryptionKeyTextBox.PlaceHolderText = "";
+            encryptionKeyTextBox.ReadOnly = true;
+            encryptionKeyTextBox.SelectionStart = 0;
+            encryptionKeyTextBox.Size = new Size(420, 31);
+            encryptionKeyTextBox.TabIndex = 8;
+            encryptionKeyTextBox.TextAlignment = HorizontalAlignment.Left;
+            // 
+            // btnToggleEncryptionKey
+            // 
+            btnToggleEncryptionKey.BorderRadius = 8;
+            btnToggleEncryptionKey.Cursor = Cursors.Hand;
+            btnToggleEncryptionKey.FlatAppearance.BorderSize = 0;
+            btnToggleEncryptionKey.FlatStyle = FlatStyle.Flat;
+            btnToggleEncryptionKey.Font = new Font("Tahoma", 9.75F);
+            btnToggleEncryptionKey.ForeColor = Color.White;
+            btnToggleEncryptionKey.HoverColor = Color.FromArgb(0, 89, 184);
+            btnToggleEncryptionKey.Icon = null;
+            btnToggleEncryptionKey.Location = new Point(444, 397);
+            btnToggleEncryptionKey.Name = "btnToggleEncryptionKey";
+            btnToggleEncryptionKey.Progress = 0;
+            btnToggleEncryptionKey.ProgressColor = Color.FromArgb(0, 46, 94);
+            btnToggleEncryptionKey.Size = new Size(100, 28);
+            btnToggleEncryptionKey.TabIndex = 9;
+            btnToggleEncryptionKey.Text = "Show";
+            btnToggleEncryptionKey.UseMnemonic = false;
+            btnToggleEncryptionKey.UseVisualStyleBackColor = false;
+            btnToggleEncryptionKey.UseWindowsAccentColor = true;
+            btnToggleEncryptionKey.WriteProgress = true;
+            btnToggleEncryptionKey.Click += BtnToggleEncryptionKey_Click;
+            // 
+            // btnCopyEncryptionKey
+            // 
+            btnCopyEncryptionKey.BorderRadius = 8;
+            btnCopyEncryptionKey.Cursor = Cursors.Hand;
+            btnCopyEncryptionKey.FlatAppearance.BorderSize = 0;
+            btnCopyEncryptionKey.FlatStyle = FlatStyle.Flat;
+            btnCopyEncryptionKey.Font = new Font("Tahoma", 9.75F);
+            btnCopyEncryptionKey.ForeColor = Color.White;
+            btnCopyEncryptionKey.HoverColor = Color.FromArgb(0, 89, 184);
+            btnCopyEncryptionKey.Icon = null;
+            btnCopyEncryptionKey.Location = new Point(552, 397);
+            btnCopyEncryptionKey.Name = "btnCopyEncryptionKey";
+            btnCopyEncryptionKey.Progress = 0;
+            btnCopyEncryptionKey.ProgressColor = Color.FromArgb(0, 46, 94);
+            btnCopyEncryptionKey.Size = new Size(100, 28);
+            btnCopyEncryptionKey.TabIndex = 10;
+            btnCopyEncryptionKey.Text = "Copy";
+            btnCopyEncryptionKey.UseMnemonic = false;
+            btnCopyEncryptionKey.UseVisualStyleBackColor = false;
+            btnCopyEncryptionKey.UseWindowsAccentColor = true;
+            btnCopyEncryptionKey.WriteProgress = true;
+            btnCopyEncryptionKey.Click += BtnCopyEncryptionKey_Click;
             // 
             // language
             // 
@@ -923,5 +1034,11 @@ namespace SuchByte.MacroDeck.GUI.MainWindowViews
         private CheckBox checkAutoStartUsb;
         private Label lblDotnetVersion;
         private Label label6;
+        private Label lblSecurity;
+        private Label lblEncryptionKeyDescription;
+        private Label lblEncryptionKey;
+        private RoundedTextBox encryptionKeyTextBox;
+        private ButtonPrimary btnToggleEncryptionKey;
+        private ButtonPrimary btnCopyEncryptionKey;
     }
 }
