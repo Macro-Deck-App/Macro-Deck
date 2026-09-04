@@ -1,8 +1,13 @@
 # Macro Deck
-![VersionBadge](https://img.shields.io/github/v/release/Macro-Deck-org/Macro-Deck)
-![LicenseBadge](https://img.shields.io/github/license/Macro-Deck-org/Macro-Deck)
-![PlatformBadge](https://img.shields.io/badge/platform-windows-blue)
-![ExtensionStoreBadge](https://img.shields.io/website?down_message=offline&label=Extension%20Store&up_message=online&url=https%3A%2F%2Fmacrodeck.org%2Fextensionstore%2Fextensionstore.php)
+
+## Legacy
+
+This branch contains the legacy **Macro Deck 2** codebase.
+
+Macro Deck 2 is no longer actively developed. Development has moved to **Macro Deck 3**, which is the current version of Macro Deck.
+
+This branch is kept for archival purposes and for users who still need access to the Macro Deck 2 source code.
+
 
 ## More than just a macro pad!
 
