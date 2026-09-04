@@ -237,6 +237,16 @@ public class Strings
     public string Run = "Run";
     public string Copy = "Copy";
     public string Paste = "Paste";
+    public string Security = "Security";
+    public string EncryptionKey = "Encryption key";
+
+    public string EncryptionKeyDescription
+        = "This key is used to encrypt your secrets, for example plugin credentials. Keep it private. In some cases you need it in Macro Deck 3, for example when you import this installation on another computer.";
+
+    public string ShowEncryptionKey = "Show";
+    public string HideEncryptionKey = "Hide";
+    public string CopiedToClipboard = "Copied";
+    public string EncryptionKeyUnavailable = "Encryption key could not be read";
     public string WebSocketAPIVersion = "Websocket API version";
     public string PluginAPIVersion = "Plugin API version";
     public string InstalledPlugins = "Installed plugins";
