@@ -36,6 +36,8 @@ jobs:
   publish:
     name: Publish to NuGet
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    # A caller cannot set this - the environment has to be declared where the job is.
+    environment: production
     permissions:
       contents: read
       # Lets the job request the OIDC token nuget.org exchanges for a short-lived API key.
