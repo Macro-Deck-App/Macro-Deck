@@ -1,5 +1,8 @@
 name: Publish Release
 
+# Publishes a successful release build: the GitHub release carries the installers and the
+# signed updater payloads, the R2 feed carries only the channel manifests pointing at them,
+# and the NuGet packages go out last, once the release they belong to actually exists.
 on:
   workflow_run:
     workflows: [Build]
@@ -18,14 +21,21 @@ jobs:
     name: Publish GitHub release
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'workflow_dispatch' && github.event.workflow_run.head_branch == 'main' }}
     runs-on: blacksmith-2vcpu-ubuntu-2404
-    # The release announcement webhook is a production environment secret.
+    # The release announcement webhook and the R2 credentials are production environment secrets.
     environment: production
+    outputs:
+      version: ${{ steps.release.outputs.version }}
     env:
       GH_TOKEN: ${{ github.token }}
       SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
       TARGET_SHA: ${{ github.event.workflow_run.head_sha }}
     steps:
       - uses: actions/checkout@v5
+
+      # For ci/scripts/point-manifests-at-release.mjs below.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
 
       - name: Download release artifacts
         uses: actions/download-artifact@v7
@@ -105,6 +115,7 @@ jobs:
               -o -name '*.sha256' \
               -o -name '*.deb' \
               -o -name '*.rpm' \
+              -o -name '*.app.tar.gz' \
               -o -name '*.nupkg' \
               -o -name '*.snupkg' \) \
               -print0
@@ -128,6 +139,54 @@ jobs:
           fi
 
           gh release create "${args[@]}"
+
+      # GitHub sanitizes asset names on upload, so the urls the build wrote are only
+      # provisional; this rewrites them to the assets the release actually carries and
+      # fails when a platform has no downloadable payload.
+      - name: Point channel manifests at the release
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          gh release view "$TAG" --json assets > release-assets.json
+          node ci/scripts/point-manifests-at-release.mjs release-assets release-assets.json
+
+      # Only the manifests are served from the feed - the payloads they name live on the
+      # GitHub release. They are overwritten every release and drive update detection, so
+      # they must always be revalidated, never cached.
+      - name: Publish channel manifests to R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          if [ -z "${R2_ACCESS_KEY_ID}" ]; then
+            echo "::warning::R2 credentials not configured - the release is published but no client will be offered it."
+            exit 0
+          fi
+          endpoint="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          dest="s3://${R2_BUCKET}/releases/"
+          echo "Publishing ${VERSION} channel manifests to ${dest}"
+          while IFS= read -r -d '' manifest; do
+            name="$(basename "${manifest}")"
+            aws s3 cp "${manifest}" "${dest}${name}" \
+              --content-type "application/json" \
+              --cache-control "no-cache" \
+              --endpoint-url "${endpoint}" \
+              --no-progress
+            # What every installed client resolves is this exact key, so assert it is
+            # really there before calling the release published.
+            aws s3api head-object \
+              --bucket "${R2_BUCKET}" \
+              --key "releases/${name}" \
+              --endpoint-url "${endpoint}" > /dev/null
+            echo "Reachable through the feed: releases/${name}"
+          done < <(find release-assets -maxdepth 1 -type f \( -name 'latest-*.json' -o -name 'beta-*.json' \) -print0)
 
       - name: Notify Discord
         continue-on-error: true
@@ -155,3 +214,19 @@ jobs:
             --header "Content-Type: application/json" \
             --data @discord-payload.json \
             "$DISCORD_WEBHOOK_URL"
+
+  # Last, and only once the release exists: a package on nuget.org cannot be taken back, so it
+  # must never be published for a release that failed to be created.
+  publish-nuget:
+    name: Publish NuGet packages
+    needs: publish
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    uses: ./.github/workflows/nuget-publish.yml
+    with:
+      version: ${{ needs.publish.outputs.version }}
+      run_id: ${{ github.event.workflow_run.id }}
+    secrets:
+      NUGET_USER: ${{ secrets.NUGET_USER }}

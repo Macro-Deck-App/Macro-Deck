@@ -1,24 +1,33 @@
 # Releasing and Packaging
 
-The release implementation lives in [`.github/workflows/build.yml`](../../.github/workflows/build.yml). This page documents how to operate it and the constraints that are easy to miss. Do not mirror the workflow job graph here.
+The release implementation is split between [`.github/workflows/build.yml`](../../.github/workflows/build.yml), which builds and packages, and [`.github/workflows/publish-release.yml`](../../.github/workflows/publish-release.yml), which publishes what that run produced. This page documents how to operate them and the constraints that are easy to miss. Do not mirror the workflow job graph here.
 
 ## Start a release
 
 Run the `Build` workflow manually and provide `version`: a stable version such as `3.0.0` or a beta such as `3.0.0-beta.4`. Version validation and native package version mapping are handled by [`ci/scripts/release-version.mjs`](../../ci/scripts/release-version.mjs).
 
-Every release covers Windows, Linux, and macOS. There is no platform selection, and nothing reaches the release feed unless all three packaged successfully and the end-to-end suite passed - a channel file that advertises a version its platform never built would offer installed clients an update that 404s.
+Every release covers Windows, Linux, and macOS. There is no platform selection: publishing runs only for a fully successful build, so nothing is published unless all three packaged and the end-to-end suite passed - a channel file that advertises a version its platform never built would offer installed clients an update that 404s.
 
 Release artifacts always use the Production build identity. Beta is derived from the version; it is not a separate build channel.
 
 ## What the workflow does
 
-The workflow tests every platform, builds the Angular UI, publishes the self-contained host for all three runtime identifiers, packages the Tauri application on the target operating systems, signs where credentials are available, runs the end-to-end suite against a production host staged from the same revision, and uploads release artifacts/update metadata once all of that has finished.
+The build workflow tests every platform, builds the Angular UI, publishes the self-contained host for all three runtime identifiers, packages the Tauri application on the target operating systems, signs where credentials are available, runs the end-to-end suite against a production host staged from the same revision, and packs the NuGet package family. It publishes nothing itself; everything it produces is a workflow artifact.
+
+Publishing then happens in one order, because each step depends on the one before it:
+
+1. The GitHub release is created and carries the installers, the checksums and the signed updater payloads.
+2. The channel manifests are repointed at the assets that release actually got, since GitHub sanitizes asset names on upload.
+3. Those manifests - and only those - are uploaded to the R2 feed installed clients poll.
+4. The NuGet packages are pushed, last, because a published package cannot be taken back and must never exist for a release that failed to be created.
 
 The Tauri bootstrapper is the installed entry point. The published host and Angular output are staged into its application bundle before packaging.
 
 Relevant implementation files:
 
-- [`.github/workflows/build.yml`](../../.github/workflows/build.yml) - release orchestration.
+- [`.github/workflows/build.yml`](../../.github/workflows/build.yml) - build and packaging.
+- [`.github/workflows/publish-release.yml`](../../.github/workflows/publish-release.yml) - publishing order.
+- [`ci/scripts/point-manifests-at-release.mjs`](../../ci/scripts/point-manifests-at-release.mjs) - repointing channel manifests at release assets.
 - [`ci/scripts/stage-host.sh`](../../ci/scripts/stage-host.sh) - local host staging for the bootstrapper.
 - [`ci/scripts/release-version.mjs`](../../ci/scripts/release-version.mjs) - release version validation/mapping.
 - [`ci/scripts/make-update-manifest.mjs`](../../ci/scripts/make-update-manifest.mjs) - updater metadata.
@@ -30,17 +39,19 @@ These files are the source of truth for exact job dependencies, artifact names, 
 
 Official packages may require platform signing/notarization, updater signing, and release storage credentials. The workflow owns the exact secret names and guards.
 
-A release should not be considered production-ready merely because an unsigned contributor build succeeded. Check the package/signing steps for every platform and confirm the expected artifacts reached the release feed.
+A release should not be considered production-ready merely because an unsigned contributor build succeeded. Check the package/signing steps for every platform and confirm the expected assets reached the GitHub release.
 
 ## Update channels
 
 Stable and beta updater metadata are generated from the normalized release version. Do not manually invent channel file contents. When update behaviour changes, update the updater implementation and manifest-generation script together.
 
+The feed hosts the channel manifests only. The payload each one names is the asset on the corresponding GitHub release, so a release whose assets are deleted breaks updates for every client still on an older version.
+
 Publishing a release to a feed does not mean every install downloads it automatically: whether a periodic check downloads a new release, only asks first, or never runs at all now depends on the user's own auto-update mode (see [ADR 0015](../decisions/0015-installation-and-update-delivery.md)).
 
 ## NuGet packages
 
-The SDK/plugin package family is packed from the release revision and version. The reusable workflows are:
+The SDK/plugin package family is packed from the release revision and version during the build, and pushed after the GitHub release exists. The reusable workflows are:
 
 - [`.github/workflows/nuget-pack.yml`](../../.github/workflows/nuget-pack.yml)
 - [`.github/workflows/nuget-publish.yml`](../../.github/workflows/nuget-publish.yml)

@@ -19,6 +19,10 @@ on:
         description: Name of the artifact holding the .nupkg/.snupkg files
         type: string
         default: nuget-packages
+      run_id:
+        description: Run the artifact was uploaded by. Empty means this run - the release publish passes the build run it is publishing, because that is a different run.
+        type: string
+        default: ''
       require_credentials:
         description: Fail instead of skipping when no nuget.org credential is configured. The manual workflow sets this - publishing is its whole purpose - while a release skips, so forks and pre-setup runs still produce a release.
         type: boolean
@@ -40,6 +44,8 @@ jobs:
     environment: production
     permissions:
       contents: read
+      # Reading an artifact from another run needs this; the same-run case does not.
+      actions: read
       # Lets the job request the OIDC token nuget.org exchanges for a short-lived API key.
       id-token: write
     steps:
@@ -82,6 +88,8 @@ jobs:
         with:
           name: ${{ inputs.artifact }}
           path: ${{ runner.temp }}/packages
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.run_id || github.run_id }}
 
       # The artifact was verified when it was packed; re-checking here is what makes the version input
       # meaningful - a caller wiring the wrong artifact or version fails before anything is pushed,
