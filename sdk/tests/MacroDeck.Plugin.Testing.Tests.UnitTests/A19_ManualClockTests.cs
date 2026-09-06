@@ -53,14 +53,18 @@ public class A19_ManualClockTests
 			var before = state.ReconnectAttempt;
 			clock.Advance(ReconnectPolicy.MaxDelay);
 
-			// Full jitter permits a near-zero delay, so a single Advance may legitimately produce no new
-			// attempt - never assert exactly one, only that it never produced more than one.
-			await Task.Delay(TimeSpan.FromMilliseconds(300));
-			var after = state.ReconnectAttempt;
+			// Waited for rather than slept over: a fixed sleep that a loaded machine outruns lets one
+			// Advance's attempt land inside the next iteration's window and read as two.
+			await Wait.UntilAsync(() => state.ReconnectAttempt > before,
+				TimeSpan.FromSeconds(10),
+				because: "advancing past the whole backoff never produced the next reconnect attempt");
 
-			Assert.That(after,
-				Is.EqualTo(before).Or.EqualTo(before + 1),
-				$"a single Advance(MaxDelay) produced more than one further attempt ({before} -> {after})");
+			var afterAdvance = state.ReconnectAttempt;
+			await Task.Delay(TimeSpan.FromMilliseconds(300));
+
+			Assert.That(state.ReconnectAttempt,
+				Is.EqualTo(afterAdvance),
+				"the next attempt was scheduled on real time rather than on the injected clock");
 		}
 	}
 
