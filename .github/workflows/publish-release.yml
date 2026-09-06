@@ -165,7 +165,7 @@ jobs:
           VERSION: ${{ steps.release.outputs.version }}
         run: |
           set -euo pipefail
-          if [ -z "${R2_ACCESS_KEY_ID}" ]; then
+          if [ -z "${AWS_ACCESS_KEY_ID}" ]; then
             echo "::warning::R2 credentials not configured - the release is published but no client will be offered it."
             exit 0
           fi
