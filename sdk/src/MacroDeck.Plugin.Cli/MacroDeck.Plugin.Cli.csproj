@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <RollForward>latestMajor</RollForward>
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <!-- Every type in this project stays internal - see AssemblyInfo.cs - so GenerateDocumentationFile
+             (on by default for a packable project, see Directory.Build.targets) has no public surface to
+             demand documentation comments for. -->
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <IsMacroDeckPackage>true</IsMacroDeckPackage>
+        <PackageId>MacroDeck.Plugin.Cli</PackageId>
+        <Description>macrodeck-plugin: the Macro Deck plugin developer CLI. Validate a manifest, inspect or pack a .macroDeckPlugin artifact, run a plugin against a stub or real host, and run the conformance suite against it - all as a dotnet tool.</Description>
+        <PackageTags>macrodeck;plugin;cli;tool</PackageTags>
+        <PackAsTool>true</PackAsTool>
+        <ToolCommandName>macrodeck-plugin</ToolCommandName>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Referenced for the localization compiler alone: PluginLanguages reads a project's .resx set
+             through the very same file-name and culture-name rules the source generator uses, so the
+             'languages' this tool writes into a manifest can never disagree with the catalog the plugin
+             actually ships. Those types are internal, hence this project's InternalsVisibleTo there. -->
+        <ProjectReference Include="..\MacroDeck.Localization\MacroDeck.Localization.csproj" />
+        <ProjectReference Include="..\MacroDeck.Plugin.Packaging\MacroDeck.Plugin.Packaging.csproj" />
+        <ProjectReference Include="..\MacroDeck.Plugin.Testing\MacroDeck.Plugin.Testing.csproj" />
+        <ProjectReference Include="..\MacroDeck.Signing\MacroDeck.Signing.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="System.CommandLine" />
+        <PackageReference Include="JsonSchema.Net" />
+        <PackageReference Include="Spectre.Console" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="MacroDeck.Plugin.Cli.Tests.UnitTests" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,74 @@
+<shared-modal [heading]="heading()" size="medium" [showFooter]="false" (close)="onDismiss()">
+  <div class="action-picker">
+    <aside class="picker-sources">
+      <button
+        type="button"
+        class="picker-source"
+        [class.active]="category() === null"
+        (click)="selectCategory(null)">
+        <span class="icon icon-layers icon-sm picker-source-glyph"></span>
+        <span class="picker-source-name">{{ allSourcesLabel() }}</span>
+      </button>
+
+      @for (cat of categories(); track cat.name) {
+        <button
+          type="button"
+          class="picker-source"
+          [class.active]="category() === cat.name"
+          (click)="selectCategory(cat.name)">
+          @if (cat.iconUrl) {
+            <img class="picker-source-icon" [src]="cat.iconUrl" alt="">
+          } @else {
+            <span class="icon {{ cat.fallbackIcon }} icon-sm picker-source-glyph"></span>
+          }
+          <span class="picker-source-name">{{ cat.name }}</span>
+          <span class="picker-source-count">{{ cat.count }}</span>
+        </button>
+      }
+    </aside>
+
+    <div class="picker-main">
+      <shared-input
+        class="picker-search-input"
+        type="search"
+        [placeholder]="searchPlaceholder()"
+        [ngModel]="search()"
+        (ngModelChange)="onSearchChange($event)"
+        (keydown)="onSearchKeydown($event)"
+        [autofocus]="true" />
+
+      <div class="picker-list" role="listbox">
+        @for (def of filtered(); track def.blockType; let i = $index) {
+          <button
+            type="button"
+            class="picker-item"
+            [class]="colorClass(def)"
+            [class.highlighted]="i === highlightIndex()"
+            role="option"
+            [attr.aria-selected]="i === highlightIndex()"
+            (mouseenter)="highlightIndex.set(i)"
+            (click)="pick(def)">
+            @if (iconUrlFor(def.integrationId); as iconUrl) {
+              <img class="picker-item-icon" [src]="iconUrl" alt="">
+            } @else {
+              <span class="icon {{ glyphFor(def) }} icon-sm picker-item-glyph" aria-hidden="true"></span>
+            }
+            <span class="picker-item-body">
+              <span class="picker-item-label">{{ def.label }}</span>
+              @if (def.description) {
+                <span class="picker-item-desc">{{ def.description }}</span>
+              }
+              <shared-action-capabilities [definition]="def" />
+            </span>
+            @if (category() === null) {
+              <span class="picker-item-category">{{ def.category }}</span>
+            }
+          </button>
+        }
+        @if (filtered().length === 0) {
+          <p class="picker-empty">{{ noResultsMessage() }}</p>
+        }
+      </div>
+    </div>
+  </div>
+</shared-modal>

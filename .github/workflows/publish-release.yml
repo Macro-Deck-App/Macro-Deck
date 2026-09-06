@@ -1,0 +1,156 @@
+name: Publish Release
+
+on:
+  workflow_run:
+    workflows: [Build]
+    types: [completed]
+
+concurrency:
+  group: publish-release
+  cancel-in-progress: false
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    name: Publish GitHub release
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'workflow_dispatch' && github.event.workflow_run.head_branch == 'main' }}
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+      TARGET_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download release artifacts
+        uses: actions/download-artifact@v7
+        with:
+          pattern: macro-deck-*
+          path: release-assets
+          merge-multiple: true
+          github-token: ${{ github.token }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+
+      - name: Download NuGet packages
+        if: false
+        uses: actions/download-artifact@v7
+        with:
+          name: nuget-packages
+          path: release-assets/nuget
+          github-token: ${{ github.token }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+
+      # Same artifact the update manifests embed their notes from, so the
+      # release body and the changelog in the update feed cannot drift apart.
+      - name: Download release notes
+        uses: actions/download-artifact@v7
+        with:
+          name: release-notes
+          path: release-notes
+          github-token: ${{ github.token }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+
+      - name: Resolve release version
+        id: release
+        run: |
+          manifest=$(find release-assets -type f \( -name 'latest-windows.json' -o -name 'beta-windows.json' \) | head -n 1)
+          if [ -z "$manifest" ]; then
+            echo "No Windows update manifest found in build artifacts." >&2
+            exit 1
+          fi
+
+          version=$(jq -r '.version // empty' "$manifest")
+          if [ -z "$version" ]; then
+            echo "Could not resolve release version from $manifest." >&2
+            exit 1
+          fi
+
+          tag="v${version}"
+          prerelease=false
+          if [[ "$version" == *-* ]]; then
+            prerelease=true
+          fi
+
+          {
+            echo "version=$version"
+            echo "tag=$tag"
+            echo "prerelease=$prerelease"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Publishing $tag from build run $SOURCE_RUN_ID at $TARGET_SHA"
+
+      - name: Create GitHub release
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+          TAG: ${{ steps.release.outputs.tag }}
+          PRERELEASE: ${{ steps.release.outputs.prerelease }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists." >&2
+            exit 1
+          fi
+
+          assets=()
+          while IFS= read -r -d '' asset; do
+            assets+=("$asset")
+          done < <(
+            find release-assets -type f \
+              \( -name '*.exe' \
+              -o -name '*.dmg' \
+              -o -name '*.AppImage' \
+              -o -name '*.sha256' \
+              -o -name '*.deb' \
+              -o -name '*.rpm' \
+              -o -name '*.nupkg' \
+              -o -name '*.snupkg' \) \
+              -print0
+          )
+
+          if [ "${#assets[@]}" -eq 0 ]; then
+            echo "No release assets found." >&2
+            exit 1
+          fi
+
+          args=(
+            "$TAG"
+            "${assets[@]}"
+            --target "$TARGET_SHA"
+            --title "Macro Deck $VERSION"
+            --notes-file release-notes/release-notes.md
+          )
+
+          if [ "$PRERELEASE" = 'true' ]; then
+            args+=(--prerelease)
+          fi
+
+          gh release create "${args[@]}"
+
+      - name: Notify Discord
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL_RELEASES }}
+          VERSION: ${{ steps.release.outputs.version }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "::warning::DISCORD_WEBHOOK_URL_RELEASES is not configured; skipping Discord notification."
+            exit 0
+          fi
+
+          release_url=$(gh release view "$TAG" --json url --jq '.url')
+
+          jq -n \
+            --arg title "Macro Deck $VERSION released" \
+            --arg url "$release_url" \
+            --arg description "A new Macro Deck release is available. See the GitHub release for the full changelog and downloads." \
+            '{embeds: [{title: $title, url: $url, description: $description}]}' > discord-payload.json
+
+          curl --fail-with-body \
+            --retry 3 \
+            --retry-all-errors \
+            --header "Content-Type: application/json" \
+            --data @discord-payload.json \
+            "$DISCORD_WEBHOOK_URL"

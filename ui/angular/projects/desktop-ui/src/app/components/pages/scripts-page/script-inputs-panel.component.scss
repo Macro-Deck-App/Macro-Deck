@@ -1,0 +1,271 @@
+@use '../../../../styles/index' as ds;
+
+.inputs-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.inputs-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+
+  .icon {
+    background-color: currentColor;
+  }
+}
+
+.inputs-title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.inputs-hint {
+  margin: var(--space-1) 0 0;
+  max-width: 62ch;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.input-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.runs-on-widget-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.runs-on-widget-hint {
+  margin: 0;
+  max-width: 62ch;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+// Mirrors the variables list: an input is read as `vars.<name>`, so the two lists should present
+// the same declaration the same way.
+.input-row {
+  @include ds.card($padding: 0.5rem 0.6875rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.input-row-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, max-content) auto;
+  align-items: center;
+  gap: var(--space-4);
+
+  .icon {
+    background-color: currentColor;
+  }
+}
+
+.input-name-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+  min-width: 0;
+}
+
+.input-public-name {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: var(--text-md);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.input-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.3125rem;
+  min-width: 0;
+  font-size: var(--text-xs);
+}
+
+.input-type-badge,
+.input-required-badge {
+  @include ds.badge;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: inherit;
+}
+
+.input-type-badge {
+  background-color: var(--type-string-bg);
+  color: var(--type-string-fg);
+}
+.input-type-badge.type-numeric { background-color: var(--type-numeric-bg); color: var(--type-numeric-fg); }
+.input-type-badge.type-boolean { background-color: var(--type-boolean-bg); color: var(--type-boolean-fg); }
+
+.input-required-badge {
+  background-color: var(--color-danger-muted);
+  color: var(--color-danger);
+}
+
+.input-label-text {
+  min-width: 0;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.input-default-col {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: var(--text-md);
+  color: var(--color-text-primary);
+  justify-self: end;
+  text-align: right;
+  min-width: 0;
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.input-default {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.input-no-default {
+  font-family: var(--font-sans, inherit);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.input-actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.input-actions ::ng-deep .dropdown-trigger {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+}
+
+.input-actions ::ng-deep .dropdown-trigger:hover {
+  background: transparent;
+  border: none;
+}
+
+.input-dots-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-compact);
+  height: var(--control-height-compact);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.input-dots-btn:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.input-menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+
+  .icon {
+    background-color: currentColor;
+  }
+}
+
+.input-menu-item:hover {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.input-menu-danger:hover {
+  background-color: var(--color-danger-muted);
+  color: var(--color-danger);
+}
+
+.row-error,
+.row-warning {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.row-error {
+  color: var(--color-danger);
+}
+
+.row-warning {
+  color: var(--color-warning, var(--color-text-secondary));
+}
+
+// Mirrors the New variable dialog: an input is declared the same way a variable is, so the two
+// dialogs should not read as different kinds of form.
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6875rem;
+}
+
+.form-preview {
+  font-size: var(--text-base);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  color: var(--color-text-secondary);
+  margin-top: 0.1875rem;
+}
+
+.form-preview .invalid {
+  color: var(--color-danger);
+}
+
+.form-preview .hint {
+  color: var(--color-text-muted);
+}
+
+.form-actions {
+  margin-top: var(--space-2);
+}

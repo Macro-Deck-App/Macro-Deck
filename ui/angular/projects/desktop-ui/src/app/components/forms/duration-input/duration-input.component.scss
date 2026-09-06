@@ -1,0 +1,13 @@
+@use '../../../../styles/index' as ds;
+
+.du-input {
+  flex: 1 1 0;
+  min-width: 4.875rem;
+  width: 100%;
+  @include ds.control-base;
+  @include ds.control-interactive;
+}
+
+.du-invalid {
+  @include ds.control-invalid;
+}

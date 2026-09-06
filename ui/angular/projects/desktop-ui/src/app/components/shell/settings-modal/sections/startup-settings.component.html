@@ -1,0 +1,32 @@
+<div class="startup">
+  <shared-settings-section
+    [heading]="'macrodeck:Settings.Startup' | translate"
+    [description]="'macrodeck.app:Settings.Startup.Description' | translate">
+    @if (loaded() && !supported()) {
+      <p class="startup__note">
+        <span class="icon icon-info icon-sm" aria-hidden="true"></span>
+        <span>{{ 'macrodeck.app:Settings.Startup.Unsupported' | translate }}</span>
+      </p>
+    }
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Startup.StartWithSystemLabel' | translate"
+      [description]="'macrodeck.app:Settings.Startup.StartWithSystemDescription' | translate">
+      <shared-toggle-switch
+        [disabled]="!loaded() || !supported()"
+        [busy]="enabledBusy()"
+        [checked]="enabled()"
+        (changed)="setEnabled($event)" />
+    </shared-settings-row>
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Startup.StartMinimizedLabel' | translate"
+      [description]="'macrodeck.app:Settings.Startup.StartMinimizedDescription' | translate">
+      <shared-toggle-switch
+        [disabled]="!loaded() || !supported() || !enabled()"
+        [busy]="openMinimizedBusy()"
+        [checked]="openMinimized()"
+        (changed)="setOpenMinimized($event)" />
+    </shared-settings-row>
+  </shared-settings-section>
+
+  <app-dock-icon-settings />
+</div>

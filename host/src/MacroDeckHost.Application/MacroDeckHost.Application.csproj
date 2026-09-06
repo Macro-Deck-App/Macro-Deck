@@ -1,0 +1,90 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <GeneratedBuildConfigFile>$(MSBuildProjectDirectory)/obj/$(Configuration)/$(TargetFramework)/Generated/BuildConfig.g.cs</GeneratedBuildConfigFile>
+    <!-- An internal host layer, never a published package - dotnet pack MacroDeck.slnx would
+         otherwise produce a nupkg for it with no readme and no intentional public surface. -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(GeneratedBuildConfigFile)" Visible="false" />
+  </ItemGroup>
+  <Target Name="GenerateBuildConfig" BeforeTargets="CoreCompile" DependsOnTargets="ValidateBuildChannel">
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(GeneratedBuildConfigFile)'))" />
+    <ItemGroup>
+      <_BuildConfigSource Include="#nullable enable" />
+      <_BuildConfigSource Include="namespace MacroDeckHost.Application.Configuration%3B" />
+      <_BuildConfigSource Include="public enum BuildChannel" />
+      <_BuildConfigSource Include="{" />
+      <_BuildConfigSource Include="    Development," />
+      <_BuildConfigSource Include="    Production" />
+      <_BuildConfigSource Include="}" />
+      <_BuildConfigSource Include="public static class BuildConfig" />
+      <_BuildConfigSource Include="{" />
+      <_BuildConfigSource Include="    public const string PublicPortEnvironmentVariable = &quot;MACRO_DECK_PORT&quot;%3B" />
+      <_BuildConfigSource Include="    public const string PublicHttpsPortEnvironmentVariable = &quot;MACRO_DECK_HTTPS_PORT&quot;%3B" />
+      <_BuildConfigSource Include="    public static readonly BuildChannel Channel = BuildChannel.$(BuildChannel)%3B" />
+      <_BuildConfigSource Include="    public const int DefaultPublicPort = $(BuildDefaultPublicPort)%3B" />
+      <_BuildConfigSource Include="    public const int DefaultPublicHttpsPort = $(BuildDefaultPublicHttpsPort)%3B" />
+      <_BuildConfigSource Include="    public const string DataRootDirectoryName = &quot;$(BuildDataRootDirectoryName)&quot;%3B" />
+      <_BuildConfigSource Include="    public const string LoopbackPortFileName = &quot;$(BuildLoopbackPortFileName)&quot;%3B" />
+      <_BuildConfigSource Include="    public const string ApplicationDisplayName = &quot;$(BuildApplicationDisplayName)&quot;%3B" />
+      <_BuildConfigSource Include="    public static int PublicPort { get%3B } = ResolvePublicPort()%3B" />
+      <_BuildConfigSource Include="    public static int ResolvePublicPort()" />
+      <_BuildConfigSource Include="    {" />
+      <_BuildConfigSource Include="        return ResolvePublicPort(System.Environment.GetEnvironmentVariable(PublicPortEnvironmentVariable))%3B" />
+      <_BuildConfigSource Include="    }" />
+      <_BuildConfigSource Include="    public static int ResolvePublicPort(string%3F configuredPort)" />
+      <_BuildConfigSource Include="    {" />
+      <_BuildConfigSource Include="        return int.TryParse(configuredPort, out var port) &amp;&amp; port is &gt; 0 and &lt;= ushort.MaxValue" />
+      <_BuildConfigSource Include="            %3F port" />
+      <_BuildConfigSource Include="            : DefaultPublicPort%3B" />
+      <_BuildConfigSource Include="    }" />
+      <_BuildConfigSource Include="}" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(GeneratedBuildConfigFile)" Lines="@(_BuildConfigSource)" Overwrite="true" />
+  </Target>
+  <ItemGroup>
+    <PackageReference Include="Scriban" />
+    <PackageReference Include="Mediator.Abstractions" />
+    <PackageReference Include="Mediator.SourceGenerator">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Extensions.Hosting" />
+    <!-- Server-side validation of WidgetEntity.Data against the host-authored widget-data-*-v1 schemas. -->
+    <PackageReference Include="JsonSchema.Net" />
+  </ItemGroup>
+
+  <!-- Embedded so IWidgetDataSchemaProvider can serve and evaluate each widget type's data schema without
+       shipping a second copy of the file. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Widgets\Schemas\widget-data-action-button-v2.schema.json"
+                       LogicalName="widget-data-action-button-v2.schema.json" />
+    <EmbeddedResource Include="Widgets\Schemas\widget-data-music-player-v1.schema.json"
+                       LogicalName="widget-data-music-player-v1.schema.json" />
+    <EmbeddedResource Include="Widgets\Schemas\widget-data-slider-v1.schema.json"
+                       LogicalName="widget-data-slider-v1.schema.json" />
+    <EmbeddedResource Include="Widgets\Schemas\widget-data-weather-v1.schema.json"
+                       LogicalName="widget-data-weather-v1.schema.json" />
+    <EmbeddedResource Include="Widgets\Schemas\widget-data-history-graph-v1.schema.json"
+                       LogicalName="widget-data-history-graph-v1.schema.json" />
+    <EmbeddedResource Include="Widgets\Schemas\widget-data-clock-v1.schema.json"
+                       LogicalName="widget-data-clock-v1.schema.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MacroDeckHost.Domain\MacroDeckHost.Domain.csproj" />
+    <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Sdk\MacroDeck.Sdk.csproj" />
+    <ProjectReference Include="..\..\..\protocol\src\MacroDeck.Plugin.Protocol\MacroDeck.Plugin.Protocol.csproj" />
+    <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Plugin.Packaging\MacroDeck.Plugin.Packaging.csproj" />
+    <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Localization\MacroDeck.Localization.csproj" />
+    <ProjectReference Include="..\MacroDeckHost.Localization\MacroDeckHost.Localization.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="MacroDeckHost" />
+    <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests" />
+    <!-- LoggingContractTests constructs a real PluginLogIngestor with a capturing logger accessor, via
+         the same internal test seam PluginLogIngestor's own remarks describe. -->
+    <InternalsVisibleTo Include="MacroDeckHost.Tests.PluginContractTests" />
+  </ItemGroup>
+</Project>

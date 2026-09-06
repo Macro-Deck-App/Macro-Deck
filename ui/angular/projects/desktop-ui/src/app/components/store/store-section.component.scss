@@ -1,0 +1,38 @@
+@use '../../../styles/index' as ds;
+
+.store-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.store-section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.store-section-heading {
+  @include ds.section-label;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.store-section-count {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+.store-section-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-3);
+
+  @include ds.breakpoint-down('md') {
+    grid-template-columns: 1fr;
+  }
+}

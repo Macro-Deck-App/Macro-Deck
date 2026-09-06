@@ -1,0 +1,46 @@
+<shared-modal [heading]="'macrodeck.app:Backup.Restore.Title' | translate" size="medium" (close)="onCancel()">
+  <div class="brm">
+    @if (backupName) {
+      <p class="brm-desc">
+        {{ 'macrodeck.app:Backup.Restore.Description' | translate:{ name: backupName } }}
+      </p>
+    }
+
+    <div class="brm-toolbar">
+      <button type="button" class="brm-link" (click)="selectAll()">{{ 'macrodeck.app:Backup.Restore.SelectAll' | translate }}</button>
+      <button type="button" class="brm-link" (click)="clearAll()">{{ 'macrodeck.app:Backup.Restore.ClearAll' | translate }}</button>
+    </div>
+
+    <ul class="brm-list">
+      @for (item of labels(); track item.id) {
+        <li class="brm-item" [attr.data-group]="item.id">
+          <label class="brm-row">
+            <shared-checkbox
+              [name]="'brm-group-' + item.id"
+              [ngModel]="isSelected(item.id)"
+              (ngModelChange)="toggleGroup(item.id, $event)" />
+            <span class="brm-row-text">
+              <span class="brm-row-label">{{ item.label }}</span>
+              <span class="brm-row-desc">{{ item.description }}</span>
+            </span>
+            @if (sizeFor(item.id); as size) {
+              <span class="brm-row-size">{{ size }}</span>
+            }
+          </label>
+
+          @for (warning of warningsFor(item.id); track warning.missingDependency) {
+            <p class="brm-warning">
+              <span class="icon icon-alert-triangle icon-xs" aria-hidden="true"></span>
+              <span>{{ warningMessage(warning) }}</span>
+            </p>
+          }
+        </li>
+      }
+    </ul>
+  </div>
+
+  <div modal-footer>
+    <shared-button variant="secondary" (click)="onCancel()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+    <shared-button variant="primary" [disabled]="!canContinue()" (click)="onConfirm()">{{ 'macrodeck:Common.Continue' | translate }}</shared-button>
+  </div>
+</shared-modal>

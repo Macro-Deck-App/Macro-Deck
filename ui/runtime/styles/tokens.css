@@ -1,0 +1,260 @@
+/*
+ * Runtime design tokens, emitted as CSS custom properties.
+ *
+ * These MUST stay custom properties (not SCSS variables): live theme switching
+ * and the user-selectable accent color depend on overriding them at runtime.
+ *
+ * Accent tokens (--color-accent*) are intentionally theme-independent. They are
+ * seeded here with the default accent and overridden at runtime by ThemeService
+ * from the user's chosen color - so they are NOT redefined in the .light block.
+ */
+
+:root {
+  /*
+   * Make native form widgets (number spinners, select popups, scrollbars,
+   * date pickers) render with the matching UA theme.
+   */
+  color-scheme: dark;
+
+  --color-bg-primary:    #121212;
+  --color-bg-secondary:  #1a1a1a;
+  --color-bg-tertiary:   #242424;
+  --color-bg-elevated:   #2a2a2a;
+  --color-bg-hover:      rgba(255, 255, 255, 0.05);
+
+  --color-border:        #333333;
+  --color-border-light:  #404040;
+  /*
+   * Slightly dimmed accent outline marking a selected row. Derived from
+   * --color-accent via color-mix so it follows the runtime accent. Resting
+   * controls keep --color-border; the focused control itself uses the full
+   * accent (see control-interactive).
+   */
+  --color-border-accent: color-mix(in srgb, var(--color-accent) 60%, var(--color-border));
+  /*
+   * Hairline edge of an elevated overlay surface (popup panels, toasts,
+   * floating cards). Translucent so it reads as a material edge on whatever
+   * it sits on instead of a drawn outline - elevation, not colour, is what
+   * separates these surfaces from the page.
+   */
+  --color-border-overlay: rgba(255, 255, 255, 0.08);
+
+  --color-text-primary:   #ffffff;
+  --color-text-secondary: #a0a0a0;
+  --color-text-muted:     #666666;
+
+  /* User-selectable accent (default #2196F3). Overridden at runtime by ThemeService. */
+  --color-accent:        #2196f3;
+  --color-accent-hover:  #1565c0;
+  --color-accent-muted:  rgba(33, 150, 243, 0.15);
+
+  /*
+   * Foreground on accent/danger/success/warning fills. Accent colors are strong
+   * hues in both themes, so this stays white and is not overridden in .light.
+   */
+  --color-on-accent:     #ffffff;
+
+  --color-danger:        #ef4444;
+  --color-danger-hover:  #dc2626;
+  --color-danger-muted:  rgba(239, 68, 68, 0.15);
+
+  --color-success:       #22c55e;
+  --color-success-muted: rgba(34, 197, 94, 0.15);
+
+  --color-warning:       #f59e0b;
+  --color-warning-muted: rgba(245, 158, 11, 0.15);
+  --color-on-warning:    #1c1c1e;
+
+  /*
+   * Semantic tint pairs for value-type and classification badges
+   * (variables, variable picker, template builder, condition builder).
+   */
+  --type-string-bg:      rgba(99, 102, 241, 0.15);
+  --type-string-fg:      rgb(165, 180, 252);
+  --type-numeric-bg:     rgba(34, 197, 94, 0.15);
+  --type-numeric-fg:     rgb(134, 239, 172);
+  --type-boolean-bg:     rgba(245, 158, 11, 0.15);
+  --type-boolean-fg:     rgb(252, 211, 77);
+  --type-resource-bg:    rgba(236, 72, 153, 0.15);
+  --type-resource-fg:    rgb(244, 114, 182);
+  --type-system-bg:      rgba(168, 85, 247, 0.15);
+  --type-system-fg:      rgb(216, 180, 254);
+  --type-integration-bg: rgba(14, 165, 233, 0.15);
+  --type-integration-fg: rgb(125, 211, 252);
+  --type-widget-bg:      rgba(20, 184, 166, 0.15);
+  --type-widget-fg:      rgb(94, 234, 212);
+
+  /* Variable-reference chips (param input, condition builder). */
+  --chip-var-bg:     rgba(34, 197, 94, 0.12);
+  --chip-var-border: rgba(34, 197, 94, 0.45);
+  --chip-var-fg:     rgb(134, 239, 172);
+
+  /* Event-payload references, tinted apart from variables so the two roots read differently. */
+  --chip-event-bg:     rgba(14, 165, 233, 0.12);
+  --chip-event-border: rgba(14, 165, 233, 0.45);
+  --chip-event-fg:     rgb(125, 211, 252);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+
+  /*
+   * The type scale, one token per semantic role. Sizes are the rendered pixels
+   * at the default 16px root; --text-xs is the floor, nothing may go below it.
+   *
+   * The scale sat a step high throughout, so every role above the floor came down
+   * by a pixel. The floor could not follow, which leaves --text-xs and --text-sm
+   * sharing 12px: a caption and a label are now told apart by weight, color and
+   * casing rather than by size. They stay two tokens because the roles are still
+   * distinct - the next move of the scale separates them again.
+   */
+  --text-xs:   0.75rem;     /* 12px - caption / metadata: badges, chips, fine print */
+  --text-sm:   0.75rem;     /* 12px - label: field labels, hints, secondary rows */
+  --text-base: 0.8125rem;   /* 13px - body / control: the default for text and controls */
+  --text-md:   0.875rem;    /* 14px - emphasized body: inputs, lead paragraphs */
+  --text-lg:   1.0625rem;   /* 17px - section heading */
+  --text-xl:   1.3125rem;   /* 21px - page title */
+
+  --font-medium:   500;
+  --font-semibold: 600;
+  --font-bold:     700;
+
+  --leading-tight:  1.25;
+  --leading-normal: 1.5;
+
+  /*
+   * Spacing, radii and control height are whole pixels at the 16px root. The
+   * values look unround because #248 raised the type scale without moving the
+   * layout: they are the pre-#248 rendered sizes, which were authored against a
+   * 13px root, carried over unchanged.
+   */
+  --space-1: 0.1875rem;    /* 3px */
+  --space-2: 0.375rem;     /* 6px */
+  --space-3: 0.625rem;     /* 10px */
+  --space-4: 0.8125rem;    /* 13px */
+  --space-5: 1.25rem;      /* 20px */
+  --space-6: 1.625rem;     /* 26px */
+  --space-8: 2.4375rem;    /* 39px */
+
+  --radius-sm: 0.3125rem;   /* 5px */
+  --radius-md: 0.375rem;    /* 6px */
+  --radius-lg: 0.625rem;    /* 10px */
+  --radius-xl: 0.8125rem;   /* 13px */
+
+  /*
+   * The single-line control height. Every single-line control declares it; none derives its
+   * height from padding, so retuning the type scale cannot pull a control away from its
+   * neighbour again (issue #346) - see the control-size mixin.
+   */
+  --control-height: 2.375rem;   /* 38px */
+
+  /*
+   * Height for a *standalone* icon button - toolbars, the top status bar, notification /
+   * connection panels, and list rows with no adjoining input. No longer a form-control size:
+   * single-line form controls all render at --control-height now (issue #554).
+   */
+  --control-height-compact: 1.625rem;   /* 26px */
+
+  /*
+   * Minimum height of a sidebar navigation item in both modes, and the width of a collapsed
+   * one - one token drives both axes so the collapsed rail reads as square buttons.
+   */
+  --nav-item-height: 2.75rem;   /* 44px */
+
+  /* Height of the global footer bar at the bottom of the shell, independent of the sidebar. */
+  --footer-bar-height: 1.5rem;   /* 24px */
+
+  --z-dropdown:     100;
+  /*
+   * The web client's reconnecting notice. Below the modal host and any dialog someone had open, so a
+   * connection drop cannot bury either of them under a mere status panel - and below the toast an
+   * offline press still fires.
+   */
+  --z-reconnecting: 900;
+  --z-overlay:      1000;
+  --z-modal:        1000;
+  --z-modal-nested: 1100;
+  /*
+   * Floating panels (menus, select/combobox popups) must paint above any
+   * modal that hosts them, but below toasts.
+   */
+  --z-popover:      1150;
+  --z-toast:        1200;
+
+  /*
+   * Press feedback is asymmetric on purpose: it has to appear within a frame so even a tap that
+   * lasts a few milliseconds is seen, and fades back out slowly enough to register (issue #454).
+   */
+  --transition-press-in:  0.02s ease;
+  --transition-press-out: 0.14s ease;
+
+  --transition-fast:   0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow:   0.3s ease;
+
+  --shadow-sm:      0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-md:      0 10px 25px rgba(0, 0, 0, 0.3);
+  --shadow-lg:      0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  --shadow-overlay: 0 20px 40px rgba(0, 0, 0, 0.5);
+  --shadow-popover: 0 8px 24px rgba(0, 0, 0, 0.35);
+  /*
+   * Modal elevation. The leading 1px ring replaces the border a dialog used to
+   * carry: without it a light-theme dialog (white on white) has no edge at all.
+   */
+  --shadow-dialog:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 2px 4px rgba(0, 0, 0, 0.2),
+    0 12px 28px -8px rgba(0, 0, 0, 0.45),
+    0 32px 64px -20px rgba(0, 0, 0, 0.65);
+
+  --focus-ring: 0 0 0 2px var(--color-bg-primary), 0 0 0 4px var(--color-accent);
+
+  --color-scrim: rgba(0, 0, 0, 0.6);
+}
+
+.light {
+  color-scheme: light;
+
+  --color-bg-primary:    #ffffff;
+  --color-bg-secondary:  #f5f5f5;
+  --color-bg-tertiary:   #ebebeb;
+  --color-bg-elevated:   #ffffff;
+  --color-bg-hover:      rgba(0, 0, 0, 0.05);
+  --color-border:        #e0e0e0;
+  --color-border-light:  #d0d0d0;
+  --color-border-overlay: rgba(0, 0, 0, 0.08);
+  --color-text-primary:   #121212;
+  --color-text-secondary: #666666;
+  --color-text-muted:     #999999;
+  --color-danger:        #dc2626;
+  --color-danger-hover:  #b91c1c;
+  --color-danger-muted:  rgba(220, 38, 38, 0.1);
+  --color-success:       #16a34a;
+  --color-success-muted: rgba(22, 163, 74, 0.12);
+  --color-warning:       #d97706;
+  --color-warning-muted: rgba(217, 119, 6, 0.12);
+  --color-on-warning:    #ffffff;
+  --type-string-fg:      rgb(79, 70, 229);
+  --type-numeric-fg:     rgb(22, 163, 74);
+  --type-boolean-fg:     rgb(180, 83, 9);
+  --type-resource-fg:    rgb(219, 39, 119);
+  --type-system-fg:      rgb(147, 51, 234);
+  --type-integration-fg: rgb(2, 132, 199);
+  --type-widget-fg:      rgb(13, 148, 136);
+  --chip-var-bg:     rgba(22, 163, 74, 0.1);
+  --chip-var-border: rgba(22, 163, 74, 0.45);
+  --chip-var-fg:     rgb(22, 163, 74);
+  --chip-event-bg:     rgba(2, 132, 199, 0.1);
+  --chip-event-border: rgba(2, 132, 199, 0.45);
+  --chip-event-fg:     rgb(2, 132, 199);
+  --shadow-sm:      0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-md:      0 6px 16px rgba(0, 0, 0, 0.1);
+  --shadow-lg:      0 16px 40px rgba(0, 0, 0, 0.15);
+  --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.18);
+  --shadow-popover: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-dialog:
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 12px 28px -8px rgba(0, 0, 0, 0.12),
+    0 32px 64px -20px rgba(0, 0, 0, 0.18);
+  --color-scrim: rgba(0, 0, 0, 0.4);
+}

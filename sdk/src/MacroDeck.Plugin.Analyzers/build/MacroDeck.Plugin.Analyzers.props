@@ -1,0 +1,34 @@
+<Project>
+
+    <!-- NuGet auto-imports build/<PackageId>.props into every PackageReference consumer. MDP1001 and
+         MDP1003 read manifest.json, and the launchSettings.json half of MDP4002 reads Properties/launchSettings.json,
+         neither of which is part of a normal compilation - an analyzer only sees them as AdditionalFiles.
+         Exists() guards each one so a project without it still builds; a plugin with no launch profile is
+         perfectly normal. A ProjectReference consumer gets no build/ import and has to add these itself. -->
+
+    <ItemGroup Condition="Exists('$(MSBuildProjectDirectory)/manifest.json')">
+        <AdditionalFiles Include="$(MSBuildProjectDirectory)/manifest.json" />
+    </ItemGroup>
+
+    <ItemGroup Condition="Exists('$(MSBuildProjectDirectory)/Properties/launchSettings.json')">
+        <AdditionalFiles Include="$(MSBuildProjectDirectory)/Properties/launchSettings.json" />
+    </ItemGroup>
+
+    <!-- The localization source generator reads a plugin's .resx through AdditionalFiles for the same
+         reason: a resource file is not part of a compilation. A glob rather than Exists() because a set
+         is many files - Strings.resx plus one per culture - and a project with no Localization folder
+         simply matches nothing. -->
+    <ItemGroup>
+        <AdditionalFiles Include="$(MSBuildProjectDirectory)/Localization/**/*.resx" />
+    </ItemGroup>
+
+    <!-- A generator sees no MSBuild property unless it is declared compiler-visible. Scope defaults to
+         the plugin id from manifest.json, and the class name to the resource set's own file name, so a
+         plugin that just drops in Localization/Strings.resx needs to set neither. -->
+    <ItemGroup>
+        <CompilerVisibleProperty Include="MacroDeckLocalizationScope" />
+        <CompilerVisibleProperty Include="MacroDeckLocalizationClassName" />
+        <CompilerVisibleProperty Include="RootNamespace" />
+    </ItemGroup>
+
+</Project>

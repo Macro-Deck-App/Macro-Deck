@@ -1,0 +1,212 @@
+<div
+  class="profile-selector"
+  sharedShellDropTarget
+  [dropKinds]="profileDropKinds"
+  (shellDropped)="onArchiveDropped($event)">
+  <shared-dropdown-menu
+    fill
+    class="profile-dropdown"
+    position="bottom-left"
+    [minWidth]="260"
+    [anchorOffset]="0"
+    [isOpen]="dropdownOpen()"
+    (isOpenChange)="dropdownOpen.set($event)">
+
+    <ng-template #triggerContent>
+      <span class="profile-trigger">
+        <span class="profile-trigger-name">{{ profileService.selectedProfile()?.name ?? ('macrodeck.app:Widgets.Profile.NoProfile' | translate) }}</span>
+        @if (profileService.isCurrentProfileLocked()) {
+          <span class="icon icon-lock icon-xs profile-trigger-lock"></span>
+        }
+        <shared-select-caret class="profile-trigger-chevron" />
+      </span>
+    </ng-template>
+
+    <ng-template #menuContent>
+      <div class="profile-list">
+        @for (profile of profileService.sortedProfiles(); track profile.id) {
+          <div
+            class="profile-list-item"
+            [class.active]="profile.id === profileService.selectedProfileId()">
+            <button class="profile-list-select" (click)="selectProfile(profile.id)">
+              @if (profile.isVirtual) {
+                <span class="icon icon-lock icon-xs profile-item-glyph"></span>
+              }
+              <span class="profile-list-name">{{ profile.name }}</span>
+              @if (profile.isVirtual) {
+                <span class="profile-badge">{{ profile.sourceIntegrationId }}</span>
+              }
+            </button>
+            <!-- Revealed on hover and on keyboard focus, so the row stays reachable without a mouse. -->
+            <shared-button-group class="profile-item-actions" size="compact" gap="xs">
+              <shared-button
+                iconOnly
+                variant="ghost"
+                [title]="'macrodeck.app:Widgets.Profile.EditNamed' | translate:{ name: profile.name }"
+                [ariaLabel]="'macrodeck.app:Widgets.Profile.EditNamed' | translate:{ name: profile.name }"
+                [disabled]="!canModify(profile)"
+                (click)="startEdit(profile)">
+                <span class="icon icon-pencil icon-xs"></span>
+              </shared-button>
+              <shared-button
+                iconOnly
+                variant="ghost"
+                [title]="'macrodeck.app:Widgets.Profile.ExportNamed' | translate:{ name: profile.name }"
+                [ariaLabel]="'macrodeck.app:Widgets.Profile.ExportNamed' | translate:{ name: profile.name }"
+                [disabled]="!canExport(profile)"
+                (click)="startExport(profile)">
+                <span class="icon icon-upload icon-xs"></span>
+              </shared-button>
+              <shared-button
+                iconOnly
+                variant="danger-ghost"
+                [title]="'macrodeck.app:Widgets.Profile.DeleteNamed' | translate:{ name: profile.name }"
+                [ariaLabel]="'macrodeck.app:Widgets.Profile.DeleteNamed' | translate:{ name: profile.name }"
+                [disabled]="!canDelete(profile)"
+                (click)="startDelete(profile)">
+                <span class="icon icon-trash icon-xs"></span>
+              </shared-button>
+            </shared-button-group>
+          </div>
+        }
+      </div>
+      <shared-button-group class="profile-list-footer">
+        <shared-button fill variant="secondary"
+          (click)="dropdownOpen.set(false); startCreate()">
+          <span class="icon icon-plus icon-sm"></span>
+          <span>{{ 'macrodeck.app:Widgets.Profile.NewProfile' | translate }}</span>
+        </shared-button>
+        <shared-button
+          iconOnly
+          variant="secondary"
+          [title]="'macrodeck.app:Widgets.Profile.ImportFileTitle' | translate"
+          [ariaLabel]="'macrodeck.app:Widgets.Profile.ImportFileTitle' | translate"
+          (click)="startImport()">
+          <span class="icon icon-download icon-sm"></span>
+        </shared-button>
+      </shared-button-group>
+    </ng-template>
+  </shared-dropdown-menu>
+</div>
+
+<input
+  #profileImportInput
+  type="file"
+  accept=".macroDeckProfile"
+  hidden
+  (change)="onImportFileSelected($event)" />
+
+@if (showExportModal()) {
+  <shared-export-options-modal
+    [heading]="'macrodeck.app:Widgets.Profile.ExportHeading' | translate"
+    [description]="'macrodeck.app:Widgets.Profile.ExportDescription' | translate"
+    [options]="exportToggles"
+    (confirmed)="onExportConfirmed($event)"
+    (cancelled)="cancelExport()">
+  </shared-export-options-modal>
+}
+
+@if (archiveImport.summary(); as archive) {
+  <shared-archive-preview-modal
+    [summary]="archive"
+    (confirmed)="archiveImport.confirm()"
+    (cancelled)="archiveImport.cancel()">
+  </shared-archive-preview-modal>
+}
+
+@if (archiveImport.passwordVisible()) {
+  <shared-import-password-modal
+    [heading]="'macrodeck.app:Widgets.Profile.ImportHeading' | translate"
+    [invalid]="archiveImport.passwordInvalid()"
+    (submitted)="archiveImport.submitPassword($event)"
+    (cancelled)="archiveImport.cancel()">
+  </shared-import-password-modal>
+}
+
+@if (portableError()) {
+  <div class="profile-portable-error">
+    <shared-error-banner [message]="portableError()!" (dismiss)="dismissPortableError()"></shared-error-banner>
+  </div>
+}
+
+@if (isCreating()) {
+  <shared-modal [heading]="'macrodeck.app:Widgets.Profile.NewProfile' | translate" size="small" (close)="cancelCreate()">
+    <shared-input
+      class="profile-name-input"
+      [ngModel]="createName()"
+      (ngModelChange)="createName.set($event)"
+      (keydown.enter)="confirmCreate()"
+      [placeholder]="'macrodeck.app:Widgets.Profile.ProfileNamePlaceholder' | translate"
+      [autofocus]="true" />
+    <div modal-footer>
+      <shared-button variant="secondary" (click)="cancelCreate()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+      <shared-button variant="primary" (click)="confirmCreate()">{{ 'macrodeck:Common.Create' | translate }}</shared-button>
+    </div>
+  </shared-modal>
+}
+
+@if (isEditing()) {
+  <shared-modal [heading]="'macrodeck.app:Widgets.Profile.EditProfileHeading' | translate" size="small" (close)="cancelEdit()">
+    <div class="profile-form">
+      <label class="form-group">
+        <span class="form-label">{{ 'macrodeck.app:Widgets.Profile.Name' | translate }}</span>
+        <shared-input
+          [ngModel]="editName()"
+          (ngModelChange)="editName.set($event)"
+          [placeholder]="'macrodeck.app:Widgets.Profile.ProfileNamePlaceholder' | translate"
+          [autofocus]="true" />
+      </label>
+
+      <shared-grid-settings
+        [cols]="editColumns()"
+        [rows]="editRows()"
+        [background]="editBackground() || ''"
+        [maxCols]="editMaxColumns()"
+        [maxRows]="editMaxRows()"
+        [colsLocked]="editColumnsLocked()"
+        [rowsLocked]="editRowsLocked()"
+        [lockNote]="gridLockNote()"
+        [spacingHonoured]="editSpacingHonoured()"
+        [cornerRadiusHonoured]="editCornerRadiusHonoured()"
+        [noEffectNote]="noEffectNote()"
+        [gridInheritable]="false"
+        [inheritedLabel]="'macrodeck.app:Widgets.Profile.DefaultInheritedLabel' | translate"
+        [showWidgetAppearance]="true"
+        [spacing]="editSpacing()"
+        [borderRadius]="editBorderRadius()"
+        [effectiveSpacing]="BUILT_IN_SPACING"
+        [effectiveBorderRadius]="null"
+        (colsChange)="editColumns.set($event ?? DEFAULT_COLUMNS)"
+        (rowsChange)="editRows.set($event ?? DEFAULT_ROWS)"
+        (backgroundChange)="editBackground.set($event)"
+        (spacingChange)="editSpacing.set($event)"
+        (borderRadiusChange)="editBorderRadius.set($event)">
+      </shared-grid-settings>
+
+      @if (layoutWarning()) {
+        <p class="layout-warning">{{ layoutWarning() }}</p>
+      }
+
+      @if (editError()) {
+        <shared-error-banner [message]="editError()!" (dismiss)="editError.set(null)"></shared-error-banner>
+      }
+    </div>
+
+    <div modal-footer>
+      <shared-button variant="secondary" (click)="cancelEdit()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+      <shared-button variant="primary" (click)="confirmEdit()">{{ 'macrodeck:Common.Save' | translate }}</shared-button>
+    </div>
+  </shared-modal>
+}
+
+@if (showDeleteConfirm()) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Widgets.Profile.DeleteProfileHeading' | translate"
+    [message]="deleteMessage()"
+    [confirmText]="'macrodeck:Common.Delete' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmDelete()"
+    (cancel)="cancelDelete()">
+  </shared-confirmation-modal>
+}

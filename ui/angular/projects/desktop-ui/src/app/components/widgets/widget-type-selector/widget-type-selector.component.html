@@ -1,0 +1,37 @@
+<shared-modal [heading]="'macrodeck.app:Widgets.TypeSelector.Heading' | translate" [showFooter]="true" maxWidth="760px" (close)="cancel.emit()">
+  <p class="subtitle">{{ 'macrodeck.app:Widgets.TypeSelector.Subtitle' | translate }}</p>
+
+  <div class="widget-types">
+    @for (option of widgetTypes; track option.id) {
+      <button class="type-card" type="button" [attr.aria-label]="name(option)" (click)="selectType(option.id)">
+        <span class="type-preview" #previewBox>
+          <shared-ui-tree-widget
+            #preview
+            class="type-preview-widget"
+            [widgetType]="option.id"
+            [sample]="true"
+            [width]="previewSize()"
+            [height]="previewSize()"
+            [style.width.px]="previewSize()"
+            [style.height.px]="previewSize()"
+            [disabled]="true"
+            [style.--wq.px]="previewSize()"
+            [style.--widget-scale]="previewScale()"
+            [style.--widget-radius.px]="previewRadius">
+          </shared-ui-tree-widget>
+          @if (preview.rejected()) {
+            <span class="type-preview-placeholder">{{ 'macrodeck.app:WebClient.Widgets.NoPreview' | translate }}</span>
+          }
+        </span>
+        <span class="type-info">
+          <span class="type-name">{{ name(option) }}</span>
+          <span class="type-description">{{ description(option) }}</span>
+        </span>
+      </button>
+    }
+  </div>
+
+  <div modal-footer>
+    <shared-button variant="secondary" (click)="onCancel()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+  </div>
+</shared-modal>

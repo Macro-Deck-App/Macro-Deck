@@ -1,0 +1,54 @@
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.widget-tile {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  // Mirrors the host wrapper radius, so the surface corners meet its clip at every deck size.
+  border-radius: calc(var(--widget-radius, 22px) * var(--widget-scale, 1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-secondary);
+  box-sizing: border-box;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+// The tree fills the tile rather than sitting centred in it: the root node is given the widget's real
+// box, so a non-square cell is covered edge to edge the way the previous renderer covered it.
+.widget-tile > shared-ui-tree {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Load-bearing beyond the cursor: this is also what makes an interactive node inside the tree - a
+   ui.slider's drag surface - inert in edit mode and on a drag ghost. Those two cases have no
+   guard of their own, because a node stops taking the pointer here rather than in the renderer. */
+.widget-tile.disabled {
+  pointer-events: none;
+  cursor: default;
+}
+
+.press-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0);
+  transition: background-color var(--transition-press-out);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.widget-tile.pressed .press-overlay {
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: background-color var(--transition-press-in);
+}

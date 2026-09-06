@@ -1,0 +1,69 @@
+<shared-modal [heading]="heading()" size="large" [showFooter]="false" (close)="closed.emit()">
+  <div class="picker">
+    <div class="controls">
+      <shared-select
+        class="pack-select"
+        [options]="packOptions()"
+        [ngModel]="selectedPackId()"
+        (ngModelChange)="onPackChange($event)" />
+      <shared-input
+        class="search"
+        type="search"
+        [placeholder]="searchPlaceholder()"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)" />
+    </div>
+
+    <div
+      class="grid-area"
+      [class.can-import]="canImport()"
+      sharedFileDrop
+      (filesDropped)="onFilesDropped($event)"
+      sharedIconDropTarget
+      [multiple]="true"
+      (iconPathsDropped)="onPathsDropped($event)">
+      @if (icons().length === 0) {
+        <shared-empty-state
+          icon="image"
+          [heading]="noIconsHeading()"
+          [message]="emptyMessage()" />
+      } @else {
+        <shared-icon-grid
+          [icons]="icons()"
+          [tileSize]="72"
+          [selectable]="true"
+          [selectedIconId]="selectedIcon()?.id ?? null"
+          (iconClick)="onIconClick($event.icon)" />
+      }
+
+      @if (canImport()) {
+        <div class="drop-hint" aria-hidden="true">
+          <span class="icon icon-download icon-2xl"></span>
+          <span>{{ dropHintText() }}</span>
+        </div>
+      }
+    </div>
+
+    <shared-button-group class="actions">
+      @if (canImport()) {
+        <div class="import-action">
+          <shared-button variant="secondary" [disabled]="importBusy()" (click)="pickFiles()">
+            <span class="icon icon-download icon-sm"></span>
+            <span>{{ importIconsLabel() }}</span>
+          </shared-button>
+          @if (importBusy()) {
+            <span class="import-status">{{ importingLabel() }}</span>
+          }
+        </div>
+      }
+      <div class="actions-end">
+        <shared-button variant="secondary" (click)="onCancel()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button variant="primary" [disabled]="!selectedIcon()" (click)="pick()">{{ useIconLabel() }}</shared-button>
+      </div>
+    </shared-button-group>
+  </div>
+</shared-modal>
+
+<input #fileInput type="file" hidden multiple accept=".png,.jpg,.jpeg,.gif,.webp,.svg,.lottie,.json" (change)="onImportFiles($event)" />
+
+<shared-import-progress />

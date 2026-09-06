@@ -1,0 +1,45 @@
+<div class="shell" [style.--sidebar-collapsed-width]="collapsedSidebarWidthCss">
+  <app-statusbar
+    [isSidebarCollapsed]="navService.isSidebarCollapsed()"
+    [isConnectionPanelOpen]="navService.isConnectionPanelOpen()"
+    (toggleSidebar)="navService.toggleSidebar()"
+    (toggleConnectionPanel)="navService.toggleConnectionPanel()">
+  </app-statusbar>
+
+  <div class="shell-content" #shellContent>
+    <app-sidebar
+      [isCollapsed]="navService.isSidebarCollapsed()"
+      [mainItemGroups]="navService.mainNavGroups()"
+      [bottomItems]="navService.bottomNavItems()"
+      [activeAction]="activeNavAction()"
+      (itemAction)="onNavAction($event)">
+    </app-sidebar>
+
+    <!-- Always mounted, like the connection panel: it animates its own width open and shut. -->
+    <app-notification-panel
+      [isOpen]="navService.isNotificationPanelOpen()"
+      (closed)="navService.closeNotificationPanel()">
+    </app-notification-panel>
+
+    <main class="shell-main">
+      <router-outlet></router-outlet>
+    </main>
+
+    <!-- Always mounted: it animates its own width, so removing it would skip the closing animation. -->
+    <app-connection-panel
+      [isOpen]="navService.isConnectionPanelOpen()"
+      (closed)="navService.closeConnectionPanel()">
+    </app-connection-panel>
+  </div>
+
+  <app-footer-bar></app-footer-bar>
+  <shared-store-progress />
+
+  @if (settingsModal.isOpen()) {
+    <app-settings-modal></app-settings-modal>
+  }
+
+  @if (updateModal.isOpen()) {
+    <app-update-modal></app-update-modal>
+  }
+</div>

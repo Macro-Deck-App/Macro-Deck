@@ -1,0 +1,9 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main-window-in-app-update",
+  "description": "In-app installation is Windows/macOS only. On Linux the shell never downloads or installs an update itself (issue #271), so install_update is not granted there and the IPC call is rejected before it reaches Rust. This covers the dev context; the packaged remote origin gets the equivalent platform-scoped grant in window.rs.",
+  "windows": ["main"],
+  "local": true,
+  "platforms": ["windows", "macOS"],
+  "permissions": ["allow-install-update"]
+}

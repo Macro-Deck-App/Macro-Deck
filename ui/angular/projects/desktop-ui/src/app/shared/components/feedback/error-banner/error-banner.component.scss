@@ -1,0 +1,33 @@
+:host { display: block; }
+
+.eb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.5rem var(--space-3);
+  background: var(--color-danger-muted);
+  color: var(--color-danger);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+}
+
+.eb-message { flex: 1; }
+
+.eb-dismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.7;
+}
+.eb-dismiss:hover { opacity: 1; }
+
+.eb-dismiss-icon {
+  width: 0.8125rem;
+  height: 0.8125rem;
+  display: block;
+}

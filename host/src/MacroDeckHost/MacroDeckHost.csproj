@@ -1,0 +1,97 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <!-- Packaged Windows builds (published with a RID) must not open a console window. -->
+        <OutputType Condition="'$(RuntimeIdentifier)' == 'win-x64'">WinExe</OutputType>
+    </PropertyGroup>
+
+    <!-- macOS codesign treats every managed assembly next to the app as an unsigned nested code
+         object and fails the .app signature (issue #316); folding them into one launcher leaves a
+         single Mach-O to sign. Scoped to a RuntimeIdentifier so the packaging shape only reaches the
+         RID publishes CI and stage-host.sh run; plain `dotnet build`/`dotnet test` never pass a RID
+         and must keep their framework-dependent output. Trimming stays off because integration
+         discovery reflects over the host assemblies. -->
+    <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+        <PublishSingleFile>true</PublishSingleFile>
+        <SelfContained>true</SelfContained>
+        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+        <PublishTrimmed>false</PublishTrimmed>
+    </PropertyGroup>
+
+    <!-- The Development Windows host must not share a file/process name with an installed release.
+         The NSIS updater stops its own host before replacing the host directory; rename only the
+         apphost so Development can update without terminating a concurrent Beta/Production host. -->
+    <Target Name="RenameDevelopmentWindowsHostApphost"
+            AfterTargets="Publish"
+            Condition="'$(BuildChannel)' == 'Development' and '$(RuntimeIdentifier)' == 'win-x64'">
+        <Move SourceFiles="$(PublishDir)$(AssemblyName).exe"
+              DestinationFiles="$(PublishDir)MacroDeckHostDevelopment.exe"
+              Condition="Exists('$(PublishDir)$(AssemblyName).exe')"
+              OverwriteReadOnlyFiles="true" />
+    </Target>
+
+    <!-- Win32 version resource + icon so the spawned host process is presented consistently with
+         the bootstrapper in Windows Task Manager / Process Explorer (issue #79) instead of the raw
+         "MacroDeckHost" assembly name and the generic .NET executable icon. AssemblyTitle drives the
+         Win32 FileDescription (the name Task Manager shows). These assembly-metadata properties are
+         cross-platform; ApplicationIcon (the shared brand icon, single source of truth in the
+         bootstrapper) only affects the Windows apphost and is ignored on the linux/macOS apphosts. -->
+    <PropertyGroup>
+        <AssemblyTitle>Macro Deck Host</AssemblyTitle>
+        <Product>Macro Deck Host</Product>
+        <Company>Manuel Mayer</Company>
+        <Description>Macro Deck Host background process</Description>
+        <ApplicationIcon>..\..\..\ui\bootstrapper\icons\icon.ico</ApplicationIcon>
+    </PropertyGroup>
+
+    <!-- Stamped by CI (-p:BuildTimestamp=... / -p:BuildNumber=...); absent in local builds so the About page shows a dev fallback. -->
+    <ItemGroup Condition="'$(BuildTimestamp)' != ''">
+        <AssemblyMetadata Include="BuildTimestamp" Value="$(BuildTimestamp)" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(BuildNumber)' != ''">
+        <AssemblyMetadata Include="BuildNumber" Value="$(BuildNumber)" />
+    </ItemGroup>
+    <!-- On Linux/macOS there is no Win32 version resource: the process name shown in `ps`/`top`/
+         Activity Monitor is the launcher's file name, fixed at exec time. Rename the published
+         apphost to the friendly "Macro Deck Host" on non-Windows RIDs so those process lists match
+         Windows (issue #79); Production/Beta keep MacroDeckHost.exe while Development renames its
+         apphost to MacroDeckHostDevelopment.exe. The single-file bundle is still published as
+         $(PublishDir)$(AssemblyName), and renaming it is safe because the apphost locates its
+         appended bundle by an embedded offset, not by its own file name. CI and
+         stage-host.sh publish with `-o <dir>`, so
+         PublishDir resolves against the invocation cwd; the Exists guard makes it a safe no-op
+         otherwise. The bootstrapper looks up this exact name (ui/bootstrapper/src/host.rs). -->
+    <Target Name="RenameHostApphostForUnix"
+            AfterTargets="Publish"
+            Condition="'$(RuntimeIdentifier)' != '' and !$(RuntimeIdentifier.StartsWith('win'))">
+        <PropertyGroup>
+            <_HostApphostSource>$(PublishDir)$(AssemblyName)</_HostApphostSource>
+            <_HostApphostTarget>$(PublishDir)Macro Deck Host</_HostApphostTarget>
+        </PropertyGroup>
+        <Move SourceFiles="$(_HostApphostSource)"
+              DestinationFiles="$(_HostApphostTarget)"
+              Condition="Exists('$(_HostApphostSource)')"
+              OverwriteReadOnlyFiles="true" />
+    </Target>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+        <PackageReference Include="Serilog" />
+        <PackageReference Include="Serilog.Extensions.Hosting" />
+        <PackageReference Include="Serilog.Sinks.Console" />
+        <PackageReference Include="Serilog.Sinks.File" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MacroDeckHost.Application\MacroDeckHost.Application.csproj" />
+      <ProjectReference Include="..\MacroDeckHost.Infrastructure\MacroDeckHost.Infrastructure.csproj" />
+      <ProjectReference Include="..\MacroDeckHost.Integrations\MacroDeckHost.Integrations.csproj" />
+      <ProjectReference Include="..\MacroDeckHost.Widgets\MacroDeckHost.Widgets.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests" />
+    </ItemGroup>
+
+</Project>

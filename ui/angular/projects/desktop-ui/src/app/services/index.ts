@@ -1,0 +1,12 @@
+export * from './data-directory.service';
+export * from './file-open.service';
+export * from './integration-filter.service';
+export * from './menu-action.service';
+export * from './navigation.service';
+export * from './restart-notice.service';
+export * from './settings-modal.service';
+export * from './update-modal.service';
+export * from './update.service';
+export * from './widget-schema.service';
+export { FolderService } from '@shared';
+export { ThemeService } from '@shared';

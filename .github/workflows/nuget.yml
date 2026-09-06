@@ -1,0 +1,43 @@
+name: NuGet
+
+# Manual publishing of the SDK and plugin developer packages, for an initial or exceptional release.
+# A normal Macro Deck release publishes them on its own from build.yml, out of the same build run as the
+# application binaries - use that path unless the packages have to ship on their own.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Package version - 3.0.0 for a full release, 3.0.0-beta.4 for a beta or 3.0.0-preview.4 for a preview
+        type: string
+        required: true
+
+concurrency:
+  group: nuget-${{ inputs.version }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  pack:
+    name: Pack
+    uses: ./.github/workflows/nuget-pack.yml
+    with:
+      version: ${{ inputs.version }}
+
+  publish:
+    name: Publish
+    needs: pack
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/nuget-publish.yml
+    with:
+      version: ${{ inputs.version }}
+      artifact: ${{ needs.pack.outputs.artifact }}
+      # Publishing is the entire point of this workflow, so a missing credential is an error here
+      # rather than the warning a release build settles for.
+      require_credentials: true
+    secrets:
+      NUGET_USER: ${{ secrets.NUGET_USER }}

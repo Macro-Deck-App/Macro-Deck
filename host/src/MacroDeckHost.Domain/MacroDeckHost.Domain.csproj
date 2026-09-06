@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <!-- An internal host layer, never a published package - dotnet pack MacroDeck.slnx would
+             otherwise produce a nupkg for it with no readme and no intentional public surface. -->
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Entities that carry user-facing labels store them as LocalizedText: the host never resolves a
+             language, so the reader's client does it. -->
+        <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Localization\MacroDeck.Localization.csproj" />
+        <!-- VariableEntity caches the write capability a provider declared for it verbatim, so the entity
+             and the SDK contract cannot drift into two shapes of the same declaration. -->
+        <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Sdk\MacroDeck.Sdk.csproj" />
+    </ItemGroup>
+
+</Project>

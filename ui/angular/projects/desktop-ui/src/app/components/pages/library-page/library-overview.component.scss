@@ -1,0 +1,93 @@
+@use '../../../../styles/index' as ds;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.library-overview {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2) var(--space-4);
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.library-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  flex-shrink: 0;
+}
+
+.library-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+}
+
+.library-subtitle {
+  font-size: var(--text-md);
+  color: var(--color-text-muted);
+}
+
+.library-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-3);
+}
+
+.library-card {
+  @include ds.card($padding: var(--space-3) var(--space-4));
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+
+  &:hover {
+    background-color: var(--color-bg-tertiary);
+    border-color: var(--color-border-light);
+  }
+}
+
+.library-card-icon {
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.library-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.library-card-name {
+  font-weight: var(--font-semibold);
+  font-size: var(--text-lg);
+  color: var(--color-text-primary);
+}
+
+.library-card-description {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.library-card-summary {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.library-card-chevron {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}

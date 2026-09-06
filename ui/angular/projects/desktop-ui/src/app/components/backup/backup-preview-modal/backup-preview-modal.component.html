@@ -1,0 +1,40 @@
+@if (backupState(); as backup) {
+  <shared-modal [heading]="'macrodeck.app:Backup.Preview.Title' | translate" size="small" (close)="onClose()">
+    <div class="bpm">
+      <dl class="bpm-facts">
+        <dt>{{ 'macrodeck.app:Backup.Preview.CreatedLabel' | translate }}</dt>
+        <dd>{{ createdLabel() }}</dd>
+
+        <dt>{{ 'macrodeck.app:Backup.Preview.MacroDeckVersionLabel' | translate }}</dt>
+        <dd>{{ backup.macroDeckVersion }}</dd>
+
+        <dt>{{ 'macrodeck.app:Backup.Preview.SizeLabel' | translate }}</dt>
+        <dd>{{ sizeLabel() }}</dd>
+
+        <dt>{{ 'macrodeck.app:Backup.Preview.TriggerLabel' | translate }}</dt>
+        <dd>{{ triggerLabel() }}</dd>
+
+        <dt>{{ 'macrodeck.app:Backup.Preview.FormatVersionLabel' | translate }}</dt>
+        <dd>{{ backup.formatVersion }}</dd>
+      </dl>
+
+      <div class="bpm-components">
+        <p class="bpm-components-title">{{ 'macrodeck.app:Backup.Preview.IncludesLabel' | translate }}</p>
+        <ul class="bpm-components-list">
+          @for (id of backup.components; track id) {
+            <li>{{ groupLabel(id) }}</li>
+          }
+        </ul>
+      </div>
+
+      <p class="bpm-decrypt" [class.bpm-decrypt-warn]="!backup.decryptableLocally">
+        <span class="icon icon-xs" [class.icon-unlock]="backup.decryptableLocally" [class.icon-lock]="!backup.decryptableLocally" aria-hidden="true"></span>
+        <span>{{ decryptLabel() }}</span>
+      </p>
+    </div>
+
+    <div modal-footer>
+      <shared-button variant="primary" (click)="onClose()">{{ 'macrodeck:Common.Close' | translate }}</shared-button>
+    </div>
+  </shared-modal>
+}

@@ -1,0 +1,96 @@
+<ng-template #content>
+  <span class="nav-icon">
+    @if (item.activity) {
+      <span class="nav-activity" aria-hidden="true"></span>
+    }
+    @if (item.indicator) {
+      <span class="nav-indicator" aria-live="polite">{{ item.indicator }}</span>
+    }
+    @switch (item.icon) {
+      @case ('grid') {
+        <span class="icon icon-grid icon-lg"></span>
+      }
+      @case ('list-play') {
+        <span class="icon icon-list-play icon-lg"></span>
+      }
+      @case ('zap') {
+        <span class="icon icon-zap icon-lg"></span>
+      }
+      @case ('puzzle') {
+        <span class="icon icon-puzzle icon-lg"></span>
+      }
+      @case ('store') {
+        <span class="icon icon-store icon-lg"></span>
+      }
+      @case ('image') {
+        <span class="icon icon-image icon-lg"></span>
+      }
+      @case ('layers') {
+        <span class="icon icon-layers icon-lg"></span>
+      }
+      @case ('folder') {
+        <span class="icon icon-folder icon-lg"></span>
+      }
+      @case ('sliders') {
+        <span class="icon icon-sliders icon-lg"></span>
+      }
+      @case ('braces-x') {
+        <span class="icon icon-braces-x icon-lg"></span>
+      }
+      @case ('file-text') {
+        <span class="icon icon-file-text icon-lg"></span>
+      }
+      @case ('code') {
+        <span class="icon icon-code icon-lg"></span>
+      }
+      @case ('bell') {
+        <span class="icon icon-bell icon-lg"></span>
+      }
+      @case ('settings') {
+        <span class="icon icon-settings icon-lg"></span>
+      }
+    }
+  </span>
+
+  <!-- Label and badge stay mounted while collapsed: the column fades out, it is not removed. -->
+  <span class="nav-text">
+    <span class="nav-label">{{ item.label }}</span>
+    @if (item.badge) {
+      <span class="nav-badge">{{ item.badge }}</span>
+    }
+  </span>
+</ng-template>
+
+@if (item.disabled) {
+  <div
+    class="nav-item disabled"
+    [class.collapsed]="isCollapsed"
+    [sharedTooltip]="item.label"
+    [tooltipDisabled]="!isCollapsed"
+    [tooltipSecondary]="item.badge ?? null">
+    <ng-container *ngTemplateOutlet="content"></ng-container>
+  </div>
+} @else if (item.action) {
+  <button
+    type="button"
+    class="nav-item"
+    [class.collapsed]="isCollapsed"
+    [class.active]="active"
+    [sharedTooltip]="item.label"
+    [tooltipDisabled]="!isCollapsed"
+    [attr.aria-label]="isCollapsed ? item.label : null"
+    (click)="action.emit(item.action)">
+    <ng-container *ngTemplateOutlet="content"></ng-container>
+  </button>
+} @else {
+  <a
+    [routerLink]="item.route"
+    routerLinkActive="active"
+    class="nav-item"
+    [class.collapsed]="isCollapsed"
+    [sharedTooltip]="item.label"
+    [tooltipDisabled]="!isCollapsed"
+    [attr.aria-label]="isCollapsed ? item.label : null">
+    <ng-container *ngTemplateOutlet="content"></ng-container>
+  </a>
+}

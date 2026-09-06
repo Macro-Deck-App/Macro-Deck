@@ -1,0 +1,65 @@
+// Canonical form layout primitives (group, label, hint, error, actions). Emitted
+// globally via main.scss. Controls themselves are styled exclusively by the
+// shared components (shared-input, shared-select, ...) via the control-base /
+// control-interactive mixins - never by global selectors, so a raw <input>
+// stands out instead of being silently half-styled.
+
+@use '../mixins' as mixins;
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+// Two markup shapes, one look. A real <label> child when the group is a <div>,
+// and .form-label on a <span> when the group is itself the <label> - the latter
+// associates the control implicitly, so those forms need no id/for wiring. Both
+// selectors weigh (0,1,1), the same as the variants below, which therefore win
+// on source order alone; keep the variants after this rule.
+.form-group label,
+.form-group .form-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text-secondary);
+}
+
+// Inline and side-panel editors (widget appearance, action param rows, the event
+// trigger selects) where the base gap and label eat the column. min-width: 0 is
+// load-bearing, not tidiness: a dense group is always a flex or grid item, and
+// without it the group refuses to shrink below its widest shared-select, which
+// blows the track out of a `repeat(auto-fit, minmax(180px, 1fr))` parent.
+.form-group--dense {
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.form-group--dense label,
+.form-group--dense .form-label {
+  font-size: var(--text-xs);
+}
+
+// Settings rows: the label is an uppercase mini-heading and the current value
+// sits opposite it on the same line.
+.form-group--section label,
+.form-group--section .form-label {
+  @include mixins.section-label;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// A step below the label, so a group reads as label -> control -> description
+// rather than three rows of equal weight. The error stays at the label size: it
+// is the one line in the group that must not be the smallest text on screen.
+.form-hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.form-error {
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+}
+

@@ -1,0 +1,4 @@
+-- Folders and widgets are no longer stored in the database. Profiles (with their folders and
+-- widgets) now live as JSON files under data/profiles/<profileId>.json. The database keeps only
+-- variables, secrets, integration config and icons. This script is intentionally a no-op so the
+-- migration history numbering stays stable.

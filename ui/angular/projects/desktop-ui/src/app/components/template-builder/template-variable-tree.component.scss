@@ -1,0 +1,177 @@
+@use '../../../styles/index' as ds;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  height: 100%;
+  min-height: 0;
+  padding: var(--space-4);
+}
+
+.tvt-search {
+  flex: 0 0 auto;
+}
+
+.tvt-empty {
+  flex: 1 1 auto;
+}
+
+.tvt-list {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+// The cdk wrapper is positioned with `left` alone, so it is shrink-to-fit and grows to its widest
+// row instead of being bounded by the scrollport. A long identifier then widened the pane into
+// scrolling sideways, and the rows' trailing padding was measured against that wider box, which put
+// the copy button back under the scrollbar. Binding the wrapper to the scrollport is what lets the
+// identifier truncate and makes the row padding mean what it says.
+.tvt-list ::ng-deep .cdk-virtual-scroll-content-wrapper {
+  width: 100%;
+}
+
+.tvt-row-slot {
+  display: flex;
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+.tvt-group-header,
+.tvt-subgroup-header {
+  @include ds.interactive-row;
+  width: 100%;
+  gap: var(--space-1);
+  padding-inline: var(--space-2);
+  border: none;
+  background: none;
+}
+
+// There is no chevron-down icon in the set; rotating chevron-right is the house convention.
+.tvt-chevron {
+  transition: transform var(--transition-fast, 120ms) ease;
+}
+
+.tvt-chevron-open {
+  transform: rotate(90deg);
+}
+
+.tvt-group-label {
+  @include ds.section-label;
+}
+
+.tvt-subgroup-header {
+  padding-inline-start: var(--space-4);
+}
+
+.tvt-subgroup-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.tvt-var-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  // No indent by default: a provider's variables line up with the rows in the Filters and Logic
+  // tabs, so the three panels read as one browser. Only a configuration level indents, and then
+  // only the rows that actually sit under one.
+  // A hovered overlay scrollbar (macOS, Chrome and Firefox alike) is drawn on top of the content at
+  // about 15px wide, and it would otherwise land exactly on the copy button. A literal rather than a
+  // --space-* token because it is sized to that scrollbar, not to the spacing scale.
+  padding-inline-end: 1rem;
+}
+
+.tvt-var-nested {
+  padding-inline-start: var(--space-4);
+}
+
+.tvt-var-main {
+  @include ds.interactive-row;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  padding: 0.125rem var(--space-2);
+  border: none;
+  background: none;
+  text-align: left;
+}
+
+.tvt-var-head,
+.tvt-var-sub {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+}
+
+.tvt-var-type {
+  @include ds.badge;
+  flex: 0 0 auto;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: var(--text-2xs, 0.625rem);
+  background-color: var(--type-string-bg);
+  color: var(--type-string-fg);
+}
+
+.tvt-var-type.type-numeric { background-color: var(--type-numeric-bg); color: var(--type-numeric-fg); }
+.tvt-var-type.type-boolean { background-color: var(--type-boolean-bg); color: var(--type-boolean-fg); }
+
+// The live value trails the identifier and yields to it: an identifier is what the user is looking
+// for, the value is context.
+.tvt-var-value {
+  @include ds.truncate;
+  flex: 0 1 auto;
+  margin-inline-start: auto;
+  max-width: 50%;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.tvt-var-primary {
+  @include ds.truncate;
+  flex: 0 1 auto;
+  max-width: 100%;
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+
+.tvt-var-secondary {
+  @include ds.truncate;
+  max-width: 100%;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.tvt-var-copy {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.tvt-var-row:hover .tvt-var-copy,
+.tvt-var-copy:focus-visible {
+  opacity: 1;
+}
+
+.tvt-var-copy:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}

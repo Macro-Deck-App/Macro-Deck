@@ -1,0 +1,34 @@
+<div class="header-icon">
+  @if (iconUrl(); as icon) {
+    @if (!iconFailed()) {
+      <img [src]="icon" alt="" loading="lazy" (error)="onIconError()">
+    } @else {
+      <span class="icon icon-{{ kindIcon() }} icon-xl"></span>
+    }
+  } @else {
+    <span class="icon icon-{{ kindIcon() }} icon-xl"></span>
+  }
+</div>
+
+<div class="header-main">
+  <span class="header-kind">{{ kindLabel() }}</span>
+  <h1 class="header-title">{{ extension().name }}</h1>
+  <div class="header-sub">
+    @if (extension().publisher) {
+      <span class="header-publisher">{{ 'macrodeck.app:Store.Page.ByPublisher' | translate:{ publisher: extension().publisher } }}</span>
+    }
+    <shared-store-state-badge [state]="extension().installState" />
+    <app-store-trust-badge [kind]="extension().kind" [trust]="extension().trust" />
+  </div>
+</div>
+
+<div class="header-action">
+  <shared-store-install-button
+    size="lg"
+    [item]="extension()"
+    [operation]="operation()"
+    (install)="install.emit()"
+    (installUnsigned)="installUnsigned.emit()"
+    (retry)="retry.emit()"
+    (uninstall)="uninstall.emit()" />
+</div>

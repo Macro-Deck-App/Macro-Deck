@@ -1,0 +1,28 @@
+<shared-modal [heading]="'macrodeck.app:Migration.Result.Heading' | translate" size="small" (close)="onDone()">
+  <div class="migration-result">
+    <p class="migration-result-summary">
+      <span class="icon icon-check icon-sm" aria-hidden="true"></span>
+      <span>{{ profileCountLabel() }}</span>
+    </p>
+
+    @if (warnings().length > 0) {
+      <div class="migration-result-section">
+        <p class="migration-result-title">{{ 'macrodeck.app:Migration.Preview.WarningsTitle' | translate }}</p>
+        <ul class="migration-result-warnings">
+          @for (warning of warnings(); track warning.kind + warning.subject) {
+            <li>
+              <span class="icon icon-alert-triangle icon-xs" aria-hidden="true"></span>
+              <span>
+                <span class="migration-result-warning-subject">{{ warning.subject }}</span>
+                <span class="migration-result-warning-detail">{{ warningDetail(warning) }}</span>
+              </span>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+  <div modal-footer>
+    <shared-button variant="primary" (click)="onDone()">{{ 'macrodeck:Common.Done' | translate }}</shared-button>
+  </div>
+</shared-modal>

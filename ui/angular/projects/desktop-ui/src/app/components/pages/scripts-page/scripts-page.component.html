@@ -1,0 +1,153 @@
+<shared-rail-page [railTitle]="'macrodeck.app:Nav.Scripts' | translate">
+  <ng-container ngProjectAs="[page-banner]">
+    @if (scripts.loadError(); as error) {
+      <shared-error-banner [message]="error" (dismiss)="scripts.loadError.set(null)" />
+    }
+  </ng-container>
+
+  <ng-container ngProjectAs="[rail-actions]">
+    <shared-button variant="secondary" size="icon" [title]="'macrodeck.app:Scripts.NewScript' | translate" [attr.aria-label]="'macrodeck.app:Scripts.NewScript' | translate"
+      (click)="openCreate()">
+      <span class="icon icon-plus icon-sm"></span>
+    </shared-button>
+  </ng-container>
+
+  <ng-container ngProjectAs="[rail]">
+    @if (scripts.isLoading() && scripts.scripts().length === 0) {
+      <shared-loading-state [message]="'macrodeck.app:Scripts.LoadingScripts' | translate" />
+    } @else if (scripts.scripts().length === 0) {
+      <shared-empty-state
+        [heading]="'macrodeck.app:Scripts.NoScriptsYetHeading' | translate"
+        [message]="'macrodeck.app:Scripts.NoScriptsYetMessage' | translate" />
+    } @else {
+      <ul class="script-list" role="listbox" [attr.aria-label]="'macrodeck.app:Nav.Scripts' | translate">
+        @for (script of scripts.sortedScripts(); track script.id) {
+          <li>
+            <shared-rail-item
+              [label]="script.name"
+              [count]="actionCount(script)"
+              [active]="script.id === selectedScriptId()"
+              (click)="select(script)" />
+          </li>
+        }
+      </ul>
+    }
+  </ng-container>
+
+  <div class="script-detail">
+    @if (selectedScript(); as script) {
+      <header class="detail-header">
+        <div class="detail-title">
+          <h2 [title]="script.name">{{ script.name }}</h2>
+          @if (isDirty()) {
+            <span class="tag">{{ 'macrodeck.app:Scripts.UnsavedTag' | translate }}</span>
+          }
+        </div>
+        @if (script.description) {
+          <p class="detail-meta">{{ script.description }}</p>
+        }
+
+        <div class="detail-actions">
+          <shared-button variant="secondary" [disabled]="isDirty()" (click)="run()">
+            <span class="icon icon-play icon-sm"></span>
+            {{ 'macrodeck.app:Scripts.RunAction' | translate }}
+          </shared-button>
+          <shared-button variant="secondary" (click)="openRename()">{{ 'macrodeck:Common.Rename' | translate }}</shared-button>
+          <shared-button variant="secondary" (click)="duplicate()">{{ 'macrodeck.app:Scripts.DuplicateAction' | translate }}</shared-button>
+          <shared-button variant="danger" (click)="requestDelete()">{{ 'macrodeck:Common.Delete' | translate }}</shared-button>
+        </div>
+      </header>
+
+      <div class="builder">
+        <shared-action-builder
+          [flows]="draftFlows()"
+          [flowOwner]="flowOwner()"
+          [triggerTabs]="triggerTabs()"
+          [allowEventTriggers]="false"
+          [allowRun]="false"
+          [availableBlocks]="availableActionBlocks()"
+          [variables]="variables()"
+          [runsOnWidget]="draftRunsOnWidget()"
+          previewScope="global"
+          [auxTabId]="inputsTabId"
+          [auxTabLabel]="'macrodeck.app:Scripts.InputsTabLabel' | translate"
+          [auxTabInline]="true"
+          [auxTabBadge]="draftInputs().length"
+          [auxTabDot]="!inputsValid()"
+          (flowsChange)="onFlowsChange($event)"
+          (validityChange)="onValidityChange($event)">
+          <app-script-inputs-panel
+            auxPanel
+            [inputs]="draftInputs()"
+            [globalNames]="globalNames()"
+            [runsOnWidget]="draftRunsOnWidget()"
+            (inputsChange)="onInputsChange($event)"
+            (validityChange)="onInputsValidityChange($event)"
+            (runsOnWidgetChange)="onRunsOnWidgetChange($event)" />
+        </shared-action-builder>
+      </div>
+
+      <footer class="detail-footer">
+        @if (!flowValidity().valid) {
+          <span class="validation-hint">{{ 'macrodeck.app:Scripts.ValidationHint' | translate }}</span>
+        }
+        @if (!inputsValid()) {
+          <span class="validation-hint">{{ 'macrodeck.app:Scripts.InputsValidationHint' | translate }}</span>
+        }
+        <shared-button variant="secondary" [disabled]="!isDirty()" (click)="discard()">{{ 'macrodeck.app:Scripts.DiscardAction' | translate }}</shared-button>
+        <shared-button variant="primary" [disabled]="!canSave()" (click)="save()">{{ 'macrodeck.app:Scripts.SaveChangesAction' | translate }}</shared-button>
+      </footer>
+    } @else {
+      <shared-empty-state
+        [heading]="'macrodeck.app:Scripts.NoScriptSelectedHeading' | translate"
+        [message]="'macrodeck.app:Scripts.NoScriptSelectedMessage' | translate" />
+    }
+  </div>
+</shared-rail-page>
+
+@if (editDialogMode(); as mode) {
+  <app-script-edit-dialog
+    [mode]="mode"
+    [script]="mode === 'edit' ? selectedScript() : null"
+    (save)="onEditDialogSave($event)"
+    (cancel)="editDialogMode.set(null)" />
+}
+
+@if (pendingDelete(); as script) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Scripts.DeleteScriptHeading' | translate"
+    [message]="deleteMessage()"
+    [confirmText]="'macrodeck:Common.Delete' | translate"
+    [danger]="true"
+    (confirm)="confirmDelete()"
+    (cancel)="pendingDelete.set(null)" />
+}
+
+@if (pendingRun(); as script) {
+  <app-script-run-dialog
+    [scriptName]="script.name"
+    [inputs]="script.inputs"
+    (run)="runWithInputs($event)"
+    (cancel)="pendingRun.set(null)" />
+}
+
+@if (pendingSelection(); as next) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Scripts.DiscardChangesHeading' | translate"
+    [message]="'macrodeck.app:Scripts.DiscardChangesSwitchMessage' | translate:{ name: next.name }"
+    [confirmText]="'macrodeck.app:Scripts.DiscardAction' | translate"
+    [danger]="true"
+    (confirm)="confirmDiscardAndSwitch()"
+    (cancel)="pendingSelection.set(null)" />
+}
+
+@if (confirmingLeave()) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Scripts.DiscardChangesHeading' | translate"
+    [message]="'macrodeck.app:Scripts.DiscardChangesLeaveMessage' | translate"
+    [confirmText]="'macrodeck.app:Scripts.DiscardAction' | translate"
+    [cancelText]="'macrodeck.app:Scripts.KeepEditingAction' | translate"
+    [danger]="true"
+    (confirm)="onDiscardAndLeave()"
+    (cancel)="onKeepEditing()" />
+}

@@ -1,0 +1,8 @@
+// Global stylesheet entry for the app, loaded by styles.scss:
+//   @use './styles/main';
+//
+// The tokens, reset, keyframes and icon masks it used to emit are plain CSS in
+// @macro-deck/runtime, loaded first there. What is left is the Angular-only global CSS.
+
+@use 'utilities';
+@use 'components/forms';

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<IsPackable>true</IsPackable>
+		<IsMacroDeckPackage>true</IsMacroDeckPackage>
+		<PackageId>MacroDeck.Ui.Testing</PackageId>
+		<Description>The headless Macro Deck UI test host: render a view, query it by id, type or text, simulate events, snapshot the tree, and verify every patch applies.</Description>
+		<PackageTags>macrodeck;ui;testing</PackageTags>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\MacroDeck.Ui\MacroDeck.Ui.csproj" />
+	</ItemGroup>
+
+</Project>

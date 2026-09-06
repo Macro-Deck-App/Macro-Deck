@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <NoWarn>$(NoWarn);CA1707</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="NUnit.Analyzers" />
+        <PackageReference Include="NUnit3TestAdapter" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\MacroDeckHost.Integrations\MacroDeckHost.Integrations.csproj" />
+        <ProjectReference Include="..\..\src\MacroDeckHost.Infrastructure\MacroDeckHost.Infrastructure.csproj" />
+        <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Sdk\MacroDeck.Sdk.csproj" />
+        <!-- Reference-only, to guarantee build ordering: the kill-tree test locates and runs the
+             fixture's own build output (PluginStubLocator), it does not link against its assembly. -->
+        <ProjectReference Include="..\fixtures\MacroDeckHost.Tests.PluginStub\MacroDeckHost.Tests.PluginStub.csproj"
+                           ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="..\MacroDeckHost.Tests.UnitTests\Plugins\Runtime\PluginStubLocator.cs"
+                 Link="Plugins\Runtime\PluginStubLocator.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="NUnit.Framework" />
+    </ItemGroup>
+
+</Project>

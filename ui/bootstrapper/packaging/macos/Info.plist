@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Merged into the generated Info.plist by the Tauri bundler (bundle.macOS.infoPlist).
+
+  CFBundleIconName points at the icon inside Assets.car, which is what macOS 26
+  and later prefer: that icon is the Icon Composer document in `Macro Deck.icon`,
+  so the system renders it itself for the light, dark, tinted and clear
+  appearances instead of showing one baked image everywhere. Older releases
+  ignore the key and fall back to CFBundleIconFile, which the bundler sets to the
+  icon.icns it copies in.
+
+  NSAppleEventsUsageDescription is required for supported macOS system actions.
+  TCC attributes the request to the responsible process - this bundle, since the
+  host runs as its child - and reads the description from here. Under the hardened
+  runtime a missing key terminates the process on the first Apple Event rather
+  than merely denying it. The matching com.apple.security.automation.apple-events
+  entitlement is applied to both hardened-runtime executables that can be
+  responsible for the request: the app and its embedded host.
+-->
+<plist version="1.0">
+<dict>
+  <key>CFBundleIconName</key>
+  <string>Macro Deck</string>
+  <!-- Without this macOS treats the bundle as English-only and never looks in .lproj folders for the
+       localized usage description below. -->
+  <key>CFBundleDevelopmentRegion</key>
+  <string>en</string>
+  <key>CFBundleLocalizations</key>
+  <array>
+    <string>en</string>
+    <string>de</string>
+    <string>it</string>
+    <string>cs</string>
+    <string>pl</string>
+    <string>es</string>
+    <string>fr</string>
+  </array>
+  <key>NSAppleEventsUsageDescription</key>
+  <string>Macro Deck uses Apple Events to perform supported macOS system actions.</string>
+</dict>
+</plist>

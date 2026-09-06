@@ -1,0 +1,67 @@
+@use '../../../styles/index' as ds;
+
+.cf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3125rem;
+}
+
+.cf-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  font-weight: var(--font-medium);
+}
+
+.cf-required {
+  color: var(--color-danger);
+  margin-left: 0.125rem;
+}
+
+.cf-input {
+  width: 100%;
+  @include ds.control-base;
+  @include ds.control-interactive;
+}
+
+.cf-secret {
+  position: relative;
+  display: flex;
+}
+
+.cf-secret-input {
+  padding-right: 2.25rem;
+}
+
+.cf-reveal {
+  position: absolute;
+  right: 0.1875rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.cf-reveal-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  display: block;
+}
+
+.cf-description {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.cf-stored-secret {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.cf-error {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+}

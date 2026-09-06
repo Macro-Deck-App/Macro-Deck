@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.macro-deck.app/macrodeck-package-signature-v1.schema.json",
+  "title": "Macro Deck package signature material",
+  "description": "The two properties a signable Macro Deck package declares in its own manifest - the declared file list a signature covers, and the signature itself - together with the archive entries that carry the signing certificate. Referenced by the plugin manifest (manifest.json), the icon pack manifest (pack.json) and the portable profile, folder and widget manifest (manifest.json). Macro Deck packages never carry a detached signature file: a signed artifact always verifies on its own.",
+  "$comment": "This schema describes fragments, not a whole document. Each format's own schema references $defs/signature and $defs/files.",
+  "type": "object",
+  "properties": {
+    "files": { "$ref": "#/$defs/files" },
+    "signature": { "$ref": "#/$defs/signature" }
+  },
+  "$defs": {
+    "files": {
+      "type": "array",
+      "description": "Every file the archive carries apart from the manifest itself and the certificate material, each with its content digest and size. This list is what the canonical digest covers, so an artifact with no declared files cannot be signed.",
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256", "size"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Forward-slash separated path of the entry inside the archive, relative to its root. Emitted into the canonical digest verbatim, so it is identical on every operating system."
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^(sha256:)?[0-9a-f]{64}$",
+            "description": "SHA-256 of the entry's exact bytes, lowercase hex. Carried into the canonical digest exactly as written here."
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The entry's uncompressed size in bytes."
+          }
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "required": ["algorithm", "keyId", "value", "signedAt"],
+      "description": "The creator signature over the format's canonical digest. Written into the manifest by `macrodeck-plugin sign`, which also places certificate.json and certificate.sig at the archive root so the artifact can be verified without any accompanying file.",
+      "properties": {
+        "algorithm": {
+          "const": "ed25519",
+          "description": "The signature algorithm."
+        },
+        "keyId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The certificateId of the signing certificate. Verification fails when it names a certificate other than the one the artifact carries."
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The raw 64-byte Ed25519 signature over the format's canonical digest document, base64-encoded. The digest covers the package identity and the declared files, never the manifest's own JSON encoding, so reformatting the manifest does not invalidate it."
+        },
+        "signedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the signature was made. No canonical digest covers this field, so it is not authenticated by the signature - a holder of the signing key can set it to any value. The certificate's validity window is evaluated at this instant, so this is advisory against a key holder, not an enforceable boundary; revocation is the control that actually stops a compromised or misused key."
+        }
+      }
+    }
+  }
+}

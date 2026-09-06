@@ -1,0 +1,17 @@
+<div
+  class="widget-tile"
+  [class.disabled]="disabled"
+  [class.pressed]="pressFeedback.isPressed() || treeNodePressed()"
+  (pointerdown)="onPressStart($event)"
+  (pointerup)="onPressEnd($event)"
+  (pointerleave)="onPressCancel()"
+  (pointercancel)="onPressCancel()"
+>
+  <shared-ui-widget-tree
+    [root]="renderedRoot()"
+    [box]="treeBox()"
+    (nodeEvent)="onTreeEvent($event)"
+    (nodePressedChange)="onNodePressedChange($event)" />
+
+  <div class="press-overlay"></div>
+</div>

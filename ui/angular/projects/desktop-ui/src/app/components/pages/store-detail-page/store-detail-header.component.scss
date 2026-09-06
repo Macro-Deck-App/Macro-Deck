@@ -1,0 +1,64 @@
+@use '../../../../styles/index' as ds;
+
+:host {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.header-icon {
+  @include ds.flex-center;
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-tertiary);
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .icon {
+    color: var(--color-text-muted);
+  }
+}
+
+.header-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.header-kind {
+  @include ds.section-label;
+}
+
+.header-title {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+  @include ds.truncate;
+}
+
+.header-sub {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.header-publisher {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.header-action {
+  flex-shrink: 0;
+}

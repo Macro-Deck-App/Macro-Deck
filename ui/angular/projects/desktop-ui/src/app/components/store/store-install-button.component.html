@@ -1,0 +1,171 @@
+@switch (effective()) {
+  @case ('install') {
+    <shared-button variant="primary" [size]="size()" (click)="onInstall()">
+      @if (prominent()) {
+        <span class="icon icon-download icon-sm" aria-hidden="true"></span>
+      }
+      {{ 'macrodeck.app:Store.Install' | translate }}
+    </shared-button>
+  }
+  @case ('update') {
+    <div class="store-installed">
+      <shared-button variant="primary" [size]="size()" (click)="onInstall()">
+        @if (prominent()) {
+          <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
+        }
+        {{ 'macrodeck.app:Store.UpdateTo' | translate:{ version: item().latestVersion } }}
+      </shared-button>
+      <shared-button variant="ghost" [size]="size()" (click)="onUninstall()">
+        {{ 'macrodeck.app:Store.Uninstall' | translate }}
+      </shared-button>
+    </div>
+  }
+  @case ('installed') {
+    <div class="store-installed">
+      @if (prominent()) {
+        <shared-button variant="secondary" [size]="size()" [disabled]="true">
+          <span class="icon icon-check icon-sm" aria-hidden="true"></span>
+          {{ 'macrodeck.app:Store.InstalledVersion' | translate:{ version: item().installedVersion } }}
+        </shared-button>
+      } @else {
+        <!-- On a card the state is already named beside this control, so the version is a quiet
+             note rather than a second button competing with the one action worth pressing. -->
+        <span class="installed-version">
+          {{ 'macrodeck.app:Store.InstalledVersion' | translate:{ version: item().installedVersion } }}
+        </span>
+      }
+      <shared-button variant="ghost" [size]="size()" (click)="onUninstall()">
+        {{ 'macrodeck.app:Store.Uninstall' | translate }}
+      </shared-button>
+    </div>
+  }
+  @case ('unsupported') {
+    <shared-button
+      variant="secondary"
+      [size]="size()"
+      [disabled]="true"
+      [title]="notSupportedOnPlatform()">
+      {{ 'macrodeck.app:Store.Unsupported' | translate }}
+    </shared-button>
+  }
+  @case ('queued') {
+    <div class="store-progress">
+      <shared-button variant="secondary" [size]="size()" [disabled]="true">{{ 'macrodeck.app:Store.Queued' | translate }}</shared-button>
+      <div class="progress-bar indeterminate" role="progressbar" [attr.aria-valuetext]="'macrodeck.app:Store.Queued' | translate"></div>
+    </div>
+  }
+  @case ('downloading') {
+    <div class="store-progress">
+      <div
+        class="progress-bar"
+        [class.indeterminate]="percent() === null"
+        role="progressbar"
+        [attr.aria-valuenow]="percent()"
+        [attr.aria-valuemin]="percent() !== null ? 0 : null"
+        [attr.aria-valuemax]="percent() !== null ? 100 : null"
+        [attr.aria-valuetext]="readout()">
+        @if (percent() !== null) {
+          <div class="progress-fill" [style.width.%]="percent()"></div>
+        }
+      </div>
+      <span class="progress-readout">
+        {{ readout() }}
+        @if (eta(); as remaining) {
+          <span class="progress-separator" aria-hidden="true">·</span>
+          <span>{{ remaining }}</span>
+        }
+      </span>
+    </div>
+  }
+  @case ('validating') {
+    <div class="store-progress">
+      <div class="progress-bar indeterminate" role="progressbar" [attr.aria-valuetext]="'macrodeck.app:Store.Validating' | translate"></div>
+      <span class="progress-readout">{{ 'macrodeck.app:Store.ValidatingEllipsis' | translate }}</span>
+    </div>
+  }
+  @case ('installing') {
+    <div class="store-progress">
+      <div class="progress-bar indeterminate" role="progressbar" [attr.aria-valuetext]="'macrodeck.app:Store.Installing' | translate"></div>
+      <span class="progress-readout">{{ 'macrodeck.app:Store.InstallingEllipsis' | translate }}</span>
+    </div>
+  }
+  @case ('completed') {
+    <shared-button variant="secondary" [size]="size()" [disabled]="true">
+      @if (prominent()) {
+        <span class="icon icon-check icon-sm" aria-hidden="true"></span>
+      }
+      {{ 'macrodeck.app:Store.Installed' | translate }}
+    </shared-button>
+  }
+  @case ('failed') {
+    @if (prominent()) {
+      <div class="store-failed prominent">
+        <p class="failed-message">
+          <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+          <span>{{ errorMessage() }}</span>
+        </p>
+        <div class="failed-actions">
+          @if (canInstallUnsigned()) {
+            <shared-button variant="secondary" size="lg" (click)="openUnsignedWarning()">
+              {{ 'macrodeck.app:Store.InstallAnyway' | translate }}
+            </shared-button>
+          }
+          @if (operation()?.canRetry) {
+            <shared-button variant="secondary" size="lg" (click)="onRetry()">{{ 'macrodeck:Common.Retry' | translate }}</shared-button>
+          }
+          @if (errorDetail()) {
+            <shared-button variant="ghost" size="lg" (click)="openDetails()">{{ 'macrodeck.app:Store.Details' | translate }}</shared-button>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="store-failed">
+        <shared-button variant="ghost" size="compact" (click)="openDetails()">{{ 'macrodeck.app:Store.Why' | translate }}</shared-button>
+        @if (canInstallUnsigned()) {
+          <shared-button variant="secondary" size="compact" (click)="openUnsignedWarning()">
+            {{ 'macrodeck.app:Store.InstallAnyway' | translate }}
+          </shared-button>
+        } @else if (operation()?.canRetry) {
+          <shared-button variant="secondary" size="compact" (click)="onRetry()">{{ 'macrodeck:Common.Retry' | translate }}</shared-button>
+        }
+      </div>
+    }
+
+    @if (detailsOpen()) {
+      <shared-modal [heading]="'macrodeck.app:Store.InstallationFailed' | translate" size="small" [showFooter]="false" (close)="closeDetails()">
+        <p class="failure-explanation">{{ errorMessage() }}</p>
+        @if (errorDetail()) {
+          <p class="failure-detail-label">{{ 'macrodeck.app:Store.WhatMacroDeckReported' | translate }}</p>
+          <p class="failure-detail">{{ errorDetail() }}</p>
+        }
+        @if (canInstallUnsigned()) {
+          <shared-button variant="secondary" (click)="openUnsignedWarning()">{{ 'macrodeck.app:Store.InstallAnyway' | translate }}</shared-button>
+        } @else if (operation()?.canRetry) {
+          <shared-button variant="primary" (click)="onRetryFromDetails()">{{ 'macrodeck.app:Store.RetryInstallation' | translate }}</shared-button>
+        }
+      </shared-modal>
+    }
+
+    <!-- The store's equivalent of the manual install flow's unsigned warning. It is deliberately not
+         the same component: that one reports an inspection of a file the user picked, while nothing
+         here has been downloaded yet - the host's refusal is all that is known. -->
+    @if (unsignedWarningOpen()) {
+      <shared-modal
+        [heading]="'macrodeck.app:Store.UnsignedPluginHeading' | translate"
+        size="small"
+        [showFooter]="false"
+        (close)="closeUnsignedWarning()">
+        <p class="unsigned-warning-lead">
+          {{ 'macrodeck.app:Store.UnsignedWarningLead' | translate:{ name: item().name } }}
+        </p>
+        <p class="unsigned-warning-body">
+          {{ 'macrodeck.app:Store.UnsignedWarningBody' | translate }}
+        </p>
+        <div class="unsigned-warning-actions">
+          <shared-button variant="secondary" (click)="closeUnsignedWarning()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+          <shared-button variant="primary" (click)="onConfirmUnsigned()">{{ 'macrodeck.app:Store.InstallAnyway' | translate }}</shared-button>
+        </div>
+      </shared-modal>
+    }
+  }
+}

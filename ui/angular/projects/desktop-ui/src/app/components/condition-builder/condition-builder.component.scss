@@ -1,0 +1,313 @@
+/* =============================================================================
+ * shared-condition-builder
+ *
+ * Sentence-style condition tree. Each comparison renders as a single
+ * row "<left>  <op>  <right>  •" with a 6px live-evaluation dot at
+ * the far right. Logical groups stack their operands vertically with
+ * an inline "and" / "or" connective between rows; nested groups gain
+ * a 1px guide-line + indent (no colored border-box).
+ *
+ * ViewEncapsulation.None: tokens cascade in from the action-builder.
+ * ========================================================================== */
+
+shared-condition-builder {
+  display: block;
+  min-width: 0;
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+
+.cb-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-1) 0;
+}
+
+/* The remove × pushes itself to the row's far right and only appears
+   on hover so it doesn't claim layout space at idle. */
+.cb-row > .cb-remove-btn {
+  margin-left: auto;
+}
+
+
+.cb-operand {
+  display: flex;
+  align-items: center;
+  flex: 1 1 8rem;
+  min-width: 8rem;
+}
+
+.cb-literal-wrap {
+  display: flex;
+  align-items: center;
+  flex: 1 1 0;
+  min-width: 0;
+  gap: var(--space-2);
+}
+
+/* Operand input - grows to fill the available row space (each side gets
+   equal share of `.cb-row`); font-family is inherited into the control. */
+.cb-literal-input {
+  flex: 1 1 0;
+  min-width: 4ch;
+  font-family: var(--font-mono);
+}
+
+/* Boolean operand: a true/false dropdown replaces the free-text input, but
+   fills the same share of the row so left/right stay aligned. */
+.cb-literal-select {
+  flex: 1 1 0;
+  min-width: 7ch;
+  font-family: var(--font-mono);
+}
+
+/* Variable picker trigger sits permanently beside the input - never
+   hover-only - so the affordance is consistent with parameter rows. */
+.cb-var-picker {
+  flex: 0 0 auto;
+}
+
+
+.cb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.0625rem 0.3125rem;
+  background-color: var(--color-bg-hover);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  line-height: var(--leading-normal);
+}
+
+.cb-chip-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 13rem;
+}
+
+.cb-chip-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.6875rem;
+  height: 0.6875rem;
+  padding: 0;
+  margin-right: -0.125rem;
+  background: none;
+  border: none;
+  border-radius: 0.125rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+
+.cb-chip:hover .cb-chip-clear,
+.cb-chip-clear:focus-visible {
+  opacity: 1;
+}
+
+.cb-chip-clear:hover {
+  color: var(--color-text-primary);
+}
+
+
+.cb-operator-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.cb-operator-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.125rem var(--space-1);
+  background: transparent;
+  border: none;
+  border-radius: 0.1875rem;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: color var(--transition-fast), text-decoration-color var(--transition-fast),
+              background-color var(--transition-fast);
+  // Sized down from the default caret - this trigger sits at the row's small type scale, not a
+  // full-height control - via the one custom property `dropdown-affordances` exists to let a
+  // caller override.
+  --caret-size: 0.625rem;
+}
+
+// The underline belongs to the label text only, so it stops before the caret instead of running
+// underneath it.
+.cb-operator-label {
+  text-decoration: underline;
+  text-decoration-color: var(--color-border-light);
+  text-underline-offset: 4px;
+  transition: text-decoration-color var(--transition-fast);
+}
+
+.cb-operator-btn:hover,
+.cb-operator-btn.open {
+  color: var(--color-text-primary);
+}
+
+.cb-operator-btn:hover .cb-operator-label,
+.cb-operator-btn.open .cb-operator-label {
+  text-decoration-color: var(--color-text-muted);
+}
+
+.cb-operator-btn.open {
+  background-color: var(--color-bg-tertiary);
+}
+
+.cb-operator-listbox {
+  display: flex;
+  flex-direction: column;
+}
+
+.cb-operator-option {
+  text-align: left;
+  padding: 0.3125rem 0.5rem;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: var(--text-base);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.cb-operator-option:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.cb-operator-option.active {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  font-weight: var(--font-medium);
+}
+
+
+.cb-dot {
+  display: inline-block;
+  width: 0.375rem;
+  height: 0.375rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  transition: background-color var(--transition-normal);
+}
+
+.cb-dot-true    { background-color: var(--color-success); }
+.cb-dot-false   { background-color: var(--color-text-muted); }
+.cb-dot-error   { background-color: var(--color-danger); }
+.cb-dot-pending { background-color: var(--color-border-light); }
+
+
+.cb-connective {
+  align-self: flex-start;
+  margin: 0.125rem 0 0.125rem var(--space-1);
+  padding: 0.0625rem 0.3125rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.125rem;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.cb-connective:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-hover);
+}
+
+
+.cb-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cb-group-nested {
+  padding-left: 0.5rem;
+  margin: var(--space-1) 0;
+  border-left: 1px solid var(--color-border);
+}
+
+.cb-group-item {
+  display: block;
+  min-width: 0;
+}
+
+
+.cb-add {
+  align-self: flex-start;
+  margin-top: 0.3125rem;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.cb-group:hover > .cb-add,
+.cb-add:focus-within {
+  opacity: 1;
+}
+
+/* Root-level add (sibling of the recursive root, not inside a group)
+   is always visible so the user always has a clear way to grow the
+   expression from a leaf-root single comparison. */
+.cb-add-root {
+  opacity: 1;
+}
+
+
+.cb-remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0.1875rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast),
+              background-color var(--transition-fast);
+}
+
+.cb-row:hover .cb-remove-btn,
+.cb-remove-btn:focus-visible {
+  opacity: 1;
+}
+
+.cb-remove-btn:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-hover);
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .cb-operator-popover {
+    animation: none;
+  }
+  .cb-dot {
+    transition: none;
+  }
+}

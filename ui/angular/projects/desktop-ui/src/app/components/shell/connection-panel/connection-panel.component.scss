@@ -1,0 +1,226 @@
+@use '../../../../styles/index' as ds;
+
+// An overlay on the opposite edge to the notification panel, and the mirror image of it in every
+// other way: it slides over the page instead of displacing it, and its box lets clicks through
+// while it is closed.
+:host {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 17.5rem;
+  max-width: 100%;
+  z-index: 30;
+  pointer-events: none;
+}
+
+// Parked off-screen while closed rather than unmounted, so both directions are the one transform
+// transition; a mount-time keyframe would only ever animate the way in.
+.cp-panel {
+  width: 100%;
+  height: 100%;
+  transform: translateX(100%);
+  transition: transform var(--transition-slow);
+  pointer-events: auto;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.cp-panel-open {
+  transform: translateX(0);
+  box-shadow: var(--shadow-lg);
+}
+
+.cp-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-secondary);
+  border-left: 1px solid var(--color-border);
+}
+
+.cp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  padding: var(--space-3) var(--space-3) var(--space-2);
+}
+
+.cp-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.cp-close {
+  @include ds.flex-center;
+
+  width: var(--control-height-compact);
+  height: var(--control-height-compact);
+  border: none;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.cp-close:hover {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.cp-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+}
+
+.cp-placeholder {
+  padding: var(--space-3);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.cp-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3125rem;
+}
+
+.cp-qr img {
+  background: #fff;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+}
+
+.cp-qr-hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.cp-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.cp-label {
+  @include ds.section-label;
+}
+
+.cp-value {
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+
+.cp-muted {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.cp-interfaces {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.cp-interface-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.cp-interface {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0.375rem 0.5rem;
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.cp-interface:hover,
+.cp-interface-group-open .cp-interface {
+  border-color: var(--color-accent);
+}
+
+.cp-interface-url {
+  @include ds.truncate;
+
+  flex: 1;
+  text-align: left;
+}
+
+.cp-interface-lock {
+  color: color-mix(in srgb, var(--color-accent) 70%, transparent);
+}
+
+.cp-interface-lock-off {
+  color: var(--color-text-muted);
+}
+
+.cp-interface-chevron {
+  flex-shrink: 0;
+  transition: transform var(--transition-normal);
+}
+
+.cp-interface-group-open .cp-interface-chevron {
+  transform: rotate(90deg);
+}
+
+.cp-targets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  padding-left: var(--space-3);
+  animation: ds-pop-in var(--transition-fast);
+}
+
+.cp-target {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0.3125rem 0.5rem;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.cp-target:hover {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-muted);
+}
+
+.cp-target-name {
+  @include ds.truncate;
+}
+
+.cp-hint {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}

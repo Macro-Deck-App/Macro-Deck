@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- An internal host layer, never a published package - dotnet pack MacroDeck.slnx would
+         otherwise produce a nupkg for it with no readme and no intentional public surface. -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- Embedded so a widget view can register its artwork with the UI resource store without the icons
+       existing as loose files beside the executable. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Weather\Icons\**\*.svg" />
+    <EmbeddedResource Include="MusicPlayer\Icons\**\*.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MacroDeckHost.Application\MacroDeckHost.Application.csproj" />
+    <ProjectReference Include="..\..\..\ui-model\src\MacroDeck.Ui\MacroDeck.Ui.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="MacroDeckHost" />
+    <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests" />
+  </ItemGroup>
+
+</Project>

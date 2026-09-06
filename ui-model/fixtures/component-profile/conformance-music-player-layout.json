@@ -1,0 +1,206 @@
+{
+  "progressResolution": "A macrodeck.progress-bar and a macrodeck.progress-text resolve their reference as position(t) = clamp(positionMs + (t - anchor) * rate, 0, durationMs), with rate defaulting to 1 when the reference omits it and the upper clamp dropped when it omits durationMs. A reader re-evaluates at least once a second. Every reference in this tree is anchored at 2026-08-25T12:00:00.000Z, and the two columns below resolve it at that instant and thirty seconds after it - which is what separates a reader that carries the position forward from one that draws the anchor and stops.",
+  "barFraction": "A progress bar's filled span always begins at the track's start and its geometry is ui.range-bar's, so only the end differs: position(t) / durationMs, clamped to 0..1. A reference with no durationMs has no fraction to draw and the track stays empty - which is also what a node with no value at all draws, and why conformance.loading.progress is in the fixture.",
+  "fillColor": "A literal is the node's own startColor/endColor. \"reader-accent\" means the node carries neither and the reader paints its own accent colour, which is why that case is here at all.",
+  "artworkAdjustment": {
+    "appliesTo": "conformance.paused.cover - the one node in this tree that is paused, and the reason the pair exists: a paused cover has to read as dimmed and colourless at a glance, which opacity alone cannot express because what a half-transparent cover looks like depends on the colour behind it.",
+    "brightness": 0.6,
+    "saturation": 0.55,
+    "order": "brightness first, then saturation, then the artwork is composited at its own opacity.",
+    "saturationFormula": "out = luma + saturation * (channel - luma), luma = 0.213 R + 0.715 G + 0.072 B",
+    "note": "Stated because two readers using different luma coefficients desaturate the same cover to visibly different greys. Every other image in this tree carries neither key and is drawn untouched - absence is 1, never a filter resolved to an identity."
+  },
+  "crossfade": {
+    "appliesTo": "Nodes carrying transition: \"crossfade\" - conformance.playing (a button's artwork) and conformance.paused.cover (an image). conformance.playing.badge carries no transition and replaces its source immediately, which is the case a reader that crossfaded unconditionally would fail.",
+    "durationMs": 220,
+    "easing": "ease-out",
+    "fromOpacity": 0,
+    "fromScale": 1.02,
+    "toScale": 1,
+    "note": "The outgoing artwork keeps being drawn until the incoming one has decoded; artwork that fails to decode replaces it at once, with no fade. These are durations and a scale, not lengths, so they are stated once rather than per basis."
+  },
+  "tileCorner": {
+    "appliesTo": "conformance.playing, the one nested button in the fixtures carrying corner: \"tile\".",
+    "rule": "A button rounds itself by 0.12 of its own height. corner: \"tile\" replaces that with the corner the reader draws the widget tile with - the same corner a button that is the whole tree takes without asking - so the ratio is not applied to this node at either basis.",
+    "note": "Not a number in this table: the tile radius is the reader's own, stated by the surface rather than by the tree, and a fixture pinning one would be pinning a setting instead of the rule. A reader that has never heard of the key rounds the node by the ratio and still draws it, which is why this is a property and not a component version."
+  },
+  "runs": {
+    "note": "What each macrodeck.progress-text must end up showing. Hours appear only once the duration reaches one, every segment below the leading one is padded to two digits, and the digits are the reader's own - so a reader in a language with its own digit system reproduces these values, not these glyphs.",
+    "atAnchor": {
+      "conformance.playing.elapsed": "0:42",
+      "conformance.playing.duration": "3:35",
+      "conformance.paused.remaining": "2:04",
+      "conformance.stream": "1:00:00"
+    },
+    "at30sAfterAnchor": {
+      "conformance.playing.elapsed": "1:12",
+      "conformance.playing.duration": "3:35",
+      "conformance.paused.remaining": "2:04",
+      "conformance.stream": "1:00:30"
+    }
+  },
+  "cases": [
+    {
+      "basis": 240,
+      "tile": {
+        "width": 240,
+        "height": 480
+      },
+      "nodes": {
+        "conformance": {
+          "contentWidth": 211.2,
+          "padding": 14.4,
+          "gap": 9.6
+        },
+        "conformance.playing": {
+          "width": 211.2,
+          "padding": 14.4,
+          "contentWidth": 182.4,
+          "artworkFit": "cover",
+          "artworkOpacity": 0.82,
+          "transition": "crossfade"
+        },
+        "conformance.playing.badge": {
+          "imageEdge": 31.2,
+          "transition": "none"
+        },
+        "conformance.playing.title": {
+          "fontSize": 18.0,
+          "minFontSize": 13.92
+        },
+        "conformance.playing.progress": {
+          "width": 182.4,
+          "trackThickness": 12.0,
+          "cornerRadius": 6.0,
+          "fillFrom": "start",
+          "fillColor": "#c9a6ff",
+          "fillLengthAtAnchor": 35.631628,
+          "fillLengthAt30s": 61.082791
+        },
+        "conformance.playing.elapsed": {
+          "fontSize": 12.96,
+          "minFontSize": 10.08
+        },
+        "conformance.playing.duration": {
+          "fontSize": 12.96
+        },
+        "conformance.paused.cover": {
+          "imageEdge": 206.4,
+          "transition": "crossfade"
+        },
+        "conformance.paused.progress": {
+          "width": 211.2,
+          "trackThickness": 12.0,
+          "cornerRadius": 6.0,
+          "fillFrom": "start",
+          "fillColor": "reader-accent",
+          "fillLengthAtAnchor": 88.900465,
+          "fillLengthAt30s": 88.900465
+        },
+        "conformance.paused.remaining": {
+          "fontSize": 12.96
+        },
+        "conformance.stream": {
+          "fontSize": 14.4
+        },
+        "conformance.empty.mark": {
+          "imageEdge": 103.2
+        },
+        "conformance.empty.title": {
+          "fontSize": 18.0
+        },
+        "conformance.loading.title": {
+          "fontSize": 18.0
+        },
+        "conformance.loading.progress": {
+          "width": 211.2,
+          "trackThickness": 12.0,
+          "cornerRadius": 6.0,
+          "fillLengthAtAnchor": 0.0,
+          "fillLengthAt30s": 0.0
+        }
+      }
+    },
+    {
+      "basis": 120,
+      "tile": {
+        "width": 120,
+        "height": 240
+      },
+      "nodes": {
+        "conformance": {
+          "contentWidth": 105.6,
+          "padding": 7.2,
+          "gap": 4.8
+        },
+        "conformance.playing": {
+          "width": 105.6,
+          "padding": 7.2,
+          "contentWidth": 91.2,
+          "artworkFit": "cover",
+          "artworkOpacity": 0.82,
+          "transition": "crossfade"
+        },
+        "conformance.playing.badge": {
+          "imageEdge": 15.6,
+          "transition": "none"
+        },
+        "conformance.playing.title": {
+          "fontSize": 9.0,
+          "minFontSize": 6.96
+        },
+        "conformance.playing.progress": {
+          "width": 91.2,
+          "trackThickness": 6.0,
+          "cornerRadius": 3.0,
+          "fillFrom": "start",
+          "fillColor": "#c9a6ff",
+          "fillLengthAtAnchor": 17.815814,
+          "fillLengthAt30s": 30.541395
+        },
+        "conformance.playing.elapsed": {
+          "fontSize": 6.48,
+          "minFontSize": 5.04
+        },
+        "conformance.playing.duration": {
+          "fontSize": 6.48
+        },
+        "conformance.paused.cover": {
+          "imageEdge": 103.2,
+          "transition": "crossfade"
+        },
+        "conformance.paused.progress": {
+          "width": 105.6,
+          "trackThickness": 6.0,
+          "cornerRadius": 3.0,
+          "fillFrom": "start",
+          "fillColor": "reader-accent",
+          "fillLengthAtAnchor": 44.450233,
+          "fillLengthAt30s": 44.450233
+        },
+        "conformance.paused.remaining": {
+          "fontSize": 6.48
+        },
+        "conformance.stream": {
+          "fontSize": 7.2
+        },
+        "conformance.empty.mark": {
+          "imageEdge": 51.6
+        },
+        "conformance.empty.title": {
+          "fontSize": 9.0
+        },
+        "conformance.loading.title": {
+          "fontSize": 9.0
+        },
+        "conformance.loading.progress": {
+          "width": 105.6,
+          "trackThickness": 6.0,
+          "cornerRadius": 3.0,
+          "fillLengthAtAnchor": 0.0,
+          "fillLengthAt30s": 0.0
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+<div class="avatar avatar--{{ size() }}">
+  @if (src(); as url) {
+    @if (!imageFailed()) {
+      <img class="avatar__image" [src]="url" [alt]="name()" (error)="onImageError()">
+    } @else {
+      <span class="avatar__initials">{{ initials() }}</span>
+    }
+  } @else {
+    <span class="avatar__initials">{{ initials() }}</span>
+  }
+</div>

@@ -1,0 +1,30 @@
+@use '../../../../../styles/index' as ds;
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.control {
+  width: 100%;
+  min-width: 0;
+  @include ds.control-base;
+  @include ds.control-interactive;
+  /*
+   * Opt-in gutters a host sets when it overlays an action on the field (shared-param-input's
+   * inline Liquid trigger, the store's search glyph). They add to control-size's own padding
+   * rather than replacing it, so the field keeps its normal text inset when no action is present.
+   */
+  padding-inline-start: calc(var(--space-3) + var(--input-action-inline-start-gutter, 0px));
+  padding-inline-end: calc(var(--space-3) + var(--input-action-inline-gutter, 0px));
+}
+
+:host(.is-invalid) .control {
+  @include ds.control-invalid;
+}
+
+textarea.control {
+  resize: vertical;
+  line-height: var(--leading-normal);
+  padding-bottom: calc(0.3125rem + var(--input-action-block-gutter, 0px));
+}

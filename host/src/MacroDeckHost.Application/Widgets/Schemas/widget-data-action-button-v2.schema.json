@@ -1,0 +1,335 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.macro-deck.app/widget-data-action-button-v2.schema.json",
+  "title": "Macro Deck Action Button widget data (v2)",
+  "description": "Describes the JSON stored in WidgetEntity.Data for an Action Button widget (WidgetType.ActionButton). Issue #612: a binary toggle became an N-state button addressed by stable state ids.",
+  "$comment": "No top-level 'required': a freshly created widget's data is a near-empty JSON object, and every property here has to stay optional so it keeps validating. additionalProperties is deliberately left unset (defaults to true) on this schema and on every nested object - an older or newer client, or a plugin-driven flow, may write extension keys this schema does not know about, and rejecting them would make the widget unsavable.",
+  "type": "object",
+  "properties": {
+    "label": {
+      "type": ["string", "null"],
+      "description": "Button label. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own label is unset - it is not a duplicate of the per-state label."
+    },
+    "imageUrl": {
+      "type": ["string", "null"],
+      "description": "URL or data URI of the button's image/icon."
+    },
+    "imageId": {
+      "type": ["string", "null"],
+      "deprecated": true,
+      "description": "Legacy mirror of imageUrl. No longer written by a save - it is only ever read when imageUrl itself is missing, and is dropped from the payload the next time this widget is saved, so editing it here has no lasting effect. Edit imageUrl instead."
+    },
+    "icon": {
+      "$ref": "#/$defs/widgetIcon",
+      "description": "stateMode off only: the typed icon reference shown on the button face. stateMode on uses each state's own icon instead and never falls back to this field. Supersedes iconId."
+    },
+    "iconId": {
+      "type": ["string", "null"],
+      "deprecated": true,
+      "description": "Legacy bare icon-pack id, superseded by icon. No longer written by a save - upgraded to icon the next time this widget is read, and dropped from the payload on save."
+    },
+    "iconDisplay": {
+      "$ref": "#/$defs/iconDisplay",
+      "description": "stateMode off only: framing (fit, zoom, position, opacity) of the root iconId. stateMode on uses each state's own iconDisplay and never falls back to this one."
+    },
+    "backgroundColor": {
+      "type": ["string", "null"],
+      "description": "Button background color. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own background color is unset - it is not a duplicate of the per-state color."
+    },
+    "labelColor": {
+      "type": ["string", "null"],
+      "description": "Label text color. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own label color is unset - it is not a duplicate of the per-state color."
+    },
+    "mode": {
+      "enum": ["momentary", "toggle", null],
+      "deprecated": true,
+      "description": "Legacy press-behaviour selector, superseded by stateMode. No longer written by a save - upgraded to stateMode/states/stateMapping the next time this widget is read, and dropped from the payload on save."
+    },
+    "isToggled": {
+      "type": "boolean",
+      "deprecated": true,
+      "description": "Legacy toggle flag, superseded by activeStateId. No longer written by a save."
+    },
+    "stateBinding": {
+      "type": "object",
+      "deprecated": true,
+      "description": "Legacy binding, superseded by stateMapping. No longer written by a save - upgraded to a single stateMapping rule the next time this widget is read."
+    },
+    "stateMode": {
+      "type": "boolean",
+      "description": "Whether this button shows one of several named states instead of a single fixed appearance. Absent is equivalent to false."
+    },
+    "cycleStatesOnPress": {
+      "type": "boolean",
+      "description": "stateMode on only: whether a short press advances the button to its next state, wrapping past the last. Absent is equivalent to true, so a button saved before this key existed keeps cycling; write false to turn it off. Never applies while a stateProvider or stateMapping is authoritative for the state. Independent of the explicit Set/Cycle Button State actions, which are never gated by it."
+    },
+    "states": {
+      "anyOf": [
+        {
+          "type": "object",
+          "deprecated": true,
+          "description": "Legacy toggle mode's per-state (off/on) appearance object. No longer written by a save - upgraded to the array form the next time this widget is read. When present, both off and on must be present.",
+          "properties": {
+            "off": { "$ref": "#/$defs/buttonState", "description": "Appearance while off." },
+            "on": { "$ref": "#/$defs/buttonState", "description": "Appearance while on." }
+          },
+          "required": ["off", "on"]
+        },
+        {
+          "type": "array",
+          "description": "The named states this button can be in, in display order.",
+          "items": { "$ref": "#/$defs/stateEntry" }
+        }
+      ],
+      "description": "The button's states. Accepts the legacy off/on object so untouched legacy data still validates - see the anyOf branches."
+    },
+    "offState": {
+      "$ref": "#/$defs/buttonState",
+      "deprecated": true,
+      "description": "Legacy mirror of the off state's appearance. No longer written by a save - it is only ever read when states itself is absent, and is dropped from the payload the next time this widget is saved."
+    },
+    "onState": {
+      "$ref": "#/$defs/buttonState",
+      "deprecated": true,
+      "description": "Legacy mirror of the on state's appearance. No longer written by a save - it is only ever read when states itself is absent, and is dropped from the payload the next time this widget is saved."
+    },
+    "stateMapping": {
+      "type": "object",
+      "description": "Rules that pick the active state from host variables, evaluated top to bottom; the first true rule wins. A single fallbackStateId field makes 'exactly one fallback' structural rather than a validation rule.",
+      "properties": {
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "stateId": { "type": "string" },
+              "when": {
+                "type": "object",
+                "description": "Condition expression. Its internal structure is deliberately not validated here."
+              }
+            },
+            "required": ["id", "stateId", "when"]
+          }
+        },
+        "fallbackStateId": {
+          "type": "string",
+          "description": "The state shown when no rule matches, or while nothing else is authoritative."
+        }
+      },
+      "required": ["rules", "fallbackStateId"]
+    },
+    "stateProvider": {
+      "type": "object",
+      "description": "Marks one of this button's own action-flow blocks as the authority for its state. Its cached states are used for offline/unavailable fallback and for the editor to render without re-polling the action.",
+      "properties": {
+        "blockId": { "type": "string", "description": "Id of the action block (among this button's own flows) that provides state." },
+        "integrationId": { "type": ["string", "null"] },
+        "actionId": { "type": ["string", "null"] },
+        "actionLabel": { "type": ["string", "null"] },
+        "states": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "label": { "type": "string" }
+            },
+            "required": ["id", "label"]
+          },
+          "description": "Cached copy of the provider's last-declared state set."
+        }
+      },
+      "required": ["blockId"]
+    },
+    "iconProvider": {
+      "type": "object",
+      "description": "Marks one of this button's own action-flow blocks as the authority for its rendered icon, independent of stateProvider. Overrides the icon that would otherwise render - for every state alike, never one icon per state - without touching the stored icon/per-state icon configuration; removing or disabling it simply stops overriding.",
+      "properties": {
+        "blockId": { "type": "string", "description": "Id of the action block (among this button's own flows) that provides the icon." },
+        "integrationId": { "type": ["string", "null"] },
+        "actionId": { "type": ["string", "null"] },
+        "actionLabel": { "type": ["string", "null"] }
+      },
+      "required": ["blockId"]
+    },
+    "manualStateBackup": {
+      "type": "object",
+      "description": "The manually-configured states/mapping/active state, stashed while a state provider is active so it can be restored exactly if the provider is removed.",
+      "properties": {
+        "states": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/stateEntry" }
+        },
+        "stateMapping": {
+          "type": "object",
+          "description": "Same shape as the top-level stateMapping."
+        },
+        "activeStateId": { "type": "string" }
+      },
+      "required": ["states"]
+    },
+    "activeStateId": {
+      "type": "string",
+      "description": "The explicitly-chosen active state id, used when neither a provider nor a mapping is authoritative."
+    },
+    "flows": {
+      "anyOf": [
+        { "type": "string" },
+        { "type": "array", "items": { "$ref": "#/$defs/actionFlow" } }
+      ],
+      "description": "Action flows triggered by this button. Stored on the wire as a nested JSON string; the editor may show it inlined as an array. Both forms are accepted here."
+    },
+    "fontFaceId": {
+      "type": ["string", "null"],
+      "description": "Stable id of the label's font face (family, weight, width and slant). With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own face id is unset - it is not a duplicate of the per-state value."
+    },
+    "fontSize": {
+      "type": "number",
+      "description": "Label font size in px. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own font size is unset - it is not a duplicate of the per-state value."
+    },
+    "textAlign": {
+      "enum": ["left", "center", "right", null],
+      "description": "Horizontal label text alignment. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own alignment is unset - it is not a duplicate of the per-state value."
+    },
+    "labelPosition": {
+      "enum": ["top", "center", "bottom", null],
+      "description": "Where the label sits relative to the icon. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own position is unset - it is not a duplicate of the per-state value."
+    },
+    "border": {
+      "$ref": "#/$defs/widgetBorder",
+      "description": "Outline drawn along the widget edge. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own border is unset - it is not a duplicate of the per-state value."
+    }
+  },
+  "$defs": {
+    "widgetBorder": {
+      "type": "object",
+      "description": "Outline drawn along the inner edge of the widget.",
+      "properties": {
+        "style": {
+          "enum": ["off", "static", "heartbeat", "breathing", "blink", "comet", "ants", "hue-shift", "rgb", null],
+          "description": "Visual style; absent, null or 'off' means no border. The color-tinted styles are static, heartbeat, breathing, blink, comet and ants; hue-shift and rgb ignore color."
+        },
+        "color": {
+          "type": ["string", "null"],
+          "description": "Ring color for the color-tinted styles. Falls back to a default color when absent or null; ignored by hue-shift and rgb."
+        }
+      }
+    },
+    "widgetIcon": {
+      "type": "object",
+      "description": "A provider-based icon reference: a provider type plus an opaque, provider-specific reference. type is deliberately not a closed enum - a provider this host build does not know about still validates and simply renders as no icon.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Icon provider type, e.g. 'icon-pack'."
+        },
+        "reference": {
+          "type": "string",
+          "description": "Provider-specific reference. Opaque here - never assumed to be a GUID."
+        }
+      },
+      "required": ["type", "reference"]
+    },
+    "iconDisplay": {
+      "type": "object",
+      "description": "Non-destructive framing of an icon within the widget face; the stored image itself is never touched.",
+      "properties": {
+        "fit": {
+          "enum": ["contain", "cover", null],
+          "description": "How the icon is fitted into the widget face; both preserve aspect ratio."
+        },
+        "zoom": {
+          "type": "number",
+          "description": "Zoom in percent, 100 = the plain fit. The renderer clamps this to 10-400."
+        },
+        "offsetX": {
+          "type": "number",
+          "description": "Horizontal shift in percent of the widget width, 0 = centered. The renderer clamps this to -100..100."
+        },
+        "offsetY": {
+          "type": "number",
+          "description": "Vertical shift in percent of the widget height, 0 = centered. The renderer clamps this to -100..100."
+        },
+        "opacity": {
+          "type": "number",
+          "description": "Opacity in percent, so an icon can sit behind the label as a background. The renderer clamps this to 0-100."
+        }
+      }
+    },
+    "buttonState": {
+      "type": "object",
+      "description": "Appearance a state can carry - the same shape whether it lives at states[].appearance or (legacy) states.off/states.on.",
+      "properties": {
+        "icon": {
+          "$ref": "#/$defs/widgetIcon",
+          "description": "Typed icon reference for this state. Never falls back to the root icon - a state that leaves this out shows no icon at all, so an icon set on one state never bleeds into another. Supersedes iconId."
+        },
+        "iconId": {
+          "type": ["string", "null"],
+          "deprecated": true,
+          "description": "Legacy bare icon-pack id, superseded by icon. No longer written by a save - upgraded to icon the next time this widget is read."
+        },
+        "iconDisplay": {
+          "$ref": "#/$defs/iconDisplay",
+          "description": "Per-state icon framing."
+        },
+        "backgroundColor": {
+          "type": ["string", "null"],
+          "description": "Background color for this state."
+        },
+        "label": {
+          "type": ["string", "null"],
+          "description": "Label text for this state."
+        },
+        "labelPosition": {
+          "enum": ["top", "center", "bottom", null],
+          "description": "Where the label sits relative to the icon for this state."
+        },
+        "labelColor": {
+          "type": ["string", "null"],
+          "description": "Label text color for this state."
+        },
+        "fontFaceId": {
+          "type": ["string", "null"],
+          "description": "Stable id of the font face used for this state's label."
+        },
+        "fontSize": {
+          "type": "number",
+          "description": "Label font size in px for this state."
+        },
+        "textAlign": {
+          "enum": ["left", "center", "right", null],
+          "description": "Horizontal text alignment for this state's label."
+        },
+        "border": {
+          "$ref": "#/$defs/widgetBorder",
+          "description": "Outline for this state, so the active/inactive status can be visually distinct."
+        }
+      }
+    },
+    "stateEntry": {
+      "type": "object",
+      "description": "One named state: a stable id everything else (appearance, mapping rules, vars.state) keys off, a display label, and an optional appearance.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable id, distinct from label - renaming the label never affects anything that references this id. Restricted to ^[a-z0-9][a-z0-9_-]{0,63}$; enforced by ActionButtonStateJson.Normalize rather than here, since this schema's keyword allowlist excludes 'pattern'."
+        },
+        "label": {
+          "type": "string",
+          "description": "Display name for this state."
+        },
+        "appearance": {
+          "$ref": "#/$defs/buttonState",
+          "description": "This state's appearance overrides. A field left out falls back to the root field of the same name - except icon and iconDisplay, which never cascade."
+        }
+      },
+      "required": ["id", "label"]
+    },
+    "actionFlow": {
+      "type": "object",
+      "description": "One action-flow entry (a trigger and its action blocks). Its internal structure is deliberately not validated here - deep flow validation is out of scope for this schema."
+    }
+  }
+}

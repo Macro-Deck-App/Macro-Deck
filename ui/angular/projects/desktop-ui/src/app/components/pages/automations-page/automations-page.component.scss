@@ -1,0 +1,121 @@
+@use '../../../../styles/index' as ds;
+
+.automation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  min-height: 0;
+  @include ds.overlay-scrollbar-clearance;
+}
+
+.automation-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.detail-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+
+  h2 {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px var(--space-1);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-tertiary);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+// The event is what the automation *is*, so it reads first and stronger than the free-text note.
+.detail-event {
+  color: var(--color-text-primary);
+  font-weight: var(--font-medium);
+}
+
+.detail-warning {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-warning);
+}
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+
+  .icon {
+    background-color: currentColor;
+  }
+}
+
+// State, not another action, so it sits at the far end of the row. `auto` rather than a spacer element
+// so it simply wraps to its own line on a narrow page instead of squeezing the buttons.
+.enabled-switch {
+  margin-inline-start: auto;
+}
+
+// The builder owns the remaining height and scrolls internally, so the footer stays reachable.
+.builder {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+
+  shared-action-builder {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+  }
+}
+
+.detail-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.validation-hint {
+  margin-right: auto;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+}

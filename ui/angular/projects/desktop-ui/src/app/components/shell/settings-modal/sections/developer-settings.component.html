@@ -1,0 +1,27 @@
+<div class="developer-settings">
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Developer.Heading' | translate"
+    [description]="'macrodeck.app:Settings.Developer.Description' | translate">
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Developer.ModeLabel' | translate"
+      [description]="'macrodeck.app:Settings.Developer.ModeDescription' | translate">
+      <shared-toggle-switch
+        [ariaLabel]="'macrodeck.app:Settings.Developer.ModeLabel' | translate"
+        [busy]="busy()"
+        [disabled]="busy() || !loaded()"
+        [checked]="enabled()"
+        (changed)="requestSetEnabled($event)" />
+    </shared-settings-row>
+  </shared-settings-section>
+</div>
+
+@if (enableConfirmOpen()) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Settings.Developer.EnableConfirmHeading' | translate"
+    [message]="'macrodeck.app:Settings.Developer.EnableConfirmMessage' | translate"
+    [confirmText]="'macrodeck.app:Settings.Developer.EnableConfirmAction' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmEnable()"
+    (cancel)="cancelEnable()" />
+}

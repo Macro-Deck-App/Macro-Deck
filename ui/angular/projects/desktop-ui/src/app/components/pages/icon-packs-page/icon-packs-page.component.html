@@ -1,0 +1,270 @@
+<shared-rail-page [railTitle]="'macrodeck.app:Nav.IconPacks' | translate">
+  <ng-container ngProjectAs="[page-banner]">
+    @if (iconPacks.loadError(); as error) {
+      <shared-error-banner [message]="error" (dismiss)="iconPacks.loadError.set(null)" />
+    }
+  </ng-container>
+
+  <ng-container ngProjectAs="[rail-actions]">
+    <shared-button variant="secondary" size="icon" [title]="'macrodeck.app:IconPacks.AddIconPack' | translate" [attr.aria-label]="'macrodeck.app:IconPacks.AddIconPack' | translate"
+      (click)="openAddPackMenu($event)">
+      <span class="icon icon-plus icon-sm"></span>
+    </shared-button>
+  </ng-container>
+
+  <ng-container ngProjectAs="[rail]">
+    @if (iconPacks.isLoading() && iconPacks.packs().length === 0) {
+      <shared-loading-state [message]="'macrodeck.app:IconPacks.LoadingIconPacks' | translate" />
+    } @else if (iconPacks.packs().length === 0) {
+      <shared-empty-state
+        [heading]="'macrodeck.app:IconPacks.NoPacksYetHeading' | translate"
+        [message]="'macrodeck.app:IconPacks.NoPacksYetMessage' | translate" />
+    } @else {
+      <ul class="pack-list" role="listbox" [attr.aria-label]="'macrodeck.app:IconPacks.IconPacksAriaLabel' | translate">
+        @for (pack of iconPacks.packs(); track pack.id) {
+          <li>
+            <shared-rail-item
+              [label]="pack.name"
+              [count]="pack.iconCount"
+              [active]="pack.id === selectedPackId()"
+              sharedFileDrop
+              (filesDropped)="importFilesInto(pack, $event)"
+              sharedIconDropTarget
+              [multiple]="true"
+              [packArchives]="true"
+              (iconPathsDropped)="onIconPathsDroppedInto(pack, $event)"
+              (click)="selectPack(pack)"
+              (contextmenu)="openPackMenu($event, pack)">
+              @if (pack.isReadOnly) {
+                <span
+                  class="icon icon-lock icon-xs"
+                  role="img"
+                  [title]="'macrodeck.app:IconPacks.ReadOnlyPack' | translate"
+                  [attr.aria-label]="'macrodeck.app:IconPacks.ReadOnlyPack' | translate"></span>
+              }
+              @if (pack.isDefault) {
+                <span class="tag">{{ 'macrodeck.app:IconPacks.DefaultTag' | translate }}</span>
+              }
+              @if (sourceLabel(pack); as source) {
+                <span class="tag" [title]="'macrodeck.app:IconPacks.ManagedByStore' | translate">{{ source }}</span>
+              }
+            </shared-rail-item>
+          </li>
+        }
+      </ul>
+    }
+  </ng-container>
+
+  <div
+    class="pack-detail"
+    sharedFileDrop
+    (filesDropped)="importFiles($event)"
+    sharedIconDropTarget
+    [multiple]="true"
+    [packArchives]="true"
+    (iconPathsDropped)="onIconPathsDropped($event)">
+    @if (selectedPack(); as pack) {
+      <header class="detail-header">
+        <div class="detail-title">
+          <h2 [title]="pack.name">{{ pack.name }}</h2>
+          @if (pack.isReadOnly) {
+            <span class="tag"><span class="icon icon-lock icon-xs"></span> {{ 'macrodeck.app:IconPacks.ReadOnly' | translate }}</span>
+          }
+          @if (sourceLabel(pack); as source) {
+            <span class="tag" [title]="'macrodeck.app:IconPacks.ManagedByStore' | translate">{{ source }}</span>
+          }
+        </div>
+        <p class="detail-meta">
+          @if (pack.description) {
+            <span>{{ pack.description }}</span>
+          }
+          @if (pack.author) {
+            <span>{{ 'macrodeck.app:IconPacks.ByAuthor' | translate:{ name: pack.author } }}</span>
+          }
+          @if (pack.version) {
+            <span>{{ 'macrodeck.app:IconPacks.VersionLabel' | translate:{ version: pack.version } }}</span>
+          }
+          <span>{{ 'macrodeck.app:IconPacks.IconCount' | translate:{ count: pack.iconCount } }}</span>
+        </p>
+
+        <div class="detail-actions">
+          <div class="search">
+            <shared-input
+              type="search"
+              [placeholder]="'macrodeck.app:IconPacks.SearchIconsPlaceholder' | translate"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="searchQuery.set($event)" />
+          </div>
+          @if (!pack.isReadOnly) {
+            <shared-button variant="primary" (click)="pickFiles()">
+              <span class="icon icon-download icon-sm"></span>
+              {{ 'macrodeck:Common.Import' | translate }}
+            </shared-button>
+            <shared-button variant="secondary" [title]="'macrodeck.app:IconPacks.MoreImportOptions' | translate" [ariaLabel]="'macrodeck.app:IconPacks.MoreImportOptions' | translate"
+              (click)="openImportMenu($event)">
+              <span class="icon icon-dots-vertical icon-sm"></span>
+            </shared-button>
+            <shared-button variant="secondary" (click)="openEditPack()">
+              <span class="icon icon-pencil icon-sm"></span>
+              {{ 'macrodeck:Common.Edit' | translate }}
+            </shared-button>
+          }
+        </div>
+      </header>
+
+      @if (icons().length === 0) {
+        @if (pack.isReadOnly) {
+          <shared-empty-state
+            icon="lock"
+            [heading]="'macrodeck.app:IconPacks.EmptyReadOnlyHeading' | translate"
+            [message]="'macrodeck.app:IconPacks.EmptyReadOnlyMessage' | translate" />
+        } @else {
+          <shared-empty-state
+            icon="image"
+            [heading]="'macrodeck.app:IconPacks.NoIconsYetHeading' | translate"
+            [message]="'macrodeck.app:IconPacks.NoIconsYetMessage' | translate">
+            <p class="supported-types">
+              {{ 'macrodeck.app:IconPacks.SupportedFileTypes' | translate }}
+            </p>
+          </shared-empty-state>
+        }
+      } @else if (filteredIcons().length === 0) {
+        <shared-empty-state [heading]="'macrodeck.app:IconPacks.NoMatchingIconsHeading' | translate" [message]="'macrodeck.app:IconPacks.NoMatchingIconsMessage' | translate" />
+      } @else {
+        @if (selectedIconIds().size > 0) {
+          <div class="selection-bar" role="toolbar" [attr.aria-label]="'macrodeck.app:IconPacks.IconSelectionAriaLabel' | translate">
+            <span class="selection-count">
+              {{ 'macrodeck.app:IconPacks.IconsSelectedCount' | translate:{ count: selectedIconIds().size } }}
+            </span>
+            <shared-button variant="ghost" (click)="clearSelection()">{{ 'macrodeck.app:IconPacks.Clear' | translate }}</shared-button>
+            @if (!pack.isReadOnly) {
+              <shared-button variant="danger" (click)="requestDeleteSelection()">
+                <span class="icon icon-trash icon-sm"></span>
+                {{ 'macrodeck:Common.Delete' | translate }}
+              </shared-button>
+            }
+          </div>
+        }
+        <shared-icon-grid
+          class="grid"
+          [icons]="filteredIcons()"
+          [selectable]="true"
+          [multiSelect]="true"
+          [selectedIconIds]="selectedIconIds()"
+          (iconClick)="onIconClick($event)"
+          (iconContextMenu)="openIconMenu($event)" />
+      }
+
+      @if (!pack.isReadOnly) {
+        <div class="drop-hint" aria-hidden="true">
+          <span class="icon icon-download icon-2xl"></span>
+          <span>{{ 'macrodeck.app:IconPacks.DropHintImportInto' | translate:{ name: pack.name } }}</span>
+        </div>
+      }
+    } @else {
+      <shared-empty-state [heading]="'macrodeck.app:IconPacks.SelectAnIconPackHeading' | translate" [message]="'macrodeck.app:IconPacks.SelectAnIconPackMessage' | translate" />
+    }
+  </div>
+</shared-rail-page>
+
+<input #fileInput type="file" hidden multiple
+  accept=".png,.jpg,.jpeg,.gif,.webp,.svg,.lottie,.json,.zip,.streamDeckIconPack,.tpi,.macroDeckIconPack,.ico,.icns,.exe,.dll"
+  (change)="onFilesPicked(fileInput)" />
+<input #folderInput type="file" hidden webkitdirectory
+  (change)="onFilesPicked(folderInput)" />
+<input #packInput type="file" hidden multiple
+  accept=".macroDeckIconPack,.streamDeckIconPack,.tpi,.zip"
+  (change)="onPacksPicked(packInput)" />
+
+<shared-context-menu
+  [isOpen]="packMenu() !== null"
+  [x]="packMenu()?.x ?? 0"
+  [y]="packMenu()?.y ?? 0"
+  [items]="packMenuItems()"
+  (itemClick)="onPackMenuAction($event)"
+  (closed)="packMenu.set(null)" />
+
+<shared-context-menu
+  [isOpen]="iconMenu() !== null"
+  [x]="iconMenu()?.x ?? 0"
+  [y]="iconMenu()?.y ?? 0"
+  [items]="iconMenuItems()"
+  (itemClick)="onIconMenuAction($event)"
+  (closed)="iconMenu.set(null)" />
+
+<shared-context-menu
+  [isOpen]="importMenu() !== null"
+  [x]="importMenu()?.x ?? 0"
+  [y]="importMenu()?.y ?? 0"
+  [items]="importMenuItems"
+  (itemClick)="onImportMenuAction($event)"
+  (closed)="importMenu.set(null)" />
+
+<shared-context-menu
+  [isOpen]="addPackMenu() !== null"
+  [x]="addPackMenu()?.x ?? 0"
+  [y]="addPackMenu()?.y ?? 0"
+  [items]="addPackMenuItems"
+  (itemClick)="onAddPackMenuAction($event)"
+  (closed)="addPackMenu.set(null)" />
+
+@if (packDialogMode(); as mode) {
+  <app-pack-edit-dialog
+    [mode]="mode"
+    [pack]="mode === 'edit' ? selectedPack() : null"
+    (save)="onPackDialogSave($event)"
+    (cancel)="packDialogMode.set(null)" />
+}
+
+@if (packPendingDeletion(); as pack) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:IconPacks.DeletePackHeading' | translate"
+    [message]="deletePackMessage(pack)"
+    [confirmText]="'macrodeck.app:IconPacks.DeletePackAction' | translate"
+    [danger]="true"
+    (confirm)="confirmDeletePack()"
+    (cancel)="packPendingDeletion.set(null)" />
+}
+
+@if (iconsPendingDeletion(); as icons) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:IconPacks.DeleteIconsHeading' | translate:{ count: icons.length }"
+    [message]="deleteIconsMessage(icons)"
+    [confirmText]="'macrodeck.app:IconPacks.DeleteIconAction' | translate:{ count: icons.length }"
+    [danger]="true"
+    (confirm)="confirmDeleteIcons()"
+    (cancel)="iconsPendingDeletion.set(null)" />
+}
+
+@if (iconPendingRename(); as icon) {
+  <shared-modal [heading]="'macrodeck.app:IconPacks.RenameIconHeading' | translate" maxWidth="360px" [showFooter]="false" (close)="iconPendingRename.set(null)">
+    <form class="rename-form" (submit)="$event.preventDefault(); confirmRename()">
+      <shared-input
+        [autofocus]="true"
+        [placeholder]="'macrodeck.app:IconPacks.IconNamePlaceholder' | translate"
+        [ngModel]="renameValue()"
+        (ngModelChange)="renameValue.set($event)"
+        name="iconName" />
+      <div class="rename-actions">
+        <shared-button variant="secondary" (click)="cancelRename()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button variant="primary" type="submit" [disabled]="!renameValue().trim()">{{ 'macrodeck:Common.Rename' | translate }}</shared-button>
+      </div>
+    </form>
+  </shared-modal>
+}
+
+@if (manualCopy(); as copy) {
+  <shared-copy-text-modal
+    [heading]="'macrodeck.app:IconPacks.CopyIconIdAction' | translate"
+    [message]="copy.message"
+    [value]="copy.value"
+    (closed)="manualCopy.set(null)" />
+}
+
+@if (showPathBrowser()) {
+  <shared-file-browser-dialog
+    (picked)="onPathPicked($event)"
+    (close)="showPathBrowser.set(false)" />
+}
+
+<shared-import-progress />

@@ -1,0 +1,142 @@
+<shared-rail-page [railTitle]="'macrodeck.app:Nav.Automations' | translate">
+  <ng-container ngProjectAs="[page-banner]">
+    @if (automations.loadError(); as error) {
+      <shared-error-banner [message]="error" (dismiss)="automations.loadError.set(null)" />
+    }
+  </ng-container>
+
+  <ng-container ngProjectAs="[rail-actions]">
+    <shared-button variant="secondary" size="icon" [title]="'macrodeck.app:Automations.NewAutomation' | translate" [attr.aria-label]="'macrodeck.app:Automations.NewAutomation' | translate"
+      (click)="openCreate()">
+      <span class="icon icon-plus icon-sm"></span>
+    </shared-button>
+  </ng-container>
+
+  <ng-container ngProjectAs="[rail]">
+    @if (automations.isLoading() && automations.automations().length === 0) {
+      <shared-loading-state [message]="'macrodeck.app:Automations.LoadingAutomations' | translate" />
+    } @else if (automations.automations().length === 0) {
+      <shared-empty-state
+        [heading]="'macrodeck.app:Automations.NoAutomationsYetHeading' | translate"
+        [message]="'macrodeck.app:Automations.NoAutomationsYetMessage' | translate" />
+    } @else {
+      <ul class="automation-list" role="listbox" [attr.aria-label]="'macrodeck.app:Nav.Automations' | translate">
+        @for (automation of automations.sortedAutomations(); track automation.id) {
+          <li>
+            <shared-rail-item
+              [label]="automation.name"
+              [count]="actionCount(automation)"
+              [active]="automation.id === selectedAutomationId()"
+              (click)="select(automation)">
+              @if (!automation.enabled) {
+                <span class="tag">{{ 'macrodeck.app:Automations.OffTag' | translate }}</span>
+              }
+            </shared-rail-item>
+          </li>
+        }
+      </ul>
+    }
+  </ng-container>
+
+  <div class="automation-detail">
+    @if (selectedAutomation(); as automation) {
+      <header class="detail-header">
+        <div class="detail-title">
+          <h2 [title]="automation.name">{{ automation.name }}</h2>
+          @if (isDirty()) {
+            <span class="tag">{{ 'macrodeck.app:Automations.UnsavedTag' | translate }}</span>
+          }
+        </div>
+        <p class="detail-meta">
+          <span class="detail-event">{{ 'macrodeck.app:Automations.WhenLabel' | translate:{ event: draftEventName() } }}</span>
+          @if (automation.description) {
+            <span class="detail-description">{{ automation.description }}</span>
+          }
+        </p>
+
+        <!-- Same row as the Scripts page, in the same order, so both detail headers read alike. -->
+        <div class="detail-actions">
+          <!-- Runs what is on screen, not a stored copy: an automation has no run endpoint, so this is
+               the only way to try one without waiting for its event. -->
+          <shared-button variant="secondary" [disabled]="!canRun()" (click)="run()">
+            <span class="icon icon-play icon-sm"></span>
+            {{ 'macrodeck.app:Automations.RunAction' | translate }}
+          </shared-button>
+          <shared-button variant="secondary" (click)="openRename()">{{ 'macrodeck:Common.Rename' | translate }}</shared-button>
+          <shared-button variant="secondary" (click)="duplicate()">{{ 'macrodeck.app:Automations.DuplicateAction' | translate }}</shared-button>
+          <shared-button variant="danger" (click)="requestDelete()">{{ 'macrodeck:Common.Delete' | translate }}</shared-button>
+
+          <!-- Pushed to the far end: it is the automation's state, not another action on it. It also
+               persists on its own - it sends only `enabled`, so an unsaved draft below is left
+               untouched rather than being saved as a side effect of flipping the switch. -->
+          <shared-toggle-switch
+            class="enabled-switch"
+            [label]="'macrodeck:Common.Enabled' | translate"
+            [ariaLabel]="'macrodeck.app:Automations.EnableAriaLabel' | translate"
+            [checked]="automation.enabled"
+            [busy]="isTogglingEnabled()"
+            (changed)="setEnabled($event)" />
+        </div>
+
+        @if (warnsIncomplete()) {
+          <p class="detail-warning">
+            {{ 'macrodeck.app:Automations.IncompleteWarning' | translate }}
+          </p>
+        }
+      </header>
+
+      <div class="builder">
+        <shared-action-builder
+          [flows]="draftFlows()"
+          [flowOwner]="flowOwner()"
+          [singleEventTrigger]="true"
+          [allowRun]="false"
+          [availableBlocks]="availableActionBlocks()"
+          [variables]="variables()"
+          previewScope="global"
+          (flowsChange)="onFlowsChange($event)"
+          (validityChange)="onValidityChange($event)" />
+      </div>
+
+      <footer class="detail-footer">
+        @if (!flowValidity().valid) {
+          <span class="validation-hint">{{ 'macrodeck.app:Automations.ValidationHint' | translate }}</span>
+        }
+        <shared-button variant="secondary" [disabled]="!isDirty()" (click)="discard()">{{ 'macrodeck.app:Automations.DiscardAction' | translate }}</shared-button>
+        <shared-button variant="primary" [disabled]="!canSave()" (click)="save()">{{ 'macrodeck.app:Automations.SaveChangesAction' | translate }}</shared-button>
+      </footer>
+    } @else {
+      <shared-empty-state
+        [heading]="'macrodeck.app:Automations.NoAutomationSelectedHeading' | translate"
+        [message]="'macrodeck.app:Automations.NoAutomationSelectedMessage' | translate" />
+    }
+  </div>
+</shared-rail-page>
+
+@if (editDialogMode(); as mode) {
+  <app-automation-edit-dialog
+    [mode]="mode"
+    [automation]="mode === 'edit' ? selectedAutomation() : null"
+    (save)="onEditDialogSave($event)"
+    (cancel)="editDialogMode.set(null)" />
+}
+
+@if (pendingDelete(); as automation) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Automations.DeleteAutomationHeading' | translate"
+    [message]="deleteMessage(automation)"
+    [confirmText]="'macrodeck:Common.Delete' | translate"
+    [danger]="true"
+    (confirm)="confirmDelete()"
+    (cancel)="pendingDelete.set(null)" />
+}
+
+@if (pendingSelection(); as next) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Automations.DiscardChangesHeading' | translate"
+    [message]="'macrodeck.app:Automations.DiscardChangesMessage' | translate:{ name: next.name }"
+    [confirmText]="'macrodeck.app:Automations.DiscardAction' | translate"
+    [danger]="true"
+    (confirm)="confirmDiscardAndSwitch()"
+    (cancel)="pendingSelection.set(null)" />
+}

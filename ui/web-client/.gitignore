@@ -1,0 +1,4 @@
+/dist
+# One per device target, e.g. dist-carthing.
+/dist-*
+/out-spec

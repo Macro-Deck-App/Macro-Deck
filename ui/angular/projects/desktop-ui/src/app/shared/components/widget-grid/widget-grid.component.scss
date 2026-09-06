@@ -1,0 +1,94 @@
+
+.grid-wrapper {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  // Default: the active theme's surface color (dark grey / white). A custom
+  // deck background is applied inline and overrides this in both themes.
+  background: var(--color-bg-primary);
+  // Animate background changes (custom colour picks and theme switches).
+  transition: background-color var(--transition-slow);
+}
+
+.grid-container {
+  position: relative;
+}
+
+// Positioned from the computed cell metrics rather than grid tracks: the legacy build targets
+// engines that drop `display: grid` wholesale, which collapsed the cell outlines into horizontal
+// artifacts while the absolutely positioned widgets on top stayed correct (issue #466).
+.empty-cell {
+  position: absolute;
+  background-color: transparent;
+  // Scales with the cell size (like the widget radii) so the grid reads uniformly at every size.
+  border-radius: calc(var(--widget-radius, 22px) * var(--widget-scale, 1));
+  border: 1px solid var(--color-bg-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // Only the hover/state colours animate - the inline geometry must snap on resize and folder
+  // switches the way the grid-placed box did.
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.empty-cell.edit-mode {
+  background-color: color-mix(in srgb, var(--color-text-primary) 2%, transparent);
+  border-color: var(--color-border);
+  cursor: pointer;
+}
+
+.empty-cell.occupied {
+  background-color: transparent;
+  border-color: transparent;
+  cursor: default;
+  pointer-events: none;
+}
+
+.empty-cell.edit-mode:not(.occupied):hover {
+  background-color: var(--color-accent-muted);
+  border-color: var(--color-accent);
+}
+
+// The cell an OS drag would land in. Same dashed accent as every other shell drop target, drawn on
+// the one cell rather than the whole grid so it promises exactly where the widget appears.
+.empty-cell.drop-target {
+  background-color: var(--color-accent-muted);
+  border: 2px dashed var(--color-accent);
+}
+
+.cell-busy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cell-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: ds-spin 0.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  // Displaced widgets glide aside and back while a drag is running. Position
+  // and transform share one timing so the base-rect swap on drop (transform
+  // resets while left/top take over) stays visually stationary. Scoped to
+  // drag-active so ordinary re-layouts (folder switch, window resize) snap.
+  //
+  // Stays here, with the tiles: the rule only matches because `shared-widget-item` carries this
+  // component's style-scoping attribute. `.drag-active` is put on the container from the outside,
+  // by the layout editor's drag service.
+  .grid-container.drag-active shared-widget-item {
+    transition:
+      transform 160ms ease,
+      left 160ms ease,
+      top 160ms ease,
+      width 160ms ease,
+      height 160ms ease;
+  }
+}

@@ -1,0 +1,10 @@
+# The compatibility floor for the framework-free runtime and the clients built on it (issue #824).
+# Kept identical to the web client's legacy build targets: this package is what that build ships.
+# 4.4 rather than 4.0: the Android 4.0-4.3 stock browser has no WebSocket, and the deck talks to
+# the host over one, so it could never connect there whatever the bundle and the stylesheet did
+# (issue #829).
+ios >= 9
+safari >= 9
+android >= 4.4
+chrome >= 30
+firefox >= 30

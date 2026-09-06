@@ -1,0 +1,57 @@
+# macOS signing/notarization support for the release pipeline.
+# - prepare_signing: ephemeral keychain + Developer ID certificate import,
+#   so the Tauri bundler's codesign pass finds the identity.
+# - notarize_app: legacy lane from the Electron era (notarization now runs inside
+#   afterSign hook) with app_path:<path to .app>; notarizes via notarytool
+#   and staples the ticket.
+# - cleanup_signing: removes the ephemeral keychain (always runs in CI).
+require 'securerandom'
+
+default_platform(:mac)
+
+KEYCHAIN_NAME = 'macro-deck-ci'
+
+platform :mac do
+  desc 'Create an ephemeral keychain and import the Developer ID certificate'
+  lane :prepare_signing do
+    keychain_password = SecureRandom.hex(32)
+
+    create_keychain(
+      name: KEYCHAIN_NAME,
+      password: keychain_password,
+      default_keychain: false,
+      unlock: true,
+      timeout: 3600,
+      lock_when_sleeps: false,
+      add_to_search_list: true
+    )
+
+    import_certificate(
+      certificate_path: ENV.fetch('MACOS_SIGN_CERT_P12_PATH'),
+      certificate_password: ENV.fetch('MACOS_SIGN_CERT_PASSWORD', ''),
+      keychain_name: KEYCHAIN_NAME,
+      keychain_password: keychain_password
+    )
+  end
+
+  desc 'Notarize and staple a signed .app bundle (app_path:<path>)'
+  lane :notarize_app do |options|
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch('APPLE_API_KEY_ID'),
+      issuer_id: ENV.fetch('APPLE_API_ISSUER_ID'),
+      key_filepath: ENV.fetch('APPLE_API_KEY_P8_PATH')
+    )
+
+    notarize(
+      package: options.fetch(:app_path),
+      api_key: api_key,
+      bundle_id: 'app.macro-deck.macrodeck'
+    )
+  end
+
+  desc 'Delete the ephemeral keychain'
+  lane :cleanup_signing do
+    keychain_db = File.expand_path("~/Library/Keychains/#{KEYCHAIN_NAME}-db")
+    delete_keychain(name: KEYCHAIN_NAME) if File.exist?(keychain_db)
+  end
+end

@@ -1,0 +1,71 @@
+changelog:
+  exclude:
+    labels:
+      - invalid
+      - duplicate
+      - wontfix
+      - ai-slop
+      - flaky-test
+      - area:ci
+      - area:e2e
+
+  categories:
+    - title: 🔐 Security
+      labels:
+        - security
+
+    - title: 🛠 Breaking Changes
+      labels:
+        - breaking-change
+        - compat:protocol
+
+    - title: ⚠️ Deprecations
+      labels:
+        - compat:deprecation
+
+    - title: 🎉 Exciting New Features
+      labels:
+        - feature
+
+    - title: 🚀 Improvements
+      labels:
+        - improvement
+
+    - title: ⚡ Performance
+      labels:
+        - performance
+
+    - title: ♿ Accessibility
+      labels:
+        - accessibility
+
+    - title: 🐞 Bug Fixes
+      labels:
+        - bug
+        - regression
+
+    - title: 🧩 Plugin SDK and Protocol
+      labels:
+        - compat:plugin-api
+        - area:sdk
+        - area:protocol
+        - area:ui-model
+        - area:cli
+        - area:packaging
+
+    - title: 🌍 Translations
+      labels:
+        - area:localization
+
+    - title: 📚 Documentation
+      labels:
+        - documentation
+        - area:docs
+
+    - title: ⬆️ Dependencies
+      labels:
+        - dependencies
+
+    - title: 🛠️ Other Changes
+      labels:
+        - "*"

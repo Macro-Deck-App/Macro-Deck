@@ -1,0 +1,91 @@
+<shared-modal [heading]="heading()" size="medium" (close)="onCancel()">
+  <div class="migration-preview">
+    @if (bannerMessage; as message) {
+      <shared-error-banner [message]="message" (dismiss)="bannerDismissed.emit()" />
+    }
+
+    @if (data(); as summary) {
+      <div class="migration-preview-caveat">
+        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+        <div>
+          <p class="migration-preview-caveat-title">{{ 'macrodeck.app:Migration.Preview.BestEffortTitle' | translate }}</p>
+          <p class="migration-preview-caveat-message">{{ bestEffortNote() }}</p>
+        </div>
+      </div>
+
+      <ul class="migration-preview-contents">
+        @for (entry of contents(); track entry.label) {
+          <li>
+            <span class="icon icon-{{ entry.icon }} icon-xs"></span>
+            <span>{{ entry.label }}</span>
+          </li>
+        }
+      </ul>
+
+      @if (credentialNote(); as note) {
+        <p class="migration-preview-note">
+          <span class="icon icon-lock icon-xs" aria-hidden="true"></span>
+          <span>{{ note }}</span>
+        </p>
+      }
+
+      @if (summary.integrations.length > 0) {
+        <div class="migration-preview-section">
+          <p class="migration-preview-title">{{ 'macrodeck.app:Migration.Preview.IntegrationsTitle' | translate }}</p>
+          <ul class="migration-preview-integrations">
+            @for (integration of summary.integrations; track integration.id) {
+              <li>
+                <span class="migration-preview-integration-name">{{ integration.title }}</span>
+                @if (integration.carriesCredentials) {
+                  <span class="migration-preview-badge">
+                    {{ 'macrodeck.app:Migration.Preview.IntegrationCarriesCredentials' | translate }}
+                  </span>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      @if (summary.unsupportedActions.length > 0) {
+        <div class="migration-preview-section">
+          <p class="migration-preview-title">
+            {{ 'macrodeck.app:Migration.Preview.UnsupportedActionsTitle' | translate }}
+            @if (unsupportedActionsSummary(); as note) {
+              <span class="migration-preview-title-note">{{ note }}</span>
+            }
+          </p>
+          <ul class="migration-preview-unsupported">
+            @for (action of summary.unsupportedActions; track action.sourcePlugin + action.sourceAction) {
+              <li>
+                <span class="migration-preview-unsupported-name">{{ action.sourcePlugin }} &rarr; {{ action.sourceAction }}</span>
+                <span class="migration-preview-unsupported-count">{{ occurrenceLabel(action.occurrences) }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      @if (summary.warnings.length > 0) {
+        <div class="migration-preview-section">
+          <p class="migration-preview-title">{{ 'macrodeck.app:Migration.Preview.WarningsTitle' | translate }}</p>
+          <ul class="migration-preview-warnings">
+            @for (warning of summary.warnings; track warning.kind + warning.subject) {
+              <li>
+                <span class="migration-preview-warning-head">
+                  <span class="icon icon-alert-triangle icon-xs" aria-hidden="true"></span>
+                  <span class="migration-preview-warning-subject">{{ warning.subject }}</span>
+                </span>
+                <span class="migration-preview-warning-detail">{{ warningDetail(warning) }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    }
+  </div>
+  <div modal-footer>
+    <shared-button variant="secondary" [disabled]="submitting" (click)="onCancel()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+    <shared-button variant="primary" [loading]="submitting" (click)="onConfirm()">{{ 'macrodeck:Common.Import' | translate }}</shared-button>
+  </div>
+</shared-modal>

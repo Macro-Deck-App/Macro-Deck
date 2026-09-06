@@ -1,0 +1,83 @@
+// Shared shell for the widget editor layouts (Action Button, Slider, Music
+// Player): a fixed-width sidebar card with the live preview on top and
+// uppercase section headings separated by hairlines, next to the main panel.
+//
+// The layout structure itself (the sidebar card, its scroll container, the main pane) now lives
+// in app-widget-editor-shell (widget-editor-shell.component.scss) - this file keeps only the
+// rules that style *projected* content. Under Angular's emulated encapsulation, projected content
+// carries the *editor's* `_ngcontent` attribute, not the shell's, so a shell-scoped rule would
+// never match it; these rules have to stay rooted here.
+
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+.editor-preview {
+  display: flex;
+  justify-content: center;
+  padding-bottom: var(--space-4);
+}
+
+.editor-preview .preview-widget {
+  width: 100px;
+  height: 100px;
+  // Container-query basis for widgets that size their internals off --wq (see the widget SCSS
+  // `cq()` helper); matches the 100x100 preview box so fluid sizing renders as it does on the deck.
+  --wq: 100px;
+  // Reference px like the widget surface it frames (WIDGET_REFERENCE_BORDER_RADIUS), not a rem
+  // token: the user's browser font-size preference must not round the preview differently than the deck.
+  border-radius: 22px;
+  overflow: hidden;
+  // Own stacking context: widget internals paint at z-index 1 (e.g. the Weather card image),
+  // which would otherwise cover the border overlay next to this element. On the deck the
+  // transform-scaled content wrapper already isolates them.
+  isolation: isolate;
+}
+
+// Positioning context for the border overlay; carries the preview radius so the
+// overlay ring (border-radius: inherit) matches the widget's corners.
+.editor-preview .preview-frame {
+  position: relative;
+  border-radius: 22px;
+}
+
+.editor-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--color-border);
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.editor-section-heading {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.editor-hint {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.editor-hint-warning {
+  color: var(--color-warning);
+}
+
+// Rooted here rather than in the shell: shared-action-builder is projected into the shell's
+// default slot, so it carries this editor's own `_ngcontent` attribute (see the file comment).
+shared-action-builder {
+  flex: 1;
+  min-height: 0;
+}

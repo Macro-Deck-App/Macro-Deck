@@ -1,0 +1,110 @@
+<div class="icon-display">
+  <!-- No image, no frame: an action targets a widget whose icon is unknowable at authoring time. -->
+  @if (iconUrl) {
+    <div class="idc-preview">
+      <div
+        #frame
+        class="idc-frame draggable"
+        [style.aspect-ratio]="frameAspect"
+        [style.background]="previewBackground || null"
+        (pointerdown)="onPointerDown($event)"
+        (pointermove)="onPointerMove($event)"
+        (pointerup)="onPointerUp($event)"
+        (pointercancel)="onPointerUp($event)"
+        (wheel)="onWheel($event)">
+        <img class="idc-image" [src]="iconUrl" [style]="previewStyle" alt="" draggable="false" />
+      </div>
+      <p class="idc-hint">{{ dragHint }}</p>
+    </div>
+  }
+
+  <div class="idc-controls">
+    <div class="form-group form-group--dense">
+      <label>{{ 'macrodeck.app:Widgets.Appearance.IconDisplay.DisplayLabel' | translate }}</label>
+      <shared-segmented-control
+        [options]="fitOptions"
+        [value]="fitValue"
+        [stretch]="true"
+        [ariaLabel]="displayModeAriaLabel"
+        (valueChange)="onFitChange($event)" />
+    </div>
+
+    <div class="form-group form-group--dense">
+      <label for="icon-zoom">{{ 'macrodeck.app:Widgets.Appearance.IconDisplay.ZoomLabel' | translate }}</label>
+      <div class="idc-slider-row">
+        <input
+          id="icon-zoom"
+          type="range"
+          class="idc-slider"
+          [min]="limits.zoom.min"
+          [max]="limits.zoom.max"
+          [step]="5"
+          [ngModel]="numberValue('zoom') === '' ? 100 : numberValue('zoom')"
+          (ngModelChange)="onNumberChange('zoom', $event)" />
+        <shared-input
+          class="idc-number"
+          type="number"
+          [min]="limits.zoom.min"
+          [max]="limits.zoom.max"
+          [placeholder]="actionMode ? unchangedPlaceholder : ''"
+          [ngModel]="numberValue('zoom')"
+          (ngModelChange)="onNumberChange('zoom', $event)" />
+      </div>
+    </div>
+
+    <div class="form-group form-group--dense">
+      <label for="icon-opacity">{{ 'macrodeck.app:Widgets.Appearance.IconDisplay.OpacityLabel' | translate }}</label>
+      <div class="idc-slider-row">
+        <input
+          id="icon-opacity"
+          type="range"
+          class="idc-slider"
+          [min]="limits.opacity.min"
+          [max]="limits.opacity.max"
+          [ngModel]="numberValue('opacity') === '' ? 100 : numberValue('opacity')"
+          (ngModelChange)="onNumberChange('opacity', $event)" />
+        <shared-input
+          class="idc-number"
+          type="number"
+          [min]="limits.opacity.min"
+          [max]="limits.opacity.max"
+          [placeholder]="actionMode ? unchangedPlaceholder : ''"
+          [ngModel]="numberValue('opacity')"
+          (ngModelChange)="onNumberChange('opacity', $event)" />
+      </div>
+    </div>
+
+    <div class="idc-offsets">
+      <div class="form-group form-group--dense">
+        <label for="icon-offset-x">{{ 'macrodeck.app:Widgets.Appearance.IconDisplay.PositionXLabel' | translate }}</label>
+        <shared-input
+          id="icon-offset-x"
+          type="number"
+          [min]="limits.offset.min"
+          [max]="limits.offset.max"
+          [placeholder]="actionMode ? unchangedPlaceholder : ''"
+          [ngModel]="numberValue('offsetX')"
+          (ngModelChange)="onNumberChange('offsetX', $event)" />
+      </div>
+      <div class="form-group form-group--dense">
+        <label for="icon-offset-y">{{ 'macrodeck.app:Widgets.Appearance.IconDisplay.PositionYLabel' | translate }}</label>
+        <shared-input
+          id="icon-offset-y"
+          type="number"
+          [min]="limits.offset.min"
+          [max]="limits.offset.max"
+          [placeholder]="actionMode ? unchangedPlaceholder : ''"
+          [ngModel]="numberValue('offsetY')"
+          (ngModelChange)="onNumberChange('offsetY', $event)" />
+      </div>
+      <shared-button
+        class="idc-reset"
+        [class.active]="resetActive"
+        [variant]="resetActive ? 'primary' : 'ghost'"
+        [title]="resetTooltip"
+        (click)="onReset()">
+        {{ resetButtonLabel }}
+      </shared-button>
+    </div>
+  </div>
+</div>

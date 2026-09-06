@@ -1,0 +1,220 @@
+@use '../../../../../styles/index' as ds;
+
+/*
+ * Custom properties inherit, so a modal opened from inside another modal (the settings modal sets
+ * --modal-height on its own host) would otherwise be stretched to the outer dialog's height.
+ * Re-declaring the default here scopes it per modal; an explicit inline value still wins.
+ */
+:host {
+  --modal-height: auto;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; }
+}
+
+@keyframes slideOut {
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+}
+
+/* Duration must stay in sync with ModalComponent.closeAnimationMs. */
+.modal-overlay.closing {
+  animation: fadeOut 0.15s ease-in forwards;
+  pointer-events: none;
+}
+
+.modal-overlay.closing .modal-dialog {
+  animation: slideOut 0.15s ease-in forwards;
+}
+
+/*
+ * No `backdrop-filter` here - it would establish a containing block
+ * for fixed-position descendants (and its own stacking context),
+ * trapping nested modals (e.g. variable-picker opened from inside an
+ * editor modal) inside the parent overlay's z-stack. Without it, an
+ * inner modal-overlay's `[zIndex]="1100"` actually escapes the parent
+ * modal's `z-index: 1000`.
+ *
+ * The same trap applies to every ancestor a modal is rendered under, since a
+ * modal sits inline in the DOM rather than in a portal: `clip-path`, `mask`,
+ * `filter`, `contain` and `transform` on an ancestor clip the overlay to that
+ * ancestor's box or make it its containing block. A rounded card that has to
+ * clip its own content must therefore do it with `overflow: hidden`, which
+ * fixed-position descendants escape (issue #292).
+ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-scrim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  animation: fadeIn 0.18s ease-out;
+}
+
+/* No container outline: the dialog separates from the scrim through elevation alone. */
+.modal-dialog {
+  background-color: var(--color-bg-elevated);
+  border-radius: var(--radius-xl);
+  width: 90%;
+  height: var(--modal-height, auto);
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-dialog);
+  animation: slideIn 0.18s ease-out;
+}
+
+.modal-header {
+  padding: 1rem var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.modal-close-btn:hover {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.modal-content {
+  padding: var(--space-5);
+  overflow-y: auto;
+  /*
+   * `1 1 auto`, not the `flex: 1` shorthand: that expands to a `0%` basis, which old WebKit resolves
+   * to a hard 0 instead of falling back to the content size in an auto-height container - and with
+   * `min-height: 0` defeating the content-based minimum too, the body contributed no height at all
+   * and the dialog collapsed to its header. An auto basis sizes to content and still grows and
+   * shrinks, so nothing changes on a current engine.
+   */
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Edge-to-edge body: the projected content owns its own padding/borders. */
+.modal-content--flush {
+  padding: 0;
+  overflow: hidden;
+}
+
+.modal-footer {
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.modal-size-small {
+  max-width: 450px;
+}
+
+.modal-size-medium {
+  max-width: 700px;
+}
+
+.modal-size-large {
+  max-width: 1100px;
+}
+
+.modal-size-full {
+  max-width: 95vw;
+}
+
+/*
+ * Phones (and narrow tablets) in either orientation: modals go full-screen
+ * edge-to-edge. `max-width` is overridden with `!important` because the
+ * component sets it inline via [style.max-width], which a plain rule could
+ * not beat.
+ */
+@include ds.phone-screen {
+  .modal-overlay {
+    align-items: stretch;
+    justify-content: stretch;
+    /*
+     * The dialog below asks for `height: 100%`, which needs a parent with a definite height. Modern
+     * engines derive one from `top: 0` / `bottom: 0` on a fixed element; Safari 9 does not, so the
+     * percentage fell back to auto and the sheet collapsed to its header - the flex body contributes
+     * nothing, having `flex: 1 1 0%` and `min-height: 0`. A fixed element's percentage height is
+     * resolved against the viewport, so this is definite everywhere.
+     */
+    height: 100%;
+  }
+
+  .modal-dialog {
+    width: 100%;
+    max-width: none !important;
+    height: 100%;
+    max-height: none;
+    border-radius: 0;
+    /* A full-screen sheet has nothing left to cast elevation onto. */
+    box-shadow: none;
+    /*
+     * Only the full-screen sheet reaches the display edges, so only it has to keep clear of the status
+     * bar, the camera housing and the home indicator. An installed iOS web app draws under all three
+     * because index.html asks for `black-translucent` with `viewport-fit=cover`; in a browser tab these
+     * insets are 0, so no rule has to ask which one it is. The dialog carries them rather than the
+     * header and footer separately so the strips are painted in its own background, and so that
+     * `.modal-content--flush` keeps winning over the padding it clears.
+     *
+     * The `0px` fallbacks are load bearing: an engine without env() drops the whole declaration, and
+     * the header would lose its padding entirely.
+     */
+    padding-right: env(safe-area-inset-right, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+
+  .modal-header {
+    padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+  }
+}

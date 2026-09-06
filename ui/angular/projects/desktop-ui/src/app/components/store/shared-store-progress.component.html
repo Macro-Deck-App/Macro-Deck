@@ -1,0 +1,50 @@
+@if (visible().length > 0) {
+  <div class="stack" role="status" aria-live="polite">
+    @for (operation of visible(); track operation.id) {
+      <div class="card" [class.failed]="operation.state === 'Failed'">
+        <div class="card-header">
+          <span class="title">{{ operation.displayName }}</span>
+          @if (isTerminal(operation)) {
+            <button type="button" class="dismiss" (click)="dismiss(operation)" [attr.aria-label]="'macrodeck.app:Store.Dismiss' | translate">
+              <span class="icon icon-x icon-sm"></span>
+            </button>
+          }
+        </div>
+
+        <span class="status">{{ label(operation) }}</span>
+
+        @if (operation.state === 'Failed') {
+          <span class="failed-hint">{{ errorMessage(operation) }}</span>
+        }
+
+        @if (!isTerminal(operation)) {
+          <div
+            class="bar"
+            [class.indeterminate]="percent(operation) === null"
+            role="progressbar"
+            [attr.aria-valuenow]="percent(operation)"
+            [attr.aria-valuemin]="percent(operation) !== null ? 0 : null"
+            [attr.aria-valuemax]="percent(operation) !== null ? 100 : null"
+            [attr.aria-valuetext]="readout(operation)">
+            @if (percent(operation) !== null) {
+              <div class="fill" [style.width.%]="percent(operation)"></div>
+            }
+          </div>
+          @if (operation.state === 'Downloading') {
+            <span class="readout">
+              {{ readout(operation) }}
+              @if (eta(operation); as remaining) {
+                <span class="readout-separator" aria-hidden="true">·</span>
+                <span>{{ remaining }}</span>
+              }
+            </span>
+          }
+        }
+
+        @if (operation.state === 'Failed' && operation.canRetry) {
+          <button type="button" class="retry" (click)="retry(operation)">{{ 'macrodeck:Common.Retry' | translate }}</button>
+        }
+      </div>
+    }
+  </div>
+}

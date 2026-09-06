@@ -1,0 +1,11 @@
+.migration-wizard-source {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 0.8125rem);
+}
+
+.migration-wizard-loading {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+}

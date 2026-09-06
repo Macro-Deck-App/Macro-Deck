@@ -1,0 +1,122 @@
+.archive-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 0.8125rem);
+}
+
+.archive-preview-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.archive-preview-name {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.archive-preview-meta {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+}
+
+.archive-preview-contents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs, 0.3125rem) var(--spacing-sm, 0.375rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.1875rem var(--spacing-sm, 0.375rem);
+    border-radius: var(--radius-sm, 6px);
+    background: var(--surface-2, rgb(255 255 255 / 6%));
+    color: var(--text-secondary);
+    font-size: var(--text-base);
+    white-space: nowrap;
+  }
+}
+
+.archive-preview-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs, 0.3125rem);
+}
+
+.archive-preview-title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.archive-preview-integrations {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--spacing-xs, 0.3125rem);
+    font-size: var(--text-md);
+  }
+}
+
+.archive-preview-integration-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.archive-preview-status {
+  font-size: var(--text-base);
+
+  &.is-ok {
+    color: var(--color-success);
+  }
+
+  &.is-warn {
+    color: var(--color-warning);
+  }
+
+  &.is-error {
+    color: var(--color-danger);
+  }
+}
+
+.archive-preview-hint {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  line-height: 1.4;
+}
+
+.archive-preview-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs, 0.3125rem);
+  margin: 0;
+  padding: var(--spacing-sm, 0.375rem) var(--spacing-md, 0.625rem);
+  border-radius: var(--radius-md, 8px);
+  background: color-mix(in srgb, var(--color-warning, #e0a100) 12%, transparent);
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  line-height: 1.4;
+
+  .icon {
+    margin-top: 0.0625rem;
+    flex-shrink: 0;
+  }
+}

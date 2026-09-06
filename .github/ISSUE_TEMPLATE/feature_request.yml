@@ -1,0 +1,24 @@
+name: Feature request
+description: Suggest an improvement to Macro Deck
+title: "[Feature] "
+labels: ["feature", "status:needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Requesting a new integration? Please use the **Integration request** form instead.
+
+  - type: textarea
+    id: request
+    attributes:
+      label: What would you like to see?
+      description: Tell us what you want to do and how this would help.
+      placeholder: Describe your idea in your own words.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else?
+      description: Screenshots, mockups, examples or related links are welcome, but optional.

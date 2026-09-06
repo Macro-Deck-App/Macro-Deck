@@ -1,0 +1,12 @@
+/*
+ * Block-type → accent color mapping. Shared by the card frame and the
+ * action picker; both stamp `action-color-<type>` on their root and
+ * read `--ab-color` inside. The `--ab-*` fallbacks let the classes
+ * work even outside an <shared-action-builder> host.
+ */
+.action-color-trigger      { --ab-color: var(--ab-trigger,      #6366f1); }
+.action-color-condition    { --ab-color: var(--ab-condition,    #f59e0b); }
+.action-color-loop         { --ab-color: var(--ab-loop,         #22c55e); }
+.action-color-delay        { --ab-color: var(--ab-delay,        #8b5cf6); }
+.action-color-action       { --ab-color: var(--ab-action,       #3b82f6); }
+.action-color-flow-control { --ab-color: var(--ab-flow-control, #ef4444); }

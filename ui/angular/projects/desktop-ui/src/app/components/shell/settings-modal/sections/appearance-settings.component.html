@@ -1,0 +1,29 @@
+<div class="appearance">
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Appearance.ThemeHeading' | translate"
+    [description]="'macrodeck.app:Settings.Appearance.ThemeDescription' | translate">
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Appearance.ThemeModeLabel' | translate"
+      [description]="'macrodeck.app:Settings.Appearance.ThemeModeDescription' | translate">
+      <shared-segmented-control
+        [ariaLabel]="'macrodeck.app:Settings.Appearance.ThemeModeLabel' | translate"
+        [options]="themeOptions()"
+        [value]="themeMode()"
+        (valueChange)="selectMode($event)" />
+    </shared-settings-row>
+  </shared-settings-section>
+
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Appearance.AccentHeading' | translate"
+    [description]="'macrodeck.app:Settings.Appearance.AccentDescription' | translate">
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Appearance.AccentLabel' | translate"
+      [description]="'macrodeck.app:Settings.Appearance.AccentPickDescription' | translate">
+      <shared-color-picker
+        [ngModel]="accentColor()"
+        (ngModelChange)="onAccentChange($event)"
+        [defaultColor]="defaultAccent">
+      </shared-color-picker>
+    </shared-settings-row>
+  </shared-settings-section>
+</div>

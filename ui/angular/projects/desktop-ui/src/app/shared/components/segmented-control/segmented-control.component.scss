@@ -1,0 +1,98 @@
+:host {
+  display: inline-flex;
+  max-width: 100%;
+  // Without this, the automatic minimum size of a flex item stops the control shrinking below its
+  // content width, so a row holding it overflows - long localized labels push into the neighbouring
+  // controls - instead of the pill scrolling internally (`.seg` below already has `overflow-x: auto`).
+  min-width: 0;
+}
+
+.seg {
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  max-width: 100%;
+
+  /*
+   * The strip scrolls when its options do not fit, but paints no scrollbar doing it: an option is never
+   * clipped or shrunk (the labels have to stay readable), so a set that overruns its column by a few
+   * pixels would otherwise draw a bar across the control - which reads as a stray line under the tabs
+   * rather than as something to scroll.
+   */
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.seg-option {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.3125rem var(--space-3);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+// An icon-only option (no label, e.g. the align/position controls) is square-ish rather than text-wide:
+// it keeps the vertical rhythm of a labelled option while sizing its width to the glyph, which is the
+// footprint the widget editor's own alignment toggles have always had.
+.seg-option.icon-only {
+  justify-content: center;
+  min-width: 2.25rem;
+  padding-inline: var(--space-2);
+}
+
+/*
+ * A strip of icon-only options keeps the glyphs at their full size and takes the room back from the
+ * spacing between them instead: three of them at the labelled spacing overrun a half-width column by a
+ * few pixels, and shrinking the glyph to fit is the wrong trade - the icon is the whole control.
+ */
+.seg:has(.seg-option.icon-only) {
+  gap: 0;
+  padding: 2px;
+}
+
+.seg-option:hover:not(.active) {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-hover);
+}
+
+.seg-option.active {
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.seg-option .icon {
+  background-color: currentColor;
+}
+
+:host(.stretch) {
+  display: flex;
+}
+
+:host(.stretch) .seg {
+  flex: 1;
+  min-width: 0;
+}
+
+// Grow from each option's own label width and share only the surplus: a `flex-basis` of 0 would
+// hand every option the same width whatever its label says, which only ever fits the shortest
+// translation of the set.
+:host(.stretch) .seg-option {
+  flex: 1 1 auto;
+  justify-content: center;
+}

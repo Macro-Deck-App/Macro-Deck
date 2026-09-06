@@ -1,0 +1,134 @@
+<shared-modal
+  [showHeader]="false"
+  [showFooter]="false"
+  [flush]="true"
+  [maxWidth]="'1280px'"
+  [style.--modal-height]="'min(48.75rem, 90vh)'"
+  (close)="onModalClose()">
+  <div class="settings-modal" [class.settings-modal--collapsed]="railCollapsed()">
+    <aside class="settings-modal__rail">
+      <div class="settings-modal__rail-header">
+        <h2 class="settings-modal__brand">{{ 'macrodeck:Settings.Title' | translate }}</h2>
+        <button
+          type="button"
+          class="settings-modal__rail-toggle"
+          [attr.aria-expanded]="!railCollapsed()"
+          [attr.aria-label]="(railCollapsed() ? 'macrodeck.app:Settings.Modal.ExpandNav' : 'macrodeck.app:Settings.Modal.CollapseNav') | translate"
+          [sharedTooltip]="(railCollapsed() ? 'macrodeck.app:Settings.Modal.ExpandNav' : 'macrodeck.app:Settings.Modal.CollapseNav') | translate"
+          (click)="toggleRail()">
+          <span class="icon icon-sidebar icon-md" aria-hidden="true"></span>
+        </button>
+      </div>
+      <button
+        type="button"
+        class="settings-modal__account"
+        [sharedTooltip]="accountName()"
+        [tooltipDisabled]="!railCollapsed()"
+        [attr.aria-label]="railCollapsed() ? accountName() : null"
+        [attr.aria-current]="activeCategory() === 'account' ? 'true' : null"
+        (click)="selectAccount()">
+        <shared-avatar
+          class="settings-modal__account-avatar"
+          size="sm"
+          [src]="connect.avatarUrl()"
+          [name]="accountName()" />
+        <span class="settings-modal__account-info">
+          <span class="settings-modal__account-name">{{ accountName() }}</span>
+          <span class="settings-modal__account-status">{{ connect.statusLabel() }}</span>
+        </span>
+      </button>
+      <shared-settings-nav
+        [groups]="categoryGroups()"
+        [activeId]="activeCategory()"
+        [collapsed]="railCollapsed()"
+        (select)="selectCategory($event)" />
+    </aside>
+
+    <section class="settings-modal__pane">
+      <header class="settings-modal__header">
+        <h3 class="settings-modal__title">{{ activeLabel() }}</h3>
+        <button
+          type="button"
+          class="settings-modal__close"
+          [attr.aria-label]="'macrodeck.app:Settings.Modal.CloseLabel' | translate"
+          (click)="close()">
+          <span class="icon icon-x icon-lg"></span>
+        </button>
+      </header>
+
+      @if (restartNotice.required()) {
+        <div class="settings-modal__restart" role="status">
+          <span class="icon icon-info icon-sm" aria-hidden="true"></span>
+          <span class="settings-modal__restart-text">
+            {{ restartNotice.message() }}
+            @if (!restartNotice.canRestart() && restartNotice.unsupportedReason(); as reason) {
+              {{ reason }}.
+            }
+          </span>
+          @if (restartNotice.canRestart()) {
+            <shared-button
+              variant="secondary"
+              [loading]="restartNotice.restarting()"
+              (click)="restartNow()">
+              {{ 'macrodeck.app:Settings.Modal.RestartNow' | translate }}
+            </shared-button>
+          }
+        </div>
+      }
+
+      <div class="settings-modal__body">
+        @switch (activeCategory()) {
+          @case ('account') {
+            <app-account-settings />
+          }
+          @case ('appearance') {
+            <app-appearance-settings />
+          }
+          @case ('startup') {
+            <app-startup-settings />
+          }
+          @case ('language') {
+            <app-language-settings />
+          }
+          @case ('security') {
+            <app-security-settings />
+          }
+          @case ('network') {
+            <app-network-settings />
+          }
+          @case ('devices') {
+            <app-devices-settings />
+          }
+          @case ('client-targets') {
+            <app-client-targets-settings />
+          }
+          @case ('adb') {
+            <app-adb-settings />
+          }
+          @case ('backups') {
+            <!-- Deferred: the backups pane (list, schedule, recovery key and their modals) is
+                 sizeable and rarely opened, so it ships as its own chunk instead of padding out
+                 every settings-modal load with code most sessions never touch. -->
+            @defer (on immediate) {
+              <app-backups-settings />
+            } @loading {
+              <shared-loading-state [message]="'macrodeck:Common.Loading' | translate" />
+            }
+          }
+          @case ('migration') {
+            <app-migration-settings />
+          }
+          @case ('logging') {
+            <app-logging-settings />
+          }
+          @case ('developer') {
+            <app-developer-settings />
+          }
+          @case ('about') {
+            <app-about-settings />
+          }
+        }
+      </div>
+    </section>
+  </div>
+</shared-modal>

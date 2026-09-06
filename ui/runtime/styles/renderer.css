@@ -1,0 +1,524 @@
+/*
+ * The stylesheet for `renderUiNode`.
+ *
+ * Ported from the Angular renderer's own sheet, with one structural difference: that renderer wraps
+ * every node in a component element and styles `> shared-ui-node`, while this one appends each
+ * child's element directly, so the flex children are the widget elements themselves and the rules
+ * address `> *`.
+ *
+ * `inset` is written as four longhands and `rgba()` is used in place of hex alpha throughout,
+ * because the compatibility floor for this package is Safari 9 - both are dropped wholesale there,
+ * and a dropped `inset` is an overlay that does not cover anything.
+ */
+
+.widget-stack {
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+}
+
+/*
+ * A child gives way when the stack has less room than the children ask for, rather than spilling out
+ * of it. The profile's lengths are fractions of the widget basis and a text node's width is its own
+ * text, so a stack can be handed more content than its box holds - and the box is inset by the safe
+ * area that clears the tile's rounded corner, so anything that leaves it is drawn under the curve
+ * and sliced by it. Shrinking only binds when the children over-subscribe the box, so a stack whose
+ * content fits keeps exactly the geometry the profile prescribes.
+ */
+.widget-stack > * {
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/*
+ * A button is a stack that also takes presses. `position: relative` plus a negative z-index on the
+ * artwork is what lets the flex children sit above it without a dedicated stacking wrapper that
+ * would interfere with the flex layout; `isolation: isolate` is what makes that negative z-index
+ * resolve against this element rather than against an ancestor that carries a transform. Without it
+ * the artwork paints behind the whole tree and this element's own background covers it entirely.
+ */
+.widget-button {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  box-sizing: border-box;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+  touch-action: none;
+  /*
+   * A nested button's corner is painted inline by the renderer, as a fraction of its own height - see
+   * BUTTON_CORNER_RATIO. Not stated here, because it is not a constant: a button half the height of
+   * another is half as round.
+   */
+}
+
+/*
+ * A button that is the whole tree fills the tile, so its corner is the tile's - the reader's own
+ * radius, in the reference pixels a tile's content is laid out in (`--widget-scale` is reset to 1
+ * there). A border that does not follow the tile it sits in is what a reader notices first.
+ *
+ * A nested button that asked for `corner: "tile"` takes the same radius for the same reason: it is a
+ * backdrop drawn to the tile's edges, and a fraction of its own height cuts an arc across the tile
+ * wherever the two disagree.
+ */
+.widget-button.widget-node-root,
+.widget-button.widget-tile-corner {
+  border-radius: calc(var(--widget-radius, 22px) * var(--widget-scale, 1));
+}
+
+/* A button is a stack, and its children give way the same way - see the rule above. */
+.widget-button > * {
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/*
+ * Text in a widget tree is a label, never a selection: dragging across a row to pick it would leave a
+ * highlight behind and swallow the gesture the node wanted. `user-select` inherits, so the containers
+ * carry it and a `ui.text-field` - the one element whose text is the user's - takes it back.
+ */
+.widget-stack,
+.widget-button,
+.widget-layer,
+.widget-list,
+.widget-text,
+.widget-image {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  /*
+   * A separate mechanism from selection, and the only thing that stops iOS from running its own
+   * long-press recognizer over a node. The callout sheet an image raises there ("Copy" / "Share")
+   * lands on top of the `long-press` the widget declares for itself, and no `preventDefault` on a
+   * pointer event suppresses it. Inherits, so the containers carry it the same way.
+   */
+  -webkit-touch-callout: none;
+}
+
+/*
+ * An image is draggable by default, so a press-and-move over artwork tears it out of the widget as a
+ * drag ghost instead of running the node's own gesture. The renderer's `draggable="false"` is what
+ * every engine honours; this is the WebKit-only extra beside it.
+ */
+.widget-button-artwork,
+.widget-image img {
+  -webkit-user-drag: none;
+}
+
+/* A node that claims a press says so under the pointer, the same way a deck tile does. */
+.widget-pressable {
+  cursor: pointer;
+}
+
+/* A text node over artwork has to stay legible against it, at any depth of nesting. */
+.widget-button .widget-text {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  line-height: 1.2;
+}
+
+.widget-button-artwork {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+}
+
+.widget-press-tint {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  background-color: rgba(255, 255, 255, 0);
+  transition: background-color var(--transition-press-out);
+  pointer-events: none;
+}
+
+.widget-press-tint-active {
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: background-color var(--transition-press-in);
+}
+
+.widget-button-ring {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  pointer-events: none;
+  /*
+   * The overlay the ring is drawn into. It takes the button's corner and the ring's own layers take
+   * this one, so the whole chain follows the reader's radius; broken anywhere along it, the ring is
+   * drawn as a hard rectangle across a rounded tile.
+   */
+  border-radius: inherit;
+}
+
+.widget-text {
+  display: block;
+  box-sizing: border-box;
+  overflow: hidden;
+  line-height: 1;
+  margin: 0;
+  /*
+   * A line box of exactly 1em is what makes the profile's geometry predictable - a text node is as
+   * tall as its size, and every length around it is a fraction of the basis rather than of whatever
+   * a font decided. But a font's own box is taller than 1em (around 1.21 for the stack this ships
+   * with), so the half-leading is negative and the glyphs hang out of the content box at both ends.
+   * `overflow: hidden` is here for the ellipsis, and it cut those ends off: every descender in the
+   * deck lost its tail.
+   *
+   * Clipping happens at the padding edge, so this hands the ink the room it overhangs by, and the
+   * negative margin gives the same amount back to the layout. The box the profile reasons about is
+   * unchanged; only what may be painted inside it grows. Physical longhands rather than the block
+   * pair, for the same reason `inset` is written out at the top of this file: the floor drops the
+   * logical properties.
+   */
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  margin-top: -0.2em;
+  margin-bottom: -0.2em;
+}
+
+/*
+ * The `max-height: 100%` every stack child carries caps the border box, while the stack sized itself
+ * from the margin box - and the rule above makes those two differ by exactly the ink's 2 x 0.2em. A
+ * container whose height came out equal to the text's own margin box therefore capped the text 0.4em
+ * short, squeezing the content box under the line box and clipping the bottom of every glyph: a
+ * reading rendered "50" with flat-bottomed digits and "0 %" with a sliced percent sign, wherever a
+ * row was sized by the text inside it.
+ *
+ * Handing the cap the same allowance the padding claims leaves the margin box at or below 100%, so
+ * nothing the profile lays out moves; only the ink the box may paint outside itself survives. A text
+ * that really does over-subscribe its box is still held to it.
+ */
+.widget-stack > .widget-text,
+.widget-button > .widget-text {
+  max-height: calc(100% + 0.4em);
+}
+
+/*
+ * A layer's children share the box instead of dividing it, first one furthest back. Painted in
+ * document order rather than with z-index, so a layer nested in a button still resolves against its
+ * own box.
+ *
+ * The rule below deliberately sets no `display`: each node type declares its own, and this selector
+ * is one specificity point heavier - a `display: block` here silently un-flexed every stack that
+ * happened to sit inside a layer, which is how a centred readout ended up pinned to the top left.
+ */
+.widget-layer {
+  position: relative;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+}
+
+.widget-layer > * {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.widget-chart {
+  display: block;
+}
+
+.widget-chart-area {
+  stroke: none;
+  fill-opacity: 0.16;
+}
+
+.widget-chart-line {
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  opacity: 0.9;
+}
+
+/* Equal advance widths for every digit, so a reserved run does not shift sideways as it counts. */
+.widget-text-tabular,
+.widget-dynamic-text {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+.widget-text-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+}
+
+.widget-clock-dial {
+  display: block;
+}
+
+.widget-clock-dial-tick,
+.widget-clock-dial-hand-hour,
+.widget-clock-dial-hand-minute,
+.widget-clock-dial-hand-second {
+  stroke-linecap: round;
+}
+
+.widget-image {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.widget-image img {
+  display: block;
+  object-fit: contain;
+}
+
+/*
+ * A crossfade stacks the incoming artwork on the settled one and fades it in, so a source change
+ * never cuts and never flashes an empty box. An animation rather than a transition: a transition off
+ * a freshly inserted element needs a reflow kick to run at all.
+ */
+.widget-image-incoming {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: widget-artwork-fade-in 220ms ease-out both;
+}
+
+.widget-artwork-incoming {
+  animation: widget-artwork-fade-in 220ms ease-out both;
+}
+
+@keyframes widget-artwork-fade-in {
+  from {
+    opacity: 0;
+    scale: 1.02;
+  }
+
+  to {
+    opacity: var(--widget-artwork-opacity, 1);
+    scale: 1;
+  }
+}
+
+/*
+ * A node that opts into a crossfade puts the whole artwork change on a curve, not just the swap: the
+ * colour behind the artwork and the artwork's own opacity move with it, because a cover, the colour
+ * derived from it and the dim it takes on when playback pauses are one visual change each time.
+ */
+.widget-artwork-eased {
+  transition: background 800ms ease;
+}
+
+.widget-artwork-eased > img {
+  transition: opacity 350ms ease, filter 350ms ease;
+}
+
+/*
+ * A progress bar is re-evaluated about once a second, so its fill would step rather than travel.
+ * Easing the width over a little under that interval turns the steps back into motion.
+ */
+.widget-progress-fill {
+  transition: width 400ms linear, background 800ms ease;
+}
+
+.widget-range-bar {
+  position: relative;
+  box-sizing: border-box;
+}
+
+.widget-range-bar-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  overflow: hidden;
+  background: var(--color-bg-tertiary);
+}
+
+.widget-range-bar-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.widget-range-bar-marker {
+  position: absolute;
+  top: 50%;
+  border-radius: 50%;
+  box-sizing: content-box;
+  transform: translate(-50%, -50%);
+}
+
+/* The whole box is the drag surface, so the browser's own touch gestures must not compete with it. */
+.widget-slider {
+  position: relative;
+  box-sizing: border-box;
+  touch-action: none;
+}
+
+.widget-slider-track {
+  position: absolute;
+  overflow: hidden;
+  background: var(--color-bg-tertiary);
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.widget-slider-vertical .widget-slider-track {
+  left: 50%;
+  right: auto;
+  top: 0;
+  bottom: 0;
+  transform: translateX(-50%);
+}
+
+.widget-slider-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  transition: width 80ms linear;
+}
+
+.widget-slider-vertical .widget-slider-fill {
+  top: auto;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transition: height 80ms linear;
+}
+
+.widget-slider-thumb {
+  position: absolute;
+  box-sizing: content-box;
+  background: var(--color-text-primary);
+  border-radius: 50%;
+  pointer-events: none;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: left 80ms linear;
+}
+
+.widget-slider-vertical .widget-slider-thumb {
+  top: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: bottom 80ms linear;
+}
+
+/* Mid-drag the pill and the thumb track the pointer exactly, rather than easing toward it. */
+.widget-slider-fill-dragging,
+.widget-slider-thumb-dragging {
+  transition: none;
+}
+
+.widget-node-unsupported {
+  background: var(--color-bg-tertiary);
+  opacity: 0.35;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .widget-image-incoming,
+  .widget-artwork-incoming {
+    animation: none;
+  }
+
+  .widget-artwork-eased,
+  .widget-artwork-eased > img,
+  .widget-progress-fill,
+  .widget-slider-fill,
+  .widget-slider-thumb {
+    transition: none;
+  }
+}
+
+/*
+ * A single line of text the user types. The face is the reader's, not the producer's: the profile gives
+ * a field a size and a placeholder and nothing else, for the same reason it gives a button no say in
+ * how its press looks.
+ */
+.widget-text-field {
+  display: block;
+  user-select: text;
+  -webkit-user-select: text;
+  /* Takes the callout back with the selection: without it iOS offers no paste into the field. */
+  -webkit-touch-callout: default;
+  box-sizing: border-box;
+  min-width: 0;
+  margin: 0;
+  padding: 0.4em 0.6em;
+  border: 1px solid var(--color-border);
+  border-radius: 0.4em;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  line-height: 1.2;
+  /* One line that scrolls sideways rather than wrapping - the profile has no multi-line entry. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.widget-text-field:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+/*
+ * A field that declares no events still draws its value: that is what makes it usable as a readout of
+ * something entered elsewhere, without a second element for the purpose.
+ */
+.widget-text-field[readonly] {
+  cursor: default;
+}
+
+/*
+ * A container that scrolls. Deliberately not a stack with a flag: a stack divides a bounded main axis
+ * between its children and every length in this profile is a fraction of that, while a list's main
+ * axis has no bound at all - so children take their natural extent along it.
+ */
+.widget-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  /*
+   * The gutter is reserved whether or not a bar is showing, so the content does not reflow the moment
+   * one appears - and, where the engine honours it, an overlay bar stops floating over the last
+   * column instead of sitting beside it. Dropped silently below the compatibility floor, which leaves
+   * the measured fallback in the renderer as the only thing keeping the two apart.
+   */
+  scrollbar-gutter: stable;
+}
+
+.widget-list > * {
+  flex: 0 0 auto;
+  min-width: 0;
+}

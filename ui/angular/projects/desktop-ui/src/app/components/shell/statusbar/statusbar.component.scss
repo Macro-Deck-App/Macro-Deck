@@ -1,0 +1,124 @@
+@use '../../../../styles/index' as ds;
+
+/* This bar is the window's title bar inside the macOS shell, and the native
+   traffic lights are centered against its height by STATUS_BAR_HEIGHT in
+   ui/bootstrapper/src/window.rs. Changing the height means changing that too -
+   the 3.25rem is 52px at the default 16px root. */
+.statusbar {
+  height: 3.25rem;
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 var(--space-4);
+  flex-shrink: 0;
+}
+
+/* Clears the native traffic lights. The shell insets them 19pt from the left,
+   as far as from the top, so the block ends 79pt in (19 + two 23pt gaps + a
+   14pt button) and this leaves 3px of slack. px, not rem: the buttons are a
+   native size and ignore the root font size, so a rem spacer would drift onto
+   them when the reader enlarges their browser font. */
+.traffic-light-spacer {
+  width: 82px;
+  flex-shrink: 0;
+}
+
+.statusbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* The sidebar toggle sits on the same vertical line as the nav icons below it: the collapsed rail
+   is centred on half its own width (its border aside), and the bar's own padding is taken off.
+   Only when it leads the bar - behind the macOS traffic lights there is no line to meet. */
+.statusbar-left > .toggle-btn:first-child {
+  margin-inline-start: calc(
+    (var(--sidebar-collapsed-width, 4rem) - 1px - var(--control-height-compact)) / 2 - var(--space-4)
+  );
+}
+
+.build-channel-badge {
+  @include ds.badge;
+
+  flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, var(--color-warning) 42%, transparent);
+  background-color: var(--color-warning-muted);
+  color: var(--color-warning);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.toggle-btn {
+  width: var(--control-height-compact);
+  height: var(--control-height-compact);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.toggle-btn:hover {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+/* Marks the panel a toggle owns as open (the network side panel). */
+.toggle-btn.active {
+  background-color: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+.toggle-btn .icon {
+  transition: transform var(--transition-slow);
+}
+
+.toggle-btn .icon.rotated {
+  transform: rotate(180deg);
+}
+
+.statusbar-center {
+  display: flex;
+  justify-content: center;
+}
+
+.profile-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.statusbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.theme-toggle {
+  width: var(--control-height-compact);
+  height: var(--control-height-compact);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.theme-toggle:hover {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-accent);
+}

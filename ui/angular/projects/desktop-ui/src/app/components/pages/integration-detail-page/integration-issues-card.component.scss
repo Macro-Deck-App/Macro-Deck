@@ -1,0 +1,67 @@
+@use '../../../../styles/index' as ds;
+
+.detail-card {
+  @include ds.card($padding: var(--space-4) 1rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  grid-column: 1 / -1;
+}
+
+.detail-card-title {
+  @include ds.section-label;
+  margin: 0 0 var(--space-2);
+}
+
+.detail-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+
+  // The heading's own bottom margin would offset it against the badge it sits beside.
+  .detail-card-title {
+    margin-bottom: 0;
+  }
+}
+
+.issue-badge {
+  @include ds.badge;
+  border: 1px solid transparent;
+  flex-shrink: 0;
+  @include ds.issue-badge-severities;
+}
+
+.issues-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.issue-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-text-muted);
+  border-radius: var(--radius-sm);
+}
+
+.issue-error { border-left-color: var(--color-danger); }
+.issue-warning { border-left-color: var(--color-warning); }
+.issue-info { border-left-color: var(--color-accent); }
+
+.issue-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  flex: 1 1 11.375rem;
+  min-width: 0;
+}
+
+.issue-item-title { font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-primary); }
+.issue-desc { font-size: var(--text-xs); color: var(--color-text-secondary); line-height: 1.4; }

@@ -1,0 +1,95 @@
+<aside
+  class="cp-panel"
+  [class.cp-panel-open]="isOpen()"
+  [attr.inert]="isOpen() ? null : ''"
+  role="complementary"
+  [attr.aria-label]="appStrings.Shell.ConnectionPanel.Title | translate">
+  <div class="cp-inner">
+    <header class="cp-header">
+      <span class="cp-title">{{ appStrings.Shell.ConnectionPanel.Title | translate }}</span>
+      <button
+        type="button"
+        class="cp-close"
+        [attr.aria-label]="appStrings.Shell.ConnectionPanel.Close | translate"
+        (click)="closed.emit()">
+        <span class="icon icon-x icon-sm"></span>
+      </button>
+    </header>
+
+    <div class="cp-body">
+      @if (loading()) {
+        <div class="cp-placeholder">{{ appStrings.Shell.ConnectionPanel.Loading | translate }}</div>
+      } @else if (info(); as info) {
+        @if (info.publicListenerUnavailable) {
+          <div class="cp-placeholder">
+            {{ appStrings.Shell.ConnectionPanel.PublicListenerUnavailable | translate }}
+          </div>
+        } @else {
+          @if (qrDataUrl(); as qr) {
+            <div class="cp-qr">
+              <img [src]="qr" [alt]="appStrings.Shell.ConnectionPanel.QrAlt | translate" width="180" height="180">
+              <span class="cp-qr-hint">{{ appStrings.Shell.ConnectionPanel.ScanHint | translate }}</span>
+            </div>
+          }
+
+          <div class="cp-section">
+            <span class="cp-label">{{ appStrings.Shell.ConnectionPanel.Instance | translate }}</span>
+            <span class="cp-value">{{ info.instanceName }}</span>
+          </div>
+
+          <div class="cp-section">
+            <span class="cp-label">{{ appStrings.Shell.ConnectionPanel.Addresses | translate }}</span>
+            @if (addressGroups().length > 0) {
+              <div class="cp-interfaces">
+                @for (group of addressGroups(); track group.address) {
+                  @for (endpoint of group.endpoints; track key(endpoint)) {
+                    <div class="cp-interface-group" [class.cp-interface-group-open]="expanded() === key(endpoint)">
+                      <button
+                        type="button"
+                        class="cp-interface"
+                        [attr.aria-expanded]="expanded() === key(endpoint)"
+                        (click)="toggle(endpoint)">
+                        <span
+                          class="icon icon-sm cp-interface-lock"
+                          role="img"
+                          [class.icon-lock]="endpoint.ssl"
+                          [class.icon-unlock]="!endpoint.ssl"
+                          [class.cp-interface-lock-off]="!endpoint.ssl"
+                          [attr.aria-label]="sslLabelKey(endpoint) | translate"></span>
+                        <span class="cp-interface-url">{{ key(endpoint) }}</span>
+                        <span class="icon icon-chevron-right icon-xs cp-interface-chevron"></span>
+                      </button>
+
+                      @if (expanded() === key(endpoint)) {
+                        <div class="cp-targets">
+                          <button type="button" class="cp-target" (click)="open(endpoint, 'config')">
+                            <span class="cp-target-name">{{ appStrings.Shell.ConnectionPanel.ConfigurationUi | translate }}</span>
+                            <span class="icon icon-arrow-right icon-xs"></span>
+                          </button>
+                          <button type="button" class="cp-target" (click)="open(endpoint, 'client')">
+                            <span class="cp-target-name">{{ appStrings.Shell.ConnectionPanel.WebClient | translate }}</span>
+                            <span class="icon icon-arrow-right icon-xs"></span>
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  }
+                }
+              </div>
+            } @else {
+              <span class="cp-value cp-muted">{{ appStrings.Shell.ConnectionPanel.NoInterfaces | translate }}</span>
+            }
+          </div>
+
+          @if (anySsl()) {
+            <p class="cp-hint">
+              {{ appStrings.Shell.ConnectionPanel.SelfSignedHint | translate }}
+            </p>
+          }
+        }
+      } @else {
+        <div class="cp-placeholder">{{ appStrings.Shell.ConnectionPanel.Unavailable | translate }}</div>
+      }
+    </div>
+  </div>
+</aside>

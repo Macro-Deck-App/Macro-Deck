@@ -1,0 +1,37 @@
+<shared-modal [heading]="heading" [showHeader]="closeOnOverlay" [closeOnOverlay]="closeOnOverlay" size="small" (close)="onCancel()">
+  <div class="rkp">
+    @if (!closeOnOverlay) {
+      <h2 class="rkp-heading">{{ heading }}</h2>
+    }
+
+    <p class="rkp-desc">
+      {{ description }}
+    </p>
+
+    @if (bannerMessage; as message) {
+      <shared-error-banner [message]="message" (dismiss)="bannerDismissed.emit()" />
+    }
+
+    @if (invalid) {
+      <p class="rkp-error">
+        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+        <span>{{ invalidMessage }}</span>
+      </p>
+    }
+
+    <shared-input
+      class="rkp-input"
+      [placeholder]="placeholder"
+      [disabled]="submitting"
+      [ngModel]="value()"
+      (ngModelChange)="value.set($event)"
+      [autofocus]="true" />
+  </div>
+
+  <div modal-footer>
+    @if (showCancel) {
+      <shared-button variant="secondary" [disabled]="submitting" (click)="onCancel()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+    }
+    <shared-button variant="primary" [disabled]="!canSubmit()" [loading]="submitting" (click)="onSubmit()">{{ confirmLabel }}</shared-button>
+  </div>
+</shared-modal>

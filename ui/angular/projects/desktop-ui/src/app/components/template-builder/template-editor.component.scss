@@ -1,0 +1,86 @@
+@use '../../../styles/index' as ds;
+
+/*
+ * Two-pane layout (issue #238): the browser pane owns its own right border and sits at a fixed
+ * rail width, the editor pane takes the rest. `[flush]` on shared-modal removes the default body
+ * padding so the browser pane's border reaches the modal's own edge.
+ */
+:host {
+  display: grid;
+  grid-template-columns: minmax(15rem, 20rem) minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+
+  @include ds.phone-screen {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.tb-editor-pane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 0;
+  padding: var(--space-3);
+}
+
+.tb-editor-host {
+  // Editor and preview share the column two-to-one and shrink together, so both stay usable at the
+  // 640px-tall minimum window rather than the preview collapsing to a single line.
+  flex: 2 1 0;
+  min-height: 7rem;
+}
+
+.tb-preview-wrap {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-height: 0;
+}
+
+.tb-preview-label {
+  @include ds.section-label;
+}
+
+.tb-preview {
+  margin: 0;
+  padding: var(--space-2) 0.5rem;
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  flex: 1 1 auto;
+  min-height: 4rem;
+  overflow-y: auto;
+
+  // The last good render, kept visible while the current one is broken.
+  &.tb-preview-stale {
+    opacity: 0.5;
+  }
+}
+
+.tb-preview-error {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.tb-preview-error-code {
+  display: inline-block;
+  margin-right: var(--space-2);
+  padding: 0.0625rem var(--space-2);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-danger-muted);
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  font-family: var(--font-mono, monospace);
+}

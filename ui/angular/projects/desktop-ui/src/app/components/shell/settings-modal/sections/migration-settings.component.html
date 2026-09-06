@@ -1,0 +1,66 @@
+<div class="migration">
+  <div class="migration-header">
+    <div>
+      <h2 class="migration-title">{{ 'macrodeck.app:Migration.Settings.Heading' | translate }}</h2>
+      <p class="migration-subtitle">{{ 'macrodeck.app:Migration.Settings.Description' | translate }}</p>
+    </div>
+  </div>
+
+  @if (error(); as message) {
+    <shared-error-banner class="migration-error" [message]="message" [dismissible]="false" />
+  } @else if (!loading()) {
+    @if (sources().length === 0) {
+      <shared-empty-state
+        class="migration-empty"
+        icon="download"
+        [heading]="'macrodeck.app:Migration.Settings.EmptyHeading' | translate"
+        [message]="'macrodeck.app:Migration.Settings.EmptyMessage' | translate" />
+    } @else {
+      <ul class="migration-list">
+        @for (source of sources(); track source.id) {
+          <li class="migration-row">
+            <div class="migration-row-main">
+              <span class="migration-icon icon icon-download icon-lg"></span>
+
+              <div class="migration-name-col">
+                <span class="migration-name">{{ source.name }}</span>
+                <span class="migration-secondary">
+                  @if (source.defaultPath) {
+                    {{ 'macrodeck.app:Migration.Settings.DetectedPath' | translate:{ path: source.defaultPath } }}
+                  } @else {
+                    {{ 'macrodeck.app:Migration.Settings.NotDetected' | translate }}
+                  }
+                </span>
+              </div>
+
+              <div class="migration-actions">
+                @if (isDesktopShell) {
+                  <shared-button variant="secondary" size="compact" (click)="pickFolder(source)">
+                    <span class="icon icon-folder icon-sm" aria-hidden="true"></span>
+                    {{ 'macrodeck.app:Migration.Settings.PickFolderAction' | translate }}
+                  </shared-button>
+                  <shared-button variant="secondary" size="compact" (click)="pickArchive(source)">
+                    <span class="icon icon-file-text icon-sm" aria-hidden="true"></span>
+                    {{ 'macrodeck.app:Migration.Settings.PickArchiveAction' | translate }}
+                  </shared-button>
+                } @else {
+                  <shared-button variant="secondary" size="compact" (click)="startUpload(source)">
+                    <span class="icon icon-upload icon-sm" aria-hidden="true"></span>
+                    {{ 'macrodeck.app:Migration.Settings.UploadArchiveAction' | translate }}
+                  </shared-button>
+                }
+              </div>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  }
+</div>
+
+<input
+  #uploadInput
+  type="file"
+  accept=".zip"
+  hidden
+  (change)="onUploadFileSelected($event)" />

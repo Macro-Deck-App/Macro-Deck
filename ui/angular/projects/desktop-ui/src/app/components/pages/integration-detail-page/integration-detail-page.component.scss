@@ -1,0 +1,288 @@
+@use '../../../../styles/index' as ds;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.detail-header-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.detail-brand-icon,
+.detail-brand-glyph { flex-shrink: 0; }
+
+.detail-brand-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  object-fit: contain;
+}
+
+.detail-brand-glyph { color: var(--color-accent); }
+
+.detail-heading {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.detail-name,
+.detail-value {
+  color: var(--color-text-primary);
+  @include ds.truncate;
+}
+
+.detail-name {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+}
+
+.detail-version {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* Badges/pills shared across the header and cards share one baseline. */
+.kind-badge,
+.status-chip {
+  @include ds.badge;
+  flex-shrink: 0;
+}
+
+.kind-badge {
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+}
+
+.kind-badge.internal {
+  background-color: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+.status-chip-ready { color: var(--color-success); background-color: var(--color-success-muted); }
+.status-chip-disabled { color: var(--color-text-muted); background-color: var(--color-bg-hover); }
+.status-chip-starting,
+.status-chip-setup { color: var(--color-warning); background-color: var(--color-warning-muted); }
+
+.detail-tabs {
+  flex-shrink: 0;
+  padding: var(--space-4) var(--space-5) 0;
+}
+
+.detail-body,
+.capability-panel {
+  min-height: 0;
+}
+
+.detail-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: var(--space-5);
+  scrollbar-gutter: stable;
+}
+
+.detail-grid,
+.capability-panel {
+  max-width: 45.5rem;
+  margin: 0 auto;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.detail-card {
+  @include ds.card($padding: var(--space-4) 1rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.detail-card-wide { grid-column: 1 / -1; }
+
+.detail-card-title {
+  @include ds.section-label;
+  margin: 0 0 var(--space-2);
+}
+
+.detail-field,
+.config-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.detail-field { gap: var(--space-4); padding: 0.3125rem 0; }
+.detail-label,
+.detail-value { font-size: var(--text-md); }
+.detail-label { color: var(--color-text-secondary); }
+.detail-value { font-weight: var(--font-medium); }
+
+.config-entry-remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+}
+
+.config-entry-summary,
+.config-entry-actions,
+.config-entry-status,
+.config-entry-action {
+  display: inline-flex;
+  align-items: center;
+}
+
+.config-entry-summary,
+.config-entry-actions { gap: var(--space-2); }
+
+.config-entry-status {
+  @include ds.badge;
+  font-size: var(--text-xs);
+}
+
+.config-status-ok { color: var(--color-success); background-color: var(--color-success-muted); }
+.config-status-warning { color: var(--color-warning); background-color: var(--color-warning-muted); }
+.config-status-pending { color: var(--color-text-muted); background-color: var(--color-bg-hover); }
+
+.config-entry-action {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--text-sm);
+  color: var(--color-accent);
+}
+
+.detail-placeholder,
+.detail-hint,
+.config-entry-title { font-size: var(--text-base); }
+.detail-placeholder,
+.detail-hint { color: var(--color-text-muted); }
+
+.detail-placeholder { font-style: italic; margin: 0 0 var(--space-3); }
+.detail-hint { margin: var(--space-2) 0 0; }
+
+.config-entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.config-entry {
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.config-entry-title { color: var(--color-text-primary); }
+
+.config-name-form,
+.config-name-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.config-name-form { gap: var(--space-3); }
+.config-name-field { gap: var(--space-1); color: var(--color-text-secondary); font-size: var(--text-sm); }
+
+/* Actions / Variables tabs */
+.capability-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  height: 100%;
+}
+
+.capability-search { display: block; width: 100%; flex-shrink: 0; }
+
+.capability-result-count {
+  flex-shrink: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.capability-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  min-height: 0;
+  @include ds.overlay-scrollbar-clearance;
+}
+
+@include ds.breakpoint-down(md) {
+  .detail-grid { grid-template-columns: minmax(0, 1fr); }
+
+  .detail-header-content { flex-wrap: wrap; }
+
+  .detail-heading { flex-wrap: wrap; flex-basis: 100%; }
+}
+
+// Catalog entries sit in the same list as the declared variables: the difference is that these have
+// nothing to show yet, which the badge says instead of a value.
+.capability-catalog-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.capability-catalog-twisty {
+  flex: none;
+  width: 1rem;
+}
+
+.capability-catalog-chevron {
+  flex: none;
+  width: 1rem;
+  transition: transform var(--transition-fast);
+}
+
+.capability-catalog-chevron-open {
+  transform: rotate(90deg);
+}
+
+.capability-dynamic-badge {
+  @include ds.badge;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+.capability-catalog-more .capability-row-name {
+  color: var(--color-accent);
+}

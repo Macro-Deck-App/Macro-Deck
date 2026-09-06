@@ -1,0 +1,95 @@
+:host { display: inline-flex; }
+
+.ts {
+  // The invisible checkbox below is stretched over this box, so it needs a positioned ancestor.
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  user-select: none;
+  // The checkbox below covers this whole box, so iOS would paint its tap highlight across the entire
+  // switch and its label - a dark flash on every tap, including one on a disabled switch that does
+  // nothing. The states below are what communicate a press.
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ts-disabled { opacity: 0.5; cursor: not-allowed; }
+
+.ts-busy { cursor: progress; }
+
+// Stretched over the whole switch rather than hidden in a corner, so the checkbox *is* the hit
+// target and no label-to-control click forwarding has to happen at all. That forwarding is what old
+// WebKit does not do for a zero-sized control, which left the switch dead to every tap on iOS 9;
+// covering the label sidesteps the question on every engine instead of relying on one behaving.
+// `z-index` because `.ts-track` is positioned and comes later in the DOM, so it would otherwise
+// take the tap itself.
+.ts-input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+// The thumb is derived from the track so the inset stays equal on all four sides at
+// any root font size: fixed px offsets against rem-sized boxes only balanced at a
+// 16px root, which this app never uses.
+$track-width: 2rem;
+$track-height: 1.125rem;
+$track-border: 1px;
+$thumb-inset: 2px;
+$thumb-size: calc(#{$track-height} - #{2 * ($track-border + $thumb-inset)});
+
+.ts-track {
+  position: relative;
+  // Geometry must not depend on the global reset (unit tests load no global styles).
+  box-sizing: border-box;
+  width: $track-width;
+  height: $track-height;
+  background: var(--color-bg-tertiary);
+  border: $track-border solid var(--color-border);
+  border-radius: var(--radius-xl);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.ts-checked .ts-track {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.ts-thumb {
+  position: absolute;
+  top: $thumb-inset;
+  left: $thumb-inset;
+  width: $thumb-size;
+  height: $thumb-size;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform var(--transition-fast);
+}
+
+.ts-checked .ts-thumb {
+  transform: translateX($track-width - $track-height);
+}
+
+.ts-spinner {
+  position: absolute;
+  inset: 1px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: ds-spin 0.7s linear infinite;
+}
+
+.ts-label {
+  font-size: var(--text-md);
+  color: var(--color-text-primary);
+}

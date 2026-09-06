@@ -1,0 +1,112 @@
+.subtitle {
+  margin: 0;
+  font-size: var(--text-md);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.widget-types {
+  padding: var(--space-2) 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  /* The grid grows with every widget a future release or an integration adds, so it scrolls rather
+     than pushing the dialog past the viewport. */
+  max-height: min(60vh, 34rem);
+  overflow-y: auto;
+}
+
+@media (max-width: 40rem) {
+  .widget-types {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 26rem) {
+  .widget-types {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+  width: 100%;
+}
+
+.type-card:hover,
+.type-card:focus-visible {
+  background-color: var(--color-accent-muted);
+  border-color: var(--color-accent);
+}
+
+.type-card:active {
+  transform: scale(0.98);
+}
+
+/* A square stage the tile sits on with room around it, the way a widget sits in a deck cell rather
+   than bleeding to the edges of whatever is holding it. */
+.type-preview {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  width: 100%;
+  padding: var(--space-3);
+  box-sizing: border-box;
+  overflow: hidden;
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  pointer-events: none;
+}
+
+/* Covers the sample area for a type whose provider declined the preview session - the sample tree
+   itself renders nothing to look at in that case, but the card still needs to say what type it is. */
+.type-preview-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2);
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-primary);
+}
+
+/* Sized in real px from the measurement, never stretched to the stage: the size the tile is drawn at
+   is the size the host built its tree for. `flex: none` and the child selector are both load-bearing -
+   `shared-ui-tree-widget`'s own `:host` sets width and height to 100% at the same specificity. */
+.type-preview > .type-preview-widget {
+  display: block;
+  flex: none;
+}
+
+.type-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.type-name {
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  font-size: var(--text-lg);
+}
+
+.type-description {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+}

@@ -1,0 +1,225 @@
+<shared-rail-page [railTitle]="'macrodeck.app:Developer.Logs.RailTitle' | translate">
+  <ng-container ngProjectAs="[rail-actions]">
+    <shared-button variant="secondary" (click)="reload()">
+      <span class="icon icon-refresh icon-sm"></span>
+      {{ 'macrodeck.app:Developer.Logs.ReloadAction' | translate }}
+    </shared-button>
+  </ng-container>
+
+  <ul ngProjectAs="[rail]" class="source-list" role="listbox" [attr.aria-label]="'macrodeck.app:Developer.Logs.SourcesAriaLabel' | translate">
+    <li>
+      <shared-rail-item
+        [label]="'macrodeck.app:Developer.Logs.AllLogsLabel' | translate"
+        [active]="isSourceSelected({ kind: 'all' })"
+        (click)="selectSource({ kind: 'all' })" />
+    </li>
+    <li>
+      <shared-rail-item
+        [label]="'macrodeck.app:Developer.Logs.HostLabel' | translate"
+        [active]="isSourceSelected({ kind: 'host' })"
+        (click)="selectSource({ kind: 'host' })" />
+    </li>
+    <li>
+      <shared-rail-item
+        [label]="'macrodeck.app:Settings.About.Bootstrapper' | translate"
+        [active]="isSourceSelected({ kind: 'bootstrapper' })"
+        (click)="selectSource({ kind: 'bootstrapper' })" />
+    </li>
+
+    @if (integrationSources().length > 0) {
+      <li class="rail-section" aria-hidden="true">{{ 'macrodeck.app:Developer.Logs.IntegrationsSectionLabel' | translate }}</li>
+      @for (integration of integrationSources(); track integration.integrationId) {
+        <li>
+          <shared-rail-item
+            [label]="integration.name"
+            [active]="isSourceSelected({ kind: 'integration', integrationId: integration.integrationId })"
+            (click)="selectSource({ kind: 'integration', integrationId: integration.integrationId })" />
+        </li>
+      }
+    }
+  </ul>
+
+  <header class="log-header">
+    <div class="log-title">
+      <h2>{{ detailTitle() }}</h2>
+    </div>
+
+    <div class="log-controls">
+      <shared-input
+        type="search"
+        [placeholder]="'macrodeck.app:Developer.Logs.SearchPlaceholder' | translate"
+        [ngModel]="search()"
+        (ngModelChange)="onSearchChange($event)" />
+
+      <div class="time-range" role="group" [attr.aria-label]="'macrodeck.app:Developer.Logs.TimeRangeLabel' | translate">
+        <span class="time-range-label">{{ 'macrodeck.app:Developer.Logs.TimeRangeLabel' | translate }}</span>
+        <shared-select
+          [options]="timeRangeOptions()"
+          [ngModel]="timeRange().preset"
+          (ngModelChange)="onTimeRangePresetChange($event)" />
+
+        @if (timeRange().preset === 'custom') {
+          <span class="time-range-label">{{ 'macrodeck.app:Developer.Logs.TimeRangeFromLabel' | translate }}</span>
+          <shared-datetime-picker
+            [value]="timeRange().customFrom ?? null"
+            (valueChange)="onCustomFromChange($event)" />
+          <span class="time-range-label">{{ 'macrodeck.app:Developer.Logs.TimeRangeToLabel' | translate }}</span>
+          <shared-datetime-picker
+            [value]="timeRange().customTo ?? null"
+            (valueChange)="onCustomToChange($event)" />
+        }
+      </div>
+
+      <div class="level-filters" role="group" [attr.aria-label]="'macrodeck.app:Developer.Logs.LevelsAriaLabel' | translate">
+        @for (level of levels; track level) {
+          <button
+            type="button"
+            [class]="'level-chip ' + levelClass(level)"
+            [class.active]="isLevelEnabled(level)"
+            [attr.aria-pressed]="isLevelEnabled(level)"
+            [title]="level"
+            (click)="toggleLevel(level)">
+            {{ levelLabel(level) }}
+          </button>
+        }
+      </div>
+
+      <shared-button
+        variant="secondary"
+        [disabled]="!hasActiveFilters()"
+        [title]="'macrodeck.app:Developer.Logs.ResetFiltersTitle' | translate"
+        (click)="resetFilters()">
+        {{ 'macrodeck.app:Developer.Logs.ResetFiltersAction' | translate }}
+      </shared-button>
+
+      <shared-button
+        variant="secondary"
+        [disabled]="visible().length === 0"
+        (click)="copyResults()">
+        <span class="icon icon-copy icon-sm"></span>
+        {{ 'macrodeck.app:Developer.Logs.CopyResultsAction' | translate }}
+      </shared-button>
+
+      <shared-button
+        variant="secondary"
+        [pressed]="autoScroll()"
+        [title]="'macrodeck.app:Developer.Logs.FollowTitle' | translate"
+        (click)="toggleAutoScroll()">
+        <span class="icon icon-arrow-down icon-sm"></span>
+        {{ 'macrodeck.app:Developer.Logs.FollowAction' | translate }}
+      </shared-button>
+    </div>
+  </header>
+
+  <!-- Outside the viewport: a variable-height sibling inside a fixed itemSize list desynchronises
+       every offset the virtual scroller computes. -->
+  @if (isLoadingOlder()) {
+    <p class="log-status">{{ 'macrodeck.app:Developer.Logs.LoadingOlderMessage' | translate }}</p>
+  } @else if (hasLoaded() && !hasMore() && visible().length > 0) {
+    <p class="log-status">{{ 'macrodeck.app:Developer.Logs.BeginningOfLogMessage' | translate }}</p>
+  }
+
+  @if (visible().length > 0) {
+    <cdk-virtual-scroll-viewport
+      class="log-lines"
+      role="log"
+      aria-live="off"
+      [attr.aria-label]="'macrodeck.app:Developer.Logs.EntriesAriaLabel' | translate"
+      [itemSize]="rowHeight"
+      minBufferPx="220"
+      maxBufferPx="440">
+      <div
+        *cdkVirtualFor="let entry of visible(); trackBy: trackEntry"
+        [class]="'log-line ' + levelClass(entry.level)"
+        [class.selected]="entry.id === selectedId()"
+        [style.height.px]="rowHeight"
+        (click)="selectEntry(entry)">
+        <span class="log-time">{{ time(entry) }}</span>
+        <span class="log-level">{{ levelLabel(entry.level) }}</span>
+        <span class="log-origin" [title]="entry.sourceId ?? origin(entry)">{{ origin(entry) }}</span>
+        <span class="log-message">{{ entry.message }}</span>
+        @if (entry.exception) {
+          <span
+            class="log-has-exception"
+            [title]="'macrodeck.app:Developer.Logs.HasExceptionTitle' | translate">!</span>
+        }
+      </div>
+    </cdk-virtual-scroll-viewport>
+  } @else if (isLoading()) {
+    <shared-empty-state
+      icon="file-text"
+      [heading]="'macrodeck.app:Developer.Logs.LoadingHeading' | translate"
+      [message]="'macrodeck.app:Developer.Logs.LoadingMessage' | translate" />
+  } @else if (enabledLevels().size === 0) {
+    <shared-empty-state
+      icon="file-text"
+      [heading]="'macrodeck.app:Developer.Logs.NoLevelsHeading' | translate"
+      [message]="'macrodeck.app:Developer.Logs.NoLevelsMessage' | translate" />
+  } @else if (hasNarrowingFilters()) {
+    <shared-empty-state
+      icon="file-text"
+      [heading]="'macrodeck.app:Developer.Logs.NothingMatchesHeading' | translate"
+      [message]="emptyStateMessageKey() | translate">
+      @if (isTimeBounded()) {
+        <shared-button variant="secondary" (click)="showAllTime()">
+          {{ 'macrodeck.app:Developer.Logs.ShowAllTimeAction' | translate }}
+        </shared-button>
+      }
+      @if (hasActiveFilters()) {
+        <shared-button variant="secondary" (click)="resetFilters()">
+          {{ 'macrodeck.app:Developer.Logs.ResetFiltersAction' | translate }}
+        </shared-button>
+      }
+    </shared-empty-state>
+  } @else {
+    <shared-empty-state
+      icon="file-text"
+      [heading]="'macrodeck.app:Developer.Logs.NoEntriesHeading' | translate"
+      [message]="'macrodeck.app:Developer.Logs.NoEntriesMessage' | translate" />
+  }
+
+  @if (selectedEntry(); as entry) {
+    <section class="log-detail" [attr.aria-label]="'macrodeck.app:Developer.Logs.DetailHeading' | translate">
+      <header class="log-detail-header">
+        <h3>{{ 'macrodeck.app:Developer.Logs.DetailHeading' | translate }}</h3>
+        <div class="log-detail-actions">
+          <shared-button
+            variant="secondary"
+            [ariaLabel]="'macrodeck.app:Developer.Logs.CopyEntryAriaLabel' | translate"
+            (click)="copyEntry()">
+            <span class="icon icon-copy icon-sm"></span>
+            {{ 'macrodeck.app:Developer.Logs.CopyEntryAction' | translate }}
+          </shared-button>
+          <shared-button
+            variant="ghost"
+            [ariaLabel]="'macrodeck:Common.Close' | translate"
+            (click)="closeDetail()">
+            {{ 'macrodeck:Common.Close' | translate }}
+          </shared-button>
+        </div>
+      </header>
+
+      <dl class="log-detail-fields">
+        <dt>{{ 'macrodeck.app:Developer.Logs.DetailTimestampLabel' | translate }}</dt>
+        <dd>{{ entry.timestamp }}</dd>
+        <dt>{{ 'macrodeck.app:Developer.Logs.DetailLevelLabel' | translate }}</dt>
+        <dd>{{ levelLabel(entry.level) }}</dd>
+        <dt>{{ 'macrodeck.app:Developer.Logs.DetailOriginLabel' | translate }}</dt>
+        <dd>{{ entry.sourceId ?? origin(entry) }}</dd>
+        <dt>{{ 'macrodeck.app:Developer.Logs.DetailMessageLabel' | translate }}</dt>
+        <dd><pre class="log-detail-text">{{ entry.message }}</pre></dd>
+        @if (entry.exception) {
+          <dt>{{ 'macrodeck.app:Developer.Logs.DetailExceptionLabel' | translate }}</dt>
+          <dd><pre class="log-detail-text log-exception">{{ entry.exception }}</pre></dd>
+        }
+      </dl>
+    </section>
+  }
+
+  @if (manualCopy(); as fallback) {
+    <shared-copy-text-modal
+      [message]="fallback.message"
+      [value]="fallback.value"
+      (closed)="manualCopy.set(null)" />
+  }
+</shared-rail-page>

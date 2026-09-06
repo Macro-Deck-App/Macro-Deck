@@ -1,0 +1,154 @@
+[
+	{
+		"name": "minimal-single-file",
+		"manifest": {
+			"id": "com.example.icons.minimal",
+			"name": "Minimal Icons",
+			"files": [
+				{
+					"path": "icon.png",
+					"sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+					"size": 5
+				}
+			]
+		},
+		"digestUtf8": "macro-deck-iconpack/1\ncom.example.icons.minimal\nMinimal Icons\n\n\nf\ticon.png\tsha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\t5\n",
+		"digestSha256": "1cf3d83d0f581165ebd366e501e01c83b95352cd37adc393cb1a73a46b889501"
+	},
+	{
+		"name": "full-multiple-files",
+		"manifest": {
+			"id": "com.example.icons.full",
+			"name": "Full Icons",
+			"files": [
+				{
+					"path": "icons/play.png",
+					"sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+					"size": 100
+				},
+				{
+					"path": "icons/stop.png",
+					"sha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+					"size": 200
+				},
+				{
+					"path": "pack.svg",
+					"sha256": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+					"size": 300
+				}
+			]
+		},
+		"digestUtf8": "macro-deck-iconpack/1\ncom.example.icons.full\nFull Icons\n\n\nf\ticons/play.png\tsha256:1111111111111111111111111111111111111111111111111111111111111111\t100\nf\ticons/stop.png\tsha256:2222222222222222222222222222222222222222222222222222222222222222\t200\nf\tpack.svg\tsha256:3333333333333333333333333333333333333333333333333333333333333333\t300\n",
+		"digestSha256": "8c337640e174d0ab935f0ca68a836ea727be54d375d1b06000269da9b571266f"
+	},
+	{
+		"name": "full-reordered-and-reformatted",
+		"manifest": {
+			"files": [
+				{
+					"size": 300,
+					"sha256": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+					"path": "pack.svg"
+				},
+				{
+					"size": 100,
+					"sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+					"path": "icons/play.png"
+				},
+				{
+					"size": 200,
+					"sha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+					"path": "icons/stop.png"
+				}
+			],
+			"name": "Full Icons",
+			"id": "com.example.icons.full"
+		},
+		"digestUtf8": "macro-deck-iconpack/1\ncom.example.icons.full\nFull Icons\n\n\nf\ticons/play.png\tsha256:1111111111111111111111111111111111111111111111111111111111111111\t100\nf\ticons/stop.png\tsha256:2222222222222222222222222222222222222222222222222222222222222222\t200\nf\tpack.svg\tsha256:3333333333333333333333333333333333333333333333333333333333333333\t300\n",
+		"digestSha256": "8c337640e174d0ab935f0ca68a836ea727be54d375d1b06000269da9b571266f"
+	},
+	{
+		"name": "ordinal-and-case-path-sort",
+		"manifest": {
+			"id": "com.example.icons.sortorder",
+			"name": "SortOrder Icons",
+			"files": [
+				{
+					"path": "app/lib.png",
+					"sha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+					"size": 2
+				},
+				{
+					"path": "plugin.png",
+					"sha256": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+					"size": 4
+				},
+				{
+					"path": "app.png",
+					"sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+					"size": 1
+				},
+				{
+					"path": "Plugin.png",
+					"sha256": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+					"size": 3
+				}
+			]
+		},
+		"digestUtf8": "macro-deck-iconpack/1\ncom.example.icons.sortorder\nSortOrder Icons\n\n\nf\tPlugin.png\tsha256:3333333333333333333333333333333333333333333333333333333333333333\t3\nf\tapp.png\tsha256:1111111111111111111111111111111111111111111111111111111111111111\t1\nf\tapp/lib.png\tsha256:2222222222222222222222222222222222222222222222222222222222222222\t2\nf\tplugin.png\tsha256:4444444444444444444444444444444444444444444444444444444444444444\t4\n",
+		"digestSha256": "60dd0b2e04c91f692d13c51efeb9fe80dd5aa213518091916fa721e1b49eef59"
+	},
+	{
+		"name": "unknown-top-level-property",
+		"manifest": {
+			"id": "com.example.icons.minimal",
+			"name": "Minimal Icons",
+			"files": [
+				{
+					"path": "icon.png",
+					"sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+					"size": 5
+				}
+			],
+			"futureField": "ignored"
+		},
+		"digestUtf8": "macro-deck-iconpack/1\ncom.example.icons.minimal\nMinimal Icons\n\n\nf\ticon.png\tsha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\t5\n",
+		"digestSha256": "1cf3d83d0f581165ebd366e501e01c83b95352cd37adc393cb1a73a46b889501"
+	},
+	{
+		"name": "attribution-baseline",
+		"manifest": {
+			"id": "com.example.icons.attribution",
+			"name": "Attribution Icons",
+			"author": "Original Author",
+			"version": "1.0.0",
+			"files": [
+				{
+					"path": "icon.png",
+					"sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+					"size": 6
+				}
+			]
+		},
+		"digestUtf8": "macro-deck-iconpack/1\ncom.example.icons.attribution\nAttribution Icons\nOriginal Author\n1.0.0\nf\ticon.png\tsha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\t6\n",
+		"digestSha256": "4ff9daa15ddd1f712cb8a7b939c97ba47b377393ca9ef4771ed0f491c6b65bcf"
+	},
+	{
+		"name": "attribution-author-changed",
+		"manifest": {
+			"id": "com.example.icons.attribution",
+			"name": "Attribution Icons",
+			"author": "Changed Author",
+			"version": "1.0.0",
+			"files": [
+				{
+					"path": "icon.png",
+					"sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+					"size": 6
+				}
+			]
+		},
+		"digestUtf8": "macro-deck-iconpack/1\ncom.example.icons.attribution\nAttribution Icons\nChanged Author\n1.0.0\nf\ticon.png\tsha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\t6\n",
+		"digestSha256": "f3b277522fa7cb12ef1e22db857a6605a10fac54f7650d72e72519d5f08020a4"
+	}
+]

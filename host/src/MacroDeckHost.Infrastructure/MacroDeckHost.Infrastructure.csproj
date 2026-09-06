@@ -1,0 +1,62 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <!-- An internal host layer, never a published package - dotnet pack MacroDeck.slnx would
+             otherwise produce a nupkg for it with no readme and no intentional public surface. -->
+        <IsPackable>false</IsPackable>
+        <!-- Pinned, and not derived from Version like everywhere else. Data Protection stores
+             KeyRingXmlDecryptor's assembly-qualified name - version included - inside every encrypted
+             key-*.xml and resolves it with Type.GetType on read. A version that moved with the release
+             would make a downgrade unable to load the type, and an unloadable decryptor is not an
+             error the user sees: Data Protection skips the key and mints a replacement, silently
+             orphaning every stored secret. -->
+        <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <!-- The Macro Deck Connect sign-in flow binds its own throwaway Kestrel listener for the OAuth
+           callback, so this layer needs the ASP.NET Core framework itself, not just abstractions. -->
+      <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MacroDeckHost.Application\MacroDeckHost.Application.csproj" />
+      <ProjectReference Include="..\MacroDeckHost.Domain\MacroDeckHost.Domain.csproj" />
+      <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Sdk\MacroDeck.Sdk.csproj" />
+      <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Signing\MacroDeck.Signing.csproj" />
+      <ProjectReference Include="..\MacroDeckHost.Integrations\MacroDeckHost.Integrations.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Cronos" />
+      <PackageReference Include="Evolve" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" />
+      <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+      <PackageReference Include="Serilog" />
+      <PackageReference Include="Serilog.Extensions.Hosting" />
+      <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+      <PackageReference Include="SixLabors.ImageSharp" />
+      <PackageReference Include="SkiaSharp" />
+      <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
+      <PackageReference Include="SkiaSharp.NativeAssets.macOS" />
+      <PackageReference Include="SkiaSharp.Resources" />
+      <PackageReference Include="SkiaSharp.Skottie" />
+      <PackageReference Include="Svg.Skia" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="Persistence\DatabaseMigrations\*.sql">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+            <TargetPath>DatabaseMigrations\%(Filename)%(Extension)</TargetPath>
+        </Content>
+    </ItemGroup>
+
+
+</Project>

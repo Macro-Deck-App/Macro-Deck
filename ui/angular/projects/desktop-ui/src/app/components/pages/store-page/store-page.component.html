@@ -1,0 +1,137 @@
+<!-- Temporary: the store backend is not live yet, so the whole page sits behind a coming-soon
+     overlay and is held inert. Remove this overlay, the `inert` binding and the ComingSoon* strings
+     once the store goes live. -->
+<div class="store-page" [attr.inert]="''">
+  <div class="store-page-content">
+    <div class="store-header">
+      <div class="store-heading">
+        <h1 class="store-title">{{ 'macrodeck.app:Store.Page.Title' | translate }}</h1>
+        <p class="store-subtitle">{{ 'macrodeck.app:Store.Page.Subtitle' | translate }}</p>
+      </div>
+      <shared-button
+        variant="secondary"
+        [loading]="catalog.registry()?.refreshing === true"
+        (click)="onRefresh()">
+        <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
+        <span>{{ 'macrodeck.app:Store.Page.RefreshAction' | translate }}</span>
+      </shared-button>
+    </div>
+
+    @if (catalog.registry()?.stale) {
+      <shared-error-banner
+        [message]="catalog.registry()?.lastErrorMessage || ('macrodeck.app:Store.Page.StaleCatalogMessage' | translate)"
+        [dismissible]="false" />
+    }
+
+    @if (catalog.loadError()) {
+      <shared-error-banner [message]="catalog.loadError()!" (dismiss)="catalog.loadError.set(null)" />
+    }
+
+    <div class="store-toolbar">
+      <div class="store-search">
+        <span class="icon icon-search icon-sm store-search-icon" aria-hidden="true"></span>
+        <shared-input
+          type="search"
+          [placeholder]="'macrodeck.app:Store.Page.SearchPlaceholder' | translate"
+          [ariaLabel]="'macrodeck.app:Store.Page.SearchAriaLabel' | translate"
+          [ngModel]="search()"
+          (ngModelChange)="onSearchChange($event)" />
+      </div>
+
+      <div class="store-facets">
+        <shared-segmented-control
+          [ariaLabel]="'macrodeck.app:Store.Page.KindFilterAriaLabel' | translate"
+          [options]="kindOptions()"
+          [value]="kind()"
+          (valueChange)="onKindChange($event)" />
+        <label class="store-sort">
+          <span class="store-sort-label">{{ 'macrodeck.app:Store.Page.SortLabel' | translate }}</span>
+          <shared-select
+            [options]="sortOptions()"
+            [ngModel]="sort()"
+            (ngModelChange)="onSortChange($event)" />
+        </label>
+      </div>
+    </div>
+
+    <div class="store-sections">
+      @if (showUnavailable()) {
+        <shared-empty-state
+          icon="alert-triangle"
+          [heading]="'macrodeck.app:Store.Page.UnavailableHeading' | translate"
+          [message]="'macrodeck.app:Store.Page.UnavailableMessage' | translate">
+          <shared-button variant="primary" (click)="onRefresh()">{{ 'macrodeck:Common.Retry' | translate }}</shared-button>
+        </shared-empty-state>
+      } @else if (showEmptyCatalog()) {
+        <shared-empty-state
+          icon="store"
+          [heading]="'macrodeck.app:Store.Page.EmptyCatalogHeading' | translate"
+          [message]="'macrodeck.app:Store.Page.EmptyCatalogMessage' | translate" />
+      } @else {
+        @if (showFeaturedRow()) {
+          <shared-store-section
+            icon="star"
+            [heading]="featuredHeading()"
+            [items]="featuredItems()"
+            (install)="onInstall($event)"
+            (installUnsigned)="onInstallUnsigned($event)"
+            (retry)="onRetry($event)"
+            (uninstall)="onUninstallRequested($event)" />
+        }
+
+        @if (showFreshRow()) {
+          <shared-store-section
+            [heading]="freshHeading()"
+            [items]="freshItems()"
+            (install)="onInstall($event)"
+            (installUnsigned)="onInstallUnsigned($event)"
+            (retry)="onRetry($event)"
+            (uninstall)="onUninstallRequested($event)" />
+        }
+
+        @if (showEmptyResults()) {
+          <shared-empty-state
+            [heading]="'macrodeck.app:Store.Page.NoResultsHeading' | translate"
+            [message]="'macrodeck.app:Store.Page.NoResultsMessage' | translate" />
+        } @else {
+          <shared-store-section
+            [heading]="resultsHeading()"
+            [count]="resultCount()"
+            [items]="catalog.items()"
+            (install)="onInstall($event)"
+            (installUnsigned)="onInstallUnsigned($event)"
+            (retry)="onRetry($event)"
+            (uninstall)="onUninstallRequested($event)" />
+
+          @if (catalog.hasMore() && !catalog.loadError()) {
+            <div class="store-load-more">
+              <shared-button
+                variant="secondary"
+                [loading]="catalog.isLoadingMore()"
+                (click)="onLoadMore()">
+                {{ 'macrodeck.app:Store.Page.LoadMoreAction' | translate }}
+              </shared-button>
+            </div>
+          }
+        }
+      }
+    </div>
+  </div>
+</div>
+
+@if (pendingUninstall()) {
+  <shared-confirmation-modal
+    [heading]="uninstallHeading()"
+    [message]="uninstallMessage()"
+    [confirmText]="'macrodeck.app:Store.Uninstall' | translate"
+    [danger]="true"
+    (confirm)="confirmUninstall()"
+    (cancel)="cancelUninstall()" />
+}
+
+<div class="store-coming-soon">
+  <shared-empty-state
+    icon="store"
+    [heading]="'macrodeck.app:Store.Page.ComingSoonHeading' | translate"
+    [message]="'macrodeck.app:Store.Page.ComingSoonMessage' | translate" />
+</div>

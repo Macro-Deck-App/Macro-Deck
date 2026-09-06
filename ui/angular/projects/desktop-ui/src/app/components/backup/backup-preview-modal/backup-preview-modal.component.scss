@@ -1,0 +1,62 @@
+.bpm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.bpm-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--space-3);
+  row-gap: var(--space-1);
+  margin: 0;
+}
+
+.bpm-facts dt {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.bpm-facts dd {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  text-align: right;
+}
+
+.bpm-components-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-1);
+}
+
+.bpm-components-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding: 0;
+  margin: 0;
+}
+
+.bpm-components-list li {
+  padding: 0.125rem var(--space-2);
+  border-radius: 999px;
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+}
+
+.bpm-decrypt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.bpm-decrypt-warn {
+  color: var(--color-warning);
+}

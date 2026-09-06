@@ -1,0 +1,222 @@
+[
+	{
+		"name": "minimal-entrypoint-no-runtime",
+		"manifest": {
+			"manifestVersion": 1,
+			"id": "com.example.minimal",
+			"name": "Minimal",
+			"version": "1.0.0",
+			"entrypoints": {
+				"linux-x64": {
+					"executable": "app"
+				}
+			}
+		},
+		"digestUtf8": "macro-deck-plugin/1\ncom.example.minimal\n1.0.0\ne\tlinux-x64\tSelfContained\t\tapp\n",
+		"digestSha256": "bf5467863c2387c3cb238e9bacaf53342116a998365a0b5bc80f906825572b0d"
+	},
+	{
+		"name": "full-three-rids-permissions-files",
+		"manifest": {
+			"manifestVersion": 1,
+			"id": "com.example.full",
+			"name": "Full",
+			"version": "2.3.1",
+			"entrypoints": {
+				"linux-x64": {
+					"executable": "app",
+					"arguments": [
+						"--flag1",
+						"--flag2"
+					]
+				},
+				"win-x64": {
+					"executable": "App.dll",
+					"runtime": {
+						"kind": "FrameworkDependent",
+						"dotnetVersion": "10.0"
+					},
+					"arguments": [
+						"--a"
+					]
+				},
+				"osx-arm64": {
+					"executable": "app-osx"
+				}
+			},
+			"permissions": [
+				"host:deck",
+				"host:scripts"
+			],
+			"files": [
+				{
+					"path": "app",
+					"sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+					"size": 10
+				},
+				{
+					"path": "App.dll",
+					"sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+					"size": 20
+				},
+				{
+					"path": "app-osx",
+					"sha256": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+					"size": 30
+				}
+			]
+		},
+		"digestUtf8": "macro-deck-plugin/1\ncom.example.full\n2.3.1\ne\tlinux-x64\tSelfContained\t\tapp\t--flag1\t--flag2\ne\tosx-arm64\tSelfContained\t\tapp-osx\ne\twin-x64\tFrameworkDependent\t10.0\tApp.dll\t--a\np\thost:deck\np\thost:scripts\nf\tApp.dll\tsha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\t20\nf\tapp\tsha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\t10\nf\tapp-osx\tsha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\t30\n",
+		"digestSha256": "81ea8275185943ac3680cbf7b17687982d53b43162cab0498882319bb37947a4"
+	},
+	{
+		"name": "full-reordered-and-reformatted",
+		"manifest": {
+			"files": [
+				{
+					"size": 30,
+					"sha256": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+					"path": "app-osx"
+				},
+				{
+					"size": 10,
+					"sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+					"path": "app"
+				},
+				{
+					"size": 20,
+					"sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+					"path": "App.dll"
+				}
+			],
+			"permissions": [
+				"host:scripts",
+				"host:deck"
+			],
+			"entrypoints": {
+				"osx-arm64": {
+					"executable": "app-osx"
+				},
+				"win-x64": {
+					"arguments": [
+						"--a"
+					],
+					"runtime": {
+						"dotnetVersion": "10.0",
+						"kind": "FrameworkDependent"
+					},
+					"executable": "App.dll"
+				},
+				"linux-x64": {
+					"arguments": [
+						"--flag1",
+						"--flag2"
+					],
+					"executable": "app"
+				}
+			},
+			"version": "2.3.1",
+			"name": "Full",
+			"id": "com.example.full",
+			"manifestVersion": 1
+		},
+		"digestUtf8": "macro-deck-plugin/1\ncom.example.full\n2.3.1\ne\tlinux-x64\tSelfContained\t\tapp\t--flag1\t--flag2\ne\tosx-arm64\tSelfContained\t\tapp-osx\ne\twin-x64\tFrameworkDependent\t10.0\tApp.dll\t--a\np\thost:deck\np\thost:scripts\nf\tApp.dll\tsha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\t20\nf\tapp\tsha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\t10\nf\tapp-osx\tsha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\t30\n",
+		"digestSha256": "81ea8275185943ac3680cbf7b17687982d53b43162cab0498882319bb37947a4"
+	},
+	{
+		"name": "ordinal-and-case-path-sort",
+		"manifest": {
+			"manifestVersion": 1,
+			"id": "com.example.sortorder",
+			"name": "SortOrder",
+			"version": "1.0.0",
+			"entrypoints": {
+				"linux-x64": {
+					"executable": "app"
+				}
+			},
+			"files": [
+				{
+					"path": "app/lib.dll",
+					"sha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+					"size": 2
+				},
+				{
+					"path": "plugin.dll",
+					"sha256": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+					"size": 4
+				},
+				{
+					"path": "app.dll",
+					"sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+					"size": 1
+				},
+				{
+					"path": "Plugin.dll",
+					"sha256": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+					"size": 3
+				}
+			]
+		},
+		"digestUtf8": "macro-deck-plugin/1\ncom.example.sortorder\n1.0.0\ne\tlinux-x64\tSelfContained\t\tapp\nf\tPlugin.dll\tsha256:3333333333333333333333333333333333333333333333333333333333333333\t3\nf\tapp.dll\tsha256:1111111111111111111111111111111111111111111111111111111111111111\t1\nf\tapp/lib.dll\tsha256:2222222222222222222222222222222222222222222222222222222222222222\t2\nf\tplugin.dll\tsha256:4444444444444444444444444444444444444444444444444444444444444444\t4\n",
+		"digestSha256": "106c0f5f3adb424901b08e0277c5787a5c499b4783f57d4fe5191ffb735ad2fb",
+		"sortedPaths": [
+			"Plugin.dll",
+			"app.dll",
+			"app/lib.dll",
+			"plugin.dll"
+		]
+	},
+	{
+		"name": "unknown-top-level-property",
+		"manifest": {
+			"manifestVersion": 1,
+			"id": "com.example.minimal",
+			"name": "Minimal",
+			"version": "1.0.0",
+			"entrypoints": {
+				"linux-x64": {
+					"executable": "app"
+				}
+			},
+			"futureField": {
+				"nested": true
+			}
+		},
+		"digestUtf8": "macro-deck-plugin/1\ncom.example.minimal\n1.0.0\ne\tlinux-x64\tSelfContained\t\tapp\n",
+		"digestSha256": "bf5467863c2387c3cb238e9bacaf53342116a998365a0b5bc80f906825572b0d"
+	},
+	{
+		"name": "permissions-empty",
+		"manifest": {
+			"manifestVersion": 1,
+			"id": "com.example.minimal",
+			"name": "Minimal",
+			"version": "1.0.0",
+			"entrypoints": {
+				"linux-x64": {
+					"executable": "app"
+				}
+			},
+			"permissions": []
+		},
+		"digestUtf8": "macro-deck-plugin/1\ncom.example.minimal\n1.0.0\ne\tlinux-x64\tSelfContained\t\tapp\n",
+		"digestSha256": "bf5467863c2387c3cb238e9bacaf53342116a998365a0b5bc80f906825572b0d"
+	},
+	{
+		"name": "permissions-absent",
+		"manifest": {
+			"manifestVersion": 1,
+			"id": "com.example.minimal",
+			"name": "Minimal",
+			"version": "1.0.0",
+			"entrypoints": {
+				"linux-x64": {
+					"executable": "app"
+				}
+			}
+		},
+		"digestUtf8": "macro-deck-plugin/1\ncom.example.minimal\n1.0.0\ne\tlinux-x64\tSelfContained\t\tapp\n",
+		"digestSha256": "bf5467863c2387c3cb238e9bacaf53342116a998365a0b5bc80f906825572b0d"
+	}
+]

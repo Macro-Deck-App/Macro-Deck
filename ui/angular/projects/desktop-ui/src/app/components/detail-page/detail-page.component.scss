@@ -1,0 +1,74 @@
+@use '../../../styles/index' as ds;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.dp-surface {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  animation: ds-slide-up-in 200ms ease-out;
+}
+
+.dp-surface.dp-leaving {
+  animation: ds-slide-up-out 160ms ease-in forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dp-surface,
+  .dp-surface.dp-leaving {
+    animation: none;
+  }
+}
+
+.dp-topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 2.625rem;
+  padding: 0 var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  flex: 0 0 auto;
+}
+
+.dp-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-compact);
+  height: var(--control-height-compact);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+
+  &:hover {
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-hover);
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+}
+
+// A flex column rather than a scroll container: every page projected here brings its own scrolling
+// region, and a block-level body would break the height chain those regions depend on - a child's
+// `flex: 1 1 0` resolves against nothing, so anything sized from its parent's height collapses.
+.dp-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}

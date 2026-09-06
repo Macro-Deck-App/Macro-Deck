@@ -1,0 +1,192 @@
+@use '../../../../../../styles/index' as ds;
+
+// Single source for the sidebar/drawer width - referenced by both the inline width and the
+// parked (off-canvas) drawer position, so 300px (EDITOR_SIDEBAR_WIDTH in the .ts) is never
+// repeated as a literal a third time.
+$sidebar-width: 300px;
+
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+.editor-shell {
+  // Containing block for the compact drawer's `position: absolute` - not `position: fixed`, which
+  // would let it (and anything it renders inline) escape to the viewport instead (issue #292).
+  position: relative;
+  display: flex;
+  gap: var(--space-5);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+// Deliberately not positioned: that is what lets the compact drawer and its scrim paint above this
+// pane without a z-index, no matter that they precede it in the DOM (see the template comment).
+// Nothing inside needs it as a containing block - the action cards' absolutely positioned parts
+// each anchor to their own `position: relative` frame.
+.editor-shell-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  // Keep the action-builder content clear of the floating Save button that
+  // overlaps the bottom-right corner of the editor page.
+  padding-bottom: 3.25rem;
+}
+
+.editor-shell-toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  padding-bottom: var(--space-3);
+}
+
+// The toggle and the drawer's close button share this look; both are native <button>s (not
+// shared-button, which doesn't forward aria-expanded/aria-label to its inner button) styled off
+// the shared control tokens rather than one-off pixel values.
+.editor-shell-appearance-toggle,
+.editor-shell-drawer-close {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  @include ds.control-base;
+  @include ds.control-interactive;
+
+  // control-interactive drops the outward ring for text-like controls (they signal focus via
+  // their border instead); a plain button has no such border-based focus signal, so restore it.
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+}
+
+// The card and the scroll container are separate elements: the scrollbar belongs to the
+// inner one, so the card's `overflow: hidden` rounds the scrollbar along with the content.
+// A clipping property on the card itself (clip-path, mask, filter, contain) would round it
+// too, but clips every descendant including the `position: fixed` modal overlays the
+// sidebar renders inline, which left them cut to the sidebar rect (issue #292). The same
+// reasoning rules out `transform` for the compact drawer's open/close animation below - a
+// `transform` on this element would make it a containing block for those `position: fixed`
+// descendants too, so the drawer animates via `inset-inline-start` instead.
+.editor-shell-sidebar {
+  width: $sidebar-width;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+  // Match the shared-rail-page `.detail` panel (Icon Packs / Variables) so all
+  // large side panels look identical.
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-secondary);
+}
+
+.editor-shell-drawer-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.editor-shell-drawer-title {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+}
+
+.editor-shell-sidebar-scroll {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  // Horizontal padding is deliberately smaller than the vertical one: the gutter below already
+  // reserves a scrollbar's width at each edge, so a full --space-4 on top of it inset the content
+  // by roughly a tenth of the panel on either side (issue #898).
+  padding: var(--space-4) var(--space-2);
+  // WebKit puts both gutters of stable both-edges at the end edge, which leaves the content
+  // visibly off-centre; the start edge mirrors the width the engine reserved, measured in the .ts.
+  scrollbar-gutter: stable;
+  padding-inline-start: calc(var(--space-2) + var(--editor-sidebar-gutter, 0px));
+
+  // Focused only programmatically (to park focus after a resize collapses the drawer); never a
+  // tab stop of its own.
+  &:focus {
+    outline: none;
+  }
+}
+
+// A dismissal surface, not a modal barrier: the drawer is a non-modal side panel, so the main pane
+// stays in the tab order behind it and a click out here just closes the drawer rather than blocking
+// the app. That is why nothing sets `inert` on the main pane and there is no focus trap.
+//
+// The scrim and the drawer both carry `--z-dropdown` in the compact layout. DOM order alone will not
+// do it: the main pane is full of elements that paint in the positioned layer without being
+// positioned - every `.icon` mask creates a stacking context, as does every action card - and they
+// come after the drawer in the DOM. `--z-dropdown` is the right rung: above page content, below
+// `--z-modal`, so a confirmation modal still covers the drawer. It caps the icon picker the sidebar
+// renders inline at that level too, which is harmless here only because no app chrome sets a
+// z-index at all - checked before choosing this over a DOM reorder, which would have put the
+// appearance pane after the action editor in the tab order.
+.editor-shell-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-dropdown);
+  background-color: var(--color-scrim);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.editor-shell-scrim--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+// Compact layout: the sidebar leaves the flex flow and becomes a slide-in drawer, parked
+// off-canvas until opened. It sits one rung above the scrim, and only here - in the wide layout it
+// is an ordinary flow item and creates no stacking context at all (see the scrim's note above).
+.editor-shell--compact .editor-shell-sidebar {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(-1 * #{$sidebar-width});
+  z-index: var(--z-dropdown);
+  // Never wider than the pane it covers - a browser viewport can be narrower than the drawer,
+  // which the desktop shell's minimum window size does not protect against.
+  max-width: 100%;
+  box-shadow: var(--shadow-popover);
+  // `visibility` is what actually keeps a parked drawer out of the tab order (inert is a
+  // progressive enhancement - there is no other `inert` usage in this repo yet, and Linux
+  // WebKitGTK needs >= 2.38). It flips to hidden only once the close slide has finished, mirroring
+  // `.editor-save-fab--hidden` in widget-editor-page.component.scss.
+  visibility: hidden;
+  transition:
+    inset-inline-start var(--transition-normal),
+    visibility 0s var(--transition-normal);
+}
+
+.editor-shell--compact.editor-shell--drawer-open .editor-shell-sidebar {
+  inset-inline-start: 0;
+  visibility: visible;
+  transition:
+    inset-inline-start var(--transition-normal),
+    visibility 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  // `transition: none` rather than a zeroed duration: the closed state delays `visibility` until
+  // the slide has finished, and zeroing only the duration would leave that delay behind.
+  .editor-shell--compact .editor-shell-sidebar,
+  .editor-shell--compact.editor-shell--drawer-open .editor-shell-sidebar,
+  .editor-shell-scrim {
+    transition: none;
+  }
+}

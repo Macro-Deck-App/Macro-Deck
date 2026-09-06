@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <!-- Underscored test names, like the other unit test projects. -->
+        <NoWarn>$(NoWarn);CA1707</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="NUnit.Analyzers" />
+        <PackageReference Include="NUnit3TestAdapter" />
+        <!-- The compilation-under-test the harness builds needs the same compiler API the analyzer
+             itself is written against. -->
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    </ItemGroup>
+
+    <!-- Plain ProjectReferences, not OutputItemType="Analyzer": the harness instantiates and runs an
+         analyzer type directly against a synthetic compilation, it does not ask the compiler to run this
+         package's analyzers over this test project's own source. MacroDeck.Sdk and MacroDeck.Plugin.Hosting
+         (which itself references MacroDeck.Plugin.Protocol) supply the real assemblies the harness's
+         synthetic compilations reference, so a test snippet can use PluginHostBuilder, ICapabilityHandler,
+         IIntegration and friends exactly as a real plugin would. -->
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\MacroDeck.Plugin.Analyzers\MacroDeck.Plugin.Analyzers.csproj" />
+        <ProjectReference Include="..\..\src\MacroDeck.Sdk\MacroDeck.Sdk.csproj" />
+        <ProjectReference Include="..\..\src\MacroDeck.Plugin.Hosting\MacroDeck.Plugin.Hosting.csproj" />
+        <ProjectReference Include="..\..\src\MacroDeck.Localization\MacroDeck.Localization.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="NUnit.Framework" />
+    </ItemGroup>
+
+</Project>

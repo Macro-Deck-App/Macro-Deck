@@ -1,0 +1,56 @@
+/*
+ * inline-flex, not inline-block: as an inline-block the trigger inside would sit on a text
+ * baseline and the line box's descender space would make the host taller than the button, which
+ * throws off a host that centres it against the field (shared-param-input).
+ */
+:host {
+  display: inline-flex;
+}
+
+/*
+ * The trigger sits inside the text field it belongs to (issue #665), so it carries no border or
+ * control padding of its own - a bordered box inside a bordered box. The host sizes it through
+ * --tb-trigger-width / --tb-trigger-height and reserves matching padding on the field, so typed
+ * text cannot reach it.
+ *
+ * The opaque background is not decoration: a multi-line field scrolls its content underneath the
+ * trigger, which would otherwise show through it.
+ */
+.tb-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--tb-trigger-width, 2.5rem);
+  height: var(--tb-trigger-height, 1.5rem);
+  padding: 0;
+  // The glyph is five characters wide in a box narrower than the label it usually sits next to,
+  // so it must never be allowed to break - a wrapped "{{ / }}" is two lines tall and blows the
+  // gutter the host reserved for it.
+  white-space: nowrap;
+  border: none;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.tb-trigger:hover:not(:disabled) {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.tb-trigger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.tb-trigger-symbol {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  letter-spacing: -0.03em;
+}
+
+/* tb-footer layout is handled globally via [modal-footer] in styles.scss */

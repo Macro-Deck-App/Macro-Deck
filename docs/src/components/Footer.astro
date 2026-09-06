@@ -1,0 +1,38 @@
+---
+// Wraps Starlight's footer so the pagination, "Edit this page" and last-updated
+// links are kept, and adds the legal links the main site carries.
+import Default from '@astrojs/starlight/components/Footer.astro';
+---
+
+<Default><slot /></Default>
+
+<footer class="legal">
+	<a href="https://macro-deck.app/imprint">Imprint</a>
+	<span aria-hidden="true">&middot;</span>
+	<a href="https://macro-deck.app/privacy">Privacy Policy</a>
+</footer>
+
+<style>
+	.legal {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		margin-top: 1.5rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--sl-color-gray-5);
+		color: var(--sl-color-gray-3);
+		font-size: var(--sl-text-sm);
+	}
+
+	.legal a {
+		color: var(--sl-color-gray-3);
+		text-decoration: none;
+	}
+
+	.legal a:hover {
+		color: var(--sl-color-text-accent);
+		text-decoration: underline;
+	}
+</style>

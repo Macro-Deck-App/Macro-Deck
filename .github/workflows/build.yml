@@ -1,0 +1,989 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version - 3.0.0 for a full release or 3.0.0-beta.4 for a beta
+        type: string
+        required: true
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+# checks: write lets dorny/test-reporter publish the .NET test results as a check run.
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
+env:
+  NODE_VERSION: 22
+  DOTNET_VERSION: 10.0.x
+  # Release artifacts always use the production host and bootstrapper identity.
+  # Beta is derived from the normalized version below, not a separate build mode.
+  BUILD_CHANNEL: Production
+
+jobs:
+  prepare:
+    name: Prepare version
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    # Overrides the workflow-level permissions above (a job-level block
+    # replaces rather than adds to them) to grant the contents: write scope
+    # POST /repos/{repo}/releases/generate-notes needs. build.yml is
+    # workflow_dispatch-only, so this elevated scope is never reachable from a
+    # fork pull request.
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      informational: ${{ steps.version.outputs.informational }}
+      build_time: ${{ steps.version.outputs.build_time }}
+      build_number: ${{ steps.version.outputs.build_number }}
+      updater_channel: ${{ steps.version.outputs.updater_channel }}
+      manifest_channels: ${{ steps.version.outputs.manifest_channels }}
+      deb_version: ${{ steps.version.outputs.deb_version }}
+      rpm_version: ${{ steps.version.outputs.rpm_version }}
+      rpm_release: ${{ steps.version.outputs.rpm_release }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Compute version
+        id: version
+        env:
+          VERSION_INPUT: ${{ inputs.version }}
+        run: |
+          version=$(node ci/scripts/release-version.mjs "$VERSION_INPUT" --github-output "$GITHUB_OUTPUT")
+          informational="${version}+${GITHUB_SHA::7}"
+          build_time=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          {
+            echo "informational=${informational}"
+            echo "build_time=${build_time}"
+            echo "build_number=${{ github.run_number }}"
+          } >> "$GITHUB_OUTPUT"
+          echo "Version: ${informational} (build ${{ github.run_number }}, built ${build_time})"
+
+      # Generated ahead of the release (which publish-release.yml creates only
+      # after this workflow succeeds) so the same body can be embedded in the
+      # update manifests below and reused verbatim for the GitHub release
+      # itself, keeping the changelog in both places identical (issue #249).
+      # An empty body is a legitimate outcome - the desktop UI has its own
+      # fallback text - so it must not fail the build.
+      - name: Generate release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/${{ github.repository }}/releases/generate-notes" \
+            -f tag_name="v${{ steps.version.outputs.version }}" \
+            -f target_commitish="$GITHUB_SHA" \
+            --jq .body > release-notes.md
+
+      - name: Upload release notes
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-notes
+          path: release-notes.md
+          retention-days: 14
+
+  test-host:
+    name: Test host
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Run tests
+        run: dotnet test MacroDeck.slnx -c Release -p:BuildChannel=${{ env.BUILD_CHANNEL }} --logger trx --results-directory TestResults
+
+      - name: Report test results
+        uses: dorny/test-reporter@v3
+        if: always()
+        with:
+          name: .NET tests (Linux)
+          path: TestResults/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+          fail-on-empty: false
+
+  test-host-windows:
+    name: Test host (Windows)
+    runs-on: blacksmith-2vcpu-windows-2025
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Run Windows platform tests
+        run: dotnet test host/tests/MacroDeckHost.Tests.UnitTests.Windows -c Release -p:BuildChannel=${{ env.BUILD_CHANNEL }} --logger trx --results-directory TestResults
+
+      - name: Report test results
+        uses: dorny/test-reporter@v3
+        if: always()
+        with:
+          name: .NET tests (Windows)
+          path: TestResults/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+          fail-on-empty: false
+
+  test-host-macos:
+    name: Test host (macOS)
+    runs-on: blacksmith-6vcpu-macos-26
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Run macOS platform tests
+        run: dotnet test host/tests/MacroDeckHost.Tests.UnitTests.MacOS -c Release -p:BuildChannel=${{ env.BUILD_CHANNEL }} --logger trx --results-directory TestResults
+
+      - name: Report test results
+        uses: dorny/test-reporter@v3
+        if: always()
+        with:
+          name: .NET tests (macOS)
+          path: TestResults/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+          fail-on-empty: false
+
+  # The SDK and plugin developer packages ship with the release, built from this run's revision rather
+  # than by a separate pipeline: they are packed here at the release version and published later from
+  # the artifact this uploads. Needs test-host rather than running the suite again - it already ran it
+  # in this run - and nothing else in the workflow produces packable output (test-host builds without a
+  # version, publish-host builds only the host per RID), so this job is where they are compiled.
+  pack-nuget:
+    if: false
+    name: Pack NuGet packages
+    needs: [prepare, test-host]
+    uses: ./.github/workflows/nuget-pack.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
+      run_tests: false
+
+  build-ui:
+    name: Build Angular UI
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ui
+        run: npm ci
+
+      # The runner image decides which Chrome these specs run against, and that changes results the
+      # app does not control: hit-testing at a rounded corner answers differently on 144 than on 151.
+      # Pin it so a new runner image cannot move the suite.
+      - name: Pin Chrome
+        id: chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: '151'
+          install-dependencies: true
+
+      - name: Use the pinned Chrome
+        run: echo "CHROME_BIN=${{ steps.chrome.outputs.chrome-path }}" >> "$GITHUB_ENV"
+
+      # Both clients import @macro-deck/runtime, whose package exports resolve only into its build
+      # output, so every step below fails to resolve the package until this has run.
+      - name: Build the framework-free runtime
+        working-directory: ui/runtime
+        run: npm run build
+
+      - name: Test desktop-ui
+        working-directory: ui/angular
+        run: npx ng test desktop-ui --watch=false --browsers=ChromeHeadless
+
+      - name: Test the framework-free web client
+        working-directory: ui/web-client
+        run: npm test
+
+      - name: Build production bundles
+        working-directory: ui/angular
+        run: npm run build:prod
+
+      - name: Build the web client and its device targets
+        working-directory: ui/web-client
+        run: |
+          npm run build
+          npm run build:carthing
+
+      - name: Web client compatibility gate
+        working-directory: ui/web-client
+        run: |
+          npm run check:es5
+          npm run test:legacy
+
+      # The worker refuses to serve a precached file whose content does not match what it recorded,
+      # so a step that rewrites an asset afterwards disables the PWA with no build error at all.
+      - name: Service worker manifest check
+        run: node ci/scripts/verify-worker-manifest.mjs ui/web-client/dist ui/web-client/dist-carthing
+
+      - name: Upload Angular dist
+        uses: actions/upload-artifact@v7
+        with:
+          name: angular-dist
+          path: ui/angular/dist/
+          retention-days: 14
+          if-no-files-found: error
+
+      # The web client left the Angular workspace in #835, so angular-dist no longer carries it and
+      # the publish job - a separate runner that only checks out the repo - has nothing to copy
+      # into wwwroot unless its builds travel with it.
+      - name: Upload web client dist
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-client-dist
+          path: |
+            ui/web-client/dist/
+            ui/web-client/dist-carthing/
+          retention-days: 14
+          if-no-files-found: error
+
+  publish-host:
+    name: Publish host (${{ matrix.rid }})
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    needs: [prepare, build-ui]
+    strategy:
+      matrix:
+        rid: [win-x64, linux-x64, osx-arm64]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Download Angular dist
+        uses: actions/download-artifact@v7
+        with:
+          name: angular-dist
+          path: ui/angular/dist
+
+      - name: Download web client dist
+        uses: actions/download-artifact@v7
+        with:
+          name: web-client-dist
+          path: ui/web-client
+
+      - name: Publish host
+        run: |
+          dotnet publish host/src/MacroDeckHost \
+            -c Release \
+            -r ${{ matrix.rid }} \
+            --self-contained true \
+            -p:Version=${{ needs.prepare.outputs.version }} \
+            -p:InformationalVersion=${{ needs.prepare.outputs.informational }} \
+            -p:BuildTimestamp=${{ needs.prepare.outputs.build_time }} \
+            -p:BuildNumber=${{ needs.prepare.outputs.build_number }} \
+            -p:BuildChannel=${{ env.BUILD_CHANNEL }} \
+            -p:DebugType=None \
+            -p:DebugSymbols=false \
+            -o publish
+
+      # Regression guard for issue #316: a loose managed assembly or PDB next to the
+      # single-file host means codesign will fail signing the macOS .app later. The pdb
+      # pattern is narrow (MacroDeck*.pdb only) because win-x64 always ships
+      # libSkiaSharp.pdb/libHarfBuzzSharp.pdb as NuGet content, which -p:DebugType=None
+      # does not strip; a blanket *.pdb check would fail every Windows release build.
+      - name: Verify the publish output has no loose assemblies
+        run: |
+          leftovers=$(find publish -type f \( -name '*.dll' -o -name 'MacroDeck*.pdb' \))
+          if [ -n "$leftovers" ]; then
+            echo "unexpected loose assemblies in the publish output:" >&2
+            echo "$leftovers" >&2
+            exit 1
+          fi
+
+      - name: Add web client, configuration UI and packaged marker
+        run: |
+          cp -R ui/web-client/dist publish/wwwroot
+          cp -R ui/angular/dist/desktop-ui/browser publish/wwwroot/admin
+          mkdir -p publish/wwwroot/targets
+          cp -R ui/web-client/dist-carthing publish/wwwroot/targets/carthing
+          touch publish/.macro-deck-packaged
+
+      - name: Pack (preserve permissions)
+        run: tar czf host-${{ matrix.rid }}.tar.gz -C publish .
+
+      - name: Upload host publish
+        uses: actions/upload-artifact@v7
+        with:
+          name: host-${{ matrix.rid }}
+          path: host-${{ matrix.rid }}.tar.gz
+          retention-days: 14
+          if-no-files-found: error
+
+  package-linux:
+    name: Package Linux (AppImage, DEB, RPM)
+    # Build against the oldest supported glibc baseline. Besides producing
+    # more portable artifacts, this avoids linuxdeploy regressions caused by
+    # newer ELF features on the ubuntu-latest (24.04) image, and keeps the
+    # declared libc6 floor in tauri.linux.conf.json's deb.depends accurate.
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [prepare, test-host, build-ui, publish-host]
+    env:
+      # Without the updater key the bundle is built without updater artifacts and
+      # no channel file is generated (mirrors the signing gates).
+      HAS_UPDATER_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ui/bootstrapper/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ui/bootstrapper
+
+      - name: Install Linux packaging dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev \
+            librsvg2-dev patchelf libxdo-dev file dpkg-dev rpm
+
+      - name: Download host publish
+        uses: actions/download-artifact@v7
+        with:
+          name: host-linux-x64
+
+      - name: Stage host
+        run: |
+          mkdir -p ui/bootstrapper/host-publish
+          tar xzf host-linux-x64.tar.gz -C ui/bootstrapper/host-publish
+
+          # The self-contained .NET runtime includes an optional LTTng trace
+          # provider linked against liblttng-ust.so.0. Ubuntu 22.04 only ships
+          # the ABI-incompatible liblttng-ust.so.1, so linuxdeploy cannot scan
+          # the otherwise unused provider - it must not reach the packaged tree,
+          # which the AppImage, DEB and RPM bundles all pack. Single-file
+          # publishing (issue #316) now folds it into the launcher, so it never
+          # exists as a loose file; assert its absence instead of removing it.
+          test ! -e ui/bootstrapper/host-publish/libcoreclrtraceptprovider.so
+
+      - name: Install dependencies
+        working-directory: ui/bootstrapper
+        run: npm ci
+
+      - name: Write version override
+        working-directory: ui/bootstrapper
+        run: |
+          printf '{"version":"%s","bundle":{"createUpdaterArtifacts":%s},"plugins":{"updater":{"endpoints":["https://dev.macro-deck.app/releases/%s-{{target}}.json"]}}}\n' \
+            "${{ needs.prepare.outputs.version }}" "${{ env.HAS_UPDATER_KEY == 'true' && 'true' || 'false' }}" "${{ needs.prepare.outputs.updater_channel }}" \
+            > version-override.json
+
+      # The release identity and the file associations live in the checked-in
+      # release.conf.json, so tests/installer_config.rs can assert them; only
+      # the per-run version bits are generated. Configs merge left to right.
+      - name: Build AppImage and DEB
+        working-directory: ui/bootstrapper
+        run: npm run tauri build -- --bundles appimage,deb --config release.conf.json --config version-override.json --verbose
+        env:
+          # Cargo reads a namespaced environment variable; derive it from the
+          # workflow's single BuildChannel source of truth.
+          MACRODECK_BUILD_CHANNEL: ${{ env.BUILD_CHANNEL }}
+          # Baked into the binary so the updater compares against the true
+          # release version rather than config.version (issue #271) - a no-op
+          # here since this build's config.version already is that version.
+          MACRODECK_RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_KEY_PASSWORD }}
+          # linuxdeploy's strip step fails on the .relr.dyn ELF sections newer
+          # glibc/binutils emit (hits the ubuntu-24.04 runner), collapsing into a
+          # bare "failed to run linuxdeploy". Skip stripping - see tauri-apps/tauri#14796.
+          NO_STRIP: 'true'
+
+      # linuxdeploy bundles the runner's libwayland* into the AppImage, which the
+      # host's Mesa then loads ahead of its own and the app never starts on newer
+      # distributions (issue #448). The bundler exposes no way to pass
+      # linuxdeploy's --exclude-library, so they are removed from the finished
+      # AppImage instead - see the script header for the full rationale.
+      - name: Strip bundled Wayland libraries from the AppImage
+        run: ci/scripts/strip-appimage-wayland.sh ui/bootstrapper/target/release/bundle/appimage
+
+      # Repacking the AppImage invalidates the signature the build wrote, so
+      # re-sign before the update manifest reads the .sig. The empty-password
+      # fallback mirrors what the bundler's own signing path does in CI.
+      - name: Re-sign the AppImage
+        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
+        working-directory: ui/bootstrapper
+        run: |
+          appimage=$(find target/release/bundle/appimage -maxdepth 1 -name '*.AppImage')
+          npm run tauri signer sign -- \
+            --private-key "$TAURI_SIGNING_PRIVATE_KEY" \
+            --password "$TAURI_SIGNING_PRIVATE_KEY_PASSWORD" \
+            "${appimage:?no AppImage found to re-sign}"
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_KEY_PASSWORD }}
+
+      - name: Write RPM version override
+        working-directory: ui/bootstrapper
+        run: |
+          printf '{"version":"%s","bundle":{"createUpdaterArtifacts":false,"linux":{"rpm":{"release":"%s"}}},"plugins":{"updater":{"endpoints":["https://dev.macro-deck.app/releases/%s-{{target}}.json"]}}}\n' \
+            "${{ needs.prepare.outputs.rpm_version }}" "${{ needs.prepare.outputs.rpm_release }}" "${{ needs.prepare.outputs.updater_channel }}" \
+            > rpm-version-override.json
+
+      # RPM version syntax forbids "-beta.N" (rpmvercmp would also sort a beta
+      # above the following stable release), so semver's config.version can
+      # never carry it - unlike the DEB above, the mapped rpmVersion and
+      # rpmRelease are themselves legal config values, so an RPM packaged at
+      # those values needs no post-bundle rewrite (issue #271).
+      # `tauri bundle` packages the binary the build step above already
+      # compiled instead of compiling a second one (issue #449), so the mapped
+      # version reaches only the RPM metadata and all three Linux packages
+      # carry the identical application. It needs none of the build step's
+      # environment: MACRODECK_* are read by build.rs at compile time, NO_STRIP
+      # only affects the AppImage's linuxdeploy pass, and the signing key is
+      # only used when createUpdaterArtifacts is set - which is false here,
+      # because the RPM is a plain, notification-only download and never an
+      # updater payload.
+      - name: Bundle RPM
+        working-directory: ui/bootstrapper
+        run: npm run tauri bundle -- --bundles rpm --config release.conf.json --config rpm-version-override.json --verbose
+
+      # The RPM now arrives already correctly versioned (bundled above), so this
+      # only fixes up the DEB version metadata and gives both packages a
+      # conventional, space-free file name.
+      - name: Map DEB/RPM package versions
+        run: |
+          ci/scripts/map-linux-package-versions.sh \
+            ui/bootstrapper/target/release/bundle \
+            "${{ needs.prepare.outputs.deb_version }}" \
+            "${{ needs.prepare.outputs.rpm_version }}" \
+            "${{ needs.prepare.outputs.rpm_release }}"
+
+      - name: Download release notes
+        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
+        uses: actions/download-artifact@v7
+        with:
+          name: release-notes
+
+      # Stable releases publish both latest and beta so beta clients can move
+      # to GA; beta releases publish only beta and never reach stable clients.
+      # Linux's updater payload stays the AppImage - DEB and RPM are plain,
+      # notification-only downloads and never appear in an update manifest.
+      - name: Generate update manifests
+        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
+        run: |
+          for channel in ${{ needs.prepare.outputs.manifest_channels }}; do
+            output="ui/bootstrapper/target/release/bundle/${channel}-linux.json"
+            node ci/scripts/make-update-manifest.mjs linux "${{ needs.prepare.outputs.version }}" \
+              ui/bootstrapper/target/release/bundle "$output" release-notes.md
+            test -f "$output"
+          done
+
+      # sha256sum's default output ("<hex>  <name>") is checked with
+      # sha256sum -c from inside the download directory, so the recorded name
+      # must be bare - hence cd-ing into each bundle's own subdirectory
+      # rather than hashing a path. The .AppImage.sha256 suffix does not
+      # match findUpdaterArtifact's `*.AppImage` filter (make-update-manifest.mjs),
+      # so it cannot be mistaken for a second updater artifact.
+      - name: Generate checksums
+        working-directory: ui/bootstrapper/target/release/bundle
+        run: |
+          for artifact in appimage/*.AppImage deb/*.deb rpm/*.rpm; do
+            dir=$(dirname "$artifact")
+            name=$(basename "$artifact")
+            (cd "$dir" && sha256sum "$name" > "$name.sha256")
+            test -f "$artifact.sha256"
+          done
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: macro-deck-linux
+          path: |
+            ui/bootstrapper/target/release/bundle/appimage/*.AppImage
+            ui/bootstrapper/target/release/bundle/appimage/*.AppImage.sha256
+            ui/bootstrapper/target/release/bundle/deb/*.deb
+            ui/bootstrapper/target/release/bundle/deb/*.deb.sha256
+            ui/bootstrapper/target/release/bundle/rpm/*.rpm
+            ui/bootstrapper/target/release/bundle/rpm/*.rpm.sha256
+            ui/bootstrapper/target/release/bundle/latest-linux.json
+            ui/bootstrapper/target/release/bundle/beta-linux.json
+          retention-days: 14
+          if-no-files-found: error
+
+  package-windows:
+    name: Package Windows (NSIS)
+    runs-on: blacksmith-4vcpu-windows-2025
+    needs: [prepare, test-host, test-host-windows, build-ui, publish-host]
+    env:
+      HAS_WIN_CERT: ${{ secrets.WINDOWS_SIGN_CERT_PFX_BASE64 != '' }}
+      HAS_UPDATER_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ui/bootstrapper/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ui/bootstrapper
+
+      - name: Download host publish
+        uses: actions/download-artifact@v7
+        with:
+          name: host-win-x64
+
+      - name: Stage host
+        shell: bash
+        run: |
+          mkdir -p ui/bootstrapper/host-publish
+          tar xzf host-win-x64.tar.gz -C ui/bootstrapper/host-publish
+
+      - name: Prepare signing certificate
+        if: ${{ env.HAS_WIN_CERT == 'true' }}
+        shell: pwsh
+        run: |
+          $pfxPath = Join-Path $env:RUNNER_TEMP 'codesign.pfx'
+          [System.IO.File]::WriteAllBytes($pfxPath,
+            [System.Convert]::FromBase64String($env:PFX_BASE64))
+          "WINDOWS_SIGN_CERT_PFX_FILE=$pfxPath" >> $env:GITHUB_ENV
+        env:
+          PFX_BASE64: ${{ secrets.WINDOWS_SIGN_CERT_PFX_BASE64 }}
+
+      - name: Sign host binaries
+        shell: pwsh
+        run: ci/signing/sign-windows-files.ps1 -Directory ui/bootstrapper/host-publish
+        env:
+          WINDOWS_SIGN_CERT_PASSWORD: ${{ secrets.WINDOWS_SIGN_CERT_PASSWORD }}
+
+      - name: Install dependencies
+        working-directory: ui/bootstrapper
+        run: npm ci
+
+      - name: Write version override
+        shell: bash
+        working-directory: ui/bootstrapper
+        run: |
+          printf '{"version":"%s","bundle":{"createUpdaterArtifacts":%s},"plugins":{"updater":{"endpoints":["https://dev.macro-deck.app/releases/%s-{{target}}.json"]}}}\n' \
+            "${{ needs.prepare.outputs.version }}" "${{ env.HAS_UPDATER_KEY == 'true' && 'true' || 'false' }}" "${{ needs.prepare.outputs.updater_channel }}" \
+            > version-override.json
+
+      # The bootstrapper executable and the NSIS installer are signed through the
+      # windows.signCommand hook (ci/signing/sign-windows-file.ps1), which skips
+      # itself when no certificate is configured.
+      - name: Build NSIS installer
+        working-directory: ui/bootstrapper
+        run: npm run tauri build -- --bundles nsis --config release.conf.json --config version-override.json
+        env:
+          # Cargo reads a namespaced environment variable; derive it from the
+          # workflow's single BuildChannel source of truth.
+          MACRODECK_BUILD_CHANNEL: ${{ env.BUILD_CHANNEL }}
+          # A no-op on Windows (config.version already is the release version):
+          # set uniformly so the updater's comparator path isn't Linux-only and
+          # untested elsewhere (issue #271).
+          MACRODECK_RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+          WINDOWS_SIGN_CERT_PASSWORD: ${{ secrets.WINDOWS_SIGN_CERT_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_KEY_PASSWORD }}
+
+      - name: Download release notes
+        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
+        uses: actions/download-artifact@v7
+        with:
+          name: release-notes
+
+      # Stable releases publish both latest and beta so beta clients can move
+      # to GA; beta releases publish only beta and never reach stable clients.
+      - name: Generate update manifests
+        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
+        shell: bash
+        run: |
+          for channel in ${{ needs.prepare.outputs.manifest_channels }}; do
+            output="ui/bootstrapper/target/release/bundle/${channel}-windows.json"
+            node ci/scripts/make-update-manifest.mjs windows "${{ needs.prepare.outputs.version }}" \
+              ui/bootstrapper/target/release/bundle "$output" release-notes.md
+            test -f "$output"
+          done
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: macro-deck-windows
+          path: |
+            ui/bootstrapper/target/release/bundle/nsis/*.exe
+            ui/bootstrapper/target/release/bundle/latest-windows.json
+            ui/bootstrapper/target/release/bundle/beta-windows.json
+          retention-days: 14
+          if-no-files-found: error
+
+  package-macos:
+    name: Package macOS (DMG)
+    runs-on: blacksmith-6vcpu-macos-26
+    needs: [prepare, test-host, test-host-macos, build-ui, publish-host]
+    env:
+      HAS_MAC_CERT: ${{ secrets.MACOS_SIGN_CERT_P12_BASE64 != '' }}
+      HAS_NOTARY_KEY: ${{ secrets.APPLE_API_KEY_P8_BASE64 != '' && secrets.APPLE_API_KEY_ID != '' && secrets.APPLE_API_ISSUER_ID != '' && secrets.MACOS_SIGN_CERT_P12_BASE64 != '' }}
+      HAS_UPDATER_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ui/bootstrapper/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ui/bootstrapper
+
+      - name: Download host publish
+        uses: actions/download-artifact@v7
+        with:
+          name: host-osx-arm64
+
+      - name: Stage host
+        run: |
+          mkdir -p ui/bootstrapper/host-publish
+          tar xzf host-osx-arm64.tar.gz -C ui/bootstrapper/host-publish
+
+      - name: Prepare signing keychain
+        if: ${{ env.HAS_MAC_CERT == 'true' }}
+        working-directory: ci
+        run: |
+          echo "$MACOS_SIGN_CERT_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/developer-id.p12"
+          echo "MACOS_SIGN_CERT_P12_PATH=$RUNNER_TEMP/developer-id.p12" >> "$GITHUB_ENV"
+          MACOS_SIGN_CERT_P12_PATH="$RUNNER_TEMP/developer-id.p12" fastlane mac prepare_signing
+          keychain=$(security list-keychains -d user | sed 's/^ *"//; s/"$//' | grep 'macro-deck-ci' | head -n 1)
+          if [ -z "$keychain" ]; then
+            echo "The ephemeral keychain is not in the user search list:" >&2
+            security list-keychains -d user >&2
+            exit 1
+          fi
+          echo "MACOS_KEYCHAIN_PATH=$keychain" >> "$GITHUB_ENV"
+        env:
+          MACOS_SIGN_CERT_P12_BASE64: ${{ secrets.MACOS_SIGN_CERT_P12_BASE64 }}
+          MACOS_SIGN_CERT_PASSWORD: ${{ secrets.MACOS_SIGN_CERT_PASSWORD }}
+
+      # A Developer ID leaf is only a *valid* identity once its issuing
+      # intermediate is in the keychain, and a p12 exported without the chain is
+      # the usual reason find-identity -v reports nothing. Best effort: a p12
+      # that already carries the chain does not need this.
+      - name: Install Apple intermediate certificates
+        if: ${{ env.HAS_MAC_CERT == 'true' }}
+        continue-on-error: true
+        run: |
+          for ca in DeveloperIDG2CA DeveloperIDCA; do
+            curl -fsSL "https://www.apple.com/certificateauthority/$ca.cer" -o "$RUNNER_TEMP/$ca.cer"
+            security import "$RUNNER_TEMP/$ca.cer" -k "$MACOS_KEYCHAIN_PATH" -T /usr/bin/codesign || true
+          done
+
+      # The Tauri bundler signs with APPLE_SIGNING_IDENTITY, and it is the
+      # variable being *set* that turns signing on - an empty value makes the
+      # bundler run codesign -s "" and fail with "no identity found". So a
+      # missing identity fails here, where the cause is still visible, rather
+      # than four minutes later inside the bundler. The SHA-1 hash is used
+      # instead of the common name because it needs no quoting and cannot match
+      # two certificates.
+      - name: Resolve signing identity
+        if: ${{ env.HAS_MAC_CERT == 'true' }}
+        run: |
+          valid=$(security find-identity -v -p codesigning "$MACOS_KEYCHAIN_PATH" || true)
+          identity=$(printf '%s\n' "$valid" \
+            | sed -n 's/^ *[0-9]*) \([0-9A-F]\{40\}\) "Developer ID Application.*"$/\1/p' | head -n 1)
+          if [ -z "$identity" ]; then
+            identity=$(printf '%s\n' "$valid" \
+              | sed -n 's/^ *[0-9]*) \([0-9A-F]\{40\}\) ".*"$/\1/p' | head -n 1)
+          fi
+          if [ -z "$identity" ]; then
+            echo "No valid codesigning identity in $MACOS_KEYCHAIN_PATH." >&2
+            echo "Identities in that keychain, including invalid ones:" >&2
+            security find-identity -p codesigning "$MACOS_KEYCHAIN_PATH" >&2 || true
+            echo "MACOS_SIGN_CERT_P12_BASE64 must hold a Developer ID Application certificate together with its private key and issuing chain." >&2
+            exit 1
+          fi
+          echo "APPLE_SIGNING_IDENTITY=$identity" >> "$GITHUB_ENV"
+          security find-identity -v -p codesigning "$MACOS_KEYCHAIN_PATH"
+
+      - name: Prepare notarization key
+        if: ${{ env.HAS_NOTARY_KEY == 'true' }}
+        run: |
+          echo "$APPLE_API_KEY_P8_BASE64" | base64 --decode > "$RUNNER_TEMP/api-key.p8"
+          {
+            echo "APPLE_API_KEY_PATH=$RUNNER_TEMP/api-key.p8"
+            echo "APPLE_API_KEY=$APPLE_API_KEY_ID"
+            echo "APPLE_API_ISSUER=$APPLE_API_ISSUER_ID"
+          } >> "$GITHUB_ENV"
+        env:
+          APPLE_API_KEY_P8_BASE64: ${{ secrets.APPLE_API_KEY_P8_BASE64 }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+
+      # Nested host binaries must carry hardened-runtime signatures before the
+      # bundler seals and notarizes the .app (the bundler only signs its own).
+      - name: Sign host binaries
+        run: ci/signing/sign-macos-host.sh ui/bootstrapper/host-publish ui/bootstrapper/entitlements.plist
+
+      - name: Install dependencies
+        working-directory: ui/bootstrapper
+        run: npm ci
+
+      - name: Write version override
+        working-directory: ui/bootstrapper
+        run: |
+          printf '{"version":"%s","bundle":{"createUpdaterArtifacts":%s},"plugins":{"updater":{"endpoints":["https://dev.macro-deck.app/releases/%s-{{target}}.json"]}}}\n' \
+            "${{ needs.prepare.outputs.version }}" "${{ env.HAS_UPDATER_KEY == 'true' && 'true' || 'false' }}" "${{ needs.prepare.outputs.updater_channel }}" \
+            > version-override.json
+
+      - name: Build DMG
+        working-directory: ui/bootstrapper
+        run: npm run tauri build -- --bundles app,dmg --config release.conf.json --config version-override.json
+        env:
+          # Cargo reads a namespaced environment variable; derive it from the
+          # workflow's single BuildChannel source of truth.
+          MACRODECK_BUILD_CHANNEL: ${{ env.BUILD_CHANNEL }}
+          # A no-op on macOS (config.version already is the release version):
+          # set uniformly so the updater's comparator path isn't Linux-only and
+          # untested elsewhere (issue #271).
+          MACRODECK_RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+          # GitHub sets CI=true, which makes the Tauri bundler skip the AppleScript DMG
+          # styling entirely (tauri-apps/tauri#592); this forces the branded layout.
+          TAURI_BUNDLER_DMG_IGNORE_CI: "true"
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_KEY_PASSWORD }}
+          # APPLE_API_KEY_PATH, APPLE_API_KEY and APPLE_API_ISSUER are
+          # exported through GITHUB_ENV by the notarization preparation step.
+
+      - name: Verify signature
+        if: ${{ env.HAS_MAC_CERT == 'true' }}
+        run: |
+          app=$(find ui/bootstrapper/target/release/bundle/macos -maxdepth 1 -name '*.app' | head -n 1)
+          codesign --verify --deep --strict --verbose=2 "$app"
+          for executable in \
+            "$app/Contents/MacOS/MacroDeck" \
+            "$app/Contents/Resources/host/Macro Deck Host"; do
+            if ! codesign -d --entitlements - "$executable" 2>&1 \
+              | grep -q 'com.apple.security.automation.apple-events'; then
+              echo "Apple Events Automation entitlement missing from $executable" >&2
+              exit 1
+            fi
+          done
+
+      - name: Cleanup signing keychain
+        if: always()
+        working-directory: ci
+        run: fastlane mac cleanup_signing || true
+
+      # The bundler names the updater archive after the .app (no version). The
+      # R2 feed is flat and caches installers immutably, so the payload must
+      # carry the version in its filename before the manifest embeds the URL.
+      - name: Version updater archive
+        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
+        working-directory: ui/bootstrapper/target/release/bundle/macos
+        run: |
+          mv "Macro Deck.app.tar.gz" "Macro Deck_${{ needs.prepare.outputs.version }}_aarch64.app.tar.gz"
+          mv "Macro Deck.app.tar.gz.sig" "Macro Deck_${{ needs.prepare.outputs.version }}_aarch64.app.tar.gz.sig"
+
+      - name: Download release notes
+        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
+        uses: actions/download-artifact@v7
+        with:
+          name: release-notes
+
+      # Stable releases publish both latest and beta so beta clients can move
+      # to GA; beta releases publish only beta and never reach stable clients.
+      - name: Generate update manifests
+        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
+        run: |
+          for channel in ${{ needs.prepare.outputs.manifest_channels }}; do
+            output="ui/bootstrapper/target/release/bundle/${channel}-darwin.json"
+            node ci/scripts/make-update-manifest.mjs darwin "${{ needs.prepare.outputs.version }}" \
+              ui/bootstrapper/target/release/bundle "$output" release-notes.md
+            test -f "$output"
+          done
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: macro-deck-macos
+          path: |
+            ui/bootstrapper/target/release/bundle/dmg/*.dmg
+            ui/bootstrapper/target/release/bundle/macos/*.app.tar.gz
+            ui/bootstrapper/target/release/bundle/latest-darwin.json
+            ui/bootstrapper/target/release/bundle/beta-darwin.json
+          retention-days: 14
+          if-no-files-found: error
+
+  # The release runs the same suite CI does, against a production host staged from this revision. It
+  # needs none of the packaging output - it stages its own - so it runs alongside the packagers rather
+  # than after them, and upload-r2 waits on all four.
+  e2e:
+    name: E2E
+    uses: ./.github/workflows/e2e-run.yml
+
+  upload-r2:
+    name: Upload installers to R2
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    # No `if:` on purpose. A release is all three platforms with a passing E2E suite, or nothing: the
+    # default rule - every job in `needs` succeeded - is exactly that gate, and any condition that lets
+    # a partial set through would publish channel files pointing at platforms this run never built.
+    needs: [prepare, package-linux, package-windows, package-macos, e2e]
+    env:
+      HAS_R2: ${{ secrets.R2_ACCESS_KEY_ID != '' }}
+    steps:
+      - name: Check R2 credentials
+        if: ${{ env.HAS_R2 != 'true' }}
+        run: echo "::warning::R2 credentials not configured - skipping installer upload."
+
+      - uses: actions/checkout@v5
+        if: ${{ env.HAS_R2 == 'true' }}
+
+      - uses: actions/setup-node@v7
+        if: ${{ env.HAS_R2 == 'true' }}
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download installer artifacts
+        if: ${{ env.HAS_R2 == 'true' }}
+        uses: actions/download-artifact@v7
+        with:
+          path: installers
+          pattern: macro-deck-*
+          merge-multiple: true
+
+      # The feed is flat: a manifest url is the feed base plus the plain file
+      # name. Fail before publishing when a channel file points at something
+      # that is not in the upload set, or when two staged files share a name
+      # (flattening would silently drop one).
+      - name: Verify the staged release feed
+        if: ${{ env.HAS_R2 == 'true' }}
+        run: node ci/scripts/verify-release-feed.mjs installers
+
+      - name: Upload installers to R2
+        if: ${{ env.HAS_R2 == 'true' }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          endpoint="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          dest="s3://${R2_BUCKET}/releases/"
+          echo "Publishing ${VERSION} to release feed ${dest}"
+          # Every object goes directly under releases/, addressed by its bare
+          # file name - that is the url the manifest hands to installed clients.
+          # The build artifacts still carry the bundler subdirectory (nsis/,
+          # appimage/, macos/, dmg/), so copy file by file instead of a
+          # --recursive sync, which would recreate those directories in the
+          # feed and leave every manifest url pointing at a 404 (issue #147).
+          while IFS= read -r -d '' file; do
+            name="$(basename "${file}")"
+            case "${name}" in
+              # Channel files are overwritten every release and drive update
+              # detection, so they must always be revalidated, never cached.
+              latest-*.json|beta-*.json)
+                aws s3 cp "${file}" "${dest}${name}" \
+                  --content-type "application/json" \
+                  --cache-control "no-cache" \
+                  --endpoint-url "${endpoint}" \
+                  --no-progress
+                ;;
+              # Installers and updater payloads carry the version in their
+              # filename and never change once published, so cache them immutably.
+              *)
+                aws s3 cp "${file}" "${dest}${name}" \
+                  --cache-control "public, max-age=31536000, immutable" \
+                  --endpoint-url "${endpoint}" \
+                  --no-progress
+                ;;
+            esac
+          done < <(find installers -type f -print0)
+          # What every installed client resolves is the manifest url, so assert
+          # the object really exists under that exact key before calling the
+          # release published.
+          while IFS= read -r name; do
+            aws s3api head-object \
+              --bucket "${R2_BUCKET}" \
+              --key "releases/${name}" \
+              --endpoint-url "${endpoint}" > /dev/null
+            echo "Reachable through the feed: releases/${name}"
+          done < <(node ci/scripts/verify-release-feed.mjs installers --names)
+          echo "Uploaded objects:"
+          aws s3 ls "${dest}" --endpoint-url "${endpoint}"
+
+  # Publishes the packages packed earlier in this run, once the installers are on the release feed and
+  # the release is therefore actually being published. Skipped along with upload-r2 when any platform
+  # failed to package. The credential lives only in this job, which is the only one that needs it.
+  #
+  # TEMPORARILY DISABLED: a release build no longer pushes to nuget.org. pack-nuget still runs, so the
+  # packages remain downloadable from the run as the `nuget-packages` artifact, and the manual
+  # nuget.yml workflow is the way to publish them. Remove the `if: false` to restore.
+  publish-nuget:
+    name: Publish NuGet packages
+    if: false
+    needs: [prepare, pack-nuget, upload-r2]
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/nuget-publish.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
+      artifact: ${{ needs.pack-nuget.outputs.artifact }}
+    secrets:
+      NUGET_USER: ${{ secrets.NUGET_USER }}

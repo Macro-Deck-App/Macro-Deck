@@ -1,0 +1,13 @@
+// Side-effect-free entry for component stylesheets.
+//
+// Forwards only the SCSS members that are still Sass - the breakpoint map and the mixins over it.
+// It emits NO global CSS, so components can safely (named explicitly, because the app's global
+// stylesheet next to the directory would otherwise win the bare `styles` lookup):
+//   @use '<rel>/styles/index' as ds;
+//   .foo { @include ds.focus-ring; }
+//
+// The design tokens, base reset, keyframes and icon masks are plain CSS in @macro-deck/runtime
+// (issue #824), because the framework-free client consumes them without a Sass toolchain.
+
+@forward 'variables';
+@forward 'mixins';

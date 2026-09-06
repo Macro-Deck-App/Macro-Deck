@@ -1,0 +1,92 @@
+@if (settings(); as s) {
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Backups.ScheduleHeading' | translate"
+    [description]="'macrodeck.app:Settings.Backups.ScheduleDescription' | translate">
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Backups.ScheduledBackupsLabel' | translate"
+      [description]="'macrodeck.app:Settings.Backups.ScheduledBackupsDescription' | translate">
+      <shared-toggle-switch
+        [checked]="s.scheduleFrequency !== 'off'"
+        [disabled]="saving()"
+        (changed)="setScheduledEnabled($event)" />
+    </shared-settings-row>
+
+    @if (s.scheduleFrequency !== 'off') {
+      <shared-settings-row [label]="'macrodeck.app:Settings.Backups.FrequencyLabel' | translate">
+        <shared-select
+          [options]="frequencyOptions()"
+          [ngModel]="s.scheduleFrequency"
+          (ngModelChange)="setFrequency($event)"
+          [disabled]="saving()" />
+      </shared-settings-row>
+
+      @if (s.scheduleFrequency === 'weekly') {
+        <shared-settings-row [label]="'macrodeck.app:Settings.Backups.DayOfWeekLabel' | translate">
+          <shared-select
+            [options]="dayOfWeekOptions()"
+            [ngModel]="s.scheduleDayOfWeek"
+            (ngModelChange)="setDayOfWeek($event)"
+            [disabled]="saving()" />
+        </shared-settings-row>
+      }
+
+      @if (s.scheduleFrequency === 'monthly') {
+        <shared-settings-row [label]="'macrodeck.app:Settings.Backups.DayOfMonthLabel' | translate">
+          <shared-select
+            [options]="dayOfMonthOptions"
+            [ngModel]="numberToString(s.scheduleDayOfMonth)"
+            (ngModelChange)="setDayOfMonth($event)"
+            [disabled]="saving()" />
+        </shared-settings-row>
+      }
+
+      <shared-settings-row [label]="'macrodeck.app:Settings.Backups.TimeOfDayLabel' | translate">
+        <shared-select
+          [options]="timeOptions"
+          [ngModel]="s.scheduleTimeOfDay"
+          (ngModelChange)="setTimeOfDay($event)"
+          [disabled]="saving()" />
+      </shared-settings-row>
+
+      @if (s.nextScheduledAt) {
+        <p class="bss-next">
+          {{ 'macrodeck.app:Settings.Backups.NextBackup' | translate: { when: (s.nextScheduledAt | date: 'medium') } }}
+        </p>
+      }
+    }
+
+    <!-- Stays visible-but-disabled with its reason on Linux (issue #36) - hiding it would make the
+         limitation invisible rather than explained. -->
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Backups.BeforeHostUpdateLabel' | translate"
+      [description]="s.preUpdateBackupSupported
+        ? ('macrodeck.app:Settings.Backups.BeforeHostUpdateDescription' | translate)
+        : (s.preUpdateBackupUnsupportedReason ?? '')">
+      <shared-toggle-switch
+        [checked]="s.beforeHostUpdate"
+        [disabled]="saving() || !s.preUpdateBackupSupported"
+        (changed)="setBeforeHostUpdate($event)" />
+    </shared-settings-row>
+
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Backups.BeforePluginUpdateLabel' | translate"
+      [description]="'macrodeck.app:Settings.Backups.BeforePluginUpdateDescription' | translate">
+      <shared-toggle-switch
+        [checked]="s.beforePluginUpdate"
+        [disabled]="saving()"
+        (changed)="setBeforePluginUpdate($event)" />
+    </shared-settings-row>
+
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Backups.KeepLatestLabel' | translate"
+      [description]="'macrodeck.app:Settings.Backups.KeepLatestDescription' | translate">
+      <shared-select
+        [options]="retentionOptions()"
+        [ngModel]="numberToString(s.retentionKeepLatest)"
+        (ngModelChange)="setRetentionKeepLatest($event)"
+        [disabled]="saving()" />
+    </shared-settings-row>
+  </shared-settings-section>
+} @else {
+  <shared-loading-state [message]="'macrodeck.app:Settings.Backups.ScheduleLoading' | translate" />
+}

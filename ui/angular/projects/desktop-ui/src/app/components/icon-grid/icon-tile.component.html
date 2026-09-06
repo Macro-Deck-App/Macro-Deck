@@ -1,0 +1,45 @@
+<button
+  type="button"
+  class="tile"
+  [class.selected]="selected"
+  [style.--tile-size.px]="size"
+  [attr.aria-label]="icon.name"
+  [attr.aria-pressed]="selected"
+  (click)="onClick($event)"
+  (contextmenu)="onContextMenu($event)">
+  @if (multiSelect) {
+    <span
+      class="checkbox"
+      [class.checked]="selected"
+      [class.visible]="selected || selectionActive"
+      role="checkbox"
+      [attr.aria-checked]="selected"
+      [attr.aria-label]="selectAriaLabel"
+      (click)="onCheckboxClick($event)">
+      @if (selected) {
+        <span class="icon icon-check icon-xs"></span>
+      }
+    </span>
+  }
+  <span class="thumb">
+    @switch (icon.processingState) {
+      @case ('Ready') {
+        <img [src]="imageUrl" [alt]="icon.name" loading="lazy" decoding="async" />
+        @if (icon.isAnimated) {
+          <span class="badge" role="img" [title]="animatedIconLabel()" [attr.aria-label]="animatedIconLabel()">
+            <span class="icon icon-play icon-xs"></span>
+          </span>
+        }
+      }
+      @case ('Failed') {
+        <span class="failed" role="img" [title]="failedTooltip" [attr.aria-label]="failedTooltip">
+          <span class="icon icon-x icon-lg"></span>
+        </span>
+      }
+      @default {
+        <span class="shimmer" role="img" [title]="processingLabel()" [attr.aria-label]="processingLabel()"></span>
+      }
+    }
+  </span>
+  <span class="name" [title]="icon.name">{{ icon.name }}</span>
+</button>

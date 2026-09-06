@@ -1,0 +1,84 @@
+.deck-page {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  // Anchor for the floating error banner, which must stay inside the page instead of
+  // overlapping the window title bar above it.
+  position: relative;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  overflow: hidden;
+}
+
+.deck-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.deck-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-4);
+  flex-shrink: 0;
+}
+
+.deck-readonly-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--text-md);
+  font-weight: var(--font-medium);
+  // Swaps with the Lock/Unlock shared-button in the same header slot, so it has to be
+  // that button's height or the header jumps when the profile lock is toggled.
+  height: var(--control-height);
+  box-sizing: border-box;
+}
+
+.deck-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.deck-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+}
+
+.deck-subtitle {
+  font-size: var(--text-md);
+  color: var(--color-text-muted);
+}
+
+.deck-grid-container {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.deck-error {
+  position: absolute;
+  top: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: min(90%, 480px);
+}
+
+// The provider owns everything inside this box; the deck contributes only the surrounding layout, so a
+// folder view fills the page the way the grid does.
+.deck-folder-view-container {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}

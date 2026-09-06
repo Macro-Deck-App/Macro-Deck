@@ -1,0 +1,23 @@
+@use '../../../../styles/index' as ds;
+
+.copy-text-message {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.copy-text-field {
+  width: 100%;
+  @include ds.control-base;
+  @include ds.control-interactive;
+  font-family: var(--font-mono);
+  user-select: all;
+  cursor: text;
+}
+
+.copy-text-footer {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}

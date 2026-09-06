@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.macro-deck.app/widget-data-history-graph-v1.schema.json",
+  "title": "Macro Deck History Graph widget data (v1)",
+  "description": "Describes the JSON stored in WidgetEntity.Data for a History Graph widget (WidgetType.HistoryGraph).",
+  "$comment": "No top-level 'required': a freshly created widget's data is a near-empty JSON object, and every property here has to stay optional so it keeps validating. additionalProperties is deliberately left unset (defaults to true) on this schema and on every nested object - an older or newer client, or a plugin-driven flow, may write extension keys this schema does not know about, and rejecting them would make the widget unsavable. That is also what keeps profiles written before the unit moved onto the variable valid: they still carry a 'unit' key, which is no longer declared here and no longer read.",
+  "type": "object",
+  "properties": {
+    "valueVariable": {
+      "type": ["string", "null"],
+      "description": "Numeric variable plotted and shown large, e.g. 'system_cpu_usage_percent'."
+    },
+    "title": {
+      "type": ["string", "null"],
+      "description": "Card title, e.g. 'CPU Load'."
+    },
+    "subtitleVariable": {
+      "type": ["string", "null"],
+      "description": "Optional text variable used as the subtitle, e.g. 'system_cpu_name'."
+    },
+    "subtitle": {
+      "type": ["string", "null"],
+      "description": "Static subtitle fallback used when no subtitleVariable is set."
+    },
+    "showSubtitle": {
+      "type": "boolean",
+      "description": "Show the subtitle line."
+    },
+    "accentColor": {
+      "type": ["string", "null"],
+      "description": "Chart/accent color; defaults to the global accent when absent or null."
+    },
+    "maxValue": {
+      "type": "number",
+      "description": "Fixed upper bound for the chart's Y scale (e.g. 100 for percent). Auto-scales when absent."
+    },
+    "historyLength": {
+      "type": "number",
+      "description": "How many recent samples to retain and plot."
+    },
+    "border": {
+      "$ref": "#/$defs/widgetBorder",
+      "description": "Outline drawn along the widget edge."
+    },
+    "flows": {
+      "anyOf": [
+        { "type": "string" },
+        { "type": "array", "items": { "$ref": "#/$defs/actionFlow" } }
+      ],
+      "description": "Press-trigger action flows, stored the same way as an Action Button's. Stored on the wire as a nested JSON string; the editor may show it inlined as an array. Both forms are accepted here."
+    }
+  },
+  "$defs": {
+    "widgetBorder": {
+      "type": "object",
+      "description": "Outline drawn along the inner edge of the widget.",
+      "properties": {
+        "style": {
+          "enum": ["off", "static", "heartbeat", "breathing", "blink", "comet", "ants", "hue-shift", "rgb", null],
+          "description": "Visual style; absent, null or 'off' means no border. The color-tinted styles are static, heartbeat, breathing, blink, comet and ants; hue-shift and rgb ignore color."
+        },
+        "color": {
+          "type": ["string", "null"],
+          "description": "Ring color for the color-tinted styles. Falls back to a default color when absent or null; ignored by hue-shift and rgb."
+        }
+      }
+    },
+    "actionFlow": {
+      "type": "object",
+      "description": "One action-flow entry (a trigger and its action blocks). Its internal structure is deliberately not validated here - deep flow validation is out of scope for this schema."
+    }
+  }
+}

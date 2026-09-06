@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "bundle": {
+    "licenseFile": null,
+    "resources": {
+      "host-publish/": "host/",
+      "packaging/macos/Assets.car": "Assets.car",
+      "packaging/macos/en.lproj/InfoPlist.strings": "en.lproj/InfoPlist.strings",
+      "packaging/macos/de.lproj/InfoPlist.strings": "de.lproj/InfoPlist.strings",
+      "packaging/macos/it.lproj/InfoPlist.strings": "it.lproj/InfoPlist.strings",
+      "packaging/macos/cs.lproj/InfoPlist.strings": "cs.lproj/InfoPlist.strings",
+      "packaging/macos/pl.lproj/InfoPlist.strings": "pl.lproj/InfoPlist.strings",
+      "packaging/macos/es.lproj/InfoPlist.strings": "es.lproj/InfoPlist.strings",
+      "packaging/macos/fr.lproj/InfoPlist.strings": "fr.lproj/InfoPlist.strings"
+    },
+    "macOS": {
+      "minimumSystemVersion": "11.0",
+      "hardenedRuntime": true,
+      "entitlements": "entitlements.plist",
+      "infoPlist": "packaging/macos/Info.plist",
+      "dmg": {
+        "background": "packaging/macos/dmg-background.png",
+        "windowPosition": { "x": 200, "y": 120 },
+        "windowSize": { "width": 660, "height": 500 },
+        "appPosition": { "x": 180, "y": 215 },
+        "applicationFolderPosition": { "x": 480, "y": 215 }
+      }
+    }
+  }
+}

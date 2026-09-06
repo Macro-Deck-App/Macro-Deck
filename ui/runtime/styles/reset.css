@@ -1,0 +1,67 @@
+/*
+ * Base reset and element defaults, shared by every Macro Deck client.
+ *
+ * Plain CSS on purpose (issue #824): the framework-free web client consumes this without a Sass
+ * toolchain, and both clients must render identically from the same bytes.
+ */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/*
+ * No `html { font-size }` rule on purpose: the root stays at the browser's own
+ * font size, so 1rem is 16px by default and the rem tokens in _themes.scss mean
+ * what they say. Setting it from --text-base made the root 13px and resolved
+ * every rem token a second time against it (issue #248).
+ */
+
+html, body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  /* Allow scrolling but block pinch-zoom and double-tap-zoom on touch devices. */
+  touch-action: pan-x pan-y;
+}
+
+body {
+  font-size: var(--text-base);
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/*
+ * Footer content projected into shared-modal via [modal-footer]. This global rule is the
+ * button group's equivalent for projected content: a shared-button-group here would tie with
+ * it on specificity, so which one lays the row out would depend on stylesheet order.
+ * Wraps rather than overflowing: a three-answer dialog (Keep editing / Discard / Save & Close) does
+ * not fit one row at phone width, and without this the leftmost button escapes the footer padding.
+ */
+[modal-footer] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  width: 100%;
+}

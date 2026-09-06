@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <IsMacroDeckPackage>true</IsMacroDeckPackage>
+        <PackageId>MacroDeck.Plugin.Testing</PackageId>
+        <Description>Test host, fakes and assertions for a Macro Deck plugin built on MacroDeck.Plugin.Hosting - launch it in-process or as a real process, drive its capabilities, and inspect what it logged and published, without running Macro Deck itself.</Description>
+        <PackageTags>macrodeck;plugin;testing;hosting</PackageTags>
+    </PropertyGroup>
+
+    <!-- Microsoft.NET.Sdk plus this framework reference, not Microsoft.NET.Sdk.Web: a library must not
+         use the web SDK, for the same reason MacroDeck.Plugin.Hosting.csproj gives - the web SDK is for
+         applications, and a library that used it would drag app-shaped defaults into every consumer.
+         The framework reference is what supplies WebApplication and Kestrel for the loopback test host. -->
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\MacroDeck.Plugin.Hosting\MacroDeck.Plugin.Hosting.csproj" />
+        <ProjectReference Include="..\MacroDeck.Plugin.Packaging\MacroDeck.Plugin.Packaging.csproj" />
+    </ItemGroup>
+
+    <!-- Validates a widget type's DataSchema the same way the host does, so FakeWidgetTypeProviderContext's
+         rules are not a fake host's guess at what a real one enforces. -->
+    <ItemGroup>
+        <PackageReference Include="JsonSchema.Net" />
+    </ItemGroup>
+
+    <!-- Lets `macrodeck-plugin run` read PluginLaunchSpec.ExecutablePath/Arguments/WorkingDirectory to
+         launch a plugin process itself (with live-streamed output and self-registering-mode support,
+         neither of which MacroDeckTestHost.LaunchAsync/ExternalPlugin offer), while still resolving its
+         artifact selector's entrypoint through PluginLaunchSpec.ForArtifactAsync instead of
+         reimplementing RID-fallback entrypoint resolution. Those three members otherwise stay internal -
+         a plugin author consuming the published package has no business reading them. -->
+    <ItemGroup>
+        <InternalsVisibleTo Include="MacroDeck.Plugin.Cli" />
+    </ItemGroup>
+
+</Project>

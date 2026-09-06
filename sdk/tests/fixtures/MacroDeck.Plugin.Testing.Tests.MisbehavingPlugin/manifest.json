@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schemas.macro-deck.app/plugin-manifest-v1.schema.json",
+  "manifestVersion": 1,
+  "id": "app.macro-deck.misbehaving-test-plugin",
+  "name": "Misbehaving Test Plugin",
+  "version": "1.0.0",
+  "description": "Deliberately non-conforming plugin used by MacroDeck.Plugin.Testing's own test suite and the conformance suite. Well-behaved unless MACRODECK_MISBEHAVE names a behaviour.",
+  "entrypoints": {
+    "win-x64": { "executable": "MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin.exe" },
+    "osx-arm64": { "executable": "MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin" },
+    "osx-x64": { "executable": "MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin" },
+    "linux-x64": { "executable": "MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin" }
+  }
+}

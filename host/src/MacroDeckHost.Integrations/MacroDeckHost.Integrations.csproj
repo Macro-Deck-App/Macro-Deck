@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <!-- An internal host layer, never a published package - dotnet pack MacroDeck.slnx would
+             otherwise produce a nupkg for it with no readme and no intentional public surface. -->
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Sdk\MacroDeck.Sdk.csproj" />
+        <!-- The DSL, not the host's UI layer: an integration builds a tree exactly as a plugin does. -->
+        <ProjectReference Include="..\..\..\ui-model\src\MacroDeck.Ui\MacroDeck.Ui.csproj" />
+        <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Localization\MacroDeck.Localization.csproj" />
+        <ProjectReference Include="..\MacroDeckHost.Localization\MacroDeckHost.Localization.csproj" />
+        <!-- HomeAssistantWatchedEntityMigration produces MacroDeckHost.Domain.Entities.VariableBinding
+             records; nothing else here depends on the domain layer. -->
+        <ProjectReference Include="..\MacroDeckHost.Domain\MacroDeckHost.Domain.csproj" />
+        <!-- HomeAssistantIntegration exposes IHomeAssistantBindingStoreConsumer so a host-owned caller can
+             hand it the IVariableBindingStore singleton before InitializeAsync runs - the same
+             pattern IAdbGatewayConsumer already uses for the ADB gateway. Application does not reference
+             this project back, so this does not create a cycle. -->
+        <ProjectReference Include="..\MacroDeckHost.Application\MacroDeckHost.Application.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="SpotifyAPI.Web" />
+      <PackageReference Include="obs-websocket-dotnet" />
+      <PackageReference Include="TwitchLib.Api" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="**\*.svg" />
+      <EmbeddedResource Include="**\*.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests" />
+      <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests.Windows" />
+      <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests.MacOS" />
+      <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests.Linux" />
+	  <InternalsVisibleTo Include="MacroDeckHost" />
+    </ItemGroup>
+
+</Project>

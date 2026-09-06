@@ -1,0 +1,67 @@
+<shared-modal [heading]="'macrodeck.app:Settings.Network.Tls.UploadHeading' | translate" size="medium" (close)="cancel()">
+  <div class="tls-upload">
+    <p class="tls-upload__desc">
+      {{ 'macrodeck.app:Settings.Network.Tls.UploadDescription' | translate }}
+    </p>
+
+    @if (error(); as message) {
+      <shared-error-banner [message]="message" (dismiss)="error.set(null)" />
+    }
+
+    <div class="tls-upload__field">
+      <div class="tls-upload__field-header">
+        <label>{{ 'macrodeck.app:Settings.Network.Tls.UploadCertificateLabel' | translate }}</label>
+        <shared-button variant="secondary" [disabled]="saving()" (click)="certificateFileInput.click()">
+          {{ 'macrodeck.app:Settings.Network.Tls.ChooseFileAction' | translate }}
+        </shared-button>
+      </div>
+      <shared-input
+        [ariaLabel]="'macrodeck.app:Settings.Network.Tls.UploadCertificateLabel' | translate"
+        [multiline]="true"
+        [rows]="8"
+        [disabled]="saving()"
+        [ngModel]="certificatePem()"
+        (ngModelChange)="certificatePem.set($event)">
+      </shared-input>
+    </div>
+
+    <div class="tls-upload__field">
+      <div class="tls-upload__field-header">
+        <label>{{ 'macrodeck.app:Settings.Network.Tls.UploadPrivateKeyLabel' | translate }}</label>
+        <shared-button variant="secondary" [disabled]="saving()" (click)="privateKeyFileInput.click()">
+          {{ 'macrodeck.app:Settings.Network.Tls.ChooseFileAction' | translate }}
+        </shared-button>
+      </div>
+      <shared-input
+        [ariaLabel]="'macrodeck.app:Settings.Network.Tls.UploadPrivateKeyLabel' | translate"
+        [multiline]="true"
+        [rows]="8"
+        [disabled]="saving()"
+        [ngModel]="privateKeyPem()"
+        (ngModelChange)="privateKeyPem.set($event)">
+      </shared-input>
+    </div>
+  </div>
+
+  <div modal-footer>
+    <shared-button variant="secondary" [disabled]="saving()" (click)="cancel()">
+      {{ 'macrodeck:Common.Cancel' | translate }}
+    </shared-button>
+    <shared-button variant="primary" [disabled]="!canSave()" [loading]="saving()" (click)="save()">
+      {{ 'macrodeck:Common.Save' | translate }}
+    </shared-button>
+  </div>
+</shared-modal>
+
+<input
+  #certificateFileInput
+  type="file"
+  hidden
+  accept=".pem,.crt,.cer,.key,.txt"
+  (change)="onCertificateFileSelected($event)" />
+<input
+  #privateKeyFileInput
+  type="file"
+  hidden
+  accept=".pem,.crt,.cer,.key,.txt"
+  (change)="onPrivateKeyFileSelected($event)" />

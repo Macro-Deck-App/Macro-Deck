@@ -1,0 +1,27 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: 0.3125rem;
+  flex: 1 1 0;
+  min-width: 0;
+  border-radius: var(--radius-sm);
+  outline: 0 dashed transparent;
+  outline-offset: 2px;
+  transition: outline-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+:host > shared-input {
+  flex: 1 1 0;
+  min-width: 4.875rem;
+}
+
+:host > shared-button {
+  flex: 0 0 auto;
+}
+
+/* Drop feedback: the OS drag has no HTML5 hover state, so the shell-forwarded
+   position is what turns this on (see ShellFileDropService). */
+:host(.fpi-drop-active) {
+  outline: 2px dashed var(--color-accent);
+  background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+}

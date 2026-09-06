@@ -1,0 +1,920 @@
+/* The client's own chrome. Everything a widget draws comes from the runtime package's sheets. */
+
+/*
+ * The deck fills the viewport, so the chain from the document down to it has to carry a height. The
+ * shared reset deliberately does not set one - the desktop app scrolls - so it is set here, and
+ * without it the grid measures a container of zero height and solves every cell to nothing.
+ */
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/*
+ * The notch, the home indicator and the rounded corners of the tablets this client lives on. Written
+ * as a padding on the root rather than per screen: every screen fills the viewport, so anything that
+ * does not respect the insets loses its edges under the hardware. `env()` is unknown to the
+ * compatibility floor, where it evaluates to nothing and the padding simply stays zero.
+ */
+.wc-root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding:
+    env(safe-area-inset-top, 0px)
+    env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px)
+    env(safe-area-inset-left, 0px);
+}
+
+.wc-panel {
+  text-align: center;
+  padding: var(--space-6);
+}
+
+.wc-panel-logo {
+  width: 72px;
+  height: 72px;
+  display: block;
+  margin: 0 auto var(--space-5);
+  /* The mark is square with its own padding, so it needs no rounding of its own. */
+  object-fit: contain;
+}
+
+.wc-panel-title {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+}
+
+.wc-panel-detail {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  max-width: 22em;
+}
+
+.wc-deck {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/*
+ * The modal chrome, shared by every dialog this client opens: a modal an action opened here, the
+ * client settings and the device-setup wizard. The three used to be three sheets' worth of near
+ * copies and had drifted into three different-looking dialogs (issue #873), so the surface, the
+ * header and the close button are stated once. What genuinely differs stays with each surface - its
+ * stacking order, its `[hidden]` rule and its own body.
+ *
+ * The three sheets are concatenated in `stylesheet.mjs` with this one first, so a surface rule left
+ * behind in a later sheet would beat the full-screen block at the bottom of this one at equal
+ * specificity. Redeclaring any of this per surface silently un-fixes the full-screen behaviour.
+ */
+.wc-modal-backdrop,
+.wc-client-settings-backdrop,
+.wc-setup-backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: var(--color-scrim);
+}
+
+.wc-modal-backdrop {
+  z-index: var(--z-modal);
+}
+
+.wc-modal-backdrop[hidden] {
+  display: none;
+}
+
+.wc-modal,
+.wc-client-settings-dialog,
+.wc-setup-dialog {
+  width: 100%;
+  max-width: 34rem;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  /*
+   * The design system's dialog surface, token for token, because the same dialogs open in the desktop
+   * UI and the two sitting side by side must not be two different dialogs. Anything hard-coded here
+   * is a colour that stops following the theme the moment the tokens move.
+   */
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-dialog);
+  overflow: hidden;
+}
+
+/*
+ * A dialog an action opened is a box before it is a container: the widget profile derives every
+ * length from the box it is given, so this one is stated rather than grown - letting it grow to its
+ * content would feed the content's own height back into the basis. It is bounded by the backdrop's
+ * box above so it never reaches past the viewport, which is how the last rows of a list ended up
+ * off-screen.
+ *
+ * And it does not scroll. A tree that has more than fits says so with a `ui.list`, which scrolls
+ * itself and asks its producer for more - a second scroll container around it puts two bars on one
+ * dialog and makes the box the basis is derived from a claim rather than a fact.
+ */
+.wc-modal {
+  height: 36rem;
+}
+
+.wc-modal-header,
+.wc-client-settings-header,
+.wc-setup-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.wc-modal-title,
+.wc-client-settings-title,
+.wc-setup-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.wc-modal-close,
+.wc-client-settings-close,
+.wc-setup-close {
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-xl);
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.wc-modal-close:hover,
+.wc-client-settings-close:hover,
+.wc-setup-close:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+/* Its own rule, not grouped with the hover above: `:focus-visible` is younger than the compatibility
+   floor, and an engine that does not know it drops the whole selector list it appears in. */
+.wc-modal-close:focus-visible,
+.wc-client-settings-close:focus-visible,
+.wc-setup-close:focus-visible {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.wc-modal-content {
+  position: relative;
+  width: 100%;
+  /* `0` rather than `auto`: the basis is the box the dialog gives it, never its own content. */
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/*
+ * 7-inch decks and anything smaller: a dialog takes the whole display instead of floating in the
+ * middle of it (issue #873). The condition is width *or* height because the panels this covers are
+ * short rather than narrow - 1024x600 and 800x480 are the common 7-inch geometries, and the Car
+ * Thing is 800x480 - so a width-only rule would leave the most common one windowed.
+ *
+ * The desktop UI does the same through its `phone-screen` mixin; the numbers differ because that one
+ * is about phones and this one about the decks this client runs on.
+ */
+@media (max-width: 1024px), (max-height: 600px) {
+  .wc-modal-backdrop,
+  .wc-client-settings-backdrop,
+  .wc-setup-backdrop {
+    align-items: stretch;
+    justify-content: stretch;
+    /*
+     * The dialog below asks for `height: 100%`, which needs a parent with a definite height. A fixed
+     * element resolves a percentage height against the viewport, so stating it here is definite on
+     * every engine; deriving one from `top: 0`/`bottom: 0` is not.
+     */
+    height: 100%;
+    padding: 0;
+  }
+
+  .wc-modal,
+  .wc-client-settings-dialog,
+  .wc-setup-dialog {
+    /*
+     * No `box-shadow: none` here, though a full-screen sheet has nothing left to cast elevation onto
+     * anyway: the shadow is themed, and the compatibility floor's sheet carries the light theme's
+     * copy of it under a `.light` prefix that outranks this rule. Overriding it here would leave the
+     * shadow on under the light theme on those engines. It falls outside the viewport regardless.
+     */
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    border-radius: 0;
+    /*
+     * Only the full-screen sheet reaches the display edges, so only it has to keep clear of the
+     * notch, the rounded corners and the home indicator. It carries them itself because the backdrop
+     * is fixed and so escapes the insets `.wc-root` already pads for. The `0px` fallbacks are load
+     * bearing: an engine without `env()` drops the whole declaration.
+     */
+    padding-right: env(safe-area-inset-right, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+
+  .wc-modal-header,
+  .wc-client-settings-header,
+  .wc-setup-header {
+    padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+  }
+}
+
+/*
+ * The UI kit: the controls the client's own chrome is built from. Ported from the design system's
+ * Angular components, so a screen written against either reads the same.
+ */
+
+.wc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  box-sizing: border-box;
+  min-height: var(--control-height);
+  padding: var(--space-2) 1.125rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  line-height: 1;
+  /* A translated label runs longer than the English it was laid out for, and must end in an
+     ellipsis rather than spill over the border. */
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+.wc-btn-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wc-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.wc-btn-loading {
+  cursor: progress;
+}
+
+.wc-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.wc-btn-primary {
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.wc-btn-primary:hover:not(:disabled) {
+  background-color: var(--color-accent-hover);
+}
+
+.wc-btn-secondary {
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.wc-btn-secondary:hover:not(:disabled) {
+  background-color: var(--color-bg-elevated);
+  border-color: var(--color-border-light);
+  color: var(--color-text-primary);
+}
+
+.wc-btn-ghost {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+}
+
+.wc-btn-ghost:hover:not(:disabled) {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.wc-btn-danger {
+  background-color: var(--color-danger);
+  color: var(--color-on-accent);
+}
+
+.wc-btn-danger:hover:not(:disabled) {
+  background-color: var(--color-danger-hover);
+}
+
+.wc-btn-spinner {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 0.875em;
+  height: 0.875em;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: ds-spin 0.7s linear infinite;
+}
+
+.wc-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--control-height);
+  padding: 0.3125rem var(--space-3);
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: var(--text-base);
+  line-height: var(--leading-tight);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.wc-input:hover:not(:disabled):not(:focus) {
+  border-color: var(--color-border-light);
+}
+
+/* A text control signals focus with the accent border, so the global outward ring is dropped
+   rather than stacked on top of it. */
+.wc-input:focus {
+  border-color: var(--color-accent);
+}
+
+.wc-input:focus-visible {
+  box-shadow: none;
+}
+
+.wc-input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.wc-input-invalid {
+  border-color: var(--color-danger);
+}
+
+.wc-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  cursor: pointer;
+}
+
+.wc-checkbox-box {
+  flex-shrink: 0;
+  width: 0.8125rem;
+  height: 0.8125rem;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.wc-checkbox-box:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.wc-checkbox-label {
+  min-width: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.wc-toggle {
+  /* The invisible checkbox is stretched over this box, so it needs a positioned ancestor. */
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  user-select: none;
+  /* The checkbox covers the whole switch, so iOS would otherwise flash its tap highlight across
+     the switch and its label on every tap, including one the switch ignores. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wc-toggle-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wc-toggle-busy {
+  cursor: progress;
+}
+
+/*
+ * Stretched over the whole switch rather than hidden in a corner, so the checkbox *is* the hit
+ * target and no label-to-control forwarding has to happen. That forwarding is what old WebKit does
+ * not do for a zero-sized control, which left the switch dead to every tap on iOS 9.
+ */
+.wc-toggle-input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.wc-toggle-track {
+  position: relative;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 1.125rem;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.wc-toggle-checked .wc-toggle-track {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* The thumb is derived from the track so its inset stays equal on all four sides at any root font
+   size: fixed pixel offsets against rem-sized boxes only balance at a 16px root. */
+.wc-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(1.125rem - 6px);
+  height: calc(1.125rem - 6px);
+  background: #fff;
+  border-radius: 50%;
+  transition: transform var(--transition-fast);
+}
+
+.wc-toggle-checked .wc-toggle-thumb {
+  transform: translateX(calc(2rem - 1.125rem));
+}
+
+.wc-toggle-spinner {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  bottom: 1px;
+  left: 1px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: ds-spin 0.7s linear infinite;
+}
+
+.wc-toggle-label {
+  color: var(--color-text-primary);
+  font-size: var(--text-md);
+}
+
+.wc-seg-host {
+  display: inline-flex;
+  /* Without this the automatic minimum size stops the control shrinking below its content width,
+     so a row holding it overflows instead of the pill scrolling itself. */
+  min-width: 0;
+  max-width: 100%;
+}
+
+.wc-seg {
+  display: inline-flex;
+  gap: var(--space-1);
+  max-width: 100%;
+  padding: var(--space-1);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+}
+
+.wc-seg-option {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.3125rem var(--space-3);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.wc-seg-option:hover:not(.wc-seg-active) {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.wc-seg-active {
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.wc-seg-option .icon {
+  background-color: currentColor;
+}
+
+.wc-seg-stretch {
+  display: flex;
+}
+
+.wc-seg-stretch .wc-seg {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Grow from each option's own label width and share only the surplus: a basis of 0 hands every
+   option the same width whatever its label says, which only fits the shortest translation. */
+.wc-seg-stretch .wc-seg-option {
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
+.wc-settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Deliberately not `flex-wrap: wrap`. A control too wide to sit beside its label used to take a
+     line of its own, and old WebKit measures a wrapping container from its first line alone - so on
+     the compatibility floor that line contributed no height and the control was drawn over the next
+     row (issue #829). The label column shrinks instead, which every engine gets right and which
+     reads better here anyway: its description simply wraps to another line. */
+  flex-wrap: nowrap;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.wc-settings-row:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.wc-settings-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  /* `min-width: 0` alone lets the text shrink on a current engine, but old WebKit still lays the
+     block out at its max-content width. The explicit grow/shrink pair says it in terms every
+     engine honours. */
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.wc-settings-row-label {
+  color: var(--color-text-primary);
+  font-size: var(--text-md);
+  font-weight: var(--font-medium);
+}
+
+.wc-settings-row-desc {
+  max-width: 30rem;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.wc-settings-row-control {
+  flex: 0 1 auto;
+}
+
+.wc-settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.wc-settings-section-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.wc-settings-section-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.wc-settings-section-title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-tight);
+}
+
+.wc-settings-section-desc {
+  margin: 0;
+  max-width: 30rem;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.wc-settings-section-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.wc-error-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.5rem var(--space-3);
+  background: var(--color-danger-muted);
+  border-radius: var(--radius-md);
+  color: var(--color-danger);
+  font-size: var(--text-base);
+}
+
+.wc-error-banner-message {
+  flex: 1;
+}
+
+.wc-error-banner-dismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.wc-error-banner-dismiss:hover {
+  opacity: 1;
+}
+
+.wc-error-banner-dismiss-icon {
+  display: block;
+  width: 0.8125rem;
+  height: 0.8125rem;
+}
+
+.wc-toasts {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  left: auto;
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+  /* The stack spans the corner of the viewport; only a toast itself may take a pointer. */
+  pointer-events: none;
+}
+
+.wc-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  box-sizing: border-box;
+  width: 21.125rem;
+  max-width: calc(100vw - var(--space-6));
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-overlay);
+  border-left: 3px solid var(--color-success);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-popover);
+  color: var(--color-text-primary);
+  pointer-events: auto;
+  animation: ds-slide-up-in 160ms ease-out;
+}
+
+.wc-toast-error {
+  border-left-color: var(--color-danger);
+}
+
+.wc-toast-icon {
+  flex: none;
+  width: 0.9375rem;
+  height: 0.9375rem;
+  margin-top: 0.125rem;
+  color: var(--color-success);
+}
+
+.wc-toast-error .wc-toast-icon {
+  color: var(--color-danger);
+}
+
+.wc-toast-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.wc-toast-message {
+  font-size: var(--text-base);
+}
+
+.wc-toast-detail {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  overflow-wrap: break-word;
+}
+
+.wc-toast-dismiss {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.wc-toast-dismiss:hover {
+  opacity: 1;
+}
+
+.wc-toast-dismiss-icon {
+  display: block;
+  width: 0.6875rem;
+  height: 0.6875rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-toast {
+    animation: none;
+  }
+}
+
+/* Sign-in. The one screen someone actually fills in, so it is a card rather than a bare panel. */
+.wc-login {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 22rem;
+  padding: var(--space-6);
+  box-sizing: border-box;
+}
+
+.wc-login-header {
+  text-align: center;
+  margin-bottom: var(--space-2);
+}
+
+.wc-login-logo {
+  width: 64px;
+  height: 64px;
+  display: block;
+  margin: 0 auto var(--space-4);
+  object-fit: contain;
+}
+
+.wc-login-title {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  margin: 0 0 var(--space-1);
+}
+
+.wc-login-subtitle {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+.wc-login-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.wc-login-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/*
+ * The host's lock screen sits over the deck rather than replacing it (issues #462, #257): the deck
+ * keeps its sessions and its state and comes straight back when the machine is unlocked.
+ */
+.wc-lock-screen {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-toast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-primary);
+}
+
+/*
+ * The reconnecting notice, over the deck rather than instead of it for the same reason as the lock
+ * screen above. Its own z-index, below `--z-modal`: at the lock screen's height it would bury a
+ * dialog someone had open and hide the "action failed" toast an offline press still fires.
+ */
+.wc-reconnecting {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-reconnecting);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-primary);
+}
+
+/*
+ * A folder a provider draws. The chrome is Macro Deck's and stays outside the provider's tree, so a
+ * view cannot draw over its own way out.
+ */
+.wc-folder-view {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.wc-folder-view-chrome {
+  flex: 0 0 auto;
+  padding: var(--space-2);
+}
+
+.wc-folder-view-back {
+  background: none;
+  border: 0;
+  color: var(--color-text-primary);
+  font: inherit;
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+}
+
+.wc-folder-view-content {
+  flex: 1 1 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.wc-folder-view-placeholder,
+.wc-folder-view-loading {
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--color-text-secondary);
+}

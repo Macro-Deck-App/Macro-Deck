@@ -1,0 +1,162 @@
+using System.Text.Json;
+using MacroDeck.Localization;
+using MacroDeck.Ui.Config;
+using MacroDeck.Ui.Dsl;
+using MacroDeck.Ui.Runtime;
+using MacroDeckHost.Localization;
+using MacroDeckHost.Widgets.Configuration;
+
+namespace MacroDeckHost.Widgets.HistoryGraph;
+
+/// <summary>
+/// Builds a History Graph widget's <c>widget-config</c> tree from its stored data - see ADR 0050.
+/// <c>historyLength</c> and <c>subtitle</c> have no control here and can never be written by this tree: no
+/// node names either key, and the client's structural composition only ever writes the key a dispatched
+/// event's own node names (ADR 0050's "an input's id is the widget data key it configures").
+/// </summary>
+internal static class HistoryGraphWidgetConfigView
+{
+	private const string _cpuUsage = "system_cpu_usage_percent";
+	private const string _cpuName = "system_cpu_name";
+	private const string _ramUsedGb = "system_ram_used_gb";
+	private const string _ramUsagePercent = "system_ram_usage_percent";
+	private const string _gpuUsagePercent = "system_gpu_usage_percent";
+	private const string _gpuName = "system_gpu_name";
+
+	public static UiElement Build(JsonElement data)
+	{
+		var valueVariable = new UiState<string>(WidgetConfigJson.ReadString(data, "valueVariable") ?? string.Empty);
+		var title = new UiState<string>(WidgetConfigJson.ReadString(data, "title") ?? string.Empty);
+		var showSubtitle = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showSubtitle") ?? true);
+		var subtitleVariable =
+			new UiState<string>(WidgetConfigJson.ReadString(data, "subtitleVariable") ?? string.Empty);
+		var maxValue = new UiState<double>(NormalizeMaxValue(WidgetConfigJson.ReadDouble(data, "maxValue") ?? 0));
+		var accentColor = new UiState<string>(WidgetConfigJson.ReadString(data, "accentColor") ?? string.Empty);
+
+		var border = WidgetConfigJson.ReadObject(data, "border");
+		var borderStyle = new UiState<string>(WidgetConfigJson.ReadString(border, "style") ?? "off");
+		var borderColor = new UiState<string>(WidgetConfigJson.ReadString(border, "color") ?? string.Empty);
+
+		var flows = new UiState<JsonElement>(WidgetConfigJson.ReadFlows(data));
+
+		// One preset applies four fields at once by writing their UiState cells directly, the pattern
+		// docs/sdk/ui/concepts/state-and-bindings.md's own worked example sanctions for keeping several
+		// nodes in sync from one interaction - a preset has no field of its own to submit, so it is a
+		// A button rather than a value-bearing input: a preset applies four keys at once, and an input would
+		// also leave a fifth key holding the preset's own name that nothing reads.
+		void ApplyPreset(string metric, string presetTitle, string subtitle, double max)
+		{
+			valueVariable.Value = metric;
+			title.Value = presetTitle;
+			subtitleVariable.Value = subtitle;
+			maxValue.Value = NormalizeMaxValue(max);
+		}
+
+		return new UiWidgetConfiguration
+		{
+			Key = "root",
+			Properties = new UiWidgetProperties
+			{
+				Key = "properties",
+				Children =
+				[
+					new UiHeading { Key = "presets-heading", Text = AppStrings.Widgets.History.Presets() },
+					new UiConfigStack
+					{
+						Key = "presets",
+						Direction = "horizontal",
+						Children =
+						[
+							PresetButton("presetCpu",
+								AppStrings.Widgets.History.PresetCpu(),
+								() => ApplyPreset(_cpuUsage, "CPU Load", _cpuName, 100)),
+							PresetButton("presetRamUsed",
+								AppStrings.Widgets.History.PresetRamUsed(),
+								() => ApplyPreset(_ramUsedGb, "RAM Usage", string.Empty, 0)),
+							PresetButton("presetRamPercent",
+								AppStrings.Widgets.History.PresetRamPercent(),
+								() => ApplyPreset(_ramUsagePercent, "RAM Usage", string.Empty, 100)),
+							PresetButton("presetGpu",
+								AppStrings.Widgets.History.PresetGpu(),
+								() => ApplyPreset(_gpuUsagePercent, "GPU Load", _gpuName, 100)),
+						],
+					},
+					new UiProse { Key = "presets-hint", Text = AppStrings.Widgets.History.PresetsHint() },
+					new UiHeading
+					{
+						Key = "metric-heading", Text = AppStrings.Widgets.History.MetricSection(),
+					},
+					new UiVariablePickerInput
+					{
+						Key = "valueVariable",
+						Label = AppStrings.Widgets.History.ValueVariable(),
+						Placeholder = AppStrings.Widgets.History.ValueVariablePlaceholder(),
+						Description = AppStrings.Widgets.History.ValueVariableHint(),
+						Binding = Bind.To(valueVariable),
+						VariableTypes = UiValue.Of<IReadOnlyList<string>>(["numeric"]),
+					},
+					new UiStringInput
+					{
+						Key = "title",
+						Label = AppStrings.Widgets.Editor.Title(),
+						Placeholder = AppStrings.Widgets.History.TitlePlaceholder(),
+						Binding = Bind.To(title),
+						LiteralOnly = true,
+					},
+					new UiBooleanInput
+					{
+						Key = "showSubtitle",
+						Label = AppStrings.Widgets.History.Subtitle(),
+						Binding = Bind.To(showSubtitle),
+					},
+					new UiVariablePickerInput
+					{
+						Key = "subtitleVariable",
+						Label = AppStrings.Widgets.History.SubtitleVariable(),
+						Description = AppStrings.Widgets.History.SubtitleVariableHint(),
+						Binding = Bind.To(subtitleVariable),
+						VariableTypes = UiValue.Of<IReadOnlyList<string>>(["text"]),
+						VisibleWhen = new UiVisibleWhen { ParameterName = "showSubtitle", Values = ["true"] },
+					},
+					new UiNumberInput
+					{
+						Key = "maxValue",
+						Label = AppStrings.Widgets.History.ChartMaximum(),
+						Placeholder = AppStrings.Widgets.History.ChartMaximumPlaceholder(),
+						Description = AppStrings.Widgets.History.ChartMaximumHint(),
+						Binding = Bind.To(maxValue),
+						Min = 0,
+					},
+					new UiColorInput
+					{
+						Key = "accentColor",
+						Label = AppStrings.Widgets.History.AccentColor(),
+						Binding = Bind.To(accentColor),
+						// Reset returns to unset rather than to a literal hex (issue #896): the chart's real
+						// default is the theme accent, which an unset value keeps following as the theme
+						// changes - the same "keep an unset colour unset" rule the Action Button label uses.
+						SupportsReset = true,
+						DefaultValue = string.Empty,
+					},
+					new UiProse { Key = "press-hint", Text = AppStrings.Widgets.History.PressHint() },
+					new UiHeading { Key = "border-heading", Text = AppStrings.Widgets.Editor.Border() },
+					WidgetConfigFragments.Border(borderStyle, borderColor, labelled: false),
+				],
+			},
+			Editor = WidgetConfigFragments.FlowsEditor(flows),
+		};
+	}
+
+	private static UiConfigButton PresetButton(string key, LocalizedString label, Action apply)
+		=> new()
+		{
+			Key = key,
+			Label = label,
+			Events = [UiEventHandler.On(UiConfigEvents.Activate, apply)],
+		};
+
+	/// <summary>Clamps a stored bound to what the <c>maxValue</c> field can hold: <c>0</c> for "auto" (absent,
+	/// non-positive or non-finite - the schema's own definition of auto-scaling), since the field is a plain
+	/// number with no separate "unset" state.</summary>
+	private static double NormalizeMaxValue(double value) => double.IsFinite(value) && value > 0 ? value : 0;
+}

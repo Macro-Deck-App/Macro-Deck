@@ -1,0 +1,81 @@
+@use '../../../../styles/index' as ds;
+
+:host {
+  position: relative;
+  display: block;
+  flex: 1 1 0;
+  min-width: 6.5rem;
+  @include ds.dropdown-affordances;
+}
+
+.cb-input {
+  width: 100%;
+  @include ds.control-base;
+  @include ds.control-interactive;
+  // Declared after control-base, whose padding-inline shorthand this narrows on one side.
+  // Reserved unconditionally, whether or not a clear button is currently rendered, so the box
+  // never changes width the moment one appears - that width jump is what makes the caret
+  // beside it look like it moved.
+  padding-right: var(--trailing-gutter);
+}
+
+// A sibling of the input, not a child - the input cannot contain children - positioned at the
+// same inset `shared-select` puts its caret at, so the two controls read as one family.
+.cb-caret {
+  position: absolute;
+  top: 50%;
+  right: var(--space-3);
+  transform: translateY(-50%);
+  display: inline-flex;
+  cursor: text;
+}
+
+.cb-clear {
+  position: absolute;
+  top: 50%;
+  right: var(--clear-inset);
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--clear-size);
+  height: var(--clear-size);
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.cb-clear:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.cb-clear svg {
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
+.cb-status {
+  padding: var(--space-2) 0.5rem;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.cb-option {
+  text-align: left;
+  padding: 0.3125rem 0.5rem;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.cb-option:hover,
+.cb-option-active {
+  background-color: var(--color-bg-hover);
+}

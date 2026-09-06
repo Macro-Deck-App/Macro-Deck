@@ -1,0 +1,32 @@
+:host {
+  display: flex;
+  align-items: center;
+  // Never squeezed by a long title next to it in a toolbar.
+  flex: 0 0 auto;
+}
+
+.cursor-position {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+
+.cursor-position-value {
+  font-family: var(--font-mono);
+  // The value changes with every mouse move - proportional digits would make
+  // the readout (and the toolbar around it) jitter.
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+}
+
+.cursor-position-empty {
+  color: var(--color-text-muted);
+}

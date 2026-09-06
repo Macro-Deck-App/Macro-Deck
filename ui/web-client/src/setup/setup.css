@@ -1,0 +1,140 @@
+/* The device-setup wizard and the banner that leads into it. */
+
+/* Everything this dialog looks like comes from the shared modal chrome in `styles.css`. Only its
+   place in the stack is its own: it sits above the deck and below the settings dialog. */
+.wc-setup-backdrop {
+  z-index: 110;
+}
+
+.wc-setup-backdrop[hidden] {
+  display: none;
+}
+
+.wc-setup-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.wc-setup-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.wc-setup-download {
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.wc-setup-download[hidden] {
+  display: none;
+}
+
+.wc-setup-download:hover,
+.wc-setup-download:focus-visible {
+  text-decoration: underline;
+}
+
+.wc-setup-hint,
+.wc-setup-notice,
+.wc-setup-platform-body {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.wc-setup-hint[hidden],
+.wc-setup-fingerprint-block[hidden],
+.wc-setup-open-secure[hidden] {
+  display: none;
+}
+
+.wc-setup-fingerprint {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  /* The hex string carries no break opportunity of its own, so without this it widens the dialog
+     until the whole page scrolls sideways. */
+  word-break: break-all;
+}
+
+.wc-setup-platform-steps {
+  margin-top: var(--space-4);
+}
+
+.wc-setup-platform-steps h3 {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-primary);
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.wc-setup-platform-steps ol {
+  margin: 0;
+  padding-left: 1.25em;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.wc-setup-platform-steps li + li {
+  margin-top: var(--space-1);
+}
+
+.wc-setup-open-secure {
+  margin-top: var(--space-4);
+}
+
+.wc-setup-why {
+  margin-top: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.wc-setup-why summary {
+  color: var(--color-text-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.wc-setup-why-body {
+  margin: var(--space-2) 0 0;
+  line-height: var(--leading-normal);
+}
+
+.wc-setup-banner {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border);
+}
+
+.wc-setup-banner[hidden] {
+  display: none;
+}
+
+.wc-setup-banner-message {
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.wc-setup-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}

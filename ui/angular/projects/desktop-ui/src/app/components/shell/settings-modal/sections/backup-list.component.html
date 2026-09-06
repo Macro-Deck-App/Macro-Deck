@@ -1,0 +1,130 @@
+<div class="bl">
+  @if (pendingRestore(); as pending) {
+    <div class="bl-pending" role="status">
+      <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+      <span class="bl-pending-text">
+        {{ 'macrodeck.app:Settings.Backups.PendingRestoreNotice' | translate }}
+        @if (!pending.restartSupported) {
+          {{ 'macrodeck.app:Settings.Backups.PendingRestoreQuitNotice' | translate }}
+          @if (pending.restartUnavailableReason; as reason) {
+            {{ reason }}.
+          }
+        }
+      </span>
+      <div class="bl-pending-actions">
+        <button type="button" class="bl-pending-btn bl-pending-cancel" [disabled]="cancellingRestore()" (click)="cancelPendingRestore()">
+          {{ 'macrodeck.app:Settings.Backups.CancelRestoreButton' | translate }}
+        </button>
+        @if (pending.restartSupported) {
+          <button type="button" class="bl-pending-btn bl-pending-restart" [disabled]="restarting()" (click)="restartNow()">
+            {{ 'macrodeck.app:Settings.Modal.RestartNow' | translate }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  @if (loadError(); as error) {
+    <shared-error-banner class="bl-error" [message]="error" [dismissible]="false" />
+    <button type="button" class="bl-retry" (click)="retry()">{{ 'macrodeck:Common.Retry' | translate }}</button>
+  } @else if (isLoading() && backups().length === 0) {
+    <shared-loading-state [message]="'macrodeck.app:Settings.Backups.ListLoading' | translate" />
+  } @else if (backups().length === 0) {
+    <shared-empty-state
+      class="bl-empty"
+      icon="layers"
+      [heading]="'macrodeck.app:Settings.Backups.EmptyHeading' | translate"
+      [message]="'macrodeck.app:Settings.Backups.EmptyMessage' | translate" />
+  } @else {
+    <ul class="bl-list">
+      @for (backup of visibleBackups(); track backup.id) {
+        <li class="bl-row">
+          <div class="bl-row-main">
+            <div class="bl-date-col">
+              <span class="bl-date">{{ dateLabel(backup.createdAt) }}</span>
+              <span class="bl-relative">{{ relativeTime(backup.createdAt) }}</span>
+            </div>
+
+            <span class="bl-badge">{{ triggerLabel(backup.trigger) }}</span>
+            <span class="bl-chip" [class.bl-chip-remote]="backup.isRemote">
+              {{ (backup.isRemote ? 'macrodeck.app:Settings.Backups.Remote' : 'macrodeck.app:Settings.Backups.Local') | translate }}
+            </span>
+            <span class="bl-version">v{{ backup.macroDeckVersion }}</span>
+            <span class="bl-size">{{ formatBytes(backup.sizeBytes) }}</span>
+            <span class="bl-location">{{ backup.providerDisplayName }}</span>
+
+            @if (!backup.decryptableLocally) {
+              <span class="bl-chip bl-chip-warn">
+                <span class="icon icon-lock icon-xs" aria-hidden="true"></span>
+                {{ 'macrodeck.app:Settings.Backups.NeedsRecoveryKey' | translate }}
+              </span>
+            }
+
+            <div class="bl-actions">
+              <shared-dropdown-menu
+                position="bottom-right"
+                [minWidth]="176"
+                [isOpen]="openMenuId() === backup.id"
+                (isOpenChange)="setMenuOpen(backup.id, $event)">
+                <ng-template #triggerContent>
+                  <span class="bl-dots-btn">
+                    <span class="icon icon-dots-vertical icon-sm"></span>
+                  </span>
+                </ng-template>
+                <ng-template #menuContent>
+                  <div class="bl-menu">
+                    <button type="button" class="bl-menu-item" (click)="download(backup)">
+                      <span class="icon icon-download icon-sm"></span>
+                      <span>{{ 'macrodeck.app:Settings.Backups.DownloadButton' | translate }}</span>
+                    </button>
+                    <button type="button" class="bl-menu-item" (click)="preview(backup)">
+                      <span class="icon icon-info icon-sm"></span>
+                      <span>{{ 'macrodeck.app:Settings.Backups.DetailsButton' | translate }}</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="bl-menu-item"
+                      [disabled]="!backup.decryptableLocally || !canMutate()"
+                      [title]="!backup.decryptableLocally ? ('macrodeck.app:Settings.Backups.NeedsRecoveryKeyTitle' | translate) : ''"
+                      (click)="restore(backup)">
+                      <span class="icon icon-refresh icon-sm"></span>
+                      <span>{{ 'macrodeck.app:Settings.Backups.RestoreButton' | translate }}</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="bl-menu-item bl-menu-danger"
+                      [disabled]="!canMutate()"
+                      (click)="requestDelete(backup)">
+                      <span class="icon icon-trash icon-sm"></span>
+                      <span>{{ 'macrodeck:Common.Delete' | translate }}</span>
+                    </button>
+                  </div>
+                </ng-template>
+              </shared-dropdown-menu>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+    @if (pageCount() > 1) {
+      <nav class="bl-pager" [attr.aria-label]="'macrodeck.app:Settings.Backups.PagesAriaLabel' | translate">
+        <shared-button
+          variant="secondary"
+          [disabled]="currentPage() === 0"
+          (clicked)="goToPage(currentPage() - 1)">
+          {{ 'macrodeck.app:Settings.Backups.PreviousPage' | translate }}
+        </shared-button>
+        <span class="bl-pager-position">
+          {{ 'macrodeck.app:Settings.Backups.PagePosition' | translate: { current: currentPage() + 1, total: pageCount() } }}
+        </span>
+        <shared-button
+          variant="secondary"
+          [disabled]="currentPage() >= pageCount() - 1"
+          (clicked)="goToPage(currentPage() + 1)">
+          {{ 'macrodeck.app:Settings.Backups.NextPage' | translate }}
+        </shared-button>
+      </nav>
+    }
+
+  }
+</div>

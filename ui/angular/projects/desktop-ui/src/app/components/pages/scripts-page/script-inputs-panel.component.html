@@ -1,0 +1,198 @@
+<div class="inputs-panel">
+  <header class="inputs-header">
+    <div class="inputs-copy">
+      <h3 class="inputs-title">{{ 'macrodeck.app:Scripts.InputsTabLabel' | translate }}</h3>
+      <p class="inputs-hint">
+        {{ 'macrodeck.app:Scripts.InputsHintBefore' | translate }}
+        <code>vars.&lt;name&gt;</code>{{ 'macrodeck.app:Scripts.InputsHintAfter' | translate }}
+      </p>
+    </div>
+    <shared-button variant="secondary" (click)="openCreate()">
+      <span class="icon icon-plus icon-sm"></span>
+      {{ 'macrodeck.app:Scripts.AddInputAction' | translate }}
+    </shared-button>
+  </header>
+
+  <div class="runs-on-widget-row">
+    <shared-toggle-switch
+      [label]="'macrodeck.app:Scripts.RunsOnWidgetLabel' | translate"
+      [checked]="runsOnWidget"
+      (changed)="setRunsOnWidget($event)" />
+    <p class="runs-on-widget-hint">{{ 'macrodeck.app:Scripts.RunsOnWidgetHint' | translate }}</p>
+  </div>
+
+  @if (inputs.length === 0) {
+    <shared-empty-state
+      [heading]="'macrodeck.app:Scripts.NoInputsYetHeading' | translate"
+      [message]="'macrodeck.app:Scripts.NoInputsYetMessage' | translate" />
+  } @else {
+    <ul class="input-rows">
+      @for (input of inputs; track $index; let rowIndex = $index) {
+        <li class="input-row">
+          <div class="input-row-main">
+            <div class="input-name-col">
+              <span class="input-public-name" [title]="publicName(input)">{{ publicName(input) }}</span>
+              <span class="input-meta">
+                <span class="input-type-badge type-{{ input.type }}">{{ typeLabels()[input.type] }}</span>
+                @if (input.required) {
+                  <span class="input-required-badge">{{ 'macrodeck.app:Scripts.RequiredBadge' | translate }}</span>
+                }
+                @if (input.label) {
+                  <span class="input-label-text">{{ input.label }}</span>
+                }
+              </span>
+            </div>
+
+            <div class="input-default-col">
+              @if (input.defaultValue !== undefined) {
+                <span class="input-default" [title]="input.defaultValue">{{ input.defaultValue }}</span>
+              } @else {
+                <span class="input-no-default">{{ 'macrodeck.app:Scripts.NoDefaultText' | translate }}</span>
+              }
+            </div>
+
+            <div class="input-actions">
+              <shared-dropdown-menu
+                position="bottom-right"
+                [minWidth]="168"
+                closeOnItemClick
+                [isOpen]="openMenuKey() === rowKey(rowIndex)"
+                (isOpenChange)="setDropdownOpen(rowKey(rowIndex), $event)">
+                <ng-template #triggerContent>
+                  <span class="input-dots-btn">
+                    <span class="icon icon-dots-vertical icon-sm"></span>
+                  </span>
+                </ng-template>
+                <ng-template #menuContent>
+                  <div class="input-menu">
+                    <button type="button" class="input-menu-item" (click)="openEdit(rowIndex)">
+                      <span class="icon icon-pencil icon-sm"></span>
+                      <span>{{ 'macrodeck:Common.Edit' | translate }}</span>
+                    </button>
+                    <button type="button" class="input-menu-item input-menu-danger" (click)="requestDelete(rowIndex)">
+                      <span class="icon icon-trash icon-sm"></span>
+                      <span>{{ 'macrodeck:Common.Delete' | translate }}</span>
+                    </button>
+                  </div>
+                </ng-template>
+              </shared-dropdown-menu>
+            </div>
+          </div>
+
+          @if (nameError(rowIndex); as error) {
+            <p class="row-error">{{ error }}</p>
+          } @else if (shadowWarning(rowIndex); as warning) {
+            <p class="row-warning">{{ warning }}</p>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>
+
+@if (showCreateModal()) {
+  <shared-modal
+    [heading]="(editIndex() === null ? 'macrodeck.app:Scripts.NewInputHeading' : 'macrodeck.app:Scripts.EditInputHeading') | translate"
+    size="small"
+    [showFooter]="false"
+    (close)="closeCreate()">
+    <form class="create-form" (ngSubmit)="submitCreate()">
+      <label class="form-group">
+        <span class="form-label">{{ 'macrodeck.app:Scripts.NameFieldLabel' | translate }}</span>
+        <shared-input
+          [placeholder]="'macrodeck.app:Scripts.InputNamePlaceholder' | translate"
+          [ngModel]="form().name"
+          (ngModelChange)="setFormName($event)"
+          name="name"
+          required />
+        <span class="form-preview">
+          @if (createNameSanitized().sanitized) {
+            <span [class.invalid]="!createNameSanitized().isValid">
+              vars.{{ createNameSanitized().sanitized }}
+            </span>
+          } @else {
+            <span class="hint">{{ 'macrodeck.app:Scripts.LowercaseHint' | translate }}</span>
+          }
+        </span>
+      </label>
+
+      <label class="form-group">
+        <span class="form-label">{{ 'macrodeck.app:Scripts.TypeFieldLabel' | translate }}</span>
+        <shared-select
+          [options]="typeOptions()"
+          [ngModel]="form().type"
+          (ngModelChange)="setFormType($event)"
+          name="type" />
+      </label>
+
+      <label class="form-group">
+        <span class="form-label">{{ 'macrodeck.app:Scripts.LabelFieldLabel' | translate }}</span>
+        <shared-input
+          [placeholder]="createNameSanitized().sanitized || ('macrodeck.app:Scripts.LabelFieldPlaceholder' | translate)"
+          [ngModel]="form().label"
+          (ngModelChange)="setFormLabel($event)"
+          name="label" />
+      </label>
+
+      <label class="form-group">
+        <span class="form-label">{{ 'macrodeck.app:Scripts.DefaultFieldLabel' | translate }}</span>
+        @switch (form().type) {
+          @case ('boolean') {
+            <shared-select
+              [options]="booleanOptions()"
+              [ngModel]="form().defaultValue || 'false'"
+              (ngModelChange)="setFormDefault($event)"
+              name="defaultValue" />
+          }
+          @case ('numeric') {
+            <shared-input
+              type="number"
+              [placeholder]="'macrodeck.app:Scripts.NoDefaultText' | translate"
+              [ngModel]="form().defaultValue"
+              (ngModelChange)="setFormDefault($event)"
+              name="defaultValue" />
+          }
+          @default {
+            <shared-input
+              [placeholder]="'macrodeck.app:Scripts.NoDefaultText' | translate"
+              [ngModel]="form().defaultValue"
+              (ngModelChange)="setFormDefault($event)"
+              name="defaultValue" />
+          }
+        }
+      </label>
+
+      <div class="form-group">
+        <shared-checkbox
+          [label]="'macrodeck.app:Scripts.RequiredBadge' | translate"
+          [ngModel]="form().required"
+          (ngModelChange)="setFormRequired($event)"
+          name="required" />
+      </div>
+
+      @if (createNameTaken()) {
+        <p class="row-error">{{ 'macrodeck.app:Scripts.NameTakenError' | translate }}</p>
+      } @else if (createShadowWarning(); as warning) {
+        <p class="row-warning">{{ warning }}</p>
+      }
+
+      <shared-button-group class="form-actions" align="end">
+        <shared-button type="button" variant="secondary" (click)="closeCreate()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button type="submit" variant="primary" [disabled]="!canCreate()">
+          {{ (editIndex() === null ? 'macrodeck:Common.Create' : 'macrodeck:Common.Save') | translate }}
+        </shared-button>
+      </shared-button-group>
+    </form>
+  </shared-modal>
+}
+
+@if (deleteCandidate(); as candidate) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Scripts.DeleteInputHeading' | translate"
+    [message]="'macrodeck.app:Scripts.DeleteInputMessage' | translate:{ name: candidate.name }"
+    [confirmText]="'macrodeck:Common.Delete' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmDelete()"
+    (cancel)="cancelDelete()" />
+}

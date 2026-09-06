@@ -1,0 +1,31 @@
+name: Integration request
+description: Request support for a new app, service or device
+title: "[Integration] "
+labels: ["feature", "area:integrations", "status:needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this when an integration does not exist yet. If an existing integration is missing functionality, use **Integration capability request**.
+
+  - type: input
+    id: integration
+    attributes:
+      label: What should Macro Deck integrate with?
+      placeholder: Home Assistant, Philips Hue, vMix
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: What would you like to do with it?
+      description: A short description or a few examples are enough.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else?
+      description: API documentation, existing plugins or other useful links are welcome, but optional.

@@ -1,0 +1,148 @@
+<shared-detail-page [backLabel]="'macrodeck.app:Store.Page.BackToStore' | translate" (close)="goBack()">
+  <div class="detail-content">
+    @if (isLoading()) {
+      <shared-loading-state [message]="'macrodeck.app:Store.Page.LoadingExtension' | translate" />
+    } @else if (loadError()) {
+      <shared-error-banner [message]="loadError()!" [dismissible]="false" />
+    } @else if (extension(); as extension) {
+      <div class="detail-inner">
+        <app-store-detail-header
+          [extension]="extension"
+          [operation]="operation()"
+          (install)="onInstall()"
+          (installUnsigned)="onInstallUnsigned()"
+          (retry)="onRetry()"
+          (uninstall)="onUninstallRequested()" />
+
+        @if (extension.screenshots.length > 0) {
+          <app-store-screenshot-strip
+            [kind]="extension.kind"
+            [extensionId]="extension.id"
+            [screenshots]="extension.screenshots" />
+        }
+
+        <div class="detail-columns">
+          <section class="detail-overview">
+            @if (extension.longDescription || extension.description) {
+              <div class="overview-block">
+                <h2 class="detail-heading">{{ 'macrodeck.app:Store.Page.OverviewHeading' | translate }}</h2>
+                <shared-store-markdown [text]="extension.longDescription || extension.description || ''" />
+              </div>
+            }
+            @if (latestChangelogEntry(); as entry) {
+              <div class="overview-block">
+                <h2 class="detail-heading">{{ 'macrodeck.app:Store.Page.WhatsNewHeading' | translate }}</h2>
+                <div class="whats-new-card">
+                  <div class="whats-new-notes">
+                    @if (entry.changelog) {
+                      <shared-store-markdown [text]="entry.changelog" />
+                    }
+                  </div>
+                  <div class="whats-new-meta">
+                    <span class="whats-new-version">{{ 'macrodeck.app:Store.Page.VersionLabel' | translate:{ version: entry.version } }}</span>
+                    @if (entry.releasedAt) {
+                      <span class="whats-new-date">{{ entry.releasedAt | date: 'mediumDate' }}</span>
+                    }
+                  </div>
+                </div>
+
+                @if (hasVersionHistory()) {
+                  <shared-button variant="ghost" (click)="openHistoryModal($event)">{{ 'macrodeck.app:Store.Page.VersionHistoryAction' | translate }}</shared-button>
+                }
+              </div>
+            }
+
+            @if (historyModalOpen()) {
+              <app-store-version-history-modal
+                [history]="extension.history"
+                (closed)="onHistoryModalClosed()" />
+            }
+          </section>
+
+          <aside class="detail-sidebar">
+            <h2 class="detail-heading">{{ 'macrodeck.app:Store.Page.DetailsHeading' | translate }}</h2>
+            <dl class="detail-list">
+              <div class="detail-row">
+                <dt>{{ 'macrodeck.app:Store.Page.VersionField' | translate }}</dt>
+                <dd>{{ extension.latestVersion }}</dd>
+              </div>
+              <div class="detail-row">
+                <dt>{{ 'macrodeck.app:Store.Page.CompatibilityField' | translate }}</dt>
+                <dd>{{ compatibilityLabel(extension.supportedOperatingSystems) }}</dd>
+              </div>
+              @if (extension.installedVersion) {
+                <div class="detail-row">
+                  <dt>{{ 'macrodeck.app:Store.Page.InstalledVersionField' | translate }}</dt>
+                  <dd>{{ extension.installedVersion }}</dd>
+                </div>
+              }
+              @if (extension.publisher) {
+                <div class="detail-row">
+                  <dt>{{ 'macrodeck.app:Store.Page.PublisherField' | translate }}</dt>
+                  <dd>{{ extension.publisher }}</dd>
+                </div>
+              }
+              @if (extension.license) {
+                <div class="detail-row">
+                  <dt>{{ 'macrodeck.app:Store.Page.LicenseField' | translate }}</dt>
+                  <dd>{{ extension.license }}</dd>
+                </div>
+              }
+              @if (extension.downloadSize) {
+                <div class="detail-row">
+                  <dt>{{ 'macrodeck.app:Store.Page.SizeField' | translate }}</dt>
+                  <dd>{{ formatBytes(extension.downloadSize) }}</dd>
+                </div>
+              }
+              @if (extension.updatedAt) {
+                <div class="detail-row">
+                  <dt>{{ 'macrodeck.app:Store.Page.UpdatedField' | translate }}</dt>
+                  <dd>{{ extension.updatedAt | date: 'mediumDate' }}</dd>
+                </div>
+              }
+            </dl>
+
+            @if (languages().length > 0) {
+              <div class="languages-group">
+                <h2 class="detail-heading">{{ 'macrodeck.app:Store.Page.LanguagesHeading' | translate }}</h2>
+                <ul class="language-list">
+                  @for (language of visibleLanguages(); track language) {
+                    <li class="language-item" [attr.lang]="language">{{ cultureDisplayName(language) }}</li>
+                  }
+                </ul>
+                @if (hasMoreLanguages()) {
+                  <shared-button variant="ghost" (click)="openLanguagesModal($event)">{{ 'macrodeck.app:Store.Page.LanguagesViewAllAction' | translate }}</shared-button>
+                }
+              </div>
+            }
+
+            @if (languagesModalOpen()) {
+              <app-store-languages-modal
+                [languages]="languages()"
+                (closed)="onLanguagesModalClosed()" />
+            }
+
+            @if (extension.repository) {
+              <div class="links-group">
+                <h2 class="detail-heading">{{ 'macrodeck.app:Store.Page.LinksHeading' | translate }}</h2>
+                <a class="detail-link" [href]="extension.repository" target="_blank" rel="noopener noreferrer">
+                  {{ 'macrodeck.app:Store.Page.RepositoryLink' | translate }}
+                </a>
+              </div>
+            }
+          </aside>
+        </div>
+      </div>
+    }
+  </div>
+</shared-detail-page>
+
+@if (uninstallConfirmOpen()) {
+  <shared-confirmation-modal
+    [heading]="uninstallHeading()"
+    [message]="uninstallMessage()"
+    [confirmText]="'macrodeck.app:Store.Uninstall' | translate"
+    [danger]="true"
+    (confirm)="confirmUninstall()"
+    (cancel)="cancelUninstall()" />
+}

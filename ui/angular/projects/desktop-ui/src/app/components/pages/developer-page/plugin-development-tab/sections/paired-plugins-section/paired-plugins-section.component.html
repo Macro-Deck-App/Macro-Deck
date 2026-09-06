@@ -1,0 +1,72 @@
+<div class="plugin-connections">
+@if (!pairingService.unavailable()) {
+    <div class="plugin-tokens-header">
+      <div>
+        <h2 class="plugin-tokens-title">{{ 'macrodeck.app:Developer.Tokens.PairedTitle' | translate }}</h2>
+        <p class="plugin-tokens-subtitle">{{ 'macrodeck.app:Developer.Tokens.PairedCount' | translate:{ count: pairedPlugins().length } }}</p>
+      </div>
+    </div>
+
+    <p class="plugin-tokens-description">
+      {{ 'macrodeck.app:Developer.Tokens.PairedDescription' | translate }}
+    </p>
+
+    @if (pairingService.loadError(); as pairingLoadError) {
+      <shared-error-banner class="plugin-tokens-error" [message]="pairingLoadError" [dismissible]="false" />
+    }
+
+    @if (pairedPlugins().length === 0) {
+      <shared-empty-state
+        class="plugin-tokens-empty"
+        icon="lock"
+        [heading]="'macrodeck.app:Developer.Tokens.PairedEmptyHeading' | translate"
+        [message]="'macrodeck.app:Developer.Tokens.PairedEmptyMessage' | translate" />
+    } @else {
+      <ul class="plugin-tokens-list">
+        @for (plugin of pairedPlugins(); track plugin.pluginId) {
+          <li class="plugin-tokens-row">
+            <div class="plugin-tokens-row-main">
+              <div class="plugin-tokens-name-col">
+                <span class="plugin-tokens-name-line">
+                  <span class="plugin-tokens-name">{{ plugin.displayName }}</span>
+                  <span class="plugin-tokens-online-badge" [class.is-online]="plugin.online">
+                    {{ (plugin.online ? 'macrodeck.app:Developer.Tokens.OnlineStatus' : 'macrodeck.app:Developer.Tokens.OfflineStatus') | translate }}
+                  </span>
+                </span>
+                <span class="plugin-tokens-secondary">{{ plugin.pluginId }}</span>
+              </div>
+
+              <div class="plugin-tokens-stats">
+                <div class="plugin-tokens-stat">
+                  <span class="plugin-tokens-stat-label">{{ 'macrodeck.app:Developer.Tokens.PairedLabel' | translate }}</span>
+                  <span class="plugin-tokens-stat-value">{{ formatDate(plugin.createdAt) }}</span>
+                </div>
+                <div class="plugin-tokens-stat">
+                  <span class="plugin-tokens-stat-label">{{ 'macrodeck.app:Developer.Tokens.LastSeenLabel' | translate }}</span>
+                  <span class="plugin-tokens-stat-value">{{ formatDate(plugin.lastSeenAt) }}</span>
+                </div>
+              </div>
+
+              <div class="plugin-tokens-actions">
+                <shared-button variant="danger-ghost" (click)="requestRevokePaired(plugin)">
+                  {{ 'macrodeck.app:Developer.Tokens.RevokeAction' | translate }}
+                </shared-button>
+              </div>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+}
+</div>
+
+@if (revokePairedCandidate(); as plugin) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Developer.Tokens.RevokePluginConfirmHeading' | translate"
+    [message]="'macrodeck.app:Developer.Tokens.RevokePluginConfirmMessage' | translate:{ name: plugin.displayName }"
+    [confirmText]="'macrodeck.app:Developer.Tokens.RevokeAction' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmRevokePaired()"
+    (cancel)="cancelRevokePaired()" />
+}

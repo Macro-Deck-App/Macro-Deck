@@ -1,0 +1,20 @@
+<div class="strip">
+  @for (screenshot of screenshots(); track screenshot.index; let i = $index) {
+    <button
+      type="button"
+      class="thumb"
+      [attr.aria-label]="thumbnailAriaLabel(screenshot, i)"
+      (click)="open(i, $event)">
+      <img [src]="thumbnailUrl(screenshot)" [alt]="screenshot.caption || ''">
+    </button>
+  }
+</div>
+
+@if (openIndex() !== null) {
+  <app-store-screenshot-viewer
+    [kind]="kind()"
+    [extensionId]="extensionId()"
+    [screenshots]="screenshots()"
+    [initialIndex]="openIndex()!"
+    (closed)="onViewerClosed()" />
+}

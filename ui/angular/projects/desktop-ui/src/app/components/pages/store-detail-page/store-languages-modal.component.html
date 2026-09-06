@@ -1,0 +1,10 @@
+<shared-modal [heading]="'macrodeck.app:Store.Page.LanguagesHeading' | translate" size="small" [showFooter]="false" (close)="onClose()">
+  <ul class="language-list">
+    @for (language of languages(); track language) {
+      <li class="language-entry">
+        <span class="language-name" [attr.lang]="language">{{ cultureDisplayName(language) }}</span>
+        <span class="language-tag">{{ language }}</span>
+      </li>
+    }
+  </ul>
+</shared-modal>

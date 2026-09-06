@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <!-- The application's own catalog, not a published contract. Keys here can be renamed and
+             removed with the code that uses them; MacroDeck.Localization's macrodeck catalog is the one
+             plugins compile against and is additive-only. -->
+        <IsPackable>false</IsPackable>
+        <!-- The default .resx pipeline would emit string-returning members and satellite assemblies; the
+             source generator reads these through AdditionalFiles instead. Same reason as
+             MacroDeck.Localization's own csproj. -->
+        <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <AdditionalFiles Include="Localization\**\*.resx" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Localization\MacroDeck.Localization.csproj" />
+        <!-- A build-time tool, never a runtime dependency. The package's own .props does this for a
+             PackageReference consumer; an in-repo ProjectReference has to say it. -->
+        <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Plugin.Analyzers\MacroDeck.Plugin.Analyzers.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <!-- A host project has no manifest.json, so the generator has no plugin id to derive a scope from and
+         would emit nothing at all if this were left unset. -->
+    <PropertyGroup>
+        <MacroDeckLocalizationScope>macrodeck.app</MacroDeckLocalizationScope>
+        <MacroDeckLocalizationClassName>AppStrings</MacroDeckLocalizationClassName>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <CompilerVisibleProperty Include="MacroDeckLocalizationScope" />
+        <CompilerVisibleProperty Include="MacroDeckLocalizationClassName" />
+        <CompilerVisibleProperty Include="RootNamespace" />
+    </ItemGroup>
+
+</Project>

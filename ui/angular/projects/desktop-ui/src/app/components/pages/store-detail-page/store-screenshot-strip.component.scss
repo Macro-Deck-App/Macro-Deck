@@ -1,0 +1,34 @@
+@use '../../../../styles/index' as ds;
+
+.strip {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  @include ds.overlay-scrollbar-clearance;
+}
+
+.thumb {
+  flex-shrink: 0;
+  width: 320px;
+  aspect-ratio: 16 / 9;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-tertiary);
+  overflow: hidden;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &:hover {
+    border-color: var(--color-accent);
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+}

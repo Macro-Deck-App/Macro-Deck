@@ -1,0 +1,18 @@
+/*
+ * Metrics for everything rendered inside a deck widget.
+ *
+ * Widget content is laid out in the reference coordinate space of a 120px cell and then
+ * transform-scaled to the real cell size, so every fixed size inside a widget is authored in
+ * reference px. `rem` is deliberately absent: the user's browser font-size preference changes the
+ * root font size, and a widget must render identically regardless of it - its proportions come from
+ * the deck cell alone. That rules out the rem-based tokens (--space-*, --text-*, --radius-*) inside
+ * a widget too; use plain px.
+ *
+ * The two reference values are mirrored from `domain/widget.interface.ts`, which owns them. A spec
+ * in this package reads this file and fails if the numbers drift apart.
+ */
+
+:root {
+  --widget-reference-cell: 120px;
+  --widget-reference-radius: 22px;
+}

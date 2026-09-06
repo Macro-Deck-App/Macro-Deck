@@ -1,0 +1,408 @@
+<div
+  class="config-node-field"
+  [class.is-invalid]="invalid()"
+  [class.is-toggle]="toggleRow()"
+  [attr.role]="hideLabel() && label() ? 'group' : null"
+  [attr.aria-label]="hideLabel() ? label() : null">
+  @if (visibleLabel(); as text) {
+    <label class="config-node-label" [attr.for]="node().id">
+      {{ text }}
+      @if (required()) { <span class="config-node-required" aria-hidden="true">*</span> }
+    </label>
+  }
+
+  <div class="config-node-control">
+    @switch (node().type) {
+      @case (types.String) {
+        @if (literalOnly()) {
+          <shared-input
+            [inputId]="node().id"
+            [inputName]="node().id"
+            [multiline]="multiline()"
+            [placeholder]="placeholder()"
+            [inputRequired]="required()"
+            [inputMaxlength]="maxLength()"
+            [disabled]="disabled()"
+            [invalid]="invalid()"
+            [ariaDescribedby]="ariaDescribedby()"
+            [ariaInvalid]="ariaInvalid()"
+            [ngModel]="stringValue()"
+            (ngModelChange)="onChange($event)" />
+        } @else {
+          <shared-node-param-input
+            [value]="stringValue()"
+            [placeholder]="placeholder()"
+            [multiline]="multiline()"
+            [ariaLabel]="label() ?? null"
+            (valueChange)="onChange($event)" />
+        }
+      }
+      @case (types.IpAddress) {
+        <shared-input
+          [inputId]="node().id"
+          [inputName]="node().id"
+          [placeholder]="placeholder()"
+          [inputRequired]="required()"
+          [inputMaxlength]="maxLength()"
+          [disabled]="disabled()"
+          [invalid]="invalid()"
+          [ariaDescribedby]="ariaDescribedby()"
+          [ariaInvalid]="ariaInvalid()"
+          [ngModel]="stringValue()"
+          (ngModelChange)="onChange($event)" />
+      }
+      @case (types.Url) {
+        <shared-input
+          type="url"
+          [inputId]="node().id"
+          [inputName]="node().id"
+          [placeholder]="placeholder()"
+          [inputRequired]="required()"
+          [inputMaxlength]="maxLength()"
+          [disabled]="disabled()"
+          [invalid]="invalid()"
+          [ariaDescribedby]="ariaDescribedby()"
+          [ariaInvalid]="ariaInvalid()"
+          [ngModel]="stringValue()"
+          (ngModelChange)="onChange($event)"
+          (blurred)="onUrlBlur()" />
+      }
+      @case (types.Number) {
+        @if (numberOptions().length) {
+          <shared-select
+            [options]="numberOptions()"
+            [disabled]="disabled()"
+            [ariaLabel]="label() ?? ''"
+            [ngModel]="numberOptionValue()"
+            (ngModelChange)="onChange(+$event)" />
+        } @else if (showSlider()) {
+          <div class="config-node-slider-row">
+            <input
+              type="range"
+              class="config-node-slider"
+              [attr.min]="min()"
+              [attr.max]="max()"
+              [attr.step]="step() ?? 1"
+              [disabled]="disabled()"
+              [ngModel]="numberValue()"
+              (ngModelChange)="onChange(+$event)" />
+            <shared-input
+              type="number"
+              [inputId]="node().id"
+              [inputName]="node().id"
+              [min]="min()"
+              [max]="max()"
+              [step]="step()"
+              [disabled]="disabled()"
+              [invalid]="invalid()"
+              [ariaDescribedby]="ariaDescribedby()"
+              [ariaInvalid]="ariaInvalid()"
+              [ngModel]="numberValue()"
+              (ngModelChange)="onChange($event)" />
+          </div>
+        } @else {
+          <shared-input
+            type="number"
+            [inputId]="node().id"
+            [inputName]="node().id"
+            [inputRequired]="required()"
+            [min]="min()"
+            [max]="max()"
+            [step]="step()"
+            [disabled]="disabled()"
+            [invalid]="invalid()"
+            [ariaDescribedby]="ariaDescribedby()"
+            [ariaInvalid]="ariaInvalid()"
+            [ngModel]="numberValue()"
+            (ngModelChange)="onChange($event)" />
+        }
+      }
+      @case (types.Boolean) {
+        @if (segmented()) {
+          <shared-segmented-control
+            [options]="booleanSegmentedOptions()"
+            [value]="booleanValue() ? 'true' : 'false'"
+            [ariaLabel]="label() ?? ''"
+            [stretch]="true"
+            (valueChange)="onBooleanSegmentedChange($event)" />
+        } @else {
+          <shared-toggle-switch
+            [checked]="booleanValue()"
+            [disabled]="disabled()"
+            (changed)="onChange($event)" />
+        }
+      }
+      @case (types.Choice) {
+        @if (cards()) {
+          <div class="config-choice-cards">
+            @for (option of cardOptions(); track option.value) {
+              <button
+                type="button"
+                class="config-choice-card"
+                [class.active]="option.value === stringValue()"
+                [disabled]="disabled()"
+                (click)="onChange(option.value)">
+                <span class="config-choice-card-name">{{ option.label }}</span>
+                @if (option.description) {
+                  <span class="config-choice-card-desc">{{ option.description }}</span>
+                }
+              </button>
+            }
+          </div>
+        } @else if (segmented()) {
+          <shared-segmented-control
+            [options]="segmentedOptions()"
+            [value]="stringValue()"
+            [ariaLabel]="label() ?? ''"
+            (valueChange)="onChange($event)" />
+        } @else if (allowsCustomValue()) {
+          <shared-combobox
+            [value]="stringValue()"
+            [placeholder]="placeholder()"
+            [options]="comboboxOptions()"
+            (valueChange)="onChange($event)"
+            (opened)="onOpen()" />
+        } @else {
+          <shared-select
+            [options]="selectOptions()"
+            [placeholder]="placeholder()"
+            [disabled]="disabled()"
+            [ngModel]="stringValue()"
+            (ngModelChange)="onChange($event)"
+            (opened)="onOpen()" />
+        }
+      }
+      @case (types.DynamicChoice) {
+        <div class="config-node-slider-row">
+          @if (allowsCustomValue()) {
+            <shared-combobox
+              [value]="stringValue()"
+              [placeholder]="placeholder()"
+              [options]="comboboxOptions()"
+              [loading]="loading()"
+              (valueChange)="onChange($event)"
+              (opened)="onOpen()" />
+          } @else {
+            <shared-select
+              [options]="selectOptions()"
+              [placeholder]="placeholder()"
+              [disabled]="disabled()"
+              [ngModel]="stringValue()"
+              (ngModelChange)="onChange($event)"
+              (opened)="onOpen()" />
+          }
+          @if (canReload()) {
+            <shared-button
+              variant="ghost"
+              size="icon"
+              [ariaLabel]="'macrodeck.app:UiRender.ReloadOptions' | translate"
+              (click)="onReload()">
+              <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
+            </shared-button>
+          }
+        </div>
+      }
+      @case (types.Autocomplete) {
+        <shared-combobox
+          [value]="stringValue()"
+          [placeholder]="placeholder()"
+          [options]="comboboxOptions()"
+          [loading]="loading()"
+          (valueChange)="onChange($event)"
+          (filterChange)="onFilter($event)"
+          (opened)="onOpen()" />
+      }
+      @case (types.MultiSelect) {
+        <shared-multi-select
+          [value]="arrayValue()"
+          [options]="multiSelectOptions()"
+          (valueChange)="onChange($event)" />
+      }
+      @case (types.Password) {
+        <shared-input
+          type="password"
+          [placeholder]="placeholder()"
+          [inputRequired]="required()"
+          [disabled]="disabled()"
+          [invalid]="invalid()"
+          [ariaDescribedby]="ariaDescribedby()"
+          [ariaInvalid]="ariaInvalid()"
+          [ngModel]="stringValue()"
+          (ngModelChange)="onChange($event)" />
+      }
+      @case (types.Secret) {
+        <shared-input
+          type="password"
+          [placeholder]="placeholder()"
+          [inputRequired]="required()"
+          [disabled]="disabled()"
+          [invalid]="invalid()"
+          [ariaDescribedby]="ariaDescribedby()"
+          [ariaInvalid]="ariaInvalid()"
+          [ngModel]="stringValue()"
+          (ngModelChange)="onChange($event)" />
+      }
+      @case (types.Color) {
+        <shared-color-picker
+          [defaultColor]="colorDefaultValue()"
+          [ngModel]="stringValue()"
+          (ngModelChange)="onChange($event)" />
+      }
+      @case (types.File) {
+        <shared-file-path-input
+          [kind]="fileKind()"
+          [extensions]="fileExtensions()"
+          [placeholder]="placeholder()"
+          [invalid]="invalid()"
+          [value]="stringValue()"
+          (valueChange)="onChange($event)" />
+      }
+      @case (types.Folder) {
+        <shared-file-path-input
+          [kind]="fileKind()"
+          [placeholder]="placeholder()"
+          [invalid]="invalid()"
+          [value]="stringValue()"
+          (valueChange)="onChange($event)" />
+      }
+      @case (types.Image) {
+        <shared-file-path-input
+          [kind]="fileKind()"
+          [extensions]="fileExtensions()"
+          [placeholder]="placeholder()"
+          [invalid]="invalid()"
+          [value]="stringValue()"
+          (valueChange)="onChange($event)" />
+      }
+      @case (types.Icon) {
+        <shared-widget-icon-control
+          [icon]="iconValue()"
+          [disabled]="disabled() || !iconEditable()"
+          (valueChange)="onIconChange($event)" />
+      }
+      @case (types.IconDisplay) {
+        <shared-widget-icon-display-control
+          [display]="iconDisplayValue()"
+          [aspectRatio]="iconDisplayAspectRatio()"
+          [previewBackground]="iconDisplayBackground()"
+          [iconUrl]="iconDisplayIconUrl()"
+          (displayChange)="onIconDisplayChange($event)"
+          (resetRequested)="onIconDisplayReset()" />
+      }
+      @case (types.Hotkey) {
+        <shared-hotkey-recorder [value]="hotkeyValue()" (valueChange)="onChange($event)" />
+      }
+      @case (types.KeyboardCombo) {
+        <shared-keyboard-combo-editor [value]="keyboardComboValue()" (valueChange)="onChange($event)" />
+      }
+      @case (types.KeyboardSequence) {
+        <shared-keyboard-sequence-editor [value]="keyboardSequenceValue()" (valueChange)="onChange($event)" />
+      }
+      @case (types.Duration) {
+        <shared-duration-input [value]="numberValue()" (valueChange)="onChange($event)" />
+      }
+      @case (types.DateTime) {
+        <shared-datetime-picker [value]="stringValue()" (valueChange)="onChange($event)" />
+      }
+      @case (types.Json) {
+        <shared-code-editor
+          [value]="stringValue()"
+          language="json"
+          [placeholder]="placeholder()"
+          (valueChange)="onChange($event)" />
+      }
+      @case (types.Code) {
+        <shared-code-editor
+          [value]="stringValue()"
+          [language]="language() ?? 'text'"
+          [placeholder]="placeholder()"
+          (valueChange)="onChange($event)" />
+      }
+      @case (types.KeyValue) {
+        <shared-keyvalue-editor [value]="recordValue()" (valueChange)="onChange($event)" />
+      }
+      @case (types.WidgetTarget) {
+        <shared-widget-target-picker
+          [value]="stringValue()"
+          [options]="comboboxOptions()"
+          [loading]="loading()"
+          (valueChange)="onChange($event)"
+          (filterChange)="onFilter($event)"
+          (opened)="onOpen()" />
+      }
+      @case (types.ActionsListEditor) {
+        <shared-node-action-builder
+          [flows]="actionFlowsValue()"
+          [triggers]="actionTriggers()"
+          [states]="actionStateOptions()"
+          [canRun]="canRunFlows()"
+          (flowsChange)="onActionFlowsChange($event)" />
+      }
+      @case (types.ActionPicker) {
+        <shared-node-action-picker [value]="stringValue()" (valueChange)="onChange($event)" />
+      }
+      @case (types.StateMappingEditor) {
+        <shared-node-state-mapping-editor
+          [value]="stateMappingValue()"
+          [stateOptions]="nodeStateOptions()"
+          (valueChange)="onStateMappingChange($event)" />
+      }
+      @case (types.VariablePicker) {
+        <shared-node-variable-picker
+          [value]="stringValue()"
+          [variableTypes]="variableTypesFilter()"
+          [writableOnly]="writableOnly()"
+          (valueChange)="onChange($event)" />
+      }
+      @case (types.DevicePicker) {
+        <shared-device-picker
+          [value]="stringValue()"
+          [placeholder]="placeholder()"
+          [disabled]="disabled()"
+          (valueChange)="onChange($event)" />
+      }
+      @case (types.IntegrationPicker) {
+        <shared-integration-picker
+          [value]="stringValue()"
+          [capability]="integrationCapability()"
+          [configurationEntries]="integrationConfigurationEntries()"
+          [placeholder]="placeholder()"
+          [disabled]="disabled()"
+          (valueChange)="onChange($event)" />
+      }
+      @case (types.Object) {
+        <div class="config-node-object">
+          @for (child of node().children ?? []; track child.id) { <shared-ui-node [node]="child" /> }
+        </div>
+      }
+      @case (types.Array) {
+        <div class="config-node-array">
+          @for (item of node().children ?? []; track item.id) {
+            @if (item.type !== types.Object || item.children?.length) {
+              <div class="config-node-array-item">
+                <shared-ui-node [node]="item" />
+                @if (canRemove()) {
+                  <shared-button variant="ghost" size="compact" (click)="onRemove(item.id)">{{
+                    'macrodeck:Common.Remove' | translate
+                  }}</shared-button>
+                }
+              </div>
+            }
+          }
+          @if (canAdd()) {
+            <shared-button variant="secondary" size="compact" (click)="onAdd()">{{
+              'macrodeck:Common.Add' | translate
+            }}</shared-button>
+          }
+        </div>
+      }
+    }
+  </div>
+
+  @if (description(); as text) {
+    <p class="config-node-description" [id]="descriptionId()">{{ text }}</p>
+  }
+  @for (entry of errorEntries(); track entry.id) {
+    <p class="config-node-error" [id]="entry.id">{{ entry.text }}</p>
+  }
+</div>

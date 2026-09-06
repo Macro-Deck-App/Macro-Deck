@@ -1,0 +1,246 @@
+<div class="action-builder">
+  @if (showTabRow()) {
+    <div class="tab-row" [class.tab-row--compact]="toolbarCompact()">
+      <div class="tab-group tab-group--triggers">
+        @if (mainTabItems().length > 0) {
+          <shared-tab-bar
+            [items]="mainTabItems()"
+            [activeId]="store.selectedTriggerId()"
+            (activeIdChange)="selectTab($event)"
+            (itemRemove)="onTriggerTabRemove($event)">
+          </shared-tab-bar>
+        }
+
+        @if (showAddTrigger()) {
+          <!-- Wrapped like `.event-menu` rather than a bare `shared-overlay-panel`: the toolbar's
+               natural-width measurement sums direct children of `.tab-group--triggers`, and the
+               overlay panel's own host element would otherwise contribute a phantom gap. -->
+          <div class="add-trigger">
+            <button
+              #addTriggerButton
+              type="button"
+              class="add-trigger-button"
+              [attr.aria-expanded]="addTriggerMenuOpen()"
+              aria-haspopup="menu"
+              [attr.aria-label]="addTriggerLabel()"
+              (click)="toggleAddTriggerMenu()">
+              <span class="icon icon-plus icon-xs" aria-hidden="true"></span>
+            </button>
+
+            <shared-overlay-panel
+              [anchor]="addTriggerButton"
+              [isOpen]="addTriggerMenuOpen()"
+              [minWidth]="180"
+              align="start"
+              (dismissed)="addTriggerMenuOpen.set(false)">
+              <div class="trigger-menu-panel" role="menu" [attr.aria-label]="addTriggerLabel()">
+                @for (tab of addableTriggerTabs(); track tab.triggerType) {
+                  <button
+                    type="button"
+                    role="menuitem"
+                    class="event-menu-item"
+                    (click)="addTrigger(tab.triggerType)">
+                    <span class="event-menu-item-label">{{ tab.label }}</span>
+                  </button>
+                }
+              </div>
+            </shared-overlay-panel>
+          </div>
+        }
+
+        @if (showAddEventTrigger()) {
+          <!-- Event triggers live behind one menu rather than one tab each: a widget may react to any
+               number of events, so tabs would grow without bound and push the fixed triggers off the
+               row. Styled as a tab bar so it reads as part of the same control. -->
+          <div class="event-menu">
+            <button
+              #eventMenuTrigger
+              type="button"
+              class="event-menu-trigger"
+              [class.active]="!!selectedEventFlow()"
+              [attr.aria-expanded]="eventMenuOpen()"
+              aria-haspopup="menu"
+              (click)="toggleEventMenu()">
+              <span class="event-menu-label">{{ eventMenuLabel() }}</span>
+              @if (eventTabItems().length > 0) {
+                <span class="event-menu-count">{{ eventTabItems().length }}</span>
+              }
+              <shared-select-caret class="event-menu-chevron" />
+            </button>
+
+            <shared-overlay-panel
+              [anchor]="eventMenuTrigger"
+              [isOpen]="eventMenuOpen()"
+              [minWidth]="200"
+              align="end"
+              [anchorOffset]="0"
+              (dismissed)="eventMenuOpen.set(false)">
+              <div class="event-menu-panel" role="menu">
+                @for (item of eventTabItems(); track item.id) {
+                  <button
+                    type="button"
+                    role="menuitem"
+                    class="event-menu-item"
+                    [class.active]="store.selectedTriggerId() === item.id"
+                    (click)="selectTab(item.id)">
+                    <span class="event-menu-item-label">{{ item.label }}</span>
+                    @if (item.badge) {
+                      <span class="event-menu-item-badge">{{ item.badge }}</span>
+                    }
+                  </button>
+                } @empty {
+                  <p class="event-menu-empty">{{ noEventTriggersYet() }}</p>
+                }
+                <button type="button" role="menuitem" class="event-menu-add" (click)="addEventTrigger()">
+                  {{ addEventTriggerLabel() }}
+                </button>
+              </div>
+            </shared-overlay-panel>
+          </div>
+        }
+      </div>
+
+      <div class="tab-group tab-group--utility">
+        @if (!isAuxTabInline() && auxTabItem(); as aux) {
+          <!-- Kept apart from the trigger tab bar (#42): it toggles a config panel, not a trigger.
+               Rendered as its own single-item tab bar so both containers share one visual style.
+               The divider lives inside this group, as its first child, so it travels with the tab
+               it separates instead of being stranded on its own when the row breaks (#279). -->
+          <div class="aux-tab-divider" aria-hidden="true"></div>
+          <shared-tab-bar
+            [items]="auxTabItems()"
+            [activeId]="isAuxSelected() ? aux.id : ''"
+            (activeIdChange)="selectTab($event)">
+          </shared-tab-bar>
+        }
+
+        @if (showVariables()) {
+          <!-- The widget's own variables, in the row that already exists rather than a toolbar of
+               its own. Only while the flow belongs to a widget: a script or an automation has no
+               widget whose variables these would be. -->
+          <button
+            type="button"
+            class="open-variables"
+            [title]="variablesTooltip()"
+            (click)="openVariables()">
+            <span class="icon icon-braces-x icon-xs" aria-hidden="true"></span>
+            {{ variablesLabel() }}
+          </button>
+        }
+
+        @if (showRun()) {
+          <!-- Runs what is on screen, not what is stored: the widget editor saves and navigates away,
+               so a run gated on the saved copy would mean leaving the editor between attempts. -->
+          <button
+            type="button"
+            class="run-flow"
+            [disabled]="!store.canRun()"
+            [title]="runTitle()"
+            (click)="runFlow()">
+            <span class="icon icon-play icon-xs" aria-hidden="true"></span>
+            {{ runLabel() }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  @if (isAuxSelected()) {
+    <!-- Caller-provided panel (e.g. the state-binding editor), projected via [auxPanel]. -->
+    <div class="aux-panel">
+      <ng-content select="[auxPanel]"></ng-content>
+    </div>
+  } @else if (awaitingTrigger()) {
+    <!-- One-event mode before the caller's flow has bound. An action would have no flow to belong to,
+         so nothing is offered rather than inventing a press flow under the default selection. -->
+    <div class="no-trigger-panel">
+      <p class="no-trigger-text">{{ loadingTriggerLabel() }}</p>
+    </div>
+  } @else {
+    <!-- Action list panel; the add affordance scrolls with the list, right under the last card.
+         The panel, not the root list, carries the paste menu: an empty flow's list collapses to a
+         few pixels, which would leave nowhere to right-click. -->
+    <div class="action-panel" (contextmenu)="onPanelContextMenu($event)">
+      @if (selectedEventFlow(); as eventFlow) {
+        <!-- What the event trigger reacts to. Inside the scrolling panel so it shares the action
+             cards' column; the actions it runs are the list below, exactly as for a press trigger -
+             only the activation differs. -->
+        <div class="event-panel">
+          <shared-event-trigger-editor [flow]="eventFlow" [removable]="eventTriggerRemovable()" />
+        </div>
+      }
+
+      <shared-action-list
+        variant="root"
+        [listId]="store.rootListId()"
+        [items]="currentChildren()" />
+
+      <div class="root-actions">
+        <button
+          type="button"
+          class="add-action-root"
+          (click)="store.requestAdd(store.rootListId())">
+          {{ addActionLabel() }}
+        </button>
+
+        <!-- Only offered while there is something to paste, and only here: one per nested list
+             would put a mostly-dead button in every branch of every If. -->
+        @if (store.canPaste()) {
+          <button
+            type="button"
+            class="paste-action-root"
+            [title]="pasteCopiedActionTooltip()"
+            (click)="pasteIntoRoot()">
+            <span class="icon icon-clipboard icon-xs" aria-hidden="true"></span>
+            {{ pasteLabel() }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<shared-context-menu
+  [isOpen]="panelMenu().isOpen"
+  [x]="panelMenu().x"
+  [y]="panelMenu().y"
+  [items]="panelMenuItems()"
+  (itemClick)="onPanelMenuAction($event)"
+  (closed)="closePanelMenu()">
+</shared-context-menu>
+
+@if (pendingTriggerRemoval()) {
+  <shared-confirmation-modal
+    [heading]="removeTriggerHeading()"
+    [message]="pendingTriggerRemovalMessage()"
+    [confirmText]="'macrodeck:Common.Remove' | translate"
+    [danger]="true"
+    (confirm)="confirmTriggerRemoval()"
+    (cancel)="cancelTriggerRemoval()">
+  </shared-confirmation-modal>
+}
+
+@if (store.pickerOpenForList() !== null) {
+  <shared-action-picker [definitions]="availableActionDefs()" />
+}
+
+<!-- Compact ghost chip following the cursor during a drag. -->
+@if (drag.dragging(); as draggedBlock) {
+  <div
+    class="drag-ghost"
+    [style.left.px]="drag.ghostX() + 14"
+    [style.top.px]="drag.ghostY() + 10">
+    <span class="drag-ghost-dot" [style.background-color]="draggedBlock.color"></span>
+    {{ draggedBlock.label }}
+  </div>
+}
+
+@if (variablesOpen()) {
+  <shared-variable-browser
+    mode="manage"
+    [heading]="widgetVariablesHeading()"
+    [scopeLabel]="'macrodeck.app:Variables.ThisWidget' | translate"
+    [variables]="scopedVariables()"
+    [scopeRefId]="store.previewScopeRefId()"
+    (close)="variablesOpen.set(false)" />
+}

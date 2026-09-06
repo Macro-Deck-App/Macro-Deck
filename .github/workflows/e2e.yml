@@ -1,0 +1,32 @@
+name: E2E tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: E2E suite to run
+        type: choice
+        required: true
+        default: all
+        options:
+          - all
+          - smoke
+      filter:
+        description: Optional Playwright test file filter
+        type: string
+        required: false
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: E2E
+    uses: ./.github/workflows/e2e-run.yml
+    with:
+      suite: ${{ inputs.suite }}
+      filter: ${{ inputs.filter }}

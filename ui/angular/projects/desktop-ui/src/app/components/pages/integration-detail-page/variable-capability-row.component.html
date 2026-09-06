@@ -1,0 +1,18 @@
+<li class="capability-row" [class.unavailable]="variable.availability !== 'Ready'">
+  <div class="capability-row-main">
+    <span class="capability-row-name">{{ variable.name }}</span>
+    <span class="vars-type-badge type-{{ variable.type }}">{{ typeLabel(variable.type) }}</span>
+    @if (variable.isTemplate) {
+      <span class="template-chip">{{ templateChipLabel(variable.name) }}</span>
+    }
+  </div>
+  <div class="capability-row-side">
+    @if (variable.valueAvailable) {
+      <span class="capability-value">{{ variable.value }}</span>
+    } @else {
+      <span class="availability-pill" [class]="'availability-' + variable.availability">
+        {{ variable.availabilityReason }}
+      </span>
+    }
+  </div>
+</li>

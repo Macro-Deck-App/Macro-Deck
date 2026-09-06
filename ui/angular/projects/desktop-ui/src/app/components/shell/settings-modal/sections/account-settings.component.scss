@@ -1,0 +1,82 @@
+.account-settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.account-settings__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.account-settings__hint {
+  margin: 0;
+  max-width: 32rem;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.account-settings__profile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.account-settings__profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.account-settings__name {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.account-settings__status {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.account-settings__offline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-warning);
+  font-size: var(--text-xs);
+
+  .icon {
+    background-color: var(--color-warning);
+  }
+}
+
+.account-settings__code-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.account-settings__code-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.account-settings__code-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.account-settings__code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.15em;
+  color: var(--color-text-primary);
+  user-select: all;
+}

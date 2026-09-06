@@ -1,0 +1,150 @@
+@use '../../../styles/index' as ds;
+
+:host {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  z-index: var(--z-toast);
+  pointer-events: none;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  // Fixed rather than only max-width: the status line changes length on every tick
+  // ("9 of 372" -> "100 of 372"), and a shrink-to-fit card visibly jitters as it counts up.
+  width: 320px;
+  max-width: calc(100vw - var(--space-4) * 2);
+}
+
+.card {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-overlay);
+  background: var(--color-bg-elevated);
+  box-shadow: var(--shadow-md);
+
+  &.failed {
+    border-color: var(--color-danger);
+  }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.title {
+  @include ds.truncate;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.dismiss {
+  @include ds.flex-center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+
+  .icon {
+    background-color: var(--color-text-muted);
+  }
+
+  &:hover {
+    background: var(--color-bg-hover);
+
+    .icon {
+      background-color: var(--color-text-primary);
+    }
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+}
+
+.status {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.bar {
+  position: relative;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-bg-tertiary);
+  overflow: hidden;
+
+  .fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-accent);
+    transition: width var(--transition-fast);
+  }
+
+  &.indeterminate::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 40%;
+    border-radius: inherit;
+    background: var(--color-accent);
+    animation: import-progress-slide 1.2s ease-in-out infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+      width: 100%;
+      opacity: 0.5;
+    }
+  }
+}
+
+@keyframes import-progress-slide {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(350%);
+  }
+}
+
+.failed-hint {
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+}
+
+.cancel {
+  align-self: flex-start;
+  margin-top: var(--space-1);
+  padding: 0.125rem var(--space-2);
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+
+  &:hover {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+}

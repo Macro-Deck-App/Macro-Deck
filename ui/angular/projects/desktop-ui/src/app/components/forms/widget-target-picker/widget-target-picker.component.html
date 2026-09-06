@@ -1,0 +1,37 @@
+@if (isSelf) {
+  <span class="target-chip">
+    <span class="chip-text">{{ 'macrodeck.app:Forms.WidgetTargetPicker.ThisWidget' | translate }}</span>
+    <button
+      type="button"
+      class="chip-clear"
+      (click)="onClearSelf()"
+      [attr.aria-label]="'macrodeck.app:Forms.WidgetTargetPicker.PickDifferentWidget' | translate">
+      <span class="icon icon-x icon-xs"></span>
+    </button>
+  </span>
+} @else {
+  <div class="target-picker">
+    <shared-combobox
+      [value]="pickerValue"
+      [displayLabel]="displayLabel"
+      [placeholder]="'macrodeck.app:Forms.WidgetTargetPicker.SelectAWidget' | translate"
+      [options]="options"
+      [loading]="loading"
+      [filterLocally]="false"
+      [clearable]="false"
+      (valueChange)="valueChange.emit($event)"
+      (filterChange)="filterChange.emit($event)"
+      (opened)="opened.emit()">
+    </shared-combobox>
+
+    @if (hasOwnerWidget) {
+      <button type="button" class="target-self" (click)="onUseThisWidget()">
+        {{ 'macrodeck.app:Forms.WidgetTargetPicker.UseThisWidget' | translate }}
+      </button>
+    }
+  </div>
+
+  @if (isMissingWidget) {
+    <p class="target-error">{{ 'macrodeck.app:Forms.WidgetTargetPicker.WidgetNoLongerExists' | translate }}</p>
+  }
+}

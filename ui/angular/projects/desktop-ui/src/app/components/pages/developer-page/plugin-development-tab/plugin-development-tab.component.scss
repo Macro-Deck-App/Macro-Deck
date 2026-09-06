@@ -1,0 +1,36 @@
+@use '../../../../../styles/index' as ds;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+shared-rail-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+}
+
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  min-height: 0;
+  @include ds.overlay-scrollbar-clearance;
+}
+
+app-connections-section,
+app-credentials-section,
+app-sessions-section,
+app-compatibility-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}

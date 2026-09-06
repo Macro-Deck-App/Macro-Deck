@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.macro-deck.app/widget-data-clock-v1.schema.json",
+  "title": "Macro Deck Clock widget data (v1)",
+  "description": "Describes the JSON stored in WidgetEntity.Data for a Clock widget (WidgetType.Clock).",
+  "$comment": "No top-level 'required': a freshly created widget's data is a near-empty JSON object, and every property here has to stay optional so it keeps validating. additionalProperties is deliberately left unset (defaults to true) on this schema and on every nested object - an older or newer client, or a plugin-driven flow, may write extension keys this schema does not know about, and rejecting them would make the widget unsavable.",
+  "type": "object",
+  "properties": {
+    "style": {
+      "enum": ["digital", "analog", null],
+      "description": "Face style: large digital time or an analog dial."
+    },
+    "timeSource": {
+      "enum": ["device", "host", null],
+      "description": "Where the time comes from: this device's clock, or the host machine via the System integration's variables."
+    },
+    "timeZone": {
+      "type": ["string", "null"],
+      "description": "IANA zone the time is rendered in (e.g. 'America/New_York'). Empty or null means the viewing device's own zone."
+    },
+    "showLabel": {
+      "type": "boolean",
+      "description": "Show the caption line naming the zone."
+    },
+    "label": {
+      "type": ["string", "null"],
+      "description": "Caption text; empty or null falls back to the city name derived from timeZone."
+    },
+    "showSeconds": {
+      "type": "boolean",
+      "description": "Show seconds (digital: HH:mm:ss, analog: second hand)."
+    },
+    "showDate": {
+      "type": "boolean",
+      "description": "Show the date line next to the time."
+    },
+    "showOffset": {
+      "type": "boolean",
+      "description": "Show the zone's UTC offset (e.g. 'UTC+02:00') as a last line. Only rendered while timeZone names a zone; the widget's own zone has no offset to state."
+    },
+    "backgroundColor": {
+      "type": ["string", "null"],
+      "description": "Widget background color. Absent or null paints nothing, leaving the deck's own tile behind the clock."
+    },
+    "textColor": {
+      "type": ["string", "null"],
+      "description": "Color for the time, date, caption and offset text, and for the analog dial's hands and ticks. Absent or null keeps each line's themed role color and leaves the dial fully themed."
+    },
+    "hourCycle": {
+      "enum": ["auto", "12h", "24h", null],
+      "description": "Which face the time is drawn on. Absent, null or 'auto' leaves the choice to the viewing device's language, which is what a clock did before the choice existed."
+    },
+    "leadingZero": {
+      "type": "boolean",
+      "description": "Whether the hour is padded to two digits (09:05 rather than 9:05). Defaults to true; meaningless while hourCycle is 'auto', where the viewing device's language decides."
+    },
+    "dateFormat": {
+      "enum": ["default", "day-first", "month-first", "iso", "long", null],
+      "description": "How the date line is written: the viewing device's own short date ('default'), 31/12/25, 12/31/25, 2025-12-31, or full weekday and month names."
+    },
+    "datePosition": {
+      "enum": ["below", "above", "left", "right", null],
+      "description": "Where the date sits relative to the time. 'left' and 'right' put the two side by side, which suits a widget wider than it is tall."
+    },
+    "border": {
+      "$ref": "#/$defs/widgetBorder",
+      "description": "Outline drawn along the widget edge."
+    },
+    "flows": {
+      "anyOf": [
+        { "type": "string" },
+        { "type": "array", "items": { "$ref": "#/$defs/actionFlow" } }
+      ],
+      "description": "Press-trigger action flows, stored the same way as an Action Button's. Stored on the wire as a nested JSON string; the editor may show it inlined as an array. Both forms are accepted here."
+    }
+  },
+  "$defs": {
+    "widgetBorder": {
+      "type": "object",
+      "description": "Outline drawn along the inner edge of the widget.",
+      "properties": {
+        "style": {
+          "enum": ["off", "static", "heartbeat", "breathing", "blink", "comet", "ants", "hue-shift", "rgb", null],
+          "description": "Visual style; absent, null or 'off' means no border. The color-tinted styles are static, heartbeat, breathing, blink, comet and ants; hue-shift and rgb ignore color."
+        },
+        "color": {
+          "type": ["string", "null"],
+          "description": "Ring color for the color-tinted styles. Falls back to a default color when absent or null; ignored by hue-shift and rgb."
+        }
+      }
+    },
+    "actionFlow": {
+      "type": "object",
+      "description": "One action-flow entry (a trigger and its action blocks). Its internal structure is deliberately not validated here - deep flow validation is out of scope for this schema."
+    }
+  }
+}

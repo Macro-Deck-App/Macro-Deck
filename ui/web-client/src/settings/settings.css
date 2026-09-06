@@ -1,0 +1,63 @@
+/* The client settings surface: the gear button and the modal behind it. */
+
+.wc-client-settings-trigger {
+  position: fixed;
+  top: calc(var(--space-3) + env(safe-area-inset-top));
+  right: calc(var(--space-3) + env(safe-area-inset-right));
+  /* Above the setup banner, which is fixed in the same corner and would otherwise paint over this
+     button; still below the settings backdrop, so the dialog covers it. */
+  z-index: 105;
+  width: 44px;
+  height: 44px;
+  /* Centred by padding rather than by flex: the only child is an <svg>, and old WebKit does not
+     size an SVG flex item, so `justify-content` had nothing to centre and the gear sat against the
+     left edge (issue #829). 44 - 2*11 leaves exactly the icon's box. */
+  box-sizing: border-box;
+  padding: 11px;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.45);
+  color: var(--color-text-secondary);
+  opacity: 0.55;
+  transition: opacity 120ms ease, color 120ms ease;
+}
+
+.wc-client-settings-trigger:hover,
+.wc-client-settings-trigger:focus-visible {
+  opacity: 1;
+  color: var(--color-text-primary);
+}
+
+.wc-client-settings-icon {
+  /* Block, so it does not sit on a text baseline and gain the descender space below it. */
+  display: block;
+  width: 22px;
+  height: 22px;
+}
+
+/* Everything this dialog looks like comes from the shared modal chrome in `styles.css`. Only its
+   place in the stack is its own: it covers the setup wizard and the gear button below it. */
+.wc-client-settings-backdrop {
+  z-index: 120;
+}
+
+.wc-client-settings-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.wc-client-settings-status {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.wc-client-settings-status[hidden] {
+  display: none;
+}

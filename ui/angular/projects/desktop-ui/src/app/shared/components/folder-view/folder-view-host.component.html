@@ -1,0 +1,49 @@
+<div class="folder-view">
+  @if (showBack()) {
+    <div class="folder-view-chrome">
+      <button
+        type="button"
+        class="folder-view-back"
+        [attr.aria-label]="'macrodeck:Common.Back' | translate"
+        (click)="onBack()">
+        <span class="icon icon-arrow-left icon-md" aria-hidden="true"></span>
+        <span>{{ 'macrodeck:Common.Back' | translate }}</span>
+      </button>
+    </div>
+  }
+
+  @if (unavailable()) {
+    <div class="folder-view-placeholder" role="status">
+      <span class="icon icon-alert-triangle icon-lg" aria-hidden="true"></span>
+      <h2 class="folder-view-placeholder-heading">
+        {{ 'macrodeck.app:Deck.FolderView.UnavailableHeading' | translate }}
+      </h2>
+      <p class="folder-view-placeholder-body">
+        {{ 'macrodeck.app:Deck.FolderView.UnavailableBody' | translate:{ viewId: viewId() } }}
+      </p>
+      @if (showRecoveryActions()) {
+      <div class="folder-view-placeholder-actions">
+        <button type="button" class="folder-view-placeholder-action" (click)="onOpenIntegrations()">
+          {{ 'macrodeck.app:Deck.FolderView.OpenIntegrations' | translate }}
+        </button>
+        <button type="button" class="folder-view-placeholder-action" (click)="onChangeView()">
+          {{ 'macrodeck.app:Deck.FolderView.ChangeView' | translate }}
+        </button>
+      </div>
+      }
+    </div>
+  } @else {
+    <div #content class="folder-view-content">
+      @if (loading()) {
+        <p class="folder-view-loading" role="status">
+          {{ 'macrodeck.app:Deck.FolderView.Loading' | translate }}
+        </p>
+      } @else {
+        <shared-ui-widget-tree
+          [root]="root()"
+          [box]="box()"
+          (nodeEvent)="onTreeEvent($event)" />
+      }
+    </div>
+  }
+</div>

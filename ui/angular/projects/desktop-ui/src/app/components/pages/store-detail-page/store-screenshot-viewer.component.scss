@@ -1,0 +1,57 @@
+.viewer-body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.viewer-figure {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+
+  img {
+    max-width: 100%;
+    max-height: 65vh;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+  }
+}
+
+.viewer-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--control-height);
+  height: var(--control-height);
+  border: none;
+  border-radius: 50%;
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-bg-hover);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.viewer-caption {
+  margin: var(--space-3) 0 0;
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.viewer-counter {
+  margin-top: var(--space-1);
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}

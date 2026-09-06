@@ -1,0 +1,209 @@
+/* =============================================================================
+ * Action card frame - shared chrome for every card variant.
+ *
+ * ViewEncapsulation.None: the wrapper-hover and drag-placeholder rules
+ * in nested-action-list style `.action-card` from outside; color
+ * custom properties (--ab-*) cascade in from <shared-action-builder>.
+ * ========================================================================== */
+
+shared-action-card-frame {
+  display: block;
+  flex: 1;
+  min-width: 0;
+}
+
+.action-card {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--ab-card-radius, var(--radius-md));
+  box-shadow: var(--ab-card-shadow, 0 1px 2px rgba(0, 0, 0, 0.18));
+  overflow: hidden;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+/* Type accent as a slim left rail instead of a full color surface. */
+.action-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: var(--ab-color, var(--color-accent));
+  opacity: 0.9;
+}
+
+.action-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0.5rem var(--space-2) 1.8125rem;
+  min-height: 1.8125rem;
+  cursor: grab;
+  touch-action: none;
+}
+
+/* Clicking a card is how the keyboard shortcuts get their target, so it still has to say which card
+   Ctrl+C would copy - but a pointer click gets the quiet accent outline rather than the full ring,
+   which read as an error state on a card the user had merely opened. Keyboard focus keeps the real
+   ring: that is the only cue a keyboard user has. */
+.action-card-header:focus {
+  outline: none;
+}
+
+.action-card:has(.action-card-header:focus) {
+  border-color: var(--color-accent);
+}
+
+.action-card-header:focus-visible {
+  outline: none;
+  box-shadow: inset var(--focus-ring);
+  border-radius: var(--ab-card-radius, var(--radius-md));
+}
+
+.action-title {
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Collapsed one-line value summary - quiet, truncating, fills the row. */
+.action-summary {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Without a summary the title takes the remaining space. */
+.action-title:last-of-type,
+.action-card:not(.collapsed) .action-title {
+  flex: 1;
+}
+
+/* Collapsed marker for a switched-off card: the toggle says so too, but the tag survives the
+   card being scrolled past at a glance, and reads without relying on the dimming alone. */
+.action-disabled-tag {
+  flex-shrink: 0;
+  padding: 0 0.3125rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  line-height: 0.9375rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.action-error-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background-color: var(--color-danger);
+  flex-shrink: 0;
+}
+
+.action-chevron {
+  color: var(--color-text-muted);
+  transition: transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.action-chevron.open {
+  transform: rotate(90deg);
+}
+
+/* Unlike the hover-only buttons, the enable switch is always readable: it shows state, not an
+   offer. Scaled down so it sits in the header row without crowding the title. */
+.action-enable-toggle {
+  flex-shrink: 0;
+  transform: scale(0.8);
+  /* Leading the row now, so the shrink is taken off the left edge rather than centred - the label
+     must not inherit the gap the scale leaves behind. */
+  transform-origin: left center;
+  margin-inline-end: -0.1875rem;
+}
+
+.action-header-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.action-header-button:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+/* A note is state, not an offer, so a commented step stays findable in a long flow by its tint. */
+
+.action-header-button.has-comment {
+  color: var(--color-warning);
+  background-color: var(--color-warning-muted);
+}
+
+.action-header-button.has-comment:hover {
+  color: var(--color-warning);
+  background-color: color-mix(in srgb, var(--color-warning) 24%, transparent);
+}
+
+.action-card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* A switched-off card recedes but stays fully operable - it is still being edited, just not run.
+   The dimming is applied per element rather than to the card, so the enable switch (the way back)
+   and the card's own surface keep their normal contrast. */
+.action-card.disabled {
+  border-style: dashed;
+}
+
+.action-card.disabled::before {
+  opacity: 0.3;
+}
+
+.action-card.disabled .action-card-body {
+  opacity: 0.45;
+}
+
+/* Marked for a move: still fully operable, but visibly on its way out. It stays until the record it
+   was pasted into is saved, so the dimming is the only thing saying a move is in flight. */
+.action-card.cut-source {
+  opacity: 0.5;
+  border-style: dashed;
+}
+
+.action-card.disabled .action-title {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .action-card,
+  .action-header-button,
+  .action-chevron {
+    transition: none;
+  }
+}

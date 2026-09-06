@@ -1,0 +1,69 @@
+<section class="detail-card detail-card-wide">
+  <div class="detail-card-header">
+    <h2 class="detail-card-title">{{ 'macrodeck.app:Integrations.Detail.CompatibilityTitle' | translate }}</h2>
+    @if (report(); as report) {
+      @if (report.state !== 'compatible') {
+        <span class="compat-badge tier-{{ stateTier(report.state) }}">{{ stateLabel(report.state) }}</span>
+      }
+    }
+  </div>
+
+  @if (loading()) {
+    <shared-loading-state [message]="'macrodeck.app:Integrations.Detail.CheckingCompatibility' | translate" />
+  } @else if (error(); as message) {
+    <shared-error-banner [message]="message" [dismissible]="false" />
+  } @else if (!report()) {
+    <shared-empty-state
+      icon="info"
+      [heading]="'macrodeck.app:Integrations.Detail.NoCompatibilityData' | translate"
+      [message]="'macrodeck.app:Integrations.Detail.NoCompatibilityDataMessage' | translate" />
+  } @else {
+    <p class="compat-evidence">{{ evidenceText(report()!) }}</p>
+
+    @if (report()!.usageTruncated) {
+      <p class="compat-truncated-note">
+        {{ 'macrodeck.app:Integrations.Detail.UsageTruncatedNote' | translate }}
+      </p>
+    }
+
+    @if (report()!.findings.length === 0) {
+      <shared-empty-state
+        icon="check"
+        [heading]="'macrodeck.app:Integrations.Detail.NoKnownIssuesHeading' | translate"
+        [message]="'macrodeck.app:Integrations.Detail.NoKnownIssuesMessage' | translate" />
+    } @else {
+      <div class="compat-findings-list">
+        @for (finding of report()!.findings; track trackFinding($index, finding)) {
+          <div class="compat-finding-item" [class]="'finding-' + finding.severity">
+            <div class="compat-finding-text">
+              <span class="compat-finding-title">
+                <span class="compat-finding-subject">{{ finding.subject }}</span>
+                <span class="compat-finding-diagnostic">{{ finding.diagnosticId }}</span>
+                <span class="compat-finding-source source-{{ finding.source }}">{{ sourceLabel(finding.source) }}</span>
+              </span>
+              <span class="compat-finding-guidance">{{ finding.guidance }}</span>
+              @if (finding.deprecatedIn || finding.removedIn || finding.replacement) {
+                <span class="compat-finding-meta">
+                  @if (finding.deprecatedIn) {
+                    <span>{{ 'macrodeck.app:Integrations.Detail.DeprecatedIn' | translate:{ version: finding.deprecatedIn } }}</span>
+                  }
+                  @if (finding.removedIn) {
+                    <span>{{ 'macrodeck.app:Integrations.Detail.RemovalPlanned' | translate:{ version: finding.removedIn } }}</span>
+                  }
+                  @if (finding.replacement) {
+                    <span>{{ 'macrodeck.app:Integrations.Detail.ReplaceWith' | translate:{ replacement: finding.replacement } }}</span>
+                  }
+                </span>
+              }
+            </div>
+            @if (finding.migrationUrl; as migrationUrl) {
+              <shared-button variant="secondary" size="compact" (click)="openMigrationLink(migrationUrl)">
+                {{ 'macrodeck.app:Integrations.Detail.MigrationGuideAction' | translate }}
+              </shared-button>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+</section>

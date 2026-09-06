@@ -1,0 +1,210 @@
+@use '../../../../styles/index' as ds;
+
+:host {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+}
+
+.cp-label {
+	font-size: var(--text-base);
+	font-weight: var(--font-medium);
+	color: var(--color-text-secondary);
+}
+
+.cp-track {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.3125rem;
+}
+
+.cp-cell {
+	--cp-fill: transparent;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 1.25rem;
+	height: 1.25rem;
+	padding: 0;
+	border: 2px solid transparent;
+	border-radius: var(--radius-sm);
+	background: var(--cp-fill);
+	cursor: pointer;
+	transition:
+		box-shadow var(--transition-fast),
+		border-color var(--transition-fast);
+}
+
+.cp-cell:focus-visible {
+	outline: none;
+	box-shadow: var(--focus-ring);
+}
+
+.cp-swatch {
+	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+
+.cp-swatch:hover:not(.cp-selected) {
+	box-shadow:
+		inset 0 0 0 1px rgba(0, 0, 0, 0.18),
+		0 0 0 2px var(--color-border-light);
+}
+
+.cp-selected {
+	border-color: var(--color-text-primary);
+	box-shadow: 0 0 0 1px var(--color-bg-primary);
+}
+
+.cp-check {
+	width: 0.6875rem;
+	height: 0.6875rem;
+	color: #fff;
+	filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45));
+	pointer-events: none;
+}
+
+.cp-reset,
+.cp-custom {
+	border: 1px solid var(--color-border-light);
+	color: var(--color-text-muted);
+}
+
+.cp-reset:hover,
+.cp-custom:hover:not(.cp-selected) {
+	color: var(--color-text-primary);
+	border-color: var(--color-text-secondary);
+}
+
+.cp-icon {
+	width: 0.6875rem;
+	height: 0.6875rem;
+	pointer-events: none;
+}
+
+.cp-custom {
+	overflow: hidden;
+}
+
+.cp-custom.cp-selected {
+	border-color: var(--color-text-primary);
+	background:
+		conic-gradient(
+			from 0deg,
+			#ef4444,
+			#f59e0b,
+			#eab308,
+			#22c55e,
+			#06b6d4,
+			#3b82f6,
+			#8b5cf6,
+			#ec4899,
+			#ef4444
+		);
+}
+
+// The panel is a child of the swatch row purely so it can reference the trigger; without this it
+// would sit in the flex flow as an empty item and pad the row by one gap.
+.cp-track > shared-overlay-panel {
+	display: contents;
+}
+
+.cp-popover {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	width: 12.5rem;
+	padding: var(--space-1);
+}
+
+.cp-area {
+	position: relative;
+	height: 7.5rem;
+	border-radius: var(--radius-sm);
+	background:
+		linear-gradient(to top, #000, rgba(0, 0, 0, 0)),
+		linear-gradient(to right, #fff, rgba(255, 255, 255, 0)),
+		var(--cp-hue, #f00);
+	cursor: crosshair;
+	touch-action: none;
+}
+
+.cp-area:focus-visible {
+	outline: none;
+	box-shadow: var(--focus-ring);
+}
+
+.cp-area-thumb {
+	position: absolute;
+	width: 0.75rem;
+	height: 0.75rem;
+	margin: -0.375rem 0 0 -0.375rem;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	background: var(--cp-fill);
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+	pointer-events: none;
+}
+
+.cp-hue {
+	@include ds.control-slider;
+	background-image: linear-gradient(
+		to right,
+		#f00 0%,
+		#ff0 17%,
+		#0f0 33%,
+		#0ff 50%,
+		#00f 67%,
+		#f0f 83%,
+		#f00 100%
+	);
+}
+
+.cp-row {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+}
+
+.cp-hex {
+	@include ds.control-base;
+	@include ds.control-interactive;
+	flex: 1 1 auto;
+	min-width: 0;
+	font-family: var(--font-mono);
+	text-transform: lowercase;
+}
+
+.cp-eyedropper {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: var(--control-height);
+	height: var(--control-height);
+	padding: 0;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-md);
+	background: none;
+	color: var(--color-text-secondary);
+	cursor: pointer;
+	transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.cp-eyedropper:hover {
+	color: var(--color-text-primary);
+	border-color: var(--color-border-light);
+}
+
+.cp-eyedropper:focus-visible {
+	outline: none;
+	box-shadow: var(--focus-ring);
+}
+
+.cp-eyedropper svg {
+	width: 0.875rem;
+	height: 0.875rem;
+	pointer-events: none;
+}

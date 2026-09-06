@@ -1,0 +1,241 @@
+<!--
+  Sentence-style recursive condition editor.
+
+  A single <ng-template #node> describes how to render any one node:
+    - Comparison leaf  → "<left>  <op>  <right>  •"  (one row, eval-dot at end)
+    - Logical group    → vertical list of operands with the AND / OR
+                         connective inline between rows (clickable to flip)
+
+  Recursion is performed via *ngTemplateOutlet, with `change` / `remove`
+  closures forwarded through the template context so each level knows
+  how to propagate an immutable update to its parent.
+
+  All boolean evaluation happens in the host backend; this template
+  only authors and visualises the tree.
+-->
+
+<ng-template
+  #node
+  let-expr
+  let-change="change"
+  let-remove="remove"
+  let-removable="removable"
+  let-depth="depth">
+
+  @if (isComparison(expr)) {
+    <div class="cb-row">
+      <!-- LEFT -->
+      <span class="cb-operand">
+        <ng-container *ngTemplateOutlet="operand; context: {
+          $implicit: expr.left,
+          comp: expr,
+          side: 'left',
+          change: change,
+          placeholder: valuePlaceholder()
+        }"></ng-container>
+      </span>
+
+      <!-- OPERATOR (click → popover with natural-language operators) -->
+      <span class="cb-operator-wrap">
+        <button
+          #operatorBtn
+          type="button"
+          class="cb-operator-btn"
+          [class.open]="isPopoverOpen(expr)"
+          (click)="toggleOperatorPopover(expr, $event)">
+          <span class="cb-operator-label">{{ operatorLabel(expr.operator) }}</span>
+          <shared-select-caret />
+        </button>
+
+        <shared-overlay-panel
+          [anchor]="operatorBtn"
+          [isOpen]="isPopoverOpen(expr)"
+          [minWidth]="160"
+          [anchorOffset]="0"
+          (dismissed)="closeOperatorPopover()">
+          <div class="cb-operator-listbox" role="listbox">
+            @for (op of operatorOptionsFor(expr); track op.value) {
+              <button
+                type="button"
+                class="cb-operator-option"
+                [class.active]="op.value === expr.operator"
+                role="option"
+                [attr.aria-selected]="op.value === expr.operator"
+                (click)="pickOperator(expr, op.value, change)">
+                {{ op.label }}
+              </button>
+            }
+          </div>
+        </shared-overlay-panel>
+      </span>
+
+      <!-- RIGHT: absent (not merely hidden) for a state operator - it ignores the right operand
+           entirely, and a hidden-but-present control would still be queryable/focusable. -->
+      @if (!isStateOperator(expr.operator)) {
+        <span class="cb-operand">
+          <ng-container *ngTemplateOutlet="operand; context: {
+            $implicit: expr.right,
+            comp: expr,
+            side: 'right',
+            change: change,
+            placeholder: valuePlaceholder()
+          }"></ng-container>
+        </span>
+      }
+
+      <!-- Inline remove (×) - hover-revealed, only for non-root operands. -->
+      @if (removable) {
+        <button
+          type="button"
+          class="cb-remove-btn"
+          (click)="remove()"
+          [attr.aria-label]="removeConditionLabel()">
+          <span class="icon icon-x icon-xs"></span>
+        </button>
+      }
+    </div>
+
+  } @else if (isLogical(expr)) {
+    <div
+      class="cb-group"
+      [class.cb-group-nested]="depth > 0"
+      [attr.data-kind]="expr.kind">
+
+      @for (op of expr.operands; track op.id; let i = $index; let last = $last) {
+        <div class="cb-group-item">
+          <ng-container *ngTemplateOutlet="node; context: {
+            $implicit: op,
+            change: childChange(expr, i, change),
+            remove: childRemove(expr, i, change),
+            removable: expr.operands.length > 1,
+            depth: depth + 1
+          }"></ng-container>
+        </div>
+
+        @if (!last) {
+          <button
+            type="button"
+            class="cb-connective"
+            [title]="connectiveToggleTitle(expr.kind)"
+            (click)="flipConnectiveAt(expr, i, change)">
+            {{ connectiveLabel(expr.kind) }}
+          </button>
+        }
+      }
+
+      <!--
+        Add-affordance for *nested* groups only. The root-level add
+        lives outside the recursive template so leaf-roots
+        (single-comparison expressions) also get a "+ condition"
+        button - without it the user has no way to grow a single
+        comparison into an AND/OR group.
+      -->
+      @if (depth > 0) {
+        <shared-button
+          class="cb-add"
+          variant="add"
+          (click)="addCondition(expr, change)">
+          {{ addConditionLabel() }}
+        </shared-button>
+      }
+    </div>
+  }
+</ng-template>
+
+<!--
+  Operand template - variable chip OR inline literal input. Dispatched
+  from each comparison's left/right slot. Uses `let-comp` / `let-side`
+  so the operand can route changes back through the comparison row's
+  closure without the parent template having to thread two helpers.
+-->
+<ng-template
+  #operand
+  let-value
+  let-comp="comp"
+  let-side="side"
+  let-change="change"
+  let-placeholder="placeholder">
+
+  @if (operandParameter(comp, side); as param) {
+    <!--
+      The opposite operand names a boolean variable or an event payload parameter with known
+      metadata → author this side with the control that metadata implies (issue #768) instead of
+      free text. A dropdown/combobox has no text to type `{{ '{{' }}` into, so this branch keeps the
+      picker and renders a reference as a whole-operand chip, same as the boolean case always did.
+    -->
+    <span class="cb-literal-wrap cb-literal-wrap-control">
+      @if (isVariable(value)) {
+        <span
+          class="cb-chip"
+          [title]="variableLabel(value)">
+          <span class="cb-chip-text">{{ variableLabel(value) }}</span>
+          <button
+            type="button"
+            class="cb-chip-clear"
+            (click)="clearComparisonVariable(comp, side, change); $event.stopPropagation()"
+            [attr.aria-label]="clearVariableAriaLabel(side)">
+            <span class="icon icon-x icon-xs"></span>
+          </button>
+        </span>
+      } @else {
+        <shared-condition-operand-input
+          [parameter]="param"
+          [value]="asPrimitive(value)"
+          [placeholder]="placeholder"
+          [variables]="variables"
+          [eventId]="eventDefinition?.id"
+          [currentParameters]="eventConfiguration"
+          (valueChange)="changeComparisonField(comp, side, $event, change)" />
+      }
+      <!--
+        Outside the branch above on purpose: comparing two booleans leaves both
+        operands as chips, and without a picker beside them the only way out was
+        to clear one first.
+      -->
+      <shared-variable-picker
+        class="cb-var-picker"
+        [variables]="variables"
+        [acceptedTypes]="param.type === 'boolean' ? booleanAcceptedTypes : undefined"
+        (pick)="pickComparisonVariable(comp, side, $event, change)"
+        (pickEventParameter)="pickComparisonEventParameter(comp, side, $event, change)">
+      </shared-variable-picker>
+    </span>
+  } @else {
+    <!-- Free text: a reference can be typed with `{{ '{{' }}` or picked. -->
+    <span class="cb-literal-wrap" [class.is-empty]="isEmpty(value)">
+      <shared-variable-text-input
+        class="cb-literal-input"
+        [placeholder]="placeholder"
+        [value]="literalText(value)"
+        [variables]="variables"
+        (valueChange)="changeComparisonField(comp, side, $event, change)" />
+      <shared-variable-picker
+        class="cb-var-picker"
+        [variables]="variables"
+        (pick)="pickComparisonVariable(comp, side, $event, change)"
+        (pickEventParameter)="pickComparisonEventParameter(comp, side, $event, change)">
+      </shared-variable-picker>
+    </span>
+  }
+</ng-template>
+
+<!-- Root invocation. -->
+<ng-container *ngTemplateOutlet="node; context: {
+  $implicit: expression,
+  change: rootChange,
+  remove: noopRemove,
+  removable: false,
+  depth: 0
+}"></ng-container>
+
+<!--
+  Always-visible root-level add. Wraps a leaf-root into a logical group
+  on demand (see addCondition / appendComparison) so the user can grow
+  a single comparison into an AND/OR expression from any starting state.
+-->
+<shared-button
+  class="cb-add cb-add-root"
+  variant="add"
+  (click)="addCondition(expression, rootChange)">
+  {{ addConditionLabel() }}
+</shared-button>

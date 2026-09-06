@@ -1,0 +1,49 @@
+<div class="block-branches">
+  @for (branch of block.branches ?? []; track branch.id; let i = $index) {
+    @if (branch.kind !== 'else') {
+      @if (branch.condition) {
+        <shared-condition-section
+          [label]="branchLabel(branch)"
+          [blockId]="block.id"
+          [branchId]="branch.id"
+          [expression]="branch.condition"
+          [removable]="branch.kind !== 'if'" />
+      }
+      <div class="block-section">
+        <h4 class="block-section-label">{{ thenLabel() }}:</h4>
+        <div class="block-section-content">
+          <shared-action-list
+            [listId]="branchListId(branch.id)"
+            [items]="branch.children" />
+        </div>
+      </div>
+    } @else {
+      <div class="block-section">
+        <h4 class="block-section-label">{{ branchLabel(branch) }}:</h4>
+        <div class="block-section-content">
+          <shared-action-list
+            [listId]="branchListId(branch.id)"
+            [items]="branch.children" />
+        </div>
+        <button
+          type="button"
+          class="block-section-remove"
+          (click)="store.removeBranch(block.id, branch.id)"
+          [attr.aria-label]="removeOtherwiseAriaLabel()">
+          <span class="icon icon-x icon-xs"></span>
+        </button>
+      </div>
+    }
+  }
+
+  <div class="block-branches-footer">
+    <button type="button" class="block-section-add-meta" (click)="store.addElseIf(block.id)">
+      {{ addElseIfLabel() }}
+    </button>
+    @if (!hasElseBranch) {
+      <button type="button" class="block-section-add-meta" (click)="store.addElse(block.id)">
+        {{ addOtherwiseLabel() }}
+      </button>
+    }
+  </div>
+</div>

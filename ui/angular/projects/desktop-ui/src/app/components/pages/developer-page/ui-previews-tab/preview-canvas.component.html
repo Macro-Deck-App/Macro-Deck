@@ -1,0 +1,73 @@
+<div class="canvas-panel">
+  <header class="canvas-toolbar">
+    <span class="canvas-readout">
+      {{ 'macrodeck.app:Developer.Previews.SizeReadout' | translate:{ width: size().width, height: size().height } }}
+    </span>
+
+    <div class="canvas-presets" role="group" [attr.aria-label]="'macrodeck.app:Developer.Previews.PresetsLabel' | translate">
+      @for (preset of presets; track preset.width + '-' + preset.height) {
+        <button type="button" class="preset-button" (click)="selectPreset(preset)">
+          {{ 'macrodeck.app:Developer.Previews.SizeReadout' | translate:{ width: preset.width, height: preset.height } }}
+        </button>
+      }
+    </div>
+
+    <shared-button
+      variant="ghost"
+      size="compact"
+      [ariaLabel]="'macrodeck.app:Developer.Previews.RefreshAriaLabel' | translate"
+      (click)="refresh()">
+      <span class="icon icon-refresh icon-sm"></span>
+      {{ 'macrodeck.app:Developer.Previews.RefreshAction' | translate }}
+    </shared-button>
+  </header>
+
+  <div class="canvas-surface-wrap">
+    <div #canvas class="canvas-surface" [style.width.px]="size().width" [style.height.px]="size().height">
+      @if (rejection(); as rejection) {
+        <div class="canvas-rejection">
+          <p class="canvas-rejection-heading">{{ 'macrodeck.app:Developer.Previews.SessionFailedHeading' | translate }}</p>
+          @if (rejection.message) {
+            <p class="canvas-rejection-message">{{ rejection.message }}</p>
+          }
+        </div>
+      } @else if (rendererKind() === 'widget') {
+        <shared-ui-widget-tree [root]="root()" [box]="box()" (nodeEvent)="onNodeEvent($event)" />
+      } @else if (rendererKind() === 'config') {
+        <shared-ui-tree [root]="root()" [box]="box()" (nodeEvent)="onNodeEvent($event)" />
+      }
+
+      <div
+        class="handle handle-right"
+        tabindex="0"
+        role="slider"
+        [attr.aria-label]="'macrodeck.app:Developer.Previews.ResizeAriaLabel' | translate"
+        [attr.aria-valuenow]="size().width"
+        (pointerdown)="onHandlePointerDown($event, 'right')"
+        (pointermove)="onHandlePointerMove($event)"
+        (pointerup)="onHandlePointerUp($event)"
+        (keydown)="onHandleKeyDown($event, 'right')"></div>
+
+      <div
+        class="handle handle-bottom"
+        tabindex="0"
+        role="slider"
+        [attr.aria-label]="'macrodeck.app:Developer.Previews.ResizeAriaLabel' | translate"
+        [attr.aria-valuenow]="size().height"
+        (pointerdown)="onHandlePointerDown($event, 'bottom')"
+        (pointermove)="onHandlePointerMove($event)"
+        (pointerup)="onHandlePointerUp($event)"
+        (keydown)="onHandleKeyDown($event, 'bottom')"></div>
+
+      <div
+        class="handle handle-corner"
+        tabindex="0"
+        role="slider"
+        [attr.aria-label]="'macrodeck.app:Developer.Previews.ResizeAriaLabel' | translate"
+        (pointerdown)="onHandlePointerDown($event, 'corner')"
+        (pointermove)="onHandlePointerMove($event)"
+        (pointerup)="onHandlePointerUp($event)"
+        (keydown)="onHandleKeyDown($event, 'corner')"></div>
+    </div>
+  </div>
+</div>

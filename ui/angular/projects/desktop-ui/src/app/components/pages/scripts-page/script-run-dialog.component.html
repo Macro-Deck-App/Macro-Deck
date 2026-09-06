@@ -1,0 +1,18 @@
+<shared-modal [heading]="heading()" maxWidth="460px" [showFooter]="false" (close)="cancel.emit()">
+  <form class="run-form" (submit)="$event.preventDefault(); submit()">
+    @for (row of rows(); track row.name) {
+      <shared-param-row
+        blockId="script-run"
+        [block]="block()"
+        [param]="row"
+        [nested]="true"
+        [allowReferences]="false"
+        (nestedChange)="setValue(inputs[$index].name, $event)" />
+    }
+
+    <shared-button-group class="actions" align="end">
+      <shared-button variant="secondary" (click)="onCancel()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+      <shared-button variant="primary" type="submit" [disabled]="!canRun()">{{ 'macrodeck.app:Scripts.RunAction' | translate }}</shared-button>
+    </shared-button-group>
+  </form>
+</shared-modal>

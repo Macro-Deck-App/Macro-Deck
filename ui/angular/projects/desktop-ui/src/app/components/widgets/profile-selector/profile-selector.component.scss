@@ -1,0 +1,161 @@
+@use '../../../../styles/index' as ds;
+
+:host {
+  display: block;
+  @include ds.dropdown-affordances;
+}
+
+.profile-selector {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+// 260px, matching the menu's [minWidth] - the pill and the panel below it are one field.
+.profile-dropdown {
+  display: block;
+  width: 16.25rem;
+}
+
+/* Make the dropdown trigger read like a wide select pill. */
+.profile-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+// A control label, not a heading: at the section-heading size it out-shouted the
+// deck title below it and crowded the pill it sits in.
+.profile-trigger-name {
+  flex: 1;
+  text-align: left;
+  font-weight: var(--font-medium);
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-trigger-lock {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.profile-trigger-chevron {
+  flex-shrink: 0;
+}
+
+.profile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 0.3125rem;
+  max-height: 13rem;
+  overflow-y: auto;
+}
+
+.profile-list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  padding-right: var(--space-1);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.profile-list-item:hover,
+.profile-list-item:focus-within {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+// Without the check glyph the weight has to carry the active state on its own.
+.profile-list-item.active {
+  color: var(--color-text-primary);
+  font-weight: var(--font-medium);
+}
+
+.profile-list-select {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-2) 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: inherit;
+  color: inherit;
+  font-size: var(--text-base);
+  text-align: left;
+  cursor: pointer;
+}
+
+// Hidden until the row is hovered or holds focus, so the list stays quiet at rest.
+// visibility, not display: the row must not reflow when the actions appear.
+.profile-item-actions {
+  visibility: hidden;
+  flex-shrink: 0;
+}
+
+.profile-list-item:hover .profile-item-actions,
+.profile-list-item:focus-within .profile-item-actions {
+  visibility: visible;
+}
+
+.profile-item-glyph {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.profile-list-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-badge {
+  padding: 0.0625rem 0.3125rem;
+  font-size: var(--text-xs);
+  border-radius: 999px;
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+  text-transform: capitalize;
+}
+
+// Matches .folder-nav-footer so both management footers read as one control.
+.profile-list-footer {
+  padding: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.profile-name-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.profile-portable-error {
+  position: fixed;
+  top: var(--spacing-md, 0.8125rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: min(90%, 480px);
+}
+
+.layout-warning {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}

@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <IsMacroDeckPackage>true</IsMacroDeckPackage>
+        <PackageId>MacroDeck.Plugin.Hosting</PackageId>
+        <Description>DI-first hosting model for out-of-process Macro Deck plugins. Write a plugin as a normal ASP.NET Core application; registration, protocol framing, heartbeats and reconnection are handled for you.</Description>
+        <PackageTags>macrodeck;plugin;hosting;aspnetcore</PackageTags>
+    </PropertyGroup>
+
+    <!-- Microsoft.NET.Sdk plus this framework reference, not Microsoft.NET.Sdk.Web: the web SDK is for
+         applications, and a library that used it would drag app-shaped defaults into every consumer.
+         The framework reference is what supplies WebApplicationBuilder, IApplicationBuilder, hosting,
+         options and IHttpClientFactory - which is also why this project needs no PackageReference at
+         all, and ClientWebSocket comes from the base runtime. -->
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\protocol\src\MacroDeck.Plugin.Protocol\MacroDeck.Plugin.Protocol.csproj" />
+        <ProjectReference Include="..\MacroDeck.Sdk\MacroDeck.Sdk.csproj" />
+        <ProjectReference Include="..\MacroDeck.Localization\MacroDeck.Localization.csproj" />
+        <ProjectReference Include="..\..\..\ui-model\src\MacroDeck.Ui\MacroDeck.Ui.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="MacroDeck.Plugin.Hosting.Tests.UnitTests" />
+        <!-- Widens this published NuGet package's internals (IPluginSocket, PluginSessionConnection,
+             CapabilityDispatcher, CapabilityCatalog, PluginConnectionState, PluginSession) to the host's
+             cross-package contract-test harness, which drives a real SDK-side dispatcher against a real
+             host-side invoker over an in-memory socket bridge - see host/tests/MacroDeckHost.Tests.PluginContractTests. -->
+        <InternalsVisibleTo Include="MacroDeckHost.Tests.PluginContractTests" />
+        <!-- The Serilog sink package needs PluginConnectionState.ActiveConnection, PluginSessionConnection
+             and PluginStateDirectory - it sends log.publish over whichever connection is current and
+             resolves its fallback file under the same per-platform state directory the credential store
+             uses. -->
+        <InternalsVisibleTo Include="MacroDeck.Plugin.Serilog" />
+        <!-- Lets the SDK-level compatibility suite call the real ActionsCapabilityHandler and
+             ConfigFlowCapabilityHandler describe mapping against a pre-#543-shaped implementation, instead
+             of restating the mapper's own interface checks as a second copy that could drift from it. -->
+        <InternalsVisibleTo Include="MacroDeck.Sdk.Tests.UnitTests" />
+    </ItemGroup>
+
+</Project>

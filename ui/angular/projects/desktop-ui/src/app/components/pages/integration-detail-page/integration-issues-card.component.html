@@ -1,0 +1,44 @@
+<section class="detail-card detail-card-wide">
+  <div class="detail-card-header">
+    <h2 class="detail-card-title">{{ 'macrodeck.app:Integrations.Detail.IssuesTitle' | translate }}</h2>
+    @if (issues().length > 0) {
+      <span class="issue-badge" [class]="'issue-badge-' + severity()">
+        {{ issueCountLabel() }}
+      </span>
+    }
+  </div>
+
+  @if (loading()) {
+    <shared-loading-state [message]="'macrodeck.app:Integrations.Detail.CheckingIssues' | translate" />
+  } @else if (error(); as message) {
+    <shared-error-banner [message]="message" (dismiss)="dismissError.emit()" />
+  } @else if (issues().length === 0) {
+    <shared-empty-state
+      icon="check"
+      [heading]="'macrodeck.app:Integrations.Detail.NoIssuesHeading' | translate"
+      [message]="'macrodeck.app:Integrations.Detail.NoIssuesMessage' | translate" />
+  } @else {
+    <div class="issues-list">
+      @for (issue of issues(); track issue.id) {
+        <div class="issue-item" [class]="'issue-' + issue.severity">
+          <div class="issue-text">
+            <span class="issue-item-title">{{ issue.title | localizedText }}</span>
+            @if (issue.description) {
+              <span class="issue-desc">{{ issue.description | localizedText }}</span>
+            }
+          </div>
+          @if (issue.actionLabel) {
+            <shared-button
+              variant="secondary"
+              size="compact"
+              [loading]="resolvingIssueId() === issue.id"
+              [disabled]="resolvingIssueId() !== null"
+              (click)="resolveIssue.emit(issue)">
+              {{ issue.actionLabel | localizedText }}
+            </shared-button>
+          }
+        </div>
+      }
+    </div>
+  }
+</section>

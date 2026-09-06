@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <IsMacroDeckPackage>true</IsMacroDeckPackage>
+        <PackageId>MacroDeck.Plugin.Packaging</PackageId>
+        <Description>The Macro Deck plugin manifest and artifact format: parsing and validating manifest.json, reading and extracting .macroDeckPlugin archives, and the semantic-version ranges compatibility and dependency declarations use. Shared by the host and by tooling that packs or validates plugin artifacts outside it.</Description>
+        <PackageTags>macrodeck;plugin;packaging;manifest</PackageTags>
+        <!-- This package absorbs an existing, largely undocumented public surface moved out of the host
+             rather than written fresh; backfilling its documentation is tracked separately, and
+             suppressing here keeps the package shippable without a documentation sweep landing inside
+             an unrelated change. -->
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\protocol\src\MacroDeck.Plugin.Protocol\MacroDeck.Plugin.Protocol.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="MacroDeck.Plugin.Cli" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+        <PackageReference Include="Serilog" />
+    </ItemGroup>
+
+    <!-- Embedded so a future offline validator (the macrodeck-plugin CLI) can check a manifest against
+         the published schema without shipping a second copy of the file. -->
+    <ItemGroup>
+        <EmbeddedResource Include="..\..\..\docs\public\schemas\plugin-manifest-v1.schema.json"
+                           LogicalName="plugin-manifest-v1.schema.json" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,170 @@
+<shared-rail-page [railTitle]="'macrodeck.app:Developer.Events.RailTitle' | translate">
+  <ul ngProjectAs="[rail]" class="source-list" role="listbox" [attr.aria-label]="'macrodeck.app:Developer.Events.ProvidersAriaLabel' | translate">
+    <li>
+      <shared-rail-item
+        [label]="'macrodeck.app:Developer.Events.AllEventsLabel' | translate"
+        [count]="catalog.events().length"
+        [active]="selectedProviderId() === null"
+        (click)="selectProvider(null)" />
+    </li>
+
+    @if (providers().length > 0) {
+      <li class="rail-section" aria-hidden="true">{{ 'macrodeck.app:Developer.Events.ProvidersSectionLabel' | translate }}</li>
+      @for (provider of providers(); track provider.providerId) {
+        <li>
+          <shared-rail-item
+            [label]="provider.providerName"
+            [count]="provider.events.length"
+            [active]="selectedProviderId() === provider.providerId"
+            (click)="selectProvider(provider.providerId)" />
+        </li>
+      }
+    }
+  </ul>
+
+  <div class="events">
+    <header class="events-header">
+      <div class="events-heading">
+        <h1 class="events-title">{{ heading() }}</h1>
+        <p class="events-subtitle">
+          {{ 'macrodeck.app:Developer.Events.Count' | translate:{ count: filteredEvents().length } }}
+        </p>
+      </div>
+      <shared-input
+        class="events-search"
+        type="search"
+        [placeholder]="'macrodeck.app:Developer.Events.SearchPlaceholder' | translate"
+        [ngModel]="search()"
+        (ngModelChange)="search.set($event)" />
+    </header>
+
+    @if (catalog.loading() && catalog.events().length === 0) {
+      <shared-loading-state [message]="'macrodeck.app:Developer.Events.LoadingEvents' | translate" />
+    } @else if (catalog.events().length === 0) {
+      <shared-empty-state
+        icon="zap"
+        [heading]="'macrodeck.app:Developer.Events.NoEventsHeading' | translate"
+        [message]="'macrodeck.app:Developer.Events.NoEventsMessage' | translate" />
+    } @else if (filteredEvents().length === 0) {
+      <shared-empty-state
+        icon="zap"
+        [heading]="'macrodeck.app:Developer.Events.NoMatchingHeading' | translate"
+        [message]="'macrodeck.app:Developer.Events.NoMatchingMessage' | translate" />
+    } @else {
+      <div class="events-body">
+        <ul class="event-list" role="listbox" [attr.aria-label]="'macrodeck.app:Developer.Events.RailTitle' | translate">
+          @for (event of filteredEvents(); track event.id) {
+            <li>
+              <button
+                type="button"
+                class="event-list-item"
+                role="option"
+                [attr.aria-selected]="selectedEventId() === event.id"
+                [class.active]="selectedEventId() === event.id"
+                (click)="select(event)">
+                <span class="event-list-name">
+                  {{ event.name | localizedText }}
+                  @if (event.deliveryKind === 'scheduled') {
+                    <span class="event-list-badge">{{ 'macrodeck.app:Developer.Events.ScheduledBadge' | translate }}</span>
+                  }
+                </span>
+                @if (selectedProviderId() === null) {
+                  <span class="event-list-provider">{{ event.providerName }}</span>
+                }
+                <span class="event-list-id">{{ event.id }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+
+        <div class="events-detail">
+          @if (selectedEvent(); as event) {
+            <div class="trigger">
+              <header class="trigger-header">
+                <h2 class="trigger-name">{{ event.name | localizedText }}</h2>
+                <div class="trigger-ids">
+                  <span class="trigger-provider">{{ event.providerName }}</span>
+                  <span class="trigger-id">{{ event.id }}</span>
+                </div>
+                @if (event.description) {
+                  <p class="trigger-description">{{ event.description | localizedText }}</p>
+                }
+              </header>
+
+              <p class="trigger-warning">
+                <span class="icon icon-alert-triangle icon-sm"></span>
+                {{ 'macrodeck.app:Developer.Events.TriggerWarning' | translate }}
+              </p>
+
+              <div class="trigger-form">
+                @if (visibleParamRows().length > 0) {
+                  @for (param of visibleParamRows(); track param.name) {
+                    <div class="trigger-param">
+                      <shared-param-row
+                        blockId="event-trigger"
+                        [block]="triggerBlock()"
+                        [param]="param"
+                        [nested]="true"
+                        [allowReferences]="false"
+                        [eventId]="selectedEvent()?.id"
+                        eventParameterKind="payload"
+                        (nestedChange)="setValue(param.name, $event)" />
+                    </div>
+                  }
+                } @else {
+                  <p class="trigger-no-params">{{ 'macrodeck.app:Developer.Events.NoPayloadMessage' | translate }}</p>
+                }
+              </div>
+
+              @if (isScheduled()) {
+                <p class="trigger-note">
+                  {{ 'macrodeck.app:Developer.Events.ScheduledNote' | translate }}
+                </p>
+              }
+
+              <div class="trigger-actions">
+                <shared-button
+                  variant="primary"
+                  [loading]="triggering()"
+                  [disabled]="triggering() || isScheduled()"
+                  (click)="trigger()">
+                  <span class="icon icon-zap icon-sm"></span>
+                  {{ 'macrodeck.app:Developer.Events.TriggerAction' | translate }}
+                </shared-button>
+              </div>
+
+              @if (result(); as result) {
+                <div class="trigger-result" [class.success]="result.success" [class.failed]="!result.success">
+                  <span class="trigger-result-status">
+                    <span class="icon icon-{{ result.success ? 'check' : 'x' }} icon-sm"></span>
+                    {{ (result.success ? 'macrodeck.app:Developer.Events.PublishedStatus' : 'macrodeck.app:Developer.Events.FailedStatus') | translate }}
+                  </span>
+                  @if (result.success) {
+                    <p class="trigger-result-detail">
+                      @if (result.queuedSubscriptions === 0) {
+                        {{ 'macrodeck.app:Developer.Events.NoListenersMessage' | translate }}
+                      } @else {
+                        {{ 'macrodeck.app:Developer.Events.QueuedForTriggers' | translate:{ count: result.queuedSubscriptions } }}
+                      }
+                    </p>
+                  }
+                  @if (result.error) {
+                    <p class="trigger-result-error">
+                      <span class="trigger-result-code">{{ result.error.code }}</span>
+                      {{ result.error.message }}
+                    </p>
+                  }
+                </div>
+              }
+            </div>
+          } @else {
+            <shared-empty-state
+              icon="zap"
+              [heading]="'macrodeck.app:Developer.Events.SelectEventHeading' | translate"
+              [message]="'macrodeck.app:Developer.Events.SelectEventMessage' | translate" />
+          }
+        </div>
+      </div>
+    }
+  </div>
+</shared-rail-page>

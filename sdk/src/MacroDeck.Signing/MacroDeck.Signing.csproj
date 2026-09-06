@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <IsMacroDeckPackage>true</IsMacroDeckPackage>
+        <PackageId>MacroDeck.Signing</PackageId>
+        <Description>Macro Deck package signing: the Ed25519 primitives, creator certificate chain verification and package signature formats behind `macrodeck-plugin sign` and `macrodeck-plugin verify`. One implementation of the canonical plugin digest and the signature documents, shared by the Macro Deck host, the plugin CLI and the Macro Deck Platform.</Description>
+        <PackageTags>macrodeck;plugin;signing;ed25519;security</PackageTags>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\MacroDeck.Plugin.Packaging\MacroDeck.Plugin.Packaging.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="NSec.Cryptography" />
+    </ItemGroup>
+
+    <!-- Embedded for the same reason MacroDeck.Plugin.Packaging embeds the manifest schema: the documents
+         this library reads are published contracts, and a second copy of the schema would drift. -->
+    <ItemGroup>
+        <EmbeddedResource Include="..\..\..\docs\public\schemas\macrodeck-certificate-v1.schema.json"
+                          LogicalName="macrodeck-certificate-v1.schema.json" />
+        <EmbeddedResource Include="..\..\..\docs\public\schemas\macrodeck-package-signature-v1.schema.json"
+                          LogicalName="macrodeck-package-signature-v1.schema.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="MacroDeck.Signing.Tests.UnitTests" />
+    </ItemGroup>
+
+</Project>

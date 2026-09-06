@@ -1,0 +1,101 @@
+<div class="kse-root">
+  @for (step of steps; track $index) {
+    <div class="kse-step">
+      <div class="kse-step-head">
+        <span class="kse-step-index">{{ $index + 1 }}</span>
+        <span class="kse-step-type">{{ stepLabel(step.type) }}</span>
+        <div class="kse-step-actions">
+          <shared-button variant="ghost" size="icon-compact"
+            [ariaLabel]="'macrodeck.app:Forms.KeyboardSequenceEditor.MoveUp' | translate"
+            [disabled]="$index === 0" (click)="moveStep($index, -1)">
+            <span class="icon icon-arrow-up icon-sm" aria-hidden="true"></span>
+          </shared-button>
+          <shared-button variant="ghost" size="icon-compact"
+            [ariaLabel]="'macrodeck.app:Forms.KeyboardSequenceEditor.MoveDown' | translate"
+            [disabled]="$index === steps.length - 1" (click)="moveStep($index, 1)">
+            <span class="icon icon-arrow-down icon-sm" aria-hidden="true"></span>
+          </shared-button>
+          <shared-button variant="ghost" size="icon-compact"
+            [ariaLabel]="'macrodeck.app:Forms.KeyboardSequenceEditor.RemoveStep' | translate"
+            (click)="removeStep($index)">
+            <span class="icon icon-x icon-sm" aria-hidden="true"></span>
+          </shared-button>
+        </div>
+      </div>
+
+      <div class="kse-step-body">
+        @switch (step.type) {
+          @case ('keyCombo') {
+            <shared-keyboard-combo-editor
+              [value]="comboValue(step)"
+              (valueChange)="onComboChange($index, $event)" />
+            <label class="kse-inline">
+              <span>{{ 'macrodeck.app:Forms.KeyboardSequenceEditor.Repeat' | translate }}</span>
+              <shared-input class="kse-number" type="number" [min]="1"
+                [ngModel]="comboRepeat(step)" (ngModelChange)="onComboRepeatChange($index, $event)" />
+            </label>
+          }
+          @case ('keyDown') {
+            <shared-keyboard-combo-editor
+              [value]="comboValue(step)"
+              (valueChange)="onComboChange($index, $event)" />
+          }
+          @case ('keyUp') {
+            <shared-keyboard-combo-editor
+              [value]="comboValue(step)"
+              (valueChange)="onComboChange($index, $event)" />
+          }
+          @case ('text') {
+            <shared-param-input
+              class="kse-text"
+              [value]="textValue(step)"
+              [multiline]="true"
+              [placeholder]="'macrodeck.app:Forms.KeyboardSequenceEditor.TextToType' | translate"
+              [variables]="variables"
+              [scope]="scope"
+              [scopeRefId]="scopeRefId"
+              [showLiquid]="true"
+              [allowReferences]="true"
+              (valueChange)="onTextChange($index, $event)" />
+          }
+          @case ('delay') {
+            <label class="kse-inline">
+              <span>{{ 'macrodeck.app:Forms.KeyboardSequenceEditor.DelayMs' | translate }}</span>
+              <shared-input class="kse-number" type="number" [min]="0"
+                [ngModel]="delayValue(step)" (ngModelChange)="onDelayChange($index, $event)" />
+            </label>
+          }
+        }
+      </div>
+    </div>
+  } @empty {
+    <div class="kse-empty">{{ 'macrodeck.app:Forms.KeyboardSequenceEditor.NoStepsYet' | translate }}</div>
+  }
+
+  <div class="kse-add">
+    <shared-select class="kse-select" [options]="stepTypeOptions()" [ngModel]="newStepType"
+      (ngModelChange)="newStepType = $any($event)" />
+    <shared-button variant="primary" (click)="addStep()">
+      <span class="icon icon-plus icon-sm" aria-hidden="true"></span>
+      {{ 'macrodeck.app:Forms.KeyboardSequenceEditor.AddStep' | translate }}
+    </shared-button>
+  </div>
+
+  <div class="kse-repeat">
+    <label class="kse-inline">
+      <span>{{ 'macrodeck.app:Forms.KeyboardSequenceEditor.RepeatSequence' | translate }}</span>
+      <shared-input class="kse-number" type="number" [min]="1"
+        [ngModel]="repeat" (ngModelChange)="onRepeatChange($event)" />
+    </label>
+    <label class="kse-inline">
+      <span>{{ 'macrodeck.app:Forms.KeyboardSequenceEditor.DelayBetweenRepeatsMs' | translate }}</span>
+      <shared-input class="kse-number" type="number" [min]="0"
+        [ngModel]="repeatDelayMs" (ngModelChange)="onRepeatDelayChange($event)" />
+    </label>
+  </div>
+
+  <div class="kse-preview">
+    <span class="kse-preview-label">{{ 'macrodeck.app:Forms.KeyboardSequenceEditor.Preview' | translate }}</span>
+    <span class="kse-preview-value">{{ preview }}</span>
+  </div>
+</div>

@@ -1,0 +1,20 @@
+// Shared utility classes that are still Angular-only (emit global CSS via main.scss).
+//
+// The icon base and its mask classes moved to @macro-deck/runtime's icons.css, which both clients
+// load directly.
+
+.divider {
+  height: 1px;
+  background-color: var(--color-border);
+}
+
+// Drop affordance for a file dragged in from the desktop (ShellDropTargetDirective sets the class).
+// Global rather than per-component because the four targets - deck grid, folder list, profile
+// selector, icon packs page - should read as the same gesture, and it matches the dashed accent
+// outline the HTML5 file-drop zones already use.
+.shell-drop-active {
+  border-radius: var(--radius-md);
+  outline: 2px dashed var(--color-accent);
+  outline-offset: -2px;
+  background-color: var(--color-accent-muted);
+}

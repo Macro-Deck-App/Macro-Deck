@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <!-- CA1707: underscored test names, like the other test projects. CA1848: tests log directly
+             through ILogger to produce events for the log-collection scenarios (A3/A4/A6); the
+             source-generated LoggerMessage pattern production code uses is unwarranted ceremony here. -->
+        <NoWarn>$(NoWarn);CA1707;CA1848</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="NUnit.Analyzers" />
+        <PackageReference Include="NUnit3TestAdapter" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\MacroDeck.Plugin.Testing\MacroDeck.Plugin.Testing.csproj" />
+        <ProjectReference Include="..\..\src\MacroDeck.Plugin.Hosting\MacroDeck.Plugin.Hosting.csproj" />
+        <!-- A4_CancellationTests composes a plugin the way a real one does, UseMacroDeckLogging() and
+             all; referenced explicitly rather than picked up through a fixture's own reference. -->
+        <ProjectReference Include="..\..\src\MacroDeck.Plugin.Serilog\MacroDeck.Plugin.Serilog.csproj" />
+        <ProjectReference Include="..\fixtures\MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin\MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin.csproj"
+                           ReferenceOutputAssembly="false" />
+        <!-- Reference-only, to guarantee build ordering: PluginLocator.cs locates and launches the
+             fixture's own build output, it does not link against its assembly - mirroring
+             host/tests/MacroDeckHost.Tests.UnitTests's own use of ReferenceOutputAssembly="false" for
+             its plugin stub (see host/tests/MacroDeckHost.Tests.UnitTests/Plugins/Runtime/PluginStubLocator.cs). -->
+        <ProjectReference Include="..\fixtures\MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin\MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin.csproj"
+                           ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="NUnit.Framework"/>
+    </ItemGroup>
+
+</Project>

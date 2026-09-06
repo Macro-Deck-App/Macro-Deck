@@ -1,0 +1,111 @@
+{
+  "description": "conformance-history-graph-tree.json resolved on one tile. The chart geometry is the point: a renderer that plots the series correctly but anchors the band, the area or the end points differently draws a visibly different graph from the same tree.",
+  "cell": 120,
+  "cases": [
+    {
+      "basis": 240,
+      "tile": { "width": 480, "height": 240 },
+      "nodes": {
+        "conformance": {
+          "note": "a layer gives every child the whole content box, in declaration order, first one furthest back",
+          "contentWidth": 480.0,
+          "contentHeight": 240.0,
+          "childBox": { "width": 480.0, "height": 240.0 },
+          "paintOrder": [
+            "conformance.dense",
+            "conformance.sparse",
+            "conformance.empty",
+            "conformance.content",
+            "conformance.value"
+          ]
+        },
+        "conformance.dense": {
+          "width": 480.0,
+          "height": 240.0,
+          "band": { "top": 158.4, "bottom": 240.0 },
+          "strokeWidth": 2.004,
+          "strokeWidthBinds": "maxOfCell",
+          "lineOpacity": 0.9,
+          "areaOpacity": 0.16,
+          "line": [
+            { "x": 0.0, "y": 238.37 },
+            { "x": 43.64, "y": 230.21 },
+            { "x": 87.27, "y": 214.7 },
+            { "x": 130.91, "y": 195.12 },
+            { "x": 174.55, "y": 179.62 },
+            { "x": 218.18, "y": 169.82 },
+            { "x": 261.82, "y": 165.74 },
+            { "x": 305.45, "y": 171.46 },
+            { "x": 349.09, "y": 186.14 },
+            { "x": 392.73, "y": 205.73 },
+            { "x": 436.36, "y": 222.86 },
+            { "x": 480.0, "y": 233.47 }
+          ],
+          "area": "the line, closed down to y=240 at both ends - the fill reaches the element's bottom edge, not the band's top"
+        },
+        "conformance.sparse": {
+          "note": "a stack justified to the end, so its one child sits against the foot of the box",
+          "width": 480.0,
+          "height": 240.0
+        },
+        "conformance.sparse.chart": {
+          "width": 480.0,
+          "height": 81.6,
+          "offsetY": 158.4,
+          "band": { "top": 0.0, "bottom": 81.6 },
+          "bandNote": "no plotTop, so the band is the whole element",
+          "strokeWidth": 4.8,
+          "line": [
+            { "x": 0.0, "y": 81.6 },
+            { "x": 240.0, "y": 0.0 },
+            { "x": 480.0, "y": 40.8 }
+          ]
+        },
+        "conformance.empty": {
+          "width": 480.0,
+          "height": 240.0,
+          "draws": "nothing at all - neither line nor fill. A flat line along the foot of the band would read as a real value of zero."
+        },
+        "conformance.content": {
+          "contentWidth": 446.4,
+          "contentHeight": 206.4,
+          "padding": 16.8,
+          "paddingBinds": "basis",
+          "gap": 2.4,
+          "gapBinds": "basis"
+        },
+        "conformance.content.title": {
+          "fontSize": 12.996,
+          "binds": "maxOfCell",
+          "note": "26.4 from the basis, held to 12.996 by the cell - this is the clamp that keeps a nine-cell card from reading as a poster"
+        },
+        "conformance.content.subtitle": {
+          "fontSize": 19.2,
+          "binds": "basis",
+          "note": "the cell clamp is present but far above the basis term, so it does not bind - a renderer that ignored maxOfCell would pass on this run alone"
+        },
+        "conformance.value": {
+          "width": 480.0,
+          "height": 240.0,
+          "note": "no padding, justified and aligned centre, so the row's centre is the card's centre"
+        },
+        "conformance.value.row": {
+          "gap": 2.4,
+          "align": "baseline",
+          "alignNote": "the two runs' text sits on one line; their boxes do not line up, and must not be made to"
+        },
+        "conformance.value.row.reading": {
+          "fontSize": 33.996,
+          "binds": "maxOfCell",
+          "digits": 3.5,
+          "minWidth": "3.5 digit advances of the face it is drawn in, the content centred within it when narrower",
+          "tabular": true
+        },
+        "conformance.value.row.unit": {
+          "fontSize": 14.496,
+          "binds": "maxOfCell"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+<aside
+  class="sidebar"
+  [class.collapsed]="isCollapsed"
+  [style.--sidebar-collapsed-width]="collapsedWidthCss"
+  [style.width.px]="isCollapsed ? collapsedWidth : expandedWidth">
+  <nav class="sidebar-main">
+    @for (group of mainItemGroups; track $index; let isLast = $last) {
+      <div class="sidebar-group">
+        @for (item of group; track item.id) {
+          <app-nav-item [item]="item" [isCollapsed]="isCollapsed"></app-nav-item>
+        }
+      </div>
+      @if (!isLast) {
+        <div class="sidebar-divider" aria-hidden="true"></div>
+      }
+    }
+  </nav>
+
+  <div class="sidebar-divider"></div>
+
+  <nav class="sidebar-bottom">
+    @for (item of bottomItems; track item.id) {
+      <app-nav-item
+        [item]="item"
+        [isCollapsed]="isCollapsed"
+        [active]="!!item.action && item.action === activeAction"
+        (action)="itemAction.emit($event)"></app-nav-item>
+    }
+  </nav>
+</aside>

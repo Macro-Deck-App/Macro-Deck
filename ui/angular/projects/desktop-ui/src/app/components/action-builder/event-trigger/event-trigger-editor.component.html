@@ -1,0 +1,91 @@
+<div class="event-trigger-editor">
+  <div class="event-trigger-header">
+    <h4 class="event-trigger-title">{{ 'macrodeck.app:ActionBuilder.EventTrigger.EventTitle' | translate }}</h4>
+    @if (removable) {
+      <button
+        type="button"
+        class="event-trigger-remove"
+        (click)="remove()"
+        [attr.aria-label]="removeTriggerAriaLabel()">
+        <span class="icon icon-trash icon-xs"></span>
+        {{ removeTriggerLabel() }}
+      </button>
+    }
+  </div>
+
+  @if (loadError(); as message) {
+    <p class="event-trigger-error">{{ message }}</p>
+  }
+
+  <div class="event-trigger-selects">
+    <label class="form-group form-group--dense">
+      <span class="form-label">{{ providerFieldLabel() }}</span>
+      <shared-select
+        [options]="providerOptions()"
+        [ngModel]="selectedProviderId()"
+        [disabled]="loading()"
+        [placeholder]="providerPlaceholder()"
+        (ngModelChange)="onProviderChange($event)">
+      </shared-select>
+    </label>
+
+    <label class="form-group form-group--dense">
+      <span class="form-label">{{ eventFieldLabel() }}</span>
+      <shared-select
+        [options]="eventOptions()"
+        [ngModel]="selectedEventId()"
+        [disabled]="loading() || !selectedProviderId()"
+        [placeholder]="eventPlaceholder()"
+        (ngModelChange)="onEventChange($event)">
+      </shared-select>
+    </label>
+  </div>
+
+  @if (definition(); as event) {
+    @if (event.description) {
+      <p class="event-trigger-description">{{ event.description }}</p>
+    }
+
+    @if (visibleParameters().length > 0) {
+      <div class="event-trigger-section">
+        <h5 class="event-trigger-section-label">{{ sectionLabel() }}</h5>
+        @for (param of visibleParameters(); track trackParam($index, param)) {
+          <shared-param-row
+            [blockId]="triggerId"
+            [block]="parameterBlock()"
+            [param]="param"
+            [eventId]="event.id"
+            [eventDefinition]="event" />
+        }
+      </div>
+    }
+
+    @if (!isScheduled()) {
+      <div class="event-trigger-section">
+        <h5 class="event-trigger-section-label">{{ extraConditionLabel() }}</h5>
+        @if (filter(); as expression) {
+          <shared-condition-builder
+            [expression]="expression"
+            [variables]="store.pickerVariables()"
+            [previewScope]="store.previewScope()"
+            [previewScopeRefId]="store.previewScopeRefId()"
+            [comparisonOperators]="store.comparisonOperators()"
+            [leafState]="leafState"
+            [eventDefinition]="event"
+            [eventConfiguration]="configurationValues()"
+            (expressionChange)="onFilterChange($event)">
+          </shared-condition-builder>
+          <button type="button" class="event-trigger-link" (click)="removeFilter()">
+            {{ removeConditionLabel() }}
+          </button>
+        } @else {
+          <button type="button" class="event-trigger-link" (click)="addFilter()">
+            {{ addConditionLabel() }}
+          </button>
+        }
+      </div>
+    }
+  } @else if (!loading()) {
+    <p class="event-trigger-hint">{{ pickEventHint() }}</p>
+  }
+</div>

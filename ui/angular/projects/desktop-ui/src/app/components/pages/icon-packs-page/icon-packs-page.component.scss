@@ -1,0 +1,184 @@
+@use '../../../../styles/index' as ds;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+// Releases shared-rail-page from its own `height: 100%`, which would resolve against this host
+// rather than the Library shell. Works because Angular's content attribute outspecifies the
+// component's `:host`; the developer page overrides it the same way.
+shared-rail-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+}
+
+.pack-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  min-height: 0;
+  @include ds.overlay-scrollbar-clearance;
+}
+
+shared-rail-item {
+  .icon {
+    background-color: var(--color-text-muted);
+  }
+
+  // Drop target affordance while a file drag hovers this pack.
+  &.file-drag-over,
+  &.icon-drop-active {
+    border-radius: var(--radius-md);
+    outline: 2px dashed var(--color-accent);
+    outline-offset: -2px;
+    background: var(--color-accent-muted);
+  }
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px var(--space-1);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-tertiary);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+
+  .icon {
+    background-color: var(--color-text-muted);
+  }
+}
+
+.pack-detail {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.detail-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+
+  h2 {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.detail-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+
+  .search {
+    flex: 1 1 200px;
+    max-width: 320px;
+    min-width: 140px;
+  }
+}
+
+.grid {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.selection-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-muted);
+}
+
+.selection-count {
+  flex: 1 1 auto;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+}
+
+// Drop-zone affordance: visible only while a file drag hovers the detail pane.
+.drop-hint {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 2px dashed var(--color-accent);
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-muted);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  pointer-events: none;
+
+  .icon {
+    background-color: var(--color-accent);
+  }
+}
+
+.pack-detail.file-drag-over .drop-hint,
+.pack-detail.icon-drop-active .drop-hint {
+  display: flex;
+}
+
+.rename-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.rename-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.supported-types {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  max-width: 26rem;
+  text-align: center;
+}

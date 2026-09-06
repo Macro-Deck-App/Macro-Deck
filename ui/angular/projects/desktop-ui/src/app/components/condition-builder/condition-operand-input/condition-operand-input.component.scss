@@ -1,0 +1,9 @@
+/*
+ * No box of its own: the condition builder's `.cb-literal-wrap` flex row sizes whichever control
+ * this renders directly (via the `cb-literal-select` / `cb-literal-input` class each one already
+ * carries, from `condition-builder.component.scss`'s unencapsulated styles) - wrapping that in a
+ * second flex item here would need its own sizing rules just to pass the space through.
+ */
+:host {
+  display: contents;
+}

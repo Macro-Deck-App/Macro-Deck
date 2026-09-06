@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <!-- Microsoft.NET.Sdk plus this framework reference, not Microsoft.NET.Sdk.Web - a plugin is a
+         headless process, the same reasoning MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin gives. -->
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\src\MacroDeck.Plugin.Hosting\MacroDeck.Plugin.Hosting.csproj" />
+        <ProjectReference Include="..\..\..\src\MacroDeck.Plugin.Serilog\MacroDeck.Plugin.Serilog.csproj" />
+        <ProjectReference Include="..\..\..\src\MacroDeck.Localization\MacroDeck.Localization.csproj" />
+        <!-- The MacroDeck.Ui DSL, used to author the config flow and action configuration trees below. -->
+        <ProjectReference Include="..\..\..\..\ui-model\src\MacroDeck.Ui\MacroDeck.Ui.csproj" />
+    </ItemGroup>
+
+    <!-- Dogfoods MacroDeck.Plugin.Analyzers against a plugin that does everything right: an analyzer
+         reference, not an assembly reference (ReferenceOutputAssembly=false), the same shape a published
+         plugin gets from the NuGet package. If a rule fires here, the rule is wrong, not the fixture. -->
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\src\MacroDeck.Plugin.Analyzers\MacroDeck.Plugin.Analyzers.csproj"
+                          OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <!-- manifest.json and Assets\icon.svg both need to land next to the built executable: the SDK reads
+         the manifest from the content root at startup and resolves the icon path against that same root,
+         serving its bytes from disk over the asset pipeline. The conformance suite's artifact subject is
+         built straight out of this output directory. -->
+    <ItemGroup>
+        <Content Include="manifest.json" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="Assets\icon.svg" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <!-- MDP1001 needs manifest.json as an AdditionalFile to see it at all. A real plugin gets this for
+         free from MacroDeck.Plugin.Analyzers' own build/MacroDeck.Plugin.Analyzers.props, auto-imported
+         by NuGet on PackageReference - but the dogfooding reference above is a ProjectReference, which
+         NuGet's build/ convention does not apply to, so this lists it explicitly. -->
+    <ItemGroup>
+        <AdditionalFiles Include="manifest.json" />
+        <!-- Same reason, for the localization generator: a real plugin gets this glob from the package's
+             build props. The scope is not declared anywhere here on purpose - it is derived from the
+             manifest's own id, which is the path a plugin author actually takes. -->
+        <AdditionalFiles Include="Localization\**\*.resx" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- Lets the host-side contract tests reach the internal WeatherRefreshedEventId constant, so a
+             test can name the exact event it asserts fired without the fixture having to make wire-facing
+             implementation detail public just for that. -->
+        <InternalsVisibleTo Include="MacroDeckHost.Tests.PluginContractTests" />
+    </ItemGroup>
+
+</Project>

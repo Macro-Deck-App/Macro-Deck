@@ -1,0 +1,21 @@
+.rkm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.rkm-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background-color: var(--color-warning-muted);
+  color: var(--color-warning);
+  font-size: var(--text-sm);
+}
+
+.rkm-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}

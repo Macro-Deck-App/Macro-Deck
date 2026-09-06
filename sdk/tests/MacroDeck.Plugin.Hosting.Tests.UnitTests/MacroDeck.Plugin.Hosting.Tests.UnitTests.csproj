@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <!-- Underscored test names, like the host test projects. CA1861 is about hoisting constant
+             arrays out of repeated calls, which does not apply to a one-off array literal inside an
+             assertion. -->
+        <NoWarn>$(NoWarn);CA1707;CA1861</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="NUnit.Analyzers" />
+        <PackageReference Include="NUnit3TestAdapter" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\MacroDeck.Plugin.Hosting\MacroDeck.Plugin.Hosting.csproj" />
+        <ProjectReference Include="..\..\src\MacroDeck.Plugin.Testing\MacroDeck.Plugin.Testing.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="NUnit.Framework"/>
+    </ItemGroup>
+
+    <!-- A manifest.json valid enough (id/name/version) for every call site that only needs
+         MacroDeckPlugin.CreatePlugin() to build. A test asserting specific metadata values uses
+         Support/PluginManifestFixture instead, which points a builder at its own temp content root. -->
+    <ItemGroup>
+        <Content Include="manifest.json" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+</Project>

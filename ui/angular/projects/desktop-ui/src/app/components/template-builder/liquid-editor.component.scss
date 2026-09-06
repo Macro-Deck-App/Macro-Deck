@@ -1,0 +1,34 @@
+@use '../../../styles/index' as ds;
+
+:host {
+  display: block;
+  position: relative;
+  height: 100%;
+  min-height: 120px;
+}
+
+.le-textarea,
+.le-cm-host {
+  position: absolute;
+  inset: 0;
+}
+
+.le-hidden {
+  display: none;
+}
+
+.le-textarea {
+  width: 100%;
+  height: 100%;
+  @include ds.control-base;
+  @include ds.control-interactive;
+  font-family: var(--font-mono);
+  line-height: var(--leading-normal);
+  resize: none;
+}
+
+.le-cm-host {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}

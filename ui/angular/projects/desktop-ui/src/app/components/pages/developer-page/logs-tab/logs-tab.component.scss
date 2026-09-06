@@ -1,0 +1,303 @@
+@use '../../../../../styles/index' as ds;
+
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  min-height: 0;
+  @include ds.overlay-scrollbar-clearance;
+}
+
+.rail-section {
+  margin-top: var(--space-3);
+  padding: 0 var(--space-3) var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.log-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.log-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+
+  h2 {
+    margin: 0;
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.log-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+
+  shared-input {
+    width: clamp(7.3125rem, 18vw, 13rem);
+  }
+}
+
+.time-range {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  shared-select {
+    width: clamp(7rem, 12vw, 10rem);
+  }
+}
+
+.time-range-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.level-filters {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.level-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  @include ds.control-size;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  // After the mixin, which sets --text-base: the chips stay deliberately smaller than
+  // the control text while sharing the row's height.
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast),
+    border-color var(--transition-fast);
+
+  &:hover {
+    border-color: var(--color-border-light);
+    color: var(--color-text-secondary);
+  }
+}
+
+// An enabled level chip carries its own severity colour, so the filter row doubles
+// as the legend for the line colours below.
+.level-chip.active {
+  border-color: currentColor;
+
+  &.level-debug {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+  }
+
+  &.level-information {
+    background-color: var(--color-accent-muted);
+    color: var(--color-accent);
+  }
+
+  &.level-warning {
+    background-color: var(--color-warning-muted);
+    color: var(--color-warning);
+  }
+
+  &.level-error,
+  &.level-fatal {
+    background-color: var(--color-danger-muted);
+    color: var(--color-danger);
+  }
+}
+
+.log-lines {
+  flex: 1 1 auto;
+  min-height: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  // Copying an arbitrary stretch of the log by dragging over it has to keep working, whatever the
+  // scroller does with the rows.
+  user-select: text;
+}
+
+.log-status {
+  flex-shrink: 0;
+  margin: 0;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+// One line, always: the row height is what the virtual scroller measures every offset against, so
+// nothing here may wrap.
+.log-line {
+  display: grid;
+  // Every row is its own grid, so a column may only be sized from its own content where that cannot
+  // push the next column out of line: the first three are fixed (the timestamp is always 8 characters
+  // and the level 3, both in a monospace face), and only the message sizes to its content. It also
+  // takes the leftover width as an fr, because an auto track would absorb that leftover differently
+  // in every row and stagger the whole list.
+  grid-template-columns: 8ch 4ch 16ch minmax(max-content, 1fr) auto;
+  // The widest row sets the scrollable width; the rest stretch to match it so hover and selection
+  // still span the full row once scrolled.
+  width: max-content;
+  min-width: 100%;
+  align-items: center;
+  gap: 0 var(--space-2);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: default;
+
+  &:hover {
+    background-color: var(--color-bg-secondary);
+  }
+
+  &.selected {
+    background-color: var(--color-bg-tertiary);
+  }
+
+  &.level-warning {
+    color: var(--color-warning);
+  }
+
+  &.level-error,
+  &.level-fatal {
+    color: var(--color-danger);
+  }
+
+  &.level-debug,
+  &.level-verbose {
+    color: var(--color-text-muted);
+  }
+}
+
+.log-time,
+.log-level,
+.log-origin,
+.log-message {
+  white-space: nowrap;
+}
+
+.log-time {
+  color: var(--color-text-muted);
+}
+
+.log-level {
+  font-weight: var(--font-semibold);
+}
+
+.log-origin {
+  color: var(--color-text-muted);
+  // The origin sits between two aligned columns, so it is the one thing that still has to be cut to
+  // keep the messages lined up. Its full value is on the row's tooltip and in the detail panel.
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.log-has-exception {
+  color: var(--color-danger);
+  font-weight: var(--font-semibold);
+}
+
+.log-detail {
+  flex-shrink: 0;
+  max-height: 40%;
+  overflow: auto;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-secondary);
+  user-select: text;
+}
+
+.log-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+
+  h3 {
+    margin: 0;
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+  }
+}
+
+.log-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.log-detail-fields {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-1) var(--space-3);
+  margin: var(--space-3) 0 0;
+
+  dt {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+  }
+
+  dd {
+    margin: 0;
+    min-width: 0;
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+  }
+}
+
+.log-detail-text {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.log-exception {
+  padding: var(--space-2);
+  border-left: 2px solid var(--color-danger);
+  background-color: var(--color-bg-primary);
+  overflow-x: auto;
+}
+
+// Narrow layouts only tighten the fixed columns; they must not re-flow the row, because a row height
+// that varies with the viewport width is exactly what a fixed itemSize cannot survive.
+@media (max-width: 768px) {
+  .log-line {
+    grid-template-columns: 8ch 4ch 10ch minmax(max-content, 1fr) auto;
+  }
+}

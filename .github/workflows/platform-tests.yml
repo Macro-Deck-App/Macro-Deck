@@ -1,0 +1,112 @@
+name: Platform tests
+
+# Runs the per-platform host test projects on demand, one runner each, for the platforms selected at
+# dispatch. The nightly CI always runs all of them alongside everything else; this exists to iterate on
+# a single platform's fixtures - a Windows-only COM interop failure, say - without waiting on the rest
+# of the pipeline. Only the platform projects run here: the cross-platform and SDK suites belong to CI.
+
+on:
+  workflow_dispatch:
+    inputs:
+      windows:
+        description: Run the Windows platform tests
+        type: boolean
+        default: true
+      linux:
+        description: Run the Linux platform tests
+        type: boolean
+        default: true
+      macos:
+        description: Run the macOS platform tests
+        type: boolean
+        default: true
+      filter:
+        description: Optional expression passed to dotnet test --filter, to run a single fixture or test (for example FullyQualifiedName~TeamsAutomationWindowsTests)
+        type: string
+        required: false
+
+concurrency:
+  group: platform-tests-${{ github.ref }}
+  cancel-in-progress: false
+
+# checks: write lets dorny/test-reporter publish the .NET test results as a check run.
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
+env:
+  DOTNET_VERSION: 10.0.x
+  # Matches CI: the platform fixtures exercise the installed product configuration.
+  BUILD_CHANNEL: Production
+
+jobs:
+  prepare:
+    name: Resolve selected platforms
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    outputs:
+      matrix: ${{ steps.platforms.outputs.matrix }}
+    steps:
+      - name: Resolve selected platforms
+        id: platforms
+        env:
+          RUN_WINDOWS: ${{ inputs.windows }}
+          RUN_LINUX: ${{ inputs.linux }}
+          RUN_MACOS: ${{ inputs.macos }}
+        run: |
+          entries=()
+          [ "$RUN_WINDOWS" = "true" ] && entries+=('{"platform":"Windows","os":"windows-latest","project":"host/tests/MacroDeckHost.Tests.UnitTests.Windows"}')
+          [ "$RUN_LINUX" = "true" ] && entries+=('{"platform":"Linux","os":"ubuntu-latest","project":"host/tests/MacroDeckHost.Tests.UnitTests.Linux"}')
+          [ "$RUN_MACOS" = "true" ] && entries+=('{"platform":"macOS","os":"macos-latest","project":"host/tests/MacroDeckHost.Tests.UnitTests.MacOS"}')
+          if [ ${#entries[@]} -eq 0 ]; then
+            echo "::error::No platform selected - enable at least one of windows/linux/macos."
+            exit 1
+          fi
+          joined=$(IFS=,; echo "${entries[*]}")
+          echo "matrix={\"include\":[${joined}]}" >> "$GITHUB_OUTPUT"
+          echo "Testing platforms: ${joined}"
+
+  test:
+    name: Host tests (${{ matrix.platform }})
+    needs: prepare
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      # bash on every runner (the Windows default is pwsh), and the filter arrives through the
+      # environment rather than an expression interpolated into the script.
+      - name: Test
+        shell: bash
+        env:
+          PROJECT: ${{ matrix.project }}
+          FILTER: ${{ inputs.filter }}
+        run: |
+          args=("$PROJECT" -c Release -p:BuildChannel=${{ env.BUILD_CHANNEL }} --logger trx --results-directory TestResults)
+          if [ -n "$FILTER" ]; then
+            args+=(--filter "$FILTER")
+          fi
+          dotnet test "${args[@]}"
+
+      - name: Report test results
+        uses: dorny/test-reporter@v3
+        if: always()
+        with:
+          name: .NET tests (${{ matrix.platform }})
+          path: TestResults/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+          fail-on-empty: false

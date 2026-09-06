@@ -1,0 +1,132 @@
+@use '../../../styles/index' as ds;
+
+.store-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  height: 100%;
+  @include ds.card($padding: var(--space-3));
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+
+  &:hover {
+    background-color: var(--color-bg-tertiary);
+    border-color: var(--color-border-light);
+  }
+}
+
+.card-top {
+  display: flex;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.card-icon {
+  @include ds.flex-center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-tertiary);
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .icon {
+    color: var(--color-text-muted);
+  }
+}
+
+.card-identity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  flex: 1;
+}
+
+.card-title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  @include ds.truncate;
+}
+
+.card-title-link {
+  color: var(--color-text-primary);
+  text-decoration: none;
+
+  // Stretched-link technique: the whole card becomes the hit area for the title link, while the
+  // visible focus target stays the title text itself - one tab stop for "open detail".
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.card-meta-text,
+.card-meta-separator {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  min-width: 0;
+}
+
+.card-meta-text {
+  @include ds.truncate;
+}
+
+.verified-chip {
+  @include ds.chip;
+  flex-shrink: 0;
+  margin-inline-start: var(--space-1);
+  color: var(--color-success);
+  background-color: var(--color-success-muted);
+
+  .icon {
+    background-color: var(--color-success);
+  }
+}
+
+.card-description {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  // Two lines of body copy: a card the reader can judge, without letting a long description set the
+  // row height for every card beside it.
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-2);
+}
+
+.card-install {
+  // Sits above the stretched title link so it stays its own, separate tab stop and click target.
+  position: relative;
+  z-index: 1;
+}

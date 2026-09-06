@@ -1,0 +1,61 @@
+@use '../../../../styles/index' as ds;
+
+:host {
+  display: inline-block;
+}
+
+.dropdown-trigger {
+  @include ds.control-base;
+  @include ds.control-interactive;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.dropdown-trigger:hover {
+  color: var(--color-text-primary);
+}
+
+// Matches ButtonComponent's primary variant, for a menu that is a page's main action.
+.dropdown-trigger-primary,
+.dropdown-trigger-primary:hover {
+  background-color: var(--color-accent);
+  border-color: transparent;
+  color: var(--color-on-accent);
+  padding: var(--space-2) 1.125rem;
+}
+
+.dropdown-trigger-primary:hover {
+  background-color: var(--color-accent-hover);
+}
+
+// The consumer sets the width on the host; the trigger has to follow it.
+:host(.dm-fill) {
+  display: block;
+}
+
+:host(.dm-fill) .dropdown-trigger {
+  width: 100%;
+}
+
+.trigger-label {
+  font-size: var(--text-md);
+}
+
+/* Utility classes for menu content */
+:host ::ng-deep .menu-section {
+  padding: var(--space-4);
+}
+
+:host ::ng-deep .menu-section + .menu-section {
+  border-top: 1px solid var(--color-border);
+}
+
+:host ::ng-deep .menu-divider {
+  height: 1px;
+  background-color: var(--color-border);
+  margin: 0;
+}

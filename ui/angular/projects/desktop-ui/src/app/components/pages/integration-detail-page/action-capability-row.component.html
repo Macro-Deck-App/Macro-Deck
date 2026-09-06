@@ -1,0 +1,25 @@
+<li class="capability-row" [class.unavailable]="!isReady">
+  <div class="capability-row-main">
+    <span class="capability-row-name">{{ action.name | localizedText }}</span>
+    @if (action.description) {
+      <span class="capability-row-desc">{{ action.description | localizedText }}</span>
+    }
+    @if (action.parameterSummary.length > 0) {
+      <span class="capability-row-params">{{ action.parameterSummary.join(', ') }}</span>
+    }
+  </div>
+  <div class="capability-row-side">
+    <span class="availability-pill" [class]="'availability-' + action.availability">
+      {{ action.availabilityReason }}
+    </span>
+    <shared-button
+      variant="secondary"
+      size="compact"
+      [disabled]="!isReady"
+      [title]="('macrodeck.app:Integrations.Detail.TryItAction' | translate) + ': ' + action.availabilityReason"
+      [ariaLabel]="('macrodeck.app:Integrations.Detail.TryItAction' | translate) + ': ' + action.availabilityReason"
+      (click)="open.emit()">
+      {{ 'macrodeck.app:Integrations.Detail.TryItAction' | translate }}
+    </shared-button>
+  </div>
+</li>

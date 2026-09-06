@@ -1,0 +1,14 @@
+<div class="splash-container" data-tauri-drag-region>
+  <div class="splash-content">
+    <div class="logo-icon"></div>
+
+    <h1 class="title">Macro Deck</h1>
+
+    <div class="status">
+      <div class="spinner"></div>
+      @if (status()) {
+        <p class="status-message">{{ status() }}</p>
+      }
+    </div>
+  </div>
+</div>

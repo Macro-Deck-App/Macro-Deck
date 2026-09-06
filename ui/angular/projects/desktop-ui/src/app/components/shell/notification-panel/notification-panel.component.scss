@@ -1,0 +1,119 @@
+@use '../../../../styles/index' as ds;
+
+// An overlay, not a column: it slides over the navigation sidebar from the same edge and the page
+// underneath never reflows. Sized here rather than on the panel so the host does not stretch the
+// flex row it sits in; pointer-events stay off it so the closed panel's box cannot swallow clicks
+// meant for the sidebar behind it.
+:host {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 20rem;
+  max-width: 100%;
+  z-index: 30;
+  pointer-events: none;
+}
+
+// Parked off-screen while closed rather than unmounted, so both directions are the one transform
+// transition; a mount-time keyframe would only ever animate the way in.
+.np-panel {
+  width: 100%;
+  height: 100%;
+  transform: translateX(-100%);
+  transition: transform var(--transition-slow);
+  pointer-events: auto;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.np-panel-open {
+  transform: translateX(0);
+  box-shadow: var(--shadow-lg);
+}
+
+.np-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-secondary);
+  border-right: 1px solid var(--color-border);
+}
+
+.np-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  padding: var(--space-3) var(--space-3) var(--space-2);
+}
+
+.np-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.np-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.np-header-btn {
+  padding: 0.125rem var(--space-2);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+
+  &:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+}
+
+.np-close {
+  @include ds.flex-center;
+
+  width: var(--control-height-compact);
+  height: var(--control-height-compact);
+  border: none;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+
+  &:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+}
+
+.np-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: var(--space-2);
+}
+
+.np-list {
+  display: flex;
+  flex-direction: column;
+}

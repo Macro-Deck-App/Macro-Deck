@@ -1,0 +1,32 @@
+name: Integration capability request
+description: Request missing functionality for an existing integration
+title: "[Integration] "
+labels: ["feature", "area:integrations", "status:needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this when an integration already exists in Macro Deck. For a completely new integration, use **Integration request**.
+
+  - type: input
+    id: integration
+    attributes:
+      label: Which integration?
+      placeholder: Spotify, OBS Studio, Twitch
+    validations:
+      required: true
+
+  - type: textarea
+    id: capability
+    attributes:
+      label: What is missing?
+      description: Tell us what you would like Macro Deck to be able to do.
+      placeholder: "For example: set the volume, react to scene changes, expose the current track..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else?
+      description: API documentation, examples or related links are welcome, but optional.

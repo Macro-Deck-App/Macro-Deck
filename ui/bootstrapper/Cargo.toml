@@ -1,0 +1,57 @@
+[package]
+name = "macro-deck-bootstrapper"
+version = "3.0.0"
+description = "Macro Deck Bootstrapper - native tray/WebView shell"
+authors = ["Manuel Mayer <info@manuel-mayer.dev>"]
+edition = "2021"
+rust-version = "1.89"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png", "devtools"] }
+tauri-plugin-single-instance = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+# Already pulled in transitively by tauri/tauri-plugin-updater (locked at 1.0.28);
+# declared directly because the updater's version comparator needs semver::Version.
+semver = "1"
+# Same story: tauri already pulls it in (locked at 2.5.8), declared directly
+# because RunEvent::Opened hands macOS file-association opens over as url::Url.
+url = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+percent-encoding = "2"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+tokio = { version = "1", features = ["macros", "sync", "time"] }
+# Posts OS notifications from this bundle so the system attributes them to Macro Deck. Used
+# directly rather than through tauri-plugin-notification, which shows the toast from a detached
+# task and discards the result - the host needs to know whether showing actually worked.
+notify-rust = "4"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+
+# Sends the forced-stop SIGKILL to the host's process group rather than just its pid - see
+# kill_child in src/host.rs.
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+# Same story as semver/url: tauri already pulls it in (locked at 0.61.3), declared directly because
+# the Windows file picker has to be opened through IFileOpenDialog by hand - see
+# src/windows_file_dialog.rs.
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_System_Com",
+    "Win32_System_JobObjects",
+    "Win32_System_Threading",
+    "Win32_UI_Shell",
+    "Win32_UI_Shell_Common",
+] }
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1

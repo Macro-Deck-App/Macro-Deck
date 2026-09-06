@@ -1,0 +1,32 @@
+<button
+  #trigger
+  class="dropdown-trigger"
+  [class.dropdown-trigger-primary]="triggerVariant === 'primary'"
+  [attr.aria-label]="triggerAriaLabel ?? triggerLabel ?? null"
+  [attr.aria-expanded]="isOpen"
+  (click)="toggle($event)">
+  @if (triggerTemplate) {
+    <ng-container *ngTemplateOutlet="triggerTemplate"></ng-container>
+  } @else {
+    <span class="icon {{ triggerIcon }} icon-sm"></span>
+    @if (triggerLabel) {
+      <span class="trigger-label">{{ triggerLabel }}</span>
+    }
+  }
+</button>
+
+<shared-overlay-panel
+  [anchor]="trigger"
+  [isOpen]="isOpen"
+  [align]="align"
+  [minWidth]="minWidth"
+  [maxHeight]="maxHeight"
+  [animateExit]="animateExit"
+  [anchorOffset]="anchorOffset"
+  (dismissed)="close()">
+  <div class="menu-content" (click)="onContentClick($event)">
+    @if (menuContentTemplate) {
+      <ng-container *ngTemplateOutlet="menuContentTemplate"></ng-container>
+    }
+  </div>
+</shared-overlay-panel>

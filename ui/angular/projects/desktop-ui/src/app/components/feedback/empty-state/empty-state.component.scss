@@ -1,0 +1,35 @@
+:host { display: block; }
+
+.es {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-5);
+  text-align: center;
+}
+
+.es-compact {
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-3);
+
+  .es-title { font-size: var(--text-md); }
+  .es-message { font-size: var(--text-sm); }
+}
+
+.es-icon { color: var(--color-text-muted); }
+
+.es-title {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.es-message {
+  margin: 0;
+  font-size: var(--text-md);
+  color: var(--color-text-muted);
+  max-width: 19.5rem;
+}

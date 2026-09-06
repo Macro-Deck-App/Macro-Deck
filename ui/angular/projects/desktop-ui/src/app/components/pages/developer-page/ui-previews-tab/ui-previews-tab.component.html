@@ -1,0 +1,62 @@
+<shared-rail-page [railTitle]="'macrodeck.app:Developer.Previews.Tab' | translate">
+  <ul
+    ngProjectAs="[rail]"
+    class="preview-groups"
+    role="listbox"
+    [attr.aria-label]="'macrodeck.app:Developer.Previews.ListAriaLabel' | translate">
+    @for (group of groups(); track group.key) {
+      <li class="group">
+        <div class="group-header" aria-hidden="true">
+          <span class="group-owner">{{ group.ownerLabel }}</span>
+          <span class="group-view">{{ group.view }}</span>
+          <span class="group-count">
+            {{ 'macrodeck.app:Developer.Previews.ScenarioCount' | translate:{ count: group.previews.length } }}
+          </span>
+        </div>
+        <ul class="scenario-list">
+          @for (preview of group.previews; track preview.id) {
+            <li>
+              <shared-rail-item
+                [label]="preview.scenario"
+                [active]="isSelected(preview.id)"
+                (click)="select(preview.id)" />
+            </li>
+          }
+        </ul>
+      </li>
+    }
+
+    @if (diagnostics().length > 0) {
+      <li class="diagnostics">
+        <p class="diagnostics-heading">{{ 'macrodeck.app:Developer.Previews.SkippedHeading' | translate }}</p>
+        <ul class="diagnostics-list">
+          @for (diagnostic of diagnostics(); track diagnostic.member) {
+            <li>
+              {{ 'macrodeck.app:Developer.Previews.SkippedMessage' | translate:{ member: diagnostic.member, reason: diagnostic.reason } }}
+            </li>
+          }
+        </ul>
+      </li>
+    }
+  </ul>
+
+  @if (loadError()) {
+    <shared-empty-state
+      icon="alert-triangle"
+      [message]="'macrodeck.app:Developer.Previews.LoadFailedMessage' | translate" />
+  } @else if (loading() && previews().length === 0) {
+    <shared-loading-state />
+  } @else if (previews().length === 0) {
+    <shared-empty-state
+      icon="layers"
+      [heading]="'macrodeck.app:Developer.Previews.EmptyHeading' | translate"
+      [message]="'macrodeck.app:Developer.Previews.EmptyMessage' | translate" />
+  } @else if (selectedPreview(); as preview) {
+    <app-preview-canvas [preview]="preview" />
+  } @else {
+    <shared-empty-state
+      icon="layers"
+      [heading]="'macrodeck.app:Developer.Previews.NoSelectionHeading' | translate"
+      [message]="'macrodeck.app:Developer.Previews.NoSelectionMessage' | translate" />
+  }
+</shared-rail-page>

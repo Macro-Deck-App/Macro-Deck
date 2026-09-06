@@ -1,0 +1,191 @@
+@use '../../../../styles/index' as ds;
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.vti-editor {
+  position: relative;
+  width: 100%;
+  // Vertical padding of the size mixin, mirrored as a variable so the multiline height can add it
+  // back: `rows` has to mean *text lines*, and the box is border-box. Must track control-size.
+  --vti-pad-y: 0.3125rem;
+  --vti-height: var(--control-height);
+  @include ds.control-base;
+  @include ds.control-interactive;
+  /*
+   * Opt-in gutter a host sets when it overlays an action on the field (shared-param-input's
+   * inline Liquid trigger). Added on top of control-size's own inset, so the field is unchanged
+   * when no action is present. The block-axis counterpart lives on the multiline variant, which
+   * also has to add it back to min-height.
+   */
+  padding-inline-end: calc(var(--space-3) + var(--input-action-inline-gutter, 0px));
+  cursor: text;
+  // A single-line field mirrors an input: it scrolls sideways instead of growing taller.
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/*
+ * A single-line field scrolls sideways like an input - and like an input it shows no bar for it.
+ * A classic scrollbar is 16px of gutter inside a ~28px control: it reads as a second row and pushes
+ * the control's height up by more than half again. The caret carries the view instead - the one
+ * deliberate exception to the native-scrollbar rule (issue #607).
+ *
+ * It also centers its own text: the box is a floor the content does not reach, and a contenteditable
+ * cannot be flex- or grid-centered without turning the editable text and its chips into layout items.
+ * Growing the line box to fill the content box centers the line inside it instead, and the
+ * out-of-flow placeholder inherits the same leading. The 3px keeps the box a hair under the floor, so
+ * `min-height` stays the binding constraint (see control-size).
+ */
+.vti-editor:not(.vti-multiline) {
+  scrollbar-width: none;
+  line-height: calc(var(--vti-height) - 2 * var(--vti-pad-y) - 3px);
+}
+
+.vti-editor:not(.vti-multiline)::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+ * `rows` counts text lines, like a textarea's own attribute. The box is border-box, so the padding
+ * and borders have to be added on top - binding `rows * line-height` alone left a two-row field
+ * with room for one line.
+ *
+ * The looser line-height lives here rather than on `.vti-editor`: a single-line field takes
+ * control-base's --leading-tight like every other control (as `.vti-editor` it made the field
+ * 2.5px taller than --control-height, so the token never bound), while wrapped text still needs
+ * the roomier leading. The fallback keeps the calc honest where the tokens are absent (a bare
+ * test harness, a consumer without the global sheet).
+ */
+.vti-editor.vti-multiline {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow-x: hidden;
+  overflow-y: auto;
+  line-height: var(--leading-normal, 1.5);
+  padding-bottom: calc(var(--vti-pad-y) + var(--input-action-block-gutter, 0px));
+  min-height: calc(
+    var(--vti-rows, 4) * var(--leading-normal, 1.5) * 1em + 2 * var(--vti-pad-y) + 2px +
+      var(--input-action-block-gutter, 0px)
+  );
+  max-height: 19.5rem;
+}
+
+.vti-editor.vti-invalid {
+  @include ds.control-invalid;
+}
+
+.vti-editor.vti-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+// The placeholder is taken out of flow so the caret still sits at the start of an empty field.
+.vti-editor.vti-empty::before {
+  content: attr(data-placeholder);
+  position: absolute;
+  inset: 0;
+  padding: inherit;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+/*
+ * Chips are built imperatively (the tree under a contenteditable cannot come from the template),
+ * so they carry no encapsulation attribute and a plain scoped selector would never match them.
+ * `:host ::ng-deep` still bounds the rules to this control's own subtree.
+ */
+:host ::ng-deep .vti-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  margin: 0 1px;
+  padding: 0 0.1875rem;
+  border: 1px solid var(--chip-var-border);
+  border-radius: var(--radius-sm);
+  background: var(--chip-var-bg);
+  color: var(--chip-var-fg);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  line-height: 1.35;
+  // Centered in the line box rather than sat on its baseline, which in the tall single-line box
+  // would drop the chip below the text beside it.
+  vertical-align: middle;
+  white-space: nowrap;
+  user-select: none;
+}
+
+:host ::ng-deep .vti-chip-event {
+  border-color: var(--chip-event-border);
+  background: var(--chip-event-bg);
+  color: var(--chip-event-fg);
+}
+
+// A reference no variable answers - still editable, but visibly not resolvable.
+:host ::ng-deep .vti-chip-unknown {
+  border-color: var(--color-danger);
+  background: var(--color-danger-muted);
+  color: var(--color-danger);
+}
+
+:host ::ng-deep .vti-chip-label {
+  max-width: 13rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:host ::ng-deep .vti-chip-remove {
+  width: 10px;
+  height: 10px;
+  opacity: 0.55;
+  cursor: pointer;
+}
+
+:host ::ng-deep .vti-chip-remove:hover {
+  opacity: 1;
+}
+
+/* An integration variable name (and its value) can be very long, so the panel is capped and the
+   rows truncate - otherwise the popup grows past the window and gets pushed off the field. */
+.vti-options {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: min(22.75rem, 80vw);
+}
+
+.vti-option {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: 0.3125rem 0.5rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.vti-option:hover,
+.vti-option-active {
+  background-color: var(--color-bg-hover);
+}
+
+.vti-option-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--font-mono);
+  @include ds.truncate;
+}
+
+.vti-option-meta {
+  flex: 0 1 auto;
+  max-width: 40%;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  @include ds.truncate;
+}

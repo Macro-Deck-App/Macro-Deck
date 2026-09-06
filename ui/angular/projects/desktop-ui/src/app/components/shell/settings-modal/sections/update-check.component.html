@@ -1,0 +1,75 @@
+@if (hasBridge) {
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Update.Heading' | translate"
+    [description]="'macrodeck.app:Settings.Update.Description' | translate">
+    @if (updates.phase() === 'unsupported') {
+      <p class="update__note">{{ 'macrodeck.app:Settings.Update.UnsupportedNote' | translate }}</p>
+    } @else {
+      <shared-settings-row [label]="'macrodeck.app:Settings.Update.SoftwareUpdateLabel' | translate" [description]="statusText()">
+        @if (showDetails()) {
+          <shared-button variant="secondary" (click)="openDetails()">
+            {{ 'macrodeck.app:Settings.Update.ViewDetailsAction' | translate }}
+          </shared-button>
+        }
+        <shared-button
+          variant="secondary"
+          [loading]="updates.phase() === 'checking'"
+          [disabled]="updates.phase() === 'checking'"
+          (click)="check()">
+          {{ checkLabel() }}
+        </shared-button>
+      </shared-settings-row>
+      @if (channelKnown()) {
+        <p class="update__meta">
+          {{ 'macrodeck.app:Settings.Update.ChannelMeta' | translate:{ channel: channelLabel() } }}
+        </p>
+      }
+      @if (partialCheck()) {
+        <p class="update__meta">{{ partialCheck() }}</p>
+      }
+    }
+
+    @if (mode() !== null) {
+      <shared-settings-row [label]="'macrodeck.app:Settings.Update.ModeLabel' | translate" [description]="modeDescription()">
+        <shared-segmented-control
+          [ariaLabel]="'macrodeck.app:Settings.Update.ModeLabel' | translate"
+          [options]="modeOptions()"
+          [value]="mode()"
+          (valueChange)="selectMode($event)" />
+      </shared-settings-row>
+      @if (modeError()) {
+        <p class="update__note">{{ modeError() }}</p>
+      }
+    }
+
+    @if (channelKnown()) {
+      <shared-settings-row [label]="'macrodeck.app:Settings.Update.BetaToggleLabel' | translate" [description]="betaDescription()">
+        <shared-toggle-switch
+          [ariaLabel]="'macrodeck.app:Settings.Update.BetaToggleLabel' | translate"
+          [checked]="betaToggleChecked()"
+          [busy]="channelBusy()"
+          [disabled]="channelBusy()"
+          (changed)="onBetaToggled($event)" />
+      </shared-settings-row>
+      @if (betaEnabled()) {
+        <p class="update__warning">
+          <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+          <span>{{ 'macrodeck.app:Settings.Update.BetaWarning' | translate }}</span>
+        </p>
+      }
+      @if (channelError()) {
+        <p class="update__note">{{ channelError() }}</p>
+      }
+    }
+  </shared-settings-section>
+}
+
+@if (confirming() === 'enable-beta') {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Settings.Update.EnableBetaConfirmHeading' | translate"
+    [message]="'macrodeck.app:Settings.Update.EnableBetaConfirmMessage' | translate"
+    [confirmText]="'macrodeck.app:Settings.Update.EnableBetaConfirmAction' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    (confirm)="confirmBetaOptIn()"
+    (cancel)="cancelBetaOptIn()" />
+}

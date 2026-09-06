@@ -1,0 +1,84 @@
+
+:host {
+  position: absolute;
+  z-index: 10;
+}
+
+.widget {
+  width: 100%;
+  height: 100%;
+  // Radius scales with the cell size (--widget-scale set by the grid container), so corners
+  // keep the same visual proportion as the transform-scaled widget content.
+  border-radius: calc(var(--widget-radius, 22px) * var(--widget-scale, 1));
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  cursor: default;
+  position: relative;
+  transition: transform var(--transition-press-out);
+}
+
+/* Press feedback scales the whole widget - wrapper, border overlay and shadow included.
+   The widget types only tint their surface; a scale inside would leave the border ring
+   and the shadow at full size while the face shrinks. */
+.widget.pressed {
+  transform: scale(0.95);
+  transition: transform var(--transition-press-in);
+}
+
+/* Laid out at the reference cell size and scaled to the real size, so widget content shrinks
+   and grows like a pre-rendered image instead of reflowing per pixel size. The transform already
+   carries the deck scale, so reset --widget-scale to 1 for everything inside: descendants that
+   multiply a reference size by --widget-scale (widget-type corner radii, the border-overlay ring
+   width) must not scale a second time, or their radius renders at radius * scale^2 and the content
+   corners no longer meet the wrapper's clip (see the sibling border-overlay, which stays real-px). */
+.widget-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+  --widget-scale: 1;
+}
+
+/* Dimmed by a decorating host - today, the source of a pending cut (move). */
+.widget.is-cut {
+  opacity: 0.45;
+}
+
+/* Deck input focus (issue #727): the cursor a wheel or D-pad moves around a device target's deck.
+   Two-tone on purpose - a single accent ring disappears on an accent-coloured action button, which
+   is most of them. */
+.widget.is-focused::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 2px var(--color-on-accent),
+    inset 0 0 0 5px var(--color-accent);
+  pointer-events: none;
+  z-index: 30;
+}
+
+ /* Hidden by a decorating host because its visuals are being carried elsewhere, e.g. by a ghost. */
+.widget.drag-source {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .widget.just-dropped {
+    animation: widget-land 250ms ease-out;
+  }
+}
+
+@keyframes widget-land {
+  0% {
+    transform: scale(1.03);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  }
+}
+

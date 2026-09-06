@@ -1,0 +1,52 @@
+/* Macro Deck brand palette, mapped onto Starlight's theme tokens.
+ *
+ * The values come from the Angular UI's design tokens in
+ * ui/angular/projects/desktop-ui/src/styles/_themes.scss and _colors.scss, so
+ * the documentation reads as the same product as the app. Keep them in step:
+ * --color-accent (#2196f3) is the app's default accent, and the grays are the
+ * app's background/border/text ramp.
+ *
+ * Starlight inverts the meaning of --sl-color-white/black between themes: in
+ * dark mode white is the brightest text and black the page background, and in
+ * light mode the two swap. The ramps below follow that convention.
+ */
+
+:root {
+	/* Dark theme - the app's default. */
+	--sl-color-accent-low: #10305a;
+	--sl-color-accent: #2196f3;
+	/* Lifted off the raw accent so link text keeps its contrast on #121212. */
+	--sl-color-accent-high: #9ecffa;
+
+	--sl-color-white: #ffffff;
+	--sl-color-gray-1: #ececec;
+	--sl-color-gray-2: #a0a0a0;
+	--sl-color-gray-3: #757575;
+	--sl-color-gray-4: #404040;
+	--sl-color-gray-5: #2a2a2a;
+	--sl-color-gray-6: #1a1a1a;
+	--sl-color-black: #121212;
+}
+
+:root[data-theme='light'] {
+	--sl-color-accent-low: #d3e9fd;
+	/* The app's --color-accent-hover: the plain accent is too light on white. */
+	--sl-color-accent: #1565c0;
+	--sl-color-accent-high: #0d3c75;
+
+	--sl-color-white: #121212;
+	--sl-color-gray-1: #1c1c1c;
+	--sl-color-gray-2: #3b3b3b;
+	--sl-color-gray-3: #666666;
+	--sl-color-gray-4: #999999;
+	--sl-color-gray-5: #d0d0d0;
+	--sl-color-gray-6: #ebebeb;
+	--sl-color-gray-7: #f5f5f5;
+	--sl-color-black: #ffffff;
+}
+
+/* The logo is a rounded app icon, so it needs no extra chrome, just room to
+ * breathe next to the wordmark. */
+.site-title img {
+	border-radius: 6px;
+}

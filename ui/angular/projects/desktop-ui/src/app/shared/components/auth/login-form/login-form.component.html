@@ -1,0 +1,39 @@
+<form class="login-card" (ngSubmit)="submit()">
+  <div class="login-header">
+    <img class="login-logo" src="images/logo.png" alt="" aria-hidden="true">
+    <h1 class="login-title">Macro Deck</h1>
+    <p class="login-subtitle">{{ 'macrodeck.app:Auth.SignInSubtitle' | translate }}</p>
+  </div>
+
+  @if (error(); as message) {
+    <shared-error-banner [message]="message" (dismiss)="error.set(null)"></shared-error-banner>
+  }
+
+  <label class="login-field">
+    <span class="login-label">{{ 'macrodeck.app:Auth.Username' | translate }}</span>
+    <shared-input
+      name="username"
+      [placeholder]="'macrodeck.app:Auth.Username' | translate"
+      [autofocus]="true"
+      [disabled]="submitting()"
+      [ngModel]="username()"
+      (ngModelChange)="username.set($event)">
+    </shared-input>
+  </label>
+
+  <label class="login-field">
+    <span class="login-label">{{ 'macrodeck.app:Auth.Password' | translate }}</span>
+    <shared-input
+      name="password"
+      type="password"
+      [placeholder]="'macrodeck.app:Auth.Password' | translate"
+      [disabled]="submitting()"
+      [ngModel]="password()"
+      (ngModelChange)="password.set($event)">
+    </shared-input>
+  </label>
+
+  <shared-button type="submit" variant="primary" [disabled]="!canSubmit()" [loading]="submitting()">
+    {{ 'macrodeck.app:Auth.SignIn' | translate }}
+  </shared-button>
+</form>

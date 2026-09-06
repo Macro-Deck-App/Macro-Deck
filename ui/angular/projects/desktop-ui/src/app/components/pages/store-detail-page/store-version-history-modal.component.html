@@ -1,0 +1,17 @@
+<shared-modal [heading]="'macrodeck.app:Store.Page.VersionHistoryAction' | translate" size="medium" [showFooter]="false" (close)="onClose()">
+  <div class="history-list">
+    @for (entry of history(); track entry.version) {
+      <div class="history-entry">
+        <div class="history-entry-header">
+          <span class="history-entry-version">{{ 'macrodeck.app:Store.Page.VersionLabel' | translate:{ version: entry.version } }}</span>
+          @if (entry.releasedAt) {
+            <span class="history-entry-date">{{ entry.releasedAt | date: 'mediumDate' }}</span>
+          }
+        </div>
+        @if (entry.changelog) {
+          <shared-store-markdown [text]="entry.changelog" />
+        }
+      </div>
+    }
+  </div>
+</shared-modal>

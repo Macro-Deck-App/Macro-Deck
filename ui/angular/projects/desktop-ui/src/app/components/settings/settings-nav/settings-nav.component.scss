@@ -1,0 +1,120 @@
+.settings-nav {
+  // Icon column of every item: as wide as the collapsed rail's content box, so an icon sits centred
+  // while collapsed and on that same x while expanded. Nothing inside an item then moves during the
+  // width transition. The host overrides this to match its own collapsed width.
+  --settings-nav-icon-column: 2.5rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.settings-nav__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+
+  & + & {
+    margin-top: var(--space-3);
+  }
+}
+
+// An unlabelled group after another one (the About entry) is set apart by a rule rather than a
+// heading, so it reads as outside the configuration groups without adding a category of its own.
+.settings-nav__group--divided {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+// Collapses to no height rather than being switched off, so the rail's width transition is not
+// interrupted by rows vanishing. The negative margin then cancels the group's own gap, leaving the
+// icons evenly spaced once the heading is gone.
+.settings-nav__group-label {
+  height: var(--text-xs);
+  margin: 0;
+  padding: 0 var(--space-3);
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: height var(--transition-slow), margin-bottom var(--transition-slow),
+    opacity var(--transition-slow);
+}
+
+.settings-nav__item {
+  display: grid;
+  grid-template-columns: var(--settings-nav-icon-column) minmax(0, 1fr);
+  align-items: center;
+  width: 100%;
+  padding: var(--space-2) 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+
+  &:hover {
+    background-color: var(--color-bg-hover);
+    color: var(--color-text-primary);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  &.active {
+    background-color: var(--color-accent-muted);
+    color: var(--color-accent);
+  }
+}
+
+.settings-nav__icon {
+  justify-self: center;
+}
+
+// Fades and slides out on the same curve as the rail's width, so the row never reflows: the label
+// column simply runs out of width and its content is clipped.
+.settings-nav__label {
+  min-width: 0;
+  padding-inline-end: var(--space-3);
+  overflow: hidden;
+  font-size: var(--text-md);
+  font-weight: var(--font-medium);
+  white-space: nowrap;
+  transition: opacity var(--transition-slow), transform var(--transition-slow);
+}
+
+// Collapsed to an icon column: with the headings gone, every group is separated by a rule instead -
+// otherwise the boundaries the headings used to draw would vanish with them.
+.settings-nav--collapsed {
+  .settings-nav__group-label {
+    height: 0;
+    margin-bottom: calc(-1 * var(--space-1));
+    opacity: 0;
+  }
+
+  .settings-nav__label {
+    opacity: 0;
+    transform: translateX(-0.25rem);
+  }
+
+  .settings-nav__group + .settings-nav__group {
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-nav__group-label,
+  .settings-nav__label {
+    transition: none;
+  }
+}

@@ -1,0 +1,52 @@
+<div class="ni-row">
+  <span class="ni-severity {{ severityClass }}">
+    <span class="icon {{ severityIcon }} icon-sm"></span>
+  </span>
+
+  <div class="ni-body">
+    <span class="ni-title">{{ notification.title }}</span>
+    @if (notification.message) {
+      <span class="ni-message">{{ notification.message }}</span>
+    }
+    @if (notification.progress) {
+      <div
+        class="ni-progress-bar"
+        [class.indeterminate]="progressPercent === null"
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        [attr.aria-valuenow]="progressPercent">
+        @if (progressPercent !== null) {
+          <div class="ni-progress-fill" [style.width.%]="progressPercent"></div>
+        }
+      </div>
+      <span class="ni-progress-label">{{ progressLabel }}</span>
+    }
+
+    <span class="ni-time">{{ relativeTime }}</span>
+
+    <div class="ni-actions">
+      @for (item of actionList; track item.kind) {
+        <button type="button" class="ni-action" (click)="onAction($event, item)">
+          {{ labelFor(item) }}
+        </button>
+      }
+      @if (notification.cancelKey) {
+        <button type="button" class="ni-action ni-cancel-action" (click)="onCancel($event)">
+          {{ commonStrings.Common.Cancel | translate }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Running work has no dismiss: it goes away by finishing. Cancel above is how you stop it. -->
+  @if (!notification.progress) {
+    <button
+      type="button"
+      class="ni-dismiss"
+      [attr.aria-label]="appStrings.Shell.Notifications.Dismiss | translate"
+      (click)="onDismiss($event)">
+      <span class="icon icon-x icon-xs"></span>
+    </button>
+  }
+</div>

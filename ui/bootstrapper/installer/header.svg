@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Source for header.bmp, the strip NSIS draws across the top of every installer
+  page after the welcome page. 150x57 px is the size MUI2 reserves for it; the
+  bitmap is stretched if it differs, so the canvas here must stay 150x57.
+
+  The background is white because MUI2 fills the rest of the header strip with
+  the system window colour and the two have to meet without a visible seam.
+
+  APP_ICON_DATA_URI is substituted with the app icon by
+  ci/scripts/generate-brand-assets.sh; that script also writes the .bmp.
+-->
+<svg width="150" height="57" viewBox="0 0 150 57" xmlns="http://www.w3.org/2000/svg">
+  <rect width="150" height="57" fill="#ffffff"/>
+  <image x="9" y="8.5" width="40" height="40" href="APP_ICON_DATA_URI"/>
+  <text x="58" y="27" font-family="Segoe UI, -apple-system, 'Helvetica Neue', Arial, sans-serif"
+        font-size="14" font-weight="600" fill="#1c1c22">Macro Deck</text>
+  <text x="58" y="41" font-family="Segoe UI, -apple-system, 'Helvetica Neue', Arial, sans-serif"
+        font-size="9" font-weight="400" fill="#6b6b76">macro-deck.app</text>
+</svg>

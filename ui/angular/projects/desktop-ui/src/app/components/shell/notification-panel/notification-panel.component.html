@@ -1,0 +1,44 @@
+<aside
+  class="np-panel"
+  [class.np-panel-open]="isOpen()"
+  [attr.inert]="isOpen() ? null : ''"
+  role="complementary"
+  [attr.aria-label]="appStrings.Nav.Notifications | translate">
+  <div class="np-inner">
+    <header class="np-header">
+      <span class="np-title">{{ appStrings.Nav.Notifications | translate }}</span>
+      <div class="np-header-actions">
+        @if (notificationCenter.hasDismissable()) {
+          <button type="button" class="np-header-btn" (click)="onClearAll()">{{ appStrings.Shell.Notifications.ClearAll | translate }}</button>
+        }
+        <button
+          type="button"
+          class="np-close"
+          [attr.aria-label]="appStrings.Shell.Notifications.Close | translate"
+          (click)="closed.emit()">
+          <span class="icon icon-x icon-sm"></span>
+        </button>
+      </div>
+    </header>
+
+    <div class="np-body">
+      @if (notifications().length === 0) {
+        <shared-empty-state
+          compact
+          icon="bell"
+          [heading]="appStrings.Shell.Notifications.EmptyHeading | translate"
+          [message]="appStrings.Shell.Notifications.EmptyMessage | translate" />
+      } @else {
+        <div class="np-list">
+          @for (notification of notifications(); track notification.id) {
+            <app-notification-item
+              [notification]="notification"
+              (action)="onAction($event)"
+              (dismissed)="onDismiss($event)"
+              (cancel)="onCancel($event)" />
+          }
+        </div>
+      }
+    </div>
+  </div>
+</aside>

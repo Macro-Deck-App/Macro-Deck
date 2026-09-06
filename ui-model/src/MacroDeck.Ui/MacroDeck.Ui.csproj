@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<IsPackable>true</IsPackable>
+		<IsMacroDeckPackage>true</IsMacroDeckPackage>
+		<PackageId>MacroDeck.Ui</PackageId>
+		<Description>The declarative Macro Deck UI DSL and reactive runtime: a view compiles to a tree, subsequent changes compile to patches, plus the configuration primitive vocabulary.</Description>
+		<PackageTags>macrodeck;ui;dsl</PackageTags>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\MacroDeck.Ui.Model\MacroDeck.Ui.Model.csproj" />
+		<ProjectReference Include="..\..\..\sdk\src\MacroDeck.Localization\MacroDeck.Localization.csproj" />
+	</ItemGroup>
+
+</Project>

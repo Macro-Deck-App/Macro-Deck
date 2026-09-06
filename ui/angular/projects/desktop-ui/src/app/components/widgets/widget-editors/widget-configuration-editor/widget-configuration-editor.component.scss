@@ -1,0 +1,34 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+.widget-config-properties,
+.widget-config-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.widget-config-editor {
+  height: 100%;
+  overflow-y: auto;
+}
+
+// No editor region: everything - preview, properties - renders in one scrollable pane rather than
+// the shell's fixed-sidebar split, which would otherwise leave the main pane empty.
+.widget-config-single-pane {
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.widget-config-rejected {
+  padding: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}

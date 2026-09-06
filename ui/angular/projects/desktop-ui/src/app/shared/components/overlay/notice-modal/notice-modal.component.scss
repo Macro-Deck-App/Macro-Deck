@@ -1,0 +1,21 @@
+.notice-message {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+/* Checkbox left, action right - and stacked on narrow viewports so neither is squeezed. */
+.notice-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.notice-suppress {
+  flex: 1 1 9.75rem;
+  min-width: 0;
+}

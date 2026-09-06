@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<IsPackable>true</IsPackable>
+		<IsMacroDeckPackage>true</IsMacroDeckPackage>
+		<PackageId>MacroDeck.Plugin.Protocol</PackageId>
+		<Description>Wire contracts for the Macro Deck plugin protocol: envelope, handshake, capability payloads, limits, versioning and error codes.</Description>
+		<PackageTags>macrodeck;plugin;protocol;websocket</PackageTags>
+		<!-- See MacroDeck.Sdk.csproj: the documentation backfill is tracked separately. -->
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\sdk\src\MacroDeck.Sdk\MacroDeck.Sdk.csproj" />
+	</ItemGroup>
+
+</Project>

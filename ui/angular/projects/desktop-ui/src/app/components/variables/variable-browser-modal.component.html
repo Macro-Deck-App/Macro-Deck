@@ -1,0 +1,83 @@
+<shared-modal
+  [heading]="headingLabel()"
+  size="large"
+  [showFooter]="false"
+  [zIndex]="zIndex"
+  (close)="onClose()">
+  <div class="vb-layout">
+    <aside class="vb-rail">
+      <ul class="vb-source-list" role="listbox" [attr.aria-label]="'macrodeck.app:Variables.Browser.SourcesAriaLabel' | translate">
+        @if (!catalogOnlyState()) {
+          <li>
+            <shared-rail-item
+              [label]="'macrodeck.app:Variables.Browser.AllVariables' | translate"
+              [count]="totalCount()"
+              [active]="isSelected('all')"
+              (click)="selectAll()" />
+          </li>
+          <li>
+            <shared-rail-item
+              [label]="'macrodeck.app:Variables.Browser.User' | translate"
+              [count]="userCount()"
+              [active]="isSelected('user')"
+              (click)="selectUser()" />
+          </li>
+          @if (eventCount() > 0) {
+            <li>
+              <shared-rail-item
+                [label]="'macrodeck.app:Variables.Browser.ThisEvent' | translate"
+                [count]="eventCount()"
+                [active]="isSelected('event')"
+                (click)="selectEvent()" />
+            </li>
+          }
+          @if (showScopeSource()) {
+            <li>
+              <shared-rail-item
+                [label]="scopeLabelState()"
+                [count]="scopeCount()"
+                [active]="isSelected('scope')"
+                (click)="selectScope()" />
+            </li>
+          }
+        }
+
+        @if (integrationSources().length > 0) {
+          <li class="vb-rail-section" aria-hidden="true">{{ 'macrodeck.app:Variables.Browser.Integrations' | translate }}</li>
+          @for (integration of integrationSources(); track integration.integrationId) {
+            <li>
+              <shared-rail-item
+                [label]="integration.name"
+                [count]="integration.count"
+                [active]="isIntegrationSelected(integration.integrationId)"
+                (click)="selectIntegration(integration.integrationId)" />
+            </li>
+          }
+        }
+      </ul>
+    </aside>
+
+    <div class="vb-main">
+      <shared-variables-manager
+        [mode]="modeState()"
+        [variables]="effectiveVariables()"
+        [source]="source()"
+        [scopeRefId]="scopeRefIdValue()"
+        [scopeLabel]="scopeLabelState()"
+        [heading]="managerTitle()"
+        [acceptedTypes]="acceptedTypeList()"
+        [writableOnly]="writableOnlyState()"
+        (pick)="onPick($event)"
+        (catalogBindRequested)="onCatalogBindRequested($event)" />
+    </div>
+  </div>
+
+  @if (bindDialogNode(); as node) {
+    <shared-variable-bind-dialog
+      [integrationId]="bindDialogIntegrationId() ?? ''"
+      [node]="node"
+      [acceptedTypes]="acceptedTypeList()"
+      (bound)="onCatalogBound($event)"
+      (close)="closeCatalogBindDialog()" />
+  }
+</shared-modal>

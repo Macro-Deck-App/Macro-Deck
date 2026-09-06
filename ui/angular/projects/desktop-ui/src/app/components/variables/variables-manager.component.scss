@@ -1,0 +1,331 @@
+@use '../../../styles/index' as ds;
+
+.vars-manager {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  gap: var(--space-4);
+  width: 100%;
+  min-height: 0;
+}
+
+.vars-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.vars-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+}
+
+.vars-subtitle {
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+}
+
+.vars-search {
+  display: block;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.vars-error {
+  display: block;
+}
+
+.vars-empty {
+  padding: var(--space-8) var(--space-4);
+}
+
+// A cdk-virtual-scroll-viewport, virtualized: positions its content by translating the wrapper and
+// stacking rows at a fixed `itemSize` (ROW_HEIGHT, see the .ts), so a per-row flex `gap` here would
+// drift every row's actual offset away from where the viewport assumes it is (~6px per row, ~300px
+// off by row 50). The equivalent spacing instead lives inside each row's fixed-height slot below.
+.vars-list {
+  list-style: none;
+  flex: 1 1 auto;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+  @include ds.overlay-scrollbar-clearance;
+}
+
+.vars-row-slot {
+  padding-bottom: var(--space-2);
+  box-sizing: border-box;
+}
+
+// A header occupies a full ROW_HEIGHT slot like every other virtualized row - that height is bound
+// to the viewport's itemSize and must not vary per row kind. Filling the slot and sitting at its
+// bottom edge spends the surplus above the label, where it reads as separation from the previous
+// group, instead of below it, where it looked like the heading had come loose from its own rows.
+.vars-group-header {
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0 var(--space-1) var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.vars-row {
+  @include ds.card($padding: 0.5rem 0.6875rem);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.vars-row.read-only {
+  opacity: 0.85;
+}
+
+.vars-row-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, max-content) auto;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.vars-row-pick {
+  grid-template-columns: minmax(0, 1fr) minmax(0, max-content);
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.vars-row:has(.vars-row-pick):hover {
+  border-color: var(--color-accent);
+}
+
+.vars-name-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+  min-width: 0;
+}
+
+.vars-public-name {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: var(--text-md);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vars-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.3125rem;
+  font-size: var(--text-xs);
+}
+
+.vars-type-badge,
+.vars-classification {
+  @include ds.badge;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: inherit;
+}
+
+.vars-type-badge {
+  background-color: var(--type-string-bg);
+  color: var(--type-string-fg);
+}
+.vars-type-badge.type-numeric { background-color: var(--type-numeric-bg); color: var(--type-numeric-fg); }
+.vars-type-badge.type-boolean { background-color: var(--type-boolean-bg); color: var(--type-boolean-fg); }
+.vars-type-badge.type-resource { background-color: var(--type-resource-bg); color: var(--type-resource-fg); }
+
+.vars-classification {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+}
+.vars-classification.class-system { background-color: var(--type-system-bg); color: var(--type-system-fg); }
+.vars-classification.class-integration {
+  background-color: var(--type-integration-bg);
+  color: var(--type-integration-fg);
+}
+.vars-classification.class-widget {
+  background-color: var(--type-widget-bg);
+  color: var(--type-widget-fg);
+}
+
+.read-only-icon {
+  color: var(--color-text-muted);
+}
+
+.vars-value-col {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: var(--text-md);
+  color: var(--color-text-primary);
+  justify-self: end;
+  text-align: right;
+  min-width: 0;
+  /* Clamps the max-content contribution of the value track so a long value can't starve the name column. */
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vars-value {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.vars-unavailable {
+  display: inline-block;
+  padding: 0.0625rem 0.3125rem;
+  border-radius: 0.1875rem;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-warning);
+  background-color: var(--color-warning-muted);
+  border: 1px solid var(--color-warning);
+}
+
+.vars-actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.vars-actions ::ng-deep .dropdown-trigger {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+}
+
+.vars-actions ::ng-deep .dropdown-trigger:hover {
+  background: transparent;
+  border: none;
+}
+
+.vars-dots-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-compact);
+  height: var(--control-height-compact);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.vars-dots-btn:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.vars-dots-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.vars-menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.vars-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.vars-menu-item:hover {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.vars-menu-danger:hover {
+  background-color: var(--color-danger-muted);
+  color: var(--color-danger);
+}
+
+.vars-input {
+  width: 100%;
+}
+
+/* Modal form */
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6875rem;
+}
+
+.form-preview {
+  font-size: var(--text-base);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  color: var(--color-text-secondary);
+  margin-top: 0.1875rem;
+}
+.form-preview .invalid {
+  color: var(--color-danger);
+}
+.form-preview .hint {
+  color: var(--color-text-muted);
+}
+
+.form-actions {
+  margin-top: var(--space-2);
+}
+
+// Catalog entries share the variable rows' chrome deliberately: they are the same integration's
+// variables, listed in the same run, one lot simply has no value until it is bound.
+// Only a button reset: the row keeps `.vars-row-main`'s grid, so a catalog entry lines its name and
+// its badge up with a materialized variable's name and value rather than sitting in its own layout.
+.vars-catalog-main {
+  width: 100%;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+// Where a materialized variable shows its value. Muted rather than coloured like a type badge:
+// it says what the row still lacks, not what it holds.
+.vars-dynamic-badge {
+  @include ds.badge;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: inherit;
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+.vars-catalog-more .vars-public-name {
+  color: var(--color-accent);
+}

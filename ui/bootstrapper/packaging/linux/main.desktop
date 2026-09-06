@@ -1,0 +1,23 @@
+[Desktop Entry]
+Categories={{categories}}
+{{#if comment}}
+Comment={{comment}}
+{{/if}}
+# %F on Exec is what makes the file associations below actually work. The bundler's own template
+# emits a bare Exec, and a desktop entry with no field code is launched with NO arguments - so a
+# double-clicked .macroDeckProfile would open Macro Deck without the file. Harmless when no
+# associations are configured: the launcher simply has no files to substitute. Never put it on
+# StartupWMClass, which has to stay the plain binary name for window matching.
+Exec={{exec}} %F
+StartupWMClass={{exec}}
+Icon={{icon}}
+Name={{name}}
+Terminal=false
+Type=Application
+{{#if mime_type}}
+MimeType={{mime_type}}
+{{/if}}
+Keywords=macro;deck;streamdeck;automation;remote;control;
+Keywords[de]=macro;deck;streamdeck;automatisierung;fernsteuerung;steuerung;
+GenericName=Control surface
+GenericName[de]=Steuerpult

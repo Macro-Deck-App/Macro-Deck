@@ -1,0 +1,150 @@
+{
+  "cases": [
+    {
+      "basis": 240,
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "nodes": {
+        "conformance": {
+          "contentWidth": 211.2,
+          "contentHeight": 211.2,
+          "padding": 14.4,
+          "gap": 4.8
+        },
+        "conformance.head": {
+          "width": 211.2,
+          "height": 100.8
+        },
+        "conformance.head.icon": {
+          "size": 48.0
+        },
+        "conformance.head.temp": {
+          "fontSize": 40.8,
+          "role": "primary"
+        },
+        "conformance.rows": {
+          "width": 211.2,
+          "height": 50.4
+        },
+        "conformance.rows.2026-07-20": {
+          "width": 211.2,
+          "height": 25.2
+        },
+        "conformance.rows.2026-07-20.day": {
+          "mainSize": 23.94,
+          "fontSize": 12.6,
+          "mainSizeOverFontSize": 1.9,
+          "role": "muted"
+        },
+        "conformance.rows.2026-07-20.icon": {
+          "size": 20.16
+        },
+        "conformance.rows.2026-07-20.bar": {
+          "width": 157.5,
+          "thickness": 7.2,
+          "fillStart": 0.2,
+          "fillEnd": 0.6,
+          "marker": 0.4
+        },
+        "conformance.rows.2026-07-21.bar": {
+          "width": 157.5,
+          "thickness": 7.2,
+          "fillStart": 0.9,
+          "fillEnd": 1.0,
+          "marker": null
+        },
+        "conformance.state": {
+          "width": 211.2,
+          "height": 50.4
+        },
+        "conformance.state.title": {
+          "fontSize": 21.6,
+          "minFontSize": 12.0,
+          "role": "secondary"
+        },
+        "conformance.state.future": {
+          "renders": "fallback"
+        },
+        "conformance.state.future.fallback": {
+          "fontSize": 14.4,
+          "role": "muted"
+        }
+      }
+    },
+    {
+      "basis": 120,
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "nodes": {
+        "conformance": {
+          "contentWidth": 105.6,
+          "contentHeight": 105.6,
+          "padding": 7.2,
+          "gap": 2.4
+        },
+        "conformance.head": {
+          "width": 105.6,
+          "height": 50.4
+        },
+        "conformance.head.icon": {
+          "size": 24.0
+        },
+        "conformance.head.temp": {
+          "fontSize": 20.4,
+          "role": "primary"
+        },
+        "conformance.rows": {
+          "width": 105.6,
+          "height": 25.2
+        },
+        "conformance.rows.2026-07-20": {
+          "width": 105.6,
+          "height": 12.6
+        },
+        "conformance.rows.2026-07-20.day": {
+          "mainSize": 11.97,
+          "fontSize": 6.3,
+          "mainSizeOverFontSize": 1.9,
+          "role": "muted"
+        },
+        "conformance.rows.2026-07-20.icon": {
+          "size": 10.08
+        },
+        "conformance.rows.2026-07-20.bar": {
+          "width": 78.75,
+          "thickness": 3.6,
+          "fillStart": 0.2,
+          "fillEnd": 0.6,
+          "marker": 0.4
+        },
+        "conformance.rows.2026-07-21.bar": {
+          "width": 78.75,
+          "thickness": 3.6,
+          "fillStart": 0.9,
+          "fillEnd": 1.0,
+          "marker": null
+        },
+        "conformance.state": {
+          "width": 105.6,
+          "height": 25.2
+        },
+        "conformance.state.title": {
+          "fontSize": 10.8,
+          "minFontSize": 6.0,
+          "role": "secondary"
+        },
+        "conformance.state.future": {
+          "renders": "fallback"
+        },
+        "conformance.state.future.fallback": {
+          "fontSize": 7.2,
+          "role": "muted"
+        }
+      }
+    }
+  ]
+}

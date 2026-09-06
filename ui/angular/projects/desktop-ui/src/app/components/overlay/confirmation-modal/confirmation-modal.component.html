@@ -1,0 +1,19 @@
+<!-- A third answer needs a wider dialog: at the default width the three buttons wrap and the decision
+     reads as two unrelated rows. The cap is generous rather than measured, because the labels are
+     translated - German runs about a third longer than the English this was first sized for - and it
+     stays bounded by the viewport either way. -->
+<shared-modal [heading]="heading" [showFooter]="true"
+              [maxWidth]="altText ? 'min(92vw, 46rem)' : '450px'" (close)="onCancel()">
+  <p class="confirmation-message">{{ message }}</p>
+  <!-- Optional extra body content (e.g. per-choice checkboxes) a caller projects in; empty for every
+       plain yes/no confirmation, which is why this renders nothing by default. -->
+  <ng-content></ng-content>
+
+  <div modal-footer>
+    <shared-button variant="secondary" (click)="onCancel()">{{ cancelText }}</shared-button>
+    <shared-button [variant]="danger ? 'danger' : 'primary'" (click)="onConfirm()">{{ confirmText }}</shared-button>
+    @if (altText) {
+      <shared-button variant="primary" (click)="onAlt()">{{ altText }}</shared-button>
+    }
+  </div>
+</shared-modal>

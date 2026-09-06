@@ -1,0 +1,202 @@
+:host {
+  --fab-slide-duration: 260ms;
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.editor-header {
+  // Equal side tracks are what actually centre the mode switch: `margin: auto` on a flex child
+  // would instead centre it within whatever space the title happened to leave over.
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.editor-header-start {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  // Grid items default to a content-based minimum width, which would keep this track from ever
+  // shrinking below the title's full text - defeating its ellipsis.
+  min-width: 0;
+}
+
+.editor-mode-switch {
+  justify-self: center;
+}
+
+.editor-cursor-position {
+  justify-self: end;
+}
+
+.editor-title {
+  flex: 1 1 0;
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editor-body {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.editor-content {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+}
+
+/*
+ * The visual and (once entered) JSON panes are stacked on top of each other rather than switched
+ * with `@if`/`display: none`. The visual editor in particular must never be destroyed - see the
+ * template comment by `#editorHost` - and CodeMirror is only ever created once, on first entry into
+ * JSON mode, so both panes stay mounted for as long as this page is.
+ */
+.editor-pane {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.editor-pane > * {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+/*
+ * `visibility` (not `display: none`) so the inactive pane stays measured: `widget-editor-shell` and
+ * `action-builder` both run `ResizeObserver`s, and a zero-size `contentRect` would latch the shell
+ * into its compact layout, force-open its drawer and steal focus. `visibility` also drops the hidden
+ * pane out of the tab order and accessibility tree for free.
+ */
+.editor-pane--hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.editor-host {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.editor-host > * {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+// Same reasoning as `.editor-pane--hidden`: the editor keeps its box while it builds itself so its
+// `ResizeObserver` sees the real width, and the overlay below is what the user actually sees.
+.editor-host--hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.editor-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// The extra `.editor-pane` qualifier outweighs `.editor-pane > *` above regardless of source order,
+// so this does not depend on staying declared after it.
+.editor-pane > .json-pane-error {
+  flex: 0 0 auto;
+  margin: 0 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-danger-muted);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+}
+
+/* Home-Assistant-style floating save action, bottom right. */
+.editor-save-fab {
+  position: absolute;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+  transform: translateY(0);
+  /* `visibility` at 0s here so showing takes effect at once; the hidden rule delays it instead. */
+  transition:
+    transform var(--fab-slide-duration) cubic-bezier(0.32, 0.72, 0, 1),
+    visibility 0s;
+}
+
+/*
+ * There is nothing to save until something is edited, so the button waits below the bottom edge -
+ * translated by its own height plus its offset, so neither it nor its shadow peeks in. It leaves by
+ * travelling rather than by fading: a fade short enough to feel responsive is over well before the
+ * slide is, and then the movement the fade was decorating is no longer visible.
+ *
+ * The button stays rendered, which is what lets it slide both ways. `visibility` is what keeps a parked
+ * button out of the tab order, and it flips only once the slide-out has played.
+ */
+.editor-save-fab--hidden {
+  transform: translateY(calc(100% + 1.25rem));
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    transform var(--fab-slide-duration) cubic-bezier(0.32, 0.72, 0, 1),
+    visibility 0s linear var(--fab-slide-duration);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    --fab-slide-duration: 0s;
+  }
+
+  .editor-save-fab,
+  .editor-save-fab--hidden {
+    transition-duration: 0s, 0s;
+  }
+}
+
+.editor-save-fab .icon {
+  background-color: currentColor;
+}
+
+.editor-not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: 3.25rem var(--space-4);
+  color: var(--color-text-secondary);
+}
+
+.editor-load-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: 3.25rem var(--space-4);
+  text-align: center;
+  color: var(--color-text-secondary);
+
+  .icon {
+    color: var(--color-warning);
+  }
+
+  p {
+    max-width: 26rem;
+  }
+}

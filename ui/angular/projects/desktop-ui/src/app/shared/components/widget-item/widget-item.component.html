@@ -1,0 +1,24 @@
+<div
+  class="widget"
+  [class.drag-source]="renderState.hidden"
+  [class.just-dropped]="renderState.landing"
+  [class.is-cut]="renderState.dimmed"
+  [class.pressed]="isPressed"
+  [class.is-focused]="focused"
+  (click)="onWidgetClick()">
+
+  <div
+    class="widget-content"
+    [style.width.px]="contentWidth"
+    [style.height.px]="contentHeight"
+    [style.--wq]="contentQueryBasis"
+    [style.transform]="contentTransform">
+    <ng-container #widgetHost></ng-container>
+  </div>
+
+  <shared-widget-border-overlay [border]="widgetBorder" />
+
+  @if (decoration) {
+    <ng-container [ngTemplateOutlet]="decoration" [ngTemplateOutletContext]="{ $implicit: widget }" />
+  }
+</div>

@@ -1,0 +1,65 @@
+@if (developerMode.enabled()) {
+  <shared-rail-page [railTitle]="'macrodeck.app:Developer.PluginDevelopmentTab' | translate">
+    <ul
+      ngProjectAs="[rail]"
+      class="source-list"
+      role="listbox"
+      [attr.aria-label]="'macrodeck.app:Developer.PluginDevelopment.SectionsAriaLabel' | translate">
+      <li>
+        <shared-rail-item
+          [label]="'macrodeck.app:Developer.ManagedPlugins.Title' | translate"
+          [count]="managedPluginsCount()"
+          [active]="isSectionActive('managed-plugins')"
+          (click)="selectSection('managed-plugins')" />
+      </li>
+      <li>
+        <shared-rail-item
+          [label]="'macrodeck.app:Developer.Tokens.PairedTitle' | translate"
+          [count]="pairedPluginsCount()"
+          [active]="isSectionActive('paired-plugins')"
+          (click)="selectSection('paired-plugins')" />
+      </li>
+      <li>
+        <shared-rail-item
+          [label]="'macrodeck.app:Developer.PluginDevelopment.CredentialsSection' | translate"
+          [count]="credentialsCount()"
+          [active]="isSectionActive('credentials')"
+          (click)="selectSection('credentials')" />
+      </li>
+      <li>
+        <shared-rail-item
+          [label]="'macrodeck.app:Developer.PluginDevelopment.SessionsSection' | translate"
+          [count]="sessionsCount()"
+          [active]="isSectionActive('sessions')"
+          (click)="selectSection('sessions')" />
+      </li>
+      <li>
+        <shared-rail-item
+          [label]="'macrodeck.app:Developer.PluginDevelopment.CompatibilitySection' | translate"
+          [count]="compatibilityCount()"
+          [active]="isSectionActive('compatibility')"
+          (click)="selectSection('compatibility')" />
+      </li>
+    </ul>
+
+    @switch (activeSection()) {
+      @case ('managed-plugins') {
+        <app-managed-plugins-section />
+      }
+      @case ('paired-plugins') {
+        <app-paired-plugins-section />
+      }
+      @case ('credentials') {
+        <app-credentials-section />
+      }
+      @case ('sessions') {
+        <app-sessions-section />
+      }
+      @case ('compatibility') {
+        <app-compatibility-section />
+      }
+    }
+  </shared-rail-page>
+} @else {
+  <app-developer-mode-gate />
+}

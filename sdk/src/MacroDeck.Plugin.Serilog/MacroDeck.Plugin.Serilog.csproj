@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <IsMacroDeckPackage>true</IsMacroDeckPackage>
+        <PackageId>MacroDeck.Plugin.Serilog</PackageId>
+        <Description>Serilog sink for Macro Deck plugins. Forwards a plugin's own logs to the host over log.publish, so plugin authors write normal Serilog code and the entries show up in the host's log viewer.</Description>
+        <PackageTags>macrodeck;plugin;serilog;logging</PackageTags>
+    </PropertyGroup>
+
+    <!-- Same rationale as MacroDeck.Plugin.Hosting's own csproj: the framework reference supplies
+         IHostedService, IOptions and dependency injection without pulling in Microsoft.NET.Sdk.Web's
+         app-shaped defaults. -->
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\protocol\src\MacroDeck.Plugin.Protocol\MacroDeck.Plugin.Protocol.csproj" />
+        <ProjectReference Include="..\MacroDeck.Plugin.Hosting\MacroDeck.Plugin.Hosting.csproj" />
+    </ItemGroup>
+
+    <!-- Versions come from Directory.Packages.props; both are already pinned there for the rest of the
+         solution. -->
+    <ItemGroup>
+        <PackageReference Include="Serilog" />
+        <PackageReference Include="Serilog.Extensions.Hosting" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="MacroDeck.Plugin.Serilog.Tests.UnitTests" />
+        <!-- LoggingContractTests drives the real MacroDeckLogSink (and the DTO projection it feeds)
+             against the real host ingestor over the in-memory link - see that project's remarks. -->
+        <InternalsVisibleTo Include="MacroDeckHost.Tests.PluginContractTests" />
+    </ItemGroup>
+
+</Project>

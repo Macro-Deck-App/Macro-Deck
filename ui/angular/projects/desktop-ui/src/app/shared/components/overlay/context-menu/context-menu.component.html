@@ -1,0 +1,67 @@
+<shared-overlay-panel
+  [x]="x"
+  [y]="y"
+  [isOpen]="isOpen"
+  [minWidth]="minWidth"
+  [maxHeight]="null"
+  (dismissed)="onOuterDismissed()">
+  @if (menuContentTemplate) {
+    <ng-container *ngTemplateOutlet="menuContentTemplate"></ng-container>
+  } @else {
+    @for (item of items; track item.id) {
+      <button
+        type="button"
+        class="menu-item"
+        [class.danger]="item.danger"
+        [class.disabled]="item.disabled"
+        [disabled]="item.disabled"
+        [attr.aria-haspopup]="item.children?.length ? 'menu' : null"
+        [attr.aria-expanded]="item.children?.length ? (openChildId() === item.id) : null"
+        (click)="onItemClick(item, $event)"
+        (mouseenter)="onItemMouseEnter(item, $event)"
+        (keydown)="onItemKeyDown(item, $event)">
+        @if (item.icon) {
+          <span class="icon {{ item.icon }} icon-sm"></span>
+        }
+        <span class="label">{{ item.label }}</span>
+        @if (item.children?.length) {
+          <span class="icon icon-chevron-right icon-xs chevron"></span>
+        }
+      </button>
+
+      @if (item.dividerAfter) {
+        <div class="divider"></div>
+      }
+    }
+
+    @if (openChildId()) {
+      <shared-overlay-panel
+        class="submenu"
+        [anchor]="openChildAnchorEl"
+        placement="right-start"
+        [isOpen]="true"
+        [minWidth]="minWidth"
+        [maxHeight]="null"
+        (dismissed)="onFlyoutDismissed()">
+        @for (child of openChildItems; track child.id) {
+          <button
+            type="button"
+            class="menu-item"
+            role="menuitemradio"
+            [class.disabled]="child.disabled"
+            [attr.aria-checked]="!!child.active"
+            [disabled]="child.disabled"
+            (click)="onChildClick(child)">
+            @if (child.icon) {
+              <span class="icon {{ child.icon }} icon-sm"></span>
+            }
+            <span class="label">{{ child.label }}</span>
+            @if (child.active) {
+              <span class="icon icon-check icon-xs active-check"></span>
+            }
+          </button>
+        }
+      </shared-overlay-panel>
+    }
+  }
+</shared-overlay-panel>

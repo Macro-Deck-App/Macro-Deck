@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <IsMacroDeckPackage>true</IsMacroDeckPackage>
+        <PackageId>MacroDeck.Localization</PackageId>
+        <Description>Renderer-independent localization for Macro Deck: localization keys, deferred localized values, the shared fallback chain, and the reusable Macro Deck string catalog plugins build on.</Description>
+        <PackageTags>macrodeck;plugin;integration;localization;i18n</PackageTags>
+        <!-- The default .resx pipeline does two things this package must not do: ResXFileCodeGenerator
+             emits string-returning members instead of the deferred LocalizedString the whole design rests
+             on, and a culture-suffixed .resx becomes a satellite assembly, putting the catalog outside the
+             single assembly a plugin host loads and unloads as one unit. The source generator reads these
+             files through AdditionalFiles and emits both the typed API and the catalog data instead. -->
+        <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <AdditionalFiles Include="Resources\**\*.resx" />
+    </ItemGroup>
+
+    <!-- This package's own catalog goes through the same generator plugin authors get, so the reusable
+         Macro Deck strings and a plugin's own are produced by one code path rather than two. A
+         ProjectReference in the analyzer slot, not a PackageReference: the package is built from this
+         repo. ReferenceOutputAssembly=false because a generator is a build-time tool, never a runtime
+         dependency. -->
+    <ItemGroup>
+        <ProjectReference Include="..\MacroDeck.Plugin.Analyzers\MacroDeck.Plugin.Analyzers.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <!-- A generator only sees MSBuild properties that are declared compiler-visible. The same three are
+         declared in build/MacroDeck.Plugin.Analyzers.props for package consumers. -->
+    <PropertyGroup>
+        <MacroDeckLocalizationScope>macrodeck</MacroDeckLocalizationScope>
+        <MacroDeckLocalizationClassName>MacroDeckStrings</MacroDeckLocalizationClassName>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <CompilerVisibleProperty Include="MacroDeckLocalizationScope" />
+        <CompilerVisibleProperty Include="MacroDeckLocalizationClassName" />
+        <CompilerVisibleProperty Include="RootNamespace" />
+    </ItemGroup>
+
+    <!-- The compiler core stays internal: it is build tooling, and anything public here would become a
+         plugin-facing compatibility commitment. The CLI drives the TypeScript emitter and the drift test
+         regenerates from the same code path. -->
+    <ItemGroup>
+        <InternalsVisibleTo Include="MacroDeck.Localization.Tests.UnitTests" />
+        <InternalsVisibleTo Include="MacroDeck.Plugin.Cli" />
+    </ItemGroup>
+
+</Project>

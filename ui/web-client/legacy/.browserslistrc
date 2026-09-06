@@ -1,0 +1,13 @@
+# Browser targets for the web client's LEGACY (ES5) build only.
+# This file is read exclusively by legacy/build-legacy.mjs and fed to @babel/preset-env and
+# autoprefixer. It lives here rather than at the package root so it can never influence the modern
+# esbuild build, which targets browsers that run the module bundle.
+# The floor itself is issue #824's and is kept identical to ../../runtime/.browserslistrc.
+# 4.4 rather than 4.0: the Android 4.0-4.3 stock browser has no WebSocket, and the deck talks to
+# the host over one, so it could never connect there whatever the bundle and the stylesheet did
+# (issue #829).
+ios >= 9
+safari >= 9
+android >= 4.4
+chrome >= 30
+firefox >= 30

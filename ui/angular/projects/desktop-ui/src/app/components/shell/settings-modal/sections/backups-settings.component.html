@@ -1,0 +1,84 @@
+@if (operation(); as op) {
+  <shared-modal
+    [heading]="(operationFailed() ? 'macrodeck.app:Settings.Backups.FailedHeading' : 'macrodeck.app:Settings.Backups.WorkingHeading') | translate"
+    [showFooter]="operationFailed()"
+    [closeOnOverlay]="operationFailed()"
+    maxWidth="420px"
+    (close)="dismissOperation()">
+    <shared-backup-progress-card [operation]="op" />
+    <div modal-footer>
+      <shared-button variant="secondary" (clicked)="dismissOperation()">{{ 'macrodeck:Common.Close' | translate }}</shared-button>
+    </div>
+  </shared-modal>
+}
+
+<div class="bks">
+  <shared-settings-section
+    [heading]="'macrodeck:Settings.Backups' | translate"
+    [description]="'macrodeck.app:Settings.Backups.Description' | translate">
+    <shared-button
+      settingsSectionAction
+      variant="primary"
+      size="compact"
+      [disabled]="!canMutate()"
+      [loading]="creating()"
+      (click)="createBackup()">
+      <span class="icon icon-folder-plus icon-sm" aria-hidden="true"></span>
+      {{ 'macrodeck.app:Settings.Backups.CreateButton' | translate }}
+    </shared-button>
+
+    <app-backup-list
+      (previewRequested)="onPreview($event)"
+      (restoreRequested)="onRestoreRequested($event)"
+      (deleteRequested)="onDeleteRequested($event)" />
+  </shared-settings-section>
+
+  <app-backup-schedule-settings />
+  <app-backup-recovery-key-settings />
+</div>
+
+@if (modal(); as m) {
+  @switch (m.kind) {
+    @case ('preview') {
+      <shared-backup-preview-modal [backup]="m.backup" (closed)="closeModal()" />
+    }
+    @case ('deleteConfirm') {
+      <shared-confirmation-modal
+        [heading]="'macrodeck.app:Settings.Backups.DeleteConfirmHeading' | translate"
+        [message]="'macrodeck.app:Settings.Backups.DeleteConfirmMessage' | translate: { name: m.backup.name }"
+        [confirmText]="'macrodeck:Common.Delete' | translate"
+        [cancelText]="'macrodeck:Common.Cancel' | translate"
+        [danger]="true"
+        (confirm)="confirmDelete()"
+        (cancel)="closeModal()" />
+    }
+    @case ('recoveryKeyPrompt') {
+      <shared-recovery-key-prompt-modal
+        [heading]="'macrodeck.app:Backup.RecoveryKeyPrompt.Title' | translate"
+        [description]="'macrodeck.app:Backup.RecoveryKeyPrompt.Description' | translate"
+        [confirmLabel]="'macrodeck:Common.Continue' | translate"
+        [invalidMessage]="'macrodeck.app:Backup.RecoveryKeyPrompt.Error' | translate"
+        [invalid]="m.invalid"
+        (submitted)="onRecoveryKeySubmitted($event)"
+        (cancelled)="closeModal()" />
+    }
+    @case ('restorePick') {
+      <shared-backup-restore-modal
+        [backupName]="m.backup.name"
+        [catalog]="m.catalog"
+        [componentsInfo]="m.components"
+        (confirmed)="onRestorePicked($event)"
+        (cancelled)="closeModal()" />
+    }
+    @case ('restoreConfirm') {
+      <shared-confirmation-modal
+        [heading]="'macrodeck.app:Settings.Backups.RestoreConfirmHeading' | translate"
+        [message]="'macrodeck.app:Settings.Backups.RestoreConfirmMessage' | translate"
+        [confirmText]="'macrodeck.app:Settings.Backups.RestoreConfirmButton' | translate"
+        [cancelText]="'macrodeck:Common.Cancel' | translate"
+        [danger]="true"
+        (confirm)="confirmRestore()"
+        (cancel)="closeModal()" />
+    }
+  }
+}

@@ -1,0 +1,66 @@
+@switch (session.step()) {
+  @case ('source') {
+    <shared-modal
+      [heading]="'macrodeck.app:Migration.Wizard.Heading' | translate"
+      size="small"
+      (close)="close()">
+      <div class="migration-wizard-source">
+        @if (session.error(); as message) {
+          <shared-error-banner [message]="message" (dismiss)="session.dismissError()" />
+        } @else {
+          <p class="migration-wizard-loading">{{ 'macrodeck:Common.Loading' | translate }}</p>
+        }
+      </div>
+      <div modal-footer>
+        <shared-button variant="secondary" (click)="close()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+      </div>
+    </shared-modal>
+  }
+
+  @case ('credentialChoice') {
+    <shared-confirmation-modal
+      [heading]="'macrodeck.app:Migration.CredentialChoice.Heading' | translate"
+      [message]="credentialChoiceMessage()"
+      [confirmText]="'macrodeck.app:Migration.CredentialChoice.SkipButton' | translate"
+      [cancelText]="'macrodeck:Common.Cancel' | translate"
+      [altText]="'macrodeck.app:Migration.CredentialChoice.EnterKeyButton' | translate"
+      (confirm)="session.chooseSkip()"
+      (cancel)="close()"
+      (alt)="session.enterKey()">
+    </shared-confirmation-modal>
+  }
+
+  @case ('keyPrompt') {
+    <shared-recovery-key-prompt-modal
+      [heading]="'macrodeck.app:Migration.KeyPrompt.Heading' | translate"
+      [description]="keyPromptDescription()"
+      [confirmLabel]="'macrodeck:Common.Continue' | translate"
+      [placeholder]="'macrodeck.app:Migration.KeyPrompt.Placeholder' | translate"
+      [invalidMessage]="'macrodeck.app:Migration.KeyPrompt.InvalidMessage' | translate"
+      [invalid]="session.keyInvalid()"
+      [submitting]="session.submitting()"
+      [closeOnSubmit]="false"
+      (submitted)="session.submitKey($event)"
+      (cancelled)="session.backToCredentialChoice()">
+    </shared-recovery-key-prompt-modal>
+  }
+
+  @case ('preview') {
+    @if (session.summary(); as summary) {
+      <app-migration-preview-modal
+        [summary]="summary"
+        [bannerMessage]="session.error()"
+        [submitting]="session.submitting()"
+        (confirmed)="session.confirmImport()"
+        (cancelled)="close()"
+        (bannerDismissed)="session.dismissError()">
+      </app-migration-preview-modal>
+    }
+  }
+
+  @case ('result') {
+    @if (session.result(); as result) {
+      <app-migration-result-modal [result]="result" (done)="close()"></app-migration-result-modal>
+    }
+  }
+}

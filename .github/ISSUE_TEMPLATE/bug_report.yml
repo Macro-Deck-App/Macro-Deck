@@ -1,0 +1,51 @@
+name: Bug report
+description: Report something that is not working in Macro Deck
+title: "[Bug] "
+labels: ["bug", "status:needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This tracker is for Macro Deck itself and built-in integrations. Problems with third-party plugins belong in the plugin's repository.
+
+        For setup help or general support, please use the [Discord community](https://discord.macro-deck.app).
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Before you start
+      options:
+        - label: This is a Macro Deck or built-in integration issue, not only a third-party plugin issue
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Tell us what went wrong and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can we reproduce it?
+      description: A short list of steps is enough. Leave this empty if you are not sure.
+
+  - type: input
+    id: version
+    attributes:
+      label: Macro Deck version
+      placeholder: 3.0.0-beta.4
+
+  - type: input
+    id: operating-system
+    attributes:
+      label: Operating system
+      placeholder: Windows 11, macOS 26, Ubuntu 24.04
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else?
+      description: Screenshots, recordings or logs are welcome, but optional.

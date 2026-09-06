@@ -1,0 +1,79 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.target-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  align-self: flex-start;
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--color-bg-hover);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
+.chip-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.6875rem;
+  height: 0.6875rem;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0.125rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+
+.target-chip:hover .chip-clear,
+.chip-clear:focus-visible {
+  opacity: 1;
+}
+
+.chip-clear:hover {
+  color: var(--color-text-primary);
+}
+
+.target-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+
+  shared-combobox {
+    flex: 1 1 6.5rem;
+    min-width: 0;
+  }
+}
+
+.target-self {
+  flex: 0 0 auto;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-accent);
+  }
+}
+
+.target-error {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+}

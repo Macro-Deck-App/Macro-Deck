@@ -1,0 +1,25 @@
+/*
+ * shared-button-group styles
+ *
+ * Host-only: the group is the flex row itself, so a consumer can keep its own
+ * class on the element for padding / borders / how the row sits in its parent.
+ * That class must not re-declare display, align-items, gap or flex-wrap - it
+ * ties with :host(...) on specificity and the winner becomes stylesheet-order
+ * dependent.
+ */
+
+:host {
+  display: flex;
+  align-items: center;
+}
+
+:host(.sbg-align-start)   { justify-content: flex-start; }
+:host(.sbg-align-center)  { justify-content: center; }
+:host(.sbg-align-end)     { justify-content: flex-end; }
+:host(.sbg-align-between) { justify-content: space-between; }
+
+:host(.sbg-gap-xs) { gap: var(--space-1); }
+:host(.sbg-gap-sm) { gap: var(--space-2); }
+:host(.sbg-gap-md) { gap: var(--space-3); }
+
+:host(.sbg-wrap) { flex-wrap: wrap; }

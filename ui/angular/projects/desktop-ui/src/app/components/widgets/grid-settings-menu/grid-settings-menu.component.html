@@ -1,0 +1,36 @@
+<shared-dropdown-menu
+  [triggerAriaLabel]="'macrodeck.app:Widgets.Grid.SettingsTitle' | translate"
+  triggerIcon="icon-dots-vertical"
+  position="bottom-right"
+  [minWidth]="256">
+
+  <ng-template #menuContent>
+    <shared-grid-settings
+      [cols]="cols"
+      [rows]="rows"
+      [background]="background"
+      [minCols]="minCols"
+      [maxCols]="maxCols"
+      [minRows]="minRows"
+      [maxRows]="maxRows"
+      [colsLocked]="colsLocked"
+      [rowsLocked]="rowsLocked"
+      [lockNote]="lockNote"
+      [spacingHonoured]="spacingHonoured"
+      [cornerRadiusHonoured]="cornerRadiusHonoured"
+      [noEffectNote]="noEffectNote"
+      [effectiveCols]="effectiveCols"
+      [effectiveRows]="effectiveRows"
+      [showWidgetAppearance]="showWidgetAppearance"
+      [spacing]="spacing"
+      [borderRadius]="borderRadius"
+      [effectiveSpacing]="effectiveSpacing"
+      [effectiveBorderRadius]="effectiveBorderRadius"
+      (colsChange)="colsChange.emit($event)"
+      (rowsChange)="rowsChange.emit($event)"
+      (backgroundChange)="backgroundChange.emit($event)"
+      (spacingChange)="spacingChange.emit($event)"
+      (borderRadiusChange)="borderRadiusChange.emit($event)">
+    </shared-grid-settings>
+  </ng-template>
+</shared-dropdown-menu>

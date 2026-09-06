@@ -1,0 +1,20 @@
+<div class="form-group form-group--section">
+  <label>
+    <span>{{ label() }}</span>
+    <span class="setting-value-cell">
+      <span class="setting-value" [class.setting-value-muted]="isInherited()">{{ valueText() }}</span>
+      @if (resettable()) {
+        <button
+          type="button"
+          class="setting-reset"
+          [disabled]="isInherited()"
+          [title]="effectiveResetLabel()"
+          [attr.aria-label]="effectiveResetLabel()"
+          (click)="onReset()">
+          <span class="icon icon-undo icon-xs"></span>
+        </button>
+      }
+    </span>
+  </label>
+  <ng-content />
+</div>

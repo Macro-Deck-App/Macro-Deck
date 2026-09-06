@@ -1,0 +1,80 @@
+@use '../../../../styles/index' as ds;
+
+:host {
+  display: contents;
+}
+
+.fb-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  height: 100%;
+  min-height: 14.625rem;
+  box-sizing: border-box;
+}
+
+.fb-path {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.fb-up-icon {
+  width: 0.8125rem;
+  height: 0.8125rem;
+  display: block;
+}
+
+.fb-path-text {
+  @include ds.truncate;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.fb-error {
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+}
+
+.fb-list {
+  flex: 1 1 0;
+  overflow-y: auto;
+  min-height: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-1);
+}
+
+.fb-entry {
+  @include ds.interactive-row;
+  gap: var(--space-2);
+  padding: 0.25rem var(--space-2);
+  background: none;
+  border: none;
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  text-align: left;
+}
+
+.fb-selected {
+  background-color: var(--color-bg-hover);
+}
+
+.fb-entry-name {
+  @include ds.truncate;
+}
+
+.fb-empty {
+  padding: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.fb-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}

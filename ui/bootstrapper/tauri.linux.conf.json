@@ -1,0 +1,56 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "bundle": {
+    "resources": {
+      "host-publish/": "host/"
+    },
+    "linux": {
+      "appimage": {
+        "bundleMediaFramework": false
+      },
+      "deb": {
+        "section": "utils",
+        "priority": "optional",
+        "desktopTemplate": "packaging/linux/main.desktop",
+        "files": {
+          "/usr/share/metainfo/app.macro-deck.macrodeck.metainfo.xml": "packaging/linux/app.macro-deck.macrodeck.metainfo.xml",
+          "/usr/share/mime/packages/app.macro-deck.macrodeck.mime.xml": "packaging/linux/app.macro-deck.macrodeck.mime.xml"
+        },
+        "depends": [
+          "libc6 (>= 2.35)",
+          "libgtk-3-0 | libgtk-3-0t64",
+          "libwebkit2gtk-4.1-0",
+          "libayatana-appindicator3-1",
+          "libxdo3",
+          "libstdc++6",
+          "zlib1g",
+          "libssl3 | libssl3t64 | libssl1.1",
+          "libicu76 | libicu74 | libicu72 | libicu71 | libicu70",
+          "shared-mime-info",
+          "desktop-file-utils"
+        ]
+      },
+      "rpm": {
+        "release": "1",
+        "epoch": 0,
+        "desktopTemplate": "packaging/linux/main.desktop",
+        "files": {
+          "/usr/share/metainfo/app.macro-deck.macrodeck.metainfo.xml": "packaging/linux/app.macro-deck.macrodeck.metainfo.xml",
+          "/usr/share/mime/packages/app.macro-deck.macrodeck.mime.xml": "packaging/linux/app.macro-deck.macrodeck.mime.xml"
+        },
+        "depends": [
+          "gtk3",
+          "webkit2gtk4.1",
+          "libappindicator-gtk3",
+          "libxdo",
+          "libstdc++",
+          "zlib",
+          "openssl-libs",
+          "libicu",
+          "shared-mime-info",
+          "desktop-file-utils"
+        ]
+      }
+    }
+  }
+}

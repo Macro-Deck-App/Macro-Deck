@@ -1,0 +1,325 @@
+@use '../../../styles/index' as ds;
+
+.config-chrome-flow,
+.config-chrome-step,
+.config-chrome-stack,
+.config-chrome-tabs,
+.config-chrome-tab,
+.config-chrome-widget-configuration,
+.config-chrome-widget-properties,
+.config-chrome-widget-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.config-chrome-stack-row {
+  flex-direction: row;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+// A stack whose `wrap` property is explicitly `false` (issue #837): its row keeps every child on one
+// line - a weighted child then shares that line's width in proportion via the inline `flex` style
+// `childFlex()` gives it, rather than wrapping onto a line of its own once the row runs out of room.
+.config-chrome-stack-row.config-chrome-stack-nowrap {
+  flex-wrap: nowrap;
+
+  // A flex item's default minimum width is its own content's, which would keep a weighted child from
+  // ever shrinking below that - defeating the very proportion `childFlex()` asked for once the row is
+  // narrower than the sum of everyone's content width.
+  > shared-ui-node {
+    min-width: 0;
+  }
+}
+
+.config-chrome-title {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.config-chrome-heading {
+  margin: 0;
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+/*
+ * A heading directly inside a widget's property region is a section marker, not a page heading - the
+ * widget editor has always drawn them as small uppercase labels above each group. Scoped to the region
+ * rather than applied to every `heading`, because a config flow's step headings are ordinary headings
+ * and would read as shouting.
+ *
+ * `:host-context` rather than a descendant selector: the region and the heading are rendered by two
+ * different component instances, so an ordinary selector across them is cut by style encapsulation.
+ */
+:host-context(.config-chrome-widget-properties) .config-chrome-heading {
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.config-chrome-description,
+.config-chrome-prose {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+// A prose paragraph carrying a severity (issue #837): a status line - "Currently <state>" - rather than
+// an explanatory paragraph, so it gets a small leading accent dot instead of `UiBanner`'s boxed treatment.
+.config-chrome-prose[data-severity] {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  &::before {
+    content: '';
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--color-text-muted);
+  }
+
+  &[data-severity='success']::before { background: var(--color-success); }
+  &[data-severity='warning']::before { background: var(--color-warning); }
+  &[data-severity='error']::before { background: var(--color-danger); }
+}
+
+.config-chrome-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 0;
+}
+
+.config-chrome-instructions {
+  margin: 0;
+  padding-left: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.config-chrome-instruction {
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+
+.config-chrome-link {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.config-chrome-advanced {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.config-chrome-banner {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+
+  &[data-severity='warning'] {
+    background: color-mix(in srgb, var(--color-warning) 12%, transparent);
+    color: var(--color-warning);
+  }
+  &[data-severity='error'] {
+    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+    color: var(--color-danger);
+  }
+  &[data-severity='success'] {
+    background: color-mix(in srgb, var(--color-success) 12%, transparent);
+    color: var(--color-success);
+  }
+  &:not([data-severity]),
+  &[data-severity='info'] {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+  }
+}
+
+.config-chrome-busy {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.config-chrome-spinner {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  animation: config-chrome-spin 0.8s linear infinite;
+}
+
+@keyframes config-chrome-spin {
+  to { transform: rotate(360deg); }
+}
+
+.config-node-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3125rem;
+}
+
+.config-node-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  font-weight: var(--font-medium);
+}
+
+/* A plain boolean is one row - caption left, switch right - the shape a widget's toggle list has
+   always had; only the caption above a control would push each toggle onto two lines. */
+.config-node-field.is-toggle {
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: 0.3125rem 0.0625rem;
+}
+
+.config-node-field.is-toggle > .config-node-label {
+  font-size: var(--text-md);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-normal);
+}
+
+.config-node-field.is-toggle > .config-node-control {
+  flex: 0 0 auto;
+}
+
+.config-node-field.is-toggle > .config-node-description,
+.config-node-field.is-toggle > .config-node-error {
+  flex: 1 0 100%;
+}
+
+.config-node-required {
+  color: var(--color-danger);
+  margin-left: 0.125rem;
+}
+
+.config-node-description {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.config-node-error {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+}
+
+.config-node-field.is-invalid .config-node-label {
+  color: var(--color-danger);
+}
+
+.config-node-unsupported {
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+// The config profile's own placeholder, which shares its class name with the widget renderer's.
+// The renderer's rules are global now and dim theirs to 0.35; this one already says what it wants
+// its background to be, so the inherited opacity would only fade it twice.
+.widget-node-unsupported {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-width: 24px;
+  min-height: 24px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-bg-tertiary) 50%, transparent);
+  opacity: 1;
+}
+
+.config-node-slider-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.config-node-slider {
+  flex: 1 1 auto;
+}
+
+.config-node-array {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.config-node-array-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+
+/*
+ * A repeated item inside a widget's properties is not a card. Elsewhere - an action's array parameter -
+ * the box is what separates one item from the next, but a widget shows one item at a time and the box
+ * would draw a frame around the whole appearance form, which the editor this replaces never had.
+ */
+:host-context(.config-chrome-widget-properties) .config-node-array-item {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+/* A `cards` choice: each option as its own tile with a sentence under its name, the presentation the
+   Music Player's cover-style picker had before it became a config tree. */
+.config-choice-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.config-choice-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+  padding: 0.5rem var(--space-3);
+  text-align: left;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.config-choice-card:hover:not(:disabled) {
+  border-color: var(--color-border-light);
+}
+
+.config-choice-card.active {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-muted);
+}
+
+.config-choice-card-name {
+  font-size: var(--text-md);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.config-choice-card-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}

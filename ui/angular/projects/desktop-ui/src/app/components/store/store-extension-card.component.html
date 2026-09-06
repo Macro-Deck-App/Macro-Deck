@@ -1,0 +1,52 @@
+<div class="store-card">
+  <div class="card-top">
+    <div class="card-icon">
+      @if (iconUrl(); as icon) {
+        @if (!iconFailed()) {
+          <img [src]="icon" alt="" loading="lazy" (error)="onIconError()">
+        } @else {
+          <span class="icon icon-{{ kindIcon() }} icon-lg"></span>
+        }
+      } @else {
+        <span class="icon icon-{{ kindIcon() }} icon-lg"></span>
+      }
+    </div>
+
+    <div class="card-identity">
+      <h3 class="card-title">
+        <a class="card-title-link" [routerLink]="['/store', item().kind, item().id]">{{ item().name }}</a>
+      </h3>
+
+      <div class="card-meta">
+        @if (publisherText(); as publisher) {
+          <span class="card-meta-text">{{ publisher }}</span>
+          <span class="card-meta-separator" aria-hidden="true">·</span>
+        }
+        <span class="card-meta-text">{{ kindLabel() }}</span>
+        @if (trustLabel(); as label) {
+          <span class="verified-chip">
+            <span class="icon icon-check icon-xs" aria-hidden="true"></span>
+            {{ label }}
+          </span>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (item().description) {
+    <p class="card-description">{{ item().description }}</p>
+  }
+
+  <div class="card-footer">
+    <shared-store-state-badge [state]="item().installState" tone="quiet" />
+    <div class="card-install">
+      <shared-store-install-button
+        [item]="item()"
+        [operation]="operation()"
+        (install)="install.emit()"
+        (installUnsigned)="installUnsigned.emit()"
+        (retry)="retry.emit()"
+        (uninstall)="uninstall.emit()" />
+    </div>
+  </div>
+</div>

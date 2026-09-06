@@ -1,0 +1,74 @@
+<div class="plugin-sessions">
+  <div class="plugin-tokens-header">
+    <div>
+      <h2 class="plugin-tokens-title">{{ 'macrodeck.app:Developer.PluginDevelopment.Sessions.Title' | translate }}</h2>
+      <p class="plugin-tokens-subtitle">{{ 'macrodeck.app:Developer.PluginDevelopment.Sessions.SessionCount' | translate:{ count: sessions().length } }}</p>
+    </div>
+  </div>
+
+  <p class="plugin-tokens-description">
+    {{ 'macrodeck.app:Developer.PluginDevelopment.Sessions.Description' | translate }}
+  </p>
+
+  @if (tokenService.loadError(); as loadError) {
+    <shared-error-banner class="plugin-tokens-error" [message]="loadError" [dismissible]="false" />
+  }
+
+  @if (sessions().length === 0) {
+    <shared-empty-state
+      class="plugin-tokens-empty"
+      icon="lock"
+      [heading]="'macrodeck.app:Developer.PluginDevelopment.Sessions.EmptyHeading' | translate"
+      [message]="'macrodeck.app:Developer.PluginDevelopment.Sessions.EmptyMessage' | translate" />
+  } @else {
+    <ul class="plugin-tokens-list">
+      @for (session of sessions(); track session.sessionId) {
+        <li class="plugin-tokens-row">
+          <div class="plugin-tokens-row-main">
+            <div class="plugin-tokens-name-col">
+              <span class="plugin-tokens-name-line">
+                <span class="plugin-tokens-name">{{ displayName(session) }}</span>
+                <span class="plugin-tokens-online-badge" [class.is-online]="isOnline(session)">
+                  {{ (isOnline(session) ? 'macrodeck.app:Developer.Tokens.OnlineStatus' : 'macrodeck.app:Developer.Tokens.OfflineStatus') | translate }}
+                </span>
+              </span>
+              <span class="plugin-tokens-secondary">{{ session.pluginId }}</span>
+            </div>
+
+            <div class="plugin-tokens-stats">
+              <div class="plugin-tokens-stat">
+                <span class="plugin-tokens-stat-label">{{ 'macrodeck.app:Developer.PluginDevelopment.Sessions.ConnectedLabel' | translate }}</span>
+                <span class="plugin-tokens-stat-value">{{ formatDate(session.connectedAt) }}</span>
+              </div>
+              <div class="plugin-tokens-stat">
+                <span class="plugin-tokens-stat-label">{{ 'macrodeck.app:Developer.Tokens.LastSeenLabel' | translate }}</span>
+                <span class="plugin-tokens-stat-value">{{ formatDate(session.lastSeenAt) }}</span>
+              </div>
+              <div class="plugin-tokens-stat">
+                <span class="plugin-tokens-stat-label">{{ 'macrodeck.app:Developer.PluginDevelopment.Sessions.ProtocolLabel' | translate }}</span>
+                <span class="plugin-tokens-stat-value">{{ session.negotiatedVersion }}</span>
+              </div>
+            </div>
+
+            <div class="plugin-tokens-actions">
+              <shared-button variant="danger-ghost" (click)="requestTerminate(session)">
+                {{ 'macrodeck.app:Developer.PluginDevelopment.Sessions.TerminateAction' | translate }}
+              </shared-button>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>
+
+@if (terminateCandidate(); as session) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Developer.PluginDevelopment.Sessions.TerminateConfirmHeading' | translate"
+    [message]="'macrodeck.app:Developer.PluginDevelopment.Sessions.TerminateConfirmMessage' | translate:{ name: displayName(session) }"
+    [confirmText]="'macrodeck.app:Developer.PluginDevelopment.Sessions.TerminateAction' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmTerminate()"
+    (cancel)="cancelTerminate()" />
+}

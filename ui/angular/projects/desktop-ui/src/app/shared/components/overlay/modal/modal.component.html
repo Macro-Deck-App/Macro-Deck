@@ -1,0 +1,35 @@
+<div
+  class="modal-overlay"
+  [class.closing]="closing"
+  [style.z-index]="zIndex"
+  (pointerdown)="onOverlayPointerDown($event)"
+  (click)="onOverlayClick($event)">
+  <div
+    class="modal-dialog"
+    [class]="sizeClass"
+    [style.max-width]="effectiveMaxWidth"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="showHeader ? headingId : null">
+    @if (showHeader) {
+      <div class="modal-header">
+        <h2 class="modal-title" [id]="headingId">{{ heading }}</h2>
+        @if (showClose) {
+          <button class="modal-close-btn" [attr.aria-label]="closeLabel" (click)="onCloseClick()">
+            <span class="icon icon-x icon-lg"></span>
+          </button>
+        }
+      </div>
+    }
+
+    <div class="modal-content" [class.modal-content--flush]="flush">
+      <ng-content></ng-content>
+    </div>
+
+    @if (showFooter) {
+      <div class="modal-footer">
+        <ng-content select="[modal-footer]"></ng-content>
+      </div>
+    }
+  </div>
+</div>

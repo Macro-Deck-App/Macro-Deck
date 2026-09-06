@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+		<!-- Underscored test names, like the host test projects. -->
+		<NoWarn>$(NoWarn);CA1707</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="coverlet.collector" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" />
+		<PackageReference Include="NUnit" />
+		<PackageReference Include="NUnit.Analyzers" />
+		<PackageReference Include="NUnit3TestAdapter" />
+		<PackageReference Include="Serilog" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\MacroDeck.Sdk\MacroDeck.Sdk.csproj" />
+		<!-- Compatibility tests (issue #543) call the real ActionsCapabilityHandler/ConfigFlowCapabilityHandler
+		     describe mapping against a pre-#543-shaped implementation, rather than restating the mapper's own
+		     `is IUiConfigurableActionDefinition`/`is IUiConfigFlowProvider` checks as a second copy that could
+		     drift from it. -->
+		<ProjectReference Include="..\..\src\MacroDeck.Plugin.Hosting\MacroDeck.Plugin.Hosting.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="NUnit.Framework"/>
+	</ItemGroup>
+
+</Project>

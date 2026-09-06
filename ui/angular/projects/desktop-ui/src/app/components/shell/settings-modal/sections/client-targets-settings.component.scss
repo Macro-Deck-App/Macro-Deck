@@ -1,0 +1,109 @@
+.client-targets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Says the feature is not finished. Deliberately a plain note rather than a warning banner: it is a
+   caveat about maturity, not something that has gone wrong. */
+.client-targets__experimental {
+  margin: 0 0 var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-left: 2px solid var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  border-radius: var(--radius-sm, 4px);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.client-targets__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+
+.client-targets__name {
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+
+.client-targets__note,
+.client-targets__field-description {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.client-targets__step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.client-targets__step-title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.client-targets__step-description {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.client-targets__instructions {
+  margin: 0;
+  padding-left: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+
+.client-targets__value {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.client-targets__value-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.client-targets__value-text {
+  /* The address is meant to be read off the screen and typed on a device, so it must not wrap
+     mid-token or collapse the port into the path. */
+  font-family: var(--font-mono, monospace);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  word-break: break-all;
+}
+
+.client-targets__link {
+  font-size: var(--text-sm);
+  color: var(--color-accent);
+}
+
+.client-targets__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.client-targets__field-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+
+.client-targets__actions {
+  display: flex;
+  gap: var(--space-2);
+}

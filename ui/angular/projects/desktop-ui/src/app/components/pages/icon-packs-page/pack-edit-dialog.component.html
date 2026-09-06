@@ -1,0 +1,48 @@
+<shared-modal [heading]="title" maxWidth="420px" [showFooter]="false" (close)="cancel.emit()">
+  <form class="pack-form" (submit)="$event.preventDefault(); submit()">
+    <label class="field">
+      <span class="label">{{ 'macrodeck.app:IconPacks.NameFieldLabel' | translate }}<span class="required" aria-hidden="true">*</span></span>
+      <shared-input
+        [autofocus]="true"
+        [placeholder]="'macrodeck.app:IconPacks.NameFieldPlaceholder' | translate"
+        [ngModel]="name()"
+        (ngModelChange)="name.set($event)"
+        name="packName"
+        required />
+    </label>
+
+    <label class="field">
+      <span class="label">{{ 'macrodeck.app:IconPacks.DescriptionFieldLabel' | translate }}</span>
+      <shared-input
+        [placeholder]="'macrodeck.app:IconPacks.DescriptionFieldPlaceholder' | translate"
+        [ngModel]="description()"
+        (ngModelChange)="description.set($event)"
+        name="packDescription" />
+    </label>
+
+    <div class="field-row">
+      <label class="field">
+        <span class="label">{{ 'macrodeck.app:IconPacks.AuthorFieldLabel' | translate }}</span>
+        <shared-input
+          [placeholder]="'macrodeck.app:IconPacks.AuthorFieldPlaceholder' | translate"
+          [ngModel]="author()"
+          (ngModelChange)="author.set($event)"
+          name="packAuthor" />
+      </label>
+
+      <label class="field">
+        <span class="label">{{ 'macrodeck.app:IconPacks.VersionFieldLabel' | translate }}</span>
+        <shared-input
+          placeholder="1.0.0"
+          [ngModel]="version()"
+          (ngModelChange)="version.set($event)"
+          name="packVersion" />
+      </label>
+    </div>
+
+    <shared-button-group class="actions" align="end">
+      <shared-button variant="secondary" (click)="onCancel()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+      <shared-button variant="primary" type="submit" [disabled]="!name().trim()">{{ saveLabel }}</shared-button>
+    </shared-button-group>
+  </form>
+</shared-modal>

@@ -1,0 +1,51 @@
+<div class="about">
+  <shared-settings-section
+    heading="Macro Deck"
+    [description]="'macrodeck.app:Settings.About.BuildDescription' | translate">
+    <shared-settings-row [label]="'macrodeck.app:Settings.About.Version' | translate">
+      <span class="about__value">{{ versionLabel() }}</span>
+    </shared-settings-row>
+    <shared-settings-row [label]="'macrodeck.app:Settings.About.BuildNumber' | translate">
+      <span class="about__value">{{ info()?.buildNumber ?? ('macrodeck.app:Settings.About.DevelopmentBuild' | translate) }}</span>
+    </shared-settings-row>
+    <shared-settings-row [label]="'macrodeck.app:Settings.About.BuildTime' | translate">
+      <span class="about__value">{{ buildTime() ?? ('macrodeck.app:Settings.About.DevelopmentBuild' | translate) }}</span>
+    </shared-settings-row>
+    <shared-settings-row [label]="'macrodeck.app:Settings.About.Commit' | translate">
+      <span class="about__value about__value--mono">{{ info()?.commit ?? '-' }}</span>
+    </shared-settings-row>
+  </shared-settings-section>
+
+  <app-update-check />
+
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.About.Environment' | translate"
+    [description]="'macrodeck.app:Settings.About.EnvironmentDescription' | translate">
+    <shared-settings-row [label]="'macrodeck.app:Settings.About.DotNetRuntime' | translate">
+      <span class="about__value">{{ info()?.runtimeVersion ?? '-' }}</span>
+    </shared-settings-row>
+    <shared-settings-row [label]="'macrodeck.app:Settings.About.OperatingSystem' | translate">
+      <span class="about__value">{{ info()?.operatingSystem ?? '-' }}</span>
+    </shared-settings-row>
+    @if (shellVersion()) {
+      <shared-settings-row [label]="'macrodeck.app:Settings.About.Bootstrapper' | translate">
+        <span class="about__value">{{ shellVersion() }}</span>
+      </shared-settings-row>
+    }
+  </shared-settings-section>
+
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.About.License' | translate"
+    [description]="'macrodeck.app:Settings.About.LicenseDescription' | translate">
+    <shared-settings-row [label]="'macrodeck.app:Settings.About.License' | translate">
+      <button type="button" class="about__link" (click)="openLicense()">
+        {{ licenseLabel() ?? ('macrodeck.app:Settings.About.ApacheLicenseLabel' | translate) }}
+        <span class="icon icon-arrow-right icon-sm" aria-hidden="true"></span>
+      </button>
+    </shared-settings-row>
+  </shared-settings-section>
+
+  @if (loadFailed()) {
+    <p class="about__error">{{ 'macrodeck.app:Settings.About.LoadFailed' | translate }}</p>
+  }
+</div>

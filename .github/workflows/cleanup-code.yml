@@ -1,0 +1,82 @@
+name: Cleanup C# code
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: cleanup-code-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_VERSION: 10.0.x
+  RESHARPER_VERSION: 2026.1.3
+
+jobs:
+  cleanup:
+    name: Run ReSharper cleanup and commit
+    if: github.ref_type == 'branch'
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      # cleanupcode cannot open .slnx yet.
+      - name: Generate solution for ReSharper
+        run: |
+          dotnet new sln -n MacroDeck.Format --format sln
+          dotnet sln MacroDeck.slnx list | grep '\.csproj$' | xargs dotnet sln MacroDeck.Format.sln add
+
+      - name: Restore
+        run: dotnet restore MacroDeck.Format.sln
+
+      - name: Install ReSharper command-line tools
+        run: |
+          dotnet tool install --global JetBrains.ReSharper.GlobalTools --version "$RESHARPER_VERSION"
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      # Two passes let cleanupcode converge formatting.
+      - name: Run code cleanup
+        run: |
+          for _ in 1 2; do
+            jb cleanupcode MacroDeck.Format.sln \
+              --profile="Built-in: Reformat Code" \
+              --settings=MacroDeck.slnx.DotSettings \
+              --no-buildin-settings \
+              --no-build \
+              --verbosity=WARN
+          done
+          rm MacroDeck.Format.sln
+
+      - name: Commit and push changes
+        run: |
+          if git diff --quiet; then
+            echo "No cleanup changes were necessary." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --update
+          git commit -m "style: apply ReSharper code cleanup"
+          git push origin "HEAD:${GITHUB_REF}"
+
+          {
+            echo "## ReSharper cleanup"
+            echo
+            echo "Committed and pushed cleanup changes to \`${GITHUB_REF_NAME}\`."
+          } >> "$GITHUB_STEP_SUMMARY"

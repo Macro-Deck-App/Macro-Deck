@@ -1,0 +1,8 @@
+<div class="status-strip">
+  @for (badge of badges(); track badge.id) {
+    <span class="status-pill status-pill-{{ badge.tier }}">
+      <span class="icon icon-{{ badge.icon }} icon-xs"></span>
+      {{ badge.label }}
+    </span>
+  }
+</div>

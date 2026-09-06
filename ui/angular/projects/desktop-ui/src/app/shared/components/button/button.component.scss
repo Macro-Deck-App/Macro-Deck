@@ -1,0 +1,173 @@
+/*
+ * shared-button styles
+ *
+ * Applied via HostBinding to the native <button> element.
+ * All size / colour values use design tokens so they adapt to
+ * light / dark themes automatically.
+ */
+
+:host {
+  display: inline-flex;
+}
+
+/* fill: take the free space in the row, so a text button can sit beside a fixed
+   square icon button without a ::ng-deep width override at the call site. */
+:host(.sb-fill) {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+// ::ng-deep because the label is projected: it carries the *caller's* encapsulation attribute, so a
+// plain `.sb > *` never matches it. Without this a clipped label just stops mid-word instead of
+// ending in an ellipsis.
+:host ::ng-deep .sb > * {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:host(.sb-fill) .sb {
+  width: 100%;
+}
+
+.sb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-weight: var(--font-medium);
+  line-height: 1;
+  // A label never breaks, but it must not escape the button either: a translated label runs longer
+  // than the English it was laid out for, and without this it spills over the border instead of
+  // ending in an ellipsis.
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  transition:
+    background-color var(--transition-fast),
+    color            var(--transition-fast),
+    border-color     var(--transition-fast),
+    opacity          var(--transition-fast);
+}
+
+.sb:disabled,
+.sb-loading {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/*
+ * The rule above makes the inner button pointer-transparent, so a click would otherwise land on
+ * this host - where the consumer's own (click) sits - and run the action the disabled state was
+ * meant to prevent. The host has to swallow the pointer too.
+ */
+:host(.sb-disabled) {
+  pointer-events: none;
+}
+
+.sb:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* compact keeps the vertical padding that used to be shared with dense form controls, so its
+   height still binds the same way with an icon child: a 16px .icon-sm plus 2 x 3px and the 1px
+   borders is 24px, under the 26px floor. The 5px it used before made an icon button 28px - 2px
+   taller than a compact select or input would have been next to it. Reserved for standalone
+   icon buttons (toolbars, the status bar, notification/connection panels, list rows) now that
+   single-line form controls all render at --control-height (issue #554). Only the inline
+   padding stays wider than a field. */
+.sb-compact { min-height: var(--control-height-compact); padding: 0.1875rem 0.6875rem;  font-size: var(--text-sm); }
+/* md matches the control height exactly: a button sits inside field rows (the browse button of a
+   file path input, the reveal button of a secret input) and beside inputs in search rows, so it
+   cannot be the odd one out. A primary action reads as the heavier element through its accent fill
+   and the wider inline padding, not through height. */
+.sb-md      { min-height: var(--control-height);         padding: var(--space-2) 1.125rem; font-size: var(--text-base); }
+.sb-lg      { min-height: 2.75rem;                       padding: var(--space-3) 1.4375rem; font-size: var(--text-lg); }
+/* icon: square button for icon-only actions - same height as sb-md */
+.sb-icon    { width: var(--control-height); height: var(--control-height); padding: 0; font-size: var(--text-base); }
+/* icon-compact: compact square for standalone icon actions (toolbars, the status bar,
+   notification/connection panels, list rows with no adjoining input) */
+.sb-icon-compact { width: var(--control-height-compact); height: var(--control-height-compact); padding: 0; font-size: var(--text-sm); }
+
+
+.sb-primary {
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+.sb-primary:hover:not(:disabled) {
+  background-color: var(--color-accent-hover);
+}
+
+.sb-secondary {
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-border);
+  color: var(--color-text-secondary);
+}
+.sb-secondary:hover:not(:disabled) {
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-light);
+}
+
+.sb-danger {
+  background-color: var(--color-danger);
+  color: var(--color-on-accent);
+}
+.sb-danger:hover:not(:disabled) {
+  background-color: var(--color-danger-hover);
+}
+
+.sb-ghost {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+}
+.sb-ghost:hover:not(:disabled) {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.sb-danger-ghost {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+}
+.sb-danger-ghost:hover:not(:disabled) {
+  background-color: var(--color-danger-muted);
+  color: var(--color-danger);
+}
+
+.sb-add {
+  background-color: transparent;
+  border-style: dashed;
+  border-color: var(--color-border);
+  color: var(--color-text-secondary);
+}
+.sb-add:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-text-primary);
+}
+
+/* A toggled button keeps the accent treatment through hover, so the pressed state cannot be
+   mistaken for a hover of the plain variant. Doubled selector to outrank the variant hover rules. */
+.sb.sb-pressed,
+.sb.sb-pressed:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+.sb-spinner {
+  display: inline-block;
+  width: 0.875em;
+  height: 0.875em;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: ds-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}

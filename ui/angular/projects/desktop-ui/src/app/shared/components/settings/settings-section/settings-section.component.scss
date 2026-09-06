@@ -1,0 +1,42 @@
+@use '../../../../../styles/index' as ds;
+
+.settings-section {
+  @include ds.card();
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.settings-section__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.settings-section__heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.settings-section__title {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+}
+
+.settings-section__desc {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  // Same readable measure as the row description, see settings-row.
+  max-width: 30rem;
+}
+
+.settings-section__body {
+  display: flex;
+  flex-direction: column;
+}

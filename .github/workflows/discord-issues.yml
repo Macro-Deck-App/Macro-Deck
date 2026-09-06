@@ -1,0 +1,92 @@
+name: Discord Issue Notifications
+
+on:
+  issues:
+    types: [opened, closed]
+
+permissions: {}
+
+jobs:
+  notify-discord:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+
+    steps:
+      - name: Send Discord notification
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          ISSUE_ACTION: ${{ github.event.action }}
+          ISSUE_STATE_REASON: ${{ github.event.issue.state_reason }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
+          ACTOR: ${{ github.actor }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "DISCORD_WEBHOOK_URL secret is not configured."
+            exit 1
+          fi
+
+          case "$ISSUE_ACTION" in
+            opened)
+              EVENT_TEXT="Issue opened"
+              COLOR=5763719
+              ;;
+            closed)
+              # state_reason distinguishes how an issue was closed; it is empty on older events.
+              case "$ISSUE_STATE_REASON" in
+                completed)
+                  EVENT_TEXT="Issue closed as completed"
+                  COLOR=10181046
+                  ;;
+                not_planned)
+                  EVENT_TEXT="Issue closed as not planned"
+                  COLOR=15548997
+                  ;;
+                duplicate)
+                  EVENT_TEXT="Issue closed as duplicate"
+                  COLOR=15548997
+                  ;;
+                *)
+                  EVENT_TEXT="Issue closed"
+                  COLOR=15548997
+                  ;;
+              esac
+              ;;
+            *)
+              echo "Unsupported issue action: $ISSUE_ACTION"
+              exit 0
+              ;;
+          esac
+
+          jq -n \
+            --arg event_text "$EVENT_TEXT" \
+            --arg repository "$REPOSITORY" \
+            --arg issue_number "$ISSUE_NUMBER" \
+            --arg issue_title "$ISSUE_TITLE" \
+            --arg issue_url "$ISSUE_URL" \
+            --arg issue_author "$ISSUE_AUTHOR" \
+            --arg actor "$ACTOR" \
+            --argjson color "$COLOR" \
+            '{
+              embeds: [
+                {
+                  title: ($event_text + ": #" + $issue_number + " " + $issue_title),
+                  url: $issue_url,
+                  color: $color,
+                  fields: [
+                    {name: "Repository", value: $repository, inline: true},
+                    {name: "Author", value: ("@" + $issue_author), inline: true},
+                    {name: "Triggered by", value: ("@" + $actor), inline: true}
+                  ]
+                }
+              ]
+            }' > payload.json
+
+          curl --fail-with-body \
+            --retry 3 \
+            --retry-all-errors \
+            --header "Content-Type: application/json" \
+            --data @payload.json \
+            "$DISCORD_WEBHOOK_URL"

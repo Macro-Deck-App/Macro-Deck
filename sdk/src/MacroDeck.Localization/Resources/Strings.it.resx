@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="Common.Add" xml:space="preserve">
+    <value>Aggiungi</value>
+  </data>
+  <data name="Common.Back" xml:space="preserve">
+    <value>Indietro</value>
+  </data>
+  <data name="Common.Cancel" xml:space="preserve">
+    <value>Annulla</value>
+  </data>
+  <data name="Common.Close" xml:space="preserve">
+    <value>Chiudi</value>
+  </data>
+  <data name="Common.Confirm" xml:space="preserve">
+    <value>Conferma</value>
+  </data>
+  <data name="Common.Continue" xml:space="preserve">
+    <value>Continua</value>
+  </data>
+  <data name="Common.Copy" xml:space="preserve">
+    <value>Copia</value>
+  </data>
+  <data name="Common.Create" xml:space="preserve">
+    <value>Crea</value>
+  </data>
+  <data name="Common.Delete" xml:space="preserve">
+    <value>Elimina</value>
+  </data>
+  <data name="Common.Disabled" xml:space="preserve">
+    <value>Disattivato</value>
+  </data>
+  <data name="Common.Done" xml:space="preserve">
+    <value>Fatto</value>
+  </data>
+  <data name="Common.Edit" xml:space="preserve">
+    <value>Modifica</value>
+  </data>
+  <data name="Common.Enabled" xml:space="preserve">
+    <value>Attivato</value>
+  </data>
+  <data name="Common.Export" xml:space="preserve">
+    <value>Esporta</value>
+  </data>
+  <data name="Common.Import" xml:space="preserve">
+    <value>Importa</value>
+  </data>
+  <data name="Common.Loading" xml:space="preserve">
+    <value>Caricamento…</value>
+  </data>
+  <data name="Common.Next" xml:space="preserve">
+    <value>Avanti</value>
+  </data>
+  <data name="Common.No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Common.None" xml:space="preserve">
+    <value>Nessuno</value>
+  </data>
+  <data name="Common.Refresh" xml:space="preserve">
+    <value>Aggiorna</value>
+  </data>
+  <data name="Common.Remove" xml:space="preserve">
+    <value>Rimuovi</value>
+  </data>
+  <data name="Common.Rename" xml:space="preserve">
+    <value>Rinomina</value>
+  </data>
+  <data name="Common.Retry" xml:space="preserve">
+    <value>Riprova</value>
+  </data>
+  <data name="Common.Save" xml:space="preserve">
+    <value>Salva</value>
+  </data>
+  <data name="Common.Select" xml:space="preserve">
+    <value>Seleziona…</value>
+  </data>
+  <data name="Common.Yes" xml:space="preserve">
+    <value>Sì</value>
+  </data>
+  <data name="ConfigFlow.SetUpIntegration" xml:space="preserve">
+    <value>Configura integrazione</value>
+  </data>
+  <data name="Connection.Connected" xml:space="preserve">
+    <value>Connesso</value>
+  </data>
+  <data name="Connection.Connecting" xml:space="preserve">
+    <value>Connessione…</value>
+  </data>
+  <data name="Connection.Disconnected" xml:space="preserve">
+    <value>Disconnesso</value>
+  </data>
+  <data name="Connection.Reconnecting" xml:space="preserve">
+    <value>Riconnessione…</value>
+  </data>
+  <data name="Settings.About" xml:space="preserve">
+    <value>Informazioni</value>
+  </data>
+  <data name="Settings.Adb" xml:space="preserve">
+    <value>ADB</value>
+  </data>
+  <data name="Settings.Advanced" xml:space="preserve">
+    <value>Avanzate</value>
+  </data>
+  <data name="Settings.Appearance" xml:space="preserve">
+    <value>Aspetto</value>
+  </data>
+  <data name="Settings.BackupAndData" xml:space="preserve">
+    <value>Backup e dati</value>
+  </data>
+  <data name="Settings.Backups" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="Settings.Connectivity" xml:space="preserve">
+    <value>Connettività</value>
+  </data>
+  <data name="Settings.DataAndPrivacy" xml:space="preserve">
+    <value>Dati e privacy</value>
+  </data>
+  <data name="Settings.Developer" xml:space="preserve">
+    <value>Sviluppatore</value>
+  </data>
+  <data name="Settings.Devices" xml:space="preserve">
+    <value>Dispositivi</value>
+  </data>
+  <data name="Settings.General" xml:space="preserve">
+    <value>Generali</value>
+  </data>
+  <data name="Settings.Language" xml:space="preserve">
+    <value>Lingua</value>
+  </data>
+  <data name="Settings.Logging" xml:space="preserve">
+    <value>Registro eventi</value>
+  </data>
+  <data name="Settings.Network" xml:space="preserve">
+    <value>Rete</value>
+  </data>
+  <data name="Settings.PrivacyAndSecurity" xml:space="preserve">
+    <value>Privacy e sicurezza</value>
+  </data>
+  <data name="Settings.Security" xml:space="preserve">
+    <value>Sicurezza</value>
+  </data>
+  <data name="Settings.Startup" xml:space="preserve">
+    <value>Avvio</value>
+  </data>
+  <data name="Settings.Title" xml:space="preserve">
+    <value>Impostazioni</value>
+  </data>
+  <data name="States.Active" xml:space="preserve">
+    <value>Attivo</value>
+  </data>
+  <data name="States.Hidden" xml:space="preserve">
+    <value>Nascosto</value>
+  </data>
+  <data name="States.Inactive" xml:space="preserve">
+    <value>Inattivo</value>
+  </data>
+  <data name="States.InPlaylist" xml:space="preserve">
+    <value>Nella playlist</value>
+  </data>
+  <data name="States.Liked" xml:space="preserve">
+    <value>Salvato</value>
+  </data>
+  <data name="States.Monitoring" xml:space="preserve">
+    <value>Monitoraggio attivo</value>
+  </data>
+  <data name="States.Muted" xml:space="preserve">
+    <value>Muto</value>
+  </data>
+  <data name="States.NotInPlaylist" xml:space="preserve">
+    <value>Non nella playlist</value>
+  </data>
+  <data name="States.NotLiked" xml:space="preserve">
+    <value>Non salvato</value>
+  </data>
+  <data name="States.NotMonitoring" xml:space="preserve">
+    <value>Monitoraggio disattivo</value>
+  </data>
+  <data name="States.NotRecording" xml:space="preserve">
+    <value>Non in registrazione</value>
+  </data>
+  <data name="States.NotStreaming" xml:space="preserve">
+    <value>Non in streaming</value>
+  </data>
+  <data name="States.Off" xml:space="preserve">
+    <value>Disattivo</value>
+  </data>
+  <data name="States.On" xml:space="preserve">
+    <value>Attivo</value>
+  </data>
+  <data name="States.Paused" xml:space="preserve">
+    <value>In pausa</value>
+  </data>
+  <data name="States.Playing" xml:space="preserve">
+    <value>In riproduzione</value>
+  </data>
+  <data name="States.PushToTalk" xml:space="preserve">
+    <value>Push-to-talk</value>
+  </data>
+  <data name="States.Recording" xml:space="preserve">
+    <value>In registrazione</value>
+  </data>
+  <data name="States.RecordingPaused" xml:space="preserve">
+    <value>Registrazione in pausa</value>
+  </data>
+  <data name="States.RepeatContext" xml:space="preserve">
+    <value>Ripeti tutto</value>
+  </data>
+  <data name="States.RepeatOff" xml:space="preserve">
+    <value>Ripetizione disattivata</value>
+  </data>
+  <data name="States.RepeatTrack" xml:space="preserve">
+    <value>Ripeti brano</value>
+  </data>
+  <data name="States.Stopped" xml:space="preserve">
+    <value>Interrotto</value>
+  </data>
+  <data name="States.Streaming" xml:space="preserve">
+    <value>In streaming</value>
+  </data>
+  <data name="States.Unavailable" xml:space="preserve">
+    <value>Non disponibile</value>
+  </data>
+  <data name="States.Unmuted" xml:space="preserve">
+    <value>Audio attivo</value>
+  </data>
+  <data name="States.Visible" xml:space="preserve">
+    <value>Visibile</value>
+  </data>
+  <data name="States.VoiceActivity" xml:space="preserve">
+    <value>Attività vocale</value>
+  </data>
+  <data name="Validation.AtLeast" xml:space="preserve">
+    <value>{field} deve essere almeno {minimum}</value>
+    <comment>[minimum:double]</comment>
+  </data>
+  <data name="Validation.AtMost" xml:space="preserve">
+    <value>{field} deve essere al massimo {maximum}</value>
+    <comment>[maximum:double]</comment>
+  </data>
+  <data name="Validation.InvalidIpAddress" xml:space="preserve">
+    <value>{field} non è un indirizzo IP valido</value>
+  </data>
+  <data name="Validation.InvalidJson" xml:space="preserve">
+    <value>{field} non è un JSON valido</value>
+  </data>
+  <data name="Validation.InvalidUrl" xml:space="preserve">
+    <value>{field} non è un URL valido</value>
+  </data>
+  <data name="Validation.InvalidValue" xml:space="preserve">
+    <value>{field} non è un valore valido</value>
+  </data>
+  <data name="Validation.PatternMismatch" xml:space="preserve">
+    <value>{field} non corrisponde al formato previsto</value>
+  </data>
+  <data name="Validation.Required" xml:space="preserve">
+    <value>{field} è obbligatorio</value>
+    <comment>Shown under an empty required field. {field} is the field's own label.</comment>
+  </data>
+  <data name="Validation.TooLong" xml:space="preserve">
+    <value>{field} supera i {limit} caratteri</value>
+    <comment>[limit:int] Character limit, not byte length.</comment>
+  </data>
+</root>

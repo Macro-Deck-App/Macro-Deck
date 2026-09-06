@@ -1,0 +1,28 @@
+@if (items().length > 0) {
+  <section class="store-section">
+    @if (heading()) {
+      <div class="store-section-header">
+        <h2 class="store-section-heading">
+          @if (icon()) {
+            <span class="icon icon-{{ icon() }} icon-sm" aria-hidden="true"></span>
+          }
+          {{ heading() }}
+        </h2>
+        @if (count()) {
+          <span class="store-section-count">{{ count() }}</span>
+        }
+      </div>
+    }
+    <div class="store-section-grid">
+      @for (item of items(); track item.kind + ':' + item.id) {
+        <shared-store-extension-card
+          [item]="item"
+          [operation]="operationFor(item)()"
+          (install)="install.emit(item)"
+          (installUnsigned)="installUnsigned.emit(item)"
+          (retry)="retry.emit(item)"
+          (uninstall)="uninstall.emit(item)" />
+      }
+    </div>
+  </section>
+}

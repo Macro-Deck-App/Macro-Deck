@@ -1,0 +1,176 @@
+<div class="folder-nav" (click)="onContainerClick()">
+  <div class="folder-nav-header">
+    <h2 class="folder-nav-title">{{ 'macrodeck.app:Widgets.Folder.Title' | translate }}</h2>
+  </div>
+
+  <div
+    class="folder-nav-list"
+    #folderList
+    sharedShellDropTarget
+    [dropKinds]="folderDropKinds"
+    (shellDropped)="onArchiveDropped($event)">
+    <div class="folder-list-inner" role="tree">
+      @for (folder of folderService.rootFolders(); track folder.id) {
+        <ng-container *ngTemplateOutlet="folderTemplate; context: { folder: folder, depth: 0 }"></ng-container>
+      }
+      @if (folderDrag.dropAtRootEnd()) {
+        <div class="root-end-line"></div>
+      }
+    </div>
+  </div>
+
+  @if (portableError()) {
+    <div class="folder-portable-error">
+      <shared-error-banner [message]="portableError()!" (dismiss)="dismissPortableError()"></shared-error-banner>
+    </div>
+  }
+
+  @if (!profileService.isCurrentProfileLocked()) {
+    <shared-button-group class="folder-nav-footer">
+      <shared-button fill variant="secondary" (click)="createRootFolder()">
+        <span class="icon icon-plus icon-sm"></span>
+        <span>{{ 'macrodeck.app:Widgets.Folder.NewFolder' | translate }}</span>
+      </shared-button>
+      <shared-button
+        iconOnly
+        variant="secondary"
+        [title]="'macrodeck.app:Widgets.Folder.ImportFileTitle' | translate"
+        [ariaLabel]="'macrodeck.app:Widgets.Folder.ImportFileTitle' | translate"
+        (click)="startImport(null)">
+        <span class="icon icon-download icon-sm"></span>
+      </shared-button>
+    </shared-button-group>
+  }
+
+  <app-folder-context-menu
+    [isOpen]="folderService.contextMenu().isOpen"
+    [x]="folderService.contextMenu().x"
+    [y]="folderService.contextMenu().y"
+    [canDelete]="canDeleteSelectedFolder()"
+    [canSetStart]="canSetContextFolderStart()"
+    [canMoveUp]="canMoveUp()"
+    [canMoveDown]="canMoveDown()"
+    [canMoveInto]="canMoveInto()"
+    [canMoveToParent]="canMoveToParent()"
+    [focusRuleCount]="focusRuleCount()"
+    [canChangeView]="canChangeView()"
+    (action)="onContextMenuAction($event)"
+    (close)="folderService.closeContextMenu()">
+  </app-folder-context-menu>
+
+  @if (isCreating) {
+    <shared-modal [heading]="'macrodeck.app:Widgets.Folder.NewFolder' | translate" size="small" (close)="cancelCreate()">
+      <shared-input
+        class="folder-name-input"
+        [(ngModel)]="renameValue"
+        (keydown.enter)="confirmCreate()"
+        [placeholder]="'macrodeck.app:Widgets.Folder.FolderNamePlaceholder' | translate"
+        [autofocus]="true" />
+      @if (canChangeView()) {
+        <app-folder-view-picker
+          [(viewId)]="createViewId"
+          [(configuration)]="createViewConfiguration" />
+      }
+      <div modal-footer>
+        <shared-button variant="secondary" (click)="cancelCreate()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button variant="primary" (click)="confirmCreate()">{{ 'macrodeck:Common.Create' | translate }}</shared-button>
+      </div>
+    </shared-modal>
+  }
+
+  @if (isRenaming) {
+    <shared-modal [heading]="'macrodeck.app:Widgets.Folder.RenameFolderHeading' | translate" size="small" (close)="cancelRename()">
+      <shared-input
+        class="folder-name-input"
+        [(ngModel)]="renameValue"
+        (keydown.enter)="confirmRename()"
+        [autofocus]="true" />
+      <div modal-footer>
+        <shared-button variant="secondary" (click)="cancelRename()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button variant="primary" (click)="confirmRename()">{{ 'macrodeck:Common.Rename' | translate }}</shared-button>
+      </div>
+    </shared-modal>
+  }
+
+  <input
+    #folderImportInput
+    type="file"
+    accept=".macroDeckFolder"
+    hidden
+    (change)="onImportFileSelected($event)" />
+
+  @if (exportFolderId()) {
+    <shared-export-options-modal
+      [heading]="'macrodeck.app:Widgets.Folder.ExportHeading' | translate"
+      [description]="'macrodeck.app:Widgets.Folder.ExportDescription' | translate"
+      [options]="exportToggles()"
+      (confirmed)="onExportConfirmed($event)"
+      (cancelled)="cancelExport()">
+    </shared-export-options-modal>
+  }
+
+  @if (archiveImport.summary(); as archive) {
+    <shared-archive-preview-modal
+      [summary]="archive"
+      (confirmed)="archiveImport.confirm()"
+      (cancelled)="archiveImport.cancel()">
+    </shared-archive-preview-modal>
+  }
+
+  @if (archiveImport.passwordVisible()) {
+    <shared-import-password-modal
+      [heading]="'macrodeck.app:Widgets.Folder.ImportHeading' | translate"
+      [invalid]="archiveImport.passwordInvalid()"
+      (submitted)="archiveImport.submitPassword($event)"
+      (cancelled)="archiveImport.cancel()">
+    </shared-import-password-modal>
+  }
+
+  @if (focusRuleFolderId(); as focusRuleFolderIdValue) {
+    <app-folder-focus-rule-modal
+      [folderId]="focusRuleFolderIdValue"
+      (closed)="focusRuleFolderId.set(null)">
+    </app-folder-focus-rule-modal>
+  }
+
+  @if (folderToDelete()) {
+    <shared-confirmation-modal
+      [heading]="'macrodeck.app:Widgets.Folder.DeleteHeading' | translate"
+      [message]="deleteMessage()"
+      [confirmText]="'macrodeck:Common.Delete' | translate"
+      [cancelText]="'macrodeck:Common.Cancel' | translate"
+      [danger]="true"
+      (confirm)="confirmFolderDelete()"
+      (cancel)="cancelFolderDelete()">
+    </shared-confirmation-modal>
+  }
+
+  @if (folderDrag.state().isDragging) {
+    <div
+      class="drag-ghost"
+      [style.left.px]="folderDrag.ghostX() + 14"
+      [style.top.px]="folderDrag.ghostY() + 10">
+      <span class="icon icon-folder icon-sm"></span>
+      {{ folderDrag.ghostLabel() }}
+    </div>
+  }
+</div>
+
+<ng-template #folderTemplate let-folder="folder" let-depth="depth">
+  <app-folder-item
+    [folder]="folder"
+    [depth]="depth"
+    [isSelected]="folderService.selectedFolderId() === folder.id"
+    [isDragging]="folderDrag.state().folderId === folder.id"
+    [hasChildren]="hasChildren(folder.id)"
+    [dropPosition]="getDropPosition(folder.id)"
+    (select)="folderService.selectFolder($event)"
+    (toggleExpand)="folderService.toggleFolderExpanded($event)"
+    (contextMenu)="onContextMenu($event)"
+    (move)="onMove($event)"
+    (navigate)="onNavigate($event)">
+    @for (child of folderService.getChildFolders(folder.id); track child.id) {
+      <ng-container *ngTemplateOutlet="folderTemplate; context: { folder: child, depth: depth + 1 }"></ng-container>
+    }
+  </app-folder-item>
+</ng-template>

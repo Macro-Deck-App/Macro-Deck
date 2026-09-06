@@ -1,0 +1,13 @@
+// Structural, compile-time SCSS variables.
+//
+// Runtime-themeable design tokens (colors, spacing, radii, …) are emitted as
+// CSS custom properties in _themes.scss so they can change live with the
+// active theme/accent. The values here are build-time only and never change
+// at runtime - primarily responsive breakpoints used by the mixins.
+
+$breakpoints: (
+  'sm': 480px,
+  'md': 768px,
+  'lg': 1024px,
+  'xl': 1280px,
+);

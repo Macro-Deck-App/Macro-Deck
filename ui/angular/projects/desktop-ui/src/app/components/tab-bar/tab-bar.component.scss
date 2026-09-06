@@ -1,0 +1,147 @@
+:host {
+  display: inline-flex;
+  max-width: 100%;
+  // Without this, the automatic minimum size of an inline-flex item stops it shrinking below its
+  // content width, so a `.tab-row` in `flex-wrap: nowrap` overflows the row instead of the bar
+  // scrolling internally (`.tab-bar` below already has `overflow-x: auto`).
+  min-width: 0;
+}
+
+.tab-bar {
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.tab-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0.6875rem;
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color            var(--transition-fast);
+}
+
+.tab-item:hover:not(.active) {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-hover);
+}
+
+.tab-item.active {
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0 0.3125rem;
+  background-color: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  font-variant-numeric: tabular-nums;
+  color: inherit;
+}
+
+.tab-item:not(.active) .tab-badge {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+}
+
+// State marker, not a count - deliberately not built on `.tab-badge`, so it
+// needs no pill box and follows the tab's own colour in both states.
+.tab-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background-color: currentColor;
+  flex-shrink: 0;
+}
+
+// A removable tab is one pill holding both the label and its "×", the way a browser tab does. The
+// wrapper carries the pill, so the tab button inside it gives its own background up - otherwise the
+// "×" would sit outside the highlight, reading as a separate control next to the tab.
+.tab-item-wrap {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-fast);
+}
+
+.tab-item-wrap:hover:not(.active) {
+  background-color: var(--color-bg-hover);
+}
+
+.tab-item-wrap.active {
+  background-color: var(--color-accent);
+}
+
+.tab-item-wrap .tab-item,
+.tab-item-wrap .tab-item:hover:not(.active),
+.tab-item-wrap .tab-item.active {
+  background-color: transparent;
+}
+
+.tab-item-wrap .tab-item {
+  padding-inline-end: var(--space-1);
+}
+
+.tab-item-wrap:hover .tab-item:not(.active) {
+  color: var(--color-text-primary);
+}
+
+// Always present, like a browser tab's close button: a hover-only affordance would be invisible on
+// touch and would change the row's measured width as the pointer moves across it.
+.tab-remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-inline-end: 0.4375rem;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color            var(--transition-fast);
+}
+
+.tab-item-wrap:hover .tab-remove-btn {
+  color: var(--color-text-secondary);
+}
+
+.tab-item-wrap.active .tab-remove-btn {
+  color: var(--color-on-accent);
+}
+
+.tab-remove-btn:hover,
+.tab-remove-btn:focus-visible {
+  color: inherit;
+  // Tinted from the pill's own colour rather than a fixed grey, so it reads the same on the accent
+  // background and on the bar's.
+  background-color: rgba(255, 255, 255, 0.18);
+}
+

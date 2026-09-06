@@ -1,0 +1,39 @@
+@use '../../../styles/index' as ds;
+
+:host {
+  display: inline-block;
+}
+
+.vp-trigger {
+  @include ds.control-base;
+  @include ds.control-interactive;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.vp-trigger:hover {
+  color: var(--color-text-primary);
+}
+
+.vp-trigger.active {
+  border-color: var(--color-accent);
+  color: var(--color-text-primary);
+}
+
+.vp-trigger-symbol {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  letter-spacing: -0.03em;
+  opacity: 0.85;
+}
+
+.vp-trigger-label {
+  font-size: var(--text-sm);
+}

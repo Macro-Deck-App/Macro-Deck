@@ -1,0 +1,122 @@
+@use '../../../../styles/index' as ds;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+.runner {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  gap: var(--space-3);
+}
+
+.runner-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  flex: 0 0 auto;
+}
+
+.runner-heading {
+  flex: 1 1 9.75rem;
+  min-width: 0;
+}
+
+.runner-title {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+  @include ds.truncate;
+}
+
+.runner-subtitle {
+  margin: 0.125rem 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.runner-search {
+  flex: 0 1 13rem;
+  min-width: 8.125rem;
+}
+
+.runner-body {
+  display: grid;
+  grid-template-columns: minmax(0, 14.625rem) minmax(0, 1fr);
+  gap: var(--space-4);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  min-height: 0;
+  @include ds.overlay-scrollbar-clearance;
+}
+
+.action-list-item {
+  @include ds.interactive-row;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: 1px solid transparent;
+  text-align: left;
+  color: var(--color-text-primary);
+
+  &.active {
+    background-color: var(--color-accent-muted);
+    border-color: var(--color-border-accent);
+  }
+}
+
+.action-list-name {
+  font-size: var(--text-md);
+  font-weight: var(--font-medium);
+  @include ds.truncate;
+}
+
+.action-list-integration {
+  font-size: var(--text-xs);
+  color: var(--color-accent);
+  @include ds.truncate;
+}
+
+.action-list-id {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono, monospace);
+  @include ds.truncate;
+}
+
+.runner-detail {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  @include ds.overlay-scrollbar-clearance;
+}
+
+@include ds.breakpoint-down(md) {
+  .runner-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .action-list {
+    max-height: 11.375rem;
+  }
+}

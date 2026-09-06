@@ -1,0 +1,64 @@
+@use '../../../styles/index' as ds;
+
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+.tbr-dynamic-browse {
+  @include ds.control-base;
+  @include ds.control-interactive;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  align-self: flex-start;
+  margin: var(--space-3) var(--space-4) 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tbr-dynamic-browse:hover {
+  color: var(--color-text-primary);
+}
+
+.tbr-pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  // Owns its own right border - this containment is what makes the tab bar inside "scoped to the
+  // left pane" a DOM fact rather than a convention (issue #238).
+  border-right: 1px solid var(--color-border);
+  background-color: var(--color-bg-secondary);
+}
+
+// Without this the tab bar hugs the pane edge while every panel below it is inset, which reads as
+// the tabs having been forgotten rather than as a deliberate edge-to-edge strip.
+.tbr-tabs {
+  flex: 0 0 auto;
+  padding: var(--space-3) var(--space-4) 0;
+}
+
+.tbr-panels {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+}
+
+.tbr-panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  // A class-level `display` outranks the user-agent's `[hidden] { display: none }`, so without this
+  // every panel stays visible and the three stack on top of each other at inset 0. The panels stay
+  // in the DOM rather than behind an @if so the search text and collapsed groups survive a tab switch.
+  &[hidden] {
+    display: none;
+  }
+}

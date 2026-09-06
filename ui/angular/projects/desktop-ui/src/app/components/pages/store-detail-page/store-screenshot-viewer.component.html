@@ -1,0 +1,31 @@
+<shared-modal [heading]="heading()" size="large" [showFooter]="false" (close)="onClose()">
+  <div class="viewer-body">
+    <button
+      type="button"
+      class="viewer-nav viewer-prev"
+      [disabled]="!hasMultiple()"
+      [attr.aria-label]="'macrodeck.app:Store.Page.PreviousScreenshotAriaLabel' | translate"
+      (click)="prev()">
+      <span class="icon icon-arrow-left icon-md"></span>
+    </button>
+
+    <figure class="viewer-figure">
+      <img [src]="currentUrl()" [alt]="currentCaption()">
+    </figure>
+
+    <button
+      type="button"
+      class="viewer-nav viewer-next"
+      [disabled]="!hasMultiple()"
+      [attr.aria-label]="'macrodeck.app:Store.Page.NextScreenshotAriaLabel' | translate"
+      (click)="next()">
+      <span class="icon icon-arrow-right icon-md"></span>
+    </button>
+  </div>
+
+  @if (currentCaption()) {
+    <p class="viewer-caption">{{ currentCaption() }}</p>
+  }
+
+  <div class="viewer-counter">{{ counter() }}</div>
+</shared-modal>

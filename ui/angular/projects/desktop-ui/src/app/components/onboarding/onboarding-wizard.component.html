@@ -1,0 +1,191 @@
+@if (onboarding.visible()) {
+  <shared-modal [heading]="stepHeading()" size="medium" [closeOnOverlay]="false" [showClose]="false">
+    @switch (step()) {
+      @case ('welcome') {
+        <p class="ob-body">{{ appStrings.Onboarding.Welcome.Body | translate }}</p>
+      }
+
+      @case ('connect') {
+        <p class="ob-lead">{{ appStrings.Onboarding.Connect.Subtitle | translate }}</p>
+
+        <div class="ob-option">
+          <div class="ob-option-text">
+            <span class="ob-option-title">{{ appStrings.Shell.ConnectionPanel.ConfigurationUi | translate }}</span>
+            <span class="ob-option-description">{{ appStrings.Onboarding.Connect.DesktopUiDescription | translate }}</span>
+          </div>
+        </div>
+
+        <div class="ob-option">
+          <div class="ob-option-text">
+            <span class="ob-option-title">{{ appStrings.Shell.ConnectionPanel.WebClient | translate }}</span>
+            <span class="ob-option-description">{{ appStrings.Onboarding.Connect.WebClientDescription | translate }}</span>
+          </div>
+        </div>
+
+        <div class="ob-option ob-option-unavailable">
+          <div class="ob-option-text">
+            <span class="ob-option-title">
+              {{ appStrings.Onboarding.Connect.NativeAppTitle | translate }}
+              <span class="ob-badge">{{ appStrings.Onboarding.Connect.NativeAppBadge | translate }}</span>
+            </span>
+            <span class="ob-option-description">{{ appStrings.Onboarding.Connect.NativeAppDescription | translate }}</span>
+          </div>
+        </div>
+
+        <span class="ob-section-label">{{ appStrings.Shell.ConnectionPanel.Addresses | translate }}</span>
+
+        @if (connectionLoading()) {
+          <p class="ob-muted">{{ appStrings.Shell.ConnectionPanel.Loading | translate }}</p>
+        } @else if (connection(); as info) {
+          @if (info.publicListenerUnavailable) {
+            <p class="ob-muted">{{ appStrings.Shell.ConnectionPanel.PublicListenerUnavailable | translate }}</p>
+          } @else if (endpoints().length === 0) {
+            <p class="ob-muted">{{ appStrings.Shell.ConnectionPanel.NoInterfaces | translate }}</p>
+          } @else {
+            @for (endpoint of endpoints(); track url(endpoint, 'client')) {
+              <div class="ob-address">
+                <span class="ob-address-url">{{ url(endpoint, 'client') }}</span>
+                <div class="ob-address-actions">
+                  <shared-button variant="secondary" size="compact" (click)="openTarget(endpoint, 'config')">
+                    {{ appStrings.Shell.ConnectionPanel.ConfigurationUi | translate }}
+                  </shared-button>
+                  <shared-button variant="secondary" size="compact" (click)="openTarget(endpoint, 'client')">
+                    {{ appStrings.Shell.ConnectionPanel.WebClient | translate }}
+                  </shared-button>
+                </div>
+              </div>
+            }
+          }
+        } @else {
+          <p class="ob-muted">{{ appStrings.Shell.ConnectionPanel.Unavailable | translate }}</p>
+        }
+      }
+
+      @case ('recovery-key') {
+        <p class="ob-lead">{{ appStrings.Onboarding.RecoveryKey.Subtitle | translate }}</p>
+        <p class="ob-body">{{ appStrings.Onboarding.RecoveryKey.OtherComputer | translate }}</p>
+        <p class="ob-body">{{ appStrings.Onboarding.RecoveryKey.Reinstall | translate }}</p>
+        <p class="ob-body">{{ appStrings.Onboarding.RecoveryKey.Loss | translate }}</p>
+
+        @if (recoveryKeyLoadState() === 'loading') {
+          <shared-loading-state [message]="appStrings.Settings.Backups.RecoveryKeyLoading | translate" />
+        } @else if (recoveryKeyLoadState() === 'failed') {
+          <p class="ob-warning">
+            <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+            <span>{{ appStrings.Onboarding.RecoveryKey.LoadFailed | translate }}</span>
+          </p>
+          <shared-button variant="secondary" (click)="retryLoadRecoveryKey()">
+            {{ 'macrodeck:Common.Retry' | translate }}
+          </shared-button>
+        } @else if (recoveryKeySatisfied()) {
+          <p class="ob-success">
+            <span class="icon icon-check icon-sm" aria-hidden="true"></span>
+            <span>{{ appStrings.Onboarding.RecoveryKey.Saved | translate }}</span>
+          </p>
+        } @else if (recoveryKeyActionFailed() === 'reveal') {
+          <p class="ob-warning">
+            <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+            <span>{{ appStrings.Onboarding.RecoveryKey.RevealUnavailable | translate }}</span>
+          </p>
+          <shared-button variant="secondary" [disabled]="recoveryKeyWorking()" (click)="requestReveal()">
+            {{ appStrings.Settings.Backups.ShowRecoveryKeyButton | translate }}
+          </shared-button>
+        } @else if (recoveryKeyActionFailed() === 'create') {
+          <p class="ob-warning">
+            <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+            <span>{{ appStrings.Onboarding.RecoveryKey.CreateFailed | translate }}</span>
+          </p>
+          <shared-button variant="primary" [loading]="recoveryKeyWorking()" (click)="createRecoveryKey()">
+            {{ appStrings.Settings.Backups.CreateRecoveryKeyButton | translate }}
+          </shared-button>
+        } @else if (recoveryKeyState()?.availability === 'None') {
+          <p class="ob-warning">
+            <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+            <span>{{ appStrings.Settings.Backups.RecoveryKeyNoneWarning | translate }}</span>
+          </p>
+          <shared-button variant="primary" [loading]="recoveryKeyWorking()" (click)="createRecoveryKey()">
+            {{ appStrings.Settings.Backups.CreateRecoveryKeyButton | translate }}
+          </shared-button>
+        } @else if (recoveryKeyState()?.availability === 'Missing') {
+          <p class="ob-warning">
+            <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+            <span>{{ appStrings.Settings.Backups.RecoveryKeyMissingWarning | translate }}</span>
+          </p>
+          <p class="ob-muted">{{ appStrings.Onboarding.RecoveryKey.MissingHint | translate }}</p>
+        } @else {
+          @if (!recoveryKeyState()?.exportedAt) {
+            <p class="ob-warning">
+              <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+              <span>{{ appStrings.Settings.Backups.RecoveryKeyNeverShownWarning | translate }}</span>
+            </p>
+          }
+          <shared-button variant="secondary" [disabled]="recoveryKeyWorking()" (click)="requestReveal()">
+            {{ appStrings.Settings.Backups.ShowRecoveryKeyButton | translate }}
+          </shared-button>
+        }
+
+        @if (recoveryKeyModal(); as m) {
+          @switch (m.kind) {
+            @case ('revealConfirm') {
+              <shared-confirmation-modal
+                [heading]="appStrings.Settings.Backups.RevealConfirmHeading | translate"
+                [message]="appStrings.Settings.Backups.RevealConfirmMessage | translate"
+                [confirmText]="appStrings.Settings.Backups.ShowKeyButton | translate"
+                [cancelText]="'macrodeck:Common.Cancel' | translate"
+                (confirm)="confirmReveal()"
+                (cancel)="cancelReveal()" />
+            }
+            @case ('keyModal') {
+              <shared-recovery-key-modal
+                [mode]="m.mode"
+                [key]="m.key"
+                [requireAcknowledgement]="true"
+                (acknowledged)="onRecoveryKeyAcknowledged()"
+                (closed)="closeRecoveryKeyModal()" />
+            }
+          }
+        }
+      }
+
+      @case ('links') {
+        <p class="ob-lead">{{ appStrings.Onboarding.Links.Subtitle | translate }}</p>
+
+        @for (link of links; track link.url) {
+          <div class="ob-option">
+            <div class="ob-option-text">
+              <span class="ob-option-title">{{ link.title | translate }}</span>
+              <span class="ob-option-description">{{ link.description | translate }}</span>
+            </div>
+            <shared-button variant="secondary" (click)="openLink(link.url)">
+              {{ appStrings.Onboarding.Connect.Open | translate }}
+            </shared-button>
+          </div>
+        }
+      }
+    }
+
+    <div modal-footer class="ob-footer">
+      <span class="ob-progress" role="status">
+        {{ stepProgress() }}
+        @if (blockedOnCurrentStep() && recoveryKeyLoadState() !== 'loading') {
+          <span class="ob-blocked-reason">{{ appStrings.Onboarding.RecoveryKey.ContinueBlocked | translate }}</span>
+        }
+      </span>
+
+      @if (!isFirstStep()) {
+        <shared-button variant="secondary" (click)="back()">
+          {{ appStrings.Onboarding.Back | translate }}
+        </shared-button>
+      }
+      @if (isLastStep()) {
+        <shared-button variant="primary" (click)="finish()">
+          {{ appStrings.Onboarding.Finish | translate }}
+        </shared-button>
+      } @else {
+        <shared-button variant="primary" [disabled]="blockedOnCurrentStep()" (click)="next()">
+          {{ appStrings.Onboarding.Next | translate }}
+        </shared-button>
+      }
+    </div>
+  </shared-modal>
+}

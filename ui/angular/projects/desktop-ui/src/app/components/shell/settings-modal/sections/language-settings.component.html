@@ -1,0 +1,15 @@
+<div class="language">
+  <shared-settings-section
+    [heading]="'macrodeck:Settings.Language' | translate"
+    [description]="'macrodeck.app:Settings.Language.Description' | translate">
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Language.ActiveLabel' | translate"
+      [description]="'macrodeck.app:Settings.Language.ActiveDescription' | translate">
+      <shared-select
+        [options]="cultureOptions()"
+        [disabled]="applying()"
+        [ngModel]="selected()"
+        (ngModelChange)="selectCulture($event)" />
+    </shared-settings-row>
+  </shared-settings-section>
+</div>

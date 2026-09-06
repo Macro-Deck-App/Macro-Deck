@@ -1,0 +1,31 @@
+:host {
+  display: inline-flex;
+  min-width: 0;
+}
+
+.cb-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  min-width: 0;
+}
+
+.cb-box {
+  width: 0.8125rem;
+  height: 0.8125rem;
+  flex-shrink: 0;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.cb-box:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.cb-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  min-width: 0;
+}

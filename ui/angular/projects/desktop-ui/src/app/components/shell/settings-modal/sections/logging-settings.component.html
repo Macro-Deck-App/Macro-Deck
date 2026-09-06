@@ -1,0 +1,15 @@
+<div class="logging">
+  <shared-settings-section
+    [heading]="'macrodeck:Settings.Logging' | translate"
+    [description]="'macrodeck.app:Settings.Logging.Description' | translate">
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Logging.MinimumLevelLabel' | translate"
+      [description]="'macrodeck.app:Settings.Logging.MinimumLevelDescription' | translate">
+      <shared-select
+        [options]="levelOptions()"
+        [disabled]="!loaded()"
+        [ngModel]="minimumLevel()"
+        (ngModelChange)="setLevel($event)" />
+    </shared-settings-row>
+  </shared-settings-section>
+</div>

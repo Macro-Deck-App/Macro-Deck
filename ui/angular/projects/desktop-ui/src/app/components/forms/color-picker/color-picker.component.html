@@ -1,0 +1,155 @@
+@if (label()) {
+  <label class="cp-label">{{ label() }}</label>
+}
+
+<div class="cp-track" role="group" [attr.aria-label]="pickerAriaLabel()">
+  @if (showsReset()) {
+    <button
+      class="cp-cell cp-reset"
+      type="button"
+      [title]="defaultColorTitle()"
+      [attr.aria-label]="resetAriaLabel()"
+      (click)="select(effectiveResetValue()!)">
+      <svg class="cp-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+          d="M20.49 9A9 9 0 1 0 21 12"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+        <polyline
+          points="21 4 21 9 16 9"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+    </button>
+  }
+
+  @for (preset of effectivePresets(); track preset.value) {
+    <button
+      class="cp-cell cp-swatch"
+      type="button"
+      [class.cp-selected]="value() === preset.value"
+      [style.--cp-fill]="preset.value"
+      [title]="preset.label"
+      [attr.aria-pressed]="value() === preset.value"
+      [attr.aria-label]="preset.label"
+      (click)="select(preset.value)">
+      @if (value() === preset.value) {
+        <svg class="cp-check" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <polyline
+            points="20 6 9 17 4 12"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      }
+    </button>
+  }
+
+  @if (allowCustom()) {
+    <button
+      #customTrigger
+      class="cp-cell cp-custom"
+      type="button"
+      aria-haspopup="dialog"
+      [class.cp-selected]="isCustom()"
+      [title]="customColorTitle()"
+      [attr.aria-label]="customColorTitle()"
+      [attr.aria-expanded]="isPickerOpen()"
+      [style.--cp-fill]="isCustom() ? customFill() : null"
+      (click)="togglePicker()">
+      @if (!isCustom()) {
+        <svg class="cp-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <line
+            x1="12" y1="5" x2="12" y2="19"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round" />
+          <line
+            x1="5" y1="12" x2="19" y2="12"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round" />
+        </svg>
+      }
+    </button>
+
+    <shared-overlay-panel
+      [anchor]="customTrigger"
+      [isOpen]="isPickerOpen()"
+      [maxHeight]="null"
+      (dismissed)="closePicker()">
+      <div class="cp-popover" role="dialog" [attr.aria-label]="customColorTitle()">
+        <div
+          class="cp-area"
+          tabindex="0"
+          role="slider"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          [style.--cp-hue]="hueColor()"
+          [attr.aria-label]="areaAriaLabel()"
+          [attr.aria-valuenow]="saturationPercent()"
+          [attr.aria-valuetext]="hexText()"
+          (pointerdown)="onAreaPointerDown($event)"
+          (pointermove)="onAreaPointerMove($event)"
+          (keydown)="onAreaKeydown($event)">
+          <div
+            class="cp-area-thumb"
+            [style.left.%]="saturationPercent()"
+            [style.top.%]="100 - brightnessPercent()"
+            [style.--cp-fill]="customFill()"></div>
+        </div>
+
+        <input
+          class="cp-hue"
+          type="range"
+          min="0"
+          max="360"
+          step="1"
+          [attr.aria-label]="hueAriaLabel()"
+          [value]="hsv().h"
+          (input)="onHueInput($event)">
+
+        <div class="cp-row">
+          <input
+            class="cp-hex"
+            type="text"
+            spellcheck="false"
+            autocomplete="off"
+            maxlength="7"
+            [attr.aria-label]="hexAriaLabel()"
+            [value]="hexText()"
+            (input)="onHexInput($event)"
+            (blur)="onHexBlur()">
+
+          @if (supportsEyedropper) {
+            <button
+              class="cp-eyedropper"
+              type="button"
+              [title]="eyedropperLabel()"
+              [attr.aria-label]="eyedropperLabel()"
+              (click)="pickFromScreen()">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true">
+                <path d="m2 22 1-1h3l9-9" />
+                <path d="M3 21v-3l9-9" />
+                <path
+                  d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3z" />
+              </svg>
+            </button>
+          }
+        </div>
+      </div>
+    </shared-overlay-panel>
+  }
+</div>

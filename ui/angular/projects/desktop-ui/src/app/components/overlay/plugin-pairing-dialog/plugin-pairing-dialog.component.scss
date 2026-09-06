@@ -1,0 +1,125 @@
+.plugin-pairing {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.plugin-pairing-warning,
+.plugin-pairing-danger,
+.plugin-pairing-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+
+  p {
+    margin: 0;
+  }
+
+  .icon {
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+  }
+}
+
+.plugin-pairing-warning {
+  background: color-mix(in srgb, var(--color-warning) 12%, transparent);
+  color: var(--color-text-secondary);
+
+  .icon {
+    color: var(--color-warning);
+  }
+}
+
+.plugin-pairing-danger {
+  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+  color: var(--color-danger);
+
+  .icon {
+    color: var(--color-danger);
+  }
+}
+
+.plugin-pairing-danger-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.plugin-pairing-note {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+
+  .icon {
+    color: var(--color-text-muted);
+  }
+}
+
+.plugin-pairing-facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.25rem var(--space-3);
+  margin: 0;
+  min-width: 0;
+  font-size: var(--text-base);
+
+  dt,
+  dd {
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+  }
+
+  dt {
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  dd {
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: inherit;
+  }
+}
+
+.plugin-pairing-primary {
+  font-family: var(--font-mono);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.plugin-pairing-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.plugin-pairing-title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.plugin-pairing-hint {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.plugin-pairing-error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+}
+
+.plugin-pairing-meta {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}

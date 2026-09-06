@@ -1,0 +1,142 @@
+@use '../../../../styles/index' as ds;
+
+// The shell hands this route a fixed-height box with overflow hidden, so the page owns its own
+// scrollport - without one a catalog taller than the window simply cannot be reached.
+:host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.store-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-2) var(--space-4);
+}
+
+// Centring lives here rather than on the scrollport: a scroll container that is itself centred
+// fights its own margins.
+.store-page-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.store-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.store-title {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+}
+
+.store-subtitle {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.store-page-content > shared-error-banner {
+  display: block;
+  margin-bottom: var(--space-3);
+}
+
+.store-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+.store-search {
+  position: relative;
+  display: flex;
+
+  shared-input {
+    flex: 1;
+    min-width: 0;
+    --input-action-inline-start-gutter: var(--space-5);
+  }
+}
+
+.store-search-icon {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.store-facets {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.store-sort {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+
+  shared-select {
+    min-width: 12rem;
+  }
+}
+
+.store-sort-label {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.store-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.store-load-more {
+  display: flex;
+  justify-content: center;
+}
+
+@include ds.breakpoint-down('sm') {
+  .store-facets {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .store-sort {
+    justify-content: space-between;
+  }
+}
+
+// Temporary: covers the page until the store backend is live. Remove together with the overlay in
+// the template.
+.store-coming-soon {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-primary);
+}

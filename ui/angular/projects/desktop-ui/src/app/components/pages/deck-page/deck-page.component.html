@@ -1,0 +1,212 @@
+@if (folderService.isLoading()) {
+  <div class="deck-page loading-state">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <p>{{ 'macrodeck.app:Deck.LoadingFolders' | translate }}</p>
+    </div>
+  </div>
+} @else if (!folderService.selectedFolder()) {
+  <div class="deck-page empty-state">
+    <div class="empty-content">
+      <p>{{ 'macrodeck.app:Deck.NoFoldersAvailable' | translate }}</p>
+      @if (folderService.loadError()) {
+        <p class="error-message">{{ folderService.loadError() }}</p>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="deck-page">
+    <div class="deck-content">
+      <div class="deck-header">
+        <div>
+          <h1 class="deck-title">{{ folderService.currentFolderName() }}</h1>
+          @if (folderService.currentIsWidgetGrid()) {
+            <p class="deck-subtitle">{{ 'macrodeck.app:Deck.GridSubtitle' | translate:{ cols: folderService.currentCols(), rows: folderService.currentRows() } }}</p>
+          } @else {
+            <p class="deck-subtitle">{{ folderViewName() }}</p>
+          }
+        </div>
+        <div class="deck-header-actions">
+          @if (folderService.currentIsWidgetGrid()) {
+            @if (!profileService.isCurrentProfileLocked()) {
+              <shared-button
+                [variant]="editMode() ? 'primary' : 'secondary'"
+                (click)="toggleEditMode()">
+                @if (editMode()) {
+                  <span class="icon icon-lock icon-md"></span>
+                  <span>{{ 'macrodeck.app:Deck.Lock' | translate }}</span>
+                } @else {
+                  <span class="icon icon-unlock icon-md"></span>
+                  <span>{{ 'macrodeck.app:Deck.Unlock' | translate }}</span>
+                }
+              </shared-button>
+            } @else {
+              <span class="deck-readonly-badge">
+                <span class="icon icon-lock icon-md"></span>
+                <span>{{ 'macrodeck.app:Deck.ReadOnly' | translate }}</span>
+              </span>
+            }
+          }
+          @if (folderService.currentIsWidgetGrid() && editMode()) {
+            <app-grid-settings-menu
+              [cols]="folderService.selectedFolder()?.cols ?? null"
+              [rows]="folderService.selectedFolder()?.rows ?? null"
+              [effectiveCols]="folderService.currentCols()"
+              [effectiveRows]="folderService.currentRows()"
+              [minCols]="folderService.minCols()"
+              [minRows]="folderService.minRows()"
+              [maxCols]="folderService.maxCols()"
+              [maxRows]="folderService.maxRows()"
+              [colsLocked]="folderService.colsLocked()"
+              [rowsLocked]="folderService.rowsLocked()"
+              [lockNote]="gridLockNote()"
+              [spacingHonoured]="folderService.spacingHonoured()"
+              [cornerRadiusHonoured]="folderService.cornerRadiusHonoured()"
+              [noEffectNote]="noEffectNote()"
+              [background]="folderService.currentBackground()"
+              [showWidgetAppearance]="true"
+              [spacing]="folderService.selectedFolder()?.spacing ?? null"
+              [borderRadius]="folderService.selectedFolder()?.borderRadius ?? null"
+              [effectiveSpacing]="folderService.currentSpacing()"
+              [effectiveBorderRadius]="folderService.currentBorderRadius()"
+              (colsChange)="onColsChange($event)"
+              (rowsChange)="onRowsChange($event)"
+              (backgroundChange)="onBackgroundChange($event)"
+              (spacingChange)="onSpacingChange($event)"
+              (borderRadiusChange)="onBorderRadiusChange($event)">
+          </app-grid-settings-menu>
+        }
+      </div>
+    </div>
+
+    @if (!folderService.currentIsWidgetGrid()) {
+      <div class="deck-folder-view-container">
+        <shared-folder-view-host
+          [folderId]="folderService.selectedFolderId() ?? ''"
+          [viewId]="folderService.currentViewId()"
+          [canGoBack]="folderService.canGoBack()"
+          (back)="folderService.goBack()"
+          (openIntegrations)="openIntegrations()"
+          (changeView)="openFolderSettings()">
+        </shared-folder-view-host>
+      </div>
+    } @else {
+    <div
+      class="deck-grid-container"
+      sharedShellDropTarget
+      [dropKinds]="deckDropKinds"
+      [dropAcceptAt]="acceptDeckDrop"
+      [highlightHost]="!dropTargetCell()"
+      (shellDropHover)="onShellDropHover($event)"
+      (shellDropped)="onShellDropped($event)">
+      <app-deck-editor-grid
+        [cols]="folderService.currentCols()"
+        [rows]="folderService.currentRows()"
+        [widgets]="folderService.currentWidgets()"
+        [background]="folderService.currentBackground()"
+        [spacing]="folderService.currentSpacing()"
+        [borderRadius]="folderService.currentBorderRadius()"
+        [editMode]="editMode()"
+        [canPaste]="clipboard.hasContent()"
+        [cutWidgetIds]="clipboard.cutWidgetIds()"
+        [dropTargetCell]="dropTargetCell()"
+        [busyCell]="creatingWidgetCell()"
+        [selectedWidgetIds]="selection.ids()"
+        (layoutCommit)="onLayoutCommit($event)"
+        (widgetSelect)="onWidgetSelect($event)"
+        (marqueeSelect)="onMarqueeSelect($event)"
+        (selectionClear)="onSelectionClear()"
+        (widgetDelete)="onWidgetDelete($event)"
+        (widgetEdit)="onWidgetEdit($event)"
+        (widgetCopy)="onWidgetCopy($event)"
+        (widgetCut)="onWidgetCut($event)"
+        (widgetPaste)="onWidgetPaste($event)"
+        (widgetExport)="onWidgetExport($event)"
+        (widgetPinnedChange)="onWidgetPinnedChange($event)"
+        (widgetsImport)="onWidgetsImport($event)"
+        (widgetDataChange)="onWidgetDataChange($event)"
+        (widgetTrigger)="onWidgetTrigger($event)"
+        (cellClick)="onCellClick($event)">
+      </app-deck-editor-grid>
+    </div>
+    }
+  </div>
+
+  @if (deckError()) {
+    <div class="deck-error">
+      <shared-error-banner [message]="deckError()!" (dismiss)="dismissDeckError()"></shared-error-banner>
+    </div>
+  }
+
+  <app-folder-navigation (changeView)="openFolderSettings($event)"></app-folder-navigation>
+
+  @if (isEditingFolderView()) {
+    <shared-modal
+      [heading]="'macrodeck.app:Deck.FolderView.Label' | translate"
+      size="small"
+      (close)="cancelFolderSettings()">
+      <app-folder-view-picker
+        [folderId]="editingFolderId()"
+        [(viewId)]="editViewId"
+        [(configuration)]="editViewConfiguration" />
+      <div modal-footer>
+        <shared-button variant="secondary" (click)="cancelFolderSettings()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button variant="primary" (click)="confirmFolderSettings()">{{ 'macrodeck:Common.Save' | translate }}</shared-button>
+      </div>
+    </shared-modal>
+  }
+</div>
+}
+
+@if (showTypeSelector()) {
+  <app-widget-type-selector
+    (typeSelected)="onWidgetTypeSelected($event)"
+    (cancel)="closeTypeSelector()">
+  </app-widget-type-selector>
+}
+
+@if (showDeleteConfirm()) {
+  <shared-confirmation-modal
+    [heading]="deleteConfirmHeading()"
+    [message]="deleteConfirmMessage()"
+    [confirmText]="'macrodeck:Common.Delete' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmWidgetDelete()"
+    (cancel)="cancelWidgetDelete()">
+  </shared-confirmation-modal>
+}
+
+<input
+  #widgetImportInput
+  type="file"
+  accept=".macroDeckWidget"
+  hidden
+  (change)="onImportFileSelected($event)" />
+
+@if (exportWidgetId()) {
+  <shared-export-options-modal
+    [heading]="'macrodeck.app:Deck.ExportWidgetHeading' | translate"
+    [description]="'macrodeck.app:Deck.ExportWidgetDescription' | translate"
+    [options]="exportToggles"
+    (confirmed)="onExportConfirmed($event)"
+    (cancelled)="cancelExport()">
+  </shared-export-options-modal>
+}
+
+@if (archiveImport.summary(); as archive) {
+  <shared-archive-preview-modal
+    [summary]="archive"
+    (confirmed)="archiveImport.confirm()"
+    (cancelled)="cancelImport()">
+  </shared-archive-preview-modal>
+}
+
+@if (archiveImport.passwordVisible()) {
+  <shared-import-password-modal
+    [heading]="'macrodeck.app:Deck.ImportWidgetsHeading' | translate"
+    [invalid]="archiveImport.passwordInvalid()"
+    (submitted)="archiveImport.submitPassword($event)"
+    (cancelled)="cancelImport()">
+  </shared-import-password-modal>
+}

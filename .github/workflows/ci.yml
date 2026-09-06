@@ -1,0 +1,515 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# dorny/test-reporter publishes the .NET test results as a check run.
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
+env:
+  NODE_VERSION: 22
+  DOTNET_VERSION: 10.0.x
+  # CI validates the installed product configuration. Local IDE builds keep
+  # the Development default in Directory.Build.props and ui/bootstrapper/build.rs.
+  BUILD_CHANNEL: Production
+
+jobs:
+  host:
+    name: Host build & tests
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      # For ci/scripts/verify-nuget-packages.mjs below.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      # Warnings gate: any build warning fails the run (CS8602 is already an error via Directory.Build.props).
+      - name: Build
+        run: dotnet build MacroDeck.slnx -c Release -p:BuildChannel=${{ env.BUILD_CHANNEL }} -warnaserror
+
+      # Runs the cross-platform + SDK tests and the Linux platform project; the Windows/macOS
+      # fixtures skip here via their [Platform] guard and run in the platform-tests matrix instead.
+      - name: Test
+        run: dotnet test MacroDeck.slnx -c Release -p:BuildChannel=${{ env.BUILD_CHANNEL }} --no-build --logger trx --results-directory TestResults
+
+      # dotnet test is the pass/fail gate; this step only surfaces the results as a check.
+      - name: Report test results
+        uses: dorny/test-reporter@v3
+        if: always()
+        with:
+          name: .NET tests
+          path: TestResults/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+          fail-on-empty: false
+
+      # CI packs but never pushes: a NuGet layout mistake - an analyzer landing under lib/ instead of
+      # analyzers/dotnet/cs/, a broken tool manifest, a package that quietly stopped being packable -
+      # must surface here rather than when a release publishes the family to nuget.org.
+      - name: Pack
+        run: >
+          dotnet pack MacroDeck.slnx -c Release -p:BuildChannel=${{ env.BUILD_CHANNEL }}
+          --no-build -o ${{ runner.temp }}/packages
+
+      # CI packs at whatever Directory.Build.props defaults to, so ask MSBuild rather than repeating
+      # that default here. A release instead passes an explicit version into the same pack command
+      # (nuget-pack.yml), which is where the version itself is the thing being checked.
+      - name: Resolve packed version
+        id: package-version
+        run: |
+          set -euo pipefail
+          version="$(dotnet msbuild sdk/src/MacroDeck.Sdk/MacroDeck.Sdk.csproj \
+            -getProperty:PackageVersion -p:BuildChannel=${{ env.BUILD_CHANNEL }})"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      # dotnet pack succeeding only proves the nuspecs are valid, not that the package family is
+      # complete or that the two hand-authored layouts inside it are right. Same script the release
+      # runs before publishing, so a package this gate accepts is one the release can ship.
+      - name: Verify packages
+        run: >
+          node ci/scripts/verify-nuget-packages.mjs
+          "${{ runner.temp }}/packages" "${{ steps.package-version.outputs.version }}"
+
+  format:
+    name: Formatting (ReSharper)
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    # To push the cleanup back to the branch instead of only telling the author about it.
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # A pull_request run checks out the merge commit, which is not a branch and cannot be
+          # pushed. Take the head branch itself so a cleanup commit lands where the author sees it.
+          ref: ${{ github.head_ref || github.ref }}
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      # jb cleanupcode cannot open .slnx solutions yet (it silently finds nothing and
+      # exits 0), so generate a classic .sln that lists the same projects to work on.
+      # --format sln is required: newer SDKs default `dotnet new sln` to .slnx, which
+      # jb cleanupcode cannot open (see below); force the classic .sln explicitly.
+      - name: Generate .sln for ReSharper
+        run: |
+          dotnet new sln -n MacroDeck.Format --format sln
+          dotnet sln MacroDeck.slnx list | grep '\.csproj$' | xargs dotnet sln MacroDeck.Format.sln add
+
+      - name: Restore
+        run: dotnet restore MacroDeck.Format.sln
+
+      - name: Install ReSharper command-line tools
+        run: |
+          dotnet tool install --global JetBrains.ReSharper.GlobalTools --version 2026.1.3
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      # Reformat in place using ONLY the repo settings (no global/personal layers), so
+      # the result is identical on any machine. A resulting git diff means the committed
+      # code does not match MacroDeck.slnx.DotSettings. Two passes because cleanupcode
+      # does not always converge in one, and the result here is committed rather than
+      # only reported - a half-converged tree would be pushed back as the fix.
+      - name: Reformat with ReSharper
+        run: |
+          for _ in 1 2; do
+            jb cleanupcode MacroDeck.Format.sln \
+              --profile="Built-in: Reformat Code" \
+              --settings=MacroDeck.slnx.DotSettings \
+              --no-buildin-settings \
+              --no-build \
+              --verbosity=WARN
+          done
+
+      # Where the branch can be written, the formatting is simply applied: telling an author to run a
+      # four-command incantation to reproduce what this job just did is work no one needs to do twice.
+      # A push authenticated with GITHUB_TOKEN deliberately starts no new workflow run, so this cannot
+      # loop - it also means the cleanup commit itself is not re-checked here, which is fine because
+      # the tree it was made from is the one this job just verified.
+      #
+      # A fork's pull request gets a read-only token and nothing to push to, and so does a scheduled
+      # or dispatched run on main. Those keep the original behaviour: report the diff and fail.
+      - name: Commit the cleanup, or report it
+        env:
+          CAN_PUSH: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -eu
+          rm -f MacroDeck.Format.sln
+          if git diff --quiet; then
+            {
+              echo "## ReSharper formatting"
+              echo
+              echo "All C# code matches \`MacroDeck.slnx.DotSettings\`."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          files="$(git diff --name-only)"
+          count="$(printf '%s\n' "$files" | wc -l | tr -d ' ')"
+
+          if [ "$CAN_PUSH" = "true" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add --update
+            git commit -m "style: apply ReSharper code cleanup"
+            git push origin "HEAD:${HEAD_REF}"
+            {
+              echo "## ReSharper formatting"
+              echo
+              echo "Reformatted **${count} file(s)** and pushed the result to \`${HEAD_REF}\`."
+              echo "Pull before you continue working on the branch."
+              echo
+              echo "<details><summary>Reformatted files (${count})</summary>"
+              echo
+              echo '```'
+              printf '%s\n' "$files"
+              echo '```'
+              echo
+              echo '</details>'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          git diff > formatting.diff
+          {
+            echo "## ReSharper formatting"
+            echo
+            echo "**${count} file(s)** do not match \`MacroDeck.slnx.DotSettings\`, and this run has no"
+            echo "branch it may push to."
+            echo
+            echo "Reformat locally (Rider *Code Cleanup* with the 'Reformat Code' profile, or the"
+            echo "command below) and commit the result:"
+            echo
+            echo '```bash'
+            echo 'dotnet new sln -n MacroDeck.Format --format sln'
+            echo "dotnet sln MacroDeck.slnx list | grep '\\.csproj\$' | xargs dotnet sln MacroDeck.Format.sln add"
+            echo 'dotnet tool install --global JetBrains.ReSharper.GlobalTools --version 2026.1.3'
+            echo 'dotnet restore MacroDeck.Format.sln'
+            echo '# cleanupcode can need a second pass to converge; running it twice is enough'
+            echo 'for _ in 1 2; do'
+            echo '  jb cleanupcode MacroDeck.Format.sln --profile="Built-in: Reformat Code" \'
+            echo '    --settings=MacroDeck.slnx.DotSettings --no-buildin-settings --no-build'
+            echo 'done'
+            echo 'rm MacroDeck.Format.sln'
+            echo '```'
+            echo
+            echo "<details><summary>Affected files (${count})</summary>"
+            echo
+            echo '```'
+            printf '%s\n' "$files"
+            echo '```'
+            echo
+            echo '</details>'
+            echo
+            echo "<details><summary>Required changes (diff, first 400 lines)</summary>"
+            echo
+            echo '```diff'
+            head -400 formatting.diff
+            echo '```'
+            echo
+            echo '</details>'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::${count} file(s) are not formatted per MacroDeck.slnx.DotSettings. See the job summary."
+          exit 1
+
+  # Same runners the release builds on. A platform fixture that passes here and fails there - or the
+  # reverse - is the failure mode this exists to rule out, and it cannot do that from a different
+  # machine than the one that ships the product.
+  platform-tests:
+    name: Host tests (${{ matrix.name }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            runner: blacksmith-2vcpu-windows-2025
+            project: host/tests/MacroDeckHost.Tests.UnitTests.Windows
+          - name: macOS
+            runner: blacksmith-2vcpu-ubuntu-2404
+            project: host/tests/MacroDeckHost.Tests.UnitTests.MacOS
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Test
+        run: dotnet test ${{ matrix.project }} -c Release -p:BuildChannel=${{ env.BUILD_CHANNEL }} --logger trx --results-directory TestResults
+
+      - name: Report test results
+        uses: dorny/test-reporter@v3
+        if: always()
+        with:
+          name: .NET tests (${{ matrix.name }})
+          path: TestResults/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+          fail-on-empty: false
+
+  ui:
+    name: UI tests & build (Linux)
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ui
+        run: npm ci
+
+      # The runner image decides which Chrome these specs run against, and that changes results the
+      # app does not control: hit-testing at a rounded corner answers differently on 144 than on 151.
+      # Pin it so a new runner image cannot move the suite.
+      - name: Pin Chrome
+        id: chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: '151'
+          install-dependencies: true
+
+      - name: Use the pinned Chrome
+        run: echo "CHROME_BIN=${{ steps.chrome.outputs.chrome-path }}" >> "$GITHUB_ENV"
+
+      - name: Verify icon names
+        run: node ci/scripts/verify-icon-names.mjs
+
+      - name: Verify app icons
+        run: node ci/scripts/verify-app-icons.mjs
+
+      - name: Build the framework-free runtime
+        working-directory: ui/runtime
+        run: npm run build
+
+      - name: Runtime compatibility gate
+        working-directory: ui/runtime
+        run: npm run check:es5
+
+      - name: Test the framework-free runtime
+        working-directory: ui/runtime
+        run: npm test
+
+      - name: Build and test the framework-free web client
+        working-directory: ui/web-client
+        run: |
+          npm run build
+          npm test
+
+      # The gate the runtime already passes, applied to what the client ships: the bundle the build
+      # just down-levelled, the transforms that produced it, and the compatibility audit over the
+      # emitted stylesheet (issue #829).
+      - name: Web client compatibility gate
+        working-directory: ui/web-client
+        run: |
+          npm run check:es5
+          npm run test:legacy
+
+      - name: Test desktop-ui
+        working-directory: ui/angular
+        run: npx ng test desktop-ui --watch=false --browsers=ChromeHeadless
+
+      - name: Dev proxy port check
+        working-directory: ui/angular
+        run: npm run test:proxy
+
+      - name: Dialog box parity
+        working-directory: ui/angular
+        run: npm run test:dialog-box
+
+      - name: Adapter layering
+        working-directory: ui/angular
+        run: npm run test:boundaries
+
+      - name: Release feed script tests
+        run: node --test ci/scripts/*.test.mjs
+
+      # Production build doubles as the UI build/warnings gate, with budgets enforced.
+      - name: Production build
+        working-directory: ui/angular
+        run: npm run build:prod
+
+      # Every device build is the same client with one module swapped, so a target that stopped
+      # building is a target nobody would notice until a device tried to load it.
+      - name: Device target builds
+        working-directory: ui/web-client
+        run: npm run build:carthing
+
+      - name: Device target wiring
+        run: node --test ci/scripts/verify-web-client-targets.test.mjs
+
+      # The worker refuses to serve a precached file whose content does not match what it recorded,
+      # so a step that rewrites an asset afterwards disables the PWA with no build error at all.
+      - name: Service worker manifest check
+        run: node ci/scripts/verify-worker-manifest.mjs ui/web-client/dist ui/web-client/dist-carthing
+
+  bootstrapper:
+    name: Bootstrapper build & tests
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ui/bootstrapper
+
+      - name: Install Linux packaging dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev \
+            librsvg2-dev patchelf libxdo-dev file
+
+      - name: Format check
+        working-directory: ui/bootstrapper
+        run: cargo fmt --check
+
+      # Warnings gate: clippy findings fail the run, mirroring -warnaserror on the host.
+      - name: Clippy
+        working-directory: ui/bootstrapper
+        run: cargo clippy --all-targets -- -D warnings
+        env:
+          # Cargo's namespaced input is derived from the workflow-wide source of truth.
+          MACRODECK_BUILD_CHANNEL: ${{ env.BUILD_CHANNEL }}
+
+      - name: Test
+        working-directory: ui/bootstrapper
+        run: cargo test
+        env:
+          # Cargo's namespaced input is derived from the workflow-wide source of truth.
+          MACRODECK_BUILD_CHANNEL: ${{ env.BUILD_CHANNEL }}
+
+  # The Linux job above never compiles anything behind #[cfg(windows)], and the Windows toolchain
+  # otherwise only runs in build.yml, which is workflow_dispatch-only - so platform-specific code
+  # such as the native file picker would reach a release build unbuilt (issue #864).
+  bootstrapper-windows:
+    name: Bootstrapper build & tests (Windows)
+    runs-on: blacksmith-4vcpu-windows-2025
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ui/bootstrapper
+
+      - name: Format check
+        working-directory: ui/bootstrapper
+        run: cargo fmt --check
+
+      # Warnings gate: clippy findings fail the run, mirroring -warnaserror on the host.
+      - name: Clippy
+        working-directory: ui/bootstrapper
+        run: cargo clippy --all-targets -- -D warnings
+        env:
+          # Cargo's namespaced input is derived from the workflow-wide source of truth.
+          MACRODECK_BUILD_CHANNEL: ${{ env.BUILD_CHANNEL }}
+
+      - name: Test
+        working-directory: ui/bootstrapper
+        run: cargo test
+        env:
+          # Cargo's namespaced input is derived from the workflow-wide source of truth.
+          MACRODECK_BUILD_CHANNEL: ${{ env.BUILD_CHANNEL }}
+
+  installer-hooks:
+    name: Installer hooks & firewall rule (Windows)
+    runs-on: blacksmith-4vcpu-windows-2025
+    steps:
+      - uses: actions/checkout@v5
+
+      # Pinned exact-version toolset (see Get-NsisToolset.ps1) - a version bump changes the key
+      # rather than invalidating this one, so a stale cache entry can never be silently reused.
+      - name: Cache NSIS toolset
+        id: nsis-cache
+        uses: actions/cache@v6
+        with:
+          path: ${{ runner.temp }}/nsis
+          key: nsis-3.11-tauri-utils-0.5.3
+
+      - name: Download NSIS toolset
+        if: steps.nsis-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: >
+          ./ui/bootstrapper/installer/tests/Get-NsisToolset.ps1
+          -Destination "${{ runner.temp }}/nsis"
+
+      # On-access scanning transiently locks freshly written executables (the compiled harnesses,
+      # the copied-and-renamed fake host processes) exactly the way a real locked host file does,
+      # which would make this suite indistinguishable from the bug it exists to catch. Best-effort
+      # only: a runner without Defender, or a policy that blocks Add-MpPreference, must not fail
+      # the job over a mitigation for a problem it may not even have.
+      - name: Exclude scratch directory from Windows Defender
+        continue-on-error: true
+        shell: pwsh
+        run: Add-MpPreference -ExclusionPath "${{ runner.temp }}/installer-tests"
+
+      - name: Run installer tests
+        shell: pwsh
+        run: >
+          ./ui/bootstrapper/installer/tests/Invoke-InstallerTests.ps1
+          -NsisRoot "${{ runner.temp }}/nsis"
+          -WorkRoot "${{ runner.temp }}/installer-tests"
+
+      - name: Upload harness logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: installer-test-logs
+          path: ${{ runner.temp }}/installer-tests/logs
+          if-no-files-found: ignore
+
+  # The same suite e2e.yml dispatches and build.yml gates a release on. It stages its own production
+  # host rather than reusing another job's output, which is what makes it a check of the shipped
+  # thing rather than of this workflow's wiring.
+  e2e:
+    name: E2E
+    uses: ./.github/workflows/e2e-run.yml

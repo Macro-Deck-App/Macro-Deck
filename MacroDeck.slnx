@@ -1,0 +1,75 @@
+<Solution>
+  <Folder Name="/host/" />
+  <Folder Name="/host/src/">
+    <Project Path="host/src/MacroDeckHost.Application/MacroDeckHost.Application.csproj" />
+    <Project Path="host/src/MacroDeckHost.Domain/MacroDeckHost.Domain.csproj" />
+    <Project Path="host/src/MacroDeckHost.Infrastructure/MacroDeckHost.Infrastructure.csproj" />
+    <Project Path="host/src/MacroDeckHost.Integrations/MacroDeckHost.Integrations.csproj" />
+    <Project Path="host/src/MacroDeckHost.Localization/MacroDeckHost.Localization.csproj" />
+    <Project Path="host/src/MacroDeckHost.Widgets/MacroDeckHost.Widgets.csproj" />
+    <Project Path="host/src/MacroDeckHost/MacroDeckHost.csproj" />
+  </Folder>
+  <Folder Name="/host/tests/">
+    <Project Path="host/tests/MacroDeckHost.Tests.PluginContractTests/MacroDeckHost.Tests.PluginContractTests.csproj" />
+    <Project Path="host/tests/MacroDeckHost.Tests.UnitTests/MacroDeckHost.Tests.UnitTests.csproj" />
+    <Project Path="host/tests/MacroDeckHost.Tests.UnitTests.Linux/MacroDeckHost.Tests.UnitTests.Linux.csproj" />
+    <Project Path="host/tests/MacroDeckHost.Tests.UnitTests.MacOS/MacroDeckHost.Tests.UnitTests.MacOS.csproj" />
+    <Project Path="host/tests/MacroDeckHost.Tests.UnitTests.Windows/MacroDeckHost.Tests.UnitTests.Windows.csproj" />
+  </Folder>
+  <Folder Name="/host/tests/fixtures/">
+    <Project Path="host/tests/fixtures/MacroDeckHost.Tests.PluginStub/MacroDeckHost.Tests.PluginStub.csproj" />
+  </Folder>
+  <Folder Name="/protocol/" />
+  <Folder Name="/protocol/src/">
+    <Project Path="protocol/src/MacroDeck.Plugin.Protocol/MacroDeck.Plugin.Protocol.csproj" />
+  </Folder>
+  <Folder Name="/protocol/tests/">
+    <Project Path="protocol/tests/MacroDeck.Plugin.Protocol.Tests.UnitTests/MacroDeck.Plugin.Protocol.Tests.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/sdk/" />
+  <Folder Name="/sdk/src/">
+    <Project Path="sdk/src/MacroDeck.Plugin.Analyzers/MacroDeck.Plugin.Analyzers.csproj" />
+    <Project Path="sdk/src/MacroDeck.Localization/MacroDeck.Localization.csproj" />
+    <Project Path="sdk/src/MacroDeck.Plugin.Cli/MacroDeck.Plugin.Cli.csproj" />
+    <Project Path="sdk/src/MacroDeck.Plugin.Hosting/MacroDeck.Plugin.Hosting.csproj" />
+    <Project Path="sdk/src/MacroDeck.Plugin.Packaging/MacroDeck.Plugin.Packaging.csproj" />
+    <Project Path="sdk/src/MacroDeck.Plugin.Serilog/MacroDeck.Plugin.Serilog.csproj" />
+    <Project Path="sdk/src/MacroDeck.Plugin.Testing/MacroDeck.Plugin.Testing.csproj" />
+    <Project Path="sdk/src/MacroDeck.Sdk/MacroDeck.Sdk.csproj" />
+    <Project Path="sdk/src/MacroDeck.Signing/MacroDeck.Signing.csproj" />
+  </Folder>
+  <Folder Name="/sdk/tests/">
+    <Project Path="sdk/tests/MacroDeck.Plugin.Analyzers.Tests.UnitTests/MacroDeck.Plugin.Analyzers.Tests.UnitTests.csproj" />
+    <Project Path="sdk/tests/MacroDeck.Localization.Tests.UnitTests/MacroDeck.Localization.Tests.UnitTests.csproj" />
+    <Project Path="sdk/tests/MacroDeck.Plugin.Cli.Tests.UnitTests/MacroDeck.Plugin.Cli.Tests.UnitTests.csproj" />
+    <Project Path="sdk/tests/MacroDeck.Plugin.Hosting.Tests.UnitTests/MacroDeck.Plugin.Hosting.Tests.UnitTests.csproj" />
+    <Project Path="sdk/tests/MacroDeck.Plugin.Packaging.Tests.UnitTests/MacroDeck.Plugin.Packaging.Tests.UnitTests.csproj" />
+    <Project Path="sdk/tests/MacroDeck.Plugin.Serilog.Tests.UnitTests/MacroDeck.Plugin.Serilog.Tests.UnitTests.csproj" />
+    <Project Path="sdk/tests/MacroDeck.Plugin.Testing.Tests.ConformanceTests/MacroDeck.Plugin.Testing.Tests.ConformanceTests.csproj" />
+    <Project Path="sdk/tests/MacroDeck.Plugin.Testing.Tests.UnitTests/MacroDeck.Plugin.Testing.Tests.UnitTests.csproj" />
+    <Project Path="sdk/tests/MacroDeck.Sdk.Tests.UnitTests/MacroDeck.Sdk.Tests.UnitTests.csproj" />
+    <Project Path="sdk/tests/MacroDeck.Signing.Tests.UnitTests/MacroDeck.Signing.Tests.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/sdk/tests/support/">
+    <Project Path="sdk/tests/support/MacroDeck.Signing.TestSupport/MacroDeck.Signing.TestSupport.csproj" />
+  </Folder>
+  <Folder Name="/sdk/tests/fixtures/">
+    <Project Path="sdk/tests/fixtures/MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin/MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin.csproj" />
+    <Project Path="sdk/tests/fixtures/MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin/MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin.csproj" />
+  </Folder>
+  <Folder Name="/solution/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/ui-model/" />
+  <Folder Name="/ui-model/src/">
+    <Project Path="ui-model/src/MacroDeck.Ui/MacroDeck.Ui.csproj" />
+    <Project Path="ui-model/src/MacroDeck.Ui.Model/MacroDeck.Ui.Model.csproj" />
+    <Project Path="ui-model/src/MacroDeck.Ui.Testing/MacroDeck.Ui.Testing.csproj" />
+  </Folder>
+  <Folder Name="/ui-model/tests/">
+    <Project Path="ui-model/tests/MacroDeck.Ui.Model.Tests.UnitTests/MacroDeck.Ui.Model.Tests.UnitTests.csproj" />
+    <Project Path="ui-model/tests/MacroDeck.Ui.Testing.Tests.UnitTests/MacroDeck.Ui.Testing.Tests.UnitTests.csproj" />
+    <Project Path="ui-model/tests/MacroDeck.Ui.Tests.UnitTests/MacroDeck.Ui.Tests.UnitTests.csproj" />
+  </Folder>
+</Solution>

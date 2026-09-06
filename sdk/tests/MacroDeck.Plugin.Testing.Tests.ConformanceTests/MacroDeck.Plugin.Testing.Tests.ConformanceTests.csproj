@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <!-- CA1707: underscored test names, like the other test projects. -->
+        <NoWarn>$(NoWarn);CA1707</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="NUnit.Analyzers" />
+        <PackageReference Include="NUnit3TestAdapter" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\MacroDeck.Plugin.Testing\MacroDeck.Plugin.Testing.csproj" />
+        <ProjectReference Include="..\..\src\MacroDeck.Plugin.Hosting\MacroDeck.Plugin.Hosting.csproj" />
+        <ProjectReference Include="..\..\src\MacroDeck.Plugin.Packaging\MacroDeck.Plugin.Packaging.csproj" />
+        <ProjectReference Include="..\fixtures\MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin\MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin.csproj" />
+        <!-- Unlike MacroDeck.Plugin.Testing.Tests.UnitTests's own PluginLocator-only reference to this
+             fixture, this project also needs its public MisbehaviorFlags constants at compile time (for
+             the counterexample tests), so this is a normal reference rather than one with
+             ReferenceOutputAssembly="false" - which still guarantees the same build ordering. -->
+        <ProjectReference Include="..\fixtures\MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin\MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="NUnit.Framework"/>
+    </ItemGroup>
+
+</Project>

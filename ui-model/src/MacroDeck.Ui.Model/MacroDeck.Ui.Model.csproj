@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<IsPackable>true</IsPackable>
+		<IsMacroDeckPackage>true</IsMacroDeckPackage>
+		<PackageId>MacroDeck.Ui.Model</PackageId>
+		<Description>The transport-neutral Macro Deck UI model: node identity, properties and patches, capability negotiation, resource handles, the surface concept and canonical serialization. No node types, no renderer.</Description>
+		<PackageTags>macrodeck;ui;model</PackageTags>
+	</PropertyGroup>
+
+</Project>

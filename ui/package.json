@@ -1,0 +1,22 @@
+{
+  "name": "macro-deck-ui",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Macro Deck UI - framework-free runtime, Angular clients and the Tauri bootstrapper",
+  "workspaces": [
+    "runtime",
+    "web-client",
+    "angular"
+  ],
+  "scripts": {
+    "dev": "node dev.js",
+    "build": "npm run build -w @macro-deck/runtime && npm run build:prod -w macro-deck-ui-angular",
+    "build:runtime": "npm run build -w @macro-deck/runtime",
+    "build:desktop": "npm run build -w @macro-deck/runtime && npm run build:desktop -w macro-deck-ui-angular -- --configuration=production",
+    "clean": "rm -rf angular/dist angular/.angular runtime/dist runtime/out-spec",
+    "start:angular": "npm start -w macro-deck-ui-angular",
+    "test:runtime": "npm test -w @macro-deck/runtime",
+    "build:web-client": "npm run build -w @macro-deck/runtime && npm run build -w @macro-deck/web-client",
+    "test:web-client": "npm test -w @macro-deck/web-client"
+  }
+}

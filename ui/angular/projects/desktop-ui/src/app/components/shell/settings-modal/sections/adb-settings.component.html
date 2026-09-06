@@ -1,0 +1,220 @@
+<div class="adb">
+  @if (error(); as message) {
+    <shared-error-banner [message]="message" (dismiss)="dismissError()" />
+  }
+
+  <shared-settings-section [heading]="'macrodeck:Settings.Adb' | translate">
+    @if (loaded() && !supported() && unsupportedReason(); as reason) {
+      <p class="adb__note">
+        <span class="icon icon-info icon-sm" aria-hidden="true"></span>
+        <span>{{ reason }}</span>
+      </p>
+    }
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Adb.EnableLabel' | translate"
+      [description]="'macrodeck.app:Settings.Adb.EnableDescription' | translate">
+      <shared-toggle-switch
+        [disabled]="!loaded() || !supported()"
+        [busy]="enabledBusy()"
+        [checked]="enabled()"
+        (changed)="setEnabled($event)" />
+    </shared-settings-row>
+  </shared-settings-section>
+
+  <!-- Nothing below this point means anything while ADB is off: no executable is resolved, no server
+       is reached and no device can be listed. -->
+  @if (loaded() && enabled()) {
+
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Adb.ProgramHeading' | translate"
+    [description]="'macrodeck.app:Settings.Adb.ProgramDescription' | translate">
+    <div class="adb__program">
+      <span class="adb__program-path">{{ resolvedExecutablePath() ?? ('macrodeck.app:Settings.Adb.SourceNotFound' | translate) }}</span>
+      @if (resolvedExecutablePath()) {
+        <span class="adb__program-source">{{ executableSourceLabel() }}</span>
+      }
+    </div>
+
+    @if (notFoundWhileEnabled()) {
+      <shared-error-banner
+        [dismissible]="false"
+        [message]="'macrodeck.app:Settings.Adb.NotFoundError' | translate" />
+
+      <div class="adb__download">
+        <shared-button
+          variant="secondary"
+          [disabled]="!loaded() || pathSaving()"
+          [loading]="downloadingPlatformTools()"
+          (click)="downloadPlatformTools()">
+          {{ 'macrodeck.app:Settings.Adb.DownloadButton' | translate }}
+        </shared-button>
+        <p class="adb__download-hint">
+          {{ 'macrodeck.app:Settings.Adb.DownloadHint' | translate }}
+        </p>
+      </div>
+    }
+
+    <div class="adb__path">
+      <p class="adb__path-label">{{ 'macrodeck.app:Settings.Adb.ExecutablePathLabel' | translate }}</p>
+      <p class="adb__path-hint">{{ 'macrodeck.app:Settings.Adb.ExecutablePathHint' | translate }}</p>
+      <div class="adb__field">
+        <shared-input
+          [ariaLabel]="'macrodeck.app:Settings.Adb.PathAriaLabel' | translate"
+          [placeholder]="'macrodeck.app:Settings.Adb.PathPlaceholder' | translate"
+          [disabled]="!loaded() || pathSaving() || downloadingPlatformTools()"
+          [ngModel]="pathDraft()"
+          (ngModelChange)="pathDraft.set($event)" />
+        <shared-button
+          variant="primary"
+          [disabled]="!canSavePath()"
+          [loading]="pathSaving()"
+          (click)="savePath()">
+          {{ 'macrodeck:Common.Save' | translate }}
+        </shared-button>
+      </div>
+    </div>
+  </shared-settings-section>
+
+  <shared-settings-section [heading]="'macrodeck.app:Settings.Adb.StatusHeading' | translate">
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Adb.ServerLabel' | translate"
+      [description]="'macrodeck.app:Settings.Adb.ServerDescription' | translate">
+      <span class="adb__status" [class.adb__status--ok]="serverReachable()">
+        {{ (serverReachable() ? 'macrodeck.app:Settings.Adb.Reachable' : 'macrodeck.app:Settings.Adb.NotReachable') | translate }}
+      </span>
+    </shared-settings-row>
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Adb.VersionLabel' | translate"
+      [description]="'macrodeck.app:Settings.Adb.VersionDescription' | translate">
+      <span>{{ adbVersion() ?? ('macrodeck.app:Settings.Adb.VersionUnknown' | translate) }}</span>
+    </shared-settings-row>
+    <div class="adb__actions">
+      <shared-button
+        variant="secondary"
+        [disabled]="!loaded()"
+        [loading]="restarting()"
+        (click)="askToRestartServer()">
+        {{ 'macrodeck.app:Settings.Adb.RestartButton' | translate }}
+      </shared-button>
+    </div>
+  </shared-settings-section>
+
+  <shared-settings-section [heading]="'macrodeck.app:Settings.Adb.UsbHeading' | translate">
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Adb.UsbEnableLabel' | translate"
+      [description]="'macrodeck.app:Settings.Adb.UsbEnableDescription' | translate">
+      <shared-toggle-switch
+        [disabled]="!loaded() || !enabled()"
+        [busy]="usbBusy()"
+        [checked]="usbConnectionsEnabled()"
+        (changed)="setUsbConnectionsEnabled($event)" />
+    </shared-settings-row>
+  </shared-settings-section>
+
+  <shared-settings-section [heading]="'macrodeck.app:Settings.Adb.DevicesHeading' | translate">
+    <shared-button
+      settingsSectionAction
+      variant="secondary"
+      size="icon-compact"
+      [ariaLabel]="'macrodeck.app:Settings.Adb.RescanAriaLabel' | translate"
+      [loading]="rescanning()"
+      (click)="rescan()">
+      <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
+    </shared-button>
+
+    <p class="adb__devices-count">{{ 'macrodeck.app:Settings.Adb.DeviceCount' | translate: { count: devices().length } }}</p>
+
+    @if (devices().length === 0) {
+      <shared-empty-state
+        icon="device-phone"
+        [heading]="'macrodeck.app:Settings.Adb.NoDevicesHeading' | translate"
+        [message]="'macrodeck.app:Settings.Adb.NoDevicesMessage' | translate" />
+    } @else {
+      <ul class="adb__device-list">
+        @for (device of devices(); track device.serial) {
+          <li class="adb__device-row">
+            <div class="adb__device-info">
+              <span class="adb__device-name">{{ deviceName(device) }}</span>
+              @if (device.manufacturer) {
+                <span class="adb__device-manufacturer">{{ device.manufacturer }}</span>
+              }
+              <button
+                type="button"
+                class="adb__device-serial"
+                [attr.aria-label]="(serialRevealed(device.serial)
+                  ? 'macrodeck.app:Settings.Adb.HideSerial'
+                  : 'macrodeck.app:Settings.Adb.ShowSerial') | translate"
+                [attr.aria-pressed]="serialRevealed(device.serial)"
+                (click)="toggleSerial(device.serial)">
+                <span>{{ displaySerial(device.serial) }}</span>
+                <span
+                  class="icon icon-sm"
+                  [class.icon-unlock]="serialRevealed(device.serial)"
+                  [class.icon-lock]="!serialRevealed(device.serial)"
+                  aria-hidden="true"></span>
+              </button>
+            </div>
+
+            <span class="adb-device-state" [class]="'adb-device-state-' + device.state">
+              {{ stateLabel(device.state) }}
+            </span>
+
+            <span class="adb__device-usb">{{ usbStatus(device) }}</span>
+
+            <div class="adb__device-actions">
+              @if (devices().length < 2) {
+                <!-- With one device the manager already falls back to it, so there is nothing to pick. -->
+              } @else if (device.isDefault) {
+                <span class="adb__device-default">{{ 'macrodeck.app:Settings.Adb.DefaultDeviceLabel' | translate }}</span>
+              } @else {
+                <shared-button
+                  variant="secondary"
+                  [disabled]="settingDefaultSerial() !== null"
+                  [loading]="settingDefaultSerial() === device.serial"
+                  (click)="setDefaultDevice(device.serial)">
+                  {{ 'macrodeck.app:Settings.Adb.SetAsDefaultButton' | translate }}
+                </shared-button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </shared-settings-section>
+
+  <shared-settings-section [heading]="'macrodeck.app:Settings.Adb.DiagnosticsHeading' | translate">
+    @if (lastError(); as lastErr) {
+      <p class="adb__diagnostic adb__diagnostic--error">
+        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+        <span>
+          {{ lastErr }}
+          @if (lastErrorAtLabel(); as at) {
+            ({{ at }})
+          }
+        </span>
+      </p>
+    }
+    @if (previousShutdownWasUnclean()) {
+      <p class="adb__diagnostic adb__diagnostic--warning">
+        <span class="icon icon-info icon-sm" aria-hidden="true"></span>
+        <span>
+          {{ 'macrodeck.app:Settings.Adb.UncleanShutdown' | translate: { count: staleTunnelsCleaned() } }}
+        </span>
+      </p>
+    }
+    @if (!lastError() && !previousShutdownWasUnclean()) {
+      <p class="adb__diagnostic adb__diagnostic--ok">{{ 'macrodeck.app:Settings.Adb.NoIssues' | translate }}</p>
+    }
+    </shared-settings-section>
+  }
+</div>
+
+@if (restartPromptOpen()) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Settings.Adb.RestartConfirmHeading' | translate"
+    [message]="'macrodeck.app:Settings.Adb.RestartConfirmMessage' | translate"
+    [confirmText]="'macrodeck.app:Settings.Adb.RestartConfirmButton' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    (confirm)="restartServer()"
+    (cancel)="cancelRestart()" />
+}

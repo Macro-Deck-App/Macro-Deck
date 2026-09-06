@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.macro-deck.app/widget-data-slider-v1.schema.json",
+  "title": "Macro Deck Slider widget data (v1)",
+  "description": "Describes the JSON stored in WidgetEntity.Data for a Slider widget (WidgetType.Slider).",
+  "$comment": "No top-level 'required': a freshly created widget's data is a near-empty JSON object, and every property here has to stay optional so it keeps validating. additionalProperties is deliberately left unset (defaults to true) on this schema and on every nested object - an older or newer client, or a plugin-driven flow, may write extension keys this schema does not know about, and rejecting them would make the widget unsavable. Unlike the other widget types, Slider data has no 'flows' key - a slider two-way binds to a writable numeric variable through 'valueVariable' and does not run press-trigger flows. Profiles written before that binding existed still carry 'action'; it validates and is simply no longer read.",
+  "type": "object",
+  "properties": {
+    "label": {
+      "type": ["string", "null"],
+      "description": "Text label shown on the slider."
+    },
+    "orientation": {
+      "enum": ["horizontal", "vertical", null],
+      "description": "Slider layout direction."
+    },
+    "color": {
+      "type": ["string", "null"],
+      "description": "Color of the slider body/track (the fill is a lighter tint of it)."
+    },
+    "labelColor": {
+      "type": ["string", "null"],
+      "description": "Color of the label and value text. Defaults to white on the colored body when absent or null."
+    },
+    "backgroundColor": {
+      "type": ["string", "null"],
+      "description": "Widget background color behind the slider body. Defaults to transparent when absent or null."
+    },
+    "icon": {
+      "$ref": "#/$defs/widgetIcon",
+      "description": "The optional typed icon reference shown inside the slider body. Supersedes iconId."
+    },
+    "iconId": {
+      "type": ["string", "null"],
+      "deprecated": true,
+      "description": "Legacy bare icon-pack id, superseded by icon. No longer written by a save - upgraded to icon the next time this widget is read, and dropped from the payload on save."
+    },
+    "showLabel": {
+      "type": "boolean",
+      "description": "Show the text label."
+    },
+    "showValue": {
+      "type": "boolean",
+      "description": "Show the numeric value."
+    },
+    "border": {
+      "$ref": "#/$defs/widgetBorder",
+      "description": "Outline drawn along the widget edge."
+    },
+    "action": {
+      "type": "object",
+      "deprecated": true,
+      "description": "Legacy binding to a slider-capable action, superseded by valueVariable. No longer read: a widget carrying only this renders unbound, and the editor offers to clear it. Kept in the schema so every stored profile keeps validating.",
+      "properties": {
+        "integrationId": {
+          "type": ["string", "null"],
+          "description": "Id of the integration that owns the bound action."
+        },
+        "actionId": {
+          "type": ["string", "null"],
+          "description": "Id of the bound action."
+        },
+        "valueParameter": {
+          "type": ["string", "null"],
+          "description": "The action parameter the slider value maps to."
+        },
+        "parameters": {
+          "type": "object",
+          "description": "Configured non-value parameters of the action (e.g. the player instance). Its internal structure is not validated here."
+        }
+      }
+    },
+    "valueVariable": {
+      "type": ["string", "null"],
+      "description": "Name of the variable the slider displays and writes. The level and value text follow the variable's live changes, and a drag writes back to it; a variable whose owner declares no write capability is display-only and the slider is inert on drag. Absent or null leaves the slider unbound."
+    },
+    "min": {
+      "type": ["number", "null"],
+      "description": "Lower bound of the range, used only where the bound variable declares no minimum of its own. The fallback is per field: a variable declaring a maximum but no minimum takes its maximum from the variable and its minimum from here, because a numeric user variable has no provider to declare any bound and an all-or-nothing rule would leave its slider undraggable."
+    },
+    "max": {
+      "type": ["number", "null"],
+      "description": "Upper bound of the range, used only where the bound variable declares no maximum of its own. See min for why the fallback is per field."
+    },
+    "step": {
+      "type": ["number", "null"],
+      "description": "Grid granularity, used only where the bound variable declares no step of its own. See min for why the fallback is per field."
+    }
+  },
+  "$defs": {
+    "widgetBorder": {
+      "type": "object",
+      "description": "Outline drawn along the inner edge of the widget.",
+      "properties": {
+        "style": {
+          "enum": ["off", "static", "heartbeat", "breathing", "blink", "comet", "ants", "hue-shift", "rgb", null],
+          "description": "Visual style; absent, null or 'off' means no border. The color-tinted styles are static, heartbeat, breathing, blink, comet and ants; hue-shift and rgb ignore color."
+        },
+        "color": {
+          "type": ["string", "null"],
+          "description": "Ring color for the color-tinted styles. Falls back to a default color when absent or null; ignored by hue-shift and rgb."
+        }
+      }
+    },
+    "widgetIcon": {
+      "type": "object",
+      "description": "A provider-based icon reference: a provider type plus an opaque, provider-specific reference. type is deliberately not a closed enum - a provider this host build does not know about still validates and simply renders as no icon.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Icon provider type, e.g. 'icon-pack'."
+        },
+        "reference": {
+          "type": "string",
+          "description": "Provider-specific reference. Opaque here - never assumed to be a GUID."
+        }
+      },
+      "required": ["type", "reference"]
+    }
+  }
+}

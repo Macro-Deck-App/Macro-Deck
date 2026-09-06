@@ -1,0 +1,86 @@
+---
+title: Macro Deck Developer Docs
+description: Build, test, package and publish plugins for Macro Deck 3.
+template: splash
+head:
+  # Without this the tab repeats the site title twice.
+  - tag: title
+    content: Macro Deck Developer Docs
+hero:
+  image:
+    file: ../../assets/macro-deck-logo.svg
+  tagline: Start building something great!
+  actions:
+    - text: Build your first plugin
+      link: /introduction/quickstart/
+      icon: right-arrow
+    - text: Plugin template
+      link: https://github.com/Macro-Deck-App/Macro-Deck-Plugin-Template
+      icon: external
+      variant: minimal
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<CardGrid>
+	<LinkCard
+		title="Getting started"
+		href="/introduction/getting-started/"
+		description="Choose the right extension path and learn the three pieces every plugin is made of."
+	/>
+	<LinkCard
+		title="Quickstart"
+		href="/introduction/quickstart/"
+		description="Scaffold, run and install a working plugin in about five minutes."
+	/>
+	<LinkCard
+		title="Your first action"
+		href="/introduction/first-action/"
+		description="Add a button action, wire it up and trigger it from the Macro Deck UI."
+	/>
+	<LinkCard
+		title="SDK overview"
+		href="/sdk/"
+		description="The packages a plugin builds against, and where each area of the SDK is documented."
+	/>
+	<LinkCard
+		title="Plugin hosting"
+		href="/sdk/hosting/"
+		description="The builder API, dependency injection, registration modes and the reserved routes."
+	/>
+	<LinkCard
+		title="Macro Deck UI"
+		href="/sdk/ui/"
+		description="A declarative UI framework: author a view, bind state to it, and serve it to a Macro Deck client."
+	/>
+	<LinkCard
+		title="Plugin CLI"
+		href="/cli/"
+		description="macrodeck-plugin: scaffold, build, validate, pack, run and test without installing a host."
+	/>
+	<LinkCard
+		title="Debugging plugins"
+		href="/guides/debugging/"
+		description="Run against the desktop host, use launchSettings.json and stop on breakpoints in your IDE."
+	/>
+	<LinkCard
+		title="Publishing to the Store"
+		href="/guides/publishing/"
+		description="Trusted Publishing from your CI workflow, and why you never hold a signing key."
+	/>
+	<LinkCard
+		title="Manifest reference"
+		href="/reference/manifest/"
+		description="Every field of manifest.json, its constraints and defaults, with a worked example."
+	/>
+	<LinkCard
+		title="Plugin protocol"
+		href="/reference/protocol/"
+		description="The wire contract: the envelope, negotiation, errors, limits, backpressure and reconnection."
+	/>
+	<LinkCard
+		title="Compatibility policy"
+		href="/policies/compatibility/"
+		description="Which surfaces are frozen, what counts as a break, and how contracts are evolved instead."
+	/>
+</CardGrid>

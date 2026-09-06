@@ -1,0 +1,41 @@
+@use '../../../../styles/index' as ds;
+
+/* The directive inserts this component as the anchor's next sibling, so a generated host box would
+   join the anchor's container as a real child - inside a gapped flex row (an action card header)
+   that shifts everything beside the anchor while the tooltip is up. `.tt` is `position: fixed` and
+   needs no host box; `display: contents` drops it without creating a stacking context the way a
+   positioned host would, which would re-order the tooltip against other overlays. */
+:host {
+  display: contents;
+}
+
+.tt {
+  @include ds.popup-panel;
+  // A hint bubble, not a panel: softer corners than the popup-panel default.
+  border-radius: var(--radius-md);
+  position: fixed;
+  z-index: var(--z-popover);
+  max-width: 18rem;
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-tight);
+  pointer-events: none;
+  animation: ds-fade-in var(--transition-fast);
+}
+
+// Guards against a first-frame flash at 0,0 before placeAgainst() has measured and positioned it.
+.tt:not(.tt-placed) {
+  visibility: hidden;
+}
+
+.tt-label {
+  font-weight: var(--font-medium);
+}
+
+.tt-secondary {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+}

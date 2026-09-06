@@ -1,0 +1,10 @@
+.library-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.library-switcher {
+  padding: var(--space-4) var(--space-5) 0;
+}

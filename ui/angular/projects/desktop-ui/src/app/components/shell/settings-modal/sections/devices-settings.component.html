@@ -1,0 +1,207 @@
+<div class="devices">
+  <div class="devices-header">
+    <div>
+      <h2 class="devices-title">{{ 'macrodeck:Settings.Devices' | translate }}</h2>
+      <p class="devices-subtitle">
+        {{ 'macrodeck.app:Settings.Devices.DeviceCount' | translate:{ count: devices().length } }}
+      </p>
+    </div>
+  </div>
+
+  @if (deviceService.loadError(); as loadError) {
+    <shared-error-banner class="devices-error" [message]="loadError" [dismissible]="false" />
+  }
+
+  @if (devices().length === 0) {
+    <shared-empty-state
+      class="devices-empty"
+      icon="device-desktop"
+      [heading]="'macrodeck.app:Settings.Devices.EmptyHeading' | translate"
+      [message]="'macrodeck.app:Settings.Devices.EmptyMessage' | translate" />
+  } @else {
+    <ul class="devices-list">
+      @for (device of devices(); track device.id) {
+        <li class="devices-row">
+          <div class="devices-row-main">
+            <span class="devices-icon icon icon-{{ formFactorIcons[device.formFactor] }} icon-lg"></span>
+
+            <div class="devices-name-col">
+              <span class="devices-name-line">
+                <span class="devices-name">{{ device.name }}</span>
+                <span class="devices-type-badge type-{{ device.clientType }}">
+                  {{ clientTypeLabelKeys[device.clientType] | translate }}
+                </span>
+                @if (isThisDevice(device)) {
+                  <span class="devices-this-marker">{{ 'macrodeck.app:Settings.Devices.ThisDeviceMarker' | translate }}</span>
+                }
+                @if (isProvidedDevice(device) && device.providerName) {
+                  <span class="devices-provider-badge">
+                    {{ 'macrodeck.app:Settings.Devices.ProvidedBy' | translate:{ provider: (device.providerName | localizedText) } }}
+                  </span>
+                }
+                @if (!isProvidedDevice(device) && sessionState(device) === 'signedOut') {
+                  <span class="devices-signedout-marker">{{ 'macrodeck.app:Settings.Devices.SignedOutMarker' | translate }}</span>
+                }
+              </span>
+              <span class="devices-secondary">{{ secondaryLine(device) }}</span>
+              <span class="devices-startup-line">
+                {{ 'macrodeck.app:Settings.Devices.StartupProfilePrefix' | translate }}
+                <span [class.devices-startup-warning]="isStartupProfileUnavailable(device)">{{ startupProfileLabel(device) }}</span>
+              </span>
+            </div>
+
+            <span
+              class="devices-online-dot"
+              [class.is-online]="device.online"
+              role="img"
+              [attr.aria-label]="statusLabel(device)"
+              [title]="statusLabel(device)"></span>
+
+            <div class="devices-actions">
+              <shared-dropdown-menu
+                position="bottom-right"
+                [minWidth]="168"
+                [isOpen]="openMenuDeviceId() === device.id"
+                (isOpenChange)="setMenuOpen(device.id, $event)">
+                <ng-template #triggerContent>
+                  <span class="devices-dots-btn">
+                    <span class="icon icon-dots-vertical icon-sm"></span>
+                  </span>
+                </ng-template>
+                <ng-template #menuContent>
+                  <div class="devices-menu">
+                    <button type="button" class="devices-menu-item" (click)="startRename(device)">
+                      <span class="icon icon-pencil icon-sm"></span>
+                      <span>{{ 'macrodeck.app:Settings.Devices.RenameAction' | translate }}</span>
+                    </button>
+                    <button type="button" class="devices-menu-item devices-menu-startup" (click)="startStartupProfile(device)">
+                      <span class="icon icon-grid icon-sm"></span>
+                      <span>{{ 'macrodeck.app:Settings.Devices.StartupProfileMenuAction' | translate }}</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="devices-menu-item devices-menu-open"
+                      [disabled]="!device.online"
+                      [title]="!device.online ? ('macrodeck.app:Settings.Devices.OpenProfileDisabledTitle' | translate) : ''"
+                      (click)="startOpenProfile(device)">
+                      <span class="icon icon-external-link icon-sm"></span>
+                      <span>{{ 'macrodeck.app:Settings.Devices.OpenProfileMenuAction' | translate }}</span>
+                    </button>
+                    @if (!isProvidedDevice(device)) {
+                      <button
+                        type="button"
+                        class="devices-menu-item devices-menu-logout devices-menu-danger"
+                        [disabled]="isThisDevice(device)"
+                        [title]="isThisDevice(device) ? ('macrodeck.app:Settings.Devices.LogOutDisabledTitle' | translate) : ''"
+                        (click)="requestLogout(device)">
+                        <span class="icon icon-power icon-sm"></span>
+                        <span>{{ 'macrodeck.app:Settings.Devices.LogOutAction' | translate }}</span>
+                      </button>
+                    }
+                    <button
+                      type="button"
+                      class="devices-menu-item devices-menu-remove devices-menu-danger"
+                      (click)="requestRemove(device)">
+                      <span class="icon icon-trash icon-sm"></span>
+                      <span>{{ 'macrodeck.app:Settings.Devices.RemoveAction' | translate }}</span>
+                    </button>
+                  </div>
+                </ng-template>
+              </shared-dropdown-menu>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>
+
+@if (renamingDevice(); as device) {
+  <shared-modal [heading]="'macrodeck.app:Settings.Devices.RenameModalHeading' | translate" size="small" [showFooter]="false" (close)="cancelRename()">
+    <form class="device-form" (ngSubmit)="commitRename()">
+      <label class="form-group">
+        <span class="form-label">{{ 'macrodeck.app:Settings.Devices.NameLabel' | translate }}</span>
+        <shared-input
+          class="devices-input"
+          [ngModel]="renameValue()"
+          (ngModelChange)="renameValue.set($event)"
+          name="name"
+          required
+          [autofocus]="true" />
+      </label>
+
+      <shared-button-group class="form-actions" align="end">
+        <shared-button type="button" variant="secondary" (click)="cancelRename()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button type="submit" variant="primary" [disabled]="!renameValue().trim()">{{ 'macrodeck:Common.Save' | translate }}</shared-button>
+      </shared-button-group>
+    </form>
+  </shared-modal>
+}
+
+@if (startupProfileDevice(); as device) {
+  <shared-modal [heading]="'macrodeck.app:Settings.Devices.StartupProfileModalHeading' | translate" size="small" [showFooter]="false" (close)="cancelStartupProfile()">
+    <div class="device-form">
+      <p class="device-form-desc">
+        {{ 'macrodeck.app:Settings.Devices.StartupProfileModalDescription' | translate:{ name: device.name } }}
+      </p>
+      <label class="form-group">
+        <span class="form-label">{{ 'macrodeck.app:Settings.Devices.ProfileLabel' | translate }}</span>
+        <shared-select
+          [options]="profileOptions()"
+          [ngModel]="startupProfileDraft()"
+          (ngModelChange)="startupProfileDraft.set($event)">
+        </shared-select>
+      </label>
+
+      <shared-button-group class="form-actions" align="end">
+        <shared-button type="button" variant="secondary" (click)="cancelStartupProfile()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button type="button" variant="primary" (click)="commitStartupProfile()">{{ 'macrodeck:Common.Save' | translate }}</shared-button>
+      </shared-button-group>
+    </div>
+  </shared-modal>
+}
+
+@if (openProfileDevice(); as device) {
+  <shared-modal [heading]="'macrodeck.app:Settings.Devices.OpenProfileModalHeading' | translate" size="small" [showFooter]="false" (close)="cancelOpenProfile()">
+    <div class="device-form">
+      <p class="device-form-desc">
+        {{ 'macrodeck.app:Settings.Devices.OpenProfileModalDescription' | translate:{ name: device.name } }}
+      </p>
+      <label class="form-group">
+        <span class="form-label">{{ 'macrodeck.app:Settings.Devices.ProfileLabel' | translate }}</span>
+        <shared-select
+          [options]="profileOptions()"
+          [ngModel]="openProfileDraft()"
+          (ngModelChange)="openProfileDraft.set($event)">
+        </shared-select>
+      </label>
+
+      <shared-button-group class="form-actions" align="end">
+        <shared-button type="button" variant="secondary" (click)="cancelOpenProfile()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button type="button" variant="primary" (click)="commitOpenProfile()">{{ 'macrodeck.app:Settings.Devices.OpenAction' | translate }}</shared-button>
+      </shared-button-group>
+    </div>
+  </shared-modal>
+}
+
+@if (logoutCandidate(); as device) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Settings.Devices.LogoutConfirmHeading' | translate"
+    [message]="'macrodeck.app:Settings.Devices.LogoutConfirmMessage' | translate:{ name: device.name }"
+    [confirmText]="'macrodeck.app:Settings.Devices.LogOutAction' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmLogout()"
+    (cancel)="cancelLogout()" />
+}
+
+@if (removeCandidate(); as device) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Settings.Devices.RemoveConfirmHeading' | translate"
+    [message]="'macrodeck.app:Settings.Devices.RemoveConfirmMessage' | translate:{ name: device.name }"
+    [confirmText]="'macrodeck.app:Settings.Devices.RemoveAction' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmRemove()"
+    (cancel)="cancelRemove()" />
+}

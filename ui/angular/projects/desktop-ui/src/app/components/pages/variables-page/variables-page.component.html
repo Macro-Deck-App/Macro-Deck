@@ -1,0 +1,56 @@
+<shared-rail-page [railTitle]="'macrodeck.app:Nav.Variables' | translate">
+  <ng-container ngProjectAs="[rail-actions]">
+    @if (manager.canCreate()) {
+      <shared-button variant="secondary" size="icon" [title]="'macrodeck.app:Variables.NewVariable' | translate" [attr.aria-label]="'macrodeck.app:Variables.NewVariable' | translate"
+        (click)="manager.openCreate()">
+        <span class="icon icon-plus icon-sm"></span>
+      </shared-button>
+    }
+  </ng-container>
+
+  <ul ngProjectAs="[rail]" class="source-list" role="listbox" [attr.aria-label]="'macrodeck.app:Variables.VariableSourcesAriaLabel' | translate">
+    <li>
+      <shared-rail-item
+        [label]="'macrodeck.app:Variables.AllVariablesHeading' | translate"
+        [count]="totalCount()"
+        [active]="isAllSelected()"
+        (click)="selectAll()" />
+    </li>
+    <li>
+      <shared-rail-item
+        [label]="'macrodeck.app:Variables.UserLabel' | translate"
+        [count]="userCount()"
+        [active]="isUserSelected()"
+        (click)="selectUser()" />
+    </li>
+
+    @if (integrationSources().length > 0) {
+      <li class="rail-section" aria-hidden="true">{{ 'macrodeck.app:Nav.Integrations' | translate }}</li>
+      @for (integration of integrationSources(); track integration.integrationId) {
+        <li>
+          <shared-rail-item
+            [label]="integration.name"
+            [count]="integration.count"
+            [unboundCount]="unboundCountFor(integration.integrationId)"
+            [active]="isIntegrationSelected(integration.integrationId)"
+            (click)="selectIntegration(integration.integrationId)" />
+        </li>
+      }
+    }
+  </ul>
+
+  <shared-variables-manager
+    #manager
+    [heading]="managerTitle()"
+    [showCreateButton]="false"
+    [source]="source()"
+    (catalogBindRequested)="onCatalogBindRequested($event)" />
+
+  @if (bindDialogNode(); as node) {
+    <shared-variable-bind-dialog
+      [integrationId]="bindDialogIntegrationId() ?? ''"
+      [node]="node"
+      (bound)="onCatalogBound()"
+      (close)="closeCatalogBindDialog()" />
+  }
+</shared-rail-page>

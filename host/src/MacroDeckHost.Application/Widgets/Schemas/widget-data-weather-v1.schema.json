@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.macro-deck.app/widget-data-weather-v1.schema.json",
+  "title": "Macro Deck Weather widget data (v1)",
+  "description": "Describes the JSON stored in WidgetEntity.Data for a Weather widget (WidgetType.Weather).",
+  "$comment": "No top-level 'required': a freshly created widget's data is a near-empty JSON object, and every property here has to stay optional so it keeps validating. additionalProperties is deliberately left unset (defaults to true) on this schema and on every nested object - an older or newer client, or a plugin-driven flow, may write extension keys this schema does not know about, and rejecting them would make the widget unsavable.",
+  "type": "object",
+  "properties": {
+    "instanceId": {
+      "type": ["string", "null"],
+      "description": "Which weather station (location) this widget displays. Empty or null means the first available station."
+    },
+    "showIcon": {
+      "type": "boolean",
+      "description": "Show the current-condition icon."
+    },
+    "showTemperature": {
+      "type": "boolean",
+      "description": "Show the current temperature."
+    },
+    "showCondition": {
+      "type": "boolean",
+      "description": "Show the condition text and location name."
+    },
+    "showForecast": {
+      "type": "boolean",
+      "description": "Show the multi-day forecast rows."
+    },
+    "animateIcon": {
+      "type": "boolean",
+      "description": "Animate the current condition's icon. The forecast rows always use still artwork."
+    },
+    "forecastDays": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 7,
+      "description": "Number of forecast rows to show."
+    },
+    "border": {
+      "$ref": "#/$defs/widgetBorder",
+      "description": "Outline drawn along the widget edge."
+    },
+    "flows": {
+      "anyOf": [
+        { "type": "string" },
+        { "type": "array", "items": { "$ref": "#/$defs/actionFlow" } }
+      ],
+      "description": "Press-trigger action flows, stored the same way as an Action Button's. Stored on the wire as a nested JSON string; the editor may show it inlined as an array. Both forms are accepted here."
+    }
+  },
+  "$defs": {
+    "widgetBorder": {
+      "type": "object",
+      "description": "Outline drawn along the inner edge of the widget.",
+      "properties": {
+        "style": {
+          "enum": ["off", "static", "heartbeat", "breathing", "blink", "comet", "ants", "hue-shift", "rgb", null],
+          "description": "Visual style; absent, null or 'off' means no border. The color-tinted styles are static, heartbeat, breathing, blink, comet and ants; hue-shift and rgb ignore color."
+        },
+        "color": {
+          "type": ["string", "null"],
+          "description": "Ring color for the color-tinted styles. Falls back to a default color when absent or null; ignored by hue-shift and rgb."
+        }
+      }
+    },
+    "actionFlow": {
+      "type": "object",
+      "description": "One action-flow entry (a trigger and its action blocks). Its internal structure is deliberately not validated here - deep flow validation is out of scope for this schema."
+    }
+  }
+}

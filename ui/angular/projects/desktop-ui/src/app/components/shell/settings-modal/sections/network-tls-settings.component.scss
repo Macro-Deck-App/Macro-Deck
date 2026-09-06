@@ -1,0 +1,55 @@
+.tls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.tls__note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background-color: var(--color-accent-muted);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+
+  .icon {
+    margin-top: 0.1em;
+    color: var(--color-accent);
+  }
+}
+
+.tls__note--warning {
+  background-color: var(--color-warning-muted, var(--color-accent-muted));
+
+  .icon {
+    color: var(--color-warning, var(--color-accent));
+  }
+}
+
+.tls__field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tls__hint {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+}
+
+.tls__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.tls__fingerprint {
+  font-family: var(--font-mono, monospace);
+  font-size: var(--text-xs);
+  word-break: break-all;
+}

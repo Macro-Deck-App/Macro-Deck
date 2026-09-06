@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>app.macro-deck.macrodeck</id>
+  <launchable type="desktop-id">Macro Deck.desktop</launchable>
+  <name>Macro Deck</name>
+  <summary>Turn a phone, tablet or browser into a control surface for your PC</summary>
+  <summary xml:lang="de">Handy, Tablet oder Browser als Steuerpult für den PC</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>Apache-2.0</project_license>
+  <developer id="app.macro-deck"><name>Manuel Mayer</name></developer>
+  <description>
+    <p>Macro Deck turns any phone, tablet or browser into a customizable control surface for your PC. Buttons run macros, launch applications, control media and OBS, and react to events from plugins.</p>
+    <p xml:lang="de">Macro Deck macht aus Handy, Tablet oder Browser ein frei gestaltbares Steuerpult für den PC. Tasten führen Makros aus, starten Anwendungen, steuern Medien und OBS und reagieren auf Ereignisse aus Plugins.</p>
+  </description>
+  <url type="homepage">https://macro-deck.app</url>
+  <url type="bugtracker">https://github.com/Macro-Deck-App/Macro-Deck/issues</url>
+  <provides>
+    <mediatype>application/vnd.macro-deck.profile</mediatype>
+    <mediatype>application/vnd.macro-deck.folder</mediatype>
+    <mediatype>application/vnd.macro-deck.widget</mediatype>
+    <mediatype>application/vnd.macro-deck.icon-pack</mediatype>
+    <mediatype>application/vnd.macro-deck.plugin</mediatype>
+  </provides>
+  <content_rating type="oars-1.1"/>
+</component>

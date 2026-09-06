@@ -1,0 +1,180 @@
+
+/*
+ * The desktop layout editor's chrome. Everything here is projected into - or stamped inside - the
+ * shared runtime grid, so it carries this component's style scoping rather than the grid's.
+ *
+ * `.widget-chrome` is the per-tile decoration: it covers the tile exactly and takes the pointer, so
+ * a press in layout mode starts a drag instead of reaching the widget underneath.
+ */
+.widget-chrome {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 5;
+  cursor: grab;
+  // Pointer events drive the drag on mouse AND touch; stop the browser from
+  // hijacking touch moves for scrolling.
+  touch-action: none;
+}
+
+.marquee-overlay {
+  position: absolute;
+  z-index: 25;
+  pointer-events: none;
+  display: none;
+  border-radius: calc(var(--widget-radius, 22px) * var(--widget-scale, 1));
+  outline: 1px solid var(--color-accent);
+  outline-offset: -1px;
+  background-color: var(--color-accent-muted);
+}
+
+.marquee-overlay.active {
+  display: block;
+}
+
+/* Wraps one or more shared-widget-ghost instances (issue #213); this is the single element
+   DeckDragService's rAF loop writes translate3d to, moved out of shared-widget-ghost's own :host so a
+   multi-widget drag still only ever transforms one element per frame. */
+.ghost-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.drop-placeholder {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  border-radius: calc(var(--widget-radius, 22px) * var(--widget-scale, 1));
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+  background-color: var(--color-accent-muted);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .drop-placeholder {
+    transition: left 80ms ease-out, top 80ms ease-out, width 80ms ease-out, height 80ms ease-out;
+  }
+}
+/* The hover ring is an overlay, not an inset outline: widget types paint their own opaque
+   backgrounds over the element's box decorations, which would hide an outline on some types
+   (Action Button, Music Player) but not others. */
+.widget-chrome::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 2px transparent;
+  transition: box-shadow var(--transition-fast);
+  pointer-events: none;
+  z-index: 30;
+}
+
+.widget-chrome:hover::after {
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+
+.widget-chrome:active {
+  cursor: grabbing;
+}
+
+.widget-chrome.is-selected::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* Two-tone on purpose. A widget paints its own background, and the default action button is very
+     close to the default accent - a single accent ring is then invisible on exactly the widgets
+     people have most of. The light inner band keeps the ring readable over any fill. */
+  box-shadow:
+    inset 0 0 0 2px var(--color-on-accent),
+    inset 0 0 0 5px var(--color-accent);
+  pointer-events: none;
+  z-index: 30;
+}
+
+.edit-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+  z-index: 5;
+}
+
+.edit-overlay .icon {
+  color: white;
+}
+
+.edit-overlay span {
+  color: white;
+  font-size: var(--text-md);
+  font-weight: var(--font-medium);
+}
+
+.widget-chrome:hover .edit-overlay {
+  opacity: 1;
+}
+
+/* Pinned widgets are locked in place, so the grab affordance would lie. */
+.widget-chrome.is-pinned,
+.widget-chrome.is-pinned:active {
+  cursor: not-allowed;
+}
+
+/* Edit-mode-only marker that this widget is shown in every folder of the profile. */
+.pin-badge {
+  position: absolute;
+  top: 0.375rem;
+  left: 0.375rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  // Hoverable so the badge can explain itself; press and click still reach the widget
+  // underneath by bubbling, so the badge does not swallow the interaction.
+  pointer-events: auto;
+  cursor: inherit;
+  z-index: 10;
+}
+
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 1.625rem;
+  height: 1.625rem;
+  cursor: nwse-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  z-index: 20;
+}
+
+.widget-chrome:hover .resize-handle {
+  opacity: 1;
+}
+
+.resize-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}

@@ -1,0 +1,54 @@
+@use '../../../../styles/index' as ds;
+
+.capability-row {
+  @include ds.card($padding: 0.625rem 0.8125rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.capability-row.unavailable { opacity: 0.85; }
+
+.capability-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+  min-width: 0;
+}
+
+.capability-row-name {
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  @include ds.truncate;
+}
+
+.capability-row-desc { font-size: var(--text-sm); color: var(--color-text-secondary); }
+
+.capability-row-params {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  @include ds.truncate;
+}
+
+.capability-row-side {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.availability-pill { @include ds.badge; border: 1px solid transparent; white-space: nowrap; }
+.availability-Ready { color: var(--color-success); background-color: var(--color-success-muted); }
+.availability-SetupRequired,
+.availability-AvailableAfterSetup { color: var(--color-warning); background-color: var(--color-warning-muted); }
+.availability-IntegrationDisabled { color: var(--color-text-muted); background-color: var(--color-bg-hover); }
+.availability-Unavailable { color: var(--color-danger); background-color: var(--color-danger-muted); }
+
+
+
+@include ds.breakpoint-down(md) {
+  .capability-row { grid-template-columns: minmax(0, 1fr); }
+  .capability-row-side { align-items: flex-start; }
+}

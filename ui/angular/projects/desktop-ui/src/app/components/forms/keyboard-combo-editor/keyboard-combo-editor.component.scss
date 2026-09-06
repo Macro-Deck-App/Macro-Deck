@@ -1,0 +1,89 @@
+@use '../../../../styles/index' as ds;
+
+.kce-root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.kce-modifiers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.kce-mod {
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.kce-mod:hover {
+  border-color: var(--color-accent);
+}
+
+.kce-mod-active {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.kce-key-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.kce-mode {
+  flex: 0 1 auto;
+}
+
+.kce-record,
+.kce-select {
+  flex: 1 1 6.5rem;
+  min-width: 4.875rem;
+}
+
+.kce-record {
+  @include ds.control-base;
+  @include ds.control-interactive;
+  text-align: left;
+  cursor: pointer;
+}
+
+.kce-recording {
+  border-color: var(--color-accent);
+  background-color: var(--color-bg-tertiary);
+}
+
+.kce-hint {
+  color: var(--color-text-muted);
+}
+
+.kce-key-name {
+  font-family: var(--font-mono);
+  font-weight: var(--font-semibold);
+}
+
+.kce-preview {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  word-break: break-word;
+}
+
+.kce-preview-empty {
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-style: italic;
+}

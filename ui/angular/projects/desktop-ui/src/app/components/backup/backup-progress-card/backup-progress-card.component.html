@@ -1,0 +1,29 @@
+@if (status(); as op) {
+  <div class="bpc" [class.bpc-failed]="isFailed()" [class.bpc-done]="isDone()">
+    <div class="bpc-head">
+      @if (!isFailed() && !isDone()) {
+        <span class="bpc-spinner" aria-hidden="true"></span>
+      } @else {
+        <span class="icon bpc-icon" [class.icon-alert-triangle]="isFailed()" [class.icon-check]="isDone()" aria-hidden="true"></span>
+      }
+      <span class="bpc-phase">{{ phaseText() }}</span>
+      @if (percent(); as pct) {
+        <span class="bpc-percent">{{ pct }}%</span>
+      }
+    </div>
+
+    @if (!isFailed() && !isDone()) {
+      <div class="bpc-bar" [class.bpc-bar-indeterminate]="percent() === null">
+        <div class="bpc-bar-fill" [style.width.%]="percent() ?? 100"></div>
+      </div>
+    }
+
+    @if (byteDetail(); as detail) {
+      <span class="bpc-detail">{{ detail }}</span>
+    }
+
+    @if (isFailed() && op.errorMessage) {
+      <span class="bpc-error">{{ op.errorMessage }}</span>
+    }
+  </div>
+}

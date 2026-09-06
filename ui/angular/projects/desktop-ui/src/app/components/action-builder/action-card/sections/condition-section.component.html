@@ -1,0 +1,34 @@
+<div class="block-section block-section-condition">
+  <h4 class="block-section-label">{{ label }}:</h4>
+  <div class="block-section-content">
+    <shared-condition-builder
+      [expression]="expression"
+      [variables]="store.pickerVariables()"
+      [previewScope]="store.previewScope()"
+      [previewScopeRefId]="store.previewScopeRefId()"
+      [comparisonOperators]="store.comparisonOperators()"
+      [leafState]="leafState"
+      [eventDefinition]="store.eventDefinition()"
+      [eventConfiguration]="store.eventConfigurationValues()"
+      (expressionChange)="onExpressionChange($event)">
+    </shared-condition-builder>
+    @if (evalState; as state) {
+      @if (state.kind === 'error') {
+        <span
+          class="condition-error-badge"
+          role="img"
+          [title]="state.message"
+          [attr.aria-label]="state.message">!</span>
+      }
+    }
+  </div>
+  @if (removable) {
+    <button
+      type="button"
+      class="block-section-remove"
+      (click)="onRemove()"
+      [attr.aria-label]="removeBranchAriaLabel">
+      <span class="icon icon-x icon-xs"></span>
+    </button>
+  }
+</div>

@@ -1,0 +1,80 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Cronos" Version="0.11.0" />
+    <PackageVersion Include="Evolve" Version="3.2.0" />
+    <PackageVersion Include="Mediator.Abstractions" Version="3.1.0-preview.17" />
+    <PackageVersion Include="Mediator.SourceGenerator" Version="3.1.0-preview.17" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.19.1" />
+    <!-- Transitive pin: Microsoft.AspNetCore.OpenApi still floors this at a version vulnerable to GHSA-v5pm-xwqc-g5wc -->
+    <PackageVersion Include="Microsoft.OpenApi" Version="2.7.6" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.1" />
+    <!-- Transitive pin: Microsoft.Extensions.Http 10.0.1 already floors this at 10.0.2 via
+         Microsoft.Extensions.Logging.Abstractions; 10.0.1 would be a downgrade (NU1109). -->
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.2" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
+    <!-- MacroDeck.Signing: .NET ships no in-box Ed25519 primitive, and the plugin signature format is
+         Ed25519 over the canonical plugin digest. NSec is libsodium-backed and is what the offline root
+         and certificate generator already used to issue the certificates in the field, so the same
+         primitive verifies them. -->
+    <PackageVersion Include="NSec.Cryptography" Version="26.4.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.2" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.2" />
+    <PackageVersion Include="Scriban" Version="7.2.5" />
+    <!-- Transitive pin: Microsoft.EntityFrameworkCore.Sqlite still floors this at a version vulnerable to GHSA-2m69-gcr7-jv3q -->
+    <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12" />
+    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.12" />
+    <PackageVersion Include="SkiaSharp" Version="3.119.2" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.2" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.macOS" Version="3.119.2" />
+    <PackageVersion Include="SkiaSharp.Resources" Version="3.119.2" />
+    <PackageVersion Include="SkiaSharp.SceneGraph" Version="3.119.2" />
+    <PackageVersion Include="SkiaSharp.Skottie" Version="3.119.2" />
+    <PackageVersion Include="Svg.Skia" Version="5.1.1" />
+    <PackageVersion Include="Serilog" Version="4.3.0" />
+    <PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
+    <!-- macrodeck-plugin CLI (sdk/src/MacroDeck.Plugin.Cli). 2.0.11 is the current GA release - the
+         betas this repository does not target have a materially different SetAction/Option<T> API. -->
+    <PackageVersion Include="System.CommandLine" Version="2.0.11" />
+    <!-- DPAPI for the Windows key-ring KEK. Not part of the shared framework on any platform, so it
+         has to come from a package even though the API is Windows-only. -->
+    <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="10.0.1" />
+    <!-- Offline plugin-manifest-v1.schema.json validation for `macrodeck-plugin validate`/`pack`. -->
+    <PackageVersion Include="JsonSchema.Net" Version="9.4.0" />
+    <!-- macrodeck-plugin's `new` wizard renders its target-platform selection as a checkbox list, which
+         needs raw-key input and cursor control System.Console cannot express portably. -->
+    <PackageVersion Include="Spectre.Console" Version="0.57.2" />
+    <!-- TestConsole/TestConsoleInput drive that prompt's keys in unit tests without a real terminal. -->
+    <PackageVersion Include="Spectre.Console.Testing" Version="0.57.2" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.0" />
+    <PackageVersion Include="NUnit" Version="4.3.2" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.7.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="5.0.0" />
+    <PackageVersion Include="obs-websocket-dotnet" Version="5.0.1" />
+    <PackageVersion Include="SpotifyAPI.Web" Version="7.4.2" />
+    <PackageVersion Include="TwitchLib.Api" Version="3.10.2" />
+    <PackageVersion Include="YamlDotNet" Version="16.3.0" />
+    <!-- MacroDeck.Plugin.Analyzers (netstandard2.0 Roslyn analyzer package). Deliberately the newest 4.x,
+         not the current 5.x: referencing 5.x would make the analyzer refuse to load in any compiler or
+         IDE older than what 5.x itself requires, for no benefit to a source analyzer that only needs the
+         4.x surface. -->
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.6.0" />
+    <!-- Transitive pin: Microsoft.CodeAnalysis.CSharp 4.14.0's netstandard2.0 dependency group floors
+         both at 9.0.0; CentralPackageTransitivePinningEnabled pins a transitive package to the version
+         declared here only when one is declared, so leaving these out would not fail the build, just
+         drop the pin. -->
+    <PackageVersion Include="System.Collections.Immutable" Version="9.0.0" />
+    <PackageVersion Include="System.Reflection.Metadata" Version="9.0.0" />
+  </ItemGroup>
+</Project>

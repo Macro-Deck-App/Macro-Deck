@@ -1,0 +1,143 @@
+{
+  "description": "The producer-pinned time and date formats, the run and dial colours, and what a dynamic text asking for more than this profile ships degrades to. Held apart from conformance-clock-tree.json because that tree's dial fills the space its siblings leave, so adding a node to it would move geometry the other fixture exists to pin.",
+  "cases": [
+    {
+      "basis": 240,
+      "tile": {
+        "width": 240,
+        "height": 480
+      },
+      "nodes": {
+        "conformance": {
+          "contentWidth": 216.0,
+          "contentHeight": 456.0,
+          "padding": 12.0,
+          "gap": 7.2,
+          "background": "#101c2c"
+        },
+        "conformance.time12": {
+          "fontSize": 28.8,
+          "secondsFontSize": 15.84,
+          "secondsRole": "muted",
+          "role": "primary"
+        },
+        "conformance.time12Padded": {
+          "fontSize": 19.2,
+          "role": "primary"
+        },
+        "conformance.time24": {
+          "fontSize": 19.2,
+          "role": "primary"
+        },
+        "conformance.time24Unpadded": {
+          "fontSize": 19.2,
+          "role": "primary"
+        },
+        "conformance.dateDayFirst": {
+          "fontSize": 19.2,
+          "role": "muted"
+        },
+        "conformance.dateMonthFirst": {
+          "fontSize": 19.2,
+          "role": "muted"
+        },
+        "conformance.dateWritten": {
+          "fontSize": 19.2,
+          "role": "muted"
+        },
+        "conformance.dateIso": {
+          "fontSize": 19.2,
+          "role": "muted",
+          "color": "#7fd4ff"
+        },
+        "conformance.offset": {
+          "fontSize": 16.8,
+          "role": "muted"
+        },
+        "conformance.beyond": {
+          "renders": false
+        },
+        "conformance.beyondFallback": {
+          "fontSize": 19.2,
+          "role": "primary"
+        },
+        "conformance.dialTinted": {
+          "width": 216.0,
+          "height": 72.0,
+          "secondHand": true,
+          "handColor": "#7fd4ff",
+          "tickColor": "#7fd4ff"
+        }
+      }
+    },
+    {
+      "basis": 120,
+      "tile": {
+        "width": 120,
+        "height": 240
+      },
+      "nodes": {
+        "conformance": {
+          "contentWidth": 108.0,
+          "contentHeight": 228.0,
+          "padding": 6.0,
+          "gap": 3.6,
+          "background": "#101c2c"
+        },
+        "conformance.time12": {
+          "fontSize": 14.4,
+          "secondsFontSize": 7.92,
+          "secondsRole": "muted",
+          "role": "primary"
+        },
+        "conformance.time12Padded": {
+          "fontSize": 9.6,
+          "role": "primary"
+        },
+        "conformance.time24": {
+          "fontSize": 9.6,
+          "role": "primary"
+        },
+        "conformance.time24Unpadded": {
+          "fontSize": 9.6,
+          "role": "primary"
+        },
+        "conformance.dateDayFirst": {
+          "fontSize": 9.6,
+          "role": "muted"
+        },
+        "conformance.dateMonthFirst": {
+          "fontSize": 9.6,
+          "role": "muted"
+        },
+        "conformance.dateWritten": {
+          "fontSize": 9.6,
+          "role": "muted"
+        },
+        "conformance.dateIso": {
+          "fontSize": 9.6,
+          "role": "muted",
+          "color": "#7fd4ff"
+        },
+        "conformance.offset": {
+          "fontSize": 8.4,
+          "role": "muted"
+        },
+        "conformance.beyond": {
+          "renders": false
+        },
+        "conformance.beyondFallback": {
+          "fontSize": 9.6,
+          "role": "primary"
+        },
+        "conformance.dialTinted": {
+          "width": 108.0,
+          "height": 36.0,
+          "secondHand": true,
+          "handColor": "#7fd4ff",
+          "tickColor": "#7fd4ff"
+        }
+      }
+    }
+  ]
+}

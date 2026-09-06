@@ -1,0 +1,124 @@
+<div class="plugin-connections">
+  <div class="managed-plugins-header">
+    <div>
+      <h2 class="managed-plugins-title">{{ 'macrodeck.app:Developer.ManagedPlugins.Title' | translate }}</h2>
+      <p class="managed-plugins-subtitle">{{ 'macrodeck.app:Developer.ManagedPlugins.PluginCount' | translate:{ count: plugins().length } }}</p>
+    </div>
+  </div>
+
+  @if (runtimeService.loadError(); as loadError) {
+    <shared-error-banner class="managed-plugins-error" [message]="loadError" [dismissible]="false" />
+  }
+
+  @if (plugins().length === 0) {
+    <shared-empty-state
+      class="managed-plugins-empty"
+      icon="puzzle"
+      [heading]="'macrodeck.app:Developer.ManagedPlugins.EmptyHeading' | translate"
+      [message]="'macrodeck.app:Developer.ManagedPlugins.EmptyMessage' | translate" />
+  } @else {
+    <ul class="managed-plugins-list">
+      @for (plugin of plugins(); track plugin.pluginId) {
+        <li class="managed-plugins-row">
+          <div class="managed-plugins-row-main">
+            <div class="managed-plugins-name-col">
+              <span class="managed-plugins-name-line">
+                <span class="managed-plugins-name">{{ plugin.displayName }}</span>
+                @if (plugin.version) {
+                  <span class="managed-plugins-version">v{{ plugin.version }}</span>
+                }
+              </span>
+              <span class="managed-plugins-badges">
+                <span class="managed-plugins-badge state-{{ plugin.state }}">{{ plugin.state }}</span>
+                <span class="managed-plugins-badge health-{{ plugin.health }}">{{ plugin.health }}</span>
+              </span>
+            </div>
+
+            <div class="managed-plugins-diagnostics">
+              <span class="managed-plugins-diagnostic">
+                <span class="managed-plugins-diagnostic-label">{{ 'macrodeck.app:Developer.ManagedPlugins.RestartsLabel' | translate }}</span>
+                <span class="managed-plugins-diagnostic-value">{{ plugin.restartCount }}</span>
+              </span>
+              <span class="managed-plugins-diagnostic">
+                <span class="managed-plugins-diagnostic-label">{{ 'macrodeck.app:Developer.ManagedPlugins.LastExitCodeLabel' | translate }}</span>
+                <span class="managed-plugins-diagnostic-value">{{ plugin.lastExitCode ?? '-' }}</span>
+              </span>
+              @if (plugin.nextRestartAt) {
+                <span class="managed-plugins-diagnostic">
+                  <span class="managed-plugins-diagnostic-label">{{ 'macrodeck.app:Developer.ManagedPlugins.NextRestartLabel' | translate }}</span>
+                  <span class="managed-plugins-diagnostic-value">{{ absoluteTime(plugin.nextRestartAt) }}</span>
+                </span>
+              }
+            </div>
+
+            <!-- The items stay listed for a self-registering plugin rather than the menu vanishing:
+                 canStart/canStop/canRestart already return false for it, so they render disabled, and
+                 the note under them says why. Behind a menu because three buttons per row cost more
+                 width than actions this rarely used are worth. -->
+            <div class="managed-plugins-actions">
+              <shared-dropdown-menu
+                position="bottom-right"
+                [minWidth]="184"
+                [triggerAriaLabel]="'macrodeck.app:Developer.ManagedPlugins.ActionsAriaLabel' | translate:{ name: plugin.displayName }"
+                [isOpen]="openMenuPluginId() === plugin.pluginId"
+                (isOpenChange)="setMenuOpen(plugin.pluginId, $event)">
+                <ng-template #menuContent>
+                  <div class="managed-plugins-menu">
+                    <button
+                      type="button"
+                      class="managed-plugins-menu-item"
+                      [disabled]="!canStart(plugin)"
+                      (click)="start(plugin)">
+                      <span class="icon icon-play icon-sm"></span>
+                      <span>{{ 'macrodeck.app:Developer.ManagedPlugins.StartAction' | translate }}</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="managed-plugins-menu-item"
+                      [disabled]="!canStop(plugin)"
+                      (click)="stop(plugin)">
+                      <span class="icon icon-power icon-sm"></span>
+                      <span>{{ 'macrodeck.app:Developer.ManagedPlugins.StopAction' | translate }}</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="managed-plugins-menu-item"
+                      [disabled]="!canRestart(plugin)"
+                      (click)="restart(plugin)">
+                      <span class="icon icon-refresh icon-sm"></span>
+                      <span>{{ 'macrodeck.app:Developer.ManagedPlugins.RestartAction' | translate }}</span>
+                    </button>
+                    @if (unmanagedReason(plugin); as reason) {
+                      <p class="managed-plugins-menu-note">{{ reason }}</p>
+                    }
+                  </div>
+                </ng-template>
+              </shared-dropdown-menu>
+            </div>
+          </div>
+
+          @if (plugin.lastError) {
+            <p class="managed-plugins-last-error">{{ plugin.lastError }}</p>
+          }
+
+          @if (hasBootstrapOutput(plugin)) {
+            <div class="managed-plugins-output">
+              <button
+                type="button"
+                class="managed-plugins-output-toggle"
+                [class.is-expanded]="isOutputExpanded(plugin.pluginId)"
+                [attr.aria-expanded]="isOutputExpanded(plugin.pluginId)"
+                (click)="toggleOutput(plugin.pluginId)">
+                <span class="icon icon-chevron-right icon-sm" aria-hidden="true"></span>
+                {{ 'macrodeck.app:Developer.ManagedPlugins.BootstrapOutputToggle' | translate }}
+              </button>
+              @if (isOutputExpanded(plugin.pluginId)) {
+                <pre class="managed-plugins-output-body">{{ plugin.bootstrapOutput.join('\n') }}</pre>
+              }
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>

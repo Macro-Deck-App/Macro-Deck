@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <!-- Underscored test names, like the host test projects. -->
+        <NoWarn>$(NoWarn);CA1707</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" />
+        <!-- Only used to prove the annotated schema still evaluates the documented examples cleanly
+             (PluginManifestRequirementsTests). The production package deliberately does not take this
+             dependency; see PluginManifestRequirements's own JSON walker. -->
+        <PackageReference Include="JsonSchema.Net" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="NUnit.Analyzers" />
+        <PackageReference Include="NUnit3TestAdapter" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\MacroDeck.Plugin.Packaging\MacroDeck.Plugin.Packaging.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="..\fixtures\signing-vectors\**\*"
+                 Link="signing-vectors\%(RecursiveDir)%(Filename)%(Extension)"
+                 CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="NUnit.Framework"/>
+    </ItemGroup>
+
+</Project>

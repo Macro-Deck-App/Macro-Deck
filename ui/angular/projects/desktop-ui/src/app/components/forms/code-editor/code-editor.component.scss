@@ -1,0 +1,39 @@
+@use '../../../../styles/index' as ds;
+
+.ce-root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.ce-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.ce-language {
+  @include ds.section-label;
+}
+
+.ce-error {
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+}
+
+.ce-textarea {
+  width: 100%;
+  resize: vertical;
+  @include ds.control-base;
+  @include ds.control-interactive;
+  font-family: var(--font-mono);
+  line-height: var(--leading-normal);
+  tab-size: 2;
+}
+
+.ce-invalid {
+  @include ds.control-invalid;
+}

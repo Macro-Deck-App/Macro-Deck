@@ -1,0 +1,101 @@
+@if (supportsSearch()) {
+  <shared-input
+    class="dvt-search"
+    type="search"
+    [placeholder]="searchPlaceholder()"
+    [ngModel]="search()"
+    (ngModelChange)="onSearchChange($event)" />
+}
+
+@if (pickFailed()) {
+  <p class="dvt-error">{{ bindFailedMessage() }}</p>
+}
+
+@if (!available()) {
+  <shared-empty-state
+    class="dvt-empty"
+    icon="alert-triangle"
+    [heading]="offlineHeading()"
+    [message]="offlineMessage()">
+    <shared-button variant="secondary" (click)="retry()">{{ retryLabel() }}</shared-button>
+  </shared-empty-state>
+} @else if (rootLoading()) {
+  <div class="dvt-loading">{{ loadingLabel() }}</div>
+} @else if (isEmpty()) {
+  <shared-empty-state
+    class="dvt-empty"
+    icon="crosshair"
+    [heading]="emptyHeading()"
+    [message]="emptyMessage()" />
+} @else {
+  <cdk-virtual-scroll-viewport
+    [itemSize]="rowHeight"
+    minBufferPx="400"
+    maxBufferPx="800"
+    class="dvt-list"
+    (scrolledIndexChange)="onScrolled()">
+    <div
+      class="dvt-row-slot"
+      *cdkVirtualFor="let row of rows(); trackBy: trackRow"
+      [style.height.px]="rowHeight">
+      @switch (row.kind) {
+        @case ('branch') {
+          <button
+            type="button"
+            class="dvt-branch"
+            [style.padding-left.px]="row.depth * 20"
+            [attr.aria-expanded]="isSearching() ? null : row.expanded"
+            [disabled]="isSearching()"
+            (click)="toggleBranch(row.node)">
+            @if (!isSearching()) {
+              <span class="icon icon-xs icon-chevron-right dvt-chevron" [class.dvt-chevron-open]="row.expanded" aria-hidden="true"></span>
+            }
+            <span class="dvt-branch-label">{{ label(row.node) }}</span>
+          </button>
+          @if (row.node.type) {
+            <span class="dvt-branch-bind">
+              <span class="dvt-leaf-type type-{{ row.node.type }}">{{ typeLabels()[row.node.type] }}</span>
+              @if (isBound(row.node)) {
+                <span class="dvt-bound-badge">{{ boundLabel() }}</span>
+              } @else if (isBindable(row.node)) {
+                <button type="button" class="dvt-bind-inline" (click)="activateLeaf(row.node)">{{ bindActionLabel() }}</button>
+              }
+            </span>
+          }
+        }
+        @case ('leaf') {
+          <button
+            type="button"
+            class="dvt-leaf"
+            [style.padding-left.px]="row.depth * 20 + 20"
+            [disabled]="!isBindable(row.node) && !isBound(row.node)"
+            (click)="activateLeaf(row.node)">
+            <span class="dvt-leaf-label">{{ label(row.node) }}</span>
+            @if (row.node.type) {
+              <span class="dvt-leaf-type type-{{ row.node.type }}">{{ typeLabels()[row.node.type] }}</span>
+            }
+            @if (isBound(row.node)) {
+              <span class="dvt-bound-badge">{{ boundLabel() }}</span>
+            }
+          </button>
+        }
+        @case ('load-more') {
+          <button type="button" class="dvt-load-more" [style.padding-left.px]="row.depth * 20 + 20" (click)="loadMore(row.parentId)">
+            {{ loadMoreLabel() }}
+          </button>
+        }
+        @case ('loading') {
+          <div class="dvt-loading-row" [style.padding-left.px]="row.depth * 20 + 20">{{ loadingLabel() }}</div>
+        }
+      }
+    </div>
+  </cdk-virtual-scroll-viewport>
+}
+
+@if (showManualIdInput()) {
+  <shared-variable-catalog-id-input
+    [integrationId]="integrationId()"
+    [acceptedTypes]="acceptedTypes()"
+    [writableOnly]="writableOnly()"
+    (bound)="onManualBound($event)" />
+}

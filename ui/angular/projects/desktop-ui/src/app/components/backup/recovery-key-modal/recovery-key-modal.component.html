@@ -1,0 +1,37 @@
+<shared-modal [heading]="heading()" size="small" (close)="onClose()">
+  <div class="rkm">
+    @if (mode === 'created') {
+      <p class="rkm-warning">
+        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+        <span>
+          {{ 'macrodeck.app:Backup.RecoveryKey.CreatedWarning' | translate }}
+        </span>
+      </p>
+    } @else {
+      <p class="rkm-desc">{{ 'macrodeck.app:Backup.RecoveryKey.RevealedDescription' | translate }}</p>
+    }
+
+    <shared-copy-value [label]="'macrodeck.app:Backup.RecoveryKey.Label' | translate" [value]="key" [fallbackZIndex]="1100" />
+
+    <shared-button variant="secondary" (click)="downloadKey()">
+      <span class="icon icon-download icon-sm" aria-hidden="true"></span>
+      {{ 'macrodeck.app:Backup.RecoveryKey.DownloadButton' | translate }}
+    </shared-button>
+
+    @if (showAcknowledgementCheckbox) {
+      <shared-checkbox
+        name="rkm-stored"
+        [label]="'macrodeck.app:Backup.RecoveryKey.StoredCheckboxLabel' | translate"
+        [ngModel]="stored()"
+        (ngModelChange)="stored.set($event)" />
+    }
+  </div>
+
+  <div modal-footer>
+    @if (showAcknowledgementCheckbox) {
+      <shared-button variant="primary" [disabled]="!canConfirm()" (click)="onConfirm()">{{ 'macrodeck:Common.Done' | translate }}</shared-button>
+    } @else {
+      <shared-button variant="primary" (click)="onConfirm()">{{ 'macrodeck:Common.Close' | translate }}</shared-button>
+    }
+  </div>
+</shared-modal>

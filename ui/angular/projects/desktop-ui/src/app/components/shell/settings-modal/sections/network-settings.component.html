@@ -1,0 +1,116 @@
+<div class="network">
+  <shared-settings-section
+    [heading]="'macrodeck:Settings.Network' | translate"
+    [description]="'macrodeck.app:Settings.Network.Description' | translate">
+    @if (error(); as message) {
+      <shared-error-banner [message]="message" (dismiss)="dismissError()" />
+    }
+
+    @if (loaded() && overriddenByEnvironment()) {
+      <p class="network__note">
+        <span class="icon icon-info icon-sm" aria-hidden="true"></span>
+        <span>
+          {{ 'macrodeck.app:Settings.Network.EnvironmentOverrideNote' | translate:{ port: activePort() } }}
+        </span>
+      </p>
+    }
+
+    @if (loaded() && publicListenerUnavailable()) {
+      <p class="network__note">
+        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+        <span>
+          {{ 'macrodeck.app:Settings.Network.ListenerUnavailableNote' | translate:{ port: activePort() } }}
+          @if (overriddenByEnvironment()) {
+            {{ 'macrodeck.app:Settings.Network.ListenerUnavailableClearOverride' | translate }}
+          } @else {
+            {{ 'macrodeck.app:Settings.Network.ListenerUnavailableChoosePort' | translate }}
+          }
+          @if (!canRestart() && restartUnsupportedReason(); as reason) {
+            {{ reason }}.
+          }
+        </span>
+      </p>
+    }
+
+    @if (loaded() && configuredPortIgnored()) {
+      <p class="network__note">
+        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+        <span>
+          {{ 'macrodeck.app:Settings.Network.ConfiguredPortIgnoredNote' | translate:{
+            configuredPort: configuredPort(), activePort: activePort() } }}
+        </span>
+      </p>
+    }
+
+    <!-- Suppressed while the configured port equals the active one - the case restartRequired() covers
+         only because the listener could not be opened. This note would then read "Port 8193 takes
+         effect after a restart. Until then, clients keep connecting on port 8193."; the unavailable
+         note above already says what to do, and the restart button below stays available. -->
+    @if (loaded() && restartRequired() && configuredPort() !== activePort()) {
+      <p class="network__note">
+        <span class="icon icon-info icon-sm" aria-hidden="true"></span>
+        <span>
+          {{ 'macrodeck.app:Settings.Network.RestartRequiredNote' | translate:{
+            configuredPort: configuredPort(), activePort: activePort() } }}
+          @if (!canRestart() && restartUnsupportedReason(); as reason) {
+            {{ reason }}.
+          }
+        </span>
+      </p>
+    }
+
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Network.ListeningPortLabel' | translate"
+      [description]="listeningPortDescription()">
+      <div class="network__field">
+        <shared-input
+          name="publicPort"
+          type="number"
+          [min]="minimumPort()"
+          [max]="maximumPort()"
+          [step]="1"
+          [ariaLabel]="'macrodeck.app:Settings.Network.ListeningPortLabel' | translate"
+          [disabled]="!loaded() || saving() || overriddenByEnvironment()"
+          [invalid]="portInvalid()"
+          [ngModel]="draft()"
+          (ngModelChange)="draft.set($event)">
+        </shared-input>
+        <shared-button
+          variant="primary"
+          [disabled]="!canSave()"
+          [loading]="saving()"
+          (click)="save()">
+          {{ 'macrodeck:Common.Save' | translate }}
+        </shared-button>
+      </div>
+    </shared-settings-row>
+
+    @if (portInvalid()) {
+      <p class="network__hint">
+        {{ 'macrodeck.app:Settings.Network.PortRangeHint' | translate:{ minimum: minimumPort(), maximum: maximumPort() } }}
+      </p>
+    }
+
+    @if (restartRequired() && canRestart()) {
+      <div class="network__actions">
+        <shared-button variant="secondary" [loading]="restarting()" (click)="askToRestart()">
+          {{ 'macrodeck.app:Settings.Network.RestartNowAction' | translate }}
+        </shared-button>
+      </div>
+    }
+  </shared-settings-section>
+
+  @if (loaded() && networkState(); as state) {
+    <app-network-tls-settings [state]="state" (stateChange)="onTlsStateChanged($event)" />
+  }
+
+  @if (restartPromptOpen()) {
+    <shared-confirmation-modal
+      [heading]="'macrodeck.app:Settings.Network.RestartConfirmHeading' | translate"
+      [message]="'macrodeck.app:Settings.Network.RestartConfirmMessage' | translate"
+      [confirmText]="'macrodeck.app:Settings.Network.RestartNowAction' | translate"
+      [cancelText]="'macrodeck.app:Settings.Network.RestartConfirmLater' | translate"
+      (confirm)="restartNow()"
+      (cancel)="cancelRestart()" />
+  }
+</div>

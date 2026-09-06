@@ -1,0 +1,187 @@
+<div class="tls">
+  @if (error(); as message) {
+    <shared-error-banner [message]="message" (dismiss)="dismissError()" />
+  }
+
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Network.Tls.Heading' | translate"
+    [description]="'macrodeck.app:Settings.Network.Tls.Description' | translate">
+    @if (failureMessage(); as message) {
+      <p class="tls__note tls__note--warning">
+        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+        <span>{{ message }}</span>
+      </p>
+    }
+    @if (rejectionMessage(); as message) {
+      <p class="tls__note tls__note--warning">
+        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+        <span>{{ message }}</span>
+      </p>
+    }
+
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Network.Tls.EnableLabel' | translate"
+      [description]="httpsToggleReason() ?? ('macrodeck.app:Settings.Network.Tls.EnableDescription' | translate)">
+      <shared-toggle-switch
+        [disabled]="httpsBusy() || !!httpsToggleReason()"
+        [busy]="httpsBusy()"
+        [checked]="state().tlsEnabled"
+        (changed)="setHttpsEnabled($event)" />
+    </shared-settings-row>
+
+    @if (state().tlsEnabled) {
+      <shared-settings-row
+        [label]="'macrodeck.app:Settings.Network.Tls.ModeLabel' | translate"
+        [description]="'macrodeck.app:Settings.Network.Tls.ModeDescription' | translate">
+        <shared-segmented-control
+          [options]="modeOptions()"
+          [value]="state().tlsMode"
+          (valueChange)="setMode($event)" />
+      </shared-settings-row>
+
+      @if (state().tlsMode === 'Replace') {
+        <p class="tls__note tls__note--warning">
+          <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+          <span>
+            {{ 'macrodeck.app:Settings.Network.Tls.ReplaceModeWarning' | translate:{ port: state().publicPort } }}
+          </span>
+        </p>
+      }
+
+      @if (state().tlsMode === 'Additional') {
+        <shared-settings-row
+          [label]="'macrodeck.app:Settings.Network.Tls.PortLabel' | translate"
+          [description]="'macrodeck.app:Settings.Network.Tls.PortDefault' | translate:{ port: state().defaultTlsHttpsPort }">
+          <div class="tls__field">
+            <shared-input
+              name="tlsHttpsPort"
+              type="number"
+              [min]="state().minimumPublicPort"
+              [max]="state().maximumPublicPort"
+              [step]="1"
+              [ariaLabel]="'macrodeck.app:Settings.Network.Tls.PortLabel' | translate"
+              [disabled]="portSaving()"
+              [invalid]="!!httpsPortInvalidReason()"
+              [ngModel]="httpsPortDraft()"
+              (ngModelChange)="httpsPortDraft.set($event)">
+            </shared-input>
+            <shared-button
+              variant="primary"
+              [disabled]="!canSaveHttpsPort()"
+              [loading]="portSaving()"
+              (click)="saveHttpsPort()">
+              {{ 'macrodeck:Common.Save' | translate }}
+            </shared-button>
+          </div>
+        </shared-settings-row>
+
+        @if (httpsPortInvalidReason(); as reason) {
+          <p class="tls__hint">{{ reason }}</p>
+        }
+      }
+    }
+  </shared-settings-section>
+
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Network.Tls.CertificateHeading' | translate"
+    [description]="'macrodeck.app:Settings.Network.Tls.CertificateDescription' | translate">
+    @if (state().tlsCertificateExpired) {
+      <p class="tls__note tls__note--warning">
+        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+        <span>{{ 'macrodeck.app:Settings.Network.Tls.CertificateExpired' | translate }}</span>
+      </p>
+    }
+    @if (state().tlsCertificateNotYetValid) {
+      <p class="tls__note tls__note--warning">
+        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+        <span>{{ 'macrodeck.app:Settings.Network.Tls.CertificateNotYetValid' | translate }}</span>
+      </p>
+    }
+
+    @if (sourceLabel(); as label) {
+      <shared-settings-row [label]="'macrodeck.app:Settings.Network.Tls.SourceLabel' | translate">
+        <span>{{ label }}</span>
+      </shared-settings-row>
+    }
+    <shared-settings-row [label]="'macrodeck.app:Settings.Network.Tls.SubjectLabel' | translate">
+      <span>{{ state().tlsCertificateSubject }}</span>
+    </shared-settings-row>
+    <shared-settings-row [label]="'macrodeck.app:Settings.Network.Tls.FingerprintLabel' | translate">
+      <span class="tls__fingerprint">{{ state().tlsCertificateFingerprint }}</span>
+    </shared-settings-row>
+    @if (notBeforeLabel(); as label) {
+      <shared-settings-row [label]="'macrodeck.app:Settings.Network.Tls.ValidFromLabel' | translate">
+        <span>{{ label }}</span>
+      </shared-settings-row>
+    }
+    @if (notAfterLabel(); as label) {
+      <shared-settings-row [label]="'macrodeck.app:Settings.Network.Tls.ValidUntilLabel' | translate">
+        <span>{{ label }}</span>
+      </shared-settings-row>
+    }
+
+    <div class="tls__actions">
+      <shared-button variant="secondary" [loading]="certificateBusy()" (click)="onGenerateClicked()">
+        {{ 'macrodeck.app:Settings.Network.Tls.ReissueAction' | translate }}
+      </shared-button>
+      <shared-button variant="secondary" [disabled]="certificateBusy()" (click)="openUploadModal()">
+        {{ 'macrodeck.app:Settings.Network.Tls.UploadAction' | translate }}
+      </shared-button>
+    </div>
+  </shared-settings-section>
+
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Network.Tls.AuthorityHeading' | translate"
+    [description]="'macrodeck.app:Settings.Network.Tls.AuthorityDescription' | translate">
+    @if (state().tlsAuthorityConfigured) {
+      <shared-settings-row [label]="'macrodeck.app:Settings.Network.Tls.AuthoritySubjectLabel' | translate">
+        <span>{{ state().tlsAuthoritySubject }}</span>
+      </shared-settings-row>
+      <shared-settings-row [label]="'macrodeck.app:Settings.Network.Tls.AuthorityFingerprintLabel' | translate">
+        <span class="tls__fingerprint">{{ state().tlsAuthorityFingerprint }}</span>
+      </shared-settings-row>
+      @if (authorityNotAfterLabel(); as label) {
+        <shared-settings-row [label]="'macrodeck.app:Settings.Network.Tls.AuthorityValidUntilLabel' | translate">
+          <span>{{ label }}</span>
+        </shared-settings-row>
+      }
+
+      <div class="tls__actions">
+        <shared-button
+          variant="danger-ghost"
+          [loading]="authorityBusy()"
+          (click)="onRegenerateAuthorityClicked()">
+          {{ 'macrodeck.app:Settings.Network.Tls.RegenerateAuthorityAction' | translate }}
+        </shared-button>
+      </div>
+    } @else {
+      <p class="tls__note">{{ 'macrodeck.app:Settings.Network.Tls.AuthorityMissing' | translate }}</p>
+    }
+  </shared-settings-section>
+
+  @if (regeneratePromptOpen()) {
+    <shared-confirmation-modal
+      [heading]="'macrodeck.app:Settings.Network.Tls.RegenerateConfirmHeading' | translate"
+      [message]="'macrodeck.app:Settings.Network.Tls.RegenerateConfirmMessage' | translate"
+      [confirmText]="'macrodeck.app:Settings.Network.Tls.ReissueAction' | translate"
+      [cancelText]="'macrodeck:Common.Cancel' | translate"
+      (confirm)="confirmRegenerate()"
+      (cancel)="cancelRegenerate()" />
+  }
+
+  @if (regenerateAuthorityPromptOpen()) {
+    <shared-confirmation-modal
+      [heading]="'macrodeck.app:Settings.Network.Tls.RegenerateAuthorityConfirmHeading' | translate"
+      [message]="'macrodeck.app:Settings.Network.Tls.RegenerateAuthorityConfirmMessage' | translate"
+      [confirmText]="'macrodeck.app:Settings.Network.Tls.RegenerateAuthorityAction' | translate"
+      [cancelText]="'macrodeck:Common.Cancel' | translate"
+      (confirm)="confirmRegenerateAuthority()"
+      (cancel)="cancelRegenerateAuthority()" />
+  }
+
+  @if (uploadModalOpen()) {
+    <app-network-tls-certificate-upload-modal
+      (saved)="onCertificateUploaded($event)"
+      (cancelled)="closeUploadModal()" />
+  }
+</div>

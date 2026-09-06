@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Source for dmg-background.png (the macOS DMG window background).
+
+  Canvas is 1320x1000 px = 2x the 660x500 pt DMG window configured in
+  tauri.macos.conf.json; the PNG is exported 1:1 from this file and stamped
+  with 144 DPI so Finder renders it at 660x500 pt on Retina displays.
+
+  The artwork ends at y=652 and the rest of the canvas is deliberately empty:
+  Finder's title bar and status bar are drawn over the top and bottom of the
+  background, so the window has to be roughly 100 pt taller than the layout for
+  the tiles and their labels to stay fully visible (issue #594).
+
+  Coordinates that must stay in sync with bundle.macOS.dmg (all px = 2 x pt):
+    - app icon centre        (360, 430)  = appPosition (180, 215)
+    - Applications centre    (960, 430)  = applicationFolderPosition (480, 215)
+    - icons are 128 pt (256 px); Finder draws the labels ~10 pt below the box.
+
+  The two "key cap" pads echo the icon's key grid and sit behind the icon +
+  label areas on purpose: Finder colours the labels itself (black in light
+  appearance, white in dark), so the pads use a mid-luminance brand indigo that
+  keeps either label colour readable. The header text is baked into the image
+  and therefore appearance-independent.
+
+  APP_ICON_DATA_URI is substituted with the app icon by
+  ci/scripts/generate-brand-assets.sh; that script also writes the .png.
+-->
+<svg width="1320" height="1000" viewBox="0 0 1320 1000" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a1a22"/>
+      <stop offset="1" stop-color="#101013"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.18" r="0.75">
+      <stop offset="0" stop-color="#6366f1" stop-opacity="0.16"/>
+      <stop offset="0.55" stop-color="#a877f7" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#a877f7" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#4f46c8"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1320" height="1000" fill="url(#bg)"/>
+  <rect width="1320" height="1000" fill="url(#glow)"/>
+
+  <!-- Header: the app icon, wordmark, instruction -->
+  <g>
+    <image x="616" y="40" width="88" height="88" href="APP_ICON_DATA_URI"/>
+    <text x="660" y="197" text-anchor="middle" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="50" font-weight="600" fill="#f5f5f7">Macro Deck</text>
+    <text x="660" y="247" text-anchor="middle" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="26" font-weight="400" fill="#9a9aa6">Drag Macro Deck to the Applications folder to install</text>
+  </g>
+
+  <!-- Key-cap pads behind the icon + label positions -->
+  <g>
+    <rect x="190" y="272" width="340" height="380" rx="44" fill="url(#pad)"/>
+    <rect x="790" y="272" width="340" height="380" rx="44" fill="url(#pad)"/>
+    <rect x="191" y="273" width="338" height="378" rx="43" fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="2"/>
+    <rect x="791" y="273" width="338" height="378" rx="43" fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="2"/>
+  </g>
+
+  <!-- Drag direction, at icon-centre height -->
+  <g stroke="#f0f0f2" stroke-width="12" stroke-linecap="round" fill="none">
+    <line x1="574" y1="430" x2="716" y2="430"/>
+    <path d="M 686 398 L 722 430 L 686 462"/>
+  </g>
+</svg>

@@ -1,0 +1,80 @@
+name: Docs
+
+# Rebuilds the plugin documentation site whenever the SDK, the protocol, the UI model
+# or the documentation itself changes, and on demand. Successful builds from main are
+# deployed to the production Cloudflare Worker.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'sdk/src/**'
+      - 'protocol/src/**'
+      - 'ui-model/src/**'
+      - '.github/workflows/docs.yml'
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Astro 7 requires >=22.12.0, so this is pinned tighter than the repo-wide NODE_VERSION.
+  NODE_VERSION: '22.12'
+
+jobs:
+  build:
+    name: Build documentation site
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: docs
+
+      # starlight-links-validator fails the build on any broken internal link.
+      - name: Build
+        run: npm run build
+        working-directory: docs
+
+      - name: Upload site
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs-site
+          path: docs/dist
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy documentation site
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    environment:
+      name: production
+      url: https://docs.macro-deck.app
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download site
+        uses: actions/download-artifact@v8
+        with:
+          name: docs-site
+          path: docs/dist
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: docs
+          command: deploy

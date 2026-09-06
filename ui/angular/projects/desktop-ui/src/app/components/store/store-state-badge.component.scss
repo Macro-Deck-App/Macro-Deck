@@ -1,0 +1,27 @@
+@use '../../../styles/index' as ds;
+
+.badge {
+  @include ds.badge;
+  border: 1px solid transparent;
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-tertiary);
+
+  &-ok {
+    color: var(--color-success);
+    background-color: var(--color-success-muted);
+  }
+
+  &-accent {
+    color: var(--color-accent);
+    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  }
+
+  // Still legible, no longer a filled pill: install state has to stay readable on a browse card
+  // without competing with the card's own action.
+  &-quiet {
+    padding-inline: 0;
+    background-color: transparent;
+    border-color: transparent;
+    font-size: var(--text-xs);
+  }
+}

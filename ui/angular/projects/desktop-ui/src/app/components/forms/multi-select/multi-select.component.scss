@@ -1,0 +1,57 @@
+@use '../../../../styles/index' as ds;
+
+:host {
+  position: relative;
+  display: block;
+  flex: 1 1 0;
+  min-width: 6.5rem;
+  @include ds.dropdown-affordances;
+}
+
+.ms-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  text-align: left;
+  cursor: pointer;
+  @include ds.control-base;
+  @include ds.control-interactive;
+}
+
+.ms-placeholder {
+  color: var(--color-text-muted);
+}
+
+.ms-summary {
+  @include ds.truncate;
+}
+
+.ms-filter {
+  width: 100%;
+  margin-bottom: var(--space-2);
+  @include ds.control-base;
+  @include ds.control-interactive;
+}
+
+.ms-status {
+  padding: var(--space-2) 0.5rem;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.ms-option {
+  display: flex;
+  padding: 0.3125rem 0.5rem;
+  border-radius: var(--radius-sm);
+  // An option label can be one unbreakable token - a Home Assistant entity id is
+  // the reason - and its min-content width would otherwise be wider than the
+  // panel. The panel scrolls on Y, so an overflow on X turns into a scrollbar
+  // even though the label had room to wrap. Inherited down to the label.
+  overflow-wrap: anywhere;
+}
+
+.ms-option:hover {
+  background-color: var(--color-bg-hover);
+}

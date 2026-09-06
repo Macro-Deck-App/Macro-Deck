@@ -1,0 +1,123 @@
+<shared-widget-grid
+  #grid
+  [cols]="cols"
+  [rows]="rows"
+  [widgets]="widgets"
+  [background]="background"
+  [outerMargin]="outerMargin"
+  [spacing]="spacing"
+  [borderRadius]="borderRadius"
+  [busyCell]="busyCell"
+  [busyCellLabel]="creatingWidgetLabel()"
+  [dropTargetCell]="dropTargetCell"
+  [focusedWidgetId]="focusedWidgetId"
+  [mode]="editMode ? 'layout' : 'runtime'"
+  [renderStates]="renderStates()"
+  [widgetDecoration]="editMode ? tileChrome : null"
+  (cellClick)="onCellClick($event)"
+  (widgetDataChange)="widgetDataChange.emit($event)"
+  (widgetTrigger)="widgetTrigger.emit($event)">
+
+  <!-- Projected into the grid container, so it shares the cells' coordinate space. -->
+  @if (editMode) {
+    <div gridOverlay>
+      @for (placeholder of drag.placeholders(); track $index) {
+        <div
+          class="drop-placeholder"
+          [style.left.px]="grid.cellLeft(placeholder)"
+          [style.top.px]="grid.cellTop(placeholder)"
+          [style.width.px]="grid.rectWidth(placeholder)"
+          [style.height.px]="grid.rectHeight(placeholder)">
+        </div>
+      }
+      <div
+        #marqueeOverlay
+        class="marquee-overlay"
+        [class.active]="marquee.box() !== null">
+      </div>
+    </div>
+  }
+
+  <!-- Anchored to the viewport rather than to a cell, so it hangs outside the grid container. -->
+  @if (drag.ghostWidgets().length > 0) {
+    <div #ghostLayer class="ghost-layer">
+      @for (ghost of drag.ghostWidgets(); track ghost.widget.id) {
+        <shared-widget-ghost
+          [widget]="ghost.widget"
+          [widthPx]="grid.rectWidth(ghost.widget)"
+          [heightPx]="grid.rectHeight(ghost.widget)"
+          [offsetX]="ghost.offsetX"
+          [offsetY]="ghost.offsetY"
+          [settling]="drag.settlingGhost()"
+          [contentScale]="grid.contentScale">
+        </shared-widget-ghost>
+      }
+    </div>
+  }
+</shared-widget-grid>
+
+<!--
+  Stamped inside every tile by the runtime grid. It only ever reads signals and its `widget` context,
+  which is what lets an embedded view attached to an OnPush tile refresh from the editor's state.
+-->
+<ng-template #tileChrome let-widget>
+  <div
+    class="widget-chrome"
+    [class.is-selected]="selectedWidgetIds.has(widget.id)"
+    [class.is-pinned]="widget.isPinned"
+    (pointerdown)="onTilePointerDown(widget, $event)"
+    (click)="onTileClick(widget, $event)"
+    (auxclick)="onTileAuxClick(widget, $event)"
+    (contextmenu)="onTileContextMenu(widget, $event)">
+
+    <div class="edit-overlay">
+      <span class="icon icon-pencil icon-xl"></span>
+      <span>{{ 'macrodeck:Common.Edit' | translate }}</span>
+    </div>
+
+    @if (widget.isPinned) {
+      <div
+        class="pin-badge"
+        role="img"
+        [title]="pinnedTitle(widget)"
+        [attr.aria-label]="pinnedTitle(widget)">
+        <span class="icon icon-pin icon-xs"></span>
+      </div>
+    } @else {
+      <div class="resize-handle" (pointerdown)="onResizePointerDown(widget, $event)" (click)="stopClick($event)">
+        <div class="resize-dot"></div>
+      </div>
+    }
+  </div>
+</ng-template>
+
+@if (editMode) {
+  <shared-widget-context-menu
+    [isOpen]="contextMenu().isOpen"
+    [x]="contextMenu().x"
+    [y]="contextMenu().y"
+    [mode]="contextMenu().mode"
+    [canPaste]="canPaste"
+    [isPinned]="menuAnyPinned()"
+    [pinScope]="contextMenu().widget?.pinScope"
+    [selectionCount]="menuSelectionCount()"
+    (action)="onContextMenuAction($event)"
+    (closed)="closeContextMenu()">
+  </shared-widget-context-menu>
+}
+
+@if (pinnedHintVisible()) {
+  <shared-notice-modal
+    [heading]="pinnedHintHeading()"
+    [message]="pinnedHintMessage()"
+    (closed)="onPinnedHintClosed($event)">
+  </shared-notice-modal>
+}
+
+@if (pinScopeHintVisible()) {
+  <shared-notice-modal
+    [heading]="pinScopeHintHeading()"
+    [message]="pinScopeHintMessage()"
+    (closed)="onPinScopeHintClosed($event)">
+  </shared-notice-modal>
+}

@@ -1,0 +1,28 @@
+<div class="library-overview">
+  <div class="library-header">
+    <div>
+      <h1 class="library-title">{{ 'macrodeck.app:Nav.Library' | translate }}</h1>
+      <p class="library-subtitle">{{ 'macrodeck.app:Library.Page.Subtitle' | translate }}</p>
+    </div>
+    <shared-button variant="secondary" (click)="browseStore()">
+      <span class="icon icon-store icon-sm" aria-hidden="true"></span>
+      {{ 'macrodeck.app:Integrations.Page.BrowseStoreAction' | translate }}
+    </shared-button>
+  </div>
+
+  <div class="library-cards">
+    @for (card of cards(); track card.type.id) {
+      <button type="button" class="library-card" (click)="open(card.type)">
+        <span class="icon icon-{{ card.type.icon }} icon-lg library-card-icon" aria-hidden="true"></span>
+        <span class="library-card-text">
+          <span class="library-card-name">{{ card.label }}</span>
+          <span class="library-card-description">{{ card.description }}</span>
+          @if (card.summary) {
+            <span class="library-card-summary">{{ card.summary }}</span>
+          }
+        </span>
+        <span class="icon icon-chevron-right icon-sm library-card-chevron" aria-hidden="true"></span>
+      </button>
+    }
+  </div>
+</div>

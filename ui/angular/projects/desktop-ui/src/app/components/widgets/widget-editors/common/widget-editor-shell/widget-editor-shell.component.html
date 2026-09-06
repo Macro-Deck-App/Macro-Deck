@@ -1,0 +1,60 @@
+<div
+  class="editor-shell"
+  [class.editor-shell--compact]="isCompact()"
+  [class.editor-shell--drawer-open]="drawerOpen()">
+  <!--
+    The sidebar comes first so it keeps its place on the left and the tab sequence runs
+    sidebar -> actions, as it did before this pane could collapse. Layering the compact drawer over
+    the main pane therefore needs a z-index rather than DOM order; the SCSS explains the choice.
+  -->
+  @if (isCompact()) {
+    <div
+      class="editor-shell-scrim"
+      [class.editor-shell-scrim--visible]="drawerOpen()"
+      (click)="closeDrawer()">
+    </div>
+  }
+
+  <aside
+    class="editor-shell-sidebar"
+    [id]="sidebarId"
+    [attr.role]="isCompact() ? 'region' : null"
+    [attr.aria-label]="isCompact() ? sidebarLabel : null"
+    [attr.inert]="isCompact() && !drawerOpen() ? '' : null"
+    (keydown.escape)="onSidebarEscape()">
+    @if (isCompact()) {
+      <div class="editor-shell-drawer-header">
+        <h2 class="editor-shell-drawer-title">{{ sidebarLabel }}</h2>
+        <button
+          #closeButton
+          type="button"
+          class="editor-shell-drawer-close"
+          [attr.aria-label]="'macrodeck:Common.Close' | translate"
+          (click)="closeDrawer()">
+          <span class="icon icon-x icon-sm" aria-hidden="true"></span>
+        </button>
+      </div>
+    }
+    <div #sidebarScroll class="editor-shell-sidebar-scroll" tabindex="-1">
+      <ng-content select="[editorSidebar]"></ng-content>
+    </div>
+  </aside>
+
+  <div class="editor-shell-main">
+    @if (isCompact()) {
+      <div class="editor-shell-toolbar">
+        <button
+          #toggleButton
+          type="button"
+          class="editor-shell-appearance-toggle"
+          [attr.aria-expanded]="drawerOpen()"
+          [attr.aria-controls]="sidebarId"
+          (click)="toggleDrawer()">
+          <span class="icon icon-sliders icon-sm" aria-hidden="true"></span>
+          {{ sidebarLabel }}
+        </button>
+      </div>
+    }
+    <ng-content></ng-content>
+  </div>
+</div>

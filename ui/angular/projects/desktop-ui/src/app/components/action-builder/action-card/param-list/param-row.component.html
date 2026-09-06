@@ -1,0 +1,392 @@
+<div class="param-row"
+  [class.boolean]="param.type === 'boolean' && !param.literalOnly"
+  [class.param-invalid]="hasError">
+  <div class="param-label-line">
+    <label class="param-label">
+      {{ param.label }}@if (param.required) {<span class="param-required" aria-hidden="true">*</span>}
+    </label>
+
+    @if (showsFilterOperator) {
+      <span class="param-operator-wrap">
+        <button
+          #filterOperatorBtn
+          type="button"
+          class="param-operator-btn"
+          [class.open]="filterOperatorOpen()"
+          aria-haspopup="listbox"
+          [attr.aria-expanded]="filterOperatorOpen()"
+          [attr.aria-label]="comparisonAriaLabel"
+          (click)="toggleFilterOperatorPopover($event)">
+          <span class="param-operator-label">{{ filterOperatorLabel }}</span>
+          <shared-select-caret />
+        </button>
+
+        <shared-overlay-panel
+          [anchor]="filterOperatorBtn"
+          [isOpen]="filterOperatorOpen()"
+          [minWidth]="160"
+          [anchorOffset]="0"
+          (dismissed)="closeFilterOperatorPopover()">
+          <div class="param-operator-listbox" role="listbox">
+            @for (op of filterOperators; track op.value) {
+              <button
+                type="button"
+                class="param-operator-option"
+                [class.active]="op.value === filterOperator"
+                role="option"
+                [attr.aria-selected]="op.value === filterOperator"
+                (click)="pickFilterOperator(op.value)">
+                {{ op.label }}
+              </button>
+            }
+          </div>
+        </shared-overlay-panel>
+      </span>
+    }
+  </div>
+
+  @if (isStateFilterOperator) {
+    <!-- A state operator (isEmpty/isAvailable/…) ignores the filter value entirely; no control to show. -->
+  } @else if (isVariable) {
+    <span class="param-variable-chip">
+      <span class="chip-text">{{ variableLabel }}</span>
+      <button
+        type="button"
+        class="chip-clear"
+        (click)="onClearVariable()"
+        [attr.aria-label]="'macrodeck.app:ActionBuilder.Param.ClearVariable' | translate">
+        <span class="icon icon-x icon-xs"></span>
+      </button>
+    </span>
+  } @else {
+    <div class="param-value">
+      @switch (param.type) {
+        @case ('string') {
+          <shared-param-input
+            [value]="stringValue"
+            [placeholder]="param.placeholder ?? ''"
+            [multiline]="param.multiline ?? false"
+            [rows]="multilineRows"
+            [variables]="store.pickerVariables()"
+            [scope]="store.previewScope()"
+            [scopeRefId]="store.previewScopeRefId()"
+            [showLiquid]="allowReferences"
+            [allowReferences]="allowReferences"
+            (valueChange)="onChange($event)">
+          </shared-param-input>
+        }
+        @case ('url') {
+          <shared-param-input
+            [value]="stringValue"
+            [placeholder]="param.placeholder ?? 'https://…'"
+            [variables]="store.pickerVariables()"
+            [scope]="store.previewScope()"
+            [scopeRefId]="store.previewScopeRefId()"
+            [showLiquid]="allowReferences"
+            [allowReferences]="allowReferences"
+            (valueChange)="onChange($event)"
+            (valueBlur)="onUrlBlur($event)">
+          </shared-param-input>
+        }
+        @case ('ipaddress') {
+          <shared-param-input
+            [value]="stringValue"
+            [placeholder]="param.placeholder ?? '192.168.0.1'"
+            [variables]="store.pickerVariables()"
+            [scope]="store.previewScope()"
+            [scopeRefId]="store.previewScopeRefId()"
+            [showLiquid]="false"
+            [allowReferences]="allowReferences"
+            (valueChange)="onChange($event)">
+          </shared-param-input>
+        }
+        @case ('number') {
+          @if (hasSlider) {
+            <input
+              type="range"
+              class="param-slider"
+              [ngModel]="numberValue"
+              (ngModelChange)="onChange(+$event)"
+              [attr.min]="param.min"
+              [attr.max]="param.max"
+              [attr.step]="param.step ?? 1">
+            <shared-input
+              class="param-slider-number"
+              type="number"
+              [invalid]="hasError"
+              [min]="param.min"
+              [max]="param.max"
+              [step]="param.step"
+              [ngModel]="primitive"
+              (ngModelChange)="onChange($event)" />
+          } @else {
+            <shared-input
+              type="number"
+              [invalid]="hasError"
+              [min]="param.min"
+              [max]="param.max"
+              [step]="param.step"
+              [ngModel]="primitive"
+              (ngModelChange)="onChange($event)" />
+          }
+        }
+        @case ('boolean') {
+          @if (param.literalOnly) {
+            <!-- A value that cannot be variable-bound can use a pure switch. -->
+            <shared-toggle-switch
+              [checked]="!!primitive"
+              (changed)="onChange($event)" />
+          } @else {
+            <shared-checkbox
+              [ngModel]="primitive"
+              (ngModelChange)="onChange($event)" />
+          }
+        }
+        @case ('choice') {
+          <shared-select
+            [options]="choiceOptions"
+            [placeholder]="emptyOptionLabel"
+            [clearable]="!param.required"
+            [ngModel]="primitive"
+            (ngModelChange)="onChange($event)" />
+        }
+        @case ('dynamic-choice') {
+          <shared-select
+            [options]="dynamicChoiceOptions"
+            [placeholder]="emptyOptionLabel"
+            [clearable]="!param.required"
+            [ngModel]="primitive"
+            (ngModelChange)="onOptionChange($event)"
+            (opened)="loadDynamicOptions()" />
+          <shared-button
+            variant="ghost"
+            size="icon"
+            [ariaLabel]="'macrodeck.app:ActionBuilder.Param.ReloadOptions' | translate"
+            [disabled]="dynLoading()"
+            (click)="reloadDynamicOptions()">
+            <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
+          </shared-button>
+        }
+        @case ('autocomplete') {
+          <shared-combobox
+            [value]="stringValue"
+            [displayLabel]="autocompleteDisplayLabel"
+            [placeholder]="param.placeholder ?? ''"
+            [options]="effectiveOptions"
+            [loading]="dynLoading()"
+            [filterLocally]="!isDynamic"
+            [clearable]="!param.required"
+            (valueChange)="onOptionChange($event)"
+            (filterChange)="isDynamic && onDynamicFilterChange($event)"
+            (opened)="isDynamic && loadDynamicOptions(autocompleteOpenFilter)">
+          </shared-combobox>
+        }
+        @case ('widget-target') {
+          <shared-widget-target-picker
+            [value]="stringValue"
+            [options]="effectiveOptions"
+            [loading]="dynLoading()"
+            [hasOwnerWidget]="hasOwnerWidget"
+            [valueLabel]="param.valueLabel ?? loadedOptionLabel"
+            (valueChange)="onOptionChange($event)"
+            (filterChange)="onDynamicFilterChange($event)"
+            (opened)="loadDynamicOptions()">
+          </shared-widget-target-picker>
+        }
+        @case ('multiselect') {
+          <shared-multi-select
+            [value]="arrayValue"
+            [options]="effectiveOptions"
+            [loading]="dynLoading()"
+            [filterLocally]="!isDynamic"
+            (valueChange)="onChange($event)"
+            (filterChange)="isDynamic && onDynamicFilterChange($event)"
+            (opened)="isDynamic && loadDynamicOptions()">
+          </shared-multi-select>
+        }
+        @case ('password') {
+          @if (allowReferences) {
+            <shared-secret-input
+              [value]="secretValue"
+              [kind]="secretKind"
+              [placeholder]="param.placeholder ?? ('macrodeck.app:ActionBuilder.Param.EnterPassword' | translate)"
+              (valueChange)="onChange($event)">
+            </shared-secret-input>
+          } @else {
+            <shared-input
+              type="password"
+              [placeholder]="param.placeholder ?? ('macrodeck.app:ActionBuilder.Param.EnterPassword' | translate)"
+              [ngModel]="stringValue"
+              (ngModelChange)="onChange($event)" />
+          }
+        }
+        @case ('secret') {
+          @if (allowReferences) {
+            <shared-secret-input
+              [value]="secretValue"
+              [kind]="secretKind"
+              [placeholder]="param.placeholder ?? ('macrodeck.app:ActionBuilder.Param.EnterSecret' | translate)"
+              (valueChange)="onChange($event)">
+            </shared-secret-input>
+          } @else {
+            <shared-input
+              type="password"
+              [placeholder]="param.placeholder ?? ('macrodeck.app:ActionBuilder.Param.EnterSecret' | translate)"
+              [ngModel]="stringValue"
+              (ngModelChange)="onChange($event)" />
+          }
+        }
+        @case ('color') {
+          <shared-color-picker
+            [ngModel]="stringValue"
+            [resetValue]="colorResetValue"
+            (ngModelChange)="onChange($event)">
+          </shared-color-picker>
+        }
+        @case ('file') {
+          <shared-file-path-input
+            kind="file"
+            [extensions]="browseExtensions"
+            [invalid]="hasError"
+            [placeholder]="param.placeholder ?? ''"
+            [value]="stringValue"
+            (valueChange)="onChange($event)" />
+        }
+        @case ('folder') {
+          <shared-file-path-input
+            kind="folder"
+            [invalid]="hasError"
+            [placeholder]="param.placeholder ?? ''"
+            [value]="stringValue"
+            (valueChange)="onChange($event)" />
+        }
+        @case ('image') {
+          <shared-file-path-input
+            kind="image"
+            [extensions]="browseExtensions"
+            [invalid]="hasError"
+            [placeholder]="param.placeholder ?? ''"
+            [value]="stringValue"
+            (valueChange)="onChange($event)" />
+        }
+        @case ('icon') {
+          <shared-widget-icon-control [icon]="iconValue" (valueChange)="onIconChange($event)" />
+        }
+        @case ('hotkey') {
+          <shared-hotkey-recorder
+            [value]="hotkeyValue"
+            (valueChange)="onChange($event)">
+          </shared-hotkey-recorder>
+        }
+        @case ('keyboard-combo') {
+          <shared-keyboard-combo-editor
+            [value]="keyboardComboValue"
+            (valueChange)="onKeyboardComboChange($event)">
+          </shared-keyboard-combo-editor>
+        }
+        @case ('keyboard-sequence') {
+          <shared-keyboard-sequence-editor
+            [value]="keyboardSequenceValue"
+            [variables]="store.pickerVariables()"
+            [scope]="store.previewScope()"
+            [scopeRefId]="store.previewScopeRefId()"
+            (valueChange)="onKeyboardSequenceChange($event)">
+          </shared-keyboard-sequence-editor>
+        }
+        @case ('duration') {
+          <shared-duration-input
+            [value]="numberValue"
+            (valueChange)="onChange($event)">
+          </shared-duration-input>
+        }
+        @case ('datetime') {
+          <shared-datetime-picker
+            [value]="stringValue"
+            (valueChange)="onChange($event)">
+          </shared-datetime-picker>
+        }
+        @case ('json') {
+          <shared-code-editor
+            [value]="stringValue"
+            language="json"
+            [placeholder]="param.placeholder ?? ''"
+            (valueChange)="onChange($event)">
+          </shared-code-editor>
+        }
+        @case ('code') {
+          <shared-code-editor
+            [value]="stringValue"
+            [language]="codeLanguage"
+            [placeholder]="param.placeholder ?? ''"
+            (valueChange)="onChange($event)">
+          </shared-code-editor>
+        }
+        @case ('keyvalue') {
+          <shared-keyvalue-editor
+            [value]="keyValueMap"
+            (valueChange)="onChange($event)">
+          </shared-keyvalue-editor>
+        }
+        @case ('object') {
+          <div class="param-nested">
+            @for (child of objectChildren; track child.name) {
+              <shared-param-row
+                [blockId]="blockId"
+                [block]="block"
+                [param]="childParam(child)"
+                [nested]="true"
+                [allowReferences]="allowReferences"
+                (nestedChange)="onChildChange(child.name, $event)" />
+            }
+          </div>
+        }
+        @case ('array') {
+          <div class="param-nested">
+            @for (index of arrayIndices(); track index) {
+              <div class="param-array-item">
+                @if (itemParam(index); as item) {
+                  <shared-param-row
+                    [blockId]="blockId"
+                    [block]="block"
+                    [param]="item"
+                    [nested]="true"
+                    [allowReferences]="allowReferences"
+                    (nestedChange)="onItemChange(index, $event)" />
+                }
+                <shared-button
+                  variant="ghost"
+                  size="icon"
+                  [ariaLabel]="'macrodeck.app:ActionBuilder.Param.RemoveItem' | translate"
+                  (click)="removeItem(index)">
+                  <span class="icon icon-x icon-sm" aria-hidden="true"></span>
+                </shared-button>
+              </div>
+            }
+            <shared-button variant="add" (click)="addItem()">
+              <span class="icon icon-plus icon-sm" aria-hidden="true"></span>
+              {{ 'macrodeck:Common.Add' | translate }}
+            </shared-button>
+          </div>
+        }
+      }
+      @if (showsExternalVariablePicker) {
+        <shared-variable-picker
+          [variables]="store.pickerVariables()"
+          [acceptedTypes]="acceptedVariableTypes"
+          (pick)="onPickVariable($event)"
+          (pickEventParameter)="onPickEventParameter($event)">
+        </shared-variable-picker>
+      }
+    </div>
+  }
+
+  @if (dynError()) {
+    <div class="param-error">{{ dynError() }}</div>
+  }
+  @if (param.description) {
+    <div class="param-description">{{ param.description }}</div>
+  }
+  @for (message of errorMessages; track message) {
+    <div class="param-error">{{ message }}</div>
+  }
+</div>

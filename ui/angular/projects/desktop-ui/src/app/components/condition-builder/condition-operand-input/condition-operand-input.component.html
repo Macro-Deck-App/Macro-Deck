@@ -1,0 +1,62 @@
+@if (controlType === 'choice') {
+  <shared-select
+    class="cb-literal-select"
+    [placeholder]="placeholder"
+    [options]="choiceOptions"
+    [ngModel]="stringValue"
+    (ngModelChange)="emit($event)">
+  </shared-select>
+} @else if (controlType === 'dynamic-choice' || controlType === 'autocomplete') {
+  <!--
+    A dynamic list is a snapshot of live state - ObsIntegration answers an empty scene/input list
+    while OBS is disconnected - so a strict select would make the condition unauthorable for as long
+    as the source is offline, and would blank an already-saved value the moment its dropdown opened
+    to an empty list. A combobox stays typeable regardless of what (if anything) loaded, unlike
+    ParamRowComponent's dynamic-choice, which is a strict select because there the value only ever
+    comes from opening that same dropdown.
+  -->
+  <shared-combobox
+    class="cb-literal-select"
+    [value]="stringValue"
+    [displayLabel]="displayLabel"
+    [placeholder]="placeholder"
+    [options]="effectiveOptions"
+    [loading]="dynLoading()"
+    [filterLocally]="!isDynamic"
+    (valueChange)="emit($event)"
+    (filterChange)="isDynamic && onDynamicFilterChange($event)"
+    (opened)="isDynamic && loadDynamicOptions(displayLabel ? '' : stringValue)">
+  </shared-combobox>
+} @else if (controlType === 'boolean') {
+  <shared-select
+    class="cb-literal-select"
+    [placeholder]="placeholder"
+    [options]="booleanOptions()"
+    [ngModel]="booleanValue"
+    (ngModelChange)="emit($event)">
+  </shared-select>
+} @else if (controlType === 'number') {
+  <shared-input
+    class="cb-literal-select"
+    type="number"
+    [placeholder]="placeholder"
+    [min]="parameter?.min"
+    [max]="parameter?.max"
+    [step]="parameter?.step"
+    [ngModel]="numberValue"
+    (ngModelChange)="emit($event)">
+  </shared-input>
+} @else if (controlType === 'datetime') {
+  <shared-datetime-picker
+    class="cb-literal-select"
+    [value]="stringValue"
+    (valueChange)="emit($event)">
+  </shared-datetime-picker>
+} @else {
+  <shared-variable-text-input
+    class="cb-literal-input"
+    [placeholder]="placeholder"
+    [value]="stringValue"
+    [variables]="variables"
+    (valueChange)="emit($event)" />
+}

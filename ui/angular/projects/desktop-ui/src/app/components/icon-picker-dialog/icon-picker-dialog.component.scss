@@ -1,0 +1,71 @@
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  height: min(60vh, 480px);
+}
+
+.controls {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+
+  .pack-select {
+    flex: 0 1 200px;
+    min-width: 140px;
+  }
+
+  .search {
+    flex: 1 1 180px;
+    min-width: 140px;
+  }
+}
+
+.grid-area {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.drop-hint {
+  display: none;
+  position: absolute;
+  inset: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 2px dashed var(--color-accent);
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-muted);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  pointer-events: none;
+
+  .icon {
+    background-color: var(--color-accent);
+  }
+}
+
+.grid-area.can-import.file-drag-over .drop-hint,
+.grid-area.can-import.icon-drop-active .drop-hint {
+  display: flex;
+}
+
+.import-action {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.import-status {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.actions-end {
+  display: flex;
+  gap: var(--space-2);
+  margin-left: auto;
+}

@@ -1,0 +1,95 @@
+:host {
+  display: block;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* The visible ring: only the outer --wb-width band of this element paints, cut out by
+   stacking a full-box mask with a content-box mask and excluding the overlap. Hidden
+   entirely when mask compositing is unsupported (legacy web-client), because without
+   the mask the background would cover the whole widget face. */
+.ring {
+  display: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: var(--wb-width, 2px);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
+  .ring {
+    display: block;
+  }
+}
+
+/* Color-tinted styles paint the ring directly; the animated ones vary its opacity. */
+.wb-static,
+.wb-heartbeat,
+.wb-breathing,
+.wb-blink {
+  background: var(--wb-color);
+}
+
+.wb-heartbeat {
+  animation: wb-heartbeat 1.4s ease-out infinite;
+}
+
+.wb-breathing {
+  animation: wb-breathing 3.2s ease-in-out infinite;
+}
+
+.wb-blink {
+  animation: wb-blink 1s linear infinite;
+}
+
+/* One color at a time cycling through the spectrum (no spatial gradient). */
+.wb-hue-shift {
+  background: #ff0000;
+  animation: wb-hue-shift 8s linear infinite;
+}
+
+/* Spatial styles: an oversized square-ish layer spins behind the ring mask. The
+   -300% inset keeps the layer covering the widget at every rotation angle even for
+   extreme aspect ratios; the overflow clip bounds what is actually painted. */
+.wb-rgb::before,
+.wb-comet::before,
+.wb-ants::before {
+  content: '';
+  position: absolute;
+  inset: -300%;
+  animation: wb-spin 4s linear infinite;
+}
+
+.wb-rgb::before {
+  background: conic-gradient(from 0deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+}
+
+.wb-comet::before {
+  background: conic-gradient(from 0deg, transparent 0deg 210deg, var(--wb-color) 360deg);
+  animation-duration: 1.6s;
+}
+
+.wb-ants::before {
+  background: repeating-conic-gradient(var(--wb-color) 0deg 9deg, transparent 9deg 18deg);
+  animation-duration: 12s;
+}
+
+/* Phase-lock every looping style to the shared page clock. Must stay after the
+   rules above: their `animation` shorthand resets the delay longhand. */
+.ring,
+.ring::before {
+  animation-delay: var(--wb-phase, 0s);
+}
+
+/* The `wb-*` keyframes this sheet's animations name are defined once, globally, in the runtime's
+   widget-border.css - which both apps load, because the framework-free renderer draws its own rings
+   from the same stylesheet. Keyframe names are never scoped by emulated encapsulation, so a copy
+   here would define each animation a second time and drift from the original in silence. */

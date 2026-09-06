@@ -1,0 +1,154 @@
+@use '../../../styles/index' as ds;
+
+:host {
+  display: block;
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  // Fixed width from --tile-size: the (possibly long) icon name must never widen the tile,
+  // or rows overflow the grid's column math and cause horizontal scrolling.
+  width: calc(var(--tile-size) + 2 * var(--space-1));
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+
+  &:hover {
+    background: var(--color-bg-hover);
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+
+  &.selected {
+    background: var(--color-accent-muted);
+  }
+
+  &:hover .checkbox {
+    opacity: 1;
+  }
+}
+
+// Gallery-style selection checkbox: appears on hover, stays visible while a selection is active.
+.checkbox {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-elevated);
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+  transition: opacity var(--transition-fast), background-color var(--transition-fast);
+
+  &.visible {
+    opacity: 1;
+  }
+
+  &.checked {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .icon {
+    background-color: #fff;
+  }
+
+  &:hover {
+    border-color: var(--color-accent);
+  }
+}
+
+// Mirrors how an action button renders its image (cover + --radius-lg), so the
+// preview matches what the icon will look like on a widget.
+.thumb {
+  position: relative;
+  width: var(--tile-size);
+  aspect-ratio: 1;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-tertiary);
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.badge {
+  position: absolute;
+  right: var(--space-1);
+  bottom: var(--space-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-sm);
+  background: var(--color-scrim);
+
+  .icon {
+    background-color: #fff;
+  }
+}
+
+.failed {
+  @include ds.flex-center;
+  width: 100%;
+  height: 100%;
+
+  .icon {
+    background-color: var(--color-danger);
+  }
+}
+
+.shimmer {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    var(--color-bg-tertiary) 40%,
+    var(--color-bg-hover) 50%,
+    var(--color-bg-tertiary) 60%
+  );
+  background-size: 200% 100%;
+  animation: icon-tile-shimmer 1.4s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    background: var(--color-bg-hover);
+  }
+}
+
+@keyframes icon-tile-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.name {
+  @include ds.truncate;
+  max-width: 100%;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  text-align: center;
+}

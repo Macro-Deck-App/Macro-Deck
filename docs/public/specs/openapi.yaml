@@ -1,0 +1,951 @@
+openapi: 3.1.0
+
+info:
+  title: Macro Deck plugin protocol - REST surface
+  version: "1"
+  description: >-
+    Registration, session exchange and pre-registration discovery for out-of-process Macro Deck
+    plugins. The wire envelope carried over the WebSocket upgrade at the end of this surface is
+    specified in asyncapi.yaml, not here. Paths are deliberately unversioned - the protocol version
+    is negotiated over POST /sessions, never encoded in the URL.
+
+# Drift anchor: MacroDeck.Plugin.Protocol.Versioning.ProtocolVersions
+x-macrodeck-protocol-versions:
+  minimum: 1
+  current: 3
+  supported: [1, 2, 3]
+
+# Drift anchor: MacroDeck.Plugin.Protocol.Limits.ProtocolLimits (camelCase, expanded numeric values)
+x-macrodeck-limits:
+  maxMessageBytes: 262144
+  maxAssetBytes: 8388608
+  maxAssetChunkBytes: 65536
+  maxInboundQueueDepth: 256
+  maxOutboundQueueDepth: 256
+  queueHighWatermark: 192
+  queueLowWatermark: 64
+  maxConcurrentInvocations: 32
+  maxDeclaredCapabilities: 512
+  maxIdempotencyKeyLength: 128
+  maxDeclaredNameLength: 128
+  maxDeclaredVersionLength: 128
+  maxSdkVersionLength: 128
+  maxReportedDeprecatedApis: 64
+  maxDeprecatedApiIdLength: 256
+  maxCompatibilityFindings: 128
+  maxErrorMessageLength: 256
+  maxErrorDetailEntries: 16
+  maxJsonDepth: 32
+  maxSessionsPerPlugin: 1
+  maxLogEventsPerBatch: 64
+  maxLogMessageLength: 4096
+  maxLogPropertiesPerEvent: 32
+  maxLogPropertyNameLength: 64
+  maxLogPropertyValueLength: 512
+  maxLogSourceContextLength: 128
+  maxLogExceptionLength: 8192
+  maxLogExceptionDepth: 5
+  maxLogInboundQueueDepth: 256
+  maxLogEventsPerSecond: 20
+  maxLocalizationCultures: 64
+  maxLocalizationEntries: 2000
+  maxLocalizationKeyLength: 128
+  maxLocalizationValueLength: 4096
+  maxLogEventBurst: 500
+  maxUiTreeBytes: 196608
+  maxUiPatchBytes: 65536
+  maxUiNodesPerTree: 2000
+  maxUiUpdatesPerSecond: 30
+  maxUiUpdateBurst: 90
+  maxUiResourceBytes: 2097152
+  maxUiAttachmentsPerSession: 16
+  maxUiSessionsPerProvider: 8
+  maxUiWidgetSessionsPerProvider: 128
+  maxVariableCatalogPageSize: 200
+  maxVariableSubscriptions: 1024
+  maxVariableValuesPerBatch: 128
+
+# Drift anchor: MacroDeck.Plugin.Protocol.Limits.ProtocolTimeouts (camelCase + Ms suffix, whole milliseconds)
+x-macrodeck-timeouts:
+  handshakeMs: 10000
+  defaultRequestMs: 30000
+  capabilityInvokeMs: 30000
+  assetUploadMs: 60000
+  keepAliveIntervalMs: 20000
+  keepAliveTimeoutMs: 60000
+  sessionResumeWindowMs: 60000
+  gracefulCloseMs: 5000
+
+# Drift anchor: MacroDeck.Plugin.Protocol.Handshake.CapabilityKinds.All
+x-macrodeck-capability-kinds:
+  - actions
+  - events
+  - variables
+  - icons
+  - config-flow
+  - music-player
+  - weather
+  - virtual-profiles
+  - issues
+  - ui
+  - localization
+  - device-provider
+  - layout-provider
+  - folder-view-provider
+  - migration
+  - widget-type-provider
+
+# Drift anchor: MacroDeck.Plugin.Protocol.Compatibility.PluginCompatibilityStates.All (ascending severity)
+x-macrodeck-compatibility-states:
+  - compatible
+  - deprecated_apis
+  - update_recommended
+  - update_required
+  - partially_incompatible
+  - incompatible
+
+# Drift anchor: MacroDeck.Plugin.Protocol.Compatibility.CompatibilityFindingSources.All
+x-macrodeck-compatibility-finding-sources:
+  - confirmed
+  - negotiated
+  - inferred
+  - unknown
+
+# Drift anchor: MacroDeck.Plugin.Protocol.Compatibility.CompatibilitySeverities.All
+x-macrodeck-compatibility-severities:
+  - info
+  - warning
+  - error
+
+# Drift anchor: MacroDeck.Plugin.Protocol.Errors.ProtocolErrorCodes.All
+x-macrodeck-error-codes:
+  - PROTOCOL_VERSION_UNSUPPORTED
+  - UNKNOWN_MESSAGE_TYPE
+  - MALFORMED_ENVELOPE
+  - INVALID_PAYLOAD
+  - UNAUTHENTICATED
+  - PLUGIN_ALREADY_REGISTERED
+  - SESSION_EXPIRED
+  - SESSION_NOT_RESUMABLE
+  - SESSION_REPLACED
+  - SESSION_NOT_FOUND
+  - CAPABILITY_UNSUPPORTED
+  - CAPABILITY_UNAVAILABLE
+  - PAYLOAD_TOO_LARGE
+  - ASSET_TOO_LARGE
+  - QUEUE_OVERFLOW
+  - RATE_LIMITED
+  - TIMEOUT
+  - CANCELLED
+  - CORRELATION_UNKNOWN
+  - DUPLICATE_IDEMPOTENCY_KEY
+  - INTERNAL_ERROR
+
+servers:
+  - url: /
+
+security: []
+
+paths:
+  /api/plugins/protocol:
+    get:
+      operationId: getProtocolDescriptor
+      summary: Pre-registration discovery
+      description: >-
+        Reports supported versions, capability kinds, limits and timeouts so a plugin can decide
+        whether and how to register before it holds any credential. No authentication required.
+      security: []
+      responses:
+        "200":
+          description: The protocol descriptor.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PluginProtocolDescriptor"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/plugins/registration:
+    post:
+      operationId: registerPlugin
+      summary: Enrol a plugin
+      description: >-
+        Mints a pluginId and a one-time pluginSecret. Authenticated by the enrollment token
+        header, never by a body field. The enrollment token is a Developer token created in the
+        desktop app.
+      security:
+        - enrollmentToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PluginRegistrationRequest"
+      responses:
+        "201":
+          description: The plugin was registered. The secret is shown exactly once.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PluginRegistrationResponse"
+        "400":
+          $ref: "#/components/responses/InvalidPayload"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/PluginAlreadyRegistered"
+        "422":
+          $ref: "#/components/responses/ProtocolVersionUnsupported"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /api/plugins/registration/{pluginId}:
+    delete:
+      operationId: revokePluginRegistration
+      summary: Revoke a plugin credential
+      description: Revokes a compromised or retired credential. Requires admin authentication.
+      security:
+        - adminBearer: []
+      parameters:
+        - name: pluginId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: The registration was revoked.
+        "400":
+          $ref: "#/components/responses/InvalidPayload"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /api/plugins/pairing:
+    post:
+      operationId: createPluginPairingRequest
+      summary: Start an interactive pairing request
+      description: >-
+        A plugin creates a short-lived PKCE-style pairing request over loopback, unauthenticated - the
+        request itself is what a plugin has instead of a credential. The desktop UI approves or rejects
+        it out of band; the plugin polls GET .../{requestId} and then redeems it.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PluginPairingRequest"
+      responses:
+        "201":
+          description: The pairing request was created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PluginPairingResponse"
+        "400":
+          $ref: "#/components/responses/InvalidPayload"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/PluginAlreadyRegistered"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /api/plugins/pairing/{requestId}:
+    get:
+      operationId: getPluginPairingStatus
+      summary: Poll a pairing request's status
+      description: >-
+        An unknown or already-pruned request id deliberately answers 200 with status "expired" rather
+        than 404, so the client state machine stays total and this endpoint is not an existence oracle.
+      security: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The current status of the pairing request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PluginPairingStatusResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/plugins/pairing/{requestId}/redemption:
+    post:
+      operationId: redeemPluginPairingRequest
+      summary: Redeem an approved pairing request for a plugin credential
+      description: >-
+        Unknown, expired, unapproved, already-redeemed and wrong-verifier request/verifier combinations
+        all answer 401 indistinguishably, deliberately - the same oracle argument as registration
+        authentication.
+      security: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PluginPairingRedemptionRequest"
+      responses:
+        "201":
+          description: The pairing request was redeemed. The secret is shown exactly once.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PluginRegistrationResponse"
+        "400":
+          $ref: "#/components/responses/InvalidPayload"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /api/plugins/sessions:
+    post:
+      operationId: createPluginSession
+      summary: Exchange a plugin secret for a session token
+      description: >-
+        Authenticated by the plugin id and secret headers. Negotiation happens here, once, and is
+        authoritative - the subsequent session.hello over the WebSocket only asserts the outcome,
+        it never re-negotiates.
+      security:
+        - pluginCredential: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PluginSessionRequest"
+      responses:
+        "201":
+          description: The session was created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PluginSessionResponse"
+        "400":
+          $ref: "#/components/responses/InvalidPayload"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/ProtocolVersionUnsupported"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /api/plugins/sessions/{sessionId}:
+    delete:
+      operationId: closePluginSession
+      summary: Voluntary session teardown
+      description: Makes the session non-resumable at once.
+      security:
+        - sessionBearer: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: The session was closed.
+        "400":
+          $ref: "#/components/responses/InvalidPayload"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /plugins/ws:
+    get:
+      operationId: upgradePluginWebSocket
+      summary: WebSocket upgrade
+      description: >-
+        Upgrades to the plugin WebSocket transport, subprotocol macrodeck.plugin.v1 via
+        Sec-WebSocket-Protocol. The envelope carried over the resulting connection is specified in
+        full in asyncapi.yaml, not here - this operation only documents the HTTP-level upgrade.
+      security:
+        - sessionBearer: []
+      responses:
+        "101":
+          description: >-
+            Switching Protocols. The connection continues as the WebSocket message exchange
+            described in asyncapi.yaml.
+        "400":
+          $ref: "#/components/responses/InvalidPayload"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/ProtocolVersionUnsupported"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+components:
+  securitySchemes:
+    enrollmentToken:
+      type: apiKey
+      in: header
+      name: X-MacroDeck-Enrollment-Token
+    pluginCredential:
+      type: apiKey
+      in: header
+      name: X-MacroDeck-Plugin-Secret
+      description: >-
+        Sent alongside the X-MacroDeck-Plugin-Id header. Session exchange only - never sent on the
+        WebSocket upgrade.
+    sessionBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Authorization: Bearer <sessionToken>, scope \"plugin\"."
+    adminBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Authorization: Bearer <accessToken>, scope \"admin\"."
+
+  responses:
+    InvalidPayload:
+      description: The request body does not match the expected shape.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProtocolError"
+    Unauthenticated:
+      description: >-
+        Authentication failed. An unknown id and a wrong secret are indistinguishable in the
+        response, the same oracle argument as device login.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProtocolError"
+    Forbidden:
+      description: >-
+        The caller did not arrive on a loopback remote address. Plugin endpoints are served on both
+        the public and private listeners, but only local processes may reach them. On the pairing
+        endpoints, on POST /api/plugins/registration, and on POST /api/plugins/sessions for a plugin
+        holding a development credential, this status also means Developer Mode is switched off in
+        the desktop app - such a refusal carries "reason": "developer_mode_disabled" in the error's
+        details, and GET /api/plugins/protocol reports the switch ahead of time.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProtocolError"
+    PluginAlreadyRegistered:
+      description: A plugin is already registered with this identity.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProtocolError"
+    ProtocolVersionUnsupported:
+      description: The requested protocol version is not supported.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProtocolError"
+    RateLimited:
+      description: Too many requests.
+      headers:
+        Retry-After:
+          required: true
+          schema:
+            type: integer
+            format: int32
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProtocolError"
+
+  schemas:
+    ProtocolErrorCode:
+      type: string
+      description: One of the codes v1 speaks. Drift anchor - see x-macrodeck-error-codes above.
+      enum:
+        - PROTOCOL_VERSION_UNSUPPORTED
+        - UNKNOWN_MESSAGE_TYPE
+        - MALFORMED_ENVELOPE
+        - INVALID_PAYLOAD
+        - UNAUTHENTICATED
+        - PLUGIN_ALREADY_REGISTERED
+        - SESSION_EXPIRED
+        - SESSION_NOT_RESUMABLE
+        - SESSION_REPLACED
+        - SESSION_NOT_FOUND
+        - CAPABILITY_UNSUPPORTED
+        - CAPABILITY_UNAVAILABLE
+        - PAYLOAD_TOO_LARGE
+        - ASSET_TOO_LARGE
+        - QUEUE_OVERFLOW
+        - RATE_LIMITED
+        - TIMEOUT
+        - CANCELLED
+        - CORRELATION_UNKNOWN
+        - DUPLICATE_IDEMPOTENCY_KEY
+        - INTERNAL_ERROR
+
+    ProtocolError:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Errors.ProtocolError.
+      required: [code, message, retryable]
+      properties:
+        code:
+          $ref: "#/components/schemas/ProtocolErrorCode"
+        message:
+          type: string
+          description: >-
+            Default English text keyed by code (MacroDeck.Plugin.Protocol.Errors.ProtocolErrorMessages).
+            The UI localises from the code, not this string.
+        details:
+          type: object
+          additionalProperties:
+            type: string
+        retryable:
+          type: boolean
+
+    PluginProtocolLimitsDescriptor:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginProtocolLimitsDescriptor.
+      required:
+        - maxMessageBytes
+        - maxAssetBytes
+        - maxAssetChunkBytes
+        - maxInboundQueueDepth
+        - maxOutboundQueueDepth
+        - queueHighWatermark
+        - queueLowWatermark
+        - maxConcurrentInvocations
+        - maxDeclaredCapabilities
+        - maxIdempotencyKeyLength
+        - maxErrorMessageLength
+        - maxErrorDetailEntries
+        - maxJsonDepth
+        - maxSessionsPerPlugin
+      properties:
+        maxMessageBytes:
+          type: integer
+        maxAssetBytes:
+          type: integer
+        maxAssetChunkBytes:
+          type: integer
+        maxInboundQueueDepth:
+          type: integer
+        maxOutboundQueueDepth:
+          type: integer
+        queueHighWatermark:
+          type: integer
+        queueLowWatermark:
+          type: integer
+        maxConcurrentInvocations:
+          type: integer
+        maxDeclaredCapabilities:
+          type: integer
+        maxIdempotencyKeyLength:
+          type: integer
+        maxErrorMessageLength:
+          type: integer
+        maxErrorDetailEntries:
+          type: integer
+        maxJsonDepth:
+          type: integer
+        maxSessionsPerPlugin:
+          type: integer
+
+    PluginProtocolTimeoutsDescriptor:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginProtocolTimeoutsDescriptor. Each field is
+        a .NET TimeSpan serialized in its default "c" format (e.g. "00:00:10" for ten seconds).
+      required:
+        - handshake
+        - defaultRequest
+        - capabilityInvoke
+        - assetUpload
+        - keepAliveInterval
+        - keepAliveTimeout
+        - sessionResumeWindow
+        - gracefulClose
+      properties:
+        handshake:
+          type: string
+        defaultRequest:
+          type: string
+        capabilityInvoke:
+          type: string
+        assetUpload:
+          type: string
+        keepAliveInterval:
+          type: string
+        keepAliveTimeout:
+          type: string
+        sessionResumeWindow:
+          type: string
+        gracefulClose:
+          type: string
+
+    PluginProtocolDescriptor:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginProtocolDescriptor.
+      required: [supportedVersions, capabilityKinds, limits, timeouts]
+      properties:
+        supportedVersions:
+          type: array
+          items:
+            type: integer
+        capabilityKinds:
+          type: array
+          items:
+            type: string
+        limits:
+          $ref: "#/components/schemas/PluginProtocolLimitsDescriptor"
+        timeouts:
+          $ref: "#/components/schemas/PluginProtocolTimeoutsDescriptor"
+        pairing:
+          $ref: "#/components/schemas/PluginPairingDescriptor"
+        enrollment:
+          $ref: "#/components/schemas/PluginEnrollmentDescriptor"
+
+    PluginEnrollmentDescriptor:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginEnrollmentDescriptor. Absent from
+        PluginProtocolDescriptor means the host does not report anything about enrolment.
+      properties:
+        developerModeEnabled:
+          type: boolean
+          description: >-
+            Whether the host would accept an enrolment right now. Absent on a host that does not
+            report it, which is not the same as false.
+
+    PluginPairingDescriptor:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginPairingDescriptor. Absent from
+        PluginProtocolDescriptor means the host does not support interactive pairing.
+      required: [supported, requestLifetimeSeconds, pollIntervalSeconds]
+      properties:
+        supported:
+          type: boolean
+        requestLifetimeSeconds:
+          type: integer
+        pollIntervalSeconds:
+          type: integer
+        developerModeEnabled:
+          type: boolean
+          description: >-
+            Whether the host would accept a pairing request right now. Absent on a host that does not
+            report it, which is not the same as false.
+
+    PluginPairingClientInfo:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginPairingClientInfo. Every field is
+        self-reported by the requesting process and is not verified by the host.
+      properties:
+        executablePath:
+          type: string
+          nullable: true
+        processId:
+          type: integer
+          nullable: true
+        sdkVersion:
+          type: string
+          nullable: true
+
+    PluginPairingRequest:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginPairingRequest.
+      required: [pluginId, displayName, codeChallenge, codeChallengeMethod]
+      properties:
+        pluginId:
+          type: string
+          description: Reverse-domain package id, validated with MacroDeckId.IsValidOwnerId.
+        displayName:
+          type: string
+        codeChallenge:
+          type: string
+          description: PKCE code challenge, derived from the plugin's code verifier.
+        codeChallengeMethod:
+          type: string
+          description: Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginPairingChallengeMethods. Currently only "S256".
+        client:
+          $ref: "#/components/schemas/PluginPairingClientInfo"
+
+    PluginPairingResponse:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginPairingResponse.
+      required: [requestId, expiresAt, pollIntervalSeconds]
+      properties:
+        requestId:
+          type: string
+          description: >-
+            Identifies the request but is not a credential and authorises nothing - it is safe in a
+            URL, and the verifier is what proves possession.
+        expiresAt:
+          type: string
+          format: date-time
+        pollIntervalSeconds:
+          type: integer
+
+    PluginPairingStatusResponse:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginPairingStatusResponse.
+      required: [status, expiresAt]
+      properties:
+        status:
+          type: string
+          description: Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginPairingStatuses.All.
+          enum: [pending, approved, rejected, expired]
+        expiresAt:
+          type: string
+          format: date-time
+
+    PluginPairingRedemptionRequest:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginPairingRedemptionRequest.
+      required: [codeVerifier]
+      properties:
+        codeVerifier:
+          type: string
+
+    PluginRegistrationRequest:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginRegistrationRequest.
+      required: [pluginId, displayName]
+      properties:
+        pluginId:
+          type: string
+          description: Reverse-domain package id, validated with MacroDeckId.IsValidOwnerId.
+        displayName:
+          type: string
+
+    PluginRegistrationResponse:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginRegistrationResponse.
+      required: [pluginId, pluginSecret]
+      properties:
+        pluginId:
+          type: string
+        pluginSecret:
+          type: string
+          description: Shown exactly once. The host stores only its hash.
+
+    ProtocolVersionRange:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Versioning.ProtocolVersionRange.
+      required: [minimum, maximum]
+      properties:
+        minimum:
+          type: integer
+        maximum:
+          type: integer
+
+    CapabilityVersionRange:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Versioning.CapabilityVersionRange.
+      required: [minimum, maximum]
+      properties:
+        minimum:
+          type: integer
+        maximum:
+          type: integer
+
+    DeclaredCapability:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Handshake.DeclaredCapability.
+      required: [kind, localId, versionRange]
+      properties:
+        kind:
+          type: string
+          description: One of x-macrodeck-capability-kinds.
+        localId:
+          type: string
+        versionRange:
+          $ref: "#/components/schemas/CapabilityVersionRange"
+        displayName:
+          type: string
+
+    CapabilityNegotiationResult:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Versioning.CapabilityNegotiationResult.
+      required: [kind, accepted]
+      properties:
+        kind:
+          type: string
+        accepted:
+          type: boolean
+        negotiatedVersion:
+          type: integer
+        rejectionReason:
+          type: string
+
+    PluginSessionRequest:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginSessionRequest.
+      required: [requestedVersion, capabilities]
+      properties:
+        requestedVersion:
+          $ref: "#/components/schemas/ProtocolVersionRange"
+        capabilities:
+          type: array
+          items:
+            $ref: "#/components/schemas/DeclaredCapability"
+        declaredName:
+          type: string
+          nullable: true
+          maxLength: 128
+          description: >-
+            The plugin's own display name for this session, as declared by the plugin process itself. Optional and
+            additive - names the current session only, never the plugin's enrollment record.
+        declaredVersion:
+          type: string
+          nullable: true
+          maxLength: 128
+          description: >-
+            The plugin's own version, from its manifest's "version". Optional and additive - sent on every session
+            so a self-updating plugin reports its new version without re-enrolling.
+        sdk:
+          $ref: "#/components/schemas/PluginSdkUsage"
+
+    PluginSdkUsage:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginSdkUsage. What the plugin was built against, and which
+        deprecated APIs it actually uses. Optional and additive - a plugin that omits it still negotiates normally
+        and is reported as compatibility source "unknown".
+      required: [sdkVersion]
+      properties:
+        sdkVersion:
+          type: string
+          maxLength: 128
+          description: The version of MacroDeck.Sdk the plugin was compiled against.
+        deprecatedApis:
+          type: array
+          nullable: true
+          maxItems: 64
+          items:
+            type: string
+            maxLength: 256
+          description: >-
+            Documentation comment ids of the deprecated APIs the plugin references, captured at build time by the
+            SDK's usage-manifest generator. Null and empty mean different things and must never be conflated - null
+            is "not reported", so the host can only infer from sdkVersion; empty is "reported, and none are used",
+            which the host treats as confirmed.
+        truncated:
+          type: boolean
+          description: True when the generator hit its cap, so the list is a floor rather than the complete set.
+
+    CompatibilityFinding:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Compatibility.CompatibilityFinding.
+      required: [diagnosticId, source, severity, subject, guidance]
+      properties:
+        diagnosticId:
+          type: string
+          description: The analyzer id this corresponds to, e.g. MDP5002.
+        source:
+          type: string
+          enum: [confirmed, negotiated, inferred, unknown]
+          description: The evidence behind the finding. An "inferred" finding says the plugin may be affected.
+        severity:
+          type: string
+          enum: [info, warning, error]
+        subject:
+          type: string
+          description: A deprecated API's display name, a capability kind, or "protocol".
+        guidance:
+          type: string
+        deprecatedIn:
+          type: string
+          nullable: true
+        removedIn:
+          type: string
+          nullable: true
+        replacement:
+          type: string
+          nullable: true
+        migrationUrl:
+          type: string
+          nullable: true
+
+    PluginCompatibilityReport:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Compatibility.PluginCompatibilityReport.
+      required: [state, usageSource, negotiatedProtocolVersion, findings]
+      properties:
+        state:
+          type: string
+          enum:
+            [
+              compatible,
+              deprecated_apis,
+              update_recommended,
+              update_required,
+              partially_incompatible,
+              incompatible,
+            ]
+        usageSource:
+          type: string
+          enum: [confirmed, negotiated, inferred, unknown]
+        negotiatedProtocolVersion:
+          type: integer
+        sdkVersion:
+          type: string
+          nullable: true
+        usageTruncated:
+          type: boolean
+        findings:
+          type: array
+          maxItems: 128
+          items:
+            $ref: "#/components/schemas/CompatibilityFinding"
+
+    PluginSessionResponse:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Handshake.PluginSessionResponse.
+      required:
+        - sessionId
+        - sessionToken
+        - negotiatedVersion
+        - capabilities
+        - limits
+        - timeouts
+      properties:
+        sessionId:
+          type: string
+        sessionToken:
+          type: string
+        negotiatedVersion:
+          type: integer
+        capabilities:
+          type: array
+          items:
+            $ref: "#/components/schemas/CapabilityNegotiationResult"
+        limits:
+          $ref: "#/components/schemas/PluginProtocolLimitsDescriptor"
+        timeouts:
+          $ref: "#/components/schemas/PluginProtocolTimeoutsDescriptor"
+        compatibility:
+          $ref: "#/components/schemas/PluginCompatibilityReport"

@@ -1,0 +1,46 @@
+<div
+  class="folder-item"
+  [class.selected]="isSelected"
+  [class.dragging]="isDragging"
+  [class.drop-before]="dropPosition === 'before'"
+  [class.drop-after]="dropPosition === 'after'"
+  [class.drop-inside]="dropPosition === 'inside'"
+  [style.padding-left.px]="depth * 16 + 8"
+  [attr.data-folder-id]="folder.id"
+  [attr.data-depth]="depth"
+  role="treeitem"
+  [attr.aria-selected]="isSelected"
+  [attr.aria-level]="depth + 1"
+  [attr.aria-expanded]="hasChildren ? folder.isExpanded : null"
+  [attr.tabindex]="isSelected ? 0 : -1"
+  (pointerdown)="onPointerDown($event)"
+  (click)="onClick($event)"
+  (contextmenu)="onContextMenu($event)"
+  (keydown)="onKeydown($event)">
+
+  @if (hasChildren) {
+    <button class="expand-btn" (click)="onToggleExpand($event)">
+      <span class="icon icon-chevron-right icon-xs" [class.rotated]="folder.isExpanded"></span>
+    </button>
+  } @else {
+    <div class="expand-placeholder"></div>
+  }
+
+  <span class="icon icon-folder icon-md folder-icon"></span>
+
+  <span class="folder-name">{{ folder.name }}</span>
+
+  @if (folder.isDefault) {
+    <span
+      class="icon icon-star icon-xs default-star"
+      role="img"
+      [title]="'macrodeck.app:Widgets.Folder.StartFolder' | translate"
+      [attr.aria-label]="'macrodeck.app:Widgets.Folder.StartFolder' | translate"></span>
+  }
+</div>
+
+@if (folder.isExpanded && hasChildren) {
+  <div class="children" role="group">
+    <ng-content></ng-content>
+  </div>
+}

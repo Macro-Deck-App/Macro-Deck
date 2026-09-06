@@ -1,0 +1,67 @@
+@if (currentAction(); as action) {
+  <div class="tester">
+    <header class="tester-header">
+      <h2 class="tester-name">{{ action.name }}</h2>
+      <div class="tester-ids">
+        <span class="tester-integration">{{ action.integrationName }}</span>
+        <span class="tester-id">{{ action.integrationId }}::{{ action.id }}</span>
+      </div>
+      @if (action.description) {
+        <p class="tester-description">{{ action.description }}</p>
+      }
+    </header>
+
+    <div class="tester-form">
+      @if (visibleParamRows().length > 0) {
+        @for (param of visibleParamRows(); track param.name) {
+          <div class="tester-param">
+            <shared-param-row
+              blockId="tester"
+              [block]="testerBlock()"
+              [param]="param"
+              [nested]="true"
+              [allowReferences]="false"
+              (nestedChange)="setValue(param.name, $event)" />
+            @if (fieldError(param.name); as error) {
+              <p class="tester-field-error">{{ error }}</p>
+            }
+          </div>
+        }
+      } @else {
+        <p class="tester-no-params">{{ 'macrodeck.app:Developer.NoParametersMessage' | translate }}</p>
+      }
+    </div>
+
+    <div class="tester-actions">
+      <shared-button
+        variant="primary"
+        [loading]="running()"
+        [disabled]="!canRun()"
+        (click)="run()">
+        <span class="icon icon-play icon-sm"></span>
+        {{ 'macrodeck.app:Developer.RunActionButton' | translate }}
+      </shared-button>
+    </div>
+
+    @if (result(); as result) {
+      <div class="tester-result" [class.success]="result.success" [class.failed]="!result.success">
+        <div class="tester-result-head">
+          <span class="tester-result-status">
+            <span class="icon icon-{{ result.success ? 'check' : 'x' }} icon-sm"></span>
+            {{ (result.success ? 'macrodeck.app:Developer.RunSuccess' : 'macrodeck.app:Developer.RunFailed') | translate }}
+            @if (result.status) {
+              <span class="tester-result-wire-status">({{ result.status }})</span>
+            }
+          </span>
+          <span class="tester-result-meta">{{ result.durationMs }} ms</span>
+        </div>
+        @if (result.error) {
+          <p class="tester-result-error">
+            <span class="tester-result-code">{{ result.error.code }}</span>
+            {{ result.error.message }}
+          </p>
+        }
+      </div>
+    }
+  </div>
+}

@@ -1,0 +1,174 @@
+{
+  "referenceInstant": {
+    "description": "10:09:30 in the reference's own zone",
+    "hourAngle": 304.5,
+    "minuteAngle": 57.0,
+    "secondAngle": 180.0
+  },
+  "cases": [
+    {
+      "basis": 240,
+      "tile": {
+        "width": 240,
+        "height": 480
+      },
+      "nodes": {
+        "conformance": {
+          "contentWidth": 216.0,
+          "contentHeight": 456.0,
+          "padding": 12.0,
+          "gap": 7.2
+        },
+        "conformance.caption": {
+          "fontSize": 19.2,
+          "role": "secondary"
+        },
+        "conformance.dial": {
+          "width": 216.0,
+          "height": 230.4,
+          "secondHand": true,
+          "geometry": {
+            "edge": 216.0,
+            "faceRadius": 103.68,
+            "tickOuterRadius": 95.04,
+            "majorTickInnerRadius": 79.92,
+            "majorTickStroke": 5.4,
+            "minorTickInnerRadius": 87.48,
+            "minorTickStroke": 3.24,
+            "hourTail": 10.8,
+            "hourTip": 45.36,
+            "hourStroke": 8.64,
+            "minuteTail": 10.8,
+            "minuteTip": 71.28,
+            "minuteStroke": 5.4,
+            "secondTail": 17.28,
+            "secondTip": 79.92,
+            "secondStroke": 2.7,
+            "hubRadius": 5.616
+          }
+        },
+        "conformance.dialPlain": {
+          "width": 216.0,
+          "height": 100.8,
+          "centre": {
+            "x": 108.0,
+            "y": 50.4
+          },
+          "secondHand": false,
+          "geometry": {
+            "edge": 100.8,
+            "faceRadius": 48.384,
+            "tickOuterRadius": 44.352,
+            "majorTickInnerRadius": 37.296,
+            "majorTickStroke": 2.52,
+            "minorTickInnerRadius": 40.824,
+            "minorTickStroke": 1.512,
+            "hourTail": 5.04,
+            "hourTip": 21.168,
+            "hourStroke": 4.032,
+            "minuteTail": 5.04,
+            "minuteTip": 33.264,
+            "minuteStroke": 2.52,
+            "secondTail": 8.064,
+            "secondTip": 37.296,
+            "secondStroke": 1.26,
+            "hubRadius": 2.6208
+          }
+        },
+        "conformance.time": {
+          "fontSize": 57.6,
+          "minFontSize": 31.2,
+          "secondsFontSize": 31.68,
+          "secondsRole": "muted",
+          "role": "primary"
+        },
+        "conformance.date": {
+          "fontSize": 19.2,
+          "role": "muted"
+        }
+      }
+    },
+    {
+      "basis": 120,
+      "tile": {
+        "width": 120,
+        "height": 240
+      },
+      "nodes": {
+        "conformance": {
+          "contentWidth": 108.0,
+          "contentHeight": 228.0,
+          "padding": 6.0,
+          "gap": 3.6
+        },
+        "conformance.caption": {
+          "fontSize": 9.6,
+          "role": "secondary"
+        },
+        "conformance.dial": {
+          "width": 108.0,
+          "height": 115.2,
+          "secondHand": true,
+          "geometry": {
+            "edge": 108.0,
+            "faceRadius": 51.84,
+            "tickOuterRadius": 47.52,
+            "majorTickInnerRadius": 39.96,
+            "majorTickStroke": 2.7,
+            "minorTickInnerRadius": 43.74,
+            "minorTickStroke": 1.62,
+            "hourTail": 5.4,
+            "hourTip": 22.68,
+            "hourStroke": 4.32,
+            "minuteTail": 5.4,
+            "minuteTip": 35.64,
+            "minuteStroke": 2.7,
+            "secondTail": 8.64,
+            "secondTip": 39.96,
+            "secondStroke": 1.35,
+            "hubRadius": 2.808
+          }
+        },
+        "conformance.dialPlain": {
+          "width": 108.0,
+          "height": 50.4,
+          "centre": {
+            "x": 54.0,
+            "y": 25.2
+          },
+          "secondHand": false,
+          "geometry": {
+            "edge": 50.4,
+            "faceRadius": 24.192,
+            "tickOuterRadius": 22.176,
+            "majorTickInnerRadius": 18.648,
+            "majorTickStroke": 1.26,
+            "minorTickInnerRadius": 20.412,
+            "minorTickStroke": 0.756,
+            "hourTail": 2.52,
+            "hourTip": 10.584,
+            "hourStroke": 2.016,
+            "minuteTail": 2.52,
+            "minuteTip": 16.632,
+            "minuteStroke": 1.26,
+            "secondTail": 4.032,
+            "secondTip": 18.648,
+            "secondStroke": 0.63,
+            "hubRadius": 1.3104
+          }
+        },
+        "conformance.time": {
+          "fontSize": 28.8,
+          "minFontSize": 15.6,
+          "secondsFontSize": 15.84,
+          "secondsRole": "muted",
+          "role": "primary"
+        },
+        "conformance.date": {
+          "fontSize": 9.6,
+          "role": "muted"
+        }
+      }
+    }
+  ]
+}

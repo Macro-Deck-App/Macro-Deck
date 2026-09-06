@@ -1,0 +1,146 @@
+# The E2E suite itself. Called by e2e.yml for a manual run, by ci.yml on every change, and by
+# build.yml before a release publishes - one definition so those three can never drift apart.
+name: E2E run
+
+on:
+  workflow_call:
+    inputs:
+      suite:
+        description: E2E suite to run - all, or smoke for the @smoke subset
+        type: string
+        required: false
+        default: all
+      filter:
+        description: Optional Playwright test file filter
+        type: string
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: 10.0.x
+  NODE_VERSION: 22
+  BUILD_CHANNEL: Production
+  E2E_LOOPBACK_PORT: 5191
+  E2E_PUBLIC_PORT: 8192
+
+jobs:
+  e2e:
+    name: Core E2E
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-e2e-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-e2e-${{ runner.os }}-
+
+      - name: Build production UIs
+        working-directory: ui
+        run: |
+          npm ci
+          npm run build
+          npm run build:web-client
+
+      - name: Stage production host
+        run: ./ci/scripts/stage-host.sh linux-x64 "3.0.0-e2e.${{ github.run_number }}" "${{ env.BUILD_CHANNEL }}"
+
+      - name: Install Playwright
+        working-directory: e2e
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Start isolated Macro Deck host
+        env:
+          MACRO_DECK_HOST_BINARY: ${{ github.workspace }}/ui/bootstrapper/host-publish/Macro Deck Host
+          MACRO_DECK_HOST_LOG: ${{ runner.temp }}/macro-deck-host.log
+          MACRO_DECK_SUPERVISOR_LOG: ${{ runner.temp }}/macro-deck-host-supervisor.log
+          MACRO_DECK_DATA_DIRECTORY: ${{ runner.temp }}/macro-deck-e2e-data
+          MACRODECK_HOST_PORT: ${{ env.E2E_LOOPBACK_PORT }}
+          MACRO_DECK_PORT: ${{ env.E2E_PUBLIC_PORT }}
+        run: |
+          mkdir -p "$MACRO_DECK_DATA_DIRECTORY"
+          bash ./e2e/scripts/host-supervisor.sh &
+          echo $! > "${{ runner.temp }}/macro-deck-supervisor.pid"
+
+      - name: Wait for host
+        run: |
+          timeout 60 bash -c 'until curl --fail --silent --show-error "http://127.0.0.1:${{ env.E2E_LOOPBACK_PORT }}/api/auth/status" >/dev/null; do sleep 1; done'
+          timeout 60 bash -c 'until curl --fail --silent --show-error "http://127.0.0.1:${{ env.E2E_PUBLIC_PORT }}/api/auth/status" >/dev/null; do sleep 1; done'
+
+      - name: Run Playwright E2E tests
+        working-directory: e2e
+        env:
+          MACRO_DECK_LOOPBACK_URL: http://127.0.0.1:${{ env.E2E_LOOPBACK_PORT }}
+          MACRO_DECK_PUBLIC_URL: http://127.0.0.1:${{ env.E2E_PUBLIC_PORT }}
+          MACRO_DECK_SUPERVISOR_LOG: ${{ runner.temp }}/macro-deck-host-supervisor.log
+          SUITE: ${{ inputs.suite }}
+          FILTER: ${{ inputs.filter }}
+        shell: bash
+        run: |
+          args=()
+          if [[ "$SUITE" == "smoke" ]]; then
+            args+=(--grep '@smoke')
+          fi
+          if [[ -n "$FILTER" ]]; then
+            args+=("$FILTER")
+          fi
+          npx playwright test "${args[@]}"
+
+      - name: Redact Playwright diagnostics
+        id: redact
+        if: always()
+        env:
+          E2E_PASSWORD: macro-deck-e2e-password
+        run: python3 e2e/scripts/redact-playwright-artifacts.py e2e/test-results e2e/playwright-report
+
+      - name: Stop Macro Deck host
+        if: always()
+        run: |
+          pid_file="${{ runner.temp }}/macro-deck-supervisor.pid"
+          if [[ -f "$pid_file" ]]; then
+            kill "$(cat "$pid_file")" 2>/dev/null || true
+            wait "$(cat "$pid_file")" 2>/dev/null || true
+          fi
+
+      - name: Upload E2E diagnostics
+        if: always() && steps.redact.outcome == 'success'
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-diagnostics-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            e2e/playwright-report/
+            e2e/test-results/
+            ${{ runner.temp }}/macro-deck-host.log
+            ${{ runner.temp }}/macro-deck-host-supervisor.log
+
+      - name: Write run summary
+        if: always()
+        run: |
+          {
+            echo '## Macro Deck E2E'
+            echo
+            echo "- Commit: \`${GITHUB_SHA}\`"
+            echo "- Suite: \`${{ inputs.suite }}\`"
+            echo "- Filter: \`${{ inputs.filter || 'none' }}\`"
+            echo "- Data root: isolated runner temp directory"
+            echo "- Host build channel: \`${{ env.BUILD_CHANNEL }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

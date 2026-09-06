@@ -1,0 +1,17 @@
+@use '../../../../styles/index' as ds;
+
+.dt-input {
+  flex: 1 1 0;
+  width: 100%;
+  @include ds.control-base;
+  @include ds.control-interactive;
+  /*
+   * The one control that needs its height stated outright rather than floored. A
+   * `datetime-local` renders its value in a UA shadow tree that brings its own metrics and does
+   * not inherit the line box control-base pins, so the intrinsic height landed 0.75px over
+   * --control-height and the min-height stopped binding - this was the only control in a row that
+   * did not match. It is a fixed single-line field that never grows, so an explicit height is
+   * safe here where it would not be in the shared mixin.
+   */
+  height: var(--control-height);
+}

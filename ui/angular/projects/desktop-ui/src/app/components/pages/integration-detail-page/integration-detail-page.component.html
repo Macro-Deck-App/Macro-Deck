@@ -1,0 +1,335 @@
+@if (integration(); as integration) {
+  <shared-detail-page [backLabel]="'macrodeck.app:Integrations.Detail.BackToIntegrations' | translate" (close)="goBack()">
+    <div class="detail-header-content" detailPageHeader>
+      @if (iconUrl(); as icon) {
+        <img class="detail-brand-icon" [src]="icon" alt="">
+      } @else {
+        <span class="icon icon-puzzle icon-lg detail-brand-glyph"></span>
+      }
+      <div class="detail-heading">
+        <h1 class="detail-name">{{ integration.name }}</h1>
+        @if (!integration.isInternal) {
+          <span class="detail-version">v{{ integration.version }}</span>
+        }
+        <span class="kind-badge" [class.internal]="integration.isInternal">
+          {{ (integration.isInternal ? 'macrodeck.app:Integrations.Page.InternalTag' : 'macrodeck.app:Integrations.Page.ExternalTag') | translate }}
+        </span>
+        <span class="status-chip" [class]="statusClass()">{{ statusLabel() }}</span>
+      </div>
+      <shared-toggle-switch
+        #enableToggle
+        [title]="'macrodeck.app:Integrations.Detail.EnableIntegration' | translate"
+        [ariaLabel]="'macrodeck.app:Integrations.Detail.EnableIntegration' | translate"
+        [checked]="integration.enabled"
+        (changed)="onToggle(enableToggle)">
+      </shared-toggle-switch>
+    </div>
+
+    <div class="detail-tabs">
+      <shared-tab-bar
+        [idPrefix]="tabIdPrefix"
+        [items]="tabs()"
+        [activeId]="activeTab()"
+        (activeIdChange)="onTabChange($event)" />
+    </div>
+
+    <div class="detail-body">
+      @switch (activeTab()) {
+        @case ('overview') {
+          <div
+            [id]="tabIdPrefix + '-panel-overview'"
+            role="tabpanel"
+            [attr.aria-labelledby]="tabIdPrefix + '-tab-overview'"
+            class="detail-grid">
+            @if (statusBadges().length > 0) {
+              <app-integration-status-strip [badges]="statusBadges()" />
+            }
+
+            @if (showIssuesCard()) {
+              <app-integration-issues-card
+                [issues]="issues()"
+                [loading]="issuesLoading()"
+                [error]="issuesError()"
+                [resolvingIssueId]="resolvingIssueId()"
+                (dismissError)="issuesError.set(null)"
+                (resolveIssue)="onResolveIssue($event)" />
+            }
+
+            @if (showCompatibilityCard()) {
+              <app-integration-compatibility-card
+                [report]="compatibilityReport()"
+                [loading]="compatibilityService.isLoading()"
+                [error]="compatibilityService.loadError()" />
+            }
+
+            <section class="detail-card">
+              <h2 class="detail-card-title">{{ 'macrodeck.app:Integrations.Detail.GeneralSectionTitle' | translate }}</h2>
+              <div class="detail-field">
+                <span class="detail-label">{{ 'macrodeck.app:Integrations.Detail.IdFieldLabel' | translate }}</span>
+                <span class="detail-value">{{ integration.id }}</span>
+              </div>
+              @if (!integration.isInternal) {
+                <div class="detail-field">
+                  <span class="detail-label">{{ 'macrodeck.app:Integrations.Detail.VersionFieldLabel' | translate }}</span>
+                  <span class="detail-value">{{ integration.version }}</span>
+                </div>
+              }
+            </section>
+
+            <section class="detail-card">
+              <h2 class="detail-card-title">{{ 'macrodeck.app:Integrations.Detail.CapabilitiesSectionTitle' | translate }}</h2>
+              <div class="detail-field">
+                <span class="detail-label">{{ 'macrodeck.app:Integrations.Detail.ActionsTab' | translate }}</span>
+                <span class="detail-value">{{ actionsCount() }}</span>
+              </div>
+              <div class="detail-field">
+                <span class="detail-label">{{ 'macrodeck.app:Integrations.Detail.VariablesTab' | translate }}</span>
+                <span class="detail-value">{{ variablesCount() }}</span>
+              </div>
+              @for (capability of additionalCapabilities(); track capability.kind) {
+                <div class="detail-field">
+                  <span class="detail-label">{{ capability.name | localizedText }}</span>
+                  <span class="detail-value">
+                    <span class="icon icon-check icon-xs"></span>
+                  </span>
+                </div>
+              }
+            </section>
+
+            <section class="detail-card detail-card-wide">
+              <h2 class="detail-card-title">{{ 'macrodeck.app:Integrations.Detail.ConfigurationSectionTitle' | translate }}</h2>
+              @if (integration.supportsConfigFlow) {
+                @if (configEntries().length > 0) {
+                  <div class="config-entry-list">
+                    @for (entry of configEntries(); track entry.id) {
+                      <div class="config-entry">
+                        <div class="config-entry-summary">
+                          <span class="config-entry-title">{{ entry.title }}</span>
+                          <span class="config-entry-status" [class]="configurationStatusClass(entry)">
+                            {{ configurationStatusLabel(entry) }}
+                          </span>
+                        </div>
+                        <div class="config-entry-actions">
+                          <button type="button" class="config-entry-action" (click)="onRenameEntry(entry)">
+                            {{ 'macrodeck.app:Integrations.Detail.RenameConfigEntryAction' | translate }}
+                          </button>
+                          <button type="button" class="config-entry-action" (click)="onEditEntry(entry)">
+                            {{ (entry.usable !== false ? 'macrodeck.app:Integrations.Detail.EditConfigEntryAction' : 'macrodeck.app:Integrations.Detail.ReconfigureConfigEntryAction') | translate }}
+                          </button>
+                          <button type="button" class="config-entry-action config-entry-remove" (click)="onRemoveEntry(entry)">
+                            <span class="icon icon-trash icon-xs"></span>
+                            {{ 'macrodeck.app:Integrations.Detail.RemoveConfigEntryAction' | translate }}
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+                @if (canSetUp()) {
+                  <shared-button variant="primary" (click)="onConfigure()">
+                    <span>{{ setUpLabel() }}</span>
+                    <span class="icon icon-arrow-right icon-xs"></span>
+                  </shared-button>
+                }
+                @if (!integration.allowsMultipleConfigurations && configEntries().length > 0) {
+                  <p class="detail-hint">
+                    {{ 'macrodeck.app:Integrations.Detail.SingleConfigurationHint' | translate }}
+                  </p>
+                }
+              } @else {
+                <p class="detail-placeholder">{{ 'macrodeck.app:Integrations.Detail.NoConfigurationOptions' | translate }}</p>
+              }
+            </section>
+          </div>
+        }
+
+        @case ('actions') {
+          <div
+            [id]="tabIdPrefix + '-panel-actions'"
+            role="tabpanel"
+            [attr.aria-labelledby]="tabIdPrefix + '-tab-actions'"
+            class="capability-panel">
+            <shared-input
+              class="capability-search"
+              type="search"
+              [placeholder]="'macrodeck.app:Integrations.Detail.SearchActionsPlaceholder' | translate"
+              [ariaLabel]="'macrodeck.app:Integrations.Detail.SearchActionsAriaLabel' | translate"
+              [ngModel]="actionSearch()"
+              (ngModelChange)="actionSearch.set($event)" />
+            @if (!capabilitiesLoading() && !capabilitiesError()) {
+              <p class="capability-result-count" aria-live="polite">
+                {{ 'macrodeck.app:Integrations.Detail.ResultCountOf' | translate:{ shown: filteredActions().length, total: declaredActions().length } }}
+              </p>
+            }
+
+            @if (capabilitiesLoading()) {
+              <shared-loading-state [message]="'macrodeck.app:Integrations.Detail.LoadingActions' | translate" />
+            } @else if (capabilitiesError(); as error) {
+              <shared-error-banner [message]="error" (dismiss)="capabilitiesError.set(null)" />
+            } @else if (declaredActions().length === 0) {
+              <shared-empty-state
+                icon="zap"
+                [heading]="'macrodeck.app:Integrations.Detail.NoActionsHeading' | translate"
+                [message]="'macrodeck.app:Integrations.Detail.NoActionsMessage' | translate" />
+            } @else if (filteredActions().length === 0) {
+              <shared-empty-state
+                icon="zap"
+                [heading]="'macrodeck.app:Integrations.Detail.NoMatchingActionsHeading' | translate"
+                [message]="'macrodeck.app:Integrations.Detail.NoMatchingSearchMessage' | translate" />
+            } @else {
+              <ul class="capability-list">
+                @for (action of filteredActions(); track action.id) {
+                  <app-action-capability-row [action]="action" (open)="tryInDeveloper(action)" />
+                }
+              </ul>
+            }
+          </div>
+        }
+
+        @case ('variables') {
+          <div
+            [id]="tabIdPrefix + '-panel-variables'"
+            role="tabpanel"
+            [attr.aria-labelledby]="tabIdPrefix + '-tab-variables'"
+            class="capability-panel">
+            <shared-input
+              class="capability-search"
+              type="search"
+              [placeholder]="'macrodeck.app:Integrations.Detail.SearchVariablesPlaceholder' | translate"
+              [ariaLabel]="'macrodeck.app:Integrations.Detail.SearchVariablesAriaLabel' | translate"
+              [ngModel]="variableSearch()"
+              (ngModelChange)="variableSearch.set($event)" />
+            @if (!capabilitiesLoading() && !capabilitiesError()) {
+              <p class="capability-result-count" aria-live="polite">
+                {{ 'macrodeck.app:Integrations.Detail.ResultCountOf' | translate:{ shown: filteredVariables().length, total: declaredVariables().length } }}
+              </p>
+            }
+
+            @if (capabilitiesLoading()) {
+              <shared-loading-state [message]="'macrodeck.app:Integrations.Detail.LoadingVariables' | translate" />
+            } @else if (capabilitiesError(); as error) {
+              <shared-error-banner [message]="error" (dismiss)="capabilitiesError.set(null)" />
+            } @else if (declaredVariables().length === 0) {
+              <shared-empty-state
+                icon="code"
+                [heading]="'macrodeck.app:Integrations.Detail.NoVariablesHeading' | translate"
+                [message]="'macrodeck.app:Integrations.Detail.NoVariablesMessage' | translate" />
+            } @else if (filteredVariables().length === 0) {
+              <shared-empty-state
+                icon="code"
+                [heading]="'macrodeck.app:Integrations.Detail.NoMatchingVariablesHeading' | translate"
+                [message]="'macrodeck.app:Integrations.Detail.NoMatchingSearchMessage' | translate" />
+            } @else {
+              <ul class="capability-list">
+                @for (row of catalogRows(); track row.key) {
+                  <li class="capability-row capability-catalog-row">
+                    @if (row.kind === 'leaf') {
+                      <button
+                        type="button"
+                        class="capability-row-main capability-catalog-main"
+                        (click)="onCatalogBindRequested(row.node)">
+                        <span class="capability-row-name">{{ catalogLabel(row.node) }}</span>
+                        @if (row.node.type) {
+                          <span class="vars-type-badge type-{{ row.node.type }}">{{ typeLabel(row.node.type) }}</span>
+                        }
+                      </button>
+                      <div class="capability-row-side">
+                        <span class="capability-dynamic-badge">{{ dynamicBadgeLabel() }}</span>
+                      </div>
+                    } @else {
+                      <button
+                        type="button"
+                        class="capability-row-main capability-catalog-main capability-catalog-more"
+                        (click)="loadMoreCatalog(row.parentId)">
+                        <span class="capability-row-name">{{ loadMoreLabel() }}</span>
+                      </button>
+                    }
+                  </li>
+                }
+                @for (variable of filteredVariables(); track variable.name) {
+                  <app-variable-capability-row [variable]="variable" />
+                }
+              </ul>
+            }
+
+            @if (catalogBindNode(); as node) {
+              <shared-variable-bind-dialog
+                [integrationId]="integration.id"
+                [node]="node"
+                (bound)="closeCatalogBindDialog()"
+                (close)="closeCatalogBindDialog()" />
+            }
+          </div>
+        }
+      }
+    </div>
+  </shared-detail-page>
+} @else if (!integrationService.isLoading()) {
+  <shared-detail-page [backLabel]="'macrodeck.app:Integrations.Detail.BackToIntegrations' | translate" (close)="goBack()">
+    <h1 class="detail-name" detailPageHeader>{{ 'macrodeck.app:Integrations.Detail.IntegrationNotFound' | translate }}</h1>
+  </shared-detail-page>
+}
+
+@if (configuring()) {
+  <shared-config-flow-dialog
+    [integrationId]="integrationId()"
+    [entryId]="configuringEntryId()"
+    [root]="configFlow.root()"
+    (closed)="onConfigFlowClosed($event)">
+  </shared-config-flow-dialog>
+}
+
+@if (configurationNameTarget()) {
+  <shared-modal
+    [heading]="'macrodeck.app:Integrations.Detail.RenameConfigurationHeading' | translate"
+    maxWidth="420px"
+    (close)="cancelConfigurationName()">
+    <form class="config-name-form" (submit)="$event.preventDefault(); submitConfigurationName()">
+      <label class="config-name-field">
+        <span>{{ 'macrodeck.app:Integrations.Detail.ConfigurationNameLabel' | translate }}</span>
+        <shared-input
+          name="configurationName"
+          [autofocus]="true"
+          [inputRequired]="true"
+          [placeholder]="'macrodeck.app:Integrations.Detail.ConfigurationNamePlaceholder' | translate"
+          [ngModel]="configurationName()"
+          (ngModelChange)="configurationName.set($event)"
+          inputName="configurationName" />
+      </label>
+    </form>
+    <div modal-footer>
+      <shared-button variant="secondary" (click)="cancelConfigurationName()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+      <shared-button
+        variant="primary"
+        [disabled]="!configurationName().trim() || configurationMutationPending()"
+        [loading]="configurationMutationPending()"
+        (click)="submitConfigurationName()">
+        {{ 'macrodeck:Common.Save' | translate }}
+      </shared-button>
+    </div>
+  </shared-modal>
+}
+
+@if (pendingRemove()) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Integrations.Detail.RemoveConfigEntryHeading' | translate"
+    [message]="removeConfigurationMessage()"
+    [confirmText]="'macrodeck.app:Integrations.Detail.RemoveConfigEntryAction' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmRemoveEntry()"
+    (cancel)="cancelRemoveEntry()">
+  </shared-confirmation-modal>
+}
+
+@if (showDisableConfirm()) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Integrations.Page.DisableHeading' | translate"
+    [message]="disableMessage()"
+    [confirmText]="'macrodeck.app:Integrations.Page.DisableAction' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmDisable()"
+    (cancel)="cancelDisable()">
+  </shared-confirmation-modal>
+}

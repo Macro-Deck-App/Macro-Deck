@@ -1,0 +1,87 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- netstandard2.0, not the repo-wide net10.0: Roslyn loads an analyzer straight into the compiler
+         process, so it has to run on whatever the consumer's own compiler targets, not on the plugin
+         SDK's own runtime. LangVersion is pinned to latest because a netstandard2.0 target under the
+         net10 SDK otherwise silently defaults to C# 7.3. -->
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <IsRoslynComponent>true</IsRoslynComponent>
+        <!-- The compiler loads this assembly directly out of the analyzers/ folder below, not as a
+             lib/ dependency - IncludeBuildOutput=false stops the default packing behaviour from also
+             adding it as one, which would make it a normal (and pointless) runtime dependency of every
+             plugin that installs this package. IncludeSymbols=false because that leaves no lib/ output
+             for a snupkg to describe, which NuGet packs anyway as NU5017; Directory.Build.targets was
+             changed to let this project opt out of the shared default. -->
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <IncludeSymbols>false</IncludeSymbols>
+        <DevelopmentDependency>true</DevelopmentDependency>
+        <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <IsMacroDeckPackage>true</IsMacroDeckPackage>
+        <PackageId>MacroDeck.Plugin.Analyzers</PackageId>
+        <Description>Roslyn analyzers for Macro Deck plugin authors: invalid ids and metadata, unsupported or obsolete SDK APIs, missing cancellation handling, invalid capability registration, and common dependency-injection and lifecycle mistakes, caught at compile time with actionable messages.</Description>
+        <PackageTags>macrodeck;plugin;analyzers;roslyn</PackageTags>
+    </PropertyGroup>
+
+    <!-- Both development-time only: consumers get just the analyzer assembly (see
+         SuppressDependenciesWhenPacking above), never a runtime dependency on Roslyn itself. -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+    </ItemGroup>
+
+    <!-- Linked, not referenced: MacroDeckId itself compiles its patterns with [GeneratedRegex], which
+         needs .NET 7+ and cannot target netstandard2.0. This project links the same source file and
+         builds a plain Regex from the same constants instead - one source of truth, two compilations.
+         See that file's remarks. -->
+    <ItemGroup>
+        <Compile Include="..\MacroDeck.Sdk\Identity\MacroDeckIdPatterns.cs" Link="Identity\MacroDeckIdPatterns.cs" />
+    </ItemGroup>
+
+    <!-- Linked, not referenced: this project cannot reference MacroDeck.Plugin.Protocol - Roslyn loads
+         an analyzer straight into the compiler process on netstandard2.0, and that assembly is not
+         netstandard2.0-safe throughout. Linking the same source file keeps the icon-extension-to-media-type
+         table a single source of truth for MDP1003, the manifest reader, and the host's own icon
+         pipeline, instead of a second copy that could silently drift from it. See that file's remarks. -->
+    <ItemGroup>
+        <Compile Include="..\..\..\protocol\src\MacroDeck.Plugin.Protocol\Assets\IconMediaTypes.cs" Link="Assets\IconMediaTypes.cs" />
+    </ItemGroup>
+
+    <!-- Linked, not referenced, for the same reason as the two files above: MacroDeck.Localization is a
+         net10.0 runtime package and this project is netstandard2.0. These files are the localization
+         compiler itself - resource parsing, placeholder rules, culture-name validation and the MDLOC
+         findings - and linking them keeps the generator, the runtime resolver and the host's validation
+         of a plugin's submitted catalog agreeing on what a valid resource set is. They are internal in
+         both compilations; anything made public here would become plugin-facing surface twice over. -->
+    <ItemGroup>
+        <Compile Include="..\MacroDeck.Localization\Compiler\*.cs" Link="Localization\%(Filename)%(Extension)" />
+    </ItemGroup>
+
+    <!-- The slot the compiler loads a C# analyzer from. -->
+    <ItemGroup>
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
+
+    <!-- Auto-imported into every consuming project (the build/<PackageId>.props NuGet convention) - adds
+         manifest.json and launchSettings.json to AdditionalFiles so MDP1001/MDP4002 see them with no
+         opt-in. See that file's own remarks. -->
+    <ItemGroup>
+        <None Include="build\MacroDeck.Plugin.Analyzers.props" Pack="true" PackagePath="build\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
+        <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="MacroDeck.Plugin.Analyzers.Tests.UnitTests" />
+    </ItemGroup>
+
+</Project>

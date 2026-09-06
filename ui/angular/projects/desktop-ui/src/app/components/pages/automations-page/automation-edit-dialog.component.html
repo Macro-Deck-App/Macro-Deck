@@ -1,0 +1,28 @@
+<shared-modal [heading]="title" maxWidth="420px" [showFooter]="false" (close)="cancel.emit()">
+  <form class="automation-form" (submit)="$event.preventDefault(); submit()">
+    <label class="field">
+      <span class="label">{{ 'macrodeck.app:Automations.NameFieldLabel' | translate }}<span class="required" aria-hidden="true">*</span></span>
+      <shared-input
+        [autofocus]="true"
+        [placeholder]="'macrodeck.app:Automations.NameFieldPlaceholder' | translate"
+        [ngModel]="name()"
+        (ngModelChange)="name.set($event)"
+        name="automationName"
+        required />
+    </label>
+
+    <label class="field">
+      <span class="label">{{ 'macrodeck.app:Automations.DescriptionFieldLabel' | translate }}</span>
+      <shared-input
+        [placeholder]="'macrodeck.app:Automations.DescriptionFieldPlaceholder' | translate"
+        [ngModel]="description()"
+        (ngModelChange)="description.set($event)"
+        name="automationDescription" />
+    </label>
+
+    <shared-button-group class="actions" align="end">
+      <shared-button variant="secondary" (click)="onCancel()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+      <shared-button variant="primary" type="submit" [disabled]="!name().trim()">{{ saveLabel }}</shared-button>
+    </shared-button-group>
+  </form>
+</shared-modal>

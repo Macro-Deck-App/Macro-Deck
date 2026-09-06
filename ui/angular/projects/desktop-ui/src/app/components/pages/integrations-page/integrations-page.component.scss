@@ -1,0 +1,294 @@
+@use '../../../../styles/index' as ds;
+
+.integrations-page {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  overflow: hidden;
+}
+
+.integrations-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2) var(--space-4);
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.integrations-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  flex-shrink: 0;
+}
+
+.integrations-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+}
+
+.integrations-subtitle {
+  font-size: var(--text-md);
+  color: var(--color-text-muted);
+}
+
+.integrations-error {
+  display: block;
+  margin-bottom: var(--space-4);
+}
+
+.integrations-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Integration list */
+.integrations-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Integration card */
+.integration-card {
+  @include ds.card($padding: var(--space-3) var(--space-4));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.integration-card:hover {
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-border-light);
+}
+
+.integration-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.integration-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.integration-icon {
+  color: var(--color-accent);
+}
+
+.integration-brand-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.integration-name {
+  font-weight: var(--font-semibold);
+  font-size: var(--text-lg);
+  color: var(--color-text-primary);
+}
+
+.integration-version {
+  margin-left: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.kind-badge {
+  @include ds.badge;
+  margin-left: var(--space-2);
+  font-size: var(--text-xs);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+}
+
+.kind-badge.internal {
+  background-color: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+.integrations-toolbar,
+.integrations-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.integrations-filters {
+  margin-bottom: var(--space-4);
+}
+
+.integrations-search {
+  flex: 1 1 13rem;
+  display: flex;
+}
+
+.integrations-search-input {
+  width: 100%;
+}
+
+.filter-value {
+  color: var(--color-text-primary);
+  font-weight: var(--font-semibold);
+}
+
+.integration-card-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.integration-chevron {
+  color: var(--color-text-muted);
+}
+
+.integration-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding-left: 2rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3125rem;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.meta-item-qualifier {
+  font-size: var(--text-xs);
+  opacity: 0.75;
+}
+
+button.meta-item-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+button.meta-item-link:hover {
+  color: var(--color-accent);
+}
+
+.issue-badge {
+  @include ds.badge;
+  border: 1px solid transparent;
+
+  @include ds.issue-badge-severities;
+}
+
+// Plugin compatibility badge (issue #418) - a plugin-backed integration whose compatibility state is
+// not "compatible". Kept separate from .issue-badge: an integration issue and a compatibility finding
+// are different things the host can report at once, and conflating their pills would blur that.
+.compat-badge {
+  @include ds.badge;
+  border: 1px solid transparent;
+}
+
+.compat-badge-warning {
+  color: var(--color-warning);
+  background-color: var(--color-warning-muted);
+}
+
+.compat-badge-danger {
+  color: var(--color-danger);
+  background-color: var(--color-danger-muted);
+}
+
+.integrations-header-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.integrations-add-menu,
+.integrations-filter-menu,
+.integration-card-menu-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.integrations-add-menu-item,
+.integrations-filter-option,
+.integration-card-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+  text-align: left;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &.is-danger {
+    color: var(--color-danger);
+  }
+
+  &.is-selected {
+    color: var(--color-accent);
+    font-weight: var(--font-semibold);
+  }
+}
+
+.integrations-add-menu-label {
+  display: flex;
+  flex-direction: column;
+}
+
+.uninstall-confirm-hint {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.uninstall-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.uninstall-confirm-text {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+}
+
+.uninstall-confirm-text,
+.uninstall-confirm-hint {
+  margin: 0;
+  line-height: var(--leading-relaxed);
+}

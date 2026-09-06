@@ -1,0 +1,170 @@
+[
+	{
+		"name": "minimal-profile-numeric-format-version",
+		"manifest": {
+			"kind": "Profile",
+			"formatVersion": 1,
+			"files": [
+				{
+					"path": "profile.json",
+					"sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+					"size": 5
+				}
+			]
+		},
+		"digestUtf8": "macro-deck-portable/1\nprofile\n1\n\nfalse\nf\tprofile.json\tsha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\t5\n",
+		"digestSha256": "dc3310ee0197aafe10fa16aae287a2a5039d435d0fdb655271827ca46d8e4490"
+	},
+	{
+		"name": "format-version-as-string-matches-numeric",
+		"manifest": {
+			"kind": "Profile",
+			"formatVersion": "1",
+			"files": [
+				{
+					"path": "profile.json",
+					"sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+					"size": 5
+				}
+			]
+		},
+		"digestUtf8": "macro-deck-portable/1\nprofile\n1\n\nfalse\nf\tprofile.json\tsha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\t5\n",
+		"digestSha256": "dc3310ee0197aafe10fa16aae287a2a5039d435d0fdb655271827ca46d8e4490"
+	},
+	{
+		"name": "full-folder-multiple-files",
+		"manifest": {
+			"kind": "Folder",
+			"formatVersion": 2,
+			"files": [
+				{
+					"path": "items/one.json",
+					"sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+					"size": 10
+				},
+				{
+					"path": "items/two.json",
+					"sha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+					"size": 20
+				},
+				{
+					"path": "folder.json",
+					"sha256": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+					"size": 30
+				}
+			]
+		},
+		"digestUtf8": "macro-deck-portable/1\nfolder\n2\n\nfalse\nf\tfolder.json\tsha256:3333333333333333333333333333333333333333333333333333333333333333\t30\nf\titems/one.json\tsha256:1111111111111111111111111111111111111111111111111111111111111111\t10\nf\titems/two.json\tsha256:2222222222222222222222222222222222222222222222222222222222222222\t20\n",
+		"digestSha256": "af75fb4706a39e2f0957b21e15e2990b4910e755f45bf87e6473d4b3a4a403bd"
+	},
+	{
+		"name": "full-reordered-and-reformatted",
+		"manifest": {
+			"files": [
+				{
+					"size": 30,
+					"sha256": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+					"path": "folder.json"
+				},
+				{
+					"size": 10,
+					"sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+					"path": "items/one.json"
+				},
+				{
+					"size": 20,
+					"sha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+					"path": "items/two.json"
+				}
+			],
+			"formatVersion": 2,
+			"kind": "Folder"
+		},
+		"digestUtf8": "macro-deck-portable/1\nfolder\n2\n\nfalse\nf\tfolder.json\tsha256:3333333333333333333333333333333333333333333333333333333333333333\t30\nf\titems/one.json\tsha256:1111111111111111111111111111111111111111111111111111111111111111\t10\nf\titems/two.json\tsha256:2222222222222222222222222222222222222222222222222222222222222222\t20\n",
+		"digestSha256": "af75fb4706a39e2f0957b21e15e2990b4910e755f45bf87e6473d4b3a4a403bd"
+	},
+	{
+		"name": "ordinal-and-case-path-sort",
+		"manifest": {
+			"kind": "Widgets",
+			"formatVersion": 1,
+			"files": [
+				{
+					"path": "app/lib.json",
+					"sha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+					"size": 2
+				},
+				{
+					"path": "widget.json",
+					"sha256": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+					"size": 4
+				},
+				{
+					"path": "app.json",
+					"sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+					"size": 1
+				},
+				{
+					"path": "Widget.json",
+					"sha256": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+					"size": 3
+				}
+			]
+		},
+		"digestUtf8": "macro-deck-portable/1\nwidgets\n1\n\nfalse\nf\tWidget.json\tsha256:3333333333333333333333333333333333333333333333333333333333333333\t3\nf\tapp.json\tsha256:1111111111111111111111111111111111111111111111111111111111111111\t1\nf\tapp/lib.json\tsha256:2222222222222222222222222222222222222222222222222222222222222222\t2\nf\twidget.json\tsha256:4444444444444444444444444444444444444444444444444444444444444444\t4\n",
+		"digestSha256": "0e090e1f935cd6650bc3ff72a13a151ca4db58430e2713162f1e2fb9fd0b44d5"
+	},
+	{
+		"name": "unknown-top-level-property",
+		"manifest": {
+			"kind": "Profile",
+			"formatVersion": 1,
+			"files": [
+				{
+					"path": "profile.json",
+					"sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+					"size": 5
+				}
+			],
+			"futureField": "ignored"
+		},
+		"digestUtf8": "macro-deck-portable/1\nprofile\n1\n\nfalse\nf\tprofile.json\tsha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\t5\n",
+		"digestSha256": "dc3310ee0197aafe10fa16aae287a2a5039d435d0fdb655271827ca46d8e4490"
+	},
+	{
+		"name": "attribution-baseline",
+		"manifest": {
+			"kind": "Profile",
+			"formatVersion": 2,
+			"appVersion": "3.1.0",
+			"includesSecrets": true,
+			"files": [
+				{
+					"path": "profile.json",
+					"sha256": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+					"size": 7
+				}
+			]
+		},
+		"digestUtf8": "macro-deck-portable/1\nprofile\n2\n3.1.0\ntrue\nf\tprofile.json\tsha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\t7\n",
+		"digestSha256": "660fe48d672db8438cdaec2c36da9a406153e05ff4a8bc32de58c4f2ed4fc330"
+	},
+	{
+		"name": "attribution-app-version-changed",
+		"manifest": {
+			"kind": "Profile",
+			"formatVersion": 2,
+			"appVersion": "3.2.0",
+			"includesSecrets": true,
+			"files": [
+				{
+					"path": "profile.json",
+					"sha256": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+					"size": 7
+				}
+			]
+		},
+		"digestUtf8": "macro-deck-portable/1\nprofile\n2\n3.2.0\ntrue\nf\tprofile.json\tsha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\t7\n",
+		"digestSha256": "227cb72a8cbccbc4d1084704e57a6bf86adc86590d4d8d1500268714b0326e8d"
+	}
+]

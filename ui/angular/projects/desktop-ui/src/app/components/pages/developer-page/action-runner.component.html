@@ -1,0 +1,63 @@
+<div class="runner">
+  <header class="runner-header">
+    <div class="runner-heading">
+      <h1 class="runner-title">{{ heading() }}</h1>
+      <p class="runner-subtitle">
+        {{ 'macrodeck.app:Developer.ActionCount' | translate:{ count: filteredActions().length } }}
+      </p>
+    </div>
+    <shared-input
+      class="runner-search"
+      type="search"
+      [placeholder]="'macrodeck.app:Developer.SearchActionsPlaceholder' | translate"
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)" />
+  </header>
+
+  @if (actionService.isLoading() && actionService.actions().length === 0) {
+    <shared-loading-state [message]="'macrodeck.app:Developer.LoadingActions' | translate" />
+  } @else if (actionService.actions().length === 0) {
+    <shared-empty-state
+      icon="zap"
+      [heading]="'macrodeck.app:Developer.NoActionsAvailableHeading' | translate"
+      [message]="'macrodeck.app:Developer.NoActionsAvailableMessage' | translate" />
+  } @else if (filteredActions().length === 0) {
+    <shared-empty-state
+      icon="zap"
+      [heading]="'macrodeck.app:Developer.NoMatchingActionsHeading' | translate"
+      [message]="'macrodeck.app:Developer.TryDifferentSearchTerm' | translate" />
+  } @else {
+    <div class="runner-body">
+      <ul class="action-list" role="listbox" [attr.aria-label]="'macrodeck.app:Developer.ActionsTab' | translate">
+        @for (action of filteredActions(); track keyOf(action)) {
+          <li>
+            <button
+              type="button"
+              class="action-list-item"
+              role="option"
+              [attr.aria-selected]="isSelected(action)"
+              [class.active]="isSelected(action)"
+              (click)="select(action)">
+              <span class="action-list-name">{{ action.name }}</span>
+              @if (integrationId() === null) {
+                <span class="action-list-integration">{{ action.integrationName }}</span>
+              }
+              <span class="action-list-id">{{ action.id }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+
+      <div class="runner-detail">
+        @if (selectedAction(); as action) {
+          <app-action-tester [action]="action" />
+        } @else {
+          <shared-empty-state
+            icon="zap"
+            [heading]="'macrodeck.app:Developer.SelectAnActionHeading' | translate"
+            [message]="'macrodeck.app:Developer.SelectAnActionMessage' | translate" />
+        }
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,11 @@
+<div class="ghost-inner">
+  <div
+    class="ghost-content"
+    [style.width.px]="contentWidth"
+    [style.height.px]="contentHeight"
+    [style.--wq]="contentQueryBasis"
+    [style.transform]="contentTransform">
+    <ng-container #ghostHost></ng-container>
+  </div>
+  <shared-widget-border-overlay [border]="widgetBorder" />
+</div>

@@ -1,0 +1,372 @@
+<div
+  class="integrations-page"
+  sharedShellDropTarget
+  [dropKinds]="['plugin']"
+  (shellDropped)="onArtifactDropped($event)">
+  <div class="integrations-content">
+    <!-- The header sits outside the loading branch so Add is reachable while the list loads, and on
+         the empty page - which is exactly when someone needs to install their first plugin. -->
+    <div class="integrations-header">
+      <div>
+        <h1 class="integrations-title">{{ 'macrodeck.app:Nav.Integrations' | translate }}</h1>
+        <p class="integrations-subtitle">
+          {{ 'macrodeck.app:Integrations.Page.EnabledSubtitle' | translate:{ enabled: integrationService.enabledCount(), total: integrationService.integrations().length } }}
+        </p>
+      </div>
+      <div class="integrations-header-actions">
+        <shared-dropdown-menu
+          position="bottom-right"
+          [minWidth]="232"
+          triggerVariant="primary"
+          [triggerAriaLabel]="'macrodeck.app:Integrations.Page.AddIntegrationAriaLabel' | translate"
+          [isOpen]="addMenuOpen()"
+          (isOpenChange)="addMenuOpen.set($event)">
+          <ng-template #triggerContent>
+            <span class="icon icon-plus icon-sm"></span>
+            <span>{{ 'macrodeck.app:Integrations.Page.AddButtonLabel' | translate }}</span>
+          </ng-template>
+          <ng-template #menuContent>
+            <div class="integrations-add-menu">
+              <button type="button" class="integrations-add-menu-item" (click)="openStore()">
+                <span class="icon icon-store icon-sm"></span>
+                <span class="integrations-add-menu-label">
+                  <span>{{ 'macrodeck.app:Integrations.Page.BrowseStoreAction' | translate }}</span>
+                </span>
+              </button>
+              <button type="button" class="integrations-add-menu-item" (click)="pickArtifact()">
+                <span class="icon icon-upload icon-sm"></span>
+                <span>{{ 'macrodeck.app:Integrations.Page.InstallFromFileAction' | translate }}</span>
+              </button>
+            </div>
+          </ng-template>
+        </shared-dropdown-menu>
+      </div>
+    </div>
+
+    @if (integrationService.isLoading()) {
+      <shared-loading-state [message]="'macrodeck.app:Integrations.Page.LoadingIntegrations' | translate" />
+    } @else {
+      @if (integrationService.integrations().length > 0) {
+        <div class="integrations-toolbar">
+          <div class="integrations-search">
+            <shared-input
+              class="integrations-search-input"
+              type="search"
+              [placeholder]="'macrodeck.app:Integrations.Page.SearchPlaceholder' | translate"
+              [ngModel]="search()"
+              (ngModelChange)="search.set($event)" />
+          </div>
+        </div>
+
+        <!-- Filter bar (#759): one dropdown per facet, each showing its selection beside the facet
+             name so the active filters are readable without opening anything. -->
+        <div class="integrations-filters">
+          <shared-dropdown-menu
+            position="bottom-left"
+            [minWidth]="200"
+            [anchorOffset]="4"
+            [isOpen]="openFilterMenu() === 'status'"
+            (isOpenChange)="setFilterMenuOpen('status', $event)">
+            <ng-template #triggerContent>
+              <span>{{ 'macrodeck.app:Integrations.Page.FilterStatusLabel' | translate }}</span>
+              @if (statusFilterLabel(); as value) {
+                <span class="filter-value">{{ value }}</span>
+              }
+            </ng-template>
+            <ng-template #menuContent>
+              <div class="integrations-filter-menu">
+                <button type="button" class="integrations-filter-option" [class.is-selected]="filters.status() === 'all'" (click)="setStatusFilter('all')">
+                  {{ 'macrodeck.app:Integrations.Page.FilterAll' | translate }}
+                </button>
+                <button type="button" class="integrations-filter-option" [class.is-selected]="filters.status() === 'enabled'" (click)="setStatusFilter('enabled')">
+                  {{ 'macrodeck:Common.Enabled' | translate }}
+                </button>
+                <button type="button" class="integrations-filter-option" [class.is-selected]="filters.status() === 'disabled'" (click)="setStatusFilter('disabled')">
+                  {{ 'macrodeck:Common.Disabled' | translate }}
+                </button>
+              </div>
+            </ng-template>
+          </shared-dropdown-menu>
+
+          <shared-dropdown-menu
+            position="bottom-left"
+            [minWidth]="200"
+            [anchorOffset]="4"
+            [isOpen]="openFilterMenu() === 'type'"
+            (isOpenChange)="setFilterMenuOpen('type', $event)">
+            <ng-template #triggerContent>
+              <span>{{ 'macrodeck.app:Integrations.Page.FilterTypeLabel' | translate }}</span>
+              @if (typeFilterLabel(); as value) {
+                <span class="filter-value">{{ value }}</span>
+              }
+            </ng-template>
+            <ng-template #menuContent>
+              <div class="integrations-filter-menu">
+                <button type="button" class="integrations-filter-option" [class.is-selected]="filters.type() === 'all'" (click)="setTypeFilter('all')">
+                  {{ 'macrodeck.app:Integrations.Page.FilterAll' | translate }}
+                </button>
+                <button type="button" class="integrations-filter-option" [class.is-selected]="filters.type() === 'internal'" (click)="setTypeFilter('internal')">
+                  {{ 'macrodeck.app:Integrations.Page.InternalTag' | translate }}
+                </button>
+                <button type="button" class="integrations-filter-option" [class.is-selected]="filters.type() === 'external'" (click)="setTypeFilter('external')">
+                  {{ 'macrodeck.app:Integrations.Page.ExternalTag' | translate }}
+                </button>
+              </div>
+            </ng-template>
+          </shared-dropdown-menu>
+
+          @if (capabilityOptions().length > 0) {
+            <shared-dropdown-menu
+              position="bottom-left"
+              [minWidth]="220"
+              [anchorOffset]="4"
+              [isOpen]="openFilterMenu() === 'capabilities'"
+              (isOpenChange)="setFilterMenuOpen('capabilities', $event)">
+              <ng-template #triggerContent>
+                <span>{{ 'macrodeck.app:Integrations.Page.FilterCapabilitiesLabel' | translate }}</span>
+                @if (capabilitiesFilterLabel(); as value) {
+                  <span class="filter-value">{{ value }}</span>
+                }
+              </ng-template>
+              <ng-template #menuContent>
+                <div class="integrations-filter-menu">
+                  @for (option of capabilityOptions(); track option.kind) {
+                    <shared-checkbox
+                      class="integrations-filter-option"
+                      [label]="option.name | localizedText"
+                      [ngModel]="filters.capabilities().includes(option.kind)"
+                      (ngModelChange)="filters.toggleCapability(option.kind)" />
+                  }
+                </div>
+              </ng-template>
+            </shared-dropdown-menu>
+          }
+
+          <shared-dropdown-menu
+            position="bottom-left"
+            [minWidth]="200"
+            [anchorOffset]="4"
+            [isOpen]="openFilterMenu() === 'issues'"
+            (isOpenChange)="setFilterMenuOpen('issues', $event)">
+            <ng-template #triggerContent>
+              <span>{{ 'macrodeck.app:Integrations.Page.FilterIssuesLabel' | translate }}</span>
+              @if (issuesFilterLabel(); as value) {
+                <span class="filter-value">{{ value }}</span>
+              }
+            </ng-template>
+            <ng-template #menuContent>
+              <div class="integrations-filter-menu">
+                <button type="button" class="integrations-filter-option" [class.is-selected]="filters.issues() === 'all'" (click)="setIssuesFilter('all')">
+                  {{ 'macrodeck.app:Integrations.Page.FilterAll' | translate }}
+                </button>
+                <button type="button" class="integrations-filter-option" [class.is-selected]="filters.issues() === 'has'" (click)="setIssuesFilter('has')">
+                  {{ 'macrodeck.app:Integrations.Page.FilterHasIssues' | translate }}
+                </button>
+                <button type="button" class="integrations-filter-option" [class.is-selected]="filters.issues() === 'none'" (click)="setIssuesFilter('none')">
+                  {{ 'macrodeck.app:Integrations.Page.FilterNoIssues' | translate }}
+                </button>
+              </div>
+            </ng-template>
+          </shared-dropdown-menu>
+
+          @if (filters.hasActiveFilters()) {
+            <shared-button variant="ghost" size="compact" (click)="filters.clear()">
+              {{ 'macrodeck.app:Integrations.Page.ClearFiltersAction' | translate }}
+            </shared-button>
+          }
+        </div>
+      }
+
+      @if (integrationService.loadError(); as loadError) {
+        <shared-error-banner class="integrations-error" [message]="loadError" [dismissible]="false" />
+      }
+
+      @if (integrationService.integrations().length === 0 && !integrationService.loadError()) {
+        <shared-empty-state
+          class="integrations-empty"
+          icon="puzzle"
+          [heading]="'macrodeck.app:Integrations.Page.NoIntegrationsAvailableHeading' | translate"
+          [message]="'macrodeck.app:Integrations.Page.NoIntegrationsAvailableMessage' | translate" />
+      } @else if (displayedIntegrations().length === 0) {
+        <shared-empty-state
+          class="integrations-empty"
+          icon="puzzle"
+          [heading]="'macrodeck.app:Integrations.Page.NoMatchingIntegrationsHeading' | translate"
+          [message]="(filters.hasActiveFilters()
+            ? 'macrodeck.app:Integrations.Page.NoMatchingFiltersMessage'
+            : 'macrodeck.app:Integrations.Page.NoMatchingIntegrationsMessage') | translate" />
+      } @else {
+        <div class="integrations-list">
+          @for (integration of displayedIntegrations(); track integration.id) {
+            <div class="integration-card" (click)="openDetail(integration)">
+              <div class="integration-card-header">
+                <div class="integration-info">
+                  @if (iconUrl(integration); as icon) {
+                    <img class="integration-brand-icon" [src]="icon" alt="">
+                  } @else {
+                    <span class="icon icon-puzzle icon-lg integration-icon"></span>
+                  }
+                  <div>
+                    <span class="integration-name">{{ integration.name }}</span>
+                    @if (!integration.isInternal) {
+                      <span class="integration-version">v{{ integration.version }}</span>
+                    }
+                    <span class="kind-badge" [class.internal]="integration.isInternal">
+                      {{ (integration.isInternal ? 'macrodeck.app:Integrations.Page.InternalTag' : 'macrodeck.app:Integrations.Page.ExternalTag') | translate }}
+                    </span>
+                  </div>
+                </div>
+                <div class="integration-card-actions">
+                  @if (canUninstall(integration)) {
+                    <!-- The whole card navigates on click, so the menu swallows its own events the same
+                         way the toggle beside it does. -->
+                    <span class="integration-card-menu" (click)="$event.stopPropagation()">
+                      <shared-dropdown-menu
+                        position="bottom-right"
+                        [minWidth]="200"
+                        [triggerAriaLabel]="'macrodeck.app:Integrations.Page.MoreActionsAriaLabel' | translate:{ name: integration.name }"
+                        [isOpen]="openMenuId() === integration.id"
+                        (isOpenChange)="setMenuOpen(integration.id, $event)">
+                        <ng-template #menuContent>
+                          <div class="integration-card-menu-items">
+                            <button
+                              type="button"
+                              class="integration-card-menu-item is-danger"
+                              (click)="requestUninstall(integration)">
+                              <span class="icon icon-trash icon-sm"></span>
+                              <span>{{ 'macrodeck.app:Integrations.Page.UninstallMenuAction' | translate }}</span>
+                            </button>
+                          </div>
+                        </ng-template>
+                      </shared-dropdown-menu>
+                    </span>
+                  }
+                  <shared-toggle-switch
+                    #enableToggle
+                    (click)="$event.stopPropagation()"
+                    [checked]="integration.enabled"
+                    (changed)="onToggle(integration, enableToggle)">
+                  </shared-toggle-switch>
+                  <span class="icon icon-chevron-right icon-sm integration-chevron"></span>
+                </div>
+              </div>
+              <div class="integration-card-meta">
+                <button
+                  type="button"
+                  class="meta-item meta-item-link"
+                  (click)="$event.stopPropagation(); onShowCapabilityTab(integration, 'actions')">
+                  <span class="icon icon-zap icon-xs"></span>
+                  {{ 'macrodeck.app:Integrations.Page.ActionCount' | translate:{ count: integration.actionCount } }}
+                </button>
+                <button
+                  type="button"
+                  class="meta-item meta-item-link"
+                  [title]="variableCountHint(integration)"
+                  (click)="$event.stopPropagation(); onShowCapabilityTab(integration, 'variables')">
+                  <span class="icon icon-sliders icon-xs"></span>
+                  {{ 'macrodeck.app:Integrations.Page.VariableCount' | translate:{ count: integration.variableCount } }}
+                  @if (integration.variablesDependOnConfiguration) {
+                    <span class="meta-item-qualifier">{{ 'macrodeck.app:Integrations.Page.PerConfigurationQualifier' | translate }}</span>
+                  }
+                </button>
+                @for (capability of extraCapabilities(integration); track capability.kind) {
+                  <span class="meta-item">
+                    <span class="icon icon-xs" [class]="'icon-' + capabilityIcon(capability.kind)"></span>
+                    {{ capability.name | localizedText }}
+                  </span>
+                }
+                @if (integration.issueCount > 0) {
+                  <span class="issue-badge" [class]="'issue-badge-' + (integration.issueSeverity ?? 'warning')">
+                    {{ 'macrodeck.app:Integrations.Page.IssueCount' | translate:{ count: integration.issueCount } }}
+                  </span>
+                }
+                @if (compatibilityFor(integration); as compat) {
+                  @if (compat.state !== 'compatible') {
+                    <span class="compat-badge" [class]="'compat-badge-' + compatibilityStateTier(compat.state)">
+                      {{ compatibilityStateLabel(compat.state) }}
+                    </span>
+                  }
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+</div>
+
+<input
+  #artifactInput
+  type="file"
+  hidden
+  accept=".macroDeckPlugin"
+  (change)="onArtifactPicked(artifactInput)" />
+
+@if (inspecting() || pendingInstall()) {
+  <shared-plugin-install-confirm-modal
+    [inspectionResult]="pendingInstall()?.inspection ?? null"
+    [loading]="inspecting()"
+    [busy]="installBusy()"
+    [allowUnsignedChoice]="true"
+    (confirmed)="confirmInstall(false, $event.allowUnsigned)"
+    (cancelled)="cancelInstall()">
+  </shared-plugin-install-confirm-modal>
+}
+
+@if (replaceTarget()) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Integrations.Page.ReinstallHeading' | translate"
+    [message]="replaceMessage()"
+    [confirmText]="'macrodeck.app:Integrations.Page.ReinstallAction' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    (confirm)="confirmInstall(true)"
+    (cancel)="cancelReplace()">
+  </shared-confirmation-modal>
+}
+
+@if (uninstallTarget(); as uninstalling) {
+  <!-- Not shared-confirmation-modal: this one carries a checkbox, and that component takes no
+       projected content. -->
+  <shared-modal [heading]="'macrodeck.app:Integrations.Page.UninstallHeading' | translate" size="small" (close)="cancelUninstall()">
+    <div class="uninstall-confirm">
+      <p class="uninstall-confirm-text">{{ uninstallMessage() }}</p>
+      <p class="uninstall-confirm-text">
+        {{ 'macrodeck.app:Integrations.Page.UninstallNote' | translate }}
+      </p>
+      <shared-checkbox
+        [label]="'macrodeck.app:Integrations.Page.DeleteDataCheckboxLabel' | translate"
+        [ngModel]="uninstallDeleteData()"
+        (ngModelChange)="uninstallDeleteData.set($event)" />
+      <p class="uninstall-confirm-hint">
+        {{ 'macrodeck.app:Integrations.Page.UninstallHint' | translate:{ name: uninstalling.name } }}
+      </p>
+    </div>
+    <div modal-footer>
+      <shared-button variant="secondary" (click)="cancelUninstall()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+      <shared-button variant="danger" [loading]="uninstallBusy()" (click)="confirmUninstall()">
+        {{ 'macrodeck.app:Integrations.Page.UninstallAction' | translate }}
+      </shared-button>
+    </div>
+  </shared-modal>
+}
+
+@if (configuringId(); as configuringId) {
+  <shared-config-flow-dialog
+    [integrationId]="configuringId"
+    [root]="configFlow.root()"
+    (closed)="onConfigFlowClosed($event)">
+  </shared-config-flow-dialog>
+}
+
+@if (disableTarget()) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Integrations.Page.DisableHeading' | translate"
+    [message]="disableMessage()"
+    [confirmText]="'macrodeck.app:Integrations.Page.DisableAction' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmDisable()"
+    (cancel)="cancelDisable()">
+  </shared-confirmation-modal>
+}

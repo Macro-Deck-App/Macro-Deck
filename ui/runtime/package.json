@@ -1,0 +1,38 @@
+{
+  "name": "@macro-deck/runtime",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Framework-free Macro Deck client runtime: domain models, grid arithmetic, the Macro Deck UI model and the host wire protocol.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/public-api.d.ts",
+      "import": "./dist/public-api.js",
+      "require": "./dist/cjs/public-api.js"
+    },
+    "./styles/*.css": "./styles/*.css",
+    "./styles/icons/*.svg": "./styles/icons/*.svg"
+  },
+  "main": "./dist/cjs/public-api.js",
+  "types": "./dist/public-api.d.ts",
+  "files": [
+    "dist",
+    "styles"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.cjs.json && node -e \"require('fs').writeFileSync('dist/cjs/package.json','{\\\"type\\\":\\\"commonjs\\\"}')\"",
+    "check:es5": "tsc -p tsconfig.es5.json && es-check es5 --module dist-es5/**/*.js",
+    "pretest": "tsc -p tsconfig.spec.json && node -e \"require('fs').writeFileSync('out-spec/package.json','{\\\"type\\\":\\\"commonjs\\\"}')\"",
+    "test": "jasmine --config=jasmine.json && npm run test:boundaries",
+    "test:boundaries": "node --test boundaries.test.mjs styles.test.mjs"
+  },
+  "devDependencies": {
+    "es-check": "^7.2.1",
+    "jasmine": "^5.6.0",
+    "jasmine-core": "~5.6.0",
+    "jsdom": "^26.0.0",
+    "typescript": "~5.9.3"
+  },
+  "module": "./dist/public-api.js"
+}

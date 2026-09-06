@@ -1,0 +1,55 @@
+<div class="grid-wrapper" #wrapper [style.background]="background || null">
+  <div
+    #gridContainer
+    class="grid-container"
+    [class.edit-mode]="isLayoutMode"
+    [style.width.px]="gridWidth"
+    [style.height.px]="gridHeight"
+    [style.padding.px]="PADDING"
+    [style.--widget-scale]="contentScale"
+    [style.--deck-scale]="contentScale"
+    [style.--widget-radius]="borderRadius !== null ? borderRadius + 'px' : null">
+
+    @for (_ of emptyCells; track $index) {
+      <div
+        class="empty-cell"
+        [style.left.px]="cellLeft(cellRect($index))"
+        [style.top.px]="cellTop(cellRect($index))"
+        [style.width.px]="cellDimensions.cellWidth"
+        [style.height.px]="cellDimensions.cellHeight"
+        [class.occupied]="isCellOccupied($index)"
+        [class.edit-mode]="isLayoutMode"
+        [class.drop-target]="isCell(dropTargetCell, $index)"
+        (click)="isLayoutMode && !isCellOccupied($index) && onCellClick($index, $event)">
+        @if (isCell(busyCell, $index)) {
+          <span class="cell-busy" role="status" [attr.aria-label]="busyCellLabel">
+            <span class="cell-spinner"></span>
+          </span>
+        }
+      </div>
+    }
+
+    @for (widget of widgets; track widget.id) {
+      <shared-widget-item
+        [widget]="widget"
+        [mode]="mode"
+        [renderState]="renderStateFor(widget.id)"
+        [decoration]="widgetDecoration"
+        [focused]="widget.id === focusedWidgetId"
+        [cellWidth]="cellDimensions.cellWidth"
+        [cellHeight]="cellDimensions.cellHeight"
+        [gap]="cellDimensions.gap"
+        [padding]="cellDimensions.padding"
+        (dataChange)="onWidgetDataChange(widget.id, $event)"
+        (trigger)="onWidgetTrigger(widget, $event)"
+        (interact)="onWidgetInteract(widget)">
+      </shared-widget-item>
+    }
+
+    <!-- Chrome a decorating host positions in container coordinates: drop placeholders, the marquee
+         box. Anchored to the viewport instead - drag ghosts, context menus - it renders outside. -->
+    <ng-content select="[gridOverlay]"></ng-content>
+  </div>
+
+  <ng-content></ng-content>
+</div>

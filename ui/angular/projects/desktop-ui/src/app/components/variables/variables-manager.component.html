@@ -1,0 +1,356 @@
+<div class="vars-manager">
+  <div class="vars-header">
+    <div>
+      <h2 class="vars-title">{{ headingLabel() }}</h2>
+      <p class="vars-subtitle">{{ subtitle() }}</p>
+    </div>
+    @if (showCreateButton && canCreate()) {
+      <shared-button variant="primary" (click)="openCreate()">
+        <span class="icon icon-plus icon-sm"></span>
+        {{ newVariableLabel() }}
+      </shared-button>
+    }
+  </div>
+
+  <shared-input
+    class="vars-search"
+    [placeholder]="searchPlaceholder()"
+    [ngModel]="search()"
+    (ngModelChange)="search.set($event)" />
+
+  @if (variableService.loadError(); as loadError) {
+    <shared-error-banner class="vars-error" [message]="loadError" [dismissible]="false" />
+  }
+
+  @if (writeFailed()) {
+    <shared-error-banner class="vars-error" [message]="writeFailedMessage()" (dismiss)="writeFailed.set(false)" />
+  }
+
+  @if (rows().length === 0) {
+    @if (hasSourceFilter()) {
+      <shared-empty-state
+        class="vars-empty"
+        icon="code"
+        [heading]="emptyFilteredHeading()"
+        [message]="emptyFilteredMessage()" />
+    } @else {
+      <shared-empty-state
+        class="vars-empty"
+        icon="code"
+        [heading]="emptyNoneHeading()"
+        [message]="emptyNoneMessage()" />
+    }
+  } @else {
+    <cdk-virtual-scroll-viewport
+      [itemSize]="rowHeight"
+      minBufferPx="400"
+      maxBufferPx="800"
+      class="vars-list"
+      (scroll)="closeOpenMenu()"
+      (scrolledIndexChange)="onCatalogScroll($event + 12)">
+      <div
+        class="vars-row-slot"
+        *cdkVirtualFor="let row of rows(); trackBy: trackRow"
+        [style.height.px]="rowHeight">
+        @if (row.kind === 'header') {
+          <div class="vars-group-header" aria-hidden="true">{{ row.label }}</div>
+        } @else if (row.kind === 'catalog-leaf') {
+          <li class="vars-row">
+            <button
+              type="button"
+              class="vars-row-main vars-catalog-main"
+              (click)="activateCatalogLeaf(row.integrationId, row.node)">
+              <div class="vars-name-col">
+                <span class="vars-public-name">{{ catalogLabel(row.node) }}</span>
+                <span class="vars-meta">
+                  @if (row.node.type) {
+                    <span class="vars-type-badge type-{{ row.node.type }}">{{ typeLabels()[row.node.type] }}</span>
+                  }
+                </span>
+              </div>
+              <div class="vars-value-col">
+                <span class="vars-dynamic-badge">{{ dynamicBadgeLabel() }}</span>
+              </div>
+            </button>
+          </li>
+        } @else if (row.kind === 'catalog-more') {
+          <li class="vars-row">
+            <button
+              type="button"
+              class="vars-row-main vars-catalog-main vars-catalog-more"
+              (click)="loadMoreCatalog(row.integrationId, row.parentId)">
+              <span class="vars-public-name">{{ loadMoreLabel() }}</span>
+            </button>
+          </li>
+        } @else {
+          <li class="vars-row" [class.read-only]="!isPickMode() && !canEditValue(row.variable)">
+            @if (isPickMode()) {
+              <button
+                type="button"
+                class="vars-row-main vars-row-pick"
+                role="option"
+                (click)="selectVariable(row.variable)">
+                <div class="vars-name-col">
+                  <span class="vars-public-name" [title]="publicName(row.variable)">{{ publicName(row.variable) }}</span>
+                  <span class="vars-meta">
+                    <span class="vars-type-badge type-{{ row.variable.type }}">{{ typeLabels()[row.variable.type] }}</span>
+                  </span>
+                </div>
+                <div class="vars-value-col">
+                  @if (row.variable.available === false) {
+                    <span
+                      class="vars-unavailable"
+                      role="img"
+                      [title]="unavailableTooltip(row.variable)"
+                      [attr.aria-label]="unavailableTooltip(row.variable)">n/v</span>
+                  } @else {
+                    <span class="vars-value" [title]="formatValue(row.variable)">{{ formatValue(row.variable) }}</span>
+                  }
+                </div>
+              </button>
+            } @else {
+              <div class="vars-row-main">
+                <div class="vars-name-col">
+                  <span class="vars-public-name" [title]="publicName(row.variable)">{{ publicName(row.variable) }}</span>
+                  <span class="vars-meta">
+                    <span class="vars-type-badge type-{{ row.variable.type }}">{{ typeLabels()[row.variable.type] }}</span>
+                    <span class="vars-classification class-{{ row.variable.classification }}">
+                      {{ classificationLabels()[row.variable.classification] }}
+                    </span>
+                    @if (!canEditValue(row.variable)) {
+                      <span
+                        class="icon icon-lock icon-xs read-only-icon"
+                        role="img"
+                        [title]="readOnlyLabel()"
+                        [attr.aria-label]="readOnlyLabel()"></span>
+                    }
+                  </span>
+                </div>
+
+                <div class="vars-value-col">
+                  @if (row.variable.available === false) {
+                    <span
+                      class="vars-unavailable"
+                      role="img"
+                      [title]="unavailableTooltip(row.variable)"
+                      [attr.aria-label]="unavailableTooltip(row.variable)">n/v</span>
+                  } @else {
+                    <span class="vars-value" [title]="formatValue(row.variable)">{{ formatValue(row.variable) }}</span>
+                  }
+                </div>
+
+                <div class="vars-actions">
+                  @if (!canEditValue(row.variable) && !canManage(row.variable) && !isBoundDynamic(row.variable)) {
+                    <button
+                      type="button"
+                      class="vars-dots-btn"
+                      disabled
+                      [title]="readOnlyTooltip()"
+                      [attr.aria-label]="readOnlyTooltip()">
+                      <span class="icon icon-dots-vertical icon-sm"></span>
+                    </button>
+                  } @else {
+                    <shared-dropdown-menu
+                      position="bottom-right"
+                      [minWidth]="168"
+                      closeOnItemClick
+                      [isOpen]="openMenuKey() === row.key"
+                      (isOpenChange)="setDropdownOpen(row.key, $event)">
+                      <ng-template #triggerContent>
+                        <span class="vars-dots-btn">
+                          <span class="icon icon-dots-vertical icon-sm"></span>
+                        </span>
+                      </ng-template>
+                      <ng-template #menuContent>
+                        <div class="vars-menu">
+                          @if (canEditValue(row.variable)) {
+                            @if (row.variable.type === 'boolean') {
+                              <button type="button" class="vars-menu-item" (click)="toggleBoolean(row.variable)">
+                                <span class="icon icon-zap icon-sm"></span>
+                                <span>{{ toggleValueLabel() }}</span>
+                              </button>
+                            }
+                            <button type="button" class="vars-menu-item" (click)="startEdit(row.variable)">
+                              <span class="icon icon-pencil icon-sm"></span>
+                              <span>{{ editValueLabel() }}</span>
+                            </button>
+                          }
+                          @if (canManage(row.variable)) {
+                            <button type="button" class="vars-menu-item vars-menu-danger" (click)="requestDelete(row.variable)">
+                              <span class="icon icon-trash icon-sm"></span>
+                              <span>{{ 'macrodeck:Common.Delete' | translate }}</span>
+                            </button>
+                          }
+                          @if (isBoundDynamic(row.variable)) {
+                            <button type="button" class="vars-menu-item vars-menu-danger" (click)="requestUnbind(row.variable)">
+                              <span class="icon icon-unlock icon-sm"></span>
+                              <span>{{ unbindActionLabel() }}</span>
+                            </button>
+                          }
+                        </div>
+                      </ng-template>
+                    </shared-dropdown-menu>
+                  }
+                </div>
+              </div>
+            }
+          </li>
+        }
+      </div>
+    </cdk-virtual-scroll-viewport>
+  }
+</div>
+
+@if (showCreateModal()) {
+  <shared-modal [heading]="newVariableLabel()" size="small" [showFooter]="false" (close)="closeCreate()">
+    <form class="create-form" (ngSubmit)="submitCreate()">
+      <label class="form-group">
+        <span class="form-label">{{ nameFieldLabel() }}</span>
+        <shared-input
+          class="vars-input"
+          [placeholder]="namePlaceholder()"
+          [ngModel]="createForm().rawName"
+          (ngModelChange)="onNameInput($event)"
+          name="name"
+          required />
+        <span class="form-preview">
+          @if (nameSanitized().sanitized) {
+            <span [class.invalid]="!nameSanitized().isValid">
+              vars.{{ nameSanitized().sanitized }}
+            </span>
+          } @else {
+            <span class="hint">{{ nameHint() }}</span>
+          }
+        </span>
+      </label>
+
+      @if (canChooseScope()) {
+        <label class="form-group">
+          <span class="form-label">{{ scopeFieldLabel() }}</span>
+          <shared-select
+            class="vars-input"
+            [options]="scopeOptions()"
+            [ngModel]="createForm().scope"
+            (ngModelChange)="setFormScope($event)"
+            name="scope" />
+          <span class="form-preview">
+            <span class="hint">
+              @if (createForm().scope === 'widget') {
+                {{ scopeHintWidget() }}
+              } @else {
+                {{ scopeHintGlobal() }}
+              }
+            </span>
+          </span>
+        </label>
+      }
+
+      <label class="form-group">
+        <span class="form-label">{{ typeFieldLabel() }}</span>
+        <shared-select
+          class="vars-input"
+          [options]="typeOptions()"
+          [ngModel]="createForm().type"
+          (ngModelChange)="setFormType($event)"
+          name="type" />
+      </label>
+
+      @if (createForm().type === 'numeric') {
+        <label class="form-group">
+          <span class="form-label">{{ decimalPlacesLabel() }}</span>
+          <shared-input
+            class="vars-input"
+            type="number"
+            [min]="0"
+            [max]="10"
+            [ngModel]="createForm().decimalPlaces"
+            (ngModelChange)="setFormDecimalPlaces($event)"
+            name="decimalPlaces" />
+        </label>
+      }
+
+      <label class="form-group">
+        <span class="form-label">{{ initialValueLabel() }}</span>
+        @if (createForm().type === 'boolean') {
+          <shared-select
+            class="vars-input"
+            [options]="booleanOptions()"
+            [ngModel]="createForm().initialValue || 'false'"
+            (ngModelChange)="setFormInitialValue($event)"
+            name="initialValue" />
+        } @else {
+          <shared-input
+            class="vars-input"
+            [type]="createForm().type === 'numeric' ? 'number' : 'text'"
+            [ngModel]="createForm().initialValue"
+            (ngModelChange)="setFormInitialValue($event)"
+            name="initialValue" />
+        }
+      </label>
+
+      <shared-button-group class="form-actions" align="end">
+        <shared-button type="button" variant="secondary" (click)="closeCreate()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button type="submit" variant="primary" [disabled]="!nameSanitized().isValid">{{ 'macrodeck:Common.Create' | translate }}</shared-button>
+      </shared-button-group>
+    </form>
+  </shared-modal>
+}
+
+@if (editingVariable(); as variable) {
+  <shared-modal [heading]="editValueLabel()" size="small" [showFooter]="false" (close)="cancelEdit()">
+    <form class="create-form" (ngSubmit)="commitEdit(variable)">
+      <label class="form-group">
+        <span class="form-label">{{ publicName(variable) }}</span>
+        @if (variable.type === 'boolean') {
+          <shared-select
+            class="vars-input"
+            [options]="booleanOptions()"
+            [ngModel]="editingValue()"
+            (ngModelChange)="editingValue.set($event)"
+            name="value" />
+        } @else if (variable.type === 'numeric') {
+          <shared-input
+            class="vars-input"
+            type="number"
+            [step]="numericStep(variable)"
+            [ngModel]="editingValue()"
+            (ngModelChange)="editingValue.set($event)"
+            name="value" />
+        } @else {
+          <shared-input
+            class="vars-input"
+            [ngModel]="editingValue()"
+            (ngModelChange)="editingValue.set($event)"
+            name="value" />
+        }
+      </label>
+
+      <shared-button-group class="form-actions" align="end">
+        <shared-button type="button" variant="secondary" (click)="cancelEdit()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button type="submit" variant="primary">{{ 'macrodeck:Common.Save' | translate }}</shared-button>
+      </shared-button-group>
+    </form>
+  </shared-modal>
+}
+
+@if (deleteCandidate(); as candidate) {
+  <shared-confirmation-modal
+    [heading]="deleteHeading()"
+    [message]="deleteMessage(candidate.name)"
+    [confirmText]="'macrodeck:Common.Delete' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmDelete()"
+    (cancel)="cancelDelete()" />
+}
+
+@if (unbindCandidate(); as candidate) {
+  <shared-confirmation-modal
+    [heading]="unbindHeading()"
+    [message]="unbindMessage(candidate.name)"
+    [confirmText]="unbindActionLabel()"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmUnbind()"
+    (cancel)="cancelUnbind()" />
+}

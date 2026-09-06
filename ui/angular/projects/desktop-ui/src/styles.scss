@@ -1,0 +1,26 @@
+@use '../../../../runtime/styles/tokens';
+@use '../../../../runtime/styles/reset';
+@use '../../../../runtime/styles/animations';
+@use '../../../../runtime/styles/icons';
+@use '../../../../runtime/styles/widget-metrics';
+// The widget renderer's own rules, global because the DOM they style is built outside Angular and
+// component-scoped styles would never reach it.
+@use '../../../../runtime/styles/renderer';
+@use '../../../../runtime/styles/widget-border';
+@use './styles/main';
+
+// The shell is a fixed 100vh layout, so the document never scrolls - but WebKit still
+// rubber-bands the viewport past it on macOS and flashes the black area behind the page
+// (issue #583). Set on both html and body: the viewport takes its value from the root, and
+// spelling out both leaves no room for a propagation difference between engines. Scoped to
+// the desktop app, so the web client keeps its browser's own overscroll behaviour.
+html,
+body {
+  overscroll-behavior: none;
+}
+
+// App-only assets that aren't shared with the web client.
+.logo-icon {
+  background: url("../public/images/logo.png") no-repeat center center / contain;
+  border-radius: var(--radius-md);
+}

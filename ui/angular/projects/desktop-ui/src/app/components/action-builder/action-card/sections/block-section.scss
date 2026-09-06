@@ -1,0 +1,116 @@
+/*
+ * Shared "Label: / content" section rhythm (HA-style). Imported via
+ * styleUrls by condition-section, branch-list and the loop-body
+ * section so all labels line up at one x-coordinate regardless of
+ * section type (If: / Then: / Else if: / Otherwise: / When: / Do:).
+ */
+
+.block-section {
+  position: relative;
+  display: block;
+  padding: 0.3125rem 0;
+}
+
+.block-section + .block-section {
+  margin-top: 0.125rem;
+}
+
+.block-section-label {
+  margin: 0 0 0.3125rem 0;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-secondary);
+  letter-spacing: 0;
+}
+
+.block-section-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3125rem;
+  padding-left: var(--space-4);
+  min-width: 0;
+  /* Nesting guide: rail in the owning container's accent color keeps
+     depth readable without box-in-box backgrounds. */
+  border-left: 2px solid color-mix(in srgb, var(--ab-color, var(--color-border)) 35%, transparent);
+  margin-left: 0.125rem;
+}
+
+/*
+ * Condition sections put the label inline with the content.
+ * Three columns: label | content | remove-button. The third column is
+ * `auto` so it collapses when no remove button is rendered (the
+ * If-branch case), while reserving dedicated space for the × on
+ * Else-if so it doesn't overlap the condition-builder's right-edge
+ * variable picker.
+ */
+.block-section-condition {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: var(--space-3);
+  row-gap: 0;
+}
+
+.block-section-condition > .block-section-label {
+  margin-bottom: 0;
+  /* Sit slightly lower so the colon visually centres against the
+     bordered input next to it. */
+  padding-top: var(--space-2);
+}
+
+.block-section-condition > .block-section-content {
+  padding-left: 0;
+  gap: var(--space-1);
+  border-left: none;
+  margin-left: 0;
+}
+
+.block-section-condition > .block-section-remove {
+  position: static;
+  align-self: start;
+  margin-top: var(--space-1);
+}
+
+/* Per-section remove (×) - hover-revealed at the section's top-right. */
+.block-section-remove {
+  position: absolute;
+  top: 0.1875rem;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0.1875rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast),
+              background-color var(--transition-fast);
+}
+
+.block-section:hover > .block-section-remove,
+.block-section-remove:focus-visible {
+  opacity: 1;
+}
+
+.block-section-remove:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-hover);
+}
+
+.condition-error-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.8125rem;
+  height: 0.8125rem;
+  border-radius: 999px;
+  background-color: var(--color-danger-muted);
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main-window",
+  "description": "IPC access for the Macro Deck UI in development: tauri dev treats the devUrl (http://localhost:4200) as a local context, so local access plus these permissions cover the dev loop. Packaged builds load the UI from a runtime-assigned loopback origin instead; the equivalent grant is registered at runtime in window.rs (CapabilityBuilder) because the port is only known after the bootstrapper assigned it. The app commands themselves are declared in build.rs (app_manifest).",
+  "windows": [
+    "main"
+  ],
+  "local": true,
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "allow-get-host-port",
+    "allow-get-shell-info",
+    "allow-get-cursor-position",
+    "allow-open-external",
+    "allow-show-open-dialog",
+    "allow-save-file",
+    "allow-take-opened-files",
+    "allow-take-menu-action",
+    "allow-set-hotkey-capture",
+    "allow-check-for-update",
+    "allow-get-update-state",
+    "allow-request-update-check",
+    "allow-cancel-update-download",
+    "allow-get-update-channel",
+    "allow-set-update-channel",
+    "allow-get-update-mode",
+    "allow-set-update-mode",
+    "allow-get-hide-dock-icon",
+    "allow-set-hide-dock-icon",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten"
+  ]
+}

@@ -1,0 +1,35 @@
+@if (deadEnd()) {
+  <shared-modal [showHeader]="false" [closeOnOverlay]="false" [showFooter]="false" size="small">
+    <div class="gate">
+      <h2 class="gate__heading">{{ appStrings.KeyRing.Unlock.Title | translate }}</h2>
+      <p class="gate__desc gate__desc--warning">
+        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+        <span>{{ appStrings.KeyRing.Unlock.Reason.EscrowMissing | translate }}</span>
+      </p>
+    </div>
+  </shared-modal>
+} @else if (result(); as unlocked) {
+  <shared-modal [showHeader]="false" [closeOnOverlay]="false" [showFooter]="false" size="small">
+    <div class="gate">
+      <h2 class="gate__heading">{{ appStrings.KeyRing.Unlock.Title | translate }}</h2>
+      <p class="gate__desc">
+        {{ (unlocked.restartRequested
+              ? appStrings.KeyRing.Unlock.RestartRequired
+              : appStrings.KeyRing.Unlock.RestartUnsupported) | translate }}
+      </p>
+    </div>
+  </shared-modal>
+} @else {
+  <shared-recovery-key-prompt-modal
+    [heading]="appStrings.KeyRing.Unlock.Title | translate"
+    [description]="description()"
+    [confirmLabel]="appStrings.KeyRing.Unlock.Submit | translate"
+    [invalidMessage]="appStrings.Errors.KeyRing.RecoveryKeyInvalid | translate"
+    [invalid]="invalid()"
+    [submitting]="submitting()"
+    [bannerMessage]="bannerMessage()"
+    [showCancel]="false"
+    [closeOnOverlay]="false"
+    (bannerDismissed)="dismissBanner()"
+    (submitted)="submit($event)" />
+}

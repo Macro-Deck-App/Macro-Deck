@@ -1,0 +1,309 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.plugin-connections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.managed-plugins-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.managed-plugins-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+}
+
+.managed-plugins-subtitle {
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+}
+
+.managed-plugins-error {
+  display: block;
+}
+
+.managed-plugins-empty {
+  padding: var(--space-8) var(--space-4);
+}
+
+.managed-plugins-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+}
+
+.managed-plugins-row {
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 0.5rem 0.6875rem;
+}
+
+.managed-plugins-row-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.managed-plugins-name-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+  min-width: 0;
+}
+
+.managed-plugins-name-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.managed-plugins-name {
+  font-size: var(--text-md);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.managed-plugins-version {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.managed-plugins-badges {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.managed-plugins-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem var(--space-2);
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-tight);
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+// Runtime state badges (PluginRuntimeState wire values).
+.managed-plugins-badge.state-stopped {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+}
+
+.managed-plugins-badge.state-starting {
+  background-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
+  color: var(--color-accent);
+}
+
+.managed-plugins-badge.state-running {
+  background-color: var(--color-success-muted);
+  color: var(--color-success);
+}
+
+.managed-plugins-badge.state-stopping {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+.managed-plugins-badge.state-backoff {
+  background-color: var(--color-warning-muted);
+  color: var(--color-warning);
+}
+
+.managed-plugins-badge.state-failed {
+  background-color: var(--color-danger-muted);
+  color: var(--color-danger);
+}
+
+// Health badges (PluginHealthState wire values).
+.managed-plugins-badge.health-unknown {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+}
+
+.managed-plugins-badge.health-healthy {
+  background-color: var(--color-success-muted);
+  color: var(--color-success);
+}
+
+.managed-plugins-badge.health-degraded {
+  background-color: var(--color-warning-muted);
+  color: var(--color-warning);
+}
+
+.managed-plugins-badge.health-unhealthy {
+  background-color: var(--color-danger-muted);
+  color: var(--color-danger);
+}
+
+.managed-plugins-badge.health-crashed {
+  background-color: var(--color-danger-muted);
+  color: var(--color-danger);
+}
+
+.managed-plugins-badge.health-failed {
+  background-color: var(--color-danger-muted);
+  color: var(--color-danger);
+}
+
+.managed-plugins-diagnostics {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.managed-plugins-diagnostic {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 5.5rem;
+}
+
+.managed-plugins-diagnostic-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.managed-plugins-diagnostic-value {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.managed-plugins-actions {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+// The shared trigger is a design-system control by default - bordered, and accent-bordered while
+// focused, which a click leaves behind. Far too loud for a per-row affordance, so it is ghosted down
+// to the weight the Revoke button carries in the sibling Plugin tokens tab. Only :focus-visible keeps
+// a ring, so keyboard users still see where they are.
+.managed-plugins-actions ::ng-deep .dropdown-trigger {
+  width: var(--control-height-compact);
+  height: var(--control-height-compact);
+  padding: 0;
+  background: transparent;
+  border-color: transparent;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+}
+
+.managed-plugins-actions ::ng-deep .dropdown-trigger:hover {
+  background-color: var(--color-bg-hover);
+  border-color: transparent;
+  color: var(--color-text-primary);
+}
+
+.managed-plugins-actions ::ng-deep .dropdown-trigger:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -1px;
+}
+
+.managed-plugins-menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.managed-plugins-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.managed-plugins-menu-item:hover:not(:disabled) {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.managed-plugins-menu-item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.managed-plugins-menu-note {
+  padding: var(--space-2) 0.5rem 0;
+  margin-top: var(--space-1);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-muted);
+}
+
+.managed-plugins-last-error {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+}
+
+.managed-plugins-output {
+  margin-top: var(--space-2);
+}
+
+.managed-plugins-output-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.managed-plugins-output-toggle .icon {
+  transition: transform var(--transition-fast);
+}
+
+.managed-plugins-output-toggle.is-expanded .icon {
+  transform: rotate(90deg);
+}
+
+.managed-plugins-output-body {
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 16rem;
+  overflow-y: auto;
+}

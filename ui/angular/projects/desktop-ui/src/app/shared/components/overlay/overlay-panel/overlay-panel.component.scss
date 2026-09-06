@@ -1,0 +1,17 @@
+@use '../../../../../styles/index' as ds;
+
+.op-panel {
+  @include ds.popup-panel;
+  position: fixed;
+  z-index: var(--z-popover);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: var(--space-1);
+  animation: ds-pop-in var(--transition-fast);
+}
+
+.op-panel.op-panel-closing {
+  animation: ds-pop-out var(--transition-fast) forwards;
+  pointer-events: none;
+}

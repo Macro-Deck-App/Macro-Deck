@@ -1,0 +1,15 @@
+<div class="template-tab">
+  <header>
+    <h1 class="playground-title">{{ 'macrodeck.app:Developer.Templates.Title' | translate }}</h1>
+    <p class="playground-subtitle">
+      {{ 'macrodeck.app:Developer.Templates.Subtitle' | translate }}
+    </p>
+  </header>
+
+  <shared-template-editor
+    class="template-editor"
+    [variables]="variables()"
+    scope="global"
+    [value]="template()"
+    (valueChange)="setTemplate($event)" />
+</div>

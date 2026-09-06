@@ -1,0 +1,117 @@
+<div
+  class="action-card"
+  [class]="colorClass"
+  [class.collapsed]="!expanded"
+  [class.disabled]="block.disabled"
+  [class.cut-source]="isCutSource">
+  <!--
+    The header doubles as a drag area (in addition to the dotted grip
+    in the wrapper): a press becomes a drag only after a few px of
+    travel, so clicking to expand/collapse keeps working.
+  -->
+  <div
+    class="action-card-header"
+    [attr.tabindex]="0"
+    role="button"
+    [attr.aria-expanded]="collapsible ? expanded : null"
+    (pointerdown)="onHeaderPress($event)"
+    (click)="toggle()"
+    (contextmenu)="onHeaderContextMenu($event)"
+    (keydown)="onHeaderKeydown($event)">
+    <!--
+      Leads the header rather than trailing it: whether a step runs at all is the first thing to read
+      about it, and putting it before the label keeps it clear of the icon buttons it would otherwise
+      be mistaken for. pointerdown is stopped so a press on the switch never starts a card drag.
+    -->
+    <shared-toggle-switch
+      class="action-enable-toggle"
+      [checked]="!block.disabled"
+      [ariaLabel]="enableToggleLabel()"
+      [title]="enableToggleTitle()"
+      (pointerdown)="$event.stopPropagation()"
+      (click)="$event.stopPropagation()"
+      (changed)="store.toggleDisabled(block.id)" />
+    <span class="action-title">{{ block.label }}</span>
+    @if (!expanded && summary) {
+      <span class="action-summary" [title]="summary">{{ summary }}</span>
+    }
+    @if (block.disabled) {
+      <span class="action-disabled-tag">{{ offTagLabel() }}</span>
+    }
+    @if (!expanded && hasErrors) {
+      <span
+        class="action-error-dot"
+        role="img"
+        [title]="incompleteConfigLabel()"
+        [attr.aria-label]="incompleteConfigLabel()"></span>
+    }
+    @if (collapsible) {
+      <span
+        class="action-chevron icon icon-chevron-right icon-xs"
+        [class.open]="expanded"
+        aria-hidden="true"></span>
+    }
+    <!--
+      Card-specific controls that belong beside the enable switch rather than inside the body: state
+      the user must be able to read and change without expanding the card first.
+    -->
+    <ng-content select="[headerControls]"></ng-content>
+    <button
+      #commentButton
+      type="button"
+      class="action-header-button action-comment-button"
+      [class.has-comment]="hasComment"
+      [class.is-open]="commentOpen()"
+      [sharedTooltip]="commentTooltip"
+      tooltipPlacement="left"
+      [tooltipDisabled]="commentOpen()"
+      [attr.aria-label]="commentAriaLabel"
+      [attr.aria-expanded]="commentOpen()"
+      (pointerdown)="$event.stopPropagation()"
+      (click)="toggleComment($event)">
+      <span class="icon icon-message-square icon-xs"></span>
+    </button>
+    <button
+      type="button"
+      class="action-header-button"
+      (click)="store.removeBlock(block.id); $event.stopPropagation()"
+      [attr.aria-label]="deleteActionLabel()"
+      [title]="deleteActionLabel()">
+      <span class="icon icon-trash icon-xs"></span>
+    </button>
+  </div>
+
+  @if (expanded) {
+    <div class="action-card-body">
+      <ng-content></ng-content>
+    </div>
+  }
+</div>
+
+<shared-context-menu
+  [isOpen]="menu().isOpen"
+  [x]="menu().x"
+  [y]="menu().y"
+  [items]="menuItems()"
+  (itemClick)="onMenuAction($event)"
+  (closed)="closeMenu()">
+</shared-context-menu>
+
+<shared-overlay-panel
+  [anchor]="commentButton"
+  [isOpen]="commentOpen()"
+  [minWidth]="260"
+  [maxHeight]="null"
+  align="end"
+  (dismissed)="closeComment()">
+  @if (commentOpen()) {
+    <shared-input
+      [multiline]="true"
+      [rows]="4"
+      [autofocus]="true"
+      [placeholder]="commentPlaceholder()"
+      [ariaLabel]="commentFieldAriaLabel()"
+      [ngModel]="commentDraft()"
+      (ngModelChange)="onCommentInput($event)" />
+  }
+</shared-overlay-panel>

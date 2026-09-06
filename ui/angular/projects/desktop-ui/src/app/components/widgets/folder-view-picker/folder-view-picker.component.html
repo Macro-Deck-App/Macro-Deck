@@ -1,0 +1,30 @@
+<div class="folder-view-picker">
+  <span class="folder-view-picker-label">
+    {{ 'macrodeck.app:Deck.FolderView.Label' | translate }}
+  </span>
+
+  <shared-select
+    [attr.aria-label]="'macrodeck.app:Deck.FolderView.Label' | translate"
+    [options]="options()"
+    [ngModel]="viewId()"
+    (ngModelChange)="onSelect($event)" />
+
+  @if (selected(); as view) {
+    @if (description(view); as text) {
+      <p class="folder-view-picker-description">{{ text }}</p>
+    }
+  } @else {
+    <p class="folder-view-picker-description">
+      {{ 'macrodeck.app:Deck.FolderView.Hint' | translate }}
+    </p>
+  }
+
+  @if (showConfiguration()) {
+    <div class="folder-view-picker-configuration">
+      <h3 class="folder-view-picker-configuration-heading">
+        {{ 'macrodeck.app:Deck.FolderView.Configuration' | translate }}
+      </h3>
+      <shared-ui-tree [root]="root()" (nodeEvent)="onNodeEvent($event)" />
+    </div>
+  }
+</div>

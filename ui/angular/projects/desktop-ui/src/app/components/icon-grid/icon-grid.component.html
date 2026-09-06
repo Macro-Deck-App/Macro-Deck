@@ -1,0 +1,17 @@
+<cdk-virtual-scroll-viewport [itemSize]="rowHeight" minBufferPx="400" maxBufferPx="800" class="viewport">
+  <div
+    class="grid-row"
+    *cdkVirtualFor="let row of rows(); trackBy: trackRow"
+    [style.height.px]="rowHeight">
+    @for (icon of row; track icon.id) {
+      <shared-icon-tile
+        [icon]="icon"
+        [size]="tileSize"
+        [selected]="isSelected(icon)"
+        [multiSelect]="multiSelect"
+        [selectionActive]="(selectedIconIds?.size ?? 0) > 0"
+        (tileClick)="iconClick.emit($event)"
+        (tileContextMenu)="iconContextMenu.emit($event)" />
+    }
+  </div>
+</cdk-virtual-scroll-viewport>

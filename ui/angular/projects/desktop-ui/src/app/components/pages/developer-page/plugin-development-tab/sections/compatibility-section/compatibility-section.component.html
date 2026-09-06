@@ -1,0 +1,88 @@
+<div class="compatibility-tab">
+  <div class="compatibility-header">
+    <div>
+      <h2 class="compatibility-title">{{ 'macrodeck.app:Developer.Compatibility.Title' | translate }}</h2>
+      <p class="compatibility-subtitle">{{ 'macrodeck.app:Developer.Compatibility.PluginCount' | translate:{ count: reports().length } }}</p>
+    </div>
+  </div>
+
+  @if (compatibilityService.loadError(); as loadError) {
+    <shared-error-banner class="compatibility-error" [message]="loadError" [dismissible]="false" />
+  }
+
+  @if (reports().length === 0) {
+    <shared-empty-state
+      class="compatibility-empty"
+      icon="puzzle"
+      [heading]="'macrodeck.app:Developer.Compatibility.EmptyHeading' | translate"
+      [message]="'macrodeck.app:Developer.Compatibility.EmptyMessage' | translate" />
+  } @else {
+    <ul class="compatibility-list">
+      @for (report of reports(); track report.pluginId) {
+        <li class="compatibility-card">
+          <div class="compatibility-card-header">
+            <div class="compatibility-name-col">
+              <span class="compatibility-name-line">
+                <span class="compatibility-name">{{ report.displayName }}</span>
+                @if (report.sdkVersion) {
+                  <span class="compatibility-sdk-version">{{ 'macrodeck.app:Developer.Compatibility.SdkVersionLabel' | translate:{ version: report.sdkVersion } }}</span>
+                }
+              </span>
+              <span class="compatibility-badge tier-{{ stateTier(report.state) }}">{{ stateLabel(report.state) }}</span>
+            </div>
+          </div>
+
+          <p class="compatibility-evidence">{{ evidenceText(report) }}</p>
+
+          @if (report.usageTruncated) {
+            <p class="compatibility-truncated-note">
+              {{ 'macrodeck.app:Developer.Compatibility.UsageTruncatedMessage' | translate }}
+            </p>
+          }
+
+          @if (hasFindings(report)) {
+            <div class="compatibility-findings-wrap">
+              <table class="compatibility-findings">
+                <thead>
+                  <tr>
+                    <th scope="col">{{ 'macrodeck.app:Developer.Compatibility.DiagnosticColumn' | translate }}</th>
+                    <th scope="col">{{ 'macrodeck.app:Developer.Compatibility.EvidenceColumn' | translate }}</th>
+                    <th scope="col">{{ 'macrodeck.app:Developer.Compatibility.AffectedApiColumn' | translate }}</th>
+                    <th scope="col">{{ 'macrodeck.app:Developer.Compatibility.DeprecatedInColumn' | translate }}</th>
+                    <th scope="col">{{ 'macrodeck.app:Developer.Compatibility.RemovalPlannedColumn' | translate }}</th>
+                    <th scope="col">{{ 'macrodeck.app:Developer.Compatibility.ReplacementColumn' | translate }}</th>
+                    <th scope="col">{{ 'macrodeck.app:Developer.Compatibility.GuidanceColumn' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (finding of report.findings; track trackFinding($index, finding)) {
+                    <tr class="finding-severity-{{ finding.severity }}">
+                      <td class="finding-diagnostic-id">{{ finding.diagnosticId }}</td>
+                      <td>
+                        <span class="finding-source-badge source-{{ finding.source }}">
+                          {{ sourceLabel(finding.source) }}
+                        </span>
+                      </td>
+                      <td class="finding-subject">{{ finding.subject }}</td>
+                      <td>{{ finding.deprecatedIn ?? '-' }}</td>
+                      <td>{{ finding.removedIn ?? '-' }}</td>
+                      <td>{{ finding.replacement ?? '-' }}</td>
+                      <td class="finding-guidance">
+                        {{ finding.guidance }}
+                        @if (finding.migrationUrl; as migrationUrl) {
+                          <button type="button" class="finding-migration-link" (click)="openMigrationLink(migrationUrl)">
+                            {{ 'macrodeck.app:Developer.Compatibility.MigrationGuideAction' | translate }}
+                          </button>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>

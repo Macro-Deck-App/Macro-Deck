@@ -1,0 +1,112 @@
+<div class="client-targets">
+  @if (error(); as message) {
+    <shared-error-banner [message]="message" (dismiss)="dismissError()" />
+  }
+
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.ClientTargets.Heading' | translate"
+    [description]="'macrodeck.app:Settings.ClientTargets.Description' | translate">
+
+    <p class="client-targets__experimental" role="note">
+      {{ 'macrodeck.app:Settings.ClientTargets.Experimental' | translate }}
+    </p>
+
+    @if (loaded() && targets().length === 0) {
+      <shared-empty-state
+        [heading]="'macrodeck.app:Settings.ClientTargets.Unavailable' | translate" />
+    }
+
+    @if (!activeTargetId()) {
+      @for (target of targets(); track target.targetId) {
+        <div class="client-targets__row">
+          <span class="client-targets__name">{{ targetName(target) }}</span>
+          <shared-button
+            variant="secondary"
+            [disabled]="!target.canProvision"
+            (click)="start(target)">
+            {{ 'macrodeck.app:Settings.ClientTargets.Start' | translate }}
+          </shared-button>
+        </div>
+        @if (!target.canProvision) {
+          <p class="client-targets__note">
+            {{ 'macrodeck.app:Settings.ClientTargets.Unavailable' | translate }}
+          </p>
+        }
+      }
+    }
+
+    @if (step(); as current) {
+      <div class="client-targets__step">
+        <h3 class="client-targets__step-title">{{ current.title | localizedText }}</h3>
+        <p class="client-targets__step-description">{{ current.description | localizedText }}</p>
+
+        @if (stepMessage(); as message) {
+          <shared-error-banner [message]="message | localizedText" [dismissible]="false" />
+        }
+
+        @if (current.instructions.length > 0) {
+          <ol class="client-targets__instructions">
+            @for (instruction of current.instructions; track $index) {
+              <li>{{ instruction | localizedText }}</li>
+            }
+          </ol>
+        }
+
+        @for (value of current.values; track value.value) {
+          <div class="client-targets__value">
+            <span class="client-targets__value-label">{{ value.label | localizedText }}</span>
+            <code class="client-targets__value-text">{{ value.value }}</code>
+          </div>
+        }
+
+        @for (link of current.links; track link.url) {
+          <a class="client-targets__link" [href]="link.url" target="_blank" rel="noopener noreferrer">
+            {{ link.label | localizedText }}
+          </a>
+        }
+
+        @for (field of current.fields; track field.fieldId) {
+          <div class="client-targets__field">
+            <label class="client-targets__field-label" [attr.for]="field.fieldId">
+              {{ field.label | localizedText }}
+            </label>
+            <p class="client-targets__field-description">{{ field.description | localizedText }}</p>
+            @if (field.choices && field.choices.length > 0) {
+              <shared-select
+                [options]="choiceOptions(field)"
+                [ngModel]="fieldValues()[field.fieldId]"
+                (ngModelChange)="setField(field.fieldId, $event)" />
+            } @else {
+              <shared-input
+                [ngModel]="fieldValues()[field.fieldId]"
+                (ngModelChange)="setField(field.fieldId, $event)" />
+            }
+          </div>
+        }
+
+        <div class="client-targets__actions">
+          @if (complete()) {
+            <shared-button variant="primary" (click)="cancel()">
+              {{ 'macrodeck.app:Settings.ClientTargets.Close' | translate }}
+            </shared-button>
+          } @else {
+            <shared-button
+              variant="primary"
+              [disabled]="!canContinue()"
+              [loading]="busy()"
+              (click)="advance()">
+              @if (stepMessage()) {
+                {{ 'macrodeck.app:Settings.ClientTargets.Retry' | translate }}
+              } @else {
+                {{ 'macrodeck.app:Settings.ClientTargets.Continue' | translate }}
+              }
+            </shared-button>
+            <shared-button variant="ghost" (click)="cancel()">
+              {{ 'macrodeck:Common.Cancel' | translate }}
+            </shared-button>
+          }
+        </div>
+      </div>
+    }
+  </shared-settings-section>
+</div>

@@ -1,0 +1,63 @@
+<div class="wizard-backdrop" data-tauri-drag-region>
+  <form class="wizard-card" (submit)="$event.preventDefault(); submit()">
+    <div class="wizard-header">
+      <img class="wizard-logo" src="images/logo.png" alt="" aria-hidden="true">
+      <h1 class="wizard-title">{{ appStrings.Setup.Welcome.Title | translate }}</h1>
+      <p class="wizard-subtitle">
+        {{ appStrings.Setup.Welcome.Subtitle | translate }}
+      </p>
+    </div>
+
+    @if (error(); as message) {
+      <shared-error-banner [message]="message" (dismiss)="error.set(null)"></shared-error-banner>
+    }
+
+    <label class="wizard-field">
+      <span class="wizard-label">{{ appStrings.Setup.Account.Username | translate }}</span>
+      <shared-input
+        name="username"
+        [placeholder]="appStrings.Setup.Account.Username | translate"
+        [autofocus]="true"
+        [disabled]="submitting()"
+        [ngModel]="username()"
+        (ngModelChange)="username.set($event)">
+      </shared-input>
+    </label>
+
+    <label class="wizard-field">
+      <span class="wizard-label">{{ appStrings.Setup.Account.Password | translate }}</span>
+      <shared-input
+        name="password"
+        type="password"
+        [placeholder]="appStrings.Setup.Account.PasswordPlaceholder | translate"
+        [disabled]="submitting()"
+        [invalid]="passwordTooShort()"
+        [ngModel]="password()"
+        (ngModelChange)="password.set($event)">
+      </shared-input>
+      @if (passwordTooShort()) {
+        <span class="wizard-hint">{{ appStrings.Setup.Account.PasswordTooShort | translate }}</span>
+      }
+    </label>
+
+    <label class="wizard-field">
+      <span class="wizard-label">{{ appStrings.Setup.Account.ConfirmPassword | translate }}</span>
+      <shared-input
+        name="passwordConfirm"
+        type="password"
+        [placeholder]="appStrings.Setup.Account.ConfirmPasswordPlaceholder | translate"
+        [disabled]="submitting()"
+        [invalid]="passwordsMismatch()"
+        [ngModel]="passwordConfirm()"
+        (ngModelChange)="passwordConfirm.set($event)">
+      </shared-input>
+      @if (passwordsMismatch()) {
+        <span class="wizard-hint">{{ appStrings.Setup.Account.PasswordsMismatch | translate }}</span>
+      }
+    </label>
+
+    <shared-button type="submit" variant="primary" [disabled]="!canSubmit()" [loading]="submitting()">
+      {{ appStrings.Setup.Account.CreateAccount | translate }}
+    </shared-button>
+  </form>
+</div>

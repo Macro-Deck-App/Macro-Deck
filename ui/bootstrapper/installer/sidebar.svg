@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Source for sidebar.bmp, the panel down the left of the NSIS welcome and finish
+  pages. 164x314 px is the size MUI2 reserves for it, so the canvas must stay
+  164x314.
+
+  Colours are the icon's own: the indigo/violet pair the keys are drawn in,
+  over the near-black the icon's plate uses. MUI2 draws its own text to the
+  right of this panel, so everything here is centred in its own column.
+
+  APP_ICON_DATA_URI is substituted with the app icon by
+  ci/scripts/generate-brand-assets.sh; that script also writes the .bmp.
+-->
+<svg width="164" height="314" viewBox="0 0 164 314" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#26263a"/>
+      <stop offset="0.55" stop-color="#1a1a24"/>
+      <stop offset="1" stop-color="#131317"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.3" r="0.72">
+      <stop offset="0" stop-color="#6366f1" stop-opacity="0.30"/>
+      <stop offset="0.6" stop-color="#a877f7" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#a877f7" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2196f3" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#a877f7" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#2196f3" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="164" height="314" fill="url(#bg)"/>
+  <rect width="164" height="314" fill="url(#glow)"/>
+
+  <image x="36" y="58" width="92" height="92" href="APP_ICON_DATA_URI"/>
+
+  <text x="82" y="193" text-anchor="middle"
+        font-family="Segoe UI, -apple-system, 'Helvetica Neue', Arial, sans-serif"
+        font-size="21" font-weight="600" fill="#f5f5f7">Macro Deck</text>
+  <rect x="52" y="205" width="60" height="1.5" fill="url(#rule)"/>
+  <text x="82" y="224" text-anchor="middle"
+        font-family="Segoe UI, -apple-system, 'Helvetica Neue', Arial, sans-serif"
+        font-size="10" font-weight="400" fill="#9a9aa6">macro-deck.app</text>
+</svg>

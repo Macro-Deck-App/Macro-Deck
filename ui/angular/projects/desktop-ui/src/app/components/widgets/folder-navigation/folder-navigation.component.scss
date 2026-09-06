@@ -1,0 +1,98 @@
+@use '../../../../styles/index' as ds;
+
+.folder-nav {
+  height: 100%;
+  width: 13rem;
+  flex-shrink: 0;
+  background-color: var(--color-bg-secondary);
+  border-left: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+
+  @include ds.breakpoint-down('md') {
+    width: 9.75rem;
+  }
+
+  @include ds.breakpoint-down('sm') {
+    width: 8.125rem;
+  }
+}
+
+.folder-nav-header {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.folder-nav-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.folder-nav-list {
+  flex: 1;
+  padding: var(--space-2);
+  overflow-y: auto;
+}
+
+.folder-list-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.folder-nav-footer {
+  padding: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.folder-portable-error {
+  padding: 0 var(--space-2) var(--space-2);
+}
+
+.folder-name-input {
+  width: 100%;
+}
+
+.root-end-line {
+  height: 2px;
+  margin: 2px 8px 0;
+  border-radius: 1px;
+  background-color: var(--color-accent);
+}
+
+/* Compact chip following the cursor during a folder drag (issue #281). */
+@keyframes folder-ghost-in {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.drag-ghost {
+  animation: folder-ghost-in 120ms ease-out;
+  position: fixed;
+  z-index: var(--z-toast);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 16.25rem;
+  padding: 0.3125rem var(--space-3);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text-primary);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drag-ghost {
+    animation: none;
+  }
+}

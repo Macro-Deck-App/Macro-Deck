@@ -1,0 +1,70 @@
+<ng-template #inlines let-runs>
+  @for (run of runs; track $index) {
+    @switch (run.kind) {
+      @case ('strong') {
+        <strong>{{ run.text }}</strong>
+      }
+      @case ('em') {
+        <em>{{ run.text }}</em>
+      }
+      @case ('code') {
+        <code class="md-inline-code">{{ run.text }}</code>
+      }
+      @case ('link') {
+        <a [href]="run.href" target="_blank" rel="noopener noreferrer">{{ run.text }}</a>
+      }
+      @default {
+        <span>{{ run.text }}</span>
+      }
+    }
+  }
+</ng-template>
+
+<div class="md">
+  @for (block of blocks(); track $index) {
+    @switch (block.kind) {
+      @case ('heading') {
+        @switch (block.level) {
+          @case (1) {
+            <h3 class="md-heading"><ng-container *ngTemplateOutlet="inlines; context: { $implicit: block.inlines }" /></h3>
+          }
+          @case (2) {
+            <h4 class="md-heading"><ng-container *ngTemplateOutlet="inlines; context: { $implicit: block.inlines }" /></h4>
+          }
+          @default {
+            <h5 class="md-heading"><ng-container *ngTemplateOutlet="inlines; context: { $implicit: block.inlines }" /></h5>
+          }
+        }
+      }
+      @case ('paragraph') {
+        <p class="md-paragraph"><ng-container *ngTemplateOutlet="inlines; context: { $implicit: block.inlines }" /></p>
+      }
+      @case ('quote') {
+        <blockquote class="md-quote"><ng-container *ngTemplateOutlet="inlines; context: { $implicit: block.inlines }" /></blockquote>
+      }
+      @case ('list') {
+        @if (block.ordered) {
+          <ol class="md-list">
+            @for (item of block.items; track $index) {
+              <li><ng-container *ngTemplateOutlet="inlines; context: { $implicit: item }" /></li>
+            }
+          </ol>
+        } @else {
+          <ul class="md-list">
+            @for (item of block.items; track $index) {
+              <li><ng-container *ngTemplateOutlet="inlines; context: { $implicit: item }" /></li>
+            }
+          </ul>
+        }
+      }
+      @case ('code') {
+        <div class="md-code-block">
+          <pre class="md-code"><code>{{ block.text }}</code></pre>
+        </div>
+      }
+      @case ('rule') {
+        <hr class="md-rule">
+      }
+    }
+  }
+</div>

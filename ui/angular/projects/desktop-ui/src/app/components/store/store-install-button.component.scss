@@ -1,0 +1,172 @@
+@use '../../../styles/index' as ds;
+
+:host {
+  display: block;
+}
+
+.store-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 140px;
+}
+
+.progress-bar {
+  position: relative;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-bg-tertiary);
+  overflow: hidden;
+
+  .progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-accent);
+    transition: width var(--transition-fast);
+  }
+
+  &.indeterminate::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 40%;
+    border-radius: inherit;
+    background: var(--color-accent);
+    animation: store-install-progress-slide 1.2s ease-in-out infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+      width: 100%;
+      opacity: 0.5;
+    }
+  }
+}
+
+@keyframes store-install-progress-slide {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(350%);
+  }
+}
+
+.progress-readout {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.store-failed {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.store-failed.prominent {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.failed-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.failure-explanation {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+}
+
+.failure-detail-label {
+  @include ds.section-label;
+  margin: 0 0 var(--space-1);
+}
+
+.failure-detail {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+// The message wraps to at most two lines instead of being cut mid-word: a truncated sentence about a
+// refused signature reads as a rendering defect rather than as a reason.
+.failed-message {
+  display: flex;
+  gap: var(--space-1);
+  align-items: flex-start;
+  margin: 0;
+  max-width: 34ch;
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+  color: var(--color-text-secondary);
+
+  .icon {
+    flex: none;
+    margin-top: 1px;
+    background-color: var(--color-danger);
+  }
+
+  > span:last-child {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+.store-failed.prominent {
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 35%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+
+  .failed-message {
+    max-width: none;
+    font-size: var(--text-sm);
+
+    > span:last-child {
+      -webkit-line-clamp: none;
+      overflow: visible;
+    }
+  }
+}
+
+.unsigned-warning-lead {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+}
+
+.unsigned-warning-body {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--color-text-secondary);
+}
+
+.unsigned-warning-actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.store-installed {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.installed-version {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+.progress-separator {
+  color: var(--color-text-muted);
+}

@@ -1,0 +1,39 @@
+name: Close stale issues
+
+on:
+  schedule:
+    - cron: "30 1 * * *"
+  workflow_dispatch:
+
+jobs:
+  stale:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+
+    permissions:
+      actions: write
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/stale@v11
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-issue-stale: 60
+          days-before-issue-close: 14
+          days-before-pr-stale: -1
+          days-before-pr-close: -1
+          stale-issue-label: "stale"
+          stale-issue-message: >
+            This issue has been automatically marked as stale because it has
+            not had recent activity. It will be closed in 14 days if no
+            further activity occurs.
+
+          close-issue-message: >
+            This issue has been automatically closed because it remained
+            inactive after being marked as stale.
+
+          remove-issue-stale-when-updated: true
+          exempt-issue-labels: "security,status:planned,status:blocked,status:in-progress,priority:critical,priority:high"
+
+          exempt-all-milestones: true

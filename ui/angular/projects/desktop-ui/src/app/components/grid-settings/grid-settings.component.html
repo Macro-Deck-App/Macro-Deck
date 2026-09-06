@@ -1,0 +1,119 @@
+<div class="settings-content">
+  <shared-inheritable-setting
+    [label]="columnsLabel()"
+    [value]="cols"
+    [effectiveValue]="effectiveCols"
+    [resettable]="gridInheritable && !colsLocked"
+    [inheritedLabel]="inheritedLabelState()"
+    (reset)="onColsReset()">
+    <input
+      type="range"
+      [min]="minCols"
+      [max]="maxCols"
+      [disabled]="colsLocked"
+      [ngModel]="cols ?? effectiveCols"
+      (ngModelChange)="onColsChange($event)"
+      class="slider">
+    @if (colsLocked && lockNote) {
+      <div class="lock-note">{{ lockNote }}</div>
+    } @else {
+      <div class="slider-range">
+        <span>{{ minCols }}</span>
+        <span>{{ maxCols }}</span>
+      </div>
+    }
+  </shared-inheritable-setting>
+
+  <shared-inheritable-setting
+    [label]="rowsLabel()"
+    [value]="rows"
+    [effectiveValue]="effectiveRows"
+    [resettable]="gridInheritable && !rowsLocked"
+    [inheritedLabel]="inheritedLabelState()"
+    (reset)="onRowsReset()">
+    <input
+      type="range"
+      [min]="minRows"
+      [max]="maxRows"
+      [disabled]="rowsLocked"
+      [ngModel]="rows ?? effectiveRows"
+      (ngModelChange)="onRowsChange($event)"
+      class="slider">
+    @if (rowsLocked && lockNote) {
+      <div class="lock-note">{{ lockNote }}</div>
+    } @else {
+      <div class="slider-range">
+        <span>{{ minRows }}</span>
+        <span>{{ maxRows }}</span>
+      </div>
+    }
+  </shared-inheritable-setting>
+
+  @if (showWidgetAppearance) {
+    <div class="divider"></div>
+
+    <shared-inheritable-setting
+      [label]="widgetSpacingLabel()"
+      unit="px"
+      [value]="spacing"
+      [effectiveValue]="effectiveSpacing"
+      [inheritedLabel]="inheritedLabelState()"
+      (reset)="onSpacingReset()">
+      <input
+        type="range"
+        [min]="minSpacing"
+        [max]="maxSpacing"
+        [disabled]="!spacingHonoured"
+        [ngModel]="spacing ?? effectiveSpacing"
+        (ngModelChange)="onSpacingSliderChange($event)"
+        class="slider">
+      @if (!spacingHonoured && noEffectNote) {
+        <div class="lock-note">{{ noEffectNote }}</div>
+      } @else {
+        <div class="slider-range">
+          <span>{{ minSpacing }}</span>
+          <span>{{ maxSpacing }}</span>
+        </div>
+      }
+    </shared-inheritable-setting>
+
+    <shared-inheritable-setting
+      [label]="cornerRadiusLabel()"
+      unit="px"
+      [value]="borderRadius"
+      [effectiveValue]="effectiveBorderRadius"
+      [inheritedLabel]="inheritedLabelState()"
+      (reset)="onBorderRadiusReset()">
+      <input
+        type="range"
+        [min]="minBorderRadius"
+        [max]="maxBorderRadius"
+        [disabled]="!cornerRadiusHonoured"
+        [ngModel]="borderRadius ?? effectiveBorderRadius ?? defaultBorderRadius"
+        (ngModelChange)="onBorderRadiusSliderChange($event)"
+        class="slider">
+      @if (!cornerRadiusHonoured && noEffectNote) {
+        <div class="lock-note">{{ noEffectNote }}</div>
+      } @else {
+        <div class="slider-range">
+          <span>{{ minBorderRadius }}</span>
+          <span>{{ maxBorderRadius }}</span>
+        </div>
+      }
+    </shared-inheritable-setting>
+  }
+
+  <div class="divider"></div>
+
+  <div class="form-group form-group--section">
+    <label>
+      <span>{{ backgroundLabel() }}</span>
+    </label>
+    <shared-color-picker
+      [presets]="backgroundPresets()"
+      defaultColor=""
+      [ngModel]="background || ''"
+      (ngModelChange)="onBackgroundChange($event)">
+    </shared-color-picker>
+  </div>
+</div>

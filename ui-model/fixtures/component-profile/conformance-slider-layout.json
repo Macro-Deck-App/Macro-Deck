@@ -1,0 +1,195 @@
+{
+  "interactiveSurface": "Every slider's interactive surface is its whole box - interactiveWidth by interactiveHeight - while the drawn track is trackThickness across. The two differ on purpose: a reader that made only the drawn track draggable would reproduce the picture and ship a control no thumb can hit.",
+  "fillColor": "A literal is the node's own levelColor. \"reader-accent\" means the node carries no levelColor and the reader paints its own accent colour, which is why that case is in the fixture at all.",
+  "thumb": "Every slider draws a thumb at its level: a disc of radius 1.25 x trackThickness ringed by 0.28 x trackThickness, its centre inset from both ends by radius + ringWidth / 2 so the ring never clips. Same shape as ui.range-bar's marker and deliberately larger - that one is read, this one is grabbed. thumbCentre is the resolved centre, measured from the leading edge along the direction axis.",
+  "cases": [
+    {
+      "basis": 240,
+      "tile": {
+        "width": 240,
+        "height": 480
+      },
+      "nodes": {
+        "conformance": {
+          "contentWidth": 211.2,
+          "contentHeight": 451.2,
+          "padding": 14.4,
+          "gap": 9.6
+        },
+        "conformance.header": {
+          "width": 211.2,
+          "height": 28.8
+        },
+        "conformance.header.label": {
+          "fontSize": 26.4,
+          "minFontSize": 18.0,
+          "role": "secondary",
+          "color": "#e8edf5"
+        },
+        "conformance.header.value": {
+          "fontSize": 28.8,
+          "role": "primary"
+        },
+        "conformance.track": {
+          "width": 211.2,
+          "height": 206.4,
+          "direction": "horizontal",
+          "interactiveWidth": 211.2,
+          "interactiveHeight": 206.4,
+          "trackLength": 211.2,
+          "trackThickness": 28.8,
+          "cornerRadius": 14.4,
+          "fillLength": 88.704,
+          "fillColor": "#4f8cff",
+          "interactive": true,
+          "thumbRadius": 36.0,
+          "thumbRingWidth": 8.064,
+          "thumbCentre": 88.704
+        },
+        "conformance.column": {
+          "width": 211.2,
+          "height": 120.0,
+          "direction": "vertical",
+          "interactiveWidth": 211.2,
+          "interactiveHeight": 120.0,
+          "trackLength": 120.0,
+          "trackThickness": 38.4,
+          "cornerRadius": 19.2,
+          "fillLength": 96.0,
+          "fillColor": "reader-accent",
+          "fillFrom": "bottom",
+          "interactive": true,
+          "thumbRadius": 48.0,
+          "thumbRingWidth": 10.752,
+          "thumbCentre": 66.624
+        },
+        "conformance.plain": {
+          "width": 211.2,
+          "height": 28.8,
+          "direction": "horizontal",
+          "interactiveWidth": 211.2,
+          "interactiveHeight": 28.8,
+          "trackLength": 211.2,
+          "trackThickness": 28.8,
+          "cornerRadius": 14.4,
+          "fillLength": 137.28,
+          "fillColor": "reader-accent",
+          "interactive": false,
+          "thumbRadius": 36.0,
+          "thumbRingWidth": 8.064,
+          "thumbCentre": 137.28
+        },
+        "conformance.empty": {
+          "width": 211.2,
+          "height": 28.8,
+          "direction": "horizontal",
+          "interactiveWidth": 211.2,
+          "interactiveHeight": 28.8,
+          "trackLength": 211.2,
+          "trackThickness": 28.8,
+          "cornerRadius": 14.4,
+          "fillLength": 0.0,
+          "fillPainted": false,
+          "interactive": false,
+          "thumbRadius": 36.0,
+          "thumbRingWidth": 8.064,
+          "thumbCentre": 40.032
+        }
+      }
+    },
+    {
+      "basis": 120,
+      "tile": {
+        "width": 120,
+        "height": 240
+      },
+      "nodes": {
+        "conformance": {
+          "contentWidth": 105.6,
+          "contentHeight": 225.6,
+          "padding": 7.2,
+          "gap": 4.8
+        },
+        "conformance.header": {
+          "width": 105.6,
+          "height": 14.4
+        },
+        "conformance.header.label": {
+          "fontSize": 13.2,
+          "minFontSize": 9.0,
+          "role": "secondary",
+          "color": "#e8edf5"
+        },
+        "conformance.header.value": {
+          "fontSize": 14.4,
+          "role": "primary"
+        },
+        "conformance.track": {
+          "width": 105.6,
+          "height": 103.2,
+          "direction": "horizontal",
+          "interactiveWidth": 105.6,
+          "interactiveHeight": 103.2,
+          "trackLength": 105.6,
+          "trackThickness": 14.4,
+          "cornerRadius": 7.2,
+          "fillLength": 44.352,
+          "fillColor": "#4f8cff",
+          "interactive": true,
+          "thumbRadius": 18.0,
+          "thumbRingWidth": 4.032,
+          "thumbCentre": 44.352
+        },
+        "conformance.column": {
+          "width": 105.6,
+          "height": 60.0,
+          "direction": "vertical",
+          "interactiveWidth": 105.6,
+          "interactiveHeight": 60.0,
+          "trackLength": 60.0,
+          "trackThickness": 19.2,
+          "cornerRadius": 9.6,
+          "fillLength": 48.0,
+          "fillColor": "reader-accent",
+          "fillFrom": "bottom",
+          "interactive": true,
+          "thumbRadius": 24.0,
+          "thumbRingWidth": 5.376,
+          "thumbCentre": 33.312
+        },
+        "conformance.plain": {
+          "width": 105.6,
+          "height": 14.4,
+          "direction": "horizontal",
+          "interactiveWidth": 105.6,
+          "interactiveHeight": 14.4,
+          "trackLength": 105.6,
+          "trackThickness": 14.4,
+          "cornerRadius": 7.2,
+          "fillLength": 68.64,
+          "fillColor": "reader-accent",
+          "interactive": false,
+          "thumbRadius": 18.0,
+          "thumbRingWidth": 4.032,
+          "thumbCentre": 68.64
+        },
+        "conformance.empty": {
+          "width": 105.6,
+          "height": 14.4,
+          "direction": "horizontal",
+          "interactiveWidth": 105.6,
+          "interactiveHeight": 14.4,
+          "trackLength": 105.6,
+          "trackThickness": 14.4,
+          "cornerRadius": 7.2,
+          "fillLength": 0.0,
+          "fillPainted": false,
+          "interactive": false,
+          "thumbRadius": 18.0,
+          "thumbRingWidth": 4.032,
+          "thumbCentre": 20.016
+        }
+      }
+    }
+  ]
+}

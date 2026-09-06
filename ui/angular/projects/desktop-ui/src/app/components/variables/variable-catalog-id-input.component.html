@@ -1,0 +1,42 @@
+<div class="dvi-panel">
+  <h3 class="dvi-heading">{{ heading() }}</h3>
+  <p class="dvi-hint">{{ hint() }}</p>
+
+  <div class="dvi-row">
+    <shared-input
+      class="dvi-input"
+      [placeholder]="placeholder()"
+      [ngModel]="resourceId()"
+      (ngModelChange)="onIdInput($event)" />
+    <shared-button variant="secondary" [disabled]="!canResolve()" [loading]="resolving()" (click)="resolve()">
+      {{ resolveActionLabel() }}
+    </shared-button>
+  </div>
+
+  @if (failed()) {
+    <p class="dvi-error">{{ resolveFailedMessage() }}</p>
+  }
+
+  @if (resolved(); as node) {
+    <div class="dvi-result">
+      <span class="dvi-result-name">{{ resolvedName() }}</span>
+      @if (node.type) {
+        <span class="dvi-result-type type-{{ node.type }}">{{ typeLabels()[node.type] }}</span>
+      }
+      @if (canBind()) {
+        <shared-button variant="primary" (click)="openBind()">{{ bindActionLabel() }}</shared-button>
+      } @else {
+        <span class="dvi-error">{{ notBindableMessage() }}</span>
+      }
+    </div>
+  }
+</div>
+
+@if (showBindDialog() && resolved(); as node) {
+  <shared-variable-bind-dialog
+    [integrationId]="integrationId"
+    [node]="node"
+    [acceptedTypes]="acceptedTypes()"
+    (bound)="onBound($event)"
+    (close)="onBindDialogClose()" />
+}

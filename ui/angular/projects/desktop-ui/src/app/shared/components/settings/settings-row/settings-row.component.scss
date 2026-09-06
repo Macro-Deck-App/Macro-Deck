@@ -1,0 +1,76 @@
+@use '../../../../../styles/index' as ds;
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  // A control too wide to sit beside its label - a segmented control carrying long localized
+  // labels, say - takes a line of its own rather than pushing the row past the dialog's width.
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--color-border);
+
+  &:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+}
+
+.settings-row__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  // `min-width: 0` alone lets the text shrink on a current engine, but old WebKit still lays the
+  // block out at its max-content width and wraps the control onto its own line. An explicit
+  // grow/shrink pair says the same thing in terms every engine honours; `space-between` already
+  // produced this result everywhere else, so nothing moves on a current browser.
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.settings-row__label {
+  font-size: var(--text-md);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+}
+
+.settings-row__desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  // Bounds the line length of description text at the wider settings dialog measure.
+  max-width: 30rem;
+}
+
+.settings-row__control {
+  flex: 0 1 auto;
+}
+
+@include ds.breakpoint-down('sm') {
+  .settings-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .settings-row__control {
+    width: 100%;
+  }
+}
+
+// The legacy flex-gap fallback deliberately skips wrapping containers, because `> * + *` margins land
+// wrong once items break onto a second line - so this row is left with no horizontal gap at all. That
+// alone is cosmetic, but without a definite basis old WebKit also lays the info block out at its
+// max-content width and pushes the control onto a line of its own. Both are corrected here, scoped to
+// the class the legacy polyfill sets after its runtime probe, so a current engine is untouched.
+//
+// The cost on that engine: a control too wide to sit beside its label no longer takes its own line,
+// it shrinks the label instead. Worth it to keep a toggle where it belongs.
+:host-context(.no-flex-gap) {
+  .settings-row > * + * {
+    margin-left: var(--space-4);
+  }
+
+  .settings-row__info {
+    flex-basis: 0;
+  }
+}

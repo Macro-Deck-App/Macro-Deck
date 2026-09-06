@@ -1,0 +1,158 @@
+// Two columns that never change between the collapsed and expanded state: an icon column as wide
+// as the collapsed rail, and a label column that simply runs out of room as the sidebar narrows.
+// Nothing about the item switches when it collapses, so the icons hold their position for the whole
+// width transition instead of being re-laid out on every frame.
+.nav-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--nav-icon-column) minmax(0, 1fr);
+  align-items: center;
+  width: 100%;
+  min-height: var(--nav-item-height);
+  padding-block: var(--space-2);
+  border: none;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+.nav-item:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.nav-item:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.nav-item.active {
+  background-color: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 50%;
+  border-radius: 2px;
+  background-color: var(--color-accent);
+}
+
+.nav-item.active:hover {
+  background-color: var(--color-accent-muted);
+}
+
+.nav-item.disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.nav-item.disabled:hover {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+}
+
+// The whole label column fades and slides out as one, on the same curve as the sidebar width, so
+// the row never reflows: the column simply runs out of width and its content is clipped.
+.nav-text {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  padding-inline-end: var(--space-3);
+  transition: opacity var(--transition-slow), transform var(--transition-slow);
+}
+
+.nav-item.collapsed .nav-text {
+  opacity: 0;
+  transform: translateX(-0.25rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-text {
+    transition: none;
+  }
+}
+
+.nav-badge {
+  margin-left: auto;
+  padding: 0.0625rem 0.3125rem;
+  border-radius: 999px;
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.nav-label {
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Shrink-wraps the icon glyph and centres itself in the icon column, so it can never under-measure
+// the glyph and the two live signals below stay pinned to it. The column is as wide as the
+// collapsed rail, which puts the icon on the same x in both states.
+.nav-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  flex-shrink: 0;
+}
+
+// Count of what is waiting. Says what happened. The glyph beside it is a mask element, and a mask
+// creates a stacking context that paints over an unlayered sibling - hence the explicit z-index.
+.nav-indicator {
+  position: absolute;
+  z-index: 1;
+  top: -0.3125rem;
+  right: -0.375rem;
+  min-width: 0.9375rem;
+  height: 0.9375rem;
+  padding: 0 0.1875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background-color: var(--color-danger);
+  color: #fff;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  line-height: 1;
+}
+
+// Ring while something behind the item is still running. Says work is in flight - a separate
+// signal from the count, so the two coexist.
+.nav-activity {
+  position: absolute;
+  inset: -0.1875rem;
+  border: 2px solid transparent;
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: ds-spin 0.7s linear infinite;
+  pointer-events: none;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    border-color: var(--color-accent);
+    opacity: 0.5;
+  }
+}

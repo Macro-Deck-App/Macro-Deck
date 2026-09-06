@@ -1,0 +1,66 @@
+<div class="developer-page">
+  <div class="developer-tabs">
+    <shared-tab-bar
+      [items]="tabs()"
+      [activeId]="activeTab()"
+      (activeIdChange)="selectTab($event)" />
+  </div>
+
+  @switch (activeTab()) {
+    @case ('run-action') {
+      <shared-rail-page [railTitle]="'macrodeck.app:Developer.ActionsTab' | translate">
+        <ul ngProjectAs="[rail]" class="source-list" role="listbox" [attr.aria-label]="'macrodeck.app:Developer.ActionSourcesAriaLabel' | translate">
+          <li>
+            <shared-rail-item
+              [label]="'macrodeck.app:Developer.AllActionsHeading' | translate"
+              [count]="totalCount()"
+              [active]="isAllSelected()"
+              (click)="selectAll()" />
+          </li>
+
+          @if (integrationSources().length > 0) {
+            <li class="rail-section" aria-hidden="true">{{ 'macrodeck.app:Nav.Integrations' | translate }}</li>
+            @for (integration of integrationSources(); track integration.integrationId) {
+              <li>
+                <shared-rail-item
+                  [label]="integration.name"
+                  [count]="integration.count"
+                  [active]="isIntegrationSelected(integration.integrationId)"
+                  (click)="selectIntegration(integration.integrationId)" />
+              </li>
+            }
+          }
+        </ul>
+
+        <app-action-runner
+          [heading]="runnerTitle()"
+          [integrationId]="selectedIntegrationId()"
+          [actionId]="selectedActionId()" />
+      </shared-rail-page>
+    }
+
+    @case ('template') {
+      <app-template-tab />
+    }
+
+    @case ('events') {
+      <app-events-tab />
+    }
+
+    @case ('logs') {
+      <app-logs-tab />
+    }
+
+    @case ('previews') {
+      <app-ui-previews-tab />
+    }
+
+    @case ('plugin-development') {
+      <app-plugin-development-tab />
+    }
+
+    @case ('maintenance') {
+      <app-maintenance-tab />
+    }
+  }
+</div>

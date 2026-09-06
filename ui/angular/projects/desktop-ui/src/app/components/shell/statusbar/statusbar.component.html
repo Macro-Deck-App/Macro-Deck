@@ -1,0 +1,34 @@
+<header class="statusbar" [attr.data-tauri-drag-region]="isShell ? '' : null">
+  <div class="statusbar-left" [attr.data-tauri-drag-region]="isShell ? '' : null">
+    @if (isShellMacOS) {
+      <div class="traffic-light-spacer" [attr.data-tauri-drag-region]="''"></div>
+    }
+    <button class="toggle-btn" (click)="toggleSidebar.emit()">
+      <span class="icon icon-sidebar icon-lg" [class.rotated]="isSidebarCollapsed"></span>
+    </button>
+    @if (navigationService.isDevelopmentBuild()) {
+      <span class="build-channel-badge" [attr.data-tauri-drag-region]="isShell ? '' : null">
+        {{ appStrings.Shell.Statusbar.DevelopmentBuild | translate }}
+      </span>
+    }
+  </div>
+
+  <div class="statusbar-center" [attr.data-tauri-drag-region]="isShell ? '' : null">
+    <div class="profile-bar">
+      <app-profile-selector></app-profile-selector>
+    </div>
+  </div>
+
+  <div class="statusbar-right" [attr.data-tauri-drag-region]="isShell ? '' : null">
+    <button
+      type="button"
+      class="toggle-btn"
+      [class.active]="isConnectionPanelOpen"
+      [attr.aria-pressed]="isConnectionPanelOpen"
+      [attr.aria-label]="appStrings.Shell.ConnectionPanel.Title | translate"
+      [title]="appStrings.Shell.ConnectionPanel.Title | translate"
+      (click)="toggleConnectionPanel.emit()">
+      <span class="icon icon-wifi icon-lg"></span>
+    </button>
+  </div>
+</header>

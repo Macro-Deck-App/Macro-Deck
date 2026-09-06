@@ -1,0 +1,18 @@
+// Deployment configuration for the documentation site's Cloudflare Worker.
+//
+// The Docs workflow deploys successful builds from main automatically. For a local
+// deployment, build first (`npm ci && npm run build` in this directory), then run:
+//
+//   npx wrangler deploy
+//
+// The Worker serves `dist` as static assets; docs.macro-deck.app is bound to it in the
+// Cloudflare dashboard.
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "macro-deck-dev-docs",
+	"compatibility_date": "2026-08-14",
+	"assets": {
+		"directory": "./dist",
+		"not_found_handling": "404-page"
+	}
+}

@@ -1,0 +1,33 @@
+@if (batches().length > 0) {
+  <div class="stack" role="status" aria-live="polite">
+    @for (batch of batches(); track batch.id) {
+      <div class="card" [class.failed]="batch.state === 'Failed'">
+        <div class="card-header">
+          <span class="title">
+            {{ batch.sourceName || sourceNameFallback() }}
+          </span>
+          @if (isTerminal(batch)) {
+            <button type="button" class="dismiss" (click)="dismiss(batch)" [attr.aria-label]="dismissLabel()">
+              <span class="icon icon-x icon-sm"></span>
+            </button>
+          }
+        </div>
+
+        <span class="status">{{ statusText(batch) }}</span>
+
+        @if (!isTerminal(batch)) {
+          <div class="bar" [class.indeterminate]="progressPercent(batch) === null">
+            @if (progressPercent(batch) !== null) {
+              <div class="fill" [style.width.%]="progressPercent(batch)"></div>
+            }
+          </div>
+          <button type="button" class="cancel" (click)="cancel(batch)">{{ 'macrodeck:Common.Cancel' | translate }}</button>
+        }
+
+        @if (batch.failed > 0 && batch.state !== 'Failed') {
+          <span class="failed-hint">{{ 'macrodeck.app:Store.IconImport.FailedFilesCouldNotBeProcessed' | translate:{ count: batch.failed } }}</span>
+        }
+      </div>
+    }
+  </div>
+}

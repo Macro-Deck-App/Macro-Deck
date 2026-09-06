@@ -1,0 +1,130 @@
+<shared-modal [heading]="'macrodeck.app:Widgets.Folder.FocusRule.Heading' | translate" size="medium" (close)="close()">
+  <div class="ffr">
+    <p class="ffr-desc">
+      {{ 'macrodeck.app:Widgets.Folder.FocusRule.Description' | translate:{ folderName: folderName() } }}
+    </p>
+
+    @if (!capabilityLoading() && !supported()) {
+      <shared-error-banner
+        [message]="capability()?.unsupportedReason ?? ('macrodeck.app:Widgets.Folder.FocusRule.UnsupportedDefault' | translate)"
+        [dismissible]="false">
+      </shared-error-banner>
+    }
+
+    @if (!editing()) {
+      @if (saveError()) {
+        <shared-error-banner [message]="saveError()!" (dismiss)="saveError.set(null)"></shared-error-banner>
+      }
+
+      @if (rules().length === 0) {
+        <p class="ffr-empty">{{ 'macrodeck.app:Widgets.Folder.FocusRule.NoRulesYet' | translate }}</p>
+      } @else {
+        <div class="ffr-list">
+          @for (rule of rules(); track rule.ruleId) {
+            <div class="ffr-row">
+              <shared-toggle-switch
+                [checked]="rule.enabled"
+                [disabled]="editingDisabled()"
+                [ariaLabel]="('macrodeck.app:Widgets.Folder.FocusRule.EnableRule' | translate:{ app: rule.applicationIdentity })"
+                (changed)="toggleEnabled(rule)">
+              </shared-toggle-switch>
+              <div class="ffr-row-info">
+                <div class="ffr-row-app">{{ rule.applicationIdentity }}</div>
+                <div class="ffr-row-detail">
+                  <span>{{ 'macrodeck.app:Widgets.Folder.FocusRule.OpensOnDevice' | translate:{ device: rule.deviceName ?? rule.deviceId } }}</span>
+                  @if (!rule.deviceExists) {
+                    <span class="ffr-warning">{{ 'macrodeck.app:Widgets.Folder.FocusRule.UnknownDevice' | translate }}</span>
+                  }
+                  @if (rule.returnOnFocusLoss) {
+                    <span>· {{ 'macrodeck.app:Widgets.Folder.FocusRule.ReturnsOnFocusLoss' | translate }}</span>
+                  }
+                </div>
+              </div>
+              <shared-button
+                variant="ghost"
+                size="icon-compact"
+                [title]="'macrodeck.app:Widgets.Folder.FocusRule.EditRule' | translate"
+                [disabled]="editingDisabled()"
+                (click)="startEdit(rule)">
+                <span class="icon icon-pencil icon-sm"></span>
+              </shared-button>
+              <shared-button
+                variant="danger-ghost"
+                size="icon-compact"
+                [title]="'macrodeck.app:Widgets.Folder.FocusRule.RemoveRule' | translate"
+                [disabled]="editingDisabled()"
+                (click)="remove(rule)">
+                <span class="icon icon-trash icon-sm"></span>
+              </shared-button>
+            </div>
+          }
+        </div>
+      }
+
+      <shared-button variant="add" [disabled]="editingDisabled()" (click)="startAdd()">
+        <span class="icon icon-plus icon-sm"></span>
+        <span>{{ 'macrodeck.app:Widgets.Folder.FocusRule.AddRule' | translate }}</span>
+      </shared-button>
+    } @else {
+      <div class="ffr-form">
+        <div class="form-group">
+          <label>{{ 'macrodeck.app:Widgets.Folder.FocusRule.Application' | translate }}</label>
+          <shared-combobox
+            [value]="editing()!.applicationIdentity"
+            [options]="appOptions()"
+            [loading]="appOptionsLoading()"
+            [placeholder]="'macrodeck.app:Widgets.Folder.FocusRule.ApplicationPlaceholder' | translate"
+            (valueChange)="onAppIdentityChange($event)"
+            (filterChange)="onAppFilterChange($event)"
+            (opened)="onAppFilterChange('')">
+          </shared-combobox>
+        </div>
+
+        @if (showIdentityKindPicker()) {
+          <div class="form-group">
+            <label>{{ 'macrodeck.app:Widgets.Folder.FocusRule.IdentifyBy' | translate }}</label>
+            <shared-select
+              [options]="identityKindOptions()"
+              [ngModel]="editing()!.identityKind"
+              (ngModelChange)="setIdentityKind($event)">
+            </shared-select>
+          </div>
+        }
+
+        <div class="form-group">
+          <label>{{ 'macrodeck.app:Widgets.Folder.FocusRule.Device' | translate }}</label>
+          <shared-select
+            [options]="deviceOptions()"
+            [ngModel]="editing()!.deviceId"
+            (ngModelChange)="setDeviceId($event)"
+            [placeholder]="'macrodeck.app:Widgets.Folder.FocusRule.ChooseDevice' | translate">
+          </shared-select>
+          <p class="form-hint">
+            {{ 'macrodeck.app:Widgets.Folder.FocusRule.DeviceHint' | translate }}
+          </p>
+        </div>
+
+        <shared-checkbox
+          [label]="'macrodeck.app:Widgets.Folder.FocusRule.ReturnOnFocusLossLabel' | translate"
+          [ngModel]="editing()!.returnOnFocusLoss"
+          (ngModelChange)="setReturnOnFocusLoss($event)">
+        </shared-checkbox>
+
+        @if (saveError()) {
+          <shared-error-banner [message]="saveError()!" (dismiss)="saveError.set(null)"></shared-error-banner>
+        }
+      </div>
+    }
+  </div>
+
+  <div modal-footer>
+    @if (!editing()) {
+      <shared-button variant="secondary" (click)="close()">{{ 'macrodeck:Common.Close' | translate }}</shared-button>
+    } @else {
+      <shared-button variant="secondary" [disabled]="saving()" (click)="cancelEdit()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+      <shared-button variant="primary" [disabled]="!canSave() || saving()" [loading]="saving()" (click)="save()">
+        {{ 'macrodeck:Common.Save' | translate }}
+      </shared-button>
+    }
+  </div>
+</shared-modal>

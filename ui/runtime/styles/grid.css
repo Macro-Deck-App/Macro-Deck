@@ -1,0 +1,135 @@
+/*
+ * The runtime deck grid.
+ *
+ * Nothing here uses `display: grid`. The compatibility floor drops it wholesale, and a deck whose
+ * empty cells collapse is a deck of misplaced widgets - so every cell and tile takes explicit
+ * left/top/width/height from the same solved metrics the widgets do.
+ */
+
+.deck-grid {
+  position: relative;
+  margin: 0 auto;
+}
+
+.deck-grid-cell {
+  position: absolute;
+  border-radius: calc(var(--widget-radius, 22px) * var(--widget-scale, 1));
+  background: var(--color-bg-secondary);
+  opacity: 0.35;
+}
+
+.deck-grid-tile {
+  position: absolute;
+  overflow: hidden;
+  border-radius: calc(var(--widget-radius, 22px) * var(--widget-scale, 1));
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  transition: transform var(--transition-press-out);
+}
+
+/*
+ * Press feedback scales the whole tile - surface, ring and shadow included. A scale applied further
+ * in would leave the border ring and the shadow at full size while the face shrinks.
+ */
+.deck-grid-tile-pressed {
+  transform: scale(0.95);
+  transition: transform var(--transition-press-in);
+}
+
+/*
+ * The wrapper carries the deck scale, so `--widget-scale` is reset to 1 inside it: anything below
+ * that multiplies by it would otherwise scale twice, and a radius would come out squared.
+ */
+.deck-grid-tile-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+}
+
+/*
+ * The widget's own face. Opaque, because a widget tree paints on top of it and the deck behind it
+ * must not show through; the same `--color-bg-secondary` an empty cell is tinted with.
+ *
+ * Text inside a deck is a label, never a selection: a drag across a tile that selected its label
+ * would both look wrong and swallow the gesture the widget wanted.
+ */
+.deck-grid-tile-surface {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: calc(var(--widget-radius, 22px) * var(--widget-scale, 1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-secondary);
+  box-sizing: border-box;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  /*
+   * A tile owns its own long press - `onLongPress` runs off a timer started in `pointerdown`. iOS
+   * raises its callout sheet from a recognizer of its own that no `preventDefault` reaches, so
+   * without this the platform menu covers the gesture the tile is in the middle of.
+   */
+  -webkit-touch-callout: none;
+}
+
+/* The tint the tile paints for a press it owns itself - a tree that claims the gesture tints its own. */
+.deck-grid-tile-press-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  background-color: rgba(255, 255, 255, 0);
+  transition: background-color var(--transition-press-out);
+  pointer-events: none;
+}
+
+.deck-grid-tile-pressed .deck-grid-tile-press-overlay {
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: background-color var(--transition-press-in);
+}
+
+/* The widget's configured border, drawn over its face along the tile edge. */
+.deck-grid-tile-border {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deck-grid-tile {
+    transition: none;
+  }
+}
+
+/*
+ * Deck input focus (issue #727): the cursor a wheel or D-pad moves around a device target's deck.
+ * Two-tone on purpose - a single accent ring disappears on an accent-coloured action button, which
+ * is most of them.
+ */
+.deck-grid-tile-focused::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 2px var(--color-on-accent),
+    inset 0 0 0 5px var(--color-accent);
+  pointer-events: none;
+  z-index: 30;
+}

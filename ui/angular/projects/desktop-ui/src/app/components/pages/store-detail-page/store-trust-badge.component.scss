@@ -1,0 +1,11 @@
+@use '../../../../styles/index' as ds;
+
+.trust-badge {
+  @include ds.chip;
+  color: var(--color-success);
+  background-color: var(--color-success-muted);
+
+  .icon {
+    background-color: var(--color-success);
+  }
+}

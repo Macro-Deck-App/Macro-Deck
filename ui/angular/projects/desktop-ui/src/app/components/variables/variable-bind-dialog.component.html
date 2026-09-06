@@ -1,0 +1,42 @@
+<shared-modal [heading]="heading()" size="small" [showFooter]="false" (close)="cancel()">
+  <form class="dvb-form" (ngSubmit)="submit()">
+    <label class="form-group">
+      <span class="form-label">{{ nameFieldLabel() }}</span>
+      <shared-input
+        class="dvb-input"
+        [ngModel]="rawName()"
+        (ngModelChange)="onNameInput($event)"
+        name="name"
+        [autofocus]="true"
+        required />
+      <span class="form-preview">
+        @if (nameTaken()) {
+          <span class="invalid">{{ nameTakenMessage() }}</span>
+        } @else if (nameSanitized().sanitized) {
+          <span [class.invalid]="!nameSanitized().isValid">vars.{{ nameSanitized().sanitized }}</span>
+        }
+      </span>
+    </label>
+
+    <label class="form-group">
+      <span class="form-label">{{ typeFieldLabel() }}</span>
+      <shared-select
+        class="dvb-input"
+        [options]="typeOptions()"
+        [ngModel]="type()"
+        (ngModelChange)="setType($event)"
+        name="type" />
+    </label>
+
+    @if (failed()) {
+      <p class="dvb-error">{{ bindFailedMessage() }}</p>
+    }
+
+    <shared-button-group class="dvb-actions" align="end">
+      <shared-button type="button" variant="secondary" (click)="cancel()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+      <shared-button type="submit" variant="primary" [disabled]="!canSubmit()" [loading]="submitting()">
+        {{ bindActionLabel() }}
+      </shared-button>
+    </shared-button-group>
+  </form>
+</shared-modal>

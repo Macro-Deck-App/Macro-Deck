@@ -1,0 +1,75 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Macro Deck",
+  "mainBinaryName": "MacroDeck",
+  "identifier": "app.macro-deck.macrodeck",
+  "bundle": {
+    "fileAssociations": [
+      {
+        "ext": ["macroDeckProfile"],
+        "name": "MacroDeck.Profile",
+        "description": "Macro Deck Profile",
+        "role": "Editor",
+        "rank": "Owner",
+        "mimeType": "application/vnd.macro-deck.profile",
+        "exportedType": {
+          "identifier": "app.macro-deck.macrodeck.profile",
+          "conformsTo": ["public.data", "public.zip-archive"]
+        }
+      },
+      {
+        "ext": ["macroDeckFolder"],
+        "name": "MacroDeck.Folder",
+        "description": "Macro Deck Folder",
+        "role": "Editor",
+        "rank": "Owner",
+        "mimeType": "application/vnd.macro-deck.folder",
+        "exportedType": {
+          "identifier": "app.macro-deck.macrodeck.folder",
+          "conformsTo": ["public.data", "public.zip-archive"]
+        }
+      },
+      {
+        "ext": ["macroDeckWidget"],
+        "name": "MacroDeck.Widget",
+        "description": "Macro Deck Widget",
+        "role": "Editor",
+        "rank": "Owner",
+        "mimeType": "application/vnd.macro-deck.widget",
+        "exportedType": {
+          "identifier": "app.macro-deck.macrodeck.widget",
+          "conformsTo": ["public.data", "public.zip-archive"]
+        }
+      },
+      {
+        "ext": ["macroDeckIconPack"],
+        "name": "MacroDeck.IconPack",
+        "description": "Macro Deck Icon Pack",
+        "role": "Editor",
+        "rank": "Owner",
+        "mimeType": "application/vnd.macro-deck.icon-pack",
+        "exportedType": {
+          "identifier": "app.macro-deck.macrodeck.icon-pack",
+          "conformsTo": ["public.data", "public.zip-archive"]
+        }
+      },
+      {
+        "ext": ["macroDeckPlugin"],
+        "name": "MacroDeck.Plugin",
+        "description": "Macro Deck Plugin",
+        "role": "Editor",
+        "rank": "Owner",
+        "mimeType": "application/vnd.macro-deck.plugin",
+        "exportedType": {
+          "identifier": "app.macro-deck.macrodeck.plugin",
+          "conformsTo": ["public.data", "public.zip-archive"]
+        }
+      }
+    ],
+    "windows": {
+      "nsis": {
+        "startMenuFolder": "Macro Deck"
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "spec_dir": "out-spec",
+  "spec_files": ["**/*.spec.js"],
+  "helpers": ["../spec-helpers/*.cjs"],
+  "env": {
+    "stopSpecOnExpectationFailure": false,
+    "random": true
+  }
+}

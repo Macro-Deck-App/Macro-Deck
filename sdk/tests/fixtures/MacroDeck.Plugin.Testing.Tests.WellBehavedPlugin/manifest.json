@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schemas.macro-deck.app/plugin-manifest-v1.schema.json",
+  "manifestVersion": 1,
+  "id": "app.macro-deck.well-behaved-test-plugin",
+  "name": "Well-Behaved Test Plugin",
+  "version": "1.0.0",
+  "description": "Fully conforming plugin used by the conformance suite and the host-side plugin contract tests. Exercises every remote capability kind: actions (plain, slider, dynamic options, one also configurable through a UI tree), variables, events, a config flow (also served as a UI tree) and a weather provider.",
+  "icon": "Assets/icon.svg",
+  "entrypoints": {
+    "win-x64": { "executable": "MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin.exe" },
+    "osx-arm64": { "executable": "MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin" },
+    "osx-x64": { "executable": "MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin" },
+    "linux-x64": { "executable": "MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin" }
+  }
+}

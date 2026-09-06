@@ -1,0 +1,24 @@
+.shell {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  overflow: hidden;
+}
+
+// Positioned so the side panels can overlay it from either edge. They slide over the page rather
+// than displacing it: a panel opening is not a reason for the deck underneath to reflow.
+.shell-content {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.shell-main {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}

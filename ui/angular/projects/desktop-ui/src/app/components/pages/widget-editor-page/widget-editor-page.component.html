@@ -1,0 +1,113 @@
+<shared-detail-page [backLabel]="'macrodeck.app:WidgetEditor.Page.BackToDeck' | translate" (close)="goBack()">
+  <div class="editor-header" detailPageHeader>
+    <div class="editor-header-start">
+      <h1 class="editor-title">{{ widgetTypeName }}</h1>
+    </div>
+    <shared-segmented-control
+      class="editor-mode-switch"
+      [ariaLabel]="'macrodeck.app:WidgetEditor.Page.EditorModeAriaLabel' | translate"
+      [options]="modeOptions()"
+      [value]="mode()"
+      (valueChange)="onModeChange($event)" />
+    <shared-cursor-position class="editor-cursor-position" />
+  </div>
+
+  <div class="editor-body">
+    @if (notFound()) {
+      <div class="editor-not-found">
+        <p>{{ 'macrodeck.app:WidgetEditor.Page.WidgetNotFoundMessage' | translate }}</p>
+        <shared-button variant="secondary" (click)="requestClose()">{{ 'macrodeck.app:WidgetEditor.Page.BackToDeck' | translate }}</shared-button>
+      </div>
+    } @else if (widget()) {
+      <div class="editor-content">
+        <!-- Always mounted, never destroyed: the #editorHost setter only (re)creates the editor
+             component when editorRef is still null, so hiding this pane behind an @if would strand
+             editorRef non-null with the component gone, and the visual editor would never come back. -->
+        <div class="editor-pane" [class.editor-pane--hidden]="mode() !== 'visual'">
+          @if (editorError()) {
+            <div class="editor-load-error">
+              <span class="icon icon-alert-triangle icon-lg" aria-hidden="true"></span>
+              <p>{{ 'macrodeck.app:WidgetEditor.Page.EditorLoadErrorMessage' | translate }}</p>
+              <shared-button variant="primary" (click)="reloadApp()">{{ 'macrodeck.app:WidgetEditor.Page.ReloadAction' | translate }}</shared-button>
+            </div>
+          }
+          <!-- Hidden rather than unmounted while the editor builds itself, for the same reason the
+               inactive pane is: the editor measures its own width to pick its layout, and a pane
+               with no box would latch it into the compact one. The loading state covers it. -->
+          <div class="editor-host" [class.editor-host--hidden]="showEditorLoading()">
+            <ng-container #editorHost></ng-container>
+          </div>
+          @if (showEditorLoading()) {
+            <shared-loading-state
+              class="editor-loading-overlay"
+              [message]="'macrodeck.app:WidgetEditor.Page.LoadingEditor' | translate" />
+          }
+        </div>
+
+        <!-- Mounted lazily on the first switch into JSON mode, then kept mounted (same reason as
+             above) so CodeMirror is created once, while visible, and measures correctly. -->
+        @if (jsonPaneMounted()) {
+          <div class="editor-pane editor-pane--json" [class.editor-pane--hidden]="mode() !== 'json'">
+            @if (jsonError(); as message) {
+              <p class="json-pane-error">{{ message }}</p>
+            }
+            <app-widget-json-editor
+              [text]="jsonText()"
+              [schema]="jsonSchema()"
+              (textChange)="jsonText.set($event)"
+              (validChange)="jsonValid.set($event)"
+              (errorChange)="jsonError.set($event)" />
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  @if (widget()) {
+    <div
+      class="editor-save-fab"
+      detailPageOverlay
+      [class.editor-save-fab--hidden]="!saveVisible()"
+      (mouseenter)="onSaveButtonEnter()"
+      (mouseleave)="onSaveButtonLeave()"
+      (focusin)="onSaveButtonEnter()"
+      (focusout)="onSaveButtonLeave()">
+      <!-- Deliberate exception to the paired sizes: a standalone FAB, never beside another button.
+           `lg` has no icon counterpart, so it must not appear in a shared-button-group. -->
+      <shared-button
+        variant="primary"
+        size="lg"
+        [title]="'macrodeck.app:WidgetEditor.Page.SaveButtonTitle' | translate"
+        [disabled]="!canSave()"
+        [loading]="saving()"
+        (click)="onSave($event)">
+        <span class="icon icon-device-floppy icon-md"></span>
+        <span>{{ saveLabel() }}</span>
+      </shared-button>
+    </div>
+  }
+</shared-detail-page>
+
+@if (confirmingLeave()) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:WidgetEditor.Page.UnsavedChangesHeading' | translate"
+    [message]="leaveMessage()"
+    [confirmText]="'macrodeck.app:WidgetEditor.Page.DiscardChangesAction' | translate"
+    [cancelText]="'macrodeck.app:WidgetEditor.Page.KeepEditingAction' | translate"
+    [altText]="canSave() ? ('macrodeck.app:WidgetEditor.Page.SaveAndCloseLabel' | translate) : ''"
+    [danger]="true"
+    (confirm)="onDiscardChanges()"
+    (cancel)="onKeepEditing()"
+    (alt)="onSaveAndLeave()" />
+}
+
+@if (confirmingJsonDiscard()) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:WidgetEditor.Page.InvalidJsonHeading' | translate"
+    [message]="'macrodeck.app:WidgetEditor.Page.InvalidJsonMessage' | translate"
+    [confirmText]="'macrodeck.app:WidgetEditor.Page.DiscardJsonChangesAction' | translate"
+    [cancelText]="'macrodeck.app:WidgetEditor.Page.KeepEditingJsonAction' | translate"
+    [danger]="true"
+    (confirm)="onDiscardJsonChanges()"
+    (cancel)="onKeepEditingJson()" />
+}

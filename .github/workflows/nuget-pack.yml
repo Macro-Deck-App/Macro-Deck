@@ -1,0 +1,101 @@
+name: NuGet pack
+
+# Builds and packs the public package family at one version, and uploads the result as an artifact.
+# Reusable so the manual NuGet workflow and the release build pack identically; deliberately takes no
+# secrets, so a compromised build step has nothing to publish with (the credential only ever reaches
+# nuget-publish.yml).
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Package version - 3.0.0, 3.0.0-beta.4 or 3.0.0-preview.4
+        type: string
+        required: true
+      run_tests:
+        description: Run the .NET test suite before packing. The release build leaves this off because its own test-host job already ran the suite in the same run.
+        type: boolean
+        default: true
+      artifact:
+        description: Name of the artifact the packages are uploaded as
+        type: string
+        default: nuget-packages
+    outputs:
+      artifact:
+        description: Name of the uploaded package artifact
+        value: ${{ inputs.artifact }}
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: 22
+  DOTNET_VERSION: 10.0.x
+  # The packages ship with the released product, so they are built with the release identity.
+  BUILD_CHANNEL: Production
+
+jobs:
+  pack:
+    name: Pack NuGet packages
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      # For the version validation and package verification scripts below.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      # Same parser the release workflow computes its version with, in its package mode: it accepts
+      # every shape a release uses plus X.Y.Z-preview.N, which the packages may ship at on their own.
+      # Output discarded: this is the validation, not a lookup.
+      - name: Validate version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: node ci/scripts/release-version.mjs "$VERSION" --package > /dev/null
+
+      # Warnings gate, mirroring ci.yml: nothing gets published out of a build that warns.
+      - name: Build
+        run: >
+          dotnet build MacroDeck.slnx -c Release
+          -p:BuildChannel=${{ env.BUILD_CHANNEL }} -p:Version=${{ inputs.version }} -warnaserror
+
+      - name: Test
+        if: ${{ inputs.run_tests }}
+        run: >
+          dotnet test MacroDeck.slnx -c Release
+          -p:BuildChannel=${{ env.BUILD_CHANNEL }} -p:Version=${{ inputs.version }}
+          --no-build --logger trx --results-directory TestResults
+
+      # --no-build reuses the build above, so both commands must carry the identical property set:
+      # Version reaches the assembly info at build time and PackageVersion at pack time
+      # (Directory.Build.targets), and BuildChannel is validated on every build.
+      - name: Pack
+        run: >
+          dotnet pack MacroDeck.slnx -c Release
+          -p:BuildChannel=${{ env.BUILD_CHANNEL }} -p:Version=${{ inputs.version }}
+          --no-build -o ${{ runner.temp }}/packages
+
+      - name: Verify packages
+        run: node ci/scripts/verify-nuget-packages.mjs "${{ runner.temp }}/packages" "${{ inputs.version }}"
+
+      # Uploaded even for a run that will not publish, so the exact artifacts a version was built from
+      # can be downloaded and inspected from the run.
+      - name: Upload packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ inputs.artifact }}
+          path: ${{ runner.temp }}/packages/*
+          retention-days: 14
+          if-no-files-found: error

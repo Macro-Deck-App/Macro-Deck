@@ -1,0 +1,27 @@
+<Project>
+
+    <!-- IsMacroDeckPackage is set in individual projects, so this metadata must be applied from .targets rather than .props. -->
+    <PropertyGroup Condition="'$(IsMacroDeckPackage)' == 'true'">
+        <Authors>Macro Deck</Authors>
+        <Company>Macro Deck</Company>
+        <Product>Macro Deck</Product>
+        <Copyright>Copyright (c) Macro Deck</Copyright>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/Macro-Deck-App/Macro-Deck</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Macro-Deck-App/Macro-Deck</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <!-- Allow individual packages to opt out, e.g. analyzer packages where a symbols package has no lib output. -->
+        <IncludeSymbols Condition="'$(IncludeSymbols)' == ''">true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <!-- PackageReadmeFile must reference a file included in the package. -->
+    <ItemGroup Condition="'$(IsMacroDeckPackage)' == 'true'">
+        <None Include="README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+</Project>

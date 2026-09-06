@@ -1,0 +1,38 @@
+<Project>
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>true</ImplicitUsings>
+        <AnalysisLevel>latest-recommended</AnalysisLevel>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+
+    <!-- BuildChannel controls product defaults; beta versions use Production defaults. Keep port pairs in sync with ui/bootstrapper/src/host.rs. -->
+    <PropertyGroup>
+        <BuildChannel Condition="'$(BuildChannel)' == ''">Development</BuildChannel>
+        <BuildDefaultPublicPort Condition="'$(BuildChannel)' == 'Development'">7193</BuildDefaultPublicPort>
+        <BuildDefaultPublicHttpsPort Condition="'$(BuildChannel)' == 'Development'">7194</BuildDefaultPublicHttpsPort>
+        <BuildDataRootDirectoryName Condition="'$(BuildChannel)' == 'Development'">.data</BuildDataRootDirectoryName>
+        <BuildLoopbackPortFileName Condition="'$(BuildChannel)' == 'Development'">macro-deck-host-development.port</BuildLoopbackPortFileName>
+        <BuildApplicationDisplayName Condition="'$(BuildChannel)' == 'Development'">Macro Deck Development</BuildApplicationDisplayName>
+
+        <BuildDefaultPublicPort Condition="'$(BuildChannel)' == 'Production'">8193</BuildDefaultPublicPort>
+        <BuildDefaultPublicHttpsPort Condition="'$(BuildChannel)' == 'Production'">8194</BuildDefaultPublicHttpsPort>
+        <BuildDataRootDirectoryName Condition="'$(BuildChannel)' == 'Production'">MacroDeck</BuildDataRootDirectoryName>
+        <BuildLoopbackPortFileName Condition="'$(BuildChannel)' == 'Production'">macro-deck-host.port</BuildLoopbackPortFileName>
+        <BuildApplicationDisplayName Condition="'$(BuildChannel)' == 'Production'">Macro Deck</BuildApplicationDisplayName>
+    </PropertyGroup>
+
+    <Target Name="ValidateBuildChannel" BeforeTargets="PrepareForBuild">
+        <Error Condition="'$(BuildChannel)' != 'Development' and '$(BuildChannel)' != 'Production'"
+               Text="BuildChannel must be Development or Production. Beta is derived from the Version pre-release tag." />
+    </Target>
+
+    <!-- CI overrides this local/dev base version explicitly. -->
+    <PropertyGroup Condition="'$(Version)' == ''">
+        <Version>3.0.0</Version>
+    </PropertyGroup>
+
+</Project>

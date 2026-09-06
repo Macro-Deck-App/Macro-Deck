@@ -1,0 +1,58 @@
+<div class="maintenance">
+  <section class="maintenance__card" data-testid="restart-card">
+    <h2 class="maintenance__heading">
+      <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
+      {{ 'macrodeck.app:Developer.Maintenance.RestartHeading' | translate }}
+    </h2>
+    <p class="maintenance__description">
+      {{ 'macrodeck.app:Developer.Maintenance.RestartDescription' | translate }}
+    </p>
+
+    @if (canRestart()) {
+      <shared-button variant="secondary" [loading]="restarting()" (click)="askToRestart()">
+        {{ 'macrodeck.app:Developer.Maintenance.RestartNowAction' | translate }}
+      </shared-button>
+    } @else {
+      <p class="maintenance__unavailable">
+        {{ unsupportedReason() ?? cannotRestartHereFallback() }}
+      </p>
+    }
+  </section>
+
+  @if (dataDirectory.available()) {
+    <section class="maintenance__card" data-testid="data-directory-card">
+      <h2 class="maintenance__heading">
+        <span class="icon icon-folder icon-sm" aria-hidden="true"></span>
+        {{ 'macrodeck.app:Developer.Maintenance.DataDirectoryHeading' | translate }}
+      </h2>
+      <p class="maintenance__description">
+        {{ 'macrodeck.app:Developer.Maintenance.DataDirectoryDescription' | translate }}
+      </p>
+
+      <shared-copy-value [label]="'macrodeck.app:Developer.Maintenance.DataDirectoryLabel' | translate" [value]="dataDirectory.path() ?? ''" />
+
+      @if (dataDirectory.canOpen()) {
+        <shared-button
+          variant="secondary"
+          [loading]="dataDirectory.opening()"
+          (click)="dataDirectory.open()">
+          {{ 'macrodeck.app:Developer.Maintenance.OpenAction' | translate }}
+        </shared-button>
+      } @else {
+        <p class="maintenance__unavailable">
+          {{ 'macrodeck.app:Developer.Maintenance.DataDirectoryUnavailableMessage' | translate }}
+        </p>
+      }
+    </section>
+  }
+</div>
+
+@if (restartPromptOpen()) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Developer.Maintenance.RestartConfirmHeading' | translate"
+    [message]="'macrodeck.app:Developer.Maintenance.RestartConfirmMessage' | translate"
+    [confirmText]="'macrodeck.app:Developer.Maintenance.RestartNowAction' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    (confirm)="restartNow()"
+    (cancel)="cancelRestart()" />
+}

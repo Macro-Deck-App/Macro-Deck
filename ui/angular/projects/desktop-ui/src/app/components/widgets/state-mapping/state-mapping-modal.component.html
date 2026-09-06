@@ -1,0 +1,81 @@
+<shared-modal
+  size="large"
+  [heading]="'macrodeck.app:Widgets.Editor.StateMapping' | translate"
+  (close)="onCancel()">
+  <div class="mapping-body">
+    <p class="mapping-hint">
+      {{ 'macrodeck.app:Widgets.Editor.MappingHint' | translate }}
+    </p>
+
+    <div class="mapping-rules">
+      @for (rule of mapping.rules; track rule.id; let i = $index) {
+        <div class="mapping-rule-row">
+          <div class="mapping-rule-order">
+            <button
+              type="button"
+              class="mapping-order-button"
+              [disabled]="i === 0"
+              [attr.aria-label]="'macrodeck.app:Widgets.Editor.MoveRuleUp' | translate"
+              (click)="moveUp(i)">
+              <span class="icon icon-arrow-up icon-xs" aria-hidden="true"></span>
+            </button>
+            <button
+              type="button"
+              class="mapping-order-button"
+              [disabled]="i === mapping.rules.length - 1"
+              [attr.aria-label]="'macrodeck.app:Widgets.Editor.MoveRuleDown' | translate"
+              (click)="moveDown(i)">
+              <span class="icon icon-arrow-down icon-xs" aria-hidden="true"></span>
+            </button>
+          </div>
+
+          <shared-select
+            class="mapping-rule-state"
+            [options]="stateOptions"
+            [ngModel]="rule.stateId"
+            (ngModelChange)="onRuleStateChange(rule.id, $event)" />
+
+          <span class="mapping-rule-when">{{ 'macrodeck.app:Widgets.Editor.WhenLabel' | translate }}</span>
+
+          <shared-condition-builder
+            class="mapping-rule-condition"
+            [expression]="rule.when"
+            [variables]="variables"
+            previewScope="widget"
+            [previewScopeRefId]="scopeRefId"
+            [comparisonOperators]="comparisonOperators()"
+            [leafState]="leafStateFor(rule.id)"
+            (expressionChange)="onRuleConditionChange(rule.id, $event)">
+          </shared-condition-builder>
+
+          <button
+            type="button"
+            class="mapping-rule-remove"
+            [attr.aria-label]="'macrodeck.app:Widgets.Editor.RemoveRule' | translate"
+            [title]="'macrodeck.app:Widgets.Editor.RemoveRule' | translate"
+            (click)="removeRule(rule.id)">
+            <span class="icon icon-x icon-xs" aria-hidden="true"></span>
+          </button>
+        </div>
+      }
+
+      <button type="button" class="mapping-add-rule" (click)="addRule()">
+        <span class="icon icon-plus icon-xs" aria-hidden="true"></span>
+        {{ 'macrodeck.app:Widgets.Editor.AddRule' | translate }}
+      </button>
+
+      <div class="mapping-rule-row mapping-fallback-row">
+        <span class="mapping-fallback-label">{{ 'macrodeck.app:Widgets.Editor.Fallback' | translate }}</span>
+        <shared-select
+          class="mapping-rule-state"
+          [options]="stateOptions"
+          [ngModel]="mapping.fallbackStateId"
+          (ngModelChange)="onFallbackChange($event)" />
+      </div>
+    </div>
+  </div>
+  <div modal-footer>
+    <shared-button variant="secondary" (click)="onCancel()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+    <shared-button variant="primary" [disabled]="!canSave()" (click)="onSave()">{{ 'macrodeck:Common.Save' | translate }}</shared-button>
+  </div>
+</shared-modal>

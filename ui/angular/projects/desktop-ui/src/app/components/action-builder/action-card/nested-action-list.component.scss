@@ -1,0 +1,254 @@
+/* =============================================================================
+ * Action list (root + nested) and drag-and-drop visuals.
+ *
+ * Drag & drop is the custom pointer engine in ActionDragService.
+ * Invariant: NOTHING in here may change geometry while a drag is
+ * active - the dragged card keeps its slot (dimmed), the insertion
+ * line is zero-height, drop feedback is colors/outlines only. That is
+ * what keeps the hit-testing glitch-free.
+ *
+ * ViewEncapsulation.None on purpose:
+ *  - `.ab-drag-active` is toggled on the builder root element;
+ *  - hover rules style `.action-card` rendered by a child component.
+ * ========================================================================== */
+
+shared-action-list {
+  display: block;
+  min-width: 0;
+}
+
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3125rem;
+  min-height: 1rem;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast), outline-color var(--transition-fast);
+  outline: 1px dashed transparent;
+  outline-offset: -1px;
+}
+
+/* Sizes to its cards so the add-action button sits right below the last one. */
+.action-list.root {
+  gap: 0.5rem;
+  min-height: 0.1875rem;
+}
+
+/* Card wrapper: grip + card side by side. */
+.action-card-wrapper {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+/* Every host element between wrapper and .action-card must stretch. */
+.action-card-wrapper > shared-action-card,
+shared-action-card > * {
+  display: block;
+  flex: 1;
+  min-width: 0;
+}
+
+.action-card-wrapper:hover .action-card {
+  border-color: var(--color-border-light);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* The dragged card stays in place, dimmed, until the drop lands. */
+.action-card-wrapper {
+  transition: opacity var(--transition-fast);
+}
+
+.action-card-wrapper.drag-source {
+  opacity: 0.35;
+}
+
+/* Landing feedback: the moved card scales in with a brief accent glow. */
+.action-card-wrapper.just-dropped > shared-action-card {
+  animation: card-land 360ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.action-card-wrapper.just-dropped .action-card {
+  animation: card-land-glow 550ms ease-out;
+}
+
+@keyframes card-land {
+  from { transform: scale(0.97); }
+  to   { transform: scale(1); }
+}
+
+@keyframes card-land-glow {
+  0%   { border-color: var(--color-accent); box-shadow: 0 0 0 3px var(--color-accent-muted); }
+  100% { border-color: var(--color-border); box-shadow: var(--ab-card-shadow, 0 1px 2px rgba(0, 0, 0, 0.18)); }
+}
+
+.drag-handle {
+  position: absolute;
+  top: 0.375rem;
+  left: 0.3125rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0.1875rem;
+  color: var(--color-text-muted);
+  /* Always visible (low opacity) so users discover the grip without
+     hovering. Bumps to full on hover to invite the grab. */
+  opacity: 0.55;
+  cursor: grab;
+  touch-action: none;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+
+.action-card-wrapper:hover .drag-handle {
+  opacity: 0.85;
+}
+
+.drag-handle:hover,
+.drag-handle:focus-visible {
+  opacity: 1;
+  color: var(--color-text-primary);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Empty nested drop zone: constant height, lights up while dragging. */
+.action-list.nested.is-empty {
+  min-height: 2rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.ab-drag-active .action-list.nested.is-empty {
+  outline-color: var(--color-border);
+  background-color: var(--color-bg-hover);
+}
+
+.ab-drag-active .action-list.nested.is-empty::before {
+  content: 'Drop actions here';
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-style: italic;
+  pointer-events: none;
+}
+
+/* List under the pointer that would receive the drop. */
+.action-list.drop-target {
+  outline-color: var(--color-accent);
+}
+
+/*
+ * Insertion line. Zero layout impact: the element is 0 px tall and the
+ * negative margins swallow the flex gap it would otherwise introduce;
+ * the visible 3px line is drawn by ::after on top of the gap.
+ */
+.drop-indicator {
+  position: relative;
+  height: 0;
+  margin: -0.125rem 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.action-list.root > .drop-indicator {
+  margin: -0.25rem 0;
+}
+
+/*
+ * As the first child the line must not reach above the list's top
+ * edge - the scroll panel would clip it. Draw it at the inner edge
+ * instead, and cancel the flex gap it introduces via the bottom
+ * margin so the cards below don't shift.
+ */
+.drop-indicator:first-child {
+  margin: 0 0 -0.3125rem;
+}
+
+.action-list.root > .drop-indicator:first-child {
+  margin: 0 0 -0.5rem;
+}
+
+.drop-indicator::after {
+  content: '';
+  position: absolute;
+  left: 0.1875rem;
+  right: 0.1875rem;
+  top: -1.5px;
+  height: 3px;
+  border-radius: 2px;
+  background-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-bg-primary);
+  /* The element is re-created whenever the slot changes, so the
+     grow-in plays on every new position. */
+  animation: indicator-in 140ms cubic-bezier(0.2, 0.8, 0.3, 1);
+  transform-origin: left center;
+}
+
+@keyframes indicator-in {
+  from { transform: scaleX(0.4); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+
+.drop-indicator:first-child::after {
+  top: 0;
+}
+
+/* While dragging: no accidental text selection, consistent cursor. */
+.ab-drag-active,
+.ab-drag-active * {
+  user-select: none;
+}
+
+.ab-drag-active .action-card-header,
+.ab-drag-active .drag-handle {
+  cursor: grabbing;
+}
+
+/* "+ Add action" under every nested list - dashed ghost that fills on hover. */
+.block-section-add {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  margin-top: 0.3125rem;
+  padding: 0.375rem var(--space-3);
+  background: transparent;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast),
+              border-color var(--transition-fast), border-style var(--transition-fast);
+}
+
+.block-section-add:hover,
+.block-section-add:focus-visible {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-border-light);
+  border-style: solid;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .action-list,
+  .action-card-wrapper,
+  .drag-handle,
+  .block-section-add {
+    transition: none;
+  }
+
+  .drop-indicator::after,
+  .action-card-wrapper.just-dropped > shared-action-card,
+  .action-card-wrapper.just-dropped .action-card {
+    animation: none;
+  }
+}

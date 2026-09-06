@@ -1,0 +1,17 @@
+<div class="footer-bar">
+  <span class="footer-version">{{ 'macrodeck.app:Shell.Footer.Version' | translate:{ version: nav.versionLabel() } }}</span>
+
+  <div class="footer-links">
+    @for (link of links(); track link.url) {
+      <a
+        class="footer-link"
+        [href]="link.url"
+        target="_blank"
+        rel="noopener noreferrer"
+        (click)="onLinkClick($event, link.url)">
+        <span class="icon icon-{{ link.icon }} icon-xs" aria-hidden="true"></span>
+        <span>{{ link.label }}</span>
+      </a>
+    }
+  </div>
+</div>

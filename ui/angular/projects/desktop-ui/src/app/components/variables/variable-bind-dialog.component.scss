@@ -1,0 +1,30 @@
+.dvb-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6875rem;
+}
+
+.dvb-input {
+  width: 100%;
+}
+
+.form-preview {
+  font-size: var(--text-base);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  color: var(--color-text-secondary);
+  margin-top: 0.1875rem;
+}
+
+.form-preview .invalid {
+  color: var(--color-danger);
+}
+
+.dvb-error {
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+.dvb-actions {
+  margin-top: var(--space-2);
+}

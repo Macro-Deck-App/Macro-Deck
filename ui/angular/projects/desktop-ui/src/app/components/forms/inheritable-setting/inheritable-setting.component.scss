@@ -1,0 +1,48 @@
+:host {
+  display: block;
+}
+
+.setting-value-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.setting-value {
+  color: var(--color-text-secondary);
+}
+
+.setting-value-muted {
+  color: var(--color-text-muted);
+}
+
+.setting-reset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.setting-reset:hover:not(:disabled) {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-secondary);
+}
+
+.setting-reset:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.setting-reset:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}

@@ -1,0 +1,24 @@
+@use '../../../../styles/index' as ds;
+
+.status-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  grid-column: 1 / -1;
+}
+
+.status-pill {
+  @include ds.badge;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.status-pill-ok {
+  color: var(--color-success);
+  background-color: var(--color-success-muted);
+}
+
+.status-pill-neutral {
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-hover);
+}

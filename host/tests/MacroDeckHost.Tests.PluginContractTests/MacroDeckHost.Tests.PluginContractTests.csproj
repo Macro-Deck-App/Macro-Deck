@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <!-- CA1861: flagged on inline array literals inside Assert.That(...) calls, the same as the
+             other test projects' arrays-in-assertions - not the repeated-hot-path case the rule targets. -->
+        <NoWarn>$(NoWarn);CA1707;CA1861</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="NUnit.Analyzers" />
+        <PackageReference Include="NUnit3TestAdapter" />
+    </ItemGroup>
+
+    <!-- Both halves of the wire have to be real for a contract test to prove anything: the host-side
+         adapters, registrar and invoker from MacroDeckHost.Application, and the SDK-side dispatcher and
+         capability handlers from MacroDeck.Plugin.Hosting. Only the transport between them (Harness/InMemoryPluginLink.cs)
+         is a test double. -->
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\MacroDeckHost.Application\MacroDeckHost.Application.csproj" />
+        <!-- CallbackContractTests needs the real host.invoke routing (PluginCallbackRouter,
+             HostCallbackThrottle), which lives in the host process project rather than the
+             Application layer - pulling it in also brings MacroDeckHost.Infrastructure transitively,
+             which is where the owner-scoped IntegrationVariableApi/IntegrationConfig it exercises live. -->
+        <ProjectReference Include="..\..\src\MacroDeckHost\MacroDeckHost.csproj" />
+        <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Plugin.Hosting\MacroDeck.Plugin.Hosting.csproj" />
+        <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Plugin.Serilog\MacroDeck.Plugin.Serilog.csproj" />
+        <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Plugin.Testing\MacroDeck.Plugin.Testing.csproj" />
+        <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Sdk\MacroDeck.Sdk.csproj" />
+        <ProjectReference Include="..\..\..\protocol\src\MacroDeck.Plugin.Protocol\MacroDeck.Plugin.Protocol.csproj" />
+        <!-- WellBehavedPluginContractTests.cs proves the full-capability fixture against the same
+             in-memory harness every other capability kind's contract tests use. -->
+        <ProjectReference Include="..\..\..\sdk\tests\fixtures\MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin\MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin.csproj" />
+    </ItemGroup>
+
+    <!-- A ProjectReference does not propagate the fixture's own Content items into this project's
+         output, so WellBehavedPluginContractTests.cs (which reads the icon straight off disk, per #560)
+         needs its own copy here. -->
+    <ItemGroup>
+        <Content Include="..\..\..\sdk\tests\fixtures\MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin\Assets\icon.svg" Link="Assets\icon.svg"
+                 CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="NUnit.Framework"/>
+    </ItemGroup>
+
+</Project>

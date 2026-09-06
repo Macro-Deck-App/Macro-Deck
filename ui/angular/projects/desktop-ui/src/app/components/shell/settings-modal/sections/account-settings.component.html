@@ -1,0 +1,123 @@
+<div class="account-settings">
+  <shared-settings-section [heading]="'macrodeck.app:Settings.Account.Heading' | translate">
+
+    @if (connect.loadError(); as error) {
+      <shared-error-banner [message]="error" [dismissible]="false" />
+    }
+
+    @if (initialLoad()) {
+      <shared-loading-state [message]="'macrodeck.app:Settings.Account.Loading' | translate" />
+    } @else {
+      @switch (status()) {
+        @case ('signedOut') {
+          <div class="account-settings__panel">
+            @if (signInFailureMessage(); as failure) {
+              <shared-error-banner [message]="failure" [dismissible]="false" />
+            }
+            <shared-button variant="primary" [loading]="signInBusy()" (click)="signIn()">
+              {{ (signInFailureMessage()
+                    ? 'macrodeck.app:Settings.Account.SignInAgain'
+                    : 'macrodeck.app:Settings.Account.SignIn') | translate }}
+            </shared-button>
+          </div>
+        }
+
+        @case ('signingIn') {
+          <div class="account-settings__panel">
+            <shared-loading-state [message]="'macrodeck.app:Settings.Account.SigningInMessage' | translate" />
+
+            @if (prompt(); as pending) {
+              <div class="account-settings__code-block">
+                <span class="account-settings__code-label">
+                  {{ 'macrodeck.app:Settings.Account.DeviceCodeLabel' | translate }}
+                </span>
+                <div class="account-settings__code-row">
+                  <code class="account-settings__code">{{ pending.userCode }}</code>
+                  <shared-button variant="secondary" size="compact" (click)="copyCode()">
+                    {{ 'macrodeck.app:Settings.Account.CopyCode' | translate }}
+                  </shared-button>
+                </div>
+                <p class="account-settings__hint">
+                  {{ 'macrodeck.app:Settings.Account.DeviceCodeHint' | translate: { url: pending.verificationUri } }}
+                </p>
+                @if (remaining(); as left) {
+                  <p class="account-settings__hint">
+                    {{ 'macrodeck.app:Settings.Account.ExpiresIn' | translate: { remaining: left } }}
+                  </p>
+                }
+              </div>
+            } @else {
+              <p class="account-settings__hint">
+                {{ 'macrodeck.app:Settings.Account.SigningInHint' | translate }}
+              </p>
+            }
+
+            <shared-button variant="secondary" [loading]="cancelBusy()" (click)="cancelSignIn()">
+              {{ 'macrodeck:Common.Cancel' | translate }}
+            </shared-button>
+          </div>
+        }
+
+        @case ('signedIn') {
+          <div class="account-settings__panel">
+            <div class="account-settings__profile">
+              <shared-avatar
+                class="account-settings__avatar"
+                size="lg"
+                [src]="connect.avatarUrl()"
+                [name]="account()?.displayName ?? ''" />
+              <div class="account-settings__profile-info">
+                <span class="account-settings__name">{{ account()?.displayName }}</span>
+                <span class="account-settings__status">{{ connect.statusLabel() }}</span>
+                @if (offlineSince(); as since) {
+                  <span class="account-settings__offline">
+                    <span class="icon icon-alert-triangle icon-xs" aria-hidden="true"></span>
+                    {{ 'macrodeck.app:Settings.Account.OfflineSince' | translate: { since: (since | date: 'medium') } }}
+                  </span>
+                }
+              </div>
+            </div>
+
+            <shared-button-group>
+              <shared-button variant="secondary" (click)="manageAccount()">
+                {{ 'macrodeck.app:Settings.Account.ManageAccount' | translate }}
+              </shared-button>
+              <shared-button variant="danger" [loading]="signOutBusy()" (click)="requestSignOut()">
+                {{ 'macrodeck.app:Settings.Account.SignOut' | translate }}
+              </shared-button>
+            </shared-button-group>
+          </div>
+        }
+
+        @case ('reauthenticationRequired') {
+          <div class="account-settings__panel">
+            <shared-error-banner [message]="attentionMessage()" [dismissible]="false" />
+            <shared-button variant="primary" [loading]="signInBusy()" (click)="signIn()">
+              {{ 'macrodeck.app:Settings.Account.SignIn' | translate }}
+            </shared-button>
+          </div>
+        }
+
+        @case ('suspended') {
+          <div class="account-settings__panel">
+            <shared-error-banner [message]="attentionMessage()" [dismissible]="false" />
+            <shared-button variant="secondary" (click)="manageAccount()">
+              {{ 'macrodeck.app:Settings.Account.ManageAccount' | translate }}
+            </shared-button>
+          </div>
+        }
+      }
+    }
+  </shared-settings-section>
+</div>
+
+@if (confirmingSignOut()) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Settings.Account.SignOutHeading' | translate"
+    [message]="'macrodeck.app:Settings.Account.SignOutMessage' | translate"
+    [confirmText]="'macrodeck.app:Settings.Account.SignOut' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmSignOut()"
+    (cancel)="cancelSignOutConfirm()" />
+}

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and support
+    url: https://discord.macro-deck.app
+    about: Use the Macro Deck Discord community for setup help, questions, and general support.
+  - name: Security vulnerability
+    url: https://github.com/Macro-Deck-App/Macro-Deck/security/advisories/new
+    about: Report vulnerabilities in Macro Deck privately. Do not open a public issue.

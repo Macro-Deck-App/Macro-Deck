@@ -1,0 +1,55 @@
+<shared-settings-section
+  [heading]="'macrodeck.app:Settings.Backups.RecoveryKeyHeading' | translate"
+  [description]="'macrodeck.app:Settings.Backups.RecoveryKeyDescription' | translate">
+  @if (state(); as s) {
+    @if (s.availability === 'None') {
+      <p class="brk-warning">
+        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+        <span>{{ 'macrodeck.app:Settings.Backups.RecoveryKeyNoneWarning' | translate }}</span>
+      </p>
+      <shared-button variant="primary" [loading]="working()" (click)="createKey()">
+        {{ 'macrodeck.app:Settings.Backups.CreateRecoveryKeyButton' | translate }}
+      </shared-button>
+    } @else if (s.availability === 'Missing') {
+      <p class="brk-warning">
+        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+        <span>{{ 'macrodeck.app:Settings.Backups.RecoveryKeyMissingWarning' | translate }}</span>
+      </p>
+    } @else {
+      @if (!s.exportedAt) {
+        <p class="brk-warning">
+          <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+          <span>{{ 'macrodeck.app:Settings.Backups.RecoveryKeyNeverShownWarning' | translate }}</span>
+        </p>
+      }
+      <shared-settings-row [label]="'macrodeck.app:Settings.Backups.RecoveryKeyRowLabel' | translate" [description]="statusLine(s)">
+        <shared-button variant="secondary" [disabled]="working()" (click)="requestReveal()">
+          {{ 'macrodeck.app:Settings.Backups.ShowRecoveryKeyButton' | translate }}
+        </shared-button>
+      </shared-settings-row>
+    }
+  } @else {
+    <shared-loading-state [message]="'macrodeck.app:Settings.Backups.RecoveryKeyLoading' | translate" />
+  }
+</shared-settings-section>
+
+@if (modal(); as m) {
+  @switch (m.kind) {
+    @case ('revealConfirm') {
+      <shared-confirmation-modal
+        [heading]="'macrodeck.app:Settings.Backups.RevealConfirmHeading' | translate"
+        [message]="'macrodeck.app:Settings.Backups.RevealConfirmMessage' | translate"
+        [confirmText]="'macrodeck.app:Settings.Backups.ShowKeyButton' | translate"
+        [cancelText]="'macrodeck:Common.Cancel' | translate"
+        (confirm)="confirmReveal()"
+        (cancel)="cancelReveal()" />
+    }
+    @case ('keyModal') {
+      <shared-recovery-key-modal
+        [mode]="m.mode"
+        [key]="m.key"
+        (acknowledged)="onAcknowledged()"
+        (closed)="closeKeyModal()" />
+    }
+  }
+}

@@ -1,0 +1,15 @@
+// Layout only. CodeMirror injects its own theme (colors, `.cm-editor` sizing, gutters, tooltips -
+// see the component's `baseTheme`) as JS stylesheets targeting classes it adds at runtime, which
+// Angular's view encapsulation never sees; this file only ever needs to size the host it mounts into.
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.json-editor-host {
+  height: 100%;
+  min-height: 0;
+}

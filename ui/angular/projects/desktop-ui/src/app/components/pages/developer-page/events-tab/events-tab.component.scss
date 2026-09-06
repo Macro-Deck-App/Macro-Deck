@@ -1,0 +1,324 @@
+@use '../../../../../styles/index' as ds;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+shared-rail-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+}
+
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  min-height: 0;
+  @include ds.overlay-scrollbar-clearance;
+}
+
+.rail-section {
+  margin-top: var(--space-3);
+  padding: 0 var(--space-3) var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.events {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  gap: var(--space-3);
+}
+
+.events-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  flex: 0 0 auto;
+}
+
+.events-heading {
+  flex: 1 1 9.75rem;
+  min-width: 0;
+}
+
+.events-title {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+  @include ds.truncate;
+}
+
+.events-subtitle {
+  margin: 0.125rem 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.events-search {
+  flex: 0 1 13rem;
+  min-width: 8.125rem;
+}
+
+.events-body {
+  display: grid;
+  grid-template-columns: minmax(0, 14.625rem) minmax(0, 1fr);
+  gap: var(--space-4);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  min-height: 0;
+  @include ds.overlay-scrollbar-clearance;
+}
+
+.event-list-item {
+  @include ds.interactive-row;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: 1px solid transparent;
+  text-align: left;
+  color: var(--color-text-primary);
+
+  &.active {
+    background-color: var(--color-accent-muted);
+    border-color: var(--color-border-accent);
+  }
+}
+
+.event-list-name {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--text-md);
+  font-weight: var(--font-medium);
+  min-width: 0;
+
+  @include ds.truncate;
+}
+
+.event-list-badge {
+  flex: 0 0 auto;
+  padding: 0.0625rem var(--space-2);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+}
+
+.event-list-provider {
+  font-size: var(--text-xs);
+  color: var(--color-accent);
+  @include ds.truncate;
+}
+
+.event-list-id {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono, monospace);
+  @include ds.truncate;
+}
+
+.events-detail {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  @include ds.overlay-scrollbar-clearance;
+}
+
+.trigger {
+  @include ds.card($padding: var(--space-4) 1rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.trigger-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.trigger-name {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+}
+
+.trigger-ids {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.trigger-provider {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-accent);
+}
+
+.trigger-id {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono, monospace);
+}
+
+.trigger-description {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.trigger-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-warning);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-primary);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+
+  .icon {
+    flex: 0 0 auto;
+    margin-top: 0.125rem;
+    color: var(--color-warning);
+  }
+}
+
+.trigger-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8125rem;
+}
+
+.trigger-param {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.trigger-no-params {
+  margin: 0;
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.trigger-note {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.trigger-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.trigger-result {
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-left-width: 3px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-primary);
+
+  &.success {
+    border-left-color: var(--color-success);
+  }
+
+  &.failed {
+    border-left-color: var(--color-danger);
+  }
+}
+
+.trigger-result-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  font-size: var(--text-md);
+  font-weight: var(--font-semibold);
+
+  .success & {
+    color: var(--color-success);
+  }
+
+  .failed & {
+    color: var(--color-danger);
+  }
+}
+
+.trigger-result-detail {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.trigger-result-error {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.trigger-result-code {
+  display: inline-block;
+  margin-right: var(--space-2);
+  padding: 0.0625rem var(--space-2);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-danger-muted);
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  font-family: var(--font-mono, monospace);
+}
+
+@include ds.breakpoint-down(md) {
+  .events-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .event-list {
+    max-height: 11.375rem;
+  }
+}

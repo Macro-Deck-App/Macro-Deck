@@ -1,0 +1,335 @@
+// Reusable style mixins built on top of the runtime CSS custom properties.
+
+@use 'sass:map';
+@use 'variables' as vars;
+
+/// Accessible focus ring matching :focus-visible in the base layer.
+@mixin focus-ring {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/// Single-line text truncation with an ellipsis.
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/// Size-only half of control-base: density (height/padding/font). Split out from
+/// control-base so a size-variant override could re-declare just this half instead
+/// of a second control-base include - re-including the full mixin would re-declare
+/// the `border` shorthand on a higher-specificity selector and defeat the
+/// lower-specificity `:focus` border-color from control-interactive.
+///
+/// `md` is the single height for every single-line control - pages, dialogs, settings,
+/// search fields, dropdowns, and dense inline editors (param rows, key-value rows,
+/// sequence steps, condition rows) alike (issue #554). Dense editors that used to opt
+/// into a shorter control now compensate with tighter surrounding spacing instead.
+///
+/// control-base pins the line box, so the padding budget is closed-form rather than a
+/// bet on the UA's `normal` leading:
+///
+///   (38 - 1.25 x 13px - 2px border) / 2 = 9.875px per side -> 5px
+///
+/// That stays under the ceiling, so the min-height remains the binding constraint -
+/// with room to spare, which is why a single-line control centers its text in the box
+/// rather than filling it.
+///
+/// The vertical padding is a literal, not a `--space-*` token, because it is
+/// derived from that budget rather than picked off the spacing scale - and the
+/// two axes are separate properties rather than the `padding` shorthand: an
+/// empty `var()` invalidates a whole shorthand, so a missing horizontal token
+/// would silently take the vertical padding (and the row height that the chip
+/// editor computes from it) down with it.
+@mixin control-size {
+  min-height: var(--control-height);
+  padding-block: 0.3125rem;
+  padding-inline: var(--space-3);
+  font-size: var(--text-base);
+}
+
+/// Trailing-affordance geometry for a dropdown-style control: the caret sits at the control's
+/// inline padding, and a clear button (when present) one gap to its left. Declared once so the
+/// caret cannot drift out of sync with what the text box reserves for it.
+///
+/// `--trailing-gutter` is measured from the control's own right border edge, so it suits a text
+/// box that spans the whole control (the combobox input). A text element that already ends before
+/// the caret - a select's label, a flex sibling of it - must reserve only
+/// `--clear-gutter` on top of that, or it would count the caret and the inline padding twice.
+@mixin dropdown-affordances {
+  --caret-size: 0.8125rem;
+  --clear-size: 1rem;
+  --clear-inset: calc(var(--space-3) + var(--caret-size) + var(--space-2));
+  --clear-gutter: calc(var(--clear-size) + var(--space-2));
+  --trailing-gutter: calc(var(--clear-inset) + var(--clear-gutter));
+}
+
+/// Shared visual baseline for inputs, selects and dropdown triggers so
+/// controls line up and theme consistently.
+@mixin control-base {
+  box-sizing: border-box;
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  outline: none;
+  // Here rather than in control-size on purpose. A native <input>, a <button>
+  // trigger and a contenteditable <div> otherwise disagree about the line box -
+  // the UA's `normal` for the first two, the inherited 1.5 for the third - which
+  // is what let the chip editor render 34.5px against a 32px token. Declaring it
+  // in control-size would instead put it on the size override, where it would
+  // beat `textarea.control` and strip the --leading-normal that multi-line
+  // controls need.
+  line-height: var(--leading-tight);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  @include control-size;
+}
+
+/// Hover / focus / disabled affordances shared by every text-like control.
+/// Apply on the control element itself.
+@mixin control-interactive {
+  &:hover:not(:disabled):not(:focus) {
+    border-color: var(--color-border-light);
+  }
+
+  // Selected/active state: a simple 1px outline in the runtime accent color.
+  &:focus,
+  &:focus-within {
+    border-color: var(--color-accent);
+  }
+
+  // Text controls signal focus with the accent border, so drop the global
+  // outward focus ring that would otherwise stack on top of it.
+  &:focus-visible {
+    box-shadow: none;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+/// Invalid/error state for a text-like control.
+@mixin control-invalid {
+  border-color: var(--color-danger);
+}
+
+/// Shared range-slider look: flat track with a round accent thumb.
+@mixin control-slider {
+  width: 100%;
+  height: 0.375rem;
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+  appearance: none;
+  cursor: pointer;
+
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: 0.8125rem;
+    height: 0.8125rem;
+    background-color: var(--color-accent);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform var(--transition-fast);
+  }
+
+  &::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+  }
+
+  &::-moz-range-thumb {
+    width: 0.8125rem;
+    height: 0.8125rem;
+    background-color: var(--color-accent);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+}
+
+/// Structural chip/pill baseline (variable chips, liquid chips, filter chips).
+/// Colors stay with the caller so tinted variants can reuse the shape.
+@mixin chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.125rem var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  line-height: var(--leading-tight);
+  white-space: nowrap;
+}
+
+/// Floating panel chrome shared by dropdown menus, comboboxes, select popups
+/// and context menus. Positioning and z-index stay with the caller.
+/// The hairline stays a real border rather than folding into the shadow, so the
+/// panel's box geometry (which overlay-panel measures to position itself) is unchanged.
+@mixin popup-panel {
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-overlay);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-popover);
+}
+
+/// Uppercase mini-heading used for panel/section titles.
+@mixin section-label {
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+/// Structural badge/pill baseline (type badges, status pills, counters).
+/// Tint colors stay with the caller (see the --type-* tokens).
+@mixin badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.125rem var(--space-2);
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-tight);
+  white-space: nowrap;
+}
+
+/// Info/warning/error colour variants for an issue-count badge (integrations overview and the
+/// integration detail page), so the colours are only ever defined once. Include inside the block that
+/// declares the badge's base class - `&-error`/`&-warning`/`&-info` resolve against that selector.
+@mixin issue-badge-severities {
+  &-error {
+    color: var(--color-danger);
+    background-color: color-mix(in srgb, var(--color-danger) 14%, transparent);
+    border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+  }
+
+  &-warning {
+    color: var(--color-warning);
+    background-color: color-mix(in srgb, var(--color-warning) 14%, transparent);
+    border-color: color-mix(in srgb, var(--color-warning) 35%, transparent);
+  }
+
+  &-info {
+    color: var(--color-accent);
+    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
+  }
+}
+
+/// Clickable list-row baseline: hover highlight and pointer affordance.
+/// Selected/active styling stays with the caller.
+@mixin interactive-row {
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+
+  &:hover {
+    background-color: var(--color-bg-hover);
+  }
+}
+
+/// Card/panel container shared by pages, settings sections and detail panels.
+@mixin card($padding: var(--space-4)) {
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: $padding;
+}
+
+/// Vertical scroll container whose content sits close to the scrollport edge. Desktop
+/// scrollbars take layout space (plus a stable gutter while content toggles), but the
+/// overlay scrollbars on touch devices ignore `scrollbar-gutter` and draw on top of the
+/// content, so reserve a clearance strip there instead.
+@mixin overlay-scrollbar-clearance($clearance: var(--space-4)) {
+  scrollbar-gutter: stable;
+
+  @media (pointer: coarse) {
+    padding-right: $clearance;
+  }
+}
+
+/// Apply styles at or below a named breakpoint.
+@mixin breakpoint-down($name) {
+  $max: map.get(vars.$breakpoints, $name);
+  @if $max == null {
+    @error 'Unknown breakpoint `#{$name}`.';
+  }
+  @media (max-width: $max) {
+    @content;
+  }
+}
+
+/// Apply styles on phone-sized screens in either orientation: portrait phones are narrow
+/// (`max-width`), landscape phones are short (`max-height`) while often wider than the
+/// tablet breakpoint. Used for full-screen modal behavior.
+@mixin phone-screen {
+  @media (max-width: #{map.get(vars.$breakpoints, 'md')}), (max-height: 500px) {
+    @content;
+  }
+}
+
+/// Apply styles at or above a named breakpoint.
+@mixin breakpoint-up($name) {
+  $min: map.get(vars.$breakpoints, $name);
+  @if $min == null {
+    @error 'Unknown breakpoint `#{$name}`.';
+  }
+  @media (min-width: $min) {
+    @content;
+  }
+}
+
+/// The chip an action parameter shows in place of its control when the value is a variable or event
+/// reference. Expects markup of `.chip-text` plus a `.chip-clear` button, which reveals on hover.
+@mixin variable-reference-chip {
+  .param-variable-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    background-color: var(--color-bg-hover);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-primary);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    align-self: flex-start;
+  }
+
+  .param-variable-chip .chip-clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 0.6875rem;
+    height: 0.6875rem;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0.125rem;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--transition-fast), color var(--transition-fast);
+  }
+
+  .param-variable-chip:hover .chip-clear,
+  .param-variable-chip .chip-clear:focus-visible {
+    opacity: 1;
+  }
+
+  .param-variable-chip .chip-clear:hover {
+    color: var(--color-text-primary);
+  }
+}

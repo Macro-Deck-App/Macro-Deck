@@ -1,0 +1,186 @@
+<div class="security">
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Security.LockScreenHeading' | translate"
+    [description]="'macrodeck.app:Settings.Security.LockScreenDescription' | translate">
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Security.LockScreenToggleLabel' | translate"
+      [description]="'macrodeck.app:Settings.Security.LockScreenToggleDescription' | translate">
+      <shared-toggle-switch
+        [ariaLabel]="'macrodeck.app:Settings.Security.LockScreenToggleLabel' | translate"
+        [disabled]="!lockScreenLoaded()"
+        [busy]="lockScreenBusy()"
+        [checked]="lockScreenEnabled()"
+        (changed)="setLockScreenEnabled($event)" />
+    </shared-settings-row>
+  </shared-settings-section>
+
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Security.UsernameHeading' | translate"
+    [description]="'macrodeck.app:Settings.Security.UsernameDescription' | translate">
+    <form class="sec-form" (submit)="$event.preventDefault(); submitUsername()">
+      @if (usernameError(); as message) {
+        <shared-error-banner [message]="message" (dismiss)="usernameError.set(null)"></shared-error-banner>
+      }
+      @if (usernameChanged()) {
+        <p class="sec-success">{{ 'macrodeck.app:Settings.Security.UsernameChanged' | translate }}</p>
+      }
+
+      <label class="sec-field">
+        <span class="sec-label">{{ 'macrodeck.app:Settings.Security.NewUsernameLabel' | translate }}</span>
+        <shared-input
+          name="newUsername"
+          [placeholder]="currentUsername() ?? ('macrodeck.app:Settings.Security.UsernamePlaceholder' | translate)"
+          [disabled]="usernameSubmitting()"
+          [ngModel]="newUsername()"
+          (ngModelChange)="newUsername.set($event)">
+        </shared-input>
+      </label>
+
+      <label class="sec-field">
+        <span class="sec-label">{{ 'macrodeck.app:Settings.Security.CurrentPasswordLabel' | translate }}</span>
+        <shared-input
+          name="usernamePassword"
+          type="password"
+          [placeholder]="'macrodeck.app:Settings.Security.CurrentPasswordLabel' | translate"
+          [disabled]="usernameSubmitting()"
+          [ngModel]="usernamePassword()"
+          (ngModelChange)="usernamePassword.set($event)">
+        </shared-input>
+      </label>
+
+      <div class="sec-actions">
+        <shared-button
+          type="submit"
+          variant="primary"
+          [disabled]="!canSubmitUsername()"
+          [loading]="usernameSubmitting()">
+          {{ 'macrodeck.app:Settings.Security.ChangeUsernameAction' | translate }}
+        </shared-button>
+      </div>
+    </form>
+  </shared-settings-section>
+
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Security.PasswordHeading' | translate"
+    [description]="'macrodeck.app:Settings.Security.PasswordDescription' | translate">
+    <form class="sec-form" (submit)="$event.preventDefault(); submitPassword()">
+      @if (passwordError(); as message) {
+        <shared-error-banner [message]="message" (dismiss)="passwordError.set(null)"></shared-error-banner>
+      }
+      @if (passwordChanged()) {
+        <p class="sec-success">{{ 'macrodeck.app:Settings.Security.PasswordChanged' | translate }}</p>
+      }
+
+      <label class="sec-field">
+        <span class="sec-label">{{ 'macrodeck.app:Settings.Security.CurrentPasswordLabel' | translate }}</span>
+        <shared-input
+          name="currentPassword"
+          type="password"
+          [placeholder]="'macrodeck.app:Settings.Security.CurrentPasswordLabel' | translate"
+          [disabled]="passwordSubmitting()"
+          [ngModel]="currentPassword()"
+          (ngModelChange)="currentPassword.set($event)">
+        </shared-input>
+      </label>
+
+      <label class="sec-field">
+        <span class="sec-label">{{ 'macrodeck.app:Settings.Security.NewPasswordLabel' | translate }}</span>
+        <shared-input
+          name="newPassword"
+          type="password"
+          [placeholder]="'macrodeck.app:Settings.Security.NewPasswordPlaceholder' | translate"
+          [disabled]="passwordSubmitting()"
+          [invalid]="newPasswordTooShort()"
+          [ngModel]="newPassword()"
+          (ngModelChange)="newPassword.set($event)">
+        </shared-input>
+        @if (newPasswordTooShort()) {
+          <span class="sec-hint">{{ 'macrodeck.app:Settings.Security.PasswordTooShort' | translate }}</span>
+        }
+      </label>
+
+      <label class="sec-field">
+        <span class="sec-label">{{ 'macrodeck.app:Settings.Security.ConfirmNewPasswordLabel' | translate }}</span>
+        <shared-input
+          name="newPasswordConfirm"
+          type="password"
+          [placeholder]="'macrodeck.app:Settings.Security.ConfirmNewPasswordPlaceholder' | translate"
+          [disabled]="passwordSubmitting()"
+          [invalid]="newPasswordsMismatch()"
+          [ngModel]="newPasswordConfirm()"
+          (ngModelChange)="newPasswordConfirm.set($event)">
+        </shared-input>
+        @if (newPasswordsMismatch()) {
+          <span class="sec-hint">{{ 'macrodeck.app:Settings.Security.PasswordsMismatch' | translate }}</span>
+        }
+      </label>
+
+      <div class="sec-actions">
+        <shared-button
+          type="submit"
+          variant="primary"
+          [disabled]="!canSubmitPassword()"
+          [loading]="passwordSubmitting()">
+          {{ 'macrodeck.app:Settings.Security.ChangePasswordAction' | translate }}
+        </shared-button>
+      </div>
+    </form>
+  </shared-settings-section>
+
+  @if (keyRingProtection(); as protection) {
+    <shared-settings-section
+      [heading]="'macrodeck.app:Settings.Security.KeyRing.Title' | translate"
+      [description]="'macrodeck.app:Settings.Security.KeyRing.Description' | translate">
+      <shared-settings-row [label]="'macrodeck.app:Settings.Security.KeyRing.StatusLabel' | translate">
+        <span>{{ stateLabel(protection.state) }}</span>
+      </shared-settings-row>
+      <shared-settings-row [label]="'macrodeck.app:Settings.Security.KeyRing.BackendLabel' | translate">
+        <span>{{ backendLabel(protection.backend) }}</span>
+      </shared-settings-row>
+
+      @if (!protection.backendAvailable) {
+        <p class="security__note security__note--warning">
+          <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+          <span>
+            {{ 'macrodeck.app:Settings.Security.KeyRing.BackendUnavailable' | translate }}
+          </span>
+        </p>
+      }
+      @if (unprotectedReasonMessage(protection); as message) {
+        <p class="security__note security__note--warning">
+          <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+          <span>{{ message }}</span>
+        </p>
+      }
+      @if (protection.migrationPending) {
+        <p class="security__note security__note--warning">
+          <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+          <span>{{ 'macrodeck.app:Settings.Security.KeyRing.MigrationPending' | translate }}</span>
+        </p>
+      }
+    </shared-settings-section>
+  }
+
+  @if (canSignOut()) {
+    <shared-settings-section
+      [heading]="'macrodeck.app:Settings.Security.SignOutHeading' | translate"
+      [description]="'macrodeck.app:Settings.Security.SignOutDescription' | translate">
+      <div class="sec-actions">
+        <shared-button variant="danger" [loading]="signOutBusy()" (click)="requestSignOut()">
+          {{ 'macrodeck.app:Settings.Security.SignOutAction' | translate }}
+        </shared-button>
+      </div>
+    </shared-settings-section>
+  }
+</div>
+
+@if (confirmingSignOut()) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Settings.Security.SignOutConfirmHeading' | translate"
+    [message]="'macrodeck.app:Settings.Security.SignOutConfirmMessage' | translate"
+    [confirmText]="'macrodeck.app:Settings.Security.SignOutAction' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmSignOut()"
+    (cancel)="cancelSignOut()" />
+}

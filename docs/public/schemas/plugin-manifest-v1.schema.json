@@ -1,0 +1,529 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.macro-deck.app/plugin-manifest-v1.schema.json",
+  "title": "Macro Deck plugin manifest (manifestVersion 1)",
+  "description": "The manifest.json a .macroDeckPlugin artifact carries at its archive root. Mirrors MacroDeckHost.Application.Plugins.Runtime.PluginManifest field for field. Property names are camelCase because the host serializes and reads this document with a camelCase naming policy.",
+  "$comment": "additionalProperties is deliberately left unset (defaulting to true) on this schema and every nested object. The reader ignores unknown properties for forward compatibility with a future manifestVersion 1 field, so a schema that rejected them would reject documents the host itself accepts. 'x-macrodeck-requirement' is a non-standard annotation keyword: validators ignore it, and it declares the field's requirement category ('runtime', 'publication', 'recommended' or 'generated'). MacroDeck.Plugin.Packaging.Manifest.PluginManifestRequirements reads it from this schema as the single source of truth for the requirement table.",
+  "type": "object",
+  "required": ["manifestVersion", "id", "name", "version", "entrypoints"],
+  "properties": {
+    "manifestVersion": {
+      "const": 1,
+      "x-macrodeck-requirement": "runtime",
+      "description": "The only manifest format this host understands. Anything else is rejected before the rest of the document is even parsed."
+    },
+    "id": {
+      "$ref": "#/$defs/reverseDomainId",
+      "x-macrodeck-requirement": "runtime",
+      "description": "The plugin's reverse-domain id, e.g. 'com.example.my-plugin'. Must match the id and version directory names the manifest is found under."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "x-macrodeck-requirement": "runtime",
+      "description": "Human-readable display name. Must not contain control characters (not expressible in this schema; validated by the host)."
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "x-macrodeck-requirement": "runtime",
+      "description": "This artifact's SemVer 2.0 version. Must match the version directory name the manifest is found under."
+    },
+    "description": {
+      "type": "string",
+      "x-macrodeck-requirement": "publication",
+      "description": "Optional, human-readable description of what the plugin does."
+    },
+    "icon": {
+      "type": "string",
+      "minLength": 1,
+      "x-macrodeck-requirement": "publication",
+      "$comment": "The reader applies the same path rule as files[].path: forward slashes only, relative, no '..' segment. A declared icon that is not present on disk is deliberately not an error - this same reader gates every plugin launch.",
+      "description": "Forward-slash separated path to the plugin's icon, relative to the version directory (the artifact root). Lets the store show an icon for a plugin that is not running; a running plugin's icon still travels over the asset pipeline."
+    },
+    "entrypoints": {
+      "type": "object",
+      "minProperties": 1,
+      "x-macrodeck-requirement": "runtime",
+      "description": "Launch targets keyed by .NET runtime identifier (RID), e.g. 'win-x64', 'osx-arm64', 'linux-x64'. Resolved against the host's own RID with a small, fixed set of silicon fallbacks (osx-arm64 -> osx-x64, win-arm64 -> win-x64); there is no 'any' key and no other fallback.",
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9.-]+$",
+        "$comment": "The host does not constrain RID syntax: any key that resolves via PluginRuntimeIdentifiers is accepted as-is, including a bare RID with no hyphen (e.g. 'linux'). This pattern only excludes characters that could never appear in a real RID; it must not reject anything the host would accept.",
+        "description": "A .NET runtime identifier, e.g. 'win-x64', 'osx-arm64' or 'linux-musl-arm64'."
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/entrypoint"
+      }
+    },
+    "shutdown": {
+      "$ref": "#/$defs/shutdownSettings",
+      "x-macrodeck-requirement": "recommended",
+      "description": "Graceful-shutdown timing. Omitted means the defaults below."
+    },
+    "health": {
+      "$ref": "#/$defs/healthSettings",
+      "x-macrodeck-requirement": "recommended",
+      "description": "Health-probe timing and target. Omitted means the defaults below."
+    },
+    "publisher": {
+      "$ref": "#/$defs/publisher",
+      "x-macrodeck-requirement": "publication",
+      "description": "Who published the artifact. Informational only; it is not an identity the host trusts on its own - that is what 'signature' is for."
+    },
+    "license": {
+      "type": "string",
+      "x-macrodeck-requirement": "publication",
+      "description": "SPDX identifier by convention. Carried verbatim and never parsed by the host."
+    },
+    "homepage": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https?://",
+      "x-macrodeck-requirement": "recommended",
+      "description": "Project homepage URL. Informational only. Must be an absolute http or https URL; the reader rejects anything else."
+    },
+    "repository": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https?://",
+      "x-macrodeck-requirement": "publication",
+      "description": "Source repository URL. Informational only. Must be an absolute http or https URL; the reader rejects anything else."
+    },
+    "compatibility": {
+      "$ref": "#/$defs/compatibility",
+      "x-macrodeck-requirement": "publication",
+      "description": "The host surfaces this artifact expects. Every member is optional; an absent member declares nothing and never blocks an install. Outside the declared range is a rejection, not a warning: an artifact declaring it needs a host this is not is malformed for this host."
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "x-macrodeck-requirement": "recommended",
+      "description": "The permission vocabulary this plugin declares it wants. Declared, validated for shape, persisted and exposed only - nothing in the host enforces these today. Deliberately not an enum: an unknown permission is advisory, not invalid, so a manifest naming a permission this host does not yet know about still installs. The reader rejects a duplicated permission string. Known values as of this schema: host:variables, host:user-variables, host:config, host:deck, host:scripts, host:widgets, host:notifications, host:action-interactions, host:devices, host:variable-values, host:layouts, host:folder-views, host:widget-types, events:publish, assets:upload, net:outbound, fs:user-files, process:spawn, device:usb."
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/languageTag"
+      },
+      "$comment": "The reader rejects a blank or duplicated tag (duplicates case-insensitively, since a language tag is case-insensitive by BCP 47), but never an unrecognised one: like permissions[], an unknown value here is a declaration a store reads, not something that can make a plugin unrunnable. 'macrodeck-plugin pack' and 'build' fill this in from the plugin's Localization/*.resx set where they can see it, and carry whatever the manifest declared where they cannot.",
+      "uniqueItems": true,
+      "x-macrodeck-requirement": "recommended",
+      "description": "The languages this plugin's own user-facing strings are available in, as BCP-47 tags. Lets a store list a plugin's languages before it is installed; once it is installed and running, the localization capability it serves is the authority. Full tags, never truncated to a two-letter code - 'zh-Hans' and 'zh-Hant' are different languages to a reader and both would collapse onto 'zh'."
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/dependency"
+      },
+      "$comment": "The reader rejects a duplicated 'id' within this array. Uniqueness is by id alone, not by the whole object, so uniqueItems cannot express it here.",
+      "x-macrodeck-requirement": "recommended",
+      "description": "Other plugins this one relies on. An unsatisfied hard (non-optional) dependency installs and activates the plugin but blocks its automatic start with a Blocking warning; an unsatisfied optional dependency is Advisory only and the plugin still starts."
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/dependency"
+      },
+      "$comment": "The reader rejects a duplicated 'id' within this array, and rejects an id that also appears in 'dependencies'. Uniqueness is by id alone, not by the whole object, so uniqueItems cannot express it here.",
+      "x-macrodeck-requirement": "recommended",
+      "description": "Plugins that must not be installed alongside this one. A live conflict - the named plugin installed at a version that also satisfies the conflict's own versionRange, when one is declared - behaves like an unsatisfied hard dependency: the plugin installs and activates but is not auto-started, with a Blocking warning."
+    },
+    "iconPacks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/iconPackReference"
+      },
+      "$comment": "The reader rejects a duplicated 'id' within this array. Uniqueness is by id alone, not by the whole object, so uniqueItems cannot express it here.",
+      "x-macrodeck-requirement": "recommended",
+      "description": "Icon packs this plugin would like available. Always Advisory regardless of the optional flag, because icon packs are identified by a database id and carry no stable reverse-domain id yet, so resolution can never succeed today."
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/fileDigest"
+      },
+      "$comment": "The reader rejects a duplicated 'path' (case-insensitive) within this array. Uniqueness is by path alone, not by the whole object, so uniqueItems cannot express it here.",
+      "x-macrodeck-requirement": "generated",
+      "description": "Per-file digests covering the artifact payload. When present the installer verifies every entry and rejects any extracted file not declared here; when absent it records an advisory warning instead of rejecting the artifact."
+    },
+    "signature": {
+      "$ref": "#/$defs/signature",
+      "x-macrodeck-requirement": "generated",
+      "description": "Detached signature over the artifact digest. An unsigned artifact stays installable; a well-formed signature this host cannot cryptographically verify is reported, never rejected. Only a malformed signature block is rejected."
+    }
+  },
+  "$defs": {
+    "reverseDomainId": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*(\\.[a-z][a-z0-9]*(-[a-z0-9]+)*)+$",
+      "description": "A reverse-domain id: lowercase, hyphen-separated segments joined by dots, at least two segments, e.g. 'com.example.my-plugin'."
+    },
+    "languageTag": {
+      "type": "string",
+      "pattern": "^[A-Za-z]{2,3}(-[A-Za-z]{4})?(-([A-Za-z]{2}|[0-9]{3}))?$",
+      "$comment": "The same shape MDLOC005 checks a Localization/Strings.<culture>.resx suffix against (MacroDeck.Localization.Compiler.LocalizationCultureName), so a resource file the SDK accepts always produces a tag this schema accepts. A shape check, not a registry lookup: no validator can know which subtags IANA has registered, and the host deliberately does not reject an unrecognised one.",
+      "description": "A BCP-47 language tag of the shapes Macro Deck resources use: 'de', 'de-DE', 'zh-Hans' or 'zh-Hant-TW' - a 2-3 letter language, an optional 4-letter script, and an optional 2-letter or 3-digit region."
+    },
+    "versionRange": {
+      "type": "string",
+      "pattern": "^(\\*|\\s*(=|>=|<=|>|<)?\\s*\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.-]+)?(\\+[0-9A-Za-z.-]+)?\\s*(,\\s*(=|>=|<=|>|<)?\\s*\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.-]+)?(\\+[0-9A-Za-z.-]+)?\\s*)*)$",
+      "description": "A deliberately small in-repo version range grammar: either '*' or one or more comma-separated comparators ('=', '>', '>=', '<', '<='), a comma meaning AND, e.g. '>=1.2.0,<2.0.0'. Not NuGet or npm syntax: no caret, tilde, '||' or wildcards. Precedence is plain SemVer 2.0, so '>=1.0.0' is not satisfied by '1.0.0-beta.1'. SemanticVersionRange.TryParse trims whitespace around each comma-separated comparator and between the operator and the version, so '>= 1.0.0, < 2.0.0' is host-valid too."
+    },
+    "entrypoint": {
+      "type": "object",
+      "required": ["executable"],
+      "description": "One RID's launch target, relative to the version directory.",
+      "properties": {
+        "executable": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "pattern": "\\.([sS][hH]|[bB][aA][tT]|[cC][mM][dD]|[pP][sS]1|[cC][oO][mM][mM][aA][nN][dD])$"
+          },
+          "x-macrodeck-requirement": "runtime",
+          "description": "Path to the launch target, relative to the version directory. Must stay inside it: no '..' segments, no absolute path. Never a script: the reader rejects '.sh', '.bat', '.cmd', '.ps1' and '.command' outright, regardless of 'runtime'. Two further rules the reader enforces cannot be expressed here because they depend on the sibling 'runtime.kind': when 'runtime.kind' is 'FrameworkDependent' this must end in '.dll'; when 'runtime' is absent or 'SelfContained' this must NOT end in '.dll'."
+        },
+        "arguments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-macrodeck-requirement": "recommended",
+          "description": "Command-line arguments passed to the executable, in order."
+        },
+        "runtime": {
+          "$ref": "#/$defs/entrypointRuntime",
+          "x-macrodeck-requirement": "recommended",
+          "description": "How this entrypoint expects to be launched. Omitted means self-contained - the only behaviour that existed before this field, so an older manifest keeps its meaning."
+        }
+      }
+    },
+    "entrypointRuntime": {
+      "type": "object",
+      "description": "How an entrypoint expects to be launched.",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["SelfContained", "FrameworkDependent"],
+          "default": "SelfContained",
+          "$comment": "The host deserializes this with a case-insensitive string enum converter, so 'frameworkdependent' or 'FRAMEWORKDEPENDENT' is host-valid too. The enum above lists only the canonical spellings; it is not exhaustive of what the host accepts.",
+          "x-macrodeck-requirement": "recommended",
+          "description": "'SelfContained': the executable runs on its own and the host launches it directly. 'FrameworkDependent': the executable is a managed assembly launched through the dotnet muxer."
+        },
+        "dotnetVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+$",
+          "x-macrodeck-requirement": "recommended",
+          "description": "'major.minor', e.g. '10.0'. Required when kind is FrameworkDependent, ignored otherwise."
+        }
+      },
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "FrameworkDependent"
+          }
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "required": ["dotnetVersion"]
+      }
+    },
+    "shutdownSettings": {
+      "type": "object",
+      "description": "Graceful-shutdown timing. gracefulTimeoutSeconds is clamped to [1, 60] by the reader; an out-of-range value is clamped, not rejected.",
+      "properties": {
+        "gracefulTimeoutSeconds": {
+          "type": "integer",
+          "default": 10,
+          "x-macrodeck-requirement": "recommended",
+          "description": "Seconds given to the plugin to exit after session.goodbye and the WebSocket close before a process-tree kill. Clamped to [1, 60]."
+        }
+      }
+    },
+    "healthSettings": {
+      "type": "object",
+      "description": "Health-probe timing and target. Every numeric member is clamped by the reader, never rejected; the floor of 2 on unhealthyThreshold makes 'a single missed health check never restarts a plugin' a structural property of the manifest format.",
+      "properties": {
+        "intervalSeconds": {
+          "type": "integer",
+          "default": 15,
+          "x-macrodeck-requirement": "recommended",
+          "description": "Seconds between health probes. Clamped to [5, 120]."
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "default": 2,
+          "x-macrodeck-requirement": "recommended",
+          "description": "Seconds before a single probe is considered failed. Clamped to [1, 10]."
+        },
+        "unhealthyThreshold": {
+          "type": "integer",
+          "default": 3,
+          "x-macrodeck-requirement": "recommended",
+          "description": "Consecutive failed probes before the plugin is considered unhealthy. Clamped to [2, 10]."
+        },
+        "path": {
+          "type": "string",
+          "default": "/_macrodeck/health",
+          "x-macrodeck-requirement": "recommended",
+          "description": "The SDK's health route the probe calls."
+        }
+      }
+    },
+    "publisher": {
+      "type": "object",
+      "required": ["name"],
+      "description": "Who published the artifact. Informational; not an identity the host trusts on its own.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "x-macrodeck-requirement": "publication",
+          "description": "Publisher display name."
+        },
+        "id": {
+          "$ref": "#/$defs/reverseDomainId",
+          "x-macrodeck-requirement": "recommended",
+          "description": "Reverse-domain publisher id, validated like a plugin id, when present."
+        },
+        "email": {
+          "type": "string",
+          "x-macrodeck-requirement": "recommended",
+          "description": "Publisher contact email."
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https?://",
+          "x-macrodeck-requirement": "recommended",
+          "description": "Publisher website URL. Must be an absolute http or https URL; the reader rejects anything else."
+        }
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "description": "The host surfaces this artifact expects. Every member is optional and null means 'declares nothing', never 'incompatible'.",
+      "properties": {
+        "sdk": {
+          "$ref": "#/$defs/versionRange",
+          "x-macrodeck-requirement": "recommended",
+          "description": "Range over the plugin SDK version. Recorded but not enforced at install time - the host cannot know which SDK a plugin was built against until it connects."
+        },
+        "protocol": {
+          "$ref": "#/$defs/protocolVersionRange",
+          "x-macrodeck-requirement": "recommended",
+          "description": "Integer-major protocol range, reused verbatim from the protocol package so the manifest and the wire handshake can never drift apart."
+        },
+        "macroDeck": {
+          "$ref": "#/$defs/versionRange",
+          "x-macrodeck-requirement": "recommended",
+          "description": "Range over the Macro Deck host version. Skipped entirely on a development build (host version 0.0.0-dev), since otherwise nothing would install locally."
+        }
+      }
+    },
+    "protocolVersionRange": {
+      "type": "object",
+      "required": ["minimum", "maximum"],
+      "description": "An inclusive [minimum, maximum] range of protocol major versions a party speaks.",
+      "$comment": "The reader also rejects maximum < minimum. JSON Schema cannot express that cross-field rule here.",
+      "properties": {
+        "minimum": {
+          "type": "integer",
+          "minimum": 1,
+          "x-macrodeck-requirement": "runtime",
+          "description": "Lowest protocol major version this artifact speaks."
+        },
+        "maximum": {
+          "type": "integer",
+          "x-macrodeck-requirement": "runtime",
+          "description": "Highest protocol major version this artifact speaks. Must be at least 'minimum'."
+        }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "required": ["id"],
+      "description": "A declared relationship to another plugin, used for both dependencies and conflicts.",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/reverseDomainId",
+          "x-macrodeck-requirement": "runtime",
+          "description": "The other plugin's reverse-domain id."
+        },
+        "versionRange": {
+          "$ref": "#/$defs/versionRange",
+          "x-macrodeck-requirement": "recommended",
+          "description": "Version range the other plugin must satisfy. Omitted means any version."
+        },
+        "optional": {
+          "type": "boolean",
+          "default": false,
+          "x-macrodeck-requirement": "recommended",
+          "description": "False (the default) makes this a hard requirement; true makes it a recommendation. A hard dependency or a live conflict blocks automatic start with a Blocking warning; an optional one is Advisory only."
+        }
+      }
+    },
+    "iconPackReference": {
+      "type": "object",
+      "required": ["id"],
+      "description": "A declared relationship to an icon pack. Shape-validated today; resolution is not implemented because icon packs carry no stable string id yet.",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/reverseDomainId",
+          "x-macrodeck-requirement": "runtime",
+          "description": "The icon pack's reverse-domain id."
+        },
+        "versionRange": {
+          "$ref": "#/$defs/versionRange",
+          "x-macrodeck-requirement": "recommended",
+          "description": "Version range the icon pack must satisfy. Omitted means any version."
+        },
+        "optional": {
+          "type": "boolean",
+          "default": false,
+          "x-macrodeck-requirement": "recommended",
+          "description": "Parsed and exposed, but resolution is always Advisory regardless of this flag - icon packs cannot be resolved by id today."
+        }
+      }
+    },
+    "fileDigest": {
+      "type": "object",
+      "required": ["path", "sha256", "size"],
+      "description": "One payload file's expected identity.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "x-macrodeck-requirement": "generated",
+          "description": "Forward-slash separated path, relative to the version directory."
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "x-macrodeck-requirement": "generated",
+          "description": "The file's digest as 'sha256:' followed by 64 lowercase hex characters."
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "x-macrodeck-requirement": "generated",
+          "description": "The file's expected size in bytes."
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "required": ["algorithm", "keyId", "value"],
+      "description": "Detached signature over the artifact digest (see PluginArtifactDigest), never over re-serialized manifest JSON.",
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "minLength": 1,
+          "x-macrodeck-requirement": "generated",
+          "description": "The signature algorithm. Only 'ed25519' is understood by this host today; the reader rejects a blank value."
+        },
+        "keyId": {
+          "type": "string",
+          "minLength": 1,
+          "x-macrodeck-requirement": "generated",
+          "description": "Identifies which key produced the signature."
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "x-macrodeck-requirement": "generated",
+          "description": "The signature bytes, base64-encoded. The reader rejects a blank value."
+        },
+        "signedAt": {
+          "type": "string",
+          "format": "date-time",
+          "x-macrodeck-requirement": "generated",
+          "description": "When the artifact was signed, when the signer recorded it."
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "manifestVersion": 1,
+      "id": "com.example.minimal",
+      "name": "Minimal Plugin",
+      "version": "1.0.0",
+      "entrypoints": {
+        "win-x64": { "executable": "MinimalPlugin.exe" },
+        "osx-arm64": { "executable": "MinimalPlugin" },
+        "linux-x64": { "executable": "MinimalPlugin" }
+      }
+    },
+    {
+      "$schema": "https://schemas.macro-deck.app/plugin-manifest-v1.schema.json",
+      "manifestVersion": 1,
+      "id": "com.example.full",
+      "name": "Full Example Plugin",
+      "version": "1.2.0",
+      "description": "Demonstrates every field a manifest can declare.",
+      "entrypoints": {
+        "win-x64": { "executable": "FullPlugin.exe", "arguments": ["--quiet"] },
+        "osx-arm64": { "executable": "FullPlugin" },
+        "linux-x64": {
+          "executable": "FullPlugin.dll",
+          "runtime": { "kind": "FrameworkDependent", "dotnetVersion": "10.0" }
+        }
+      },
+      "shutdown": {
+        "gracefulTimeoutSeconds": 10
+      },
+      "health": {
+        "path": "/_macrodeck/health",
+        "intervalSeconds": 15,
+        "timeoutSeconds": 2,
+        "unhealthyThreshold": 3
+      },
+      "publisher": {
+        "name": "Example Publisher",
+        "id": "com.example",
+        "email": "plugins@example.com",
+        "url": "https://example.com"
+      },
+      "license": "MIT",
+      "homepage": "https://example.com/full-plugin",
+      "repository": "https://github.com/example/full-plugin",
+      "compatibility": {
+        "sdk": ">=1.0.0,<2.0.0",
+        "protocol": { "minimum": 1, "maximum": 1 },
+        "macroDeck": ">=3.0.0"
+      },
+      "permissions": ["host:variables", "net:outbound"],
+      "languages": ["en", "de", "zh-Hant-TW"],
+      "dependencies": [
+        { "id": "com.example.core", "versionRange": ">=1.0.0,<2.0.0", "optional": false },
+        { "id": "com.example.extras", "optional": true }
+      ],
+      "conflicts": [
+        { "id": "com.example.legacy" }
+      ],
+      "iconPacks": [
+        { "id": "com.example.icons", "versionRange": ">=1.0.0", "optional": true }
+      ],
+      "files": [
+        {
+          "path": "FullPlugin.exe",
+          "sha256": "sha256:b512f83e009ab0fcdda47e89a16013fa8bdf0baeb4b10e3343fc7ceca3cf6f3a",
+          "size": 204800
+        }
+      ],
+      "signature": {
+        "algorithm": "ed25519",
+        "keyId": "macro-deck-store-2026",
+        "value": "MEUCIQDx8p6...base64...==",
+        "signedAt": "2026-01-15T12:00:00Z"
+      }
+    }
+  ]
+}

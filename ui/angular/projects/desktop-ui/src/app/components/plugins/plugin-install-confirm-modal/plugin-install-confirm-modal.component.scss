@@ -1,0 +1,235 @@
+.plugin-install {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.plugin-install-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.plugin-install-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-tertiary);
+
+  img {
+    width: 2.5rem;
+    height: 2.5rem;
+    object-fit: contain;
+  }
+
+  // No icon of its own: a neutral placeholder, muted so it never reads as a brand mark of its own.
+  .icon {
+    color: var(--color-text-muted);
+  }
+}
+
+.plugin-install-facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.25rem var(--space-3);
+  margin: 0;
+  min-width: 0;
+  font-size: var(--text-base);
+
+  // Both sides carry the size explicitly: a dl inherits from the modal body, and letting labels and
+  // values drift apart is what makes a facts list look misaligned.
+  dt,
+  dd {
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+  }
+
+  dt {
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  dd {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: var(--color-text-primary);
+  }
+
+  // How far the row can be relied on: verified, merely claimed, or absent.
+  dd.is-success { color: var(--color-success); }
+  dd.is-warning { color: var(--color-warning); }
+  dd.is-danger  { color: var(--color-danger); }
+
+  dd .icon {
+    align-self: center;
+  }
+}
+
+.plugin-install-mono {
+  // A monospace face runs optically larger at the same size, so it is nudged back to match its row.
+  font-family: var(--font-mono);
+  font-size: 0.925em;
+}
+
+.plugin-install-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.plugin-install-title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+}
+
+.plugin-install-publisher {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1);
+  margin: 0;
+  font-size: var(--text-md);
+}
+
+.plugin-install-publisher-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: var(--font-semibold);
+}
+
+.plugin-install-claim {
+  padding: 0.0625rem var(--space-2);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-warning) 14%, transparent);
+  color: var(--color-warning);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  white-space: nowrap;
+}
+
+.plugin-install-hint {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+}
+
+.plugin-install-warning,
+.plugin-install-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+
+  span {
+    font-size: inherit;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  // Carries the severity itself rather than inheriting the body colour, or it reads as punctuation
+  // rather than as an alert.
+  .icon {
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+  }
+}
+
+.plugin-install-warning .icon {
+  color: var(--color-warning);
+}
+
+.plugin-install-error .icon {
+  color: var(--color-danger);
+}
+
+.plugin-install-warning {
+  background: color-mix(in srgb, var(--color-warning) 12%, transparent);
+  color: var(--color-text-secondary);
+}
+
+.plugin-install-error {
+  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+  color: var(--color-danger);
+}
+
+.plugin-install-warnings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    padding-left: var(--space-2);
+    border-left: 2px solid transparent;
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    overflow-wrap: anywhere;
+
+    &.is-warn {
+      border-left-color: var(--color-warning);
+    }
+
+    &.is-error {
+      border-left-color: var(--color-danger);
+    }
+  }
+}
+
+.plugin-install-blocking {
+  color: var(--color-text-secondary);
+}
+
+.plugin-install-trust {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+}
+
+.plugin-install-consent {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  cursor: pointer;
+
+  input {
+    flex: none;
+    // Nudged onto the first line's baseline; the checkbox is shorter than the line box.
+    margin-top: 0.2em;
+    cursor: pointer;
+  }
+
+  &:has(input:disabled) {
+    cursor: default;
+
+    input {
+      cursor: default;
+    }
+  }
+}

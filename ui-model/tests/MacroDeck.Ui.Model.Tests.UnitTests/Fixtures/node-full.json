@@ -1,0 +1,1 @@
+{"id":"root","type":"chart","requiredComponentVersion":2,"properties":{"path":"M0,0 L1,1"},"children":[{"id":"child","type":"text","properties":{},"children":[]}],"fallback":{"id":"root-fallback","type":"text","properties":{},"children":[]}}

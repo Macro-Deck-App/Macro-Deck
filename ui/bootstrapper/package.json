@@ -1,0 +1,15 @@
+{
+  "name": "macro-deck-bootstrapper",
+  "productName": "Macro Deck",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Macro Deck Bootstrapper - native tray/WebView shell (Tauri)",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.9.0"
+  }
+}

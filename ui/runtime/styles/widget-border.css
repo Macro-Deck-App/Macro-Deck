@@ -1,0 +1,166 @@
+/*
+ * A widget's configured border, as a fixed-width ring along the widget edge.
+ *
+ * The ring is the element's own paint area, cut out via a two-layer exclude mask (everything but the
+ * content box), so the styles can paint anything into it: a flat colour for the static and
+ * opacity-animated styles, or a rotating oversized conic gradient for the spatial ones.
+ *
+ * The width stays a fixed 2px at every deck scale - unlike the corner radius, a ring that grew with
+ * the cell would read as wildly inconsistent between differently sized widgets. That holds wherever
+ * the ring is mounted: a tile draws its own beside the scaled content, while a button node's ring
+ * lives inside it and divides `--deck-scale` back out, so both paint 2px on screen.
+ *
+ * Mount it in a `position: relative` box carrying the widget's radius; the ring inherits it.
+ */
+
+.widget-button-ring {
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/*
+ * Hidden entirely where mask compositing is unsupported: without the mask the background would cover
+ * the whole widget face, which is far worse than no border at all.
+ */
+.ring {
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: var(--wb-width, 2px);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
+  .ring {
+    display: block;
+  }
+}
+
+/* Colour-tinted styles paint the ring directly; the animated ones vary its opacity. */
+.wb-static,
+.wb-heartbeat,
+.wb-breathing,
+.wb-blink {
+  background: var(--wb-color);
+}
+
+.wb-heartbeat {
+  animation: wb-heartbeat 1.4s ease-out infinite;
+}
+
+.wb-breathing {
+  animation: wb-breathing 3.2s ease-in-out infinite;
+}
+
+.wb-blink {
+  animation: wb-blink 1s linear infinite;
+}
+
+/* One colour at a time cycling through the spectrum, with no spatial gradient. */
+.wb-hue-shift {
+  background: #ff0000;
+  animation: wb-hue-shift 8s linear infinite;
+}
+
+/*
+ * Spatial styles: an oversized square-ish layer spins behind the ring mask. The -300% inset keeps the
+ * layer covering the widget at every rotation angle even for extreme aspect ratios; the overflow clip
+ * bounds what is actually painted.
+ */
+.wb-rgb::before,
+.wb-comet::before,
+.wb-ants::before {
+  content: '';
+  position: absolute;
+  top: -300%;
+  right: -300%;
+  bottom: -300%;
+  left: -300%;
+  animation: wb-spin 4s linear infinite;
+}
+
+.wb-rgb::before {
+  background: conic-gradient(from 0deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+}
+
+.wb-comet::before {
+  background: conic-gradient(from 0deg, transparent 0deg 210deg, var(--wb-color) 360deg);
+  animation-duration: 1.6s;
+}
+
+.wb-ants::before {
+  background: repeating-conic-gradient(var(--wb-color) 0deg 9deg, transparent 9deg 18deg);
+  animation-duration: 12s;
+}
+
+/*
+ * Phase-locks every looping style to the shared clock. Must stay after the rules above: their
+ * `animation` shorthand resets the delay longhand.
+ */
+.ring,
+.ring::before {
+  animation-delay: var(--wb-phase, 0s);
+}
+
+@keyframes wb-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes wb-heartbeat {
+  0%, 45%, 100% {
+    opacity: 0.35;
+  }
+
+  10%, 30% {
+    opacity: 1;
+  }
+
+  20% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes wb-breathing {
+  0%, 100% {
+    opacity: 0.15;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes wb-blink {
+  0%, 49.9% {
+    opacity: 1;
+  }
+
+  50%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes wb-hue-shift {
+  to {
+    filter: hue-rotate(1turn);
+  }
+}
+
+/* Every style freezes to its static look for reduced-motion users. */
+@media (prefers-reduced-motion: reduce) {
+  .ring,
+  .ring::before {
+    animation: none;
+  }
+}

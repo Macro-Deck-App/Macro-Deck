@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <IsMacroDeckPackage>true</IsMacroDeckPackage>
+        <PackageId>MacroDeck.Sdk</PackageId>
+        <Description>Capability contracts for Macro Deck integrations and plugins: actions, config flows, variables, events, profiles, host-brokered UI sessions and the shared identity rules.</Description>
+        <PackageTags>macrodeck;plugin;integration;sdk</PackageTags>
+        <!-- The public surface predates packaging and is not fully documented yet. Backfilling it is
+             tracked separately; suppressing here keeps the package shippable without a documentation
+             sweep landing inside an unrelated change. -->
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Serilog" />
+        <ProjectReference Include="..\..\..\ui-model\src\MacroDeck.Ui.Model\MacroDeck.Ui.Model.csproj" />
+        <ProjectReference Include="..\MacroDeck.Localization\MacroDeck.Localization.csproj" />
+    </ItemGroup>
+
+</Project>

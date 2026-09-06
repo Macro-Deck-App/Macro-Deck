@@ -1,0 +1,45 @@
+<ng-template #previewBlock>
+  <div class="editor-preview">
+    <div class="preview-frame">
+      <shared-ui-tree-widget
+        class="preview-widget"
+        [widgetType]="widget.type"
+        [data]="previewData()"
+        [width]="100"
+        [height]="100"
+        [tileDrawsBorder]="true">
+      </shared-ui-tree-widget>
+      <shared-widget-border-overlay [border]="previewBorder()" />
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #propertiesBlock>
+  @if (propertiesRegion(); as propertiesNode) {
+    <div class="widget-config-properties">
+      <shared-ui-node [node]="propertiesNode" />
+    </div>
+  }
+</ng-template>
+
+@if (rejection()) {
+  <div class="widget-config-rejected" role="alert">
+    {{ 'macrodeck.app:Widgets.Editor.ConfigUnavailableMessage' | translate }}
+  </div>
+} @else if (editorRegion(); as editorNode) {
+  <app-widget-editor-shell>
+    <ng-container editorSidebar>
+      <ng-container [ngTemplateOutlet]="previewBlock" />
+      <ng-container [ngTemplateOutlet]="propertiesBlock" />
+    </ng-container>
+
+    <div class="widget-config-editor">
+      <shared-ui-node [node]="editorNode" />
+    </div>
+  </app-widget-editor-shell>
+} @else {
+  <div class="widget-config-single-pane">
+    <ng-container [ngTemplateOutlet]="previewBlock" />
+    <ng-container [ngTemplateOutlet]="propertiesBlock" />
+  </div>
+}

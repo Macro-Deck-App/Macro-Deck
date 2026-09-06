@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Connect" xml:space="preserve">
+    <value>Verbinden</value>
+  </data>
+  <data name="Configuration.Title" xml:space="preserve">
+    <value>Wohlerzogenes Plugin</value>
+  </data>
+  <data name="DeviceCount" xml:space="preserve">
+    <value>{count} Geräte gefunden</value>
+  </data>
+</root>

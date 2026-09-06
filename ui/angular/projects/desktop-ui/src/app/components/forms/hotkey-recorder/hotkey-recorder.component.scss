@@ -1,0 +1,36 @@
+@use '../../../../styles/index' as ds;
+
+/* The row itself is a shared-button-group; this describes how it sits in its parent. */
+.hk-root {
+  flex: 1 1 0;
+}
+
+.hk-field {
+  flex: 1 1 0;
+  @include ds.control-base;
+  @include ds.control-interactive;
+  // The field mixes an icon with text, so center it explicitly instead of leaving
+  // the two to the UA's button layout now that the box is taller than its content.
+  display: inline-flex;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+}
+
+.hk-recording {
+  border-color: var(--color-accent);
+}
+
+.hk-hint {
+  color: var(--color-text-muted);
+}
+
+.hk-value {
+  font-family: var(--font-mono);
+}
+
+.hk-clear-icon {
+  width: 0.8125rem;
+  height: 0.8125rem;
+  display: block;
+}

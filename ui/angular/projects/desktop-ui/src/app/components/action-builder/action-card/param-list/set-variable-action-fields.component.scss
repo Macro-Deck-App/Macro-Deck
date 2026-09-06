@@ -1,0 +1,26 @@
+@use '../../../../../styles/index' as ds;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: var(--space-2);
+}
+
+.form-group {
+  flex: 1 1 0;
+}
+
+.value-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.value-row > *:not(shared-variable-picker) {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+@include ds.variable-reference-chip;

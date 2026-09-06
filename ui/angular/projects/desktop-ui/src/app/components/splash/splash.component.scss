@@ -1,0 +1,81 @@
+.splash-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: var(--color-bg-secondary);
+}
+
+.splash-content {
+  text-align: center;
+  animation: ds-fade-in 0.5s ease-out;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-icon {
+  width: 4.875rem;
+  height: 4.875rem;
+}
+
+.title {
+  // Intentional splash-only display size, larger than --text-xl.
+  font-size: 1.625rem;
+  font-weight: var(--font-semibold);
+  margin: 0 0 var(--space-6) 0;
+  letter-spacing: -0.025em;
+}
+
+.status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(96, 165, 250, 0.2);
+  border-top-color: #60a5fa;
+  border-radius: 50%;
+  animation: ds-spin 1s linear infinite;
+}
+
+.checkmark {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xl);
+  color: #34d399;
+}
+
+.status-message {
+  font-size: var(--text-md);
+  color: #a1a1aa;
+  margin: 0;
+}
+
+.retry-button {
+  margin-top: var(--space-5);
+  padding: var(--space-3) var(--space-5);
+  background: #60a5fa;
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-md);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.retry-button:hover {
+  background: #3b82f6;
+}
+
+.retry-button:active {
+  background: #2563eb;
+}

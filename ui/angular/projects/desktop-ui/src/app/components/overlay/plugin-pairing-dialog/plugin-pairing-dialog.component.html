@@ -1,0 +1,94 @@
+@if (pending(); as request) {
+  <shared-modal
+    [heading]="'macrodeck.app:Dialogs.PluginPairing.Heading' | translate"
+    size="medium"
+    [closeOnOverlay]="false"
+    [showFooter]="true"
+    (close)="reject()">
+    <div class="plugin-pairing">
+      <div class="plugin-pairing-warning">
+        <span class="icon icon-alert-triangle icon-sm"></span>
+        <p>
+          {{ 'macrodeck.app:Dialogs.PluginPairing.Warning' | translate }}
+        </p>
+      </div>
+
+      <dl class="plugin-pairing-facts">
+        <dt>{{ 'macrodeck.app:Dialogs.PluginPairing.PackageId' | translate }}</dt>
+        <dd class="plugin-pairing-primary">{{ request.pluginId }}</dd>
+      </dl>
+
+      <div class="plugin-pairing-section">
+        <p class="plugin-pairing-title">{{ 'macrodeck.app:Dialogs.PluginPairing.ReportedByRequester' | translate }}</p>
+        <p class="plugin-pairing-hint">
+          {{ 'macrodeck.app:Dialogs.PluginPairing.NotVerifiedHint' | translate }}
+        </p>
+        <dl class="plugin-pairing-facts">
+          <dt>{{ 'macrodeck.app:Dialogs.PluginPairing.DisplayName' | translate }}</dt>
+          <dd>{{ request.displayName }}</dd>
+
+          <dt>{{ 'macrodeck.app:Dialogs.PluginPairing.ExecutablePath' | translate }}</dt>
+          <dd>{{ clientLine(request, 'executablePath') }}</dd>
+
+          <dt>{{ 'macrodeck.app:Dialogs.PluginPairing.ProcessId' | translate }}</dt>
+          <dd>{{ clientLine(request, 'processId') }}</dd>
+
+          <dt>{{ 'macrodeck.app:Dialogs.PluginPairing.SdkVersion' | translate }}</dt>
+          <dd>{{ clientLine(request, 'sdkVersion') }}</dd>
+        </dl>
+      </div>
+
+      @if (request.arrivedOnPublicListener) {
+        <div class="plugin-pairing-note">
+          <span class="icon icon-info icon-sm"></span>
+          <p>
+            {{ 'macrodeck.app:Dialogs.PluginPairing.NetworkListenerNote' | translate }}
+          </p>
+        </div>
+      }
+
+      @if (request.replacesExistingRegistration) {
+        <div class="plugin-pairing-danger">
+          <span class="icon icon-alert-triangle icon-sm"></span>
+          <div class="plugin-pairing-danger-body">
+            <p>
+              {{ 'macrodeck.app:Dialogs.PluginPairing.ReplacesWarning' | translate }}
+            </p>
+            <dl class="plugin-pairing-facts">
+              <dt>{{ 'macrodeck.app:Dialogs.PluginPairing.ExistingOrigin' | translate }}</dt>
+              <dd>{{ request.existingRegistrationOrigin ?? ('macrodeck.app:Dialogs.PluginPairing.Unknown' | translate) }}</dd>
+
+              <dt>{{ 'macrodeck.app:Dialogs.PluginPairing.ExistingSince' | translate }}</dt>
+              <dd>{{ request.existingRegistrationCreatedAt ?? ('macrodeck.app:Dialogs.PluginPairing.Unknown' | translate) }}</dd>
+            </dl>
+            <shared-checkbox
+              name="replaceConfirmed"
+              [label]="'macrodeck.app:Dialogs.PluginPairing.ReplaceConfirmLabel' | translate"
+              [ngModel]="replaceConfirmed()"
+              (ngModelChange)="replaceConfirmed.set($event)" />
+          </div>
+        </div>
+      }
+
+      @if (errorMessage(); as error) {
+        <p class="plugin-pairing-error">{{ error }}</p>
+      }
+
+      <p class="plugin-pairing-meta">
+        {{ 'macrodeck.app:Dialogs.PluginPairing.ExpiresIn' | translate:{ seconds: secondsRemaining() } }}
+        @if (queuedCount() > 0) {
+          {{ 'macrodeck.app:Dialogs.PluginPairing.MoreWaiting' | translate:{ count: queuedCount() } }}
+        }
+      </p>
+    </div>
+
+    <div modal-footer>
+      <shared-button variant="secondary" [disabled]="busy()" (click)="reject()">
+        {{ 'macrodeck.app:Dialogs.PluginPairing.Reject' | translate }}
+      </shared-button>
+      <shared-button variant="primary" [loading]="busy()" [disabled]="approveDisabled()" (click)="approve()">
+        {{ 'macrodeck.app:Dialogs.PluginPairing.Approve' | translate }}
+      </shared-button>
+    </div>
+  </shared-modal>
+}

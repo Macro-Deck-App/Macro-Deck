@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Maps Macro Deck's export file names to MIME types. The .desktop file's
+  MimeType= only says which types the app handles; without this nothing on the
+  system knows that a *.macroDeckProfile is one of them, so a double-click would
+  still find no application.
+
+  Each type carries both the camelCase glob and an all-lowercase one:
+  shared-mime-info's case handling for mixed-case patterns is not dependable
+  across desktops, and a name that differs only in case must still open.
+
+  Installed to /usr/share/mime/packages by the DEB and RPM bundles; the
+  shared-mime-info dependency is what makes the package trigger update-mime-database.
+-->
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/vnd.macro-deck.profile">
+    <comment>Macro Deck Profile</comment>
+    <sub-class-of type="application/zip"/>
+    <glob pattern="*.macroDeckProfile"/>
+    <glob pattern="*.macrodeckprofile"/>
+  </mime-type>
+  <mime-type type="application/vnd.macro-deck.folder">
+    <comment>Macro Deck Folder</comment>
+    <sub-class-of type="application/zip"/>
+    <glob pattern="*.macroDeckFolder"/>
+    <glob pattern="*.macrodeckfolder"/>
+  </mime-type>
+  <mime-type type="application/vnd.macro-deck.widget">
+    <comment>Macro Deck Widget</comment>
+    <sub-class-of type="application/zip"/>
+    <glob pattern="*.macroDeckWidget"/>
+    <glob pattern="*.macrodeckwidget"/>
+  </mime-type>
+  <mime-type type="application/vnd.macro-deck.icon-pack">
+    <comment>Macro Deck Icon Pack</comment>
+    <sub-class-of type="application/zip"/>
+    <glob pattern="*.macroDeckIconPack"/>
+    <glob pattern="*.macrodeckiconpack"/>
+  </mime-type>
+  <mime-type type="application/vnd.macro-deck.plugin">
+    <comment>Macro Deck Plugin</comment>
+    <sub-class-of type="application/zip"/>
+    <glob pattern="*.macroDeckPlugin"/>
+    <glob pattern="*.macrodeckplugin"/>
+  </mime-type>
+</mime-info>
