@@ -216,7 +216,9 @@ jobs:
             "$DISCORD_WEBHOOK_URL"
 
   # Last, and only once the release exists: a package on nuget.org cannot be taken back, so it
-  # must never be published for a release that failed to be created.
+  # must never be published for a release that failed to be created. It is also the one publishing
+  # step allowed to fail - the release is already out, and the packages can be pushed afterwards
+  # from nuget.yml at the same version.
   publish-nuget:
     name: Publish NuGet packages
     needs: publish
@@ -228,5 +230,6 @@ jobs:
     with:
       version: ${{ needs.publish.outputs.version }}
       run_id: ${{ github.event.workflow_run.id }}
+      allow_failure: true
     secrets:
       NUGET_USER: ${{ secrets.NUGET_USER }}

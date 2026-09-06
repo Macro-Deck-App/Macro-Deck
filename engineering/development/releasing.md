@@ -19,7 +19,7 @@ Publishing then happens in one order, because each step depends on the one befor
 1. The GitHub release is created and carries the installers, the checksums and the signed updater payloads.
 2. The channel manifests are repointed at the assets that release actually got, since GitHub sanitizes asset names on upload.
 3. Those manifests - and only those - are uploaded to the R2 feed installed clients poll.
-4. The NuGet packages are pushed, last, because a published package cannot be taken back and must never exist for a release that failed to be created.
+4. The NuGet packages are pushed, last, because a published package cannot be taken back and must never exist for a release that failed to be created. This is the one publishing step allowed to fail: the release is already out, and a failed push is reported as a warning so the packages can be pushed afterwards from the manual NuGet workflow at the same version.
 
 The Tauri bootstrapper is the installed entry point. The published host and Angular output are staged into its application bundle before packaging.
 

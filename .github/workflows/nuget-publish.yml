@@ -27,6 +27,10 @@ on:
         description: Fail instead of skipping when no nuget.org credential is configured. The manual workflow sets this - publishing is its whole purpose - while a release skips, so forks and pre-setup runs still produce a release.
         type: boolean
         default: false
+      allow_failure:
+        description: Report a failed push as a warning instead of failing the job. The release publish sets this - the GitHub release is already out by then, and nuget.yml can push the packages afterwards - while the manual workflow fails loudly.
+        type: boolean
+        default: false
     secrets:
       NUGET_USER:
         description: nuget.org account (profile) name that owns the trusted publishing policy
@@ -83,7 +87,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Download packages
+        id: download
         if: ${{ steps.credentials.outputs.configured == 'true' }}
+        continue-on-error: ${{ inputs.allow_failure }}
         uses: actions/download-artifact@v7
         with:
           name: ${{ inputs.artifact }}
@@ -95,13 +101,16 @@ jobs:
       # meaningful - a caller wiring the wrong artifact or version fails before anything is pushed,
       # because a push to nuget.org cannot be taken back.
       - name: Verify packages
-        if: ${{ steps.credentials.outputs.configured == 'true' }}
+        id: verify
+        if: ${{ steps.credentials.outputs.configured == 'true' && steps.download.outcome == 'success' }}
+        continue-on-error: ${{ inputs.allow_failure }}
         run: node ci/scripts/verify-nuget-packages.mjs "${{ runner.temp }}/packages" "${{ inputs.version }}"
 
       # As late as possible: the issued key is valid for one hour, and one token yields one key.
       - name: NuGet login
         id: login
-        if: ${{ steps.credentials.outputs.configured == 'true' }}
+        if: ${{ steps.credentials.outputs.configured == 'true' && steps.verify.outcome == 'success' }}
+        continue-on-error: ${{ inputs.allow_failure }}
         uses: NuGet/login@v1
         with:
           user: ${{ secrets.NUGET_USER }}
@@ -110,7 +119,9 @@ jobs:
       # second time would come back as a 409. No --skip-duplicate - a version that is already published
       # must fail the run rather than pass silently.
       - name: Push packages
-        if: ${{ steps.credentials.outputs.configured == 'true' }}
+        id: push
+        if: ${{ steps.credentials.outputs.configured == 'true' && steps.login.outcome == 'success' }}
+        continue-on-error: ${{ inputs.allow_failure }}
         env:
           NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
           PACKAGE_DIR: ${{ runner.temp }}/packages
@@ -123,8 +134,21 @@ jobs:
               --source https://api.nuget.org/v3/index.json
           done
 
+      # A tolerated failure still has to be visible: the job is green, so nothing else says the
+      # packages never made it out.
+      - name: Report a tolerated failure
+        if: ${{ steps.download.outcome == 'failure' || steps.verify.outcome == 'failure' || steps.login.outcome == 'failure' || steps.push.outcome == 'failure' }}
+        run: |
+          echo "::warning::Publishing ${{ inputs.version }} to nuget.org failed. Everything else in this release is published - rerun the NuGet workflow at this version once the cause is fixed."
+          {
+            echo "## NuGet publish failed"
+            echo
+            echo "Version \`${{ inputs.version }}\` was not pushed. The rest of the release is unaffected;"
+            echo "run the NuGet workflow at this version to publish the packages."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Summarize
-        if: ${{ steps.credentials.outputs.configured == 'true' }}
+        if: ${{ steps.credentials.outputs.configured == 'true' && steps.push.outcome == 'success' }}
         env:
           PACKAGE_DIR: ${{ runner.temp }}/packages
         run: |
