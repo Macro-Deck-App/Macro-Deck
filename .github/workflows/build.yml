@@ -186,7 +186,6 @@ jobs:
   # in this run - and nothing else in the workflow produces packable output (test-host builds without a
   # version, publish-host builds only the host per RID), so this job is where they are compiled.
   pack-nuget:
-    if: false
     name: Pack NuGet packages
     needs: [prepare, test-host]
     uses: ./.github/workflows/nuget-pack.yml
@@ -970,13 +969,8 @@ jobs:
   # Publishes the packages packed earlier in this run, once the installers are on the release feed and
   # the release is therefore actually being published. Skipped along with upload-r2 when any platform
   # failed to package. The credential lives only in this job, which is the only one that needs it.
-  #
-  # TEMPORARILY DISABLED: a release build no longer pushes to nuget.org. pack-nuget still runs, so the
-  # packages remain downloadable from the run as the `nuget-packages` artifact, and the manual
-  # nuget.yml workflow is the way to publish them. Remove the `if: false` to restore.
   publish-nuget:
     name: Publish NuGet packages
-    if: false
     needs: [prepare, pack-nuget, upload-r2]
     permissions:
       contents: read
