@@ -2,7 +2,8 @@ name: Publish Release
 
 # Publishes a successful release build: the GitHub release carries the installers and the
 # signed updater payloads, the R2 feed carries only the channel manifests pointing at them,
-# and the NuGet packages go out last, once the release they belong to actually exists.
+# and the NuGet packages go to nuget.org only - never onto the release - last, once the
+# release they belong to actually exists.
 on:
   workflow_run:
     workflows: [Build]
@@ -43,14 +44,6 @@ jobs:
           pattern: macro-deck-*
           path: release-assets
           merge-multiple: true
-          github-token: ${{ github.token }}
-          run-id: ${{ env.SOURCE_RUN_ID }}
-
-      - name: Download NuGet packages
-        uses: actions/download-artifact@v7
-        with:
-          name: nuget-packages
-          path: release-assets/nuget
           github-token: ${{ github.token }}
           run-id: ${{ env.SOURCE_RUN_ID }}
 
@@ -115,9 +108,7 @@ jobs:
               -o -name '*.sha256' \
               -o -name '*.deb' \
               -o -name '*.rpm' \
-              -o -name '*.app.tar.gz' \
-              -o -name '*.nupkg' \
-              -o -name '*.snupkg' \) \
+              -o -name '*.app.tar.gz' \) \
               -print0
           )
 
