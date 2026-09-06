@@ -35,7 +35,6 @@ jobs:
           run-id: ${{ env.SOURCE_RUN_ID }}
 
       - name: Download NuGet packages
-        if: false
         uses: actions/download-artifact@v7
         with:
           name: nuget-packages
