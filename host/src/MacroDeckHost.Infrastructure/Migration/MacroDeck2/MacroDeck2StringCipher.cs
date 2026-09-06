@@ -32,6 +32,11 @@ internal static class MacroDeck2StringCipher
 
 	private const int DerivationIterations = 1000;
 
+	// A wrong key still clears PKCS7 roughly once every 256 values, and the plaintext that survives is
+	// random bytes, so the decode has to reject them rather than paper over them with U+FFFD.
+	private static readonly UTF8Encoding StrictUtf8 = new(encoderShouldEmitUTF8Identifier: false,
+		throwOnInvalidBytes: true);
+
 	/// <summary>
 	/// Decrypts one value, or returns null when it cannot be decrypted with this passphrase. A wrong key
 	/// is an expected outcome - it is what makes the host offer to ask for another one - so it is never
@@ -68,9 +73,13 @@ internal static class MacroDeck2StringCipher
 			using var aes = Aes.Create();
 			aes.Key = DeriveKey(passPhrase, salt);
 
-			return Encoding.UTF8.GetString(aes.DecryptCbc(cipher, iv, PaddingMode.PKCS7));
+			return StrictUtf8.GetString(aes.DecryptCbc(cipher, iv, PaddingMode.PKCS7));
 		}
 		catch (CryptographicException)
+		{
+			return null;
+		}
+		catch (DecoderFallbackException)
 		{
 			return null;
 		}

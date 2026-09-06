@@ -27,6 +27,21 @@ public class MacroDeck2StringCipherTests
 		=> Assert.That(MacroDeck2StringCipher.TryDecrypt(GoldenCipherText, "00000000-0000-0000-0000-000000000000"),
 			Is.Null);
 
+	// Macro Deck 2's format carries no authentication tag, so a wrong key clears PKCS7 padding by chance
+	// for roughly one value in 256. This pair is one of those: the wrong key below decrypts it without a
+	// CryptographicException, leaving bytes that are not text. Accepting them made the host trust a key
+	// that opens nothing, which is what MigrationError.InvalidDecryptionKey exists to prevent.
+	private const string PaddingCollisionCipherText =
+		"Dp9ceQnYiOf79LW4B+9eu8PwZpzt4T0wgUvPmq69v9adhw36YYSy6FPTOencG1qI";
+
+	private const string PaddingCollisionWrongPassPhrase = "11111111-1111-1111-1111-111111111111";
+
+	[Test]
+	public void TryDecrypt_WithAWrongKeyThatClearsPadding_StillReportsFailure()
+		=> Assert.That(MacroDeck2StringCipher.TryDecrypt(PaddingCollisionCipherText,
+				PaddingCollisionWrongPassPhrase),
+			Is.Null);
+
 	// A truncated or hand-edited value must be refused the same way a wrong key is: the migration offers to
 	// carry on without the encrypted data, and that path is only reachable if nothing here throws.
 	[TestCase("")]
