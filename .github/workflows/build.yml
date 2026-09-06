@@ -366,6 +366,8 @@ jobs:
     # newer ELF features on the ubuntu-latest (24.04) image, and keeps the
     # declared libc6 floor in tauri.linux.conf.json's deb.depends accurate.
     runs-on: blacksmith-4vcpu-ubuntu-2204
+    # The signing and updater credentials this job reads are production environment secrets.
+    environment: production
     needs: [prepare, test-host, build-ui, publish-host]
     env:
       # Without the updater key the bundle is built without updater artifacts and
@@ -558,6 +560,8 @@ jobs:
   package-windows:
     name: Package Windows (NSIS)
     runs-on: blacksmith-4vcpu-windows-2025
+    # The signing and updater credentials this job reads are production environment secrets.
+    environment: production
     needs: [prepare, test-host, test-host-windows, build-ui, publish-host]
     env:
       HAS_WIN_CERT: ${{ secrets.WINDOWS_SIGN_CERT_PFX_BASE64 != '' }}
@@ -668,6 +672,8 @@ jobs:
   package-macos:
     name: Package macOS (DMG)
     runs-on: blacksmith-6vcpu-macos-26
+    # The signing, notarization and updater credentials this job reads are production environment secrets.
+    environment: production
     needs: [prepare, test-host, test-host-macos, build-ui, publish-host]
     env:
       HAS_MAC_CERT: ${{ secrets.MACOS_SIGN_CERT_P12_BASE64 != '' }}
@@ -879,6 +885,8 @@ jobs:
     # default rule - every job in `needs` succeeded - is exactly that gate, and any condition that lets
     # a partial set through would publish channel files pointing at platforms this run never built.
     needs: [prepare, package-linux, package-windows, package-macos, e2e]
+    # The R2 credentials this job reads are production environment secrets.
+    environment: production
     env:
       HAS_R2: ${{ secrets.R2_ACCESS_KEY_ID != '' }}
     steps:
