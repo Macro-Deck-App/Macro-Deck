@@ -6,7 +6,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { buildManifest, findUpdaterArtifact, FEED_BASE_URL, MAX_NOTES_LENGTH, TARGETS } from './make-update-manifest.mjs';
+import {
+  buildManifest,
+  findUpdaterArtifact,
+  MAX_NOTES_LENGTH,
+  releaseAssetBaseUrl,
+  TARGETS,
+} from './make-update-manifest.mjs';
 
 const scriptPath = fileURLToPath(new URL('./make-update-manifest.mjs', import.meta.url));
 
@@ -72,7 +78,7 @@ test('builds a manifest with the platform key, trimmed signature, encoded url an
     platforms: {
       'windows-x86_64': {
         signature: 'dGVzdA==',
-        url: `${FEED_BASE_URL}Macro%20Deck_3.0.0-beta.42_x64-setup.exe`,
+        url: `${releaseAssetBaseUrl('3.0.0-beta.42')}Macro%20Deck_3.0.0-beta.42_x64-setup.exe`,
       },
     },
     notes: '## What changed\n\n- Fixed a bug',
@@ -243,4 +249,19 @@ test('the CLI exits non-zero with an error mentioning the path when the notes fi
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+// The payload is served from the GitHub release rather than the R2 feed, so the
+// url has to address the tag publish-release.yml creates for this version.
+test('the payload url addresses the release tag of the version', () => {
+  assert.equal(
+    releaseAssetBaseUrl('3.0.0-beta.42', 'Macro-Deck-App/Macro-Deck'),
+    'https://github.com/Macro-Deck-App/Macro-Deck/releases/download/v3.0.0-beta.42/'
+  );
+
+  const manifest = buildManifest('linux', '3.0.0', 'Macro Deck_3.0.0_amd64.AppImage', 'sig', '2026-07-21T00:00:00.000Z');
+  assert.equal(
+    manifest.platforms['linux-x86_64'].url,
+    'https://github.com/Macro-Deck-App/Macro-Deck/releases/download/v3.0.0/Macro%20Deck_3.0.0_amd64.AppImage'
+  );
 });
