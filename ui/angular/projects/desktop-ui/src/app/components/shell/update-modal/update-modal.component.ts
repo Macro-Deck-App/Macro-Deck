@@ -23,9 +23,13 @@ export class UpdateModalComponent {
 
   protected readonly heading = computed(() => this.localization.translateKey(AppStrings.Settings.Update.SoftwareUpdateLabel));
 
+  protected readonly knownVersion = computed(() => this.updates.version());
+
   protected readonly versionHeading = computed(() => {
-    const version = this.updates.version() ?? this.updates.currentVersion();
-    return this.localization.translateKey(AppStrings.Update.Details.VersionHeading, { version });
+    const version = this.knownVersion();
+    return version === null
+      ? null
+      : this.localization.translateKey(AppStrings.Update.Details.VersionHeading, { version });
   });
 
   protected readonly currentVersionLine = computed(() =>
@@ -62,10 +66,11 @@ export class UpdateModalComponent {
       : this.localization.translateKey(AppStrings.Update.Details.DownloadingStatus, { percent });
   });
 
-  protected readonly downloadFailedMessage = computed(() =>
-    this.localization.translateKey(AppStrings.Update.Details.DownloadFailed, {
-      error: this.updates.error() ?? '',
-    }));
+  protected readonly failureMessage = computed(() =>
+    this.localization.translateKey(
+      this.updates.checkFailed() ? AppStrings.Update.Details.CheckFailed : AppStrings.Update.Details.DownloadFailed,
+      { error: this.updates.error() ?? '' },
+    ));
 
   install(): void {
     void this.updates.install();

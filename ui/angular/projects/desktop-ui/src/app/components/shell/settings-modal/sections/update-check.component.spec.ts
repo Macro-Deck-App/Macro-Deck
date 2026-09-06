@@ -23,6 +23,7 @@ function makeState(overrides: Partial<ShellUpdateState> = {}): ShellUpdateState 
     downloadUrl: null,
     partialCheck: null,
     error: null,
+    failure: null,
     progress: null,
     lastCheckedAt: null,
     ...overrides,

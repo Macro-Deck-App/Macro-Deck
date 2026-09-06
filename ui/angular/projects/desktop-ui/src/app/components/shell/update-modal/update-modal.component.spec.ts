@@ -17,6 +17,7 @@ function makeState(overrides: Partial<ShellUpdateState> = {}): ShellUpdateState 
     downloadUrl: 'https://macro-deck.app/download',
     partialCheck: null,
     error: null,
+    failure: null,
     progress: null,
     lastCheckedAt: null,
     ...overrides,
@@ -243,6 +244,55 @@ describe('UpdateModalComponent', () => {
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('network unreachable');
     expect(text).not.toContain("You're on the latest version");
+  });
+
+  it('words a failed check as a failed check, not as a failed download', async () => {
+    setShell({
+      getUpdateState: () => Promise.resolve(
+        makeState({ phase: 'failed', failure: 'check', version: null, error: 'could not check for updates on any feed (stable, beta)' }),
+      ),
+      onUpdateState: () => Promise.resolve(() => {}),
+    });
+
+    const fixture = await createFixture();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain("Couldn't check for updates.");
+    expect(text).toContain('could not check for updates on any feed (stable, beta)');
+    expect(text).not.toContain('The download failed.');
+  });
+
+  it('offers no version and no changelog when a check failed without finding one', async () => {
+    setShell({
+      getUpdateState: () => Promise.resolve(
+        makeState({ phase: 'failed', failure: 'check', version: null, currentVersion: '3.0.0-beta.2', error: 'feed unreachable' }),
+      ),
+      onUpdateState: () => Promise.resolve(() => {}),
+    });
+
+    const fixture = await createFixture();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('You currently have 3.0.0-beta.2');
+    expect(text).not.toContain('Macro Deck 3.0.0-beta.2');
+    expect(text).not.toContain('No release notes were published for this version.');
+    expect(fixture.nativeElement.querySelector('.update-modal__changelog')).toBeNull();
+  });
+
+  it('still words a failed download as a failed download', async () => {
+    setShell({
+      getUpdateState: () => Promise.resolve(
+        makeState({ phase: 'failed', failure: 'install', version: '3.1.0', error: 'connection reset' }),
+      ),
+      onUpdateState: () => Promise.resolve(() => {}),
+    });
+
+    const fixture = await createFixture();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('The download failed.');
+    expect(text).toContain('connection reset');
+    expect(text).toContain('Macro Deck 3.1.0');
   });
 
   it('disables Install while a download/install is in flight', async () => {

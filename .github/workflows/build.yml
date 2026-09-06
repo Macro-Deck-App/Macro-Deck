@@ -420,7 +420,7 @@ jobs:
       - name: Write version override
         working-directory: ui/bootstrapper
         run: |
-          printf '{"version":"%s","bundle":{"createUpdaterArtifacts":%s},"plugins":{"updater":{"endpoints":["https://dev.macro-deck.app/releases/%s-{{target}}.json"]}}}\n' \
+          printf '{"version":"%s","bundle":{"createUpdaterArtifacts":%s},"plugins":{"updater":{"endpoints":["https://updater.macro-deck.app/releases/%s-{{target}}.json"]}}}\n' \
             "${{ needs.prepare.outputs.version }}" "${{ env.HAS_UPDATER_KEY == 'true' && 'true' || 'false' }}" "${{ needs.prepare.outputs.updater_channel }}" \
             > version-override.json
 
@@ -472,7 +472,7 @@ jobs:
       - name: Write RPM version override
         working-directory: ui/bootstrapper
         run: |
-          printf '{"version":"%s","bundle":{"createUpdaterArtifacts":false,"linux":{"rpm":{"release":"%s"}}},"plugins":{"updater":{"endpoints":["https://dev.macro-deck.app/releases/%s-{{target}}.json"]}}}\n' \
+          printf '{"version":"%s","bundle":{"createUpdaterArtifacts":false,"linux":{"rpm":{"release":"%s"}}},"plugins":{"updater":{"endpoints":["https://updater.macro-deck.app/releases/%s-{{target}}.json"]}}}\n' \
             "${{ needs.prepare.outputs.rpm_version }}" "${{ needs.prepare.outputs.rpm_release }}" "${{ needs.prepare.outputs.updater_channel }}" \
             > rpm-version-override.json
 
@@ -617,7 +617,7 @@ jobs:
         shell: bash
         working-directory: ui/bootstrapper
         run: |
-          printf '{"version":"%s","bundle":{"createUpdaterArtifacts":%s},"plugins":{"updater":{"endpoints":["https://dev.macro-deck.app/releases/%s-{{target}}.json"]}}}\n' \
+          printf '{"version":"%s","bundle":{"createUpdaterArtifacts":%s},"plugins":{"updater":{"endpoints":["https://updater.macro-deck.app/releases/%s-{{target}}.json"]}}}\n' \
             "${{ needs.prepare.outputs.version }}" "${{ env.HAS_UPDATER_KEY == 'true' && 'true' || 'false' }}" "${{ needs.prepare.outputs.updater_channel }}" \
             > version-override.json
 
@@ -788,7 +788,7 @@ jobs:
       - name: Write version override
         working-directory: ui/bootstrapper
         run: |
-          printf '{"version":"%s","bundle":{"createUpdaterArtifacts":%s},"plugins":{"updater":{"endpoints":["https://dev.macro-deck.app/releases/%s-{{target}}.json"]}}}\n' \
+          printf '{"version":"%s","bundle":{"createUpdaterArtifacts":%s},"plugins":{"updater":{"endpoints":["https://updater.macro-deck.app/releases/%s-{{target}}.json"]}}}\n' \
             "${{ needs.prepare.outputs.version }}" "${{ env.HAS_UPDATER_KEY == 'true' && 'true' || 'false' }}" "${{ needs.prepare.outputs.updater_channel }}" \
             > version-override.json
 

@@ -1124,6 +1124,7 @@ mod tests {
             download_url: DOWNLOAD_PAGE_URL,
             partial_check: None,
             error: None,
+            failure: None,
             progress: None,
             last_checked_at: None,
         }
@@ -1336,38 +1337,38 @@ mod tests {
 
     #[test]
     fn feed_urls_derive_beta_from_latest() {
-        let feeds =
-            feed_urls_for("https://dev.macro-deck.app/releases/latest-{{target}}.json").unwrap();
+        let feeds = feed_urls_for("https://updater.macro-deck.app/releases/latest-{{target}}.json")
+            .unwrap();
         assert_eq!(
             feeds.stable,
-            "https://dev.macro-deck.app/releases/latest-{{target}}.json"
+            "https://updater.macro-deck.app/releases/latest-{{target}}.json"
         );
         assert_eq!(
             feeds.beta,
-            "https://dev.macro-deck.app/releases/beta-{{target}}.json"
+            "https://updater.macro-deck.app/releases/beta-{{target}}.json"
         );
     }
 
     #[test]
     fn feed_urls_derive_latest_from_beta() {
         let feeds =
-            feed_urls_for("https://dev.macro-deck.app/releases/beta-{{target}}.json").unwrap();
+            feed_urls_for("https://updater.macro-deck.app/releases/beta-{{target}}.json").unwrap();
         assert_eq!(
             feeds.stable,
-            "https://dev.macro-deck.app/releases/latest-{{target}}.json"
+            "https://updater.macro-deck.app/releases/latest-{{target}}.json"
         );
         assert_eq!(
             feeds.beta,
-            "https://dev.macro-deck.app/releases/beta-{{target}}.json"
+            "https://updater.macro-deck.app/releases/beta-{{target}}.json"
         );
     }
 
     #[test]
     fn feed_urls_are_none_for_the_dev_endpoint() {
-        assert!(
-            feed_urls_for("https://dev.macro-deck.app/releases/development-{{target}}.json")
-                .is_none()
-        );
+        assert!(feed_urls_for(
+            "https://updater.macro-deck.app/releases/development-{{target}}.json"
+        )
+        .is_none());
     }
 
     #[test]

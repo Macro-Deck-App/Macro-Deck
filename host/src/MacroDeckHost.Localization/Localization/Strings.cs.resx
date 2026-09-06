@@ -14258,6 +14258,10 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Stahování se nezdařilo. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.CheckFailed" xml:space="preserve">
+    <value>Aktualizace se nepodařilo zkontrolovat. {error}</value>
+    <comment>[error:string]</comment>
+  </data>
   <data name="Update.Details.CancelDownloadAction" xml:space="preserve">
     <value>Zrušit stahování</value>
   </data>

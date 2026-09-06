@@ -115,6 +115,16 @@ impl UpdatePhase {
     }
 }
 
+// Which attempt the `Failed` phase came from. The phase alone cannot say: a
+// feed that could not be reached and a download that died both land on
+// `Failed`, and the UI has to word them differently.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) enum UpdateFailure {
+    Check,
+    Install,
+}
+
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct DownloadProgress {
@@ -152,6 +162,7 @@ pub(crate) struct UpdateSnapshot {
     pub(crate) download_url: &'static str,
     pub(crate) partial_check: Option<String>,
     pub(crate) error: Option<String>,
+    pub(crate) failure: Option<UpdateFailure>,
     pub(crate) progress: Option<DownloadProgress>,
     pub(crate) last_checked_at: Option<u64>,
 }
@@ -169,6 +180,7 @@ pub(crate) struct UpdateState {
     pub(crate) download_url: &'static str,
     pub(crate) partial_check: Option<String>,
     pub(crate) error: Option<String>,
+    pub(crate) failure: Option<UpdateFailure>,
     pub(crate) progress: Option<DownloadProgress>,
     // Consumed only once the host has actually been told, so a host that is
     // down or unreachable never permanently loses this version's signal - the
@@ -204,6 +216,7 @@ impl UpdateState {
             download_url,
             partial_check: None,
             error: None,
+            failure: None,
             progress: None,
             signalled_version: None,
             last_check_at: None,
@@ -267,6 +280,7 @@ impl UpdateState {
         self.published_at = published_at;
         self.partial_check = partial_check;
         self.error = None;
+        self.failure = None;
         // A completed or failed download from a previous check must not leak
         // its progress into this one - a fresh Available must never carry a
         // stale 100%.
@@ -281,12 +295,14 @@ impl UpdateState {
         self.published_at = None;
         self.partial_check = partial_check;
         self.error = None;
+        self.failure = None;
     }
 
     pub(crate) fn record_check_failed(&mut self, now: u64, error: String) {
         self.last_check_at = Some(now);
         self.phase = UpdatePhase::Failed;
         self.error = Some(error);
+        self.failure = Some(UpdateFailure::Check);
     }
 
     // The single replacement for the old `UPDATE_IN_PROGRESS` static: both the
@@ -302,6 +318,7 @@ impl UpdateState {
         self.phase = UpdatePhase::Downloading;
         self.progress = None;
         self.error = None;
+        self.failure = None;
         true
     }
 
@@ -341,6 +358,7 @@ impl UpdateState {
     pub(crate) fn record_install_failed(&mut self, error: String) {
         self.phase = UpdatePhase::Failed;
         self.error = Some(error);
+        self.failure = Some(UpdateFailure::Install);
     }
 
     pub(crate) fn record_cancelled(&mut self) {
@@ -375,6 +393,7 @@ impl UpdateState {
             download_url: self.download_url,
             partial_check: self.partial_check.clone(),
             error: self.error.clone(),
+            failure: self.failure,
             progress: self.progress.clone(),
             last_checked_at: self.last_check_at,
         }
@@ -706,6 +725,40 @@ mod tests {
             let serialized = serde_json::to_value(phase).unwrap();
             assert_eq!(serialized.as_str(), Some(phase.as_str()));
         }
+    }
+
+    #[test]
+    fn a_failed_check_and_a_failed_download_are_distinguishable() {
+        let mut state = idle_state();
+        state.record_check_failed(1, "feed unreachable".to_string());
+        let snapshot = state.snapshot();
+        assert_eq!(snapshot.phase, UpdatePhase::Failed);
+        assert_eq!(snapshot.failure, Some(UpdateFailure::Check));
+        assert!(
+            snapshot.version.is_none(),
+            "a check that never resolved a release must not offer one"
+        );
+
+        let mut state = idle_state();
+        state.record_available(1, "3.1.0".to_string(), None, None, None);
+        assert!(state.try_begin_download());
+        state.record_install_failed("connection reset".to_string());
+        let snapshot = state.snapshot();
+        assert_eq!(snapshot.phase, UpdatePhase::Failed);
+        assert_eq!(snapshot.failure, Some(UpdateFailure::Install));
+        assert_eq!(snapshot.version.as_deref(), Some("3.1.0"));
+    }
+
+    #[test]
+    fn a_later_successful_check_clears_the_previous_failure() {
+        let mut state = idle_state();
+        state.record_check_failed(1, "feed unreachable".to_string());
+        state.record_up_to_date(2, None);
+        assert!(state.snapshot().failure.is_none());
+
+        state.record_check_failed(3, "feed unreachable".to_string());
+        state.record_available(4, "3.1.0".to_string(), None, None, None);
+        assert!(state.snapshot().failure.is_none());
     }
 
     #[test]

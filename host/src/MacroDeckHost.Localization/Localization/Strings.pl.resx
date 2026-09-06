@@ -14258,6 +14258,10 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Pobieranie nie powiodło się. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.CheckFailed" xml:space="preserve">
+    <value>Nie udało się sprawdzić dostępności aktualizacji. {error}</value>
+    <comment>[error:string]</comment>
+  </data>
   <data name="Update.Details.CancelDownloadAction" xml:space="preserve">
     <value>Anuluj pobieranie</value>
   </data>

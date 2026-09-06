@@ -14257,6 +14257,10 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>The download failed. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.CheckFailed" xml:space="preserve">
+    <value>Couldn't check for updates. {error}</value>
+    <comment>[error:string]</comment>
+  </data>
   <data name="Update.Details.CancelDownloadAction" xml:space="preserve">
     <value>Cancel download</value>
   </data>
