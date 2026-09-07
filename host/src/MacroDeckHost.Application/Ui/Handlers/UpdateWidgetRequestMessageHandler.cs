@@ -165,8 +165,9 @@ public class UpdateWidgetRequestMessageHandler : IUiTransportMessageHandler<Upda
 		var stored = _folderCache.GetFolderById(folderId)?.Widgets.FirstOrDefault(w => w.Id == widgetId);
 		var storedBag = ActionButtonStateJson.ParseDataBag(stored?.Data);
 
-		return StateCount(incoming) > Math.Max(StateCount(storedBag),
-			StateCount(storedBag["manualStateBackup"] as JsonObject));
+		return StateCount(incoming) >
+			Math.Max(StateCount(storedBag),
+				StateCount(storedBag["manualStateBackup"] as JsonObject));
 	}
 
 	// The stored bag may still hold the legacy off/on object rather than an array, which counts as no

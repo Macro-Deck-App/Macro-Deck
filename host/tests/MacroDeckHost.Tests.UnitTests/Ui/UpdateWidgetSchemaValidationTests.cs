@@ -336,7 +336,8 @@ public class UpdateWidgetSchemaValidationTests
 		});
 	}
 
-	private static (RecordingWidgetService Service, UpdateWidgetRequestMessageHandler Handler, UpdateWidgetRequest Request)
+	private static (RecordingWidgetService Service, UpdateWidgetRequestMessageHandler Handler, UpdateWidgetRequest
+		Request)
 		OverLimitButton(int stored, int incoming)
 	{
 		var widgetId = Guid.NewGuid();
