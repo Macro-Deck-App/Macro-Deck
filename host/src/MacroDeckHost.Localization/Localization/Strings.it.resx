@@ -14258,6 +14258,10 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>Il download non è riuscito. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.CheckFailed" xml:space="preserve">
+    <value>Impossibile controllare gli aggiornamenti. {error}</value>
+    <comment>[error:string]</comment>
+  </data>
   <data name="Update.Details.CancelDownloadAction" xml:space="preserve">
     <value>Annulla download</value>
   </data>

@@ -126,6 +126,7 @@ declare global {
     downloadUrl: string | null;
     partialCheck: string | null;
     error: string | null;
+    failure: 'check' | 'install' | null;
     progress: ShellUpdateProgress | null;
     lastCheckedAt: number | null;
   }

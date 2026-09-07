@@ -184,7 +184,7 @@ fn development_tauri_config_has_an_isolated_identity() {
     );
     assert_eq!(
         cfg["plugins"]["updater"]["endpoints"][0].as_str(),
-        Some("https://dev.macro-deck.app/releases/development-{{target}}.json")
+        Some("https://updater.macro-deck.app/releases/development-{{target}}.json")
     );
 }
 

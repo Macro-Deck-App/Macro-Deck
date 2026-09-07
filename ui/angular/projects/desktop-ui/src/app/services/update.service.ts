@@ -21,6 +21,7 @@ const IDLE_STATE: ShellUpdateState = {
   downloadUrl: null,
   partialCheck: null,
   error: null,
+  failure: null,
   progress: null,
   lastCheckedAt: null,
 };
@@ -50,6 +51,7 @@ export class UpdateService {
   readonly downloadUrl = computed(() => this.state().downloadUrl);
   readonly partialCheck = computed(() => this.state().partialCheck);
   readonly error = computed(() => this.state().error);
+  readonly failure = computed(() => this.state().failure);
   readonly progressPercent = computed(() => this.state().progress?.percent ?? null);
   readonly lastCheckedAt = computed(() => this.state().lastCheckedAt);
 
@@ -57,6 +59,7 @@ export class UpdateService {
   readonly canInstall = computed(() => this.phase() === 'available' || this.phase() === 'downloaded');
   readonly externalDownload = computed(() => this.installStrategy() === 'externalDownload');
   readonly installFailed = computed(() => this.phase() === 'failed' && this.installAttempted());
+  readonly checkFailed = computed(() => this.phase() === 'failed' && this.failure() === 'check');
 
   constructor() {
     const bridge = window.macroDeckShell;
@@ -131,6 +134,7 @@ export class UpdateService {
         this.state.update(current => ({
           ...current,
           phase: 'failed',
+          failure: 'install',
           error: installErrorMessage(error),
         }));
       })

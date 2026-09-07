@@ -29,7 +29,7 @@ export const DEFAULT_REPOSITORY = 'Macro-Deck-App/Macro-Deck';
 
 // Where the release feed serves the channel manifests from. Payloads are not
 // published here any more - only these manifests are.
-export const FEED_BASE_URL = 'https://dev.macro-deck.app/releases/';
+export const FEED_BASE_URL = 'https://updater.macro-deck.app/releases/';
 
 // The tag publish-release.yml creates for a version, and the asset base url under it.
 export function releaseAssetBaseUrl(version, repository = DEFAULT_REPOSITORY) {

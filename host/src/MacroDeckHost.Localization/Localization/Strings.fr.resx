@@ -14258,6 +14258,10 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Le téléchargement a échoué. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.CheckFailed" xml:space="preserve">
+    <value>Impossible de vérifier les mises à jour. {error}</value>
+    <comment>[error:string]</comment>
+  </data>
   <data name="Update.Details.CancelDownloadAction" xml:space="preserve">
     <value>Annuler le téléchargement</value>
   </data>

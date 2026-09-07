@@ -3,7 +3,9 @@
   [maxWidth]="'520px'"
   (close)="onModalClose()">
   <div class="update-modal">
-    <h3 class="update-modal__version">{{ versionHeading() }}</h3>
+    @if (versionHeading(); as version) {
+      <h3 class="update-modal__version">{{ version }}</h3>
+    }
     <p class="update-modal__current">{{ currentVersionLine() }}</p>
 
     <div class="update-modal__meta">
@@ -15,16 +17,18 @@
       }
     </div>
 
-    <section class="update-modal__changelog-section">
-      <h4 class="update-modal__section-heading">{{ appStrings.Update.Details.ChangelogHeading | translate }}</h4>
-      <div class="update-modal__changelog">
-        @if (hasChangelog()) {
-          <shared-store-markdown [text]="changelogText()" />
-        } @else {
-          <p class="update-modal__no-changelog">{{ appStrings.Update.Details.NoChangelog | translate }}</p>
-        }
-      </div>
-    </section>
+    @if (knownVersion() !== null) {
+      <section class="update-modal__changelog-section">
+        <h4 class="update-modal__section-heading">{{ appStrings.Update.Details.ChangelogHeading | translate }}</h4>
+        <div class="update-modal__changelog">
+          @if (hasChangelog()) {
+            <shared-store-markdown [text]="changelogText()" />
+          } @else {
+            <p class="update-modal__no-changelog">{{ appStrings.Update.Details.NoChangelog | translate }}</p>
+          }
+        </div>
+      </section>
+    }
 
     @switch (updates.phase()) {
       @case ('downloading') {
@@ -45,7 +49,7 @@
         <p class="update-modal__status">{{ appStrings.Update.Details.ReadyStatus | translate }}</p>
       }
       @case ('failed') {
-        <p class="update-modal__status update-modal__status--error">{{ downloadFailedMessage() }}</p>
+        <p class="update-modal__status update-modal__status--error">{{ failureMessage() }}</p>
       }
     }
   </div>

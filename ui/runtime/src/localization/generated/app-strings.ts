@@ -5820,6 +5820,7 @@ export const AppStrings = {
 		Details: {
 			CancelDownloadAction: 'macrodeck.app:Update.Details.CancelDownloadAction',
 			ChangelogHeading: 'macrodeck.app:Update.Details.ChangelogHeading',
+			CheckFailed: 'macrodeck.app:Update.Details.CheckFailed',
 			CurrentVersion: 'macrodeck.app:Update.Details.CurrentVersion',
 			DownloadFailed: 'macrodeck.app:Update.Details.DownloadFailed',
 			DownloadingStatus: 'macrodeck.app:Update.Details.DownloadingStatus',
@@ -11289,6 +11290,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:UiRender.UnsupportedField': 'This field isn\'t supported by this version of Macro Deck',
 	'macrodeck.app:Update.Details.CancelDownloadAction': 'Cancel download',
 	'macrodeck.app:Update.Details.ChangelogHeading': 'What\'s new',
+	'macrodeck.app:Update.Details.CheckFailed': 'Couldn\'t check for updates. {error}',
 	'macrodeck.app:Update.Details.CurrentVersion': 'You currently have {version}',
 	'macrodeck.app:Update.Details.DownloadFailed': 'The download failed. {error}',
 	'macrodeck.app:Update.Details.DownloadingStatus': 'Downloading… {percent}%',

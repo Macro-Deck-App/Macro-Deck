@@ -14256,6 +14256,10 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Der Download ist fehlgeschlagen. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.CheckFailed" xml:space="preserve">
+    <value>Die Suche nach Updates ist fehlgeschlagen. {error}</value>
+    <comment>[error:string]</comment>
+  </data>
   <data name="Update.Details.CancelDownloadAction" xml:space="preserve">
     <value>Download abbrechen</value>
   </data>
