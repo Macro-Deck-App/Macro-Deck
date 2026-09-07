@@ -3,6 +3,8 @@ using System.Net.WebSockets;
 using System.Text.Json;
 using System.Threading.Channels;
 using MacroDeckHost.WebSockets;
+using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Ui;
 
@@ -23,7 +25,12 @@ public sealed class UiWebSocketEndpoint(
 	TimeProvider timeProvider)
 {
 	private const int QueueLimit = 256;
+
+	// Reported to the client when an outbound envelope will not fit the protocol's size limit.
+	internal const string OversizedCode = "message_too_large";
+
 	private static readonly TimeSpan SendDeadline = TimeSpan.FromSeconds(30);
+	private static readonly ILogger _logger = Log.ForContext<UiWebSocketEndpoint>();
 
 	public async Task HandleAsync(HttpContext context)
 	{
@@ -310,7 +317,7 @@ public sealed class UiWebSocketEndpoint(
 
 	private static bool ValidId(string? value) => value is null or { Length: <= 128 };
 
-	private static async Task WriteAsync(WebSocket socket,
+	internal static async Task WriteAsync(WebSocket socket,
 		ChannelReader<UiWebSocketEnvelope> reader,
 		CancellationTokenSource cancellation,
 		TimeProvider timeProvider)
@@ -322,7 +329,13 @@ public sealed class UiWebSocketEndpoint(
 				var bytes = JsonSerializer.SerializeToUtf8Bytes(envelope, UiWebSocketProtocol.Json);
 				if (bytes.Length > UiWebSocketProtocol.MaxMessageBytes)
 				{
-					throw new JsonException("The outbound UI WebSocket message exceeded the size limit.");
+					if (await ReportOversized(socket, envelope, bytes.Length, timeProvider, cancellation))
+					{
+						continue;
+					}
+
+					cancellation.Cancel();
+					return;
 				}
 
 				await WebSocketMessageIO.SendTextAsync(socket, bytes, SendDeadline, timeProvider, cancellation.Token);
@@ -336,6 +349,47 @@ public sealed class UiWebSocketEndpoint(
 			cancellation.Cancel();
 			socket.Abort();
 		}
+	}
+
+	// Reports an envelope too large to send and says whether the session may continue. This used to abort
+	// the socket silently, leaving a client waiting forever for a message it was never told was dropped.
+	private static async Task<bool> ReportOversized(WebSocket socket,
+		UiWebSocketEnvelope envelope,
+		int size,
+		TimeProvider timeProvider,
+		CancellationTokenSource cancellation)
+	{
+		_logger.Error(
+			"Outbound UI message {Kind}/{Type} is {Size} bytes, over the {Limit} byte limit, and was not sent",
+			envelope.Kind,
+			envelope.Type ?? "-",
+			size,
+			UiWebSocketProtocol.MaxMessageBytes);
+
+		// Only a correlated envelope can be reported without ending the session: a client matches an error
+		// to its pending request by correlationId and ignores one carrying none (websocket-transport.ts).
+		if (envelope.CorrelationId is not null)
+		{
+			// Built here rather than through Error, which reads the id of an inbound request: what
+			// correlates an outbound envelope to that request is its own CorrelationId.
+			var error = new UiWebSocketEnvelope(UiWebSocketProtocol.Version,
+				"error",
+				envelope.Type,
+				null,
+				envelope.CorrelationId,
+				null,
+				new UiWebSocketError(OversizedCode));
+
+			var bytes = JsonSerializer.SerializeToUtf8Bytes(error, UiWebSocketProtocol.Json);
+			if (bytes.Length <= UiWebSocketProtocol.MaxMessageBytes)
+			{
+				await WebSocketMessageIO.SendTextAsync(socket, bytes, SendDeadline, timeProvider, cancellation.Token);
+				return true;
+			}
+		}
+
+		await CloseAsync(socket, WebSocketCloseStatus.MessageTooBig, "Message too large", CancellationToken.None);
+		return false;
 	}
 
 	private async Task HeartbeatAsync(WebSocket socket,
