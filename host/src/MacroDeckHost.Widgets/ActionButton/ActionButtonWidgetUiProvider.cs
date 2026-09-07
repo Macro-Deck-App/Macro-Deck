@@ -184,6 +184,7 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 			iconResourcesState,
 			iconProviderState,
 			widget,
+			_folderCache,
 			_triggerService,
 			_lockState,
 			_iconResources,

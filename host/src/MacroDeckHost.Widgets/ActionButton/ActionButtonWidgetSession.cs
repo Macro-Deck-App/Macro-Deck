@@ -2,6 +2,7 @@ using System.Text.Json;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Dsl;
 using MacroDeckHost.Application.Actions;
+using MacroDeckHost.Application.Caching;
 using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Patches;
@@ -46,6 +47,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 	private readonly UiState<IReadOnlyDictionary<WidgetIconReference, UiResource>> _iconResourcesState;
 	private readonly UiState<WidgetIconResolution> _iconProviderState;
 	private readonly WidgetEntity _widget;
+	private readonly IFolderCache _folderCache;
 	private readonly IWidgetTriggerService _triggerService;
 	private readonly IHostLockState _lockState;
 	private readonly IWidgetIconResources _iconResources;
@@ -134,6 +136,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		UiState<IReadOnlyDictionary<WidgetIconReference, UiResource>> iconResourcesState,
 		UiState<WidgetIconResolution> iconProviderState,
 		WidgetEntity widget,
+		IFolderCache folderCache,
 		IWidgetTriggerService triggerService,
 		IHostLockState lockState,
 		IWidgetIconResources iconResources,
@@ -151,6 +154,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		ArgumentNullException.ThrowIfNull(iconResourcesState);
 		ArgumentNullException.ThrowIfNull(iconProviderState);
 		ArgumentNullException.ThrowIfNull(widget);
+		ArgumentNullException.ThrowIfNull(folderCache);
 		ArgumentNullException.ThrowIfNull(triggerService);
 		ArgumentNullException.ThrowIfNull(lockState);
 		ArgumentNullException.ThrowIfNull(iconResources);
@@ -166,6 +170,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		_iconResourcesState = iconResourcesState;
 		_iconProviderState = iconProviderState;
 		_widget = widget;
+		_folderCache = folderCache;
 		_triggerService = triggerService;
 		_lockState = lockState;
 		_iconResources = iconResources;
@@ -434,10 +439,21 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		string? originClientId,
 		CancellationToken cancellationToken)
 	{
+		// The profile cache replaces the widget instance on every edit, so the entity this session opened
+		// with is a pre-edit snapshot whose flows a press must not run (issue #683).
+		var widget = _folderCache.GetAllFolders()
+			.SelectMany(folder => folder.Widgets)
+			.FirstOrDefault(candidate => candidate.Id == _widget.Id);
+
+		if (widget is null)
+		{
+			return;
+		}
+
 		// No origin device: a press dispatched through a UI session comes from a deck client, which is
 		// identified by its client id. A device origin belongs to a plugin-provided device (ADR 0068).
 		var dispatch = await _triggerService
-			.ExecuteAsync(_widget, triggerType, originClientId, originDeviceId: (Guid?)null, cancellationToken)
+			.ExecuteAsync(widget, triggerType, originClientId, originDeviceId: (Guid?)null, cancellationToken)
 			.ConfigureAwait(false);
 
 		// dispatch.Result is null when the flow outran WidgetTriggerService's own bound and was detached -

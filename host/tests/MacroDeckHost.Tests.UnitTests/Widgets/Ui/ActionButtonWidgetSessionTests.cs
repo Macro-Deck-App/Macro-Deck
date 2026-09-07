@@ -17,6 +17,7 @@ using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Tests.UnitTests.Triggers;
 using MacroDeckHost.Widgets.ActionButton;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -620,6 +621,53 @@ public class ActionButtonWidgetSessionTests
 		await fixture.Session.DisposeAsync();
 	}
 
+	[Test]
+	public async Task A_press_runs_the_flows_the_widget_has_now_not_the_ones_its_session_opened_with()
+	{
+		var fixture = Build(FlowData("original"), interactive: true);
+
+		var edited = FlowData("edited");
+		fixture.Folder.Widgets[0] = new WidgetEntity
+		{
+			Id = _widgetId,
+			FolderId = fixture.Folder.Id,
+			Type = WidgetTypeIds.ActionButton,
+			Data = edited
+		};
+
+		fixture.Host.ById("actionButton").Raise(UiComponentEvents.Press);
+		await fixture.Host.SettleAsync();
+
+		Assert.That(fixture.Trigger.Calls.Single().WidgetData, Is.EqualTo(edited));
+
+		await fixture.Session.DisposeAsync();
+	}
+
+	[Test]
+	public async Task A_press_on_a_widget_that_is_no_longer_stored_runs_nothing()
+	{
+		var fixture = Build(FlowData("original"), interactive: true);
+
+		fixture.Folder.Widgets.Clear();
+
+		fixture.Host.ById("actionButton").Raise(UiComponentEvents.Press);
+		await fixture.Host.SettleAsync();
+
+		Assert.That(fixture.Trigger.Calls, Is.Empty);
+
+		await fixture.Session.DisposeAsync();
+	}
+
+	private static string FlowData(string blockId)
+	{
+		var flows = JsonSerializer.Serialize(new[]
+		{
+			new { triggerId = "t", triggerType = "onShortPress", children = new[] { new { id = blockId } } }
+		});
+
+		return JsonSerializer.Serialize(new { stateMode = false, label = "Button", flows });
+	}
+
 	private static SessionFixture Build(
 		string data,
 		bool interactive,
@@ -638,6 +686,9 @@ public class ActionButtonWidgetSessionTests
 			= new UiState<IReadOnlyDictionary<WidgetIconReference, UiResource>>(
 				new Dictionary<WidgetIconReference, UiResource>());
 		var widget = new WidgetEntity { Id = _widgetId, Type = WidgetTypeIds.ActionButton, Data = data };
+		var folderCache = new StubFolderCache();
+		var folder = folderCache.AddFolder(widget);
+		widget.FolderId = folder.Id;
 		var trigger = new RecordingTriggerService();
 		var lockState = new FakeHostLockState { IsLocked = locked };
 		var icons = iconResources ?? new FakeWidgetIconResources();
@@ -658,6 +709,7 @@ public class ActionButtonWidgetSessionTests
 			iconResourcesState,
 			iconProviderState,
 			widget,
+			folderCache,
 			trigger,
 			lockState,
 			icons,
@@ -688,7 +740,8 @@ public class ActionButtonWidgetSessionTests
 			transport,
 			stateSubscriptions,
 			labelSubscriptions,
-			iconServiceFake);
+			iconServiceFake,
+			folder);
 	}
 
 	private sealed record SessionFixture(
@@ -699,7 +752,8 @@ public class ActionButtonWidgetSessionTests
 		RecordingTransport Transport,
 		WidgetStateSubscriptionTracker StateSubscriptions,
 		LabelSubscriptionTracker LabelSubscriptions,
-		FakeWidgetIconService IconService);
+		FakeWidgetIconService IconService,
+		FolderEntity Folder);
 
 	/// <summary>A configurable <see cref="IWidgetIconService" /> stand-in - defaults to
 	/// <see cref="WidgetIconResolution.Inactive" />, matching a button with no icon-provider assignment.</summary>
@@ -754,7 +808,7 @@ public class ActionButtonWidgetSessionTests
 
 	private sealed class RecordingTriggerService : IWidgetTriggerService
 	{
-		public List<(string TriggerType, string? OriginClientId)> Calls { get; } = [];
+		public List<(string TriggerType, string? OriginClientId, string? WidgetData)> Calls { get; } = [];
 
 		public FlowExecutionResult? Result { get; set; }
 
@@ -765,7 +819,7 @@ public class ActionButtonWidgetSessionTests
 			Guid? originDeviceId,
 			CancellationToken cancellationToken)
 		{
-			Calls.Add((triggerType, originClientId));
+			Calls.Add((triggerType, originClientId, widget.Data));
 
 			return Task.FromResult(new ActionExecutionDispatch(Guid.NewGuid(), Result));
 		}
