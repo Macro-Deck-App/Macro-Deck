@@ -97,6 +97,7 @@ public class WidgetStateVariablesAndPushTests
 			new WidgetDerivedStateStore(),
 			harness.Service,
 			new NoOpFlowExecutor(),
+			new NoOpWidgetStatePublisher(),
 			folderCache,
 			new NotSupportedWidgetService(),
 			new WidgetDataWriteLock(),

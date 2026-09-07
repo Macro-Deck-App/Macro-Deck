@@ -52,6 +52,7 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 	private readonly WidgetDerivedStateStore _store;
 	private readonly IVariableService _variableService;
 	private readonly IFlowExecutor _flowExecutor;
+	private readonly IWidgetStatePublisher _publisher;
 	private readonly IFolderCache _folderCache;
 	private readonly IWidgetService _widgetService;
 	private readonly IWidgetDataWriteLock _writeLock;
@@ -65,6 +66,7 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 		WidgetDerivedStateStore store,
 		IVariableService variableService,
 		IFlowExecutor flowExecutor,
+		IWidgetStatePublisher publisher,
 		IFolderCache folderCache,
 		IWidgetService widgetService,
 		IWidgetDataWriteLock writeLock,
@@ -77,6 +79,7 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 		_store = store;
 		_variableService = variableService;
 		_flowExecutor = flowExecutor;
+		_publisher = publisher;
 		_folderCache = folderCache;
 		_widgetService = widgetService;
 		_writeLock = writeLock;
@@ -137,6 +140,20 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 		var transitioned = previous is not null && previous != resolution.StateId;
 		var changed = previous != resolution.StateId;
 
+		var reconciliation = new WidgetStateReconciliation(resolution.StateId,
+			resolution.StateLabel,
+			resolution.States,
+			changed,
+			transitioned,
+			resolution.ProviderSetChanged)
+		{
+			OptimisticState = resolution.OptimisticState
+		};
+
+		// Announced before the flow it triggers, never after: a client that learns the transition only
+		// once the flow finished cannot see anything the flow paints in between (issue #678).
+		await PublishTransition(widgetId, reconciliation, cancellationToken);
+
 		if (transitioned)
 		{
 			var depth = _reconcileDepth.AddOrUpdate(widgetId, 1, static (_, d) => d + 1);
@@ -160,15 +177,29 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 			}
 		}
 
-		return new WidgetStateReconciliation(resolution.StateId,
-			resolution.StateLabel,
-			resolution.States,
-			changed,
-			transitioned,
-			resolution.ProviderSetChanged)
+		return reconciliation;
+	}
+
+	// Called on every reconcile, gated inside PublishIfChanged. An unreachable client must not cancel
+	// the flow, so a failing push only logs; a cancelled reconcile still stops before firing one.
+	private async Task PublishTransition(Guid widgetId,
+		WidgetStateReconciliation reconciliation,
+		CancellationToken cancellationToken)
+	{
+		try
 		{
-			OptimisticState = resolution.OptimisticState
-		};
+			await _publisher.PublishIfChanged(widgetId, reconciliation, cancellationToken);
+		}
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+		{
+			throw;
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			_logger.Warning(exception,
+				"Failed to publish the state transition for widget {WidgetId}; continuing with its onStateChange flow",
+				widgetId);
+		}
 	}
 
 	private bool IsCurrent(WidgetStateResolution resolution)

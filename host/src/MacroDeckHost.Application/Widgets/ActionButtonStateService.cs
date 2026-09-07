@@ -27,20 +27,17 @@ public sealed class ActionButtonStateService : IActionButtonStateService
 	private readonly IWidgetDataWriteLock _writeLock;
 	private readonly IWidgetService _widgetService;
 	private readonly IWidgetStateReconciler _reconciler;
-	private readonly IWidgetStatePublisher _publisher;
 
 	public ActionButtonStateService(
 		IFolderCache folderCache,
 		IWidgetDataWriteLock writeLock,
 		IWidgetService widgetService,
-		IWidgetStateReconciler reconciler,
-		IWidgetStatePublisher publisher)
+		IWidgetStateReconciler reconciler)
 	{
 		_folderCache = folderCache;
 		_writeLock = writeLock;
 		_widgetService = widgetService;
 		_reconciler = reconciler;
-		_publisher = publisher;
 	}
 
 	public Task<WidgetStateWriteResult> SetAsync(Guid widgetId,
@@ -132,8 +129,7 @@ public sealed class ActionButtonStateService : IActionButtonStateService
 		// lock, and reconciling while still holding it would deadlock that action against this call.
 		// Reconciling inline (not just enqueuing) is what guarantees vars.state is committed, and the
 		// flow has already run, before this call returns.
-		var reconciliation = await _reconciler.Reconcile(widgetId, cancellationToken);
-		await _publisher.PublishIfChanged(widgetId, reconciliation, cancellationToken);
+		await _reconciler.Reconcile(widgetId, cancellationToken);
 		return WidgetStateWriteResult.Succeeded(newStateId);
 	}
 

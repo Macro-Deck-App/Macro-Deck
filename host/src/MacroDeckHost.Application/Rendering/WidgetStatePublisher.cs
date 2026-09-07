@@ -5,10 +5,10 @@ using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
 namespace MacroDeckHost.Application.Rendering;
 
 /// <summary>
-/// The single place a reconciliation result turns into a client push, shared by the background
-/// eval loop and the explicit "Set"/"Cycle Button State" actions - the actions reconcile inline
-/// (so <c>vars.state</c> is committed before they return) but still need the same one push a
-/// background-driven transition gets, not a duplicate and not none.
+/// The single place a reconciliation result turns into a client push. <see cref="WidgetStateReconciler" />
+/// calls this on every reconcile, right after committing the state and before any <c>onStateChange</c>
+/// flow runs, so a client can see what that flow paints while it runs rather than only its end result
+/// (issue #678). Whether a call actually pushes is decided here, not by the caller.
 /// </summary>
 public interface IWidgetStatePublisher
 {

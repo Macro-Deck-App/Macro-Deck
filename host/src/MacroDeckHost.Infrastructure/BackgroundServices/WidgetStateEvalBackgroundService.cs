@@ -23,7 +23,6 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 
 	private readonly WidgetStateEvalChannel _queue;
 	private readonly IServiceScopeFactory _scopeFactory;
-	private readonly IWidgetStatePublisher _publisher;
 	private readonly WidgetStateSubscriptionTracker _subscriptions;
 	private readonly IFolderCache _folderCache;
 	private readonly IWidgetVariableIndex _variableIndex;
@@ -37,7 +36,6 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 		IHostApplicationLifetime lifetime,
 		WidgetStateEvalChannel queue,
 		IServiceScopeFactory scopeFactory,
-		IWidgetStatePublisher publisher,
 		WidgetStateSubscriptionTracker subscriptions,
 		IFolderCache folderCache,
 		IWidgetVariableIndex variableIndex,
@@ -48,7 +46,6 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 	{
 		_queue = queue;
 		_scopeFactory = scopeFactory;
-		_publisher = publisher;
 		_subscriptions = subscriptions;
 		_folderCache = folderCache;
 		_variableIndex = variableIndex;
@@ -199,7 +196,6 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 		using var scope = _scopeFactory.CreateScope();
 		var reconciler = scope.ServiceProvider.GetRequiredService<IWidgetStateReconciler>();
 
-		var result = await reconciler.Reconcile(widgetId, cancellationToken);
-		await _publisher.PublishIfChanged(widgetId, result, cancellationToken);
+		await reconciler.Reconcile(widgetId, cancellationToken);
 	}
 }
