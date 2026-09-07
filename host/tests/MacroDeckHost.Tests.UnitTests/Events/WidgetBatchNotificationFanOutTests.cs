@@ -95,6 +95,7 @@ public class WidgetBatchNotificationFanOutTests
 			_derivedState,
 			_variableScope.ServiceProvider.GetRequiredService<IVariableService>(),
 			new NoOpFlowExecutor(),
+			new NoOpWidgetStatePublisher(),
 			_folderCache,
 			new NotSupportedWidgetService(),
 			new WidgetDataWriteLock(),

@@ -283,6 +283,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			derivedStateStore,
 			vars,
 			new NoOpFlowExecutor(),
+			new NoOpWidgetStatePublisher(),
 			folders,
 			widgets,
 			writeLock,
@@ -290,7 +291,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			TestLocalization.Resolver,
 			Serilog.Log.Logger);
 
-		return new ActionButtonStateService(folders, writeLock, widgets, reconciler, new NoOpPublisher());
+		return new ActionButtonStateService(folders, writeLock, widgets, reconciler);
 	}
 
 	[TearDown]
@@ -881,11 +882,4 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			});
 	}
 
-	private sealed class NoOpPublisher : IWidgetStatePublisher
-	{
-		public Task PublishIfChanged(Guid widgetId,
-			WidgetStateReconciliation result,
-			CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
-	}
 }

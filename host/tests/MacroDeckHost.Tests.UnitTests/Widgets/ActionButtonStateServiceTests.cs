@@ -165,6 +165,38 @@ public class ActionButtonStateServiceTests
 		});
 	}
 
+	// Issue #678: the transition has to reach clients while its onStateChange flow is still running.
+	// Published only after the flow returned, anything that flow paints and then clears again - a
+	// Set Border with a Wait and a Set Border off - is never visible on any client.
+	[Test]
+	public async Task StateWrite_IsPublishedWhileItsOnStateChangeFlowIsStillRunning()
+	{
+		var fixture = new Fixture(TwoStates);
+
+		// Seed the derived-state store so the next write is a real transition, not the initial seed.
+		Assert.That((await fixture.Service.SetAsync(fixture.WidgetId, "off")).Success, Is.True);
+		var publishedBeforeTheFlow = fixture.Publisher.Calls;
+
+		var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var flowEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var callsSeenInsideTheFlow = -1;
+		fixture.Flow.OnFlowExecuting = () =>
+		{
+			callsSeenInsideTheFlow = fixture.Publisher.Calls;
+			flowEntered.SetResult();
+			return release.Task;
+		};
+
+		var write = fixture.Service.SetAsync(fixture.WidgetId, "on");
+		await flowEntered.Task;
+
+		Assert.That(callsSeenInsideTheFlow, Is.EqualTo(publishedBeforeTheFlow + 1),
+			"the transition was still unpublished while its own flow was running");
+
+		release.SetResult();
+		Assert.That((await write).Success, Is.True);
+	}
+
 	// Carried over from UpdateWidgetDataRuntimeGuardTests.AFlowThatWritesTheSameWidget_DoesNotDeadlockThePress:
 	// the reconciler used to run while ActionButtonStateService still held the per-widget write lock, so
 	// an onStateChange flow containing a widget action targeting this same button deadlocked against
@@ -228,6 +260,7 @@ public class ActionButtonStateServiceTests
 				new WidgetDerivedStateStore(),
 				Vars,
 				Flow,
+				Publisher,
 				folderCache,
 				Widgets,
 				writeLock,
@@ -235,7 +268,7 @@ public class ActionButtonStateServiceTests
 				TestLocalization.Resolver,
 				Serilog.Log.Logger);
 
-			Service = new ActionButtonStateService(folderCache, writeLock, Widgets, reconciler, Publisher);
+			Service = new ActionButtonStateService(folderCache, writeLock, Widgets, reconciler);
 		}
 
 		public Guid WidgetId { get; }

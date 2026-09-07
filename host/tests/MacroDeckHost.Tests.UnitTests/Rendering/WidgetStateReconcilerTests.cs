@@ -29,29 +29,32 @@ public class WidgetStateReconcilerTests
 	};
 
 	private static (WidgetStateReconciler Reconciler, RecordingFlowExecutor Flow, RecordingVariableService Vars,
-		WidgetDerivedStateStore Store) Build(WidgetEntity widget, params string?[] resolvedStateIds)
+		WidgetDerivedStateStore Store, RecordingStatePublisher Publisher) Build(WidgetEntity widget,
+		params string?[] resolvedStateIds)
 	{
 		var store = new WidgetDerivedStateStore();
 		var flow = new RecordingFlowExecutor();
 		var vars = new RecordingVariableService();
+		var publisher = new RecordingStatePublisher();
 		var reconciler = new WidgetStateReconciler(new QueuedStateService(resolvedStateIds),
 			store,
 			vars,
 			flow,
+			publisher,
 			new FakeFolderCache(widget),
 			new NotSupportedWidgetService(),
 			new WidgetDataWriteLock(),
 			TestLocalization.Preferences,
 			TestLocalization.Resolver,
 			Serilog.Log.Logger);
-		return (reconciler, flow, vars, store);
+		return (reconciler, flow, vars, store, publisher);
 	}
 
 	[Test]
 	public async Task FirstEvaluation_seeds_var_without_firing_flow()
 	{
 		var widget = BoundButton(Guid.NewGuid());
-		var (reconciler, flow, vars, _) = Build(widget, "on");
+		var (reconciler, flow, vars, _, _) = Build(widget, "on");
 
 		var result = await reconciler.Reconcile(widget.Id);
 
@@ -73,7 +76,7 @@ public class WidgetStateReconcilerTests
 	public async Task Transition_fires_onStateChange_and_updates_var()
 	{
 		var widget = BoundButton(Guid.NewGuid());
-		var (reconciler, flow, vars, _) = Build(widget, "off", "on");
+		var (reconciler, flow, vars, _, _) = Build(widget, "off", "on");
 
 		await reconciler.Reconcile(widget.Id); // seed = off
 		var result = await reconciler.Reconcile(widget.Id); // flip to on
@@ -93,7 +96,7 @@ public class WidgetStateReconcilerTests
 	public async Task Transition_marks_its_flow_host_originated_so_it_is_not_gated_while_locked()
 	{
 		var widget = BoundButton(Guid.NewGuid());
-		var (reconciler, flow, _, _) = Build(widget, "off", "on");
+		var (reconciler, flow, _, _, _) = Build(widget, "off", "on");
 
 		await reconciler.Reconcile(widget.Id); // seed = off
 		await reconciler.Reconcile(widget.Id); // flip to on
@@ -105,7 +108,7 @@ public class WidgetStateReconcilerTests
 	public async Task UnchangedValue_does_not_fire_flow_or_report_changed()
 	{
 		var widget = BoundButton(Guid.NewGuid());
-		var (reconciler, flow, _, _) = Build(widget, "on", "on");
+		var (reconciler, flow, _, _, _) = Build(widget, "on", "on");
 
 		await reconciler.Reconcile(widget.Id); // seed = on
 		var result = await reconciler.Reconcile(widget.Id); // still on
@@ -122,7 +125,7 @@ public class WidgetStateReconcilerTests
 	public async Task Unresolvable_widget_returns_none_and_forgets_state()
 	{
 		var widget = BoundButton(Guid.NewGuid());
-		var (reconciler, flow, _, store) = Build(widget, "on", null);
+		var (reconciler, flow, _, store, _) = Build(widget, "on", null);
 
 		await reconciler.Reconcile(widget.Id); // seed = on
 		var result = await reconciler.Reconcile(widget.Id); // now unbound / unresolvable
@@ -164,6 +167,7 @@ public class WidgetStateReconcilerTests
 			derivedStates,
 			vars,
 			flow,
+			new NoOpWidgetStatePublisher(),
 			new FakeFolderCache(widget),
 			new NotSupportedWidgetService(),
 			new WidgetDataWriteLock(),
@@ -189,7 +193,7 @@ public class WidgetStateReconcilerTests
 	public async Task StateTransition_FiresOnStateChangeOncePerActualTransition()
 	{
 		var widget = BoundButton(Guid.NewGuid());
-		var (reconciler, flow, _, _) = Build(widget, "off", "on", "on", "off"); // cpu: 50, 95, 96, 40
+		var (reconciler, flow, _, _, _) = Build(widget, "off", "on", "on", "off"); // cpu: 50, 95, 96, 40
 
 		foreach (var _ in Enumerable.Range(0, 4))
 		{
@@ -245,6 +249,7 @@ public class WidgetStateReconcilerTests
 			new WidgetDerivedStateStore(),
 			variableService,
 			flow,
+			new NoOpWidgetStatePublisher(),
 			folderCache,
 			new NotSupportedWidgetService(),
 			new WidgetDataWriteLock(),
@@ -263,6 +268,114 @@ public class WidgetStateReconcilerTests
 
 		Assert.That(finished, Is.SameAs(ticks), "the reconciler hung instead of settling");
 		Assert.That(flow.Triggers.Count, Is.LessThanOrEqualTo(1), "at most one onStateChange across 5 ticks");
+	}
+
+	// Issue #678: a client that is told about the transition only once the flow has finished cannot see
+	// anything the flow paints while it runs - a Set Border it also turns off again is invisible.
+	[Test]
+	public async Task Transition_IsPublishedBeforeItsOnStateChangeFlowRuns()
+	{
+		var widget = BoundButton(Guid.NewGuid());
+		var (reconciler, flow, _, _, publisher) = Build(widget, "off", "on");
+		var publishedWhenFlowStarted = -1;
+		flow.OnExecuting = () =>
+		{
+			publishedWhenFlowStarted = publisher.Published.Count;
+			return Task.CompletedTask;
+		};
+
+		await reconciler.Reconcile(widget.Id); // seed = off
+		await reconciler.Reconcile(widget.Id); // flip to on
+
+		Assert.That(publishedWhenFlowStarted, Is.EqualTo(2), "the transition was still unpublished when its flow ran");
+		Assert.That(publisher.Published[^1].StateId, Is.EqualTo("on"));
+	}
+
+	[Test]
+	public async Task Reconcile_DoesNotReturnUntilItsOnStateChangeFlowHasFinished()
+	{
+		var widget = BoundButton(Guid.NewGuid());
+		var (reconciler, flow, _, _, _) = Build(widget, "off", "on");
+		var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		flow.OnExecuting = () => release.Task;
+
+		await reconciler.Reconcile(widget.Id); // seed = off
+		var reconcile = reconciler.Reconcile(widget.Id);
+
+		Assert.That(await Task.WhenAny(reconcile, Task.Delay(200)), Is.Not.SameAs(reconcile),
+			"Set/Cycle Button State rely on the flow having run before the call returns");
+		release.SetResult();
+		Assert.That((await reconcile).Transitioned, Is.True);
+	}
+
+	// The seed is a change without a transition, and it is the one the Changed gate exists for: it must
+	// still be published even though it fires no flow.
+	[Test]
+	public async Task Seed_IsPublishedAndFiresNoFlow()
+	{
+		var widget = BoundButton(Guid.NewGuid());
+		var (reconciler, flow, _, _, publisher) = Build(widget, "on");
+
+		await reconciler.Reconcile(widget.Id);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(publisher.Published.Single().Changed, Is.True);
+			Assert.That(publisher.Published.Single().Transitioned, Is.False);
+			Assert.That(flow.Triggers, Is.Empty);
+		});
+	}
+
+	// The push travels an unisolated signal multicast and a real socket write. Neither is allowed to
+	// stop the flow: an unreachable client must not cancel host business logic.
+	[Test]
+	public async Task PublishFailure_StillLeavesTheOnStateChangeFlowFired()
+	{
+		var widget = BoundButton(Guid.NewGuid());
+		var (reconciler, flow, _, _, publisher) = Build(widget, "off", "on");
+		publisher.OnPublishing = () => throw new InvalidOperationException("a session handler threw");
+
+		await reconciler.Reconcile(widget.Id); // seed = off
+		var result = await reconciler.Reconcile(widget.Id); // flip to on
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(flow.Triggers, Is.EqualTo(new[] { "onStateChange" }));
+			Assert.That(result.StateId, Is.EqualTo("on"));
+		});
+	}
+
+	private sealed class RecordingStatePublisher : IWidgetStatePublisher
+	{
+		private readonly List<WidgetStateReconciliation> _published = [];
+
+		public List<WidgetStateReconciliation> Published
+		{
+			get
+			{
+				lock (_published)
+				{
+					return _published.ToList();
+				}
+			}
+		}
+
+		public Func<Task>? OnPublishing { get; set; }
+
+		public async Task PublishIfChanged(Guid widgetId,
+			WidgetStateReconciliation result,
+			CancellationToken cancellationToken = default)
+		{
+			lock (_published)
+			{
+				_published.Add(result);
+			}
+
+			if (OnPublishing is { } callback)
+			{
+				await callback();
+			}
+		}
 	}
 
 	private sealed class QueuedStateService : IWidgetStateService
@@ -363,16 +476,25 @@ public class WidgetStateReconcilerTests
 
 		public List<FlowExecutionRequest> Requests { get; } = [];
 
-		public Task<FlowExecutionResult> ExecuteAsync(FlowExecutionRequest request, CancellationToken cancellationToken)
+		public Func<Task>? OnExecuting { get; set; }
+
+		public async Task<FlowExecutionResult> ExecuteAsync(FlowExecutionRequest request,
+			CancellationToken cancellationToken)
 		{
 			Triggers.Add(request.Trigger.Value);
 			Requests.Add(request);
-			return Task.FromResult(new FlowExecutionResult
+
+			if (OnExecuting is { } callback)
+			{
+				await callback();
+			}
+
+			return new FlowExecutionResult
 			{
 				ExecutionId = Guid.NewGuid(),
 				Status = FlowExecutionStatus.Succeeded,
 				MatchedFlows = 1
-			});
+			};
 		}
 	}
 
