@@ -190,7 +190,8 @@ public class ActionButtonStateServiceTests
 		var write = fixture.Service.SetAsync(fixture.WidgetId, "on");
 		await flowEntered.Task;
 
-		Assert.That(callsSeenInsideTheFlow, Is.EqualTo(publishedBeforeTheFlow + 1),
+		Assert.That(callsSeenInsideTheFlow,
+			Is.EqualTo(publishedBeforeTheFlow + 1),
 			"the transition was still unpublished while its own flow was running");
 
 		release.SetResult();

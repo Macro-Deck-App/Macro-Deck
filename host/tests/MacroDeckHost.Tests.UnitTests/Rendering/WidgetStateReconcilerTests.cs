@@ -30,7 +30,7 @@ public class WidgetStateReconcilerTests
 
 	private static (WidgetStateReconciler Reconciler, RecordingFlowExecutor Flow, RecordingVariableService Vars,
 		WidgetDerivedStateStore Store, RecordingStatePublisher Publisher) Build(WidgetEntity widget,
-		params string?[] resolvedStateIds)
+			params string?[] resolvedStateIds)
 	{
 		var store = new WidgetDerivedStateStore();
 		var flow = new RecordingFlowExecutor();
@@ -302,7 +302,8 @@ public class WidgetStateReconcilerTests
 		await reconciler.Reconcile(widget.Id); // seed = off
 		var reconcile = reconciler.Reconcile(widget.Id);
 
-		Assert.That(await Task.WhenAny(reconcile, Task.Delay(200)), Is.Not.SameAs(reconcile),
+		Assert.That(await Task.WhenAny(reconcile, Task.Delay(200)),
+			Is.Not.SameAs(reconcile),
 			"Set/Cycle Button State rely on the flow having run before the call returns");
 		release.SetResult();
 		Assert.That((await reconcile).Transitioned, Is.True);
