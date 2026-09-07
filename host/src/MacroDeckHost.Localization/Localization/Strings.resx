@@ -2770,6 +2770,10 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>No provider handled the widget</value>
   </data>
+  <data name="Errors.Widgets.TooManyStates" xml:space="preserve">
+    <value>A button can have at most {max} states.</value>
+    <comment>[max:int]</comment>
+  </data>
   <data name="Errors.Widgets.UnsupportedActionTriggers" xml:space="preserve">
     <value>Widget does not support action triggers</value>
   </data>
@@ -15310,6 +15314,10 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.Editor.MappingHint" xml:space="preserve">
     <value>The first rule whose condition matches wins. When no rule matches, the fallback state is used.</value>
+  </data>
+  <data name="Widgets.Editor.MaxStatesReached" xml:space="preserve">
+    <value>Maximum of {max} states reached.</value>
+    <comment>[max:int]</comment>
   </data>
   <data name="Widgets.Editor.MappingRuleCount.One" xml:space="preserve">
     <value>{count} rule</value>

@@ -602,22 +602,27 @@ internal static class ActionButtonWidgetConfigView
 								: UiOption.Of(s.Id, s.Label))
 							.ToList()),
 				},
-				new UiConfigButton
+				new UiWhen
 				{
-					Key = "addState",
-					Label = AppStrings.Widgets.Editor.AddState(),
-					Icon = "plus",
-					Events =
-					[
-						UiEventHandler.On(UiConfigEvents.Activate,
-							() =>
-							{
-								var id = Guid.NewGuid().ToString("N");
-								var newState = new ActionButtonStateEntry(id, NextStateLabel(states.Value), null);
-								states.Value = [.. states.Value, newState];
-								activeStoredStateId.Value = id;
-							}),
-					],
+					Key = "addState-when",
+					Condition = () => states.Value.Count < ActionButtonStateModel.MaxStates,
+					Content = () => new UiConfigButton
+					{
+						Key = "addState",
+						Label = AppStrings.Widgets.Editor.AddState(),
+						Icon = "plus",
+						Events =
+						[
+							UiEventHandler.On(UiConfigEvents.Activate,
+								() =>
+								{
+									var id = Guid.NewGuid().ToString("N");
+									var newState = new ActionButtonStateEntry(id, NextStateLabel(states.Value), null);
+									states.Value = [.. states.Value, newState];
+									activeStoredStateId.Value = id;
+								}),
+						],
+					},
 				},
 				new UiConfigButton
 				{
@@ -683,6 +688,21 @@ internal static class ActionButtonWidgetConfigView
 				Key = "live-state",
 				Severity = "success",
 				Text = UiText.FromLocalized(() => AppStrings.Widgets.Editor.CurrentlyState(name: liveStateLabel.Value)),
+			},
+		};
+
+		// Says why Add went away (issue #673), since UiConfigButton has no disabled state to show instead.
+		// At or above the limit, not exactly on it: a button predating the limit can hold far more.
+		UiElement BuildStateLimitLine() => new UiWhen
+		{
+			Key = "state-limit-when",
+			Condition = () => states.Value.Count >= ActionButtonStateModel.MaxStates,
+			Content = () => new UiProse
+			{
+				Key = "state-limit",
+				Severity = "warning",
+				Text = UiText.FromLocalized(()
+					=> AppStrings.Widgets.Editor.MaxStatesReached(max: ActionButtonStateModel.MaxStates)),
 			},
 		};
 
@@ -815,7 +835,10 @@ internal static class ActionButtonWidgetConfigView
 			Content = () => new UiFragment
 			{
 				Key = "state-row-group",
-				Children = [BuildStateRow(), BuildManageStateDisclosure(), BuildLiveStateLine()],
+				Children =
+				[
+					BuildStateRow(), BuildManageStateDisclosure(), BuildStateLimitLine(), BuildLiveStateLine()
+				],
 			},
 		};
 

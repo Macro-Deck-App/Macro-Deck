@@ -2771,6 +2771,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>Żaden dostawca nie obsłużył widżetu</value>
   </data>
+  <data name="Errors.Widgets.TooManyStates" xml:space="preserve">
+    <value>Maksymalna liczba stanów przycisku: {max}.</value>
+  </data>
   <data name="Errors.Widgets.UnsupportedActionTriggers" xml:space="preserve">
     <value>Widżet nie obsługuje wyzwalaczy akcji</value>
   </data>
@@ -15311,6 +15314,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Widgets.Editor.MappingHint" xml:space="preserve">
     <value>Wygrywa pierwsza reguła, której warunek jest spełniony. Gdy żadna reguła nie pasuje, używany jest stan rezerwowy.</value>
+  </data>
+  <data name="Widgets.Editor.MaxStatesReached" xml:space="preserve">
+    <value>Osiągnięto maksymalną liczbę stanów ({max}).</value>
   </data>
   <data name="Widgets.Editor.MappingRuleCount.One" xml:space="preserve">
     <value>{count} reguła</value>

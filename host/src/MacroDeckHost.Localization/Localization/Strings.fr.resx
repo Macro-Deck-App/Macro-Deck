@@ -2771,6 +2771,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>Aucun fournisseur n'a pris en charge le widget</value>
   </data>
+  <data name="Errors.Widgets.TooManyStates" xml:space="preserve">
+    <value>Un bouton peut avoir au maximum {max} états.</value>
+  </data>
   <data name="Errors.Widgets.UnsupportedActionTriggers" xml:space="preserve">
     <value>Le widget ne prend pas en charge les déclencheurs d'action</value>
   </data>
@@ -15311,6 +15314,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Widgets.Editor.MappingHint" xml:space="preserve">
     <value>La première règle dont la condition correspond l'emporte. Si aucune règle ne correspond, l'état de repli est utilisé.</value>
+  </data>
+  <data name="Widgets.Editor.MaxStatesReached" xml:space="preserve">
+    <value>Maximum de {max} états atteint.</value>
   </data>
   <data name="Widgets.Editor.MappingRuleCount.One" xml:space="preserve">
     <value>{count} règle</value>

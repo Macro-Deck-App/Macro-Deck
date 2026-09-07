@@ -2771,6 +2771,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>Ningún proveedor gestionó el widget</value>
   </data>
+  <data name="Errors.Widgets.TooManyStates" xml:space="preserve">
+    <value>Un botón puede tener como máximo {max} estados.</value>
+  </data>
   <data name="Errors.Widgets.UnsupportedActionTriggers" xml:space="preserve">
     <value>El widget no admite disparadores de acción</value>
   </data>
@@ -15311,6 +15314,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Widgets.Editor.MappingHint" xml:space="preserve">
     <value>Gana la primera regla cuya condición se cumpla. Si ninguna regla coincide, se usa el estado alternativo.</value>
+  </data>
+  <data name="Widgets.Editor.MaxStatesReached" xml:space="preserve">
+    <value>Se alcanzó el máximo de {max} estados.</value>
   </data>
   <data name="Widgets.Editor.MappingRuleCount.One" xml:space="preserve">
     <value>{count} regla</value>

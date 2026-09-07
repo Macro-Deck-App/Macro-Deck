@@ -56,6 +56,14 @@ public sealed class ActionButtonStateModel
 
 	public const string DefaultOnStateId = "on";
 
+	/// <summary>
+	/// The most states one button may be configured with (issue #673). A button past this size stops
+	/// being editable at all: its configuration tree grows until the editor can no longer be opened.
+	/// Enforced where states are created - the editor's own add control and the widget save gate - and
+	/// deliberately not on the read path, so an existing button that already holds more still loads.
+	/// </summary>
+	public const int MaxStates = 25;
+
 	public required bool StateMode { get; init; }
 
 	public required IReadOnlyList<ActionButtonStateEntry> States { get; init; }

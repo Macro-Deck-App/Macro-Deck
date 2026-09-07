@@ -1,5 +1,7 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using MacroDeck.Localization;
+using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
@@ -15,11 +17,15 @@ public class UpdateWidgetRequestMessageHandler : IUiTransportMessageHandler<Upda
 {
 	private readonly IWidgetService _widgetService;
 	private readonly IWidgetDataSchemaProvider _schemas;
+	private readonly IFolderCache _folderCache;
 
-	public UpdateWidgetRequestMessageHandler(IWidgetService widgetService, IWidgetDataSchemaProvider schemas)
+	public UpdateWidgetRequestMessageHandler(IWidgetService widgetService,
+		IWidgetDataSchemaProvider schemas,
+		IFolderCache folderCache)
 	{
 		_widgetService = widgetService;
 		_schemas = schemas;
+		_folderCache = folderCache;
 	}
 
 	public async ValueTask<UpdateWidgetResponse> Handle(
@@ -46,6 +52,12 @@ public class UpdateWidgetRequestMessageHandler : IUiTransportMessageHandler<Upda
 			if (!ActionButtonStateJson.HasResolvableFallback(bag))
 			{
 				return Fail("VALIDATION_ERROR", AppStrings.Errors.Widgets.FallbackStateUnresolved());
+			}
+
+			if (GrowsPastStateLimit(bag, widgetId, folderId))
+			{
+				return Fail("VALIDATION_ERROR",
+					AppStrings.Errors.Widgets.TooManyStates(max: ActionButtonStateModel.MaxStates));
 			}
 
 			data = bag.ToJsonString();
@@ -139,6 +151,27 @@ public class UpdateWidgetRequestMessageHandler : IUiTransportMessageHandler<Upda
 				: AppStrings.Errors.Widgets.DataValidationFailed(details: shown);
 		}
 	}
+
+	// Refuses growth only (issue #673): a button already over the limit still saves, so one predating the
+	// limit stays repairable, and an adopted provider set is the provider's own and never blocked here.
+	private bool GrowsPastStateLimit(JsonObject incoming, Guid widgetId, Guid folderId)
+	{
+		if (StateCount(incoming) <= ActionButtonStateModel.MaxStates ||
+			ActionButtonStateModel.Read(incoming).StateProvider is not null)
+		{
+			return false;
+		}
+
+		var stored = _folderCache.GetFolderById(folderId)?.Widgets.FirstOrDefault(w => w.Id == widgetId);
+		var storedBag = ActionButtonStateJson.ParseDataBag(stored?.Data);
+
+		return StateCount(incoming) > Math.Max(StateCount(storedBag),
+			StateCount(storedBag["manualStateBackup"] as JsonObject));
+	}
+
+	// The stored bag may still hold the legacy off/on object rather than an array, which counts as no
+	// states at all: only the array form can carry a count this limit is about.
+	private static int StateCount(JsonObject? data) => (data?["states"] as JsonArray)?.Count ?? 0;
 
 	private static UpdateWidgetResponse Fail(string code, LocalizedText message)
 		=> new()

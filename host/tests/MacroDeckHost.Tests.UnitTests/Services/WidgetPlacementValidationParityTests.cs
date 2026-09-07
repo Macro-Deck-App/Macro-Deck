@@ -44,7 +44,8 @@ public class WidgetPlacementValidationParityTests
 		_create = new CreateWidgetRequestMessageHandler(service);
 		_createMany = new CreateWidgetsRequestMessageHandler(service);
 		_update = new UpdateWidgetRequestMessageHandler(service,
-			new WidgetDataSchemaProvider(new WidgetTypeRegistry(new RecordingMediator())));
+			new WidgetDataSchemaProvider(new WidgetTypeRegistry(new RecordingMediator())),
+			new FolderCache(_cache));
 		_move = new UpdateWidgetPositionsRequestMessageHandler(service);
 
 		var profileId = Guid.NewGuid();
