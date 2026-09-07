@@ -2771,6 +2771,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>Nessun provider ha gestito il widget</value>
   </data>
+  <data name="Errors.Widgets.TooManyStates" xml:space="preserve">
+    <value>Un pulsante può avere al massimo {max} stati.</value>
+  </data>
   <data name="Errors.Widgets.UnsupportedActionTriggers" xml:space="preserve">
     <value>Il widget non supporta i trigger di azione</value>
   </data>
@@ -15315,6 +15318,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Widgets.Editor.MappingHint" xml:space="preserve">
     <value>Vince la prima regola la cui condizione corrisponde. Se nessuna regola corrisponde, viene usato lo stato di riserva.</value>
+  </data>
+  <data name="Widgets.Editor.MaxStatesReached" xml:space="preserve">
+    <value>Raggiunto il massimo di {max} stati.</value>
   </data>
   <data name="Widgets.Editor.MappingRuleCount.One" xml:space="preserve">
     <value>{count} regola</value>

@@ -2771,6 +2771,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>Žádný poskytovatel widget nezpracoval</value>
   </data>
+  <data name="Errors.Widgets.TooManyStates" xml:space="preserve">
+    <value>Maximální počet stavů tlačítka: {max}.</value>
+  </data>
   <data name="Errors.Widgets.UnsupportedActionTriggers" xml:space="preserve">
     <value>Widget nepodporuje triggery akcí</value>
   </data>
@@ -15315,6 +15318,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Widgets.Editor.MappingHint" xml:space="preserve">
     <value>Použije se první pravidlo, jehož podmínka je splněna. Pokud žádné pravidlo neodpovídá, použije se záložní stav.</value>
+  </data>
+  <data name="Widgets.Editor.MaxStatesReached" xml:space="preserve">
+    <value>Byl dosažen maximální počet stavů ({max}).</value>
   </data>
   <data name="Widgets.Editor.MappingRuleCount.One" xml:space="preserve">
     <value>{count} pravidlo</value>

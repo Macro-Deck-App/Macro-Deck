@@ -358,6 +358,65 @@ public class ActionButtonWidgetConfigTests
 			Is.EqualTo("off"));
 	}
 
+	// Issue #673: a button with hundreds of states stops being editable at all, so the editor stops
+	// offering to add one at the limit. UiConfigButton has no disabled state, hence gone rather than dimmed.
+	[Test]
+	public void A_state_can_still_be_added_one_below_the_limit()
+	{
+		var host = Render(StatesData(ActionButtonStateModel.MaxStates - 1));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.FindById("root.properties.state-row.addState"), Is.Not.Null);
+			Assert.That(host.FindById("root.properties.state-limit"), Is.Null);
+		});
+	}
+
+	[Test]
+	public void At_the_limit_no_state_can_be_added_and_the_editor_says_why()
+	{
+		var host = Render(StatesData(ActionButtonStateModel.MaxStates));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.FindById("root.properties.state-row.addState"), Is.Null);
+			Assert.That(host.FindById("root.properties.state-limit"), Is.Not.Null);
+		});
+	}
+
+	// The transition is the part that can actually break: one dispatch adds a state, removes the add
+	// control and inserts the notice, and UiTestHost applies that patch under the client's own rules.
+	[Test]
+	public void Adding_the_last_allowed_state_removes_the_add_control_and_shows_the_notice()
+	{
+		var host = Render(StatesData(ActionButtonStateModel.MaxStates - 1));
+
+		host.ById("root.properties.state-row.addState").Activate();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ReadStates(host), Has.Count.EqualTo(ActionButtonStateModel.MaxStates));
+			Assert.That(host.FindById("root.properties.state-row.addState"), Is.Null);
+			Assert.That(host.FindById("root.properties.state-limit"), Is.Not.Null);
+		});
+	}
+
+	// A button configured before the limit existed keeps opening, with its states intact: the limit is
+	// enforced where states are created, never on the way in.
+	[Test]
+	public void A_button_stored_far_over_the_limit_still_builds_its_editor()
+	{
+		var host = Render(StatesData(400));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ReadStates(host), Has.Count.EqualTo(400));
+			Assert.That(host.FindById("root.properties.state-row.addState"), Is.Null);
+			Assert.That(host.FindById("root.properties.state-limit"), Is.Not.Null);
+			Assert.That(host.FindById("activeStateId"), Is.Not.Null);
+		});
+	}
+
 	[Test]
 	public void Adding_a_state_selects_it_and_produces_a_patch_the_renderer_can_apply()
 	{
@@ -953,6 +1012,14 @@ public class ActionButtonWidgetConfigTests
 			new FakeIntegrationRegistry(),
 			fonts ?? new FakeFontCatalog(),
 			liveState));
+
+	private static object StatesData(int count) => new
+	{
+		stateMode = true,
+		states = Enumerable.Range(0, count)
+			.Select(i => new { id = $"s{i}", label = $"State {i}" })
+			.ToArray()
+	};
 
 	private static string Id(JsonElement state) => state.GetProperty("id").GetString()!;
 

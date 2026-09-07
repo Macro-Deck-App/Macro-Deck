@@ -1,3 +1,4 @@
+using System.Globalization;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Services;
@@ -16,8 +17,11 @@ namespace MacroDeckHost.Tests.UnitTests.Ui;
 [TestFixture]
 public class UpdateWidgetSchemaValidationTests
 {
-	private static UpdateWidgetRequestMessageHandler CreateHandler(RecordingWidgetService service)
-		=> new(service, new WidgetDataSchemaProvider(new WidgetTypeRegistry(new RecordingMediator())));
+	private static UpdateWidgetRequestMessageHandler CreateHandler(RecordingWidgetService service,
+		IFolderCache? folderCache = null)
+		=> new(service,
+			new WidgetDataSchemaProvider(new WidgetTypeRegistry(new RecordingMediator())),
+			folderCache ?? new FakeFolderCache(Guid.NewGuid()));
 
 	private static UpdateWidgetRequest Request(string type, string? data) => new()
 	{
@@ -26,6 +30,14 @@ public class UpdateWidgetSchemaValidationTests
 		Type = type,
 		Data = data
 	};
+
+	private static string StateData(int count)
+	{
+		var states = string.Join(",",
+			Enumerable.Range(0, count).Select(i => $"{{\"id\":\"s{i}\",\"label\":\"State {i}\"}}"));
+
+		return $"{{\"stateMode\":true,\"states\":[{states}]}}";
+	}
 
 	[Test]
 	public async Task Schema_invalid_data_is_rejected_before_it_reaches_the_widget_service()
@@ -184,6 +196,161 @@ public class UpdateWidgetSchemaValidationTests
 			Assert.That(response.Success, Is.True);
 			Assert.That(service.Updated, Is.Not.Null);
 		});
+	}
+
+	// Issue #673: a button grows unboundedly until its editor can no longer be opened, so the write
+	// boundary refuses growth past the limit even when no editor is involved.
+	[Test]
+	public async Task A_button_cannot_be_saved_with_more_states_than_the_limit()
+	{
+		var service = new RecordingWidgetService();
+		var handler = CreateHandler(service);
+
+		var response = await handler.Handle(
+			Request(WidgetTypeIds.ActionButton, StateData(ActionButtonStateModel.MaxStates + 1)),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.False);
+			Assert.That(response.Error!.Code, Is.EqualTo("VALIDATION_ERROR"));
+			Assert.That(TestLocalization.Resolve(response.Error!.Message),
+				Does.Contain(ActionButtonStateModel.MaxStates.ToString(CultureInfo.InvariantCulture)));
+			Assert.That(service.Updated, Is.Null, "a rejected update must never reach the widget service");
+		});
+	}
+
+	[Test]
+	public async Task A_button_at_exactly_the_limit_is_saved()
+	{
+		var service = new RecordingWidgetService();
+		var handler = CreateHandler(service);
+
+		var response = await handler.Handle(
+			Request(WidgetTypeIds.ActionButton, StateData(ActionButtonStateModel.MaxStates)),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.True);
+			Assert.That(service.Updated, Is.Not.Null);
+		});
+	}
+
+	// The limit must not strand a button configured before it existed: such a button keeps saving, so it
+	// can still be edited and trimmed back down, and only growing it further is refused.
+	[Test]
+	public async Task An_existing_button_over_the_limit_can_still_be_saved_unchanged()
+	{
+		var (service, handler, request) = OverLimitButton(400, 400);
+
+		var response = await handler.Handle(request, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.True);
+			Assert.That(service.Updated, Is.Not.Null);
+		});
+	}
+
+	[Test]
+	public async Task An_existing_button_over_the_limit_can_be_trimmed_towards_the_limit()
+	{
+		var (service, handler, request) = OverLimitButton(400, 30);
+
+		var response = await handler.Handle(request, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.True);
+			Assert.That(service.Updated, Is.Not.Null);
+		});
+	}
+
+	[Test]
+	public async Task An_existing_button_over_the_limit_cannot_be_grown_further()
+	{
+		var (service, handler, request) = OverLimitButton(400, 401);
+
+		var response = await handler.Handle(request, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.False);
+			Assert.That(response.Error!.Code, Is.EqualTo("VALIDATION_ERROR"));
+			Assert.That(service.Updated, Is.Null, "a rejected update must never reach the widget service");
+		});
+	}
+
+	// A provider declares the complete set of states it can report, so adopting one is not the growth
+	// this limit is about, and refusing it would leave the button unsavable instead.
+	[Test]
+	public async Task An_adopted_provider_set_larger_than_the_limit_is_saved()
+	{
+		var service = new RecordingWidgetService();
+		var handler = CreateHandler(service);
+		var states = string.Join(",",
+			Enumerable.Range(0, 40).Select(i => $"{{\"id\":\"s{i}\",\"label\":\"State {i}\"}}"));
+		var data = $"{{\"stateMode\":true,\"states\":[{states}]," +
+			$"\"stateProvider\":{{\"blockId\":\"b1\",\"states\":[{states}]}}}}";
+
+		var response = await handler.Handle(Request(WidgetTypeIds.ActionButton, data), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.True);
+			Assert.That(service.Updated, Is.Not.Null);
+		});
+	}
+
+	// Turning a state provider off restores the manual states stashed before it was adopted. A button
+	// that had more than the limit back then has to be allowed to get them back.
+	[Test]
+	public async Task Removing_a_state_provider_restores_a_manual_set_larger_than_the_limit()
+	{
+		var widgetId = Guid.NewGuid();
+		var folderId = Guid.NewGuid();
+		var backup = string.Join(",",
+			Enumerable.Range(0, 60).Select(i => $"{{\"id\":\"s{i}\",\"label\":\"State {i}\"}}"));
+		var stored = $"{{\"stateMode\":true,\"states\":[{{\"id\":\"p1\",\"label\":\"P1\"}}]," +
+			$"\"stateProvider\":{{\"blockId\":\"b1\"}}," +
+			$"\"manualStateBackup\":{{\"states\":[{backup}]}}}}";
+
+		var service = new RecordingWidgetService();
+		var cache = new FakeFolderCache(folderId,
+			new WidgetEntity { Id = widgetId, Type = WidgetTypeIds.ActionButton, Data = stored });
+		var handler = CreateHandler(service, cache);
+
+		var request = Request(WidgetTypeIds.ActionButton,
+			$"{{\"stateMode\":true,\"states\":[{{\"id\":\"p1\",\"label\":\"P1\"}}]," +
+			$"\"manualStateBackup\":{{\"states\":[{backup}]}}}}");
+		request.Id = widgetId.ToString();
+		request.FolderId = folderId.ToString();
+
+		var response = await handler.Handle(request, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.True);
+			Assert.That(service.Updated, Is.Not.Null);
+		});
+	}
+
+	private static (RecordingWidgetService Service, UpdateWidgetRequestMessageHandler Handler, UpdateWidgetRequest
+		Request)
+		OverLimitButton(int stored, int incoming)
+	{
+		var widgetId = Guid.NewGuid();
+		var folderId = Guid.NewGuid();
+		var service = new RecordingWidgetService();
+		var cache = new FakeFolderCache(folderId,
+			new WidgetEntity { Id = widgetId, Type = WidgetTypeIds.ActionButton, Data = StateData(stored) });
+
+		var request = Request(WidgetTypeIds.ActionButton, StateData(incoming));
+		request.Id = widgetId.ToString();
+		request.FolderId = folderId.ToString();
+
+		return (service, CreateHandler(service, cache), request);
 	}
 
 	private sealed class NoOpFlowExecutor : IFlowExecutor

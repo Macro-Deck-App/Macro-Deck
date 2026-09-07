@@ -2770,6 +2770,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>Kein Anbieter hat das Widget verarbeitet</value>
   </data>
+  <data name="Errors.Widgets.TooManyStates" xml:space="preserve">
+    <value>Ein Button kann höchstens {max} Zustände haben.</value>
+  </data>
   <data name="Errors.Widgets.UnsupportedActionTriggers" xml:space="preserve">
     <value>Das Widget unterstützt keine Aktionsauslöser</value>
   </data>
@@ -15313,6 +15316,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Widgets.Editor.MappingHint" xml:space="preserve">
     <value>Die erste Regel, deren Bedingung zutrifft, gewinnt. Trifft keine Regel zu, wird der Ausweichstatus verwendet.</value>
+  </data>
+  <data name="Widgets.Editor.MaxStatesReached" xml:space="preserve">
+    <value>Maximum von {max} Status erreicht.</value>
   </data>
   <data name="Widgets.Editor.MappingRuleCount.One" xml:space="preserve">
     <value>{count} Regel</value>
