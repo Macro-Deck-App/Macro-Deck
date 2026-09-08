@@ -56,12 +56,9 @@
             "scripts": [],
             "allowedCommonJsDependencies": [
               "qrcode",
-              "deepmerge",
-              "ebnf",
               "fast-deep-equal",
-              "smtp-address-parser",
-              "valid-url",
-              "@sagold/json-pointer"
+              "uri-js",
+              "valid-url"
             ]
           },
           "configurations": {

@@ -4,11 +4,14 @@ import type { Diagnostic } from '@codemirror/lint';
 import type { CompletionContext, CompletionResult } from '@codemirror/autocomplete';
 import type { syntaxTree as syntaxTreeFn } from '@codemirror/language';
 import type { SyntaxNode, Tree } from '@lezer/common';
-import type { Draft07 } from 'json-schema-library';
+import type { compileSchema, draft07 } from 'json-schema-library';
+
+type SchemaNode = ReturnType<typeof compileSchema>;
 
 export interface JsonEditorDeps {
   syntaxTree: typeof syntaxTreeFn;
-  Draft07: typeof Draft07;
+  compileSchema: typeof compileSchema;
+  draft07: typeof draft07;
 }
 
 const VALUE_NODE_NAMES = new Set(['Object', 'Array', 'String', 'Number', 'True', 'False', 'Null']);
@@ -101,15 +104,19 @@ function toDataPointer(path: string[]): string {
   return path.length ? '#/' + path.map(escapePointerSegment).join('/') : '';
 }
 
-const draftCache = new WeakMap<object, InstanceType<typeof Draft07>>();
+const draftCache = new WeakMap<object, SchemaNode>();
 
-function draftFor(deps: JsonEditorDeps, schema: object): InstanceType<typeof Draft07> {
+function draftFor(deps: JsonEditorDeps, schema: object): SchemaNode {
   let draft = draftCache.get(schema);
   if (!draft) {
-    draft = new deps.Draft07(schema);
+    draft = deps.compileSchema(schema, { drafts: [deps.draft07] });
     draftCache.set(schema, draft);
   }
   return draft;
+}
+
+function schemaAt(deps: JsonEditorDeps, schema: object, path: string[], data: unknown): unknown {
+  return draftFor(deps, schema).getNode(toDataPointer(path), data).node?.schema;
 }
 
 function safeParseDoc(doc: Text): unknown {
@@ -151,7 +158,7 @@ export function buildCombinedLintSource(
     }
 
     const data = JSON.parse(view.state.doc.toString());
-    const errors = draftFor(deps, schema).validate(data);
+    const { errors } = draftFor(deps, schema).validate(data);
     if (errors.length === 0) {
       observers.onResult(true, null);
       return [];
@@ -240,8 +247,7 @@ export function buildSchemaCompletionSource(
     if (propertyMatch) {
       const path = ancestorPath(propertyMatch.containerNode, context.state.doc);
       if (!path) return null;
-      const draft = draftFor(deps, schema);
-      const containerSchema = draft.getSchema({ pointer: toDataPointer(path), data: safeParseDoc(context.state.doc) });
+      const containerSchema = schemaAt(deps, schema, path, safeParseDoc(context.state.doc));
       if (!isSchemaObject(containerSchema)) return null;
       const properties = containerSchema['properties'] as Record<string, Record<string, unknown>> | undefined;
       if (!properties) return null;
@@ -262,8 +268,7 @@ export function buildSchemaCompletionSource(
     if (valueMatch) {
       const path = ancestorPath(valueMatch.valueNode, context.state.doc);
       if (!path) return null;
-      const draft = draftFor(deps, schema);
-      const valueSchema = draft.getSchema({ pointer: toDataPointer(path), data: safeParseDoc(context.state.doc) });
+      const valueSchema = schemaAt(deps, schema, path, safeParseDoc(context.state.doc));
       if (!isSchemaObject(valueSchema)) return null;
       const enumValues = valueSchema['enum'];
       if (!Array.isArray(enumValues)) return null;
@@ -302,8 +307,7 @@ export function buildSchemaHoverSource(
     const path = ancestorPath(valueNode, view.state.doc);
     if (!path) return null;
 
-    const draft = draftFor(deps, schema);
-    const resolved = draft.getSchema({ pointer: toDataPointer(path), data: safeParseDoc(view.state.doc) });
+    const resolved = schemaAt(deps, schema, path, safeParseDoc(view.state.doc));
     const description = isSchemaObject(resolved) && typeof resolved['description'] === 'string'
       ? resolved['description'] as string
       : undefined;

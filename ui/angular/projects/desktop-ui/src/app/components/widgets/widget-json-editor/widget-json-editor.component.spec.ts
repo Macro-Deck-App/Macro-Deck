@@ -8,11 +8,11 @@ import {
 
 describe('WidgetJsonEditorComponent JSON schema glue', () => {
   async function buildDeps(): Promise<JsonEditorDeps> {
-    const [{ syntaxTree }, { Draft07 }] = await Promise.all([
+    const [{ syntaxTree }, { compileSchema, draft07 }] = await Promise.all([
       import('@codemirror/language'),
       import('json-schema-library'),
     ]);
-    return { syntaxTree, Draft07 };
+    return { syntaxTree, compileSchema, draft07 };
   }
 
   describe('linting', () => {

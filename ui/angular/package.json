@@ -36,7 +36,7 @@
     "@codemirror/view": "^6.43.8",
     "@macro-deck/runtime": "*",
     "@types/qrcode": "^1.5.6",
-    "json-schema-library": "^9.3.5",
+    "json-schema-library": "^11.6.2",
     "qrcode": "^1.5.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
