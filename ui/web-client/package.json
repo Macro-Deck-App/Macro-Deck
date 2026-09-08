@@ -16,8 +16,8 @@
     "@macro-deck/runtime": "*"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.7",
-    "@babel/preset-env": "^7.29.7",
+    "@babel/core": "^8.0.1",
+    "@babel/preset-env": "^8.0.2",
     "@ungap/structured-clone": "^1.4.0",
     "abort-controller": "^3.0.0",
     "autoprefixer": "^10.5.4",
