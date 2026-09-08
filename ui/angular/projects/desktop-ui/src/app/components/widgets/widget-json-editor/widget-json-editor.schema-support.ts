@@ -128,7 +128,7 @@ function safeParseDoc(doc: Text): unknown {
 }
 
 function isSchemaObject(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === 'object' && (value as { type?: unknown }).type !== 'error';
+  return !!value && typeof value === 'object';
 }
 
 export interface LintObservers {

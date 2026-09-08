@@ -13,12 +13,12 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.41.7",
-    "astro": "^7.2.2",
+    "@astrojs/starlight": "^0.42.0",
+    "astro": "^7.3.1",
     "astro-mermaid": "^2.1.0",
-    "mermaid": "^11.6.0",
-    "sharp": "^0.34.1",
-    "starlight-links-validator": "^0.25.3",
-    "starlight-openapi": "^0.26.1"
+    "mermaid": "^11.17.2",
+    "sharp": "^0.35.4",
+    "starlight-links-validator": "^0.26.0",
+    "starlight-openapi": "^0.26.2"
   }
 }

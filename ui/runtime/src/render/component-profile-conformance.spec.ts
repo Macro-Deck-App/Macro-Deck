@@ -93,11 +93,19 @@ function num(style: string): number {
   return parseFloat(style);
 }
 
+function rgbNotation(hex: string): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 function sameColor(actual: string, expectedHex: string): boolean {
-  const r = parseInt(expectedHex.slice(1, 3), 16);
-  const g = parseInt(expectedHex.slice(3, 5), 16);
-  const b = parseInt(expectedHex.slice(5, 7), 16);
-  return actual === expectedHex || actual === `rgb(${r}, ${g}, ${b})`;
+  return actual === expectedHex || actual === rgbNotation(expectedHex);
+}
+
+function containsColor(actual: string, expectedHex: string): boolean {
+  return actual.includes(expectedHex) || actual.includes(rgbNotation(expectedHex));
 }
 
 let container: HTMLElement;
@@ -668,10 +676,11 @@ describe('component-profile conformance fixtures: music-player tree', () => {
             const fillEl = () => el.querySelector('.widget-progress-fill') as HTMLElement | null;
             if ('fillColor' in spec) {
               const fill = fillEl()!;
-              // progressFillStyle() always builds a two-stop gradient, even where start === end colour
-              // (the fixture's literal case) - `toContain` is what a solid-looking gradient still is.
-              const needle = spec.fillColor === 'reader-accent' ? '--color-accent' : (spec.fillColor as string);
-              expect(fill.style.background).withContext(`${id}.fillColor`).toContain(needle);
+              // progressFillStyle() always builds a two-stop gradient, even where start === end colour.
+              const matched = spec.fillColor === 'reader-accent'
+                ? fill.style.background.includes('--color-accent')
+                : containsColor(fill.style.background, spec.fillColor as string);
+              expect(matched).withContext(`${id}.fillColor ${fill.style.background}`).toBeTrue();
             }
 
             retick();

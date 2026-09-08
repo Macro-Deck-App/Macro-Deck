@@ -29,6 +29,17 @@ function tsNumber(name) {
   return Number(match[1]);
 }
 
+test('the list surface scrolls its own children rather than dividing its box between them', () => {
+  const renderer = readFileSync(path.join(HERE, 'styles', 'renderer.css'), 'utf8');
+  const surface = renderer.match(/\n\.widget-list \{([^}]*)\}/);
+  assert.ok(surface, 'renderer.css declares no .widget-list rule');
+  assert.match(surface[1], /overflow-y:\s*(auto|scroll)\b/);
+
+  const children = renderer.match(/\n\.widget-list > \* \{([^}]*)\}/);
+  assert.ok(children, 'renderer.css declares no .widget-list > * rule');
+  assert.match(children[1], /flex:\s*0 0 auto\b/);
+});
+
 test('the widget reference cell is the same number in CSS and TypeScript', () => {
   assert.equal(cssPx('widget-reference-cell'), tsNumber('WIDGET_REFERENCE_CELL_SIZE'));
 });
