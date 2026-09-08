@@ -329,3 +329,48 @@ test('every ring style the fallback tints is one that paints the colour on the r
   assert.deepEqual(fallbackList('TINTED_RING_STYLES').sort(), declared.sort(),
     'a style that paints --wb-color on the element needs the fallback, and no other does');
 });
+
+test('no sheet that styles a widget border ring conditions it on reduced motion', () => {
+  // The ring is the one decoration that keeps looping under the preference (issue 682): freezing it in
+  // the runtime sheet alone left it animating in the configuration UI and dead in the web client.
+  const roots = [
+    path.join(HERE, 'styles'),
+    path.resolve(HERE, '..', 'angular', 'projects'),
+    path.resolve(HERE, '..', 'web-client', 'src'),
+  ];
+  // Asserted rather than skipped: a root that moved would otherwise take a whole surface out of the
+  // walk and leave this green, which is the one failure a guard cannot afford.
+  for (const root of roots) assert.ok(existsSync(root), `${root} must exist to be scanned`);
+
+  const styling = [];
+  const offenders = [];
+  const stack = [...roots];
+  while (stack.length) {
+    const entry = stack.pop();
+    if (statSync(entry).isDirectory()) {
+      for (const child of readdirSync(entry)) {
+        if (child === 'node_modules' || child === 'dist') continue;
+        stack.push(path.join(entry, child));
+      }
+      continue;
+    }
+    if (!/\.(scss|css)$/.test(entry)) continue;
+    const sheet = readFileSync(entry, 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/(^|[^:])\/\/.*$/gm, '$1');
+    if (!/(^|[\s,>+~(&])\.(ring(?![\w-])|wb-)/.test(sheet)) continue;
+    styling.push(path.relative(HERE, entry));
+    if (/prefers-reduced-motion/.test(sheet)) offenders.push(path.relative(HERE, entry));
+  }
+
+  // Whatever the query gates, and however it nests, a sheet holding the ring's own rules has no
+  // business naming the preference at all, so the check needs no parser.
+  assert.deepEqual(offenders, [],
+    'a widget border ring must keep animating whatever the viewer prefers, on every surface');
+  // By name, not by count: a third sheet matching .wb- for its own reasons would otherwise let one of
+  // these two go missing unnoticed.
+  for (const sheet of ['styles/widget-border.css', 'widget-border-overlay.component.scss']) {
+    assert.ok(styling.some(found => found.endsWith(sheet)),
+      `${sheet} styles the ring and must be among the scanned sheets, saw ${styling.join(', ')}`);
+  }
+});
