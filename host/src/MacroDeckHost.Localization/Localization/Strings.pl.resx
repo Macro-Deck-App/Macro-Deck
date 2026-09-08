@@ -8609,7 +8609,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Głośność wyjścia systemowego jest niedostępna.</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
-    <value>Nie znaleziono obsługiwanego zaplecza GPU. Obsługiwane: NVIDIA przez nvidia-smi (wszystkie platformy), AMD przez sterownik amdgpu (Linux) oraz GPU Apple (macOS).</value>
+    <value>Nie wykryto obsługiwanej karty graficznej. W systemie Linux metryki GPU wymagają sterownika amdgpu lub nvidia-smi.</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableTitle" xml:space="preserve">
     <value>Metryki GPU niedostępne</value>
@@ -8659,14 +8659,14 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.System.Variables.RamTotalGb" xml:space="preserve">
     <value>Całkowita pamięć RAM (GB)</value>
   </data>
-  <data name="Integrations.System.Variables.GpuUsage" xml:space="preserve">
-    <value>Obciążenie GPU</value>
-  </data>
   <data name="Integrations.System.Variables.CpuName" xml:space="preserve">
     <value>Nazwa procesora</value>
   </data>
-  <data name="Integrations.System.Variables.GpuName" xml:space="preserve">
-    <value>Nazwa karty graficznej</value>
+  <data name="Integrations.System.Variables.GpuUsageIndexed" xml:space="preserve">
+    <value>Obciążenie GPU {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.GpuNameIndexed" xml:space="preserve">
+    <value>Nazwa karty graficznej {index}</value>
   </data>
   <data name="Integrations.System.Variables.PcName" xml:space="preserve">
     <value>Nazwa komputera</value>

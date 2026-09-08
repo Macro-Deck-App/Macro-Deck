@@ -4,15 +4,17 @@ namespace MacroDeckHost.Tests.UnitTests.System;
 
 internal sealed class FakeSystemMetricsService : ISystemMetricsService
 {
-	public FakeSystemMetricsService(bool supported = true, bool gpuSupported = true)
+	public FakeSystemMetricsService(bool supported = true, bool gpuSupported = true, int gpuCount = 1)
 	{
 		IsSupported = supported;
-		IsGpuSupported = gpuSupported;
+		GpuCount = gpuSupported ? gpuCount : 0;
 	}
 
 	public bool IsSupported { get; }
 
-	public bool IsGpuSupported { get; }
+	public int GpuCount { get; }
+
+	public bool IsGpuSupported => GpuCount > 0;
 
 	public double? CpuUsage { get; set; }
 
@@ -22,15 +24,23 @@ internal sealed class FakeSystemMetricsService : ISystemMetricsService
 
 	public string? GpuName { get; set; }
 
+	public Dictionary<int, double?> GpuUsageByIndex { get; } = new();
+
+	public Dictionary<int, string?> GpuNameByIndex { get; } = new();
+
 	public Task<double?> GetCpuUsageAsync(CancellationToken cancellationToken = default)
 		=> Task.FromResult(CpuUsage);
 
 	public Task<MemoryInfo?> GetMemoryAsync(CancellationToken cancellationToken = default)
 		=> Task.FromResult(Memory);
 
-	public Task<double?> GetGpuUsageAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(GpuUsage);
+	public Task<double?> GetGpuUsageAsync(int gpuIndex, CancellationToken cancellationToken = default)
+		=> Task.FromResult(gpuIndex < 0 || gpuIndex >= GpuCount
+			? null
+			: GpuUsageByIndex.TryGetValue(gpuIndex, out var usage) ? usage : GpuUsage);
 
-	public Task<string?> GetGpuNameAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(IsGpuSupported ? GpuName : null);
+	public Task<string?> GetGpuNameAsync(int gpuIndex, CancellationToken cancellationToken = default)
+		=> Task.FromResult(gpuIndex < 0 || gpuIndex >= GpuCount
+			? null
+			: GpuNameByIndex.TryGetValue(gpuIndex, out var name) ? name : GpuName);
 }

@@ -23,4 +23,20 @@ public class SystemMetricsWindowsTests
 			});
 		}
 	}
+
+	[Test]
+	public async Task Gpu_enumeration_and_reads_stay_within_contract()
+	{
+		var metrics = SystemMetricsServiceFactory.Create();
+		using (metrics as IDisposable)
+		{
+			for (var index = 0; index < metrics.GpuCount; index++)
+			{
+				var usage = await metrics.GetGpuUsageAsync(index);
+				Assert.That(usage, Is.Null.Or.InRange(0d, 100d));
+			}
+
+			Assert.That(await metrics.GetGpuUsageAsync(metrics.GpuCount), Is.Null);
+		}
+	}
 }

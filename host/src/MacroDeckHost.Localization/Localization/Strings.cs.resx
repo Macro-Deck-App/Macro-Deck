@@ -8609,7 +8609,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Hlasitost systémového výstupu není dostupná.</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
-    <value>Nebyl nalezen žádný podporovaný backend GPU. Podporováno: NVIDIA přes nvidia-smi (všechny platformy), AMD přes ovladač amdgpu (Linux) a Apple GPU (macOS).</value>
+    <value>Nebyla nalezena žádná podporovaná GPU. V systému Linux vyžadují metriky GPU ovladač amdgpu nebo nvidia-smi.</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableTitle" xml:space="preserve">
     <value>Metriky GPU nedostupné</value>
@@ -8659,14 +8659,14 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.System.Variables.RamTotalGb" xml:space="preserve">
     <value>Celková RAM (GB)</value>
   </data>
-  <data name="Integrations.System.Variables.GpuUsage" xml:space="preserve">
-    <value>Vytížení GPU</value>
-  </data>
   <data name="Integrations.System.Variables.CpuName" xml:space="preserve">
     <value>Název CPU</value>
   </data>
-  <data name="Integrations.System.Variables.GpuName" xml:space="preserve">
-    <value>Název GPU</value>
+  <data name="Integrations.System.Variables.GpuUsageIndexed" xml:space="preserve">
+    <value>Vytížení GPU {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.GpuNameIndexed" xml:space="preserve">
+    <value>Název GPU {index}</value>
   </data>
   <data name="Integrations.System.Variables.PcName" xml:space="preserve">
     <value>Název počítače</value>

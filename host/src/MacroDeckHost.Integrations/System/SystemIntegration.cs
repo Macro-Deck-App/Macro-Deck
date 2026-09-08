@@ -43,6 +43,8 @@ public sealed class SystemIntegration
 
 	private const string VolumePercentId = "system-volume-percent";
 
+	private const int MaxIndexedGpus = 8;
+
 	private const double MinVolumePercent = 0d;
 	private const double MaxVolumePercent = 100d;
 
@@ -111,6 +113,8 @@ public sealed class SystemIntegration
 		_power = power;
 		_lock = lockStateReader ?? new NullLockStateReader();
 
+		Variables = BuildVariables(_metrics.GpuCount);
+
 		Actions =
 		[
 			new LaunchApplicationActionDefinition(_applications),
@@ -146,7 +150,9 @@ public sealed class SystemIntegration
 
 	public IReadOnlyList<IIntegrationMigration> Migrations { get; } = [new WindowsUtilsMacroDeck2Migration()];
 
-	public IReadOnlyList<VariableDefinition> Variables { get; } =
+	public IReadOnlyList<VariableDefinition> Variables { get; }
+
+	private static IReadOnlyList<VariableDefinition> BuildVariables(int gpuCount) =>
 	[
 		VariableDefinition.Eager("system_volume_percent", VariableType.Numeric, 0, TimeSpan.FromSeconds(2))
 			with
@@ -191,22 +197,10 @@ public sealed class SystemIntegration
 				Unit = GigabyteUnit,
 				SemanticKind = VariableSemanticKinds.None
 			},
-		VariableDefinition.Eager("system_gpu_usage_percent", VariableType.Numeric, 0, TimeSpan.FromSeconds(3))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.GpuUsage(),
-				Unit = PercentUnit,
-				SemanticKind = VariableSemanticKinds.Percentage
-			},
 		VariableDefinition.Eager("system_cpu_name", VariableType.Text, refreshInterval: TimeSpan.FromMinutes(5))
 			with
 			{
 				DisplayName = AppStrings.Integrations.System.Variables.CpuName()
-			},
-		VariableDefinition.Eager("system_gpu_name", VariableType.Text, refreshInterval: TimeSpan.FromMinutes(5))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.GpuName()
 			},
 		VariableDefinition.Eager("system_pc_name", VariableType.Text, refreshInterval: TimeSpan.FromMinutes(5))
 			with
@@ -257,8 +251,28 @@ public sealed class SystemIntegration
 			with
 			{
 				DisplayName = AppStrings.Integrations.System.Variables.Locked()
-			}
+			},
+		.. Enumerable.Range(0, Math.Min(gpuCount, MaxIndexedGpus)).SelectMany(IndexedGpuVariables)
 	];
+
+	private static IEnumerable<VariableDefinition> IndexedGpuVariables(int index)
+	{
+		var label = index.ToString(CultureInfo.InvariantCulture);
+		yield return VariableDefinition.Eager(
+			$"system_gpu_{index}_usage_percent", VariableType.Numeric, 0, TimeSpan.FromSeconds(3))
+			with
+			{
+				DisplayName = AppStrings.Integrations.System.Variables.GpuUsageIndexed(index: label),
+				Unit = PercentUnit,
+				SemanticKind = VariableSemanticKinds.Percentage
+			};
+		yield return VariableDefinition.Eager(
+			$"system_gpu_{index}_name", VariableType.Text, refreshInterval: TimeSpan.FromMinutes(5))
+			with
+			{
+				DisplayName = AppStrings.Integrations.System.Variables.GpuNameIndexed(index: label)
+			};
+	}
 
 	public Task InitializeAsync(IIntegrationContext context)
 	{
@@ -355,10 +369,7 @@ public sealed class SystemIntegration
 				VariableReading.Of(ToGigabytes((await _metrics.GetMemoryAsync(cancellationToken))?.UsedBytes)),
 			"system-ram-total-gb" =>
 				VariableReading.Of(ToGigabytes((await _metrics.GetMemoryAsync(cancellationToken))?.TotalBytes)),
-			"system-gpu-usage-percent" =>
-				VariableReading.Of(RoundPercent(await _metrics.GetGpuUsageAsync(cancellationToken))),
 			"system-cpu-name" => VariableReading.Of(SystemInfo.CpuName),
-			"system-gpu-name" => VariableReading.Of(await _metrics.GetGpuNameAsync(cancellationToken)),
 			"system-pc-name" => VariableReading.Of(SystemInfo.PcName),
 			"system-os" => VariableReading.Of(SystemInfo.OsName),
 			"system-date" => VariableReading.Of(Now("yyyy-MM-dd")),
@@ -372,8 +383,37 @@ public sealed class SystemIntegration
 			// clients can never momentarily disagree; the reader answers only until the first one lands.
 			"system-locked" when _lock.IsSupported =>
 				VariableReading.Of(LockStateSnapshot.Current.Value ?? _lock.IsLocked()),
-			_ => VariableReading.Unavailable
+			_ => await ReadIndexedGpuAsync(localId, cancellationToken)
 		};
+	}
+
+	private async ValueTask<VariableReading> ReadIndexedGpuAsync(string localId, CancellationToken cancellationToken)
+	{
+		if (IndexedGpuNumber(localId, "-usage-percent") is { } usageIndex)
+		{
+			return VariableReading.Of(RoundPercent(await _metrics.GetGpuUsageAsync(usageIndex, cancellationToken)));
+		}
+
+		if (IndexedGpuNumber(localId, "-name") is { } nameIndex)
+		{
+			return VariableReading.Of(await _metrics.GetGpuNameAsync(nameIndex, cancellationToken));
+		}
+
+		return VariableReading.Unavailable;
+	}
+
+	private static int? IndexedGpuNumber(string localId, string suffix)
+	{
+		const string prefix = "system-gpu-";
+		if (localId.Length <= prefix.Length + suffix.Length ||
+			!localId.StartsWith(prefix, StringComparison.Ordinal) ||
+			!localId.EndsWith(suffix, StringComparison.Ordinal))
+		{
+			return null;
+		}
+
+		var digits = localId[prefix.Length..^suffix.Length];
+		return int.TryParse(digits, CultureInfo.InvariantCulture, out var index) && index >= 0 ? index : null;
 	}
 
 	public async ValueTask<VariableWriteResult> SetValueAsync(
