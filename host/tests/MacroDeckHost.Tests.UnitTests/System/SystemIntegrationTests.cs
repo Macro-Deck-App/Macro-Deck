@@ -28,10 +28,10 @@ public class SystemIntegrationTests
 	private static readonly string[] _expectedVariableNames =
 	[
 		"system_volume_percent", "system_muted", "system_cpu_usage_percent", "system_ram_usage_percent",
-		"system_ram_used_gb", "system_ram_total_gb", "system_gpu_usage_percent", "system_cpu_name",
-		"system_gpu_name", "system_pc_name", "system_os",
+		"system_ram_used_gb", "system_ram_total_gb", "system_cpu_name", "system_pc_name", "system_os",
 		"system_date", "system_time", "system_datetime", "system_timestamp_unix",
-		"system_day_of_week", "system_hour", "system_minute", "system_locked"
+		"system_day_of_week", "system_hour", "system_minute", "system_locked",
+		"system_gpu_0_usage_percent", "system_gpu_0_name"
 	];
 
 	[TearDown]
@@ -137,7 +137,7 @@ public class SystemIntegrationTests
 		var ramUsage = (await integration.ReadAsync("system-ram-usage-percent", CancellationToken.None)).Value;
 		var ramUsed = (await integration.ReadAsync("system-ram-used-gb", CancellationToken.None)).Value;
 		var ramTotal = (await integration.ReadAsync("system-ram-total-gb", CancellationToken.None)).Value;
-		var gpu = (await integration.ReadAsync("system-gpu-usage-percent", CancellationToken.None)).Value;
+		var gpu = (await integration.ReadAsync("system-gpu-0-usage-percent", CancellationToken.None)).Value;
 
 		Assert.Multiple(() =>
 		{
@@ -150,14 +150,63 @@ public class SystemIntegrationTests
 	}
 
 	[Test]
+	public void Every_detected_gpu_gets_its_own_variables()
+	{
+		var integration = Create(metrics: new FakeSystemMetricsService(gpuCount: 2));
+
+		Assert.That(integration.Variables.Select(v => v.Name), Is.SupersetOf(new[]
+		{
+			"system_gpu_0_usage_percent", "system_gpu_0_name",
+			"system_gpu_1_usage_percent", "system_gpu_1_name"
+		}));
+	}
+
+	[Test]
+	public async Task Indexed_gpu_variables_read_their_own_gpu()
+	{
+		var metrics = new FakeSystemMetricsService(gpuCount: 2);
+		metrics.GpuUsageByIndex[0] = 11;
+		metrics.GpuUsageByIndex[1] = 72;
+		metrics.GpuNameByIndex[0] = "Discrete";
+		metrics.GpuNameByIndex[1] = "Integrated";
+		var integration = Create(metrics: metrics);
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That((await integration.ReadAsync("system-gpu-0-usage-percent", CancellationToken.None)).Value,
+				Is.EqualTo(11));
+			Assert.That((await integration.ReadAsync("system-gpu-1-usage-percent", CancellationToken.None)).Value,
+				Is.EqualTo(72));
+			Assert.That((await integration.ReadAsync("system-gpu-0-name", CancellationToken.None)).Value,
+				Is.EqualTo("Discrete"));
+			Assert.That((await integration.ReadAsync("system-gpu-1-name", CancellationToken.None)).Value,
+				Is.EqualTo("Integrated"));
+		});
+	}
+
+	[Test]
+	public async Task A_machine_without_a_gpu_declares_no_gpu_variables()
+	{
+		var integration = Create(metrics: new FakeSystemMetricsService(gpuSupported: false));
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(integration.Variables.Select(v => v.Name), Has.None.StartsWith("system_gpu"));
+			Assert.That((await integration.ReadAsync("system-gpu-0-usage-percent", CancellationToken.None)).Value,
+				Is.Null);
+			Assert.That((await integration.ReadAsync("system-gpu-0-name", CancellationToken.None)).Value, Is.Null);
+		});
+	}
+
+	[Test]
 	public async Task ReadAsync_returns_null_metrics_when_readings_unavailable()
 	{
 		var integration = Create(metrics: new FakeSystemMetricsService(supported: false));
 
 		var names = new[]
 		{
-			"system_cpu_usage_percent", "system_ram_usage_percent", "system_ram_used_gb",
-			"system_ram_total_gb", "system_gpu_usage_percent"
+			"system-cpu-usage-percent", "system-ram-usage-percent", "system-ram-used-gb",
+			"system-ram-total-gb", "system-gpu-0-usage-percent"
 		};
 		foreach (var name in names)
 		{
@@ -195,7 +244,7 @@ public class SystemIntegrationTests
 	{
 		var integration = Create(metrics: new FakeSystemMetricsService { GpuName = "NVIDIA GeForce RTX 3080" });
 
-		Assert.That((await integration.ReadAsync("system-gpu-name", CancellationToken.None)).Value,
+		Assert.That((await integration.ReadAsync("system-gpu-0-name", CancellationToken.None)).Value,
 			Is.EqualTo("NVIDIA GeForce RTX 3080"));
 	}
 
@@ -204,7 +253,7 @@ public class SystemIntegrationTests
 	{
 		var integration = Create(metrics: new FakeSystemMetricsService(gpuSupported: false) { GpuName = "ignored" });
 
-		Assert.That((await integration.ReadAsync("system-gpu-name", CancellationToken.None)).Value, Is.Null);
+		Assert.That((await integration.ReadAsync("system-gpu-0-name", CancellationToken.None)).Value, Is.Null);
 	}
 
 	[Test]

@@ -8607,7 +8607,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Die Systemausgabelautstärke ist nicht verfügbar.</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
-    <value>Es wurde kein unterstütztes GPU-Backend gefunden. Unterstützt: NVIDIA über nvidia-smi (alle Plattformen), AMD über den amdgpu-Treiber (Linux) und Apple-GPUs (macOS).</value>
+    <value>Es wurde keine unterstützte GPU erkannt. Unter Linux brauchen GPU-Messwerte den amdgpu-Treiber oder nvidia-smi.</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableTitle" xml:space="preserve">
     <value>GPU-Messwerte nicht verfügbar</value>
@@ -8657,14 +8657,14 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.System.Variables.RamTotalGb" xml:space="preserve">
     <value>RAM insgesamt (GB)</value>
   </data>
-  <data name="Integrations.System.Variables.GpuUsage" xml:space="preserve">
-    <value>GPU-Auslastung</value>
-  </data>
   <data name="Integrations.System.Variables.CpuName" xml:space="preserve">
     <value>CPU-Name</value>
   </data>
-  <data name="Integrations.System.Variables.GpuName" xml:space="preserve">
-    <value>GPU-Name</value>
+  <data name="Integrations.System.Variables.GpuUsageIndexed" xml:space="preserve">
+    <value>Auslastung GPU {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.GpuNameIndexed" xml:space="preserve">
+    <value>Name GPU {index}</value>
   </data>
   <data name="Integrations.System.Variables.PcName" xml:space="preserve">
     <value>PC-Name</value>

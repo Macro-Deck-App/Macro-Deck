@@ -1,14 +1,29 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using MacroDeck.Sdk.Logging;
+using Serilog;
 
 namespace MacroDeckHost.Integrations.System.Metrics;
 
 [SupportedOSPlatform("windows")]
 internal sealed class WindowsSystemMetricsService : SystemMetricsServiceBase
 {
-	private readonly bool _hasNvidiaSmi = ProcessRunner.CommandExists("nvidia-smi");
+	private static readonly ILogger _logger =
+		IntegrationLog.For<WindowsSystemMetricsService>("app.macro-deck.system");
 
-	public override bool IsGpuSupported => _hasNvidiaSmi;
+	private readonly bool _hasNvidiaSmi = ProcessRunner.CommandExists("nvidia-smi");
+	private readonly WindowsGpuInterop _interop = new();
+	private readonly IReadOnlyList<WindowsGpuAdapter> _adapters;
+
+	private bool _loggedEmptyCounters;
+	private bool _loggedLuidFallback;
+
+	public WindowsSystemMetricsService()
+	{
+		_adapters = WindowsGpuSnapshotBuilder.Surviving(WindowsGpuInterop.EnumerateAdapters());
+	}
+
+	public override int GpuCount => _adapters.Count > 0 ? _adapters.Count : _hasNvidiaSmi ? 1 : 0;
 
 	protected override Task<CpuTimes?> ReadCpuTimesAsync(CancellationToken cancellationToken)
 	{
@@ -33,30 +48,70 @@ internal sealed class WindowsSystemMetricsService : SystemMetricsServiceBase
 		return Task.FromResult<MemoryInfo?>(new MemoryInfo((long)status.TotalPhys, (long)status.AvailPhys));
 	}
 
-	protected override async Task<double?> ReadGpuUsageAsync(CancellationToken cancellationToken)
+	protected override async Task<IReadOnlyList<GpuSample>> ReadGpuSnapshotAsync(CancellationToken cancellationToken)
 	{
-		if (!_hasNvidiaSmi)
-		{
-			return null;
-		}
+		var counters = _interop.ReadCounters();
+		LogEmptyCountersOnce(counters);
 
-		var output = await ProcessRunner.RunAsync("nvidia-smi",
-			["--query-gpu=utilization.gpu", "--format=csv,noheader,nounits"],
-			cancellationToken);
-		return NvidiaSmiParser.ParseUtilization(output);
+		var nvidia = WindowsGpuSnapshotBuilder.NeedsNvidiaFallback(_adapters, counters, _hasNvidiaSmi)
+			? await ReadNvidiaSmiAsync(cancellationToken)
+			: null;
+
+		var snapshot = WindowsGpuSnapshotBuilder.Build(_adapters, counters, nvidia, out var join);
+		LogLuidFallbackOnce(join);
+		return snapshot;
 	}
 
-	protected override async Task<string?> ReadGpuNameAsync(CancellationToken cancellationToken)
+	protected override void Dispose(bool disposing)
 	{
-		if (!_hasNvidiaSmi)
+		if (disposing)
+		{
+			_interop.Dispose();
+		}
+
+		base.Dispose(disposing);
+	}
+
+	private static async Task<string?> ReadNvidiaSmiAsync(CancellationToken cancellationToken)
+	{
+		try
+		{
+			return await ProcessRunner.RunAsync("nvidia-smi",
+				["--query-gpu=index,name,utilization.gpu", "--format=csv,noheader,nounits"],
+				cancellationToken);
+		}
+		catch (OperationCanceledException)
+		{
+			throw;
+		}
+		catch
 		{
 			return null;
 		}
+	}
 
-		var output = await ProcessRunner.RunAsync("nvidia-smi",
-			["--query-gpu=name", "--format=csv,noheader"],
-			cancellationToken);
-		return NvidiaSmiParser.ParseName(output);
+	private void LogEmptyCountersOnce(CounterReadResult counters)
+	{
+		if (_loggedEmptyCounters || counters is not (CounterReadResult.Failed or CounterReadResult.Instances([])))
+		{
+			return;
+		}
+
+		_loggedEmptyCounters = true;
+		_logger.Warning(
+			"The GPU Engine performance counters returned nothing ({Result}); GPU usage falls back to nvidia-smi or reads as unavailable",
+			counters.GetType().Name);
+	}
+
+	private void LogLuidFallbackOnce(WindowsGpuSnapshotBuilder.LuidJoin join)
+	{
+		if (_loggedLuidFallback || join == WindowsGpuSnapshotBuilder.LuidJoin.Matched)
+		{
+			return;
+		}
+
+		_loggedLuidFallback = true;
+		_logger.Warning("GPU counter instances did not join to the DXGI adapters as expected ({Join})", join);
 	}
 
 	[DllImport("kernel32.dll", SetLastError = true)]

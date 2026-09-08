@@ -8609,7 +8609,7 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>Il volume di uscita del sistema non è disponibile.</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
-    <value>Non è stato trovato nessun backend GPU supportato. Supportati: NVIDIA tramite nvidia-smi (tutte le piattaforme), AMD tramite il driver amdgpu (Linux) e GPU Apple (macOS).</value>
+    <value>Nessuna GPU supportata rilevata. Su Linux le metriche GPU richiedono il driver amdgpu o nvidia-smi.</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableTitle" xml:space="preserve">
     <value>Metriche GPU non disponibili</value>
@@ -8659,14 +8659,14 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.System.Variables.RamTotalGb" xml:space="preserve">
     <value>RAM totale (GB)</value>
   </data>
-  <data name="Integrations.System.Variables.GpuUsage" xml:space="preserve">
-    <value>Utilizzo GPU</value>
-  </data>
   <data name="Integrations.System.Variables.CpuName" xml:space="preserve">
     <value>Nome CPU</value>
   </data>
-  <data name="Integrations.System.Variables.GpuName" xml:space="preserve">
-    <value>Nome GPU</value>
+  <data name="Integrations.System.Variables.GpuUsageIndexed" xml:space="preserve">
+    <value>Utilizzo GPU {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.GpuNameIndexed" xml:space="preserve">
+    <value>Nome GPU {index}</value>
   </data>
   <data name="Integrations.System.Variables.PcName" xml:space="preserve">
     <value>Nome del PC</value>

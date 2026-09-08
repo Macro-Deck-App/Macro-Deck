@@ -5,33 +5,36 @@ namespace MacroDeckHost.Tests.UnitTests.System;
 public class NvidiaSmiParserTests
 {
 	[Test]
-	public void Parses_single_gpu_output()
+	public void Every_reported_card_becomes_a_gpu_in_index_order()
 	{
-		Assert.That(NvidiaSmiParser.ParseUtilization("42\n"), Is.EqualTo(42.0));
+		var samples = NvidiaSmiParser.ParseGpus("1, NVIDIA GeForce RTX 4070, 42\n0, NVIDIA RTX A2000, 7\n");
+
+		Assert.That(samples, Is.EqualTo(new[]
+		{
+			new GpuSample("NVIDIA RTX A2000", 7),
+			new GpuSample("NVIDIA GeForce RTX 4070", 42)
+		}));
 	}
 
 	[Test]
-	public void Uses_first_gpu_on_multi_gpu_output()
+	public void Blank_and_partial_lines_are_skipped()
 	{
-		Assert.That(NvidiaSmiParser.ParseUtilization("17\n83\n"), Is.EqualTo(17.0));
+		var samples = NvidiaSmiParser.ParseGpus("\n0, NVIDIA GeForce RTX 4070, 42\nnot a row\n1, only two fields\n");
+
+		Assert.That(samples, Is.EqualTo(new[] { new GpuSample("NVIDIA GeForce RTX 4070", 42) }));
 	}
 
 	[Test]
-	public void Returns_null_for_unparsable_output()
+	public void An_unreadable_utilization_leaves_the_name_usable()
 	{
-		Assert.That(NvidiaSmiParser.ParseUtilization("NVIDIA-SMI has failed\n"), Is.Null);
+		var samples = NvidiaSmiParser.ParseGpus("0, NVIDIA GeForce RTX 4070, [N/A]\n");
+
+		Assert.That(samples, Is.EqualTo(new[] { new GpuSample("NVIDIA GeForce RTX 4070", null) }));
 	}
 
 	[Test]
-	public void ParseName_returns_first_gpu_name()
+	public void Utilization_is_clamped()
 	{
-		Assert.That(NvidiaSmiParser.ParseName("NVIDIA GeForce RTX 3080\nNVIDIA GeForce RTX 3060\n"),
-			Is.EqualTo("NVIDIA GeForce RTX 3080"));
-	}
-
-	[Test]
-	public void ParseName_returns_null_for_empty_output()
-	{
-		Assert.That(NvidiaSmiParser.ParseName("\n  \n"), Is.Null);
+		Assert.That(NvidiaSmiParser.ParseGpus("0, GPU, 140\n")[0].UsagePercent, Is.EqualTo(100));
 	}
 }

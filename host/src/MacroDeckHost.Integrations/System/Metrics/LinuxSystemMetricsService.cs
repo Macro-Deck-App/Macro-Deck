@@ -6,9 +6,15 @@ namespace MacroDeckHost.Integrations.System.Metrics;
 internal sealed class LinuxSystemMetricsService : SystemMetricsServiceBase
 {
 	private readonly bool _hasNvidiaSmi = ProcessRunner.CommandExists("nvidia-smi");
-	private readonly string? _amdGpuBusyPercentPath = FindAmdGpuBusyPercentPath();
+	private readonly IReadOnlyList<string> _amdGpuBusyPercentPaths = LinuxDrmEnumerator.FindAmdGpuBusyPercentPaths();
+	private readonly int _nvidiaGpuCount;
 
-	public override bool IsGpuSupported => _hasNvidiaSmi || _amdGpuBusyPercentPath is not null;
+	public LinuxSystemMetricsService()
+	{
+		_nvidiaGpuCount = LinuxDrmEnumerator.CountNvidiaGpus() ?? (_hasNvidiaSmi ? 1 : 0);
+	}
+
+	public override int GpuCount => _nvidiaGpuCount + _amdGpuBusyPercentPaths.Count;
 
 	protected override async Task<CpuTimes?> ReadCpuTimesAsync(CancellationToken cancellationToken)
 		=> LinuxMetricsParser.ParseProcStat(await File.ReadAllTextAsync("/proc/stat", cancellationToken));
@@ -16,61 +22,58 @@ internal sealed class LinuxSystemMetricsService : SystemMetricsServiceBase
 	protected override async Task<MemoryInfo?> ReadMemoryAsync(CancellationToken cancellationToken)
 		=> LinuxMetricsParser.ParseMemInfo(await File.ReadAllTextAsync("/proc/meminfo", cancellationToken));
 
-	protected override async Task<double?> ReadGpuUsageAsync(CancellationToken cancellationToken)
+	protected override async Task<IReadOnlyList<GpuSample>> ReadGpuSnapshotAsync(CancellationToken cancellationToken)
 	{
-		if (_hasNvidiaSmi)
+		var samples = new List<GpuSample>(GpuCount);
+
+		if (_nvidiaGpuCount > 0)
 		{
-			var output = await ProcessRunner.RunAsync("nvidia-smi",
-				["--query-gpu=utilization.gpu", "--format=csv,noheader,nounits"],
-				cancellationToken);
-			return NvidiaSmiParser.ParseUtilization(output);
+			var nvidia = await ReadNvidiaGpusAsync(cancellationToken);
+			for (var index = 0; index < _nvidiaGpuCount; index++)
+			{
+				samples.Add(index < nvidia.Count ? nvidia[index] : new GpuSample(null, null));
+			}
 		}
 
-		if (_amdGpuBusyPercentPath is not null)
+		foreach (var path in _amdGpuBusyPercentPaths)
 		{
-			var content = await File.ReadAllTextAsync(_amdGpuBusyPercentPath, cancellationToken);
-			return LinuxMetricsParser.ParseGpuBusyPercent(content);
+			double? usage;
+			try
+			{
+				usage = LinuxMetricsParser.ParseGpuBusyPercent(await File.ReadAllTextAsync(path, cancellationToken));
+			}
+			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+			{
+				usage = null;
+			}
+
+			samples.Add(new GpuSample(null, usage));
 		}
 
-		return null;
+		return samples;
 	}
 
-	protected override async Task<string?> ReadGpuNameAsync(CancellationToken cancellationToken)
+	private async Task<IReadOnlyList<GpuSample>> ReadNvidiaGpusAsync(CancellationToken cancellationToken)
 	{
 		if (!_hasNvidiaSmi)
 		{
-			return null;
+			return [];
 		}
 
-		var output = await ProcessRunner.RunAsync("nvidia-smi",
-			["--query-gpu=name", "--format=csv,noheader"],
-			cancellationToken);
-		return NvidiaSmiParser.ParseName(output);
-	}
-
-	private static string? FindAmdGpuBusyPercentPath()
-	{
 		try
 		{
-			if (!Directory.Exists("/sys/class/drm"))
-			{
-				return null;
-			}
-
-			foreach (var card in Directory.GetDirectories("/sys/class/drm", "card*").Order(StringComparer.Ordinal))
-			{
-				var path = Path.Combine(card, "device", "gpu_busy_percent");
-				if (File.Exists(path))
-				{
-					return path;
-				}
-			}
-
-			return null;
+			var output = await ProcessRunner.RunAsync("nvidia-smi",
+				["--query-gpu=index,name,utilization.gpu", "--format=csv,noheader,nounits"],
+				cancellationToken);
+			return NvidiaSmiParser.ParseGpus(output);
+		}
+		catch (OperationCanceledException)
+		{
+			throw;
 		}
 		catch
 		{
-			return null;
+			return [];
 		}
 	}
 }
