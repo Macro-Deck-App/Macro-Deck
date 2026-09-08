@@ -45,6 +45,9 @@
   }
 }
 
+/* Every looping style below keeps running under prefers-reduced-motion. Freezing the ring here alone
+   left one border animating in the configuration UI and dead in the web client (issue 682). */
+
 /* Colour-tinted styles paint the ring directly; the animated ones vary its opacity. */
 .wb-static,
 .wb-heartbeat,
@@ -154,13 +157,5 @@
 @keyframes wb-hue-shift {
   to {
     filter: hue-rotate(1turn);
-  }
-}
-
-/* Every style freezes to its static look for reduced-motion users. */
-@media (prefers-reduced-motion: reduce) {
-  .ring,
-  .ring::before {
-    animation: none;
   }
 }

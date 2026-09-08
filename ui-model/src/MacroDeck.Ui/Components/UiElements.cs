@@ -783,8 +783,9 @@ public sealed record UiSlider : UiComponentLeaf
 /// basis, deliberately: a ring that grew with the element would read wildly inconsistently across
 /// differently sized widgets. Every looping <see cref="UiComponentBorderStyles" /> is phase-locked to a
 /// clock shared with the host rather than to its own element, so one button shows the same phase on every
-/// client displaying it; a reader honouring a reduced-motion preference freezes each style to its static
-/// look.
+/// client displaying it, and it keeps animating whatever the viewer's reduced-motion preference says: a
+/// border a deck owner configured to move is the same border on every client, so a reader must not freeze
+/// it.
 /// </para>
 ///
 /// <para>

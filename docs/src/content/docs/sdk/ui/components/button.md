@@ -59,7 +59,8 @@ ignore it. The ring is drawn at a fixed `2` device-independent units along the i
 element's corner radius - the one length in the framework that is not a fraction of the basis, deliberately:
 a ring that grew with the element would read wildly inconsistently across differently sized buttons. Every
 looping style is phase-locked to a clock shared with Macro Deck, so one button animates in step on every
-client showing it; a reader honouring a reduced-motion preference freezes each style to its static look.
+client showing it, and it keeps animating whatever the viewer's reduced-motion preference says - a border
+a deck owner configured to move is the same border on every client, so a reader must not freeze it.
 
 Paint order, which none of the properties imply and a reader owes: `background`, then the artwork, then
 the children, then the press feedback, then the ring. The ring is above everything so artwork covering the
