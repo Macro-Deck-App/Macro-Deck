@@ -20,8 +20,8 @@ internal static class HistoryGraphWidgetConfigView
 	private const string _cpuName = "system_cpu_name";
 	private const string _ramUsedGb = "system_ram_used_gb";
 	private const string _ramUsagePercent = "system_ram_usage_percent";
-	private const string _gpuUsagePercent = "system_gpu_usage_percent";
-	private const string _gpuName = "system_gpu_name";
+	private const string _gpuUsagePercent = "system_gpu_0_usage_percent";
+	private const string _gpuName = "system_gpu_0_name";
 
 	public static UiElement Build(JsonElement data)
 	{

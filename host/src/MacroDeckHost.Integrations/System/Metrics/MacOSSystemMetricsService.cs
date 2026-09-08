@@ -15,7 +15,7 @@ internal sealed class MacOsSystemMetricsService : SystemMetricsServiceBase
 	private const int VmInactiveIndex = 2;
 	private const int VmPurgeableIndex = 22;
 
-	public override bool IsGpuSupported => true;
+	public override int GpuCount => 1;
 
 	protected override Task<CpuTimes?> ReadCpuTimesAsync(CancellationToken cancellationToken)
 	{
@@ -57,16 +57,14 @@ internal sealed class MacOsSystemMetricsService : SystemMetricsServiceBase
 		return Task.FromResult<MemoryInfo?>(new MemoryInfo(total, available));
 	}
 
-	protected override async Task<double?> ReadGpuUsageAsync(CancellationToken cancellationToken)
+	protected override async Task<IReadOnlyList<GpuSample>> ReadGpuSnapshotAsync(CancellationToken cancellationToken)
 	{
 		var output = await ReadIoRegAcceleratorAsync(cancellationToken);
-		return MacOsIoRegParser.ParseDeviceUtilization(output);
-	}
-
-	protected override async Task<string?> ReadGpuNameAsync(CancellationToken cancellationToken)
-	{
-		var output = await ReadIoRegAcceleratorAsync(cancellationToken);
-		return MacOsIoRegParser.ParseAcceleratorModel(output);
+		return
+		[
+			new GpuSample(MacOsIoRegParser.ParseAcceleratorModel(output),
+				MacOsIoRegParser.ParseDeviceUtilization(output))
+		];
 	}
 
 	private static Task<string> ReadIoRegAcceleratorAsync(CancellationToken cancellationToken)
