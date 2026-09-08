@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TOOLTIP_SHOW_DELAY_MS, TooltipDirective } from './tooltip.directive';
@@ -6,6 +6,7 @@ import { TOOLTIP_SHOW_DELAY_MS, TooltipDirective } from './tooltip.directive';
 @Component({
   standalone: true,
   imports: [TooltipDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<button class="host" [sharedTooltip]="text" [tooltipSecondary]="secondary"
                      [tooltipDisabled]="disabled">Icon</button>`,
 })

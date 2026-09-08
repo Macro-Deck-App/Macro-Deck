@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ShellFileDropService } from '../../services/shell-file-drop.service';
@@ -8,6 +8,7 @@ import { IconDropTargetDirective } from './icon-drop-target.directive';
 @Component({
   standalone: true,
   imports: [IconDropTargetDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<div class="tile" sharedIconDropTarget (iconPathDropped)="dropped.push($event)"></div>`,
 })
 class HostComponent {
@@ -17,6 +18,7 @@ class HostComponent {
 @Component({
   standalone: true,
   imports: [IconDropTargetDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<div class="zone" sharedIconDropTarget [multiple]="true" (iconPathsDropped)="dropped = $event"></div>`,
 })
 class MultipleHostComponent {
@@ -26,6 +28,7 @@ class MultipleHostComponent {
 @Component({
   standalone: true,
   imports: [IconDropTargetDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<div class="zone" sharedIconDropTarget [multiple]="true" [packArchives]="true"
     (iconPathsDropped)="dropped = $event"></div>`,
 })
@@ -36,6 +39,7 @@ class PackArchivesHostComponent {
 @Component({
   standalone: true,
   imports: [IconDropTargetDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<div class="zone" sharedIconDropTarget [packArchives]="true"
     (iconPathDropped)="dropped.push($event)"></div>`,
 })

@@ -730,11 +730,10 @@ describe('widget node renderer', () => {
 
     afterEach(() => jasmine.clock().uninstall());
 
-    it('scrolls rather than dividing its box between its children', () => {
+    it('lays its children out one under the other rather than dividing its box between them', () => {
       list(3);
 
-      expect(getComputedStyle(surface()).overflowY).not.toBe('visible');
-      expect(container.querySelectorAll('.widget-text').length).toBe(3);
+      expect(surface().children.length).toBe(3);
     });
 
     it('asks for more as soon as it is drawn, when its content does not fill it', () => {

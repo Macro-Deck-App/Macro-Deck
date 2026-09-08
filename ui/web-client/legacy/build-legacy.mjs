@@ -50,9 +50,7 @@ async function toEs5(code, targets) {
     // The bundle ends in a sourceMappingURL comment. Its map describes the pre-Babel code, so it is
     // dropped rather than carried into an output it no longer maps.
     inputSourceMap: false,
-    // `bugfixes` keeps preset-env from applying a transform to engines that only carry a narrower
-    // bug than the one the plugin exists for - notably Safari 9's block-scoped function bugs.
-    presets: [['@babel/preset-env', { targets, bugfixes: true, useBuiltIns: false }]],
+    presets: [['@babel/preset-env', { targets, useBuiltIns: false }]],
   });
   return result.code.replace(/\n?\/\/# sourceMappingURL=\S*\s*$/, '') + '\n';
 }

@@ -1,4 +1,4 @@
-import { Component, ViewChild, provideZonelessChangeDetection } from '@angular/core';
+import { Component, ViewChild, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DropdownMenuComponent } from './dropdown-menu.component';
@@ -6,6 +6,7 @@ import { DropdownMenuComponent } from './dropdown-menu.component';
 @Component({
   standalone: true,
   imports: [DropdownMenuComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <shared-dropdown-menu [isOpen]="true" [closeOnItemClick]="closeOnItemClick">
       <ng-template #menuContent>

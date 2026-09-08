@@ -21,7 +21,8 @@ permissions:
 
 env:
   DOTNET_VERSION: 10.0.x
-  NODE_VERSION: 22
+  # The Angular CLI declares a node floor of 22.22.3, and a bare major can resolve below it.
+  NODE_VERSION: '^22.22.3'
   BUILD_CHANNEL: Production
   E2E_LOOPBACK_PORT: 5191
   E2E_PUBLIC_PORT: 8192

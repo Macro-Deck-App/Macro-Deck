@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RailItemComponent } from './rail-item.component';
 import { RailPageComponent } from './rail-page.component';
@@ -6,6 +6,7 @@ import { RailPageComponent } from './rail-page.component';
 @Component({
   standalone: true,
   imports: [RailPageComponent, RailItemComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <shared-rail-page railTitle="Test Title">
       <ng-container ngProjectAs="[page-banner]">

@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ButtonComponent, ButtonSize } from './button.component';
 import { ButtonGroupComponent, ButtonGroupSize } from './button-group.component';
@@ -118,6 +118,7 @@ describe('ButtonComponent', () => {
   selector: 'app-group-host',
   standalone: true,
   imports: [ButtonComponent, ButtonGroupComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <shared-button-group [size]="size()">
       @if (show()) {
@@ -193,6 +194,7 @@ describe('ButtonComponent inside a shared-button-group', () => {
   selector: 'app-projecting-group',
   standalone: true,
   imports: [ButtonGroupComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: '<shared-button-group size="compact"><ng-content></ng-content></shared-button-group>',
 })
 class ProjectingGroupComponent {}
@@ -201,6 +203,7 @@ class ProjectingGroupComponent {}
   selector: 'app-projection-host',
   standalone: true,
   imports: [ButtonComponent, ProjectingGroupComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: '<app-projecting-group><shared-button>Label</shared-button></app-projecting-group>',
 })
 class ProjectionHostComponent {}
@@ -209,6 +212,7 @@ class ProjectionHostComponent {}
   selector: 'app-nested-group-host',
   standalone: true,
   imports: [ButtonComponent, ButtonGroupComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <shared-button-group size="md">
       <shared-button-group size="compact">
@@ -246,6 +250,7 @@ describe('ButtonComponent group resolution boundaries', () => {
 @Component({
   standalone: true,
   imports: [ButtonComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <shared-button [disabled]="true" (click)="clicks = clicks + 1">Delete</shared-button>
   `,

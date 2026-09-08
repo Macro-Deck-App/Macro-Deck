@@ -28,11 +28,11 @@
     "test:boundaries": "node --test boundaries.test.mjs styles.test.mjs"
   },
   "devDependencies": {
-    "es-check": "^7.2.1",
-    "jasmine": "^5.6.0",
-    "jasmine-core": "~5.6.0",
-    "jsdom": "^26.0.0",
-    "typescript": "~5.9.3"
+    "es-check": "^9.6.4",
+    "jasmine": "^7.0.0",
+    "jasmine-core": "~7.0.2",
+    "jsdom": "^30.0.1",
+    "typescript": "~6.0.3"
   },
   "module": "./dist/public-api.js"
 }

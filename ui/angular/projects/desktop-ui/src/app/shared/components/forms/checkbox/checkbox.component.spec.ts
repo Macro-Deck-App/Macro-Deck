@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { CheckboxComponent } from './checkbox.component';
@@ -6,6 +6,7 @@ import { CheckboxComponent } from './checkbox.component';
 @Component({
   standalone: true,
   imports: [FormsModule, CheckboxComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<shared-checkbox label="Enabled" [ngModel]="value()" (ngModelChange)="value.set($event)" />`,
 })
 class HostComponent {

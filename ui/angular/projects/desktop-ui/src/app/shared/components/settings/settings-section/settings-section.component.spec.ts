@@ -1,10 +1,11 @@
-import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SettingsSectionComponent } from './settings-section.component';
 
 @Component({
   standalone: true,
   imports: [SettingsSectionComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <shared-settings-section heading="Theme" [description]="description()">
       <span class="projected">body</span>

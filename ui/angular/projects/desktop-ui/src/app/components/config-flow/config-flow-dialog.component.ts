@@ -79,7 +79,7 @@ const COPY_FALLBACK_Z_INDEX = 1100;
         }
         @if (step.instructions?.length) {
           <shared-config-flow-instructions
-            [instructions]="step.instructions ?? []"
+            [instructions]="step.instructions"
             [fallbackZIndex]="copyFallbackZIndex" />
         }
         @if (step.links?.length) {
@@ -125,7 +125,7 @@ const COPY_FALLBACK_Z_INDEX = 1100;
             </shared-toggle-switch>
             @if (showAdvanced()) {
               <div class="cfd-fields">
-                @for (field of step.advancedFields ?? []; track field.name) {
+                @for (field of step.advancedFields; track field.name) {
                   <shared-config-field
                     [field]="field"
                     [value]="flow.values()[field.name]"

@@ -18,7 +18,8 @@ permissions:
   checks: write
 
 env:
-  NODE_VERSION: 22
+  # The Angular CLI declares a node floor of 22.22.3, and a bare major can resolve below it.
+  NODE_VERSION: '^22.22.3'
   DOTNET_VERSION: 10.0.x
   # CI validates the installed product configuration. Local IDE builds keep
   # the Development default in Directory.Build.props and ui/bootstrapper/build.rs.

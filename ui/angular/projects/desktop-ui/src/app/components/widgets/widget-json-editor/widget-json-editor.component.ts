@@ -89,7 +89,7 @@ export class WidgetJsonEditorComponent implements OnInit, OnDestroy {
 
     if (this.destroyed) return;
 
-    const deps: JsonEditorDeps = { syntaxTree: language.syntaxTree, Draft07: schemaLib.Draft07 };
+    const deps: JsonEditorDeps = { syntaxTree: language.syntaxTree, compileSchema: schemaLib.compileSchema, draft07: schemaLib.draft07 };
     const getSchema = (): object | null => this.schema();
 
     const highlightStyle = language.HighlightStyle.define([

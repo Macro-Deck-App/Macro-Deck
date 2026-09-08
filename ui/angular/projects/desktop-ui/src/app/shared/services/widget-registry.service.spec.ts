@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, WritableSignal, signal } from '@angular/core';
+import { Component, EventEmitter, Input, WritableSignal, signal, ChangeDetectionStrategy } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { GridWidget, WidgetData, WidgetType } from '@macro-deck/runtime';
 
@@ -10,7 +10,8 @@ import { WidgetTypeInfo } from '../transport';
 import { WidgetConfigurationEditorComponent } from '../../components/widgets/widget-editors/widget-configuration-editor/widget-configuration-editor.component';
 import { UiTreeWidgetComponent } from '../components/widget-types/ui-tree-widget/ui-tree-widget.component';
 
-@Component({ selector: 'shared-test-widget', standalone: true, template: '' })
+@Component({ selector: 'shared-test-widget', standalone: true, changeDetection: ChangeDetectionStrategy.Eager,
+ template: '' })
 class TestWidgetComponent implements IWidgetComponent {
   @Input() data: WidgetData = {};
   @Input() width = 0;
@@ -18,7 +19,8 @@ class TestWidgetComponent implements IWidgetComponent {
   @Input() disabled = false;
 }
 
-@Component({ selector: 'shared-test-widget-editor', standalone: true, template: '' })
+@Component({ selector: 'shared-test-widget-editor', standalone: true, changeDetection: ChangeDetectionStrategy.Eager,
+ template: '' })
 class TestWidgetEditorComponent implements IWidgetEditorComponent {
   widget!: GridWidget;
   save = new EventEmitter<Partial<WidgetData>>();

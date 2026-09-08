@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 
 import { TranslatePipe } from '@shared';
 import { GridSettingsComponent } from '../../grid-settings/grid-settings.component';
@@ -9,6 +9,7 @@ import { DropdownMenuComponent } from '../../overlay/dropdown-menu/dropdown-menu
   standalone: true,
   imports: [DropdownMenuComponent, GridSettingsComponent, TranslatePipe],
   templateUrl: './grid-settings-menu.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./grid-settings-menu.component.scss']
 })
 export class GridSettingsMenuComponent {

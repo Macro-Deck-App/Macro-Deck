@@ -19,7 +19,8 @@ permissions:
   checks: write
 
 env:
-  NODE_VERSION: 22
+  # The Angular CLI declares a node floor of 22.22.3, and a bare major can resolve below it.
+  NODE_VERSION: '^22.22.3'
   DOTNET_VERSION: 10.0.x
   # Release artifacts always use the production host and bootstrapper identity.
   # Beta is derived from the normalized version below, not a separate build mode.

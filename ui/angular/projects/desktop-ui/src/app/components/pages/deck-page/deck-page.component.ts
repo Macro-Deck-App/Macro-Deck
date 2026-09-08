@@ -1,4 +1,4 @@
-import { Component, HostListener, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { Component, HostListener, ViewChild, computed, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { FileOpenService, FolderService } from '../../../services';
@@ -24,6 +24,7 @@ import { FolderViewPickerComponent } from '../../widgets/folder-view-picker/fold
   standalone: true,
   imports: [DeckEditorGridComponent, ShellDropTargetDirective, FolderNavigationComponent, GridSettingsMenuComponent, WidgetTypeSelectorComponent, ConfirmationModalComponent, ButtonComponent, ArchivePreviewModalComponent, ExportOptionsModalComponent, ImportPasswordModalComponent, ErrorBannerComponent, TranslatePipe, FolderViewHostComponent, FolderViewPickerComponent, ModalComponent],
   templateUrl: './deck-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./deck-page.component.scss']
 })
 export class DeckPageComponent {

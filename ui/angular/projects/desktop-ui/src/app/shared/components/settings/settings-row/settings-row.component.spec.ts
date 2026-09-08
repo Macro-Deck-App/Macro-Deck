@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SettingsRowComponent } from './settings-row.component';
 
@@ -12,6 +12,7 @@ import { SettingsRowComponent } from './settings-row.component';
       </shared-settings-row>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: '.dialog { width: 240px; overflow: hidden; } .wide-control { width: 200px; }',
 })
 class HostComponent {}
