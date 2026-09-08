@@ -9,11 +9,12 @@ public class NvidiaSmiParserTests
 	{
 		var samples = NvidiaSmiParser.ParseGpus("1, NVIDIA GeForce RTX 4070, 42\n0, NVIDIA RTX A2000, 7\n");
 
-		Assert.That(samples, Is.EqualTo(new[]
-		{
-			new GpuSample("NVIDIA RTX A2000", 7),
-			new GpuSample("NVIDIA GeForce RTX 4070", 42)
-		}));
+		Assert.That(samples,
+			Is.EqualTo(new[]
+			{
+				new GpuSample("NVIDIA RTX A2000", 7),
+				new GpuSample("NVIDIA GeForce RTX 4070", 42)
+			}));
 	}
 
 	[Test]

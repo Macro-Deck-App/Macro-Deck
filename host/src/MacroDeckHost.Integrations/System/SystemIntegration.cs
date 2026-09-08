@@ -258,16 +258,19 @@ public sealed class SystemIntegration
 	private static IEnumerable<VariableDefinition> IndexedGpuVariables(int index)
 	{
 		var label = index.ToString(CultureInfo.InvariantCulture);
-		yield return VariableDefinition.Eager(
-			$"system_gpu_{index}_usage_percent", VariableType.Numeric, 0, TimeSpan.FromSeconds(3))
+		yield return VariableDefinition.Eager($"system_gpu_{index}_usage_percent",
+				VariableType.Numeric,
+				0,
+				TimeSpan.FromSeconds(3))
 			with
 			{
 				DisplayName = AppStrings.Integrations.System.Variables.GpuUsageIndexed(index: label),
 				Unit = PercentUnit,
 				SemanticKind = VariableSemanticKinds.Percentage
 			};
-		yield return VariableDefinition.Eager(
-			$"system_gpu_{index}_name", VariableType.Text, refreshInterval: TimeSpan.FromMinutes(5))
+		yield return VariableDefinition.Eager($"system_gpu_{index}_name",
+				VariableType.Text,
+				refreshInterval: TimeSpan.FromMinutes(5))
 			with
 			{
 				DisplayName = AppStrings.Integrations.System.Variables.GpuNameIndexed(index: label)

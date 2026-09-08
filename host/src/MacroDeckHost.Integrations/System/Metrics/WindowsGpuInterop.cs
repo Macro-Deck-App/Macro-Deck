@@ -90,8 +90,7 @@ internal sealed class WindowsGpuInterop : IDisposable
 						continue;
 					}
 
-					adapters.Add(new WindowsGpuAdapter(
-						description.Description ?? string.Empty,
+					adapters.Add(new WindowsGpuAdapter(description.Description ?? string.Empty,
 						description.AdapterLuidHigh,
 						description.AdapterLuidLow,
 						(ulong)description.DedicatedVideoMemory,
@@ -165,8 +164,13 @@ internal sealed class WindowsGpuInterop : IDisposable
 	{
 		var bufferSize = 0u;
 		var itemCount = 0u;
-		if (PdhGetFormattedCounterArray(_counter, PdhFmtDouble | PdhFmtNoCap100,
-				ref bufferSize, out itemCount, nint.Zero) != PdhMoreData || bufferSize == 0)
+		if (PdhGetFormattedCounterArray(_counter,
+				PdhFmtDouble | PdhFmtNoCap100,
+				ref bufferSize,
+				out itemCount,
+				nint.Zero) !=
+			PdhMoreData ||
+			bufferSize == 0)
 		{
 			return [];
 		}
@@ -174,8 +178,12 @@ internal sealed class WindowsGpuInterop : IDisposable
 		var buffer = Marshal.AllocHGlobal((int)bufferSize);
 		try
 		{
-			if (PdhGetFormattedCounterArray(_counter, PdhFmtDouble | PdhFmtNoCap100,
-					ref bufferSize, out itemCount, buffer) != 0)
+			if (PdhGetFormattedCounterArray(_counter,
+					PdhFmtDouble | PdhFmtNoCap100,
+					ref bufferSize,
+					out itemCount,
+					buffer) !=
+				0)
 			{
 				return [];
 			}
@@ -241,6 +249,7 @@ internal sealed class WindowsGpuInterop : IDisposable
 	{
 		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
 		public string Description;
+
 		public uint VendorId;
 		public uint DeviceId;
 		public uint SubSysId;
@@ -262,18 +271,25 @@ internal sealed class WindowsGpuInterop : IDisposable
 		void SetPrivateDataInterface();
 		void GetPrivateData();
 		void GetParent();
+
 		[PreserveSig]
 		int EnumAdapters(uint index, out nint adapter);
+
 		[PreserveSig]
 		int MakeWindowAssociation(nint windowHandle, uint flags);
+
 		[PreserveSig]
 		int GetWindowAssociation(out nint windowHandle);
+
 		[PreserveSig]
 		int CreateSwapChain(nint device, nint description, out nint swapChain);
+
 		[PreserveSig]
 		int CreateSoftwareAdapter(nint module, out nint adapter);
+
 		[PreserveSig]
 		int EnumAdapters1(uint index, [MarshalAs(UnmanagedType.Interface)] out IDxgiAdapter1 adapter);
+
 		[PreserveSig]
 		int IsCurrent();
 	}
@@ -287,12 +303,16 @@ internal sealed class WindowsGpuInterop : IDisposable
 		void SetPrivateDataInterface();
 		void GetPrivateData();
 		void GetParent();
+
 		[PreserveSig]
 		int EnumOutputs(uint index, out nint output);
+
 		[PreserveSig]
 		int GetDesc(out nint description);
+
 		[PreserveSig]
 		int CheckInterfaceSupport(in Guid guid, out long version);
+
 		[PreserveSig]
 		int GetDesc1(out DxgiAdapterDesc1 description);
 	}

@@ -37,10 +37,14 @@ internal sealed class FakeSystemMetricsService : ISystemMetricsService
 	public Task<double?> GetGpuUsageAsync(int gpuIndex, CancellationToken cancellationToken = default)
 		=> Task.FromResult(gpuIndex < 0 || gpuIndex >= GpuCount
 			? null
-			: GpuUsageByIndex.TryGetValue(gpuIndex, out var usage) ? usage : GpuUsage);
+			: GpuUsageByIndex.TryGetValue(gpuIndex, out var usage)
+				? usage
+				: GpuUsage);
 
 	public Task<string?> GetGpuNameAsync(int gpuIndex, CancellationToken cancellationToken = default)
 		=> Task.FromResult(gpuIndex < 0 || gpuIndex >= GpuCount
 			? null
-			: GpuNameByIndex.TryGetValue(gpuIndex, out var name) ? name : GpuName);
+			: GpuNameByIndex.TryGetValue(gpuIndex, out var name)
+				? name
+				: GpuName);
 }

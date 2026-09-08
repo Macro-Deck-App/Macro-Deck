@@ -62,8 +62,7 @@ internal sealed class MacOsSystemMetricsService : SystemMetricsServiceBase
 		var output = await ReadIoRegAcceleratorAsync(cancellationToken);
 		return
 		[
-			new GpuSample(
-				MacOsIoRegParser.ParseAcceleratorModel(output),
+			new GpuSample(MacOsIoRegParser.ParseAcceleratorModel(output),
 				MacOsIoRegParser.ParseDeviceUtilization(output))
 		];
 	}

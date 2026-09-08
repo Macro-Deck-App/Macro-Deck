@@ -45,10 +45,8 @@ public class WindowsGpuSnapshotBuilderTests
 	{
 		var adapter = Adapter("Radeon", 0xAB);
 
-		var samples = WindowsGpuSnapshotBuilder.Build(
-			[adapter],
-			Counters(
-				new CounterEntry(Instance(0xAB, 0, "3D"), 40),
+		var samples = WindowsGpuSnapshotBuilder.Build([adapter],
+			Counters(new CounterEntry(Instance(0xAB, 0, "3D"), 40),
 				new CounterEntry(Instance(0xAB, 0, "VideoDecode"), 30)),
 			null,
 			out _);
@@ -61,10 +59,8 @@ public class WindowsGpuSnapshotBuilderTests
 	{
 		var adapter = Adapter("Radeon", 0xAB);
 
-		var samples = WindowsGpuSnapshotBuilder.Build(
-			[adapter],
-			Counters(
-				new CounterEntry(Instance(0xAB, 0, "Copy"), 60),
+		var samples = WindowsGpuSnapshotBuilder.Build([adapter],
+			Counters(new CounterEntry(Instance(0xAB, 0, "Copy"), 60),
 				new CounterEntry(Instance(0xAB, 1, "Copy"), 50)),
 			null,
 			out _);
@@ -77,10 +73,8 @@ public class WindowsGpuSnapshotBuilderTests
 	{
 		var adapter = Adapter("Radeon", 0xAB);
 
-		var samples = WindowsGpuSnapshotBuilder.Build(
-			[adapter],
-			Counters(
-				new CounterEntry(Instance(0xAB, 0, "3D", pid: 1), 70),
+		var samples = WindowsGpuSnapshotBuilder.Build([adapter],
+			Counters(new CounterEntry(Instance(0xAB, 0, "3D", pid: 1), 70),
 				new CounterEntry(Instance(0xAB, 0, "3D", pid: 2), 60)),
 			null,
 			out _);
@@ -93,8 +87,7 @@ public class WindowsGpuSnapshotBuilderTests
 	{
 		var samples = WindowsGpuSnapshotBuilder.Build(
 			[Adapter("Discrete", 0xAB), Adapter("Integrated", 0xCD, dedicated: 1)],
-			Counters(
-				new CounterEntry(Instance(0xAB, 0, "3D"), 80),
+			Counters(new CounterEntry(Instance(0xAB, 0, "3D"), 80),
 				new CounterEntry(Instance(0xCD, 0, "3D"), 20)),
 			null,
 			out var join);
@@ -122,10 +115,8 @@ public class WindowsGpuSnapshotBuilderTests
 	[Test]
 	public void Malformed_instance_names_are_ignored()
 	{
-		var samples = WindowsGpuSnapshotBuilder.Build(
-			[Adapter("Radeon", 0xAB)],
-			Counters(
-				new CounterEntry("not an instance name", 99),
+		var samples = WindowsGpuSnapshotBuilder.Build([Adapter("Radeon", 0xAB)],
+			Counters(new CounterEntry("not an instance name", 99),
 				new CounterEntry("pid_1_luid_zz_zz_phys_0_eng_0_engtype_3D", 99),
 				new CounterEntry(Instance(0xAB, 0, "3D"), 25)),
 			null,
@@ -137,8 +128,7 @@ public class WindowsGpuSnapshotBuilderTests
 	[Test]
 	public void A_luid_that_matches_nothing_still_reads_a_single_gpu()
 	{
-		var samples = WindowsGpuSnapshotBuilder.Build(
-			[Adapter("Radeon", 0xAB)],
+		var samples = WindowsGpuSnapshotBuilder.Build([Adapter("Radeon", 0xAB)],
 			Counters(new CounterEntry(Instance(0xFFFF, 0, "3D"), 55)),
 			null,
 			out var join);
@@ -159,18 +149,18 @@ public class WindowsGpuSnapshotBuilderTests
 			null,
 			out _);
 
-		Assert.That(samples, Is.EqualTo(new[]
-		{
-			new GpuSample("Discrete", null),
-			new GpuSample("Integrated", null)
-		}));
+		Assert.That(samples,
+			Is.EqualTo(new[]
+			{
+				new GpuSample("Discrete", null),
+				new GpuSample("Integrated", null)
+			}));
 	}
 
 	[Test]
 	public void A_failed_counter_read_keeps_the_adapter_names()
 	{
-		var samples = WindowsGpuSnapshotBuilder.Build(
-			[Adapter("Radeon", 0xAB)],
+		var samples = WindowsGpuSnapshotBuilder.Build([Adapter("Radeon", 0xAB)],
 			new CounterReadResult.Failed(),
 			null,
 			out _);
@@ -181,8 +171,7 @@ public class WindowsGpuSnapshotBuilderTests
 	[Test]
 	public void The_first_collect_reports_no_usage_yet()
 	{
-		var samples = WindowsGpuSnapshotBuilder.Build(
-			[Adapter("Radeon", 0xAB)],
+		var samples = WindowsGpuSnapshotBuilder.Build([Adapter("Radeon", 0xAB)],
 			new CounterReadResult.FirstCollect(),
 			null,
 			out _);
@@ -193,18 +182,18 @@ public class WindowsGpuSnapshotBuilderTests
 	[Test]
 	public void The_first_collect_never_reaches_nvidia_smi()
 	{
-		Assert.That(
-			WindowsGpuSnapshotBuilder.NeedsNvidiaFallback(
-				[Adapter("GeForce", 0xAB)], new CounterReadResult.FirstCollect(), hasNvidiaSmi: true),
+		Assert.That(WindowsGpuSnapshotBuilder.NeedsNvidiaFallback([Adapter("GeForce", 0xAB)],
+				new CounterReadResult.FirstCollect(),
+				hasNvidiaSmi: true),
 			Is.False);
 	}
 
 	[Test]
 	public void A_failed_counter_read_reaches_nvidia_smi()
 	{
-		Assert.That(
-			WindowsGpuSnapshotBuilder.NeedsNvidiaFallback(
-				[Adapter("GeForce", 0xAB)], new CounterReadResult.Failed(), hasNvidiaSmi: true),
+		Assert.That(WindowsGpuSnapshotBuilder.NeedsNvidiaFallback([Adapter("GeForce", 0xAB)],
+				new CounterReadResult.Failed(),
+				hasNvidiaSmi: true),
 			Is.True);
 	}
 
@@ -219,18 +208,18 @@ public class WindowsGpuSnapshotBuilderTests
 	[Test]
 	public void An_nvidia_card_that_dxgi_does_not_list_reaches_nvidia_smi()
 	{
-		Assert.That(
-			WindowsGpuSnapshotBuilder.NeedsNvidiaFallback(
-				[], Counters(new CounterEntry(Instance(0xAB, 0, "3D"), 10)), hasNvidiaSmi: true),
+		Assert.That(WindowsGpuSnapshotBuilder.NeedsNvidiaFallback([],
+				Counters(new CounterEntry(Instance(0xAB, 0, "3D"), 10)),
+				hasNvidiaSmi: true),
 			Is.True);
 	}
 
 	[Test]
 	public void Nothing_is_spawned_when_nvidia_smi_is_not_installed()
 	{
-		Assert.That(
-			WindowsGpuSnapshotBuilder.NeedsNvidiaFallback(
-				[Adapter("Radeon", 0xAB)], new CounterReadResult.Failed(), hasNvidiaSmi: false),
+		Assert.That(WindowsGpuSnapshotBuilder.NeedsNvidiaFallback([Adapter("Radeon", 0xAB)],
+				new CounterReadResult.Failed(),
+				hasNvidiaSmi: false),
 			Is.False);
 	}
 
@@ -243,18 +232,18 @@ public class WindowsGpuSnapshotBuilderTests
 			"0, NVIDIA GeForce RTX 4070, 42\n",
 			out _);
 
-		Assert.That(samples, Is.EqualTo(new[]
-		{
-			new GpuSample("NVIDIA GeForce RTX 4070", 42),
-			new GpuSample("Intel UHD Graphics", null)
-		}));
+		Assert.That(samples,
+			Is.EqualTo(new[]
+			{
+				new GpuSample("NVIDIA GeForce RTX 4070", 42),
+				new GpuSample("Intel UHD Graphics", null)
+			}));
 	}
 
 	[Test]
 	public void The_nvidia_fallback_is_the_whole_snapshot_when_dxgi_found_nothing()
 	{
-		var samples = WindowsGpuSnapshotBuilder.Build(
-			[],
+		var samples = WindowsGpuSnapshotBuilder.Build([],
 			new CounterReadResult.Failed(),
 			"0, NVIDIA GeForce RTX 4070, 42\n",
 			out _);
@@ -265,8 +254,7 @@ public class WindowsGpuSnapshotBuilderTests
 	[Test]
 	public void Instances_that_cannot_be_parsed_at_all_leave_a_single_gpu_unavailable()
 	{
-		var samples = WindowsGpuSnapshotBuilder.Build(
-			[Adapter("Radeon", 0xAB)],
+		var samples = WindowsGpuSnapshotBuilder.Build([Adapter("Radeon", 0xAB)],
 			Counters(new CounterEntry("not an instance name", 99)),
 			null,
 			out _);

@@ -17,7 +17,10 @@ internal static class NvidiaSmiParser
 			}
 
 			var name = fields[1].Trim();
-			var usage = double.TryParse(fields[2].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value)
+			var usage = double.TryParse(fields[2].Trim(),
+				NumberStyles.Float,
+				CultureInfo.InvariantCulture,
+				out var value)
 				? Math.Clamp(value, 0d, 100d)
 				: (double?)null;
 

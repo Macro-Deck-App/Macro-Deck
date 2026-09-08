@@ -154,11 +154,12 @@ public class SystemIntegrationTests
 	{
 		var integration = Create(metrics: new FakeSystemMetricsService(gpuCount: 2));
 
-		Assert.That(integration.Variables.Select(v => v.Name), Is.SupersetOf(new[]
-		{
-			"system_gpu_0_usage_percent", "system_gpu_0_name",
-			"system_gpu_1_usage_percent", "system_gpu_1_name"
-		}));
+		Assert.That(integration.Variables.Select(v => v.Name),
+			Is.SupersetOf(new[]
+			{
+				"system_gpu_0_usage_percent", "system_gpu_0_name",
+				"system_gpu_1_usage_percent", "system_gpu_1_name"
+			}));
 	}
 
 	[Test]
