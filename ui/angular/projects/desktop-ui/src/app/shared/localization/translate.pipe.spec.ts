@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
 import { ApiService } from '../transport';
@@ -10,6 +10,7 @@ import { TranslatePipe } from './translate.pipe';
 @Component({
   standalone: true,
   imports: [TranslatePipe, LocalizedTextPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <span id="key">{{ 'macrodeck:Common.Save' | translate }}</span>
     <span id="plural">{{ 'macrodeck.app:Icons' | translate: { count: count() } }}</span>

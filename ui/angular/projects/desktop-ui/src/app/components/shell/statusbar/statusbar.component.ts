@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 
 import { AppStrings } from '@macro-deck/runtime';
 import { TranslatePipe } from '@shared';
@@ -13,6 +13,7 @@ import { NavigationService } from '../../../services';
     TranslatePipe,
   ],
   templateUrl: './statusbar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./statusbar.component.scss']
 })
 export class StatusbarComponent {

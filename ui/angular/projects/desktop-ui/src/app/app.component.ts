@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 
 import { RouterOutlet } from '@angular/router';
 import { AppStrings } from '@macro-deck/runtime';
@@ -67,6 +67,7 @@ const BOOTSTRAP_RETRY_MS = 1500;
     }
     <shared-toast-host></shared-toast-host>
     `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .auth-gate {
       display: flex;

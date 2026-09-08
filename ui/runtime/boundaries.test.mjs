@@ -1,7 +1,7 @@
 /**
  * Guards what makes this a framework-independent package (issue #824).
  *
- * Most of it the build already enforces: `tsconfig.json` compiles against `lib: ES5 + DOM` with no
+ * Most of it the build already enforces: `tsconfig.json` compiles against `target: ES5` with no
  * Angular types in scope, and `check:es5` gates the emitted bundle. What the build cannot see is the
  * dependency graph - npm hoists the Angular workspace's `node_modules` to `ui/`, so an `@angular/core`
  * or `rxjs` import from here would resolve and compile perfectly well. That is what these check.

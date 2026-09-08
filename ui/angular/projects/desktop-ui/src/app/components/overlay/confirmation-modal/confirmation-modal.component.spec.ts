@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ConfirmationModalComponent } from './confirmation-modal.component';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
@@ -89,6 +89,7 @@ describe('ConfirmationModalComponent', () => {
 @Component({
   standalone: true,
   imports: [ConfirmationModalComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<shared-confirmation-modal heading="Delete Folder" message="Sure?" />`,
 })
 class StaticHeadingHostComponent {}

@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection, ViewChild } from '@angular/core';
+import { Component, provideZonelessChangeDetection, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
@@ -78,6 +78,7 @@ describe('the editor compact breakpoint against the nav rail collapse', () => {
 @Component({
   standalone: true,
   imports: [WidgetEditorShellComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <app-widget-editor-shell>
       <ng-container editorSidebar>

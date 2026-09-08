@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ShellDropKind } from '../../domain/shell-drop.util';
@@ -9,6 +9,7 @@ import { ShellDrop, ShellDropTargetDirective } from './shell-drop-target.directi
 @Component({
   standalone: true,
   imports: [ShellDropTargetDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<div
     class="zone"
     sharedShellDropTarget

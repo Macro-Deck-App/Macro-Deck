@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { InheritableSettingComponent } from './inheritable-setting.component';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
@@ -6,6 +6,7 @@ import { provideLocalizationTesting } from '../../../../testing/localization-tes
 @Component({
   standalone: true,
   imports: [InheritableSettingComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <shared-inheritable-setting
       [label]="label()"

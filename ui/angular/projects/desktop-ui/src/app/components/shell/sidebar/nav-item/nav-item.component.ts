@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -10,6 +10,7 @@ import { NavItem } from '../../../../domain/navigation.interface';
   standalone: true,
   imports: [RouterLink, RouterLinkActive, NgTemplateOutlet, TooltipDirective],
   templateUrl: './nav-item.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./nav-item.component.scss']
 })
 export class NavItemComponent {

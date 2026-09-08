@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ModalComponent, dismissModal } from './modal.component';
 import { provideLocalizationTesting } from '../../../localization/localization-test-support';
@@ -116,6 +116,7 @@ describe('dismissModal', () => {
 @Component({
   standalone: true,
   imports: [ModalComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<shared-modal heading="Add action">Body</shared-modal>`,
 })
 class StaticHeadingHostComponent {}
@@ -167,6 +168,7 @@ describe('ModalComponent heading input (regression: no native title tooltip)', (
 @Component({
   standalone: true,
   imports: [ModalComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <shared-modal heading="Outer" [style.--modal-height]="'min(48.75rem, 90vh)'">
       <shared-modal heading="Inner" size="small">

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, provideZonelessChangeDetection, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -12,7 +12,8 @@ import { WidgetEditorPageComponent } from './widget-editor-page.component';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
 import { WIDGET_GRID_VIEW_ID } from '@macro-deck/runtime';
 
-@Component({ selector: 'app-test-widget-editor', standalone: true, template: '' })
+@Component({ selector: 'app-test-widget-editor', standalone: true, changeDetection: ChangeDetectionStrategy.Eager,
+ template: '' })
 class TestWidgetEditorComponent implements IWidgetEditorComponent {
   @Input({ required: true }) widget!: GridWidget;
   @Input() unsavedChanges = false;
@@ -26,7 +27,8 @@ class TestWidgetEditorComponent implements IWidgetEditorComponent {
   }
 }
 
-@Component({ selector: 'app-deferred-widget-editor', standalone: true, template: '' })
+@Component({ selector: 'app-deferred-widget-editor', standalone: true, changeDetection: ChangeDetectionStrategy.Eager,
+ template: '' })
 class DeferredWidgetEditorComponent implements IWidgetEditorComponent {
   @Input({ required: true }) widget!: GridWidget;
   @Input() unsavedChanges = false;
@@ -41,7 +43,8 @@ class DeferredWidgetEditorComponent implements IWidgetEditorComponent {
   }
 }
 
-@Component({ selector: 'app-normalizing-widget-editor', standalone: true, template: '' })
+@Component({ selector: 'app-normalizing-widget-editor', standalone: true, changeDetection: ChangeDetectionStrategy.Eager,
+ template: '' })
 class NormalizingWidgetEditorComponent implements IWidgetEditorComponent, OnInit {
   @Input({ required: true }) widget!: GridWidget;
   @Input() unsavedChanges = false;
@@ -61,7 +64,8 @@ class NormalizingWidgetEditorComponent implements IWidgetEditorComponent, OnInit
   }
 }
 
-@Component({ selector: 'app-widget-json-editor', standalone: true, template: '' })
+@Component({ selector: 'app-widget-json-editor', standalone: true, changeDetection: ChangeDetectionStrategy.Eager,
+ template: '' })
 class TestWidgetJsonEditorComponent {
   @Input({ required: true }) text!: string;
   @Input() schema: object | null = null;

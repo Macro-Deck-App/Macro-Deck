@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { ButtonComponent, InputComponent } from '@shared';
@@ -101,6 +101,7 @@ const CONTROL_BOXES: Record<string, string> = {
 @Component({
   standalone: true,
   imports: [...CONTROLS],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <shared-input />
     <shared-select />
@@ -118,6 +119,7 @@ class StandardControlsHostComponent {}
 @Component({
   standalone: true,
   imports: [InputComponent, VariableTextInputComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <shared-input [multiline]="true" [rows]="3" />
     <shared-variable-text-input [multiline]="true" [rows]="3" />

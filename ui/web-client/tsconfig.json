@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
     "target": "ES5",
     "module": "ES2015",
     "moduleResolution": "bundler",
     "lib": ["ES2015", "DOM"],
+    "rootDir": "./src",
     "downlevelIteration": true,
     "importHelpers": false,
     "strict": true,

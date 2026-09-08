@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SelectComponent, SelectOption } from './select.component';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
@@ -6,6 +6,7 @@ import { provideLocalizationTesting } from '../../../../testing/localization-tes
 @Component({
   standalone: true,
   imports: [SelectComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<shared-select [options]="options" placeholder="Pick…" />`,
 })
 class HostComponent {
@@ -105,6 +106,7 @@ describe('SelectComponent', () => {
 @Component({
   standalone: true,
   imports: [SelectComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<shared-select [options]="options" placeholder="Pick…" />`,
 })
 class TypeaheadHostComponent {

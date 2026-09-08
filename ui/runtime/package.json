@@ -32,7 +32,7 @@
     "jasmine": "^5.6.0",
     "jasmine-core": "~5.6.0",
     "jsdom": "^26.0.0",
-    "typescript": "~5.9.3"
+    "typescript": "~6.0.3"
   },
   "module": "./dist/public-api.js"
 }

@@ -1,10 +1,11 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FileDropDirective } from './file-drop.directive';
 
 @Component({
   standalone: true,
   imports: [FileDropDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<div class="zone" sharedFileDrop (filesDropped)="files = $event"></div>`,
 })
 class HostComponent {

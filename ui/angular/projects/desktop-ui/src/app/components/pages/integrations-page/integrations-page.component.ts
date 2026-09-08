@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, computed, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FileOpenService } from '../../../services/file-open.service';
@@ -54,6 +54,7 @@ type FilterFacet = 'status' | 'type' | 'capabilities' | 'issues';
     TranslatePipe,
   ],
   templateUrl: './integrations-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./integrations-page.component.scss']
 })
 export class IntegrationsPageComponent implements OnInit {

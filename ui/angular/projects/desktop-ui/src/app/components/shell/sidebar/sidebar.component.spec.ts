@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { NavItem } from '../../../domain/navigation.interface';
@@ -128,6 +128,7 @@ describe('NavigationService main groups', () => {
         [bottomItems]="bottom"></app-sidebar>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: ['.host { display: flex; }'],
 })
 class SidebarHostComponent {

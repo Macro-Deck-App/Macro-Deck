@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 
@@ -9,6 +9,7 @@ import { ParamInputComponent } from './param-input.component';
 @Component({
   standalone: true,
   imports: [FormsModule, ParamInputComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <shared-param-input
       [type]="type()"

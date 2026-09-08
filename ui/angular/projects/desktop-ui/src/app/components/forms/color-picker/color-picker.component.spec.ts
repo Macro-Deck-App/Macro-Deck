@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { hexToHsv } from './color-conversion';
@@ -8,6 +8,7 @@ import { provideLocalizationTesting } from '../../../../testing/localization-tes
 @Component({
   standalone: true,
   imports: [FormsModule, ColorPickerComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <shared-color-picker
       [presets]="presets()"

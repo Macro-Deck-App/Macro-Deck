@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SegmentedControlComponent, SegmentedOption } from './segmented-control.component';
 
@@ -84,6 +84,7 @@ const LONG_LABELS: SegmentedOption[] = [
       <shared-segmented-control [options]="LONG_LABELS" [value]="value()" [stretch]="true" />
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     .header {
       display: grid;

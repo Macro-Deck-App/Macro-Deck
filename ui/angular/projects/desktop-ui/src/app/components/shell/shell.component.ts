@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, DestroyRef, ElementRef, ViewChild, computed, inject } from '@angular/core';
+import { AfterViewInit, Component, DestroyRef, ElementRef, ViewChild, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { RouterOutlet } from '@angular/router';
 import { SharedStoreProgressComponent } from '../store/shared-store-progress.component';
@@ -32,6 +32,7 @@ import { FooterBarComponent } from './footer-bar/footer-bar.component';
     SharedStoreProgressComponent,
   ],
   templateUrl: './shell.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./shell.component.scss']
 })
 export class ShellComponent implements AfterViewInit {

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 
 import { NavItem } from '../../../domain/navigation.interface';
 import { SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_EXPANDED_WIDTH } from '../../../services';
@@ -9,6 +9,7 @@ import { NavItemComponent } from './nav-item/nav-item.component';
   standalone: true,
   imports: [NavItemComponent],
   templateUrl: './sidebar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./sidebar.component.scss']
 })
 export class SidebarComponent {
