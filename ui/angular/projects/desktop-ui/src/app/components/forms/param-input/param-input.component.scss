@@ -21,11 +21,8 @@
   min-width: 0;
 }
 
-/*
- * The shell owns the geometry of the overlaid action: it sizes the trigger and, through the
- * gutter properties the field components read, reserves exactly the matching padding. Keeping
- * both sides of that in one place is what stops typed text from ever reaching the trigger.
- */
+// The shell owns the geometry of the overlaid action. It publishes the band and the gutter
+// together: a publisher that sets one without the other under-reserves the field that reads it.
 .pi-has-liquid {
   // Wide enough for the five-character {{ }} glyph with room to spare for a fallback mono font -
   // the trigger must never wrap, and the gutter below is derived from this width.
@@ -36,6 +33,26 @@
 
 .pi-has-liquid:not(.pi-multiline) {
   --input-action-inline-gutter: calc(var(--tb-trigger-width) + var(--space-2));
+  --input-action-inline-band: calc(var(--input-action-inline-gutter) + var(--space-3));
+}
+
+// The field's scrollport is its padding box, so it paints content through the band it reserved.
+// Depends on the field staying at z-index auto: a z-index there lifts the text back over this.
+.pi-has-liquid:not(.pi-multiline) .pi-field::after {
+  content: '';
+  position: absolute;
+  inset-block: 1px;
+  inset-inline-end: 1px;
+  width: var(--input-action-inline-band);
+  border-start-end-radius: calc(var(--radius-md) - 1px);
+  border-end-end-radius: calc(var(--radius-md) - 1px);
+  background-color: var(--color-bg-primary);
+  pointer-events: none;
+}
+
+// The field dims itself from inside, so the band has to dim with it or it reads as a solid block.
+.pi-shell.pi-disabled .pi-field::after {
+  opacity: 0.55;
 }
 
 /*

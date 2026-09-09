@@ -274,12 +274,28 @@ export class VariableTextInputComponent implements AfterViewInit {
     const chip = remove?.parentElement;
     const token = chip?.dataset['token'];
     if (!chip || token === undefined || this.disabled) return;
+    if (this.isUnderOverlaidAction(event)) return;
 
     const start = this.offsetBefore(chip);
     if (start === null) return;
     event.preventDefault();
     const value = this.valueState();
     this.commit(value.slice(0, start) + value.slice(start + token.length), start);
+  }
+
+  // An action overlaid on the field hides whatever scrolled under the band it reserved, and the
+  // backdrop passes clicks through so the field stays focusable there.
+  private isUnderOverlaidAction(event: MouseEvent): boolean {
+    const editor = this.editorRef?.nativeElement;
+    if (!editor) return false;
+
+    const style = getComputedStyle(editor);
+    const band = parseFloat(style.scrollPaddingInlineEnd);
+    if (!Number.isFinite(band)) return false;
+
+    const contentEdge = editor.getBoundingClientRect().right
+      - band - parseFloat(style.borderInlineEndWidth);
+    return event.clientX > contentEdge;
   }
 
   onBlur(): void {

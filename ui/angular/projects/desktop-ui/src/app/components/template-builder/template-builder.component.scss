@@ -10,11 +10,10 @@
 /*
  * The trigger sits inside the text field it belongs to (issue #665), so it carries no border or
  * control padding of its own - a bordered box inside a bordered box. The host sizes it through
- * --tb-trigger-width / --tb-trigger-height and reserves matching padding on the field, so typed
- * text cannot reach it.
+ * --tb-trigger-width / --tb-trigger-height and reserves matching padding on the field.
  *
- * The opaque background is not decoration: a multi-line field scrolls its content underneath the
- * trigger, which would otherwise show through it.
+ * The opaque background is not decoration: a field scrolls its content underneath the trigger,
+ * which would otherwise show through it.
  */
 .tb-trigger {
   display: inline-flex;

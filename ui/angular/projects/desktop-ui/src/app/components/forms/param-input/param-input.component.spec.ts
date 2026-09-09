@@ -201,4 +201,74 @@ describe('ParamInputComponent', () => {
     expect(chipEditor()?.querySelectorAll('.vti-chip').length).toBe(1);
   });
 
+  describe('the space reserved for the Liquid trigger', () => {
+    function editor(): HTMLElement {
+      return fixture.nativeElement.querySelector('.vti-editor');
+    }
+
+    function backdrop(): CSSStyleDeclaration {
+      return getComputedStyle(chipEditor()!, '::after');
+    }
+
+    async function overflowingSingleLineField(): Promise<void> {
+      enableChipEditor();
+      enableLiquid();
+      await setValue('Now playing: {{ vars.title }} on repeat for the rest of the afternoon');
+    }
+
+    it('is covered across the whole width the field reserved', async () => {
+      await overflowingSingleLineField();
+
+      expect(parseFloat(backdrop().width))
+        .toBe(parseFloat(getComputedStyle(editor()).paddingInlineEnd));
+    });
+
+    it('is covered from the top border of the field to its bottom border', async () => {
+      await overflowingSingleLineField();
+
+      const field = getComputedStyle(editor());
+      expect(parseFloat(backdrop().insetBlockStart)).toBe(parseFloat(field.borderTopWidth));
+      expect(parseFloat(backdrop().insetBlockEnd)).toBe(parseFloat(field.borderBottomWidth));
+    });
+
+    it('hides what scrolls into it rather than letting it reach the trigger', async () => {
+      await overflowingSingleLineField();
+
+      expect(backdrop().backgroundColor).toBe(getComputedStyle(editor()).backgroundColor);
+    });
+
+    it('still lets a click there put the caret in the field', async () => {
+      await overflowingSingleLineField();
+
+      // Karma's banner can push the fixture out of the viewport, where nothing hit-tests at all.
+      editor().scrollIntoView({ block: 'center' });
+      const field = editor().getBoundingClientRect();
+      // Other fixtures share the document, so only this one's elements can be hit-tested.
+      const hits = document
+        .elementsFromPoint(field.right - 3, field.top + field.height / 2)
+        .filter(element => fixture.nativeElement.contains(element));
+      expect(hits.length).toBeGreaterThan(0);
+      expect(hits[0]).toBe(editor());
+    });
+
+    it('dims with the field rather than staying a solid block on it', async () => {
+      await overflowingSingleLineField();
+      paramInput().setDisabledState(true);
+      fixture.detectChanges();
+
+      expect(parseFloat(backdrop().opacity)).toBeLessThan(1);
+    });
+
+    it('is not reserved on a multiline field, which puts the trigger below the text', async () => {
+      await overflowingSingleLineField();
+      const singleLine = getComputedStyle(editor()).scrollPaddingInlineEnd;
+
+      fixture.componentInstance.multiline.set(true);
+      fixture.detectChanges();
+
+      expect(parseFloat(singleLine)).toBeGreaterThan(0);
+      expect(getComputedStyle(editor()).scrollPaddingInlineEnd).toBe('auto');
+    });
+  });
+
 });
