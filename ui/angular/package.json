@@ -15,6 +15,7 @@
     "test:proxy": "node --test proxy.conf.test.mjs",
     "test:dialog-box": "node --test dialog-box.test.mjs",
     "test:boundaries": "node --test projects/desktop-ui/boundaries.test.mjs",
+    "test:stacking": "node --test projects/desktop-ui/stacking.test.mjs",
     "build:runtime": "npm run build --prefix ../runtime"
   },
   "private": true,

@@ -364,6 +364,10 @@ jobs:
         working-directory: ui/angular
         run: npm run test:boundaries
 
+      - name: Page stacking layering
+        working-directory: ui/angular
+        run: npm run test:stacking
+
       - name: Release feed script tests
         run: node --test ci/scripts/*.test.mjs
 
