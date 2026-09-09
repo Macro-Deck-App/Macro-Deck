@@ -289,6 +289,7 @@ export function parseWidgetData(type: WidgetType, json: string | undefined): Wid
           showSubtitle: parsed.showSubtitle ?? true,
           accentColor: parsed.accentColor,
           maxValue: parsed.maxValue,
+          minValue: parsed.minValue,
           historyLength: parsed.historyLength,
           border: parsed.border
         };
@@ -491,6 +492,7 @@ export function serializeWidgetData(type: WidgetType, data: WidgetData): string 
         showSubtitle: d.showSubtitle,
         accentColor: d.accentColor,
         maxValue: d.maxValue,
+        minValue: d.minValue,
         historyLength: d.historyLength,
         border: d.border,
         flows: JSON.stringify(d.flows ?? [])

@@ -15718,10 +15718,16 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Diagramm-Maximum</value>
   </data>
   <data name="Widgets.History.ChartMaximumHint" xml:space="preserve">
-    <value>Feste Obergrenze (z. B. 100 für Prozent). Leer lassen für automatische Skalierung.</value>
+    <value>Feste Obergrenze (z. B. 100 für Prozent). Setze 0 für automatische Skalierung.</value>
   </data>
   <data name="Widgets.History.ChartMaximumPlaceholder" xml:space="preserve">
     <value>Automatisch</value>
+  </data>
+  <data name="Widgets.History.ChartMinimum" xml:space="preserve">
+    <value>Diagramm-Minimum</value>
+  </data>
+  <data name="Widgets.History.ChartMinimumHint" xml:space="preserve">
+    <value>Feste Untergrenze, darf negativ sein (z. B. -100). Setze 0 für automatische Skalierung.</value>
   </data>
   <data name="Widgets.History.MetricSection" xml:space="preserve">
     <value>Messwert</value>

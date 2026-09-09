@@ -12,7 +12,7 @@ namespace MacroDeckHost.Tests.UnitTests.Widgets.Ui;
 
 /// <summary>
 /// The History Graph widget's <c>widget-config</c> tree (issue #837): every key the shipped schema declares
-/// for it, the <c>subtitle</c> dependency on <c>showSubtitle</c>, a preset writing its four fields
+/// for it, the <c>subtitle</c> dependency on <c>showSubtitle</c>, a preset writing its five fields
 /// together, and the provider's decline of a foreign widget type. <c>historyLength</c> has no control and is
 /// asserted absent from every key this tree ever touches.
 /// </summary>
@@ -39,6 +39,7 @@ public class HistoryGraphWidgetConfigTests
 		host.ById("title").Change("RAM");
 		host.ById("subtitle").Change("{{ vars.system_ram_name }}");
 		host.ById("maxValue").Change(100);
+		host.ById("minValue").Change(-100);
 		host.ById("accentColor").Change("#00ff00");
 		host.ById("border.style").Change("comet");
 		host.ById("border.color").Change("#0000ff");
@@ -54,6 +55,7 @@ public class HistoryGraphWidgetConfigTests
 			Assert.That(composed.GetProperty("valueVariable").GetString(), Is.EqualTo("system_ram_usage_percent"));
 			Assert.That(composed.GetProperty("title").GetString(), Is.EqualTo("RAM"));
 			Assert.That(composed.GetProperty("maxValue").GetDouble(), Is.EqualTo(100));
+			Assert.That(composed.GetProperty("minValue").GetDouble(), Is.EqualTo(-100));
 			Assert.That(composed.GetProperty("accentColor").GetString(), Is.EqualTo("#00ff00"));
 		});
 	}
@@ -120,9 +122,9 @@ public class HistoryGraphWidgetConfigTests
 	}
 
 	[Test]
-	public void The_cpu_preset_writes_all_four_of_its_fields_together()
+	public void The_cpu_preset_writes_all_five_of_its_fields_together()
 	{
-		var host = Render(new { valueVariable = "something_else", title = "Something" });
+		var host = Render(new { valueVariable = "something_else", title = "Something", minValue = -100 });
 
 		// A button is chrome, not an input, so its id is the full structural path - through the presets
 		// row it sits in - rather than a bare field name, unlike every other node this test touches.
@@ -136,6 +138,33 @@ public class HistoryGraphWidgetConfigTests
 			Assert.That(host.ById("subtitle").Text(UiConfigProperties.Value),
 				Is.EqualTo("{{ vars.system_cpu_name }}"));
 			Assert.That(host.ById("maxValue").Number(UiConfigProperties.Value), Is.EqualTo(100));
+			Assert.That(host.ById("minValue").Number(UiConfigProperties.Value),
+				Is.EqualTo(0),
+				"a preset describes a whole metric, so it must not leave an unrelated floor behind");
+		});
+	}
+
+	[Test]
+	public void A_negative_minimum_survives_the_tree_unchanged()
+	{
+		var host = Render(new { valueVariable = "custom_metric", minValue = -100 });
+
+		Assert.That(host.ById("minValue").Number(UiConfigProperties.Value),
+			Is.EqualTo(-100),
+			"clamping the floor the way the ceiling is clamped would erase the only values it exists for");
+	}
+
+	[Test]
+	public void The_minimum_field_declares_no_lower_bound_of_its_own()
+	{
+		var host = Render(_stored);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ById("maxValue").Number(UiConfigProperties.Min), Is.EqualTo(0));
+			Assert.That(host.ById("minValue").Number(UiConfigProperties.Min),
+				Is.Null,
+				"a bound of zero would reject the negative floors the field exists to accept");
 		});
 	}
 
@@ -242,6 +271,7 @@ public class HistoryGraphWidgetConfigTests
 			["showSubtitle"] = host.ById("showSubtitle").Flag(UiConfigProperties.Value),
 			["subtitle"] = host.ById("subtitle").Text(UiConfigProperties.Value),
 			["maxValue"] = host.ById("maxValue").Number(UiConfigProperties.Value),
+			["minValue"] = host.ById("minValue").Number(UiConfigProperties.Value),
 			["accentColor"] = host.ById("accentColor").Text(UiConfigProperties.Value),
 			["border"] = border,
 		};

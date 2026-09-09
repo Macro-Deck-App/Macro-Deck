@@ -15720,10 +15720,16 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Maksimum wykresu</value>
   </data>
   <data name="Widgets.History.ChartMaximumHint" xml:space="preserve">
-    <value>Stała górna granica (np. 100 dla procentów). Pozostaw puste, aby skalować automatycznie.</value>
+    <value>Stała górna granica (np. 100 dla procentów). Aby skalować automatycznie, wpisz 0.</value>
   </data>
   <data name="Widgets.History.ChartMaximumPlaceholder" xml:space="preserve">
     <value>Automatycznie</value>
+  </data>
+  <data name="Widgets.History.ChartMinimum" xml:space="preserve">
+    <value>Minimum wykresu</value>
+  </data>
+  <data name="Widgets.History.ChartMinimumHint" xml:space="preserve">
+    <value>Stała dolna granica, może być ujemna (np. -100). Aby skalować automatycznie, wpisz 0.</value>
   </data>
   <data name="Widgets.History.MetricSection" xml:space="preserve">
     <value>Metryka</value>

@@ -22,6 +22,10 @@ public sealed record HistoryGraphWidgetData
 	/// <summary>A fixed upper bound for the chart's scale. Absent scales to the retained window.</summary>
 	public double? MaxValue { get; init; }
 
+	/// <summary>A fixed lower bound for the chart's scale, which may be negative. Absent, or zero, scales to
+	/// the retained window - the editor's number field has no unset state and spells "auto" as zero.</summary>
+	public double? MinValue { get; init; }
+
 	public int HistoryLength { get; init; } = DefaultHistoryLength;
 
 	public static HistoryGraphWidgetData Parse(JsonElement data)
@@ -41,6 +45,7 @@ public sealed record HistoryGraphWidgetData
 			ShowSubtitle = ReadBool(data, "showSubtitle") ?? true,
 			AccentColor = ReadHexColor(data, "accentColor"),
 			MaxValue = ReadDouble(data, "maxValue"),
+			MinValue = ReadDouble(data, "minValue"),
 
 			// A length of one would leave the chart a single flat segment forever, so anything at or below
 			// it reads as "unset" rather than as a one-sample graph - the same floor the client applied.

@@ -15720,10 +15720,16 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>Máximo del gráfico</value>
   </data>
   <data name="Widgets.History.ChartMaximumHint" xml:space="preserve">
-    <value>Límite superior fijo (p. ej. 100 para porcentaje). Déjalo vacío para escalar automáticamente.</value>
+    <value>Límite superior fijo (p. ej. 100 para porcentaje). Pon 0 para escalar automáticamente.</value>
   </data>
   <data name="Widgets.History.ChartMaximumPlaceholder" xml:space="preserve">
     <value>Automático</value>
+  </data>
+  <data name="Widgets.History.ChartMinimum" xml:space="preserve">
+    <value>Mínimo del gráfico</value>
+  </data>
+  <data name="Widgets.History.ChartMinimumHint" xml:space="preserve">
+    <value>Límite inferior fijo, puede ser negativo (p. ej. -100). Pon 0 para escalar automáticamente.</value>
   </data>
   <data name="Widgets.History.MetricSection" xml:space="preserve">
     <value>Métrica</value>

@@ -30,6 +30,10 @@ public class HistoryGraphViewStateResolverTests
 
 	private static readonly double[] _clampedToCeiling = [0.5, 1d];
 
+	private static readonly double[] _swingingThroughZero = [-100d, -50d, 0d, 50d, 100d];
+
+	private static readonly double[] _wholeBandInFive = [0d, 0.25, 0.5, 0.75, 1d];
+
 	[Test]
 	public void A_configured_maximum_pins_the_scale_rather_than_the_window_deciding_it()
 	{
@@ -76,6 +80,112 @@ public class HistoryGraphViewStateResolverTests
 		Assert.That(points,
 			Is.EqualTo(_clampedToCeiling).AsCollection,
 			"a sample that outgrows a fixed scale must not be dropped, nor drawn outside the band");
+	}
+
+	[Test]
+	public void A_configured_minimum_keeps_the_negative_half_of_the_scale_legible()
+	{
+		var resolver = Resolver(new { valueVariable = Metric, minValue = -100, maxValue = 100 });
+
+		var points = resolver.Resolve(_swingingThroughZero).Points;
+
+		Assert.That(points,
+			Is.EqualTo(_wholeBandInFive).AsCollection,
+			"without a minimum every negative sample collapses onto the floor and -100 reads as 0");
+	}
+
+	[Test]
+	public void A_configured_minimum_leaves_an_unconfigured_ceiling_following_the_window()
+	{
+		var resolver = Resolver(new { valueVariable = Metric, minValue = -100 });
+
+		var points = resolver.Resolve([-100d, -50d, 0d]).Points;
+
+		Assert.That(points,
+			Is.EqualTo(new[] { 0d, 0.5, 1d }).AsCollection,
+			"one bound configured must pin that end only, not switch the other end to a literal");
+	}
+
+	[Test]
+	public void A_sample_below_a_configured_minimum_flattens_against_the_floor()
+	{
+		var resolver = Resolver(new { valueVariable = Metric, minValue = -100, maxValue = 100 });
+
+		var points = resolver.Resolve([-150d, 0d]).Points;
+
+		Assert.That(points,
+			Is.EqualTo(new[] { 0d, 0.5 }).AsCollection,
+			"a fixed floor bounds the scale the same way a fixed ceiling does, rather than moving for one sample");
+	}
+
+	[Test]
+	public void A_window_lying_entirely_below_a_configured_minimum_flattens_against_the_floor()
+	{
+		var resolver = Resolver(new { valueVariable = Metric, minValue = 100 });
+
+		var points = resolver.Resolve([10d, 20d, 30d]).Points;
+
+		Assert.That(points,
+			Is.EqualTo(new[] { 0d, 0d, 0d }).AsCollection,
+			"a fixed floor the whole window is under reads as the floor, not as the middle of the range");
+	}
+
+	[Test]
+	public void A_window_entirely_below_a_configured_minimum_with_an_automatic_ceiling_still_uses_the_floor()
+	{
+		var resolver = Resolver(new { valueVariable = Metric, minValue = -100 });
+
+		var points = resolver.Resolve([-150d, -120d]).Points;
+
+		Assert.That(points,
+			Is.EqualTo(new[] { 0d, 0d }).AsCollection,
+			"a floor is a floor whether or not a ceiling is configured beside it");
+	}
+
+	[Test]
+	public void A_flat_window_is_measured_against_a_configured_minimum_rather_than_halved()
+	{
+		var resolver = Resolver(new { valueVariable = Metric, minValue = -100 });
+
+		var points = resolver.Resolve(_flat).Points;
+
+		Assert.That(points,
+			Is.EqualTo(new[] { 1d, 1d, 1d }).AsCollection,
+			"half height is what an unpinned window means, not a rule that outranks a configured bound");
+	}
+
+	[TestCase(0)]
+	[TestCase(null)]
+	public void An_unset_minimum_leaves_a_configured_maximum_scaling_exactly_as_before(int? minValue)
+	{
+		var resolver = Resolver(new { valueVariable = Metric, minValue, maxValue = 100 });
+
+		var points = resolver.Resolve(_rising).Points;
+
+		Assert.That(points,
+			Is.EqualTo(_lowerHalf).AsCollection,
+			"a maximum on its own has always pinned the floor at zero, and every stored profile means that");
+	}
+
+	[TestCase(0)]
+	[TestCase(null)]
+	public void An_unset_minimum_leaves_the_window_deciding_the_scale(int? minValue)
+	{
+		var resolver = Resolver(new { valueVariable = Metric, minValue });
+
+		var points = resolver.Resolve(_rising).Points;
+
+		Assert.That(points, Is.EqualTo(_wholeBand).AsCollection, "an unset bound must not pin anything");
+	}
+
+	[Test]
+	public void A_negative_minimum_is_reserved_for_before_the_value_ever_reaches_it()
+	{
+		var resolver = Resolver(new { valueVariable = Metric, minValue = -100 }, Registry("5"));
+
+		Assert.That(resolver.Resolve(_nothing).Digits,
+			Is.GreaterThan(3),
+			"a sign needs room of its own, so the value does not shift sideways the first time it goes negative");
 	}
 
 	[Test]
