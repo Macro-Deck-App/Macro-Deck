@@ -316,6 +316,24 @@ public class WeatherWidgetViewTests
 	}
 
 	[Test]
+	public void S8_A_named_station_with_no_data_hides_its_name_when_the_location_is_hidden()
+	{
+		var host = RenderState(WeatherStatePayload.Unavailable("loc1", "Vienna"), Config(showLocation: false));
+
+		Assert.That(host.ById("weather.state.title").Property("text")!.Value.GetRawText(),
+			Does.Contain("Widgets.Weather.CardTitle"));
+	}
+
+	[Test]
+	public void S8_A_missing_station_keeps_its_own_diagnostic_title_when_the_location_is_hidden()
+	{
+		var host = RenderState(WeatherStatePayload.UnknownStation("loc1"), Config(showLocation: false));
+
+		Assert.That(host.ById("weather.state.title").Property("text")!.Value.GetRawText(),
+			Does.Contain("Widgets.Weather.LocationUnavailable"));
+	}
+
+	[Test]
 	public void S8_A_station_that_no_longer_exists_renders_a_different_tree_from_the_loading_case()
 	{
 		var loading = RenderState(WeatherStatePayload.Unavailable("loc1"));
@@ -384,16 +402,69 @@ public class WeatherWidgetViewTests
 	}
 
 	[Test]
-	public void S9_ShowCondition_false_drops_the_condition_and_the_location_line()
+	public void S9_ShowCondition_false_drops_the_condition_and_keeps_the_location_line()
 	{
 		var host = RenderState(Sample(), Config(showCondition: false));
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(host.FindById("weather.current.labels"), Is.Null);
 			Assert.That(host.FindById("weather.current.labels.condition"), Is.Null);
-			Assert.That(host.FindById("weather.current.labels.location"), Is.Null);
+			Assert.That(host.FindById("weather.current.labels.location"), Is.Not.Null);
 		});
+	}
+
+	[Test]
+	public void S9_ShowLocation_false_drops_the_location_and_keeps_the_condition_line()
+	{
+		var host = RenderState(Sample(), Config(showLocation: false));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.FindById("weather.current.labels.location"), Is.Null);
+			Assert.That(host.FindById("weather.current.labels.condition"), Is.Not.Null);
+		});
+	}
+
+	[Test]
+	public void S9_Hiding_both_labels_drops_the_labels_stack()
+	{
+		var host = RenderState(Sample(), Config(showCondition: false, showLocation: false));
+
+		Assert.That(host.FindById("weather.current.labels"), Is.Null);
+	}
+
+	[Test]
+	public void S9_A_station_with_no_name_renders_no_labels_stack_when_the_condition_is_hidden()
+	{
+		var payload = Sample();
+		payload.LocationName = string.Empty;
+
+		var host = RenderState(payload, Config(showCondition: false));
+
+		Assert.That(host.FindById("weather.current.labels"), Is.Null);
+	}
+
+	[Test]
+	public void S9_A_widget_saved_before_the_split_still_hides_both_labels()
+	{
+		var config = WeatherWidgetData.Parse(JsonSerializer.SerializeToElement(new { showCondition = false }));
+
+		var host = RenderState(Sample(), config);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(config.ShowLocation, Is.False);
+			Assert.That(host.FindById("weather.current.labels"), Is.Null);
+		});
+	}
+
+	[Test]
+	public void S9_An_explicit_location_option_wins_over_the_pre_split_one()
+	{
+		var config = WeatherWidgetData.Parse(
+			JsonSerializer.SerializeToElement(new { showCondition = false, showLocation = true }));
+
+		Assert.That(config.ShowLocation, Is.True);
 	}
 
 	[Test]
@@ -839,6 +910,7 @@ public class WeatherWidgetViewTests
 		bool showIcon = true,
 		bool showTemperature = true,
 		bool showCondition = true,
+		bool showLocation = true,
 		bool showForecast = true,
 		int forecastDays = 5)
 		=> new()
@@ -846,6 +918,7 @@ public class WeatherWidgetViewTests
 			ShowIcon = showIcon,
 			ShowTemperature = showTemperature,
 			ShowCondition = showCondition,
+			ShowLocation = showLocation,
 			ShowForecast = showForecast,
 			ForecastDays = forecastDays,
 		};

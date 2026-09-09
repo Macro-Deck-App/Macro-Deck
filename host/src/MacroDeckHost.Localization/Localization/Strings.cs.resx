@@ -16018,6 +16018,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Weather.LocationSection" xml:space="preserve">
     <value>Místo</value>
   </data>
+  <data name="Widgets.Weather.LocationName" xml:space="preserve">
+    <value>Název místa</value>
+  </data>
   <data name="Widgets.Weather.NoLocation" xml:space="preserve">
     <value>Žádné místo</value>
   </data>

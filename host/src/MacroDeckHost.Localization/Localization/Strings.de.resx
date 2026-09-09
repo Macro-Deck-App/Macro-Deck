@@ -16016,6 +16016,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Weather.LocationSection" xml:space="preserve">
     <value>Standort</value>
   </data>
+  <data name="Widgets.Weather.LocationName" xml:space="preserve">
+    <value>Ortsname</value>
+  </data>
   <data name="Widgets.Weather.NoLocation" xml:space="preserve">
     <value>Kein Standort</value>
   </data>

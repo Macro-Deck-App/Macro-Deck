@@ -21,6 +21,9 @@ internal static class WeatherWidgetConfigView
 		var showIcon = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showIcon") ?? true);
 		var showTemperature = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showTemperature") ?? true);
 		var showCondition = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showCondition") ?? true);
+		// Must match WeatherWidgetData.Parse: the editor recomposes every bound key on save.
+		var showLocation = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showLocation") ??
+			WidgetConfigJson.ReadBool(data, "showCondition") ?? true);
 		var showForecast = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showForecast") ?? true);
 		var animateIcon = new UiState<bool>(WidgetConfigJson.ReadBool(data, "animateIcon") ?? true);
 		var forecastDays = new UiState<double>(
@@ -67,6 +70,12 @@ internal static class WeatherWidgetConfigView
 						Key = "showCondition",
 						Label = AppStrings.Widgets.Weather.ConditionText(),
 						Binding = Bind.To(showCondition),
+					},
+					new UiBooleanInput
+					{
+						Key = "showLocation",
+						Label = AppStrings.Widgets.Weather.LocationName(),
+						Binding = Bind.To(showLocation),
 					},
 					new UiBooleanInput
 					{

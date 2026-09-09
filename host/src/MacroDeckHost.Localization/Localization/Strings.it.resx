@@ -16018,6 +16018,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.Weather.LocationSection" xml:space="preserve">
     <value>Posizione</value>
   </data>
+  <data name="Widgets.Weather.LocationName" xml:space="preserve">
+    <value>Nome della località</value>
+  </data>
   <data name="Widgets.Weather.NoLocation" xml:space="preserve">
     <value>Nessuna posizione</value>
   </data>

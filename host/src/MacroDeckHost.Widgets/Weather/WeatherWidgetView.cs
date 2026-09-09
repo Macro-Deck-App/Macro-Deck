@@ -45,7 +45,7 @@ internal static class WeatherWidgetView
 				{
 					Key = "unavailableGate",
 					Condition = () => !state.Value.IsAvailable,
-					Content = () => BuildUnavailable(state),
+					Content = () => BuildUnavailable(state, config),
 				},
 			],
 		};
@@ -53,6 +53,9 @@ internal static class WeatherWidgetView
 
 	private static bool HasForecastRows(WeatherStatePayload payload, WeatherWidgetData config)
 		=> config.ShowForecast && payload.Days.Count > 0;
+
+	private static bool HasLocationLine(WeatherStatePayload payload, WeatherWidgetData config)
+		=> config.ShowLocation && !string.IsNullOrEmpty(payload.LocationName);
 
 	private static UiStack BuildCurrent(
 		UiAsyncState<WeatherStatePayload> state,
@@ -116,7 +119,7 @@ internal static class WeatherWidgetView
 				new UiWhen
 				{
 					Key = "labelsGate",
-					Condition = () => config.ShowCondition,
+					Condition = () => config.ShowCondition || HasLocationLine(state.Value, config),
 					Content = () => new UiStack
 					{
 						Key = "labels",
@@ -124,19 +127,24 @@ internal static class WeatherWidgetView
 						Gap = 0.008,
 						Children =
 						[
-							new UiTextRun
+							new UiWhen
 							{
-								Key = "condition",
-								Size = 0.11,
-								MinSize = 0.078,
-								Weight = UiComponentTextWeights.SemiBold,
-								Role = UiComponentTextRoles.Primary,
-								Text = UiText.FromLocalized(() => ConditionText(state.Value.Condition)),
+								Key = "conditionGate",
+								Condition = () => config.ShowCondition,
+								Content = () => new UiTextRun
+								{
+									Key = "condition",
+									Size = 0.11,
+									MinSize = 0.078,
+									Weight = UiComponentTextWeights.SemiBold,
+									Role = UiComponentTextRoles.Primary,
+									Text = UiText.FromLocalized(() => ConditionText(state.Value.Condition)),
+								},
 							},
 							new UiWhen
 							{
 								Key = "locationGate",
-								Condition = () => !string.IsNullOrEmpty(state.Value.LocationName),
+								Condition = () => HasLocationLine(state.Value, config),
 								Content = () => new UiTextRun
 								{
 									Key = "location",
@@ -276,7 +284,7 @@ internal static class WeatherWidgetView
 		};
 	}
 
-	private static UiStack BuildUnavailable(UiAsyncState<WeatherStatePayload> state)
+	private static UiStack BuildUnavailable(UiAsyncState<WeatherStatePayload> state, WeatherWidgetData config)
 		=> new()
 		{
 			Key = "state",
@@ -294,7 +302,7 @@ internal static class WeatherWidgetView
 					Weight = UiComponentTextWeights.SemiBold,
 					Role = UiComponentTextRoles.Secondary,
 					Align = UiComponentAlignments.Center,
-					Text = UiText.Optional(() => TitleText(state.Value)),
+					Text = UiText.Optional(() => TitleText(state.Value, config)),
 				},
 				new UiTextRun
 				{
@@ -308,11 +316,11 @@ internal static class WeatherWidgetView
 			],
 		};
 
-	private static UiText TitleText(WeatherStatePayload payload)
+	private static UiText TitleText(WeatherStatePayload payload, WeatherWidgetData config)
 	{
 		if (payload.StationExists)
 		{
-			return string.IsNullOrEmpty(payload.LocationName)
+			return string.IsNullOrEmpty(payload.LocationName) || !config.ShowLocation
 				? AppStrings.Widgets.Weather.CardTitle()
 				: payload.LocationName;
 		}

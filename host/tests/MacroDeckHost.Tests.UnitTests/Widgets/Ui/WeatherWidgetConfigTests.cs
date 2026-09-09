@@ -29,6 +29,7 @@ public class WeatherWidgetConfigTests
 		showIcon = true,
 		showTemperature = true,
 		showCondition = true,
+		showLocation = true,
 		showForecast = true,
 		animateIcon = true,
 		forecastDays = 5,
@@ -62,6 +63,7 @@ public class WeatherWidgetConfigTests
 		host.ById("showIcon").Change(false);
 		host.ById("showTemperature").Change(false);
 		host.ById("showCondition").Change(false);
+		host.ById("showLocation").Change(false);
 		host.ById("showForecast").Change(false);
 		host.ById("forecastDays").Change(3);
 		host.ById("border.style").Change("comet");
@@ -104,6 +106,22 @@ public class WeatherWidgetConfigTests
 		host.ById("showForecast").Change(false);
 
 		Assert.That(WidgetConfigTestSupport.IsVisible(host, "forecastDays"), Is.False);
+	}
+
+	[Test]
+	public void A_widget_saved_before_the_split_opens_with_the_location_toggle_off()
+	{
+		var host = Render(new { showCondition = false });
+
+		Assert.That(host.ById("showLocation").Flag(UiConfigProperties.Value), Is.False);
+	}
+
+	[Test]
+	public void An_explicit_location_option_wins_over_the_pre_split_one_in_the_editor()
+	{
+		var host = Render(new { showCondition = false, showLocation = true });
+
+		Assert.That(host.ById("showLocation").Flag(UiConfigProperties.Value), Is.True);
 	}
 
 	[Test]
@@ -159,6 +177,7 @@ public class WeatherWidgetConfigTests
 			["showIcon"] = host.ById("showIcon").Flag(UiConfigProperties.Value),
 			["showTemperature"] = host.ById("showTemperature").Flag(UiConfigProperties.Value),
 			["showCondition"] = host.ById("showCondition").Flag(UiConfigProperties.Value),
+			["showLocation"] = host.ById("showLocation").Flag(UiConfigProperties.Value),
 			["showForecast"] = host.ById("showForecast").Flag(UiConfigProperties.Value),
 			["animateIcon"] = host.ById("animateIcon").Flag(UiConfigProperties.Value),
 			["forecastDays"] = host.ById("forecastDays").Number(UiConfigProperties.Value),
