@@ -388,6 +388,9 @@ jobs:
 
   aur-package:
     name: AUR package
+    # Main and manual runs only: a broken PKGBUILD has to be caught before the next release,
+    # not before every merge, and an Arch container per pull request is not worth that.
+    if: github.event_name != 'pull_request'
     runs-on: blacksmith-2vcpu-ubuntu-2404
     container: archlinux:base-devel
     steps:
