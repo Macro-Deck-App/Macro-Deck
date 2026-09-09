@@ -84,6 +84,10 @@ public sealed class IntegrationVariablePollingBackgroundService : HostReadyBackg
 			}
 
 			runtime.BringForward(_refresh.DrainFor(integration.Id));
+			if (_refresh.DrainEagerRefreshRequested(integration.Id))
+			{
+				runtime.BringForwardAll();
+			}
 
 			var now = DateTime.UtcNow;
 			foreach (var state in runtime.Variables.Values)
@@ -257,6 +261,14 @@ public sealed class IntegrationVariablePollingBackgroundService : HostReadyBackg
 	private sealed class ProviderRuntime
 	{
 		public Dictionary<string, VariableState> Variables { get; } = new(StringComparer.Ordinal);
+
+		public void BringForwardAll()
+		{
+			foreach (var state in Variables.Values)
+			{
+				state.Schedule.MarkDueNow();
+			}
+		}
 
 		public void BringForward(IReadOnlyList<Guid> variableIds)
 		{

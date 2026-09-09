@@ -1,5 +1,6 @@
 using System.Globalization;
 using MacroDeck.Localization;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.Obs.Actions;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
@@ -21,6 +22,7 @@ public sealed class ObsIntegration
 		IEventProvider,
 		IDynamicEventOptionsProvider,
 		IMigrationProvider,
+		IVariableRefreshSignalConsumer,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.obs";
@@ -30,11 +32,13 @@ public sealed class ObsIntegration
 
 	private readonly VariableApiAccessor _variableAccessor = new();
 	private readonly Func<Guid, IObsClient> _clientFactory;
+	private readonly TimeSpan? _pollInterval;
 	private readonly SemaphoreSlim _reloadGate = new(1, 1);
 	private readonly ObsTargetResolver _targetResolver;
 	private readonly ObsVariableCatalog _dynamicVariables;
 
 	private IIntegrationContext? _context;
+	private IVariableRefreshSignal? _refreshSignal;
 	private IReadOnlyList<ObsRuntime> _runtimes = [];
 
 	public ObsIntegration()
@@ -42,9 +46,10 @@ public sealed class ObsIntegration
 	{
 	}
 
-	internal ObsIntegration(Func<Guid, IObsClient> clientFactory)
+	internal ObsIntegration(Func<Guid, IObsClient> clientFactory, TimeSpan? pollInterval = null)
 	{
 		_clientFactory = clientFactory;
+		_pollInterval = pollInterval;
 		_targetResolver = new ObsTargetResolver(RuntimeSnapshot);
 		_dynamicVariables = new ObsVariableCatalog(RuntimeSnapshot);
 		Actions = ObsActions.Create(_targetResolver, _variableAccessor);
@@ -110,6 +115,10 @@ public sealed class ObsIntegration
 		var eager = Variables.FirstOrDefault(v => string.Equals(v.ResolvedId, localId, StringComparison.Ordinal));
 		return eager ?? await _dynamicVariables.ResolveAsync(localId, cancellationToken).ConfigureAwait(false);
 	}
+
+	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
+
+	private void RequestVariableRefresh() => _refreshSignal?.RequestEagerRefresh(IntegrationId);
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -231,7 +240,9 @@ public sealed class ObsIntegration
 				var connection = new ObsConnection(_clientFactory(item.Id),
 					item.Settings.Url,
 					item.Settings.Password,
-					events: events);
+					events: events,
+					onVariablesChanged: RequestVariableRefresh,
+					pollInterval: _pollInterval);
 				connection.Start();
 				next.Add(new ObsRuntime(item.Id, item.Title, item.Identity, item.Settings, connection));
 			}

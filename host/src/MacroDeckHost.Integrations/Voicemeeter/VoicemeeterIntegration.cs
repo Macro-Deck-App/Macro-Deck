@@ -1,4 +1,5 @@
 using System.Globalization;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.Voicemeeter.Actions;
 using MacroDeckHost.Integrations.Voicemeeter.Native;
 using MacroDeck.Localization;
@@ -21,6 +22,7 @@ public sealed class VoicemeeterIntegration
 		IDynamicEventOptionsProvider,
 		IIntegrationIssueProvider,
 		IMigrationProvider,
+		IVariableRefreshSignalConsumer,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.voicemeeter";
@@ -33,6 +35,7 @@ public sealed class VoicemeeterIntegration
 	private readonly Func<IVoicemeeterRemote> _remoteFactory;
 
 	private VoicemeeterConnection? _connection;
+	private IVariableRefreshSignal? _refreshSignal;
 
 	public VoicemeeterIntegration()
 		: this(VoicemeeterRemoteFactory.Create)
@@ -68,11 +71,17 @@ public sealed class VoicemeeterIntegration
 
 	public byte[] GetIcon() => _icon;
 
+	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
+
+	private void RequestVariableRefresh() => _refreshSignal?.RequestEagerRefresh(IntegrationId);
+
 	public Task InitializeAsync(IIntegrationContext context)
 	{
 		_variableAccessor.Current = context.Variables;
 
-		_connection = new VoicemeeterConnection(_remoteFactory(), new VoicemeeterEventEmitter(context.Events));
+		_connection = new VoicemeeterConnection(_remoteFactory(),
+			new VoicemeeterEventEmitter(context.Events),
+			onVariablesChanged: RequestVariableRefresh);
 		_connection.Start();
 		IsInitialized = true;
 

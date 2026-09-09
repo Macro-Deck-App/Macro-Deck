@@ -50,6 +50,8 @@ internal sealed class HomeAssistantConnection : IDisposable
 	private readonly ConcurrentDictionary<string, byte> _observedEventTypes = new(StringComparer.Ordinal);
 
 	private IHomeAssistantClient? _client;
+	private readonly Action? _onVariablesChanged;
+
 	private volatile HomeAssistantState _state = HomeAssistantState.Disconnected;
 	private volatile HomeAssistantCatalog _catalog = HomeAssistantCatalog.Empty;
 	private volatile IReadOnlyList<string> _missingEntities = [];
@@ -70,7 +72,8 @@ internal sealed class HomeAssistantConnection : IDisposable
 		IReadOnlyList<string>? watchedEntities = null,
 		HomeAssistantEventEmitter? events = null,
 		HomeAssistantVariableCatalog? dynamicVariables = null,
-		TimeSpan? reconnectDelay = null)
+		TimeSpan? reconnectDelay = null,
+		Action? onVariablesChanged = null)
 	{
 		_clientFactory = clientFactory;
 		_uri = uri;
@@ -78,6 +81,7 @@ internal sealed class HomeAssistantConnection : IDisposable
 		_watchedEntities = watchedEntities ?? [];
 		_events = events;
 		_dynamicVariables = dynamicVariables;
+		_onVariablesChanged = onVariablesChanged;
 		_reconnectDelay = reconnectDelay ?? TimeSpan.FromSeconds(5);
 	}
 
@@ -311,6 +315,8 @@ internal sealed class HomeAssistantConnection : IDisposable
 				EntityCount = _entities.Count
 			};
 
+			_onVariablesChanged?.Invoke();
+
 			_missingEntities = FindMissingEntities();
 
 			if (_dynamicVariables is { } dynamicVariables)
@@ -352,6 +358,7 @@ internal sealed class HomeAssistantConnection : IDisposable
 			client.Disconnected -= OnDisconnected;
 			_client = null;
 			_state = HomeAssistantState.Disconnected;
+			_onVariablesChanged?.Invoke();
 
 			try
 			{

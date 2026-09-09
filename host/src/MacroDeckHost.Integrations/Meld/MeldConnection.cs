@@ -29,6 +29,7 @@ internal sealed class MeldConnection : IDisposable
 	private readonly TimeSpan _confirmationTimeout;
 	private readonly TimeSpan _needsSetupReconnectDelay;
 	private readonly Action<MeldState>? _onState;
+	private readonly Action? _onVariablesChanged;
 	private readonly Action<string, string, bool>? _onTrackMute;
 	private readonly Action? _onReset;
 
@@ -57,7 +58,8 @@ internal sealed class MeldConnection : IDisposable
 		Action<MeldState>? onState = null,
 		Action<string, string, bool>? onTrackMute = null,
 		Action? onReset = null,
-		TimeSpan? needsSetupReconnectDelay = null)
+		TimeSpan? needsSetupReconnectDelay = null,
+		Action? onVariablesChanged = null)
 	{
 		_clientFactory = clientFactory;
 		_endpoint = endpoint;
@@ -65,6 +67,7 @@ internal sealed class MeldConnection : IDisposable
 		_maxReconnectDelay = maxReconnectDelay ?? _defaultMaxReconnectDelay;
 		_confirmationTimeout = confirmationTimeout ?? _defaultConfirmationTimeout;
 		_onState = onState;
+		_onVariablesChanged = onVariablesChanged;
 		_onTrackMute = onTrackMute;
 		_onReset = onReset;
 		_needsSetupReconnectDelay = needsSetupReconnectDelay ?? _needsSetupReconnectDelayDefault;
@@ -481,6 +484,7 @@ internal sealed class MeldConnection : IDisposable
 
 			announced = true;
 			_onState?.Invoke(_state);
+			_onVariablesChanged?.Invoke();
 			Pulse();
 			_logger.Information("Connected to Meld Studio (API v{Version}) at {Endpoint}", apiVersion, _endpoint);
 
@@ -506,6 +510,7 @@ internal sealed class MeldConnection : IDisposable
 
 			_state = MeldState.Disconnected;
 			_onState?.Invoke(_state);
+			_onVariablesChanged?.Invoke();
 			Pulse();
 			_onReset?.Invoke();
 
@@ -562,6 +567,7 @@ internal sealed class MeldConnection : IDisposable
 
 		_state = current with { Session = session, IsStreaming = isStreaming, IsRecording = isRecording };
 		_onState?.Invoke(_state);
+		_onVariablesChanged?.Invoke();
 		Pulse();
 
 		if (sessionChanged)

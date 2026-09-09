@@ -15,7 +15,6 @@ internal enum ObsConnectionStatus
 
 internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 {
-	private static readonly TimeSpan _pollInterval = TimeSpan.FromSeconds(1);
 	private static readonly TimeSpan _maxReconnectDelay = TimeSpan.FromMinutes(1);
 
 	// Per-target reads (an input's mute, a scene item's visibility, a filter's enabled flag) are not part
@@ -29,6 +28,8 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	private readonly string _url;
 	private readonly string? _password;
 	private readonly TimeSpan _reconnectDelay;
+	private readonly TimeSpan _pollInterval;
+	private readonly Action? _onVariablesChanged;
 	private readonly CancellationTokenSource _cts = new();
 
 	private readonly Channel<ConnectionSignal> _signals = Channel.CreateUnbounded<ConnectionSignal>(
@@ -63,7 +64,9 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		TimeSpan? reconnectDelay = null,
 		ObsEventEmitter? events = null,
 		ILogger? logger = null,
-		TimeSpan? failureSummaryInterval = null)
+		TimeSpan? failureSummaryInterval = null,
+		Action? onVariablesChanged = null,
+		TimeSpan? pollInterval = null)
 	{
 		_client = client;
 		_logger = logger ?? IntegrationLog.For<ObsConnection>(ObsIntegration.IntegrationId);
@@ -71,6 +74,8 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		_password = password;
 		_reconnectDelay = reconnectDelay ?? TimeSpan.FromSeconds(5);
 		_events = events;
+		_onVariablesChanged = onVariablesChanged;
+		_pollInterval = pollInterval ?? TimeSpan.FromSeconds(1);
 		_failures = new FailureEpisodeTracker(failureSummaryInterval);
 
 		_client.Connected += OnConnected;
@@ -386,6 +391,7 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 					if (RefreshState())
 					{
 						StartPolling();
+						_onVariablesChanged?.Invoke();
 					}
 
 					continue;
@@ -478,6 +484,7 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		{
 			StartPolling();
 			_signals.Writer.TryWrite(ConnectionSignal.Established);
+			_onVariablesChanged?.Invoke();
 		}
 	}
 
@@ -530,10 +537,17 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		}
 
 		StopPolling();
+		_onVariablesChanged?.Invoke();
 		_signals.Writer.TryWrite(ConnectionSignal.Lost(reason));
 	}
 
-	private void OnStateChanged(object? sender, EventArgs e) => RefreshState();
+	private void OnStateChanged(object? sender, EventArgs e)
+	{
+		if (RefreshState())
+		{
+			_onVariablesChanged?.Invoke();
+		}
+	}
 
 	private bool RefreshState()
 	{

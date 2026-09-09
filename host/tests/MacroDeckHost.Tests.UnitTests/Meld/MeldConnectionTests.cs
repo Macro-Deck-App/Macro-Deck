@@ -551,17 +551,32 @@ internal sealed class MeldConnectionTests
 		Assert.DoesNotThrowAsync(async () => await pending);
 	}
 
+	[Test]
+	public async Task Connecting_asks_for_an_eager_variable_refresh()
+	{
+		var requests = 0;
+		using var connection = Create(onVariablesChanged: () => Interlocked.Increment(ref requests));
+		connection.Start();
+
+		await WaitForAsync(() => connection.IsConnected, "the connection to come up");
+		await WaitForAsync(() => Volatile.Read(ref requests) > 0, "an eager refresh request");
+
+		Assert.That(Volatile.Read(ref requests), Is.GreaterThan(0));
+	}
+
 	private MeldConnection Create(
 		int reconnectDelayMs = 20,
 		int? maxReconnectDelayMs = null,
 		int? needsSetupReconnectDelayMs = null,
-		int confirmationTimeoutMs = 500)
+		int confirmationTimeoutMs = 500,
+		Action? onVariablesChanged = null)
 		=> new(_factory.Create,
 			_uri,
 			TimeSpan.FromMilliseconds(reconnectDelayMs),
 			TimeSpan.FromMilliseconds(maxReconnectDelayMs ?? reconnectDelayMs * 4),
 			TimeSpan.FromMilliseconds(confirmationTimeoutMs),
-			needsSetupReconnectDelay: TimeSpan.FromMilliseconds(needsSetupReconnectDelayMs ?? reconnectDelayMs * 2));
+			needsSetupReconnectDelay: TimeSpan.FromMilliseconds(needsSetupReconnectDelayMs ?? reconnectDelayMs * 2),
+			onVariablesChanged: onVariablesChanged);
 
 	private static async Task WaitForAsync(Func<bool> condition, string because)
 	{

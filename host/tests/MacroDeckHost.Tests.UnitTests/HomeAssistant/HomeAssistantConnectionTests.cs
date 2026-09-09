@@ -332,12 +332,26 @@ internal sealed class HomeAssistantConnectionTests
 		});
 	}
 
-	private HomeAssistantConnection Create(int reconnectDelayMs = 20)
+	[Test]
+	public async Task Connecting_asks_for_an_eager_variable_refresh()
+	{
+		var requests = 0;
+		using var connection = Create(onVariablesChanged: () => Interlocked.Increment(ref requests));
+		connection.Start();
+
+		await WaitForAsync(() => connection.IsConnected, "the connection to come up");
+		await WaitForAsync(() => Volatile.Read(ref requests) > 0, "an eager refresh request");
+
+		Assert.That(Volatile.Read(ref requests), Is.GreaterThan(0));
+	}
+
+	private HomeAssistantConnection Create(int reconnectDelayMs = 20, Action? onVariablesChanged = null)
 		=> new(_factory.Create,
 			_uri,
 			"the-token",
 			events: _emitter,
-			reconnectDelay: TimeSpan.FromMilliseconds(reconnectDelayMs));
+			reconnectDelay: TimeSpan.FromMilliseconds(reconnectDelayMs),
+			onVariablesChanged: onVariablesChanged);
 
 	private static async Task WaitForAsync(Func<bool> condition, string because, int timeout = 5)
 	{

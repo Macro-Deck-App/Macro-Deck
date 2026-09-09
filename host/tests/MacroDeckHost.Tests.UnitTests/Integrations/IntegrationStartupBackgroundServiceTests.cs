@@ -1,6 +1,7 @@
 using System.Globalization;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -234,6 +235,7 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 			null!,
 			null!,
 			null!,
+			new VariableRefreshSignal(),
 			new FakeIntegrationHostIssueStore(),
 			TestLayoutProviders.Host(),
 			TestFolderViewProviders.Host(),
@@ -253,6 +255,7 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 			new UserNotificationStore(),
 			null!,
 			null!,
+			new VariableRefreshSignal(),
 			new FakeIntegrationHostIssueStore(),
 			TestLayoutProviders.Host(),
 			TestFolderViewProviders.Host(),
