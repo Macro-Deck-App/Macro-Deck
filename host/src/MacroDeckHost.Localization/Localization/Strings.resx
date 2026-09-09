@@ -15721,7 +15721,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Chart maximum</value>
   </data>
   <data name="Widgets.History.ChartMaximumHint" xml:space="preserve">
-    <value>Fixed upper bound (e.g. 100 for percent). Leave empty to auto-scale.</value>
+    <value>Fixed upper bound (e.g. 100 for percent). Set 0 to scale automatically.</value>
   </data>
   <data name="Widgets.History.ChartMaximumPlaceholder" xml:space="preserve">
     <value>Auto</value>
@@ -15730,7 +15730,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Chart minimum</value>
   </data>
   <data name="Widgets.History.ChartMinimumHint" xml:space="preserve">
-    <value>Fixed lower bound, may be negative (e.g. -100). Leave empty or 0 to auto-scale.</value>
+    <value>Fixed lower bound, may be negative (e.g. -100). Set 0 to scale automatically.</value>
   </data>
   <data name="Widgets.History.ChartMinimumPlaceholder" xml:space="preserve">
     <value>Auto</value>
