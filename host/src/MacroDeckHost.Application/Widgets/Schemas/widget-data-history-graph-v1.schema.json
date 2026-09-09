@@ -16,11 +16,11 @@
     },
     "subtitleVariable": {
       "type": ["string", "null"],
-      "description": "Optional text variable used as the subtitle, e.g. 'system_cpu_name'."
+      "description": "Legacy: a text variable used as the subtitle, e.g. 'system_cpu_name'. Read only when 'subtitle' is absent, and then as '{{ vars.<name> }}'. Written by profiles that predate the freetext subtitle; the editor no longer writes it."
     },
     "subtitle": {
       "type": ["string", "null"],
-      "description": "Static subtitle fallback used when no subtitleVariable is set."
+      "description": "Subtitle line, as freetext that may carry '{{ vars.x }}' placeholders of any variable type. An empty string means the subtitle was cleared, which is not the same as the key being absent."
     },
     "showSubtitle": {
       "type": "boolean",

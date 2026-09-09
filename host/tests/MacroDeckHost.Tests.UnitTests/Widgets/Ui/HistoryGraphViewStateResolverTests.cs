@@ -1,3 +1,5 @@
+using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Domain.Enums;
 using static MacroDeckHost.Tests.UnitTests.Widgets.Ui.HistoryGraphTestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Widgets.Ui;
@@ -142,22 +144,122 @@ public class HistoryGraphViewStateResolverTests
 	}
 
 	[Test]
-	public void The_subtitle_falls_back_to_its_static_text_when_the_variable_says_nothing()
+	public void The_subtitle_is_freetext_that_can_carry_a_variable_of_any_type()
 	{
-		var config = new
-		{
-			valueVariable = Metric, subtitleVariable = Caption, subtitle = "Static", showSubtitle = true,
-		};
+		var variables = Registry().WithVariable("room", "Living Room");
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(Resolver(config).Resolve(_nothing).Subtitle, Is.EqualTo("Apple M3 Max"));
-			Assert.That(Resolver(config, Registry(caption: null)).Resolve(_nothing).Subtitle, Is.EqualTo("Static"));
-			Assert.That(Resolver(new { valueVariable = Metric, subtitleVariable = Caption, showSubtitle = false })
+			Assert.That(
+				Resolver(new { valueVariable = Metric, subtitle = "Current value: {{ vars.system_cpu_usage_percent }}" },
+						variables)
+					.Resolve(_nothing).Subtitle,
+				Is.EqualTo("Current value: 73"),
+				"a numeric variable is what the issue asks the subtitle to be able to show");
+			Assert.That(
+				Resolver(new { valueVariable = Metric, subtitle = "{{ vars.room }} / {{ vars.system_cpu_name }}" },
+						variables)
+					.Resolve(_nothing).Subtitle,
+				Is.EqualTo("Living Room / Apple M3 Max"));
+			Assert.That(Resolver(new { valueVariable = Metric, subtitle = "Plain words" }).Resolve(_nothing).Subtitle,
+				Is.EqualTo("Plain words"));
+		});
+	}
+
+	[Test]
+	public void A_numeric_subtitle_variable_keeps_the_decimal_places_it_declares()
+	{
+		var variables = Registry().WithVariable("load", "7.25", VariableType.Numeric, decimalPlaces: 1);
+
+		Assert.That(Resolver(new { valueVariable = Metric, subtitle = "{{ vars.load }}" }, variables)
+				.Resolve(_nothing).Subtitle,
+			Is.EqualTo("7.3"));
+	}
+
+	[Test]
+	public void A_subtitle_resolves_the_variables_scoped_to_the_widget_it_is_drawn_for()
+	{
+		const string widgetId = "11111111-1111-1111-1111-111111111111";
+		var variables = Registry()
+			.WithVariable("brightness", "80", VariableType.Numeric, scope: VariableScope.Widget,
+				scopeRefId: widgetId);
+		var config = new { valueVariable = Metric, subtitle = "{{ vars.brightness }}" };
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Resolver(config, variables, widgetId).Resolve(_nothing).Subtitle, Is.EqualTo("80"));
+			Assert.That(Resolver(config, variables).Resolve(_nothing).Subtitle,
+				Is.Empty,
+				"a widget-scoped variable is nobody else's to read");
+		});
+	}
+
+	[Test]
+	public void A_profile_that_predates_the_freetext_subtitle_still_shows_its_variable()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(Resolver(new { valueVariable = Metric, subtitleVariable = Caption }).Resolve(_nothing).Subtitle,
+				Is.EqualTo("Apple M3 Max"));
+			Assert.That(
+				Resolver(new { valueVariable = Metric, subtitleVariable = Caption, subtitle = "" })
 					.Resolve(_nothing).Subtitle,
 				Is.Empty,
-				"a subtitle switched off stays off however well its variable resolves");
+				"a subtitle the user cleared stays cleared, rather than the older key resurrecting it");
+			Assert.That(
+				Resolver(new { valueVariable = Metric, subtitleVariable = "not a name }} {{", subtitle = (string?)null })
+					.Resolve(_nothing).Subtitle,
+				Is.Empty,
+				"a legacy key holding something that is not a variable name is not interpolated");
+			Assert.That(
+				Resolver(new { valueVariable = Metric, subtitleVariable = Caption, subtitle = "Mine" })
+					.Resolve(_nothing).Subtitle,
+				Is.EqualTo("Mine"),
+				"the freetext field is the one the editor writes, so it decides over the key it replaced");
 		});
+	}
+
+	[Test]
+	public void A_subtitle_naming_a_variable_that_has_gone_stale_says_so_rather_than_going_blank()
+	{
+		var variables = Registry();
+		var caption = variables.GetAll().First(variable => variable.Name == Caption);
+		variables.SetAvailable(caption.Id, false);
+
+		Assert.That(Resolver(new { valueVariable = Metric, subtitle = "on {{ vars.system_cpu_name }}" }, variables)
+				.Resolve(_nothing).Subtitle,
+			Is.EqualTo($"on {VariableTemplateRenderer.UnavailablePlaceholder}"),
+			"a provider that stopped reporting is worth showing, the way every other template shows it");
+	}
+
+	[Test]
+	public void A_subtitle_naming_a_variable_that_is_not_reporting_says_so_rather_than_emptying_the_line()
+	{
+		var variables = Registry(caption: null);
+
+		Assert.That(Resolver(new { valueVariable = Metric, subtitle = "on {{ vars.system_cpu_name }}" }, variables)
+				.Resolve(_nothing).Subtitle,
+			Is.EqualTo("on "),
+			"a name the registry does not know renders as nothing, the way every other template reads it");
+	}
+
+	[Test]
+	public void A_subtitle_that_is_not_a_valid_template_shows_itself_instead_of_faulting_the_sample_tick()
+	{
+		var subtitle = "100% {{ of max";
+		var resolver = Resolver(new { valueVariable = Metric, subtitle });
+
+		Assert.That(() => resolver.Resolve(_nothing), Throws.Nothing);
+		Assert.That(resolver.Resolve(_nothing).Subtitle, Is.EqualTo(subtitle));
+	}
+
+	[Test]
+	public void A_subtitle_switched_off_stays_off_however_well_its_variable_resolves()
+	{
+		Assert.That(
+			Resolver(new { valueVariable = Metric, subtitle = "{{ vars.system_cpu_name }}", showSubtitle = false })
+				.Resolve(_nothing).Subtitle,
+			Is.Empty);
 	}
 
 	/// <summary>

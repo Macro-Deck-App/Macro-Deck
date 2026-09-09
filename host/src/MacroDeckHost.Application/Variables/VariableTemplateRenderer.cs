@@ -116,15 +116,12 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 	}
 
 	public Task<string> RenderAsync(string templateText, VariableScope contextScope, string? contextScopeRefId)
-	{
-		if (!ContainsLiquid(templateText))
-		{
-			return Task.FromResult(templateText);
-		}
+		=> Task.FromResult(Render(templateText, contextScope, contextScopeRefId));
 
-		var context = BuildContext(contextScope, contextScopeRefId);
-		return Task.FromResult(Render(templateText, context));
-	}
+	public string Render(string templateText, VariableScope contextScope, string? contextScopeRefId)
+		=> ContainsLiquid(templateText)
+			? Render(templateText, BuildContext(contextScope, contextScopeRefId))
+			: templateText;
 
 	public Task<VariableContext> CreateContextAsync(VariableScope contextScope, string? contextScopeRefId)
 		=> Task.FromResult(BuildContext(contextScope, contextScopeRefId));

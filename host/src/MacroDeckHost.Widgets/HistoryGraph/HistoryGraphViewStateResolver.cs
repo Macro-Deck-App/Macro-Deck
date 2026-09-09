@@ -29,15 +29,22 @@ internal sealed class HistoryGraphViewStateResolver
 
 	private readonly HistoryGraphWidgetData _config;
 	private readonly VariableRegistry _variables;
+	private readonly VariableTemplateRenderer _templates;
+	private readonly string? _scopeRefId;
 	private double _widestSeen;
 
-	public HistoryGraphViewStateResolver(HistoryGraphWidgetData config, VariableRegistry variables)
+	public HistoryGraphViewStateResolver(
+		HistoryGraphWidgetData config,
+		VariableRegistry variables,
+		string? scopeRefId = null)
 	{
 		ArgumentNullException.ThrowIfNull(config);
 		ArgumentNullException.ThrowIfNull(variables);
 
 		_config = config;
 		_variables = variables;
+		_scopeRefId = scopeRefId;
+		_templates = new VariableTemplateRenderer(variables);
 	}
 
 	public HistoryGraphViewState Resolve(IReadOnlyList<double> samples)
@@ -110,22 +117,28 @@ internal sealed class HistoryGraphViewStateResolver
 
 	private string ResolveSubtitle()
 	{
-		if (!_config.ShowSubtitle)
+		if (!_config.ShowSubtitle || _config.Subtitle is not { Length: > 0 } subtitle)
 		{
 			return string.Empty;
 		}
 
-		if (!string.IsNullOrEmpty(_config.SubtitleVariable))
+		if (!VariableTemplateRenderer.ContainsLiquid(subtitle))
 		{
-			var variable = Resolve(_config.SubtitleVariable);
-
-			if (variable is not null && !string.IsNullOrEmpty(variable.Value))
-			{
-				return variable.Value;
-			}
+			return subtitle;
 		}
 
-		return _config.Subtitle ?? string.Empty;
+		try
+		{
+			return _templates.Render(subtitle,
+				_scopeRefId is null ? VariableScope.Global : VariableScope.Widget,
+				_scopeRefId);
+		}
+		catch (Exception e) when (e is not OutOfMemoryException and not StackOverflowException)
+		{
+			// A subtitle is user written text, and this runs on the sampling timer: an unparsable
+			// template must show itself rather than take the tick down with it.
+			return subtitle;
+		}
 	}
 
 	/// <summary>The value and the unit it is drawn beside, both taken from the variable: the graph no longer

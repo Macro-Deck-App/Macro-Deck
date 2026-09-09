@@ -15752,11 +15752,14 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.History.Subtitle" xml:space="preserve">
     <value>Sous-titre</value>
   </data>
-  <data name="Widgets.History.SubtitleVariable" xml:space="preserve">
-    <value>Variable de sous-titre</value>
+  <data name="Widgets.History.SubtitleText" xml:space="preserve">
+    <value>Texte du sous-titre</value>
   </data>
-  <data name="Widgets.History.SubtitleVariableHint" xml:space="preserve">
-    <value>Variable de texte facultative sous le titre (ex. le nom du CPU ou du GPU).</value>
+  <data name="Widgets.History.SubtitleTextHint" xml:space="preserve">
+    <value>Texte libre sous le titre. Insère n'importe quelle variable, y compris numérique.</value>
+  </data>
+  <data name="Widgets.History.SubtitleTextPlaceholder" xml:space="preserve">
+    <value>ex. Apple M3 Max</value>
   </data>
   <data name="Widgets.History.TitlePlaceholder" xml:space="preserve">
     <value>ex. Charge CPU</value>

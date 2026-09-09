@@ -160,6 +160,14 @@ describe('WidgetConfigurationEditorComponent', () => {
     void fixture;
   });
 
+  it('scopes the live preview to the widget being edited, so its widget-scoped variables resolve', async () => {
+    await createFixture();
+
+    const preview = opens.find(request => request.kind === 'widget' && request.widgetType !== undefined);
+
+    expect(preview && 'variableScopeWidgetId' in preview ? preview.variableScopeWidgetId : undefined).toBe('w1');
+  });
+
   it('opens the config session with the draft being edited, not just the widget id', async () => {
     const fixture = await createFixture(widget({ data: { label: 'Draft' } as WidgetData }));
 
