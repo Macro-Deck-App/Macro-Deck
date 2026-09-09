@@ -390,6 +390,15 @@ export class ParamRowComponent implements OnInit, OnChanges {
     this.onChange(value as unknown as ParameterValue);
   }
 
+  onNumberChange(value: string | number): void {
+    if (value === '' || value == null) {
+      this.onChange('');
+      return;
+    }
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) this.onChange(parsed);
+  }
+
   onChange(value: ParameterValue): void {
     if (this.nested) {
       this.nestedChange.emit(value);

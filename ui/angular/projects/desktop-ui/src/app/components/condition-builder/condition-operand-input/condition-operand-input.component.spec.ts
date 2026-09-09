@@ -48,6 +48,36 @@ describe('ConditionOperandInputComponent', () => {
     fixture.detectChanges();
   }
 
+  describe('a numeric literal', () => {
+    const param: Param = { name: 'threshold', type: 'number', label: 'Threshold' };
+
+    it('is emitted as a number', async () => {
+      await render(param, 10);
+      const emitted: unknown[] = [];
+      fixture.componentInstance.valueChange.subscribe(value => emitted.push(value));
+
+      const box = fixture.nativeElement.querySelector('input[type="number"]') as HTMLInputElement;
+      box.value = '25';
+      box.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+
+      expect(emitted).toEqual([25]);
+    });
+
+    it('can still be cleared', async () => {
+      await render(param, 10);
+      const emitted: unknown[] = [];
+      fixture.componentInstance.valueChange.subscribe(value => emitted.push(value));
+
+      const box = fixture.nativeElement.querySelector('input[type="number"]') as HTMLInputElement;
+      box.value = '';
+      box.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+
+      expect(emitted).toEqual(['']);
+    });
+  });
+
   describe('a dynamic list that cannot resolve the stored value (issue #768)', () => {
     const sceneParam: Param = { name: 'sceneName', type: 'dynamic-choice', label: 'Scene', dynamicOptions: true };
 

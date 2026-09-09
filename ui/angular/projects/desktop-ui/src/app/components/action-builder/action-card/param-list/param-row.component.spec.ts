@@ -175,6 +175,40 @@ describe('ParamRowComponent host-backed option labels', () => {
     ]);
   });
 
+  it('stores what a number box was given as a number', async () => {
+    const fixture = TestBed.createComponent(ParamRowComponent);
+    fixture.componentRef.setInput('blockId', 'block-1');
+    fixture.componentRef.setInput('param', {
+      name: 'delay', type: 'number', label: 'Delay', value: 10,
+    } satisfies ActionBlockParameter);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const box = fixture.nativeElement.querySelector('input[type="number"]') as HTMLInputElement;
+    box.value = '25';
+    box.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+
+    expect(store.updateParam.calls.mostRecent().args[2] as unknown).toBe(25);
+  });
+
+  it('lets an optional number parameter be emptied', async () => {
+    const fixture = TestBed.createComponent(ParamRowComponent);
+    fixture.componentRef.setInput('blockId', 'block-1');
+    fixture.componentRef.setInput('param', {
+      name: 'delay', type: 'number', label: 'Delay', value: 10,
+    } satisfies ActionBlockParameter);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const box = fixture.nativeElement.querySelector('input[type="number"]') as HTMLInputElement;
+    box.value = '';
+    box.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+
+    expect(store.updateParam.calls.mostRecent().args[2] as unknown).toBe('');
+  });
+
   it('renders what an empty pick list means, as the provider named it', () => {
     const fixture = TestBed.createComponent(ParamRowComponent);
     fixture.componentRef.setInput('blockId', 'block-1');

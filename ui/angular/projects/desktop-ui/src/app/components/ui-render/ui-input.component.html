@@ -98,7 +98,7 @@
               [ariaDescribedby]="ariaDescribedby()"
               [ariaInvalid]="ariaInvalid()"
               [ngModel]="numberValue()"
-              (ngModelChange)="onChange($event)" />
+              (ngModelChange)="onNumberChange($event)" />
           </div>
         } @else {
           <shared-input
@@ -114,7 +114,7 @@
             [ariaDescribedby]="ariaDescribedby()"
             [ariaInvalid]="ariaInvalid()"
             [ngModel]="numberValue()"
-            (ngModelChange)="onChange($event)" />
+            (ngModelChange)="onNumberChange($event)" />
         }
       }
       @case (types.Boolean) {
