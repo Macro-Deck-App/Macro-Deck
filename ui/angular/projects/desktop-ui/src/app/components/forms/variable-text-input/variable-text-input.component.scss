@@ -41,6 +41,9 @@
  * `min-height` stays the binding constraint (see control-size).
  */
 .vti-editor:not(.vti-multiline) {
+  // The caret is revealed into the padding box, which is where an overlaid action is painted.
+  // isUnderOverlaidAction reads this back as the band's width, so it has to stay in step with it.
+  scroll-padding-inline-end: var(--input-action-inline-band, auto);
   scrollbar-width: none;
   line-height: calc(var(--vti-height) - 2 * var(--vti-pad-y) - 3px);
 }

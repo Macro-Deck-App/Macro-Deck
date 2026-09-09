@@ -249,6 +249,86 @@ describe('VariableTextInputComponent', () => {
     });
   });
 
+  describe('a field with an action overlaid on it', () => {
+    const GUTTER = 46;
+    const BAND = GUTTER + 10;
+
+    function overlayAction(): void {
+      editor().style.width = '200px';
+      editor().style.setProperty('--input-action-inline-gutter', `${GUTTER}px`);
+      editor().style.setProperty('--input-action-inline-band', `${BAND}px`);
+      fixture.detectChanges();
+    }
+
+    function overflowingValue(): void {
+      setValue('a {{ vars.title }} and enough trailing text to overflow the box several times over');
+    }
+
+    it('reveals the end of an overflowing value clear of the space the action reserved', () => {
+      overlayAction();
+      setValue('enough leading text to overflow the box several times over {{ vars.title }}');
+
+      const end = chips()[chips().length - 1];
+      editor().scrollLeft = 0;
+      end.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+
+      const revealed = editor().getBoundingClientRect().right
+        - end.getBoundingClientRect().right;
+      expect(revealed).toBeGreaterThanOrEqual(BAND);
+    });
+
+    it('does not remove a reference the action is painted over', () => {
+      overlayAction();
+      overflowingValue();
+      const emitted: string[] = [];
+      component.valueChange.subscribe(v => emitted.push(v));
+
+      const chip = chips()[0];
+      editor().scrollLeft = chip.offsetLeft - 10;
+      const remove = chip.querySelector<HTMLElement>('.vti-chip-remove')!;
+      remove.dispatchEvent(new MouseEvent('mousedown', {
+        bubbles: true,
+        clientX: editor().getBoundingClientRect().right - 3,
+      }));
+      fixture.detectChanges();
+
+      expect(emitted).toEqual([]);
+      expect(chips().length).toBe(1);
+    });
+
+    it('still removes a reference the user can see', () => {
+      overlayAction();
+      overflowingValue();
+      const emitted: string[] = [];
+      component.valueChange.subscribe(v => emitted.push(v));
+
+      const chip = chips()[0];
+      const remove = chip.querySelector<HTMLElement>('.vti-chip-remove')!;
+      remove.dispatchEvent(new MouseEvent('mousedown', {
+        bubbles: true,
+        clientX: chip.getBoundingClientRect().right,
+      }));
+      fixture.detectChanges();
+
+      expect(chips().length).toBe(0);
+    });
+
+    it('removes a reference anywhere in a field that has no action overlaid on it', () => {
+      editor().style.width = '200px';
+      overflowingValue();
+
+      const chip = chips()[0];
+      const remove = chip.querySelector<HTMLElement>('.vti-chip-remove')!;
+      remove.dispatchEvent(new MouseEvent('mousedown', {
+        bubbles: true,
+        clientX: editor().getBoundingClientRect().right - 3,
+      }));
+      fixture.detectChanges();
+
+      expect(chips().length).toBe(0);
+    });
+  });
+
   describe('reading the edited tree back', () => {
     it('turns a token typed as loose text into a chip and emits the value', () => {
       setValue('Hello ');

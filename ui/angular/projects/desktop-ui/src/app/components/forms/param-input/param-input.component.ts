@@ -31,7 +31,11 @@ import { VariableTextInputComponent } from '../variable-text-input/variable-text
     },
   ],
   template: `
-    <div class="pi-shell" [class.pi-multiline]="multiline" [class.pi-has-liquid]="showLiquid">
+    <div
+      class="pi-shell"
+      [class.pi-multiline]="multiline"
+      [class.pi-has-liquid]="showLiquid"
+      [class.pi-disabled]="disabledState()">
       @if (usesVariableEditor) {
         <shared-variable-text-input
           class="pi-field"
