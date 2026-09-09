@@ -16019,6 +16019,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Weather.LocationSection" xml:space="preserve">
     <value>Location</value>
   </data>
+  <data name="Widgets.Weather.LocationName" xml:space="preserve">
+    <value>Location name</value>
+  </data>
   <data name="Widgets.Weather.NoLocation" xml:space="preserve">
     <value>No location</value>
   </data>

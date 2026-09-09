@@ -16018,6 +16018,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.Weather.LocationSection" xml:space="preserve">
     <value>Emplacement</value>
   </data>
+  <data name="Widgets.Weather.LocationName" xml:space="preserve">
+    <value>Nom du lieu</value>
+  </data>
   <data name="Widgets.Weather.NoLocation" xml:space="preserve">
     <value>Aucun emplacement</value>
   </data>
