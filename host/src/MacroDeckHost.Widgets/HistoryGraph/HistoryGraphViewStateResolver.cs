@@ -108,9 +108,11 @@ internal sealed class HistoryGraphViewStateResolver
 		{
 			points[i] = range > 0
 				? Math.Round(Math.Clamp((samples[i] - low) / range, 0, 1), 4)
-				: min is null && max is null ? 0.5
-				: samples[i] <= low ? 0
-				: 1;
+				: min is null && max is null
+					? 0.5
+					: samples[i] <= low
+						? 0
+						: 1;
 		}
 
 		return points;
