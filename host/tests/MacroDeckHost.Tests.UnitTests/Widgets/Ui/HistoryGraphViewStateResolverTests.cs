@@ -150,14 +150,14 @@ public class HistoryGraphViewStateResolverTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(
-				Resolver(new { valueVariable = Metric, subtitle = "Current value: {{ vars.system_cpu_usage_percent }}" },
+			Assert.That(Resolver(new
+							{ valueVariable = Metric, subtitle = "Current value: {{ vars.system_cpu_usage_percent }}" },
 						variables)
 					.Resolve(_nothing).Subtitle,
 				Is.EqualTo("Current value: 73"),
 				"a numeric variable is what the issue asks the subtitle to be able to show");
-			Assert.That(
-				Resolver(new { valueVariable = Metric, subtitle = "{{ vars.room }} / {{ vars.system_cpu_name }}" },
+			Assert.That(Resolver(new
+							{ valueVariable = Metric, subtitle = "{{ vars.room }} / {{ vars.system_cpu_name }}" },
 						variables)
 					.Resolve(_nothing).Subtitle,
 				Is.EqualTo("Living Room / Apple M3 Max"));
@@ -181,7 +181,10 @@ public class HistoryGraphViewStateResolverTests
 	{
 		const string widgetId = "11111111-1111-1111-1111-111111111111";
 		var variables = Registry()
-			.WithVariable("brightness", "80", VariableType.Numeric, scope: VariableScope.Widget,
+			.WithVariable("brightness",
+				"80",
+				VariableType.Numeric,
+				scope: VariableScope.Widget,
 				scopeRefId: widgetId);
 		var config = new { valueVariable = Metric, subtitle = "{{ vars.brightness }}" };
 
@@ -201,18 +204,16 @@ public class HistoryGraphViewStateResolverTests
 		{
 			Assert.That(Resolver(new { valueVariable = Metric, subtitleVariable = Caption }).Resolve(_nothing).Subtitle,
 				Is.EqualTo("Apple M3 Max"));
-			Assert.That(
-				Resolver(new { valueVariable = Metric, subtitleVariable = Caption, subtitle = "" })
+			Assert.That(Resolver(new { valueVariable = Metric, subtitleVariable = Caption, subtitle = "" })
 					.Resolve(_nothing).Subtitle,
 				Is.Empty,
 				"a subtitle the user cleared stays cleared, rather than the older key resurrecting it");
-			Assert.That(
-				Resolver(new { valueVariable = Metric, subtitleVariable = "not a name }} {{", subtitle = (string?)null })
+			Assert.That(Resolver(new
+						{ valueVariable = Metric, subtitleVariable = "not a name }} {{", subtitle = (string?)null })
 					.Resolve(_nothing).Subtitle,
 				Is.Empty,
 				"a legacy key holding something that is not a variable name is not interpolated");
-			Assert.That(
-				Resolver(new { valueVariable = Metric, subtitleVariable = Caption, subtitle = "Mine" })
+			Assert.That(Resolver(new { valueVariable = Metric, subtitleVariable = Caption, subtitle = "Mine" })
 					.Resolve(_nothing).Subtitle,
 				Is.EqualTo("Mine"),
 				"the freetext field is the one the editor writes, so it decides over the key it replaced");
@@ -256,8 +257,8 @@ public class HistoryGraphViewStateResolverTests
 	[Test]
 	public void A_subtitle_switched_off_stays_off_however_well_its_variable_resolves()
 	{
-		Assert.That(
-			Resolver(new { valueVariable = Metric, subtitle = "{{ vars.system_cpu_name }}", showSubtitle = false })
+		Assert.That(Resolver(new
+					{ valueVariable = Metric, subtitle = "{{ vars.system_cpu_name }}", showSubtitle = false })
 				.Resolve(_nothing).Subtitle,
 			Is.Empty);
 	}

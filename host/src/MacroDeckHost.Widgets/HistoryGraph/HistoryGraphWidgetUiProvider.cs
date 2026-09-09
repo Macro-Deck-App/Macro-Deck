@@ -86,8 +86,8 @@ public sealed class HistoryGraphWidgetUiProvider : IBuiltInWidgetUiProvider
 	}
 
 	private static string? VariableScopeWidgetId(UiSurface surface)
-		=> ReadStringAttribute(surface, UiWidgetSurfaceAttributes.WidgetId)
-			?? ReadStringAttribute(surface, UiWidgetSurfaceAttributes.VariableScopeWidgetId);
+		=> ReadStringAttribute(surface, UiWidgetSurfaceAttributes.WidgetId) ??
+			ReadStringAttribute(surface, UiWidgetSurfaceAttributes.VariableScopeWidgetId);
 
 	private static string? ReadStringAttribute(UiSurface surface, string name)
 		=> surface.Attributes.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String

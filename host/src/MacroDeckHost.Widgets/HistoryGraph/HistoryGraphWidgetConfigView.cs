@@ -28,9 +28,10 @@ internal static class HistoryGraphWidgetConfigView
 		var valueVariable = new UiState<string>(WidgetConfigJson.ReadString(data, "valueVariable") ?? string.Empty);
 		var title = new UiState<string>(WidgetConfigJson.ReadString(data, "title") ?? string.Empty);
 		var showSubtitle = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showSubtitle") ?? true);
-		var subtitle = new UiState<string>(
-			HistoryGraphWidgetData.SubtitleTextOf(WidgetConfigJson.ReadString(data, "subtitle"),
-				WidgetConfigJson.ReadString(data, "subtitleVariable")) ?? string.Empty);
+		var subtitle = new UiState<string>(HistoryGraphWidgetData.SubtitleTextOf(
+				WidgetConfigJson.ReadString(data, "subtitle"),
+				WidgetConfigJson.ReadString(data, "subtitleVariable")) ??
+			string.Empty);
 		var maxValue = new UiState<double>(NormalizeMaxValue(WidgetConfigJson.ReadDouble(data, "maxValue") ?? 0));
 		var accentColor = new UiState<string>(WidgetConfigJson.ReadString(data, "accentColor") ?? string.Empty);
 
@@ -70,7 +71,10 @@ internal static class HistoryGraphWidgetConfigView
 						[
 							PresetButton("presetCpu",
 								AppStrings.Widgets.History.PresetCpu(),
-								() => ApplyPreset(_cpuUsage, "CPU Load", HistoryGraphWidgetData.VariableToken(_cpuName), 100)),
+								() => ApplyPreset(_cpuUsage,
+									"CPU Load",
+									HistoryGraphWidgetData.VariableToken(_cpuName),
+									100)),
 							PresetButton("presetRamUsed",
 								AppStrings.Widgets.History.PresetRamUsed(),
 								() => ApplyPreset(_ramUsedGb, "RAM Usage", string.Empty, 0)),
@@ -79,7 +83,10 @@ internal static class HistoryGraphWidgetConfigView
 								() => ApplyPreset(_ramUsagePercent, "RAM Usage", string.Empty, 100)),
 							PresetButton("presetGpu",
 								AppStrings.Widgets.History.PresetGpu(),
-								() => ApplyPreset(_gpuUsagePercent, "GPU Load", HistoryGraphWidgetData.VariableToken(_gpuName), 100)),
+								() => ApplyPreset(_gpuUsagePercent,
+									"GPU Load",
+									HistoryGraphWidgetData.VariableToken(_gpuName),
+									100)),
 						],
 					},
 					new UiProse { Key = "presets-hint", Text = AppStrings.Widgets.History.PresetsHint() },

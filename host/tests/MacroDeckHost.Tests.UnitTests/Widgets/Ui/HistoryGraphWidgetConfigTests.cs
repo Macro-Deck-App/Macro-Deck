@@ -78,9 +78,11 @@ public class HistoryGraphWidgetConfigTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(subtitle.Type, Is.EqualTo(UiConfigPrimitives.String));
-			Assert.That(subtitle.HasProperty(UiConfigProperties.LiteralOnly), Is.False,
+			Assert.That(subtitle.HasProperty(UiConfigProperties.LiteralOnly),
+				Is.False,
 				"a literal-only field renders a plain box with no variable helper");
-			Assert.That(subtitle.HasProperty(UiConfigProperties.VariableTypes), Is.False,
+			Assert.That(subtitle.HasProperty(UiConfigProperties.VariableTypes),
+				Is.False,
 				"the field the issue asks for filters no variable type out");
 		});
 	}
@@ -108,8 +110,9 @@ public class HistoryGraphWidgetConfigTests
 	public void The_default_data_of_a_new_history_graph_names_its_subtitle_through_the_field()
 	{
 		var defaultData = BuiltInWidgetTypes.All(new HashSet<string>(StringComparer.Ordinal))
-			.Single(type => type.Id == WidgetTypeIds.HistoryGraph)
-			.DefaultData ?? "{}";
+				.Single(type => type.Id == WidgetTypeIds.HistoryGraph)
+				.DefaultData ??
+			"{}";
 		var host = Render(JsonSerializer.Deserialize<JsonElement>(defaultData));
 
 		Assert.That(host.ById("subtitle").Text(UiConfigProperties.Value),
