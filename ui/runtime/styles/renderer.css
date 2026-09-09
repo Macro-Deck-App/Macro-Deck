@@ -51,6 +51,7 @@
   min-width: 0;
   min-height: 0;
   touch-action: none;
+  transition: background-color var(--transition-slow);
   /*
    * A nested button's corner is painted inline by the renderer, as a fraction of its own height - see
    * BUTTON_CORNER_RATIO. Not stated here, because it is not a constant: a button half the height of
@@ -445,6 +446,7 @@
     animation: none;
   }
 
+  .widget-button,
   .widget-artwork-eased,
   .widget-artwork-eased > img,
   .widget-progress-fill,

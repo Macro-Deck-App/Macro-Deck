@@ -54,6 +54,9 @@ export function paintStackLayout<TState>(node: UiNode, ctx: UiComponentContext<T
   const tileCorner = isButton && !ctx.isTreeRoot && buttonTakesTileCorner(node);
   ctx.setClass(element, 'widget-node-root', isButton && ctx.isTreeRoot);
   ctx.setClass(element, 'widget-tile-corner', tileCorner);
+  // Before the corner: a nested button measures its own height, and that read flushes style. With the
+  // colour still unset the flush settles on transparent and the button eases in from it on every mount.
+  ctx.setStyle(element, 'background', isButton ? buttonBackground(node) : stackBackground(node) ?? null);
   ctx.setStyle(element, 'border-radius',
     isButton && !ctx.isTreeRoot && !tileCorner ? px(buttonCornerPx(element, ctx.box.height)) : null);
   ctx.setStyle(element, 'flex-direction', horizontal ? 'row' : 'column');
@@ -61,7 +64,6 @@ export function paintStackLayout<TState>(node: UiNode, ctx: UiComponentContext<T
   ctx.setStyle(element, 'align-items', nodeAlign(node));
   ctx.setStyle(element, 'gap', px(gap));
   ctx.setStyle(element, 'padding', px(padding));
-  ctx.setStyle(element, 'background', isButton ? buttonBackground(node) : stackBackground(node) ?? null);
   ctx.sizeTo(element, ctx.box);
 
   const entries = layoutStackChildren(node, ctx.box, ctx.basis, padding, gap, horizontal, ctx.registry);

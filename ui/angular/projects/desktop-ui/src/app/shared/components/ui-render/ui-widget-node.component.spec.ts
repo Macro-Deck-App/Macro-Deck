@@ -1183,6 +1183,10 @@ describe('ui.button appearance', () => {
     return el(rendered).querySelector('.widget-button') as HTMLElement;
   }
 
+  function reducedMotion(): boolean {
+    return matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
   it('is its own stacking context, so its always-present background cannot paint over the negative-z artwork', async () => {
     // .widget-button-artwork uses z-index: -1 to sit behind the flex children while staying above the
     // button's own background - but a negative z-index only paints behind whatever stacking context it
@@ -1193,6 +1197,65 @@ describe('ui.button appearance', () => {
     const rendered = await renderTree(node, withBasis(200));
 
     expect(getComputedStyle(buttonEl(rendered)).isolation).toBe('isolate');
+  });
+
+  it('eases a background colour change over the third of a second a viewer can follow', async () => {
+    if (reducedMotion()) pending('the viewer asked for less motion, so nothing is meant to move');
+
+    const node: UiNode = { id: 'btn', type: Types.Button, properties: { [Props.Background]: '#2b6cee' } };
+    const rendered = await renderTree(node, withBasis(200));
+    const style = getComputedStyle(buttonEl(rendered));
+    const seconds = parseFloat(style.transitionDuration);
+
+    expect(style.transitionProperty).toContain('background-color');
+    expect(seconds).toBeGreaterThanOrEqual(0.3);
+    expect(seconds).toBeLessThanOrEqual(0.5);
+  });
+
+  it('leaves a button that eases its artwork on its own longer curve', async () => {
+    if (reducedMotion()) pending('the viewer asked for less motion, so nothing is meant to move');
+
+    const plain = await renderTree(
+      { id: 'btn', type: Types.Button, properties: { [Props.Background]: '#2b6cee' } }, withBasis(200));
+    const plainSeconds = parseFloat(getComputedStyle(buttonEl(plain)).transitionDuration);
+
+    const crossfading = await renderTree(
+      {
+        id: 'btn', type: Types.Button,
+        properties: { [Props.Background]: '#2b6cee', [Props.Transition]: 'crossfade' },
+      }, withBasis(200));
+
+    expect(parseFloat(getComputedStyle(buttonEl(crossfading)).transitionDuration))
+      .toBeGreaterThan(plainSeconds);
+  });
+
+  it('starts fading when the colour changes and not when the button first appears', async () => {
+    if (reducedMotion()) pending('the viewer asked for less motion, so nothing is meant to move');
+
+    const button = (properties: Record<string, unknown>): UiNode =>
+      ({ id: 'btn', type: Types.Button, properties });
+    const rendered = await renderTree(button({ [Props.Background]: '#2b6cee' }), withBasis(200));
+
+    expect(buttonEl(rendered).getAnimations().length).toBe(0);
+
+    await updateTree(rendered, { root: button({ [Props.Background]: '#ef4444' }) });
+
+    expect(buttonEl(rendered).getAnimations()
+      .some(animation => (animation as CSSTransition).transitionProperty === 'background-color'))
+      .toBeTrue();
+  });
+
+  it('does not fade a button in from transparent when it is nested inside a stack', async () => {
+    if (reducedMotion()) pending('the viewer asked for less motion, so nothing is meant to move');
+
+    const node: UiNode = {
+      id: 'root', type: Types.Stack, properties: {},
+      children: [{ id: 'btn', type: Types.Button, properties: { [Props.Background]: '#2b6cee' } }],
+    };
+    const rendered = await renderTree(node, withBasis(200));
+
+    expect(buttonEl(rendered).getAnimations().length).toBe(0);
+    expect(getComputedStyle(buttonEl(rendered)).backgroundColor).toBe('rgb(43, 108, 238)');
   });
 
   it('draws a ring in the configured color when borderStyle/borderColor are set', async () => {
