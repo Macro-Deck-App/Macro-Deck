@@ -385,3 +385,24 @@ test('no sheet that styles a widget border ring conditions it on reduced motion'
       `${sheet} styles the ring and must be among the scanned sheets, saw ${styling.join(', ')}`);
   }
 });
+
+test('a button that fades its background stops fading when the viewer asks for less motion', () => {
+  const source = readFileSync(path.join(HERE, 'styles', 'renderer.css'), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  const opened = source.search(/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{/);
+  assert.notEqual(opened, -1, 'renderer.css declares no prefers-reduced-motion block');
+
+  let depth = 0;
+  let end = source.indexOf('{', opened);
+  for (let at = end; at < source.length; at++) {
+    if (source[at] === '{') depth++;
+    else if (source[at] === '}' && --depth === 0) { end = at; break; }
+  }
+
+  const stilled = [...source.slice(source.indexOf('{', opened) + 1, end).matchAll(/([^{}]+)\{([^}]*)\}/g)]
+    .filter(rule => /transition:\s*none/.test(rule[2]))
+    .flatMap(rule => rule[1].split(',').map(one => one.trim()));
+
+  assert.ok(stilled.includes('.widget-button'),
+    'a button eases its background colour, so the reduce query has to still it like every other transition');
+});
