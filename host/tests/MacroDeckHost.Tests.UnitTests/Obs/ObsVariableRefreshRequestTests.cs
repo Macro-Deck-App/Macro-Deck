@@ -64,8 +64,8 @@ internal sealed class ObsVariableRefreshRequestTests
 
 		Assert.That(signal.DrainEagerRefreshRequested(ObsIntegration.IntegrationId),
 			Is.False,
-			"the status timer would lift variables that change continuously, such as cpu_usage, above their "
-			+ "declared refresh interval");
+			"the status timer would lift variables that change continuously, such as cpu_usage, above their " +
+			"declared refresh interval");
 	}
 
 	private static async Task WaitForQueryStatusCalls(Func<int> calls, int target)
@@ -111,8 +111,7 @@ internal sealed class ObsVariableRefreshRequestTests
 
 		public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(
-				[new ConfigEntrySnapshot(_entryId, "mdfi")]);
+			=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>([new ConfigEntrySnapshot(_entryId, "mdfi")]);
 
 		public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
 			=> Task.FromResult<string?>(key switch

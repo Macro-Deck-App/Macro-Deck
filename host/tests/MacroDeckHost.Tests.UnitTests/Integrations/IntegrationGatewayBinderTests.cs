@@ -77,8 +77,8 @@ internal sealed class IntegrationGatewayBinderTests
 			Assert.That(integration.ReceivedSignal, Is.Not.Null);
 			Assert.That(integration.SignalReceivedBeforeInitialize,
 				Is.True,
-				"UseVariableRefreshSignal must run before InitializeAsync, because an integration wires its "
-				+ "connections up during initialization");
+				"UseVariableRefreshSignal must run before InitializeAsync, because an integration wires its " +
+				"connections up during initialization");
 		});
 	}
 
