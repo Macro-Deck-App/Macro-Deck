@@ -133,9 +133,9 @@ $sidebar-width: 300px;
 // positioned - every `.icon` mask creates a stacking context, as does every action card - and they
 // come after the drawer in the DOM. `--z-dropdown` is the right rung: above page content, below
 // `--z-modal`, so a confirmation modal still covers the drawer. It caps the icon picker the sidebar
-// renders inline at that level too, which is harmless here only because no app chrome sets a
-// z-index at all - checked before choosing this over a DOM reorder, which would have put the
-// appearance pane after the action editor in the tab order.
+// renders inline at that level too - checked before choosing this over a DOM reorder, which would
+// have put the appearance pane after the action editor in the tab order. It does outrank the shell
+// side panels at 30, so an open drawer covers one: a click on the scrim dismisses it either way.
 .editor-shell-scrim {
   position: absolute;
   inset: 0;

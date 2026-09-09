@@ -364,6 +364,10 @@ jobs:
         working-directory: ui/angular
         run: npm run test:boundaries
 
+      - name: Page stacking layering
+        working-directory: ui/angular
+        run: npm run test:stacking
+
       - name: Release feed script tests
         run: node --test ci/scripts/*.test.mjs
 
@@ -385,6 +389,41 @@ jobs:
       # so a step that rewrites an asset afterwards disables the PWA with no build error at all.
       - name: Service worker manifest check
         run: node ci/scripts/verify-worker-manifest.mjs ui/web-client/dist ui/web-client/dist-carthing
+
+  aur-package:
+    name: AUR package
+    # Main and manual runs only: a broken PKGBUILD has to be caught before the next release,
+    # not before every merge, and an Arch container per pull request is not worth that.
+    if: github.event_name != 'pull_request'
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    container: archlinux:base-devel
+    steps:
+      # A partial upgrade leaves an Arch container with mismatched libraries, so this is -Syu.
+      - name: Install packaging tools
+        run: pacman -Syu --noconfirm --needed git nodejs
+
+      - uses: actions/checkout@v5
+
+      # The release path pushes whatever makepkg derives, so makepkg is what has to accept it.
+      - name: Rendered PKGBUILD parses
+        run: |
+          set -euo pipefail
+          useradd --create-home builder
+          mkdir -p aur-check
+          node ci/scripts/make-aur-package.mjs macro-deck-beta-bin 3.0.0-beta.2 \
+            ci/aur/fixtures/assets.json ci/aur/fixtures/macro-deck.deb.sha256 aur-check/PKGBUILD
+          chown -R builder aur-check
+          # BUILDDIR defaults to the working directory, which the container's root owns, so
+          # makepkg has to be run from inside the directory builder owns.
+          cd aur-check && runuser -u builder -- makepkg --printsrcinfo
+
+      # The beta pkgver is only a graduation path if pacman really sorts it below the stable one,
+      # and the release path asks this same vercmp before replacing a published package.
+      - name: Beta versions sort below the stable release
+        run: |
+          set -euo pipefail
+          test "$(vercmp 3.0.0beta.3 3.0.0)" -lt 0
+          test "$(vercmp 3.0.0beta.2 3.0.0beta.10)" -lt 0
 
   bootstrapper:
     name: Bootstrapper build & tests

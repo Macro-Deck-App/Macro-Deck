@@ -202,6 +202,7 @@ export interface WeatherData {
   showIcon?: boolean;
   showTemperature?: boolean;
   showCondition?: boolean;
+  showLocation?: boolean;
   showForecast?: boolean;
   animateIcon?: boolean;
   forecastDays?: number;

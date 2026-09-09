@@ -10,9 +10,9 @@ namespace MacroDeckHost.Widgets.HistoryGraph;
 
 /// <summary>
 /// Builds a History Graph widget's <c>widget-config</c> tree from its stored data - see ADR 0050.
-/// <c>historyLength</c> and <c>subtitle</c> have no control here and can never be written by this tree: no
-/// node names either key, and the client's structural composition only ever writes the key a dispatched
-/// event's own node names (ADR 0050's "an input's id is the widget data key it configures").
+/// <c>historyLength</c> has no control here and can never be written by this tree: no node names that key,
+/// and the client's structural composition only ever writes the key a dispatched event's own node names
+/// (ADR 0050's "an input's id is the widget data key it configures").
 /// </summary>
 internal static class HistoryGraphWidgetConfigView
 {
@@ -28,8 +28,10 @@ internal static class HistoryGraphWidgetConfigView
 		var valueVariable = new UiState<string>(WidgetConfigJson.ReadString(data, "valueVariable") ?? string.Empty);
 		var title = new UiState<string>(WidgetConfigJson.ReadString(data, "title") ?? string.Empty);
 		var showSubtitle = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showSubtitle") ?? true);
-		var subtitleVariable =
-			new UiState<string>(WidgetConfigJson.ReadString(data, "subtitleVariable") ?? string.Empty);
+		var subtitle = new UiState<string>(HistoryGraphWidgetData.SubtitleTextOf(
+				WidgetConfigJson.ReadString(data, "subtitle"),
+				WidgetConfigJson.ReadString(data, "subtitleVariable")) ??
+			string.Empty);
 		var maxValue = new UiState<double>(NormalizeMaxValue(WidgetConfigJson.ReadDouble(data, "maxValue") ?? 0));
 		var minValue = new UiState<double>(WidgetConfigJson.ReadDouble(data, "minValue") ?? 0);
 		var accentColor = new UiState<string>(WidgetConfigJson.ReadString(data, "accentColor") ?? string.Empty);
@@ -42,11 +44,11 @@ internal static class HistoryGraphWidgetConfigView
 
 		// Writes several UiState cells from one interaction, the pattern
 		// docs/sdk/ui/concepts/state-and-bindings.md sanctions; a button, so no key holds the preset's name.
-		void ApplyPreset(string metric, string presetTitle, string subtitle, double max)
+		void ApplyPreset(string metric, string presetTitle, string presetSubtitle, double max)
 		{
 			valueVariable.Value = metric;
 			title.Value = presetTitle;
-			subtitleVariable.Value = subtitle;
+			subtitle.Value = presetSubtitle;
 			maxValue.Value = NormalizeMaxValue(max);
 			minValue.Value = 0;
 		}
@@ -68,7 +70,10 @@ internal static class HistoryGraphWidgetConfigView
 						[
 							PresetButton("presetCpu",
 								AppStrings.Widgets.History.PresetCpu(),
-								() => ApplyPreset(_cpuUsage, "CPU Load", _cpuName, 100)),
+								() => ApplyPreset(_cpuUsage,
+									"CPU Load",
+									HistoryGraphWidgetData.VariableToken(_cpuName),
+									100)),
 							PresetButton("presetRamUsed",
 								AppStrings.Widgets.History.PresetRamUsed(),
 								() => ApplyPreset(_ramUsedGb, "RAM Usage", string.Empty, 0)),
@@ -77,7 +82,10 @@ internal static class HistoryGraphWidgetConfigView
 								() => ApplyPreset(_ramUsagePercent, "RAM Usage", string.Empty, 100)),
 							PresetButton("presetGpu",
 								AppStrings.Widgets.History.PresetGpu(),
-								() => ApplyPreset(_gpuUsagePercent, "GPU Load", _gpuName, 100)),
+								() => ApplyPreset(_gpuUsagePercent,
+									"GPU Load",
+									HistoryGraphWidgetData.VariableToken(_gpuName),
+									100)),
 						],
 					},
 					new UiProse { Key = "presets-hint", Text = AppStrings.Widgets.History.PresetsHint() },
@@ -108,13 +116,13 @@ internal static class HistoryGraphWidgetConfigView
 						Label = AppStrings.Widgets.History.Subtitle(),
 						Binding = Bind.To(showSubtitle),
 					},
-					new UiVariablePickerInput
+					new UiStringInput
 					{
-						Key = "subtitleVariable",
-						Label = AppStrings.Widgets.History.SubtitleVariable(),
-						Description = AppStrings.Widgets.History.SubtitleVariableHint(),
-						Binding = Bind.To(subtitleVariable),
-						VariableTypes = UiValue.Of<IReadOnlyList<string>>(["text"]),
+						Key = "subtitle",
+						Label = AppStrings.Widgets.History.SubtitleText(),
+						Placeholder = AppStrings.Widgets.History.SubtitleTextPlaceholder(),
+						Description = AppStrings.Widgets.History.SubtitleTextHint(),
+						Binding = Bind.To(subtitle),
 						VisibleWhen = new UiVisibleWhen { ParameterName = "showSubtitle", Values = ["true"] },
 					},
 					// No Min bound, unlike the maximum beside it: a negative floor is the whole point.

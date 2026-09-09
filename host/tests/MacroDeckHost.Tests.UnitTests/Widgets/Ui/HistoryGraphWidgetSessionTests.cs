@@ -30,7 +30,7 @@ public class HistoryGraphWidgetSessionTests
 {
 	private static readonly object _config = new
 	{
-		valueVariable = Metric, title = "CPU Load", subtitleVariable = Caption, maxValue = 100,
+		valueVariable = Metric, title = "CPU Load", subtitle = "{{ vars.system_cpu_name }}", maxValue = 100,
 	};
 
 	/// <summary>The card's root and its chart, named by the test rather than read back from the tree: a
@@ -59,6 +59,25 @@ public class HistoryGraphWidgetSessionTests
 				Has.All.EqualTo(UiPatchOperations.SetProperties),
 				"a graph that reconciled its tree once a second would cost more than the data it carries");
 		});
+	}
+
+	[Test]
+	public async Task A_variable_named_only_inside_the_subtitle_still_repaints_the_card()
+	{
+		var registry = Registry();
+		await using var fixture = new Fixture(
+			new { valueVariable = Metric, subtitle = "on {{ vars.system_cpu_name }}", maxValue = 100 },
+			registry: registry);
+
+		var caption = registry.GetAll().First(variable => variable.Name == Caption);
+		caption.Value = "Apple M4 Max";
+		registry.Upsert(caption);
+
+		fixture.Variables.Publish(Caption);
+
+		Assert.That(fixture.Session.DrainPatches(),
+			Is.Not.Empty,
+			"the subtitle names it, so the card has to follow it even though nothing else does");
 	}
 
 	[Test]
@@ -346,10 +365,10 @@ public class HistoryGraphWidgetSessionTests
 
 	private sealed class Fixture : IAsyncDisposable
 	{
-		public Fixture(object data, IVariableHistoryWindow? window = null)
+		public Fixture(object data, IVariableHistoryWindow? window = null, VariableRegistry? registry = null)
 		{
 			var config = Config(data);
-			var resolver = Resolver(data);
+			var resolver = Resolver(data, registry);
 			_stub = window as StubWindow ?? (window is null ? new StubWindow() : null);
 			var sampled = window ?? _stub!;
 			Variables = new VariableChangeNotifier();

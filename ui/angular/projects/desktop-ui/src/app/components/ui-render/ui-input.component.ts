@@ -342,6 +342,12 @@ export class UiInputComponent {
     this.context.setValue(this.node(), value);
   }
 
+  protected onNumberChange(value: string | number): void {
+    if (value === '' || value == null) return;
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) this.onChange(parsed);
+  }
+
   protected onBooleanSegmentedChange(value: string): void {
     this.onChange(value === 'true');
   }

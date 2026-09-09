@@ -36,6 +36,42 @@ internal sealed class WeatherStationTests
 		Assert.That(station.Current.IsAvailable, Is.False);
 	}
 
+	[Test]
+	public async Task A_seeded_station_keeps_the_weather_and_reports_the_new_name()
+	{
+		var client = new FakeOpenMeteoClient { Forecast = ForecastWith(21) };
+		var renamed = new WeatherStation(client, 52.5, 13.4, TemperatureUnit.Celsius, "52.5, 13.4");
+		await renamed.RefreshAsync(CancellationToken.None);
+
+		var seeded = new WeatherStation(client, 52.5, 13.4, TemperatureUnit.Celsius, "Office", renamed.Current);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(seeded.Current.IsAvailable, Is.True);
+			Assert.That(seeded.Current.Temperature, Is.EqualTo(21.0));
+			Assert.That(seeded.Current.LocationName, Is.EqualTo("Office"));
+		});
+	}
+
+	[Test]
+	public void A_station_seeded_with_an_unavailable_snapshot_stays_unavailable()
+	{
+		var client = new FakeOpenMeteoClient { Forecast = ForecastWith(21) };
+
+		var seeded = new WeatherStation(client,
+			52.5,
+			13.4,
+			TemperatureUnit.Celsius,
+			"Office",
+			WeatherSnapshot.Unavailable("52.5, 13.4"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(seeded.Current.IsAvailable, Is.False);
+			Assert.That(seeded.Current.LocationName, Is.EqualTo("Office"));
+		});
+	}
+
 	private static OpenMeteoForecastResponse ForecastWith(double temperature)
 		=> new()
 		{

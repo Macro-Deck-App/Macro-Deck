@@ -12,9 +12,9 @@ namespace MacroDeckHost.Tests.UnitTests.Widgets.Ui;
 
 /// <summary>
 /// The History Graph widget's <c>widget-config</c> tree (issue #837): every key the shipped schema declares
-/// for it, the <c>subtitleVariable</c> dependency on <c>showSubtitle</c>, a preset writing its five fields
-/// together, and the provider's decline of a foreign widget type. <c>historyLength</c> and <c>subtitle</c>
-/// have no control and are asserted absent from every key this tree ever touches.
+/// for it, the <c>subtitle</c> dependency on <c>showSubtitle</c>, a preset writing its five fields
+/// together, and the provider's decline of a foreign widget type. <c>historyLength</c> has no control and is
+/// asserted absent from every key this tree ever touches.
 /// </summary>
 [TestFixture]
 public class HistoryGraphWidgetConfigTests
@@ -24,7 +24,7 @@ public class HistoryGraphWidgetConfigTests
 		valueVariable = "custom_metric",
 		title = "Custom",
 		showSubtitle = true,
-		subtitleVariable = "custom_caption",
+		subtitle = "custom caption",
 		maxValue = 50,
 		accentColor = "#ff0000",
 		border = new { style = "static", color = "#ff0000" },
@@ -37,7 +37,7 @@ public class HistoryGraphWidgetConfigTests
 
 		host.ById("valueVariable").Change("system_ram_usage_percent");
 		host.ById("title").Change("RAM");
-		host.ById("subtitleVariable").Change("system_ram_name");
+		host.ById("subtitle").Change("{{ vars.system_ram_name }}");
 		host.ById("maxValue").Change(100);
 		host.ById("minValue").Change(-100);
 		host.ById("accentColor").Change("#00ff00");
@@ -61,15 +61,64 @@ public class HistoryGraphWidgetConfigTests
 	}
 
 	[Test]
-	public void SubtitleVariable_is_visible_exactly_while_showSubtitle_is_set()
+	public void Subtitle_is_visible_exactly_while_showSubtitle_is_set()
 	{
 		var host = Render(new { showSubtitle = true });
 
-		Assert.That(WidgetConfigTestSupport.IsVisible(host, "subtitleVariable"), Is.True);
+		Assert.That(WidgetConfigTestSupport.IsVisible(host, "subtitle"), Is.True);
 
 		host.ById("showSubtitle").Change(false);
 
-		Assert.That(WidgetConfigTestSupport.IsVisible(host, "subtitleVariable"), Is.False);
+		Assert.That(WidgetConfigTestSupport.IsVisible(host, "subtitle"), Is.False);
+	}
+
+	[Test]
+	public void The_subtitle_is_a_freetext_field_that_accepts_variables_of_every_type()
+	{
+		var subtitle = Render(new { showSubtitle = true }).ById("subtitle");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(subtitle.Type, Is.EqualTo(UiConfigPrimitives.String));
+			Assert.That(subtitle.HasProperty(UiConfigProperties.LiteralOnly),
+				Is.False,
+				"a literal-only field renders a plain box with no variable helper");
+			Assert.That(subtitle.HasProperty(UiConfigProperties.VariableTypes),
+				Is.False,
+				"the field the issue asks for filters no variable type out");
+		});
+	}
+
+	[Test]
+	public void A_profile_that_predates_the_freetext_subtitle_seeds_the_field_with_its_variable()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(Render(new { showSubtitle = true, subtitleVariable = "system_cpu_name" })
+					.ById("subtitle").Text(UiConfigProperties.Value),
+				Is.EqualTo("{{ vars.system_cpu_name }}"));
+			Assert.That(Render(new { showSubtitle = true, subtitleVariable = "system_cpu_name", subtitle = "" })
+					.ById("subtitle").Text(UiConfigProperties.Value),
+				Is.Empty,
+				"a subtitle the user cleared must not be re-seeded from the older key on the next visit");
+			Assert.That(Render(new { showSubtitle = true, subtitleVariable = "system_cpu_name", subtitle = "Mine" })
+					.ById("subtitle").Text(UiConfigProperties.Value),
+				Is.EqualTo("Mine"),
+				"the form shows what the deck shows, so a later save cannot overwrite it");
+		});
+	}
+
+	[Test]
+	public void The_default_data_of_a_new_history_graph_names_its_subtitle_through_the_field()
+	{
+		var defaultData = BuiltInWidgetTypes.All(new HashSet<string>(StringComparer.Ordinal))
+				.Single(type => type.Id == WidgetTypeIds.HistoryGraph)
+				.DefaultData ??
+			"{}";
+		var host = Render(JsonSerializer.Deserialize<JsonElement>(defaultData));
+
+		Assert.That(host.ById("subtitle").Text(UiConfigProperties.Value),
+			Is.EqualTo("{{ vars.system_cpu_name }}"));
 	}
 
 	[Test]
@@ -86,7 +135,8 @@ public class HistoryGraphWidgetConfigTests
 			Assert.That(host.ById("valueVariable").Text(UiConfigProperties.Value),
 				Is.EqualTo("system_cpu_usage_percent"));
 			Assert.That(host.ById("title").Text(UiConfigProperties.Value), Is.EqualTo("CPU Load"));
-			Assert.That(host.ById("subtitleVariable").Text(UiConfigProperties.Value), Is.EqualTo("system_cpu_name"));
+			Assert.That(host.ById("subtitle").Text(UiConfigProperties.Value),
+				Is.EqualTo("{{ vars.system_cpu_name }}"));
 			Assert.That(host.ById("maxValue").Number(UiConfigProperties.Value), Is.EqualTo(100));
 			Assert.That(host.ById("minValue").Number(UiConfigProperties.Value),
 				Is.EqualTo(0),
@@ -119,14 +169,14 @@ public class HistoryGraphWidgetConfigTests
 	}
 
 	[Test]
-	public void HistoryLength_and_subtitle_have_no_node_and_are_never_among_the_keys_the_tree_configures()
+	public void HistoryLength_has_no_node_and_is_never_among_the_keys_the_tree_configures()
 	{
 		var host = Render(_stored);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(host.FindById("historyLength"), Is.Null);
-			Assert.That(host.FindById("subtitle"), Is.Null);
+			Assert.That(host.FindById("subtitleVariable"), Is.Null);
 		});
 	}
 
@@ -219,7 +269,7 @@ public class HistoryGraphWidgetConfigTests
 			["valueVariable"] = host.ById("valueVariable").Text(UiConfigProperties.Value),
 			["title"] = host.ById("title").Text(UiConfigProperties.Value),
 			["showSubtitle"] = host.ById("showSubtitle").Flag(UiConfigProperties.Value),
-			["subtitleVariable"] = host.ById("subtitleVariable").Text(UiConfigProperties.Value),
+			["subtitle"] = host.ById("subtitle").Text(UiConfigProperties.Value),
 			["maxValue"] = host.ById("maxValue").Number(UiConfigProperties.Value),
 			["minValue"] = host.ById("minValue").Number(UiConfigProperties.Value),
 			["accentColor"] = host.ById("accentColor").Text(UiConfigProperties.Value),

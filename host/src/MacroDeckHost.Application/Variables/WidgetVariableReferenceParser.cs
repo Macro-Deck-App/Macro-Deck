@@ -69,6 +69,12 @@ public static class WidgetVariableReferenceParser
 			: new WidgetVariableReferences(labelNames, mappingNames, provider, iconProvider);
 	}
 
+	// Dynamic access, vars[name], names nothing after the prefix and is not collected.
+	public static IReadOnlySet<string> ReferencedNames(string? template)
+		=> VariableTemplateRenderer.ContainsLiquid(template)
+			? CollectNamesAfter(template!, VarsPrefix)
+			: WidgetVariableReferences.Empty.LabelNames;
+
 	private static (string IntegrationId, string ActionId)? ReadProviderReference(string data, string key)
 	{
 		var bag = ActionButtonStateJson.ParseDataBag(data);
