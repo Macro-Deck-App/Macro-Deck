@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Integrations.HomeAssistant.Actions;
 using MacroDeckHost.Integrations.HomeAssistant.Protocol;
@@ -26,6 +27,7 @@ public sealed class HomeAssistantIntegration
 		IIntegrationIssueProvider,
 		IHomeAssistantBindingStoreConsumer,
 		IMigrationProvider,
+		IVariableRefreshSignalConsumer,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.homeassistant";
@@ -44,6 +46,7 @@ public sealed class HomeAssistantIntegration
 	private readonly HomeAssistantVariableCatalog _dynamicVariables;
 
 	private HomeAssistantConnection? _connection;
+	private IVariableRefreshSignal? _refreshSignal;
 	private HomeAssistantEventEmitter? _events;
 	private IIntegrationConfig? _config;
 	private IVariableBindingStore? _bindingStore;
@@ -104,6 +107,8 @@ public sealed class HomeAssistantIntegration
 	];
 
 	public byte[] GetIcon() => _icon;
+
+	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
 
 	public IConfigFlow CreateConfigFlow() => new HomeAssistantConfigFlow(() => new HomeAssistantClient());
 
@@ -382,7 +387,8 @@ public sealed class HomeAssistantIntegration
 			token,
 			watchedEntities,
 			_events,
-			_dynamicVariables);
+			_dynamicVariables,
+			onVariablesChanged: () => _refreshSignal?.RequestEagerRefresh(IntegrationId));
 		_connection.Start();
 	}
 }

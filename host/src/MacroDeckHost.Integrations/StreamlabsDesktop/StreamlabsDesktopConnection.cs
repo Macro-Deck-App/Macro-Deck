@@ -16,6 +16,7 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 	private readonly StreamlabsDesktopEndpoint _endpoint;
 	private readonly string _token;
 	private readonly StreamlabsDesktopEventEmitter? _events;
+	private readonly Action? _onVariablesChanged;
 	private readonly TimeSpan _reconnectDelay;
 	private readonly ILogger _logger;
 	private readonly CancellationTokenSource _cts = new();
@@ -45,12 +46,14 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 		string token,
 		StreamlabsDesktopEventEmitter? events = null,
 		TimeSpan? reconnectDelay = null,
-		ILogger? logger = null)
+		ILogger? logger = null,
+		Action? onVariablesChanged = null)
 	{
 		_clientFactory = clientFactory;
 		_endpoint = endpoint;
 		_token = token;
 		_events = events;
+		_onVariablesChanged = onVariablesChanged;
 		_reconnectDelay = reconnectDelay ?? TimeSpan.FromSeconds(5);
 		_logger = logger ?? IntegrationLog.For<StreamlabsDesktopConnection>(StreamlabsDesktopIntegration.IntegrationId);
 		_catalog = new StreamlabsDesktopCatalog(() => _client);
@@ -613,6 +616,7 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 			await SeedStateAsync(client, cancellationToken).ConfigureAwait(false);
 
 			Interlocked.Exchange(ref _failures, 0);
+			_onVariablesChanged?.Invoke();
 			_events?.MarkReady();
 			_events?.PublishConnected();
 			_announcedConnected = true;
@@ -627,7 +631,7 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 			_client = null;
 
 			_catalog.Clear();
-			SetState(StreamlabsDesktopState.Disconnected);
+			SetStateAndRequestRefresh(StreamlabsDesktopState.Disconnected);
 			lock (_stateGate)
 			{
 				_pushedFields.Clear();
@@ -736,6 +740,7 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 			{
 				case StreamlabsServices.Scenes + "." + StreamlabsServices.SceneSwitched:
 					OnSceneSwitched(push.Data);
+					_onVariablesChanged?.Invoke();
 					break;
 
 				case StreamlabsServices.Scenes + "." + StreamlabsServices.SceneAdded:
@@ -764,18 +769,22 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 
 				case StreamlabsServices.Streaming + "." + StreamlabsServices.StreamingStatusChange:
 					OnStreamingStatus(StreamlabsModelReader.ReadStreamingState(push.Data));
+					_onVariablesChanged?.Invoke();
 					break;
 
 				case StreamlabsServices.Streaming + "." + StreamlabsServices.RecordingStatusChange:
 					OnRecordingStatus(StreamlabsModelReader.ReadRecordingState(push.Data));
+					_onVariablesChanged?.Invoke();
 					break;
 
 				case StreamlabsServices.Streaming + "." + StreamlabsServices.ReplayBufferStatusChange:
 					OnReplayBufferStatus(StreamlabsModelReader.ReadReplayBufferState(push.Data));
+					_onVariablesChanged?.Invoke();
 					break;
 
 				case StreamlabsServices.Transitions + "." + StreamlabsServices.StudioModeChanged:
 					OnStudioModeChanged(push.Data.ValueKind == JsonValueKind.True);
+					_onVariablesChanged?.Invoke();
 					break;
 
 				default:
@@ -969,6 +978,8 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 			{
 				_state = _state with { SceneCount = count };
 			}
+
+			_onVariablesChanged?.Invoke();
 		}
 		catch (Exception ex)
 		{
@@ -986,6 +997,12 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 		{
 			_catalog.Invalidate();
 		}
+	}
+
+	private void SetStateAndRequestRefresh(StreamlabsDesktopState state)
+	{
+		SetState(state);
+		_onVariablesChanged?.Invoke();
 	}
 
 	private void SetState(StreamlabsDesktopState state)

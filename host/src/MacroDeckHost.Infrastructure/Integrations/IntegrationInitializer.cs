@@ -5,6 +5,7 @@ using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Triggers;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Infrastructure.Widgets;
 using MacroDeckHost.Integrations.Adb;
@@ -40,6 +41,7 @@ public sealed class IntegrationInitializer
 	private readonly IUserNotificationStore _userNotificationStore;
 	private readonly IAdbGateway _adbGateway;
 	private readonly IVariableBindingStore _bindingStore;
+	private readonly IVariableRefreshSignal _refreshSignal;
 	private readonly IIntegrationHostIssueStore _hostIssueStore;
 	private readonly LayoutProviderHost _layoutProviders;
 	private readonly FolderViewProviderHost _folderViewProviders;
@@ -61,6 +63,7 @@ public sealed class IntegrationInitializer
 		IUserNotificationStore userNotificationStore,
 		IAdbGateway adbGateway,
 		IVariableBindingStore bindingStore,
+		IVariableRefreshSignal refreshSignal,
 		IIntegrationHostIssueStore hostIssueStore,
 		LayoutProviderHost layoutProviders,
 		FolderViewProviderHost folderViewProviders,
@@ -79,6 +82,7 @@ public sealed class IntegrationInitializer
 		_userNotificationStore = userNotificationStore;
 		_adbGateway = adbGateway;
 		_bindingStore = bindingStore;
+		_refreshSignal = refreshSignal;
 		_hostIssueStore = hostIssueStore;
 		_layoutProviders = layoutProviders;
 		_folderViewProviders = folderViewProviders;
@@ -127,7 +131,7 @@ public sealed class IntegrationInitializer
 		// same Task.Run rather than running on the enumerating thread ahead of it.
 		var attempt = Task.Run(() =>
 			{
-				IntegrationGatewayBinder.Bind(integration, _adbGateway, _bindingStore);
+				IntegrationGatewayBinder.Bind(integration, _adbGateway, _bindingStore, _refreshSignal);
 				return integration.InitializeAsync(context);
 			},
 			CancellationToken.None);

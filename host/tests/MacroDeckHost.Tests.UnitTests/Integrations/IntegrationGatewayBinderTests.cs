@@ -1,10 +1,12 @@
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Infrastructure.Adb;
 using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Infrastructure.Notifications;
 using MacroDeckHost.Domain.Entities;
+using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Adb;
 using MacroDeckHost.Integrations.HomeAssistant;
 using MacroDeckHost.Tests.UnitTests.Adb;
@@ -28,7 +30,10 @@ internal sealed class IntegrationGatewayBinderTests
 		using var gateway = CreateGateway();
 		var integration = new GatewayConsumerIntegration();
 
-		IntegrationGatewayBinder.Bind(integration, gateway, new NullVariableBindingStore());
+		IntegrationGatewayBinder.Bind(integration,
+			gateway,
+			new NullVariableBindingStore(),
+			new VariableRefreshSignal());
 
 		Assert.That(integration.ReceivedGateway, Is.SameAs(gateway));
 	}
@@ -39,8 +44,42 @@ internal sealed class IntegrationGatewayBinderTests
 		using var gateway = CreateGateway();
 		var integration = new PlainRecordingIntegration();
 
-		Assert.DoesNotThrow(() =>
-			IntegrationGatewayBinder.Bind(integration, gateway, new NullVariableBindingStore()));
+		Assert.DoesNotThrow(() => IntegrationGatewayBinder.Bind(integration,
+			gateway,
+			new NullVariableBindingStore(),
+			new VariableRefreshSignal()));
+	}
+
+	[Test]
+	public void Bind_gives_the_variable_refresh_signal_to_a_consumer_integration()
+	{
+		using var gateway = CreateGateway();
+		var signal = new VariableRefreshSignal();
+		var integration = new RefreshSignalConsumerIntegration();
+
+		IntegrationGatewayBinder.Bind(integration, gateway, new NullVariableBindingStore(), signal);
+
+		Assert.That(integration.ReceivedSignal, Is.SameAs(signal));
+	}
+
+	[Test]
+	public async Task Startup_binds_the_variable_refresh_signal_before_InitializeAsync_runs()
+	{
+		using var gateway = CreateGateway();
+		var integration = new RefreshSignalConsumerIntegration();
+		using var serviceProvider = BuildScopeServices();
+		var initializer = CreateInitializer(gateway, serviceProvider);
+
+		await initializer.InitializeAsync(integration, "Refresh Signal Consumer");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(integration.ReceivedSignal, Is.Not.Null);
+			Assert.That(integration.SignalReceivedBeforeInitialize,
+				Is.True,
+				"UseVariableRefreshSignal must run before InitializeAsync, because an integration wires its " +
+				"connections up during initialization");
+		});
 	}
 
 	[Test]
@@ -142,7 +181,7 @@ internal sealed class IntegrationGatewayBinderTests
 		var store = new NullVariableBindingStore();
 		var integration = new BindingStoreConsumerIntegration();
 
-		IntegrationGatewayBinder.Bind(integration, gateway, store);
+		IntegrationGatewayBinder.Bind(integration, gateway, store, new VariableRefreshSignal());
 
 		Assert.That(integration.ReceivedStore, Is.SameAs(store));
 	}
@@ -179,6 +218,7 @@ internal sealed class IntegrationGatewayBinderTests
 			new UserNotificationStore(),
 			gateway,
 			new NullVariableBindingStore(),
+			new VariableRefreshSignal(),
 			new FakeIntegrationHostIssueStore(),
 			TestLayoutProviders.Host(),
 			TestFolderViewProviders.Host(),
@@ -194,6 +234,32 @@ internal sealed class IntegrationGatewayBinderTests
 			.AddSingleton(TestLocalization.Resolver)
 			.AddSingleton(TestLocalization.Preferences)
 			.BuildServiceProvider();
+
+	private sealed class RefreshSignalConsumerIntegration : IIntegration, IVariableRefreshSignalConsumer
+	{
+		public string Id => "test.refresh-signal-consumer";
+		public LocalizedText Name => "Refresh Signal Consumer";
+		public string Version => "1.0.0";
+		public bool IsInitialized { get; private set; }
+		public IReadOnlyList<IActionDefinition> Actions => [];
+		public IVariableRefreshSignal? ReceivedSignal { get; private set; }
+		public bool SignalReceivedBeforeInitialize { get; private set; }
+
+		public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => ReceivedSignal = signal;
+
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			SignalReceivedBeforeInitialize = ReceivedSignal is not null;
+			IsInitialized = true;
+			return Task.CompletedTask;
+		}
+
+		public Task ShutdownAsync()
+		{
+			IsInitialized = false;
+			return Task.CompletedTask;
+		}
+	}
 
 	private sealed class GatewayConsumerIntegration : IIntegration, IAdbGatewayConsumer
 	{

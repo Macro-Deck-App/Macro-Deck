@@ -9,6 +9,7 @@ using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -59,6 +60,7 @@ internal sealed class IntegrationLifecycleTests
 			new FakeNotificationStore(),
 			null!,
 			null!,
+			new VariableRefreshSignal(),
 			new FakeIntegrationHostIssueStore(),
 			TestLayoutProviders.Host(),
 			TestFolderViewProviders.Host(),

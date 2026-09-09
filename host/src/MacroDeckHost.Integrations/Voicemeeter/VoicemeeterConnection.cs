@@ -17,6 +17,7 @@ internal sealed class VoicemeeterConnection : IDisposable
 	private readonly VoicemeeterEventEmitter? _events;
 	private readonly TimeSpan _connectedInterval;
 	private readonly TimeSpan _idleInterval;
+	private readonly Action? _onVariablesChanged;
 	private readonly CancellationTokenSource _cts = new();
 
 	private volatile VoicemeeterState _state = VoicemeeterState.Disconnected;
@@ -30,12 +31,14 @@ internal sealed class VoicemeeterConnection : IDisposable
 		IVoicemeeterRemote remote,
 		VoicemeeterEventEmitter? events = null,
 		TimeSpan? connectedInterval = null,
-		TimeSpan? idleInterval = null)
+		TimeSpan? idleInterval = null,
+		Action? onVariablesChanged = null)
 	{
 		_remote = remote;
 		_events = events;
 		_connectedInterval = connectedInterval ?? TimeSpan.FromMilliseconds(200);
 		_idleInterval = idleInterval ?? TimeSpan.FromSeconds(2);
+		_onVariablesChanged = onVariablesChanged;
 	}
 
 	public VoicemeeterState State => _state;
@@ -254,6 +257,7 @@ internal sealed class VoicemeeterConnection : IDisposable
 
 		_logger.Information("Voicemeeter is no longer running");
 		_state = VoicemeeterState.Disconnected;
+		_onVariablesChanged?.Invoke();
 
 		// The catalogue is deliberately left alone: the pickers must keep working while Voicemeeter
 		// restarts, which is exactly when a user is most likely to be editing a widget.
@@ -265,6 +269,7 @@ internal sealed class VoicemeeterConnection : IDisposable
 		_state = state;
 		_catalog = VoicemeeterChannelCatalog.FromState(state);
 		_events?.Observe(state);
+		_onVariablesChanged?.Invoke();
 	}
 
 	private VoicemeeterState BuildState(VoicemeeterEdition edition, IReadOnlyDictionary<int, bool> macroButtons)

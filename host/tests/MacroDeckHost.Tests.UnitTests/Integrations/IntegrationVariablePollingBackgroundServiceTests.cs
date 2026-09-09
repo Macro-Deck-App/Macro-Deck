@@ -12,6 +12,7 @@ using MacroDeck.Sdk.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using VariableReading = MacroDeck.Sdk.Variables.VariableReading;
 using SdkVariableType = MacroDeck.Sdk.Variables.VariableType;
 using VariableDefinition = MacroDeck.Sdk.Variables.VariableDefinition;
 
@@ -133,10 +134,146 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 		Assert.That(variableService.Deleted, Does.Not.Contain(dynamic.Id));
 	}
 
+	[Test]
+	public async Task An_eager_refresh_request_reads_before_the_declared_interval_elapses()
+	{
+		var integration = CountingIntegration("app.test.one");
+		var refresh = new VariableRefreshSignal();
+		var service = CreateService(new ConfigurableIntegrationRegistry([integration]),
+			new RecordingVariableService(),
+			new VariablePollingInvalidationSignal(),
+			refresh);
+
+		await DispatchUntilRead(service, integration);
+
+		refresh.RequestEagerRefresh("app.test.one");
+
+		await DispatchUntilRead(service, integration, "a requested refresh must not wait for the declared interval");
+	}
+
+	[Test]
+	public async Task Without_a_request_a_variable_is_not_read_again_before_its_interval()
+	{
+		var integration = CountingIntegration("app.test.one");
+		var refresh = new VariableRefreshSignal();
+		var service = CreateService(new ConfigurableIntegrationRegistry([integration]),
+			new RecordingVariableService(),
+			new VariablePollingInvalidationSignal(),
+			refresh);
+
+		await DispatchUntilRead(service, integration);
+
+		await service.DispatchDue(CancellationToken.None);
+
+		refresh.RequestEagerRefresh("app.test.one");
+		await DispatchUntilRead(service, integration);
+
+		Assert.That(integration.ReadCount, Is.EqualTo(2));
+	}
+
+	[Test]
+	public async Task A_refresh_request_is_one_shot()
+	{
+		var integration = CountingIntegration("app.test.one");
+		var refresh = new VariableRefreshSignal();
+		var service = CreateService(new ConfigurableIntegrationRegistry([integration]),
+			new RecordingVariableService(),
+			new VariablePollingInvalidationSignal(),
+			refresh);
+
+		await DispatchUntilRead(service, integration);
+
+		refresh.RequestEagerRefresh("app.test.one");
+		await DispatchUntilRead(service, integration);
+
+		await service.DispatchDue(CancellationToken.None);
+
+		refresh.RequestEagerRefresh("app.test.one");
+		await DispatchUntilRead(service, integration);
+
+		Assert.That(integration.ReadCount, Is.EqualTo(3));
+	}
+
+	[Test]
+	public async Task A_request_only_brings_forward_the_integration_it_names()
+	{
+		var one = CountingIntegration("app.test.one");
+		var two = CountingIntegration("app.test.two");
+		var refresh = new VariableRefreshSignal();
+		var service = CreateService(new ConfigurableIntegrationRegistry([one, two]),
+			new RecordingVariableService(),
+			new VariablePollingInvalidationSignal(),
+			refresh);
+
+		await DispatchUntilRead(service, one, two);
+
+		refresh.RequestEagerRefresh("app.test.one");
+		await DispatchUntilRead(service, one);
+
+		Assert.That(two.ReadCount, Is.EqualTo(1));
+	}
+
+	private static Task DispatchUntilRead(
+		IntegrationVariablePollingBackgroundService service,
+		CountingVariableProviderIntegration integration,
+		string? because = null)
+		=> DispatchUntilRead(service, because, integration);
+
+	private static async Task DispatchUntilRead(
+		IntegrationVariablePollingBackgroundService service,
+		params CountingVariableProviderIntegration[] integrations)
+		=> await DispatchUntilRead(service, null, integrations);
+
+	private static async Task DispatchUntilRead(
+		IntegrationVariablePollingBackgroundService service,
+		string? because,
+		params CountingVariableProviderIntegration[] integrations)
+	{
+		var before = integrations.Select(integration => integration.ReadCount).ToArray();
+		var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(30);
+		while (integrations.Where((integration, i) => integration.ReadCount == before[i]).Any())
+		{
+			if (DateTime.UtcNow > deadline)
+			{
+				Assert.Fail(because ?? "an integration was never read");
+			}
+
+			await service.DispatchDue(CancellationToken.None);
+			await Task.Delay(5);
+		}
+	}
+
+	private static CountingVariableProviderIntegration CountingIntegration(string id)
+		=> new()
+		{
+			Id = id,
+			IsInitialized = true,
+			Variables =
+			[
+				VariableDefinition.Eager("first", SdkVariableType.Text, refreshInterval: TimeSpan.FromMinutes(5))
+			]
+		};
+
+	private sealed class CountingVariableProviderIntegration : FakeVariableProviderIntegration
+	{
+		private int _readCount;
+
+		public int ReadCount => Volatile.Read(ref _readCount);
+
+		public override ValueTask<VariableReading> ReadAsync(
+			string localId,
+			CancellationToken cancellationToken = default)
+		{
+			Interlocked.Increment(ref _readCount);
+			return ValueTask.FromResult(VariableReading.Of("value"));
+		}
+	}
+
 	private static IntegrationVariablePollingBackgroundService CreateService(
 		ConfigurableIntegrationRegistry registry,
 		RecordingVariableService variableService,
-		IVariablePollingInvalidationSignal invalidation)
+		IVariablePollingInvalidationSignal invalidation,
+		IVariableRefreshSignal? refresh = null)
 	{
 		var services = new ServiceCollection();
 		services.AddScoped<IVariableService>(_ => variableService);
@@ -146,7 +283,7 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 			registry,
 			scopeFactory,
 			invalidation,
-			new VariableRefreshSignal(),
+			refresh ?? new VariableRefreshSignal(),
 			Log.Logger);
 	}
 

@@ -24,6 +24,8 @@ internal sealed class StreamerbotConnection : IDisposable
 	private readonly CancellationTokenSource _cts = new();
 
 	private IStreamerbotClient? _client;
+	private readonly Action? _onVariablesChanged;
+
 	private volatile StreamerbotState _state = StreamerbotState.Disconnected;
 	private volatile StreamerbotCatalog _catalog = StreamerbotCatalog.Empty;
 	private volatile bool _authenticated;
@@ -36,12 +38,14 @@ internal sealed class StreamerbotConnection : IDisposable
 		Uri uri,
 		string? password,
 		StreamerbotEventEmitter? events = null,
-		TimeSpan? reconnectDelay = null)
+		TimeSpan? reconnectDelay = null,
+		Action? onVariablesChanged = null)
 	{
 		_clientFactory = clientFactory;
 		_uri = uri;
 		_password = password;
 		_events = events;
+		_onVariablesChanged = onVariablesChanged;
 		_reconnectDelay = reconnectDelay ?? TimeSpan.FromSeconds(5);
 	}
 
@@ -237,6 +241,7 @@ internal sealed class StreamerbotConnection : IDisposable
 
 			_failures = 0;
 			announced = true;
+			_onVariablesChanged?.Invoke();
 			_events?.PublishConnected();
 			_logger.Information("Connected to Streamer.bot {Version} at {Uri} with {ActionCount} actions",
 				info?.Version ?? "(unknown version)",
@@ -252,6 +257,7 @@ internal sealed class StreamerbotConnection : IDisposable
 			_client = null;
 			_authenticated = false;
 			_state = StreamerbotState.Disconnected;
+			_onVariablesChanged?.Invoke();
 
 			try
 			{

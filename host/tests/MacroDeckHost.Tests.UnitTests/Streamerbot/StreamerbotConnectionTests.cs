@@ -391,8 +391,29 @@ internal sealed class StreamerbotConnectionTests
 		Assert.That(_factory.Created, Has.Count.EqualTo(attempts));
 	}
 
-	private StreamerbotConnection Create(string? password = null, int reconnectDelayMs = 20)
-		=> new(_factory.Create, _uri, password, _emitter, TimeSpan.FromMilliseconds(reconnectDelayMs));
+	[Test]
+	public async Task Connecting_asks_for_an_eager_variable_refresh()
+	{
+		var requests = 0;
+		using var connection = Create(onVariablesChanged: () => Interlocked.Increment(ref requests));
+		connection.Start();
+
+		await WaitForAsync(() => connection.IsConnected, "the connection to come up");
+		await WaitForAsync(() => Volatile.Read(ref requests) > 0, "an eager refresh request");
+
+		Assert.That(Volatile.Read(ref requests), Is.GreaterThan(0));
+	}
+
+	private StreamerbotConnection Create(
+		string? password = null,
+		int reconnectDelayMs = 20,
+		Action? onVariablesChanged = null)
+		=> new(_factory.Create,
+			_uri,
+			password,
+			_emitter,
+			TimeSpan.FromMilliseconds(reconnectDelayMs),
+			onVariablesChanged);
 
 	private static async Task WaitForAsync(Func<bool> condition, string because)
 	{

@@ -1,4 +1,5 @@
 using System.Globalization;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.StreamlabsDesktop.Actions;
 using MacroDeckHost.Integrations.StreamlabsDesktop.Protocol;
 using MacroDeck.Localization;
@@ -25,6 +26,7 @@ public sealed class StreamlabsDesktopIntegration
 		IDynamicEventOptionsProvider,
 		IIntegrationIssueProvider,
 		IMigrationProvider,
+		IVariableRefreshSignalConsumer,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.streamlabs-desktop";
@@ -37,6 +39,7 @@ public sealed class StreamlabsDesktopIntegration
 	private readonly VariableApiAccessor _variableAccessor = new();
 
 	private StreamlabsDesktopConnection? _connection;
+	private IVariableRefreshSignal? _refreshSignal;
 	private StreamlabsDesktopEventEmitter? _events;
 
 	public StreamlabsDesktopIntegration()
@@ -63,6 +66,8 @@ public sealed class StreamlabsDesktopIntegration
 	public bool AllowsMultipleConfigurations => false;
 
 	public byte[] GetIcon() => _icon;
+
+	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
 
 	public IConfigFlow CreateConfigFlow() => new StreamlabsDesktopConfigFlow();
 
@@ -218,7 +223,8 @@ public sealed class StreamlabsDesktopIntegration
 		_connection = new StreamlabsDesktopConnection(() => new StreamlabsJsonRpcClient(),
 			StreamlabsDesktopEndpoint.Create(host, port),
 			token,
-			_events);
+			_events,
+			onVariablesChanged: () => _refreshSignal?.RequestEagerRefresh(IntegrationId));
 		_connection.Start();
 	}
 

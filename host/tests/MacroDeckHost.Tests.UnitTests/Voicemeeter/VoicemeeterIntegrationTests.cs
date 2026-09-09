@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Voicemeeter;
 using MacroDeckHost.Tests.UnitTests.System;
@@ -370,6 +371,49 @@ internal sealed class VoicemeeterIntegrationTests
 			Assert.That(_integration.IconMimeType, Is.EqualTo("image/svg+xml"));
 			Assert.That(_integration.GetIcon(), Is.Not.Empty);
 		});
+	}
+
+	[Test]
+	public async Task Connecting_asks_for_an_eager_refresh()
+	{
+		var signal = new VariableRefreshSignal();
+		_integration.UseVariableRefreshSignal(signal);
+		_remote.Run(VoicemeeterEdition.Banana);
+
+		await Connected();
+
+		Assert.That(signal.DrainEagerRefreshRequested(VoicemeeterIntegration.IntegrationId), Is.True);
+	}
+
+	[Test]
+	public async Task A_dirty_parameter_asks_for_an_eager_refresh()
+	{
+		var signal = new VariableRefreshSignal();
+		_integration.UseVariableRefreshSignal(signal);
+		_remote.Run(VoicemeeterEdition.Banana);
+		await Connected();
+		signal.DrainEagerRefreshRequested(VoicemeeterIntegration.IntegrationId);
+
+		_remote.UserSets("Strip[0].Gain", -4.3f);
+		_integration.Connection!.Poll();
+
+		Assert.That(signal.DrainEagerRefreshRequested(VoicemeeterIntegration.IntegrationId),
+			Is.True,
+			"a gain the user just moved must not wait for the variable's own cadence");
+	}
+
+	[Test]
+	public async Task A_poll_that_finds_nothing_dirty_asks_for_nothing()
+	{
+		var signal = new VariableRefreshSignal();
+		_integration.UseVariableRefreshSignal(signal);
+		_remote.Run(VoicemeeterEdition.Banana);
+		await Connected();
+		signal.DrainEagerRefreshRequested(VoicemeeterIntegration.IntegrationId);
+
+		_integration.Connection!.Poll();
+
+		Assert.That(signal.DrainEagerRefreshRequested(VoicemeeterIntegration.IntegrationId), Is.False);
 	}
 
 	private async Task Connected()

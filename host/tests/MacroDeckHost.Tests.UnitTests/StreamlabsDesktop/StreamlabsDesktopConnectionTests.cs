@@ -492,13 +492,31 @@ public class StreamlabsDesktopConnectionTests
 			StreamlabsServices.SubscriptionId(StreamlabsServices.Streaming, StreamlabsServices.StreamingStatusChange),
 			$"\"{status}\"");
 
-	private StreamlabsDesktopConnection Create(Func<IStreamlabsClient> factory)
+	[Test]
+	public async Task Connecting_asks_for_an_eager_variable_refresh()
+	{
+		var requests = 0;
+		var client = new FakeStreamlabsClient();
+		var connection = Create(() => client, () => Interlocked.Increment(ref requests));
+		_connections.Add(connection);
+		connection.Start();
+
+		await WaitUntil(() => connection.State.IsConnected);
+		await WaitUntil(() => Volatile.Read(ref requests) > 0);
+
+		Assert.That(Volatile.Read(ref requests), Is.GreaterThan(0));
+	}
+
+	private StreamlabsDesktopConnection Create(
+		Func<IStreamlabsClient> factory,
+		Action? onVariablesChanged = null)
 	{
 		var connection = new StreamlabsDesktopConnection(factory,
 			new StreamlabsDesktopEndpoint("127.0.0.1", 59650),
 			"token",
 			new StreamlabsDesktopEventEmitter(_publisher),
-			TimeSpan.FromMilliseconds(20));
+			TimeSpan.FromMilliseconds(20),
+			onVariablesChanged: onVariablesChanged);
 
 		_connections.Add(connection);
 		return connection;

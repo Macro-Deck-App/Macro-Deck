@@ -13,12 +13,23 @@ public interface IVariableRefreshSignal
 
 	/// <summary>Removes and returns every variable id pending for <paramref name="integrationId"/>.</summary>
 	IReadOnlyList<Guid> DrainFor(string integrationId);
+
+	/// <summary>
+	/// Asks for every eager variable of <paramref name="integrationId"/> to be read again. The catalog
+	/// half is polled by a different loop and is not covered.
+	/// </summary>
+	void RequestEagerRefresh(string integrationId);
+
+	/// <summary>Whether an eager refresh was requested, clearing the request.</summary>
+	bool DrainEagerRefreshRequested(string integrationId);
 }
 
 public sealed class VariableRefreshSignal : IVariableRefreshSignal
 {
 	private readonly ConcurrentDictionary<string, ConcurrentDictionary<Guid, byte>> _pending =
 		new(StringComparer.Ordinal);
+
+	private readonly ConcurrentDictionary<string, byte> _pendingEager = new(StringComparer.Ordinal);
 
 	public void RequestRefresh(string integrationId, Guid variableId)
 	{
@@ -49,4 +60,17 @@ public sealed class VariableRefreshSignal : IVariableRefreshSignal
 
 		return drained;
 	}
+
+	public void RequestEagerRefresh(string integrationId)
+	{
+		if (string.IsNullOrEmpty(integrationId))
+		{
+			return;
+		}
+
+		_pendingEager[integrationId] = 0;
+	}
+
+	public bool DrainEagerRefreshRequested(string integrationId)
+		=> _pendingEager.TryRemove(integrationId, out _);
 }

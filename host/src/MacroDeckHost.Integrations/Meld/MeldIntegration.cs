@@ -1,4 +1,5 @@
 using System.Globalization;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.Meld.Actions;
 using MacroDeckHost.Integrations.Meld.Protocol;
 using MacroDeck.Localization;
@@ -23,6 +24,7 @@ public sealed class MeldIntegration
 		IEventProvider,
 		IDynamicEventOptionsProvider,
 		IIntegrationIssueProvider,
+		IVariableRefreshSignalConsumer,
 		IDisposable
 {
 	public const string IntegrationId = MeldObjects.IntegrationId;
@@ -36,6 +38,7 @@ public sealed class MeldIntegration
 	private readonly MeldVariableCatalog _catalog;
 
 	private MeldConnection? _connection;
+	private IVariableRefreshSignal? _refreshSignal;
 	private MeldEventEmitter? _events;
 
 	public MeldIntegration()
@@ -115,6 +118,8 @@ public sealed class MeldIntegration
 	public string CatalogName => MeldVariableCatalog.CatalogName;
 
 	public byte[] GetIcon() => _icon;
+
+	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
 
 	public IConfigFlow CreateConfigFlow() => new MeldConfigFlow();
 
@@ -277,7 +282,8 @@ public sealed class MeldIntegration
 			endpoint,
 			onState: state => events?.Observe(state),
 			onTrackMute: (trackId, trackName, muted) => events?.ObserveTrackMute(trackId, trackName, muted),
-			onReset: () => events?.Reset());
+			onReset: () => events?.Reset(),
+			onVariablesChanged: () => _refreshSignal?.RequestEagerRefresh(IntegrationId));
 		_connection.Start();
 	}
 

@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Infrastructure.BackgroundServices;
 using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Infrastructure.Notifications;
@@ -280,6 +281,7 @@ internal sealed class IntegrationInitializerTests
 			new UserNotificationStore(),
 			null!,
 			null!,
+			new VariableRefreshSignal(),
 			hostIssueStore ?? new FakeIntegrationHostIssueStore(),
 			TestLayoutProviders.Host(),
 			TestFolderViewProviders.Host(),
