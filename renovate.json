@@ -1,6 +1,290 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
-  ]
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommitsDisabled"
+  ],
+  "timezone": "Europe/Berlin",
+  "schedule": [
+    "* 7-8 * * 0"
+  ],
+  "minimumReleaseAge": "14 days",
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 0,
+  "branchPrefix": "chore/renovate-",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": [
+      "before 9am on the first day of the month"
+    ]
+  },
+  "vulnerabilityAlerts": {
+    "minimumReleaseAge": null,
+    "schedule": [],
+    "prConcurrentLimit": 0,
+    "branchConcurrentLimit": 0,
+    "labels": [
+      "dependencies",
+      "security"
+    ]
+  },
+  "packageRules": [
+    {
+      "description": "The .NET SDK pin in global.json moves on its own, never bundled with packages.",
+      "matchManagers": [
+        "dotnet-sdk"
+      ],
+      "groupName": "dotnet sdk"
+    },
+    {
+      "description": "ASP.NET Core, EF Core and Microsoft.Extensions all ship from the same .NET release train and have to move together.",
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "Microsoft.AspNetCore.**",
+        "Microsoft.EntityFrameworkCore**",
+        "Microsoft.Extensions.**",
+        "Microsoft.IdentityModel.**",
+        "System.Security.Cryptography.ProtectedData"
+      ],
+      "groupName": "dotnet runtime packages"
+    },
+    {
+      "description": "Roslyn analyzer stack. Microsoft.CodeAnalysis.CSharp stays on 4.x deliberately (see Directory.Packages.props); the two System.* entries are its transitive pins and must not drift past its floor.",
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "Microsoft.CodeAnalysis.**",
+        "System.Collections.Immutable",
+        "System.Reflection.Metadata"
+      ],
+      "groupName": "roslyn analyzers"
+    },
+    {
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "Microsoft.CodeAnalysis.CSharp"
+      ],
+      "allowedVersions": "<5.0.0"
+    },
+    {
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "System.Collections.Immutable",
+        "System.Reflection.Metadata"
+      ],
+      "allowedVersions": "<10.0.0"
+    },
+    {
+      "description": "SkiaSharp ships every native asset package in lockstep, and Svg.Skia binds to one SkiaSharp major.",
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "SkiaSharp**",
+        "Svg.Skia"
+      ],
+      "groupName": "skiasharp"
+    },
+    {
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "Serilog",
+        "Serilog.**"
+      ],
+      "groupName": "serilog"
+    },
+    {
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "NUnit",
+        "NUnit.**",
+        "NUnit3TestAdapter",
+        "Microsoft.NET.Test.Sdk",
+        "coverlet.collector"
+      ],
+      "groupName": "dotnet test stack"
+    },
+    {
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "Spectre.Console",
+        "Spectre.Console.Testing"
+      ],
+      "groupName": "spectre.console"
+    },
+    {
+      "description": "Abstractions and source generator are one product and mismatch breaks the build.",
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "Mediator.Abstractions",
+        "Mediator.SourceGenerator"
+      ],
+      "groupName": "mediator"
+    },
+    {
+      "description": "Angular framework, CLI and build tooling are released together.",
+      "matchManagers": [
+        "npm"
+      ],
+      "matchPackageNames": [
+        "@angular/**",
+        "@angular-devkit/**"
+      ],
+      "groupName": "angular"
+    },
+    {
+      "matchManagers": [
+        "npm"
+      ],
+      "matchPackageNames": [
+        "@codemirror/**"
+      ],
+      "groupName": "codemirror"
+    },
+    {
+      "matchManagers": [
+        "npm"
+      ],
+      "matchPackageNames": [
+        "qrcode",
+        "@types/qrcode"
+      ],
+      "groupName": "qrcode"
+    },
+    {
+      "description": "Karma and jasmine are pinned per workspace and have to stay identical across runtime, web-client and angular.",
+      "matchManagers": [
+        "npm"
+      ],
+      "matchPackageNames": [
+        "jasmine",
+        "jasmine-core",
+        "@types/jasmine",
+        "karma",
+        "jsdom",
+        "karma-chrome-launcher",
+        "karma-coverage",
+        "karma-jasmine",
+        "karma-jasmine-html-reporter"
+      ],
+      "groupName": "js test stack"
+    },
+    {
+      "description": "One TypeScript version across every workspace; Angular constrains which one.",
+      "matchManagers": [
+        "npm"
+      ],
+      "matchPackageNames": [
+        "typescript"
+      ],
+      "groupName": "typescript"
+    },
+    {
+      "description": "Web-client legacy build chain: babel, browserslist data, polyfills and the es5 gate.",
+      "matchManagers": [
+        "npm"
+      ],
+      "matchPackageNames": [
+        "@babel/**",
+        "browserslist",
+        "caniuse-lite",
+        "core-js",
+        "es-check",
+        "regenerator-runtime",
+        "@ungap/structured-clone",
+        "abort-controller",
+        "raf",
+        "resize-observer-polyfill",
+        "whatwg-fetch"
+      ],
+      "groupName": "web-client legacy toolchain"
+    },
+    {
+      "matchManagers": [
+        "npm"
+      ],
+      "matchPackageNames": [
+        "esbuild",
+        "postcss",
+        "autoprefixer"
+      ],
+      "groupName": "web-client bundler"
+    },
+    {
+      "matchManagers": [
+        "npm"
+      ],
+      "matchFileNames": [
+        "docs/package.json"
+      ],
+      "groupName": "docs site"
+    },
+    {
+      "matchManagers": [
+        "cargo"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "groupName": "rust crates",
+      "description": "Cargo.toml keeps bare requirements on purpose, so most crates only move in Cargo.lock; this covers the 0.x ones that do need a manifest edit."
+    },
+    {
+      "description": "One PR a week for every patch bump across all managers. Lockstep groups stay consistent because their patches land in this same PR.",
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "groupName": "all patch updates"
+    },
+    {
+      "description": "Tauri's npm CLI and its Rust crates ship as one release; a split bump breaks the bootstrapper build.",
+      "matchPackageNames": [
+        "@tauri-apps/**",
+        "tauri",
+        "tauri-build",
+        "tauri-plugin-**"
+      ],
+      "groupName": "tauri"
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "github actions"
+    },
+    {
+      "description": "The windows crate major is dictated by whatever tauri locks; bump it with tauri, not on its own.",
+      "matchManagers": [
+        "cargo"
+      ],
+      "matchPackageNames": [
+        "windows"
+      ],
+      "dependencyDashboardApproval": true,
+      "matchUpdateTypes": [
+        "major",
+        "minor"
+      ]
+    }
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "rebaseWhen": "conflicted"
 }
