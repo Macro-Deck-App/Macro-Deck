@@ -15731,9 +15731,6 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.History.ChartMinimumHint" xml:space="preserve">
     <value>Limite inférieure fixe, peut être négative (ex. -100). Mets 0 pour une mise à l'échelle automatique.</value>
   </data>
-  <data name="Widgets.History.ChartMinimumPlaceholder" xml:space="preserve">
-    <value>Auto</value>
-  </data>
   <data name="Widgets.History.MetricSection" xml:space="preserve">
     <value>Métrique</value>
   </data>

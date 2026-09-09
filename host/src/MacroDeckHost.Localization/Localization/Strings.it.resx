@@ -15731,9 +15731,6 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.History.ChartMinimumHint" xml:space="preserve">
     <value>Limite inferiore fisso, può essere negativo (ad es. -100). Imposta 0 per la scala automatica.</value>
   </data>
-  <data name="Widgets.History.ChartMinimumPlaceholder" xml:space="preserve">
-    <value>Automatico</value>
-  </data>
   <data name="Widgets.History.MetricSection" xml:space="preserve">
     <value>Metrica</value>
   </data>

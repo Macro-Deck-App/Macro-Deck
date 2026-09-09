@@ -15731,9 +15731,6 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.History.ChartMinimumHint" xml:space="preserve">
     <value>Pevná dolní hranice, může být záporná (např. -100). Pro automatické měřítko zadejte 0.</value>
   </data>
-  <data name="Widgets.History.ChartMinimumPlaceholder" xml:space="preserve">
-    <value>Automaticky</value>
-  </data>
   <data name="Widgets.History.MetricSection" xml:space="preserve">
     <value>Metrika</value>
   </data>

@@ -130,7 +130,6 @@ internal static class HistoryGraphWidgetConfigView
 					{
 						Key = "minValue",
 						Label = AppStrings.Widgets.History.ChartMinimum(),
-						Placeholder = AppStrings.Widgets.History.ChartMinimumPlaceholder(),
 						Description = AppStrings.Widgets.History.ChartMinimumHint(),
 						Binding = Bind.To(minValue),
 					},

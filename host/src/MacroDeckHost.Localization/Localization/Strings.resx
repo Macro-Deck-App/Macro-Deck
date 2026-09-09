@@ -15732,9 +15732,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.History.ChartMinimumHint" xml:space="preserve">
     <value>Fixed lower bound, may be negative (e.g. -100). Set 0 to scale automatically.</value>
   </data>
-  <data name="Widgets.History.ChartMinimumPlaceholder" xml:space="preserve">
-    <value>Auto</value>
-  </data>
   <data name="Widgets.History.MetricSection" xml:space="preserve">
     <value>Metric</value>
   </data>
