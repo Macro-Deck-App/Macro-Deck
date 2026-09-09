@@ -22,10 +22,17 @@ public sealed class WeatherIntegration
 	private static readonly ILogger _logger = IntegrationLog.For<WeatherIntegration>(IntegrationId);
 	private static readonly byte[] _icon = LoadIcon();
 
-	private readonly IOpenMeteoClient _client = new OpenMeteoClient();
+	private readonly IOpenMeteoClient _client;
 
 	public WeatherIntegration()
+		: this(new OpenMeteoClient())
 	{
+	}
+
+	internal WeatherIntegration(IOpenMeteoClient client)
+	{
+		_client = client;
+
 		// Handed the live instance list rather than the integration itself, so the action reads the
 		// stations as they are when a user opens its options rather than as they were at construction.
 		Actions = [new WeatherDetailsActionDefinition(GetInstances)];
@@ -178,16 +185,25 @@ public sealed class WeatherIntegration
 				: TemperatureUnit.Celsius;
 
 			var entryId = entry.Id.ToString();
-			var name = string.IsNullOrWhiteSpace(displayName) ? entry.Title : displayName;
+			var name = string.IsNullOrWhiteSpace(entry.Title) ? displayName ?? string.Empty : entry.Title.Trim();
 
-			if (existing.TryGetValue(entryId, out var prior) &&
-				prior.Station.Matches(latitude, longitude, unit, name))
+			existing.TryGetValue(entryId, out var prior);
+
+			if (prior is not null && prior.Station.Matches(latitude, longitude, unit, name))
 			{
 				stations.Add(prior);
 				continue;
 			}
 
-			stations.Add(new ConfiguredStation(entryId, new WeatherStation(_client, latitude, longitude, unit, name)));
+			// Carried over only when the location itself is unchanged: seeding a moved station would report
+			// the previous location's weather, and a provider outage would keep it doing so.
+			var seed = prior is not null &&
+				prior.Station.Matches(latitude, longitude, unit, prior.Station.DisplayName)
+					? prior.Station.Current
+					: null;
+
+			stations.Add(new ConfiguredStation(entryId,
+				new WeatherStation(_client, latitude, longitude, unit, name, seed)));
 		}
 
 		_stations = stations;

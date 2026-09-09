@@ -12,6 +12,8 @@ public sealed record WeatherWidgetData
 
 	public bool ShowCondition { get; init; } = true;
 
+	public bool ShowLocation { get; init; } = true;
+
 	public bool ShowForecast { get; init; } = true;
 
 	public bool AnimateIcon { get; init; } = true;
@@ -31,6 +33,9 @@ public sealed record WeatherWidgetData
 			ShowIcon = ReadBool(data, "showIcon") ?? true,
 			ShowTemperature = ReadBool(data, "showTemperature") ?? true,
 			ShowCondition = ReadBool(data, "showCondition") ?? true,
+			// Widgets saved before the two options split stored one showCondition for both lines, so an
+			// absent showLocation has to keep meaning whatever showCondition said.
+			ShowLocation = ReadBool(data, "showLocation") ?? ReadBool(data, "showCondition") ?? true,
 			ShowForecast = ReadBool(data, "showForecast") ?? true,
 			AnimateIcon = ReadBool(data, "animateIcon") ?? true,
 			ForecastDays = Math.Clamp(ReadInt(data, "forecastDays") ?? 5, 1, 7),

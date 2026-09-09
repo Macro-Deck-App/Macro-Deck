@@ -12,10 +12,6 @@ public sealed record HistoryGraphWidgetData
 
 	public string? Title { get; init; }
 
-	/// <summary>A text variable shown as the subtitle. Falls back to <see cref="Subtitle" /> whenever it
-	/// resolves to nothing.</summary>
-	public string? SubtitleVariable { get; init; }
-
 	public string? Subtitle { get; init; }
 
 	public bool ShowSubtitle { get; init; } = true;
@@ -41,8 +37,7 @@ public sealed record HistoryGraphWidgetData
 		{
 			ValueVariable = ReadString(data, "valueVariable") ?? string.Empty,
 			Title = ReadString(data, "title"),
-			SubtitleVariable = ReadString(data, "subtitleVariable"),
-			Subtitle = ReadString(data, "subtitle"),
+			Subtitle = SubtitleTextOf(ReadString(data, "subtitle"), ReadString(data, "subtitleVariable")),
 			ShowSubtitle = ReadBool(data, "showSubtitle") ?? true,
 			AccentColor = ReadHexColor(data, "accentColor"),
 			MaxValue = ReadDouble(data, "maxValue"),
@@ -53,6 +48,40 @@ public sealed record HistoryGraphWidgetData
 				? (int)Math.Floor(historyLength.Value)
 				: DefaultHistoryLength,
 		};
+	}
+
+	public static string VariableToken(string variableName) => $"{{{{ vars.{variableName} }}}}";
+
+	// An empty subtitle is an answer rather than an absence: the user cleared it, and the key it
+	// replaced must not resurrect it.
+	public static string? SubtitleTextOf(string? subtitle, string? subtitleVariable)
+	{
+		if (subtitle is not null)
+		{
+			return subtitle;
+		}
+
+		// Nothing constrains the older key to a variable name, so a hand written profile can hold text
+		// that would interpolate into broken liquid.
+		return IsVariableName(subtitleVariable) ? VariableToken(subtitleVariable!) : null;
+	}
+
+	private static bool IsVariableName(string? name)
+	{
+		if (string.IsNullOrEmpty(name) || char.IsAsciiDigit(name[0]))
+		{
+			return false;
+		}
+
+		foreach (var character in name)
+		{
+			if (!char.IsAsciiLetterOrDigit(character) && character != '_')
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	private static string? ReadString(JsonElement data, string name)

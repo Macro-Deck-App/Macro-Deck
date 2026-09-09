@@ -1,0 +1,40 @@
+{
+  "assets": [
+    {
+      "name": "macro-deck-3.0.0-0.beta.2.x86_64.rpm",
+      "url": "https://github.com/Macro-Deck-App/Macro-Deck/releases/download/v3.0.0-beta.2/macro-deck-3.0.0-0.beta.2.x86_64.rpm"
+    },
+    {
+      "name": "macro-deck-3.0.0-0.beta.2.x86_64.rpm.sha256",
+      "url": "https://github.com/Macro-Deck-App/Macro-Deck/releases/download/v3.0.0-beta.2/macro-deck-3.0.0-0.beta.2.x86_64.rpm.sha256"
+    },
+    {
+      "name": "macro-deck_3.0.0.beta.2_amd64.deb",
+      "url": "https://github.com/Macro-Deck-App/Macro-Deck/releases/download/v3.0.0-beta.2/macro-deck_3.0.0.beta.2_amd64.deb"
+    },
+    {
+      "name": "macro-deck_3.0.0.beta.2_amd64.deb.sha256",
+      "url": "https://github.com/Macro-Deck-App/Macro-Deck/releases/download/v3.0.0-beta.2/macro-deck_3.0.0.beta.2_amd64.deb.sha256"
+    },
+    {
+      "name": "Macro.Deck_3.0.0-beta.2_aarch64.app.tar.gz",
+      "url": "https://github.com/Macro-Deck-App/Macro-Deck/releases/download/v3.0.0-beta.2/Macro.Deck_3.0.0-beta.2_aarch64.app.tar.gz"
+    },
+    {
+      "name": "Macro.Deck_3.0.0-beta.2_aarch64.dmg",
+      "url": "https://github.com/Macro-Deck-App/Macro-Deck/releases/download/v3.0.0-beta.2/Macro.Deck_3.0.0-beta.2_aarch64.dmg"
+    },
+    {
+      "name": "Macro.Deck_3.0.0-beta.2_amd64.AppImage",
+      "url": "https://github.com/Macro-Deck-App/Macro-Deck/releases/download/v3.0.0-beta.2/Macro.Deck_3.0.0-beta.2_amd64.AppImage"
+    },
+    {
+      "name": "Macro.Deck_3.0.0-beta.2_amd64.AppImage.sha256",
+      "url": "https://github.com/Macro-Deck-App/Macro-Deck/releases/download/v3.0.0-beta.2/Macro.Deck_3.0.0-beta.2_amd64.AppImage.sha256"
+    },
+    {
+      "name": "Macro.Deck_3.0.0-beta.2_x64-setup.exe",
+      "url": "https://github.com/Macro-Deck-App/Macro-Deck/releases/download/v3.0.0-beta.2/Macro.Deck_3.0.0-beta.2_x64-setup.exe"
+    }
+  ]
+}

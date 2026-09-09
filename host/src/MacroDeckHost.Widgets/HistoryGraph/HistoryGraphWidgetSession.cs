@@ -42,10 +42,7 @@ internal sealed class HistoryGraphWidgetSession : IUiSession
 			_watched.Add(config.ValueVariable);
 		}
 
-		if (!string.IsNullOrEmpty(config.SubtitleVariable))
-		{
-			_watched.Add(config.SubtitleVariable);
-		}
+		_watched.UnionWith(WidgetVariableReferenceParser.ReferencedNames(config.Subtitle));
 
 		_window.Changed += OnSampled;
 		_variables.Changed += OnVariableChanged;

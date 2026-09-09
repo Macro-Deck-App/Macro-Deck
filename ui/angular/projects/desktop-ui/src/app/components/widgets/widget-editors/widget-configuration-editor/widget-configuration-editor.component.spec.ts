@@ -160,6 +160,14 @@ describe('WidgetConfigurationEditorComponent', () => {
     void fixture;
   });
 
+  it('scopes the live preview to the widget being edited, so its widget-scoped variables resolve', async () => {
+    await createFixture();
+
+    const preview = opens.find(request => request.kind === 'widget' && request.widgetType !== undefined);
+
+    expect(preview && 'variableScopeWidgetId' in preview ? preview.variableScopeWidgetId : undefined).toBe('w1');
+  });
+
   it('opens the config session with the draft being edited, not just the widget id', async () => {
     const fixture = await createFixture(widget({ data: { label: 'Draft' } as WidgetData }));
 
@@ -401,6 +409,36 @@ describe('WidgetConfigurationEditorComponent', () => {
     await settle(fixture);
 
     expect((fixture.componentInstance.widget.data as { label?: string }).label).toBe('After');
+  });
+
+  it('folds a typed font size into widget.data as a number, and sends a number to the session (issue #698)', async () => {
+    const w = widget({ data: { fontSize: 14 } as unknown as WidgetData });
+    const fixture = await createFixture(w);
+
+    const sizeNode: UiNode = {
+      id: 'fontSize',
+      type: UiConfigPrimitives.Number,
+      properties: {
+        [UiConfigProperties.Events]: [UiConfigEvents.Change],
+        [UiConfigProperties.Value]: 14,
+        [UiConfigProperties.Label]: 'Size (%)',
+        [UiConfigProperties.Min]: 1,
+        [UiConfigProperties.Max]: 100,
+      },
+    };
+    configHandle().root.set(configRoot([propertiesRegion([sizeNode])]));
+    await settle(fixture);
+
+    const box = fixture.nativeElement.querySelector('input[type="number"]') as HTMLInputElement;
+    box.value = '20';
+    box.dispatchEvent(new Event('input'));
+    await settle(fixture);
+    await Promise.resolve();
+    await settle(fixture);
+
+    expect(configHandle().sent).toEqual([{ nodeId: 'fontSize', name: UiConfigEvents.Change, data: 20 }]);
+    expect((fixture.componentInstance.widget.data as { fontSize?: unknown }).fontSize).toBe(20);
+    expect(box.value).toBe('20');
   });
 
   it('forwards a change event to the session and folds it into widget.data, with a nested edit landing as nested JSON', async () => {

@@ -15752,11 +15752,14 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.History.Subtitle" xml:space="preserve">
     <value>Podnadpis</value>
   </data>
-  <data name="Widgets.History.SubtitleVariable" xml:space="preserve">
-    <value>Proměnná podnadpisu</value>
+  <data name="Widgets.History.SubtitleText" xml:space="preserve">
+    <value>Text podnadpisu</value>
   </data>
-  <data name="Widgets.History.SubtitleVariableHint" xml:space="preserve">
-    <value>Volitelná textová proměnná pod nadpisem (např. název CPU nebo GPU).</value>
+  <data name="Widgets.History.SubtitleTextHint" xml:space="preserve">
+    <value>Volný text pod nadpisem. Lze vložit libovolnou proměnnou, i číselnou.</value>
+  </data>
+  <data name="Widgets.History.SubtitleTextPlaceholder" xml:space="preserve">
+    <value>např. Apple M3 Max</value>
   </data>
   <data name="Widgets.History.TitlePlaceholder" xml:space="preserve">
     <value>např. Vytížení CPU</value>
@@ -16017,6 +16020,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Widgets.Weather.LocationSection" xml:space="preserve">
     <value>Místo</value>
+  </data>
+  <data name="Widgets.Weather.LocationName" xml:space="preserve">
+    <value>Název místa</value>
   </data>
   <data name="Widgets.Weather.NoLocation" xml:space="preserve">
     <value>Žádné místo</value>

@@ -118,7 +118,7 @@
               [max]="param.max"
               [step]="param.step"
               [ngModel]="primitive"
-              (ngModelChange)="onChange($event)" />
+              (ngModelChange)="onNumberChange($event)" />
           } @else {
             <shared-input
               type="number"
@@ -127,7 +127,7 @@
               [max]="param.max"
               [step]="param.step"
               [ngModel]="primitive"
-              (ngModelChange)="onChange($event)" />
+              (ngModelChange)="onNumberChange($event)" />
           }
         }
         @case ('boolean') {

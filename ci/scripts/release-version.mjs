@@ -98,6 +98,7 @@ export function mapNativePackageVersion(version) {
       debVersion: parsed.coreVersion,
       rpmVersion: parsed.coreVersion,
       rpmRelease: '1',
+      aurVersion: parsed.coreVersion,
     };
   }
 
@@ -105,6 +106,9 @@ export function mapNativePackageVersion(version) {
     debVersion: `${parsed.coreVersion}~beta.${parsed.betaNumber}`,
     rpmVersion: parsed.coreVersion,
     rpmRelease: `0.beta.${parsed.betaNumber}`,
+    // pacman reserves '-' for the pkgrel separator, and a trailing alpha segment
+    // sorts below an exhausted one, so this stays lower than the stable version.
+    aurVersion: `${parsed.coreVersion}beta.${parsed.betaNumber}`,
   };
 }
 

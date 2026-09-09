@@ -20,7 +20,11 @@
     },
     "showCondition": {
       "type": "boolean",
-      "description": "Show the condition text and location name."
+      "description": "Show the condition text. For data written before the location gained its own option, this also governs the location name: see showLocation."
+    },
+    "showLocation": {
+      "type": "boolean",
+      "description": "Show the weather configuration's name. When absent, falls back to showCondition and then to true, so a widget saved before the two options were split keeps hiding both lines together."
     },
     "showForecast": {
       "type": "boolean",

@@ -15753,11 +15753,14 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.History.Subtitle" xml:space="preserve">
     <value>Subtitle</value>
   </data>
-  <data name="Widgets.History.SubtitleVariable" xml:space="preserve">
-    <value>Subtitle variable</value>
+  <data name="Widgets.History.SubtitleText" xml:space="preserve">
+    <value>Subtitle text</value>
   </data>
-  <data name="Widgets.History.SubtitleVariableHint" xml:space="preserve">
-    <value>Optional text variable under the title (e.g. the CPU or GPU name).</value>
+  <data name="Widgets.History.SubtitleTextHint" xml:space="preserve">
+    <value>Freetext under the title. Insert any variable, including numbers.</value>
+  </data>
+  <data name="Widgets.History.SubtitleTextPlaceholder" xml:space="preserve">
+    <value>e.g. Apple M3 Max</value>
   </data>
   <data name="Widgets.History.TitlePlaceholder" xml:space="preserve">
     <value>e.g. CPU Load</value>
@@ -16018,6 +16021,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.Weather.LocationSection" xml:space="preserve">
     <value>Location</value>
+  </data>
+  <data name="Widgets.Weather.LocationName" xml:space="preserve">
+    <value>Location name</value>
   </data>
   <data name="Widgets.Weather.NoLocation" xml:space="preserve">
     <value>No location</value>

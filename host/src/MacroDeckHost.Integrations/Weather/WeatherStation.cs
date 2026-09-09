@@ -17,14 +17,17 @@ internal sealed class WeatherStation : IWeatherStation
 		double latitude,
 		double longitude,
 		TemperatureUnit unit,
-		string displayName)
+		string displayName,
+		WeatherSnapshot? seed = null)
 	{
 		_client = client;
 		_latitude = latitude;
 		_longitude = longitude;
 		_unit = unit;
 		DisplayName = displayName;
-		_current = WeatherSnapshot.Unavailable(displayName);
+		_current = seed is { IsAvailable: true }
+			? seed with { LocationName = displayName }
+			: WeatherSnapshot.Unavailable(displayName);
 	}
 
 	public string DisplayName { get; }

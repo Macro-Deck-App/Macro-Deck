@@ -95,6 +95,8 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit {
 
   value: string | number = '';
 
+  private modelValue: string | number = '';
+
   onChange: (value: string | number) => void = () => {};
   onTouched: () => void = () => {};
 
@@ -109,7 +111,12 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit {
   }
 
   writeValue(value: string | number | null): void {
-    this.value = value ?? '';
+    const next = value ?? '';
+    this.modelValue = next;
+    // A model that only renormalises what is being typed must not rewrite the box: it would drop a
+    // trailing zero and move the caret mid-entry.
+    if (this.type === 'number' && next !== '' && this.value !== '' && Number(this.value) === Number(next)) return;
+    this.value = next;
   }
 
   registerOnChange(fn: (value: string | number) => void): void {
@@ -130,6 +137,7 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit {
   }
 
   onBlur(): void {
+    if (this.type === 'number' && this.value !== this.modelValue) this.value = this.modelValue;
     this.onTouched();
     this.blurred.emit();
   }

@@ -28,6 +28,57 @@ describe('InputComponent', () => {
     expect((el as HTMLInputElement).type).toBe('number');
   });
 
+  it('keeps what is being typed into a number box when the model only renormalises it', () => {
+    component.type = 'number';
+    component.onInput('1.10');
+
+    component.writeValue(1.1);
+
+    expect(component.value).toBe('1.10');
+  });
+
+  it('takes a number box to the value the model changed to', () => {
+    component.type = 'number';
+    component.onInput('14');
+
+    component.writeValue(20);
+
+    expect(component.value).toBe(20);
+  });
+
+  it('brings a number box back to the model value once typing is over', () => {
+    component.type = 'number';
+    component.onInput('1e3');
+    component.writeValue(1000);
+
+    expect(component.value).toBe('1e3');
+
+    component.onBlur();
+
+    expect(component.value).toBe(1000);
+  });
+
+  it('brings an emptied number box back to a model value the caller kept', () => {
+    component.type = 'number';
+    component.writeValue(14);
+    component.onInput('');
+
+    component.onBlur();
+
+    expect(component.value).toBe(14);
+  });
+
+  it('leaves an emptied number box empty for a model that accepted the empty value', () => {
+    component.type = 'number';
+    component.writeValue(14);
+    component.onInput('');
+    component.writeValue('');
+
+    component.onBlur();
+
+    expect(component.value).toBe('');
+  });
+
   it('renders a textarea when multiline is set', () => {
     component.multiline = true;
     fixture.detectChanges();

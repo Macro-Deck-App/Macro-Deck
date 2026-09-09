@@ -15752,11 +15752,14 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.History.Subtitle" xml:space="preserve">
     <value>Subtítulo</value>
   </data>
-  <data name="Widgets.History.SubtitleVariable" xml:space="preserve">
-    <value>Variable de subtítulo</value>
+  <data name="Widgets.History.SubtitleText" xml:space="preserve">
+    <value>Texto del subtítulo</value>
   </data>
-  <data name="Widgets.History.SubtitleVariableHint" xml:space="preserve">
-    <value>Variable de texto opcional bajo el título (p. ej. el nombre de la CPU o la GPU).</value>
+  <data name="Widgets.History.SubtitleTextHint" xml:space="preserve">
+    <value>Texto libre bajo el título. Inserta cualquier variable, también numérica.</value>
+  </data>
+  <data name="Widgets.History.SubtitleTextPlaceholder" xml:space="preserve">
+    <value>p. ej. Apple M3 Max</value>
   </data>
   <data name="Widgets.History.TitlePlaceholder" xml:space="preserve">
     <value>p. ej. Carga de CPU</value>
@@ -16017,6 +16020,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Widgets.Weather.LocationSection" xml:space="preserve">
     <value>Ubicación</value>
+  </data>
+  <data name="Widgets.Weather.LocationName" xml:space="preserve">
+    <value>Nombre de la ubicación</value>
   </data>
   <data name="Widgets.Weather.NoLocation" xml:space="preserve">
     <value>Sin ubicación</value>

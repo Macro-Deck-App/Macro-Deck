@@ -54,6 +54,34 @@ internal static class HistoryGraphTestSupport
 	public static HistoryGraphWidgetData Config(object data)
 		=> HistoryGraphWidgetData.Parse(JsonSerializer.SerializeToElement(data));
 
-	public static HistoryGraphViewStateResolver Resolver(object data, VariableRegistry? variables = null)
-		=> new(Config(data), variables ?? Registry());
+	public static HistoryGraphViewStateResolver Resolver(
+		object data,
+		VariableRegistry? variables = null,
+		string? scopeRefId = null)
+		=> new(Config(data), variables ?? Registry(), scopeRefId);
+
+	public static VariableRegistry WithVariable(
+		this VariableRegistry registry,
+		string name,
+		string value,
+		VariableType type = VariableType.Text,
+		int? decimalPlaces = null,
+		VariableScope scope = VariableScope.Global,
+		string? scopeRefId = null)
+	{
+		registry.Upsert(new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = scope,
+			ScopeRefId = scopeRefId,
+			Type = type,
+			Classification = VariableClassification.User,
+			Value = value,
+			DecimalPlaces = decimalPlaces,
+			UpdatedAt = DateTime.UtcNow,
+		});
+
+		return registry;
+	}
 }

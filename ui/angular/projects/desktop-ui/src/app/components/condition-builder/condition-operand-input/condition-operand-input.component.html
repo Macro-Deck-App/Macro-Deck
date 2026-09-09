@@ -44,7 +44,7 @@
     [max]="parameter?.max"
     [step]="parameter?.step"
     [ngModel]="numberValue"
-    (ngModelChange)="emit($event)">
+    (ngModelChange)="emitNumber($event)">
   </shared-input>
 } @else if (controlType === 'datetime') {
   <shared-datetime-picker

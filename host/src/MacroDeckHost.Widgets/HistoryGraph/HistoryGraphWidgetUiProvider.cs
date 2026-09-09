@@ -73,7 +73,7 @@ public sealed class HistoryGraphWidgetUiProvider : IBuiltInWidgetUiProvider
 				HistoryGraphWidgetView.Build(new UiState<HistoryGraphViewState>(sampleState), sampleConfig)));
 		}
 
-		var resolver = new HistoryGraphViewStateResolver(config, _variables);
+		var resolver = new HistoryGraphViewStateResolver(config, _variables, VariableScopeWidgetId(request.Surface));
 		var window = string.IsNullOrEmpty(config.ValueVariable)
 			? EmptyVariableHistoryWindow.Instance
 			: _history.Open(config.ValueVariable, config.HistoryLength);
@@ -84,6 +84,15 @@ public sealed class HistoryGraphWidgetUiProvider : IBuiltInWidgetUiProvider
 
 		return new HistoryGraphWidgetSession(view, state, resolver, window, _notifier, config);
 	}
+
+	private static string? VariableScopeWidgetId(UiSurface surface)
+		=> ReadStringAttribute(surface, UiWidgetSurfaceAttributes.WidgetId) ??
+			ReadStringAttribute(surface, UiWidgetSurfaceAttributes.VariableScopeWidgetId);
+
+	private static string? ReadStringAttribute(UiSurface surface, string name)
+		=> surface.Attributes.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
+			? element.GetString()
+			: null;
 
 	private static JsonElement DataElement(UiSurface surface)
 		=> surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;
