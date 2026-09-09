@@ -67,7 +67,7 @@ public static class BuiltInWidgetTypes
 		WidgetTypeIds.Weather =>
 			"""{"showIcon":true,"showTemperature":true,"showCondition":true,"showLocation":true,"showForecast":true,"forecastDays":5}""",
 		WidgetTypeIds.HistoryGraph =>
-			"""{"valueVariable":"system_cpu_usage_percent","title":"CPU Load","subtitleVariable":"system_cpu_name","showSubtitle":true,"unit":"%","maxValue":100}""",
+			"""{"valueVariable":"system_cpu_usage_percent","title":"CPU Load","subtitle":"{{ vars.system_cpu_name }}","showSubtitle":true,"unit":"%","maxValue":100}""",
 		WidgetTypeIds.Clock => """{"style":"digital","showSeconds":true,"showDate":true}""",
 		_ => "{}",
 	};

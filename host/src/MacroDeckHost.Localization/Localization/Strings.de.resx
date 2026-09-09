@@ -15750,11 +15750,14 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.History.Subtitle" xml:space="preserve">
     <value>Untertitel</value>
   </data>
-  <data name="Widgets.History.SubtitleVariable" xml:space="preserve">
-    <value>Untertitelvariable</value>
+  <data name="Widgets.History.SubtitleText" xml:space="preserve">
+    <value>Untertiteltext</value>
   </data>
-  <data name="Widgets.History.SubtitleVariableHint" xml:space="preserve">
-    <value>Optionale Textvariable unter dem Titel (z. B. der Name der CPU oder GPU).</value>
+  <data name="Widgets.History.SubtitleTextHint" xml:space="preserve">
+    <value>Freitext unter dem Titel. Füge beliebige Variablen ein, auch Zahlen.</value>
+  </data>
+  <data name="Widgets.History.SubtitleTextPlaceholder" xml:space="preserve">
+    <value>z. B. Apple M3 Max</value>
   </data>
   <data name="Widgets.History.TitlePlaceholder" xml:space="preserve">
     <value>z. B. CPU-Auslastung</value>

@@ -374,7 +374,7 @@ export function defaultWidgetData(type: WidgetType): WidgetData {
       return {
         valueVariable: 'system_cpu_usage_percent',
         title: 'CPU Load',
-        subtitleVariable: 'system_cpu_name',
+        subtitle: '{{ vars.system_cpu_name }}',
         showSubtitle: true,
         maxValue: 100
       } as HistoryGraphData;
