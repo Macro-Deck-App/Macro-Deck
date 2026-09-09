@@ -70,7 +70,8 @@
   top: var(--space-4);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1000;
+  // Below the shell side panels at 30, and above the marquee overlay at 25 the banner has to clear.
+  z-index: 28;
   width: min(90%, 480px);
 }
 

@@ -150,7 +150,8 @@
   top: var(--spacing-md, 0.8125rem);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1000;
+  // Below the shell side panels at 30: a wrapped message reaches the panel header on a narrow window.
+  z-index: 28;
   width: min(90%, 480px);
 }
 
