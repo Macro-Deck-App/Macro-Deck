@@ -119,7 +119,7 @@ test('derives the update channels from the parsed prerelease', () => {
   });
 });
 
-test('maps a beta-to-stable series for Debian and RPM package ordering', () => {
+test('maps a beta-to-stable series for Debian, RPM and AUR package ordering', () => {
   assert.deepEqual(
     ['3.0.0-beta.9', '3.0.0-beta.10', '3.0.0-beta.11', '3.0.0'].map(mapNativePackageVersion),
     [
@@ -127,21 +127,25 @@ test('maps a beta-to-stable series for Debian and RPM package ordering', () => {
         debVersion: '3.0.0~beta.9',
         rpmVersion: '3.0.0',
         rpmRelease: '0.beta.9',
+        aurVersion: '3.0.0beta.9',
       },
       {
         debVersion: '3.0.0~beta.10',
         rpmVersion: '3.0.0',
         rpmRelease: '0.beta.10',
+        aurVersion: '3.0.0beta.10',
       },
       {
         debVersion: '3.0.0~beta.11',
         rpmVersion: '3.0.0',
         rpmRelease: '0.beta.11',
+        aurVersion: '3.0.0beta.11',
       },
       {
         debVersion: '3.0.0',
         rpmVersion: '3.0.0',
         rpmRelease: '1',
+        aurVersion: '3.0.0',
       },
     ]
   );

@@ -1,0 +1,180 @@
+name: Publish AUR
+
+# Publishes the PKGBUILD for an already-released version to the AUR. This must stay the only place
+# the AUR key is used, and it runs on Arch so makepkg and vercmp are the real ones.
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Version to publish, without the leading v. Its GitHub release must already exist.
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to publish, without the leading v
+        type: string
+        required: true
+
+concurrency:
+  group: publish-aur
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish to the AUR
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    container: archlinux:base-devel
+    # The AUR key is a production environment secret, alongside the R2 credentials.
+    environment: production
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ inputs.version }}
+      # A release skips an unconfigured push so a fork or a pre-setup run still publishes; a manual
+      # run exists to push, so it fails instead.
+      REQUIRE_CREDENTIALS: ${{ github.event_name == 'workflow_dispatch' }}
+    steps:
+      # A partial upgrade leaves an Arch container with mismatched libraries, so this is -Syu.
+      - name: Install packaging tools
+        run: pacman -Syu --noconfirm --needed git github-cli nodejs openssh
+
+      - uses: actions/checkout@v5
+
+      - name: Resolve the release
+        run: |
+          set -euo pipefail
+          tag="v${VERSION}"
+          gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets > assets.json
+          gh release download "$tag" --repo "$GITHUB_REPOSITORY" --pattern '*.deb.sha256' --dir sidecar
+          sidecar=$(find sidecar -name '*.deb.sha256' | head -n 1)
+          if [ -z "$sidecar" ]; then
+            echo "Release $tag carries no DEB checksum sidecar." >&2
+            exit 1
+          fi
+          echo "SIDECAR=$sidecar" >> "$GITHUB_ENV"
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+
+      - name: Configure the AUR key
+        id: credentials
+        env:
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${AUR_SSH_PRIVATE_KEY}" ]; then
+            if [ "$REQUIRE_CREDENTIALS" = 'true' ]; then
+              echo "AUR_SSH_PRIVATE_KEY is not configured." >&2
+              exit 1
+            fi
+            echo "::warning::AUR_SSH_PRIVATE_KEY is not configured - the packages are rendered and built but not pushed."
+            echo "The AUR push was skipped: \`AUR_SSH_PRIVATE_KEY\` is not configured." >> "$GITHUB_STEP_SUMMARY"
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Outside the workspace, which is where every rendered package and makepkg's own
+          # build tree live.
+          key="${RUNNER_TEMP}/aur"
+          install -m 600 /dev/null "$key"
+          printf '%s\n' "${AUR_SSH_PRIVATE_KEY}" > "$key"
+          echo "GIT_SSH_COMMAND=ssh -i $key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=${GITHUB_WORKSPACE}/ci/aur/known_hosts" >> "$GITHUB_ENV"
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+          git config --global user.name 'Macro Deck CI'
+          git config --global user.email 'ci@macro-deck.app'
+          git config --global --add safe.directory '*'
+
+      - name: Render, build and push
+        env:
+          CONFIGURED: ${{ steps.credentials.outputs.configured }}
+        run: |
+          set -euo pipefail
+          useradd --create-home builder
+          # One shared source cache, so a stable release downloads the 149 MB DEB once
+          # rather than once per package.
+          export SRCDEST="${GITHUB_WORKSPACE}/aur-srcdest"
+          mkdir -p "$SRCDEST" && chown builder "$SRCDEST"
+
+          for pkgname in $(node -e "
+            import('./ci/scripts/make-aur-package.mjs').then((m) => console.log(m.aurPackagesFor(process.env.VERSION).join(' ')))
+          "); do
+            echo "::group::$pkgname"
+            work="aur/$pkgname"
+            rm -rf "$work"
+            current=
+
+            if [ "$CONFIGURED" = 'true' ]; then
+              git clone "ssh://aur@aur.archlinux.org/${pkgname}.git" "$work"
+              if [ -f "$work/PKGBUILD" ]; then
+                cp "$work/PKGBUILD" "${pkgname}.published"
+                current="${pkgname}.published"
+              fi
+            else
+              mkdir -p "$work"
+            fi
+
+            vercmp_result=1
+            if [ -n "$current" ]; then
+              published=$(sed -n 's/^pkgver=//p' "$current")
+              candidate=$(node -e "
+                import('./ci/scripts/release-version.mjs').then((m) => console.log(m.mapNativePackageVersion(process.env.VERSION).aurVersion))
+              ")
+              vercmp_result=$(vercmp "$candidate" "$published")
+            fi
+
+            push=$(node -e "
+              import('./ci/scripts/make-aur-package.mjs').then((m) => console.log(
+                m.shouldPush({ pkgname: process.argv[1], version: process.env.VERSION, vercmp: Number(process.argv[2]) })
+              ))
+            " "$pkgname" "$vercmp_result")
+
+            if [ "$push" != 'true' ]; then
+              echo "::notice::$pkgname already carries a newer version than ${VERSION}; leaving it alone."
+              echo "::endgroup::"
+              continue
+            fi
+
+            render=(node ci/scripts/make-aur-package.mjs "$pkgname" "$VERSION" assets.json "$SIDECAR" "$work/PKGBUILD")
+            if [ -n "$current" ]; then
+              render+=("$current")
+            fi
+            "${render[@]}"
+
+            chown -R builder "$work"
+            runuser -u builder -- bash -euo pipefail -c "
+              cd '$work'
+              makepkg --printsrcinfo > .SRCINFO
+              makepkg -f --nodeps --noconfirm
+            "
+
+            # makepkg exits 0 for a package built from an empty pkgdir, so the built archive is
+            # what proves the release asset really unpacked.
+            built=$(find "$work" -maxdepth 1 -name '*.pkg.tar.*' | head -n 1)
+            if [ -z "$built" ] || ! bsdtar -tf "$built" | grep -qx 'usr/bin/MacroDeck'; then
+              echo "error: $pkgname built no package containing usr/bin/MacroDeck" >&2
+              exit 1
+            fi
+            rm -f "$work"/*.pkg.tar.*
+
+            if [ "$CONFIGURED" != 'true' ]; then
+              echo "::notice::$pkgname builds; not pushed (no key configured)."
+              echo "::endgroup::"
+              continue
+            fi
+
+            git -C "$work" add PKGBUILD .SRCINFO
+            if git -C "$work" diff --cached --quiet; then
+              echo "::notice::$pkgname is already up to date."
+            else
+              git -C "$work" commit -m "Update to ${VERSION}"
+              # A freshly created AUR repository clones with no branch, and the AUR only
+              # accepts master.
+              git -C "$work" push origin HEAD:master
+              echo "Pushed \`$pkgname\` at \`${VERSION}\`." >> "$GITHUB_STEP_SUMMARY"
+            fi
+            echo "::endgroup::"
+          done
+
+      - name: Remove the AUR key
+        if: always()
+        run: rm -f "${RUNNER_TEMP}/aur"

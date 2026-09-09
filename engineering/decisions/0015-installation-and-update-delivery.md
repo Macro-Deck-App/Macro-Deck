@@ -97,6 +97,36 @@ it. `UpdateCheckResult` carries `installStrategy` on the wire so the UI renders 
 without detecting the platform itself. The DEB and RPM carry no `.sig` and are referenced by no channel
 file; their integrity is published as SHA-256 checksums.
 
+### The AUR carries the DEB's payload, in two packages
+
+Arch is the one platform where the distribution channel is a package *recipe* rather than a package
+([#670](https://github.com/Macro-Deck-App/Macro-Deck/issues/670)), so the release pipeline maintains
+two AUR packages: `macro-deck-bin` for stable releases and `macro-deck-beta-bin` for prereleases,
+each providing `macro-deck` and conflicting with it, so only one can be installed.
+
+They wrap the **DEB**, not the AppImage. `host_binary_candidates` looks for the host beside the
+executable and then under Tauri's resource directory, which for an installed `/usr/bin/MacroDeck`
+resolves to `/usr/lib/Macro Deck/` — the DEB's own layout. A hand-built tree that relocated it would
+produce an app that launches and cannot find its host, so `package()` extracts the DEB's `data.tar`
+verbatim and the desktop entry, icons, metainfo and mime definitions come from the same files every
+other Linux package ships. The AppImage would mean unpacking a squashfs and re-deriving all of it.
+
+A stable release publishes to **both** packages, so Beta installations graduate the way they do
+through the channel manifests above — but only after `vercmp` confirms it is not older than what the
+beta package already carries. The manifests can be published unconditionally because
+`resolve_update` ranks candidates; the AUR ranks nothing and offers whatever was pushed last, so an
+unguarded rule would offer every beta user a downgrade the first time a patch release follows a
+prerelease of a higher version.
+
+`pkgver` drops the hyphen `pacman` reserves for `pkgrel`, giving `3.0.0beta.3`, which sorts *below*
+`3.0.0` because libalpm never lets a trailing alpha segment beat an exhausted one. That ordering is
+what makes graduation an upgrade rather than a downgrade, so CI asserts it with the real `vercmp`
+rather than a reimplementation. `.SRCINFO` likewise comes from real `makepkg --printsrcinfo`, and
+the push is gated on `makepkg` producing a package that actually contains `usr/bin/MacroDeck`.
+
+An AUR install is a package-manager-owned install, so it inherits the notification-only rule above
+with no bootstrapper change at all.
+
 ### Exactly one Windows installer step elevates
 
 `installer/firewall.nsh` builds a single `cmd.exe` command that deletes any rule scoped to the host's
@@ -137,6 +167,15 @@ installed copy, because single-instance would otherwise make that launch exit im
   prompt, never an in-place write Macro Deck performs. The experience is intentionally less smooth than
   on Windows and macOS; that is the cost of respecting each distribution's ownership model. If signed APT
   and DNF repositories ship later, the package manager should own delivery for those installs.
+- The two AUR package names are a permanent commitment: once someone has installed `macro-deck-bin`,
+  renaming it strands them. Publishing them also depends on an AUR maintainer account and a key the
+  release pipeline holds; until that exists the job still renders and builds every release, and only
+  the push is skipped.
+- An Arch user tracking the beta package stays on it after a stable release, at that stable version.
+  Moving to `macro-deck-bin` is a manual switch, as it is for every AUR prerelease package.
+- A packaging-only fix needs a `pkgrel` bump to be visible to an AUR helper, so the pipeline derives
+  `pkgrel` from what is already published rather than pinning it to 1, and can be re-run at an
+  already-released version.
 - Any install can move between Stable and Beta from Settings, and a stable release is never hidden from a
   Beta install even when the beta feed has gone stale. A Beta check makes up to two HTTP requests instead
   of one, which is immaterial against a 6-hour interval.
@@ -163,6 +202,11 @@ installed copy, because single-instance would otherwise make that launch exit im
   security regression, not a convenience.
 - **Ship only the AppImage on Linux.** Keeps a uniform updater story but forgoes native packages many
   distributions expect.
+- **Build the AUR package from source.** Every Arch user would recompile a 149 MB self-contained host
+  behind a .NET, Node and Rust toolchain, to arrive at the binary the release already published.
+- **One AUR package tracking whichever release is newest.** Simpler to publish, but it hands
+  prereleases to users who asked for a stable package, which is the distinction the channel design
+  exists to preserve.
 - **A server-side, channel-aware endpoint.** The release feed is static JSON on R2; adding request-time
   logic means operating a service to answer a question the client can answer from two files it already
   has URLs for.
