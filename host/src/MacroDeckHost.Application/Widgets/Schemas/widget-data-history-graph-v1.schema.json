@@ -32,7 +32,11 @@
     },
     "maxValue": {
       "type": "number",
-      "description": "Fixed upper bound for the chart's Y scale (e.g. 100 for percent). Auto-scales when absent."
+      "description": "Fixed upper bound for the chart's Y scale (e.g. 100 for percent). Auto-scales when absent, zero or negative."
+    },
+    "minValue": {
+      "type": "number",
+      "description": "Fixed lower bound for the chart's Y scale, may be negative (e.g. -100). Auto-scales when absent or zero; a maximum without a minimum keeps pinning the floor at 0. Samples below it flatten against the floor."
     },
     "historyLength": {
       "type": "number",

@@ -79,6 +79,21 @@ public class WidgetDataSchemaTests
 	}
 
 	[Test]
+	public void HistoryGraph_declares_the_chart_minimum_as_a_number_that_may_be_negative()
+	{
+		var accepted = Validate(WidgetTypeIds.HistoryGraph, """{"minValue":-100,"maxValue":100}""");
+
+		// A key the schema never declares would validate anyway, so the rejection is what proves it exists.
+		var rejected = Validate(WidgetTypeIds.HistoryGraph, """{"minValue":"deep"}""");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(accepted, Is.Empty, Describe(accepted));
+			Assert.That(rejected, Is.Not.Empty, "a non-numeric floor must not validate");
+		});
+	}
+
+	[Test]
 	public void ActionButton_states_missing_on_is_invalid_with_a_pointer_at_states()
 	{
 		Assert.That(Validate(WidgetTypeIds.ActionButton, "{}"), Is.Empty, "an empty object must always validate");

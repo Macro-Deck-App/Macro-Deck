@@ -217,6 +217,7 @@ export interface HistoryGraphData {
   showSubtitle?: boolean;
   accentColor?: string;
   maxValue?: number;
+  minValue?: number;
   historyLength?: number;
   border?: WidgetBorder;
   flows?: ActionFlow[];

@@ -31,6 +31,7 @@ internal static class HistoryGraphWidgetConfigView
 		var subtitleVariable =
 			new UiState<string>(WidgetConfigJson.ReadString(data, "subtitleVariable") ?? string.Empty);
 		var maxValue = new UiState<double>(NormalizeMaxValue(WidgetConfigJson.ReadDouble(data, "maxValue") ?? 0));
+		var minValue = new UiState<double>(WidgetConfigJson.ReadDouble(data, "minValue") ?? 0);
 		var accentColor = new UiState<string>(WidgetConfigJson.ReadString(data, "accentColor") ?? string.Empty);
 
 		var border = WidgetConfigJson.ReadObject(data, "border");
@@ -39,17 +40,15 @@ internal static class HistoryGraphWidgetConfigView
 
 		var flows = new UiState<JsonElement>(WidgetConfigJson.ReadFlows(data));
 
-		// One preset applies four fields at once by writing their UiState cells directly, the pattern
-		// docs/sdk/ui/concepts/state-and-bindings.md's own worked example sanctions for keeping several
-		// nodes in sync from one interaction - a preset has no field of its own to submit, so it is a
-		// A button rather than a value-bearing input: a preset applies four keys at once, and an input would
-		// also leave a fifth key holding the preset's own name that nothing reads.
+		// Writes several UiState cells from one interaction, the pattern
+		// docs/sdk/ui/concepts/state-and-bindings.md sanctions; a button, so no key holds the preset's name.
 		void ApplyPreset(string metric, string presetTitle, string subtitle, double max)
 		{
 			valueVariable.Value = metric;
 			title.Value = presetTitle;
 			subtitleVariable.Value = subtitle;
 			maxValue.Value = NormalizeMaxValue(max);
+			minValue.Value = 0;
 		}
 
 		return new UiWidgetConfiguration
@@ -117,6 +116,15 @@ internal static class HistoryGraphWidgetConfigView
 						Binding = Bind.To(subtitleVariable),
 						VariableTypes = UiValue.Of<IReadOnlyList<string>>(["text"]),
 						VisibleWhen = new UiVisibleWhen { ParameterName = "showSubtitle", Values = ["true"] },
+					},
+					// No Min bound, unlike the maximum beside it: a negative floor is the whole point.
+					new UiNumberInput
+					{
+						Key = "minValue",
+						Label = AppStrings.Widgets.History.ChartMinimum(),
+						Placeholder = AppStrings.Widgets.History.ChartMinimumPlaceholder(),
+						Description = AppStrings.Widgets.History.ChartMinimumHint(),
+						Binding = Bind.To(minValue),
 					},
 					new UiNumberInput
 					{

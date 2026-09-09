@@ -115,6 +115,7 @@ describe('toEditorJson / fromEditorJson round trip', () => {
     unit: 'MB',
     accentColor: '#abcdef',
     maxValue: 500,
+    minValue: -100,
     historyLength: 20,
     border: { style: 'rgb' },
     flows: JSON.stringify([{ id: 'hf1' }]),
