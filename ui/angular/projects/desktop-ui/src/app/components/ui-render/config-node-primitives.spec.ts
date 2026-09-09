@@ -182,6 +182,95 @@ describe('shared-ui-node every configuration primitive', () => {
     expect(rendered.events).toEqual([{ nodeId: 'n', name: 'change', data: 1 }]);
   });
 
+  it('emits a number from the plain number box and keeps showing what was typed', async () => {
+    const rendered = await renderTree({
+      id: 'n',
+      type: 'number',
+      properties: { value: 14, min: 1, max: 100, events: ['change'] },
+    });
+    const box = el(rendered).querySelector<HTMLInputElement>('input[type="number"]')!;
+
+    box.value = '20';
+    box.dispatchEvent(new Event('input'));
+    await tick(rendered);
+
+    expect(rendered.events).toEqual([{ nodeId: 'n', name: 'change', data: 20 }]);
+    expect(box.value).toBe('20');
+  });
+
+  it('emits a number from the number box paired with a slider', async () => {
+    const rendered = await renderTree({
+      id: 'n',
+      type: 'number',
+      properties: { value: 5, min: 0, max: 10, showSlider: true, events: ['change'] },
+    });
+    const box = el(rendered).querySelector<HTMLInputElement>('input[type="number"]')!;
+
+    box.value = '7';
+    box.dispatchEvent(new Event('input'));
+    await tick(rendered);
+
+    expect(rendered.events).toEqual([{ nodeId: 'n', name: 'change', data: 7 }]);
+  });
+
+  it('steps the number box from the value it shows (issue #698)', async () => {
+    const rendered = await renderTree({
+      id: 'n',
+      type: 'number',
+      properties: { value: 14, min: 1, max: 100, events: ['change'] },
+    });
+    const box = el(rendered).querySelector<HTMLInputElement>('input[type="number"]')!;
+
+    box.stepUp();
+    box.dispatchEvent(new Event('input'));
+    await tick(rendered);
+    expect(box.value).toBe('15');
+
+    box.stepUp();
+    box.dispatchEvent(new Event('input'));
+    await tick(rendered);
+    expect(box.value).toBe('16');
+
+    expect(rendered.events).toEqual([
+      { nodeId: 'n', name: 'change', data: 15 },
+      { nodeId: 'n', name: 'change', data: 16 },
+    ]);
+  });
+
+  it('leaves a half-typed decimal alone while the model renormalises it', async () => {
+    const rendered = await renderTree({
+      id: 'n',
+      type: 'number',
+      properties: { value: 1, events: ['change'] },
+    });
+    const box = el(rendered).querySelector<HTMLInputElement>('input[type="number"]')!;
+
+    box.value = '1.10';
+    box.dispatchEvent(new Event('input'));
+    await tick(rendered);
+
+    expect(rendered.events).toEqual([{ nodeId: 'n', name: 'change', data: 1.1 }]);
+    expect(box.value).toBe('1.10');
+  });
+
+  it('sends nothing for an emptied number box and shows the kept value again on blur', async () => {
+    const rendered = await renderTree({
+      id: 'n',
+      type: 'number',
+      properties: { value: 14, min: 1, max: 100, events: ['change'] },
+    });
+    const box = el(rendered).querySelector<HTMLInputElement>('input[type="number"]')!;
+
+    box.value = '';
+    box.dispatchEvent(new Event('input'));
+    await tick(rendered);
+    expect(rendered.events).toEqual([]);
+
+    box.dispatchEvent(new Event('blur'));
+    await tick(rendered);
+    expect(box.value).toBe('14');
+  });
+
   // The Action Button's state list is the case: a user opening it wants to see which state the button
   // is on right now, which is a fact about the option, not part of its name.
   it('marks a choice option carrying a badge, and leaves the others unmarked', async () => {

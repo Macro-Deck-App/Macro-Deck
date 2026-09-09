@@ -127,6 +127,15 @@ export class ConditionOperandInputComponent implements OnInit, OnChanges, OnDest
     this.valueChange.emit(value);
   }
 
+  emitNumber(value: string | number): void {
+    if (value === '' || value == null) {
+      this.emit('');
+      return;
+    }
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) this.emit(parsed);
+  }
+
   loadDynamicOptions(filter?: string): void {
     const parameter = this.parameter;
     if (!parameter) return;
