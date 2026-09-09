@@ -206,6 +206,18 @@ jobs:
             --data @discord-payload.json \
             "$DISCORD_WEBHOOK_URL"
 
+  # Its own job rather than steps on publish: an AUR failure must not fail the release after it is
+  # out, nor skip publish-nuget, which gates on publish succeeding.
+  publish-aur:
+    name: Publish AUR packages
+    needs: publish
+    permissions:
+      contents: read
+    uses: ./.github/workflows/publish-aur.yml
+    with:
+      version: ${{ needs.publish.outputs.version }}
+    secrets: inherit
+
   # Last, and only once the release exists: a package on nuget.org cannot be taken back, so it
   # must never be published for a release that failed to be created. It is also the one publishing
   # step allowed to fail - the release is already out, and the packages can be pushed afterwards
