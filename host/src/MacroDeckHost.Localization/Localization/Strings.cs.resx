@@ -16375,4 +16375,19 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Onboarding.RecoveryKey.RevealUnavailable" xml:space="preserve">
     <value>Klíč lze zobrazit pouze na počítači, na kterém Macro Deck běží.</value>
   </data>
+  <data name="Settings.Network.PortUsedByMacroDeck" xml:space="preserve">
+    <value>Tento port již používá samotný Macro Deck. Zvolte jiný.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadCertificateRequired" xml:space="preserve">
+    <value>Je vyžadován certifikát ve formátu PEM.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadPrivateKeyRequired" xml:space="preserve">
+    <value>Je vyžadován soukromý klíč ve formátu PEM.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadPrivateKeyEncrypted" xml:space="preserve">
+    <value>Soukromý klíč je zašifrován heslem. Použijte místo něj nešifrovaný soukromý klíč PKCS#8.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadPairInvalid" xml:space="preserve">
+    <value>Certifikát nebo soukromý klíč se nepodařilo načíst. Ověřte, že jde o platný certifikát X.509 ve formátu PEM a odpovídající nešifrovaný soukromý klíč PKCS#8.</value>
+  </data>
 </root>

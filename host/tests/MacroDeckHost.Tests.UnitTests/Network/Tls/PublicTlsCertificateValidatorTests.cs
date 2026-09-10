@@ -2,6 +2,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using MacroDeckHost.Application.Network.Tls;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Network.Tls;
 
@@ -45,7 +46,7 @@ public class PublicTlsCertificateValidatorTests
 		{
 			Assert.That(result.Valid, Is.False);
 			Assert.That(result.Certificate, Is.Null);
-			Assert.That(result.Error, Is.Not.Null.And.Not.Empty);
+			Assert.That(TestLocalization.Resolve(result.Error), Is.Not.Null.And.Not.Empty);
 		});
 	}
 
@@ -62,7 +63,7 @@ public class PublicTlsCertificateValidatorTests
 		{
 			Assert.That(missingCertificate.Valid, Is.False);
 			Assert.That(missingKey.Valid, Is.False);
-			Assert.That(missingCertificate.Error, Is.Not.EqualTo(missingKey.Error));
+			Assert.That(TestLocalization.Resolve(missingCertificate.Error), Is.Not.EqualTo(TestLocalization.Resolve(missingKey.Error)));
 		});
 	}
 
@@ -79,9 +80,9 @@ public class PublicTlsCertificateValidatorTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(garbage.Valid, Is.False);
-			Assert.That(garbage.Error, Is.Not.Null.And.Not.Empty);
-			Assert.That(garbage.Error, Is.Not.EqualTo(missingCertificate.Error));
-			Assert.That(garbage.Error, Is.Not.EqualTo(missingKey.Error));
+			Assert.That(TestLocalization.Resolve(garbage.Error), Is.Not.Null.And.Not.Empty);
+			Assert.That(TestLocalization.Resolve(garbage.Error), Is.Not.EqualTo(TestLocalization.Resolve(missingCertificate.Error)));
+			Assert.That(TestLocalization.Resolve(garbage.Error), Is.Not.EqualTo(TestLocalization.Resolve(missingKey.Error)));
 		});
 	}
 
@@ -101,7 +102,7 @@ public class PublicTlsCertificateValidatorTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Valid, Is.False);
-			Assert.That(result.Error,
+			Assert.That(TestLocalization.Resolve(result.Error),
 				Does.Contain("passphrase").IgnoreCase
 					.Or.Contain("encrypted").IgnoreCase);
 		});
@@ -132,13 +133,13 @@ public class PublicTlsCertificateValidatorTests
 		{
 			foreach (var result in results)
 			{
-				Assert.That(result.Error, Is.Not.Null);
-				Assert.That(result.Error, Does.Not.Contain("BEGIN"));
+				Assert.That(TestLocalization.Resolve(result.Error), Is.Not.Null);
+				Assert.That(TestLocalization.Resolve(result.Error), Does.Not.Contain("BEGIN"));
 
-				AssertNoLongSubstringLeaked(result.Error!, certificatePem);
-				AssertNoLongSubstringLeaked(result.Error!, privateKeyPem);
-				AssertNoLongSubstringLeaked(result.Error!, mismatchedKeyPem);
-				AssertNoLongSubstringLeaked(result.Error!, encryptedKeyPem);
+				AssertNoLongSubstringLeaked(TestLocalization.Resolve(result.Error)!, certificatePem);
+				AssertNoLongSubstringLeaked(TestLocalization.Resolve(result.Error)!, privateKeyPem);
+				AssertNoLongSubstringLeaked(TestLocalization.Resolve(result.Error)!, mismatchedKeyPem);
+				AssertNoLongSubstringLeaked(TestLocalization.Resolve(result.Error)!, encryptedKeyPem);
 			}
 		});
 	}

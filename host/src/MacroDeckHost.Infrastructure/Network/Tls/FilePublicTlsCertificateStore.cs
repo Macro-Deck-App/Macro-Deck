@@ -108,7 +108,7 @@ public sealed class FilePublicTlsCertificateStore : IPublicTlsCertificateStore
 		var result = PublicTlsCertificateValidator.Validate(certificatePem, privateKeyPem, source);
 		if (!result.Valid || result.Certificate is null)
 		{
-			throw new ArgumentException(result.Error ?? "The certificate/key pair is invalid.");
+			throw new ArgumentException(result.Error?.ToString() ?? "The certificate/key pair is invalid.");
 		}
 
 		Directory.CreateDirectory(Path.GetDirectoryName(_keyFilePath)!);

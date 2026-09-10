@@ -16375,4 +16375,19 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Onboarding.RecoveryKey.RevealUnavailable" xml:space="preserve">
     <value>La clave solo se puede mostrar en el ordenador donde se ejecuta Macro Deck.</value>
   </data>
+  <data name="Settings.Network.PortUsedByMacroDeck" xml:space="preserve">
+    <value>Macro Deck ya usa este puerto. Elige otro.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadCertificateRequired" xml:space="preserve">
+    <value>Se requiere un certificado PEM.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadPrivateKeyRequired" xml:space="preserve">
+    <value>Se requiere una clave privada PEM.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadPrivateKeyEncrypted" xml:space="preserve">
+    <value>La clave privada está cifrada con una frase de contraseña. Usa en su lugar una clave privada PKCS#8 sin cifrar.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadPairInvalid" xml:space="preserve">
+    <value>No se pudo cargar el certificado o la clave privada. Comprueba que sean un certificado X.509 válido codificado en PEM y una clave privada PKCS#8 correspondiente y sin cifrar.</value>
+  </data>
 </root>

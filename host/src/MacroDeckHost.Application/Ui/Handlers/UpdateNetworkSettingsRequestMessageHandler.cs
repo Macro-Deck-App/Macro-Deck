@@ -1,10 +1,12 @@
-using System.Globalization;
+using MacroDeck.Localization;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Lifecycle;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Settings;
+using MacroDeckHost.Localization;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
 
@@ -15,16 +17,19 @@ public class UpdateNetworkSettingsRequestMessageHandler
 	private readonly IApplicationRestartService _restart;
 	private readonly IHostListenerState _listenerState;
 	private readonly INetworkRestartNotifier _restartNotifier;
+	private readonly IServiceScopeFactory _scopeFactory;
 
 	public UpdateNetworkSettingsRequestMessageHandler(IAppPreferenceService preferences,
 		IApplicationRestartService restart,
 		IHostListenerState listenerState,
-		INetworkRestartNotifier restartNotifier)
+		INetworkRestartNotifier restartNotifier,
+		IServiceScopeFactory scopeFactory)
 	{
 		_preferences = preferences;
 		_restart = restart;
 		_listenerState = listenerState;
 		_restartNotifier = restartNotifier;
+		_scopeFactory = scopeFactory;
 	}
 
 	public async ValueTask<UpdateNetworkSettingsResponse> Handle(
@@ -48,7 +53,10 @@ public class UpdateNetworkSettingsRequestMessageHandler
 		if (Reject(request.PublicPort, current, effectiveTlsEnabled, effectiveTlsMode, effectiveTlsHttpsPort)
 			is { } error)
 		{
-			return NetworkSettingsResponseFactory.Create(current, _restart.Availability, false, error);
+			return NetworkSettingsResponseFactory.Create(current,
+				_restart.Availability,
+				false,
+				await ActiveLocalization.Resolve(_scopeFactory, error));
 		}
 
 		var unchanged = request.PublicPort == current.PublicPort &&
@@ -68,7 +76,7 @@ public class UpdateNetworkSettingsRequestMessageHandler
 		return NetworkSettingsResponseFactory.Create(updated, _restart.Availability, true, null);
 	}
 
-	private string? Reject(int publicPort,
+	private LocalizedText? Reject(int publicPort,
 		NetworkSettings current,
 		bool effectiveTlsEnabled,
 		PublicTlsMode effectiveTlsMode,
@@ -76,15 +84,13 @@ public class UpdateNetworkSettingsRequestMessageHandler
 	{
 		if (!PublicPortSelector.IsConfigurable(publicPort))
 		{
-			return string.Format(CultureInfo.InvariantCulture,
-				"Enter a port between {0} and {1}. Lower ports are reserved by the operating system.",
-				PublicPortSelector.MinimumConfigurablePort,
-				PublicPortSelector.MaximumConfigurablePort);
+			return AppStrings.Settings.Network.PortRangeHint(minimum: PublicPortSelector.MinimumConfigurablePort,
+				maximum: PublicPortSelector.MaximumConfigurablePort);
 		}
 
 		if (publicPort == _listenerState.LoopbackPort)
 		{
-			return "This port is already used by Macro Deck itself. Choose a different one.";
+			return AppStrings.Settings.Network.PortUsedByMacroDeck();
 		}
 
 		// Only the moment the user switches HTTPS on, not every save made while it happens to be on. HTTPS
@@ -93,7 +99,7 @@ public class UpdateNetworkSettingsRequestMessageHandler
 		// already reported through PublicTlsRejection.NoCertificate rather than hidden.
 		if (effectiveTlsEnabled && !current.TlsEnabled && !current.TlsCertificateConfigured)
 		{
-			return "Add a certificate before turning HTTPS on.";
+			return AppStrings.Settings.Network.Tls.RejectionNoCertificate();
 		}
 
 		if (effectiveTlsMode != PublicTlsMode.Additional)
@@ -103,19 +109,17 @@ public class UpdateNetworkSettingsRequestMessageHandler
 
 		if (!PublicPortSelector.IsConfigurable(effectiveTlsHttpsPort))
 		{
-			return string.Format(CultureInfo.InvariantCulture,
-				"The HTTPS port must be between {0} and {1}.",
-				PublicPortSelector.MinimumConfigurablePort,
-				PublicPortSelector.MaximumConfigurablePort);
+			return AppStrings.Settings.Network.Tls.PortRangeHint(minimum: PublicPortSelector.MinimumConfigurablePort,
+				maximum: PublicPortSelector.MaximumConfigurablePort);
 		}
 
 		if (effectiveTlsHttpsPort == publicPort)
 		{
-			return "The HTTPS port must be different from the port Macro Deck already uses.";
+			return AppStrings.Settings.Network.Tls.PortConflictsWithPublicPort();
 		}
 
 		return effectiveTlsHttpsPort == _listenerState.LoopbackPort
-			? "The HTTPS port is used by Macro Deck itself. Choose a different one."
+			? AppStrings.Settings.Network.Tls.RejectionHttpsPortConflictsWithLoopbackPort()
 			: null;
 	}
 }

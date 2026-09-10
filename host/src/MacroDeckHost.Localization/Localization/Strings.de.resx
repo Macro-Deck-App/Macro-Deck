@@ -16373,4 +16373,19 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Onboarding.RecoveryKey.RevealUnavailable" xml:space="preserve">
     <value>Der Schlüssel kann nur auf dem Computer angezeigt werden, auf dem Macro Deck läuft.</value>
   </data>
+  <data name="Settings.Network.PortUsedByMacroDeck" xml:space="preserve">
+    <value>Dieser Port wird bereits von Macro Deck selbst verwendet. Wähle einen anderen.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadCertificateRequired" xml:space="preserve">
+    <value>Ein Zertifikat im PEM-Format ist erforderlich.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadPrivateKeyRequired" xml:space="preserve">
+    <value>Ein privater Schlüssel im PEM-Format ist erforderlich.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadPrivateKeyEncrypted" xml:space="preserve">
+    <value>Der private Schlüssel ist mit einer Passphrase verschlüsselt. Verwende stattdessen einen unverschlüsselten privaten PKCS#8-Schlüssel.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadPairInvalid" xml:space="preserve">
+    <value>Das Zertifikat oder der private Schlüssel konnte nicht geladen werden. Prüfe, ob es sich um ein gültiges PEM-codiertes X.509-Zertifikat und einen passenden, unverschlüsselten privaten PKCS#8-Schlüssel handelt.</value>
+  </data>
 </root>
