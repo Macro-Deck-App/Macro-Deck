@@ -1,8 +1,10 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { GetNetworkSettingsResponse } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
 import { NetworkSettingsComponent } from './network-settings.component';
+import { NetworkTlsSettingsComponent } from './network-tls-settings.component';
 import { EMPTY } from 'rxjs';
 
 describe('NetworkSettingsComponent', () => {
@@ -43,6 +45,7 @@ describe('NetworkSettingsComponent', () => {
     tlsAuthorityFingerprint: null,
     tlsAuthorityNotBefore: null,
     tlsAuthorityNotAfter: null,
+    discoveryEnabled: true,
   };
 
   function installApi(state: Partial<GetNetworkSettingsResponse> = {}): GetNetworkSettingsResponse {
@@ -263,5 +266,35 @@ describe('NetworkSettingsComponent', () => {
 
     expect(api.getNetworkSettings).toHaveBeenCalledTimes(2);
     expect(fixture.componentInstance.error()).toBe('The port could not be saved.');
+  });
+
+  it('shows the network discovery state the host reports', async () => {
+    installApi({ discoveryEnabled: false });
+    const fixture = await create();
+
+    expect(fixture.componentInstance.discoveryEnabled()).toBeFalse();
+  });
+
+  it('switches network discovery with the configured port and no TLS values', async () => {
+    installApi({ publicPort: 9100, activePublicPort: 8193 });
+    const fixture = await create();
+
+    await fixture.componentInstance.setDiscoveryEnabled(false);
+
+    expect(api.updateNetworkSettings).toHaveBeenCalledOnceWith({ publicPort: 9100, discoveryEnabled: false });
+  });
+
+  it('keeps network discovery locked while an HTTPS change is being saved', async () => {
+    const fixture = await create();
+    const tls = fixture.debugElement.query(By.directive(NetworkTlsSettingsComponent))
+      .componentInstance as NetworkTlsSettingsComponent;
+
+    tls.httpsBusy.set(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await fixture.componentInstance.setDiscoveryEnabled(false);
+
+    expect(fixture.componentInstance.tlsBusy()).toBeTrue();
+    expect(api.updateNetworkSettings).not.toHaveBeenCalled();
   });
 });

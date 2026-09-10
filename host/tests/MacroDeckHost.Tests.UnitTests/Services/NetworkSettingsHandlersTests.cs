@@ -5,6 +5,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Lifecycle;
+using MacroDeckHost.Application.Network.Discovery;
 using MacroDeckHost.Application.Network.Tls;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Persistence.Repositories;
@@ -32,8 +33,19 @@ public class NetworkSettingsHandlersTests
 
 		public int Writes { get; private set; }
 
+		private int _changeReads;
+
+		public (string Key, int OnRead, string Value)? ChangeBehindTheHandler { get; set; }
+
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(_store.GetValueOrDefault(key));
+		{
+			if (ChangeBehindTheHandler is { } change && change.Key == key && ++_changeReads == change.OnRead)
+			{
+				_store[key] = new AppPreferenceEntity { Key = key, Value = change.Value };
+			}
+
+			return Task.FromResult(_store.GetValueOrDefault(key));
+		}
 
 		public Task SetValue(string key, string value)
 		{
@@ -76,6 +88,13 @@ public class NetworkSettingsHandlersTests
 		public IReadOnlyList<string> GetHostNames() => ["deck-pc", "deck-pc.local"];
 	}
 
+	private sealed class FakeDiscoveryRefresher : IDiscoveryAdvertisementRefresher
+	{
+		public int Requests { get; private set; }
+
+		public void RequestRefresh() => Requests++;
+	}
+
 	private sealed record Fixture(
 		CountingAppPreferenceRepository Repository,
 		FakePublicTlsCertificateStore CertificateStore,
@@ -83,7 +102,8 @@ public class NetworkSettingsHandlersTests
 		GetNetworkSettingsRequestMessageHandler Get,
 		UpdateNetworkSettingsRequestMessageHandler Update,
 		UpdateNetworkTlsCertificateRequestMessageHandler UpdateCertificate,
-		ReissueTlsCertificateRequestMessageHandler ReissueCertificate);
+		ReissueTlsCertificateRequestMessageHandler ReissueCertificate,
+		FakeDiscoveryRefresher Discovery);
 
 	private static Fixture CreateFixture(
 		bool overriddenByEnvironment = false,
@@ -122,12 +142,13 @@ public class NetworkSettingsHandlersTests
 		var notifications = new UserNotificationStore();
 		var notifier = new NetworkRestartNotifier(service, restartService, notifications, TestLocalization.Resolver);
 		var addressProvider = new FakeLocalAddressProvider();
+		var discovery = new FakeDiscoveryRefresher();
 
 		return new Fixture(repository,
 			certificateStore,
 			notifications,
 			new GetNetworkSettingsRequestMessageHandler(service, restartService),
-			new UpdateNetworkSettingsRequestMessageHandler(service, restartService, listenerState, notifier),
+			new UpdateNetworkSettingsRequestMessageHandler(service, restartService, listenerState, notifier, discovery),
 			new UpdateNetworkTlsCertificateRequestMessageHandler(service, restartService, certificateStore, notifier),
 			new ReissueTlsCertificateRequestMessageHandler(service,
 				restartService,
@@ -135,7 +156,8 @@ public class NetworkSettingsHandlersTests
 					addressProvider,
 					new FakeHostNameProvider(),
 					new LoggerConfiguration().CreateLogger()),
-				notifier));
+				notifier),
+			discovery);
 	}
 
 	private static (string CertificatePem, string PrivateKeyPem, string Fingerprint) ReissueCertificate()
@@ -156,6 +178,71 @@ public class NetworkSettingsHandlersTests
 		return (certificate.ExportCertificatePem(),
 			rsa.ExportPkcs8PrivateKeyPem(),
 			certificate.GetCertHashString(HashAlgorithmName.SHA256));
+	}
+
+	[Test]
+	public async Task Discovery_is_on_for_a_fresh_installation()
+	{
+		var fixture = CreateFixture();
+
+		var response = await fixture.Get.Handle(new GetNetworkSettingsRequest(), CancellationToken.None);
+
+		Assert.That(response.DiscoveryEnabled, Is.True);
+	}
+
+	[Test]
+	public async Task Turning_discovery_off_is_saved_live_without_asking_for_a_restart()
+	{
+		var fixture = CreateFixture();
+
+		var response = await fixture.Update.Handle(
+			new UpdateNetworkSettingsRequest { PublicPort = ActivePort, DiscoveryEnabled = false },
+			CancellationToken.None);
+		var stored = await fixture.Repository.GetByKey(AppPreferenceService.DiscoveryEnabledKey);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.True);
+			Assert.That(response.DiscoveryEnabled, Is.False);
+			Assert.That(response.RestartRequired, Is.False);
+			Assert.That(stored?.Value, Is.EqualTo(bool.FalseString));
+			Assert.That(fixture.Discovery.Requests, Is.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task A_save_that_omits_discovery_keeps_the_stored_value()
+	{
+		var fixture = CreateFixture();
+		fixture.Repository.Seed(AppPreferenceService.DiscoveryEnabledKey, bool.FalseString);
+
+		var response = await fixture.Update.Handle(new UpdateNetworkSettingsRequest { PublicPort = 9100 },
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.PublicPort, Is.EqualTo(9100));
+			Assert.That(response.DiscoveryEnabled, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_tls_save_does_not_revert_a_discovery_change_that_landed_after_the_handler_read()
+	{
+		var fixture = CreateFixture();
+		fixture.Repository.ChangeBehindTheHandler = (AppPreferenceService.DiscoveryEnabledKey, 2, bool.FalseString);
+
+		var response = await fixture.Update.Handle(
+			new UpdateNetworkSettingsRequest { PublicPort = ActivePort, TlsHttpsPort = 9443 },
+			CancellationToken.None);
+		var stored = await fixture.Repository.GetByKey(AppPreferenceService.DiscoveryEnabledKey);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.TlsHttpsPort, Is.EqualTo(9443));
+			Assert.That(response.DiscoveryEnabled, Is.False);
+			Assert.That(stored?.Value, Is.EqualTo(bool.FalseString));
+		});
 	}
 
 	[Test]

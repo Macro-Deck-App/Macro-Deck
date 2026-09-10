@@ -1164,7 +1164,8 @@ public class RemotePluginIntegrationRegistrarTests
 		public Task<NetworkSettings> SetNetwork(int? publicPort,
 			bool? tlsEnabled = null,
 			string? tlsMode = null,
-			int? tlsHttpsPort = null)
+			int? tlsHttpsPort = null,
+			bool? discoveryEnabled = null)
 			=> throw new NotSupportedException();
 
 		public Task<AdbSettings> GetAdb() => throw new NotSupportedException();

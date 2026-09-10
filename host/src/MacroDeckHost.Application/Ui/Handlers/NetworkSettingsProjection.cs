@@ -37,7 +37,8 @@ internal readonly record struct NetworkSettingsProjection(
 	string? TlsAuthorityNotAfter,
 	bool RestartRequired,
 	bool RestartSupported,
-	string? RestartUnsupportedReason)
+	string? RestartUnsupportedReason,
+	bool DiscoveryEnabled)
 {
 	public static NetworkSettingsProjection From(NetworkSettings settings, RestartAvailability restart)
 	{
@@ -80,6 +81,7 @@ internal readonly record struct NetworkSettingsProjection(
 			settings.TlsAuthorityNotAfter?.ToString("O"),
 			restartRequired,
 			restart.Supported,
-			restart.Reason);
+			restart.Reason,
+			settings.DiscoveryEnabled);
 	}
 }

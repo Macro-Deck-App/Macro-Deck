@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AppStrings, GetNetworkSettingsResponse } from '@macro-deck/runtime';
-import { ApiService, ButtonComponent, ErrorBannerComponent, InputComponent, LocalizationService, SettingsRowComponent, SettingsSectionComponent, TranslatePipe } from '@shared';
+import { ApiService, ButtonComponent, ErrorBannerComponent, InputComponent, LocalizationService, SettingsRowComponent, SettingsSectionComponent, ToggleSwitchComponent, TranslatePipe } from '@shared';
 import { ConfirmationModalComponent } from '../../../overlay/confirmation-modal/confirmation-modal.component';
 import { RestartNoticeService } from '../../../../services/restart-notice.service';
 import { NetworkTlsSettingsComponent } from './network-tls-settings.component';
@@ -14,6 +14,7 @@ import { NetworkTlsSettingsComponent } from './network-tls-settings.component';
     SettingsSectionComponent,
     SettingsRowComponent,
     InputComponent,
+    ToggleSwitchComponent,
     ButtonComponent,
     ErrorBannerComponent,
     ConfirmationModalComponent,
@@ -46,6 +47,14 @@ export class NetworkSettingsComponent {
   readonly restartUnsupportedReason = signal<string | null>(null);
 
   readonly draft = signal('');
+
+  readonly discoveryEnabled = signal(true);
+  readonly discoverySaving = signal(false);
+  readonly tlsBusy = signal(false);
+
+  // A save sends every TLS value it read earlier, so two overlapping saves can undo each other.
+  readonly discoveryLocked = computed(() =>
+    !this.loaded() || this.saving() || this.discoverySaving() || this.tlsBusy());
 
   readonly networkState = signal<GetNetworkSettingsResponse | null>(null);
 
@@ -114,6 +123,31 @@ export class NetworkSettingsComponent {
     }
   }
 
+  async setDiscoveryEnabled(value: boolean): Promise<void> {
+    if (this.discoveryLocked()) {
+      return;
+    }
+
+    this.discoverySaving.set(true);
+    this.discoveryEnabled.set(value);
+    this.error.set(null);
+    try {
+      const response = await this.api.updateNetworkSettings({
+        publicPort: this.configuredPort(),
+        discoveryEnabled: value,
+      });
+      this.applyState(response);
+      if (!response.success) {
+        this.error.set(response.error ?? this.localization.translateKey(AppStrings.Settings.Network.Tls.SaveFailed));
+      }
+    } catch {
+      this.error.set(this.localization.translateKey(AppStrings.Settings.Network.Tls.SaveFailed));
+      await this.load();
+    } finally {
+      this.discoverySaving.set(false);
+    }
+  }
+
   askToRestart(): void {
     if (this.canRestart()) {
       this.restartPromptOpen.set(true);
@@ -164,6 +198,7 @@ export class NetworkSettingsComponent {
     this.publicListenerUnavailable.set(state.publicListenerUnavailable);
     this.restartSupported.set(state.restartSupported);
     this.restartUnsupportedReason.set(state.restartUnsupportedReason);
+    this.discoveryEnabled.set(state.discoveryEnabled);
     this.draft.set(String(state.publicPort));
   }
 }

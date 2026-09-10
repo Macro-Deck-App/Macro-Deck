@@ -12825,6 +12825,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Settings.Network.Description" xml:space="preserve">
     <value>El puerto en el que Macro Deck escucha conexiones de teléfonos, tablets y navegadores en tu red.</value>
   </data>
+  <data name="Settings.Network.DiscoveryDescription" xml:space="preserve">
+    <value>Permite que la app Macro Deck en móviles y tablets encuentre este equipo automáticamente. Los demás dispositivos de la red ven su nombre y su versión.</value>
+  </data>
+  <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
+    <value>Mostrar en la red local</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>MACRO_DECK_PORT está definido para este inicio y determina el puerto ({port}). El valor configurado permanece sin usar hasta que se elimine esa anulación.</value>
     <comment>[port:int]</comment>

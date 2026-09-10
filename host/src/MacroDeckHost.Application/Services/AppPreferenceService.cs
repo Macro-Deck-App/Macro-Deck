@@ -26,6 +26,8 @@ public partial class AppPreferenceService : IAppPreferenceService
 	public const string TlsModeKey = "network.tls.mode";
 	public const string TlsHttpsPortKey = "network.tls.httpsPort";
 
+	public const string DiscoveryEnabledKey = "network.discovery.enabled";
+
 	public const string AdbEnabledKey = "adb.enabled";
 	public const string AdbExecutablePathKey = "adb.executablePath";
 	public const string AdbUsbConnectionsEnabledKey = "adb.usbConnectionsEnabled";
@@ -183,19 +185,23 @@ public partial class AppPreferenceService : IAppPreferenceService
 		var storedTlsEnabled = (await _repository.GetByKey(TlsEnabledKey))?.Value;
 		var storedTlsMode = (await _repository.GetByKey(TlsModeKey))?.Value;
 		var storedTlsHttpsPort = (await _repository.GetByKey(TlsHttpsPortKey))?.Value;
+		var storedDiscoveryEnabled = (await _repository.GetByKey(DiscoveryEnabledKey))?.Value;
 
 		return BuildNetworkSettings(NormalizePublicPort(storedPort),
 			NormalizeTlsEnabled(storedTlsEnabled),
 			PublicTlsSelector.ParseMode(storedTlsMode),
-			NormalizeTlsHttpsPort(storedTlsHttpsPort));
+			NormalizeTlsHttpsPort(storedTlsHttpsPort),
+			NormalizeFlag(storedDiscoveryEnabled, true));
 	}
 
 	public async Task<NetworkSettings> SetNetwork(int? publicPort,
 		bool? tlsEnabled = null,
 		string? tlsMode = null,
-		int? tlsHttpsPort = null)
+		int? tlsHttpsPort = null,
+		bool? discoveryEnabled = null)
 	{
 		var current = await GetNetwork();
+		var resolvedDiscoveryEnabled = discoveryEnabled ?? current.DiscoveryEnabled;
 
 		var resolvedPort = NormalizePublicPort(publicPort?.ToString(CultureInfo.InvariantCulture));
 		var resolvedTlsEnabled = tlsEnabled ?? PublicTlsSelector.DefaultTlsEnabled;
@@ -226,7 +232,16 @@ public partial class AppPreferenceService : IAppPreferenceService
 			await _repository.SetValue(TlsHttpsPortKey, resolvedTlsHttpsPort.ToString(CultureInfo.InvariantCulture));
 		}
 
-		return BuildNetworkSettings(resolvedPort, resolvedTlsEnabled, resolvedTlsMode, resolvedTlsHttpsPort);
+		if (resolvedDiscoveryEnabled != current.DiscoveryEnabled)
+		{
+			await _repository.SetValue(DiscoveryEnabledKey, resolvedDiscoveryEnabled.ToString());
+		}
+
+		return BuildNetworkSettings(resolvedPort,
+			resolvedTlsEnabled,
+			resolvedTlsMode,
+			resolvedTlsHttpsPort,
+			resolvedDiscoveryEnabled);
 	}
 
 	public async Task<AdbSettings> GetAdb()
@@ -489,7 +504,8 @@ public partial class AppPreferenceService : IAppPreferenceService
 	private NetworkSettings BuildNetworkSettings(int publicPort,
 		bool tlsEnabled,
 		PublicTlsMode tlsMode,
-		int tlsHttpsPort)
+		int tlsHttpsPort,
+		bool discoveryEnabled)
 	{
 		var certificateInfo = _certificateStore?.ReadInfo();
 		var authorityInfo = _certificateStore?.ReadAuthorityInfo();
@@ -525,7 +541,8 @@ public partial class AppPreferenceService : IAppPreferenceService
 			authorityInfo?.Subject,
 			authorityInfo?.Fingerprint,
 			authorityInfo?.NotBefore,
-			authorityInfo?.NotAfter);
+			authorityInfo?.NotAfter,
+			discoveryEnabled);
 	}
 
 	private static int NormalizePublicPort(string? value)

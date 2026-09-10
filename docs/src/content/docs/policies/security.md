@@ -14,7 +14,7 @@ The host runs more than one listener.
 
 | Listener | Reachable from | Notes |
 | --- | --- | --- |
-| Public listener | The LAN | Serves the API and the web client. HTTPS is optional and configurable - see [ADR 0040](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0040-public-listeners-and-tls.md). |
+| Public listener | The LAN | Serves the API and the web client. HTTPS is optional and configurable - see [ADR 0040](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0040-public-listeners-and-tls.md). While its plain-HTTP port is serving, the host announces its instance name, version and that port on the LAN over mDNS (`_macrodeck._tcp`), unless this is turned off in Settings > Network - see [ADR 0082](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0082-lan-discovery-uses-the-platform-responder.md). |
 | Private loopback listener | The local machine only | Never gets TLS: the desktop shell and the plugin SDK reach it over plain HTTP on `127.0.0.1`. |
 
 **Plugin endpoints are served on both listeners but only accept a loopback remote address.** A caller

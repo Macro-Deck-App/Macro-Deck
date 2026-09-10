@@ -12825,6 +12825,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Network.Description" xml:space="preserve">
     <value>Port, na kterém Macro Deck naslouchá telefonům, tabletům a prohlížečům v lokální síti.</value>
   </data>
+  <data name="Settings.Network.DiscoveryDescription" xml:space="preserve">
+    <value>Umožňuje aplikaci Macro Deck v telefonech a tabletech automaticky najít tento počítač. Ostatní zařízení v síti vidí jeho název a verzi.</value>
+  </data>
+  <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
+    <value>Zobrazit v místní síti</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>Pro toto spuštění je nastavena proměnná MACRO_DECK_PORT, která určuje port ({port}). Nastavená hodnota zůstává nevyužitá, dokud toto přepsání nebude odstraněno.</value>
     <comment>[port:int]</comment>

@@ -98,10 +98,23 @@
         </shared-button>
       </div>
     }
+
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Network.DiscoveryLabel' | translate"
+      [description]="'macrodeck.app:Settings.Network.DiscoveryDescription' | translate">
+      <shared-toggle-switch
+        [disabled]="!loaded() || saving() || tlsBusy()"
+        [busy]="discoverySaving()"
+        [checked]="discoveryEnabled()"
+        (changed)="setDiscoveryEnabled($event)" />
+    </shared-settings-row>
   </shared-settings-section>
 
   @if (loaded() && networkState(); as state) {
-    <app-network-tls-settings [state]="state" (stateChange)="onTlsStateChanged($event)" />
+    <app-network-tls-settings
+      [state]="state"
+      (stateChange)="onTlsStateChanged($event)"
+      (busyChange)="tlsBusy.set($event)" />
   }
 
   @if (restartPromptOpen()) {

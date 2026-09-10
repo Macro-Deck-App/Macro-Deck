@@ -45,6 +45,7 @@ describe('RestartNoticeService', () => {
     tlsAuthorityFingerprint: null,
     tlsAuthorityNotBefore: null,
     tlsAuthorityNotAfter: null,
+    discoveryEnabled: true,
   };
 
   beforeEach(() => {

@@ -68,6 +68,10 @@ export class NetworkTlsSettingsComponent {
   readonly authorityBusy = signal(false);
   readonly uploadModalOpen = signal(false);
 
+  readonly busyChange = output<boolean>();
+  private readonly busy = computed(() =>
+    this.httpsBusy() || this.modeBusy() || this.portSaving() || this.certificateBusy() || this.authorityBusy());
+
   readonly sourceLabel = computed(() => {
     const source = this.state().tlsCertificateSource;
     if (!source) {
@@ -146,6 +150,7 @@ export class NetworkTlsSettingsComponent {
 
   constructor() {
     effect(() => this.httpsPortDraft.set(String(this.state().tlsHttpsPort)));
+    effect(() => this.busyChange.emit(this.busy()));
   }
 
   async setHttpsEnabled(value: boolean): Promise<void> {

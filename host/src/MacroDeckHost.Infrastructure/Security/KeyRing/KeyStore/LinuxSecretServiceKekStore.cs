@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using MacroDeckHost.Application.Security.KeyRing;
+using MacroDeckHost.Infrastructure.Native;
 using MacroDeckHost.Infrastructure.Security.KeyRing.KeyStore.Native;
 
 namespace MacroDeckHost.Infrastructure.Security.KeyRing.KeyStore;
@@ -91,8 +92,8 @@ public sealed class LinuxSecretServiceKekStore : IKekStore
 		}
 
 		var encoded = Convert.ToBase64String(kek);
-		var label = LinuxSecretServiceInterop.Utf8($"{identity.Service} key ring");
-		var password = LinuxSecretServiceInterop.Utf8(encoded);
+		var label = NativeUtf8.Alloc($"{identity.Service} key ring");
+		var password = NativeUtf8.Alloc(encoded);
 		try
 		{
 			var stored = LinuxSecretServiceInterop.StoreSync(LinuxSecretServiceInterop.Schema,

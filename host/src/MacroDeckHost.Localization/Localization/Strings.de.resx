@@ -12823,6 +12823,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.Network.Description" xml:space="preserve">
     <value>Der Port, über den Smartphones, Tablets und Browser in deinem Netzwerk Macro Deck erreichen.</value>
   </data>
+  <data name="Settings.Network.DiscoveryDescription" xml:space="preserve">
+    <value>Damit die Macro Deck App auf Smartphones und Tablets diesen Computer automatisch findet. Andere Geräte im Netzwerk sehen seinen Namen und seine Version.</value>
+  </data>
+  <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
+    <value>Im lokalen Netzwerk anzeigen</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>MACRO_DECK_PORT ist für diesen Start gesetzt und bestimmt den Port ({port}). Der konfigurierte Wert bleibt ungenutzt, bis diese Überschreibung entfernt wird.</value>
     <comment>[port:int]</comment>
