@@ -47,6 +47,8 @@ Transport shortcuts such as Android ADB reverse tunnels must terminate on the pu
 
 The public listener can use HTTP or HTTPS according to the resolved network configuration. See [ADR 0040](decisions/0040-public-listeners-and-tls.md).
 
+The host advertises its plain-HTTP public listener on the LAN as `_macrodeck._tcp` through the operating system's own mDNS responder, so the companion app finds it without scanning. See [ADR 0082](decisions/0082-lan-discovery-uses-the-platform-responder.md).
+
 Backup archives concentrate the same secrets this trust boundary protects - the Data Protection key ring, the TLS and token signing keys, and every stored secret - encrypted under a key stored only on this installation. Backup download, import, and restore are therefore loopback-only, the same restriction setup and plugin pairing already have. The key ring itself is wrapped by a key held in the platform keystore and escrowed under that same recovery key, so the recovery key is the one root both an archive and the live installation depend on. See [ADR 0047](decisions/0047-secrets-backups-and-restore.md).
 
 ## Persistence and state changes

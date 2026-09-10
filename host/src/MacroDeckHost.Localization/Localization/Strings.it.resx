@@ -12825,6 +12825,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Settings.Network.Description" xml:space="preserve">
     <value>La porta su cui Macro Deck resta in ascolto per telefoni, tablet e browser sulla tua rete.</value>
   </data>
+  <data name="Settings.Network.DiscoveryDescription" xml:space="preserve">
+    <value>Permette all'app Macro Deck su smartphone e tablet di trovare automaticamente questo computer. Gli altri dispositivi nella rete ne vedono il nome e la versione.</value>
+  </data>
+  <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
+    <value>Mostra nella rete locale</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>MACRO_DECK_PORT è impostata per questo avvio e determina la porta ({port}). Il valore configurato resta inutilizzato finché questo override non viene rimosso.</value>
     <comment>[port:int]</comment>

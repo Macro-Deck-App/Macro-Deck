@@ -73,4 +73,50 @@ describe('parseMarkdown', () => {
     const inlines = blocks[0].kind === 'paragraph' ? blocks[0].inlines : [];
     expect(inlines).toEqual([{ kind: 'link', text: 'docs', href: 'https://example.com/path' }]);
   });
+
+  it('turns a bare http or https URL into an https link and leaves trailing punctuation outside it', () => {
+    expect(parseMarkdown('See https://example.com/a_b, or http://example.com/x.')).toEqual([{
+      kind: 'paragraph',
+      inlines: [
+        { kind: 'text', text: 'See ' },
+        { kind: 'link', text: 'https://example.com/a_b', href: 'https://example.com/a_b', bare: true },
+        { kind: 'text', text: ', or ' },
+        { kind: 'link', text: 'http://example.com/x', href: 'https://example.com/x', bare: true },
+        { kind: 'text', text: '.' },
+      ],
+    }]);
+  });
+
+  it('never autolinks a non-http scheme', () => {
+    expect(JSON.stringify(parseMarkdown('javascript:alert(1) and ftp://example.com'))).not.toContain('"link"');
+  });
+
+  it('drops a block-level HTML comment, on one line or several, and keeps what follows', () => {
+    const blocks = parseMarkdown('<!-- generated at abc -->\n\n## Title\n\n<!--\nhidden\n-->\nAfter.');
+
+    expect(blocks.map(block => block.kind)).toEqual(['heading', 'paragraph']);
+    expect(JSON.stringify(blocks)).not.toContain('hidden');
+    expect(JSON.stringify(blocks)).not.toContain('<!--');
+  });
+
+  it('keeps text written after the closing --> on the same line', () => {
+    expect(parseMarkdown('<!-- note --> visible')).toEqual([{ kind: 'paragraph', inlines: [{ kind: 'text', text: 'visible' }] }]);
+  });
+
+  it('ends a paragraph at a comment line', () => {
+    expect(parseMarkdown('Line\n<!-- x -->\nNext').map(block => block.kind)).toEqual(['paragraph', 'paragraph']);
+  });
+
+  it('leaves a comment indented four spaces or opened mid-line as literal text', () => {
+    expect(JSON.stringify(parseMarkdown('    <!-- x -->'))).toContain('<!-- x -->');
+    expect(JSON.stringify(parseMarkdown('a <!-- x --> b'))).toContain('<!-- x -->');
+  });
+
+  it('keeps a comment inside a fenced code block as code', () => {
+    expect(parseMarkdown('```\n<!-- x -->\n```')).toEqual([{ kind: 'code', text: '<!-- x -->', language: null }]);
+  });
+
+  it('hides everything after an unterminated comment, as GitHub does', () => {
+    expect(parseMarkdown('Before\n\n<!-- open\nstill hidden')).toEqual([{ kind: 'paragraph', inlines: [{ kind: 'text', text: 'Before' }] }]);
+  });
 });

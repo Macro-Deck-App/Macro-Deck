@@ -43,6 +43,7 @@ describe('NetworkTlsSettingsComponent', () => {
     tlsAuthorityFingerprint: 'CC:DD',
     tlsAuthorityNotBefore: null,
     tlsAuthorityNotAfter: null,
+    discoveryEnabled: true,
   };
 
   let current: GetNetworkSettingsResponse;

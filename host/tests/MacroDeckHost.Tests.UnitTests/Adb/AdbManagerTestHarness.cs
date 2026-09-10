@@ -35,7 +35,8 @@ internal sealed class FakeAdbPreferenceService : IAppPreferenceService
 	public Task<NetworkSettings> SetNetwork(int? publicPort,
 		bool? tlsEnabled = null,
 		string? tlsMode = null,
-		int? tlsHttpsPort = null)
+		int? tlsHttpsPort = null,
+		bool? discoveryEnabled = null)
 		=> throw new NotSupportedException();
 
 	public Task<DeveloperSettings> GetDeveloper() => throw new NotSupportedException();

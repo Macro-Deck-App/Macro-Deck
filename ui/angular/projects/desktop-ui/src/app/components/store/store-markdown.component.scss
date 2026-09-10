@@ -6,7 +6,7 @@
   gap: var(--space-3);
   min-width: 0;
   color: var(--color-text-secondary);
-  font-size: var(--text-sm);
+  font-size: var(--md-font-size, var(--text-sm));
   line-height: var(--leading-normal);
 
   > :first-child {
@@ -21,8 +21,17 @@
 .md-heading {
   margin: 0;
   color: var(--color-text-primary);
+  font-size: 1em;
   font-weight: var(--font-semibold);
   line-height: var(--leading-tight);
+}
+
+h3.md-heading {
+  font-size: 1.3em;
+}
+
+h4.md-heading {
+  font-size: 1.15em;
 }
 
 .md-paragraph {
@@ -69,7 +78,7 @@
   margin: 0;
   padding: var(--space-3);
   font-family: var(--font-mono);
-  font-size: var(--text-sm);
+  font-size: inherit;
   line-height: var(--leading-normal);
   white-space: pre;
   color: var(--color-text-primary);

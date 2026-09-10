@@ -81,6 +81,25 @@ public class HistoryGraphWidgetSessionTests
 	}
 
 	[Test]
+	public async Task A_subtitle_naming_the_value_variable_shows_the_new_value_after_one_publish()
+	{
+		var registry = Registry();
+		await using var fixture = new Fixture(new
+				{ valueVariable = Metric, subtitle = "now {{ vars.system_cpu_usage_percent }}", maxValue = 100 },
+			registry: registry);
+
+		SetMetric(registry, 88);
+		fixture.Variables.Publish(Metric);
+
+		var written = fixture.Session.DrainPatches()
+			.SelectMany(patch => patch.Operations)
+			.SelectMany(operation => operation.Properties?.Values ?? [])
+			.Select(value => value.GetRawText());
+
+		Assert.That(written, Has.Some.Contains("now 88"));
+	}
+
+	[Test]
 	public async Task A_change_to_a_variable_the_card_does_not_name_leaves_it_alone()
 	{
 		await using var fixture = new Fixture(_config);

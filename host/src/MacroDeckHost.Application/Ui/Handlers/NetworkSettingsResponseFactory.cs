@@ -50,6 +50,7 @@ internal static class NetworkSettingsResponseFactory
 			RestartRequired = view.RestartRequired,
 			RestartSupported = view.RestartSupported,
 			RestartUnsupportedReason = view.RestartUnsupportedReason,
+			DiscoveryEnabled = view.DiscoveryEnabled,
 			MinimumPublicPort = PublicPortSelector.MinimumConfigurablePort,
 			MaximumPublicPort = PublicPortSelector.MaximumConfigurablePort
 		};

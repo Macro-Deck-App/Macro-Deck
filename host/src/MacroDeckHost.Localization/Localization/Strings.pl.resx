@@ -12825,6 +12825,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Settings.Network.Description" xml:space="preserve">
     <value>Port, na którym Macro Deck nasłuchuje połączeń z telefonów, tabletów i przeglądarek w sieci.</value>
   </data>
+  <data name="Settings.Network.DiscoveryDescription" xml:space="preserve">
+    <value>Umożliwia aplikacji Macro Deck na telefonach i tabletach automatyczne znalezienie tego komputera. Inne urządzenia w sieci widzą jego nazwę i wersję.</value>
+  </data>
+  <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
+    <value>Pokaż w sieci lokalnej</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>Dla tego uruchomienia ustawiono zmienną MACRO_DECK_PORT, która decyduje o porcie ({port}). Skonfigurowana wartość pozostaje nieużywana, dopóki to zastąpienie nie zostanie usunięte.</value>
     <comment>[port:int]</comment>

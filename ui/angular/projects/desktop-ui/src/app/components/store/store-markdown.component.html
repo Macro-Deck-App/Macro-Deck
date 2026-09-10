@@ -21,7 +21,7 @@
 </ng-template>
 
 <div class="md">
-  @for (block of blocks(); track $index) {
+  @for (block of rendered(); track $index) {
     @switch (block.kind) {
       @case ('heading') {
         @switch (block.level) {

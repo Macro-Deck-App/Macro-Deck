@@ -59,6 +59,7 @@ public class GetNetworkSettingsRequestMessageHandler
 			RestartRequired = view.RestartRequired,
 			RestartSupported = view.RestartSupported,
 			RestartUnsupportedReason = view.RestartUnsupportedReason,
+			DiscoveryEnabled = view.DiscoveryEnabled,
 			MinimumPublicPort = PublicPortSelector.MinimumConfigurablePort,
 			MaximumPublicPort = PublicPortSelector.MaximumConfigurablePort
 		};

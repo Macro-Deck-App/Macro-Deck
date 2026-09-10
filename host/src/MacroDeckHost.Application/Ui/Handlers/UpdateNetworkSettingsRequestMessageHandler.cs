@@ -1,6 +1,7 @@
 using MacroDeck.Localization;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Lifecycle;
+using MacroDeckHost.Application.Network.Discovery;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
@@ -17,18 +18,21 @@ public class UpdateNetworkSettingsRequestMessageHandler
 	private readonly IApplicationRestartService _restart;
 	private readonly IHostListenerState _listenerState;
 	private readonly INetworkRestartNotifier _restartNotifier;
+	private readonly IDiscoveryAdvertisementRefresher _discovery;
 	private readonly IServiceScopeFactory _scopeFactory;
 
 	public UpdateNetworkSettingsRequestMessageHandler(IAppPreferenceService preferences,
 		IApplicationRestartService restart,
 		IHostListenerState listenerState,
 		INetworkRestartNotifier restartNotifier,
+		IDiscoveryAdvertisementRefresher discovery,
 		IServiceScopeFactory scopeFactory)
 	{
 		_preferences = preferences;
 		_restart = restart;
 		_listenerState = listenerState;
 		_restartNotifier = restartNotifier;
+		_discovery = discovery;
 		_scopeFactory = scopeFactory;
 	}
 
@@ -62,14 +66,23 @@ public class UpdateNetworkSettingsRequestMessageHandler
 		var unchanged = request.PublicPort == current.PublicPort &&
 			effectiveTlsEnabled == current.TlsEnabled &&
 			effectiveTlsMode == current.TlsMode &&
-			effectiveTlsHttpsPort == current.TlsHttpsPort;
+			effectiveTlsHttpsPort == current.TlsHttpsPort &&
+			(request.DiscoveryEnabled is null || request.DiscoveryEnabled == current.DiscoveryEnabled);
 
+		// Discovery is passed through unresolved: SetNetwork resolves an omitted value from its own fresh
+		// read, so a TLS-only save racing a discovery save cannot write back the stale value read above.
 		var updated = unchanged
 			? current
 			: await _preferences.SetNetwork(request.PublicPort,
 				effectiveTlsEnabled,
 				effectiveTlsMode.ToString(),
-				effectiveTlsHttpsPort);
+				effectiveTlsHttpsPort,
+				request.DiscoveryEnabled);
+
+		if (!unchanged)
+		{
+			_discovery.RequestRefresh();
+		}
 
 		await _restartNotifier.Sync(cancellationToken);
 

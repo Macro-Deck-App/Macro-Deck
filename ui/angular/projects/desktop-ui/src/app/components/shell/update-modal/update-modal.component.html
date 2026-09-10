@@ -1,6 +1,7 @@
 <shared-modal
   [heading]="heading()"
-  [maxWidth]="'520px'"
+  [maxWidth]="'900px'"
+  [style.--modal-height]="'min(88vh, 60rem)'"
   (close)="onModalClose()">
   <div class="update-modal">
     @if (versionHeading(); as version) {
@@ -22,7 +23,12 @@
         <h4 class="update-modal__section-heading">{{ appStrings.Update.Details.ChangelogHeading | translate }}</h4>
         <div class="update-modal__changelog">
           @if (hasChangelog()) {
-            <shared-store-markdown [text]="changelogText()" />
+            @for (section of sections(); track $index) {
+              <shared-store-markdown
+                class="update-modal__notes-section"
+                [class.update-modal__notes-section--category]="section[0].kind === 'heading'"
+                [blocks]="section" />
+            }
           } @else {
             <p class="update-modal__no-changelog">{{ appStrings.Update.Details.NoChangelog | translate }}</p>
           }

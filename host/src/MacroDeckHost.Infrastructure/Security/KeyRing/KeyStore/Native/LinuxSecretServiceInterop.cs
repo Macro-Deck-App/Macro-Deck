@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Text;
+using MacroDeckHost.Infrastructure.Native;
 
 namespace MacroDeckHost.Infrastructure.Security.KeyRing.KeyStore.Native;
 
@@ -53,8 +53,8 @@ internal static class LinuxSecretServiceInterop
 			return LinuxSecretAttributes.None;
 		}
 
-		var key = Utf8("account");
-		var value = Utf8(account);
+		var key = NativeUtf8.Alloc("account");
+		var value = NativeUtf8.Alloc(account);
 		HashTableInsert(table, key, value);
 
 		return new LinuxSecretAttributes(table, key, value);
@@ -77,15 +77,6 @@ internal static class LinuxSecretServiceInterop
 		{
 			ErrorFree(error);
 		}
-	}
-
-	public static IntPtr Utf8(string value)
-	{
-		var bytes = Encoding.UTF8.GetBytes(value + "\0");
-		var buffer = Marshal.AllocHGlobal(bytes.Length);
-		Marshal.Copy(bytes, 0, buffer, bytes.Length);
-
-		return buffer;
 	}
 
 	private static LinuxSecretServiceBinding? Bind()
@@ -131,9 +122,9 @@ internal static class LinuxSecretServiceInterop
 			Marshal.WriteIntPtr(schema, offset, IntPtr.Zero);
 		}
 
-		Marshal.WriteIntPtr(schema, SchemaNameOffset, Utf8(name));
+		Marshal.WriteIntPtr(schema, SchemaNameOffset, NativeUtf8.Alloc(name));
 		Marshal.WriteInt32(schema, SchemaFlagsOffset, SecretSchemaDontMatchName);
-		Marshal.WriteIntPtr(schema, SchemaFirstAttributeNameOffset, Utf8(attribute));
+		Marshal.WriteIntPtr(schema, SchemaFirstAttributeNameOffset, NativeUtf8.Alloc(attribute));
 		Marshal.WriteInt32(schema, SchemaFirstAttributeTypeOffset, SecretSchemaAttributeString);
 
 		return schema;
