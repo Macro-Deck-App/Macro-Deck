@@ -31,7 +31,9 @@ mod windows_file_dialog;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
-use tauri::{AppHandle, Manager, RunEvent};
+use tauri::{AppHandle, Emitter, Manager, RunEvent};
+
+pub const HOST_STOPPING_EVENT: &str = "host-stopping";
 
 static QUITTING: AtomicBool = AtomicBool::new(false);
 
@@ -50,6 +52,11 @@ pub fn is_quitting() -> bool {
 pub fn request_quit(app: &AppHandle) {
     if QUITTING.swap(true, Ordering::SeqCst) {
         return;
+    }
+    if let Err(error) = app.emit(HOST_STOPPING_EVENT, ()) {
+        logging::error(&format!(
+            "[app] could not emit host-stopping event: {error}"
+        ));
     }
     let app = app.clone();
     tauri::async_runtime::spawn(async move {

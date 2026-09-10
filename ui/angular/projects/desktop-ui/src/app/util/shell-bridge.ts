@@ -48,6 +48,7 @@ export interface ShellBridge {
   takeOpenedFiles?: () => Promise<string[]>;
   onMenuAction?: (callback: (event: ShellMenuActionEvent) => void) => Promise<() => void>;
   takeMenuAction?: () => Promise<string | null>;
+  onHostStopping?: (callback: () => void) => Promise<() => void>;
   saveFile?: (options: ShellSaveFileOptions) => Promise<ShellSaveFileResult>;
   setHotkeyCapture?: (active: boolean) => Promise<void>;
 }

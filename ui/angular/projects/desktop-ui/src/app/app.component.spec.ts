@@ -142,6 +142,7 @@ describe('AppComponent (desktop-ui) - splash status during an update install (is
   const PREPARING_UPDATE = 'Preparing update…';
   const INSTALL_FAILED_DEFAULT = 'Couldn\'t install the update. Please try again.';
   const CONNECTING = 'Connecting to Macro Deck…';
+  const STOPPING = 'Stopping Macro Deck…';
 
   afterEach(() => {
     delete (window as { macroDeckShell?: unknown }).macroDeckShell;
@@ -177,6 +178,7 @@ describe('AppComponent (desktop-ui) - splash status during an update install (is
       [AppStrings.Shell.Splash.PreparingUpdate]: PREPARING_UPDATE,
       [AppStrings.Settings.Update.InstallFailed]: INSTALL_FAILED_DEFAULT,
       [AppStrings.WebClient.Connecting]: CONNECTING,
+      [AppStrings.Shell.Splash.Stopping]: STOPPING,
     };
     return map[key] ?? key;
   }
@@ -321,6 +323,52 @@ describe('AppComponent (desktop-ui) - splash status during an update install (is
 
     expect(statusText(fixture)).toBe(CONNECTING);
     expect(statusText(fixture)).not.toContain('Preparing update');
+  });
+
+  it('a quit announced by the shell turns the connecting message into the stopping message', async () => {
+    let announce!: () => void;
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ phase: 'idle' })),
+      onHostStopping: (callback: () => void) => {
+        announce = callback;
+        return Promise.resolve(() => {});
+      },
+    });
+
+    const fixture = await createFixture('authenticated', 'reconnecting');
+    expect(statusText(fixture)).toBe(CONNECTING);
+
+    announce();
+    await settle(fixture);
+
+    expect(statusText(fixture)).toBe(STOPPING);
+  });
+
+  it('a quit after a failed install shows the stopping message, not the install error', async () => {
+    let push!: (state: ShellUpdateState) => void;
+    let announce!: () => void;
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ phase: 'idle' })),
+      onUpdateState: (callback: (state: ShellUpdateState) => void) => {
+        push = callback;
+        return Promise.resolve(() => {});
+      },
+      onHostStopping: (callback: () => void) => {
+        announce = callback;
+        return Promise.resolve(() => {});
+      },
+    });
+
+    const fixture = await createFixture('authenticated', 'disconnected');
+    push(makeState({ phase: 'installing' }));
+    await settle(fixture);
+    push(makeState({ phase: 'failed', error: 'The update signature could not be verified.' }));
+    await settle(fixture);
+
+    announce();
+    await settle(fixture);
+
+    expect(statusText(fixture)).toBe(STOPPING);
   });
 
   it('A8: the message updates reactively as the phase moves from installing to failed', async () => {

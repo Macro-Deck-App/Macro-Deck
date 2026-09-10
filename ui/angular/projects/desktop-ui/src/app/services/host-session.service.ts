@@ -1,5 +1,7 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { ApiService } from '@shared';
+
+import { shellBridge } from '../util/shell-bridge';
 
 const STORAGE_KEY = 'macro-deck.host-session';
 
@@ -9,7 +11,11 @@ export class HostSessionService {
 
   private checking = false;
 
+  private readonly stoppingSignal = signal(false);
+  readonly stopping = this.stoppingSignal.asReadonly();
+
   start(): void {
+    void shellBridge()?.onHostStopping?.(() => this.stoppingSignal.set(true));
     this.api.connectionState$.subscribe(state => {
       if (state === 'connected') {
         void this.check();

@@ -13567,6 +13567,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Shell.Splash.PreparingUpdate" xml:space="preserve">
     <value>Przygotowywanie aktualizacji…</value>
   </data>
+  <data name="Shell.Splash.Stopping" xml:space="preserve">
+    <value>Zamykanie aplikacji Macro Deck…</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Build deweloperski</value>
   </data>

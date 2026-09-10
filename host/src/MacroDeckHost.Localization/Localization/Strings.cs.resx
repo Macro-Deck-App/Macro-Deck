@@ -13567,6 +13567,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Shell.Splash.PreparingUpdate" xml:space="preserve">
     <value>Příprava aktualizace…</value>
   </data>
+  <data name="Shell.Splash.Stopping" xml:space="preserve">
+    <value>Ukončování aplikace Macro Deck…</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Vývojová verze</value>
   </data>
