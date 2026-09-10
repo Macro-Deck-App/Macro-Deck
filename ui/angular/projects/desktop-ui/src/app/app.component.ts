@@ -101,6 +101,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
   protected readonly splashStatus = computed(() => {
     if (!this.isConnected()) {
+      if (this.hostSession.stopping()) {
+        return this.localizationService.translateKey(AppStrings.Shell.Splash.Stopping);
+      }
       if (this.updateService.phase() === 'installing') {
         return this.localizationService.translateKey(AppStrings.Shell.Splash.PreparingUpdate);
       }

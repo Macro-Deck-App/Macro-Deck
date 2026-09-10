@@ -13565,6 +13565,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Shell.Splash.PreparingUpdate" xml:space="preserve">
     <value>Update wird vorbereitet …</value>
   </data>
+  <data name="Shell.Splash.Stopping" xml:space="preserve">
+    <value>Macro Deck wird beendet …</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Entwicklungsversion</value>
   </data>

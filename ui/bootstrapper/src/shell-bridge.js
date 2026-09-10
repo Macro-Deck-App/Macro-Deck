@@ -79,6 +79,9 @@
     onMenuAction: function (callback) {
       return listen('menu-action', callback);
     },
+    onHostStopping: function (callback) {
+      return listen('host-stopping', callback);
+    },
     takeMenuAction: function () {
       return invoke('take_menu_action');
     },
