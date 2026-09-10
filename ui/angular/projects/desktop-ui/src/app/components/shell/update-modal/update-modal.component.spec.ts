@@ -155,6 +155,55 @@ describe('UpdateModalComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('<script>alert(1)</script>');
   });
 
+  it('renders GitHub release notes without the generator comment or a second heading, one bordered section per category', async () => {
+    const notes = [
+      '<!-- Release notes generated using configuration in .github/release.yml at fd59e92 -->',
+      '',
+      "## What's Changed",
+      '### 🛠 Breaking Changes',
+      '* Detect GPUs by @a in https://github.com/Macro-Deck-App/Macro-Deck/pull/697',
+      '### 🐞 Bug Fixes',
+      '* Run a button press by @a in https://github.com/Macro-Deck-App/Macro-Deck/pull/689',
+      '* Keep widget border animating by @a in https://github.com/Macro-Deck-App/Macro-Deck/pull/691',
+      '',
+      '## New Contributors',
+      '* @b made their first contribution in https://github.com/Macro-Deck-App/Macro-Deck/pull/700',
+      '',
+      '',
+      '**Full Changelog**: https://github.com/Macro-Deck-App/Macro-Deck/compare/v3.0.0-beta.2...v3.0.0-beta.3',
+    ].join('\n');
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ notes })),
+      onUpdateState: () => Promise.resolve(() => {}),
+    });
+
+    const fixture = await createFixture();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(text.split("What's new").length - 1).toBe(1);
+    expect(text).not.toContain("What's Changed");
+    expect(text).not.toContain('<!--');
+    expect(text).not.toContain('release.yml');
+
+    const changelog = fixture.nativeElement.querySelector('.update-modal__changelog') as HTMLElement;
+    const categories = Array.from(changelog.querySelectorAll<HTMLElement>('.update-modal__notes-section--category'));
+    expect(categories.map(section => section.querySelector('.md-heading')?.textContent?.trim()))
+      .toEqual(['🛠 Breaking Changes', '🐞 Bug Fixes', 'New Contributors']);
+    expect(changelog.textContent).toContain('Full Changelog');
+    expect(categories.some(section => section.textContent!.includes('Full Changelog'))).toBeFalse();
+  });
+
+  it('shows the no-changelog fallback when the notes are only a generator comment', async () => {
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ notes: '<!-- Release notes generated using configuration in .github/release.yml -->\n' })),
+      onUpdateState: () => Promise.resolve(() => {}),
+    });
+
+    const fixture = await createFixture();
+
+    expect(fixture.nativeElement.querySelector('.update-modal__no-changelog')).not.toBeNull();
+  });
+
   it('shows the no-changelog fallback for null notes', async () => {
     setShell({
       getUpdateState: () => Promise.resolve(makeState({ notes: null })),

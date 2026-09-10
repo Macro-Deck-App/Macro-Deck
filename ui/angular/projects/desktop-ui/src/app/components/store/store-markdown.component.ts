@@ -14,7 +14,8 @@ import { MarkdownBlock, parseMarkdown } from '../../util/markdown';
   styleUrls: ['./store-markdown.component.scss'],
 })
 export class StoreMarkdownComponent {
-  readonly text = input.required<string>();
+  readonly text = input('');
+  readonly blocks = input<MarkdownBlock[] | null>(null);
 
-  protected readonly blocks = computed<MarkdownBlock[]>(() => parseMarkdown(this.text()));
+  protected readonly rendered = computed<MarkdownBlock[]>(() => this.blocks() ?? parseMarkdown(this.text()));
 }

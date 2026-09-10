@@ -7,7 +7,7 @@ export type MarkdownInline =
   | { kind: 'strong'; text: string }
   | { kind: 'em'; text: string }
   | { kind: 'code'; text: string }
-  | { kind: 'link'; text: string; href: string };
+  | { kind: 'link'; text: string; href: string; bare?: true };
 
 export type MarkdownBlock =
   | { kind: 'heading'; level: 1 | 2 | 3; inlines: MarkdownInline[] }
@@ -23,6 +23,8 @@ const ORDERED_ITEM = /^\d+\.\s+(.*)$/;
 const QUOTE_LINE = /^>\s?(.*)$/;
 const FENCE = /^```\s*(\S*)\s*$/;
 const RULE = /^([-*_])(?:\s*\1){2,}$/;
+const COMMENT_OPEN = /^ {0,3}<!--/;
+const TRAILING_PUNCTUATION = /[.,:;!?'"*_~]+$/;
 
 function safeHref(rawHref: string): string | null {
   const href = rawHref.trim();
@@ -40,7 +42,7 @@ function safeHref(rawHref: string): string | null {
   }
 }
 
-const INLINE_TOKEN = /(\*\*([^*]+)\*\*)|(\*([^*]+)\*)|(`([^`]+)`)|(\[([^\]]*)\]\(([^)\s]*)\))/;
+const INLINE_TOKEN = /(\*\*([^*]+)\*\*)|(\*([^*]+)\*)|(`([^`]+)`)|(\[([^\]]*)\]\(([^)\s]*)\))|(https?:\/\/[^\s<>()[\]]+)/;
 
 function parseInline(source: string): MarkdownInline[] {
   const inlines: MarkdownInline[] = [];
@@ -57,22 +59,28 @@ function parseInline(source: string): MarkdownInline[] {
       inlines.push({ kind: 'text', text: remaining.slice(0, match.index) });
     }
 
+    let consumed = match[0].length;
     if (match[1] !== undefined) {
       inlines.push({ kind: 'strong', text: match[2] });
     } else if (match[3] !== undefined) {
       inlines.push({ kind: 'em', text: match[4] });
     } else if (match[5] !== undefined) {
       inlines.push({ kind: 'code', text: match[6] });
-    } else {
+    } else if (match[7] !== undefined) {
       const href = safeHref(match[9]);
       if (href) {
         inlines.push({ kind: 'link', text: match[8], href });
       } else {
         inlines.push({ kind: 'text', text: match[0] });
       }
+    } else {
+      const url = match[10].replace(TRAILING_PUNCTUATION, '');
+      const href = safeHref(url);
+      inlines.push(href ? { kind: 'link', text: url, href, bare: true } : { kind: 'text', text: url });
+      consumed = url.length;
     }
 
-    remaining = remaining.slice(match.index + match[0].length);
+    remaining = remaining.slice(match.index + consumed);
   }
 
   return inlines;
@@ -102,6 +110,23 @@ export function parseMarkdown(source: string): MarkdownBlock[] {
       }
       i++; // skip closing fence (or EOF)
       blocks.push({ kind: 'code', text: codeLines.join('\n'), language });
+      continue;
+    }
+
+    if (COMMENT_OPEN.test(line)) {
+      let end = line.indexOf('-->', line.indexOf('<!--') + 4);
+      while (end < 0 && ++i < lines.length) {
+        end = lines[i].indexOf('-->');
+      }
+      if (i >= lines.length) {
+        break;
+      }
+      const rest = lines[i].slice(end + 3).trimStart();
+      if (rest === '') {
+        i++;
+      } else {
+        lines[i] = rest;
+      }
       continue;
     }
 
@@ -163,6 +188,7 @@ export function parseMarkdown(source: string): MarkdownBlock[] {
       !UNORDERED_ITEM.test(lines[i]) &&
       !ORDERED_ITEM.test(lines[i]) &&
       !QUOTE_LINE.test(lines[i]) &&
+      !COMMENT_OPEN.test(lines[i]) &&
       !RULE.test(lines[i].trim())
     ) {
       paragraphLines.push(lines[i]);
