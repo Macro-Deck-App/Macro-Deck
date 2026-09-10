@@ -46,7 +46,8 @@ public class NetworkListenerIdentityTests
 			TlsAuthoritySubject: null,
 			TlsAuthorityFingerprint: null,
 			TlsAuthorityNotBefore: null,
-			TlsAuthorityNotAfter: null);
+			TlsAuthorityNotAfter: null,
+			DiscoveryEnabled: true);
 
 	// A fresh installation stores no TLS rows at all, so the reported configuration comes from the same
 	// default the listener was opened with. If the two ever drift apart, every installation gets a

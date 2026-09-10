@@ -9,4 +9,6 @@ public class UpdateNetworkSettingsRequest
 	public string? TlsMode { get; set; }
 
 	public int? TlsHttpsPort { get; set; }
+
+	public bool? DiscoveryEnabled { get; set; }
 }

@@ -24,6 +24,8 @@ public class GetNetworkSettingsResponse
 
 	public int MaximumPublicPort { get; set; }
 
+	public bool DiscoveryEnabled { get; set; }
+
 	public bool TlsEnabled { get; set; }
 
 	public string TlsMode { get; set; } = string.Empty;

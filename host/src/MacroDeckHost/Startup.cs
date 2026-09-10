@@ -76,6 +76,7 @@ using MacroDeckHost.Infrastructure.Icons.AppIcons;
 using MacroDeckHost.Infrastructure.Lifecycle;
 using MacroDeckHost.Infrastructure.HostLocking;
 using MacroDeckHost.Infrastructure.MusicPlayer;
+using MacroDeckHost.Infrastructure.Network.Discovery;
 using MacroDeckHost.Infrastructure.Network.Tls;
 using MacroDeckHost.Infrastructure.Notifications;
 using MacroDeckHost.Infrastructure.Migration;
@@ -752,6 +753,7 @@ public class Startup
 		services.AddDbContext<DatabaseContext>();
 
 		services.AddPublicTlsCertificateStore();
+		services.AddServiceAdvertisement();
 
 		// AddDataProtection registers its key manager and hosted service with TryAdd, so they resolve
 		// even though Program.cs's provider wins IDataProtectionProvider - and they would point at the

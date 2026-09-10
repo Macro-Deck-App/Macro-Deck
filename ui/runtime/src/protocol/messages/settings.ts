@@ -99,6 +99,8 @@ export interface GetNetworkSettingsResponse {
   tlsAuthorityFingerprint: string | null;
   tlsAuthorityNotBefore: string | null;
   tlsAuthorityNotAfter: string | null;
+
+  discoveryEnabled: boolean;
 }
 
 export interface UpdateNetworkSettingsRequest {
@@ -106,6 +108,7 @@ export interface UpdateNetworkSettingsRequest {
   tlsEnabled?: boolean;
   tlsMode?: TlsMode;
   tlsHttpsPort?: number;
+  discoveryEnabled?: boolean;
 }
 
 export interface UpdateNetworkSettingsResponse extends GetNetworkSettingsResponse {

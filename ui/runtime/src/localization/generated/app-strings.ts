@@ -5184,6 +5184,8 @@ export const AppStrings = {
 		Network: {
 			ConfiguredPortIgnoredNote: 'macrodeck.app:Settings.Network.ConfiguredPortIgnoredNote',
 			Description: 'macrodeck.app:Settings.Network.Description',
+			DiscoveryDescription: 'macrodeck.app:Settings.Network.DiscoveryDescription',
+			DiscoveryLabel: 'macrodeck.app:Settings.Network.DiscoveryLabel',
 			EnvironmentOverrideNote: 'macrodeck.app:Settings.Network.EnvironmentOverrideNote',
 			ListenerUnavailableChoosePort: 'macrodeck.app:Settings.Network.ListenerUnavailableChoosePort',
 			ListenerUnavailableClearOverride: 'macrodeck.app:Settings.Network.ListenerUnavailableClearOverride',
@@ -10841,6 +10843,8 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Settings.Modal.RestartNow': 'Restart now',
 	'macrodeck.app:Settings.Network.ConfiguredPortIgnoredNote': 'Port {configuredPort} could not be used at the last start, so Macro Deck is listening on {activePort}. Choose a different port.',
 	'macrodeck.app:Settings.Network.Description': 'The port Macro Deck listens on for phones, tablets and browsers on your network.',
+	'macrodeck.app:Settings.Network.DiscoveryDescription': 'Lets the Macro Deck app on phones and tablets find this computer automatically. Other devices on the network can see its name and version.',
+	'macrodeck.app:Settings.Network.DiscoveryLabel': 'Show on the local network',
 	'macrodeck.app:Settings.Network.EnvironmentOverrideNote': 'MACRO_DECK_PORT is set for this launch and decides the port ({port}). The configured value stays unused until that override is removed.',
 	'macrodeck.app:Settings.Network.ListenerUnavailableChoosePort': 'Choose a different port below and restart Macro Deck.',
 	'macrodeck.app:Settings.Network.ListenerUnavailableClearOverride': 'Clear MACRO_DECK_PORT or set it to a free port, then restart Macro Deck.',
