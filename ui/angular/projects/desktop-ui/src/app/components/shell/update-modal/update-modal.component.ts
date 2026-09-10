@@ -4,6 +4,7 @@ import { ButtonComponent, LocalizationService, ModalComponent, TranslatePipe, di
 import { StoreMarkdownComponent } from '../../store/store-markdown.component';
 import { UpdateModalService } from '../../../services/update-modal.service';
 import { UpdateService } from '../../../services/update.service';
+import { releaseNoteSections } from './release-notes';
 
 @Component({
   selector: 'app-update-modal',
@@ -56,8 +57,8 @@ export class UpdateModalComponent {
       ? this.localization.translateKey(AppStrings.Settings.Update.ChannelBeta)
       : this.localization.translateKey(AppStrings.Settings.Update.ChannelStable));
 
-  protected readonly changelogText = computed(() => this.updates.notes() ?? '');
-  protected readonly hasChangelog = computed(() => this.changelogText().trim().length > 0);
+  protected readonly sections = computed(() => releaseNoteSections(this.updates.notes() ?? ''));
+  protected readonly hasChangelog = computed(() => this.sections().length > 0);
 
   protected readonly downloadStatus = computed(() => {
     const percent = this.updates.progressPercent();
