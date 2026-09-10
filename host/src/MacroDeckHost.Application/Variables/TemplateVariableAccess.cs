@@ -45,10 +45,23 @@ internal static class TemplateVariableAccess
 				return true;
 			case ScriptFunctionCall call:
 				return IsPureCallee(call.Target) && call.Arguments.All(argument => Visit(argument, names));
-			case ScriptPage or ScriptBlockStatement or ScriptRawStatement or ScriptEscapeStatement
-				or ScriptExpressionStatement or ScriptIfStatement or ScriptElseStatement or ScriptEndStatement
-				or ScriptNopStatement or ScriptKeyword or ScriptToken or ScriptList or ScriptPipeCall
-				or ScriptNestedExpression or ScriptLiteral or ScriptBinaryExpression or ScriptUnaryExpression:
+			case ScriptPage
+				or ScriptBlockStatement
+				or ScriptRawStatement
+				or ScriptEscapeStatement
+				or ScriptExpressionStatement
+				or ScriptIfStatement
+				or ScriptElseStatement
+				or ScriptEndStatement
+				or ScriptNopStatement
+				or ScriptKeyword
+				or ScriptToken
+				or ScriptList
+				or ScriptPipeCall
+				or ScriptNestedExpression
+				or ScriptLiteral
+				or ScriptBinaryExpression
+				or ScriptUnaryExpression:
 				return node.Children.All(child => Visit(child, names));
 			default:
 				return false;

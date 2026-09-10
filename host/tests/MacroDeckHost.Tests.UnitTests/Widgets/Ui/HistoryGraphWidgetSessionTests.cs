@@ -84,8 +84,8 @@ public class HistoryGraphWidgetSessionTests
 	public async Task A_subtitle_naming_the_value_variable_shows_the_new_value_after_one_publish()
 	{
 		var registry = Registry();
-		await using var fixture = new Fixture(
-			new { valueVariable = Metric, subtitle = "now {{ vars.system_cpu_usage_percent }}", maxValue = 100 },
+		await using var fixture = new Fixture(new
+				{ valueVariable = Metric, subtitle = "now {{ vars.system_cpu_usage_percent }}", maxValue = 100 },
 			registry: registry);
 
 		SetMetric(registry, 88);

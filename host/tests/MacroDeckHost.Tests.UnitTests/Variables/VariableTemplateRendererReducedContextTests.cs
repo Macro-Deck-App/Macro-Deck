@@ -82,8 +82,7 @@ public class VariableTemplateRendererReducedContextTests
 		attributed.Attributes = new Dictionary<string, string> { ["room"] = "kitchen" };
 		var gone = Var("gone", "stale");
 
-		var registry = Registry(
-			Var("a", "Alpha"),
+		var registry = Registry(Var("a", "Alpha"),
 			Var("b", "Beta"),
 			Var("empty_text", string.Empty),
 			Var("flag", "true", VariableType.Boolean),
@@ -136,7 +135,9 @@ public class VariableTemplateRendererReducedContextTests
 		var live = Var("a", "one");
 		var registry = Registry(live);
 		var renderer = new VariableTemplateRenderer(registry);
-		string Render() => renderer.Render("{{ vars.a }}|{{ vars.a.unit }}|{{ vars.a.room }}", VariableScope.Global, null);
+
+		string Render() =>
+			renderer.Render("{{ vars.a }}|{{ vars.a.unit }}|{{ vars.a.room }}", VariableScope.Global, null);
 
 		Assert.That(Render(), Is.EqualTo("one||"));
 

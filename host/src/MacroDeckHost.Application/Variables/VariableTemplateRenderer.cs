@@ -197,11 +197,12 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 	}
 
 	private ParsedTemplate Parse(string templateText)
-		=> _templateCache.GetOrAdd(templateText, text =>
-		{
-			var template = Template.ParseLiquid(text, null, _liquidParserOptions);
-			return new ParsedTemplate(template, TemplateVariableAccess.ReadNames(template));
-		});
+		=> _templateCache.GetOrAdd(templateText,
+			text =>
+			{
+				var template = Template.ParseLiquid(text, null, _liquidParserOptions);
+				return new ParsedTemplate(template, TemplateVariableAccess.ReadNames(template));
+			});
 
 	private static VariableEntity Detach(VariableEntity live) => new()
 	{
