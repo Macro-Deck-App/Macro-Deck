@@ -259,6 +259,7 @@ public class AuthController : ControllerBase
 		{
 			_loginThrottle.RegisterSuccess(key);
 		}
+
 		SetAuthCookies(result.Data);
 
 		return Ok(ToTokenResponse(result.Data));

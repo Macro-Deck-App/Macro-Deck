@@ -245,8 +245,8 @@ public class AuthPolicyMatrixTests
 		{
 			Assert.That(first.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 			Assert.That(scope, Is.EqualTo("client"));
-			Assert.That(first.Headers.TryGetValues("Set-Cookie", out var cookies)
-				&& cookies.Any(cookie => cookie.StartsWith(AuthDefaults.RefreshCookie, StringComparison.Ordinal)),
+			Assert.That(first.Headers.TryGetValues("Set-Cookie", out var cookies) &&
+				cookies.Any(cookie => cookie.StartsWith(AuthDefaults.RefreshCookie, StringComparison.Ordinal)),
 				Is.True);
 			Assert.That(replay.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
 		});
