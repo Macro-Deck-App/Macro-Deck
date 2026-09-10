@@ -58,6 +58,7 @@ public class AuthControllerCookieTests
 		httpContext.Request.Host = new HostString("192.168.20.13", 8193);
 		var controller = new AuthController(new StubAuthService(login),
 			new LoginThrottle(TimeProvider.System),
+			new PairingCodeStore(),
 			TimeProvider.System,
 			new UserNotificationStore(),
 			new FailedLoginNotificationTracker(),
@@ -117,6 +118,7 @@ public class AuthControllerCookieTests
 		var store = new UserNotificationStore();
 		var controller = new AuthController(new FailingAuthService(),
 			new LoginThrottle(TimeProvider.System),
+			new PairingCodeStore(),
 			TimeProvider.System,
 			store,
 			new FailedLoginNotificationTracker(),
@@ -152,6 +154,7 @@ public class AuthControllerCookieTests
 		var store = new UserNotificationStore();
 		var controller = new AuthController(new FailingAuthService(),
 			new LoginThrottle(TimeProvider.System),
+			new PairingCodeStore(),
 			TimeProvider.System,
 			store,
 			new FailedLoginNotificationTracker(),
@@ -189,6 +192,7 @@ public class AuthControllerCookieTests
 		var store = new UserNotificationStore();
 		var controller = new AuthController(new FailingAuthService(),
 			new LoginThrottle(TimeProvider.System),
+			new PairingCodeStore(),
 			TimeProvider.System,
 			store,
 			new FailedLoginNotificationTracker(),

@@ -546,6 +546,7 @@ export {
   type ChangePasswordRequest,
   type ChangeUsernameRequest,
   type LoginRequest,
+  type PairingCodeResponse,
   type RedeemDeviceEnrollmentRequest,
   type SetupRequest,
   type TokenResponse,

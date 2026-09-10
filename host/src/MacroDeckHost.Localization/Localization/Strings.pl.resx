@@ -13434,6 +13434,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Shell.ConnectionPanel.NoInterfaces" xml:space="preserve">
     <value>Nie znaleziono interfejsów sieciowych</value>
   </data>
+  <data name="Shell.ConnectionPanel.PairingCode" xml:space="preserve">
+    <value>Kod parowania</value>
+  </data>
+  <data name="Shell.ConnectionPanel.PairingCodeExpiresIn" xml:space="preserve">
+    <value>Wygasa za {time}</value>
+  </data>
   <data name="Shell.ConnectionPanel.PublicListenerUnavailable" xml:space="preserve">
     <value>Macro Deck jest obecnie niedostępny w sieci: nie udało się otworzyć publicznego nasłuchu. Sprawdź porty i ustawienia HTTPS w Ustawienia &gt; Sieć, a następnie uruchom Macro Deck ponownie.</value>
   </data>

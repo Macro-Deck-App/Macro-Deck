@@ -32,6 +32,14 @@
             </div>
           }
 
+          @if (groupedPairingCode(); as code) {
+            <div class="cp-section">
+              <span class="cp-label">{{ appStrings.Shell.ConnectionPanel.PairingCode | translate }}</span>
+              <span class="cp-pairing-code">{{ code }}</span>
+              <span class="cp-value cp-muted">{{ appStrings.Shell.ConnectionPanel.PairingCodeExpiresIn | translate: { time: pairingCodeRemaining() } }}</span>
+            </div>
+          }
+
           <div class="cp-section">
             <span class="cp-label">{{ appStrings.Shell.ConnectionPanel.Instance | translate }}</span>
             <span class="cp-value">{{ info.instanceName }}</span>

@@ -40,6 +40,11 @@ export interface ChangeUsernameRequest {
   newUsername: string;
 }
 
+export interface PairingCodeResponse {
+  code: string;
+  expiresAt: string;
+}
+
 export interface RedeemDeviceEnrollmentRequest {
   token: string;
   device: DeviceLoginInfo;

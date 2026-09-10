@@ -20,9 +20,20 @@ describe('ConnectionPanelComponent', () => {
     version: '3.0.0-test',
   };
 
+  const pairingCode = { code: '482915', expiresAt: new Date(Date.now() + 15 * 60_000).toISOString() };
+
+  async function settle(target: ComponentFixture<ConnectionPanelComponent>): Promise<void> {
+    for (let i = 0; i < 10; i++) {
+      await target.whenStable();
+    }
+    target.detectChanges();
+  }
+
   beforeEach(async () => {
-    api = jasmine.createSpyObj<ApiService>('ApiService', ['getConnectionInfo', 'onNotification']);
+    api = jasmine.createSpyObj<ApiService>('ApiService', ['getConnectionInfo', 'onNotification', 'rotatePairingCode', 'getPairingCode']);
     api.getConnectionInfo.and.resolveTo(info);
+    api.rotatePairingCode.and.resolveTo(pairingCode);
+    api.getPairingCode.and.resolveTo(pairingCode);
     api.onNotification.and.returnValue(EMPTY);
 
     await TestBed.configureTestingModule({
@@ -33,7 +44,7 @@ describe('ConnectionPanelComponent', () => {
     fixture = TestBed.createComponent(ConnectionPanelComponent);
     fixture.componentRef.setInput('isOpen', true);
     fixture.detectChanges();
-    await fixture.whenStable();
+    await settle(fixture);
   });
 
   async function renderPanel(overrides: Partial<GetConnectionInfoResponse> = {}): Promise<HTMLElement> {
@@ -41,9 +52,7 @@ describe('ConnectionPanelComponent', () => {
     const panel = TestBed.createComponent(ConnectionPanelComponent);
     panel.componentRef.setInput('isOpen', true);
     panel.detectChanges();
-    await panel.whenStable();
-    await panel.whenStable();
-    panel.detectChanges();
+    await settle(panel);
     return panel.nativeElement as HTMLElement;
   }
 
@@ -222,7 +231,7 @@ describe('ConnectionPanelComponent', () => {
     panel.detectChanges();
     await panel.whenStable();
 
-    const url = panel.componentInstance['buildConnectUrl']({ ...info, endpoints: [https, http] });
+    const url = panel.componentInstance['buildConnectUrl']({ ...info, endpoints: [https, http] }, '');
     const payload = JSON.parse(atob(url.replace('https://connect.macro-deck.app/', ''))) as {
       payloadVersion: number;
       endpoints: ConnectionEndpoint[];
@@ -230,5 +239,82 @@ describe('ConnectionPanelComponent', () => {
 
     expect(payload.payloadVersion).toBe(2);
     expect(payload.endpoints).toEqual([https, http]);
+  });
+  it('puts the code minted on open into the connect payload and shows it grouped', async () => {
+    const buildConnectUrl = spyOn(
+      ConnectionPanelComponent.prototype as unknown as { buildConnectUrl: (...args: unknown[]) => string },
+      'buildConnectUrl'
+    ).and.callThrough();
+    const rotationsBefore = api.rotatePairingCode.calls.count();
+
+    const element = await renderPanel();
+
+    expect(api.rotatePairingCode.calls.count()).toBe(rotationsBefore + 1);
+    expect(buildConnectUrl.calls.mostRecent().args[1]).toBe('482915');
+    expect(element.querySelector('.cp-pairing-code')?.textContent?.trim()).toBe('482 915');
+    expect(element.textContent).toContain('Expires in');
+  });
+
+  it('replaces the code on every open', async () => {
+    const panel = TestBed.createComponent(ConnectionPanelComponent);
+    panel.detectChanges();
+    await panel.whenStable();
+    const before = api.rotatePairingCode.calls.count();
+
+    for (const open of [true, false, true]) {
+      panel.componentRef.setInput('isOpen', open);
+      panel.detectChanges();
+      await panel.whenStable();
+    }
+
+    expect(api.rotatePairingCode.calls.count()).toBe(before + 2);
+  });
+
+  it('keeps a single poller when the panel is reopened before the first load finished', async () => {
+    const started = spyOn(window, 'setInterval').and.callThrough();
+    const stopped = spyOn(window, 'clearInterval').and.callThrough();
+    const panel = TestBed.createComponent(ConnectionPanelComponent);
+
+    for (const open of [true, false, true]) {
+      panel.componentRef.setInput('isOpen', open);
+      panel.detectChanges();
+    }
+    await settle(panel);
+
+    expect(started.calls.count() - stopped.calls.count()).toBe(1);
+    panel.destroy();
+  });
+
+  it('hides the code and keeps an empty token when the host refuses to hand one out', async () => {
+    api.rotatePairingCode.and.rejectWith(new Error('403'));
+    const buildConnectUrl = spyOn(
+      ConnectionPanelComponent.prototype as unknown as { buildConnectUrl: (...args: unknown[]) => string },
+      'buildConnectUrl'
+    ).and.callThrough();
+
+    const element = await renderPanel();
+
+    expect(element.querySelector('.cp-pairing-code')).toBeNull();
+    expect(element.querySelector('img[alt="Connect QR code"]')).not.toBeNull();
+    expect(buildConnectUrl.calls.mostRecent().args[1]).toBe('');
+  });
+
+  it('shows the new code once the host replaced it', async () => {
+    jasmine.clock().install();
+    try {
+      const panel = TestBed.createComponent(ConnectionPanelComponent);
+      panel.componentRef.setInput('isOpen', true);
+      panel.detectChanges();
+      await settle(panel);
+      api.getPairingCode.and.resolveTo({ ...pairingCode, code: '107233' });
+
+      jasmine.clock().tick(5_000);
+      await settle(panel);
+
+      const text = (panel.nativeElement as HTMLElement).querySelector('.cp-pairing-code')?.textContent?.trim();
+      expect(text).toBe('107 233');
+    } finally {
+      jasmine.clock().uninstall();
+    }
   });
 });

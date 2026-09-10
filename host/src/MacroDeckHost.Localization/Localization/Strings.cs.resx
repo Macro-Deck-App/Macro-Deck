@@ -13434,6 +13434,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Shell.ConnectionPanel.NoInterfaces" xml:space="preserve">
     <value>Nebyla nalezena žádná síťová rozhraní</value>
   </data>
+  <data name="Shell.ConnectionPanel.PairingCode" xml:space="preserve">
+    <value>Párovací kód</value>
+  </data>
+  <data name="Shell.ConnectionPanel.PairingCodeExpiresIn" xml:space="preserve">
+    <value>Platnost vyprší za {time}</value>
+  </data>
   <data name="Shell.ConnectionPanel.PublicListenerUnavailable" xml:space="preserve">
     <value>Macro Deck momentálně není dostupný v síti: nepodařilo se otevřít žádný veřejný naslouchací port. Zkontrolujte porty a nastavení HTTPS v Nastavení &gt; Síť a restartujte Macro Deck.</value>
   </data>

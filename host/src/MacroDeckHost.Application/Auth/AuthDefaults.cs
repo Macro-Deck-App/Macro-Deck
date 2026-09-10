@@ -34,7 +34,12 @@ public static class AuthDefaults
 	public const int MaxUsernameLength = 64;
 
 	public static readonly TimeSpan AccessTokenLifetime = TimeSpan.FromMinutes(15);
-	public static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(30);
+	public static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(365);
+
+	// Reuse detection only sees a rotated token while its row exists: this is that window. See ADR 0083.
+	public static readonly TimeSpan RevokedRefreshTokenRetention = TimeSpan.FromDays(30);
+
+	public static readonly TimeSpan PairingCodeLifetime = TimeSpan.FromMinutes(15);
 
 	/// <summary>
 	/// How long a device-enrollment credential stays valid. Short on purpose: setup restarts the

@@ -13432,6 +13432,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Shell.ConnectionPanel.NoInterfaces" xml:space="preserve">
     <value>Keine Netzwerkschnittstellen gefunden</value>
   </data>
+  <data name="Shell.ConnectionPanel.PairingCode" xml:space="preserve">
+    <value>Kopplungscode</value>
+  </data>
+  <data name="Shell.ConnectionPanel.PairingCodeExpiresIn" xml:space="preserve">
+    <value>Läuft in {time} ab</value>
+  </data>
   <data name="Shell.ConnectionPanel.PublicListenerUnavailable" xml:space="preserve">
     <value>Macro Deck ist im Netzwerk derzeit nicht erreichbar: Es konnte kein öffentlicher Listener geöffnet werden. Prüfe die Port- und HTTPS-Einstellungen unter Einstellungen &gt; Netzwerk und starte Macro Deck neu.</value>
   </data>

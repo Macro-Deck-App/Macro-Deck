@@ -29,6 +29,8 @@ public record DeviceCredential(string DeviceId, string? DeviceSecret, string? St
 
 public record DeviceEnrollmentResponse(string Token, string ExpiresAt);
 
+public record PairingCodeResponse(string Code, string ExpiresAt);
+
 public record RedeemDeviceEnrollmentRequest(string Token, DeviceLoginInfo? Device);
 
 public record LoginRequest(
@@ -55,8 +57,13 @@ public class AuthController : ControllerBase
 	private const string FailedLoginDedupeKey = "login-failed";
 	private const int MaxAttemptedUsernameLength = 64;
 
+	// No address in the key: a LAN caller can switch addresses freely, so guesses at the six digit
+	// pairing code are limited across all callers at once.
+	private const string PairingCodeThrottleKey = "pairing-code";
+
 	private readonly IAuthService _authService;
 	private readonly LoginThrottle _loginThrottle;
+	private readonly PairingCodeStore _pairingCodes;
 	private readonly TimeProvider _timeProvider;
 	private readonly IUserNotificationStore _userNotificationStore;
 	private readonly FailedLoginNotificationTracker _failedLoginTracker;
@@ -66,6 +73,7 @@ public class AuthController : ControllerBase
 	public AuthController(
 		IAuthService authService,
 		LoginThrottle loginThrottle,
+		PairingCodeStore pairingCodes,
 		TimeProvider timeProvider,
 		IUserNotificationStore userNotificationStore,
 		FailedLoginNotificationTracker failedLoginTracker,
@@ -74,6 +82,7 @@ public class AuthController : ControllerBase
 	{
 		_authService = authService;
 		_loginThrottle = loginThrottle;
+		_pairingCodes = pairingCodes;
 		_timeProvider = timeProvider;
 		_userNotificationStore = userNotificationStore;
 		_failedLoginTracker = failedLoginTracker;
@@ -197,6 +206,12 @@ public class AuthController : ControllerBase
 		return Ok(new DeviceEnrollmentResponse(result.Data.Token, result.Data.ExpiresAt.ToString("O")));
 	}
 
+	[HttpGet("pairing-code")]
+	public IActionResult GetPairingCode() => PairingCodeResult(rotate: false);
+
+	[HttpPost("pairing-code")]
+	public IActionResult RotatePairingCode() => PairingCodeResult(rotate: true);
+
 	/// <summary>
 	/// Spends an enrollment credential for an ordinary client session. Anonymous by necessity - the
 	/// device has nothing else to present - but the credential is single-use, short-lived and only
@@ -206,8 +221,21 @@ public class AuthController : ControllerBase
 	[AllowAnonymous]
 	public async Task<IActionResult> RedeemDeviceEnrollment(RedeemDeviceEnrollmentRequest body)
 	{
-		var throttleKey = $"{HttpContext.Connection.RemoteIpAddress}|device-enrollment";
-		if (_loginThrottle.IsThrottled(throttleKey, out var retryAfter))
+		var token = body.Token ?? string.Empty;
+		string[] throttleKeys = PairingCodeStore.IsPairingCodeShape(token)
+			? [$"{HttpContext.Connection.RemoteIpAddress}|device-enrollment", PairingCodeThrottleKey]
+			: [$"{HttpContext.Connection.RemoteIpAddress}|device-enrollment"];
+
+		var retryAfter = TimeSpan.Zero;
+		foreach (var key in throttleKeys)
+		{
+			if (_loginThrottle.IsThrottled(key, out var keyRetryAfter) && keyRetryAfter > retryAfter)
+			{
+				retryAfter = keyRetryAfter;
+			}
+		}
+
+		if (retryAfter > TimeSpan.Zero)
 		{
 			Response.Headers.RetryAfter
 				= ((int)Math.Ceiling(retryAfter.TotalSeconds)).ToString(CultureInfo.InvariantCulture);
@@ -215,15 +243,23 @@ public class AuthController : ControllerBase
 				title: "Too many failed enrollment attempts. Try again later.");
 		}
 
-		var result = await _authService.RedeemDeviceEnrollment(body.Token ?? string.Empty,
+		var result = await _authService.RedeemDeviceEnrollment(token,
 			ToDeviceRegistration(body.Device) ?? UnknownDeviceRegistration());
 		if (!result.Success || result.Data is null)
 		{
-			_loginThrottle.RegisterFailure(throttleKey);
+			foreach (var key in throttleKeys)
+			{
+				_loginThrottle.RegisterFailure(key);
+			}
+
 			return AuthProblem(result.Error, result.ErrorMessage);
 		}
 
-		_loginThrottle.RegisterSuccess(throttleKey);
+		foreach (var key in throttleKeys)
+		{
+			_loginThrottle.RegisterSuccess(key);
+		}
+
 		SetAuthCookies(result.Data);
 
 		return Ok(ToTokenResponse(result.Data));
@@ -290,6 +326,19 @@ public class AuthController : ControllerBase
 		}
 
 		return NoContent();
+	}
+
+	private IActionResult PairingCodeResult(bool rotate)
+	{
+		if (!LoopbackConnection.IsTrusted(HttpContext))
+		{
+			return Problem(statusCode: StatusCodes.Status403Forbidden,
+				title: "Pairing codes are only available in the desktop app.");
+		}
+
+		var now = _timeProvider.GetUtcNow().UtcDateTime;
+		var code = rotate ? _pairingCodes.Rotate(now) : _pairingCodes.Current(now);
+		return Ok(new PairingCodeResponse(code.Code, code.ExpiresAt.ToString("O")));
 	}
 
 	private TokenResponse ToTokenResponse(LoginResult login)

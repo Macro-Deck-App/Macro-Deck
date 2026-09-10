@@ -85,7 +85,8 @@ internal sealed class InMemoryRefreshTokenRepository : IRefreshTokenRepository
 
 	public Task DeleteExpired(DateTime now)
 	{
-		Tokens.RemoveAll(t => t.ExpiresAt < now);
+		Tokens.RemoveAll(t => t.ExpiresAt < now ||
+			(t.RevokedAt is { } revokedAt && revokedAt < now - AuthDefaults.RevokedRefreshTokenRetention));
 		return Task.CompletedTask;
 	}
 }

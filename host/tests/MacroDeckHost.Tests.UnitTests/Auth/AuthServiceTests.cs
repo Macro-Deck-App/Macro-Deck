@@ -1,3 +1,4 @@
+using System.Globalization;
 using MacroDeckHost.Infrastructure.Auth;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Devices;
@@ -15,10 +16,21 @@ public class AuthServiceTests
 	private ManualTimeProvider _time = null!;
 	private FakeOnboardingPreferences _preferences = null!;
 	private AuthService _service = null!;
+	private PairingCodeStore _pairingCodes = null!;
+
+	private static readonly DeviceRegistration _phone = new(null,
+		null,
+		DeviceClientType.Native,
+		"Pixel 8 - Phone",
+		"Android",
+		null,
+		DeviceFormFactor.Phone,
+		"1.0.0");
 
 	[SetUp]
 	public void SetUp()
 	{
+		_pairingCodes = new PairingCodeStore();
 		_users = new InMemoryUserRepository();
 		_tokens = new InMemoryRefreshTokenRepository();
 		_time = new ManualTimeProvider();
@@ -42,6 +54,7 @@ public class AuthServiceTests
 				new ProviderDevicePresenceTracker(),
 				new FakeIntegrationRegistry()),
 			new DeviceEnrollmentStore(),
+			_pairingCodes,
 			_preferences,
 			_time);
 	}
@@ -275,4 +288,192 @@ public class AuthServiceTests
 			Assert.That(login.Success, Is.True);
 		});
 	}
+
+	[Test]
+	public void A_pairing_code_is_six_ascii_digits()
+	{
+		for (var i = 0; i < 200; i++)
+		{
+			Assert.That(_pairingCodes.Rotate(_time.Now.UtcDateTime).Code, Does.Match("^[0-9]{6}$"));
+		}
+	}
+
+	[Test]
+	public async Task A_pairing_code_buys_one_client_scope_session_and_is_then_spent()
+	{
+		await _service.Setup("admin", "password123");
+		var code = _pairingCodes.Rotate(_time.Now.UtcDateTime).Code;
+
+		var first = await _service.RedeemDeviceEnrollment(code, _phone);
+		var replay = await _service.RedeemDeviceEnrollment(code, _phone);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first.Success, Is.True);
+			Assert.That(first.Data!.Scope, Is.EqualTo(AuthScope.Client));
+			Assert.That(first.Data.DeviceId, Is.Not.Null);
+			Assert.That(replay.Error, Is.EqualTo(AuthError.InvalidCredentials));
+		});
+	}
+
+	[Test]
+	public async Task Opening_the_panel_again_invalidates_the_previous_code_at_once()
+	{
+		await _service.Setup("admin", "password123");
+		var previous = _pairingCodes.Rotate(_time.Now.UtcDateTime).Code;
+		var current = _pairingCodes.Rotate(_time.Now.UtcDateTime).Code;
+
+		var withPrevious = await _service.RedeemDeviceEnrollment(previous, _phone);
+		var withCurrent = await _service.RedeemDeviceEnrollment(current, _phone);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(current, Is.Not.EqualTo(previous));
+			Assert.That(withPrevious.Success, Is.False);
+			Assert.That(withCurrent.Success, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task A_pairing_code_stays_the_same_until_it_expires_after_fifteen_minutes()
+	{
+		await _service.Setup("admin", "password123");
+		var minted = _pairingCodes.Rotate(_time.Now.UtcDateTime);
+
+		_time.Advance(TimeSpan.FromMinutes(14));
+		var beforeExpiry = _pairingCodes.Current(_time.Now.UtcDateTime);
+		_time.Advance(TimeSpan.FromMinutes(1));
+		var expired = await _service.RedeemDeviceEnrollment(minted.Code, _phone);
+		var replacement = _pairingCodes.Current(_time.Now.UtcDateTime);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(beforeExpiry, Is.EqualTo(minted));
+			Assert.That(minted.ExpiresAt, Is.EqualTo(_time.Now.UtcDateTime));
+			Assert.That(expired.Success, Is.False);
+			Assert.That(replacement.Code, Is.Not.EqualTo(minted.Code));
+		});
+	}
+
+	[Test]
+	public async Task Five_failed_redeems_from_any_caller_clear_the_code()
+	{
+		await _service.Setup("admin", "password123");
+		var code = _pairingCodes.Rotate(_time.Now.UtcDateTime).Code;
+
+		for (var i = 1; i <= PairingCodeStore.MaxFailures; i++)
+		{
+			await _service.RedeemDeviceEnrollment(WrongCode(code, i), _phone);
+		}
+
+		var correct = await _service.RedeemDeviceEnrollment(code, _phone);
+		var next = _pairingCodes.Current(_time.Now.UtcDateTime).Code;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(correct.Success, Is.False);
+			Assert.That(next, Is.Not.EqualTo(code));
+		});
+	}
+
+	[Test]
+	public async Task Fewer_failed_redeems_than_the_limit_leave_the_code_valid()
+	{
+		await _service.Setup("admin", "password123");
+		var code = _pairingCodes.Rotate(_time.Now.UtcDateTime).Code;
+
+		for (var i = 1; i < PairingCodeStore.MaxFailures; i++)
+		{
+			await _service.RedeemDeviceEnrollment(WrongCode(code, i), _phone);
+		}
+
+		Assert.That((await _service.RedeemDeviceEnrollment(code, _phone)).Success, Is.True);
+	}
+
+	[Test]
+	public async Task A_burst_of_parallel_guesses_never_gets_more_than_the_failure_limit()
+	{
+		var now = _time.Now.UtcDateTime;
+		var code = _pairingCodes.Rotate(now).Code;
+
+		await Task.WhenAll(Enumerable.Range(1, 50)
+			.Select(i => Task.Run(() => _pairingCodes.TryRedeem(WrongCode(code, i), now))));
+
+		Assert.That(_pairingCodes.TryRedeem(code, now), Is.False);
+	}
+
+	[Test]
+	public async Task Failed_enrollment_tokens_do_not_count_against_the_pairing_code()
+	{
+		await _service.Setup("admin", "password123");
+		var code = _pairingCodes.Rotate(_time.Now.UtcDateTime).Code;
+
+		for (var i = 0; i < PairingCodeStore.MaxFailures * 2; i++)
+		{
+			await _service.RedeemDeviceEnrollment(TokenHasher.Generate(), _phone);
+		}
+
+		Assert.That((await _service.RedeemDeviceEnrollment(code, _phone)).Success, Is.True);
+	}
+
+	[Test]
+	public async Task No_pairing_code_is_valid_until_the_desktop_mints_one()
+	{
+		await _service.Setup("admin", "password123");
+
+		var guesses = await Task.WhenAll(Enumerable.Range(0, 3)
+			.Select(i => _service.RedeemDeviceEnrollment(i.ToString("D6", CultureInfo.InvariantCulture), _phone)));
+
+		Assert.That(guesses.Select(guess => guess.Success), Is.All.False);
+	}
+
+	[Test]
+	public async Task A_refresh_token_lives_365_days()
+	{
+		await _service.Setup("admin", "password123");
+
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+
+		Assert.That(login.Data!.RefreshTokenExpiresAt, Is.EqualTo(_time.Now.UtcDateTime.AddDays(365)));
+	}
+
+	[Test]
+	public async Task A_rotated_refresh_token_presented_again_within_30_days_still_revokes_every_session()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		var rotated = await _service.Refresh(login.Data!.RefreshToken);
+
+		_time.Advance(TimeSpan.FromDays(29));
+		await _service.Login("admin", "password123", AuthScope.Client);
+		var reuse = await _service.Refresh(login.Data.RefreshToken);
+		var successor = await _service.Refresh(rotated.Data!.RefreshToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(reuse.Error, Is.EqualTo(AuthError.RefreshTokenReused));
+			Assert.That(successor.Success, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task Rotated_refresh_tokens_are_deleted_30_days_after_rotation_while_live_ones_stay()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		var rotated = await _service.Refresh(login.Data!.RefreshToken);
+
+		_time.Advance(TimeSpan.FromDays(31));
+		await _service.Login("admin", "password123", AuthScope.Client);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_tokens.Tokens.Any(t => t.TokenHash == TokenHasher.Hash(login.Data.RefreshToken)), Is.False);
+			Assert.That(_tokens.Tokens.Any(t => t.TokenHash == TokenHasher.Hash(rotated.Data!.RefreshToken)), Is.True);
+		});
+	}
+
+	private static string WrongCode(string code, int offset)
+		=> ((int.Parse(code, CultureInfo.InvariantCulture) + offset) % 1_000_000)
+			.ToString("D6", CultureInfo.InvariantCulture);
 }

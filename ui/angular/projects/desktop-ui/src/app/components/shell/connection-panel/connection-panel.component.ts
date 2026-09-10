@@ -1,7 +1,18 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Output, computed, effect, inject, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  EventEmitter,
+  Output,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { toDataURL } from 'qrcode';
 
-import { AppStrings, ConnectionEndpoint, GetConnectionInfoResponse } from '@macro-deck/runtime';
+import { AppStrings, ConnectionEndpoint, GetConnectionInfoResponse, PairingCodeResponse } from '@macro-deck/runtime';
 import { ApiService, LocalizationService, TranslatePipe, LocalizationKey } from '@shared';
 import { ExternalLinkService } from '../../../services/external-link.service';
 
@@ -9,6 +20,8 @@ interface AddressGroup {
   address: string;
   endpoints: ConnectionEndpoint[];
 }
+
+const PAIRING_POLL_SECONDS = 5;
 
 @Component({
   selector: 'app-connection-panel',
@@ -31,8 +44,23 @@ export class ConnectionPanelComponent {
   protected readonly info = signal<GetConnectionInfoResponse | null>(null);
   protected readonly qrDataUrl = signal<string | null>(null);
   protected readonly loading = signal(true);
+  protected readonly pairingCode = signal<PairingCodeResponse | null>(null);
+  private readonly now = signal(Date.now());
+  private timer: ReturnType<typeof setInterval> | null = null;
+  private loadGeneration = 0;
 
   protected readonly expanded = signal<string | null>(null);
+
+  protected readonly groupedPairingCode = computed(() => {
+    const code = this.pairingCode()?.code;
+    return code ? `${code.slice(0, 3)} ${code.slice(3)}` : null;
+  });
+
+  protected readonly pairingCodeRemaining = computed(() => {
+    const expiresAt = this.pairingCode()?.expiresAt;
+    const seconds = expiresAt ? Math.max(0, Math.ceil((Date.parse(expiresAt) - this.now()) / 1000)) : 0;
+    return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+  });
 
   protected readonly addressGroups = computed<AddressGroup[]>(() => {
     const groups: AddressGroup[] = [];
@@ -53,23 +81,85 @@ export class ConnectionPanelComponent {
     effect(() => {
       if (this.isOpen()) {
         void this.load();
+      } else {
+        this.stopPairingTimer();
       }
     });
+    inject(DestroyRef).onDestroy(() => this.stopPairingTimer());
   }
 
   private async load(): Promise<void> {
     this.loading.set(true);
     this.expanded.set(null);
+    this.stopPairingTimer();
+    const generation = ++this.loadGeneration;
 
     try {
       const info = await this.api.getConnectionInfo();
+      const code = await this.api.rotatePairingCode().catch(() => null);
+      if (generation !== this.loadGeneration) {
+        return;
+      }
+
       this.info.set(info);
-      this.qrDataUrl.set(await toDataURL(this.buildConnectUrl(info), { margin: 1, width: 220 }));
+      await this.showPairingCode(code);
+      if (code && this.isOpen()) {
+        this.startPairingTimer();
+      }
     } catch {
-      this.info.set(null);
+      if (generation === this.loadGeneration) {
+        this.info.set(null);
+      }
     } finally {
-      this.loading.set(false);
+      if (generation === this.loadGeneration) {
+        this.loading.set(false);
+      }
     }
+  }
+
+  private startPairingTimer(): void {
+    this.stopPairingTimer();
+    let ticks = 0;
+    this.timer = setInterval(() => {
+      this.now.set(Date.now());
+      const expired = Date.parse(this.pairingCode()?.expiresAt ?? '') <= Date.now();
+      if (++ticks % PAIRING_POLL_SECONDS === 0 || expired) {
+        void this.pollPairingCode();
+      }
+    }, 1000);
+  }
+
+  private stopPairingTimer(): void {
+    if (this.timer !== null) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  }
+
+  private async pollPairingCode(): Promise<void> {
+    const generation = this.loadGeneration;
+    try {
+      const code = await this.api.getPairingCode();
+      if (generation !== this.loadGeneration) {
+        return;
+      }
+
+      if (code.code !== this.pairingCode()?.code || code.expiresAt !== this.pairingCode()?.expiresAt) {
+        await this.showPairingCode(code);
+      }
+    } catch {
+      if (generation === this.loadGeneration) {
+        this.stopPairingTimer();
+        await this.showPairingCode(null);
+      }
+    }
+  }
+
+  private async showPairingCode(code: PairingCodeResponse | null): Promise<void> {
+    this.now.set(Date.now());
+    this.pairingCode.set(code);
+    const info = this.info();
+    this.qrDataUrl.set(info ? await toDataURL(this.buildConnectUrl(info, code?.code ?? ''), { margin: 1, width: 220, errorCorrectionLevel: 'L' }) : null);
   }
 
   protected key(endpoint: ConnectionEndpoint): string {
@@ -92,12 +182,12 @@ export class ConnectionPanelComponent {
     this.expanded.set(null);
   }
 
-  private buildConnectUrl(info: GetConnectionInfoResponse): string {
+  private buildConnectUrl(info: GetConnectionInfoResponse, token: string): string {
     const payload = {
       payloadVersion: 2,
       instanceName: info.instanceName,
       endpoints: info.endpoints,
-      token: '',
+      token,
       version: info.version,
     };
     const base64 = btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(payload))));
