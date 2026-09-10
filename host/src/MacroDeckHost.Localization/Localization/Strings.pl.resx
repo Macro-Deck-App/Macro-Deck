@@ -16381,4 +16381,19 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Onboarding.RecoveryKey.RevealUnavailable" xml:space="preserve">
     <value>Klucz można pokazać wyłącznie na komputerze, na którym działa Macro Deck.</value>
   </data>
+  <data name="Settings.Network.PortUsedByMacroDeck" xml:space="preserve">
+    <value>Ten port jest już używany przez Macro Deck. Wybierz inny.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadCertificateRequired" xml:space="preserve">
+    <value>Wymagany jest certyfikat PEM.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadPrivateKeyRequired" xml:space="preserve">
+    <value>Wymagany jest klucz prywatny PEM.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadPrivateKeyEncrypted" xml:space="preserve">
+    <value>Klucz prywatny jest zaszyfrowany hasłem. Użyj zamiast niego niezaszyfrowanego klucza prywatnego PKCS#8.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadPairInvalid" xml:space="preserve">
+    <value>Nie udało się wczytać certyfikatu lub klucza prywatnego. Sprawdź, czy jest to prawidłowy certyfikat X.509 w formacie PEM i pasujący, niezaszyfrowany klucz prywatny PKCS#8.</value>
+  </data>
 </root>

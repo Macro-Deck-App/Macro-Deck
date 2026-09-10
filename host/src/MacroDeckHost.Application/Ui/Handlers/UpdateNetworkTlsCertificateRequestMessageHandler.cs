@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Settings;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
 
@@ -14,16 +15,19 @@ public class UpdateNetworkTlsCertificateRequestMessageHandler
 	private readonly IApplicationRestartService _restart;
 	private readonly IPublicTlsCertificateStore _certificateStore;
 	private readonly INetworkRestartNotifier _restartNotifier;
+	private readonly IServiceScopeFactory _scopeFactory;
 
 	public UpdateNetworkTlsCertificateRequestMessageHandler(IAppPreferenceService preferences,
 		IApplicationRestartService restart,
 		IPublicTlsCertificateStore certificateStore,
-		INetworkRestartNotifier restartNotifier)
+		INetworkRestartNotifier restartNotifier,
+		IServiceScopeFactory scopeFactory)
 	{
 		_preferences = preferences;
 		_restart = restart;
 		_certificateStore = certificateStore;
 		_restartNotifier = restartNotifier;
+		_scopeFactory = scopeFactory;
 	}
 
 	public async ValueTask<UpdateNetworkSettingsResponse> Handle(
@@ -38,7 +42,8 @@ public class UpdateNetworkTlsCertificateRequestMessageHandler
 
 		if (!validation.Valid)
 		{
-			return NetworkSettingsResponseFactory.Create(current, _restart.Availability, false, validation.Error);
+			var error = validation.Error is { } text ? await ActiveLocalization.Resolve(_scopeFactory, text) : null;
+			return NetworkSettingsResponseFactory.Create(current, _restart.Availability, false, error);
 		}
 
 		_certificateStore.Save(request.CertificatePem, request.PrivateKeyPem, PublicTlsCertificateSource.Custom);

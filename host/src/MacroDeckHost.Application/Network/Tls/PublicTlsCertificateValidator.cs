@@ -1,8 +1,10 @@
 using System.Security.Cryptography;
+using MacroDeck.Localization;
+using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Application.Network.Tls;
 
-public sealed record PublicTlsValidationResult(bool Valid, PublicTlsCertificateInfo? Certificate, string? Error);
+public sealed record PublicTlsValidationResult(bool Valid, PublicTlsCertificateInfo? Certificate, LocalizedText? Error);
 
 public static class PublicTlsCertificateValidator
 {
@@ -15,19 +17,23 @@ public static class PublicTlsCertificateValidator
 	{
 		if (string.IsNullOrWhiteSpace(certificatePem))
 		{
-			return new PublicTlsValidationResult(false, null, "A certificate PEM is required.");
+			return new PublicTlsValidationResult(false,
+				null,
+				AppStrings.Settings.Network.Tls.UploadCertificateRequired());
 		}
 
 		if (string.IsNullOrWhiteSpace(privateKeyPem))
 		{
-			return new PublicTlsValidationResult(false, null, "A private key PEM is required.");
+			return new PublicTlsValidationResult(false,
+				null,
+				AppStrings.Settings.Network.Tls.UploadPrivateKeyRequired());
 		}
 
 		if (privateKeyPem.Contains(EncryptedPrivateKeyLabel, StringComparison.Ordinal))
 		{
 			return new PublicTlsValidationResult(false,
 				null,
-				"The private key is passphrase-encrypted. Supply an unencrypted PKCS#8 private key instead.");
+				AppStrings.Settings.Network.Tls.UploadPrivateKeyEncrypted());
 		}
 
 		// Deliberately the full server-certificate path, not just CreateFromPem: a pair that parses but
@@ -54,8 +60,7 @@ public static class PublicTlsCertificateValidator
 			// sure of that.
 			return new PublicTlsValidationResult(false,
 				null,
-				"The certificate or private key could not be loaded. Verify they are a valid PEM-encoded " +
-				"X.509 certificate and a matching, unencrypted PKCS#8 private key.");
+				AppStrings.Settings.Network.Tls.UploadPairInvalid());
 		}
 	}
 }

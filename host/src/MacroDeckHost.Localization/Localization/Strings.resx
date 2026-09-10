@@ -16382,4 +16382,19 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Onboarding.RecoveryKey.RevealUnavailable" xml:space="preserve">
     <value>The key can only be shown on the computer running Macro Deck.</value>
   </data>
+  <data name="Settings.Network.PortUsedByMacroDeck" xml:space="preserve">
+    <value>This port is already used by Macro Deck itself. Choose a different one.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadCertificateRequired" xml:space="preserve">
+    <value>A certificate PEM is required.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadPrivateKeyRequired" xml:space="preserve">
+    <value>A private key PEM is required.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadPrivateKeyEncrypted" xml:space="preserve">
+    <value>The private key is passphrase-encrypted. Supply an unencrypted PKCS#8 private key instead.</value>
+  </data>
+  <data name="Settings.Network.Tls.UploadPairInvalid" xml:space="preserve">
+    <value>The certificate or private key could not be loaded. Verify they are a valid PEM-encoded X.509 certificate and a matching, unencrypted PKCS#8 private key.</value>
+  </data>
 </root>

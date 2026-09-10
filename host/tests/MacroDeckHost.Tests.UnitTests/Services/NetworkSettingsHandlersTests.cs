@@ -16,6 +16,7 @@ using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.Notifications;
+using MacroDeckHost.Localization;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Serilog;
 
@@ -148,8 +149,17 @@ public class NetworkSettingsHandlersTests
 			certificateStore,
 			notifications,
 			new GetNetworkSettingsRequestMessageHandler(service, restartService),
-			new UpdateNetworkSettingsRequestMessageHandler(service, restartService, listenerState, notifier, discovery),
-			new UpdateNetworkTlsCertificateRequestMessageHandler(service, restartService, certificateStore, notifier),
+			new UpdateNetworkSettingsRequestMessageHandler(service,
+				restartService,
+				listenerState,
+				notifier,
+				discovery,
+				TestLocalization.ScopeFactory),
+			new UpdateNetworkTlsCertificateRequestMessageHandler(service,
+				restartService,
+				certificateStore,
+				notifier,
+				TestLocalization.ScopeFactory),
 			new ReissueTlsCertificateRequestMessageHandler(service,
 				restartService,
 				new PublicTlsBootstrapper(certificateStore,
@@ -377,6 +387,39 @@ public class NetworkSettingsHandlersTests
 			Assert.That(response.Error, Is.Not.Empty);
 			Assert.That(fixture.Repository.Writes, Is.Zero);
 		});
+	}
+
+	[Test]
+	public async Task A_rejection_reaches_the_user_in_their_own_language()
+	{
+		var fixture = CreateFixture();
+		await TestLocalization.Preferences.SetLocalization("de");
+		try
+		{
+			var portResponse = await fixture.Update.Handle(new UpdateNetworkSettingsRequest { PublicPort = 80 },
+				CancellationToken.None);
+			var certificateResponse = await fixture.UpdateCertificate.Handle(
+				new UpdateNetworkTlsCertificateRequest { CertificatePem = "", PrivateKeyPem = "" },
+				CancellationToken.None);
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(portResponse.Error,
+					Is.EqualTo(TestLocalization.Resolve(AppStrings.Settings.Network.PortRangeHint(
+							minimum: PublicPortSelector.MinimumConfigurablePort,
+							maximum: PublicPortSelector.MaximumConfigurablePort),
+						"de")));
+				Assert.That(portResponse.Error, Does.Not.StartWith("Enter"));
+				Assert.That(certificateResponse.Error,
+					Is.EqualTo(TestLocalization.Resolve(AppStrings.Settings.Network.Tls.UploadCertificateRequired(),
+						"de")));
+				Assert.That(certificateResponse.Error, Does.Contain("Zertifikat"));
+			});
+		}
+		finally
+		{
+			await TestLocalization.Preferences.SetLocalization("en");
+		}
 	}
 
 	[Test]
