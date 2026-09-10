@@ -63,7 +63,8 @@ public class PublicTlsCertificateValidatorTests
 		{
 			Assert.That(missingCertificate.Valid, Is.False);
 			Assert.That(missingKey.Valid, Is.False);
-			Assert.That(TestLocalization.Resolve(missingCertificate.Error), Is.Not.EqualTo(TestLocalization.Resolve(missingKey.Error)));
+			Assert.That(TestLocalization.Resolve(missingCertificate.Error),
+				Is.Not.EqualTo(TestLocalization.Resolve(missingKey.Error)));
 		});
 	}
 
@@ -81,8 +82,10 @@ public class PublicTlsCertificateValidatorTests
 		{
 			Assert.That(garbage.Valid, Is.False);
 			Assert.That(TestLocalization.Resolve(garbage.Error), Is.Not.Null.And.Not.Empty);
-			Assert.That(TestLocalization.Resolve(garbage.Error), Is.Not.EqualTo(TestLocalization.Resolve(missingCertificate.Error)));
-			Assert.That(TestLocalization.Resolve(garbage.Error), Is.Not.EqualTo(TestLocalization.Resolve(missingKey.Error)));
+			Assert.That(TestLocalization.Resolve(garbage.Error),
+				Is.Not.EqualTo(TestLocalization.Resolve(missingCertificate.Error)));
+			Assert.That(TestLocalization.Resolve(garbage.Error),
+				Is.Not.EqualTo(TestLocalization.Resolve(missingKey.Error)));
 		});
 	}
 

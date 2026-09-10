@@ -323,7 +323,8 @@ public class NetworkSettingsHandlersTests
 						"de")));
 				Assert.That(portResponse.Error, Does.Not.StartWith("Enter"));
 				Assert.That(certificateResponse.Error,
-					Is.EqualTo(TestLocalization.Resolve(AppStrings.Settings.Network.Tls.UploadCertificateRequired(), "de")));
+					Is.EqualTo(TestLocalization.Resolve(AppStrings.Settings.Network.Tls.UploadCertificateRequired(),
+						"de")));
 				Assert.That(certificateResponse.Error, Does.Contain("Zertifikat"));
 			});
 		}

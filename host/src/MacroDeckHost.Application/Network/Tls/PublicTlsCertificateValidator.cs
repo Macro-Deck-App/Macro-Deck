@@ -17,12 +17,16 @@ public static class PublicTlsCertificateValidator
 	{
 		if (string.IsNullOrWhiteSpace(certificatePem))
 		{
-			return new PublicTlsValidationResult(false, null, AppStrings.Settings.Network.Tls.UploadCertificateRequired());
+			return new PublicTlsValidationResult(false,
+				null,
+				AppStrings.Settings.Network.Tls.UploadCertificateRequired());
 		}
 
 		if (string.IsNullOrWhiteSpace(privateKeyPem))
 		{
-			return new PublicTlsValidationResult(false, null, AppStrings.Settings.Network.Tls.UploadPrivateKeyRequired());
+			return new PublicTlsValidationResult(false,
+				null,
+				AppStrings.Settings.Network.Tls.UploadPrivateKeyRequired());
 		}
 
 		if (privateKeyPem.Contains(EncryptedPrivateKeyLabel, StringComparison.Ordinal))
