@@ -108,7 +108,8 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 	private static readonly ParserOptions _liquidParserOptions = new() { LiquidFunctionsToScriban = true };
 
 	private readonly VariableRegistry _registry;
-	private readonly ConcurrentDictionary<string, Template> _templateCache = new();
+	private readonly ConcurrentDictionary<string, ParsedTemplate> _templateCache = new();
+	private readonly ConcurrentDictionary<(VariableScope Scope, string? ScopeRefId), RenderMemo> _memo = new();
 
 	public VariableTemplateRenderer(VariableRegistry registry)
 	{
@@ -119,9 +120,109 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 		=> Task.FromResult(Render(templateText, contextScope, contextScopeRefId));
 
 	public string Render(string templateText, VariableScope contextScope, string? contextScopeRefId)
-		=> ContainsLiquid(templateText)
-			? Render(templateText, BuildContext(contextScope, contextScopeRefId))
-			: templateText;
+	{
+		if (!ContainsLiquid(templateText))
+		{
+			return templateText;
+		}
+
+		var parsed = Parse(templateText);
+		if (parsed.Names is null)
+		{
+			return Render(parsed.Template, BuildContext(contextScope, contextScopeRefId));
+		}
+
+		var snapshot = CaptureSnapshot(parsed.Names, contextScope, contextScopeRefId);
+		var key = (contextScope, contextScopeRefId);
+
+		if (_memo.TryGetValue(key, out var memo) &&
+			string.Equals(memo.TemplateText, templateText, StringComparison.Ordinal) &&
+			memo.Snapshot.SequenceEqual(snapshot))
+		{
+			return memo.Output;
+		}
+
+		var output = RenderSnapshot(parsed.Template, snapshot);
+		_memo[key] = new RenderMemo(templateText, snapshot, output);
+		return output;
+	}
+
+	internal IReadOnlyList<VariableSnapshot> CaptureSnapshot(
+		IReadOnlyCollection<string> names,
+		VariableScope contextScope,
+		string? contextScopeRefId)
+	{
+		var readsLocals = contextScope != VariableScope.Global && !string.IsNullOrEmpty(contextScopeRefId);
+		var snapshot = new List<VariableSnapshot>(names.Count);
+
+		foreach (var name in names)
+		{
+			var entity = (readsLocals ? _registry.FindByName(contextScope, contextScopeRefId, name) : null) ??
+				_registry.FindByName(VariableScope.Global, null, name);
+
+			snapshot.Add(entity is null
+				? new VariableSnapshot(name, null, false)
+				: new VariableSnapshot(name, Detach(entity), _registry.IsAvailable(entity.Id)));
+		}
+
+		return snapshot;
+	}
+
+	internal string RenderSnapshot(string templateText, IReadOnlyList<VariableSnapshot> snapshot)
+		=> RenderSnapshot(Parse(templateText).Template, snapshot);
+
+	private static string RenderSnapshot(Template template, IReadOnlyList<VariableSnapshot> snapshot)
+	{
+		var vars = new VariablesScriptObject();
+		var resolvable = new Dictionary<string, VariableEntity>(StringComparer.Ordinal);
+
+		// Rendered from the detached copies only, never the live entities writers mutate in place: the memo
+		// then stores text and snapshot that describe the same data, so an equal snapshot means equal text.
+		foreach (var entry in snapshot)
+		{
+			if (entry.Variable is not { } variable)
+			{
+				continue;
+			}
+
+			vars[entry.Name] = EntryOf(variable, entry.IsAvailable);
+			if (entry.IsAvailable)
+			{
+				resolvable[entry.Name] = variable;
+			}
+		}
+
+		var root = new ScriptObject { ["vars"] = vars, ["event"] = new ScriptObject() };
+		return Render(template, new VariableContext(resolvable, root));
+	}
+
+	private ParsedTemplate Parse(string templateText)
+		=> _templateCache.GetOrAdd(templateText,
+			text =>
+			{
+				var template = Template.ParseLiquid(text, null, _liquidParserOptions);
+				return new ParsedTemplate(template, TemplateVariableAccess.ReadNames(template));
+			});
+
+	private static VariableEntity Detach(VariableEntity live) => new()
+	{
+		Id = live.Id,
+		Name = live.Name,
+		Scope = live.Scope,
+		ScopeRefId = live.ScopeRefId,
+		Type = live.Type,
+		Classification = live.Classification,
+		Value = live.Value,
+		DecimalPlaces = live.DecimalPlaces,
+		Unit = live.Unit,
+		SemanticKind = live.SemanticKind,
+		Attributes = live.Attributes is { } attributes
+			? new Dictionary<string, string>(attributes, StringComparer.Ordinal)
+			: null,
+		Min = live.Min,
+		Max = live.Max,
+		Step = live.Step,
+	};
 
 	public Task<VariableContext> CreateContextAsync(VariableScope contextScope, string? contextScopeRefId)
 		=> Task.FromResult(BuildContext(contextScope, contextScopeRefId));
@@ -154,16 +255,11 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 		var resolvable = new Dictionary<string, VariableEntity>(StringComparer.Ordinal);
 		foreach (var kv in byName)
 		{
-			if (_registry.IsAvailable(kv.Value.Id))
+			var isAvailable = _registry.IsAvailable(kv.Value.Id);
+			vars[kv.Key] = EntryOf(kv.Value, isAvailable);
+			if (isAvailable)
 			{
-				vars[kv.Key] = Wrap(kv.Value, FormatForTemplate(kv.Value), isAvailable: true);
 				resolvable[kv.Key] = kv.Value;
-			}
-			else
-			{
-				// Wrapped on this branch too: a variable's unit does not stop existing because its
-				// provider is momentarily quiet, so vars.x.unit still resolves while vars.x reads "n/v".
-				vars[kv.Key] = Wrap(kv.Value, UnavailablePlaceholder, isAvailable: false);
 			}
 		}
 
@@ -178,12 +274,61 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 			return templateText;
 		}
 
-		var parsed = _templateCache.GetOrAdd(templateText, t => Template.ParseLiquid(t, null, _liquidParserOptions));
+		return Render(Parse(templateText).Template, context);
+	}
+
+	private static string Render(Template template, VariableContext context)
+	{
 		var templateContext = new VariableTemplateContext();
 
 		templateContext.PushGlobal(TemplateFilters.CreateScope());
 		templateContext.PushGlobal(context.ScribanObject);
-		return parsed.Render(templateContext);
+		return template.Render(templateContext);
+	}
+
+	// Wrapped on the unavailable branch too: a variable's unit does not stop existing because its provider is
+	// momentarily quiet, so vars.x.unit still resolves while vars.x reads "n/v".
+	private static VariableTemplateValue EntryOf(VariableEntity variable, bool isAvailable)
+		=> isAvailable
+			? Wrap(variable, FormatForTemplate(variable), isAvailable: true)
+			: Wrap(variable, UnavailablePlaceholder, isAvailable: false);
+
+	private sealed record ParsedTemplate(Template Template, IReadOnlyCollection<string>? Names);
+
+	private sealed record RenderMemo(string TemplateText, IReadOnlyList<VariableSnapshot> Snapshot, string Output);
+
+	internal sealed record VariableSnapshot(string Name, VariableEntity? Variable, bool IsAvailable)
+	{
+		public bool Equals(VariableSnapshot? other)
+			=> other is not null &&
+				string.Equals(Name, other.Name, StringComparison.Ordinal) &&
+				IsAvailable == other.IsAvailable &&
+				RendersAlike(Variable, other.Variable);
+
+		public override int GetHashCode() => HashCode.Combine(Name, IsAvailable, Variable?.Value);
+
+		private static bool RendersAlike(VariableEntity? left, VariableEntity? right)
+			=> left is null || right is null
+				? left is null && right is null
+				: left.Id == right.Id &&
+				left.Type == right.Type &&
+				string.Equals(left.Value, right.Value, StringComparison.Ordinal) &&
+				left.DecimalPlaces == right.DecimalPlaces &&
+				string.Equals(left.Unit, right.Unit, StringComparison.Ordinal) &&
+				string.Equals(left.SemanticKind, right.SemanticKind, StringComparison.Ordinal) &&
+				Nullable.Equals(left.Min, right.Min) &&
+				Nullable.Equals(left.Max, right.Max) &&
+				Nullable.Equals(left.Step, right.Step) &&
+				SameAttributes(left.Attributes, right.Attributes);
+
+		private static bool SameAttributes(
+			IReadOnlyDictionary<string, string>? left,
+			IReadOnlyDictionary<string, string>? right)
+			=> left is null || right is null
+				? left is null && right is null
+				: left.Count == right.Count &&
+				left.All(pair => right.TryGetValue(pair.Key, out var value) &&
+					string.Equals(value, pair.Value, StringComparison.Ordinal));
 	}
 
 	public static bool ContainsLiquid(string? template)
