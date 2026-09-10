@@ -15,6 +15,7 @@ internal sealed class HistoryGraphWidgetSession : IUiSession
 	private readonly IVariableHistoryWindow _window;
 	private readonly IVariableChangeNotifier _variables;
 	private readonly HashSet<string> _watched;
+	private readonly Lock _refreshSync = new();
 
 	public HistoryGraphWidgetSession(UiView view,
 		UiState<HistoryGraphViewState> state,
@@ -82,5 +83,12 @@ internal sealed class HistoryGraphWidgetSession : IUiSession
 
 	// One resolve feeds every property the tree reads, and an unchanged resolve compares equal - so a flat
 	// metric between two samples costs a comparison and emits no patch at all.
-	private void Refresh() => _state.Set(_resolver.Resolve(_window.Values));
+	private void Refresh()
+	{
+		// The sampling timer and the variable notifier both land here, and the resolver keeps state of its own.
+		lock (_refreshSync)
+		{
+			_state.Set(_resolver.Resolve(_window.Values));
+		}
+	}
 }
