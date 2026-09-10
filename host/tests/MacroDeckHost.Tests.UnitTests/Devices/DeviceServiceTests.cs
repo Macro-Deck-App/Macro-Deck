@@ -482,6 +482,7 @@ public class DeviceServiceTests
 			new FakeAccessTokenIssuer(_time),
 			_service,
 			new DeviceEnrollmentStore(),
+			new PairingCodeStore(),
 			new FakeOnboardingPreferences(),
 			_time);
 		await authService.Setup("admin", "password123");

@@ -410,6 +410,7 @@ public class Startup
 		// Singleton beside the scoped auth service: a one-time device credential is minted in one
 		// request and spent in the next, so it cannot live on a per-request object (issue #727).
 		services.AddSingleton<IDeviceEnrollmentStore, DeviceEnrollmentStore>();
+		services.AddSingleton<PairingCodeStore>();
 		services.AddScoped<IAuthService, AuthService>();
 
 		// Plugin registration and developer tokens (issue #411). The registry, the launch-token store

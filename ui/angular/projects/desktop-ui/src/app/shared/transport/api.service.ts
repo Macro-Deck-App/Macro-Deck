@@ -199,6 +199,7 @@ import {
   OpenUiPreviewSessionResponse,
   OpenWidgetUiSessionRequest,
   OpenWidgetUiSessionResponse,
+  PairingCodeResponse,
   PluginInstallActionResponse,
   PluginPairingActionResponse,
   PluginRuntimeOperationResponse,
@@ -1054,6 +1055,14 @@ export class ApiService {
 
   redeemDeviceEnrollment(request: RedeemDeviceEnrollmentRequest): Promise<TokenResponse> {
     return this.http('POST', '/api/auth/device-enrollment/redeem', request);
+  }
+
+  getPairingCode(): Promise<PairingCodeResponse> {
+    return this.http('GET', '/api/auth/pairing-code');
+  }
+
+  rotatePairingCode(): Promise<PairingCodeResponse> {
+    return this.http('POST', '/api/auth/pairing-code');
   }
 
   getOnboardingState(): Promise<GetOnboardingStateResponse> {

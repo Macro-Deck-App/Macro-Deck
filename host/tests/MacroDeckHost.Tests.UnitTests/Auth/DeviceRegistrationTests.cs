@@ -55,6 +55,7 @@ public class DeviceRegistrationTests
 			_issuer,
 			CreateDeviceService(),
 			new DeviceEnrollmentStore(),
+			new PairingCodeStore(),
 			new FakeOnboardingPreferences(),
 			_time);
 

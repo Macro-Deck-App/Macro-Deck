@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -46,5 +47,10 @@ public class RefreshTokenRepository : IRefreshTokenRepository
 			.ToListAsync();
 
 	public Task DeleteExpired(DateTime now)
-		=> _context.RefreshTokens.Where(t => t.ExpiresAt < now).ExecuteDeleteAsync();
+	{
+		var revokedBefore = now - AuthDefaults.RevokedRefreshTokenRetention;
+		return _context.RefreshTokens
+			.Where(t => t.ExpiresAt < now || (t.RevokedAt != null && t.RevokedAt < revokedBefore))
+			.ExecuteDeleteAsync();
+	}
 }

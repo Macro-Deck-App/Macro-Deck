@@ -125,6 +125,14 @@
   color: var(--color-text-primary);
 }
 
+.cp-pairing-code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  letter-spacing: 0.08em;
+  color: var(--color-text-primary);
+  user-select: all;
+}
+
 .cp-muted {
   color: var(--color-text-muted);
   font-style: italic;

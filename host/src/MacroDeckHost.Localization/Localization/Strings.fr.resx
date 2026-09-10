@@ -13428,6 +13428,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Shell.ConnectionPanel.NoInterfaces" xml:space="preserve">
     <value>Aucune interface réseau trouvée</value>
   </data>
+  <data name="Shell.ConnectionPanel.PairingCode" xml:space="preserve">
+    <value>Code d’appairage</value>
+  </data>
+  <data name="Shell.ConnectionPanel.PairingCodeExpiresIn" xml:space="preserve">
+    <value>Expire dans {time}</value>
+  </data>
   <data name="Shell.ConnectionPanel.PublicListenerUnavailable" xml:space="preserve">
     <value>Macro Deck n'est pas accessible sur le réseau actuellement : aucun écouteur public n'a pu être ouvert. Vérifie les ports et les paramètres HTTPS dans Paramètres &gt; Réseau, puis redémarre Macro Deck.</value>
   </data>

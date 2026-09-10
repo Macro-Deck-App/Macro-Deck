@@ -13428,6 +13428,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Shell.ConnectionPanel.NoInterfaces" xml:space="preserve">
     <value>Nessuna interfaccia di rete trovata</value>
   </data>
+  <data name="Shell.ConnectionPanel.PairingCode" xml:space="preserve">
+    <value>Codice di abbinamento</value>
+  </data>
+  <data name="Shell.ConnectionPanel.PairingCodeExpiresIn" xml:space="preserve">
+    <value>Scade tra {time}</value>
+  </data>
   <data name="Shell.ConnectionPanel.PublicListenerUnavailable" xml:space="preserve">
     <value>Macro Deck non è raggiungibile in rete al momento: non è stato possibile aprire un listener pubblico. Controlla le porte e le impostazioni HTTPS in Impostazioni &gt; Rete e riavvia Macro Deck.</value>
   </data>

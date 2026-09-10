@@ -217,6 +217,42 @@ public class AuthPolicyMatrixTests
 	}
 
 	[Test]
+	public async Task Pairing_codes_are_only_handed_out_on_the_loopback_listener()
+	{
+		var remoteRead = await Send(HttpMethod.Get, "/api/auth/pairing-code", _adminToken);
+		var remoteRotate = await SendJson(HttpMethod.Post, "/api/auth/pairing-code", new { }, _adminToken);
+		var loopback = await SendJson(HttpMethod.Post, "/api/auth/pairing-code", new { }, loopback: true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(remoteRead.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+			Assert.That(remoteRotate.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+			Assert.That(loopback.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+		});
+	}
+
+	[Test]
+	public async Task A_pairing_code_redeems_like_an_enrollment_once_and_is_then_refused()
+	{
+		var minted = await SendJson(HttpMethod.Post, "/api/auth/pairing-code", new { }, loopback: true);
+		var token = (await ReadJson(minted)).GetProperty("code").GetString();
+
+		var first = await SendJson(HttpMethod.Post, "/api/auth/device-enrollment/redeem", new { token });
+		var replay = await SendJson(HttpMethod.Post, "/api/auth/device-enrollment/redeem", new { token });
+		var scope = (await ReadJson(first)).GetProperty("scope").GetString();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(scope, Is.EqualTo("client"));
+			Assert.That(first.Headers.TryGetValues("Set-Cookie", out var cookies)
+				&& cookies.Any(cookie => cookie.StartsWith(AuthDefaults.RefreshCookie, StringComparison.Ordinal)),
+				Is.True);
+			Assert.That(replay.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+		});
+	}
+
+	[Test]
 	public async Task An_enrolled_device_gets_client_scope_and_never_admin()
 	{
 		var minted = await SendJson(HttpMethod.Post, "/api/auth/device-enrollment", new { }, loopback: true);

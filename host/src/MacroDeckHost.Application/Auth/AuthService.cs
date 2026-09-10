@@ -15,6 +15,7 @@ public class AuthService : IAuthService
 	private readonly IAccessTokenIssuer _accessTokenIssuer;
 	private readonly IDeviceService _deviceService;
 	private readonly IDeviceEnrollmentStore _deviceEnrollments;
+	private readonly PairingCodeStore _pairingCodes;
 	private readonly IAppPreferenceService _appPreferences;
 	private readonly TimeProvider _timeProvider;
 
@@ -25,6 +26,7 @@ public class AuthService : IAuthService
 		IAccessTokenIssuer accessTokenIssuer,
 		IDeviceService deviceService,
 		IDeviceEnrollmentStore deviceEnrollments,
+		PairingCodeStore pairingCodes,
 		IAppPreferenceService appPreferences,
 		TimeProvider timeProvider)
 	{
@@ -34,6 +36,7 @@ public class AuthService : IAuthService
 		_accessTokenIssuer = accessTokenIssuer;
 		_deviceService = deviceService;
 		_deviceEnrollments = deviceEnrollments;
+		_pairingCodes = pairingCodes;
 		_appPreferences = appPreferences;
 		_timeProvider = timeProvider;
 	}
@@ -102,10 +105,13 @@ public class AuthService : IAuthService
 		string token,
 		DeviceRegistration device)
 	{
-		// Removed before it is judged, so a wrong guess and a right one both spend the attempt and a
-		// leaked credential cannot be replayed.
-		var consumed = _deviceEnrollments.TryConsume(HashToken(token), out var expiresAt);
-		if (!consumed || expiresAt < UtcNow())
+		// An enrollment token is removed before it is judged, so a wrong guess and a right one both spend
+		// the attempt and a leaked credential cannot be replayed.
+		var now = UtcNow();
+		var accepted = PairingCodeStore.IsPairingCodeShape(token)
+			? _pairingCodes.TryRedeem(token, now)
+			: _deviceEnrollments.TryConsume(HashToken(token), out var expiresAt) && expiresAt >= now;
+		if (!accepted)
 		{
 			return Result.Fail<LoginResult, AuthError>(AuthError.InvalidCredentials,
 				"The enrollment credential is not valid.");

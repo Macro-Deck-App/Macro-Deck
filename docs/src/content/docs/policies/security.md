@@ -74,6 +74,12 @@ they are stored and revoked.
   Expiry is not what makes this immediate: the host re-checks the live session registry on every
   request, so a terminated session stops working at once even though its 15-minute JWT is still
   cryptographically valid.
+- **Client sessions** (the web client, the companion app) hold a 15-minute access token and a refresh
+  token that rotates on every use and lives 365 days. A rotated refresh token presented again within 30
+  days of its rotation revokes every session of the account. The companion pairs with a six digit,
+  single-use code from the desktop app's network panel: one code at a time, minted only on the loopback
+  listener, cleared after five failed guesses from any caller, and throttled globally. See
+  [ADR 0083](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0083-companion-pairing-code-and-year-long-refresh.md).
 - **A self-registering plugin's own copy of its secret is not encrypted at rest.** The SDK writes it
   owner-only, to a temporary file made owner-only before anything is written to it, then moves it into
   place. On Windows the per-user profile ACL is the protection.
