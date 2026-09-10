@@ -910,7 +910,8 @@ public class RemotePluginIntegrationRegistrarTests
 		var resolver = new LocalizationResolver(_localizationCatalogs);
 		Assert.Multiple(() =>
 		{
-			Assert.That(_integrationRegistry.Registered.Single(i => i.Id == pluginId), Is.InstanceOf<IIntegrationIconProvider>());
+			Assert.That(_integrationRegistry.Registered.Single(i => i.Id == pluginId),
+				Is.InstanceOf<IIntegrationIconProvider>());
 			Assert.That(resolver.Resolve(new LocalizedString(new LocalizationKey(scope, "Connect")), "en"),
 				Is.EqualTo("Connect"));
 		});
