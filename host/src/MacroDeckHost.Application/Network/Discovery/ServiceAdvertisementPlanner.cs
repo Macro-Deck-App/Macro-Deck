@@ -60,9 +60,12 @@ public static class ServiceAdvertisementPlanner
 	private static bool IsLanInterface(NetworkInterfaceSnapshot nic)
 		=> nic.IsUp &&
 			nic.Index > 0 &&
-			nic.Type is not (NetworkInterfaceType.Loopback or NetworkInterfaceType.Tunnel or NetworkInterfaceType.Ppp) &&
+			nic.Type is not (NetworkInterfaceType.Loopback
+				or NetworkInterfaceType.Tunnel
+				or NetworkInterfaceType.Ppp) &&
 			!VirtualNamePrefixes.Any(prefix => nic.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) &&
-			!VirtualDescriptionMarkers.Any(marker => nic.Description.Contains(marker, StringComparison.OrdinalIgnoreCase));
+			!VirtualDescriptionMarkers.Any(marker =>
+				nic.Description.Contains(marker, StringComparison.OrdinalIgnoreCase));
 
 	private static bool IsLanAddress(IPAddress address)
 	{

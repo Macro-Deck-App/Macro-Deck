@@ -33,7 +33,8 @@ internal sealed class ServiceAdvertisementPlannerTests
 	{
 		var plan = Plan();
 
-		Assert.That(plan!.Txt, Is.EqualTo(new[] { new TxtEntry("name", "Studio PC"), new TxtEntry("version", "3.1.0") }));
+		Assert.That(plan!.Txt,
+			Is.EqualTo(new[] { new TxtEntry("name", "Studio PC"), new TxtEntry("version", "3.1.0") }));
 	}
 
 	[Test]
@@ -73,7 +74,10 @@ internal sealed class ServiceAdvertisementPlannerTests
 	[Test]
 	public void Only_real_lan_interfaces_are_advertised()
 	{
-		var ethernet = Nic(5, "Ethernet", "Intel(R) Ethernet Connection I219-V", NetworkInterfaceType.Ethernet,
+		var ethernet = Nic(5,
+			"Ethernet",
+			"Intel(R) Ethernet Connection I219-V",
+			NetworkInterfaceType.Ethernet,
 			"192.168.1.5");
 		var interfaces = new[]
 		{
@@ -86,17 +90,22 @@ internal sealed class ServiceAdvertisementPlannerTests
 			Nic(31, "Ethernet 3", "Hyper-V Virtual Ethernet Adapter #2", NetworkInterfaceType.Ethernet, "172.21.0.1"),
 			Nic(32, "docker0", "docker0", NetworkInterfaceType.Ethernet, "172.17.0.1"),
 			Nic(33, "Teredo", "Teredo Tunneling Pseudo-Interface", NetworkInterfaceType.Tunnel, "10.9.9.9"),
-			new NetworkInterfaceSnapshot(34, "en1", "Thunderbolt Ethernet", NetworkInterfaceType.Ethernet, false,
+			new NetworkInterfaceSnapshot(34,
+				"en1",
+				"Thunderbolt Ethernet",
+				NetworkInterfaceType.Ethernet,
+				false,
 				[IPAddress.Parse("192.168.30.2")])
 		};
 
 		var plan = Plan(interfaces: interfaces);
 
-		Assert.That(plan!.Interfaces, Is.EqualTo(new[]
-		{
-			new AdvertisedInterface(5, IPAddress.Parse("192.168.1.5")),
-			new AdvertisedInterface(17, IPAddress.Parse("192.168.20.13"))
-		}));
+		Assert.That(plan!.Interfaces,
+			Is.EqualTo(new[]
+			{
+				new AdvertisedInterface(5, IPAddress.Parse("192.168.1.5")),
+				new AdvertisedInterface(17, IPAddress.Parse("192.168.20.13"))
+			}));
 	}
 
 	[Test]

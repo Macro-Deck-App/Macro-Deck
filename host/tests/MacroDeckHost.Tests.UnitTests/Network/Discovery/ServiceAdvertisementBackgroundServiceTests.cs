@@ -157,8 +157,12 @@ internal sealed class ServiceAdvertisementBackgroundServiceTests
 		var harness = Create();
 		await harness.Service.Reconcile();
 
-		harness.Interfaces.Interfaces.Add(new NetworkInterfaceSnapshot(5, "en7", "USB LAN", NetworkInterfaceType.Ethernet,
-			true, [IPAddress.Parse("192.168.30.4")]));
+		harness.Interfaces.Interfaces.Add(new NetworkInterfaceSnapshot(5,
+			"en7",
+			"USB LAN",
+			NetworkInterfaceType.Ethernet,
+			true,
+			[IPAddress.Parse("192.168.30.4")]));
 		await harness.Service.Reconcile();
 
 		Assert.That(harness.Advertiser.Published.Last().Interfaces, Has.Count.EqualTo(2));

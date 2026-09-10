@@ -182,8 +182,10 @@ internal sealed class WindowsDnsServiceAdvertiser
 		ushort priority,
 		ushort weight,
 		uint propertiesCount,
-		[MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] keys,
-		[MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] values);
+		[MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)]
+		string[] keys,
+		[MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)]
+		string[] values);
 
 	[DllImport(Library)]
 	private static extern uint DnsServiceRegister(IntPtr request, IntPtr cancel);

@@ -18,7 +18,8 @@ internal sealed class MacOsDnsSdServiceAdvertiser
 	private const short PollHup = 0x10;
 
 	private static readonly Lazy<bool> Loadable = new(() =>
-		NativeLibrary.TryLoad(Library, out var handle) && NativeLibrary.TryGetExport(handle, "DNSServiceRegister", out _));
+		NativeLibrary.TryLoad(Library, out var handle) &&
+		NativeLibrary.TryGetExport(handle, "DNSServiceRegister", out _));
 
 	private readonly ILogger _logger = Log.ForContext<MacOsDnsSdServiceAdvertiser>();
 	private readonly HashSet<IntPtr> _failed = [];
