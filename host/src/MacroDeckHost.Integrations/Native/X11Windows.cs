@@ -9,6 +9,15 @@ internal static class X11Windows
 {
 	private const string LibX11 = "libX11.so.6";
 
+	// Xlib's default error handler exits the process, and a foreign window can vanish between two requests.
+	private static readonly XErrorHandler _ignoreErrors = static (_, _) => 0;
+
+	public static IntPtr OpenDisplay()
+	{
+		_ = XSetErrorHandler(_ignoreErrors);
+		return XOpenDisplay(IntPtr.Zero);
+	}
+
 	public static nuint InternAtom(IntPtr display, string name)
 		=> XInternAtom(display, Encoding.UTF8.GetBytes(name + '\0'), true);
 
@@ -76,6 +85,15 @@ internal static class X11Windows
 		var values = ReadLongProperty(display, window, atom);
 		return values.Count > 0 ? (int)values[0] : null;
 	}
+
+	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+	private delegate int XErrorHandler(IntPtr display, IntPtr errorEvent);
+
+	[DllImport(LibX11)]
+	private static extern IntPtr XSetErrorHandler(XErrorHandler handler);
+
+	[DllImport(LibX11)]
+	private static extern IntPtr XOpenDisplay(IntPtr display);
 
 	[DllImport(LibX11)]
 	private static extern nuint XInternAtom(

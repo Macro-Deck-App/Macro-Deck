@@ -182,7 +182,7 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 	{
 		try
 		{
-			return XOpenDisplay(IntPtr.Zero);
+			return X11Windows.OpenDisplay();
 		}
 		catch (DllNotFoundException)
 		{
@@ -264,9 +264,6 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 			_ = XCloseDisplay(_display);
 		}
 	}
-
-	[DllImport(LibX11)]
-	private static extern IntPtr XOpenDisplay(IntPtr display);
 
 	[DllImport(LibX11)]
 	private static extern int XCloseDisplay(IntPtr display);

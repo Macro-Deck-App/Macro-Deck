@@ -96,7 +96,7 @@ public sealed class LinuxFocusedWindowReader : IFocusedWindowReader, IDisposable
 	{
 		try
 		{
-			return XOpenDisplay(IntPtr.Zero);
+			return X11Windows.OpenDisplay();
 		}
 		catch (DllNotFoundException)
 		{
@@ -114,9 +114,6 @@ public sealed class LinuxFocusedWindowReader : IFocusedWindowReader, IDisposable
 		_disposed = true;
 		_ = XCloseDisplay(_display);
 	}
-
-	[DllImport(LibX11)]
-	private static extern IntPtr XOpenDisplay(IntPtr display);
 
 	[DllImport(LibX11)]
 	private static extern int XCloseDisplay(IntPtr display);
