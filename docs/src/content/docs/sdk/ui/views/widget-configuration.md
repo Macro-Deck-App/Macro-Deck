@@ -63,6 +63,31 @@ inside an object keyed `border` configures `border.style` and a repeated `UiArra
 configures a JSON array. Items are addressed by their own stable key and never by position - a positional
 id destroys focus and in-flight edits on every reorder.
 
+## Letting the user order a selection
+
+A `UiMultiSelectInput` stores its values in the order they were checked. When that order means something -
+which sources a widget shows first, say - set `Reorderable`:
+
+```csharp
+new UiMultiSelectInput
+{
+    Key = "sourceIds",
+    Label = MyStrings.Sources(),
+    Options = UiValue.Of<IReadOnlyList<UiOption>>(options),
+    Binding = Bind.To(sourceIds),
+    Reorderable = true,
+}
+```
+
+The desktop editor then draws the options as a list instead of a dropdown: the checked values first, in
+the bound list's order, each with a drag handle and move buttons, followed by the unchecked options.
+Checking an option appends it, unchecking removes it, and the bound value is always the order shown.
+
+The value keeps its shape - a plain list of option values - so switching an existing input is the one
+property. `Reorderable` is a presentation flag on the `multiselect` node, emitted as `reorderable` only
+when set: a renderer that does not know it draws the ordinary multi-select over the same value, and an
+input without it is unchanged.
+
 ## The tree renders a draft it does not own
 
 Nothing your tree does persists anything. Macro Deck accumulates the edits and writes them through the
