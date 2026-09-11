@@ -145,6 +145,114 @@ public class EventSubscriptionMatcherTests
 
 	private static Dictionary<string, object?> Omitted() => new(StringComparer.Ordinal);
 
+	private const string EditorCombo = """{"modifiers":["Ctrl","Shift"],"key":"F3"}""";
+
+	private const string ReorderedCombo = """{"key":"F3","modifiers":["Shift","Ctrl"]}""";
+
+	private static readonly EventDefinitionDescriptor _hotkeyPressed = new(QualifiedId.Parse("hotkey::pressed"),
+		"hotkey",
+		"Hotkey",
+		true,
+		new EventDefinition
+		{
+			Id = "pressed",
+			Name = "Hotkey Pressed",
+			ConfigurationParameters = [ActionParameter.KeyboardCombo("combo", "Combo")],
+			PayloadParameters = [ActionParameter.KeyboardCombo("combo", "Combo")]
+		});
+
+	private static EventSubscription ComboSubscription(string configuredJson, string? op = null)
+		=> new(EventTriggerOwner.ForWidget(Guid.NewGuid()),
+			"t1",
+			"hotkey::pressed",
+			new Dictionary<string, EventConfigurationValue>(StringComparer.Ordinal)
+			{
+				["combo"] = Config(configuredJson, op)
+			},
+			null);
+
+	private static bool ComboMatches(string configuredJson, object? published, string? op = null)
+		=> Matcher().Matches(ComboSubscription(configuredJson, op),
+			_hotkeyPressed,
+			Context(new Dictionary<string, object?>(StringComparer.Ordinal) { ["combo"] = published }));
+
+	[TestCase(EditorCombo)]
+	[TestCase(ReorderedCombo)]
+	[TestCase("""{"key":"F3","modifiers":["Ctrl","Shift"]}""")]
+	[TestCase("""{"modifiers":["Shift","Ctrl"],"key":"F3"}""")]
+	[TestCase("""{"key":"f3","modifiers":["ctrl","shift"]}""")]
+	public void A_combo_trigger_matches_the_same_combo_published_in_any_order(string published)
+		=> Assert.That(ComboMatches(EditorCombo, published), Is.True);
+
+	[Test]
+	public void A_combo_configured_as_a_json_string_is_not_quick_rejected_for_a_reordered_combo()
+	{
+		var subscription = ComboSubscription(JsonSerializer.Serialize(EditorCombo));
+		var occurrence = new EventOccurrence("hotkey::pressed",
+			new Dictionary<string, object?>(StringComparer.Ordinal) { ["combo"] = ReorderedCombo });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(EventSubscriptionMatcher.QuickReject(subscription, occurrence), Is.False);
+			Assert.That(Matcher().Matches(subscription, _hotkeyPressed, Context(occurrence.Parameters)), Is.True);
+		});
+	}
+
+	[Test]
+	public void A_combo_configured_with_modifiers_in_click_order_matches_the_recorded_order()
+		=> Assert.That(ComboMatches("""{"modifiers":["Shift","Ctrl"],"key":"F3"}""", EditorCombo), Is.True);
+
+	[Test]
+	public void A_combo_trigger_matches_a_combo_published_as_a_structured_value()
+	{
+		var element = JsonDocument.Parse(ReorderedCombo).RootElement.Clone();
+		var dictionary = new Dictionary<string, object?>
+		{
+			["key"] = "F3",
+			["modifiers"] = new List<object?> { "Shift", "Ctrl" }
+		};
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ComboMatches(EditorCombo, element), Is.True);
+			Assert.That(ComboMatches(EditorCombo, dictionary), Is.True);
+		});
+	}
+
+	[TestCase("""{"modifiers":["Ctrl","Shift"],"key":"F4"}""")]
+	[TestCase("""{"modifiers":["Ctrl"],"key":"F3"}""")]
+	[TestCase("""{"modifiers":["Ctrl","Shift","Alt"],"key":"F3"}""")]
+	[TestCase("{}")]
+	[TestCase("""{"foo":1}""")]
+	[TestCase("Ctrl+Shift+F3")]
+	public void A_combo_trigger_does_not_match_a_different_combo(string published)
+		=> Assert.That(ComboMatches(EditorCombo, published), Is.False);
+
+	[Test]
+	public void A_not_equal_combo_trigger_compares_combos_regardless_of_order()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(ComboMatches(EditorCombo, ReorderedCombo, "!="), Is.False);
+			Assert.That(ComboMatches(EditorCombo, """{"modifiers":["Ctrl"],"key":"F3"}""", "!="), Is.True);
+		});
+	}
+
+	[Test]
+	public void A_text_parameter_holding_combo_json_is_still_compared_verbatim()
+	{
+		var subscription = new EventSubscription(EventTriggerOwner.ForWidget(Guid.NewGuid()),
+			"t1",
+			"obs::scene-changed",
+			new Dictionary<string, EventConfigurationValue>(StringComparer.Ordinal)
+			{
+				["sceneName"] = Config(EditorCombo)
+			},
+			null);
+
+		Assert.That(Matcher().Matches(subscription, _sceneChanged, Context(Payload(ReorderedCombo))), Is.False);
+	}
+
 	[Test]
 	public void IsNotEmpty_filter_matches_only_a_non_empty_delivered_parameter()
 	{

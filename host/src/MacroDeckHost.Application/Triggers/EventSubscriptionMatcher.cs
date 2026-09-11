@@ -1,5 +1,6 @@
 using System.Text.Json;
 using MacroDeckHost.Application.Variables;
+using MacroDeck.Sdk.Actions;
 
 namespace MacroDeckHost.Application.Triggers;
 
@@ -74,7 +75,7 @@ public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
 			}
 
 			if (!context.TryResolveEventParameter(payload.Name, out var actual) ||
-				!Holds(actual, configured.Operator, expected.Value))
+				!Holds(payload.Type, actual, configured.Operator, expected.Value))
 			{
 				return false;
 			}
@@ -97,6 +98,79 @@ public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
 
 	private static bool Holds(object? actual, string @operator, object? expected)
 		=> ActionConditionEvaluator.EvaluateOperator(actual, @operator, expected);
+
+	private static bool Holds(ActionParameterType type, object? actual, string @operator, object? expected)
+		=> type == ActionParameterType.KeyboardCombo &&
+			@operator is "==" or "!=" &&
+			TryReadCombo(actual, out var actualCombo) &&
+			TryReadCombo(expected, out var expectedCombo)
+				? actualCombo == expectedCombo == (@operator == "==")
+				: Holds(actual, @operator, expected);
+
+	private static bool TryReadCombo(object? value, out (string Key, string Modifiers) combo)
+	{
+		combo = default;
+		JsonElement element;
+		try
+		{
+			element = value switch
+			{
+				null => default,
+				JsonElement json => json,
+				string text => JsonSerializer.Deserialize<JsonElement>(text),
+				_ => JsonSerializer.SerializeToElement(value)
+			};
+		}
+		catch (Exception e) when (e is JsonException or NotSupportedException or InvalidOperationException)
+		{
+			return false;
+		}
+
+		if (element.ValueKind != JsonValueKind.Object)
+		{
+			return false;
+		}
+
+		string? key = null;
+		var modifiers = new SortedSet<string>(StringComparer.Ordinal);
+		foreach (var property in element.EnumerateObject())
+		{
+			if (string.Equals(property.Name, "key", StringComparison.OrdinalIgnoreCase))
+			{
+				if (property.Value.ValueKind != JsonValueKind.String)
+				{
+					return false;
+				}
+
+				key = property.Value.GetString()!.ToUpperInvariant();
+			}
+			else if (string.Equals(property.Name, "modifiers", StringComparison.OrdinalIgnoreCase))
+			{
+				if (property.Value.ValueKind != JsonValueKind.Array)
+				{
+					return false;
+				}
+
+				foreach (var modifier in property.Value.EnumerateArray())
+				{
+					if (modifier.ValueKind != JsonValueKind.String)
+					{
+						return false;
+					}
+
+					modifiers.Add(modifier.GetString()!.ToUpperInvariant());
+				}
+			}
+		}
+
+		if (key is null)
+		{
+			return false;
+		}
+
+		combo = (key, string.Join('+', modifiers));
+		return true;
+	}
 
 	private static bool TryReadLiteral(JsonElement element, out object? value)
 	{
@@ -147,6 +221,12 @@ public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
 				}
 
 				if (VariableTemplateRenderer.ContainsLiquid(text))
+				{
+					continue;
+				}
+
+				// A JSON object literal may be a structured value that Matches compares by content, not text.
+				if (text.StartsWith('{'))
 				{
 					continue;
 				}
