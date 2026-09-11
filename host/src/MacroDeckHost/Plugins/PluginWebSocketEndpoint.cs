@@ -929,7 +929,7 @@ public sealed class PluginWebSocketEndpoint
 		}
 	}
 
-	private void HandleEventPublish(string pluginId, ProtocolEnvelope envelope)
+	internal void HandleEventPublish(string pluginId, ProtocolEnvelope envelope)
 	{
 		EventPublishPayload? payload;
 		try
@@ -966,6 +966,7 @@ public sealed class PluginWebSocketEndpoint
 				JsonValueKind.Number => property.Value.TryGetInt64(out var i) ? i : property.Value.GetDouble(),
 				JsonValueKind.True => true,
 				JsonValueKind.False => false,
+				JsonValueKind.Object or JsonValueKind.Array => property.Value.GetRawText(),
 				_ => null
 			};
 		}

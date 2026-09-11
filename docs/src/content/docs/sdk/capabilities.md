@@ -99,6 +99,8 @@ paging, push versus poll, binding lifetime, and how all of it crosses the plugin
 
 `IEventProvider` declares events an integration can emit. `IEventPublisher` publishes occurrences through the host event system.
 
+A parameter value that serializes to a JSON object or array, such as `new { modifiers = new[] { "Ctrl", "Shift" }, key = "F3" }`, reaches triggers and templates as its compact JSON text (`{"modifiers":["Ctrl","Shift"],"key":"F3"}`). A condition on it compares that text. Strings, numbers and booleans arrive as themselves.
+
 Event definition ids are stable public identities. Dynamic option providers may supply runtime choices for configuration and payload parameters alike, without changing the event definition itself.
 
 Payload parameters are not only documentation. An event's `PayloadParameters` are ordinary `ActionParameter` declarations, and Macro Deck reuses that metadata when a user writes a condition against `$event`: the value being compared against is authored with the control the payload parameter's own type implies, while the condition still stores the raw value the occurrence carries. Declare a payload value the integration can enumerate the same way its matching filter is declared, so a user picks a friendly name instead of pasting an id.

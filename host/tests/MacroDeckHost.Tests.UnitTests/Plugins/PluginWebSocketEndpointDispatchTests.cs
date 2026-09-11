@@ -6,6 +6,7 @@ using MacroDeck.Plugin.Protocol.Capabilities;
 using MacroDeck.Plugin.Protocol.Capabilities.Variables;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Errors;
+using MacroDeck.Plugin.Protocol.Events;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Logging;
@@ -34,7 +35,7 @@ public class PluginWebSocketEndpointDispatchTests
 {
 	private static (PluginWebSocketEndpoint Endpoint, FakePluginConnection Connection, FakePluginCapabilityInvoker
 		Invoker)
-		CreateEndpoint()
+		CreateEndpoint(IEventBus? eventBus = null)
 	{
 		var registry = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
 		var invoker = new FakePluginCapabilityInvoker();
@@ -48,7 +49,7 @@ public class PluginWebSocketEndpointDispatchTests
 			new FakePluginCallbackRouter(),
 			new PluginAssetReceiver(new InMemoryPluginAssetCache()),
 			statePusher,
-			new FakeEventBus(),
+			eventBus ?? new FakeEventBus(),
 			throttle,
 			TimeProvider.System,
 			new RecordingMediator(),
@@ -392,6 +393,42 @@ public class PluginWebSocketEndpointDispatchTests
 		{
 			Assert.That(connection.Sent, Is.Empty);
 			Assert.That(registrar.RegisteredPluginIds, Is.Empty);
+		});
+	}
+
+	[Test]
+	public void Event_publish_delivers_object_and_array_parameters_as_their_json_text()
+	{
+		var events = new FakeEventBus();
+		var (endpoint, _, _) = CreateEndpoint(events);
+		var parameters = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
+			{
+				["combo"] = new { modifiers = new[] { "Ctrl", "Shift" }, key = "F3" },
+				["keys"] = new[] { "A", "B" },
+				["count"] = 3,
+				["label"] = "text",
+				["missing"] = null
+			},
+			PluginProtocolJson.Options);
+
+		endpoint.HandleEventPublish("com.example.plugin",
+			new ProtocolEnvelope
+			{
+				Type = MessageTypes.EventPublish,
+				Id = "1",
+				Payload = JsonSerializer.SerializeToElement(
+					new EventPublishPayload { EventId = "hotkey-pressed", Parameters = parameters },
+					PluginProtocolJson.Options)
+			});
+
+		Assert.That(events.Reader.TryRead(out var occurrence), Is.True);
+		Assert.Multiple(() =>
+		{
+			Assert.That(occurrence!.Parameters["combo"], Is.EqualTo("""{"modifiers":["Ctrl","Shift"],"key":"F3"}"""));
+			Assert.That(occurrence.Parameters["keys"], Is.EqualTo("""["A","B"]"""));
+			Assert.That(occurrence.Parameters["count"], Is.EqualTo(3L));
+			Assert.That(occurrence.Parameters["label"], Is.EqualTo("text"));
+			Assert.That(occurrence.Parameters["missing"], Is.Null);
 		});
 	}
 
