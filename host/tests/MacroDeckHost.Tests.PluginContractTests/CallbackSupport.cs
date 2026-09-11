@@ -636,6 +636,7 @@ internal sealed class CallbackHostLink(
 				JsonValueKind.Number => property.Value.TryGetInt64(out var i) ? i : property.Value.GetDouble(),
 				JsonValueKind.True => true,
 				JsonValueKind.False => false,
+				JsonValueKind.Object or JsonValueKind.Array => property.Value.GetRawText(),
 				_ => null
 			};
 		}

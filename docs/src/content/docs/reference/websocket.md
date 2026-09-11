@@ -234,7 +234,7 @@ it reports for push. See [Push or poll](/sdk/variables/#push-or-poll).
 
 | Type | Direction | Purpose | Payload |
 | --- | --- | --- | --- |
-| `event.publish` | plugin → host | Publishes a domain event. **Fire-and-forget** - no reply message. | `eventId` (required, unqualified; the host qualifies it with the authenticated plugin id), `parameters` |
+| `event.publish` | plugin → host | Publishes a domain event. **Fire-and-forget** - no reply message. | `eventId` (required, unqualified; the host qualifies it with the authenticated plugin id), `parameters` (an object; a value that is itself an object or array is delivered to triggers and templates as its JSON text) |
 | `log.publish` | plugin → host | Forwards a batch of structured log events. **Fire-and-forget.** | `events` (array, required), `dropped` (int) |
 | `state.update` | plugin → host | "This kind's snapshot is stale, re-describe it." Deliberately **not** data-carrying. | `kind` (required), `localId`, `reason` |
 
