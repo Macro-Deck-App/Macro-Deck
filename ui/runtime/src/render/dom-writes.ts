@@ -2,6 +2,14 @@ interface StyleCache {
   [property: string]: string;
 }
 
+// The compatibility floor only knows these behind the prefix (PREFIXED_AT_FLOOR in the web client)
+// and silently drops the standard name, so both are always written and cleared together.
+const PREFIXED_AT_FLOOR: { [property: string]: string } = {
+  'transform': '-webkit-transform',
+  'transform-origin': '-webkit-transform-origin',
+  'filter': '-webkit-filter',
+};
+
 function styleCacheOf(element: HTMLElement | SVGElement): StyleCache {
   const withCache = element as unknown as { __mdStyleCache?: StyleCache };
   if (withCache.__mdStyleCache === undefined) withCache.__mdStyleCache = {};
@@ -15,7 +23,10 @@ export function setStyle(element: HTMLElement | SVGElement, name: string, value:
   cache[name] = normalized;
   // `setProperty(name, null)` is the documented removal, but the oldest engines in the baseline
   // ignore it, so an empty string does the removing instead.
-  (element as HTMLElement).style.setProperty(name, normalized);
+  const style = (element as HTMLElement).style;
+  const prefixed = PREFIXED_AT_FLOOR[name];
+  if (prefixed !== undefined) style.setProperty(prefixed, normalized);
+  style.setProperty(name, normalized);
   return true;
 }
 

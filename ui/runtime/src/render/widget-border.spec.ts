@@ -1,3 +1,4 @@
+import { setCustomPropertySupportForTesting } from './custom-properties';
 import { renderWidgetBorder } from './widget-border';
 
 describe('widget border', () => {
@@ -78,6 +79,18 @@ describe('widget border', () => {
 
     expect(ring()).not.toBe(before);
     expect(phase()).not.toBe(phaseBefore);
+  });
+
+  it('phase-locks the ring on an engine that only knows the prefixed animation properties', () => {
+    setCustomPropertySupportForTesting(false);
+    const writes = spyOn(CSSStyleDeclaration.prototype, 'setProperty').and.callThrough();
+    try {
+      renderWidgetBorder(overlay, () => 1500).update({ style: 'breathing', color: '#ff0000' });
+
+      expect(writes).toHaveBeenCalledWith('-webkit-animation-delay', phase());
+    } finally {
+      setCustomPropertySupportForTesting(null);
+    }
   });
 
   it('ignores a clock reading that only differs by the time the two reads took', () => {
