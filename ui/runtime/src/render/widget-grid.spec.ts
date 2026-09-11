@@ -267,6 +267,15 @@ describe('runtime widget grid', () => {
     expect(seen).toEqual(['press']);
   });
 
+  it('hands every tile the global UI font, so tile text re-fits when it changes', () => {
+    const uiFontKey = jasmine.createSpy('uiFontKey').and.returnValue('1');
+    const handle = renderWidgetGrid(container, { host: { ...host, uiFontKey }, geometry: { cols: 5, rows: 3 } });
+
+    handle.update([widget('a', 0, 0)], () => tree('Vol'));
+
+    expect(uiFontKey).toHaveBeenCalled();
+  });
+
   it('keeps a tile across updates instead of building it again', () => {
     const handle = mount();
     handle.update([widget('a', 0, 0)], () => tree('before'));

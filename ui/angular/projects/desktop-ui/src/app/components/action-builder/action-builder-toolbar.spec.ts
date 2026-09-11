@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { Subject } from 'rxjs';
 
-import { ApiService } from '@shared';
+import { ApiService, ThemeService } from '@shared';
 import { ActionBuilderComponent } from './action-builder.component';
 import { measureToolbarNaturalWidth } from './action-builder-layout';
 
@@ -135,6 +135,17 @@ describe('ActionBuilderComponent toolbar layout', () => {
 
     const styles = getComputedStyle(tabRow());
     expect(styles.flexDirection).toBe('column');
+  });
+
+  it('measures the toolbar again when the global UI font changes', async () => {
+    const measure = spyOn(component, 'measureToolbar').and.callThrough();
+
+    TestBed.inject(ThemeService).uiFontVersion.update(version => version + 1);
+    TestBed.tick();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(measure).toHaveBeenCalled();
   });
 
   it('does not oscillate: the measured need is the same in either layout', () => {

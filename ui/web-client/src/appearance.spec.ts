@@ -1,3 +1,9 @@
+import {
+  setCustomPropertySupportForTesting,
+  type SystemFontFace,
+  UiFont,
+  type UiFontBackend,
+} from '@macro-deck/runtime';
 import { Appearance, DEFAULT_ACCENT_COLOR } from './appearance';
 import { RenderingModeStore, SIMPLE_RENDERING_CLASS } from './rendering-mode';
 
@@ -76,6 +82,76 @@ describe('appearance', () => {
 
   it('starts from the default accent when nothing is cached', () => {
     expect(new Appearance().accentColor()).toBe(DEFAULT_ACCENT_COLOR);
+  });
+
+  describe('global font', () => {
+    const inter: SystemFontFace = {
+      faceId: 'inter-400', family: 'Inter', weight: 400, width: 5, slant: 'upright', styleName: 'Regular',
+      remoteRenderable: true,
+    };
+    const added: unknown[] = [];
+    const backend: UiFontBackend = {
+      create: (family, source) => ({ family, source }),
+      add: face => added.push(face),
+      remove: face => added.splice(added.indexOf(face), 1),
+      onLoadingDone: () => undefined,
+    };
+
+    beforeEach(() => {
+      added.length = 0;
+      setCustomPropertySupportForTesting(true);
+    });
+
+    afterEach(() => {
+      setCustomPropertySupportForTesting(null);
+      document.documentElement.style.removeProperty('--font-sans');
+    });
+
+    const withFont = () => {
+      const appearance = new Appearance();
+      appearance.useUiFont(new UiFont(document.documentElement, backend), () => Promise.resolve([inter]),
+        faceId => `http://host/api/system/fonts/${faceId}/file`);
+      return appearance;
+    };
+    const fontSans = () => document.documentElement.style.getPropertyValue('--font-sans');
+
+    it('uses the host font and downloads its faces from the host', async () => {
+      const appearance = withFont();
+
+      appearance.applyFromHost('dark', '#ff0000', 'Inter');
+      await Promise.resolve();
+
+      expect(fontSans()).toContain('"Inter"');
+      expect(added).toEqual([{ family: 'MacroDeckUiFont', source: 'url(http://host/api/system/fonts/inter-400/file)' }]);
+    });
+
+    it('returns to the system font when the host clears it', () => {
+      const appearance = withFont();
+      appearance.applyFromHost('dark', '#ff0000', 'Inter');
+
+      appearance.applyFromHost('dark', '#ff0000', '');
+
+      expect(fontSans()).toBe('');
+    });
+
+    it('keeps the font when a host that does not know the setting answers', () => {
+      const appearance = withFont();
+      appearance.applyFromHost('dark', '#ff0000', 'Inter');
+
+      appearance.applyFromHost('light', '#ff0000', undefined);
+
+      expect(appearance.fontFamily()).toBe('Inter');
+      expect(fontSans()).toContain('"Inter"');
+    });
+
+    it('paints the first frame in the font this device last showed', () => {
+      withFont().applyFromHost('dark', '#ff0000', 'Inter');
+      document.documentElement.style.removeProperty('--font-sans');
+
+      withFont();
+
+      expect(fontSans()).toContain('"Inter"');
+    });
   });
 });
 

@@ -231,6 +231,7 @@ export class FolderView {
       simpleRendering: () => base.simpleRendering(),
       fontFamily: faceId => base.fontFamily(faceId),
       fontReady: faceId => base.fontReady(faceId),
+      uiFontKey: () => base.uiFontKey?.() ?? '',
       emit: (node, name, data) => {
         if (sessionId === null) return;
         void connection.request('SendUiEvent', [{

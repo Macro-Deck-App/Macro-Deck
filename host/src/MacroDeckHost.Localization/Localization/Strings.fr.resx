@@ -12324,6 +12324,18 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Settings.Appearance.Dark" xml:space="preserve">
     <value>Sombre</value>
   </data>
+  <data name="Settings.Appearance.FontDescription" xml:space="preserve">
+    <value>La police utilisée dans Macro Deck et sur chaque client connecté.</value>
+  </data>
+  <data name="Settings.Appearance.FontHeading" xml:space="preserve">
+    <value>Police</value>
+  </data>
+  <data name="Settings.Appearance.FontLabel" xml:space="preserve">
+    <value>Famille de polices</value>
+  </data>
+  <data name="Settings.Appearance.FontSystemDefault" xml:space="preserve">
+    <value>Par défaut du système</value>
+  </data>
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Clair</value>
   </data>

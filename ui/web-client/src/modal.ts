@@ -119,6 +119,10 @@ export class ModalHost {
     }
   }
 
+  repaint(): void {
+    this.paint();
+  }
+
   private paint(): void {
     if (this.modalId === null || this.sessionId === null) return;
 
@@ -144,6 +148,7 @@ export class ModalHost {
       simpleRendering: () => base.simpleRendering(),
       fontFamily: faceId => base.fontFamily(faceId),
       fontReady: faceId => base.fontReady(faceId),
+      uiFontKey: () => base.uiFontKey?.() ?? '',
       emit: (node: UiNode, name: string, data?: unknown) => this.onTreeEvent(node, name, data),
     };
   }

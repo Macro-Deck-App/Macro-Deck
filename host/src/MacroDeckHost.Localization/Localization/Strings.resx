@@ -12324,6 +12324,18 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.Appearance.Dark" xml:space="preserve">
     <value>Dark</value>
   </data>
+  <data name="Settings.Appearance.FontDescription" xml:space="preserve">
+    <value>The typeface used across Macro Deck and every connected client.</value>
+  </data>
+  <data name="Settings.Appearance.FontHeading" xml:space="preserve">
+    <value>Font</value>
+  </data>
+  <data name="Settings.Appearance.FontLabel" xml:space="preserve">
+    <value>Font family</value>
+  </data>
+  <data name="Settings.Appearance.FontSystemDefault" xml:space="preserve">
+    <value>System default</value>
+  </data>
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Light</value>
   </data>

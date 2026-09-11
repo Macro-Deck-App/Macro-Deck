@@ -23,7 +23,8 @@ public class GetAppearanceSettingsRequestMessageHandler
 		return new GetAppearanceSettingsResponse
 		{
 			ThemeMode = settings.ThemeMode,
-			AccentColor = settings.AccentColor
+			AccentColor = settings.AccentColor,
+			FontFamily = settings.FontFamily
 		};
 	}
 }

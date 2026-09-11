@@ -26,4 +26,16 @@
       </shared-color-picker>
     </shared-settings-row>
   </shared-settings-section>
+
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Appearance.FontHeading' | translate"
+    [description]="'macrodeck.app:Settings.Appearance.FontDescription' | translate">
+    <shared-settings-row [label]="'macrodeck.app:Settings.Appearance.FontLabel' | translate">
+      <shared-select
+        class="font-select"
+        [options]="fontOptions()"
+        [ngModel]="fontFamily()"
+        (ngModelChange)="onFontChange($event)" />
+    </shared-settings-row>
+  </shared-settings-section>
 </div>

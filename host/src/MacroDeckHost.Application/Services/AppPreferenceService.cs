@@ -14,6 +14,8 @@ public partial class AppPreferenceService : IAppPreferenceService
 
 	public const string AccentColorKey = "appearance.accentColor";
 
+	public const string FontFamilyKey = "appearance.fontFamily";
+
 	// Keyed under the historical "telemetry." prefix: the value seeds the key ring's KEK store
 	// identity, so renaming it would orphan every existing installation's encrypted key material.
 	public const string InstallationIdKey = "telemetry.installationId";
@@ -129,18 +131,22 @@ public partial class AppPreferenceService : IAppPreferenceService
 	{
 		var themeMode = (await _repository.GetByKey(ThemeModeKey))?.Value;
 		var accentColor = (await _repository.GetByKey(AccentColorKey))?.Value;
+		var fontFamily = (await _repository.GetByKey(FontFamilyKey))?.Value;
 
 		return new AppearanceSettings(NormalizeThemeMode(themeMode),
-			NormalizeAccentColor(accentColor));
+			NormalizeAccentColor(accentColor),
+			fontFamily?.Trim() ?? string.Empty);
 	}
 
-	public async Task<AppearanceSettings> SetAppearance(string? themeMode, string? accentColor)
+	public async Task<AppearanceSettings> SetAppearance(string? themeMode, string? accentColor, string? fontFamily = null)
 	{
 		var resolved = new AppearanceSettings(NormalizeThemeMode(themeMode),
-			NormalizeAccentColor(accentColor));
+			NormalizeAccentColor(accentColor),
+			fontFamily?.Trim() ?? (await GetAppearance()).FontFamily);
 
 		await _repository.SetValue(ThemeModeKey, resolved.ThemeMode);
 		await _repository.SetValue(AccentColorKey, resolved.AccentColor);
+		await _repository.SetValue(FontFamilyKey, resolved.FontFamily);
 
 		return resolved;
 	}

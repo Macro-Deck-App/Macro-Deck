@@ -1,11 +1,12 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
-import { type AppearanceChangedEvent, type ThemeMode } from '@macro-deck/runtime';
+import { type AppearanceChangedEvent, type SystemFontFace, type ThemeMode, UiFont } from '@macro-deck/runtime';
 import { ApiService } from '../transport';
 
 export type ResolvedTheme = 'light' | 'dark';
 
 const STORAGE_KEY_MODE = 'md.appearance.themeMode';
 const STORAGE_KEY_ACCENT = 'md.appearance.accentColor';
+const STORAGE_KEY_FONT = 'md.appearance.fontFamily';
 
 export const DEFAULT_THEME_MODE: ThemeMode = 'system';
 export const DEFAULT_ACCENT_COLOR = '#2196F3';
@@ -16,8 +17,13 @@ export class ThemeService {
 
   readonly themeMode = signal<ThemeMode>(DEFAULT_THEME_MODE);
   readonly accentColor = signal<string>(DEFAULT_ACCENT_COLOR);
+  readonly fontFamily = signal<string>('');
+  readonly uiFontVersion = signal<number>(0);
 
   private readonly systemPrefersDark = signal<boolean>(true);
+  private readonly uiFont = new UiFont();
+  private readonly fontFaces = signal<readonly SystemFontFace[] | null>(null);
+  private fontFacesRequested = false;
 
   readonly resolvedTheme = computed<ResolvedTheme>(() => {
     const mode = this.themeMode();
@@ -39,9 +45,18 @@ export class ThemeService {
       localStorage.setItem(STORAGE_KEY_ACCENT, accent);
     });
 
+    this.uiFont.onChange(() => this.uiFontVersion.update(version => version + 1));
+    effect(() => {
+      const family = this.fontFamily();
+      const faces = this.fontFaces();
+      localStorage.setItem(STORAGE_KEY_FONT, family);
+      if (family && faces === null) this.requestFontFaces();
+      this.uiFont.apply(family, faces ?? [], faceId => this.api.getFontFileUrl(faceId));
+    });
+
     this.api
       .onNotification<AppearanceChangedEvent>('AppearanceChangedEvent')
-      .subscribe(evt => this.applyServerSettings(evt.themeMode, evt.accentColor));
+      .subscribe(evt => this.applyServerSettings(evt.themeMode, evt.accentColor, evt.fontFamily));
 
     // The one load during startup can land before there is a session to answer it, and it fails
     // quietly when it does - leaving the deck on its cached colours for the rest of the visit. Every
@@ -55,14 +70,34 @@ export class ThemeService {
   async loadFromHost(): Promise<void> {
     try {
       const settings = await this.api.getAppearanceSettings();
-      this.applyServerSettings(settings.themeMode, settings.accentColor);
+      this.applyServerSettings(settings.themeMode, settings.accentColor, settings.fontFamily);
     } catch {
     }
   }
 
-  private applyServerSettings(themeMode: ThemeMode | undefined, accentColor: string | undefined): void {
+  private applyServerSettings(
+    themeMode: ThemeMode | undefined,
+    accentColor: string | undefined,
+    fontFamily: string | undefined,
+  ): void {
     this.themeMode.set(themeMode ?? DEFAULT_THEME_MODE);
     this.accentColor.set(accentColor ?? DEFAULT_ACCENT_COLOR);
+    if (fontFamily !== undefined) this.fontFamily.set(fontFamily);
+  }
+
+  setFontFamily(family: string): void {
+    this.fontFamily.set(family);
+    void this.persist();
+  }
+
+  private requestFontFaces(): void {
+    if (this.fontFacesRequested) return;
+    this.fontFacesRequested = true;
+    this.api.getSystemFonts().then(
+      response => this.fontFaces.set(response.faces ?? []),
+      () => {
+        this.fontFacesRequested = false;
+      });
   }
 
   setThemeMode(mode: ThemeMode): void {
@@ -79,7 +114,8 @@ export class ThemeService {
     try {
       await this.api.updateAppearanceSettings({
         themeMode: this.themeMode(),
-        accentColor: this.accentColor()
+        accentColor: this.accentColor(),
+        fontFamily: this.fontFamily()
       });
     } catch {
     }
@@ -94,6 +130,7 @@ export class ThemeService {
     if (cachedAccent) {
       this.accentColor.set(cachedAccent);
     }
+    this.fontFamily.set(localStorage.getItem(STORAGE_KEY_FONT) ?? '');
   }
 
   private watchSystemPreference(): void {

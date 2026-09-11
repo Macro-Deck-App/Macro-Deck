@@ -12324,6 +12324,18 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Appearance.Dark" xml:space="preserve">
     <value>Tmavý</value>
   </data>
+  <data name="Settings.Appearance.FontDescription" xml:space="preserve">
+    <value>Písmo používané v celém Macro Decku a ve všech připojených klientech.</value>
+  </data>
+  <data name="Settings.Appearance.FontHeading" xml:space="preserve">
+    <value>Písmo</value>
+  </data>
+  <data name="Settings.Appearance.FontLabel" xml:space="preserve">
+    <value>Rodina písma</value>
+  </data>
+  <data name="Settings.Appearance.FontSystemDefault" xml:space="preserve">
+    <value>Výchozí systémové</value>
+  </data>
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Světlý</value>
   </data>

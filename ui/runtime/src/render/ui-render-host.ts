@@ -17,6 +17,8 @@ export interface UiRenderHost {
 
   fontReady(faceId: string): boolean;
 
+  uiFontKey?(): string;
+
   emit(node: UiNode, event: string, payload?: unknown): void;
 
   setPressed?(node: UiNode, pressed: boolean): void;

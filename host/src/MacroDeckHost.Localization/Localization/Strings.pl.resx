@@ -12324,6 +12324,18 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Settings.Appearance.Dark" xml:space="preserve">
     <value>Ciemny</value>
   </data>
+  <data name="Settings.Appearance.FontDescription" xml:space="preserve">
+    <value>Czcionka używana w całym Macro Deck i we wszystkich połączonych klientach.</value>
+  </data>
+  <data name="Settings.Appearance.FontHeading" xml:space="preserve">
+    <value>Czcionka</value>
+  </data>
+  <data name="Settings.Appearance.FontLabel" xml:space="preserve">
+    <value>Rodzina czcionek</value>
+  </data>
+  <data name="Settings.Appearance.FontSystemDefault" xml:space="preserve">
+    <value>Domyślna systemowa</value>
+  </data>
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Jasny</value>
   </data>

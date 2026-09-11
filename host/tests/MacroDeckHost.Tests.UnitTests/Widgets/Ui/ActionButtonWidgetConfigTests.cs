@@ -771,7 +771,7 @@ public class ActionButtonWidgetConfigTests
 			Assert.That(family.Text(UiConfigProperties.Value), Is.EqualTo("Inter"));
 			var familyNames = family.Property(UiConfigProperties.Options)!.Value.EnumerateArray()
 				.Select(o => o.GetProperty("value").GetString()).ToList();
-			Assert.That(familyNames, Is.EquivalentTo(new[] { "Inter", "Acme" }));
+			Assert.That(familyNames, Is.EquivalentTo(new[] { "", "Inter", "Acme" }));
 		});
 	}
 
@@ -802,6 +802,79 @@ public class ActionButtonWidgetConfigTests
 			.Select(o => o.GetProperty("value").GetString()).ToList();
 
 		Assert.That(styleOptions, Is.EquivalentTo(new[] { "inter-400", "inter-700" }));
+	}
+
+	[Test]
+	public void Font_starts_on_inherited_and_neither_dropdown_shows_an_unreachable_default()
+	{
+		var host = Render(new { }, fonts: new FakeFontCatalog(_interRegular, _interBold, _acmeRegular));
+
+		var family = host.ById("fontFamily");
+		var firstOption = family.Property(UiConfigProperties.Options)!.Value.EnumerateArray().First();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(family.Text(UiConfigProperties.Value), Is.Empty);
+			Assert.That(firstOption.GetProperty("value").GetString(), Is.Empty);
+			Assert.That(firstOption.GetProperty("label").GetRawText(), Does.Contain("Forms.InheritableSetting.Inherited"));
+			Assert.That(family.HasProperty(UiConfigProperties.Placeholder), Is.False);
+			Assert.That(host.ById("fontFaceId").HasProperty(UiConfigProperties.Placeholder), Is.False);
+		});
+	}
+
+	[Test]
+	public void Choosing_inherited_removes_the_buttons_own_font()
+	{
+		var host = Render(new { fontFaceId = "inter-400" },
+			fonts: new FakeFontCatalog(_interRegular, _interBold, _acmeRegular));
+
+		host.ById("fontFamily").Change("");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ById("fontFamily").Text(UiConfigProperties.Value), Is.Empty);
+			Assert.That(host.ById("fontFaceId").Text(UiConfigProperties.Value), Is.Empty);
+		});
+	}
+
+	[Test]
+	public void A_font_that_is_no_longer_installed_can_still_be_reset_to_inherited()
+	{
+		var host = Render(new { fontFaceId = "gone-400" },
+			fonts: new FakeFontCatalog(_interRegular, _interBold, _acmeRegular));
+
+		Assert.That(host.ById("fontFamily").Text(UiConfigProperties.Value), Is.Not.Empty);
+
+		host.ById("fontFamily").Change("");
+
+		Assert.That(host.ById("fontFaceId").Text(UiConfigProperties.Value), Is.Empty);
+	}
+
+	[Test]
+	public void Style_is_disabled_until_a_font_is_chosen()
+	{
+		var host = Render(new { }, fonts: new FakeFontCatalog(_interRegular, _interBold, _acmeRegular));
+
+		Assert.That(host.ById("fontFaceId").Flag(UiConfigProperties.Disabled), Is.True);
+
+		host.ById("fontFamily").Change("Inter");
+
+		Assert.That(host.ById("fontFaceId").Flag(UiConfigProperties.Disabled), Is.False);
+	}
+
+	[Test]
+	public void Choosing_inherited_on_a_state_removes_that_states_own_font()
+	{
+		var host = Render(_twoStates, fonts: new FakeFontCatalog(_interRegular, _interBold, _acmeRegular));
+		host.ById("activeStateId").Change("on");
+		host.ById("states.on.appearance.fontFamily").Change("Inter");
+
+		host.ById("states.on.appearance.fontFamily").Change("");
+
+		var on = ReadStates(host).First(s => Id(s) == "on");
+		var hasOwnFont = on.TryGetProperty("appearance", out var appearance)
+			&& appearance.TryGetProperty("fontFaceId", out _);
+		Assert.That(hasOwnFont, Is.False);
 	}
 
 	// ---- the state row's "Manage this state" menu (issue #837) ----------------------------------------------

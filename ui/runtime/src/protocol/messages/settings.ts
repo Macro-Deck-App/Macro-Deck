@@ -5,21 +5,25 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 export interface GetAppearanceSettingsResponse {
   themeMode: ThemeMode;
   accentColor: string;
+  fontFamily?: string;
 }
 
 export interface UpdateAppearanceSettingsRequest {
   themeMode: ThemeMode;
   accentColor: string;
+  fontFamily?: string;
 }
 
 export interface UpdateAppearanceSettingsResponse {
   themeMode: ThemeMode;
   accentColor: string;
+  fontFamily?: string;
 }
 
 export interface AppearanceChangedEvent {
   themeMode: ThemeMode;
   accentColor: string;
+  fontFamily?: string;
 }
 
 export interface GetLoggingSettingsResponse {

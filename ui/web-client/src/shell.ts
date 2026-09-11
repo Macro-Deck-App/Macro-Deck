@@ -164,6 +164,7 @@ export class Shell {
   repaint(): void {
     this.paintDeck();
     this.paintOverlays();
+    this.modals.repaint();
   }
 
   private onConnectedChanged(connected: boolean): void {

@@ -87,7 +87,7 @@ export interface ClientOptions {
 }
 
 export interface AppearanceSink {
-  applyFromHost(mode: ThemeMode | undefined, accent: string | undefined): void;
+  applyFromHost(mode: ThemeMode | undefined, accent: string | undefined, fontFamily?: string): void;
 }
 
 function defaultReadHash(): string {
@@ -551,7 +551,7 @@ export class Client {
     if (this.appearance === null) return;
     try {
       const settings = await this.http.get<GetAppearanceSettingsResponse>('/api/settings/appearance');
-      this.appearance.applyFromHost(settings.themeMode, settings.accentColor);
+      this.appearance.applyFromHost(settings.themeMode, settings.accentColor, settings.fontFamily);
     } catch {
       // The cached appearance stands rather than snapping back to the default.
     }
@@ -1051,7 +1051,8 @@ export class Client {
         // change without being reloaded.
         this.appearance?.applyFromHost(
           body['themeMode'] as ThemeMode | undefined,
-          typeof body['accentColor'] === 'string' ? body['accentColor'] : undefined);
+          typeof body['accentColor'] === 'string' ? body['accentColor'] : undefined,
+          typeof body['fontFamily'] === 'string' ? body['fontFamily'] : undefined);
         break;
       case 'LocalizationCultureChangedEvent':
       case 'LocalizationCatalogChangedEvent':

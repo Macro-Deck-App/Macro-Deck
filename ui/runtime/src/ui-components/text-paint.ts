@@ -47,8 +47,8 @@ export function paintTextCommon<TState>(
   const size = resolveLength(nodeLength(node, UiComponentProperties.Size), ctx.basis, ctx.crossExtent);
   const minSize = resolveLength(nodeLength(node, UiComponentProperties.MinSize), ctx.basis, ctx.crossExtent);
   const fontReady = faceId ? ctx.host.fontReady(faceId) : true;
-  ctx.keepFit(
-    element, textFit(element, size, minSize), `${size}|${minSize}|${text}|${faceId ?? ''}|${fontReady}`);
+  const font = faceId ? `${faceId}|${fontReady}` : `|${ctx.host.uiFontKey?.() ?? ''}`;
+  ctx.keepFit(element, textFit(element, size, minSize), `${size}|${minSize}|${text}|${font}`);
 }
 
 export function textIntrinsicMainPx(
