@@ -59,6 +59,7 @@ export function renderWidgetBorder(
         // one scale factor thick on an engine from 2015 beats no ring at all.
         element.style.padding = `${WIDGET_BORDER_WIDTH}px`;
         element.style.animationDelay = phase;
+        element.style.setProperty('-webkit-animation-delay', phase);
         if (TINTED_RING_STYLES.indexOf(resolved.style) !== -1) element.style.background = resolved.color;
       }
       overlay.appendChild(element);
