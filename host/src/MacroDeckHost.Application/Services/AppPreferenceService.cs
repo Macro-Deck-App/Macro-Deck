@@ -143,7 +143,9 @@ public partial class AppPreferenceService : IAppPreferenceService
 			fontFamily?.Trim() ?? string.Empty);
 	}
 
-	public async Task<AppearanceSettings> SetAppearance(string? themeMode, string? accentColor, string? fontFamily = null)
+	public async Task<AppearanceSettings> SetAppearance(string? themeMode,
+		string? accentColor,
+		string? fontFamily = null)
 	{
 		var resolved = new AppearanceSettings(NormalizeThemeMode(themeMode),
 			NormalizeAccentColor(accentColor),

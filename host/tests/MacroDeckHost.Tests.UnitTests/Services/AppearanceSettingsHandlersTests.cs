@@ -89,8 +89,8 @@ public class AppearanceSettingsHandlersTests
 		var updateHandler = CreateUpdateHandler(service);
 		var getHandler = new GetAppearanceSettingsRequestMessageHandler(service);
 
-		var updated = await updateHandler.Handle(
-			new UpdateAppearanceSettingsRequest { ThemeMode = "light", AccentColor = "#3b82f6", FontFamily = "Inter" },
+		var updated = await updateHandler.Handle(new UpdateAppearanceSettingsRequest
+				{ ThemeMode = "light", AccentColor = "#3b82f6", FontFamily = "Inter" },
 			CancellationToken.None);
 
 		var reloaded = await getHandler.Handle(new GetAppearanceSettingsRequest(), CancellationToken.None);
@@ -112,8 +112,8 @@ public class AppearanceSettingsHandlersTests
 		var service = CreateService();
 		var updateHandler = CreateUpdateHandler(service);
 
-		var updated = await updateHandler.Handle(
-			new UpdateAppearanceSettingsRequest { ThemeMode = "neon", AccentColor = "blue", FontFamily = "Nope Sans" },
+		var updated = await updateHandler.Handle(new UpdateAppearanceSettingsRequest
+				{ ThemeMode = "neon", AccentColor = "blue", FontFamily = "Nope Sans" },
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -129,8 +129,8 @@ public class AppearanceSettingsHandlersTests
 	{
 		var updateHandler = CreateUpdateHandler(CreateService());
 
-		var updated = await updateHandler.Handle(
-			new UpdateAppearanceSettingsRequest { ThemeMode = "dark", AccentColor = "#3b82f6", FontFamily = "Locked" },
+		var updated = await updateHandler.Handle(new UpdateAppearanceSettingsRequest
+				{ ThemeMode = "dark", AccentColor = "#3b82f6", FontFamily = "Locked" },
 			CancellationToken.None);
 
 		Assert.That(updated.FontFamily, Is.Empty);
@@ -141,12 +141,12 @@ public class AppearanceSettingsHandlersTests
 	{
 		var service = CreateService();
 		var updateHandler = CreateUpdateHandler(service);
-		await updateHandler.Handle(
-			new UpdateAppearanceSettingsRequest { ThemeMode = "dark", AccentColor = "#3b82f6", FontFamily = "Inter" },
+		await updateHandler.Handle(new UpdateAppearanceSettingsRequest
+				{ ThemeMode = "dark", AccentColor = "#3b82f6", FontFamily = "Inter" },
 			CancellationToken.None);
 
-		var updated = await updateHandler.Handle(
-			new UpdateAppearanceSettingsRequest { ThemeMode = "dark", AccentColor = "#3b82f6", FontFamily = "" },
+		var updated = await updateHandler.Handle(new UpdateAppearanceSettingsRequest
+				{ ThemeMode = "dark", AccentColor = "#3b82f6", FontFamily = "" },
 			CancellationToken.None);
 
 		Assert.That(updated.FontFamily, Is.Empty);
@@ -157,8 +157,8 @@ public class AppearanceSettingsHandlersTests
 	{
 		var service = CreateService();
 		var updateHandler = CreateUpdateHandler(service);
-		await updateHandler.Handle(
-			new UpdateAppearanceSettingsRequest { ThemeMode = "dark", AccentColor = "#3b82f6", FontFamily = "Inter" },
+		await updateHandler.Handle(new UpdateAppearanceSettingsRequest
+				{ ThemeMode = "dark", AccentColor = "#3b82f6", FontFamily = "Inter" },
 			CancellationToken.None);
 
 		var updated = await updateHandler.Handle(
@@ -179,8 +179,8 @@ public class AppearanceSettingsHandlersTests
 		var mediator = new RecordingMediator();
 		var updateHandler = CreateUpdateHandler(service, mediator);
 
-		await updateHandler.Handle(
-			new UpdateAppearanceSettingsRequest { ThemeMode = "neon", AccentColor = "#3b82f6", FontFamily = "Inter" },
+		await updateHandler.Handle(new UpdateAppearanceSettingsRequest
+				{ ThemeMode = "neon", AccentColor = "#3b82f6", FontFamily = "Inter" },
 			CancellationToken.None);
 
 		var published = mediator.Published.OfType<AppearanceChangedNotification>().Single();

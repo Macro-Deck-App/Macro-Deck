@@ -816,7 +816,8 @@ public class ActionButtonWidgetConfigTests
 		{
 			Assert.That(family.Text(UiConfigProperties.Value), Is.Empty);
 			Assert.That(firstOption.GetProperty("value").GetString(), Is.Empty);
-			Assert.That(firstOption.GetProperty("label").GetRawText(), Does.Contain("Forms.InheritableSetting.Inherited"));
+			Assert.That(firstOption.GetProperty("label").GetRawText(),
+				Does.Contain("Forms.InheritableSetting.Inherited"));
 			Assert.That(family.HasProperty(UiConfigProperties.Placeholder), Is.False);
 			Assert.That(host.ById("fontFaceId").HasProperty(UiConfigProperties.Placeholder), Is.False);
 		});
@@ -872,8 +873,8 @@ public class ActionButtonWidgetConfigTests
 		host.ById("states.on.appearance.fontFamily").Change("");
 
 		var on = ReadStates(host).First(s => Id(s) == "on");
-		var hasOwnFont = on.TryGetProperty("appearance", out var appearance)
-			&& appearance.TryGetProperty("fontFaceId", out _);
+		var hasOwnFont = on.TryGetProperty("appearance", out var appearance) &&
+			appearance.TryGetProperty("fontFaceId", out _);
 		Assert.That(hasOwnFont, Is.False);
 	}
 
