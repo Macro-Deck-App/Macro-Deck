@@ -217,7 +217,8 @@ public class UiConfigVocabularyTests
 						Configure(WithOptions(new UiDynamicChoiceInput { Key = "dynamicChoice" })),
 						Configure(WithOptions(new UiAutocompleteInput { Key = "autocomplete" })),
 						Configure(WithOptions(new UiMultiSelectInput { Key = "multiSelect" })),
-						Configure(WithOptions(new UiMultiSelectInput { Key = "orderedMultiSelect", Reorderable = true })),
+						Configure(
+							WithOptions(new UiMultiSelectInput { Key = "orderedMultiSelect", Reorderable = true })),
 						Configure(new UiColorInput { Key = "color" }),
 						Configure(new UiFileInput
 							{ Key = "file", FileExtensions = UiValue.Of<IReadOnlyList<string>>(["txt"]) }),
