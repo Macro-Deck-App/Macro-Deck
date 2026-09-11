@@ -12322,6 +12322,18 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.Appearance.Dark" xml:space="preserve">
     <value>Dunkel</value>
   </data>
+  <data name="Settings.Appearance.FontDescription" xml:space="preserve">
+    <value>Die Schrift, die Macro Deck und alle verbundenen Clients verwenden.</value>
+  </data>
+  <data name="Settings.Appearance.FontHeading" xml:space="preserve">
+    <value>Schriftart</value>
+  </data>
+  <data name="Settings.Appearance.FontLabel" xml:space="preserve">
+    <value>Schriftfamilie</value>
+  </data>
+  <data name="Settings.Appearance.FontSystemDefault" xml:space="preserve">
+    <value>Systemstandard</value>
+  </data>
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Hell</value>
   </data>

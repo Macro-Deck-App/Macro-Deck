@@ -2,7 +2,9 @@ import {
   ClientAppStrings,
   disablePageZoom,
   randomToken,
+  UiFont,
   uiResourceUrl,
+  type GetSystemFontsResponse,
   type UiRenderHost,
   type WebClientTarget,
 } from '@macro-deck/runtime';
@@ -49,6 +51,11 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
   const client = new Client(hostBaseUrl, clientId(), { appearance });
   const clock = new ServerClock(client.http);
   const fonts = new FontLoader(hostBaseUrl());
+  const uiFont = new UiFont();
+  appearance.useUiFont(
+    uiFont,
+    () => client.http.get<GetSystemFontsResponse>('/api/system/fonts').then(response => response.faces ?? []),
+    faceId => `${hostBaseUrl()}/api/system/fonts/${encodeURIComponent(faceId)}/file`);
   const rendering = new RenderingModeStore();
   const wakeLock = new WakeLock(CLIENT_TYPE, target.capabilities.wakeLock ? undefined : null);
   const pwa = setupPwa(target.capabilities.serviceWorker ? {} : { devMode: true });
@@ -67,6 +74,7 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
     simpleRendering: () => rendering.simple(),
     fontFamily: faceId => (faceId ? `MacroDeckFont_${faceId}` : null),
     fontReady: faceId => fonts.ready(faceId),
+    uiFontKey: () => String(uiFont.version()),
     // Replaced per tile by the grid, which knows which widget a node belongs to.
     emit: () => undefined,
   };
@@ -119,6 +127,7 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
   syncDocumentLanguage(client);
   // A face landing is the moment text held back in it can finally be drawn.
   fonts.onChange(() => shell.repaint());
+  uiFont.onChange(() => shell.repaint());
   rendering.onChange(() => shell.repaint());
   appearance.onChange(() => shell.repaint());
   appearance.setPersistence((mode, accent) => void client.saveAppearance(mode, accent));

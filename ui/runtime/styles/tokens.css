@@ -94,7 +94,8 @@
   --chip-event-border: rgba(14, 165, 233, 0.45);
   --chip-event-fg:     rgb(125, 211, 252);
 
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: var(--font-sans-system);
   --font-mono: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
 
   /*

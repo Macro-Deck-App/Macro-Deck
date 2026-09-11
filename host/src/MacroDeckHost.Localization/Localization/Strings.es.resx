@@ -12324,6 +12324,18 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Settings.Appearance.Dark" xml:space="preserve">
     <value>Oscuro</value>
   </data>
+  <data name="Settings.Appearance.FontDescription" xml:space="preserve">
+    <value>La tipografía que usan Macro Deck y todos los clientes conectados.</value>
+  </data>
+  <data name="Settings.Appearance.FontHeading" xml:space="preserve">
+    <value>Fuente</value>
+  </data>
+  <data name="Settings.Appearance.FontLabel" xml:space="preserve">
+    <value>Familia tipográfica</value>
+  </data>
+  <data name="Settings.Appearance.FontSystemDefault" xml:space="preserve">
+    <value>Predeterminada del sistema</value>
+  </data>
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Claro</value>
   </data>

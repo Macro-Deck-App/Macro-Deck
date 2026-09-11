@@ -388,16 +388,28 @@ internal static class ActionButtonWidgetConfigView
 								Key = "fontFamily",
 								Transient = true,
 								Label = AppStrings.Widgets.Appearance.Font.FontLabel(),
-								Placeholder = AppStrings.Widgets.Appearance.Font.Default(),
-								Binding = Bind.Custom(() => FamilyOf(currentFontFaceId()),
+								// A face missing from the catalogue reports its raw id, so the Inherited option
+								// still differs from it and choosing it actually clears the override.
+								Binding = Bind.Custom(() =>
+									{
+										var faceId = currentFontFaceId();
+										var family = FamilyOf(faceId);
+
+										return family.Length == 0 ? faceId : family;
+									},
 									family =>
 									{
 										var faces = FacesForFamily(family);
 										setFontFaceId(faces.Count > 0 ? faces[0].FaceId : string.Empty);
 									}),
-								Options = UiValue.From(() => (IReadOnlyList<UiOption>)fontFamilies
-									.Select(family => UiOption.Of(family, family))
-									.ToList()),
+								Options = UiValue.From(() => (IReadOnlyList<UiOption>)
+								[
+									new UiOption
+									{
+										Value = string.Empty, Label = AppStrings.Forms.InheritableSetting.Inherited(),
+									},
+									.. fontFamilies.Select(family => UiOption.Of(family, family)),
+								]),
 							},
 							new UiConfigStack
 							{
@@ -410,8 +422,9 @@ internal static class ActionButtonWidgetConfigView
 									{
 										Key = "fontFaceId",
 										Label = AppStrings.Widgets.Appearance.Font.StyleLabel(),
-										Placeholder = AppStrings.Widgets.Appearance.Font.Default(),
 										Binding = fontFaceIdBinding,
+										Disabled = UiValue.From(() =>
+											FacesForFamily(FamilyOf(currentFontFaceId())).Count == 0),
 										Options = UiValue.From(() =>
 											(IReadOnlyList<UiOption>)FacesForFamily(FamilyOf(currentFontFaceId()))
 												.Select(face => UiOption.Of(face.FaceId, face.StyleName))
@@ -784,7 +797,19 @@ internal static class ActionButtonWidgetConfigView
 						currentFontFaceId: () =>
 							ReadAppearanceString(states.Value, stateId, "fontFaceId") ?? string.Empty,
 						setFontFaceId: value =>
-							MutateAppearance(states, stateId, appearance => appearance["fontFaceId"] = value),
+							MutateAppearance(states,
+								stateId,
+								appearance =>
+								{
+									if (value.Length == 0)
+									{
+										appearance.Remove("fontFaceId");
+									}
+									else
+									{
+										appearance["fontFaceId"] = value;
+									}
+								}),
 						fontSizeBinding: StateDoubleBinding(states, stateId, "fontSize", 14),
 						textAlignBinding: StateStringBinding(states, stateId, "textAlign", fallback: "center"),
 						labelPositionBinding: StateStringBinding(states, stateId, "labelPosition", fallback: "center"),

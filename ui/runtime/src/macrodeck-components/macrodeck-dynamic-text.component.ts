@@ -131,7 +131,7 @@ export const macrodeckDynamicTextComponent: UiComponentDefinition<UiDynamicTextS
     const minSize = resolveLength(nodeLength(node, UiComponentProperties.MinSize), ctx.basis, ctx.crossExtent);
     ctx.keepFit(element, textFit(element, declared, minSize, size => {
       ctx.setStyle(seconds, 'font-size', size === undefined ? null : px(size * 0.55));
-    }), `${declared}|${minSize}|${run.before}${run.seconds}${run.after}`);
+    }), `${declared}|${minSize}|${run.before}${run.seconds}${run.after}|${ctx.host.uiFontKey?.() ?? ''}`);
   },
 
   intrinsicMainPx: textIntrinsicMainPx,

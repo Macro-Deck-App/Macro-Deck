@@ -1208,6 +1208,7 @@ export {
   type UiRenderTimers,
 } from './render/ui-node-renderer';
 export { type UiRenderHost } from './render/ui-render-host';
+export { UiFont, UI_FONT_FAMILY, browserUiFontBackend, type UiFontBackend } from './render/ui-font';
 export { PressFeedback, PRESS_FEEDBACK_MIN_VISIBLE_MS } from './render/press-feedback';
 export { renderWidgetBorder, type WidgetBorderHandle } from './render/widget-border';
 export {

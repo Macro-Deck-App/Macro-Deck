@@ -2,7 +2,7 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Observable, Subject } from 'rxjs';
 import { ApiService, ConnectionState } from '../transport';
-import { DEFAULT_ACCENT_COLOR, DEFAULT_THEME_MODE, ThemeService } from './theme.service';
+import { DEFAULT_ACCENT_COLOR, DEFAULT_THEME_MODE, ThemeService, UiFontService } from './theme.service';
 
 describe('ThemeService', () => {
   let apiSpy: jasmine.SpyObj<ApiService>;
@@ -15,6 +15,7 @@ describe('ThemeService', () => {
     document.documentElement.style.removeProperty('--color-accent');
     document.documentElement.style.removeProperty('--color-accent-hover');
     document.documentElement.style.removeProperty('--color-accent-muted');
+    document.documentElement.style.removeProperty('--font-sans');
   }
 
   afterEach(resetAppearanceRoot);
@@ -28,7 +29,16 @@ describe('ThemeService', () => {
       'getAppearanceSettings',
       'updateAppearanceSettings',
       'onNotification',
+      'getSystemFonts',
+      'getFontFileUrl',
     ], { connectionStateSignal: connectionState });
+    apiSpy.getSystemFonts.and.resolveTo({
+      faces: [{
+        faceId: 'inter-400', family: 'Inter', weight: 400, width: 5, slant: 'upright', styleName: 'Regular',
+        remoteRenderable: true,
+      }],
+    });
+    apiSpy.getFontFileUrl.and.callFake(faceId => `http://host/api/system/fonts/${faceId}/file`);
     apiSpy.getAppearanceSettings.and.resolveTo({ themeMode: 'dark', accentColor: '#123456' });
     apiSpy.updateAppearanceSettings.and.resolveTo({ themeMode: 'light', accentColor: '#abcdef' });
     apiSpy.onNotification.and.callFake(<T>(method: string): Observable<T> => {
@@ -119,6 +129,48 @@ describe('ThemeService', () => {
     expect(service.accentColor()).toBe('#abcdef');
     // Applying a host push must not trigger another save (which would loop back to the host).
     expect(apiSpy.updateAppearanceSettings).not.toHaveBeenCalled();
+  });
+
+  it('switches the whole UI to a pushed global font and back', () => {
+    const service = create();
+
+    notifications.get('AppearanceChangedEvent')!.next({ themeMode: 'dark', accentColor: '#abcdef', fontFamily: 'Inter' });
+    TestBed.tick();
+    expect(document.documentElement.style.getPropertyValue('--font-sans')).toContain('"Inter"');
+    expect(service.fontFamily()).toBe('Inter');
+
+    notifications.get('AppearanceChangedEvent')!.next({ themeMode: 'dark', accentColor: '#abcdef', fontFamily: '' });
+    TestBed.tick();
+    expect(document.documentElement.style.getPropertyValue('--font-sans')).toBe('');
+  });
+
+  it('tells the renderers the UI font changed, so fitted text measures again', () => {
+    const service = create();
+    const uiFonts = TestBed.inject(UiFontService);
+    TestBed.tick();
+    const before = uiFonts.version();
+
+    service.setFontFamily('Inter');
+    TestBed.tick();
+
+    expect(uiFonts.version()).toBeGreaterThan(before);
+  });
+
+  it('persists the chosen global font to the host', () => {
+    const service = create();
+
+    service.setFontFamily('Inter');
+
+    expect(apiSpy.updateAppearanceSettings).toHaveBeenCalledWith(jasmine.objectContaining({ fontFamily: 'Inter' }));
+  });
+
+  it('keeps the font when a host that does not know the setting answers', async () => {
+    const service = create();
+    service.setFontFamily('Inter');
+
+    await service.loadFromHost();
+
+    expect(service.fontFamily()).toBe('Inter');
   });
 
   it('restores cached values for an instant pre-connection paint', () => {

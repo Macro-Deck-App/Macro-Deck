@@ -1,7 +1,9 @@
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { EMPTY } from 'rxjs';
 import { ApiService } from '@shared';
+import { SelectComponent } from '../../../forms/select/select.component';
 import { AppearanceSettingsComponent } from './appearance-settings.component';
 
 describe('AppearanceSettingsComponent', () => {
@@ -15,9 +17,18 @@ describe('AppearanceSettingsComponent', () => {
       'getAppearanceSettings',
       'updateAppearanceSettings',
       'onNotification',
+      'getSystemFonts',
+      'getFontFileUrl',
     ], { connectionStateSignal: signal('disconnected') });
     api.onNotification.and.returnValue(EMPTY);
     api.updateAppearanceSettings.and.resolveTo({ themeMode: 'dark', accentColor: '#2196F3' });
+    api.getSystemFonts.and.resolveTo({
+      faces: [{
+        faceId: 'inter-400', family: 'Inter', weight: 400, width: 5, slant: 'upright', styleName: 'Regular',
+        remoteRenderable: true,
+      }],
+    });
+    api.getFontFileUrl.and.callFake(faceId => `http://host/api/system/fonts/${faceId}/file`);
 
     await TestBed.configureTestingModule({
       imports: [AppearanceSettingsComponent],
@@ -37,6 +48,7 @@ describe('AppearanceSettingsComponent', () => {
     root.style.removeProperty('--color-accent');
     root.style.removeProperty('--color-accent-hover');
     root.style.removeProperty('--color-accent-muted');
+    root.style.removeProperty('--font-sans');
     localStorage.clear();
   });
 
@@ -63,10 +75,28 @@ describe('AppearanceSettingsComponent', () => {
     expect(fixture.nativeElement.querySelector('shared-color-picker')).toBeTruthy();
   });
 
-  it('offers appearance only, with no interface-scale control', () => {
+  it('offers the system default and every installed family as the global font', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const select = fixture.debugElement.query(By.directive(SelectComponent)).componentInstance as SelectComponent;
+
+    expect(select.options.map(option => option.value)).toEqual(['', 'Inter']);
+  });
+
+  it('saves the chosen global font to the host', async () => {
+    await fixture.whenStable();
+    const select = fixture.debugElement.query(By.directive(SelectComponent));
+
+    select.triggerEventHandler('ngModelChange', 'Inter');
+
+    expect(api.updateAppearanceSettings).toHaveBeenCalledWith(jasmine.objectContaining({ fontFamily: 'Inter' }));
+  });
+
+  it('offers theme, accent and font, with no interface-scale control', () => {
     const sections = fixture.nativeElement.querySelectorAll('shared-settings-section');
 
-    expect(sections.length).toBe(2);
+    expect(sections.length).toBe(3);
     expect(fixture.nativeElement.querySelector('shared-slider')).toBeNull();
     expect(fixture.nativeElement.querySelector('.slider-input')).toBeNull();
   });

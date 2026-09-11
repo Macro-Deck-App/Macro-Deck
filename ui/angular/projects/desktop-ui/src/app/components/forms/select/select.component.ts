@@ -203,6 +203,9 @@ export class SelectComponent implements ControlValueAccessor {
     this.activeIndex.set(selected >= 0 ? selected : this.firstEnabled(0, 1));
     this.typeaheadBuffer = '';
     this.isOpen.set(true);
+    if (this.activeIndex() >= 0) {
+      this.scrollActiveIntoView(this.activeIndex());
+    }
     this.opened.emit();
   }
 

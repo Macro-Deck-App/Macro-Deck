@@ -1697,6 +1697,40 @@ describe('widget text inside the box its stack has', () => {
       expect(reads).toBeGreaterThan(0);
     });
 
+    it('P7: text without a face of its own re-fits when the global UI font changes', () => {
+      roomPx = 1000;
+      let uiFont = 'a';
+      const fontHost = testHost({ uiFontKey: () => uiFont });
+      const handle = renderUiNode(container, header('Vol'), { width: 120, height: 30 }, null, 120, fontHost);
+
+      reads = 0;
+      handle.update(header('Vol'), { width: 120, height: 30 }, null);
+      expect(reads).toBe(0);
+
+      uiFont = 'b';
+      handle.update(header('Vol'), { width: 120, height: 30 }, null);
+      expect(reads).toBeGreaterThan(0);
+    });
+
+    it('P7: a clock re-fits when the global UI font changes', () => {
+      roomPx = 1000;
+      let uiFont = 'a';
+      const fontHost = testHost({ uiFontKey: () => uiFont });
+      const clockNode: UiNode = {
+        id: 'clock', type: 'macrodeck.dynamic-text',
+        properties: {
+          format: 'date', value: { $time: { zone: 'UTC' } }, size: { basis: 0.2 }, minSize: { basis: 0.1 },
+        },
+      } as UiNode;
+      const handle = renderUiNode(container, clockNode, { width: 120, height: 30 }, null, 120, fontHost);
+
+      uiFont = 'b';
+      reads = 0;
+      handle.update(clockNode, { width: 120, height: 30 }, null);
+
+      expect(reads).toBeGreaterThan(0);
+    });
+
     it('P7: text re-fits when only the box or basis changes', () => {
       roomPx = 1000;
       const handle = renderUiNode(

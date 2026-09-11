@@ -94,6 +94,18 @@ describe('SelectComponent', () => {
     expect(changes).toEqual(['b']);
   });
 
+  it('scrolls the selected option into view when it opens', async () => {
+    const scrolled = spyOn(HTMLElement.prototype, 'scrollIntoView');
+    instance().writeValue('b');
+
+    trigger().click();
+    fixture.detectChanges();
+    await new Promise(resolve => requestAnimationFrame(resolve));
+
+    expect(scrolled).toHaveBeenCalled();
+    expect((scrolled.calls.mostRecent().object as HTMLElement).textContent).toContain('B');
+  });
+
   it('emits opened when the listbox opens', () => {
     let openedCount = 0;
     instance().opened.subscribe(() => openedCount++);

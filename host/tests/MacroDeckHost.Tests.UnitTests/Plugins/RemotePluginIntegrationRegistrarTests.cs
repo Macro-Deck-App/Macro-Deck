@@ -1225,7 +1225,7 @@ public class RemotePluginIntegrationRegistrarTests
 
 		public Task<AppearanceSettings> GetAppearance() => throw new NotSupportedException();
 
-		public Task<AppearanceSettings> SetAppearance(string? themeMode, string? accentColor)
+		public Task<AppearanceSettings> SetAppearance(string? themeMode, string? accentColor, string? fontFamily)
 			=> throw new NotSupportedException();
 
 		public Task<Guid> GetInstallationId() => throw new NotSupportedException();

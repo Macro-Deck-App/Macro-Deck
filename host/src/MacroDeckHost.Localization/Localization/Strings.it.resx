@@ -12324,6 +12324,18 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Settings.Appearance.Dark" xml:space="preserve">
     <value>Scuro</value>
   </data>
+  <data name="Settings.Appearance.FontDescription" xml:space="preserve">
+    <value>Il carattere usato in tutto Macro Deck e in ogni client connesso.</value>
+  </data>
+  <data name="Settings.Appearance.FontHeading" xml:space="preserve">
+    <value>Carattere</value>
+  </data>
+  <data name="Settings.Appearance.FontLabel" xml:space="preserve">
+    <value>Famiglia di caratteri</value>
+  </data>
+  <data name="Settings.Appearance.FontSystemDefault" xml:space="preserve">
+    <value>Predefinito di sistema</value>
+  </data>
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Chiaro</value>
   </data>

@@ -4,7 +4,7 @@ using MacroDeckHost.Application.Network.Tls;
 
 namespace MacroDeckHost.Application.Services;
 
-public record AppearanceSettings(string ThemeMode, string AccentColor);
+public record AppearanceSettings(string ThemeMode, string AccentColor, string FontFamily = "");
 
 public record LoggingSettings(LogEntryLevel MinimumLevel, LogEntryLevel DefaultMinimumLevel);
 
@@ -81,7 +81,8 @@ public interface IAppPreferenceService
 {
 	Task<AppearanceSettings> GetAppearance();
 
-	Task<AppearanceSettings> SetAppearance(string? themeMode, string? accentColor);
+	// A null fontFamily keeps the stored one: older clients update only theme and accent.
+	Task<AppearanceSettings> SetAppearance(string? themeMode, string? accentColor, string? fontFamily = null);
 
 	Task<Guid> GetInstallationId();
 
