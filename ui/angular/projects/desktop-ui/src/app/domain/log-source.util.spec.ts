@@ -216,14 +216,18 @@ describe('log-source.util', () => {
   });
 
   describe('formatLogTime', () => {
-    it('renders the local wall-clock time of the entry', () => {
-      const local = new Date(2026, 6, 28, 14, 5, 9);
+    const local = new Date(2026, 6, 28, 14, 5, 9);
 
-      expect(formatLogTime(local.toISOString())).toBe('14:05:09');
+    it('renders the local wall-clock time of the entry on a 24-hour clock', () => {
+      expect(formatLogTime(local.toISOString(), { locale: 'en', hourCycle: 'h23' })).toBe('14:05:09');
+    });
+
+    it('follows a 12-hour preference with a day period', () => {
+      expect(formatLogTime(local.toISOString(), { locale: 'en', hourCycle: 'h12' })).toMatch(/^2:05:09\sPM$/);
     });
 
     it('passes an unparsable timestamp through unchanged', () => {
-      expect(formatLogTime('not a date')).toBe('not a date');
+      expect(formatLogTime('not a date', { locale: 'en' })).toBe('not a date');
     });
   });
 });

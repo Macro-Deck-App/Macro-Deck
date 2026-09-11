@@ -11,6 +11,8 @@ export interface UiRenderHost {
 
   culture(): string;
 
+  hourCycle?(): 'h12' | 'h23' | undefined;
+
   simpleRendering(): boolean;
 
   fontFamily(faceId: string): string | null;

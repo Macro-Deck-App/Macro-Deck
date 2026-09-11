@@ -7,6 +7,8 @@ import {
   GetLocalizationResponse,
   LocalizationCatalogChangedEvent,
   LocalizationCultureChangedEvent,
+  LocalizationHourCycle,
+  LocalizationTimeFormat,
   pluralForm,
   StringsDefaults,
   UpdateLocalizationSettingsRequest,
@@ -17,10 +19,17 @@ const STORAGE_KEY_FALLBACK_CULTURE = 'md.localization.fallbackCulture';
 const STORAGE_KEY_TRANSLATIONS = 'md.localization.translations';
 const STORAGE_KEY_AVAILABLE_CULTURES = 'md.localization.availableCultures';
 const STORAGE_KEY_FOLLOW_SYSTEM = 'md.localization.followSystem';
+const STORAGE_KEY_TIME_FORMAT = 'md.localization.timeFormat';
+const STORAGE_KEY_HOUR_CYCLE = 'md.localization.hourCycle';
 
 export const DEFAULT_CULTURE = 'en';
 
 const MAX_ARGUMENT_DEPTH = 4;
+
+export interface TimeLocale {
+  locale: string;
+  hourCycle?: LocalizationHourCycle;
+}
 
 const BUNDLED_DEFAULTS: Readonly<Record<string, string>> = { ...StringsDefaults, ...AppStringsDefaults };
 
@@ -32,6 +41,8 @@ export class LocalizationService {
   readonly fallbackCulture = signal<string>(DEFAULT_CULTURE);
   readonly availableCultures = signal<string[]>([]);
   readonly followsSystem = signal(false);
+  readonly timeFormat = signal<LocalizationTimeFormat>('system');
+  readonly hourCycle = signal<LocalizationHourCycle | undefined>(undefined);
 
   private readonly translations = signal<Record<string, string>>({ ...BUNDLED_DEFAULTS });
 
@@ -62,6 +73,14 @@ export class LocalizationService {
 
   async followSystemCulture(): Promise<void> {
     await this.applyLocalizationSettings({ followSystem: true });
+  }
+
+  async setTimeFormat(timeFormat: LocalizationTimeFormat): Promise<void> {
+    await this.applyLocalizationSettings({ timeFormat });
+  }
+
+  timeLocale(): TimeLocale {
+    return { locale: this.culture(), hourCycle: this.hourCycle() };
   }
 
   private async applyLocalizationSettings(request: UpdateLocalizationSettingsRequest): Promise<void> {
@@ -124,6 +143,8 @@ export class LocalizationService {
     this.merge(response.translations ?? {});
     this.availableCultures.set(response.availableCultures ?? []);
     this.followsSystem.set(response.followSystem ?? false);
+    this.timeFormat.set(isTimeFormat(response.timeFormat) ? response.timeFormat : 'system');
+    this.hourCycle.set(isHourCycle(response.hourCycle) ? response.hourCycle : undefined);
     this.catalogVersion.update(v => v + 1);
     this.persist();
   }
@@ -139,6 +160,10 @@ export class LocalizationService {
       localStorage.setItem(STORAGE_KEY_TRANSLATIONS, JSON.stringify(this.translations()));
       localStorage.setItem(STORAGE_KEY_AVAILABLE_CULTURES, JSON.stringify(this.availableCultures()));
       localStorage.setItem(STORAGE_KEY_FOLLOW_SYSTEM, String(this.followsSystem()));
+      localStorage.setItem(STORAGE_KEY_TIME_FORMAT, this.timeFormat());
+      const hourCycle = this.hourCycle();
+      if (hourCycle) localStorage.setItem(STORAGE_KEY_HOUR_CYCLE, hourCycle);
+      else localStorage.removeItem(STORAGE_KEY_HOUR_CYCLE);
     } catch {
     }
   }
@@ -153,6 +178,10 @@ export class LocalizationService {
       if (culture) this.culture.set(culture);
       if (fallbackCulture) this.fallbackCulture.set(fallbackCulture);
       if (followSystem) this.followsSystem.set(followSystem === 'true');
+      const timeFormat = localStorage.getItem(STORAGE_KEY_TIME_FORMAT);
+      if (isTimeFormat(timeFormat)) this.timeFormat.set(timeFormat);
+      const hourCycle = localStorage.getItem(STORAGE_KEY_HOUR_CYCLE);
+      if (isHourCycle(hourCycle)) this.hourCycle.set(hourCycle);
       if (rawTranslations) {
         const parsed: unknown = JSON.parse(rawTranslations);
         if (isTranslationMap(parsed)) this.merge(parsed);
@@ -164,6 +193,14 @@ export class LocalizationService {
     } catch {
     }
   }
+}
+
+function isTimeFormat(value: unknown): value is LocalizationTimeFormat {
+  return value === 'system' || value === '12h' || value === '24h';
+}
+
+function isHourCycle(value: unknown): value is LocalizationHourCycle {
+  return value === 'h12' || value === 'h23';
 }
 
 function isTranslationMap(value: unknown): value is Record<string, string> {

@@ -70,6 +70,11 @@ public partial class AppPreferenceService : IAppPreferenceService
 	public const string BackupBeforeHostUpdateKey = "backups.triggers.beforeHostUpdate";
 	public const string BackupBeforePluginUpdateKey = "backups.triggers.beforePluginUpdate";
 	public const string LocalizationCultureKey = "localization.culture";
+	public const string LocalizationTimeFormatKey = "localization.timeFormat";
+
+	public const string TimeFormatSystem = "system";
+	public const string TimeFormat12h = "12h";
+	public const string TimeFormat24h = "24h";
 
 	public const string ExtensionsStoreEnabledKey = "extensions.storeEnabled";
 	public const string ExtensionsCheckForUpdatesKey = "extensions.checkForUpdates";
@@ -452,6 +457,24 @@ public partial class AppPreferenceService : IAppPreferenceService
 		await _repository.SetValue(LocalizationCultureKey, culture);
 		return new LocalizationSettings(culture, false);
 	}
+
+	public async Task<string> GetTimeFormat()
+		=> NormalizeTimeFormat((await _repository.GetByKey(LocalizationTimeFormatKey))?.Value);
+
+	public async Task<string> SetTimeFormat(string? timeFormat)
+	{
+		var resolved = NormalizeTimeFormat(timeFormat);
+		await _repository.SetValue(LocalizationTimeFormatKey, resolved);
+		return resolved;
+	}
+
+	private static string NormalizeTimeFormat(string? value)
+		=> value?.Trim().ToLowerInvariant() switch
+		{
+			TimeFormat12h => TimeFormat12h,
+			TimeFormat24h => TimeFormat24h,
+			_ => TimeFormatSystem
+		};
 
 	public async Task<DateTimeOffset?> GetBackupScheduleLastRun()
 		=> DateTimeOffset.TryParse((await _repository.GetByKey(BackupScheduleLastRunAtKey))?.Value,

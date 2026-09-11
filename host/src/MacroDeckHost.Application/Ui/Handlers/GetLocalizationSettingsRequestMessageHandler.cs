@@ -25,7 +25,8 @@ public class GetLocalizationSettingsRequestMessageHandler
 		{
 			Culture = settings.Culture,
 			FallbackCulture = LocalizationDefaults.Culture,
-			FollowSystem = settings.FollowSystem
+			FollowSystem = settings.FollowSystem,
+			TimeFormat = await _service.GetTimeFormat()
 		};
 	}
 }

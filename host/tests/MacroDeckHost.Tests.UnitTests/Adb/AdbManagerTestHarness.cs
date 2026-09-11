@@ -78,6 +78,10 @@ internal sealed class FakeAdbPreferenceService : IAppPreferenceService
 	public Task<LocalizationSettings> GetLocalization() => Task.FromResult(new LocalizationSettings("en", false));
 
 	public Task<LocalizationSettings> SetLocalization(string? culture) => throw new NotSupportedException();
+
+	public Task<string> GetTimeFormat() => Task.FromResult(AppPreferenceService.TimeFormatSystem);
+
+	public Task<string> SetTimeFormat(string? timeFormat) => throw new NotSupportedException();
 }
 
 internal sealed class ManualTimeProvider : TimeProvider

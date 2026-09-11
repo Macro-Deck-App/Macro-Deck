@@ -22,10 +22,18 @@ internal static class WeatherDetailsView
 
 	private const int ForecastRows = 7;
 
-	public static UiElement Build(UiAsyncState<WeatherStatePayload> state, WeatherIconResources icons)
+	public static UiElement Build(
+		UiAsyncState<WeatherStatePayload> state,
+		WeatherIconResources icons,
+		Func<TimeOnly, string>? formatTime = null)
 	{
 		ArgumentNullException.ThrowIfNull(state);
 		ArgumentNullException.ThrowIfNull(icons);
+
+		Func<string, string> displayTime = text => formatTime is not null &&
+			TimeOnly.TryParseExact(text, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var time)
+				? formatTime(time)
+				: text;
 
 		return new UiStack
 		{
@@ -51,7 +59,7 @@ internal static class WeatherDetailsView
 				{
 					Key = "availableGate",
 					Condition = () => state.Value.IsAvailable,
-					Content = () => Available(state, icons),
+					Content = () => Available(state, icons, displayTime),
 				},
 			],
 		};
@@ -76,7 +84,10 @@ internal static class WeatherDetailsView
 	/// design: a second scroll container around a tree that already scrolls puts two bars on one dialog.
 	/// Left as a stack, the days below the fold were simply cut off.
 	/// </summary>
-	private static UiList Available(UiAsyncState<WeatherStatePayload> state, WeatherIconResources icons)
+	private static UiList Available(
+		UiAsyncState<WeatherStatePayload> state,
+		WeatherIconResources icons,
+		Func<string, string> displayTime)
 		=> new()
 		{
 			Key = "available",
@@ -85,12 +96,12 @@ internal static class WeatherDetailsView
 			Children =
 			[
 				Current(state, icons),
-				Measurements(state),
+				Measurements(state, displayTime),
 				new UiWhen
 				{
 					Key = "hourlyGate",
 					Condition = () => state.Value.Hours.Count > 0,
-					Content = () => Hourly(state, icons),
+					Content = () => Hourly(state, icons, displayTime),
 				},
 				new UiWhen
 				{
@@ -150,33 +161,50 @@ internal static class WeatherDetailsView
 			],
 		};
 
-	private static UiStack Measurements(UiAsyncState<WeatherStatePayload> state)
+	private static UiStack Measurements(UiAsyncState<WeatherStatePayload> state, Func<string, string> displayTime)
 		=> new()
 		{
 			Key = "measurements",
+			Direction = UiComponentDirections.Vertical,
+			Gap = 0.03,
+			Children =
+			[
+				MeasurementRow("conditions",
+				[
+					Measurement("wind",
+						AppStrings.Integrations.Weather.Details.Wind(),
+						() => Wind(state.Value)),
+					Measurement("humidity",
+						AppStrings.Integrations.Weather.Details.Humidity(),
+						() => state.Value.Humidity is { } humidity
+							? AppStrings.Integrations.Weather.Details.HumidityValue(Number(humidity, 0))
+							: Placeholder()),
+					Measurement("precipitation",
+						AppStrings.Integrations.Weather.Details.Precipitation(),
+						() => Precipitation(state.Value)),
+				]),
+				MeasurementRow("sun",
+				[
+					Measurement("sunrise",
+						AppStrings.Integrations.Weather.Details.Sunrise(),
+						() => LocalizedText.FromLiteral(state.Value.Sunrise is { } sunrise
+							? displayTime(sunrise)
+							: "-")),
+					Measurement("sunset",
+						AppStrings.Integrations.Weather.Details.Sunset(),
+						() => LocalizedText.FromLiteral(state.Value.Sunset is { } sunset ? displayTime(sunset) : "-")),
+				]),
+			],
+		};
+
+	private static UiStack MeasurementRow(string key, IReadOnlyList<UiElement> measurements)
+		=> new()
+		{
+			Key = key,
 			Direction = UiComponentDirections.Horizontal,
 			Justify = UiComponentJustify.SpaceBetween,
 			Gap = 0.02,
-			Children =
-			[
-				Measurement("wind",
-					AppStrings.Integrations.Weather.Details.Wind(),
-					() => Wind(state.Value)),
-				Measurement("humidity",
-					AppStrings.Integrations.Weather.Details.Humidity(),
-					() => state.Value.Humidity is { } humidity
-						? AppStrings.Integrations.Weather.Details.HumidityValue(Number(humidity, 0))
-						: Placeholder()),
-				Measurement("precipitation",
-					AppStrings.Integrations.Weather.Details.Precipitation(),
-					() => Precipitation(state.Value)),
-				Measurement("sunrise",
-					AppStrings.Integrations.Weather.Details.Sunrise(),
-					() => LocalizedText.FromLiteral(state.Value.Sunrise ?? "-")),
-				Measurement("sunset",
-					AppStrings.Integrations.Weather.Details.Sunset(),
-					() => LocalizedText.FromLiteral(state.Value.Sunset ?? "-")),
-			],
+			Children = measurements,
 		};
 
 	private static UiStack Measurement(string key, LocalizedText label, Func<LocalizedText> value)
@@ -199,7 +227,10 @@ internal static class WeatherDetailsView
 			],
 		};
 
-	private static UiStack Hourly(UiAsyncState<WeatherStatePayload> state, WeatherIconResources icons)
+	private static UiStack Hourly(
+		UiAsyncState<WeatherStatePayload> state,
+		WeatherIconResources icons,
+		Func<string, string> displayTime)
 		=> new()
 		{
 			Key = "hourly",
@@ -215,34 +246,46 @@ internal static class WeatherDetailsView
 					Role = UiComponentTextRoles.Secondary,
 					Weight = UiComponentTextWeights.SemiBold,
 				},
-				new UiStack
+				new UiList
 				{
 					Key = "hours",
 					Direction = UiComponentDirections.Horizontal,
-					Justify = UiComponentJustify.SpaceBetween,
-					Gap = 0.015,
-					Children =
-					[
-						new UiRepeat<WeatherHourPayload>
-						{
-							Key = "hourRepeat",
-							Items = UiValue.From<IReadOnlyList<WeatherHourPayload>>(() =>
-								Take(state.Value.Hours, HourlyColumns)),
-							// A repeat key composes into a node id, whose grammar has no colon - the payload's
-							// own HH:mm would make the whole tree unbuildable rather than just this row.
-							KeySelector = hour => hour.Time.Replace(':', '-'),
-							Template = (hour, key) => Hour(hour, key, state, icons),
-						},
-					],
+					RequiredComponentVersion = 2,
+					Gap = UiSize.FromBasis(0.04),
+					Children = [HourRepeat(state, icons, displayTime, state => state.Hours)],
+					Fallback = new UiStack
+					{
+						Key = "hourColumns",
+						Direction = UiComponentDirections.Horizontal,
+						Justify = UiComponentJustify.SpaceBetween,
+						Gap = 0.015,
+						Children = [HourRepeat(state, icons, displayTime, state => Take(state.Hours, HourlyColumns))],
+					},
 				},
 			],
+		};
+
+	private static UiRepeat<WeatherHourPayload> HourRepeat(
+		UiAsyncState<WeatherStatePayload> state,
+		WeatherIconResources icons,
+		Func<string, string> displayTime,
+		Func<WeatherStatePayload, List<WeatherHourPayload>> hours)
+		=> new()
+		{
+			Key = "hourRepeat",
+			Items = UiValue.From<IReadOnlyList<WeatherHourPayload>>(() => hours(state.Value)),
+			// A repeat key composes into a node id, whose grammar has no colon - the payload's
+			// own HH:mm would make the whole tree unbuildable rather than just this row.
+			KeySelector = hour => hour.Time.Replace(':', '-'),
+			Template = (hour, key) => Hour(hour, key, state, icons, displayTime),
 		};
 
 	private static UiStack Hour(
 		WeatherHourPayload hour,
 		string key,
 		UiAsyncState<WeatherStatePayload> state,
-		WeatherIconResources icons)
+		WeatherIconResources icons,
+		Func<string, string> displayTime)
 		=> new()
 		{
 			Key = key,
@@ -257,7 +300,7 @@ internal static class WeatherDetailsView
 				new UiTextRun
 				{
 					Key = "time",
-					Text = hour.Time,
+					Text = displayTime(hour.Time),
 					Size = 0.032,
 					Align = UiComponentAlignments.Center,
 					Role = UiComponentTextRoles.Muted,

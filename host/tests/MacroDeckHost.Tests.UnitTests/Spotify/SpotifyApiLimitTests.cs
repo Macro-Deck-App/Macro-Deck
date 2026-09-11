@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Net;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Integrations.Spotify;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Issues;
@@ -283,6 +285,24 @@ internal sealed class SpotifyApiLimitTests
 			Assert.That(TestLocalization.Resolve(issues[0].Description),
 				Does.Contain("other apps on this Spotify account"));
 		});
+
+		await integration.ShutdownAsync();
+	}
+
+	[Test]
+	public async Task The_api_limit_issue_shows_times_in_the_app_time_format()
+	{
+		var twelveHour = new TimeOfDayFormat(CultureInfo.GetCultureInfo("en-US"), HourCycles.H12);
+		var integration = new SpotifyIntegration(new FakeSpotifyOAuthClient(),
+			new LimitedTransport(),
+			timeOfDayFormat: () => Task.FromResult(twelveHour));
+		var config = new SpotifyConfigStub();
+		await integration.InitializeAsync(new SpotifyContextStub(config));
+
+		await integration.GetPlayer(config.EntryId.ToString())!.GetStateAsync();
+		var issues = await integration.GetIssuesAsync();
+
+		Assert.That(TestLocalization.Resolve(issues[0].Description), Does.Match(@"\d:\d\d\s(AM|PM)"));
 
 		await integration.ShutdownAsync();
 	}

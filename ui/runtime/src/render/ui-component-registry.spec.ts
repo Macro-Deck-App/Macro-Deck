@@ -182,6 +182,12 @@ describe('the component registry', () => {
       v3.remove();
     });
 
+    it('advertises ui.list up to version 2, the version that scrolls horizontally', () => {
+      const registry = createUiComponentRegistry(...UI_CORE_COMPONENTS);
+
+      expect(registry.capabilities()['ui.list']).toEqual({ minimum: 1, maximum: 2 });
+    });
+
     it('defaults an unversioned definition to {minimum: 1, maximum: 1}', () => {
       const registry = createUiComponentRegistry(...UI_CORE_COMPONENTS, versionedDefinition(undefined));
 

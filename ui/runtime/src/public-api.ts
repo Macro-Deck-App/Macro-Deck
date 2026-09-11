@@ -768,6 +768,8 @@ export {
   type GetLocalizationSettingsResponse,
   type LocalizationCatalogChangedEvent,
   type LocalizationCultureChangedEvent,
+  type LocalizationHourCycle,
+  type LocalizationTimeFormat,
   type UpdateLocalizationSettingsRequest,
   type UpdateLocalizationSettingsResponse,
 } from './protocol/messages/localization';

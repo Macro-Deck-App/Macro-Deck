@@ -620,6 +620,8 @@ public class Startup
 		services.AddSingleton<IBuildEnvironment, BuildEnvironment>();
 		services.AddScoped<IAppPreferenceRepository, AppPreferenceRepository>();
 		services.AddScoped<IAppPreferenceService, AppPreferenceService>();
+		services.AddSingleton(Integrations.Native.SystemHourCycleReaderFactory.Create());
+		services.AddScoped<TimeFormatResolver>();
 		services.AddSingleton(AutostartRegistrarFactory.Create());
 		services.AddSingleton<IAutostartService, AutostartService>();
 		services.AddSingleton<IApplicationRestartService, ApplicationRestartService>();

@@ -70,6 +70,7 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
     // The host's language, not the browser's: a widget's dates are written in the language the deck
     // is configured for, and the two disagree about as often as they agree.
     culture: () => client.localization.culture(),
+    hourCycle: () => client.localization.hourCycle(),
     simpleRendering: () => rendering.simple(),
     fontFamily: faceId => (faceId ? `MacroDeckFont_${faceId}` : null),
     fontReady: faceId => fonts.ready(faceId),

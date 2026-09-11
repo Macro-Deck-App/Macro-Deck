@@ -12779,6 +12779,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>System</value>
     <comment>The language selector's first entry, meaning the operating system's language rather than a chosen one. Translate it only where the word for the operating system differs.</comment>
   </data>
+  <data name="Settings.Language.TimeFormatDescription" xml:space="preserve">
+    <value>Wie Uhrzeiten auf allen verbundenen Clients angezeigt werden. System folgt der 12- oder 24-Stunden-Einstellung deines Betriebssystems.</value>
+  </data>
+  <data name="Settings.Language.TimeFormatLabel" xml:space="preserve">
+    <value>Zeitformat</value>
+  </data>
   <data name="Settings.Logging.Description" xml:space="preserve">
     <value>Lege fest, wie detailliert Macro Deck während des Betriebs protokolliert.</value>
   </data>
@@ -15119,7 +15125,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>24 Stunden</value>
   </data>
   <data name="Widgets.Clock.HourCycleAuto" xml:space="preserve">
-    <value>Dem Gerät folgen</value>
+    <value>App-Einstellung verwenden</value>
   </data>
   <data name="Widgets.Clock.LabelPlaceholderExample" xml:space="preserve">
     <value>z. B. Büro</value>
