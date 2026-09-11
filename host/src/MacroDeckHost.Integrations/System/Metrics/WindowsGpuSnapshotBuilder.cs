@@ -13,6 +13,10 @@ internal static class WindowsGpuSnapshotBuilder
 	public static IReadOnlyList<WindowsGpuAdapter> Surviving(IReadOnlyList<WindowsGpuAdapter> adapters)
 		=> adapters
 			.Where(a => !a.IsSoftware && (a.DedicatedVideoMemory > 0 || a.SharedSystemMemory > 0))
+			// On multi-GPU machines DXGI can list the default adapter again under another LUID. Two
+			// physically identical cards are indistinguishable here and collapse too.
+			.GroupBy(a => (a.Name, a.VendorId, a.DeviceId, a.SubSysId, a.Revision, a.DedicatedVideoMemory))
+			.Select(g => g.First() with { Luids = g.SelectMany(a => a.Luids).ToArray() })
 			.OrderByDescending(a => a.DedicatedVideoMemory)
 			.ToArray();
 
@@ -58,10 +62,10 @@ internal static class WindowsGpuSnapshotBuilder
 	{
 		var usage = WindowsGpuCounterParser.Aggregate(entries);
 
-		if (adapters.Any(a => usage.ContainsKey((a.LuidHigh, a.LuidLow))))
+		if (adapters.Any(a => a.Luids.Any(usage.ContainsKey)))
 		{
 			join = LuidJoin.Matched;
-			return adapters.Select(a => Sample(a, usage.GetValueOrDefault((a.LuidHigh, a.LuidLow)))).ToArray();
+			return adapters.Select(a => Sample(a, a.Luids.Max(luid => usage.GetValueOrDefault(luid)))).ToArray();
 		}
 
 		// Which adapter an instance belongs to is unknown here. A single GPU still gets a correct

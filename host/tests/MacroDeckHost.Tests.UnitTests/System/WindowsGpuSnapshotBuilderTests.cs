@@ -9,8 +9,9 @@ public class WindowsGpuSnapshotBuilderTests
 		uint luidLow,
 		ulong dedicated = 4UL * 1024 * 1024 * 1024,
 		ulong shared = 8UL * 1024 * 1024 * 1024,
-		bool software = false)
-		=> new(name, 0, luidLow, dedicated, shared, software);
+		bool software = false,
+		uint deviceId = 0)
+		=> new(name, 0, luidLow, dedicated, shared, software) { DeviceId = deviceId };
 
 	private static string Instance(uint luidLow, int engine, string engineType, int pid = 1234)
 		=> $"pid_{pid}_luid_0x00000000_0x{luidLow:X8}_phys_0_eng_{engine}_engtype_{engineType}";
@@ -38,6 +39,56 @@ public class WindowsGpuSnapshotBuilderTests
 		var surviving = WindowsGpuSnapshotBuilder.Surviving([real, software, virtualDisplay]);
 
 		Assert.That(surviving.Select(a => a.Name), Is.EqualTo(new[] { "Radeon" }));
+	}
+
+	[Test]
+	public void A_card_dxgi_lists_twice_under_two_luids_is_one_gpu()
+	{
+		var surviving = WindowsGpuSnapshotBuilder.Surviving([
+			Adapter("NVIDIA GeForce RTX 4070", 0x2, deviceId: 0x2786),
+			Adapter("AMD Radeon(TM) Graphics", 0x1, dedicated: 512 * 1024 * 1024, deviceId: 0x164E),
+			Adapter("NVIDIA GeForce RTX 4070", 0x3, deviceId: 0x2786)
+		]);
+
+		Assert.That(surviving.Select(a => a.Name),
+			Is.EqualTo(new[] { "NVIDIA GeForce RTX 4070", "AMD Radeon(TM) Graphics" }));
+	}
+
+	[Test]
+	public void A_card_listed_twice_reads_its_usage_from_whichever_luid_has_counters()
+	{
+		var surviving = WindowsGpuSnapshotBuilder.Surviving([
+			Adapter("NVIDIA GeForce RTX 4070", 0x2, deviceId: 0x2786),
+			Adapter("AMD Radeon(TM) Graphics", 0x1, dedicated: 512 * 1024 * 1024, deviceId: 0x164E),
+			Adapter("NVIDIA GeForce RTX 4070", 0x3, deviceId: 0x2786)
+		]);
+
+		var samples = WindowsGpuSnapshotBuilder.Build(surviving,
+			Counters(new CounterEntry(Instance(0x3, 0, "3D"), 35), new CounterEntry(Instance(0x1, 0, "3D"), 5)),
+			null,
+			out var join);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(join, Is.EqualTo(WindowsGpuSnapshotBuilder.LuidJoin.Matched));
+			Assert.That(samples,
+				Is.EqualTo(new[]
+				{
+					new GpuSample("NVIDIA GeForce RTX 4070", 35),
+					new GpuSample("AMD Radeon(TM) Graphics", 5)
+				}));
+		});
+	}
+
+	[Test]
+	public void Cards_with_the_same_name_but_different_device_ids_stay_separate()
+	{
+		var surviving = WindowsGpuSnapshotBuilder.Surviving([
+			Adapter("NVIDIA GeForce RTX 4070", 0x2, deviceId: 0x2786),
+			Adapter("NVIDIA GeForce RTX 4070", 0x3, deviceId: 0x2709)
+		]);
+
+		Assert.That(surviving, Has.Count.EqualTo(2));
 	}
 
 	[Test]

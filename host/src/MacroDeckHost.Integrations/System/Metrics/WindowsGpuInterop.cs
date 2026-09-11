@@ -95,7 +95,13 @@ internal sealed class WindowsGpuInterop : IDisposable
 						description.AdapterLuidLow,
 						(ulong)description.DedicatedVideoMemory,
 						(ulong)description.SharedSystemMemory,
-						(description.Flags & DxgiAdapterFlagSoftware) != 0));
+						(description.Flags & DxgiAdapterFlagSoftware) != 0)
+					{
+						VendorId = description.VendorId,
+						DeviceId = description.DeviceId,
+						SubSysId = description.SubSysId,
+						Revision = description.Revision
+					});
 				}
 				finally
 				{
