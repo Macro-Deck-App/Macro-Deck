@@ -213,10 +213,19 @@
           (opened)="onOpen()" />
       }
       @case (types.MultiSelect) {
-        <shared-multi-select
-          [value]="arrayValue()"
-          [options]="multiSelectOptions()"
-          (valueChange)="onChange($event)" />
+        @if (reorderable()) {
+          <shared-reorderable-list
+            [value]="arrayValue()"
+            [options]="multiSelectOptions()"
+            [loading]="loading()"
+            [disabled]="disabled()"
+            (valueChange)="onChange($event)" />
+        } @else {
+          <shared-multi-select
+            [value]="arrayValue()"
+            [options]="multiSelectOptions()"
+            (valueChange)="onChange($event)" />
+        }
       }
       @case (types.Password) {
         <shared-input

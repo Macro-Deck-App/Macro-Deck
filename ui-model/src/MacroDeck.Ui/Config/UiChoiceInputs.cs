@@ -63,8 +63,23 @@ public sealed record UiAutocompleteInput : UiOptionsInput<string>
 /// </summary>
 public sealed record UiMultiSelectInput : UiOptionsInput<IReadOnlyList<string>>
 {
+	/// <summary>Draws the options as a list whose selected rows the user drags or moves into order, so the order
+	/// of the bound list is meaningful - a presentation flag like <see cref="UiChoiceInput.Segmented" />. The
+	/// value keeps its shape; a renderer that does not know the flag draws the plain multiple selection.</summary>
+	public UiValue<bool> Reorderable { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiConfigPrimitives.MultiSelect;
+
+	/// <inheritdoc />
+	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
+	{
+		ArgumentNullException.ThrowIfNull(properties);
+
+		base.DeclareProperties(properties);
+
+		properties.Set(UiConfigProperties.Reorderable, Reorderable);
+	}
 }
 
 /// <summary>

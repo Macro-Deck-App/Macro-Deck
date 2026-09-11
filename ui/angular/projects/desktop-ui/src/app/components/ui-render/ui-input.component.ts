@@ -8,6 +8,7 @@ import { normalizeHttpsUrl } from '../../domain/url-input.util';
 import { SelectComponent, SelectOption } from '../forms/select/select.component';
 import { ComboboxComponent, ComboboxOption } from '../forms/combobox/combobox.component';
 import { MultiSelectComponent, MultiSelectOption } from '../forms/multi-select/multi-select.component';
+import { ReorderableListComponent } from '../forms/reorderable-list/reorderable-list.component';
 import { ColorPickerComponent } from '../forms/color-picker/color-picker.component';
 import { FilePathInputComponent, FilePathKind } from '../forms/file-path-input/file-path-input.component';
 import { HotkeyRecorderComponent } from '../forms/hotkey-recorder/hotkey-recorder.component';
@@ -47,6 +48,7 @@ const Properties = UiConfigProperties;
     SelectComponent,
     ComboboxComponent,
     MultiSelectComponent,
+    ReorderableListComponent,
     ColorPickerComponent,
     FilePathInputComponent,
     HotkeyRecorderComponent,
@@ -103,6 +105,7 @@ export class UiInputComponent {
   );
   protected readonly segmented = computed(() => nodeBoolean(this.node(), Properties.Segmented) === true);
   protected readonly cards = computed(() => nodeBoolean(this.node(), Properties.Cards) === true);
+  protected readonly reorderable = computed(() => nodeBoolean(this.node(), Properties.Reorderable) === true);
 
   protected readonly toggleRow = computed(
     () => this.node().type === UiConfigPrimitives.Boolean && !this.segmented() && !this.hideLabel(),

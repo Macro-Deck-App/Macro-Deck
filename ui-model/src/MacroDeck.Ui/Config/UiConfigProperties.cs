@@ -218,6 +218,10 @@ public static class UiConfigProperties
 	/// heading above it, or a sibling it is paired with.</summary>
 	public const string HideLabel = "hideLabel";
 
+	/// <summary>Whether a multiple selection renders as a list the user puts in order, making the order of its
+	/// value meaningful.</summary>
+	public const string Reorderable = "reorderable";
+
 #pragma warning restore CA1720
 
 	/// <summary>The property keys this package ships names for, in declaration order. Not exhaustive - see the
@@ -231,5 +235,6 @@ public static class UiConfigProperties
 		CanSubmit, Direction, Text, Url, DefaultExpanded, ClearOnCollapse, Severity, For, Triggers, CanRun,
 		IntegrationId, VariableTypes, WritableOnly, Capability, ConfigurationEntries, Segmented, Cards, Icon,
 		AspectRatio, Background, States, FalseLabel, TrueLabel, RowWeight, Wrap, HideLabel,
+		Reorderable,
 	];
 }

@@ -60,6 +60,7 @@ export const UiConfigProperties = {
   RowWeight: 'rowWeight',
   Wrap: 'wrap',
   HideLabel: 'hideLabel',
+  Reorderable: 'reorderable',
 } as const;
 
 export interface UiNodeOption {
