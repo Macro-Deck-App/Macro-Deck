@@ -5470,6 +5470,7 @@ export const AppStrings = {
 		},
 		Splash: {
 			PreparingUpdate: 'macrodeck.app:Shell.Splash.PreparingUpdate',
+			Stopping: 'macrodeck.app:Shell.Splash.Stopping',
 		},
 		Statusbar: {
 			DevelopmentBuild: 'macrodeck.app:Shell.Statusbar.DevelopmentBuild',
@@ -11099,6 +11100,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Shell.RestartNotice.PortRetry': 'Macro Deck could not open port {port}; restarting tries it again.',
 	'macrodeck.app:Shell.RestartNotice.RestartFailed': 'Macro Deck could not restart.',
 	'macrodeck.app:Shell.Splash.PreparingUpdate': 'Preparing update…',
+	'macrodeck.app:Shell.Splash.Stopping': 'Stopping Macro Deck…',
 	'macrodeck.app:Shell.Statusbar.DevelopmentBuild': 'Development Build',
 	'macrodeck.app:Store.Cancelled': 'Cancelled',
 	'macrodeck.app:Store.Details': 'Details',

@@ -13573,6 +13573,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Shell.Splash.PreparingUpdate" xml:space="preserve">
     <value>Preparazione dell'aggiornamento…</value>
   </data>
+  <data name="Shell.Splash.Stopping" xml:space="preserve">
+    <value>Chiusura di Macro Deck…</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Build di sviluppo</value>
   </data>

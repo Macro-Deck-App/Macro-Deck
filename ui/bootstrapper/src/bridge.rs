@@ -608,6 +608,14 @@ mod tests {
     }
 
     #[test]
+    fn shell_bridge_exposes_the_host_stopping_event() {
+        let script = include_str!("shell-bridge.js");
+
+        assert!(script.contains("onHostStopping"));
+        assert!(script.contains(&format!("'{}'", crate::HOST_STOPPING_EVENT)));
+    }
+
+    #[test]
     fn save_file_extensions_keep_only_plain_extensions() {
         assert_eq!(
             parse_save_file_extensions(".macroDeckProfile, zip"),

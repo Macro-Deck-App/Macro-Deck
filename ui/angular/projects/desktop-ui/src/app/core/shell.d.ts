@@ -28,6 +28,7 @@ declare global {
       takeOpenedFiles?: () => Promise<string[]>;
       onMenuAction?: (callback: (event: ShellMenuActionEvent) => void) => Promise<() => void>;
       takeMenuAction?: () => Promise<string | null>;
+      onHostStopping?: (callback: () => void) => Promise<() => void>;
       setHotkeyCapture?: (active: boolean) => Promise<void>;
       checkForUpdate?: () => Promise<ShellUpdateStatus>;
       installUpdate?: () => Promise<void>;

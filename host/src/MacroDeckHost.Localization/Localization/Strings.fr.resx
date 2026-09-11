@@ -13573,6 +13573,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Shell.Splash.PreparingUpdate" xml:space="preserve">
     <value>Préparation de la mise à jour…</value>
   </data>
+  <data name="Shell.Splash.Stopping" xml:space="preserve">
+    <value>Fermeture de Macro Deck…</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Build de développement</value>
   </data>

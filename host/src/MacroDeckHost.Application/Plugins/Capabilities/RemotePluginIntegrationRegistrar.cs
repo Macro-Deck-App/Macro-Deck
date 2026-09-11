@@ -621,7 +621,7 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			hasDynamicEventOptions: current is IDynamicEventOptionsProvider);
 		adapter.VariableSubscriptions = _variableSubscriptions;
 
-		await UnregisterAsync(pluginId, cancellationToken).ConfigureAwait(false);
+		await _integrationRegistry.UnregisterAsync(pluginId).ConfigureAwait(false);
 
 		var registration = await _integrationRegistry.RegisterAsync(adapter,
 			IntegrationOrigin.Plugin,
@@ -744,7 +744,7 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			hasDynamicEventOptions: current is IDynamicEventOptionsProvider);
 		adapter.VariableSubscriptions = _variableSubscriptions;
 
-		await UnregisterAsync(pluginId).ConfigureAwait(false);
+		await _integrationRegistry.UnregisterAsync(pluginId).ConfigureAwait(false);
 
 		var registration = await _integrationRegistry.RegisterAsync(adapter,
 			IntegrationOrigin.Plugin,

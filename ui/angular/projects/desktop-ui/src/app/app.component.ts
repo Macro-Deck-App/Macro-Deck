@@ -43,7 +43,7 @@ const BOOTSTRAP_RETRY_MS = 1500;
           </div>
         }
         @case ('authenticated') {
-          @if (isConnected()) {
+          @if (isConnected() && !installingUpdate()) {
             <router-outlet></router-outlet>
           } @else {
             <app-splash [status]="splashStatus()"></app-splash>
@@ -99,15 +99,18 @@ export class AppComponent implements OnInit, OnDestroy {
 
   readonly isConnected = computed(() => this.api.connectionStateSignal() === 'connected');
 
+  protected readonly installingUpdate = computed(() => this.updateService.phase() === 'installing');
+
   protected readonly splashStatus = computed(() => {
-    if (!this.isConnected()) {
-      if (this.updateService.phase() === 'installing') {
-        return this.localizationService.translateKey(AppStrings.Shell.Splash.PreparingUpdate);
-      }
-      if (this.updateService.installFailed()) {
-        return this.updateService.error()
-          ?? this.localizationService.translateKey(AppStrings.Settings.Update.InstallFailed);
-      }
+    if (this.hostSession.stopping()) {
+      return this.localizationService.translateKey(AppStrings.Shell.Splash.Stopping);
+    }
+    if (this.installingUpdate()) {
+      return this.localizationService.translateKey(AppStrings.Shell.Splash.PreparingUpdate);
+    }
+    if (!this.isConnected() && this.updateService.installFailed()) {
+      return this.updateService.error()
+        ?? this.localizationService.translateKey(AppStrings.Settings.Update.InstallFailed);
     }
     return this.localizationService.translateKey(AppStrings.WebClient.Connecting);
   });

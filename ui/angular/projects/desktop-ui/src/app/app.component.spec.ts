@@ -142,6 +142,7 @@ describe('AppComponent (desktop-ui) - splash status during an update install (is
   const PREPARING_UPDATE = 'Preparing update…';
   const INSTALL_FAILED_DEFAULT = 'Couldn\'t install the update. Please try again.';
   const CONNECTING = 'Connecting to Macro Deck…';
+  const STOPPING = 'Stopping Macro Deck…';
 
   afterEach(() => {
     delete (window as { macroDeckShell?: unknown }).macroDeckShell;
@@ -177,6 +178,7 @@ describe('AppComponent (desktop-ui) - splash status during an update install (is
       [AppStrings.Shell.Splash.PreparingUpdate]: PREPARING_UPDATE,
       [AppStrings.Settings.Update.InstallFailed]: INSTALL_FAILED_DEFAULT,
       [AppStrings.WebClient.Connecting]: CONNECTING,
+      [AppStrings.Shell.Splash.Stopping]: STOPPING,
     };
     return map[key] ?? key;
   }
@@ -312,15 +314,120 @@ describe('AppComponent (desktop-ui) - splash status during an update install (is
     expect(statusText(fixture)).toBe(CONNECTING);
   });
 
-  it('A7: connected + installing (the @default branch) still shows connecting, not preparing-update', async () => {
+  it('A7: an install in progress shows the preparing-update message even before auth is known', async () => {
     setShell({
       getUpdateState: () => Promise.resolve(makeState({ phase: 'installing' })),
     });
 
     const fixture = await createFixture('unknown', 'connected');
 
+    expect(statusText(fixture)).toBe(PREPARING_UPDATE);
+  });
+
+  it('starting an install replaces the app with the preparing-update splash while the host is still connected', async () => {
+    let push!: (state: ShellUpdateState) => void;
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ phase: 'downloaded' })),
+      onUpdateState: (callback: (state: ShellUpdateState) => void) => {
+        push = callback;
+        return Promise.resolve(() => {});
+      },
+    });
+
+    const fixture = await createFixture('authenticated', 'connected');
+    expect(fixture.nativeElement.querySelector('router-outlet')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('app-splash')).toBeNull();
+
+    push(makeState({ phase: 'installing' }));
+    await settle(fixture);
+
+    expect(fixture.nativeElement.querySelector('router-outlet')).toBeNull();
+    expect(statusText(fixture)).toBe(PREPARING_UPDATE);
+  });
+
+  it('an install that fails before the host stops brings the app back', async () => {
+    let push!: (state: ShellUpdateState) => void;
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ phase: 'installing' })),
+      onUpdateState: (callback: (state: ShellUpdateState) => void) => {
+        push = callback;
+        return Promise.resolve(() => {});
+      },
+    });
+
+    const fixture = await createFixture('authenticated', 'connected');
+    expect(statusText(fixture)).toBe(PREPARING_UPDATE);
+
+    push(makeState({ phase: 'failed', error: 'The pre-update backup failed.' }));
+    await settle(fixture);
+
+    expect(fixture.nativeElement.querySelector('app-splash')).toBeNull();
+    expect(fixture.nativeElement.querySelector('router-outlet')).not.toBeNull();
+  });
+
+  it('a quit announced during an install shows the stopping message while the host is still connected', async () => {
+    let announce!: () => void;
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ phase: 'installing' })),
+      onHostStopping: (callback: () => void) => {
+        announce = callback;
+        return Promise.resolve(() => {});
+      },
+    });
+
+    const fixture = await createFixture('authenticated', 'connected');
+    expect(statusText(fixture)).toBe(PREPARING_UPDATE);
+
+    announce();
+    await settle(fixture);
+
+    expect(statusText(fixture)).toBe(STOPPING);
+  });
+
+  it('a quit announced by the shell turns the connecting message into the stopping message', async () => {
+    let announce!: () => void;
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ phase: 'idle' })),
+      onHostStopping: (callback: () => void) => {
+        announce = callback;
+        return Promise.resolve(() => {});
+      },
+    });
+
+    const fixture = await createFixture('authenticated', 'reconnecting');
     expect(statusText(fixture)).toBe(CONNECTING);
-    expect(statusText(fixture)).not.toContain('Preparing update');
+
+    announce();
+    await settle(fixture);
+
+    expect(statusText(fixture)).toBe(STOPPING);
+  });
+
+  it('a quit after a failed install shows the stopping message, not the install error', async () => {
+    let push!: (state: ShellUpdateState) => void;
+    let announce!: () => void;
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ phase: 'idle' })),
+      onUpdateState: (callback: (state: ShellUpdateState) => void) => {
+        push = callback;
+        return Promise.resolve(() => {});
+      },
+      onHostStopping: (callback: () => void) => {
+        announce = callback;
+        return Promise.resolve(() => {});
+      },
+    });
+
+    const fixture = await createFixture('authenticated', 'disconnected');
+    push(makeState({ phase: 'installing' }));
+    await settle(fixture);
+    push(makeState({ phase: 'failed', error: 'The update signature could not be verified.' }));
+    await settle(fixture);
+
+    announce();
+    await settle(fixture);
+
+    expect(statusText(fixture)).toBe(STOPPING);
   });
 
   it('A8: the message updates reactively as the phase moves from installing to failed', async () => {
