@@ -157,6 +157,7 @@ export class BackupListComponent {
   }
 
   dateLabel(iso: string): string {
-    return new Date(iso).toLocaleString();
+    const { locale, hourCycle } = this.localization.timeLocale();
+    return new Date(iso).toLocaleString(locale, { hourCycle });
   }
 }

@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AppStrings, UpdateBackupSettingsRequest } from '@macro-deck/runtime';
@@ -22,12 +21,6 @@ const DAY_VALUES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fri
 const DAYS_OF_MONTH: SelectOption[] =
   Array.from({ length: 31 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) }));
 
-const TIMES_OF_DAY: SelectOption[] =
-  Array.from({ length: 24 }, (_, i) => {
-    const hour = String(i).padStart(2, '0');
-    return { value: `${hour}:00`, label: `${hour}:00` };
-  });
-
 // The "before Macro Deck updates" row is a hard platform limitation, not a preference: the host reports
 // it unsupported on Linux, and the row stays visible-but-disabled with that reason rather than
 // disappearing, so the gap does not read as a bug.
@@ -35,7 +28,7 @@ const TIMES_OF_DAY: SelectOption[] =
   selector: 'app-backup-schedule-settings',
   standalone: true,
   imports: [
-    FormsModule, DatePipe, SettingsSectionComponent, SettingsRowComponent, SelectComponent,
+    FormsModule, SettingsSectionComponent, SettingsRowComponent, SelectComponent,
     ToggleSwitchComponent, LoadingStateComponent, TranslatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,7 +51,19 @@ export class BackupScheduleSettingsComponent {
   protected readonly dayOfWeekOptions = computed<SelectOption[]>(() =>
     DAY_VALUES.map((value, i) => ({ value, label: this.localization.translateKey(DAY_OF_WEEK_KEYS[i]) })));
   protected readonly dayOfMonthOptions = DAYS_OF_MONTH;
-  protected readonly timeOptions = TIMES_OF_DAY;
+  protected readonly timeOptions = computed<SelectOption[]>(() => {
+    const { locale, hourCycle } = this.localization.timeLocale();
+    const format = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hourCycle, timeZone: 'UTC' });
+    return Array.from({ length: 24 }, (_, i) => ({
+      value: `${String(i).padStart(2, '0')}:00`,
+      label: format.format(Date.UTC(2000, 0, 1, i)),
+    }));
+  });
+
+  protected dateTimeLabel(iso: string): string {
+    const { locale, hourCycle } = this.localization.timeLocale();
+    return new Date(iso).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'medium', hourCycle });
+  }
 
   protected readonly retentionOptions = computed<SelectOption[]>(() => {
     const state = this.settings();

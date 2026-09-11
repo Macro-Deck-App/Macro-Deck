@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AppStrings } from '@macro-deck/runtime';
+import { AppStrings, LocalizationTimeFormat } from '@macro-deck/runtime';
 import { LocalizationService, SettingsRowComponent, SettingsSectionComponent, TranslatePipe } from '@shared';
 import { SelectComponent, SelectOption } from '../../../forms/select/select.component';
 import { cultureDisplayName } from '../../../../localization/culture-display.util';
@@ -25,6 +25,14 @@ export class LanguageSettingsComponent implements OnInit {
     this.localization.followsSystem() ? SYSTEM_CULTURE : this.culture(),
   );
 
+  protected readonly timeFormat = this.localization.timeFormat;
+
+  protected readonly timeFormatOptions = computed<SelectOption[]>(() => [
+    { value: 'system', label: this.localization.translateKey(AppStrings.Settings.Language.SystemOption) },
+    { value: '12h', label: this.localization.translateKey(AppStrings.Widgets.Clock.HourCycle12) },
+    { value: '24h', label: this.localization.translateKey(AppStrings.Widgets.Clock.HourCycle24) },
+  ]);
+
   protected readonly cultureOptions = computed<SelectOption[]>(() => [
     {
       value: SYSTEM_CULTURE,
@@ -47,6 +55,17 @@ export class LanguageSettingsComponent implements OnInit {
       await (culture === SYSTEM_CULTURE
         ? this.localization.followSystemCulture()
         : this.localization.setCulture(culture));
+    } finally {
+      this.applying.set(false);
+    }
+  }
+
+  async selectTimeFormat(timeFormat: LocalizationTimeFormat): Promise<void> {
+    if (timeFormat === this.timeFormat() || this.applying()) return;
+
+    this.applying.set(true);
+    try {
+      await this.localization.setTimeFormat(timeFormat);
     } finally {
       this.applying.set(false);
     }

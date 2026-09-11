@@ -1,7 +1,11 @@
+using MacroDeckHost.Application.Services;
+
 namespace MacroDeckHost.Application.Ui.Transport.Messages.Settings;
 
 public class UpdateLocalizationSettingsResponse
 {
+	public string TimeFormat { get; set; } = AppPreferenceService.TimeFormatSystem;
+
 	public bool Success { get; set; }
 
 	public string? Error { get; set; }

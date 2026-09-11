@@ -39,7 +39,9 @@ export class BackupPreviewModalComponent {
 
   protected readonly createdLabel = computed(() => {
     const backup = this.backupState();
-    return backup ? new Date(backup.createdAt).toLocaleString() : '';
+    if (!backup) return '';
+    const { locale, hourCycle } = this.localization.timeLocale();
+    return new Date(backup.createdAt).toLocaleString(locale, { hourCycle });
   });
 
   protected readonly sizeLabel = computed(() => formatBytes(this.backupState()?.sizeBytes));

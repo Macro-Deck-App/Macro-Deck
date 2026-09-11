@@ -12769,6 +12769,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>Sistema</value>
     <comment>The language selector's first entry, meaning the operating system's language rather than a chosen one. Translate it only where the word for the operating system differs.</comment>
   </data>
+  <data name="Settings.Language.TimeFormatDescription" xml:space="preserve">
+    <value>Cómo se muestran las horas en todos los clientes conectados. Sistema sigue el ajuste de 12 o 24 horas de tu sistema operativo.</value>
+  </data>
+  <data name="Settings.Language.TimeFormatLabel" xml:space="preserve">
+    <value>Formato de hora</value>
+  </data>
   <data name="Settings.Logging.Description" xml:space="preserve">
     <value>Controla cuánto detalle registra Macro Deck mientras se ejecuta.</value>
   </data>
@@ -15109,7 +15115,7 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>24 horas</value>
   </data>
   <data name="Widgets.Clock.HourCycleAuto" xml:space="preserve">
-    <value>Seguir el dispositivo</value>
+    <value>Usar el ajuste de la app</value>
   </data>
   <data name="Widgets.Clock.LabelPlaceholderExample" xml:space="preserve">
     <value>p. ej. Oficina</value>

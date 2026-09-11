@@ -288,4 +288,161 @@ public class LocalizationSettingsHandlersTests
 			Assert.That(received.FallbackCulture, Is.EqualTo(LocalizationDefaults.Culture));
 		});
 	}
+
+	private sealed class FixedHourCycleReader(string? hourCycle) : ISystemHourCycleReader
+	{
+		public string? Read() => hourCycle;
+	}
+
+	private static async Task<TimeFormatResolver> Resolver(string culture, string timeFormat, string? systemHourCycle)
+	{
+		var service = CreateService(new FakeAppPreferenceRepository());
+		await service.SetLocalization(culture);
+		await service.SetTimeFormat(timeFormat);
+		return new TimeFormatResolver(service, new FixedHourCycleReader(systemHourCycle));
+	}
+
+	[Test]
+	public async Task The_time_format_survives_a_restart_and_an_unknown_value_reads_as_system()
+	{
+		var repository = new FakeAppPreferenceRepository();
+		await CreateService(repository).SetTimeFormat("12h");
+		var reloaded = await CreateService(repository).GetTimeFormat();
+
+		await repository.SetValue(AppPreferenceService.LocalizationTimeFormatKey, "36h");
+		var garbled = await CreateService(repository).GetTimeFormat();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(reloaded, Is.EqualTo("12h"));
+			Assert.That(garbled, Is.EqualTo("system"));
+		});
+	}
+
+	[TestCase("12h", HourCycles.H23, HourCycles.H12)]
+	[TestCase("24h", HourCycles.H12, HourCycles.H23)]
+	[TestCase("system", HourCycles.H12, HourCycles.H12)]
+	[TestCase("system", HourCycles.H23, HourCycles.H23)]
+	public async Task A_pinned_time_format_wins_and_system_follows_the_operating_system(string timeFormat,
+		string systemHourCycle,
+		string expected)
+	{
+		var resolver = await Resolver("de-DE", timeFormat, systemHourCycle);
+
+		Assert.That(await resolver.ResolveHourCycle(), Is.EqualTo(expected));
+	}
+
+	[TestCase("en-US", HourCycles.H12)]
+	[TestCase("de-DE", HourCycles.H23)]
+	public async Task Without_an_operating_system_setting_the_app_language_decides(string culture, string expected)
+	{
+		var resolver = await Resolver(culture, "system", null);
+
+		Assert.That(await resolver.ResolveHourCycle(), Is.EqualTo(expected));
+	}
+
+	[TestCase("HH 'h' mm", HourCycles.H23)]
+	[TestCase("h:mm tt", HourCycles.H12)]
+	[TestCase("h:mm 'H'", HourCycles.H12)]
+	[TestCase("mm:ss", null)]
+	public void An_hour_cycle_is_read_from_a_time_pattern(string pattern, string? expected)
+		=> Assert.That(HourCycles.FromPattern(pattern), Is.EqualTo(expected));
+
+	[Test]
+	public void A_twelve_hour_time_drops_the_leading_zero_of_a_padded_twenty_four_hour_language()
+		=> Assert.That(new TimeOfDayFormat(CultureInfo.GetCultureInfo("de-DE"), HourCycles.H12)
+				.Format(new TimeOnly(21, 5)),
+			Does.Match(@"^9:05\s\S+$"));
+
+	[Test]
+	public async Task Times_are_formatted_in_the_app_language_not_the_process_language()
+	{
+		var previous = CultureInfo.CurrentCulture;
+		CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
+		try
+		{
+			var twelveHour = await (await Resolver("en-US", "12h", null)).ResolveAsync();
+			var twentyFourHour = await (await Resolver("es-ES", "24h", null)).ResolveAsync();
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(twelveHour.Format(new TimeOnly(9, 5)), Does.Match(@"^9:05\sAM$"));
+				Assert.That(twentyFourHour.Format(new TimeOnly(9, 5)), Is.EqualTo("9:05"));
+				Assert.That(twentyFourHour.Format(new TimeOnly(21, 5)), Is.EqualTo("21:05"));
+			});
+		}
+		finally
+		{
+			CultureInfo.CurrentCulture = previous;
+		}
+	}
+
+	[Test]
+	public async Task A_time_format_only_update_keeps_the_language_and_is_persisted()
+	{
+		var service = CreateService(new FakeAppPreferenceRepository());
+		await service.SetLocalization("de-DE");
+		var mediator = new RecordingMediator();
+		var updateHandler =
+			new UpdateLocalizationSettingsRequestMessageHandler(service, new FakeIntegrationRegistrar(), mediator);
+
+		var response = await updateHandler.Handle(new UpdateLocalizationSettingsRequest { TimeFormat = "12h" },
+			CancellationToken.None);
+		var reloaded = await new GetLocalizationSettingsRequestMessageHandler(service)
+			.Handle(new GetLocalizationSettingsRequest(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.True);
+			Assert.That(response.Culture, Is.EqualTo("de-DE"));
+			Assert.That(response.TimeFormat, Is.EqualTo("12h"));
+			Assert.That(reloaded.Culture, Is.EqualTo("de-DE"));
+			Assert.That(reloaded.FollowSystem, Is.False);
+			Assert.That(reloaded.TimeFormat, Is.EqualTo("12h"));
+			Assert.That(mediator.Published.OfType<LocalizationCultureChangedNotification>(), Has.Exactly(1).Items);
+		});
+	}
+
+	[Test]
+	public async Task An_unknown_time_format_is_rejected_and_keeps_the_stored_one()
+	{
+		var service = CreateService(new FakeAppPreferenceRepository());
+		await service.SetTimeFormat("12h");
+		var mediator = new RecordingMediator();
+		var updateHandler =
+			new UpdateLocalizationSettingsRequestMessageHandler(service, new FakeIntegrationRegistrar(), mediator);
+
+		var response = await updateHandler.Handle(new UpdateLocalizationSettingsRequest { TimeFormat = "36h" },
+			CancellationToken.None);
+		var stored = await service.GetTimeFormat();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.False);
+			Assert.That(response.TimeFormat, Is.EqualTo("12h"));
+			Assert.That(stored, Is.EqualTo("12h"));
+			Assert.That(mediator.Published, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task An_empty_update_succeeds_without_changing_anything()
+	{
+		var repository = new CountingAppPreferenceRepository();
+		repository.Seed(AppPreferenceService.LocalizationCultureKey, "de-DE");
+		repository.Seed(AppPreferenceService.LocalizationTimeFormatKey, "24h");
+		var updateHandler = new UpdateLocalizationSettingsRequestMessageHandler(CreateService(repository),
+			new FakeIntegrationRegistrar(),
+			new RecordingMediator());
+
+		var response = await updateHandler.Handle(new UpdateLocalizationSettingsRequest(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.True);
+			Assert.That(response.Culture, Is.EqualTo("de-DE"));
+			Assert.That(response.TimeFormat, Is.EqualTo("24h"));
+			Assert.That(repository.Writes, Is.Zero);
+		});
+	}
 }

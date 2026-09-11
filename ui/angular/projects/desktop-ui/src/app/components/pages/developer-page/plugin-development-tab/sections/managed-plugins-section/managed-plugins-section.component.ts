@@ -116,6 +116,7 @@ export class ManagedPluginsSectionComponent {
     if (Number.isNaN(date.getTime())) {
       return '-';
     }
-    return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    const { locale, hourCycle } = this.localization.timeLocale();
+    return date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hourCycle });
   }
 }

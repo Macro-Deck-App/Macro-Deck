@@ -242,6 +242,10 @@ internal sealed class ContractAppPreferences : IAppPreferenceService
 
 	public Task<LocalizationSettings> SetLocalization(string? culture) => throw new NotSupportedException();
 
+	public Task<string> GetTimeFormat() => Task.FromResult(AppPreferenceService.TimeFormatSystem);
+
+	public Task<string> SetTimeFormat(string? timeFormat) => throw new NotSupportedException();
+
 	public Task<AppearanceSettings> GetAppearance() => throw new NotSupportedException();
 
 	public Task<AppearanceSettings> SetAppearance(string? themeMode, string? accentColor)

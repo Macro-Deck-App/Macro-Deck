@@ -228,6 +228,7 @@ export class FolderView {
       resourceUrl: resource => base.resourceUrl(resource),
       now: () => base.now(),
       culture: () => base.culture(),
+      hourCycle: () => base.hourCycle?.(),
       simpleRendering: () => base.simpleRendering(),
       fontFamily: faceId => base.fontFamily(faceId),
       fontReady: faceId => base.fontReady(faceId),

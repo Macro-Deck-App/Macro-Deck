@@ -524,3 +524,10 @@
   flex: 0 0 auto;
   min-width: 0;
 }
+
+.widget-list-horizontal {
+  flex-direction: row;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-gutter: auto;
+}

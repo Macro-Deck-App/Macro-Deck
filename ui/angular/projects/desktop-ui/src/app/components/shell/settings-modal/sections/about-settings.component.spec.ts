@@ -78,11 +78,11 @@ describe('AboutSettingsComponent', () => {
     expect(buildNumberRow?.textContent).toContain('Development build');
   });
 
-  it('formats the build timestamp as a local date string', async () => {
+  it('formats the build timestamp as a local date string in the app language', async () => {
     const fixture = await createFixture();
 
     const text = fixture.nativeElement.textContent as string;
-    expect(text).toContain(new Date('2026-07-18T12:00:00Z').toLocaleString());
+    expect(text).toContain(new Date('2026-07-18T12:00:00Z').toLocaleString('en'));
     expect(text).not.toContain('Development build');
   });
 
