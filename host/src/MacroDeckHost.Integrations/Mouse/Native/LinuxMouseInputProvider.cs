@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using MacroDeck.Localization;
+using MacroDeckHost.Integrations.Native;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Mouse.Native;
@@ -214,7 +215,7 @@ public sealed class LinuxMouseInputProvider : IMouseInputProvider, IDisposable
 		IntPtr display;
 		try
 		{
-			display = XOpenDisplay(IntPtr.Zero);
+			display = X11Windows.OpenDisplay();
 		}
 		catch (DllNotFoundException)
 		{
@@ -262,9 +263,6 @@ public sealed class LinuxMouseInputProvider : IMouseInputProvider, IDisposable
 		_disposed = true;
 		_ = XCloseDisplay(_display);
 	}
-
-	[DllImport(LibX11)]
-	private static extern IntPtr XOpenDisplay(IntPtr display);
 
 	[DllImport(LibX11)]
 	private static extern int XCloseDisplay(IntPtr display);
