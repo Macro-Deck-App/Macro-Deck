@@ -40,6 +40,15 @@ test('the list surface scrolls its own children rather than dividing its box bet
   assert.match(children[1], /flex:\s*0 0 auto\b/);
 });
 
+test('a horizontal list lays its children out in a row that scrolls along x only', () => {
+  const renderer = readFileSync(path.join(HERE, 'styles', 'renderer.css'), 'utf8');
+  const surface = renderer.match(/\n\.widget-list-horizontal \{([^}]*)\}/);
+  assert.ok(surface, 'renderer.css declares no .widget-list-horizontal rule');
+  assert.match(surface[1], /flex-direction:\s*row\b/);
+  assert.match(surface[1], /overflow-x:\s*(auto|scroll)\b/);
+  assert.match(surface[1], /overflow-y:\s*hidden\b/);
+});
+
 test('the widget reference cell is the same number in CSS and TypeScript', () => {
   assert.equal(cssPx('widget-reference-cell'), tsNumber('WIDGET_REFERENCE_CELL_SIZE'));
 });

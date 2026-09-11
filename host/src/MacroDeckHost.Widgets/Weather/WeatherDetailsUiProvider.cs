@@ -2,10 +2,12 @@ using System.Text.Json;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport.Messages.Weather;
 using MacroDeckHost.Application.Weather;
+using Microsoft.Extensions.DependencyInjection;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Widgets.Weather;
@@ -24,17 +26,20 @@ public sealed class WeatherDetailsUiProvider : IBuiltInIntegrationUiProvider
 	private readonly IWeatherRegistry _registry;
 	private readonly IUiResourceStore _resources;
 	private readonly IWeatherStateNotifier _notifier;
+	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly ILogger _logger;
 
 	public WeatherDetailsUiProvider(
 		IWeatherRegistry registry,
 		IUiResourceStore resources,
 		IWeatherStateNotifier notifier,
+		IServiceScopeFactory scopeFactory,
 		ILogger logger)
 	{
 		_registry = registry;
 		_resources = resources;
 		_notifier = notifier;
+		_scopeFactory = scopeFactory;
 		_logger = logger.ForContext<WeatherDetailsUiProvider>();
 	}
 
@@ -63,7 +68,9 @@ public sealed class WeatherDetailsUiProvider : IBuiltInIntegrationUiProvider
 		var initial = await LoadAsync(instanceId, cancellationToken).ConfigureAwait(false);
 		var state = new UiAsyncState<WeatherStatePayload>(ct => LoadAsync(instanceId, ct), initial);
 
-		var view = new UiView(request.Surface, WeatherDetailsView.Build(state, icons));
+		var timeFormat = await TimeFormatResolver.ResolveAsync(_scopeFactory).ConfigureAwait(false);
+
+		var view = new UiView(request.Surface, WeatherDetailsView.Build(state, icons, timeFormat.Format));
 
 		// The widget's session, reused rather than duplicated: a dialog needs exactly the same thing from
 		// it - refresh the state when this station changes, and relay the view's patches and faults.

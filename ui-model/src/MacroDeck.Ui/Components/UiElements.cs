@@ -1196,6 +1196,16 @@ public sealed record UiList : UiComponentContainer
 	/// children.</summary>
 	public UiValue<string> Background { get; init; }
 
+	/// <summary>The scroll axis - see <see cref="UiComponentDirections" />. Absent means
+	/// <see cref="UiComponentDirections.Vertical" />.
+	/// <para>
+	/// <see cref="UiComponentDirections.Horizontal" /> needs <c>ui.list</c> component version 2: a version 1
+	/// reader ignores the value and scrolls vertically. A producer that sets it therefore also sets
+	/// <see cref="Dsl.UiElement.RequiredComponentVersion" /> to 2 and supplies a
+	/// <see cref="Dsl.UiElement.Fallback" />.
+	/// </para></summary>
+	public UiValue<string> Direction { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiComponents.List;
 
@@ -1209,5 +1219,6 @@ public sealed record UiList : UiComponentContainer
 		properties.Set(UiComponentProperties.Gap, Gap.Value);
 		properties.Set(UiComponentProperties.Padding, Padding.Value);
 		properties.Set(UiComponentProperties.Background, Background);
+		properties.Set(UiComponentProperties.Direction, Direction);
 	}
 }

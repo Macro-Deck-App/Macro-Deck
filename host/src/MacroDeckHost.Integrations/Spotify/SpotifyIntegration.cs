@@ -9,6 +9,7 @@ using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.MusicPlayer.Actions;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Localization;
 using Serilog;
 using SpotifyAPI.Web;
@@ -54,6 +55,7 @@ public sealed class SpotifyIntegration
 	private readonly TimeSpan _persisterDrainTimeout;
 	private readonly TimeSpan? _persistenceBudget;
 	private readonly TimeProvider? _timeProvider;
+	private readonly Func<Task<TimeOfDayFormat>>? _timeOfDayFormat;
 
 	private IIntegrationContext? _context;
 	private SpotifyTokenPersister? _tokenPersister;
@@ -69,6 +71,10 @@ public sealed class SpotifyIntegration
 
 	public IReadOnlyList<IActionDefinition> Actions { get; }
 
+	// Built-in integrations are created by Activator.CreateInstance and never see the DI container,
+	// so the host installs its time-of-day resolution here once it is built.
+	internal static Func<Task<TimeOfDayFormat>>? HostTimeOfDayFormat { get; set; }
+
 	public SpotifyIntegration()
 		: this(new SpotifyOAuthClient())
 	{
@@ -80,10 +86,12 @@ public sealed class SpotifyIntegration
 		TimeSpan? unreachableIssueThreshold = null,
 		TimeSpan? persisterDrainTimeout = null,
 		TimeSpan? persistenceBudget = null,
-		TimeProvider? timeProvider = null)
+		TimeProvider? timeProvider = null,
+		Func<Task<TimeOfDayFormat>>? timeOfDayFormat = null)
 	{
 		_oauth = oauth;
 		_timeProvider = timeProvider;
+		_timeOfDayFormat = timeOfDayFormat;
 		_transport = transport ?? SpotifyHttpClients.Api;
 		_unreachableIssueThreshold = unreachableIssueThreshold ?? _defaultUnreachableIssueThreshold;
 		_persisterDrainTimeout = persisterDrainTimeout ?? _defaultPersisterDrainTimeout;
@@ -488,8 +496,10 @@ public sealed class SpotifyIntegration
 		if (ApiLimit(instances) is { } limit)
 		{
 			var quota = limit.Kind == SpotifyApiLimitKind.Quota;
-			var pausedAt = limit.Since.ToLocalTime().ToString("HH:mm", CultureInfo.CurrentCulture);
+			var format = await TimeOfDayFormatAsync();
+			var pausedAt = LocalTimeOfDay(format, limit.Since);
 			var resumesAt = limit.PausedUntil.ToLocalTime();
+			var resumesTime = LocalTimeOfDay(format, limit.PausedUntil);
 			var sameDay = resumesAt.Date == DateTimeOffset.Now.Date;
 			return SingleIssue(new IntegrationIssue
 			{
@@ -500,16 +510,16 @@ public sealed class SpotifyIntegration
 				Description = quota
 					? (sameDay
 						? AppStrings.Integrations.Spotify.Issues.QuotaReachedDescriptionSameDay(pausedAt: pausedAt,
-							resumesAt: resumesAt.ToString("HH:mm", CultureInfo.CurrentCulture))
+							resumesAt: resumesTime)
 						: AppStrings.Integrations.Spotify.Issues.QuotaReachedDescriptionOtherDay(pausedAt: pausedAt,
 							resumesDate: resumesAt.ToString("d MMMM", CultureInfo.CurrentCulture),
-							resumesTime: resumesAt.ToString("HH:mm", CultureInfo.CurrentCulture)))
+							resumesTime: resumesTime))
 					: (sameDay
 						? AppStrings.Integrations.Spotify.Issues.RateLimitedDescriptionSameDay(pausedAt: pausedAt,
-							resumesAt: resumesAt.ToString("HH:mm", CultureInfo.CurrentCulture))
+							resumesAt: resumesTime)
 						: AppStrings.Integrations.Spotify.Issues.RateLimitedDescriptionOtherDay(pausedAt: pausedAt,
 							resumesDate: resumesAt.ToString("d MMMM", CultureInfo.CurrentCulture),
-							resumesTime: resumesAt.ToString("HH:mm", CultureInfo.CurrentCulture))),
+							resumesTime: resumesTime)),
 				Severity = IntegrationIssueSeverity.Warning,
 				ActionLabel = null
 			});
@@ -522,7 +532,7 @@ public sealed class SpotifyIntegration
 				Id = UnreachableIssueId,
 				Title = AppStrings.Integrations.Spotify.Issues.NotRespondingTitle(),
 				Description = AppStrings.Integrations.Spotify.Issues.NotRespondingDescription(
-					since: since.ToLocalTime().ToString("HH:mm", CultureInfo.CurrentCulture)),
+					since: LocalTimeOfDay(await TimeOfDayFormatAsync(), since)),
 				Severity = IntegrationIssueSeverity.Info,
 				ActionLabel = null
 			});
@@ -533,6 +543,13 @@ public sealed class SpotifyIntegration
 
 	private static List<IntegrationIssue> SingleIssue(IntegrationIssue primary)
 		=> [primary];
+
+	private Task<TimeOfDayFormat> TimeOfDayFormatAsync()
+		=> (_timeOfDayFormat ?? HostTimeOfDayFormat)?.Invoke() ??
+			Task.FromResult(new TimeOfDayFormat(CultureInfo.CurrentCulture, HourCycles.H23));
+
+	private static string LocalTimeOfDay(TimeOfDayFormat format, DateTimeOffset instant)
+		=> format.Format(TimeOnly.FromDateTime(instant.ToLocalTime().DateTime));
 
 	// The longest-running episode across instances, so a second account joining a limit that is already
 	// open cannot restart the issue's timestamp (and with it its JSON, and with it a re-send).

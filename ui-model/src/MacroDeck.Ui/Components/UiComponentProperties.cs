@@ -19,8 +19,8 @@ public static class UiComponentProperties
 	/// siblings. Mutually exclusive with <see cref="MainSize" /> in practice, though not enforced.</summary>
 	public const string Fill = "fill";
 
-	/// <summary>A stack's layout axis, or the axis a slider's level travels along - see
-	/// <see cref="UiComponentDirections" />. The two carry opposite defaults when absent, which each type
+	/// <summary>A stack's layout axis, a list's scroll axis, or the axis a slider's level travels along - see
+	/// <see cref="UiComponentDirections" />. The defaults when absent differ by type, which each type
 	/// states.</summary>
 	public const string Direction = "direction";
 

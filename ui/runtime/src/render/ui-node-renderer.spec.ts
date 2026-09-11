@@ -839,6 +839,49 @@ describe('widget node renderer', () => {
       expect(widthOfFirstRow()).toBe('185px');
     });
 
+    it('lays a horizontal list out in a row that scrolls along x', () => {
+      const columns = [0, 1, 2].map(index => ({ id: `col-${index}`, type: 'ui.stack', properties: {} }) as UiNode);
+      mount(node2('ui.list', { direction: 'horizontal' }, columns), 200, 100, testHost({}));
+
+      const element = surface();
+      expect(element.classList.contains('widget-list-horizontal')).toBeTrue();
+      const first = element.children[0] as HTMLElement;
+      expect(first.style.height).toBe('100px');
+      expect(first.style.width).toBe('');
+    });
+
+    it('keeps a list without a direction vertical', () => {
+      list(3);
+
+      const element = surface();
+      expect(element.classList.contains('widget-list-horizontal')).toBeFalse();
+      expect((element.children[0] as HTMLElement).style.width).toBe('200px');
+    });
+
+    it('reports how far along a horizontal list the user has come', () => {
+      const node = (count: number) => node2('ui.list', { direction: 'horizontal', events: ['reveal'] }, rows(count));
+      const handle = mount(node(20), 200, 100, testHost({
+        emit: (_, event, payload) => emitted.push({ event, payload }),
+      }));
+      const element = surface();
+      Object.defineProperty(element, 'clientWidth', { value: 60, configurable: true });
+      Object.defineProperty(element, 'clientHeight', { value: 100, configurable: true });
+      Object.defineProperty(element, 'scrollLeft', { value: 0, configurable: true, writable: true });
+      for (let index = 0; index < element.children.length; index++) {
+        Object.defineProperty(element.children[index], 'offsetLeft', { value: index * 20, configurable: true });
+        Object.defineProperty(element.children[index], 'offsetTop', { value: 0, configurable: true });
+      }
+      jasmine.clock().tick(PAST_THROTTLE_MS);
+      handle.update(node(20), { width: 200, height: 100 }, null);
+      emitted.length = 0;
+      jasmine.clock().tick(PAST_THROTTLE_MS);
+
+      (element as unknown as { scrollLeft: number }).scrollLeft = 100;
+      element.dispatchEvent(new Event('scroll'));
+
+      expect(emitted).toEqual([{ event: 'reveal', payload: 8 }]);
+    });
+
     it('asks again once the user goes further than they have been', () => {
       const handle = list(20, { events: ['reveal'] });
       const element = layOut(3);
@@ -1766,5 +1809,48 @@ describe('widget text inside the box its stack has', () => {
         containerB.remove();
       });
     });
+  });
+});
+
+describe('macrodeck.dynamic-text time with a host hour cycle', () => {
+  let container: HTMLElement;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => container.remove());
+
+  function shown(format: string, overrides: Partial<UiRenderHost>): string {
+    const tree = {
+      id: 'clock', type: 'macrodeck.dynamic-text', properties: { format, value: { $time: { zone: 'UTC' } } },
+    } as UiNode;
+    renderUiNode(container, tree, { width: 100, height: 100 }, null, 120, testHost(overrides));
+    return (container.querySelector('.widget-dynamic-text') as HTMLElement).textContent ?? '';
+  }
+
+  it('writes a 24-hour time in the language\'s own padding when the host prefers h23', () => {
+    expect(shown('time', { culture: () => 'es', hourCycle: () => 'h23' })).toBe('3:04');
+  });
+
+  it('adds a day period when the host prefers h12, even in a 24-hour language', () => {
+    const german = shown('time', { culture: () => 'de', hourCycle: () => 'h12' });
+
+    expect(german).toContain('3:04');
+    expect(german.length).toBeGreaterThan('3:04'.length);
+  });
+
+  it('renders exactly as before when the host has no preference', () => {
+    const withoutMember = shown('time', {});
+    container.innerHTML = '';
+    const undecided = shown('time', { hourCycle: () => undefined });
+
+    expect(withoutMember).toBe('3:04');
+    expect(undecided).toBe(withoutMember);
+  });
+
+  it('keeps a pinned 24-hour face when the host prefers h12', () => {
+    expect(shown('time-24h', { hourCycle: () => 'h12' })).toBe('03:04');
   });
 });

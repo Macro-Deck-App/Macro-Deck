@@ -1,3 +1,5 @@
+using MacroDeckHost.Application.Services;
+
 namespace MacroDeckHost.Application.Ui.Transport.Messages.Localization;
 
 public class GetLocalizationResponse
@@ -15,4 +17,8 @@ public class GetLocalizationResponse
 	/// A client presents this as its own "System" entry instead of the culture it resolves to.
 	/// </summary>
 	public bool FollowSystem { get; set; }
+
+	public string TimeFormat { get; set; } = AppPreferenceService.TimeFormatSystem;
+
+	public string HourCycle { get; set; } = HourCycles.H23;
 }

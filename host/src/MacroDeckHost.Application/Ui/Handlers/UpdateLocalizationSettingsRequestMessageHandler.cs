@@ -28,10 +28,12 @@ public class UpdateLocalizationSettingsRequestMessageHandler
 		UpdateLocalizationSettingsRequest request,
 		CancellationToken cancellationToken)
 	{
+		var changesLanguage = request.FollowSystem || request.Culture is not null;
+
 		// Validated here, before anything is written: a culture that cannot be used would look saved and
 		// then fall back to the default on the next resolve, which is exactly the surprise the setting is
 		// supposed to avoid.
-		if (!request.FollowSystem && !LocalizationCultureValidation.IsValid(request.Culture))
+		if (changesLanguage && !request.FollowSystem && !LocalizationCultureValidation.IsValid(request.Culture))
 		{
 			var current = await _preferences.GetLocalization();
 			return new UpdateLocalizationSettingsResponse
@@ -40,25 +42,52 @@ public class UpdateLocalizationSettingsRequestMessageHandler
 				Error = $"'{request.Culture}' is not a recognized culture.",
 				Culture = current.Culture,
 				FallbackCulture = LocalizationDefaults.Culture,
-				FollowSystem = current.FollowSystem
+				FollowSystem = current.FollowSystem,
+				TimeFormat = await _preferences.GetTimeFormat()
 			};
 		}
 
-		var settings = await _preferences.SetLocalization(request.FollowSystem ? null : request.Culture);
+		if (request.TimeFormat is not null
+			and not (AppPreferenceService.TimeFormatSystem
+			or AppPreferenceService.TimeFormat12h
+			or AppPreferenceService.TimeFormat24h))
+		{
+			var current = await _preferences.GetLocalization();
+			return new UpdateLocalizationSettingsResponse
+			{
+				Success = false,
+				Error = $"'{request.TimeFormat}' is not a recognized time format.",
+				Culture = current.Culture,
+				FallbackCulture = LocalizationDefaults.Culture,
+				FollowSystem = current.FollowSystem,
+				TimeFormat = await _preferences.GetTimeFormat()
+			};
+		}
+
+		var settings = changesLanguage
+			? await _preferences.SetLocalization(request.FollowSystem ? null : request.Culture)
+			: await _preferences.GetLocalization();
+		var timeFormat = request.TimeFormat is null
+			? await _preferences.GetTimeFormat()
+			: await _preferences.SetTimeFormat(request.TimeFormat);
 
 		await _mediator.Publish(
 				new LocalizationCultureChangedNotification(settings.Culture, LocalizationDefaults.Culture),
 				cancellationToken)
 			.ConfigureAwait(false);
 
-		await _registrar.RefreshLocalizationCatalogsAsync(cancellationToken).ConfigureAwait(false);
+		if (changesLanguage)
+		{
+			await _registrar.RefreshLocalizationCatalogsAsync(cancellationToken).ConfigureAwait(false);
+		}
 
 		return new UpdateLocalizationSettingsResponse
 		{
 			Success = true,
 			Culture = settings.Culture,
 			FallbackCulture = LocalizationDefaults.Culture,
-			FollowSystem = settings.FollowSystem
+			FollowSystem = settings.FollowSystem,
+			TimeFormat = timeFormat
 		};
 	}
 }

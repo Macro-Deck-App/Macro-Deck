@@ -146,4 +146,8 @@ public interface IAppPreferenceService
 	/// choice so the operating system's language applies again.
 	/// </summary>
 	Task<LocalizationSettings> SetLocalization(string? culture);
+
+	Task<string> GetTimeFormat();
+
+	Task<string> SetTimeFormat(string? timeFormat);
 }

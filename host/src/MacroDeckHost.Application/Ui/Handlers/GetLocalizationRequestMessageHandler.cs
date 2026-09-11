@@ -11,14 +11,17 @@ public class GetLocalizationRequestMessageHandler
 	private readonly IAppPreferenceService _preferences;
 	private readonly ILocalizationCatalogRegistry _catalogs;
 	private readonly ILocalizationResolver _resolver;
+	private readonly TimeFormatResolver _timeFormat;
 
 	public GetLocalizationRequestMessageHandler(IAppPreferenceService preferences,
 		ILocalizationCatalogRegistry catalogs,
-		ILocalizationResolver resolver)
+		ILocalizationResolver resolver,
+		TimeFormatResolver timeFormat)
 	{
 		_preferences = preferences;
 		_catalogs = catalogs;
 		_resolver = resolver;
+		_timeFormat = timeFormat;
 	}
 
 	public async ValueTask<GetLocalizationResponse> Handle(
@@ -69,7 +72,9 @@ public class GetLocalizationRequestMessageHandler
 			FallbackCulture = LocalizationDefaults.Culture,
 			Translations = translations,
 			AvailableCultures = [.. availableCultures],
-			FollowSystem = settings.FollowSystem
+			FollowSystem = settings.FollowSystem,
+			TimeFormat = await _preferences.GetTimeFormat(),
+			HourCycle = await _timeFormat.ResolveHourCycle()
 		};
 	}
 }

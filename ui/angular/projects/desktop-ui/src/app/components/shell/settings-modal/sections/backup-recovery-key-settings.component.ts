@@ -40,8 +40,9 @@ export class BackupRecoveryKeySettingsComponent {
     if (!state.exportedAt) {
       return this.localization.translateKey(AppStrings.Settings.Backups.RecoveryKeyNeverShown);
     }
+    const { locale, hourCycle } = this.localization.timeLocale();
     return this.localization.translateKey(AppStrings.Settings.Backups.RecoveryKeyLastShown, {
-      when: new Date(state.exportedAt).toLocaleString(),
+      when: new Date(state.exportedAt).toLocaleString(locale, { hourCycle }),
     });
   }
 

@@ -23,9 +23,15 @@ guessing which one a tree meant.
 | `gap` | The gap between children, a length | No gap |
 | `padding` | Inner padding on every edge, a length | No padding |
 | `background` | The list's own fill, as `#rrggbb` | The list paints nothing behind its children |
+| `direction` | The scroll axis, `vertical` or `horizontal` | `vertical` |
 
 `background` follows the same literal-colour rule every other container fill does - see
 [Colours and text](/sdk/ui/concepts/theming/).
+
+**`horizontal` needs `requiredComponentVersion: 2` and a fallback.** Negotiation catches an unknown node
+*type*, never an unknown property *value*: a reader that predates version 2 ignores `direction` and
+scrolls vertically, stacking a row of columns into one tall column. Ask for version 2 and carry a
+`ui.stack` as the node's `fallback`, and such a reader draws that instead.
 
 ## Supported children
 
@@ -54,8 +60,9 @@ thing a reader can state without agreeing with the producer on anything.
 
 ## Layout behaviour
 
-A list's main axis is unbounded by definition: children take their natural extent along it, and
-`mainSize`/`fill` are ignored on that axis. On its own parent's main axis, a list follows the ordinary
+A list's main axis - its `direction`, so `y` for a vertical list and `x` for a horizontal one - is unbounded
+by definition: children take their natural extent along it, and `mainSize`/`fill` are ignored on that
+axis. Across it, each child takes the list's inner extent. On its own parent's main axis, a list follows the ordinary
 container rule - `mainSize` or `fill` if declared, otherwise its content extent. See
 [Sizing](/sdk/ui/concepts/sizing/).
 

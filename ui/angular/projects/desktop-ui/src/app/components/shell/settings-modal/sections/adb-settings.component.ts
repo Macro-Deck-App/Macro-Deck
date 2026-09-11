@@ -97,7 +97,9 @@ export class AdbSettingsComponent {
       return null;
     }
     const date = new Date(at);
-    return Number.isNaN(date.getTime()) ? null : date.toLocaleString();
+    if (Number.isNaN(date.getTime())) return null;
+    const { locale, hourCycle } = this.localization.timeLocale();
+    return date.toLocaleString(locale, { hourCycle });
   });
 
   constructor() {

@@ -123,4 +123,12 @@ describe('LanguageSettingsComponent', () => {
 
     expect(api.updateLocalizationSettings).toHaveBeenCalledWith({ followSystem: true });
   });
+
+  it('changes only the time format, leaving the language as it is', async () => {
+    fixture = await create();
+
+    await fixture.componentInstance.selectTimeFormat('12h');
+
+    expect(api.updateLocalizationSettings).toHaveBeenCalledOnceWith({ timeFormat: '12h' });
+  });
 });

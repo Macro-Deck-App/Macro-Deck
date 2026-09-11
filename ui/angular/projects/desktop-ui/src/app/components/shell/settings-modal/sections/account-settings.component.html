@@ -72,7 +72,7 @@
                 @if (offlineSince(); as since) {
                   <span class="account-settings__offline">
                     <span class="icon icon-alert-triangle icon-xs" aria-hidden="true"></span>
-                    {{ 'macrodeck.app:Settings.Account.OfflineSince' | translate: { since: (since | date: 'medium') } }}
+                    {{ 'macrodeck.app:Settings.Account.OfflineSince' | translate: { since: dateTimeLabel(since) } }}
                   </span>
                 }
               </div>

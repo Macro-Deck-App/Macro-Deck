@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { AppStrings } from '@macro-deck/runtime';
 import { ButtonComponent, ButtonGroupComponent, ErrorBannerComponent, LocalizationService, SettingsSectionComponent, ToastService, TranslatePipe } from '@shared';
@@ -20,7 +19,6 @@ const SIGN_IN_FAILURE_KEYS = {
   selector: 'app-account-settings',
   standalone: true,
   imports: [
-    DatePipe,
     AvatarComponent,
     ButtonComponent,
     ButtonGroupComponent,
@@ -54,6 +52,11 @@ export class AccountSettingsComponent implements OnInit {
   protected readonly prompt = this.connect.signInPrompt;
 
   private readonly now = signal(Date.now());
+
+  protected dateTimeLabel(value: string | number | Date): string {
+    const { locale, hourCycle } = this.localization.timeLocale();
+    return new Date(value).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'medium', hourCycle });
+  }
 
   protected readonly remaining = computed(() => {
     const pending = this.prompt();

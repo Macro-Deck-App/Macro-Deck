@@ -7,6 +7,11 @@ namespace MacroDeckHost.Tests.UnitTests.Ui;
 
 public class GetLocalizationRequestMessageHandlerTests
 {
+	private sealed class NoSystemHourCycle : ISystemHourCycleReader
+	{
+		public string? Read() => null;
+	}
+
 	private sealed class FakeLocalizationPreferenceService : IAppPreferenceService
 	{
 		public string Culture { get; set; } = "en";
@@ -14,6 +19,10 @@ public class GetLocalizationRequestMessageHandlerTests
 		public Task<LocalizationSettings> GetLocalization() => Task.FromResult(new LocalizationSettings(Culture));
 
 		public Task<LocalizationSettings> SetLocalization(string? culture) => throw new NotSupportedException();
+
+		public Task<string> GetTimeFormat() => Task.FromResult(AppPreferenceService.TimeFormatSystem);
+
+		public Task<string> SetTimeFormat(string? timeFormat) => throw new NotSupportedException();
 
 		public Task<AppearanceSettings> GetAppearance() => throw new NotSupportedException();
 
@@ -101,7 +110,8 @@ public class GetLocalizationRequestMessageHandlerTests
 
 		var handler = new GetLocalizationRequestMessageHandler(new FakeLocalizationPreferenceService(),
 			catalogs,
-			new LocalizationResolver(catalogs));
+			new LocalizationResolver(catalogs),
+			new TimeFormatResolver(new FakeLocalizationPreferenceService(), new NoSystemHourCycle()));
 
 		var response = await handler.Handle(new GetLocalizationRequest(), CancellationToken.None);
 
@@ -132,7 +142,8 @@ public class GetLocalizationRequestMessageHandlerTests
 
 		var handler = new GetLocalizationRequestMessageHandler(new FakeLocalizationPreferenceService(),
 			catalogs,
-			new LocalizationResolver(catalogs));
+			new LocalizationResolver(catalogs),
+			new TimeFormatResolver(new FakeLocalizationPreferenceService(), new NoSystemHourCycle()));
 
 		var response = await handler.Handle(new GetLocalizationRequest(), CancellationToken.None);
 
