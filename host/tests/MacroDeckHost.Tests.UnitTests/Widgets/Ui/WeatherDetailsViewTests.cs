@@ -95,7 +95,9 @@ public class WeatherDetailsViewTests
 	public void Sunrise_and_sunset_sit_in_their_own_row_below_the_other_measurements()
 	{
 		var host = Render(Sample());
-		UiTestNode Measurement(string key) => Walk(host.Root).Single(node => node.Id.EndsWith($".{key}", StringComparison.Ordinal) &&
+
+		UiTestNode Measurement(string key) => Walk(host.Root).Single(node =>
+			node.Id.EndsWith($".{key}", StringComparison.Ordinal) &&
 			node.Parent?.Parent?.Id.EndsWith(".measurements", StringComparison.Ordinal) == true);
 
 		var wind = Measurement("wind");
@@ -136,7 +138,8 @@ public class WeatherDetailsViewTests
 	public void The_hourly_strip_does_not_negotiate_for_a_reader_that_only_knows_list_version_1()
 	{
 		var strip = HourlyStrip(Render(WithHours(10)));
-		var node = new UiNode { Id = strip.Id, Type = strip.Type, RequiredComponentVersion = strip.RequiredComponentVersion };
+		var node = new UiNode
+			{ Id = strip.Id, Type = strip.Type, RequiredComponentVersion = strip.RequiredComponentVersion };
 
 		UiNegotiationResult Negotiate(int maximum) => UiCapabilityNegotiator.NegotiateComponent(node,
 			new UiCapabilities

@@ -11,6 +11,7 @@ public class GetLocalizationRequestMessageHandlerTests
 	{
 		public string? Read() => null;
 	}
+
 	private sealed class FakeLocalizationPreferenceService : IAppPreferenceService
 	{
 		public string Culture { get; set; } = "en";

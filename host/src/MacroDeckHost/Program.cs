@@ -245,7 +245,8 @@ public static class Program
 			await SeedLogLevelAsync(host, logLevelState);
 
 			var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
-			Integrations.Spotify.SpotifyIntegration.HostTimeOfDayFormat = () => TimeFormatResolver.ResolveAsync(scopeFactory);
+			Integrations.Spotify.SpotifyIntegration.HostTimeOfDayFormat
+				= () => TimeFormatResolver.ResolveAsync(scopeFactory);
 
 			// The shell tells a requested restart from a crash by the exit code alone, so it has to
 			// survive the graceful shutdown RunAsync performs.

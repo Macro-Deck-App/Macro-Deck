@@ -187,7 +187,9 @@ internal static class WeatherDetailsView
 				[
 					Measurement("sunrise",
 						AppStrings.Integrations.Weather.Details.Sunrise(),
-						() => LocalizedText.FromLiteral(state.Value.Sunrise is { } sunrise ? displayTime(sunrise) : "-")),
+						() => LocalizedText.FromLiteral(state.Value.Sunrise is { } sunrise
+							? displayTime(sunrise)
+							: "-")),
 					Measurement("sunset",
 						AppStrings.Integrations.Weather.Details.Sunset(),
 						() => LocalizedText.FromLiteral(state.Value.Sunset is { } sunset ? displayTime(sunset) : "-")),

@@ -47,7 +47,8 @@ public class UpdateLocalizationSettingsRequestMessageHandler
 			};
 		}
 
-		if (request.TimeFormat is not null and not (AppPreferenceService.TimeFormatSystem
+		if (request.TimeFormat is not null
+			and not (AppPreferenceService.TimeFormatSystem
 			or AppPreferenceService.TimeFormat12h
 			or AppPreferenceService.TimeFormat24h))
 		{

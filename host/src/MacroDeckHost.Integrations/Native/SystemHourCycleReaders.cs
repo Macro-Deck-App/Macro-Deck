@@ -165,8 +165,8 @@ internal sealed class LinuxHourCycleReader : ISystemHourCycleReader
 
 		try
 		{
-			return HourCycles.FromPattern(
-				CultureInfo.GetCultureInfo(name, predefinedOnly: true).DateTimeFormat.ShortTimePattern);
+			return HourCycles.FromPattern(CultureInfo.GetCultureInfo(name, predefinedOnly: true).DateTimeFormat
+				.ShortTimePattern);
 		}
 		catch (CultureNotFoundException)
 		{
