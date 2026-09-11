@@ -519,6 +519,15 @@ describe('shared-ui-widget-node', () => {
     });
   });
 
+const limitedWidths = new WeakMap<Element, () => number>();
+const realGetComputedStyle = window.getComputedStyle;
+let computedWidthLimited = false;
+
+function restoreComputedWidth(): void {
+  window.getComputedStyle = realGetComputedStyle;
+  computedWidthLimited = false;
+}
+
 function limitAvailableWidth(element: HTMLElement, availableWidth: () => number): void {
   Object.defineProperty(element, 'clientWidth', { configurable: true, get: availableWidth });
 
@@ -527,6 +536,23 @@ function limitAvailableWidth(element: HTMLElement, availableWidth: () => number)
     const box = measured();
     return Object.assign(box.toJSON() as DOMRect, { width: Math.min(box.width, availableWidth()) });
   };
+
+  limitedWidths.set(element, availableWidth);
+  if (computedWidthLimited) return;
+  computedWidthLimited = true;
+  const real = realGetComputedStyle.bind(window);
+  window.getComputedStyle = ((target: Element, pseudo?: string | null) => {
+    const style = real(target, pseudo);
+    const limit = limitedWidths.get(target);
+    if (!limit) return style;
+    return new Proxy(style, {
+      get(source, key) {
+        if (key === 'width') return `${Math.min(parseFloat(source.width), limit())}px`;
+        const value = Reflect.get(source, key, source);
+        return typeof value === 'function' ? value.bind(source) : value;
+      },
+    });
+  }) as typeof window.getComputedStyle;
 }
 
 function isClipped(element: HTMLElement): boolean {
@@ -553,6 +579,8 @@ function naturalWidthOf(element: HTMLElement): number {
 }
 
   describe('#804 guard - minSize re-measures when only the available width changes', () => {
+    afterEach(() => restoreComputedWidth());
+
     it('restores the declared size after the surface is widened without its smaller side changing', async () => {
       const root: UiNode = {
         id: 'root',
@@ -596,6 +624,8 @@ function naturalWidthOf(element: HTMLElement): number {
   });
 
   describe('#761 guard - minSize re-measures on a localization catalog change', () => {
+    afterEach(() => restoreComputedWidth());
+
     // Wrapped because measuring a text run resizes it, which schedules another observation:
     // Chrome reports that as the benign `ResizeObserver loop completed with undelivered
     // notifications` on the window, and karma fails a spec on any window error. The assertion

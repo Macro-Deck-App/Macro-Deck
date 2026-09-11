@@ -13,7 +13,7 @@ const TEXT_FIT_STEPS = 3;
 export interface TextFit {
   declare(): void;
 
-  measure(scale: number): number;
+  measure(): number;
 
   apply(available: number): number | undefined;
 }
@@ -44,27 +44,12 @@ function elementWidth(element: Element): number {
   return (element as HTMLElement).clientWidth;
 }
 
-// Taken from an ancestor, not the node itself: dividing a node's own painted width by its own layout
-// width just gives that layout width back. A tile is laid out at the widget basis and scaled by a
-// transform, so a painted rectangle and a laid-out box are in different units - above scale 1 the
-// fit believed it had more room than it has and the browser ellipsized a clock to "07:40...".
-function contentScale(element: HTMLElement): number {
-  for (let at = element.parentElement; at !== null; at = at.parentElement) {
-    const layout = at.offsetWidth;
-    if (layout <= 0) continue;
-
-    const painted = at.getBoundingClientRect().width;
-    if (painted > 0) return painted / layout;
-  }
-
-  return 1;
-}
-
-// The border box rather than the client width: a client width is a whole number of pixels and the text
-// under it is not, so a node would read a hair narrower than its own text and shrink again on every
-// repaint - a music player's elapsed time stepping down and back up once a second.
-function availableTextWidth(element: HTMLElement, scale: number): number {
-  return element.getBoundingClientRect().width / scale;
+// The computed layout width, never a painted rect or a client width: it stays fractional, and no ancestor
+// transform (a tile's scale, a rotated or zoomed ui.transform) changes the room the text actually has.
+function availableTextWidth(element: HTMLElement): number {
+  const view = element.ownerDocument.defaultView;
+  const width = view === null ? Number.NaN : parseFloat(view.getComputedStyle(element).width);
+  return Number.isFinite(width) ? width : 0;
 }
 
 // Deliberately not scrollWidth: an element that clips and ellipsizes reports a scroll width equal to
@@ -125,8 +110,8 @@ export function textFit(
       setFontSize(element, px(declared));
     },
 
-    measure(scale: number): number {
-      return availableTextWidth(element, scale);
+    measure(): number {
+      return availableTextWidth(element);
     },
 
     apply(available: number): number | undefined {
@@ -160,7 +145,6 @@ export function textFit(
 function runSettle(fits: MountedFit[]): void {
   if (fits.length === 0) return;
 
-  const scale = contentScale(fits[0].element as HTMLElement);
   let previous: Array<number | undefined> = [];
   for (let index = 0; index < fits.length; index++) previous.push(fits[index].lastSize);
 
@@ -168,7 +152,7 @@ function runSettle(fits: MountedFit[]): void {
     for (let index = 0; index < fits.length; index++) fits[index].fit.declare();
 
     const widths: number[] = [];
-    for (let index = 0; index < fits.length; index++) widths.push(fits[index].fit.measure(scale));
+    for (let index = 0; index < fits.length; index++) widths.push(fits[index].fit.measure());
 
     const sizes: Array<number | undefined> = [];
     for (let index = 0; index < fits.length; index++) sizes.push(fits[index].fit.apply(widths[index]));

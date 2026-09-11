@@ -958,6 +958,71 @@ public sealed record UiLayer : UiComponentContainer
 }
 
 /// <summary>
+/// A container that draws its children like a <see cref="UiLayer" />, every child across the whole content
+/// box, and then scales, rotates and shifts all of them together as one picture. A gauge needle or a
+/// compass rose is declared once and turned by patching <see cref="Rotation" /> alone.
+///
+/// <para>
+/// The order is fixed: <see cref="Zoom" />, then <see cref="Rotation" />, both about the
+/// <see cref="OriginX" />/<see cref="OriginY" /> pivot, then <see cref="OffsetX" />/<see cref="OffsetY" />
+/// in the parent's unrotated axes. Nested transforms compose.
+/// </para>
+///
+/// <para>
+/// The transform is visual only: the node's own box, its size on the parent's main axis and its siblings
+/// are laid out as if it were absent, and it clips nothing itself - an ancestor that clips, such as a tile
+/// or a <see cref="UiButton" />, still does. Presses hit the drawn shape. A <see cref="UiSlider" /> under a
+/// non-zero <see cref="Rotation" /> has no defined pointer mapping.
+/// </para>
+///
+/// <para>
+/// A reader that does not know this type draws <see cref="UiElement.Fallback" />, so a gauge should carry
+/// one that still shows its reading, such as the value as text.
+/// </para>
+/// </summary>
+public sealed record UiTransform : UiComponentContainer
+{
+	/// <inheritdoc />
+	public override string Type => UiComponents.Transform;
+
+	/// <summary>The turn in degrees, clockwise, about the pivot. Absent means <c>0</c>.</summary>
+	public UiValue<double> Rotation { get; init; }
+
+	/// <summary>Where the pivot sits across the box, as a fraction of the element's own width. <c>0.5</c> is
+	/// the centre, and a value outside <c>0..1</c> puts the pivot outside the box. Absent means
+	/// <c>0.5</c>.</summary>
+	public UiValue<double> OriginX { get; init; }
+
+	/// <summary>The same down the element's own height. Absent means <c>0.5</c>.</summary>
+	public UiValue<double> OriginY { get; init; }
+
+	/// <summary>A multiplier scaling the content about the pivot. Absent, or not greater than <c>0</c>,
+	/// means <c>1</c>.</summary>
+	public UiValue<double> Zoom { get; init; }
+
+	/// <summary>The content shifted across, as a fraction of the element's own width, applied after
+	/// <see cref="Zoom" /> and <see cref="Rotation" />. Absent means <c>0</c>.</summary>
+	public UiValue<double> OffsetX { get; init; }
+
+	/// <summary>The same down the element's own height. Absent means <c>0</c>.</summary>
+	public UiValue<double> OffsetY { get; init; }
+
+	/// <inheritdoc />
+	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
+	{
+		ArgumentNullException.ThrowIfNull(properties);
+
+		base.DeclareProperties(properties);
+		properties.Set(UiComponentProperties.Rotation, Rotation);
+		properties.Set(UiComponentProperties.OriginX, OriginX);
+		properties.Set(UiComponentProperties.OriginY, OriginY);
+		properties.Set(UiComponentProperties.Zoom, Zoom);
+		properties.Set(UiComponentProperties.OffsetX, OffsetX);
+		properties.Set(UiComponentProperties.OffsetY, OffsetY);
+	}
+}
+
+/// <summary>
 /// A series drawn as a line across the element with the area beneath it filled.
 ///
 /// <para>

@@ -9,6 +9,7 @@ import { uiSliderComponent } from './ui-slider.component';
 import { uiStackComponent } from './ui-stack.component';
 import { uiTextComponent } from './ui-text.component';
 import { uiTextFieldComponent } from './ui-text-field.component';
+import { uiTransformComponent } from './ui-transform.component';
 
 export const UI_CORE_COMPONENTS: readonly UiComponentDefinition[] = [
   uiStackComponent,
@@ -21,4 +22,5 @@ export const UI_CORE_COMPONENTS: readonly UiComponentDefinition[] = [
   uiChartComponent,
   uiTextFieldComponent,
   uiListComponent,
+  uiTransformComponent,
 ];

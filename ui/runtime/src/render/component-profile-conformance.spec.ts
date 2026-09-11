@@ -73,6 +73,7 @@ const ASSERTED_KEYS = new Set([
   'secondsFontSize', 'secondsRole',
   'handColor', 'tickColor',
   'renders',
+  'transform', 'transformOrigin',
 ]);
 
 const ROLE_COLOR: Record<string, string> = {
@@ -847,6 +848,39 @@ describe('component-profile conformance fixtures: clock formats tree', () => {
   }
 });
 
+describe('component-profile conformance fixtures: gauge tree', () => {
+  const tree = loadTree('conformance-gauge-tree.json');
+  const layout = loadJson<LayoutFixture>('conformance-gauge-layout.json');
+
+  for (const testCase of layout.cases) {
+    describe(`basis ${testCase.basis}`, () => {
+      beforeEach(() => mount(tree, testCase.tile, testCase.basis));
+
+      for (const [id, spec] of Object.entries(testCase.nodes)) {
+        it(`resolves ${id}`, () => {
+          const element = byId(id);
+          for (const prefix of ['', '-webkit-']) {
+            expect(element.style.getPropertyValue(`${prefix}transform`)).withContext(`${id} ${prefix}transform`)
+              .toBe((spec.transform as string | null) ?? '');
+            expect(element.style.getPropertyValue(`${prefix}transform-origin`))
+              .withContext(`${id} ${prefix}transform-origin`).toBe((spec.transformOrigin as string | null) ?? '');
+          }
+
+          const box = spec.childBox as { width: number; height: number };
+          const children = Array.from(element.children).filter(child => child.hasAttribute('data-node-id'));
+          expect(children.length).withContext(`${id} children`).toBeGreaterThan(0);
+          for (const child of children as HTMLElement[]) {
+            expect(num(child.style.width)).withContext(`${id} child width`).toBeCloseTo(box.width, 2);
+            if (child.style.height !== '') {
+              expect(num(child.style.height)).withContext(`${id} child height`).toBeCloseTo(box.height, 2);
+            }
+          }
+        });
+      }
+    });
+  }
+});
+
 describe('component-profile conformance fixtures: coverage', () => {
   const LAYOUT_FILES = [
     'conformance-layout.json',
@@ -856,6 +890,7 @@ describe('component-profile conformance fixtures: coverage', () => {
     'conformance-action-button-layout.json',
     'conformance-music-player-layout.json',
     'conformance-history-graph-layout.json',
+    'conformance-gauge-layout.json',
   ];
 
   it('records every fixture key exactly once, as asserted or as a documented omission', () => {
@@ -882,7 +917,7 @@ describe('component-profile conformance fixtures: coverage', () => {
       'conformance-tree.json', 'conformance-clock-tree.json',
       'conformance-clock-formats-tree.json', 'conformance-slider-tree.json',
       'conformance-action-button-tree.json', 'conformance-music-player-tree.json',
-      'conformance-history-graph-tree.json',
+      'conformance-history-graph-tree.json', 'conformance-gauge-tree.json',
     ];
     for (const name of exercised) expect(() => loadTree(name)).not.toThrow();
   });

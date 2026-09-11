@@ -48,7 +48,10 @@ public class ComponentProfileConformanceFixtureTests
 		yield return "conformance-music-player-tree.json";
 		yield return "conformance-history-graph-tree.json";
 		yield return "conformance-picker-tree.json";
+		yield return "conformance-gauge-tree.json";
 	}
+
+	private static readonly string[] _transformKeys = ["rotation", "originX", "originY", "zoom", "offsetX", "offsetY"];
 
 	// Stated once so the assertion that uses it fits a line.
 	private const string _playingProgressJson =
@@ -68,6 +71,26 @@ public class ComponentProfileConformanceFixtureTests
 		Assert.That(UiCanonicalJson.Serialize(tree!),
 			Is.EqualTo(text),
 			"the fixture must be byte-identical to what this model writes, or it cannot be a conformance target");
+	}
+
+	[Test]
+	public void The_gauge_fixture_pins_every_transform_key_the_identity_shape_nesting_and_the_fallback()
+	{
+		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-gauge-tree.json"),
+			UiCanonicalJson.Options)!;
+		var nodes = Walk(tree.Root).ToDictionary(node => node.Id, StringComparer.Ordinal);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(nodes["conformance.needle"].Properties.Keys, Is.EquivalentTo(_transformKeys));
+			Assert.That(nodes["conformance.needle"].Fallback?.Type,
+				Is.EqualTo("ui.text"),
+				"a reader without ui.transform must still have a reading to draw");
+			Assert.That(nodes["conformance.identity"].Properties,
+				Is.Empty,
+				"identity is every key absent, never a written 0 or 1");
+			Assert.That(nodes["conformance.outer"].Children.Single().Type, Is.EqualTo("ui.transform"));
+		});
 	}
 
 	[Test]

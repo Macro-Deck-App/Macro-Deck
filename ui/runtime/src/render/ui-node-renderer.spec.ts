@@ -1247,6 +1247,20 @@ describe('widget clock ticking', () => {
   });
 });
 
+function stubComputedWidth(widthOf: (element: Element) => number | null): () => void {
+  const view = document.defaultView!;
+  const real = view.getComputedStyle;
+  view.getComputedStyle = function (element: Element, pseudo?: string | null): CSSStyleDeclaration {
+    const style = real.call(view, element, pseudo);
+    const width = widthOf(element);
+    if (width === null) return style;
+    return new Proxy(style, {
+      get(target, key) { return key === 'width' ? `${width}px` : Reflect.get(target, key); },
+    });
+  } as typeof view.getComputedStyle;
+  return () => { view.getComputedStyle = real; };
+}
+
 describe('widget text inside the box its stack has', () => {
   let roomPx: number;
 
@@ -1255,6 +1269,7 @@ describe('widget text inside the box its stack has', () => {
   let container: HTMLElement;
   let realRect: () => DOMRect;
   let realClientWidth: PropertyDescriptor | undefined;
+  let restoreComputedStyle: () => void;
 
   const naturalWidth = (element: HTMLElement) =>
     (element.textContent ?? '').length * parseFloat(element.style.fontSize || '0') * ADVANCE;
@@ -1285,9 +1300,15 @@ describe('widget text inside the box its stack has', () => {
       const asked = row.reduce((total, sibling) => total + naturalWidth(sibling), 0);
       return { width: asked > roomPx ? natural * roomPx / asked : natural, height: 0 } as DOMRect;
     };
+
+    restoreComputedStyle = stubComputedWidth(element =>
+      element.classList.contains('widget-text') || element.classList.contains('widget-dynamic-text')
+        ? element.getBoundingClientRect().width
+        : null);
   });
 
   afterEach(() => {
+    restoreComputedStyle();
     Element.prototype.getBoundingClientRect = realRect;
     if (realClientWidth) Object.defineProperty(Element.prototype, 'clientWidth', realClientWidth);
     else delete (Element.prototype as unknown as Record<string, unknown>)['clientWidth'];

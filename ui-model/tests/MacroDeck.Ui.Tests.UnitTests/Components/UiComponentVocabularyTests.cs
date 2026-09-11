@@ -25,7 +25,7 @@ public class UiComponentVocabularyTests
 	private static readonly string[] _expectedCoreComponents =
 	[
 		"ui.stack", "ui.text", "ui.image", "ui.range-bar", "ui.slider", "ui.button", "ui.layer",
-		"ui.chart", "ui.text-field", "ui.list",
+		"ui.chart", "ui.text-field", "ui.list", "ui.transform",
 	];
 
 	private static readonly string[] _expectedMacroDeckComponents =
@@ -41,7 +41,7 @@ public class UiComponentVocabularyTests
 		"transition", "fit", "zoom", "offsetX", "offsetY", "opacity", "brightness", "saturation", "start",
 		"end", "startColor", "endColor", "marker", "thickness", "value", "format", "seconds", "level",
 		"step", "levelColor", "borderStyle", "borderColor", "corner", "points", "plotTop", "digits",
-		"answer", "placeholder",
+		"answer", "placeholder", "rotation", "originX", "originY",
 	];
 
 	private static readonly string[] _expectedTimeFormats =
@@ -71,12 +71,12 @@ public class UiComponentVocabularyTests
 		=> new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };
 
 	[Test]
-	public void The_core_component_set_is_the_ten_ui_names()
+	public void The_core_component_set_is_the_eleven_ui_names()
 	{
 		Assert.Multiple(() =>
 		{
 			Assert.That(UiComponents.WellKnown, Is.EqualTo(_expectedCoreComponents).AsCollection);
-			Assert.That(UiComponents.WellKnown.Distinct(StringComparer.Ordinal).Count(), Is.EqualTo(10));
+			Assert.That(UiComponents.WellKnown.Distinct(StringComparer.Ordinal).Count(), Is.EqualTo(11));
 
 			foreach (var type in UiComponents.WellKnown)
 			{
@@ -230,7 +230,7 @@ public class UiComponentVocabularyTests
 		});
 	}
 
-	/// <summary>One element of each of the ten types, with every property the DSL exposes populated.</summary>
+	/// <summary>One element of each of the eleven types, with every property the DSL exposes populated.</summary>
 	private static UiStack BuildEveryWidgetPrimitive()
 		=> new()
 		{
@@ -408,6 +408,25 @@ public class UiComponentVocabularyTests
 							Text = "73.4",
 							Size = 0.26,
 							Digits = 3.5,
+						},
+					],
+				},
+				new UiTransform
+				{
+					Key = "needle",
+					Rotation = 42,
+					OriginX = 0.5,
+					OriginY = 0.9,
+					Zoom = 1.2,
+					OffsetX = 0.1,
+					OffsetY = -0.05,
+					Children =
+					[
+						new UiTextRun
+						{
+							Key = "needleGlyph",
+							Text = "|",
+							Size = 0.2,
 						},
 					],
 				},
