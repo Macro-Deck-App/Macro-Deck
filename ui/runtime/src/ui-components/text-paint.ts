@@ -42,7 +42,10 @@ export function paintTextCommon<TState>(
   ctx.setStyle(element, '-webkit-line-clamp', maxLines > 1 ? String(maxLines) : null);
   ctx.setStyle(element, 'min-width', digits === null ? null : `${digits}ch`);
 
-  if (element.textContent !== text) element.textContent = text;
+  // A final line break in pre-wrap text opens no line of its own, so a label's trailing blank line
+  // would vanish. One more break keeps it, the way a native text view lays it out.
+  const painted = wraps && text.endsWith('\n') ? `${text}\n` : text;
+  if (element.textContent !== painted) element.textContent = painted;
 
   const size = resolveLength(nodeLength(node, UiComponentProperties.Size), ctx.basis, ctx.crossExtent);
   const minSize = resolveLength(nodeLength(node, UiComponentProperties.MinSize), ctx.basis, ctx.crossExtent);

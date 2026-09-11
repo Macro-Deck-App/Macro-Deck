@@ -100,4 +100,34 @@ describe('ui.text ink', () => {
 
     expect(below.top - root.top).toBeCloseTo(BASIS * 0.1, 1);
   });
+
+  describe('wrapping text with blank lines after it', () => {
+    const wrapping = (id: string, value: string): UiNode => ({
+      id,
+      type: Types.Text,
+      properties: { [Props.Text]: value, [Props.Size]: { basis: 0.1 }, [Props.Wrap]: true },
+    });
+
+    async function heightOf(value: string): Promise<number> {
+      const rendered = await renderTree(
+        { id: 'root', type: Types.Stack, properties: {}, children: [wrapping('value', value)] },
+        withBasis(BASIS),
+      );
+      const height = node(rendered, 'value').getBoundingClientRect().height;
+      TestBed.resetTestingModule();
+      return height;
+    }
+
+    it('keeps one trailing blank line as a line of its own', async () => {
+      expect(await heightOf('Back\n')).toBeCloseTo(await heightOf('a\nb'), 0);
+    });
+
+    it('keeps every trailing blank line', async () => {
+      expect(await heightOf('Back\n\n')).toBeCloseTo(await heightOf('a\nb\nc'), 0);
+    });
+
+    it('adds no line to text without a trailing break', async () => {
+      expect(await heightOf('Back')).toBeCloseTo(await heightOf('a'), 0);
+    });
+  });
 });
