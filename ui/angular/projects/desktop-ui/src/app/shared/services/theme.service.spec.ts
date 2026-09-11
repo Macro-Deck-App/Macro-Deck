@@ -2,7 +2,7 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Observable, Subject } from 'rxjs';
 import { ApiService, ConnectionState } from '../transport';
-import { DEFAULT_ACCENT_COLOR, DEFAULT_THEME_MODE, ThemeService } from './theme.service';
+import { DEFAULT_ACCENT_COLOR, DEFAULT_THEME_MODE, ThemeService, UiFontService } from './theme.service';
 
 describe('ThemeService', () => {
   let apiSpy: jasmine.SpyObj<ApiService>;
@@ -146,13 +146,14 @@ describe('ThemeService', () => {
 
   it('tells the renderers the UI font changed, so fitted text measures again', () => {
     const service = create();
+    const uiFonts = TestBed.inject(UiFontService);
     TestBed.tick();
-    const before = service.uiFontVersion();
+    const before = uiFonts.version();
 
     service.setFontFamily('Inter');
     TestBed.tick();
 
-    expect(service.uiFontVersion()).toBeGreaterThan(before);
+    expect(uiFonts.version()).toBeGreaterThan(before);
   });
 
   it('persists the chosen global font to the host', () => {

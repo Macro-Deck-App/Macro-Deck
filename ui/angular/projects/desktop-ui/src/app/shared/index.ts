@@ -19,7 +19,7 @@ export { IconImageService } from './services/icon-image.service';
 export { IconPrefetchService } from './services/icon-prefetch.service';
 export { KeyRingService } from './services/key-ring.service';
 export { ProfileService } from './services/profile.service';
-export { DEFAULT_ACCENT_COLOR, ThemeService } from './services/theme.service';
+export { DEFAULT_ACCENT_COLOR, ThemeService, UiFontService } from './services/theme.service';
 export { ToastService } from './services/toast.service';
 export {
   type UiSessionHandle,

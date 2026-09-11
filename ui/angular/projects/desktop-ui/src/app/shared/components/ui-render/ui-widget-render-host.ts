@@ -12,7 +12,7 @@ import { FontLoaderService, internalFontFamily } from '../../services/font-loade
 import { LocalizationService } from '../../localization';
 import { RenderingModeService } from '../../services/rendering-mode.service';
 import { ServerClockService } from '../../services/server-clock.service';
-import { ThemeService } from '../../services/theme.service';
+import { UiFontService } from '../../services/theme.service';
 import { UiNodeEventBus } from './ui-node-event-bus';
 import { UiWidgetResourceBaseUrl } from './ui-widget-resource-base-url';
 import { UiWidgetTimeService } from './ui-widget-time.service';
@@ -24,7 +24,7 @@ export class UiWidgetRenderHostFactory {
   private readonly serverClock = inject(ServerClockService);
   private readonly renderingMode = inject(RenderingModeService);
   private readonly fontLoader = inject(FontLoaderService);
-  private readonly theme = inject(ThemeService);
+  private readonly uiFonts = inject(UiFontService);
 
   private readonly baseUrl = signal<string | null>(this.resourceBaseUrl.current);
 
@@ -50,7 +50,7 @@ export class UiWidgetRenderHostFactory {
       // renderer hides text in a face that is still loading, and the read is what brings the frame
       // back once the face lands (issue #457 findings 7/8).
       fontReady: faceId => this.fontLoader.ensureFace(faceId)() !== 'loading',
-      uiFontKey: () => String(this.theme.uiFontVersion()),
+      uiFontKey: () => String(this.uiFonts.version()),
       emit: (node, name, data) => bus.emit(node, name, data),
       setPressed: (node, pressed) => bus.setPressed(node, pressed),
       ownsRootWidgetBorder,

@@ -17,7 +17,7 @@ import {
 } from '@angular/core';
 
 import { ActionBlockDefinition, ActionFlow, AppStrings, eventConfigurationValues, eventPayloadVariables, hydrateBlockParameters, isEventFlow, isSameTriggerType, normalizeEventTriggerNames, normalizeLegacyParamTypes, qualifiedEventId, resolveLocalizedText } from '@macro-deck/runtime';
-import { ContextMenuComponent, ContextMenuItem, LocalizationService, OverlayPanelComponent, ThemeService, ToastService, TranslatePipe } from '@shared';
+import { ContextMenuComponent, ContextMenuItem, LocalizationService, OverlayPanelComponent, ToastService, TranslatePipe, UiFontService } from '@shared';
 import type { Variable, VariableScope } from '@macro-deck/runtime';
 import { ActionFlowValidationResult } from '../../domain/action-flow-validation.util';
 import { isToolbarCompact, measureToolbarNaturalWidth } from './action-builder-layout';
@@ -75,7 +75,7 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
   private toolbarMeasureScheduled = false;
   private readonly injector = inject(Injector);
   private readonly localization = inject(LocalizationService);
-  private readonly theme = inject(ThemeService);
+  private readonly uiFonts = inject(UiFontService);
   private readonly translate = (key: string): string => this.localization.translateKey(key);
 
   protected readonly builtInTriggerTabs = computed<readonly TriggerTab[]>(() => defaultTriggerTabs(this.translate));
@@ -434,7 +434,7 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
       this.auxTabItem();
       this.showRun();
       this.showAddTrigger();
-      this.theme.uiFontVersion();
+      this.uiFonts.version();
       this.scheduleToolbarMeasure();
     });
 

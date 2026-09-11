@@ -12,16 +12,25 @@ export const DEFAULT_THEME_MODE: ThemeMode = 'system';
 export const DEFAULT_ACCENT_COLOR = '#2196F3';
 
 @Injectable({ providedIn: 'root' })
+export class UiFontService {
+  readonly font = new UiFont();
+  readonly version = signal<number>(0);
+
+  constructor() {
+    this.font.onChange(() => this.version.update(version => version + 1));
+  }
+}
+
+@Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly api = inject(ApiService);
 
   readonly themeMode = signal<ThemeMode>(DEFAULT_THEME_MODE);
   readonly accentColor = signal<string>(DEFAULT_ACCENT_COLOR);
   readonly fontFamily = signal<string>('');
-  readonly uiFontVersion = signal<number>(0);
 
   private readonly systemPrefersDark = signal<boolean>(true);
-  private readonly uiFont = new UiFont();
+  private readonly uiFonts = inject(UiFontService);
   private readonly fontFaces = signal<readonly SystemFontFace[] | null>(null);
   private fontFacesRequested = false;
 
@@ -45,13 +54,12 @@ export class ThemeService {
       localStorage.setItem(STORAGE_KEY_ACCENT, accent);
     });
 
-    this.uiFont.onChange(() => this.uiFontVersion.update(version => version + 1));
     effect(() => {
       const family = this.fontFamily();
       const faces = this.fontFaces();
       localStorage.setItem(STORAGE_KEY_FONT, family);
       if (family && faces === null) this.requestFontFaces();
-      this.uiFont.apply(family, faces ?? [], faceId => this.api.getFontFileUrl(faceId));
+      this.uiFonts.font.apply(family, faces ?? [], faceId => this.api.getFontFileUrl(faceId));
     });
 
     this.api

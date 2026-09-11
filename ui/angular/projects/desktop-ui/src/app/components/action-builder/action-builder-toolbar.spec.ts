@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { Subject } from 'rxjs';
 
-import { ApiService, ThemeService } from '@shared';
+import { ApiService, UiFontService } from '@shared';
 import { ActionBuilderComponent } from './action-builder.component';
 import { measureToolbarNaturalWidth } from './action-builder-layout';
 
@@ -140,7 +140,7 @@ describe('ActionBuilderComponent toolbar layout', () => {
   it('measures the toolbar again when the global UI font changes', async () => {
     const measure = spyOn(component, 'measureToolbar').and.callThrough();
 
-    TestBed.inject(ThemeService).uiFontVersion.update(version => version + 1);
+    TestBed.inject(UiFontService).version.update(version => version + 1);
     TestBed.tick();
     fixture.detectChanges();
     await fixture.whenStable();
