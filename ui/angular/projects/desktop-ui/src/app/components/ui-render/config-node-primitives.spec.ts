@@ -363,4 +363,43 @@ describe('shared-ui-node every configuration primitive', () => {
     expect(host.querySelector('shared-segmented-control')).toBeNull();
     expect(host.querySelector('shared-select')).not.toBeNull();
   });
+
+  it('draws a reorderable multiselect as an ordered list, and emits the new order when a row moves', async () => {
+    const rendered = await renderTree({
+      id: 'n',
+      type: 'multiselect',
+      properties: {
+        reorderable: true,
+        value: ['a', 'b'],
+        events: ['change'],
+        options: [
+          { value: 'a', label: 'Alpha' },
+          { value: 'b', label: 'Beta' },
+          { value: 'c', label: 'Gamma' },
+        ],
+      },
+    });
+    const host = el(rendered);
+
+    expect(host.querySelector('shared-multi-select')).toBeNull();
+    const rows = Array.from(host.querySelectorAll<HTMLElement>('.rl-row'));
+    expect(rows.map(r => r.textContent?.trim())).toEqual(['Alpha', 'Beta', 'Gamma']);
+
+    host.querySelector<HTMLButtonElement>('.rl-down button')!.click();
+    await tick(rendered);
+
+    expect(rendered.events).toEqual([{ nodeId: 'n', name: 'change', data: ['b', 'a'] }]);
+  });
+
+  it('draws a multiselect with no reorderable property as the dropdown, unchanged', async () => {
+    const rendered = await renderTree({
+      id: 'n',
+      type: 'multiselect',
+      properties: { value: ['a'], options: [{ value: 'a', label: 'Alpha' }] },
+    });
+    const host = el(rendered);
+
+    expect(host.querySelector('shared-reorderable-list')).toBeNull();
+    expect(host.querySelector('shared-multi-select')).not.toBeNull();
+  });
 });

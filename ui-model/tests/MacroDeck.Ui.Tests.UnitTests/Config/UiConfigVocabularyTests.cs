@@ -146,6 +146,28 @@ public class UiConfigVocabularyTests
 		});
 	}
 
+	[Test]
+	public void A_multiple_selection_authored_without_the_reorderable_flag_emits_the_same_node_as_before()
+	{
+		var tree = UiViewBuilder.Build(ConfigSurface(),
+			Configure(WithOptions(new UiMultiSelectInput { Key = "devices" })));
+
+		var node = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.MultiSelect);
+
+		Assert.That(node.Properties.Keys, Does.Not.Contain(UiConfigProperties.Reorderable));
+	}
+
+	[Test]
+	public void A_reorderable_multiple_selection_emits_the_flag_on_the_multiselect_node()
+	{
+		var tree = UiViewBuilder.Build(ConfigSurface(),
+			Configure(WithOptions(new UiMultiSelectInput { Key = "devices", Reorderable = true })));
+
+		var node = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.MultiSelect);
+
+		Assert.That(node.Properties[UiConfigProperties.Reorderable].GetBoolean(), Is.True);
+	}
+
 	/// <summary>
 	/// One element of each of the forty-one types, with every property the DSL exposes populated. The option
 	/// properties are set explicitly rather than through a <see cref="UiOptionsState" />, because
@@ -195,6 +217,8 @@ public class UiConfigVocabularyTests
 						Configure(WithOptions(new UiDynamicChoiceInput { Key = "dynamicChoice" })),
 						Configure(WithOptions(new UiAutocompleteInput { Key = "autocomplete" })),
 						Configure(WithOptions(new UiMultiSelectInput { Key = "multiSelect" })),
+						Configure(
+							WithOptions(new UiMultiSelectInput { Key = "orderedMultiSelect", Reorderable = true })),
 						Configure(new UiColorInput { Key = "color" }),
 						Configure(new UiFileInput
 							{ Key = "file", FileExtensions = UiValue.Of<IReadOnlyList<string>>(["txt"]) }),
