@@ -21,6 +21,7 @@ cross axis.
 | `ui.chart` | A series drawn as a filled line | [Chart](/sdk/ui/components/chart/) |
 | `ui.text-field` | A line the user types | [Text field](/sdk/ui/components/text-field/) |
 | `ui.list` | A container that scrolls and asks for more | [List](/sdk/ui/components/list/) |
+| `ui.transform` | Rotates, scales and shifts its children together about a pivot | [Transform](/sdk/ui/components/transform/) |
 
 ## `macrodeck.*`
 

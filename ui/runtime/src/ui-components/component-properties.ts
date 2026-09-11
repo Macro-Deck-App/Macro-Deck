@@ -46,6 +46,9 @@ export const UiComponentProperties = {
   Digits: 'digits',
   Placeholder: 'placeholder',
   Answer: 'answer',
+  Rotation: 'rotation',
+  OriginX: 'originX',
+  OriginY: 'originY',
 } as const;
 
 export const UI_COMPONENT_PROPERTIES_WELL_KNOWN: readonly string[] =

@@ -62,10 +62,14 @@ public static class UiComponents
 	/// what it holds.</summary>
 	public const string List = "ui.list";
 
+	/// <summary>A container that draws its children like <see cref="Layer" /> and then rotates, scales and
+	/// shifts them together about a pivot.</summary>
+	public const string Transform = "ui.transform";
+
 	/// <summary>The types the core framework ships. Not exhaustive of what a renderer may meet - see the
 	/// type's remarks.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
 	[
-		Stack, Text, Image, RangeBar, Slider, Button, Layer, Chart, TextField, List,
+		Stack, Text, Image, RangeBar, Slider, Button, Layer, Chart, TextField, List, Transform,
 	];
 }

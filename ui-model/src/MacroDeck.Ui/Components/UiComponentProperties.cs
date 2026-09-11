@@ -97,15 +97,30 @@ public static class UiComponentProperties
 	/// <see cref="UiComponentImageFits.Contain" />.</summary>
 	public const string Fit = "fit";
 
-	/// <summary>A multiplier scaling a button's artwork about its own centre. Absent means <c>1</c>.</summary>
+	/// <summary>A multiplier scaling a button's artwork about its own centre, or a
+	/// <see cref="UiTransform" />'s content about its <see cref="OriginX" />/<see cref="OriginY" /> pivot.
+	/// Absent means <c>1</c>.</summary>
 	public const string Zoom = "zoom";
 
-	/// <summary>A button's artwork shifted across, as a fraction of the element's own width, applied after
-	/// <see cref="Zoom" /> so an offset means the same distance at any zoom. Absent means <c>0</c>.</summary>
+	/// <summary>A button's artwork, or a <see cref="UiTransform" />'s content, shifted across as a fraction
+	/// of the element's own width, applied after <see cref="Zoom" /> so an offset means the same distance at
+	/// any zoom. Absent means <c>0</c>.</summary>
 	public const string OffsetX = "offsetX";
 
 	/// <summary>The same down the element's own height. Absent means <c>0</c>.</summary>
 	public const string OffsetY = "offsetY";
+
+	/// <summary>A <see cref="UiTransform" />'s turn in degrees, clockwise, about its pivot. Absent means
+	/// <c>0</c>.</summary>
+	public const string Rotation = "rotation";
+
+	/// <summary>Where a <see cref="UiTransform" />'s pivot sits across its box, as a fraction of the element's
+	/// own width: <c>0.5</c> is the centre, and a value outside <c>0..1</c> puts the pivot outside the box.
+	/// Absent means <c>0.5</c>.</summary>
+	public const string OriginX = "originX";
+
+	/// <summary>The same down the element's own height. Absent means <c>0.5</c>.</summary>
+	public const string OriginY = "originY";
 
 	/// <summary>How opaque artwork is drawn, in <c>0..1</c> - a button's backdrop or an image's own
 	/// bytes. Absent means fully opaque.</summary>
@@ -208,6 +223,6 @@ public static class UiComponentProperties
 		Weight, Role, Color, MaxLines, Wrap, FontFace, Source, Transition, Fit, Zoom, OffsetX, OffsetY,
 		Opacity, Brightness, Saturation, Start, End, StartColor, EndColor, Marker, Thickness, Value,
 		Format, Seconds, Level, Step, LevelColor, BorderStyle, BorderColor, Corner, Points, PlotTop,
-		Digits, Answer, Placeholder,
+		Digits, Answer, Placeholder, Rotation, OriginX, OriginY,
 	];
 }

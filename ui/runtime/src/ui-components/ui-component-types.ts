@@ -9,12 +9,13 @@ export const UiComponents = {
   Chart: 'ui.chart',
   TextField: 'ui.text-field',
   List: 'ui.list',
+  Transform: 'ui.transform',
 } as const;
 
 export const UI_COMPONENTS_WELL_KNOWN: readonly string[] = [
   UiComponents.Stack, UiComponents.Text, UiComponents.Image, UiComponents.RangeBar,
   UiComponents.Slider, UiComponents.Button, UiComponents.Layer, UiComponents.Chart,
-  UiComponents.TextField, UiComponents.List,
+  UiComponents.TextField, UiComponents.List, UiComponents.Transform,
 ];
 
 export const UiComponentDirections = { Vertical: 'vertical', Horizontal: 'horizontal' } as const;

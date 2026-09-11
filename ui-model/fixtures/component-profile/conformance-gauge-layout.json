@@ -1,0 +1,56 @@
+{
+  "cases": [
+    {
+      "basis": 240,
+      "tile": { "width": 240, "height": 240 },
+      "nodes": {
+        "conformance.needle": {
+          "transform": "translate(25%, -12.5%) rotate(42deg) scale(1.5)",
+          "transformOrigin": "50% 87.5%",
+          "childBox": { "width": 240, "height": 240 }
+        },
+        "conformance.identity": {
+          "transform": null,
+          "transformOrigin": null,
+          "childBox": { "width": 240, "height": 240 }
+        },
+        "conformance.outer": {
+          "transform": "translate(0%, 0%) rotate(-90deg) scale(1)",
+          "transformOrigin": "50% 50%",
+          "childBox": { "width": 240, "height": 240 }
+        },
+        "conformance.inner": {
+          "transform": "translate(0%, 0%) rotate(0deg) scale(0.5)",
+          "transformOrigin": "50% 50%",
+          "childBox": { "width": 240, "height": 240 }
+        }
+      }
+    },
+    {
+      "basis": 120,
+      "tile": { "width": 120, "height": 120 },
+      "nodes": {
+        "conformance.needle": {
+          "transform": "translate(25%, -12.5%) rotate(42deg) scale(1.5)",
+          "transformOrigin": "50% 87.5%",
+          "childBox": { "width": 120, "height": 120 }
+        },
+        "conformance.identity": {
+          "transform": null,
+          "transformOrigin": null,
+          "childBox": { "width": 120, "height": 120 }
+        },
+        "conformance.outer": {
+          "transform": "translate(0%, 0%) rotate(-90deg) scale(1)",
+          "transformOrigin": "50% 50%",
+          "childBox": { "width": 120, "height": 120 }
+        },
+        "conformance.inner": {
+          "transform": "translate(0%, 0%) rotate(0deg) scale(0.5)",
+          "transformOrigin": "50% 50%",
+          "childBox": { "width": 120, "height": 120 }
+        }
+      }
+    }
+  ]
+}

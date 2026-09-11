@@ -23,6 +23,8 @@ Three artefacts, and the third is the one that does the work:
 | `conformance-music-player-layout.json` | the progress geometry and runs resolved **at two instants**, plus the crossfade's own constants |
 | `conformance-history-graph-tree.json` | the wire form of the layered shapes - a chart series behind two layers of content, and the reservation a live readout keeps |
 | `conformance-history-graph-layout.json` | the chart's **normative geometry** resolved: the plot band, every point of a dense series, and which term of each length actually binds |
+| `conformance-gauge-tree.json` | the wire form of the transformed shapes - a needle turned about a pivot below its centre, an identity transform, and two nested transforms |
+| `conformance-gauge-layout.json` | the transform and pivot each `ui.transform` resolves to, and the box its children are drawn across |
 | this README | what the fixtures deliberately contain, so they are not trimmed by accident |
 
 One tree per widget shape rather than one growing tree: the weather tree's proportions are themselves
@@ -37,9 +39,9 @@ canonical JSON, so it is one line, like the wire goldens in
 
 Trimming any of these turns the fixture into one a wrong renderer passes:
 
-- across the six trees, all twelve primitives - `ui.stack`, `ui.text`, `ui.image`,
+- across the trees, every primitive - including `ui.stack`, `ui.text`, `ui.image`,
   `ui.range-bar`, `macrodeck.dynamic-text`, `macrodeck.clock-dial`, `macrodeck.progress-bar`,
-  `macrodeck.progress-text`, `ui.slider`, `ui.button`, `ui.layer`, `ui.chart` - and every
+  `macrodeck.progress-text`, `ui.slider`, `ui.button`, `ui.layer`, `ui.chart`, `ui.transform` - and every
   property key the profile ships; coverage is a property of the fixture set, not of any one file alone;
 - a length whose `maxOfCross` **binds** (the forecast weekday, clamped by its row height) *and* one where
   `basis` binds (the range-bar thickness, in the same row) - a renderer that ignores `maxOfCross` passes a
@@ -72,6 +74,20 @@ Trimming any of these turns the fixture into one a wrong renderer passes:
 - `align: baseline` on a row of two runs at different sizes, which is the only alignment their boxes
   cannot fake;
 - a `ui.layer` whose children are read in paint order, first furthest back.
+
+## What the gauge tree deliberately contains
+
+- a needle carrying **every** transform key at a non-default value - a `rotation`, a pivot below the centre
+  (`originY: 0.875`), a `zoom` away from `1` and offsets of **opposite sign** - so a reader that applies the
+  steps in a different order, or pivots zoom about the centre, resolves a different transform;
+- a transform with **no keys at all**, which draws no transform whatsoever - absent, never a written `0` or
+  `1` - so a reader that always writes an identity transform (and with it a new stacking context) fails;
+- a transform **nested** in another, each resolving only its own keys, which is what lets them compose;
+- a `fallback` on the needle that still shows the reading as text - a reader too old for `ui.transform`
+  loses the needle, never the value.
+
+The layout table states the same strings at both bases: offsets and the pivot are fractions of the element's
+own box, so a transform is resolution-independent by construction.
 
 ## What the clock tree deliberately contains
 

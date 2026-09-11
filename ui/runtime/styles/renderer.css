@@ -90,6 +90,7 @@
 .widget-stack,
 .widget-button,
 .widget-layer,
+.widget-transform,
 .widget-list,
 .widget-text,
 .widget-image {
@@ -215,6 +216,13 @@
   max-height: calc(100% + 0.4em);
 }
 
+.widget-transform {
+  position: relative;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+}
+
 /*
  * A layer's children share the box instead of dividing it, first one furthest back. Painted in
  * document order rather than with z-index, so a layer nested in a button still resolves against its
@@ -232,6 +240,12 @@
 }
 
 .widget-layer > * {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.widget-transform > * {
   position: absolute;
   top: 0;
   left: 0;

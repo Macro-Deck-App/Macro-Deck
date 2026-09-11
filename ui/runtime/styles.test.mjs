@@ -194,6 +194,25 @@ test('a layer does not un-flex the nodes inside it', () => {
   assert.doesNotMatch(rule[1], /(^|[^-\w])display\s*:/);
 });
 
+test('a transform does not un-flex the nodes inside it', () => {
+  const source = readFileSync(path.join(HERE, 'styles', 'renderer.css'), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  const rule = /\.widget-transform\s*>\s*\*\s*\{([^}]*)\}/.exec(source);
+
+  assert.ok(rule, '.widget-transform > * must exist');
+  assert.doesNotMatch(rule[1], /(^|[^-\w])display\s*:/);
+});
+
+test('a layer can place a transform across its box', () => {
+  const source = readFileSync(path.join(HERE, 'styles', 'renderer.css'), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  const own = source.search(/(^|[\s,}])\.widget-transform\s*\{/);
+  const layered = source.search(/\.widget-layer\s*>\s*\*\s*\{/);
+
+  assert.ok(own >= 0 && layered >= 0);
+  assert.ok(own < layered, '.widget-transform must come before .widget-layer > *, or its position wins');
+});
+
 test('every widget type declares the display it needs', () => {
   // The corollary of the rule above: nothing else sets it for them. Read rule by rule rather than by
   // the first mention of the class - a grouped selector carrying something else entirely (the shared
