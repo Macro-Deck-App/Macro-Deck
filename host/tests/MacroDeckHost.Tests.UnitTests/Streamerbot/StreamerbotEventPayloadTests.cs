@@ -103,15 +103,11 @@ internal sealed class StreamerbotEventPayloadTests
 	}
 
 	[Test]
-	public void Build_skips_arrays_but_keeps_them_in_the_raw_data()
+	public void Build_carries_arrays_as_json_text()
 	{
 		var payload = Build("Twitch", "Sub", """{ "userName": "Ada", "emotes": [ { "name": "Kappa" } ] }""");
 
-		Assert.Multiple(() =>
-		{
-			Assert.That(payload.ContainsKey("emotes"), Is.False);
-			Assert.That(payload["data"] as string, Does.Contain("Kappa"));
-		});
+		Assert.That(payload["emotes"], Is.EqualTo("""[ { "name": "Kappa" } ]"""));
 	}
 
 	[Test]
@@ -162,7 +158,11 @@ internal sealed class StreamerbotEventPayloadTests
 	{
 		var payload = Build("Misc", "Test", """{ "a": { "b": { "c": { "d": "too deep" } } } }""");
 
-		Assert.That(payload.Keys, Has.No.Member("a.b.c.d"));
+		Assert.Multiple(() =>
+		{
+			Assert.That(payload.Keys, Has.No.Member("a.b.c.d"));
+			Assert.That(payload["a.b.c"], Is.EqualTo("""{ "d": "too deep" }"""));
+		});
 	}
 
 	private static IReadOnlyDictionary<string, object?> Build(string source, string type, string data)

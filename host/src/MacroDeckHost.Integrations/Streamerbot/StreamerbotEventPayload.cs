@@ -62,21 +62,13 @@ internal static class StreamerbotEventPayload
 			}
 
 			var name = prefix is null ? property.Name : $"{prefix}.{property.Name}";
-			switch (property.Value.ValueKind)
+			if (property.Value.ValueKind == JsonValueKind.Object && depth + 1 < MaxDepth)
 			{
-				case JsonValueKind.Object:
-					Flatten(property.Value, name, depth + 1, target);
-					break;
-				case JsonValueKind.Array:
-					// Deliberately skipped; the full payload stays available as `data`.
-					break;
-				default:
-					if (!IsReserved(name))
-					{
-						target[name] = ToPrimitive(property.Value);
-					}
-
-					break;
+				Flatten(property.Value, name, depth + 1, target);
+			}
+			else if (!IsReserved(name))
+			{
+				target[name] = ToPrimitive(property.Value);
 			}
 		}
 	}
@@ -87,6 +79,7 @@ internal static class StreamerbotEventPayload
 		JsonValueKind.True => true,
 		JsonValueKind.False => false,
 		JsonValueKind.Number => value.TryGetInt64(out var integer) ? integer : value.GetDouble(),
+		JsonValueKind.Object or JsonValueKind.Array => value.GetRawText(),
 		_ => null
 	};
 
