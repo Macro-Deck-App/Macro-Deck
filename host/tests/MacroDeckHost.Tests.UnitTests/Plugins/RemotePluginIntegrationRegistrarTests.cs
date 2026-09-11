@@ -864,6 +864,78 @@ public class RemotePluginIntegrationRegistrarTests
 	}
 
 	[Test]
+	public async Task A_refreshed_snapshot_keeps_the_plugins_catalog_widget_types_folder_views_and_layouts()
+	{
+		var pluginId = "com.example.plugin";
+		var scope = await RegisterLocalizedPluginAsync(pluginId);
+		var widgetType = await _widgetTypeRegistry.Register(pluginId,
+			new WidgetTypeDescriptor("gauge", LocalizedText.FromLiteral("Gauge")));
+		var folderView = await _folderViewRegistry.Register(pluginId,
+			new FolderViewDescriptor("dashboard", LocalizedText.FromLiteral("Dashboard")));
+		var layout = await _layoutRegistry.Register(pluginId,
+			new LayoutDescriptor("stream-deck-xl", "Stream Deck XL", []));
+		var before = _integrationRegistry.Registered.Single(i => i.Id == pluginId);
+
+		await _registrar.ApplyRefreshedSnapshotAsync(pluginId, _snapshotStore.GetSnapshot(pluginId));
+
+		var resolver = new LocalizationResolver(_localizationCatalogs);
+		Assert.Multiple(() =>
+		{
+			Assert.That(_integrationRegistry.Registered.Single(i => i.Id == pluginId), Is.Not.SameAs(before));
+			Assert.That(resolver.Resolve(new LocalizedString(new LocalizationKey(scope, "Connect")), "en"),
+				Is.EqualTo("Connect"));
+			Assert.That(_widgetTypeRegistry.IsRegistered(widgetType.WidgetTypeId), Is.True);
+			Assert.That(_folderViewRegistry.TryResolve(folderView.FolderViewId, out _), Is.True);
+			Assert.That(_layoutRegistry.TryResolve(layout.LayoutId, out _), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task A_committed_icon_keeps_the_plugins_localization_catalog()
+	{
+		var pluginId = "com.example.plugin";
+		var scope = await RegisterLocalizedPluginAsync(pluginId);
+
+		var iconBytes = new byte[] { 1, 2, 3 };
+		var contentHash = MacroDeck.Plugin.Protocol.Assets.AssetContentHash.Compute(iconBytes);
+		_assetReceiver.Begin(pluginId,
+			"icon",
+			MacroDeck.Plugin.Protocol.Assets.AssetKinds.Icon,
+			"image/png",
+			iconBytes.Length,
+			contentHash);
+		_assetReceiver.Chunk(pluginId, "icon", 0, iconBytes);
+		_assetReceiver.Commit(pluginId, "icon");
+
+		var resolver = new LocalizationResolver(_localizationCatalogs);
+		Assert.Multiple(() =>
+		{
+			Assert.That(_integrationRegistry.Registered.Single(i => i.Id == pluginId),
+				Is.InstanceOf<IIntegrationIconProvider>());
+			Assert.That(resolver.Resolve(new LocalizedString(new LocalizationKey(scope, "Connect")), "en"),
+				Is.EqualTo("Connect"));
+		});
+	}
+
+	private async Task<string> RegisterLocalizedPluginAsync(string pluginId)
+	{
+		_invoker.ActionsDescribeResult = new ActionCatalogPayload { Actions = [] };
+		var scope = LocalizationScope.ForPlugin(pluginId);
+		_invoker.LocalizationDescribeResult =
+			new LocalizationDescribeResult { Scope = scope, DefaultCulture = "en", Cultures = ["en"] };
+		_invoker.LocalizationCatalogsByCulture["en"] = new LocalizationCatalogResult
+		{
+			Culture = "en", Entries = new Dictionary<string, string>(StringComparer.Ordinal) { ["Connect"] = "Connect" }
+		};
+
+		await ConnectSessionAsync(pluginId,
+			[Action("play"), Provider(CapabilityKinds.Localization)],
+			Accepted(CapabilityKinds.Actions, CapabilityKinds.Localization));
+		Assert.That(await _registrar.RegisterAsync(pluginId), Is.True);
+		return scope;
+	}
+
+	[Test]
 	public async Task Uninstalling_a_plugin_withdraws_its_widget_types_folder_views_and_layouts()
 	{
 		var pluginId = "com.example.plugin";
