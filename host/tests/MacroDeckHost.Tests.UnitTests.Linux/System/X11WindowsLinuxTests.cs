@@ -13,8 +13,8 @@ public class X11WindowsLinuxTests
 	[Test]
 	public void Reading_a_window_that_was_just_closed_returns_nothing_instead_of_terminating_the_process()
 	{
-		var display = X11Windows.OpenDisplay();
-		Assume.That(display, Is.Not.EqualTo(IntPtr.Zero), "needs an X11 display, for example Xvfb");
+		var display = TryOpenDisplay();
+		Assume.That(display, Is.Not.EqualTo(IntPtr.Zero), "needs libX11 and an X11 display, for example Xvfb");
 
 		try
 		{
@@ -29,6 +29,18 @@ public class X11WindowsLinuxTests
 		finally
 		{
 			_ = XCloseDisplay(display);
+		}
+	}
+
+	private static IntPtr TryOpenDisplay()
+	{
+		try
+		{
+			return X11Windows.OpenDisplay();
+		}
+		catch (DllNotFoundException)
+		{
+			return IntPtr.Zero;
 		}
 	}
 
