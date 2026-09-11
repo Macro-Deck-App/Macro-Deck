@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.System;
 using MacroDeckHost.Integrations.System.Focus;
 using MacroDeckHost.Integrations.System.Lock;
@@ -577,6 +578,50 @@ public class SystemIntegrationTests
 		{
 			await integration.ShutdownAsync();
 		}
+	}
+
+	[Test]
+	public async Task A_volume_change_asks_for_the_volume_and_mute_variables_only()
+	{
+		var volume = new FakeVolumeService();
+		var signal = new VariableRefreshSignal();
+		var integration = Create(volume);
+		integration.UseVariableRefreshSignal(signal);
+
+		try
+		{
+			await integration.InitializeAsync(new FakeIntegrationContext(new RecordingVariableApi()));
+
+			volume.RaiseChanged();
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(signal.DrainDefinitionsFor(SystemIntegration.IntegrationId),
+					Is.EquivalentTo(new[] { "system-volume-percent", "system-muted" }));
+				Assert.That(signal.DrainEagerRefreshRequested(SystemIntegration.IntegrationId), Is.False);
+			});
+		}
+		finally
+		{
+			await integration.ShutdownAsync();
+		}
+	}
+
+	[Test]
+	public async Task After_shutdown_a_volume_change_asks_for_nothing_even_after_a_repeated_initialization()
+	{
+		var volume = new FakeVolumeService();
+		var signal = new VariableRefreshSignal();
+		var integration = Create(volume);
+		integration.UseVariableRefreshSignal(signal);
+
+		await integration.InitializeAsync(new FakeIntegrationContext(new RecordingVariableApi()));
+		await integration.InitializeAsync(new FakeIntegrationContext(new RecordingVariableApi()));
+		await integration.ShutdownAsync();
+
+		volume.RaiseChanged();
+
+		Assert.That(signal.DrainDefinitionsFor(SystemIntegration.IntegrationId), Is.Empty);
 	}
 
 	private sealed class FakeNotificationService : INotificationService

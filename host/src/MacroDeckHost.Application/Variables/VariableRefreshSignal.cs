@@ -14,6 +14,10 @@ public interface IVariableRefreshSignal
 	/// <summary>Removes and returns every variable id pending for <paramref name="integrationId"/>.</summary>
 	IReadOnlyList<Guid> DrainFor(string integrationId);
 
+	void RequestDefinitionRefresh(string integrationId, string definitionId);
+
+	IReadOnlyList<string> DrainDefinitionsFor(string integrationId);
+
 	/// <summary>
 	/// Asks for every eager variable of <paramref name="integrationId"/> to be read again. The catalog
 	/// half is polled by a different loop and is not covered.
@@ -27,6 +31,9 @@ public interface IVariableRefreshSignal
 public sealed class VariableRefreshSignal : IVariableRefreshSignal
 {
 	private readonly ConcurrentDictionary<string, ConcurrentDictionary<Guid, byte>> _pending =
+		new(StringComparer.Ordinal);
+
+	private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, byte>> _pendingDefinitions =
 		new(StringComparer.Ordinal);
 
 	private readonly ConcurrentDictionary<string, byte> _pendingEager = new(StringComparer.Ordinal);
@@ -50,6 +57,37 @@ public sealed class VariableRefreshSignal : IVariableRefreshSignal
 		}
 
 		var drained = new List<Guid>();
+		foreach (var id in ids.Keys)
+		{
+			if (ids.TryRemove(id, out _))
+			{
+				drained.Add(id);
+			}
+		}
+
+		return drained;
+	}
+
+	public void RequestDefinitionRefresh(string integrationId, string definitionId)
+	{
+		if (string.IsNullOrEmpty(integrationId) || string.IsNullOrEmpty(definitionId))
+		{
+			return;
+		}
+
+		var ids = _pendingDefinitions.GetOrAdd(integrationId,
+			static _ => new ConcurrentDictionary<string, byte>(StringComparer.Ordinal));
+		ids.TryAdd(definitionId, 0);
+	}
+
+	public IReadOnlyList<string> DrainDefinitionsFor(string integrationId)
+	{
+		if (!_pendingDefinitions.TryGetValue(integrationId, out var ids) || ids.IsEmpty)
+		{
+			return [];
+		}
+
+		var drained = new List<string>();
 		foreach (var id in ids.Keys)
 		{
 			if (ids.TryRemove(id, out _))

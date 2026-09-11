@@ -15,6 +15,10 @@ internal sealed class FakeVolumeService : IVolumeService
 
 	public bool? Muted { get; set; }
 
+	public event Action? Changed;
+
+	public void RaiseChanged() => Changed?.Invoke();
+
 	public Task<float?> GetVolumeAsync(CancellationToken cancellationToken = default) => Task.FromResult(Volume);
 
 	public Task SetVolumeAsync(float level, CancellationToken cancellationToken = default)

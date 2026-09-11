@@ -4,6 +4,8 @@ public interface IVolumeService
 {
 	bool IsSupported { get; }
 
+	event Action? Changed;
+
 	Task<float?> GetVolumeAsync(CancellationToken cancellationToken = default);
 
 	Task SetVolumeAsync(float level, CancellationToken cancellationToken = default);

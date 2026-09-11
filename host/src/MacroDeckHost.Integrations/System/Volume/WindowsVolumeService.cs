@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using Serilog;
 
 namespace MacroDeckHost.Integrations.System.Volume;
 
@@ -12,7 +13,49 @@ internal sealed class WindowsVolumeService : IVolumeService
 
 	private static readonly Guid _audioEndpointVolumeIid = typeof(IAudioEndpointVolume).GUID;
 
+	private static readonly ILogger _logger = Log.ForContext<WindowsVolumeService>();
+
+	private readonly object _gate = new();
+	private readonly VolumeCallback _callback;
+
+	private volatile Action? _changed;
+	private volatile bool _armed;
+	private IAudioEndpointVolume? _listened;
+	private string? _listenedId;
+
+	public WindowsVolumeService()
+	{
+		_callback = new VolumeCallback(this);
+	}
+
 	public bool IsSupported => true;
+
+	public event Action? Changed
+	{
+		add
+		{
+			lock (_gate)
+			{
+				_changed += value;
+				if (!_armed && _changed is not null)
+				{
+					Arm();
+				}
+			}
+		}
+		remove
+		{
+			lock (_gate)
+			{
+				_changed -= value;
+				if (_armed && _changed is null)
+				{
+					_armed = false;
+					StopListening();
+				}
+			}
+		}
+	}
 
 	public Task<float?> GetVolumeAsync(CancellationToken cancellationToken = default)
 	{
@@ -94,7 +137,23 @@ internal sealed class WindowsVolumeService : IVolumeService
 		return Task.CompletedTask;
 	}
 
-	private static IAudioEndpointVolume? GetEndpointVolume()
+	private void Arm()
+	{
+		_armed = true;
+		try
+		{
+			if (GetEndpointVolume() is { } endpoint)
+			{
+				Marshal.ReleaseComObject(endpoint);
+			}
+		}
+		catch (COMException e)
+		{
+			_logger.Debug(e, "Could not listen for Windows volume changes yet");
+		}
+	}
+
+	private IAudioEndpointVolume? GetEndpointVolume()
 	{
 		var enumerator = (IMMDeviceEnumerator)(object)new MMDeviceEnumerator();
 		try
@@ -111,6 +170,7 @@ internal sealed class WindowsVolumeService : IVolumeService
 			Marshal.ThrowExceptionForHR(hr);
 			try
 			{
+				FollowDefaultEndpoint(device);
 				var iid = _audioEndpointVolumeIid;
 				Marshal.ThrowExceptionForHR(device.Activate(ref iid, ClsCtxAll, IntPtr.Zero, out var instance));
 				return (IAudioEndpointVolume)instance;
@@ -123,6 +183,82 @@ internal sealed class WindowsVolumeService : IVolumeService
 		finally
 		{
 			Marshal.ReleaseComObject(enumerator);
+		}
+	}
+
+	private void FollowDefaultEndpoint(IMMDevice device)
+	{
+		if (!_armed || device.GetId(out var id) != 0)
+		{
+			return;
+		}
+
+		lock (_gate)
+		{
+			if (!_armed || id == _listenedId)
+			{
+				return;
+			}
+
+			StopListening();
+
+			var iid = _audioEndpointVolumeIid;
+			if (device.Activate(ref iid, ClsCtxAll, IntPtr.Zero, out var instance) != 0)
+			{
+				return;
+			}
+
+			var endpoint = (IAudioEndpointVolume)instance;
+			if (endpoint.RegisterControlChangeNotify(_callback) != 0)
+			{
+				_logger.Debug("Could not register for Windows volume change notifications");
+				Marshal.ReleaseComObject(endpoint);
+				return;
+			}
+
+			_listened = endpoint;
+			_listenedId = id;
+		}
+	}
+
+	private void StopListening()
+	{
+		if (_listened is null)
+		{
+			return;
+		}
+
+		_ = _listened.UnregisterControlChangeNotify(_callback);
+		Marshal.ReleaseComObject(_listened);
+		_listened = null;
+		_listenedId = null;
+	}
+
+	[ComVisible(true)]
+	private sealed class VolumeCallback : IAudioEndpointVolumeCallback
+	{
+		private readonly WindowsVolumeService _owner;
+
+		public VolumeCallback(WindowsVolumeService owner)
+		{
+			_owner = owner;
+		}
+
+		public int OnNotify(IntPtr notifyData)
+		{
+			try
+			{
+				if (_owner._armed)
+				{
+					_owner._changed?.Invoke();
+				}
+			}
+			catch (Exception e)
+			{
+				_logger.Error(e, "The Windows volume change callback failed");
+			}
+
+			return 0;
 		}
 	}
 
@@ -153,6 +289,21 @@ internal sealed class WindowsVolumeService : IVolumeService
 			int clsCtx,
 			IntPtr activationParams,
 			[MarshalAs(UnmanagedType.IUnknown)] out object instance);
+
+		[PreserveSig]
+		int OpenPropertyStore(int stgmAccess, out IntPtr properties);
+
+		[PreserveSig]
+		int GetId([MarshalAs(UnmanagedType.LPWStr)] out string id);
+	}
+
+	[ComImport]
+	[Guid("657804FA-D6AD-4496-8A60-352752AF4F89")]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	private interface IAudioEndpointVolumeCallback
+	{
+		[PreserveSig]
+		int OnNotify(IntPtr notifyData);
 	}
 
 	[ComImport]
@@ -161,10 +312,10 @@ internal sealed class WindowsVolumeService : IVolumeService
 	private interface IAudioEndpointVolume
 	{
 		[PreserveSig]
-		int RegisterControlChangeNotify(IntPtr notify);
+		int RegisterControlChangeNotify(IAudioEndpointVolumeCallback notify);
 
 		[PreserveSig]
-		int UnregisterControlChangeNotify(IntPtr notify);
+		int UnregisterControlChangeNotify(IAudioEndpointVolumeCallback notify);
 
 		[PreserveSig]
 		int GetChannelCount(out uint channelCount);

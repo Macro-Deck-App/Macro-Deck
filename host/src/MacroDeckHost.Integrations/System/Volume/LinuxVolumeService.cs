@@ -14,6 +14,12 @@ internal sealed partial class LinuxVolumeService : IVolumeService
 
 	public bool IsSupported => _hasPactl || _hasAmixer;
 
+	public event Action? Changed
+	{
+		add { }
+		remove { }
+	}
+
 	public async Task<float?> GetVolumeAsync(CancellationToken cancellationToken = default)
 	{
 		if (_hasPactl)
