@@ -24,7 +24,9 @@ same reference as an analogue face. Splitting the two is what lets a digital run
 shape rather than each inventing its own.
 
 Never compose a time out of several nodes. Separator, digit system, writing direction and the position of
-the day period all come from the reader's own language, so a producer that assembles the pieces itself
+the day period all come from the reader's own language, and for `time` the hour cycle follows the user's
+app-wide time format preference (12-hour, 24-hour or the operating system's) as supplied by the host,
+falling back to the reader's language. A producer that assembles the pieces itself
 gets Korean and right-to-left languages wrong. Where a producer does need a particular shape - a deck is
 a fixed display its owner arranges, and a clock set to a 12-hour face has to stay one on every device it
 is shown on - it picks a `format` that names that shape, never a pattern of its own.
@@ -55,7 +57,7 @@ are drawn with equal advance width, so the run does not shift sideways as it cou
 
 | value | what the run shows |
 |---|---|
-| `time` | The clock time, its hour cycle and shape chosen by the reader's own language |
+| `time` | The clock time in the reader's own language; its hour cycle follows the user's app-wide time format preference (12h, 24h or system) when the host supplies one, else the reader's language. The pinned `time-*` formats below are unaffected |
 | `time-12h` | A 12-hour face with the reader's day period; hour `1`-`12` |
 | `time-12h-padded` | The same, hour `01`-`12` |
 | `time-24h` | A 24-hour face, no day period; hour `00`-`23` |

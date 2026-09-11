@@ -12769,6 +12769,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Systém</value>
     <comment>The language selector's first entry, meaning the operating system's language rather than a chosen one. Translate it only where the word for the operating system differs.</comment>
   </data>
+  <data name="Settings.Language.TimeFormatDescription" xml:space="preserve">
+    <value>Způsob zobrazení času na všech připojených klientech. Možnost Systém se řídí 12hodinovým nebo 24hodinovým nastavením operačního systému.</value>
+  </data>
+  <data name="Settings.Language.TimeFormatLabel" xml:space="preserve">
+    <value>Formát času</value>
+  </data>
   <data name="Settings.Logging.Description" xml:space="preserve">
     <value>Nastavte, jak podrobně Macro Deck zaznamenává svůj běh.</value>
   </data>
@@ -15106,7 +15112,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>24hodinový</value>
   </data>
   <data name="Widgets.Clock.HourCycleAuto" xml:space="preserve">
-    <value>Podle zařízení</value>
+    <value>Podle nastavení aplikace</value>
   </data>
   <data name="Widgets.Clock.LabelPlaceholderExample" xml:space="preserve">
     <value>např. Kancelář</value>

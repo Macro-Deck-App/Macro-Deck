@@ -8,6 +8,7 @@ export interface LocalizationCatalogSnapshot {
   culture?: string;
   fallbackCulture?: string;
   translations?: { [key: string]: string };
+  hourCycle?: 'h12' | 'h23';
 }
 
 export const DEFAULT_CULTURE = 'en';
@@ -17,10 +18,15 @@ const MAX_ARGUMENT_DEPTH = 4;
 export class LocalizationCatalog implements LocalizationTranslator {
   private translations: { [key: string]: string } = { ...StringsDefaults, ...ClientAppStringsDefaults };
   private active = DEFAULT_CULTURE;
+  private activeHourCycle: 'h12' | 'h23' | undefined;
   private readonly listeners: Array<() => void> = [];
 
   culture(): string {
     return this.active;
+  }
+
+  hourCycle(): 'h12' | 'h23' | undefined {
+    return this.activeHourCycle;
   }
 
   onChange(listener: () => void): () => void {
@@ -33,6 +39,7 @@ export class LocalizationCatalog implements LocalizationTranslator {
 
   apply(snapshot: LocalizationCatalogSnapshot): void {
     this.active = snapshot.culture || DEFAULT_CULTURE;
+    this.activeHourCycle = snapshot.hourCycle === 'h12' || snapshot.hourCycle === 'h23' ? snapshot.hourCycle : undefined;
     this.translations = { ...StringsDefaults, ...ClientAppStringsDefaults, ...(snapshot.translations ?? {}) };
     for (let index = 0; index < this.listeners.length; index++) this.listeners[index]();
   }

@@ -368,7 +368,7 @@ export class LogsTabComponent {
   }
 
   time(entry: LogEntry): string {
-    return formatLogTime(entry.timestamp);
+    return formatLogTime(entry.timestamp, this.localization.timeLocale());
   }
 
   origin(entry: LogEntry): string {

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { GetAboutInfoResponse } from '@macro-deck/runtime';
-import { ApiService, SettingsRowComponent, SettingsSectionComponent, TranslatePipe } from '@shared';
+import { ApiService, LocalizationService, SettingsRowComponent, SettingsSectionComponent, TranslatePipe } from '@shared';
 import { ExternalLinkService } from '../../../../services/external-link.service';
 import { UpdateCheckComponent } from './update-check.component';
 import { formatBuildVersion } from '../../../../services';
@@ -18,6 +18,7 @@ const LICENSE_URL = 'https://www.apache.org/licenses/LICENSE-2.0';
 export class AboutSettingsComponent {
   private readonly api = inject(ApiService);
   private readonly externalLinks = inject(ExternalLinkService);
+  private readonly localization = inject(LocalizationService);
 
   readonly info = signal<GetAboutInfoResponse | null>(null);
   readonly loadFailed = signal(false);
@@ -30,7 +31,9 @@ export class AboutSettingsComponent {
       return null;
     }
     const parsed = new Date(timestamp);
-    return Number.isNaN(parsed.getTime()) ? timestamp : parsed.toLocaleString();
+    if (Number.isNaN(parsed.getTime())) return timestamp;
+    const { locale, hourCycle } = this.localization.timeLocale();
+    return parsed.toLocaleString(locale, { hourCycle });
   });
 
   readonly licenseLabel = computed(() => {

@@ -4,6 +4,8 @@ public class UpdateLocalizationSettingsRequest
 {
 	public string? Culture { get; set; }
 
+	public string? TimeFormat { get; set; }
+
 	/// <summary>
 	/// Clears the stored choice so the operating system's language applies, now and whenever it changes.
 	/// <see cref="Culture" /> is ignored when this is set - the two are alternatives, not a value and a

@@ -148,7 +148,9 @@ public static class UiTimeFormats
 {
 	/// <summary>
 	/// The clock time of the referenced instant, formatted in the reader's own language, including the
-	/// seconds exactly when <see cref="UiComponentProperties.Seconds" /> is set.
+	/// seconds exactly when <see cref="UiComponentProperties.Seconds" /> is set. The hour cycle follows the
+	/// user's app-wide time format preference (12-hour, 24-hour or the operating system's) when the host
+	/// supplies one, and the reader's language otherwise; the pinned <c>time-*</c> formats are unaffected.
 	///
 	/// <para>
 	/// <b>The seconds are drawn differently, and that is normative</b> - the properties do not say so,

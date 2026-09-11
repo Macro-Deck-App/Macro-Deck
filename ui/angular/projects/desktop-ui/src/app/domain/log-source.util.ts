@@ -1,4 +1,4 @@
-import { LogEntry, LogEntryLevel, LogEntrySource, LogQuery, LogSourceSummary } from '@macro-deck/runtime';
+import { LocalizationHourCycle, LogEntry, LogEntryLevel, LogEntrySource, LogQuery, LogSourceSummary } from '@macro-deck/runtime';
 
 export type LogSourceFilter =
   | { kind: 'all' }
@@ -156,13 +156,16 @@ export function formatLogEntryForCopy(entry: LogEntry, origin: string): string {
   return entry.exception ? `${line}\n${entry.exception}` : line;
 }
 
-export function formatLogTime(timestamp: string): string {
+export function formatLogTime(timestamp: string, time: { locale: string; hourCycle?: LocalizationHourCycle }): string {
   const date = new Date(timestamp);
   if (Number.isNaN(date.getTime())) {
     return timestamp;
   }
 
-  const pad = (value: number): string => value.toString().padStart(2, '0');
-
-  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  return date.toLocaleTimeString(time.locale, {
+    hour: time.hourCycle === 'h12' ? 'numeric' : '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: time.hourCycle ?? 'h23',
+  });
 }

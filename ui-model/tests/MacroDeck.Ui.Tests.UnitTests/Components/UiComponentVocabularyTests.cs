@@ -437,6 +437,35 @@ public class UiComponentVocabularyTests
 			],
 		};
 
+	[Test]
+	public void A_list_emits_its_direction_only_when_one_is_declared()
+	{
+		var tree = UiViewBuilder.Build(WidgetSurface(),
+			new UiStack
+			{
+				Key = "root",
+				Children =
+				[
+					new UiList { Key = "plain", Children = [new UiTextRun { Key = "a", Text = "a" }] },
+					new UiList
+					{
+						Key = "row",
+						Direction = UiComponentDirections.Horizontal,
+						Children = [new UiTextRun { Key = "b", Text = "b" }],
+					},
+				],
+			});
+
+		var lists = Walk(tree.Root).Where(node => node.Type == "ui.list")
+			.ToDictionary(node => node.Id.Split('.')[^1], StringComparer.Ordinal);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(lists["plain"].Properties.ContainsKey("direction"), Is.False);
+			Assert.That(lists["row"].Properties["direction"].GetString(), Is.EqualTo("horizontal"));
+		});
+	}
+
 	private static IEnumerable<UiNode> Walk(UiNode node)
 	{
 		yield return node;

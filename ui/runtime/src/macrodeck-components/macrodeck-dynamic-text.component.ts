@@ -51,7 +51,7 @@ function timeRun(node: UiNode, ctx: UiComponentContext<UiDynamicTextState>): Tim
   const plain = (before: string): TimeRun => ({ before, seconds: '', after: '' });
 
   if (format === UiTimeFormats.Time) {
-    return formatTimeRun(instant, reference.zone, showsSeconds(node), locale);
+    return formatTimeRun(instant, reference.zone, showsSeconds(node), locale, undefined, ctx.host.hourCycle?.());
   }
   if (format in HOUR_STYLES) {
     return formatTimeRun(instant, reference.zone, showsSeconds(node), locale, HOUR_STYLES[format]);

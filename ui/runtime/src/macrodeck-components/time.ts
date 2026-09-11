@@ -93,6 +93,7 @@ export function formatTimeRun(
   withSeconds: boolean,
   locale: string,
   hour?: UiHourStyle,
+  preferredCycle?: 'h12' | 'h23',
 ): UiTimeRun {
   if (!hasIntlParts()) {
     // 24-hour: which of the two a language writes is locale data, and there is none here. A producer
@@ -110,7 +111,7 @@ export function formatTimeRun(
     // with two digits anyway - which is exactly the leading zero this format promises to control.
     hour: hour ? '2-digit' : 'numeric',
     minute: '2-digit',
-    ...(hour ? { hourCycle: hour.cycle } : {}),
+    ...(hour ? { hourCycle: hour.cycle } : preferredCycle ? { hourCycle: preferredCycle } : {}),
     ...(withSeconds ? { second: '2-digit' } : {}),
     ...(timeZone ? { timeZone } : {}),
   }).formatToParts(instant), hour, locale);

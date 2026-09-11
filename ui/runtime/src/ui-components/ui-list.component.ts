@@ -1,7 +1,7 @@
 import { emitsEvent } from '../ui-framework/node-properties.util';
 import { UiComponents } from './ui-component-types';
 import { UiComponentEvents } from './component-events';
-import { nodeGapPx, nodePaddingPx, stackBackground } from './style';
+import { nodeGapPx, nodeIsHorizontal, nodePaddingPx, stackBackground } from './style';
 import type { UiComponentContext, UiComponentDefinition } from '../ui-framework/component-registry';
 import { px } from './px.util';
 
@@ -12,11 +12,12 @@ export interface UiListState {
   revealTimer: ReturnType<typeof setTimeout> | null;
 }
 
-function lastRevealedIndex(element: HTMLElement): number {
-  const bottom = element.scrollTop + element.clientHeight;
+function lastRevealedIndex(element: HTMLElement, horizontal: boolean): number {
+  const end = horizontal ? element.scrollLeft + element.clientWidth : element.scrollTop + element.clientHeight;
   let last = -1;
   for (let index = 0; index < element.children.length; index++) {
-    if ((element.children[index] as HTMLElement).offsetTop <= bottom) last = index;
+    const child = element.children[index] as HTMLElement;
+    if ((horizontal ? child.offsetLeft : child.offsetTop) <= end) last = index;
   }
   return last;
 }
@@ -30,9 +31,10 @@ function reportReveal(element: HTMLElement, ctx: UiComponentContext<UiListState>
 
   // A list with no box has revealed nothing. Without this, a list painted before it has been laid out
   // reads every child as visible at offset zero, claims the last index and never asks again.
-  if (element.clientHeight <= 0) return;
+  const horizontal = nodeIsHorizontal(node);
+  if ((horizontal ? element.clientWidth : element.clientHeight) <= 0) return;
 
-  const index = lastRevealedIndex(element);
+  const index = lastRevealedIndex(element, horizontal);
   if (index <= state.revealed) return;
 
   state.revealed = index;
@@ -42,6 +44,8 @@ function reportReveal(element: HTMLElement, ctx: UiComponentContext<UiListState>
 
 export const uiListComponent: UiComponentDefinition<UiListState> = {
   type: UiComponents.List,
+  // Version 2 adds the horizontal direction, which a version 1 reader would silently scroll vertically.
+  version: { minimum: 1, maximum: 2 },
 
   create(doc: Document) {
     return doc.createElement('div');
@@ -61,7 +65,10 @@ export const uiListComponent: UiComponentDefinition<UiListState> = {
     const padding = nodePaddingPx(node, ctx.basis, ctx.crossExtent);
     const gap = nodeGapPx(node, ctx.basis, ctx.crossExtent);
 
+    const horizontal = nodeIsHorizontal(node);
+
     ctx.setClassName(element, 'widget-list');
+    ctx.setClass(element, 'widget-list-horizontal', horizontal);
     ctx.setStyle(element, 'gap', px(gap));
     ctx.setStyle(element, 'padding', px(padding));
     ctx.setStyle(element, 'background', stackBackground(node) ?? null);
@@ -73,17 +80,20 @@ export const uiListComponent: UiComponentDefinition<UiListState> = {
     // nothing, which is the whole reason this is not a stack.
     const children = node.children ?? [];
     const layOut = (inner: number | null) => {
-      const entries: Array<{ child: typeof children[number]; box: { width: number | null; height: null }; crossExtent: number | null }> = [];
+      const entries: Array<{ child: typeof children[number]; box: { width: number | null; height: number | null }; crossExtent: number | null }> = [];
       for (let index = 0; index < children.length; index++) {
-        entries.push({ child: children[index], box: { width: inner, height: null }, crossExtent: inner });
+        const box = horizontal ? { width: null, height: inner } : { width: inner, height: null };
+        entries.push({ child: children[index], box, crossExtent: inner });
       }
       ctx.syncChildren(element, entries);
     };
 
-    const given = ctx.box.width === null ? null : Math.max(0, ctx.box.width - 2 * padding);
+    const boxCross = horizontal ? ctx.box.height : ctx.box.width;
+    const given = boxCross === null ? null : Math.max(0, boxCross - 2 * padding);
     layOut(given);
 
-    const available = element.clientWidth === 0 ? null : Math.max(0, element.clientWidth - 2 * padding);
+    const client = horizontal ? element.clientHeight : element.clientWidth;
+    const available = client === 0 ? null : Math.max(0, client - 2 * padding);
     if (available !== null && (given === null || Math.abs(available - given) >= 0.5)) layOut(available);
 
     // Asked once after every paint as well as on scroll: a list whose content does not fill its box has

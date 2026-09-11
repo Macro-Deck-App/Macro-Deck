@@ -89,6 +89,10 @@ public class PluginPairingServiceTests
 		public Task<LocalizationSettings> GetLocalization() => throw new NotSupportedException();
 
 		public Task<LocalizationSettings> SetLocalization(string? culture) => throw new NotSupportedException();
+
+		public Task<string> GetTimeFormat() => Task.FromResult(AppPreferenceService.TimeFormatSystem);
+
+		public Task<string> SetTimeFormat(string? timeFormat) => throw new NotSupportedException();
 	}
 
 	private ManualTimeProvider _time = null!;

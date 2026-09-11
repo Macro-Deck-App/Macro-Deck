@@ -11,5 +11,14 @@
         [ngModel]="selected()"
         (ngModelChange)="selectCulture($event)" />
     </shared-settings-row>
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Language.TimeFormatLabel' | translate"
+      [description]="'macrodeck.app:Settings.Language.TimeFormatDescription' | translate">
+      <shared-select
+        [options]="timeFormatOptions()"
+        [disabled]="applying()"
+        [ngModel]="timeFormat()"
+        (ngModelChange)="selectTimeFormat($event)" />
+    </shared-settings-row>
   </shared-settings-section>
 </div>
