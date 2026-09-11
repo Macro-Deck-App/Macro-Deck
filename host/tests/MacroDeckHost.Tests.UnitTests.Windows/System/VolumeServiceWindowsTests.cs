@@ -32,4 +32,18 @@ public class VolumeServiceWindowsTests
 				"Both readings come from the same default endpoint, so they are available together.");
 		});
 	}
+
+	[Test]
+	public void Subscribing_to_and_unsubscribing_from_volume_changes_does_not_throw()
+	{
+		var service = VolumeServiceFactory.Create();
+		Action handler = () => { };
+
+		Assert.Multiple(() =>
+		{
+			Assert.DoesNotThrow(() => service.Changed += handler);
+			Assert.DoesNotThrowAsync(() => service.GetVolumeAsync());
+			Assert.DoesNotThrow(() => service.Changed -= handler);
+		});
+	}
 }

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Events.Handlers;
 using MacroDeckHost.Application.Rendering;
@@ -213,6 +214,49 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 		Assert.That(two.ReadCount, Is.EqualTo(1));
 	}
 
+	[Test]
+	public async Task A_definition_request_reads_that_variable_early_once_and_leaves_its_siblings_alone()
+	{
+		var integration = CountingIntegration("app.test.one");
+		integration.Variables =
+		[
+			VariableDefinition.Eager("first", SdkVariableType.Text, refreshInterval: TimeSpan.FromMinutes(5)),
+			VariableDefinition.Eager("second", SdkVariableType.Text, refreshInterval: TimeSpan.FromMinutes(5))
+		];
+		var refresh = new VariableRefreshSignal();
+		var service = CreateService(new ConfigurableIntegrationRegistry([integration]),
+			new RecordingVariableService(),
+			new VariablePollingInvalidationSignal(),
+			refresh);
+
+		await DispatchUntil(service, () => integration.ReadsOf("first") == 1 && integration.ReadsOf("second") == 1);
+
+		refresh.RequestDefinitionRefresh("app.test.one", "first");
+		await DispatchUntil(service, () => integration.ReadsOf("first") == 2);
+		await service.DispatchDue(CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(integration.ReadsOf("first"), Is.EqualTo(2));
+			Assert.That(integration.ReadsOf("second"), Is.EqualTo(1));
+		});
+	}
+
+	private static async Task DispatchUntil(IntegrationVariablePollingBackgroundService service, Func<bool> done)
+	{
+		var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(30);
+		while (!done())
+		{
+			if (DateTime.UtcNow > deadline)
+			{
+				Assert.Fail("the expected reads never happened");
+			}
+
+			await service.DispatchDue(CancellationToken.None);
+			await Task.Delay(5);
+		}
+	}
+
 	private static Task DispatchUntilRead(
 		IntegrationVariablePollingBackgroundService service,
 		CountingVariableProviderIntegration integration,
@@ -256,14 +300,18 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 
 	private sealed class CountingVariableProviderIntegration : FakeVariableProviderIntegration
 	{
+		private readonly ConcurrentDictionary<string, int> _readsById = new(StringComparer.Ordinal);
 		private int _readCount;
 
 		public int ReadCount => Volatile.Read(ref _readCount);
+
+		public int ReadsOf(string localId) => _readsById.TryGetValue(localId, out var reads) ? reads : 0;
 
 		public override ValueTask<VariableReading> ReadAsync(
 			string localId,
 			CancellationToken cancellationToken = default)
 		{
+			_readsById.AddOrUpdate(localId, 1, static (_, reads) => reads + 1);
 			Interlocked.Increment(ref _readCount);
 			return ValueTask.FromResult(VariableReading.Of("value"));
 		}

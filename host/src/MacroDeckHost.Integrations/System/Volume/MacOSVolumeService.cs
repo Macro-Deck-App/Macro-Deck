@@ -1,5 +1,7 @@
+using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using Serilog;
 
 namespace MacroDeckHost.Integrations.System.Volume;
 
@@ -21,7 +23,58 @@ internal sealed class MacOsVolumeService : IVolumeService
 
 	private static readonly uint[] _stereoElements = [1, 2];
 
+	private static readonly AudioObjectPropertyAddress[] _deviceAddresses =
+	[
+		new(VolumeScalarSelector, OutputScope, MainElement),
+		new(VolumeScalarSelector, OutputScope, 1),
+		new(VolumeScalarSelector, OutputScope, 2),
+		new(MuteSelector, OutputScope, MainElement)
+	];
+
+	private static readonly ILogger _logger = Log.ForContext<MacOsVolumeService>();
+
+	// CoreAudio keeps this pointer for as long as any listener is registered, so the delegate has to stay
+	// reachable for the process lifetime.
+	private static readonly PropertyListener _listener = OnPropertyChanged;
+	private static readonly IntPtr _listenerPointer = Marshal.GetFunctionPointerForDelegate(_listener);
+
+	private static long _nextToken;
+	private static readonly ConcurrentDictionary<IntPtr, MacOsVolumeService> _instances = new();
+
+	private readonly object _gate = new();
+
+	private volatile Action? _changed;
+	private volatile bool _armed;
+	private IntPtr _token;
+	private uint _listenedDevice = UnknownDevice;
+
 	public bool IsSupported => true;
+
+	public event Action? Changed
+	{
+		add
+		{
+			lock (_gate)
+			{
+				_changed += value;
+				if (!_armed && _changed is not null)
+				{
+					Arm();
+				}
+			}
+		}
+		remove
+		{
+			lock (_gate)
+			{
+				_changed -= value;
+				if (_armed && _changed is null)
+				{
+					Disarm();
+				}
+			}
+		}
+	}
 
 	public Task<float?> GetVolumeAsync(CancellationToken cancellationToken = default)
 		=> Task.FromResult(ReadVolume());
@@ -39,6 +92,91 @@ internal sealed class MacOsVolumeService : IVolumeService
 	{
 		_ = TryWriteMute(mute);
 		return Task.CompletedTask;
+	}
+
+	private void Arm()
+	{
+		_token = checked((IntPtr)Interlocked.Increment(ref _nextToken));
+		_instances[_token] = this;
+		_armed = true;
+
+		var address = new AudioObjectPropertyAddress(DefaultOutputDeviceSelector, GlobalScope, MainElement);
+		_ = AudioObjectAddPropertyListener(SystemObject, ref address, _listenerPointer, _token);
+		ListenTo(ReadDefaultOutputDevice() ?? UnknownDevice);
+	}
+
+	private void Disarm()
+	{
+		_armed = false;
+
+		var address = new AudioObjectPropertyAddress(DefaultOutputDeviceSelector, GlobalScope, MainElement);
+		_ = AudioObjectRemovePropertyListener(SystemObject, ref address, _listenerPointer, _token);
+		ListenTo(UnknownDevice);
+		_instances.TryRemove(_token, out _);
+	}
+
+	private void Retarget()
+	{
+		lock (_gate)
+		{
+			if (_armed)
+			{
+				ListenTo(ReadDefaultOutputDevice() ?? UnknownDevice);
+			}
+		}
+	}
+
+	private void ListenTo(uint device)
+	{
+		if (_listenedDevice != UnknownDevice)
+		{
+			foreach (var entry in _deviceAddresses)
+			{
+				var address = entry;
+				_ = AudioObjectRemovePropertyListener(_listenedDevice, ref address, _listenerPointer, _token);
+			}
+		}
+
+		_listenedDevice = device;
+		if (device == UnknownDevice)
+		{
+			return;
+		}
+
+		foreach (var entry in _deviceAddresses)
+		{
+			var address = entry;
+			if (HasProperty(device, ref address))
+			{
+				_ = AudioObjectAddPropertyListener(device, ref address, _listenerPointer, _token);
+			}
+		}
+	}
+
+	private static int OnPropertyChanged(uint objectId, uint addressCount, IntPtr addresses, IntPtr clientData)
+	{
+		try
+		{
+			if (!_instances.TryGetValue(clientData, out var service) || !service._armed)
+			{
+				return 0;
+			}
+
+			// Moving the listeners locks the gate, and a CoreAudio callback must never block on it.
+			if (objectId == SystemObject)
+			{
+				ThreadPool.QueueUserWorkItem(static s => s.Retarget(), service, preferLocal: false);
+			}
+
+			service._changed?.Invoke();
+		}
+		catch (Exception e)
+		{
+			// Runs inside a CoreAudio call frame: an exception unwinding into native code is undefined behaviour.
+			_logger.Error(e, "The macOS volume change callback failed");
+		}
+
+		return 0;
 	}
 
 	private static float? ReadVolume()
@@ -160,6 +298,23 @@ internal sealed class MacOsVolumeService : IVolumeService
 		=> HasProperty(device, ref address) &&
 			AudioObjectIsPropertySettable(device, ref address, out var settable) == 0 &&
 			settable != 0;
+
+	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+	private delegate int PropertyListener(uint objectId, uint addressCount, IntPtr addresses, IntPtr clientData);
+
+	[DllImport(CoreAudioLibrary)]
+	private static extern int AudioObjectAddPropertyListener(
+		uint objectId,
+		ref AudioObjectPropertyAddress address,
+		IntPtr listener,
+		IntPtr clientData);
+
+	[DllImport(CoreAudioLibrary)]
+	private static extern int AudioObjectRemovePropertyListener(
+		uint objectId,
+		ref AudioObjectPropertyAddress address,
+		IntPtr listener,
+		IntPtr clientData);
 
 	[DllImport(CoreAudioLibrary)]
 	private static extern int AudioObjectGetPropertyData(

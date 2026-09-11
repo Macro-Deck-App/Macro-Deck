@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Threading.Channels;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.System.Actions;
 using MacroDeckHost.Integrations.System.Application;
 using MacroDeckHost.Integrations.System.Focus;
@@ -26,7 +27,8 @@ public sealed class SystemIntegration
 		IVariableProvider,
 		IIntegrationIssueProvider,
 		IIntegrationIconProvider,
-		IMigrationProvider
+		IMigrationProvider,
+		IVariableRefreshSignalConsumer
 {
 	public const string IntegrationId = "app.macro-deck.system";
 
@@ -42,6 +44,7 @@ public sealed class SystemIntegration
 	private const string GigabyteUnit = "GB";
 
 	private const string VolumePercentId = "system-volume-percent";
+	private const string MutedId = "system-muted";
 
 	private const int MaxIndexedGpus = 8;
 
@@ -86,6 +89,7 @@ public sealed class SystemIntegration
 	private VariableHandle? _focusedAppHandle;
 	private VariableHandle? _focusedAppPathHandle;
 	private VariableHandle? _focusedAppBundleIdHandle;
+	private IVariableRefreshSignal? _refreshSignal;
 
 	public SystemIntegration()
 		: this(ApplicationServiceFactory.Create(),
@@ -281,6 +285,9 @@ public sealed class SystemIntegration
 	{
 		_variableAccessor.Current = context.Variables;
 
+		_volume.Changed -= OnVolumeChanged;
+		_volume.Changed += OnVolumeChanged;
+
 		_focusedAppHandle = null;
 		_focusedAppPathHandle = null;
 		_focusedAppBundleIdHandle = null;
@@ -303,6 +310,7 @@ public sealed class SystemIntegration
 
 	public async Task ShutdownAsync()
 	{
+		_volume.Changed -= OnVolumeChanged;
 		FocusedApplicationSnapshot.Current.Changed -= OnFocusChanged;
 		_focusChannel?.Writer.TryComplete();
 
@@ -315,6 +323,14 @@ public sealed class SystemIntegration
 	}
 
 	private void OnFocusChanged(FocusedAppInfo? info) => _focusChannel?.Writer.TryWrite(info);
+
+	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
+
+	private void OnVolumeChanged()
+	{
+		_refreshSignal?.RequestDefinitionRefresh(IntegrationId, VolumePercentId);
+		_refreshSignal?.RequestDefinitionRefresh(IntegrationId, MutedId);
+	}
 
 	// One consumer draining a capacity-1 drop-oldest channel, rather than an unordered Task per focus
 	// change: the variable API is async and Changed fires synchronously on the focus pipeline's own
@@ -362,7 +378,7 @@ public sealed class SystemIntegration
 				await _volume.GetVolumeAsync(cancellationToken) is { } volume
 					? VariableReading.Of((int)Math.Round(volume * 100), MinVolumePercent, MaxVolumePercent, 1)
 					: VariableReading.Unavailable,
-			"system-muted" when _volume.IsSupported =>
+			MutedId when _volume.IsSupported =>
 				VariableReading.Of(await _volume.GetMuteAsync(cancellationToken)),
 			"system-cpu-usage-percent" =>
 				VariableReading.Of(RoundPercent(await _metrics.GetCpuUsageAsync(cancellationToken))),

@@ -84,6 +84,7 @@ public sealed class IntegrationVariablePollingBackgroundService : HostReadyBackg
 			}
 
 			runtime.BringForward(_refresh.DrainFor(integration.Id));
+			runtime.BringForwardDefinitions(_refresh.DrainDefinitionsFor(integration.Id));
 			if (_refresh.DrainEagerRefreshRequested(integration.Id))
 			{
 				runtime.BringForwardAll();
@@ -267,6 +268,17 @@ public sealed class IntegrationVariablePollingBackgroundService : HostReadyBackg
 			foreach (var state in Variables.Values)
 			{
 				state.Schedule.MarkDueNow();
+			}
+		}
+
+		public void BringForwardDefinitions(IReadOnlyList<string> definitionIds)
+		{
+			foreach (var definitionId in definitionIds)
+			{
+				if (Variables.TryGetValue(definitionId, out var state))
+				{
+					state.Schedule.MarkDueNow();
+				}
 			}
 		}
 

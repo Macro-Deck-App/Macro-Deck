@@ -4,6 +4,12 @@ internal sealed class NullVolumeService : IVolumeService
 {
 	public bool IsSupported => false;
 
+	public event Action? Changed
+	{
+		add { }
+		remove { }
+	}
+
 	public Task<float?> GetVolumeAsync(CancellationToken cancellationToken = default)
 		=> Task.FromResult<float?>(null);
 

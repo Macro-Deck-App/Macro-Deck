@@ -60,4 +60,35 @@ internal sealed class VariableRefreshSignalTests
 			Assert.That(signal.DrainFor("app.test.one"), Is.EqualTo(new[] { variable }));
 		});
 	}
+
+	[Test]
+	public void Definition_requests_are_reported_once_and_coalesce()
+	{
+		var signal = new VariableRefreshSignal();
+
+		signal.RequestDefinitionRefresh("app.test.one", "volume");
+		signal.RequestDefinitionRefresh("app.test.one", "volume");
+		signal.RequestDefinitionRefresh("app.test.one", "muted");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(signal.DrainDefinitionsFor("app.test.one"), Is.EquivalentTo(new[] { "volume", "muted" }));
+			Assert.That(signal.DrainDefinitionsFor("app.test.one"), Is.Empty);
+		});
+	}
+
+	[Test]
+	public void A_definition_request_belongs_to_one_integration_and_raises_no_other_request()
+	{
+		var signal = new VariableRefreshSignal();
+
+		signal.RequestDefinitionRefresh("app.test.one", "volume");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(signal.DrainDefinitionsFor("app.test.two"), Is.Empty);
+			Assert.That(signal.DrainFor("app.test.one"), Is.Empty);
+			Assert.That(signal.DrainEagerRefreshRequested("app.test.one"), Is.False);
+		});
+	}
 }
