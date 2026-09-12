@@ -16,6 +16,7 @@ using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Widgets;
+using MacroDeckHost.Infrastructure.BackgroundServices;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Triggers;
 using MacroDeckHost.Widgets.ActionButton;
@@ -35,6 +36,12 @@ public class ActionButtonWidgetSessionTests
 		"\"flows\":\"[]\"}";
 
 	private const string LiquidLabelData = "{\"stateMode\":false,\"label\":\"Vol: {{ vol }}%\"}";
+
+	private const string TemplatedTwoStateData =
+		"{\"stateMode\":true,\"activeStateId\":\"a\",\"states\":[" +
+		"{\"id\":\"a\",\"label\":\"A\",\"appearance\":{\"label\":\"{{ vars.name }} Off\"}}," +
+		"{\"id\":\"b\",\"label\":\"B\",\"appearance\":{\"label\":\"{{ vars.name }} On\"}}]," +
+		"\"flows\":\"[]\"}";
 
 	// No "activeStateId" at all - a freshly placed two-state button, never explicitly advanced or set.
 	private const string TwoStateDataNoStoredActiveId =
@@ -531,6 +538,46 @@ public class ActionButtonWidgetSessionTests
 		Assert.That(fixture.LabelSubscriptions.HasAnySubscribers(widgetKey),
 			Is.False,
 			"a signal handler must never be able to register a new subscription once disposal has begun");
+		Assert.That(fixture.LabelRenders.Reader.TryRead(out _),
+			Is.False,
+			"a disposed session must not queue label renders");
+	}
+
+	[Test]
+	public async Task A_state_change_shows_the_new_states_templated_label_without_any_variable_changing()
+	{
+		var fixture = Build(TemplatedTwoStateData, interactive: true, initialLabel: "Strip3 Off");
+		var labelText = new Devices.Surfaces.FakeLabelTextService();
+		labelText.Set(_widgetId, "a", "Strip3 Off");
+		labelText.Set(_widgetId, "b", "Strip3 On");
+		await using var services = new ServiceCollection()
+			.AddScoped<ILabelTextService>(_ => labelText)
+			.BuildServiceProvider();
+		using var labelService = new LabelRenderBackgroundService(new Variables.StartedHostLifetime(),
+			fixture.LabelRenders,
+			services.GetRequiredService<IServiceScopeFactory>(),
+			fixture.Transport,
+			fixture.LabelSubscriptions,
+			fixture.Signals,
+			Serilog.Log.Logger);
+		await labelService.StartAsync(CancellationToken.None);
+
+		fixture.Signals.RaiseStateChanged(
+			new WidgetStateUpdatedEvent { WidgetId = _widgetId.ToString(), StateId = "b" });
+
+		var deadline = DateTime.UtcNow.AddSeconds(15);
+		string? shown;
+		do
+		{
+			await Task.Delay(20);
+			await fixture.Host.SettleAsync();
+			shown = fixture.Host.ById("actionButton.label").Text("text");
+		} while (shown != "Strip3 On" && DateTime.UtcNow < deadline);
+
+		Assert.That(shown, Is.EqualTo("Strip3 On"));
+
+		await labelService.StopAsync(CancellationToken.None);
+		await fixture.Session.DisposeAsync();
 	}
 
 	/// <summary>An <see cref="IWidgetRenderSignals" /> whose subscription <c>Dispose()</c> does not stop
@@ -696,6 +743,7 @@ public class ActionButtonWidgetSessionTests
 		var labelSubscriptions = new LabelSubscriptionTracker();
 		var signals = renderSignals ?? new WidgetRenderSignals();
 		var transport = new RecordingTransport();
+		var labelRenders = new LabelRenderChannel();
 		var iconServiceFake = iconService ?? new FakeWidgetIconService();
 		var iconProviderState = new UiState<WidgetIconResolution>(iconServiceFake.Resolution);
 		var scopeFactory = new ServiceCollection()
@@ -718,6 +766,7 @@ public class ActionButtonWidgetSessionTests
 			labelSubscriptions,
 			signals,
 			transport,
+			labelRenders,
 			interactive);
 		var element = ActionButtonWidgetView.Build(configState,
 			activeState,
@@ -741,7 +790,8 @@ public class ActionButtonWidgetSessionTests
 			stateSubscriptions,
 			labelSubscriptions,
 			iconServiceFake,
-			folder);
+			folder,
+			labelRenders);
 	}
 
 	private sealed record SessionFixture(
@@ -753,7 +803,8 @@ public class ActionButtonWidgetSessionTests
 		WidgetStateSubscriptionTracker StateSubscriptions,
 		LabelSubscriptionTracker LabelSubscriptions,
 		FakeWidgetIconService IconService,
-		FolderEntity Folder);
+		FolderEntity Folder,
+		LabelRenderChannel LabelRenders);
 
 	/// <summary>A configurable <see cref="IWidgetIconService" /> stand-in - defaults to
 	/// <see cref="WidgetIconResolution.Inactive" />, matching a button with no icon-provider assignment.</summary>

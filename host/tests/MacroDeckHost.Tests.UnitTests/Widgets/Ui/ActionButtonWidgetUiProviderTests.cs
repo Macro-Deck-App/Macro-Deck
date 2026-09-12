@@ -456,6 +456,7 @@ public class ActionButtonWidgetUiProviderTests
 			lockState ?? new FakeHostLockState(),
 			new WidgetStateSubscriptionTracker(),
 			new LabelSubscriptionTracker(),
+			new LabelRenderChannel(),
 			renderSignals ?? new WidgetRenderSignals(),
 			new RecordingTransport(),
 			TestLocalization.SampleText,
