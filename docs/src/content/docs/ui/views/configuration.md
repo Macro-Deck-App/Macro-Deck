@@ -3,124 +3,223 @@ title: Serving a configuration view
 description: Rendering a config flow or an action's configuration as a Macro Deck UI tree beside the declared fields it never replaces.
 ---
 
-Configuration is the first place Macro Deck renders your views in the shipped app. This page covers its
-two plugin-facing entry points: an integration's config flow, and one configured instance of an action.
-Both are opt-in and additive - you keep your existing config flow and your existing `Parameters` list
-exactly as they are, and add a tree beside them.
+Serve a tree for an integration's config flow or one configured action instance, beside the declared
+fields it never replaces.
 
-The same surface carries two further entry points with their own rules, because neither has a declared
-field list to fall back to: a folder's selected view (see [Folder views](/ui/views/folder-views/)) and a
-widget (see [Configuring a widget](/ui/views/widget-configuration/)).
+## Example
 
-**A configuration tree renders a transaction it does not own.** It never completes a flow and never
-persists a parameter. `SubmitAsync` remains the only way a config flow accepts values, and the ordinary
-save path remains the only way an action instance is written. That is what keeps secret encryption, OAuth
-and configuration replacement working unchanged - see
-[ADR 0050](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0050-ui-sessions-are-host-brokered.md).
-
-Two rules follow, and both matter:
-
-- **Keep serving the declared fields.** Your `ConfigFlowStep.Fields` and your `IActionDefinition.Parameters`
-  are still required. They are what a client that cannot render a tree falls back to, and for a config
-  flow they are also how Macro Deck learns which submitted values are secret.
-- **Name your top-level inputs after the fields they collect.** A top-level input node's id is the field
-  key it submits, so the tree feeds the same transaction the declared fields do.
-
-## A complete config tree
-
-A two-field step - an API key and a poll interval - authored as a tree whose top-level input ids match
-the declared field keys:
+A config flow whose step is also drawn as a tree. The input keys match the declared field names:
 
 ```csharp
-var apiKey = new UiState<string>(string.Empty);
-var pollSeconds = new UiState<int>(30);
-
-var view = new UiConfigStack
+public sealed class MediaServerIntegration : IPluginIntegration, IUiConfigFlowProvider
 {
-    Key = "root",
-    Children =
-    [
-        new UiStringInput
+    public IReadOnlyList<IActionDefinition> Actions { get; } = [new ToggleAction()];
+
+    public IConfigFlow CreateConfigFlow() => new MediaServerConfigFlow();
+
+    public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+
+    public Task ShutdownAsync() => Task.CompletedTask;
+}
+
+public sealed class MediaServerConfigFlow : IUiConfigFlow
+{
+    private static ConfigFlowStep ConnectionStep() => new()
+    {
+        StepId = "connection",
+        Title = Strings.Setup.ConnectionTitle(),
+        Fields =
+        [
+            ActionParameter.Secret("api_key", label: Strings.Setup.ApiKey(), required: true),
+            ActionParameter.Number("poll_seconds", label: Strings.Setup.PollInterval(), min: 5, max: 3600,
+                defaultValue: 30),
+        ],
+    };
+
+    public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
+        => Task.FromResult(ConfigFlowResult.Step(ConnectionStep()));
+
+    public async Task<ConfigFlowResult> SubmitAsync(string stepId, IReadOnlyDictionary<string, object?> input,
+        IConfigFlowContext context, CancellationToken cancellationToken)
+    {
+        var apiKey = input.GetValueOrDefault("api_key") as string ?? string.Empty;
+
+        return await MediaServerClient.CanConnectAsync(apiKey, cancellationToken)
+            ? ConfigFlowResult.Complete("Media server")
+            : ConfigFlowResult.Error(ConnectionStep(), Strings.Setup.CannotConnect());
+    }
+
+    public Task<IUiSession?> CreateUiSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
+    {
+        var apiKey = new UiState<string>(string.Empty);
+        var pollSeconds = new UiState<double>(30);
+
+        var root = new UiConfigStack
         {
-            Key = "apiKey", // matches ConfigFlowStep.Fields' "apiKey" key
-            Label = MyStrings.ApiKeyLabel(),
-            Secret = true,
-            Binding = Bind.To(apiKey),
-            Required = true,
-        },
-        new UiNumberInput
-        {
-            Key = "pollSeconds", // matches the "pollSeconds" parameter/field key
-            Label = MyStrings.PollIntervalLabel(),
-            Min = 5,
-            Max = 3600,
-            Binding = Bind.To(pollSeconds),
-        },
-    ],
-};
+            Key = "root",
+            Children =
+            [
+                new UiSecretInput
+                {
+                    Key = "api_key",
+                    Label = Strings.Setup.ApiKey(),
+                    Required = true,
+                    Binding = Bind.To(apiKey),
+                },
+                new UiNumberInput
+                {
+                    Key = "poll_seconds",
+                    Label = Strings.Setup.PollInterval(),
+                    Description = Strings.Setup.PollIntervalHint(),
+                    Min = 5,
+                    Max = 3600,
+                    ShowSlider = true,
+                    Binding = Bind.To(pollSeconds),
+                },
+            ],
+        };
+
+        return Task.FromResult<IUiSession?>(new ViewSession(new UiView(request.Surface, root)));
+    }
+}
 ```
 
-Because both input keys are top-level, their node ids are exactly `apiKey` and `pollSeconds` - the same
-keys the declared `ConfigFlowStep.Fields` and `IActionDefinition.Parameters` use, so a submission through
-the tree lands in the same transaction a submission through the fallback fields would.
+`ViewSession` is the adapter from [Serving a view](/ui/views/sessions/#example).
+
+## The tree renders a transaction it does not own
+
+```csharp
+// Declared fields stay - they are the fallback and they mark secrets.
+ActionParameter.Secret("api_key", label: Strings.Setup.ApiKey(), required: true)
+
+// The tree's top-level input with the same key feeds the same submit.
+new UiSecretInput { Key = "api_key", Label = Strings.Setup.ApiKey(), Binding = Bind.To(apiKey) }
+```
+
+A configuration tree never completes a flow and never persists a parameter. `SubmitAsync` stays the only
+way a flow accepts values, and the ordinary save path the only way an action instance is written - which
+keeps secret encryption, OAuth and entry replacement unchanged
+([ADR 0050](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0050-ui-sessions-are-host-brokered.md)).
+
+- **Keep serving the declared fields.** `ConfigFlowStep.Fields` and `IActionDefinition.Parameters` are
+  still required: they are the fallback, and for a config flow they tell Macro Deck which submitted values
+  are secret.
+- **Name top-level inputs after their fields.** A top-level input's node id is the field key it submits.
 
 ## From a config flow
 
-Implement `IUiConfigFlowProvider` on the integration and `IUiConfigFlow` on the flow. It goes on the flow
-object itself so the tree's state and `SubmitAsync`'s state are one thing:
-
 ```csharp
-public sealed class DemoIntegration : IPluginIntegration, IUiConfigFlowProvider
+public sealed class MediaServerIntegration : IPluginIntegration, IUiConfigFlowProvider { /* ... */ }
+
+public sealed class MediaServerConfigFlow : IUiConfigFlow
 {
-    public IConfigFlow CreateConfigFlow() => new DemoConfigFlow();
-}
-
-public sealed class DemoConfigFlow : IUiConfigFlow
-{
-    public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken) => ...;
-
-    public Task<ConfigFlowResult> SubmitAsync(string stepId,
-        IReadOnlyDictionary<string, object?> input,
-        IConfigFlowContext context,
-        CancellationToken cancellationToken) => ...;
-
     public Task<IUiSession?> CreateUiSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-        => Task.FromResult<IUiSession?>(new DemoConfigFlowSession(this));
+        => Task.FromResult<IUiSession?>(new ViewSession(new UiView(request.Surface, BuildTree())));
 }
 ```
 
-Because Macro Deck relays your tree without inspecting it, it cannot tell which of a tree's values are
-sensitive the way it can for a declared field. **A flow serving a tree classifies its own secrets** when
-it completes, by returning them as secret config-flow values.
+`IUiConfigFlowProvider` goes on the integration; `describe` then reports `servesConfigUiTree`.
+`IUiConfigFlow` goes on the flow object itself, so the tree's state and `SubmitAsync`'s state are one
+thing. Macro Deck relays the tree without inspecting it, so it cannot tell which tree values are secret:
+**a flow serving a tree classifies its own secrets** by returning them as `ConfigFlowValue.Secret` from
+`Complete`.
 
 ## From an action
-
-Implement `IUiConfigurableActionDefinition`. One session is created per open configuration surface, so
-several may be live at once for the same action - keep state on the session, never on the definition:
 
 ```csharp
 public sealed class ToggleAction : IUiConfigurableActionDefinition
 {
-    public IReadOnlyList<ActionParameter> Parameters => [ActionParameter.Text("target"), ...];
+    public string Id => "toggle";
 
-    public Task<IUiSession?> CreateConfigurationSessionAsync(
-        ActionConfigurationRequest request,
+    public LocalizedText Name => Strings.Toggle.Name();
+
+    public LocalizedText Description => Strings.Toggle.Description();
+
+    public IReadOnlyList<ActionParameter> Parameters { get; } =
+    [
+        ActionParameter.Text("target", label: Strings.Toggle.Target(), required: true),
+        ActionParameter.Text("mode", label: Strings.Toggle.Mode(), defaultValue: "toggle"),
+    ];
+
+    public IActionExecutor CreateExecutor() => new ToggleExecutor();
+
+    public Task<IUiSession?> CreateConfigurationSessionAsync(ActionConfigurationRequest request,
         CancellationToken cancellationToken)
-        => Task.FromResult<IUiSession?>(new ToggleConfigSession(request.Parameters));
+    {
+        var target = new UiState<string>(Read(request, "target") ?? string.Empty);
+        var mode = new UiState<string>(Read(request, "mode") ?? "toggle");
+
+        var root = new UiConfigStack
+        {
+            Key = "root",
+            Children =
+            [
+                new UiStringInput { Key = "target", Label = Strings.Toggle.Target(), Required = true, Binding = Bind.To(target) },
+                new UiChoiceInput
+                {
+                    Key = "mode",
+                    Label = Strings.Toggle.Mode(),
+                    Segmented = true,
+                    Binding = Bind.To(mode),
+                    Options = UiValue.Of<IReadOnlyList<UiOption>>([
+                        UiOption.Of("on", Strings.Toggle.ModeOn()),
+                        UiOption.Of("off", Strings.Toggle.ModeOff()),
+                        UiOption.Of("toggle", Strings.Toggle.ModeToggle()),
+                    ]),
+                },
+            ],
+        };
+
+        return Task.FromResult<IUiSession?>(new ViewSession(new UiView(request.Session.Surface, root)));
+    }
+
+    private static string? Read(ActionConfigurationRequest request, string name)
+        => request.Parameters.TryGetValue(name, out var value) && value.ValueKind == JsonValueKind.String
+            ? value.GetString()
+            : null;
 }
 ```
 
-`request.Parameters` carries the values already stored on the instance being configured, keyed by
-parameter name, so your tree can render them. `Secret`- and `Password`-typed parameters arrive **masked**
-rather than at their real value: opening a configuration surface is a UI interaction, not an explicit
-intent to reveal a stored secret. You receive the real value the ordinary way, when the user submits.
+One session is created per open configuration surface, so several can be live for the same action at
+once - keep state on the session, never on the definition. `request.Parameters` holds the instance's
+stored values, keyed by parameter name. `Secret` and `Password` parameters arrive **masked**
+(`UiConfigSurfaceAttributes.MaskedSecretValue`, `"$masked"`), because opening a configuration surface is
+not an intent to reveal a secret. You get the real value the ordinary way, when the user submits.
 
-## Which representation a client renders
+## Declining and fallback
 
-Returning `null` from either method declines, which is not an error - Macro Deck renders your declared
-fields instead. The same is true of every other way the tree path can fail: a provider that times out,
-disconnects, or trips a session limit lands the user on the working field list, never on an error.
+```csharp
+public Task<IUiSession?> CreateUiSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
+    => Task.FromResult<IUiSession?>(null); // the client renders the declared fields
+```
 
-The client chooses one representation, never a mix of both. It negotiates the UI model version locally,
-before a session is opened, so a client that cannot render your tree costs you nothing - no session, no
-slot.
+| What happens | What the user gets |
+| --- | --- |
+| You return `null` | The declared fields. Not an error. |
+| The provider times out, disconnects or trips a session limit | The declared fields, never an error. |
+| The client cannot render your UI model version | The declared fields. Negotiated before any session opens - no session, no slot. |
+
+A client renders one representation, never a mix of both.
+
+## Entry points
+
+A `config` surface names its entry point in `UiConfigSurfaceAttributes.EntryPoint`:
+
+| `UiConfigEntryPoints` | Attributes | Served by |
+| --- | --- | --- |
+| `IntegrationConfig` (`integration-config`) | `IntegrationId`, `ConfigFlowSessionId` | `IUiConfigFlow.CreateUiSessionAsync` |
+| `ActionConfig` (`action-config`) | `ActionId`, `Parameters` | `IUiConfigurableActionDefinition.CreateConfigurationSessionAsync` |
+| `FolderViewConfig` (`folder-view-config`) | `FolderId`, `FolderViewId`, `FolderViewConfiguration` | Your `IUiProvider` - see [Folder views](/ui/views/folder-views/) |
+| `WidgetConfig` (`widget-config`) | `WidgetId`, `WidgetType`, `WidgetData`, `WidgetWidth`, `WidgetHeight` | Your `IUiProvider` - see [Configuring a widget](/ui/views/widget-configuration/) |
+
+Out of process, `MacroDeck.Plugin.Hosting` routes `integration-config` and `action-config` to the flow or
+action first; if that target does not exist, serves no tree or declines, it falls through to your
+`IUiProvider`s. Folder views and widgets have no declared field list, so their rules differ - see their
+pages.
+
+## See also
+
+- [Setup flows](/features/setup-flows/)
+- [Actions](/features/actions/)
+- [Serving a view](/ui/views/sessions/)
+- [Configuring a widget](/ui/views/widget-configuration/)

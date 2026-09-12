@@ -3,111 +3,162 @@ title: Serving a view
 description: IUiProvider, the session lifecycle every surface shares, the protocol limits, and what a refused update looks like.
 ---
 
-Macro Deck renders a view inside a **session** that the host owns. Implement
-`MacroDeck.Sdk.Ui.IUiProvider` to serve one:
+Implement `MacroDeck.Sdk.Ui.IUiProvider` to serve a view; Macro Deck owns the session it renders in.
+
+## Example
+
+A deck widget that counts presses, shared by every device showing it:
 
 ```csharp
-public sealed class SetupUiProvider : IUiProvider
+using MacroDeck.Sdk.Ui;
+using MacroDeck.Ui.Components;
+using MacroDeck.Ui.Dsl;
+using MacroDeck.Ui.Model.Events;
+using MacroDeck.Ui.Model.Nodes;
+using MacroDeck.Ui.Model.Patches;
+using MacroDeck.Ui.Model.Surfaces;
+using MacroDeck.Ui.Runtime;
+
+public sealed class CounterUiProvider : IUiProvider
 {
-    public IReadOnlyList<UiSurfaceDeclaration> Surfaces =>
-        [new UiSurfaceDeclaration { Kind = "config", SessionMode = "exclusive" }];
+    private readonly UiState<int> _count = new(0);
+
+    public IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; } =
+        [new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared }];
 
     public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-        => Task.FromResult<IUiSession?>(request.Surface.Kind == "config" ? new SetupSession() : null);
+    {
+        if (request.Surface.Kind != UiSurfaceKinds.Widget)
+        {
+            return Task.FromResult<IUiSession?>(null);
+        }
+
+        var root = new UiButton
+        {
+            Key = "counter",
+            Events = [UiEventHandler.On(UiComponentEvents.Press, () => _count.Value++)],
+            Children = [new UiTextRun { Key = "value", Text = UiText.From(() => _count.Value.ToString()), Size = 0.4 }],
+        };
+
+        return Task.FromResult<IUiSession?>(new ViewSession(new UiView(request.Surface, root)));
+    }
+}
+
+public sealed class ViewSession : IUiSession
+{
+    private readonly UiView _view;
+
+    public ViewSession(UiView view)
+    {
+        _view = view;
+        _view.Changed += (_, _) => Changed?.Invoke(this, EventArgs.Empty);
+        _view.HandlerFaulted += (_, fault)
+            => Faulted?.Invoke(this, new UiSessionFaultedEventArgs(fault.Exception.Message, fault.Exception));
+    }
+
+    public event EventHandler? Changed;
+
+    public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
+
+    public UiTree BuildTree() => _view.Tree;
+
+    public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+
+    public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
+
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }
 ```
 
-`Surfaces` is what Macro Deck reads to learn which surfaces you serve, before anything is initialized - so
-it must be side-effect free and must not depend on a live connection. Declaring a surface does not commit
-you to every session for it: returning `null` from `CreateSessionAsync` declines the surface. The
-surface-kind vocabulary is open (see [Views and surfaces](/ui/views/)), so declining a kind you do not
-recognise is the correct answer, not an error.
+`ViewSession` is the whole adapter between a `MacroDeck.Ui` `UiView` and `IUiSession`; the other pages
+in this section reuse it. `IUiSession` itself speaks only `MacroDeck.Ui.Model` terms, so a provider can
+serve a tree without the DSL.
 
-`IUiSession` is expressed in `MacroDeck.Ui.Model` terms - `BuildTree`, `DrainPatches`, `Changed`,
-`Faulted`, `Dispatch` - so a provider can serve a tree without depending on the DSL. If you authored the
-view with `MacroDeck.Ui`, forward each member to your `UiView`.
+## Declaring surfaces
+
+```csharp
+public IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; } =
+[
+    new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
+    new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+];
+```
+
+Macro Deck reads `Surfaces` before anything is initialized, so it must be side-effect free and must not
+depend on a live connection. Declaring a surface does not commit you to every session for it: return
+`null` from `CreateSessionAsync` to decline one. The kind vocabulary is open (see
+[Views and surfaces](/ui/views/)), so declining a kind you do not recognise is correct, not an error.
 
 ## The lifecycle every surface shares
 
-1. **Open.** The host asks for a session for one surface, carrying the UI model version it speaks. The
-   session id is host-issued.
-2. **Snapshot on request.** The host asks for a full tree when a client attaches and whenever it needs to
-   resynchronise. `BuildTree()` must describe the same revision your emitted patches have reached.
-3. **Patches.** Raise `Changed` when patches are waiting; the host drains them. Coalescing several changes
-   into one raise is expected - the host drains rather than counting raises. A patch dropped in
-   `DrainPatches` is lost to every attached client.
-4. **Events.** `Dispatch` delivers a client event, never concurrently for one session. Reject an event by
-   producing no patch, not by throwing: a throw faults the session.
-5. **Close.** The host disposes the session. It may do so at any time - a client detaching for good, a
-   limit trip, or a fault.
+| Step | What happens | Your side |
+| --- | --- | --- |
+| Open | The host asks for a session for one surface, carrying the UI model version it speaks (`request.UiModelVersion`). | Return a session or `null`. The session id is host-issued. |
+| Snapshot | The host asks for a full tree when a client attaches and whenever it must resynchronise. | `BuildTree()` must describe the revision your emitted patches have reached. |
+| Patches | You raise `Changed`; the host drains. | Coalescing several changes into one raise is fine - the host drains rather than counts. A patch dropped in `DrainPatches` is lost to every attached client. |
+| Events | `Dispatch` delivers a client event, never concurrently for one session. | Reject an event by producing no patch. A throw faults the session. |
+| Close | The host disposes the session - at any time: a client leaving for good, a limit trip, or a fault. | Release what the session holds in `DisposeAsync`. |
 
-You never see who is attached, how many clients there are, or when one attaches. That is deliberate: the
-host owns the session, so a provider writes one code path whether the tree is rendered on one deck or
-several.
+You never see who is attached, how many clients there are, or when one attaches: one code path serves one
+deck or several.
 
-The host relays your bytes rather than your objects. A tree or patch is bounded and forwarded verbatim, so
-unknown members, member order and number formatting reach the client exactly as you produced them.
-
-Out of process, the same contract is the `ui` capability kind on the plugin protocol - see
-[the operations below](#over-the-plugin-protocol) and the
-[`ui` host api](/reference/websocket/#host-callbacks) for pushing snapshots, patches and faults back.
-`MacroDeck.Plugin.Hosting` maps that capability onto `IUiProvider` for you: register an integration that
-implements it and the SDK declares the kind, answers `describe` from your `Surfaces`, and drives the
-snapshot, patch and fault callbacks from the session you return. There is no capability handler to write.
+The host relays your bytes, not your objects. A tree or patch is bounded and forwarded verbatim, so unknown
+members, member order and number formatting reach the client exactly as you produced them.
 
 ## Limits
 
-The `maxUi*` limits are listed with every other protocol limit in
+The `maxUi*` values are listed with every other protocol limit in
 [Plugin WebSocket protocol](/reference/websocket/#limits-and-timeouts). The host advertises them in the
-protocol descriptor and the session response; read them from there rather than hard-coding them.
+protocol descriptor and the session response - read them from there, never hard-code them.
 
-What they mean for a provider:
-
-- Tree and patch sizes are measured in UTF-8 bytes of the serialized payload, and node counts include
-  `fallback` subtrees.
-- The update rate and its burst allowance are per session, not per provider, so one busy view cannot
-  starve another.
-- `maxUiResourceBytes` bounds both a `UiResource`'s **declared** `byteLength` and the bytes the host's
-  resource store accepts for one resource, so a declaration can never promise more than the host will
-  serve. A `byteLength` of `null` is accepted.
+| Limit | Measured as |
+| --- | --- |
+| Tree and patch size | UTF-8 bytes of the serialized payload. |
+| Node count | Every node, including `fallback` subtrees. |
+| Update rate and burst | Per session, not per provider - one busy view cannot starve another. |
+| `maxUiResourceBytes` | Both a `UiResource`'s declared `byteLength` and the bytes the host's resource store accepts for one resource. A `byteLength` of `null` is accepted. |
 
 ## What a refused update looks like
 
-Nothing is ever dropped silently - a client left on a revision that will never advance again is the
-failure this design exists to prevent.
+Nothing is dropped silently - no client is ever left on a revision that will never advance.
 
-- **A patch over the byte limit, or too fast:** the patch is refused and the host asks you for a fresh
-  tree instead. The client receives that tree, not silence.
-- **A patch whose `fromRevision` does not match the session:** refused and resynced the same way. The
-  client ends at your current revision through a full tree, never through a patch that did not apply.
-- **A patch carrying no operations, or not advancing the revision:** refused with `INVALID_PAYLOAD`.
-  Nothing is delivered and nothing is resynced - the session's revision never moved, so no client is
-  stale.
-- **A tree over the byte, node or declared-resource limit:** the session ends with `PAYLOAD_TOO_LARGE` and
-  the attached clients are told. A tree cannot be superseded by anything smaller, so there is nothing to
-  resync to.
-- **Sustained overload after a resync:** the session ends with `RATE_LIMITED`, which clients are told is
-  retryable.
+| You send | The host | The client sees |
+| --- | --- | --- |
+| A patch over the byte limit, or too fast | Refuses it and asks you for a fresh tree. | That tree. |
+| A patch whose `fromRevision` does not match the session | Refuses it and resyncs the same way. | Your current revision, through a full tree. |
+| A patch with no operations, or one that does not advance the revision | Refuses it with `INVALID_PAYLOAD`. No resync - the revision never moved. | Nothing; it is not stale. |
+| A tree over the byte, node or declared-resource limit | Ends the session with `PAYLOAD_TOO_LARGE`. Nothing smaller can supersede a tree. | The session ended. |
+| Sustained overload after a resync | Ends the session with `RATE_LIMITED`. | The session ended; retryable. |
 
-An out-of-process provider observes each of these as an error on that call's own `host.result` - the reply
-to the `host.invoke` that carried the payload. So a refusal is always attributable to the update that
-caused it.
+Out of process, each refusal is an error on that call's own `host.result` - the reply to the `host.invoke`
+that carried the payload - so it is always attributable to the update that caused it.
 
 ## Over the plugin protocol
 
-Over the plugin protocol the same contract is the `ui` capability kind, invoked by the host:
+Out of process, the same contract is the `ui` capability kind. `MacroDeck.Plugin.Hosting` maps it onto
+`IUiProvider`: register an integration that implements it and the SDK declares the kind, answers
+`describe` from your `Surfaces`, and drives the snapshot, patch and fault callbacks from your session.
+There is no capability handler to write.
+
+Like the other provider-shaped capabilities, `ui` declares the single local id `provider` - the capability
+*is* the plugin's one UI provider. The host invokes `kind: "ui", localId: "provider"`.
 
 | Operation | Purpose |
 | --- | --- |
-| `describe` | The surfaces this provider can serve, the UI model version it speaks, and the [preview scenarios](/ui/views/developer-preview/) it declares. `previews` is optional: a plugin built against an SDK that predates it omits the key, and the host reads that as none. |
-| `session.open` (config) | A `config` surface carries the entry point being configured in its surface attributes - `integration-config` with the config flow session, `action-config` with the action id and the instance's stored parameters, `folder-view-config` with the folder and its view, or `widget-config` with the widget id, type and stored configuration. `MacroDeck.Plugin.Hosting` routes these to `IUiConfigFlow`/`IUiConfigurableActionDefinition` before it consults `IUiProvider`. |
+| `describe` | The surfaces this provider serves, the UI model version it speaks, and the [preview scenarios](/ui/views/developer-preview/) it declares. `previews` is optional: a plugin built against an SDK that predates it omits the key, and the host reads that as none. |
 | `session.open` | Open a session for one surface. The session id is host-issued; a provider never mints one. |
-| `session.open` (developer preview) | A `developer-preview` surface names one registered preview scenario in its surface attributes. `MacroDeck.Plugin.Hosting` builds that scenario and never consults `IUiProvider`, so a production provider is unreachable from a preview. |
-| `session.snapshot` | Produce the session's current full tree. The tree does not return on the result - it arrives as a separate `host.invoke ui/snapshot`, so one delivery path serves a first attach and a resync alike. |
+| `session.open` (config) | A `config` surface names its entry point in its surface attributes - `integration-config` with the config flow session, `action-config` with the action id and the instance's stored parameters, `folder-view-config` with the folder and its view, or `widget-config` with the widget id, type and stored configuration. `MacroDeck.Plugin.Hosting` routes `integration-config` and `action-config` to `IUiConfigFlow`/`IUiConfigurableActionDefinition` before it consults `IUiProvider`. |
+| `session.open` (developer preview) | A `developer-preview` surface names one registered scenario in its surface attributes. `MacroDeck.Plugin.Hosting` builds that scenario and never consults `IUiProvider`, so a production provider is unreachable from a preview. |
+| `session.snapshot` | Produce the current full tree. The tree does not return on the result - it arrives as a separate `host.invoke ui/snapshot`, so a first attach and a resync share one delivery path. |
 | `session.event` | A client acted on a node. `clientId` says which one, and is meaningful only for a shared session. |
 | `session.close` | The host is ending this session. |
-| `modal.result` | How a modal this plugin opened ended. Host-to-plugin because the wait is unbounded by a person - see [action modals](/ui/views/modal/). |
+| `modal.result` | How a modal this plugin opened ended. Host-to-plugin because a person, not a timeout, bounds the wait - see [Modal views](/ui/views/modal/). |
 
 Trees, patches and faults travel the other way through the [`ui` host api](/reference/websocket/#host-callbacks).
 
-Like the other provider-shaped capabilities, `ui` declares the single local id `provider`: the capability *is* the plugin's one UI provider, so there is no per-instance identity to name. The host invokes `kind: "ui", localId: "provider"`.
+## See also
+
+- [Views and surfaces](/ui/views/)
+- [Patches](/ui/reference/patches/)
+- [Resources](/ui/reference/resources/)
+- [Plugin hosting](/reference/plugin-hosting/)

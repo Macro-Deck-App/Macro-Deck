@@ -3,21 +3,16 @@ title: Custom views
 description: A complete "now playing" folder view, from composed components through a served surface to a headless test.
 ---
 
-Nothing about `MacroDeck.Ui` is specific to configuration, deck widgets or modals - a
-[folder view](/ui/views/folder-views/) is an ordinary `IUiProvider` serving an ordinary tree, and this page
-walks one all the way from composition to a passing test.
+A "now playing" folder view, end to end: the view, the provider that serves it, previews and a test.
 
-## The view
-
-A "now playing" card: artwork, a title, a progress bar that keeps advancing on its own, and a skip
-button.
+## Example
 
 ```csharp
 public static class NowPlayingView
 {
     public static UiElement Build(INowPlayingService service)
     {
-        var track = service.CurrentTrack; // UiState<TrackInfo>, owned by the service
+        var track = service.CurrentTrack; // UiState<TrackInfo?>, owned by the service
 
         return new UiStack
         {
@@ -26,30 +21,20 @@ public static class NowPlayingView
             Gap = 0.04,
             Children =
             [
-                new UiImage
-                {
-                    Key = "art",
-                    Source = UiValue.From(() => track.Value.ArtworkHandle),
-                    Size = 0.6,
-                },
-                new UiTextRun
-                {
-                    Key = "title",
-                    Text = UiValue.From(() => UiText.Of(track.Value.Title)),
-                    MainSize = UiSize.FromBasis(0.9),
-                },
+                new UiImage { Key = "art", Source = UiValue.From(() => track.Value?.Artwork!), Size = 0.6 },
+                new UiTextRun { Key = "title", Text = UiText.From(() => track.Value?.Title), Size = 0.12 },
                 new UiProgressBar
                 {
                     Key = "progress",
-                    Value = UiValue.From(() => track.Value.Progress),
+                    Value = UiValue.From(() => track.Value?.Progress!),
                     Thickness = 0.05,
                 },
                 new UiButton
                 {
                     Key = "skip",
-                    Justify = UiJustify.Center,
-                    Events = [UiEventHandler.On(UiComponentEvents.Press, () => service.SkipAsync())],
-                    Children = [new UiTextRun { Key = "label", Text = UiText.Of("Skip"), Size = 0.12 }],
+                    Justify = "center",
+                    Events = [UiEventHandler.OnAsync(UiComponentEvents.Press, service.SkipAsync)],
+                    Children = [new UiTextRun { Key = "label", Text = Strings.NowPlaying.Skip(), Size = 0.12 }],
                 },
             ],
         };
@@ -57,22 +42,22 @@ public static class NowPlayingView
 }
 ```
 
-`macrodeck.progress-bar` is `macrodeck.*` rather than `ui.*` because `track.Value.Progress` is a
-`UiProgressReference` - the reader resolves it against its own clock rather than us pushing a patch every
-second. See [The progress family](/ui/components/progress/) and
-[the `ui.*`/`macrodeck.*` rule](/ui/) for why.
+`Progress` is a `UiProgressReference` (for example `UiProgressReference.Advancing(positionMs, anchor,
+durationMs)`): each reader advances it against its own clock, so you push no patch every second. That is
+why the bar is `macrodeck.progress-bar` rather than a `ui.*` component - see
+[The progress family](/ui/components/progress/) and [the UI overview](/ui/).
 
 ## Serving it on a folder surface
 
 ```csharp
-public sealed class NowPlayingFolderView : IUiProvider
+public sealed class NowPlayingUiProvider : IUiProvider
 {
     private readonly INowPlayingService _service;
 
-    public NowPlayingFolderView(INowPlayingService service) => _service = service;
+    public NowPlayingUiProvider(INowPlayingService service) => _service = service;
 
-    public IReadOnlyList<UiSurfaceDeclaration> Surfaces =>
-        [new UiSurfaceDeclaration { Kind = UiSurfaceKinds.Folder, SessionMode = UiSessionModes.Shared }];
+    public IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; } =
+        [new() { Kind = UiSurfaceKinds.Folder, SessionMode = UiSessionModes.Shared }];
 
     public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
     {
@@ -81,75 +66,84 @@ public sealed class NowPlayingFolderView : IUiProvider
             return Task.FromResult<IUiSession?>(null);
         }
 
-        var view = new UiView(NowPlayingView.Build(_service));
-        return Task.FromResult<IUiSession?>(new NowPlayingSession(view));
+        var view = new UiView(request.Surface, NowPlayingView.Build(_service));
+        return Task.FromResult<IUiSession?>(new ViewSession(view));
     }
 }
 ```
 
-`NowPlayingSession` forwards `BuildTree`, `DrainPatches`, `Changed`, `Faulted` and `Dispatch` to the
-`UiView` it wraps - see [Serving a view](/ui/views/sessions/) for what each of those means and the
-limits the session is held to. Register `NowPlayingFolderView` the way any `IFolderViewProvider`'s tree is
-served; see [Folder views](/ui/views/folder-views/) for the registration side.
+`ViewSession` forwards `BuildTree`, `DrainPatches`, `Changed`, `Faulted` and `Dispatch` to the `UiView` -
+see [Serving a view](/ui/views/sessions/#example) for it, the lifecycle and the limits. A folder only
+opens this surface once your integration has registered the view through `IFolderViewProvider`; when you
+offer more than one folder view, check `UiFolderSurfaceAttributes.ViewId` and decline the others. See
+[Folder views](/ui/views/folder-views/).
 
 ## Previewing it
 
 ```csharp
 internal static class NowPlayingViewPreviews
 {
-    [UiPreview("Playing")]
+    [UiPreview("Playing", Profile = UiPreviewProfiles.Widget)]
     public static UiElement Playing() => NowPlayingView.Build(new MockNowPlayingService
     {
-        CurrentTrack = MockTrack.Playing("Nightcall", elapsedMs: 42_000, durationMs: 215_000),
+        CurrentTrack = new UiState<TrackInfo?>(new TrackInfo(
+            "Nightcall",
+            Artwork: null,
+            UiProgressReference.Advancing(42_000, DateTimeOffset.UtcNow, durationMs: 215_000))),
     });
 
-    [UiPreview("Between tracks")]
-    public static UiElement BetweenTracks() => NowPlayingView.Build(new MockNowPlayingService
-    {
-        CurrentTrack = MockTrack.Empty(),
-    });
+    [UiPreview("Between tracks", Profile = UiPreviewProfiles.Widget)]
+    public static UiElement BetweenTracks() => NowPlayingView.Build(new MockNowPlayingService());
 }
 ```
 
-See [Developer preview](/ui/views/developer-preview/) for what governs a `[UiPreview]` method and how
-scenarios group under the view they preview.
+See [Developer preview](/ui/views/developer-preview/) for the rules a `[UiPreview]` method follows and how
+scenarios group.
 
 ## Testing it
-
-`MacroDeck.Ui.Testing` renders the view without a browser or running host. Use it to:
-
-- query rendered elements;
-- simulate events;
-- update state and inspect the resulting tree;
-- verify emitted patches apply cleanly;
-- snapshot meaningful public view state when a snapshot is the clearest contract.
 
 ```csharp
 [Fact]
 public async Task Pressing_skip_invokes_the_service()
 {
-    var service = new MockNowPlayingService
-    {
-        CurrentTrack = MockTrack.Playing("Nightcall", elapsedMs: 42_000, durationMs: 215_000),
-    };
-    using var host = UiTestHost.Render(NowPlayingView.Build(service));
+    var service = new MockNowPlayingService();
+    var host = UiTestHost.Render(NowPlayingView.Build(service));
 
-    await host.Find("skip").PressAsync();
+    host.ById("skip").Raise(UiComponentEvents.Press);
+    await host.SettleAsync();
 
     Assert.True(service.SkipWasCalled);
 }
 
 [Fact]
-public void Title_reflects_the_current_track()
+public void Title_shows_the_current_track()
 {
     var service = new MockNowPlayingService
     {
-        CurrentTrack = MockTrack.Playing("Nightcall", elapsedMs: 0, durationMs: 215_000),
+        CurrentTrack = new UiState<TrackInfo?>(new TrackInfo(
+            "Nightcall", Artwork: null, UiProgressReference.Halted(0, DateTimeOffset.UtcNow, durationMs: 215_000))),
     };
-    using var host = UiTestHost.Render(NowPlayingView.Build(service));
+    var host = UiTestHost.Render(NowPlayingView.Build(service));
 
-    Assert.Equal("Nightcall", host.Find("title").Text());
+    Assert.NotEmpty(host.ByText("Nightcall"));
 }
 ```
 
-Test observable UI behavior, not internal dependency-tracking implementation.
+`MacroDeck.Ui.Testing` renders a view with no browser and no running host.
+
+| Task | `UiTestHost` / `UiTestNode` |
+| --- | --- |
+| Query rendered nodes | `ById`, `FindById`, `ByType`, `SingleByType`, `ByText` |
+| Simulate events | `Raise(name)`, `Change(value)`, `Activate()`, `Submit()` |
+| Wait for async handlers and loads | `SettleAsync()` |
+| Inspect the tree and emitted patches | `Tree`, `Revision`, `Patches`, `LastPatch`, `Describe()`, `DescribePatches()` |
+| Snapshot public view state | `ToCanonicalJson()` |
+
+Test observable UI behaviour, not the internals of dependency tracking.
+
+## See also
+
+- [Folder views](/ui/views/folder-views/)
+- [Serving a view](/ui/views/sessions/)
+- [Developer preview](/ui/views/developer-preview/)
+- [Testing](/features/testing/)

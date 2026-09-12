@@ -3,72 +3,90 @@ title: Developer preview
 description: Registering [UiPreview] scenarios so Developer Tools can render a view in states that are hard to reach live.
 ---
 
-A view is often easiest to judge in the states that are hard to reach: disconnected, empty, mid-load,
-failing, or holding a translation three times longer than the English. Register those states as
-**previews** and Macro Deck's Developer Tools lists them, renders them through the same renderer the real
-app uses, and lets you resize the surface freely while it re-lays-out.
+Mark static methods with `[UiPreview]` and Developer Tools renders your view in states that are hard to
+reach live.
 
-Mark a static method with `[UiPreview]`:
+## Example
 
 ```csharp
-internal static class SpotifyConfigViewPreviews
+using MacroDeck.Ui.Dsl;
+using MacroDeck.Ui.Previews;
+
+internal static class WeatherViewPreviews
 {
-    [UiPreview("Default")]
-    public static UiElement Default() => SpotifyConfigView.Build(new MockSpotifyService());
+    [UiPreview("Sunny", Profile = UiPreviewProfiles.Widget)]
+    public static UiElement Sunny() => WeatherView.Build(new MockWeatherService { City = "Vienna" });
 
-    [UiPreview("Connected")]
-    public static UiElement Connected()
-        => SpotifyConfigView.Build(new MockSpotifyService { IsConnected = true, UserName = "Test User" });
+    [UiPreview("Offline", Profile = UiPreviewProfiles.Widget)]
+    public static UiElement Offline() => WeatherView.Build(new MockWeatherService { Offline = true });
 
-    [UiPreview("Error")]
-    public static UiElement Error()
-        => SpotifyConfigView.Build(new MockSpotifyService { Error = "Authentication failed" });
+    [UiPreview("Long city name", Profile = UiPreviewProfiles.Widget)]
+    public static UiElement LongName()
+        => WeatherView.Build(new MockWeatherService { City = "Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch" });
 }
 ```
 
-The method must be `static`, take no parameters, and return a `UiElement`, a `UiView`, or a `UiPreview`.
-It takes no parameters because a scenario builds its own mocks: nothing is injected, and nothing reaches
-the real service.
+Developer Tools lists the three scenarios under `WeatherView`, renders each through the same renderer the
+app uses, and lets you resize the surface freely while it re-lays-out. Good candidates: disconnected,
+empty, mid-load, failing, and a translation three times longer than the English.
 
-Scenarios group under the view they preview. The group name is the declaring type's name with a trailing
-`Previews` removed - `SpotifyConfigViewPreviews` groups under `SpotifyConfigView` - or whatever you set
-explicitly:
+## Writing a scenario
 
 ```csharp
-[UiPreview("Long text", View = "WeatherDetailsView", Profile = UiPreviewProfiles.Widget)]
+[UiPreview("Offline")]
+public static UiElement Offline() => WeatherView.Build(new MockWeatherService { Offline = true });
 ```
 
-`Profile` says which component namespace the tree is authored in, `config` or `widget`. It only decides
-how the preview canvas is set up before the first tree arrives; the tree itself decides how it renders.
+The method must be `static`, take no parameters, and return a `UiElement`, a `UiView` or a `UiPreview`.
+Nothing is injected: a scenario builds its own mocks, and nothing reaches the real service.
+
+## Grouping and profile
+
+```csharp
+[UiPreview("Long text", View = "WeatherDetailsView", Profile = UiPreviewProfiles.Config)]
+```
+
+| Member | Default | Meaning |
+| --- | --- | --- |
+| `Scenario` (constructor) | - | The scenario's name. Required, not blank. |
+| `View` | The declaring type's name without a trailing `Previews` (`WeatherViewPreviews` becomes `WeatherView`) | The view the scenario groups under. |
+| `Profile` | `UiPreviewProfiles.Config` (`config`) | The component namespace the tree is authored in: `config` or `widget`. It only sets up the canvas before the first tree arrives; the tree decides how it renders. |
 
 ## Releasing what a mock owns
 
-Opening, switching, refreshing and closing a preview each end the previous session. A scenario whose mock
-starts something that has to be stopped - a timer, a subscription, a fake connection - hands it over, and
-Macro Deck disposes it when the preview ends:
-
 ```csharp
-[UiPreview("Streaming")]
-public static UiPreview Streaming()
+[UiPreview("Live feed", Profile = UiPreviewProfiles.Widget)]
+public static UiPreview LiveFeed()
 {
-    var mock = new MockTelemetryFeed();
+    var feed = new MockWeatherFeed();
 
-    return UiPreview.Of(TelemetryView.Build(mock), mock);
+    return UiPreview.Of(WeatherView.Build(feed), feed);
 }
 ```
 
-A scenario that only builds a tree from plain data returns the element and never mentions `UiPreview`.
+Opening, switching, refreshing and closing a preview each end the previous session. Hand anything that
+must be stopped - a timer, a subscription, a fake connection - to `UiPreview.Of` as an `IDisposable` or
+`IAsyncDisposable`, and Macro Deck disposes it when the preview ends. A scenario that only builds a tree
+from plain data returns the element and never mentions `UiPreview`.
 
 ## What a preview cannot affect
 
-Previews are developer tooling and are deliberately inert in a running Macro Deck:
+| Fact | Consequence |
+| --- | --- |
+| Discovery reads metadata only. | A scenario runs only when someone opens it; declaring one costs a running host nothing. |
+| A preview renders on its own `developer-preview` surface. | No provider you wrote for `config`, `widget`, `dialog` or `folder` is ever asked to serve one. |
+| A malformed `[UiPreview]` method (not static, takes parameters, wrong return type) is skipped and reported in Developer Tools. | Discovery never fails, so one bad preview cannot take down your real surfaces. |
+| A scenario that throws when opened fails only that preview. | Other previews and sessions carry on. |
+| Listing and opening previews require an admin session. | Previews are not reachable by deck clients. |
 
-- Discovery reads metadata only. A scenario is never called until somebody opens it, so declaring one
-  costs a running host nothing.
-- A preview renders on its own `developer-preview` surface. No provider you wrote for a `config`,
-  `widget`, `dialog` or `folder` surface is ever asked to serve one.
-- A malformed `[UiPreview]` method - not static, taking parameters, returning the wrong type - is skipped
-  and reported in Developer Tools. It never fails discovery, so one bad preview cannot take down the
-  surfaces your plugin really serves.
-- A scenario that throws when it is opened fails only that preview.
-- Listing and opening previews require an admin session.
+## Over the plugin protocol
+
+`describe` lists your scenarios in `previews`. `MacroDeck.Plugin.Hosting` scans the assemblies of your
+registered integrations plus the entry assembly, lazily. A `developer-preview` surface names one scenario
+by id in its attributes; the SDK builds that scenario ahead of every production path and never consults
+`IUiProvider`. See [Serving a view](/ui/views/sessions/#over-the-plugin-protocol).
+
+## See also
+
+- [Custom views](/ui/views/custom/) - a view with previews and tests
+- [Views and surfaces](/ui/views/)
