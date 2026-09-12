@@ -1,130 +1,352 @@
 ---
 title: Plugin protocol
-description: Human overview of the versioned HTTP and WebSocket contract for out-of-process plugins.
+description: The versioned HTTP and WebSocket contract for out-of-process plugins - envelope, negotiation, errors, limits, backpressure and reconnection.
 ---
 
-The public plugin protocol is a versioned JSON contract over HTTP and WebSocket. Most .NET plugins should use `MacroDeck.Plugin.Hosting`; implement this protocol directly only when building another runtime or language binding.
+The plugin protocol is a versioned JSON contract over HTTP and WebSocket; implement it directly only when building another runtime or language binding - .NET plugins use `MacroDeck.Plugin.Hosting`.
 
-Machine-readable contracts are authoritative for exact request/message fields:
+The machine-readable contracts are authoritative for exact fields: the [OpenAPI spec](/specs/openapi.yaml)
+(HTTP bootstrap, registration, sessions, the upgrade) and the [AsyncAPI spec](/specs/asyncapi.yaml)
+(envelopes and payloads). The public DTOs and constants live in `MacroDeck.Plugin.Protocol`, which is
+independent of the host assemblies. The message catalogue is in the [WebSocket reference](/reference/websocket/).
 
-- [OpenAPI specification](/specs/openapi.yaml) for HTTP bootstrap, registration, sessions, and the WebSocket endpoint.
-- [AsyncAPI specification](/specs/asyncapi.yaml) for WebSocket envelopes and message payloads.
+## At a glance
 
-The public DTOs and constants live in `MacroDeck.Plugin.Protocol` and are independent from host implementation assemblies.
+```mermaid
+sequenceDiagram
+    participant P as Plugin
+    participant H as Host
+    P->>H: GET /api/plugins/protocol
+    P->>H: POST /api/plugins/sessions (requestedVersion 1..3)
+    H-->>P: 201 negotiatedVersion 3, sessionToken
+    P->>H: GET /plugins/ws + Bearer + macrodeck.plugin.v1
+    P->>H: session.hello
+    H-->>P: session.welcome
+    P->>H: capability.declare
+    H-->>P: capability.declare.ack
+    H->>P: capability.invoke
+    P-->>H: capability.result
+    P->>H: host.invoke
+    H-->>P: host.result
+    P->>H: session.goodbye
+```
 
-## Connection lifecycle
+1. Read the descriptor.
+2. Self-registering only: register once, through pairing or a Developer token. Managed plugins receive
+   launch credentials instead. See [Authentication](/reference/authentication/) and
+   [Plugin hosting](/reference/plugin-hosting/).
+3. Exchange the credential for a short-lived session - **this is where the version is negotiated**.
+4. Upgrade to `/plugins/ws` with the session token.
+5. Send `session.hello`, wait for `session.welcome`.
+6. Exchange capability and host-callback messages until the session ends.
 
-A self-registering plugin typically:
+## The envelope
 
-1. Reads the protocol descriptor.
-2. Registers with an enrollment credential when it does not already have a plugin registration.
-3. Exchanges its plugin credential for a short-lived session.
-4. Connects to `/plugins/ws` with the session token.
-5. Sends `session.hello` and waits for `session.welcome`.
-6. Exchanges capability and host-callback messages until the session ends.
+```json
+{
+  "type": "session.hello",
+  "id": "01a09528-bb98-798a-bd96-e46f5388cd89",
+  "sentAt": "2026-09-12T10:27:49.784Z",
+  "protocolVersion": 3,
+  "payload": {
+    "protocolVersion": 3,
+    "sessionId": "01a09528-bb8e-7eb4-a4f0-0aa018202b2b",
+    "instanceId": "01a09528-bb9d-7057-8d59-ff9a1d93885a"
+  }
+}
+```
 
-Installed managed plugins skip self-registration and receive launch credentials from the host. See [Authentication](/reference/authentication/) and [Plugin hosting](/reference/plugin-hosting/).
-
-## Envelope
-
-Every WebSocket message uses the protocol envelope. Exact fields are defined by AsyncAPI and `MacroDeck.Plugin.Protocol`.
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `type` | string | yes | `<domain>.<verb>` |
+| `id` | string | yes | UUIDv7, minted by the sender |
+| `correlationId` | string | no | The `id` this message answers |
+| `sentAt` | string | no | RFC 3339 UTC, informational only |
+| `protocolVersion` | integer | no | |
+| `deadlineMs` | integer | no | |
+| `idempotencyKey` | string | no | At most 128 characters |
+| `payload` | object | no | Shaped by `type`; mutually exclusive with `error` |
+| `error` | `ProtocolError` | no | See [Errors](#errors) |
 
 Compatibility rules:
 
-- Unknown optional fields are ignored.
-- Unknown message types return a protocol error and do not by themselves terminate the session.
-- Malformed messages are rejected as protocol errors rather than becoming unhandled parser exceptions.
-- Correlation ids are preserved where possible so callers can match replies/errors to requests.
+- Unknown optional fields are ignored on read and never echoed back.
+- An unknown `type` gets `UNKNOWN_MESSAGE_TYPE` with the `id` preserved as `correlationId`, and **does
+  not terminate the session**.
+- Malformed input (unparseable, oversize, too deep, missing `type` or `id`) gets `MALFORMED_ENVELOPE`,
+  never an unhandled parser exception, and does not close the socket either.
+- Replies carry the request's `id` as `correlationId`. Correlation, cancellation and idempotency rules
+  are in the [WebSocket reference](/reference/websocket/#correlation-and-response-pairing).
 
 ## Version negotiation
 
-The protocol uses an integer major version. Additive changes remain inside the current major; breaking wire changes require a new major.
+Request, in `POST /api/plugins/sessions`:
 
-Three majors are served today: `1` through `3`. Major `2` changes only the `widgets` host-api payload, where a widget appearance change now names the states it applies to by stable id instead of the old fixed selector. Major `3` lets a plugin's descriptor text be a localized reference instead of a plain string. A plugin that speaks an earlier major keeps working; the host translates for it. See the [migration guide](/policies/migrations/).
+```json
+{ "requestedVersion": { "minimum": 1, "maximum": 3 } }
+```
 
-The WebSocket sub-protocol string names the protocol *family*, not the major, and does not change between majors — the session handshake is the only place the version is negotiated.
+Response:
 
-Session creation negotiates the highest mutually supported version. `session.hello` confirms the already negotiated session/version; it does not perform a second negotiation.
+```json
+{ "negotiatedVersion": 3, "capabilities": [{ "kind": "actions", "accepted": true, "negotiatedVersion": 1 }] }
+```
 
-Capability versions negotiate independently. An unsupported capability is rejected/degraded without necessarily rejecting the whole session.
+No overlap:
 
-See the [compatibility policy](/policies/compatibility/).
+```http
+HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/json
+
+{ "code": "PROTOCOL_VERSION_UNSUPPORTED", "message": "The requested protocol version is not supported.", "details": { "supportedMinimum": "1", "supportedMaximum": "3" }, "retryable": false }
+```
+
+The version is a single integer major, not semver. Additive changes stay inside the current major;
+breaking wire changes need a new major, with earlier majors still served. The host picks the highest
+mutually supported version, once. `session.hello` only confirms it.
+
+| Major | Change | Older plugins |
+| --- | --- | --- |
+| `1` | Baseline | - |
+| `2` | `widgets` host-api payload only: a widget appearance change names the states it applies to by stable id, not the old fixed selector | Translated by the host |
+| `3` | Descriptor text (action names, parameter labels, config-flow text) may be a `{"$localized":…}` reference instead of a plain string. Below `3` a plugin must send a plain string | Translated by the host |
+
+- The subprotocol `macrodeck.plugin.v1` names the protocol **family**, not the major, and does not
+  change between majors.
+- Capability versions negotiate independently per kind. An unsupported capability comes back
+  `accepted: false` with a `rejectionReason`, without rejecting the whole session.
+- See the [migration guide](/policies/migrations/) and the [compatibility policy](/policies/compatibility/).
+
+## The handshake
+
+Captured against the CLI's stub host:
+
+```json
+{"type":"session.welcome","id":"01a09528-bb9d-7b67-9659-b7ec73280280","correlationId":"01a09528-bb98-798a-bd96-e46f5388cd89","payload":{"sessionId":"01a09528-bb8e-7eb4-a4f0-0aa018202b2b","resumed":false}}
+```
+
+The first message must be `session.hello` (see [the envelope](#the-envelope)) within the handshake
+timeout (10 s). It carries no credential.
+
+| `session.hello` field | Required | Meaning |
+| --- | --- | --- |
+| `protocolVersion` | yes | The negotiated version, asserted |
+| `sessionId` | yes | The session from `POST /api/plugins/sessions` |
+| `resumeSessionId` | no | Present when resuming a dropped session |
+| `instanceId` | no | The connecting process instance, for logs |
+
+| Outcome | Host response |
+| --- | --- |
+| Timeout, not `session.hello`, or malformed payload | `protocol.error` `INVALID_PAYLOAD`, normal close |
+| Session unknown, or `sessionId` does not match the token | `SESSION_EXPIRED`, close `4002` |
+| `protocolVersion` differs from the negotiated one | `PROTOCOL_VERSION_UNSUPPORTED`, close `4001` |
+| Resume refused | `SESSION_NOT_RESUMABLE`, normal close |
+| Success | `session.welcome` with `resumed` |
 
 ## Capability operations
 
-A plugin declares the capabilities it can serve. The host invokes them through `capability.invoke`; the plugin replies through `capability.result` or the corresponding error/cancellation path.
+```json
+{ "type": "capability.invoke", "id": "<id>", "deadlineMs": 30000, "payload": { "…": "…" } }
+```
 
-Supported capability families include actions, variables, events, icons, config flows, music players, weather, virtual profiles, issues, device providers (`device-provider`), layout providers (`layout-provider`), folder view providers (`folder-view-provider`), migrations (`migration`), and Macro Deck UI (`ui`). Exact operation names and payloads are defined by the protocol package and AsyncAPI.
+```json
+{ "type": "capability.result", "id": "<id>", "correlationId": "<invoke-id>", "payload": { "…": "…" } }
+```
 
-Do not invent custom operation names inside an existing capability kind. Additions to the public operation vocabulary are compatibility-sensitive protocol changes.
+A plugin declares the capabilities it serves. The host invokes them with `capability.invoke`; the
+plugin answers with `capability.result`, an error, or the cancellation path. The kinds a host supports
+are listed in the descriptor's `capabilityKinds`:
 
-`state.update` is an invalidation signal. It tells the peer to refresh the relevant capability state rather than defining a second per-capability diff protocol.
+`actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`,
+`virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`,
+`folder-view-provider`, `migration`, `widget-type-provider`.
 
-The `actions` kind gained a `state` operation, additively and inside major `1`, for actions that supply an Action Button's states. It is keyed by the action's *configured parameters*, so the host polls it rather than expecting a push: `state.update` is keyed by declared capability id — the action type — and so cannot name which configured instance changed. See [capabilities](/features/).
+- **Do not invent operation names inside an existing kind.** Additions to the operation vocabulary are
+  compatibility-sensitive protocol changes. Exact operations and payloads are in the protocol package
+  and AsyncAPI.
+- `state.update` is an invalidation signal: the peer refreshes that capability's state. It is not a
+  second per-capability diff protocol.
+- `actions` gained `state`, additively in major `1`, for actions that supply an Action Button's states.
+  It is keyed by the action's configured parameters, so the host **polls** it: `state.update` is keyed
+  by the declared capability id (the action type) and cannot name which configured instance changed.
+- `actions` also gained `icon` and `icon.content`, the same way, for an action whose configured instance
+  supplies a widget's icon (`ActionDescriptorDto.ProvidesIcon`). `icon` is polled like `state` and
+  answers an identity, not bytes; `icon.content` fetches the bytes only when that identity changes,
+  uploaded over the `asset.*` pipeline, never inside the capability reply. The `widgets` host API's
+  `invalidate-icon` asks the host to re-read an action sooner than its next poll.
 
-The `actions` kind also gained `icon` and `icon.content` operations, the same way and inside the same major, for an action whose configured instance supplies a widget's rendered icon; `ActionDescriptorDto.ProvidesIcon` marks it. `icon` is polled like `state`, answering an identity rather than bytes; `icon.content` fetches the bytes behind that identity only when it changes, uploaded over the same `asset.*` pipeline a plugin uses to send the host any other asset it originates, never inside the capability reply itself. A plugin can also ask the host to re-read a specific action sooner than its next poll through the `widgets` host API's `invalidate-icon` operation. See [capabilities](/features/) and [Capability parity](/reference/capability-parity/).
+See [capabilities](/features/) and [Capability parity](/reference/capability-parity/).
 
 ## Host callbacks
 
-Plugins can call host-owned APIs through the host invocation/result messages. `MacroDeck.Plugin.Hosting` maps these to `IIntegrationContext` APIs.
+```json
+{ "type": "host.invoke", "id": "<id>", "payload": { "…": "…" } }
+```
 
-Some synchronous-looking SDK state is backed by the last snapshot pushed over the protocol. See [Capability parity](/reference/capability-parity/) before assuming an out-of-process call has the same timing as an in-process integration.
+```json
+{ "type": "host.result", "id": "<id>", "correlationId": "<host-invoke-id>", "payload": { "…": "…" } }
+```
 
-A host callback can also hand bytes back to the plugin - today, an icon fetched through the `devices`
-api's `icon` operation, or a widget's currently rendered action-icon-provider icon fetched through the
-same api's `widget-icon` operation. Those travel over `host.asset.*`, a chunked pipeline the host drives
-in the opposite direction from the plugin-driven `asset.*` pipeline a plugin uses to upload its own assets.
-The two are separate message-type sets on purpose: `asset.*` keeps its existing plugin-to-host
-direction exactly as any other protocol major-1 type must, and the new host-to-plugin direction gets
-its own types instead of a meaning change grafted onto old ones. See
-[the WebSocket reference](/reference/websocket/#assets).
+Plugins call host-owned APIs with `host.invoke` and cancel with `host.cancel`. `MacroDeck.Plugin.Hosting`
+maps these to `IIntegrationContext`. Some synchronous-looking SDK state is served from the last
+`host.state` snapshot, so check [Capability parity](/reference/capability-parity/) before assuming
+in-process timing.
+
+A callback can return bytes: an icon from the `devices` api's `icon` operation, or a widget's rendered
+action icon from its `widget-icon` operation. These travel over `host.asset.*`, a host-to-plugin
+pipeline kept separate from the plugin-to-host `asset.*` types so those keep their major-1 direction.
+See [the WebSocket reference](/reference/websocket/#assets).
 
 ## Errors
 
-Protocol errors use stable error codes and correlated replies where a correlation id is available. Malformed input, unsupported operations/capabilities, authentication failures, timeouts, cancellation, and backpressure are protocol outcomes, not unhandled transport exceptions.
+```json
+{
+  "type": "protocol.error",
+  "id": "<id>",
+  "correlationId": "<id-of-the-offending-message>",
+  "error": { "code": "UNKNOWN_MESSAGE_TYPE", "message": "The message type is not recognised.", "retryable": false }
+}
+```
 
-Use the AsyncAPI/OpenAPI specifications and `MacroDeck.Plugin.Protocol` for the exact error payload and currently defined codes.
+On HTTP the same `ProtocolError` object is the whole response body. Protocol failures (malformed input,
+unsupported operations or capabilities, authentication, timeouts, cancellation, backpressure) are
+protocol outcomes with stable codes, not transport exceptions. `message` is a default English string
+keyed by `code`; localise from the code. `details` is a string-to-string map, at most 16 entries.
+
+| Code | Default message |
+| --- | --- |
+| `PROTOCOL_VERSION_UNSUPPORTED` | The requested protocol version is not supported. |
+| `UNKNOWN_MESSAGE_TYPE` | The message type is not recognised. |
+| `MALFORMED_ENVELOPE` | The message envelope could not be parsed. |
+| `INVALID_PAYLOAD` | The message payload does not match the expected shape. |
+| `UNAUTHENTICATED` | Authentication failed. |
+| `PLUGIN_ALREADY_REGISTERED` | A plugin is already registered with this identity. |
+| `SESSION_EXPIRED` | The session has expired. |
+| `SESSION_NOT_RESUMABLE` | The session can no longer be resumed. |
+| `SESSION_REPLACED` | The session was replaced by a newer connection. |
+| `SESSION_NOT_FOUND` | No session matches that id. |
+| `CAPABILITY_UNSUPPORTED` | The capability kind is not supported. |
+| `CAPABILITY_UNAVAILABLE` | The capability is not currently available. |
+| `PAYLOAD_TOO_LARGE` | The message payload exceeds the allowed size. |
+| `ASSET_TOO_LARGE` | The asset exceeds the allowed size. |
+| `QUEUE_OVERFLOW` | The message queue overflowed. |
+| `RATE_LIMITED` | Too many requests; retry after the given delay. |
+| `TIMEOUT` | The operation timed out. |
+| `CANCELLED` | The operation was cancelled. |
+| `CORRELATION_UNKNOWN` | No in-flight message matches this correlation id. |
+| `DUPLICATE_IDEMPOTENCY_KEY` | This idempotency key is already in flight. |
+| `INTERNAL_ERROR` | An internal error occurred. |
+
+The list is append-only within a major. A `reason` in `details` (today only `developer_mode_disabled`)
+refines a deliberately generic code; a client that does not recognise it handles the code alone.
+
+Closing the socket is reserved for seven conditions; everything else is a `protocol.error` on an open
+socket:
+
+| Close | Condition | .NET SDK |
+| --- | --- | --- |
+| `1013` | `QUEUE_OVERFLOW` (RFC 6455 "Try Again Later") | Reconnects |
+| `4000` | `SESSION_REPLACED` | Stops |
+| `4001` | `PROTOCOL_VERSION_UNSUPPORTED` | Stops |
+| `4002` | `SESSION_EXPIRED` | Opens a new session |
+| `4003` | Authentication failed | New session, up to `MaxAuthenticationFailures`, then stops |
+| `4004` | Supervisor is stopping a managed plugin - nothing failed | Stops |
+| `4005` | Declared capabilities rejected (invalid or duplicated ids, colliding integration id). Terminal: fix the declaration | Stops |
 
 ## Delivery and retries
 
-The protocol is at-most-once and does not maintain a replay log for messages lost during a disconnect.
+Delivery is **at-most-once**. There are no sequence numbers and no replay log for messages lost during
+a disconnect; do not expect the host to replay an unacknowledged event after reconnecting. For a
+retryable operation that must not run twice, send an `idempotencyKey`: a repeat while the original is in
+flight gets `DUPLICATE_IDEMPOTENCY_KEY`, a repeat after completion gets the cached result.
 
-For retryable operations that must not execute twice, reuse the protocol idempotency key as required by the operation. Do not assume the host will replay an unacknowledged event after reconnection.
+## Limits
 
-## Limits and backpressure
+```json
+{ "maxMessageBytes": 262144, "maxInboundQueueDepth": 256, "queueHighWatermark": 192, "queueLowWatermark": 64, "maxConcurrentInvocations": 32, "maxSessionsPerPlugin": 1 }
+```
 
-Message size, queue, concurrency, timeout, and asset limits are published in the protocol descriptor and constants. Treat these values as negotiated/runtime limits rather than copying literal numbers into plugin logic or documentation.
+Message size, queue depth, concurrency, timeouts and asset sizes are published in the descriptor and
+again in the session response (`limits`, `timeouts`). Read them at runtime; do not copy the numbers into
+plugin logic. The full current table is in the [WebSocket reference](/reference/websocket/#limits-and-timeouts).
+A message over `maxMessageBytes` is `MALFORMED_ENVELOPE`; a payload over a specific cap (UI tree, asset)
+is `PAYLOAD_TOO_LARGE` or `ASSET_TOO_LARGE`.
 
-A peer that produces work faster than the bounded protocol queues can accept may be disconnected or receive the defined protocol error. Plugin code should use bounded concurrency and honor cancellation.
+## Backpressure
 
-## Session resume and replacement
+Sent by the host when its inbound queue reaches the high watermark (192), and lifted at the low
+watermark (64):
 
-A dropped connection may resume the same session while it remains resumable. A fresh session after the old session expires is different from a resume and can require capability state/lifecycle reinitialization.
+```json
+{ "type": "flow.pause", "id": "<id>", "payload": { "reason": "The host's inbound queue is filling." } }
+```
 
-`MacroDeck.Plugin.Hosting` handles the normal reconnect/resume behavior for .NET plugins.
+```json
+{ "type": "flow.resume", "id": "<id>", "payload": { "reason": "The host's inbound queue has drained." } }
+```
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `reason` | yes | Diagnostic text |
+| `resumeAfterMs` | no | Hint for when to try again |
+
+While paused, send only the exempt types (replies, pings, cancels, `host.*` calls, errors - the full
+list is in the [WebSocket reference](/reference/websocket/#backpressure)). A peer that keeps sending
+past `maxInboundQueueDepth` gets one `QUEUE_OVERFLOW` and a `1013` close. Use bounded concurrency and
+honour cancellation.
+
+## Reconnection and resume
+
+```json
+{ "type": "session.hello", "id": "<id>", "payload": { "protocolVersion": 3, "sessionId": "<session-id>", "resumeSessionId": "<session-id>", "instanceId": "<instance-id>" } }
+```
+
+```json
+{ "type": "session.welcome", "id": "<id>", "correlationId": "<hello-id>", "payload": { "sessionId": "<session-id>", "resumed": true } }
+```
+
+| Situation | Result |
+| --- | --- |
+| New connection with `resumeSessionId`, inside the 60 s window, session still exists | Resume: `resumed: true` |
+| Same, but outside the window or the session is gone | `SESSION_NOT_RESUMABLE` - open a new session |
+| New session for a plugin that already has one (`maxSessionsPerPlugin` is 1) | The old connection is closed with `4000` |
+| `session.goodbye` or `DELETE /api/plugins/sessions/{sessionId}` | Session non-resumable at once |
+| No inbound traffic for 60 s (host pings every 20 s) | Host aborts the socket |
+
+A resume keeps the session id, negotiated version, capability map, declared catalogue and the host-side
+idempotency cache. It drops in-flight invocations, event subscriptions and queued outbound messages. A
+fresh session after expiry is not a resume and may need capability state and lifecycle
+re-initialisation. Reconnect with full-jitter exponential backoff: 1 s initial, 30 s maximum, factor 2.
+`MacroDeck.Plugin.Hosting` does all of this for .NET plugins.
 
 ## Security
 
-Plugin endpoints require plugin-specific credentials and are restricted to the local machine. Browser cookies are not a plugin WebSocket authentication mechanism.
-
-Never log plugin secrets, session tokens, enrollment credentials, OAuth credentials, or authorization headers.
-
-See [Security](/policies/security/) and [Authentication](/reference/authentication/).
+Plugin endpoints need plugin-specific credentials and accept only local callers. Browser cookies are
+not a plugin WebSocket authentication mechanism. Never log plugin secrets, session tokens, enrolment
+credentials, OAuth credentials or authorisation headers. See [Security](/policies/security/) and
+[Authentication](/reference/authentication/).
 
 ## SDK compatibility metadata
 
-A plugin can report the SDK version it was built against and build-time evidence about deprecated API usage. The host can return a compatibility report without making older plugins unable to deserialize a session response.
+```json
+{ "sdk": { "sdkVersion": "3.0.0", "deprecatedApis": [], "truncated": false } }
+```
 
-See [Deprecations](/policies/deprecations/) for the evidence model.
+Sent in `POST /api/plugins/sessions`. `deprecatedApis: null` means "not reported"; `[]` means "reported,
+none used". The host can return a `compatibility` report without making older plugins unable to
+deserialise the session response. See [Deprecations](/policies/deprecations/).
 
 ## Implementing the protocol yourself
 
-Use the OpenAPI/AsyncAPI specifications and the `MacroDeck.Plugin.Protocol` package as the source of truth. The human documentation intentionally does not duplicate every field, error code, timeout, operation, or message type.
+The specs and `MacroDeck.Plugin.Protocol` are the source of truth; this page does not duplicate every
+field, timeout, operation or message type. Test at least negotiation, authentication, unknown-message
+tolerance, cancellation, idempotency and retry, reconnect and resume, backpressure, and capability
+payload compatibility. The [conformance suite](/reference/conformance/) runs these against a plugin.
 
-A custom implementation should test at least negotiation, authentication, unknown-message tolerance, cancellation, idempotency/retry behavior, reconnect/resume, backpressure, and capability payload compatibility.
+## See also
 
-## Related documentation
-
+- [WebSocket reference](/reference/websocket/) - every message type and payload.
+- [Authentication](/reference/authentication/) - credentials and the session token.
 - [Plugin hosting](/reference/plugin-hosting/)
 - [Capability parity](/reference/capability-parity/)
 - [Manifest](/reference/manifest/)
