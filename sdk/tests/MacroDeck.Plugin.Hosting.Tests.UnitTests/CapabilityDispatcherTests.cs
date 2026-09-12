@@ -369,6 +369,43 @@ public class CapabilityDispatcherTests
 	}
 
 	[Test]
+	public async Task A_retry_after_the_connection_dropped_mid_invocation_runs_again()
+	{
+		var calls = 0;
+		var running = new TaskCompletionSource();
+		using var connection = new CancellationTokenSource();
+
+		using var dispatcher = TestSession.Dispatcher(new TestCapabilityHandler("actions",
+			async (_, token) =>
+			{
+				if (Interlocked.Increment(ref calls) > 1)
+				{
+					return CapabilityInvocationResult.Ok();
+				}
+
+				running.TrySetResult();
+				await Task.Delay(Timeout.Infinite, token);
+				return CapabilityInvocationResult.Ok();
+			}));
+
+		var first = dispatcher.DispatchAsync(Invoke(idempotencyKey: "key"), Reply, connection.Token);
+		await running.Task;
+
+		await connection.CancelAsync();
+		await first;
+		dispatcher.AbortInFlight();
+		_replies.Clear();
+
+		await dispatcher.DispatchAsync(Invoke(idempotencyKey: "key"), Reply, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(calls, Is.EqualTo(2));
+			Assert.That(Single().Error, Is.Null);
+		});
+	}
+
+	[Test]
 	public async Task A_repeated_idempotency_key_while_the_first_is_in_flight_is_refused()
 	{
 		var running = new TaskCompletionSource();

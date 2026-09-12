@@ -316,9 +316,9 @@ honour cancellation.
 | No inbound traffic for 60 s (host pings every 20 s) | Host aborts the socket |
 
 A resume keeps the session id, negotiated version, capability map, declared catalogue and the plugin-side
-idempotency cache. It drops in-flight invocations, event subscriptions and queued outbound messages. A
-fresh session after expiry is not a resume and may need capability state and lifecycle
-re-initialisation. Reconnect with full-jitter exponential backoff: 1 s initial, 30 s maximum, factor 2.
+idempotency cache. It drops in-flight invocations (a retry of one with its idempotency key runs
+again), event subscriptions and queued outbound messages. A fresh session after expiry is not a resume
+and may need capability state and lifecycle re-initialisation. Reconnect with full-jitter exponential backoff: 1 s initial, 30 s maximum, factor 2.
 `MacroDeck.Plugin.Hosting` does all of this for .NET plugins.
 
 ## Security

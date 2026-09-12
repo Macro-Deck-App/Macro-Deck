@@ -218,7 +218,7 @@ internal sealed class CapabilityDispatcher(
 		}
 		catch (OperationCanceledException) when (invocation.Token.IsCancellationRequested)
 		{
-			var timedOut = !invocation.CancelledByPeer;
+			var timedOut = !invocation.CancelledByPeer && !invocation.ConnectionLost;
 
 			return CapabilityInvocationResult.Failed(
 				timedOut ? ProtocolErrorCodes.Timeout : ProtocolErrorCodes.Cancelled,
@@ -357,12 +357,14 @@ internal sealed class CapabilityDispatcher(
 	private sealed class Invocation : IDisposable
 	{
 		private readonly CancellationTokenSource _cancellation;
+		private readonly CancellationToken _connectionToken;
 		private int _cancelledByPeer;
 		private int _replied;
 
 		public Invocation(string correlationId, int? deadlineMs, DateTimeOffset now, CancellationToken connectionToken)
 		{
 			CorrelationId = correlationId;
+			_connectionToken = connectionToken;
 			_cancellation = CancellationTokenSource.CreateLinkedTokenSource(connectionToken);
 
 			// The protocol's invoke timeout is the ceiling even when the caller asked for longer: a
@@ -386,6 +388,8 @@ internal sealed class CapabilityDispatcher(
 
 		/// <summary>True when a <c>capability.cancel</c> caused the cancellation, rather than the deadline.</summary>
 		public bool CancelledByPeer => Volatile.Read(ref _cancelledByPeer) == 1;
+
+		public bool ConnectionLost => _connectionToken.IsCancellationRequested;
 
 		/// <summary>Wins the right to send the one reply. Only the first caller gets true.</summary>
 		public bool TryComplete() => Interlocked.Exchange(ref _replied, 1) == 0;
