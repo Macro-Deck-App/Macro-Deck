@@ -119,7 +119,9 @@ internal sealed class CompanionStateAndActionsTests
 		using var dispatcher = Dispatcher(harness, new ClaimsPrincipal(new ClaimsIdentity([], "test")));
 
 		var refusal = Assert.ThrowsAsync<UiWebSocketDispatchException>(async () =>
-			await dispatcher.DispatchAsync("ReportCompanionState", Payload(new { batteryLevelPercent = 50 }), CancellationToken.None));
+			await dispatcher.DispatchAsync("ReportCompanionState",
+				Payload(new { batteryLevelPercent = 50 }),
+				CancellationToken.None));
 
 		Assert.That(refusal!.Code, Is.EqualTo("forbidden"));
 	}
@@ -172,7 +174,8 @@ internal sealed class CompanionStateAndActionsTests
 		return await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext { Parameters = values });
 	}
 
-	private static JsonElement Payload(object value) => JsonSerializer.SerializeToElement(value, UiWebSocketProtocol.Json);
+	private static JsonElement Payload(object value) =>
+		JsonSerializer.SerializeToElement(value, UiWebSocketProtocol.Json);
 
 	private static UiWebSocketDispatcher Dispatcher(CompanionHarness harness, ClaimsPrincipal principal)
 		=> new(connectionId: "connection-1",

@@ -13,7 +13,8 @@ internal sealed class CompanionAutoCreationTests
 	private const string IntegrationId = CompanionHarness.IntegrationId;
 
 	[Test]
-	public async Task First_report_with_no_stored_choice_creates_one_entry_titled_with_the_device_name_and_enables_the_integration()
+	public async Task
+		First_report_with_no_stored_choice_creates_one_entry_titled_with_the_device_name_and_enables_the_integration()
 	{
 		var harness = new CompanionHarness();
 		var device = harness.AddDevice("Stage phone");
@@ -138,7 +139,8 @@ internal sealed class CompanionAutoCreationTests
 			Assert.That(parsed, Is.True);
 			Assert.That(identity.Key, Is.EqualTo("phone_1234"));
 			Assert.That(variables, Has.Count.EqualTo(8));
-			Assert.That(variables.All(variable => variable.Name.StartsWith("companion_phone_1234_", StringComparison.Ordinal)),
+			Assert.That(variables.All(variable =>
+					variable.Name.StartsWith("companion_phone_1234_", StringComparison.Ordinal)),
 				Is.True);
 		});
 	}
@@ -149,7 +151,12 @@ internal sealed class CompanionAutoCreationTests
 		var harness = new CompanionHarness(suffixFactory: () => 1234);
 		foreach (var name in new[] { "companion_phone_is_connected", "companion_phone_1234_is_connected" })
 		{
-			await harness.Variables.CreateUserVariable(name, VariableScope.Global, null, VariableType.Boolean, null, null);
+			await harness.Variables.CreateUserVariable(name,
+				VariableScope.Global,
+				null,
+				VariableType.Boolean,
+				null,
+				null);
 		}
 
 		var outcome = await harness.Coordinator.CompleteAsync(IntegrationId,
@@ -162,7 +169,8 @@ internal sealed class CompanionAutoCreationTests
 		{
 			Assert.That(outcome.Success, Is.False);
 			Assert.That(TestLocalization.Resolve(outcome.Error),
-				Is.EqualTo(TestLocalization.Resolve(AppStrings.Integrations.Companion.Config.VariableIdentityExhausted()))
+				Is.EqualTo(TestLocalization.Resolve(
+						AppStrings.Integrations.Companion.Config.VariableIdentityExhausted()))
 					.And.Not.Empty);
 			Assert.That(harness.Entries, Is.Empty);
 		});

@@ -41,7 +41,9 @@ internal sealed class CompanionHarness
 		services.AddSingleton(TestLocalization.Resolver);
 		services.AddSingleton(TestLocalization.Preferences);
 		services.AddScoped<IUiTransportMessageHandler<SetIntegrationEnabledRequest, SetIntegrationEnabledResponse>>(_ =>
-			new SetIntegrationEnabledRequestMessageHandler(Registry!, new InitializingLifecycle(this), new RecordingMediator()));
+			new SetIntegrationEnabledRequestMessageHandler(Registry!,
+				new InitializingLifecycle(this),
+				new RecordingMediator()));
 		ScopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
 
 		StateStore = new MemoryStateStore(storedOff ? new Dictionary<string, bool> { [IntegrationId] = false } : []);
@@ -172,7 +174,10 @@ internal sealed class CompanionHarness
 				await before();
 			}
 
-			var outcome = await Inner.CompleteUnlessDisabledAsync(integrationId, entryId, title, values,
+			var outcome = await Inner.CompleteUnlessDisabledAsync(integrationId,
+				entryId,
+				title,
+				values,
 				cancellationToken);
 			if (AfterComplete is { } after)
 			{
@@ -246,7 +251,8 @@ internal sealed class CompanionHarness
 			{
 				return Task.FromResult<IReadOnlyList<ConfigEntrySummary>>(Entries
 					.Where(entry => entry.IntegrationId == integrationId)
-					.Select(entry => new ConfigEntrySummary(entry.Id, entry.IntegrationId, entry.Title, entry.CreatedAt))
+					.Select(entry =>
+						new ConfigEntrySummary(entry.Id, entry.IntegrationId, entry.Title, entry.CreatedAt))
 					.ToList());
 			}
 		}

@@ -46,7 +46,8 @@ internal sealed class CompanionConfigFlowTests
 	{
 		var harness = new CompanionHarness(storedOff: true);
 		var manager = Manager(harness);
-		var outcome = await SubmitThroughManagerAsync(manager, manager.StartAsync(IntegrationId, CancellationToken.None));
+		var outcome = await SubmitThroughManagerAsync(manager,
+			manager.StartAsync(IntegrationId, CancellationToken.None));
 		var device = harness.AddDevice("Phone");
 
 		await harness.ReportAsync("connection-1", device);
@@ -76,7 +77,8 @@ internal sealed class CompanionConfigFlowTests
 	[TestCase("existing entry")]
 	[TestCase("requested title")]
 	[TestCase("new configuration")]
-	public async Task Submitting_while_the_user_switched_off_a_usable_entry_keeps_the_integration_disabled(string startPath)
+	public async Task Submitting_while_the_user_switched_off_a_usable_entry_keeps_the_integration_disabled(
+		string startPath)
 	{
 		var harness = new CompanionHarness();
 		var existing = harness.AddDevice("Phone");

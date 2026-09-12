@@ -48,10 +48,11 @@ internal static class CompanionActions
 					defaultValue: Automatic)
 			],
 			resolver,
-			parameters => parameters.GetValueOrDefault(OrientationParameter) is string orientation and
-				(Automatic or Portrait or Landscape)
-				? new CompanionCommand(CompanionCommand.SetOrientation, Orientation: orientation)
-				: null),
+			parameters =>
+				parameters.GetValueOrDefault(OrientationParameter) is string orientation
+					and (Automatic or Portrait or Landscape)
+					? new CompanionCommand(CompanionCommand.SetOrientation, Orientation: orientation)
+					: null),
 		new CompanionAction("vibrate",
 			AppStrings.Integrations.Companion.Actions.Vibrate.Name(),
 			AppStrings.Integrations.Companion.Actions.Vibrate.Description(),

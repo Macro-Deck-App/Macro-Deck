@@ -224,8 +224,10 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 			if (_registry.DisabledVersion(IntegrationId) != disabledVersion)
 			{
 				await scope.ServiceProvider
-					.GetRequiredService<IUiTransportMessageHandler<SetIntegrationEnabledRequest, SetIntegrationEnabledResponse>>()
-					.Handle(new SetIntegrationEnabledRequest { Id = IntegrationId, Enabled = false }, CancellationToken.None);
+					.GetRequiredService<IUiTransportMessageHandler<SetIntegrationEnabledRequest,
+						SetIntegrationEnabledResponse>>()
+					.Handle(new SetIntegrationEnabledRequest { Id = IntegrationId, Enabled = false },
+						CancellationToken.None);
 			}
 		}
 		catch (Exception ex)
