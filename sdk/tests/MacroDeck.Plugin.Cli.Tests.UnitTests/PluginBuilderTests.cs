@@ -157,10 +157,10 @@ public class PluginBuilderTests
 		try
 		{
 			foreach (var file in (string[])
-			[
-				"Acme.LightControl.csproj", "Program.cs", "PluginIntegration.cs", "LogMessageAction.cs",
-				"Localization/Strings.resx", "Properties/launchSettings.json"
-			])
+				[
+					"Acme.LightControl.csproj", "Program.cs", "PluginIntegration.cs", "LogMessageAction.cs",
+					"Localization/Strings.resx", "Properties/launchSettings.json"
+				])
 			{
 				var path = Path.Combine(project, file);
 				Directory.CreateDirectory(Path.GetDirectoryName(path)!);
