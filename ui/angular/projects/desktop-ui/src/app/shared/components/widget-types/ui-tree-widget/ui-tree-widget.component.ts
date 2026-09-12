@@ -15,7 +15,18 @@ import {
   signal,
 } from '@angular/core';
 
-import { ActionButtonTriggerType, emitsEvent, nodeEvents, nodeIsDisabledRegion, UiNode, UiNodeEvent, type UiComponentBox, UiComponentEvents, WidgetData } from '@macro-deck/runtime';
+import {
+  ActionButtonTriggerType,
+  activationClaim,
+  activationFor,
+  emitsEvent,
+  treeClaimsGesture,
+  UiNode,
+  UiNodeEvent,
+  type UiComponentBox,
+  UiComponentEvents,
+  WidgetData,
+} from '@macro-deck/runtime';
 import { ApiService, ConnectionState } from '../../../transport';
 import { UiSessionHandle, UiSessionOpenRequest, UiSessionService } from '../../../services/ui-session.service';
 import { PressFeedback } from '../../../util/press-feedback';
@@ -79,7 +90,7 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
 
   readonly rejected = computed(() => this.handleSignal()?.rejection() != null);
 
-  protected readonly treeClaimsGesture = computed(() => findActivatableNode(this.renderedRoot(), declaresAnyEvent) !== null);
+  protected readonly treeClaimsGesture = computed(() => treeClaimsGesture(this.renderedRoot()));
 
   private openedForWidgetId: string | undefined;
   private previewDebounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -196,8 +207,9 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
   activateFromInput(): void {
     if (this.disabled) return;
 
-    const interactive = findActivatableNode(this.renderedRoot(), declaresActivation);
-    if (interactive === 'absorbed') return;
+    const claim = activationClaim(this.renderedRoot());
+    if (claim === 'absorbed') return;
+    const interactive = claim === 'none' ? null : claim.node;
 
     // The same 60ms floor a tap gets. On a device driven by physical controls this flash is the only
     // confirmation the press landed, so it is painted for both paths below.
@@ -205,6 +217,11 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
     this.pressFeedback.release();
 
     if (interactive !== null) {
+      const activation = activationFor(interactive);
+      if (activation !== null) {
+        this.onTreeEvent({ nodeId: interactive.id, name: activation.name, data: activation.payload });
+        return;
+      }
       for (const name of [UiComponentEvents.PressStart, UiComponentEvents.PressEnd, UiComponentEvents.Press]) {
         // The same gate UiNodeEventBus.emit applies: a node never raises an event it did not declare.
         if (emitsEvent(interactive, name)) {
@@ -276,39 +293,6 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
       this.longPressTimeout = null;
     }
   }
-}
-
-const GESTURE_EVENTS: readonly string[] = [
-  UiComponentEvents.Drag, UiComponentEvents.DragEnd, UiComponentEvents.Swipe, UiComponentEvents.Pinch, UiComponentEvents.PinchEnd,
-];
-
-function declaresAnyEvent(node: UiNode): boolean {
-  return nodeEvents(node).length > 0;
-}
-
-function declaresActivation(node: UiNode): boolean {
-  return nodeEvents(node).some(name => !GESTURE_EVENTS.includes(name));
-}
-
-function findActivatableNode(root: UiNode | null, claims: (node: UiNode) => boolean): UiNode | 'absorbed' | null {
-  let absorbed = false;
-
-  function visit(node: UiNode): UiNode | null {
-    if (nodeIsDisabledRegion(node)) {
-      absorbed = true;
-      return null;
-    }
-    if (claims(node)) return node;
-
-    for (const child of node.children ?? []) {
-      const found = visit(child);
-      if (found !== null) return found;
-    }
-    return null;
-  }
-
-  const found = root === null ? null : visit(root);
-  return found ?? (absorbed ? 'absorbed' : null);
 }
 
 function isRealChange(change: SimpleChange | undefined): boolean {

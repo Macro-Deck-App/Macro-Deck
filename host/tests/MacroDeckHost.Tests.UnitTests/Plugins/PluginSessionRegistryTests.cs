@@ -175,6 +175,73 @@ public class PluginSessionRegistryTests
 	}
 
 	[Test]
+	public async Task Once_The_Goodbye_Connection_Ends_The_Plugin_Is_No_Longer_Reachable_Or_Connected()
+	{
+		var record = NewRecord();
+		await _registry.Create(record);
+		var connection = new FakePluginConnection();
+		_registry.TryAttach(record.SessionId, connection, null);
+		_registry.MakeNonResumable(record.SessionId);
+
+		_registry.ReleaseConnection(record.SessionId, connection);
+
+		var sent = await _registry.SendToPlugin(record.PluginId,
+			new ProtocolEnvelope { Type = "session.ping", Id = "1" });
+		var resumed = _registry.TryResume(record.PluginId, record.SessionId, _time.GetUtcNow(), out _);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(sent, Is.False);
+			Assert.That(resumed, Is.False);
+			Assert.That(_registry.Snapshot().Where(s => s.State == PluginSessionState.Connected), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_Goodbye_Session_Ends_As_Pruned_And_Never_As_Detached()
+	{
+		var record = NewRecord();
+		await _registry.Create(record);
+		var connection = new FakePluginConnection();
+		_registry.TryAttach(record.SessionId, connection, null);
+		var reasons = new List<PluginSessionEndReason>();
+		_registry.SessionEnded += (_, e) => reasons.Add(e.Reason);
+
+		_registry.MakeNonResumable(record.SessionId);
+		_registry.ReleaseConnection(record.SessionId, connection);
+		var afterPrune = _registry.Snapshot();
+		var terminated = await _registry.Terminate(record.SessionId, 1000, "Closed by the plugin.");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(afterPrune.Single().State, Is.EqualTo(PluginSessionState.Dropped));
+			Assert.That(terminated, Is.True, "the plugin's DELETE must still find its session");
+			Assert.That(reasons, Is.EqualTo(new[] { PluginSessionEndReason.Pruned }));
+		});
+	}
+
+	[Test]
+	public async Task A_Goodbye_Session_Without_A_Delete_Ends_As_Pruned_Once_The_Resume_Window_Elapses()
+	{
+		var record = NewRecord();
+		await _registry.Create(record);
+		var connection = new FakePluginConnection();
+		_registry.TryAttach(record.SessionId, connection, null);
+		var reasons = new List<PluginSessionEndReason>();
+		_registry.SessionEnded += (_, e) => reasons.Add(e.Reason);
+
+		_registry.MakeNonResumable(record.SessionId);
+		_registry.ReleaseConnection(record.SessionId, connection);
+		_time.Advance(ProtocolTimeouts.SessionResumeWindow + TimeSpan.FromSeconds(1));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_registry.Snapshot(), Is.Empty);
+			Assert.That(reasons, Is.EqualTo(new[] { PluginSessionEndReason.Pruned }));
+		});
+	}
+
+	[Test]
 	public async Task Dropped_Records_Are_Pruned_After_The_Window()
 	{
 		var record = NewRecord();

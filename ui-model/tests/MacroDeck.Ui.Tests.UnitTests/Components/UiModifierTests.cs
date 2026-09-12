@@ -408,6 +408,40 @@ public class UiModifierTests
 	}
 
 	[Test]
+	public void A_toggle_wrapped_in_a_disabled_modifier_declares_no_events_and_ignores_a_change()
+	{
+		var flipped = 0;
+		var view = View(new UiModifier
+		{
+			Key = "frame",
+			Padding = 0.05,
+			Disabled = true,
+			Child = new UiToggle
+			{
+				Key = "toggle",
+				On = true,
+				Events = [UiEventHandler.On(UiComponentEvents.Change, () => flipped++)],
+			},
+		});
+
+		var toggle = Find(view.Tree.Root, "root.frame.toggle")!;
+		var result = view.Dispatch(new UiEvent
+		{
+			NodeId = "root.frame.toggle",
+			Name = UiComponentEvents.Change,
+			Data = UiCanonicalJson.ToElement(false),
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(toggle.Type, Is.EqualTo("ui.toggle"));
+			Assert.That(toggle.Properties.ContainsKey("events"), Is.False);
+			Assert.That(result.Outcome, Is.EqualTo(UiDispatchOutcome.Ignored));
+			Assert.That(flipped, Is.Zero);
+		});
+	}
+
+	[Test]
 	public void An_event_aimed_inside_a_disabled_region_is_ignored_and_runs_nothing()
 	{
 		var pressed = 0;

@@ -10328,6 +10328,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Voicemeeter.Variables.ChannelMuted" xml:space="preserve">
     <value>Channel Muted</value>
   </data>
+  <data name="Integrations.Voicemeeter.Variables.StripRouted" xml:space="preserve">
+    <value>Routed to {bus}</value>
+  </data>
   <data name="Integrations.Weather.Config.CelsiusOption" xml:space="preserve">
     <value>Celsius (°C)</value>
   </data>

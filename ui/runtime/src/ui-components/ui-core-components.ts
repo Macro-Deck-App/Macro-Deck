@@ -11,6 +11,13 @@ import { uiStackComponent } from './ui-stack.component';
 import { uiTextComponent } from './ui-text.component';
 import { uiTextFieldComponent } from './ui-text-field.component';
 import { uiTransformComponent } from './ui-transform.component';
+import { uiShapeComponent } from './ui-shape.component';
+import { uiIconComponent } from './ui-icon.component';
+import { uiGridComponent } from './ui-grid.component';
+import { uiGaugeComponent } from './ui-gauge.component';
+import { uiToggleComponent } from './ui-toggle.component';
+import { uiSegmentedComponent } from './ui-segmented.component';
+import { uiDialComponent } from './ui-dial.component';
 
 export const UI_CORE_COMPONENTS: readonly UiComponentDefinition[] = [
   uiStackComponent,
@@ -24,5 +31,12 @@ export const UI_CORE_COMPONENTS: readonly UiComponentDefinition[] = [
   uiTextFieldComponent,
   uiListComponent,
   uiTransformComponent,
+  uiShapeComponent,
+  uiIconComponent,
+  uiGridComponent,
+  uiGaugeComponent,
+  uiToggleComponent,
+  uiSegmentedComponent,
+  uiDialComponent,
   uiModifierComponent,
 ];

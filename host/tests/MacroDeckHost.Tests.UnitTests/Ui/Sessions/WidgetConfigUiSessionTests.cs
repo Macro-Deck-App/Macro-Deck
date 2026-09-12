@@ -1,5 +1,7 @@
 using System.Text.Json;
+using MacroDeck.Localization;
 using MacroDeck.Sdk.Ui;
+using MacroDeck.Sdk.Widgets;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Caching;
@@ -270,6 +272,33 @@ internal sealed class WidgetConfigUiSessionTests
 			Assert.That(secondTicket.SessionId,
 				Is.Not.EqualTo(firstTicket.SessionId),
 				"two widgets of the same type shared one session - the config provider id did not carry the widget id");
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_widget_type_without_configuration_is_refused_before_its_provider_is_asked()
+	{
+		var widgetTypes = new WidgetTypeRegistry(new RecordingMediator());
+		var registration = await widgetTypes.Register("com.example.gauges",
+			new WidgetTypeDescriptor("plain", LocalizedText.FromLiteral("Plain"), HasConfiguration: false));
+		var opener = new ConfigUiSessionOpener(new StubIntegrationRegistry(),
+			new ThrowingConfigFlowManager(),
+			TestFolderViewProviders.Registry(),
+			_folders,
+			widgetTypes,
+			_broker);
+		var widget = AddWidget(registration.WidgetTypeId, "{}");
+
+		var ticket = opener.Open(new OpenConfigUiSessionRequest
+			{
+				EntryPoint = UiConfigEntryPoints.WidgetConfig, WidgetId = widget.Id.ToString()
+			},
+			DeviceA);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ticket.Accepted, Is.False);
+			Assert.That(ticket.Code, Is.EqualTo(UiSessionErrorCodes.ProviderRejected));
 		});
 	}
 

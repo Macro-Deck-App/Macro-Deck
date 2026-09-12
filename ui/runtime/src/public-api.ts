@@ -449,6 +449,7 @@ export {
   type WebClientTargetCapabilities,
 } from './client-target/client-target';
 export {
+  activationFor,
   containsTickingNode,
   activationClaim,
   findInteractiveNode,
@@ -458,6 +459,7 @@ export {
   nodeIsDisabledRegion,
   treeClaimsGesture,
   type UiActivationClaim,
+  type UiNodeActivation,
 } from './ui-framework/node-gestures';
 export {
   UI_COMPONENT_BORDER_LINES_WELL_KNOWN,
@@ -476,6 +478,19 @@ export { resolveFrame, type UiResolvedFrame } from './ui-framework/frame';
 export { WIDGET_GESTURE_CANCEL_EVENT } from './render/node-gesture-recognizer';
 export { chartPaths, type UiChartPaths } from './ui-components/chart';
 export {
+  arcMetrics,
+  arcPath,
+  arcPoint,
+  arcSweep,
+  dialTravelOnMove,
+  dialTravelOnPress,
+  pointerAngle,
+  type ArcMetrics,
+  type ArcSweep,
+} from './ui-components/arc';
+export { layoutGridCells, placeGridChildren, type UiGridCell, type UiGridPlacement } from './ui-components/grid-layout';
+export { isShapePathData, shapeOutline } from './ui-components/ui-shape.component';
+export {
   dialAngles,
   dialHands,
   dialMetrics,
@@ -489,6 +504,10 @@ export {
   UI_COMPONENT_BUTTON_CORNERS_WELL_KNOWN,
   UI_COMPONENT_IMAGE_TRANSITIONS_WELL_KNOWN,
   UI_COMPONENTS_WELL_KNOWN,
+  UI_COMPONENT_SHAPES_WELL_KNOWN,
+  UI_ICON_VERSIONS,
+  UI_ICONS_WELL_KNOWN,
+  UiComponentShapes,
   UiComponentAlignments,
   UiComponentBorderStyles,
   UiComponentButtonCorners,

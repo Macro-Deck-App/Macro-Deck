@@ -216,6 +216,52 @@ public static class UiComponentProperties
 	/// field's own value: a prompt is written for the reader, a value is the user's.</summary>
 	public const string Placeholder = "placeholder";
 
+	/// <summary>Which outline a <see cref="UiShape" /> draws - see <see cref="UiComponentShapes" />.</summary>
+	public const string Shape = "shape";
+
+	/// <summary>A <see cref="UiShape" />'s corner radius, as a <see cref="UiLength" />.</summary>
+	public const string CornerRadius = "cornerRadius";
+
+	/// <summary>A <see cref="UiShape" />'s outline colour, as <c>#rrggbb</c>.</summary>
+	public const string StrokeColor = "strokeColor";
+
+	/// <summary>A <see cref="UiShape" />'s outline width, as a <see cref="UiLength" />.</summary>
+	public const string StrokeWidth = "strokeWidth";
+
+	/// <summary>A <see cref="UiShape" />'s outline as restricted path data - see
+	/// <see cref="UiShape.Path" />.</summary>
+	public const string Path = "path";
+
+	/// <summary>The name of the glyph a <see cref="UiIcon" /> draws - see <see cref="UiIcons" />.</summary>
+	public const string Icon = "icon";
+
+	/// <summary>A <see cref="UiGrid" />'s column count.</summary>
+	public const string Columns = "columns";
+
+	/// <summary>A <see cref="UiGrid" />'s row count. Absent means as many as its children need.</summary>
+	public const string Rows = "rows";
+
+	/// <summary>How many columns a child of a <see cref="UiGrid" /> spans. Ignored under any other
+	/// parent.</summary>
+	public const string ColumnSpan = "columnSpan";
+
+	/// <summary>How many rows a child of a <see cref="UiGrid" /> spans. Ignored under any other
+	/// parent.</summary>
+	public const string RowSpan = "rowSpan";
+
+	/// <summary>Where the arc of a <see cref="UiGauge" /> or <see cref="UiDial" /> begins, in degrees
+	/// clockwise from twelve o'clock.</summary>
+	public const string StartAngle = "startAngle";
+
+	/// <summary>Where that arc ends, in the same degrees.</summary>
+	public const string EndAngle = "endAngle";
+
+	/// <summary>Whether a <see cref="UiToggle" /> is on.</summary>
+	public const string On = "on";
+
+	/// <summary>The index of a <see cref="UiSegmented" />'s selected segment.</summary>
+	public const string Selected = "selected";
+
 	/// <summary>
 	/// The geometry-free modifiers any node of this profile may carry, as one object keyed by
 	/// <see cref="UiComponentModifiers" />. Nested rather than flat, so no member can collide with a key a
@@ -243,6 +289,8 @@ public static class UiComponentProperties
 		Weight, Role, Color, MaxLines, Wrap, FontFace, Source, Transition, Fit, Zoom, OffsetX, OffsetY,
 		Opacity, Brightness, Saturation, Start, End, StartColor, EndColor, Marker, Thickness, Value,
 		Format, Seconds, Level, Step, LevelColor, BorderStyle, BorderColor, Corner, Points, PlotTop,
-		Digits, Answer, Placeholder, Rotation, OriginX, OriginY, Modifiers, Frame, Clip, Mask,
+		Digits, Answer, Placeholder, Rotation, OriginX, OriginY, Shape, CornerRadius, StrokeColor,
+		StrokeWidth, Path, Icon, Columns, Rows, ColumnSpan, RowSpan, StartAngle, EndAngle, On, Selected,
+		Modifiers, Frame, Clip, Mask,
 	];
 }

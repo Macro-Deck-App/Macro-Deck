@@ -1,7 +1,8 @@
-import { emitsEvent, nodeRecord } from './node-properties.util';
+import { emitsEvent, nodeBoolean, nodeNumber, nodeRecord } from './node-properties.util';
 import { UiNode } from './ui-node.interface';
 import { UiComponentEvents } from '../ui-components/component-events';
 import { UiComponentModifiers } from '../ui-components/component-modifiers';
+import { UiComponents } from '../ui-components/ui-component-types';
 import { UiComponentProperties } from '../ui-components/component-properties';
 import type { UiComponentRegistry } from './component-registry';
 
@@ -28,11 +29,32 @@ export function nodeIsDisabledRegion(node: UiNode | null | undefined): boolean {
   return nodeRecord(node, UiComponentProperties.Modifiers)?.[UiComponentModifiers.Disabled] === true;
 }
 
+export interface UiNodeActivation {
+  name: string;
+  payload: unknown;
+}
+
+export function activationFor(node: UiNode): UiNodeActivation | null {
+  if (!emitsEvent(node, UiComponentEvents.Change)) return null;
+  if (node.type === UiComponents.Toggle) {
+    return { name: UiComponentEvents.Change, payload: nodeBoolean(node, UiComponentProperties.On) !== true };
+  }
+  if (node.type === UiComponents.Segmented) {
+    const count = (node.children ?? []).length;
+    if (count === 0) return null;
+    const selected = nodeNumber(node, UiComponentProperties.Selected);
+    const current = selected !== undefined && selected >= 0 && selected < count ? Math.floor(selected) : -1;
+    return { name: UiComponentEvents.Change, payload: (current + 1) % count };
+  }
+  return null;
+}
+
 export function findInteractiveNode(node: UiNode | null | undefined): UiNode | null {
   if (!node) return null;
   if (nodeIsDisabledRegion(node) || nodeClaimsGesture(node) || nodeClaimsValue(node) || nodeDeclaresGesture(node)) {
     return node;
   }
+  if (node.type === UiComponents.Segmented) return null;
 
   const children = node.children ?? [];
   for (let index = 0; index < children.length; index++) {
@@ -57,6 +79,7 @@ export function activationClaim(tree: UiNode | null | undefined): UiActivationCl
       return null;
     }
     if (nodeClaimsGesture(node) || nodeClaimsValue(node)) return node;
+    if (node.type === UiComponents.Segmented) return null;
 
     const children = node.children ?? [];
     for (let index = 0; index < children.length; index++) {

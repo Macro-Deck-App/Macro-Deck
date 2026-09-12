@@ -15,6 +15,9 @@ transferred once per client rather than embedded a hundred times. Registering ar
 today; a plugin gets one when the upload path referenced on [Deck widget views](/ui/views/widget/)
 lands.
 
+Macro Deck's own icons need no resource at all: name one with [`ui.icon`](/ui/components/icon/) and every
+reader draws it from its own set.
+
 `UiButton.Source` takes the same handle for its backdrop, framed by `Fit`, `Zoom`, `OffsetX`, `OffsetY`
 and `Opacity`. Those are fractions and multipliers, not pixels or percentages: the scale is applied inside
 the translation, so an offset covers the same distance at any zoom.

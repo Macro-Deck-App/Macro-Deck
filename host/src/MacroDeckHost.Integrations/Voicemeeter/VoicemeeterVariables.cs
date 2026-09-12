@@ -60,9 +60,15 @@ internal static class VoicemeeterVariables
 			NameSuffix => VariableReading.Of(channel.DisplayName(state.Layout)),
 			GainSuffix => VariableReading.Of(Math.Round(channel.Gain, 1), MinimumGain, MaximumGain, GainStep),
 			MutedSuffix => VariableReading.Of(channel.Muted),
-			_ => VariableReading.Unavailable
+			_ => ReadRouting(channel, suffix)
 		};
 	}
+
+	private static VariableReading ReadRouting(VoicemeeterChannel channel, string suffix)
+		=> channel.Kind == VoicemeeterChannelKind.Strip &&
+			channel.Assignments.TryGetValue(suffix[1..].ToUpperInvariant(), out var routed)
+				? VariableReading.Of(routed)
+				: VariableReading.Unavailable;
 
 	public static VariableWriteResult Write(VoicemeeterConnection connection, string name, double decibels)
 	{
@@ -112,6 +118,7 @@ internal static class VoicemeeterVariables
 		for (var index = 0; index < layout.Strips; index++)
 		{
 			AddChannel(variables, StripPrefix, index);
+			AddRouting(variables, index, layout);
 		}
 
 		for (var index = 0; index < layout.Buses; index++)
@@ -145,6 +152,21 @@ internal static class VoicemeeterVariables
 				{
 					DisplayName = AppStrings.Integrations.Voicemeeter.Variables.ChannelMuted()
 				});
+	}
+
+	private static void AddRouting(List<VariableDefinition> variables, int strip, VoicemeeterLayout layout)
+	{
+		foreach (var bus in layout.BusAssignmentNames())
+		{
+			var name = string.Create(CultureInfo.InvariantCulture,
+				$"{StripPrefix}{strip}_{bus.ToLowerInvariant()}");
+
+			variables.Add(VariableDefinition.Eager(name, VariableType.Boolean, refreshInterval: _liveInterval)
+				with
+				{
+					DisplayName = AppStrings.Integrations.Voicemeeter.Variables.StripRouted(bus: bus)
+				});
+		}
 	}
 
 	private static bool TryParse(string name, out VoicemeeterChannelKind kind, out int index, out string suffix)

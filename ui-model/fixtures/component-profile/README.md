@@ -25,6 +25,8 @@ Three artefacts, and the third is the one that does the work:
 | `conformance-history-graph-layout.json` | the chart's **normative geometry** resolved: the plot band, every point of a dense series, and which term of each length actually binds |
 | `conformance-gauge-tree.json` | the wire form of the transformed shapes - a needle turned about a pivot below its centre, an identity transform, and two nested transforms |
 | `conformance-gauge-layout.json` | the transform and pivot each `ui.transform` resolves to, and the box its children are drawn across |
+| `conformance-building-blocks-tree.json` | the wire form of the building blocks - a grid placing a shape, an icon, a gauge, a toggle, a segmented control, a dial and a path, each with the fallback an older reader draws |
+| `conformance-building-blocks-layout.json` | each grid cell resolved, plus the shape, glyph, arc, toggle track and segment face geometry at two bases |
 | `conformance-modifier-tree.json` | the wire form of the universal modifiers - every `modifiers` member on ordinary nodes, the `ui.modifier` wrapper with every one of its properties, and the gesture event names |
 | `conformance-modifier-layout.json` | what a reader writes for each of them: backgrounds, corners, the border drawn inside the edge, the accessibility attributes, the dim of a disabled region, and the wrapper's frame, padding, clip and mask resolved |
 | this README | what the fixtures deliberately contain, so they are not trimmed by accident |
@@ -43,7 +45,7 @@ Trimming any of these turns the fixture into one a wrong renderer passes:
 
 - across the trees, every primitive - including `ui.stack`, `ui.text`, `ui.image`,
   `ui.range-bar`, `macrodeck.dynamic-text`, `macrodeck.clock-dial`, `macrodeck.progress-bar`,
-  `macrodeck.progress-text`, `ui.slider`, `ui.button`, `ui.layer`, `ui.chart`, `ui.transform` - and every
+  `macrodeck.progress-text`, `ui.slider`, `ui.button`, `ui.layer`, `ui.chart`, `ui.transform`, `ui.shape`, `ui.icon`, `ui.grid`, `ui.gauge`, `ui.toggle`, `ui.segmented`, `ui.dial` - and every
   property key the profile ships; coverage is a property of the fixture set, not of any one file alone;
 - a length whose `maxOfCross` **binds** (the forecast weekday, clamped by its row height) *and* one where
   `basis` binds (the range-bar thickness, in the same row) - a renderer that ignores `maxOfCross` passes a
@@ -281,3 +283,14 @@ The Angular assertions restate the table's numbers rather than reading this file
 the Angular workspace, and CI invokes `ng test` directly rather than through an npm script, so a copy step
 would silently not run there. If the two ever disagree, this file is the contract and the renderer is
 wrong.
+
+## What the building-blocks tree deliberately contains
+
+- a `ui.grid` with a declared `rows`, a child spanning two columns and one spanning two rows, so the dense
+  row-major placement is visible in the cell geometry rather than assumed;
+- every new type with the fallback the issue recommends: a stack with the same background, a text label, a
+  range bar at the same level, a button, a stack of buttons, and a slider keeping the dial's own events;
+- a decorative path shape with **no fallback at all**, because drawing nothing is an allowed degradation;
+- a toggle that is on and a segmented control with a selection, so the painted state is checked, not only
+  the track;
+- a full-turn dial (`0` to `360`), the case the seam rule exists for.

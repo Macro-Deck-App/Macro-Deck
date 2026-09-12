@@ -411,6 +411,13 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 
 	private async Task RequestSnapshotAsync(SessionContext context, CancellationToken cancellationToken)
 	{
+		// An attach queues its snapshot behind the provider open, so a declined open has already ended the
+		// session by the time this runs, and the provider no longer knows the id.
+		if (_registry.Find(context.SessionId) is null)
+		{
+			return;
+		}
+
 		try
 		{
 			await context.Provider.RequestSnapshotAsync(context.SessionId, cancellationToken).ConfigureAwait(false);

@@ -594,6 +594,73 @@ describe('UiTreeWidgetComponent', () => {
       expect(pressed[0]).toBeTrue();
     });
 
+    it('flips a toggle the tree holds, sending the new state', () => {
+      const fixture = createFixture({ widgetId: 'w1' });
+      handles[0].root.set({
+        id: 'toggle',
+        type: UiComponents.Toggle,
+        properties: { [UiComponentProperties.Events]: ['change'], [UiComponentProperties.On]: true },
+      });
+      fixture.detectChanges();
+
+      const triggers: string[] = [];
+      fixture.componentInstance.trigger.subscribe(t => triggers.push(t));
+      fixture.componentInstance.activateFromInput();
+
+      expect(handles[0].sent).toEqual([{ nodeId: 'toggle', name: 'change', data: false }]);
+      expect(triggers).toEqual([]);
+    });
+
+    it('steps a segmented control to its next segment, wrapping', () => {
+      const fixture = createFixture({ widgetId: 'w1' });
+      handles[0].root.set({
+        id: 'mode',
+        type: UiComponents.Segmented,
+        properties: { [UiComponentProperties.Events]: ['change'], [UiComponentProperties.Selected]: 1 },
+        children: [textNode(0.1, 'A'), { ...textNode(0.1, 'B'), id: 'b' }],
+      });
+      fixture.detectChanges();
+
+      fixture.componentInstance.activateFromInput();
+
+      expect(handles[0].sent).toEqual([{ nodeId: 'mode', name: 'change', data: 0 }]);
+    });
+
+    it("keeps the tile's own trigger for a segmented that offers nothing, whatever its segments declare", () => {
+      const fixture = createFixture({ widgetId: 'w1' });
+      handles[0].root.set({
+        id: 'mode',
+        type: UiComponents.Segmented,
+        children: [buttonRoot(['press'])],
+      } as UiNode);
+      fixture.detectChanges();
+
+      const triggers: string[] = [];
+      fixture.componentInstance.trigger.subscribe(t => triggers.push(t));
+      fixture.componentInstance.activateFromInput();
+
+      expect(handles[0].sent).toEqual([]);
+      expect(triggers).toEqual(['onTouchStart', 'onTouchEnd', 'onShortPress']);
+    });
+
+    it("keeps the tile's own trigger for a list that only asks to reveal more, which is no press", () => {
+      const fixture = createFixture({ widgetId: 'w1' });
+      handles[0].root.set({
+        id: 'results',
+        type: UiComponents.List,
+        properties: { [UiComponentProperties.Events]: ['reveal'] },
+        children: [textNode(0.1)],
+      });
+      fixture.detectChanges();
+
+      const triggers: string[] = [];
+      fixture.componentInstance.trigger.subscribe(t => triggers.push(t));
+      fixture.componentInstance.activateFromInput();
+
+      expect(triggers).toEqual(['onTouchStart', 'onTouchEnd', 'onShortPress']);
+      expect(handles[0].sent.map(event => event.name)).not.toContain('press');
+    });
+
     it('does nothing at all while the widget is disabled', () => {
       const fixture = createFixture({ widgetId: 'w1', disabled: true });
       handles[0].root.set(buttonRoot(['press']));

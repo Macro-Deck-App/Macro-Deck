@@ -49,6 +49,7 @@ public class ComponentProfileConformanceFixtureTests
 		yield return "conformance-history-graph-tree.json";
 		yield return "conformance-picker-tree.json";
 		yield return "conformance-gauge-tree.json";
+		yield return "conformance-building-blocks-tree.json";
 		yield return "conformance-modifier-tree.json";
 	}
 
@@ -91,6 +92,33 @@ public class ComponentProfileConformanceFixtureTests
 				Is.Empty,
 				"identity is every key absent, never a written 0 or 1");
 			Assert.That(nodes["conformance.outer"].Children.Single().Type, Is.EqualTo("ui.transform"));
+		});
+	}
+
+	[Test]
+	public void The_building_blocks_fixture_pins_each_recommended_fallback_and_an_honest_degradation()
+	{
+		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-building-blocks-tree.json"),
+			UiCanonicalJson.Options)!;
+		var nodes = Walk(tree.Root).ToDictionary(node => node.Id, StringComparer.Ordinal);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(nodes["conformance.shape"].Fallback?.Type, Is.EqualTo("ui.stack"));
+			Assert.That(nodes["conformance.icon"].Fallback?.Type, Is.EqualTo("ui.text"));
+			Assert.That(nodes["conformance.gauge"].Fallback?.Type, Is.EqualTo("ui.range-bar"));
+			Assert.That(nodes["conformance.toggle"].Fallback?.Type, Is.EqualTo("ui.button"));
+			Assert.That(nodes["conformance.segmented"].Fallback?.Type, Is.EqualTo("ui.stack"));
+			Assert.That(nodes["conformance.dial"].Fallback?.Type, Is.EqualTo("ui.slider"));
+			Assert.That(nodes["conformance.dial"].Fallback?.Properties["events"].GetRawText(),
+				Is.EqualTo("""["adjust","change"]"""),
+				"a slider fallback keeps the dial's own events, so the older reader is still the same control");
+			Assert.That(nodes["conformance.path"].Fallback,
+				Is.Null,
+				"drawing nothing is an allowed degradation for a decorative shape");
+			Assert.That(nodes["conformance"].Properties.ContainsKey("rows"),
+				Is.True,
+				"a declared row count is what makes the grid drop children that do not fit");
 		});
 	}
 

@@ -235,7 +235,7 @@ describe('node modifiers', () => {
         expect(subject.style.getPropertyValue('background')).withContext(type).toBe(normalized('background', '#123456'));
         expect(subject.style.getPropertyValue('border-radius')).withContext(type).toBe('12px');
         const overlay = subject.querySelector(':scope > .widget-modifier-border') as HTMLElement | null;
-        const overlaid = ['ui.stack', 'ui.button', 'ui.layer', 'ui.transform', 'ui.modifier'].includes(type);
+        const overlaid = ['ui.stack', 'ui.button', 'ui.layer', 'ui.transform', 'ui.modifier', 'ui.grid'].includes(type);
         expect(overlay === null).withContext(`${type} overlay`).toBe(!overlaid);
         if (!overlaid) expect(subject.style.getPropertyValue('outline')).withContext(type).toBe('1.2px solid #ffffff');
         else expect(overlay?.style.borderWidth).withContext(type).toBe('1.2px');
@@ -307,6 +307,30 @@ describe('node modifiers', () => {
       ]));
 
       expect((byId('field') as HTMLInputElement).readOnly).toBeTrue();
+    });
+
+    it('refuses local interaction on the toggle, segmented control and dial inside a disabled region', () => {
+      const controls: UiNode[] = [
+        node('ui.toggle', { events: ['change'] }, [], 'control'),
+        node('ui.segmented', { events: ['change'] }, [node('ui.text', { text: 'a' }), node('ui.text', { text: 'b' })], 'control'),
+        node('ui.dial', { events: ['adjust', 'change'], level: 0.5 }, [], 'control'),
+      ];
+      const pressed = (disabled: boolean, control: UiNode) => {
+        container.innerHTML = '';
+        emitted = [];
+        mount(node('ui.stack', disabled ? { modifiers: { disabled: true } } : {}, [control]));
+        const element = byId('control');
+        element.getBoundingClientRect = () => ({ left: 0, top: 0, right: 100, bottom: 100, width: 100, height: 100 }) as DOMRect;
+        element.dispatchEvent(pointer('pointerdown', { clientX: 90, clientY: 50 }));
+        element.dispatchEvent(pointer('pointermove', { clientX: 80, clientY: 10 }));
+        element.dispatchEvent(pointer('pointerup', { clientX: 80, clientY: 10 }));
+        return { names: names(), pressable: element.classList.contains('widget-pressable') };
+      };
+
+      for (const control of controls) {
+        expect(pressed(false, control).names.length).withContext(`${control.type} enabled`).toBeGreaterThan(0);
+        expect(pressed(true, control)).withContext(`${control.type} disabled`).toEqual({ names: [], pressable: false });
+      }
     });
 
     it('does not move a slider inside a disabled region', () => {

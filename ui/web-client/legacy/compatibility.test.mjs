@@ -219,3 +219,11 @@ test('the shipped shell carries no accent placeholder into a stylesheet', () => 
     assert.ok(!resolvedCss.includes(sentinel));
   }
 });
+
+test('an API is found wherever code reaches it, never in data that merely spells its name', () => {
+  assert.equal(referencesApi("icons:['clipboard','copy']", 'navigator.clipboard'), false);
+  assert.equal(referencesApi('n.clipboard.writeText(t)', 'navigator.clipboard'), true);
+  assert.equal(referencesApi("navigator['clipboard'].writeText(t)", 'navigator.clipboard'), true);
+  assert.equal(referencesApi('const { clipboard } = navigator;', 'navigator.clipboard'), true);
+  assert.equal(referencesApi('new Intl.DateTimeFormat()', 'Intl'), true);
+});
