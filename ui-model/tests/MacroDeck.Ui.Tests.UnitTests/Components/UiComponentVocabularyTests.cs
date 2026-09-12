@@ -27,7 +27,18 @@ public class UiComponentVocabularyTests
 		"ui.stack", "ui.text", "ui.image", "ui.range-bar", "ui.slider", "ui.button", "ui.layer",
 		"ui.chart", "ui.text-field", "ui.list", "ui.transform", "ui.shape", "ui.icon", "ui.grid", "ui.gauge",
 		"ui.toggle", "ui.segmented", "ui.dial",
+		"ui.modifier",
 	];
+
+	private static readonly string[] _expectedModifierMembers =
+	[
+		"background", "radius", "borderWidth", "borderColor", "borderLine", "accessibilityLabel",
+		"accessibilityHint", "disabled",
+	];
+
+	private static readonly string[] _expectedClips = ["bounds", "circle", "capsule"];
+
+	private static readonly string[] _expectedBorderLines = ["solid", "dashed", "dotted"];
 
 	private static readonly string[] _expectedMacroDeckComponents =
 	[
@@ -45,6 +56,7 @@ public class UiComponentVocabularyTests
 		"answer", "placeholder", "rotation", "originX", "originY", "shape", "cornerRadius", "strokeColor",
 		"strokeWidth", "path", "icon", "columns", "rows", "columnSpan", "rowSpan", "startAngle", "endAngle",
 		"on", "selected",
+		"modifiers", "frame", "clip", "mask",
 	];
 
 	private static readonly string[] _expectedIconsVersion1 =
@@ -84,18 +96,21 @@ public class UiComponentVocabularyTests
 	];
 
 	private static readonly string[] _expectedEvents =
-		["change", "adjust", "press", "long-press", "press-start", "press-end", "reveal", "double-press"];
+	[
+		"change", "adjust", "press", "long-press", "press-start", "press-end", "reveal", "double-press", "drag",
+		"drag-end", "swipe", "pinch", "pinch-end",
+	];
 
 	private static UiSurface WidgetSurface()
 		=> new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };
 
 	[Test]
-	public void The_core_component_set_is_the_eighteen_ui_names()
+	public void The_core_component_set_is_the_nineteen_ui_names()
 	{
 		Assert.Multiple(() =>
 		{
 			Assert.That(UiComponents.WellKnown, Is.EqualTo(_expectedCoreComponents).AsCollection);
-			Assert.That(UiComponents.WellKnown.Distinct(StringComparer.Ordinal).Count(), Is.EqualTo(18));
+			Assert.That(UiComponents.WellKnown.Distinct(StringComparer.Ordinal).Count(), Is.EqualTo(19));
 
 			foreach (var type in UiComponents.WellKnown)
 			{
@@ -182,6 +197,22 @@ public class UiComponentVocabularyTests
 	public void The_widget_event_set_is_frozen()
 	{
 		Assert.That(UiComponentEvents.WellKnown, Is.EqualTo(_expectedEvents).AsCollection);
+	}
+
+	[Test]
+	public void The_modifier_member_clip_and_border_line_sets_and_the_normative_constants_are_frozen()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(UiComponentModifiers.WellKnown, Is.EqualTo(_expectedModifierMembers).AsCollection);
+			Assert.That(UiComponentClips.WellKnown, Is.EqualTo(_expectedClips).AsCollection);
+			Assert.That(UiComponentBorderLines.WellKnown, Is.EqualTo(_expectedBorderLines).AsCollection);
+			Assert.That(UiComponentModifiers.DimOpacity, Is.EqualTo(0.4));
+			Assert.That(UiComponentModifiers.GestureSlop, Is.EqualTo(0.04));
+			Assert.That(UiComponentModifiers.SwipeMinDistance, Is.EqualTo(0.2));
+			Assert.That(UiComponentModifiers.SwipeMaxDurationMs, Is.EqualTo(500));
+			Assert.That(UiComponentModifiers.GestureThrottleMs, Is.EqualTo(100));
+		});
 	}
 
 	[Test]
@@ -519,6 +550,18 @@ public class UiComponentVocabularyTests
 					LevelColor = "#5856d6",
 					Thickness = 0.05,
 					Events = [UiEventHandler.On(UiComponentEvents.Adjust, static () => { })],
+				},
+				new UiModifier
+				{
+					Key = "framed",
+					Padding = 0.03,
+					Clip = UiComponentClips.Bounds,
+					Mask = UiMask.Linear(180,
+						new UiMaskStop { Offset = 0, Opacity = 1 },
+						new UiMaskStop { Offset = 1, Opacity = 0 }),
+					Frame = new UiFrame { AspectRatio = 1 },
+					Radius = 0.05,
+					Child = new UiTextRun { Key = "framedLabel", Text = "Framed" },
 				},
 				new UiTextField
 				{

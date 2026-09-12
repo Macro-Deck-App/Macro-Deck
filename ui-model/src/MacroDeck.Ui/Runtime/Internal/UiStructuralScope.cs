@@ -36,6 +36,8 @@ internal sealed class UiStructuralScope : UiDependent
 	/// <summary>The input-id scope in force at this scope's position.</summary>
 	internal string? InputScope { get; }
 
+	internal IReadOnlyList<UiValue<bool>>? Disabled { get; init; }
+
 	/// <summary>The diagnostic declaration path this scope's element was declared under.</summary>
 	internal string ParentDeclarationPath { get; }
 

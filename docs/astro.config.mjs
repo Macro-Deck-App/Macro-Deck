@@ -105,6 +105,7 @@ export default defineConfig({
 								'ui/components/stack-and-layer',
 								'ui/components/grid',
 								'ui/components/transform',
+								'ui/components/modifier',
 								'ui/components/list',
 								'ui/components/text',
 								'ui/components/image',

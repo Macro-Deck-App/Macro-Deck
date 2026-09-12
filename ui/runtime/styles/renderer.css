@@ -93,6 +93,7 @@
 .widget-transform,
 .widget-grid,
 .widget-segmented,
+.widget-modifier,
 .widget-list,
 .widget-text,
 .widget-image {
@@ -214,7 +215,8 @@
  * that really does over-subscribe its box is still held to it.
  */
 .widget-stack > .widget-text,
-.widget-button > .widget-text {
+.widget-button > .widget-text,
+.widget-modifier > .widget-text {
   max-height: calc(100% + 0.4em);
 }
 
@@ -251,6 +253,51 @@
   position: absolute;
   top: 0;
   left: 0;
+}
+
+.widget-modifier {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+}
+
+.widget-modifier > * {
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.widget-modifier-fill-width > * {
+  flex: 1 1 auto;
+}
+
+.widget-modifier-fill-height {
+  align-items: stretch;
+}
+
+.widget-modifier-border {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  box-sizing: border-box;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.widget-layer > .widget-modifier,
+.widget-transform > .widget-modifier {
+  right: 0;
+  bottom: 0;
+  margin: auto;
 }
 
 .widget-chart {

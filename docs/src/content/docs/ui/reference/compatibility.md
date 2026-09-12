@@ -28,6 +28,17 @@ emits, and `UiIconInput` is unchanged.
 Either way a client and a provider negotiate the model version as they always have - before a session is
 opened - and a mismatch produces the same graceful decline, never a tree the reader cannot parse.
 
+## Additions that moved no version
+
+New component types and new properties are additive and leave the model version alone; the component
+profile's rule decides which of the two a new feature is. [Modifiers](/ui/components/modifier/) add both:
+
+| Addition | Shape | An older reader |
+|---|---|---|
+| `modifiers` (background, radius, border, accessibility text, `disabled`) | A property on any node | Ignores it and draws the node plainer. A disabled subtree still offers none of its own events, because the DSL stopped it declaring them, but the reader does not know the region absorbs the tile's press, so a deck tile's own flows still run there. |
+| `drag`, `drag-end`, `swipe`, `pinch`, `pinch-end` | Event names | Never sends a name it does not implement. |
+| `ui.modifier` (padding, opacity, clip, mask, frame), component version 1 | A type | Draws the node's explicit `fallback`; without one, none of the wrapped content (Macro Deck's renderer shows a faint placeholder box). No fallback is invented for you. |
+
 See [ADR 0064](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0064-components-are-a-registry-over-two-namespaces.md)
 for why the vocabulary is organized as a registry over the `ui.*`/`macrodeck.*` namespaces rather than one
 flat list, and [The UI model](/ui/concepts/ui-model/#model-version-negotiation) for where negotiation

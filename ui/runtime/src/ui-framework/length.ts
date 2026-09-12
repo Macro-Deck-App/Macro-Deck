@@ -17,7 +17,10 @@ export function nodeLength(
   node: UiNode | null | undefined,
   key: string,
 ): UiLength | undefined {
-  const raw = nodeRaw(node, key);
+  return asUiLength(nodeRaw(node, key));
+}
+
+export function asUiLength(raw: unknown): UiLength | undefined {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return undefined;
 
   const candidate = raw as { basis?: unknown; maxOfCross?: unknown; maxOfCell?: unknown };
@@ -55,7 +58,9 @@ export function resolveLength(
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
 export function nodeHexColor(node: UiNode | null | undefined, key: string): string | undefined {
-  const raw = nodeRaw(node, key);
+  return asHexColor(nodeRaw(node, key));
+}
 
+export function asHexColor(raw: unknown): string | undefined {
   return typeof raw === 'string' && HEX_COLOR.test(raw) ? raw : undefined;
 }

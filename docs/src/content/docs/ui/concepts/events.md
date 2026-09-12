@@ -112,8 +112,9 @@ new UiButton { Key = "idle" } // drawn, but accepts nothing
 ```
 
 The names in `Events` are exactly what the node advertises under `events`, and a reader sends an event only
-where that list names it. There is no separate disabled property: declaring nothing *is* disabled, and
-declaring some names says the rest are not yours to receive.
+where that list names it. Declaring nothing *is* disabled, and declaring some names says the rest are not
+yours to receive. A modifier's `Disabled` is shorthand for exactly that - the DSL stops the subtree
+declaring events - plus a dimmed look; see [Modifier](/ui/components/modifier/#disabled).
 
 A component's own list of names is documentation, not a gate - the wire format does not stop a slider from
 declaring any name. It is the reader's contract to send only what a node declared. A reader never infers
@@ -135,6 +136,13 @@ hidden one keeps and submits its value. See [Conditional content](/ui/concepts/s
 | `press-end` | `UiComponentEvents.PressEnd` | `ui.button` | The press ended, however it ended. Exactly one follows each `press-start`, including a cancelled gesture or the pointer leaving the element. | None |
 | `double-press` | `UiComponentEvents.DoublePress` | `ui.slider` | Two taps completed in quick succession, each without a drag. Sent after the second tap's `change`, never instead of it. | None |
 | `reveal` | `UiComponentEvents.Reveal` | `ui.list` | The user scrolled further down the list. At most twice a second, and only for an index beyond the furthest already sent for that list. | Index of the furthest child in view, a number |
+| `drag` | `UiComponentEvents.Drag` | any node | The pointer moved past the slop. At most ten a second. | `{"x":n,"y":n}`, translation since the start in basis fractions |
+| `drag-end` | `UiComponentEvents.DragEnd` | any node | Once on release, after a `drag` began; not if the node left the tree or became disabled meanwhile. | As `drag`, the final translation |
+| `swipe` | `UiComponentEvents.Swipe` | any node | On release, after a quick travel along one axis. | `"left"`, `"right"`, `"up"` or `"down"` |
+| `pinch` | `UiComponentEvents.Pinch` | any node | While two pointers move. At most ten a second. | The scale since the start, a number |
+| `pinch-end` | `UiComponentEvents.PinchEnd` | any node | Once, when the pinch ends; not if the node left the tree or became disabled meanwhile. | As `pinch`, the final scale |
+
+The thresholds and which of two nested nodes gets a gesture are on [Modifier](/ui/components/modifier/#gestures).
 
 Configuration inputs use `change` from `UiConfigEvents`. See the [component reference](/ui/components/) for
 each component's geometry and semantics, and [Modal views](/ui/views/modal/) for `modal.complete`, the one

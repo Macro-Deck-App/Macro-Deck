@@ -29,6 +29,10 @@ cross axis.
 | `ui.toggle` | An on/off switch the user flips | [Toggle](/ui/components/toggle/) |
 | `ui.segmented` | A row of segments the user chooses one of | [Segmented](/ui/components/segmented/) |
 | `ui.dial` | A rotary level the user turns | [Dial](/ui/components/dial/) |
+| `ui.modifier` | Pads, fades, clips, masks or frames its one child | [Modifier](/ui/components/modifier/) |
+
+Any node can also carry a `modifiers` object - background, border, radius, accessibility text and
+`disabled` - and the gesture events. See [Modifier](/ui/components/modifier/).
 
 ## `macrodeck.*`
 

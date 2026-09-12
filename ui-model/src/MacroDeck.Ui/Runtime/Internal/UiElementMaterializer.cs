@@ -1,4 +1,5 @@
 using System.Text.Json;
+using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.Identity;
 using MacroDeck.Ui.Model.Nodes;
@@ -56,7 +57,8 @@ internal sealed class UiElementMaterializer
 		var rootNode = MaterializeSingle(root,
 			structuralPrefix: null,
 			inputScope: null,
-			parentDeclarationPath: string.Empty);
+			parentDeclarationPath: string.Empty,
+			disabled: null);
 
 		Link(rootNode, parent: null, isFallbackOfParent: false);
 
@@ -74,7 +76,9 @@ internal sealed class UiElementMaterializer
 		UiChildRegion region,
 		string? structuralPrefix,
 		string? inputScope,
-		string parentDeclarationPath)
+		string parentDeclarationPath,
+		IReadOnlyList<UiValue<bool>>? disabled,
+		IReadOnlyList<UiModifier>? modifiers)
 	{
 		// The declaration path gains a segment on every recursion, including through the transparent
 		// elements, so its depth is the recursion depth - no separate counter has to be threaded through.
@@ -89,7 +93,7 @@ internal sealed class UiElementMaterializer
 		{
 			case UiWhen when1:
 			{
-				var scope = CreateStructuralScope(when1, structuralPrefix, inputScope, parentDeclarationPath);
+				var scope = CreateStructuralScope(when1, structuralPrefix, inputScope, parentDeclarationPath, disabled);
 				var content = region.AddRegion(scope);
 
 				// The condition and the content closure are the structural decision, so they - and only they -
@@ -112,7 +116,9 @@ internal sealed class UiElementMaterializer
 						content,
 						structuralPrefix,
 						inputScope,
-						Extend(parentDeclarationPath, when1.Key));
+						Extend(parentDeclarationPath, when1.Key),
+						disabled,
+						modifiers: null);
 				}
 
 				return;
@@ -124,7 +130,7 @@ internal sealed class UiElementMaterializer
 
 				foreach (var child in fragment.Children)
 				{
-					MaterializeInto(child, region, structuralPrefix, inputScope, declarationPath);
+					MaterializeInto(child, region, structuralPrefix, inputScope, declarationPath, disabled, null);
 				}
 
 				return;
@@ -132,7 +138,11 @@ internal sealed class UiElementMaterializer
 
 			case IUiRepeatElement repeat:
 			{
-				var scope = CreateStructuralScope(element, structuralPrefix, inputScope, parentDeclarationPath);
+				var scope = CreateStructuralScope(element,
+					structuralPrefix,
+					inputScope,
+					parentDeclarationPath,
+					disabled);
 				var items = region.AddRegion(scope);
 
 				// The templates run inside the structural scope too: an item's element is part of the
@@ -149,7 +159,9 @@ internal sealed class UiElementMaterializer
 						items,
 						structuralPrefix,
 						inputScope,
-						Extend(parentDeclarationPath, itemKey));
+						Extend(parentDeclarationPath, itemKey),
+						disabled,
+						modifiers: null);
 				}
 
 				return;
@@ -160,12 +172,30 @@ internal sealed class UiElementMaterializer
 					inputContainer,
 					structuralPrefix,
 					inputScope,
-					parentDeclarationPath));
+					parentDeclarationPath,
+					disabled,
+					modifiers));
 
 				return;
 
 			case IUiInputElement:
-				region.AddNode(MaterializeInput(element, structuralPrefix, inputScope, parentDeclarationPath));
+				region.AddNode(MaterializeInput(element,
+					structuralPrefix,
+					inputScope,
+					parentDeclarationPath,
+					disabled,
+					modifiers));
+
+				return;
+
+			case UiModifier modifier:
+				MaterializeModifier(modifier,
+					region,
+					structuralPrefix,
+					inputScope,
+					parentDeclarationPath,
+					disabled,
+					modifiers);
 
 				return;
 
@@ -174,7 +204,9 @@ internal sealed class UiElementMaterializer
 					container.Children,
 					structuralPrefix,
 					inputScope,
-					parentDeclarationPath));
+					parentDeclarationPath,
+					disabled,
+					modifiers));
 
 				return;
 
@@ -183,7 +215,9 @@ internal sealed class UiElementMaterializer
 					[],
 					structuralPrefix,
 					inputScope,
-					parentDeclarationPath));
+					parentDeclarationPath,
+					disabled,
+					modifiers));
 
 				return;
 
@@ -225,13 +259,14 @@ internal sealed class UiElementMaterializer
 		UiElement element,
 		string? structuralPrefix,
 		string? inputScope,
-		string parentDeclarationPath)
+		string parentDeclarationPath,
+		IReadOnlyList<UiValue<bool>>? disabled)
 	{
 		// No owner: a slot that must hold exactly one node has no parent child list, so nothing in it can be
 		// inserted, removed or moved. A structural scope declared here reports that on invalidation.
 		var slot = new UiChildRegion(parent: null, scope: null);
 
-		MaterializeInto(element, slot, structuralPrefix, inputScope, parentDeclarationPath);
+		MaterializeInto(element, slot, structuralPrefix, inputScope, parentDeclarationPath, disabled, null);
 
 		var nodes = new List<UiMaterializedNode>();
 		slot.Flatten(nodes);
@@ -246,6 +281,98 @@ internal sealed class UiElementMaterializer
 		return nodes[0];
 	}
 
+	private void MaterializeModifier(
+		UiModifier modifier,
+		UiChildRegion region,
+		string? structuralPrefix,
+		string? inputScope,
+		string parentDeclarationPath,
+		IReadOnlyList<UiValue<bool>>? disabled,
+		IReadOnlyList<UiModifier>? modifiers)
+	{
+		var child = modifier.Child;
+		var where = $"The modifier keyed '{modifier.Key}' declared near '{parentDeclarationPath}'";
+
+		if (modifier.Children.Count != 0)
+		{
+			throw new UiViewException($"{where} takes its one element through Child, not Children.");
+		}
+
+		if (child is UiWhen or UiFragment or IUiRepeatElement)
+		{
+			throw new UiViewException($"{where} needs a single element as its Child, not a conditional, a " +
+				"repeat or a fragment, which can produce other than one node.");
+		}
+
+		IReadOnlyList<UiModifier> layers = modifiers is null ? [modifier] : [modifier, .. modifiers];
+		IReadOnlyList<UiValue<bool>>? chain = !modifier.Disabled.IsDeclared
+			? disabled
+			: disabled is null
+				? [modifier.Disabled]
+				: [.. disabled, modifier.Disabled];
+
+		if (!modifier.IsWrapper)
+		{
+			if (modifier.MainSize.IsDeclared ||
+				modifier.Fill.IsDeclared ||
+				modifier.Answer.IsDeclared ||
+				modifier.ColumnSpan.IsDeclared ||
+				modifier.RowSpan.IsDeclared ||
+				modifier.Fallback is not null ||
+				modifier.RequiredComponentVersion is not null)
+			{
+				throw new UiViewException($"{where} sets only node modifiers, so it emits no node that could carry " +
+					"MainSize, Fill, Answer, ColumnSpan, RowSpan, a Fallback or a component version. Set them on " +
+					"its child, or assign a wrapper member.");
+			}
+
+			MaterializeInto(child,
+				region,
+				structuralPrefix,
+				inputScope,
+				Extend(parentDeclarationPath, modifier.Key),
+				chain,
+				layers);
+
+			return;
+		}
+
+		if (SizesItselfInParent(child))
+		{
+			throw new UiViewException($"{where} is a wrapper, so its child is laid out inside it and cannot set " +
+				"MainSize, Fill, ColumnSpan or RowSpan. Set them on the modifier instead.");
+		}
+
+		region.AddNode(MaterializeStructural(modifier,
+			[child],
+			structuralPrefix,
+			inputScope,
+			parentDeclarationPath,
+			chain,
+			layers));
+	}
+
+	private static bool SizesItselfInParent(UiElement element)
+	{
+		while (element is UiModifier { IsWrapper: false } inner)
+		{
+			element = inner.Child;
+		}
+
+		return element switch
+		{
+			UiComponentContainer container => container.MainSize.IsDeclared ||
+				container.Fill.IsDeclared ||
+				container.ColumnSpan.IsDeclared ||
+				container.RowSpan.IsDeclared,
+			UiComponentLeaf leaf => leaf.MainSize.IsDeclared ||
+				leaf.Fill.IsDeclared ||
+				leaf.ColumnSpan.IsDeclared ||
+				leaf.RowSpan.IsDeclared,
+			_ => false,
+		};
+	}
+
 	/// <summary>Materializes a structural element - a <see cref="UiContainer" /> with children or a
 	/// <see cref="UiLeaf" /> without - which composes its id from the structural prefix and opens no input-id
 	/// scope.</summary>
@@ -254,31 +381,35 @@ internal sealed class UiElementMaterializer
 		IReadOnlyList<UiElement> children,
 		string? structuralPrefix,
 		string? inputScope,
-		string parentDeclarationPath)
+		string parentDeclarationPath,
+		IReadOnlyList<UiValue<bool>>? disabled,
+		IReadOnlyList<UiModifier>? modifiers)
 	{
 		var (id, declarationPath) = ComposeAndValidate(structuralPrefix, element.Key, parentDeclarationPath);
 
 		var childRegion = new UiChildRegion(parent: null, scope: null);
 		foreach (var child in children)
 		{
-			MaterializeInto(child, childRegion, id, inputScope, declarationPath);
+			MaterializeInto(child, childRegion, id, inputScope, declarationPath, disabled, null);
 		}
 
-		var fallback = MaterializeFallback(element, structuralPrefix, inputScope, parentDeclarationPath);
+		var fallback = MaterializeFallback(element, structuralPrefix, inputScope, parentDeclarationPath, disabled);
 
-		return BuildNode(element, id, childRegion, fallback);
+		return BuildNode(element, id, childRegion, fallback, disabled, modifiers);
 	}
 
 	private UiMaterializedNode MaterializeInput(
 		UiElement input,
 		string? structuralPrefix,
 		string? inputScope,
-		string parentDeclarationPath)
+		string parentDeclarationPath,
+		IReadOnlyList<UiValue<bool>>? disabled,
+		IReadOnlyList<UiModifier>? modifiers)
 	{
 		var (id, _) = ComposeAndValidate(inputScope, input.Key, parentDeclarationPath);
-		var fallback = MaterializeFallback(input, structuralPrefix, inputScope, parentDeclarationPath);
+		var fallback = MaterializeFallback(input, structuralPrefix, inputScope, parentDeclarationPath, disabled);
 
-		return BuildNode(input, id, new UiChildRegion(parent: null, scope: null), fallback);
+		return BuildNode(input, id, new UiChildRegion(parent: null, scope: null), fallback, disabled, modifiers);
 	}
 
 	private UiMaterializedNode MaterializeInputContainer(
@@ -286,26 +417,29 @@ internal sealed class UiElementMaterializer
 		IUiInputContainerElement inputContainer,
 		string? structuralPrefix,
 		string? inputScope,
-		string parentDeclarationPath)
+		string parentDeclarationPath,
+		IReadOnlyList<UiValue<bool>>? disabled,
+		IReadOnlyList<UiModifier>? modifiers)
 	{
 		var (id, declarationPath) = ComposeAndValidate(inputScope, element.Key, parentDeclarationPath);
 
 		var childRegion = new UiChildRegion(parent: null, scope: null);
 		foreach (var child in inputContainer.Children)
 		{
-			MaterializeInto(child, childRegion, structuralPrefix, id, declarationPath);
+			MaterializeInto(child, childRegion, structuralPrefix, id, declarationPath, disabled, null);
 		}
 
-		var fallback = MaterializeFallback(element, structuralPrefix, inputScope, parentDeclarationPath);
+		var fallback = MaterializeFallback(element, structuralPrefix, inputScope, parentDeclarationPath, disabled);
 
-		return BuildNode(element, id, childRegion, fallback);
+		return BuildNode(element, id, childRegion, fallback, disabled, modifiers);
 	}
 
 	private UiMaterializedNode? MaterializeFallback(
 		UiElement element,
 		string? structuralPrefix,
 		string? inputScope,
-		string parentDeclarationPath)
+		string parentDeclarationPath,
+		IReadOnlyList<UiValue<bool>>? disabled)
 	{
 		if (element.Fallback is null)
 		{
@@ -315,17 +449,40 @@ internal sealed class UiElementMaterializer
 		return MaterializeSingle(element.Fallback,
 			structuralPrefix,
 			inputScope,
-			Extend(parentDeclarationPath, element.Key) + ".fallback");
+			Extend(parentDeclarationPath, element.Key) + ".fallback",
+			disabled);
 	}
 
 	private UiMaterializedNode BuildNode(
 		UiElement element,
 		string id,
 		UiChildRegion childRegion,
-		UiMaterializedNode? fallback)
+		UiMaterializedNode? fallback,
+		IReadOnlyList<UiValue<bool>>? disabled,
+		IReadOnlyList<UiModifier>? modifiers)
 	{
 		var declaration = new UiPropertyDeclaration();
 		element.DeclareProperties(declaration);
+
+		var modifierHandlers = new List<UiEventHandler>();
+
+		if (modifiers is not null)
+		{
+			DeclareModifiers(declaration, modifiers, id);
+
+			foreach (var layer in modifiers)
+			{
+				if (!ReferenceEquals(layer, element))
+				{
+					modifierHandlers.AddRange(layer.Events);
+				}
+			}
+		}
+
+		if (modifierHandlers.Count > 0 || disabled is not null)
+		{
+			ComposeEvents(declaration.Cells, modifierHandlers, disabled);
+		}
 
 		var cells = declaration.Cells;
 		var properties = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
@@ -360,7 +517,11 @@ internal sealed class UiElementMaterializer
 			Fallback = fallback?.Node,
 		};
 
-		var materialized = new UiMaterializedNode(element, node, childRegion, children, fallback, cells);
+		var materialized = new UiMaterializedNode(element, node, childRegion, children, fallback, cells)
+		{
+			ModifierHandlers = modifierHandlers,
+			Disabled = disabled,
+		};
 
 		childRegion.Owner = materialized;
 
@@ -373,13 +534,109 @@ internal sealed class UiElementMaterializer
 		return materialized;
 	}
 
+	private static void DeclareModifiers(UiPropertyDeclaration declaration,
+		IReadOnlyList<UiModifier> modifiers,
+		string id)
+	{
+		var members = new List<UiModifierMember>();
+
+		foreach (var layer in modifiers)
+		{
+			layer.CollectSafeMembers(members);
+		}
+
+		var keys = new HashSet<string>(StringComparer.Ordinal);
+
+		foreach (var member in members)
+		{
+			if (!keys.Add(member.Key))
+			{
+				throw new UiViewException($"The node '{id}' is given the modifier '{member.Key}' by more than one " +
+					"UiModifier. Assign each modifier once per node.");
+			}
+		}
+
+		if (members.Count == 0)
+		{
+			return;
+		}
+
+		declaration.Set(UiComponentProperties.Modifiers,
+			UiValue.Optional(() =>
+			{
+				var values = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
+
+				foreach (var member in members)
+				{
+					if (member.Evaluate() is { } value)
+					{
+						values[member.Key] = value;
+					}
+				}
+
+				return values.Count == 0
+					? UiValue.None<IReadOnlyDictionary<string, JsonElement>>()
+					: UiValue.Of<IReadOnlyDictionary<string, JsonElement>>(values);
+			}));
+	}
+
+	// Reading the disabled values inside the cell subscribes it, so a toggle re-emits the events.
+	private static void ComposeEvents(
+		List<UiPropertyCell> cells,
+		List<UiEventHandler> modifierHandlers,
+		IReadOnlyList<UiValue<bool>>? disabled)
+	{
+		var index = cells.FindIndex(cell =>
+			string.Equals(cell.Key, UiComponentProperties.Events, StringComparison.Ordinal));
+		var declared = index >= 0
+			? ((UiPropertyCell<IReadOnlyList<string>>)cells[index]).Value
+			: UiValue.None<IReadOnlyList<string>>();
+
+		var composed = UiValue.Optional(() =>
+		{
+			if (UiMaterializedNode.IsAnyDisabled(disabled))
+			{
+				return UiValue.None<IReadOnlyList<string>>();
+			}
+
+			var names = declared.TryEvaluate(out var own) ? new List<string>(own) : [];
+
+			foreach (var handler in modifierHandlers)
+			{
+				if (!names.Contains(handler.Name, StringComparer.Ordinal))
+				{
+					names.Add(handler.Name);
+				}
+			}
+
+			return names.Count == 0
+				? UiValue.None<IReadOnlyList<string>>()
+				: UiValue.Of<IReadOnlyList<string>>(names);
+		});
+
+		var replacement = new UiPropertyCell<IReadOnlyList<string>>(UiComponentProperties.Events, composed);
+
+		if (index >= 0)
+		{
+			cells[index] = replacement;
+		}
+		else
+		{
+			cells.Add(replacement);
+		}
+	}
+
 	private UiStructuralScope CreateStructuralScope(
 		UiElement element,
 		string? structuralPrefix,
 		string? inputScope,
-		string parentDeclarationPath)
+		string parentDeclarationPath,
+		IReadOnlyList<UiValue<bool>>? disabled)
 	{
-		var scope = new UiStructuralScope(element, structuralPrefix, inputScope, parentDeclarationPath);
+		var scope = new UiStructuralScope(element, structuralPrefix, inputScope, parentDeclarationPath)
+		{
+			Disabled = disabled,
+		};
 
 		scope.BindTo(_view);
 		_dependents.Add(scope);

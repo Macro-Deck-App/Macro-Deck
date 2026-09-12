@@ -50,6 +50,7 @@ public class ComponentProfileConformanceFixtureTests
 		yield return "conformance-picker-tree.json";
 		yield return "conformance-gauge-tree.json";
 		yield return "conformance-building-blocks-tree.json";
+		yield return "conformance-modifier-tree.json";
 	}
 
 	private static readonly string[] _transformKeys = ["rotation", "originX", "originY", "zoom", "offsetX", "offsetY"];

@@ -262,6 +262,26 @@ public static class UiComponentProperties
 	/// <summary>The index of a <see cref="UiSegmented" />'s selected segment.</summary>
 	public const string Selected = "selected";
 
+	/// <summary>
+	/// The geometry-free modifiers any node of this profile may carry, as one object keyed by
+	/// <see cref="UiComponentModifiers" />. Nested rather than flat, so no member can collide with a key a
+	/// component already owns. Absent means none. A reader that does not implement the key ignores it and
+	/// draws the node exactly as it would without it, which is why nothing in it may change a node's size.
+	/// </summary>
+	public const string Modifiers = "modifiers";
+
+	/// <summary>A <see cref="UiComponents.Modifier" />'s size constraints, as a <see cref="UiFrame" />.
+	/// Absent means the wrapper takes the box its parent gives it.</summary>
+	public const string Frame = "frame";
+
+	/// <summary>The shape a <see cref="UiComponents.Modifier" /> clips its child to - see
+	/// <see cref="UiComponentClips" />. Absent means no clipping.</summary>
+	public const string Clip = "clip";
+
+	/// <summary>A <see cref="UiComponents.Modifier" />'s opacity gradient over its child, as a
+	/// <see cref="UiMask" />. Absent means no mask.</summary>
+	public const string Mask = "mask";
+
 	/// <summary>The property keys this profile ships.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
 	[
@@ -271,5 +291,6 @@ public static class UiComponentProperties
 		Format, Seconds, Level, Step, LevelColor, BorderStyle, BorderColor, Corner, Points, PlotTop,
 		Digits, Answer, Placeholder, Rotation, OriginX, OriginY, Shape, CornerRadius, StrokeColor,
 		StrokeWidth, Path, Icon, Columns, Rows, ColumnSpan, RowSpan, StartAngle, EndAngle, On, Selected,
+		Modifiers, Frame, Clip, Mask,
 	];
 }

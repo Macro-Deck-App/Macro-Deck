@@ -220,7 +220,7 @@ export const uiSliderComponent: UiComponentDefinition<UiSliderState> = {
       const node = ctx.current();
       // A node with no declared events offers no interaction, so it leaves the pointer to the press
       // handling on whatever encloses this tree.
-      if (!nodeClaimsValue(node)) return;
+      if (!nodeClaimsValue(node) || ctx.isDisabled()) return;
 
       const pointer = event as PointerEvent;
       if (state.pointerId !== null || pointer.button > 0) return;
@@ -280,7 +280,7 @@ export const uiSliderComponent: UiComponentDefinition<UiSliderState> = {
     const vertical = sliderIsVertical(node);
     ctx.setClassName(element, 'widget-slider');
     ctx.setClass(element, 'widget-slider-vertical', vertical);
-    ctx.setClass(element, 'widget-pressable', nodeClaimsValue(node));
+    ctx.setClass(element, 'widget-pressable', nodeClaimsValue(node) && !ctx.isDisabled());
     ctx.sizeTo(element, ctx.box);
 
     const thickness = nodeThicknessPx(node, ctx.basis, ctx.crossExtent);

@@ -81,7 +81,9 @@ internal sealed class UiStructuralReconciler
 				region,
 				scope.StructuralPrefix,
 				scope.InputScope,
-				UiElementMaterializer.Extend(scope.ParentDeclarationPath, segment));
+				UiElementMaterializer.Extend(scope.ParentDeclarationPath, segment),
+				scope.Disabled,
+				modifiers: null);
 		}
 
 		var newNodes = new List<UiMaterializedNode>();

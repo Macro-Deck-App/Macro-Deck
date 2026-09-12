@@ -17,9 +17,9 @@ import {
 
 import {
   ActionButtonTriggerType,
+  activationClaim,
   activationFor,
   emitsEvent,
-  findInteractiveNode,
   treeClaimsGesture,
   UiNode,
   UiNodeEvent,
@@ -207,12 +207,15 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
   activateFromInput(): void {
     if (this.disabled) return;
 
+    const claim = activationClaim(this.renderedRoot());
+    if (claim === 'absorbed') return;
+    const interactive = claim === 'none' ? null : claim.node;
+
     // The same 60ms floor a tap gets. On a device driven by physical controls this flash is the only
     // confirmation the press landed, so it is painted for both paths below.
     this.pressFeedback.press();
     this.pressFeedback.release();
 
-    const interactive = findInteractiveNode(this.renderedRoot());
     if (interactive !== null) {
       const activation = activationFor(interactive);
       if (activation !== null) {

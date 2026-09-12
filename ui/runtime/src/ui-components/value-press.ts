@@ -21,7 +21,7 @@ export function claimsChange(node: UiNode): boolean {
 }
 
 export function paintValueTint<TState>(node: UiNode, ctx: UiComponentContext<TState>): void {
-  const claims = claimsChange(node);
+  const claims = claimsChange(node) && !ctx.isDisabled();
   ctx.setClass(ctx.element, 'widget-pressable', claims);
   if (!claims) {
     ctx.dropPart('tint');
@@ -48,7 +48,7 @@ export function bindValuePress<TState>(
 
   element.addEventListener('pointerdown', (event: Event) => {
     const pointer = event as PointerEvent;
-    if (!claimsChange(ctx.current()) || state.pointerId !== null || pointer.button > 0) return;
+    if (!claimsChange(ctx.current()) || ctx.isDisabled() || state.pointerId !== null || pointer.button > 0) return;
     event.preventDefault();
     event.stopPropagation();
     state.pointerId = pointer.pointerId;

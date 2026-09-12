@@ -339,6 +339,60 @@ describe('runtime widget grid', () => {
     expect(fired).toEqual([]);
   });
 
+  describe('a tile whose tree claims part of it', () => {
+    const tileTriggers = (root: UiNode) => {
+      const fired: string[] = [];
+      const handle = renderWidgetGrid(container, {
+        host,
+        geometry: { cols: 5, rows: 3 },
+        onWidgetTrigger: (_widgetId, triggerType) => fired.push(triggerType),
+      });
+      handle.update([widget('a', 0, 0)], () => root);
+      return fired;
+    };
+
+    it('runs no tile flow for a press on a blank area beside an inner button', () => {
+      const fired = tileTriggers({
+        id: 'root', type: 'ui.stack', properties: {},
+        children: [{ id: 'button', type: 'ui.button', properties: { events: ['press'] } }],
+      } as UiNode);
+
+      press(container.querySelector('.deck-grid-tile-surface') as HTMLElement);
+
+      expect(fired).toEqual([]);
+    });
+
+    it('runs no tile press or long press for a tree that only drags', () => {
+      jasmine.clock().install();
+      try {
+        const fired = tileTriggers({
+          id: 'root', type: 'ui.stack', properties: {},
+          children: [{ id: 'surface', type: 'ui.modifier', properties: { events: ['drag'] }, children: [] }],
+        } as UiNode);
+        const surface = container.querySelector('.deck-grid-tile-surface') as HTMLElement;
+
+        surface.dispatchEvent(pointer('pointerdown'));
+        jasmine.clock().tick(1000);
+        surface.dispatchEvent(pointer('pointerup'));
+
+        expect(fired).toEqual([]);
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
+
+    it('absorbs every press on a tile whose tree holds a disabled region', () => {
+      const fired = tileTriggers({
+        id: 'root', type: 'ui.stack', properties: {},
+        children: [{ id: 'region', type: 'ui.stack', properties: { modifiers: { disabled: true } } }],
+      } as UiNode);
+
+      press(container.querySelector('.deck-grid-tile-surface') as HTMLElement);
+
+      expect(fired).toEqual([]);
+    });
+  });
+
   it('scales the tile while the tree it holds reports itself pressed', () => {
     const handle = mount();
     handle.update([widget('a', 0, 0)], () => pressable());

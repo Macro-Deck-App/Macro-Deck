@@ -64,6 +64,30 @@ internal sealed class UiMaterializedNode
 	/// <summary>The cells feeding this node's properties, in declaration order.</summary>
 	internal List<UiPropertyCell> Cells { get; }
 
+	internal IReadOnlyList<UiEventHandler> ModifierHandlers { get; init; } = [];
+
+	internal IReadOnlyList<UiValue<bool>>? Disabled { get; init; }
+
+	internal bool IsDisabled => IsAnyDisabled(Disabled);
+
+	internal static bool IsAnyDisabled(IReadOnlyList<UiValue<bool>>? chain)
+	{
+		if (chain is null)
+		{
+			return false;
+		}
+
+		foreach (var value in chain)
+		{
+			if (value.TryEvaluate(out var disabled) && disabled)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	/// <summary>True when this node lies on the spine the current flush has to rebuild.</summary>
 	internal bool NeedsRebuild { get; set; }
 

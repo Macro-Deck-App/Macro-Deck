@@ -27,6 +27,8 @@ Three artefacts, and the third is the one that does the work:
 | `conformance-gauge-layout.json` | the transform and pivot each `ui.transform` resolves to, and the box its children are drawn across |
 | `conformance-building-blocks-tree.json` | the wire form of the building blocks - a grid placing a shape, an icon, a gauge, a toggle, a segmented control, a dial and a path, each with the fallback an older reader draws |
 | `conformance-building-blocks-layout.json` | each grid cell resolved, plus the shape, glyph, arc, toggle track and segment face geometry at two bases |
+| `conformance-modifier-tree.json` | the wire form of the universal modifiers - every `modifiers` member on ordinary nodes, the `ui.modifier` wrapper with every one of its properties, and the gesture event names |
+| `conformance-modifier-layout.json` | what a reader writes for each of them: backgrounds, corners, the border drawn inside the edge, the accessibility attributes, the dim of a disabled region, and the wrapper's frame, padding, clip and mask resolved |
 | this README | what the fixtures deliberately contain, so they are not trimmed by accident |
 
 One tree per widget shape rather than one growing tree: the weather tree's proportions are themselves
@@ -59,6 +61,24 @@ Trimming any of these turns the fixture into one a wrong renderer passes:
   omitted when empty, and both spellings are part of the canonical bytes;
 - an unknown type (`macrodeck.sparkline`) carrying `requiredComponentVersion` and a `fallback`, so
   degradation is exercised rather than assumed.
+
+## What the modifier tree deliberately contains
+
+- **every `modifiers` member** - `background` in all three shapes (hex, `linear`, `radial`), `radius`,
+  `borderWidth`, `borderColor`, every `borderLine` value, `accessibilityLabel` both as a plain string and
+  `accessibilityHint` as a localization reference, and `disabled`;
+- a disabled `ui.button` that **still declares** `press` - a hand-written tree can say that, and the fixture
+  states that a reader emits nothing inside a disabled region, dims the node once and marks it
+  `aria-disabled`, while the button keeps its own corner because `radius` is absent;
+- a labelled container and a labelled press claimant, which take `role` `group` and `button` respectively;
+- **every `ui.modifier` property** - `padding`, `opacity`, all three `clip` values, `mask` in both shapes and
+  `frame` with every one of its keys spread over three wrappers - including an `aspectRatio` that derives the
+  side the parent leaves open and a `maxWidth` that binds before it does;
+- a wrapper carrying its own `modifiers`, so the background covers the padding, and its opacity is the one
+  value a reader writes, never multiplied into a second copy;
+- every gesture event name (`drag`, `drag-end`, `swipe`, `pinch`, `pinch-end`) on one wrapper, which is also
+  what keeps the platform from panning under it;
+- an explicit `fallback` on that wrapper, so a reader without `ui.modifier` still shows the content.
 
 ## What the history-graph tree deliberately contains
 

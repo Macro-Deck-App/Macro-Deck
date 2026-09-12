@@ -177,7 +177,7 @@ export const uiDialComponent: UiComponentDefinition<UiDialState> = {
 
     element.addEventListener('pointerdown', (event: Event) => {
       const node = ctx.current();
-      if (!nodeClaimsValue(node) || arcSweep(node).sweep === 0) return;
+      if (!nodeClaimsValue(node) || ctx.isDisabled() || arcSweep(node).sweep === 0) return;
       const pointer = event as PointerEvent;
       if (state.pointerId !== null || pointer.button > 0) return;
 
@@ -226,7 +226,7 @@ export const uiDialComponent: UiComponentDefinition<UiDialState> = {
 
   paint(node, ctx) {
     ctx.setClassName(ctx.element, 'widget-dial');
-    ctx.setClass(ctx.element, 'widget-pressable', nodeClaimsValue(node) && arcSweep(node).sweep !== 0);
+    ctx.setClass(ctx.element, 'widget-pressable', nodeClaimsValue(node) && !ctx.isDisabled() && arcSweep(node).sweep !== 0);
     paintDial(node, ctx);
   },
 

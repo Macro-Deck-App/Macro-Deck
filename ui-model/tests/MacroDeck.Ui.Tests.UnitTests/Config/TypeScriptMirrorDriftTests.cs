@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Model.Versioning;
@@ -25,6 +26,9 @@ public class TypeScriptMirrorDriftTests
 	private const string _eventsPath = "ui/runtime/src/ui-config/config-events.ts";
 	private const string _entryPointsPath = "ui/runtime/src/ui-config/config-entry-points.ts";
 	private const string _propertiesPath = "ui/runtime/src/ui-config/config-properties.ts";
+	private const string _componentPropertiesPath = "ui/runtime/src/ui-components/component-properties.ts";
+	private const string _componentEventsPath = "ui/runtime/src/ui-components/component-events.ts";
+	private const string _componentModifiersPath = "ui/runtime/src/ui-components/component-modifiers.ts";
 
 	[Test]
 	public void The_client_speaks_the_same_ui_model_majors_this_package_does()
@@ -58,6 +62,52 @@ public class TypeScriptMirrorDriftTests
 	public void The_client_mirrors_the_configuration_property_keys_in_declaration_order()
 		=> AssertMirrors(_propertiesPath, "UiConfigProperties", UiConfigProperties.WellKnown);
 
+	[Test]
+	public void The_client_mirrors_the_component_property_keys_in_declaration_order()
+		=> AssertMirrors(_componentPropertiesPath, "UiComponentProperties", UiComponentProperties.WellKnown);
+
+	[Test]
+	public void The_client_mirrors_the_component_events_in_declaration_order()
+		=> AssertMirrors(_componentEventsPath, "UiComponentEvents", UiComponentEvents.WellKnown);
+
+	[Test]
+	public void The_client_mirrors_the_modifier_members_clips_and_border_lines_in_declaration_order()
+	{
+		AssertMirrors(_componentModifiersPath, "UiComponentModifiers", UiComponentModifiers.WellKnown);
+		AssertMirrors(_componentModifiersPath, "UiComponentClips", UiComponentClips.WellKnown);
+		AssertMirrors(_componentModifiersPath, "UiComponentBorderLines", UiComponentBorderLines.WellKnown);
+	}
+
+	[Test]
+	public void The_client_applies_the_same_normative_modifier_and_gesture_numbers()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_MODIFIER_DIM_OPACITY"),
+				Is.EqualTo(UiComponentModifiers.DimOpacity));
+			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_GESTURE_SLOP"),
+				Is.EqualTo(UiComponentModifiers.GestureSlop));
+			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_SWIPE_MIN_DISTANCE"),
+				Is.EqualTo(UiComponentModifiers.SwipeMinDistance));
+			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_SWIPE_MAX_DURATION_MS"),
+				Is.EqualTo(UiComponentModifiers.SwipeMaxDurationMs));
+			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_GESTURE_THROTTLE_MS"),
+				Is.EqualTo(UiComponentModifiers.GestureThrottleMs));
+		});
+	}
+
+	private static double? ReadTopLevelNumber(string path, string constName)
+	{
+		var source = File.ReadAllText(Path.Combine(FindRepositoryRoot(), path));
+		var match = Regex.Match(source,
+			$@"^export const {constName}\s*=\s*(?<value>-?\d+(\.\d+)?)\s*;",
+			RegexOptions.Multiline);
+
+		return match.Success
+			? double.Parse(match.Groups["value"].Value, System.Globalization.CultureInfo.InvariantCulture)
+			: null;
+	}
+
 	private static void AssertMirrors(string path, string constName, IReadOnlyList<string> declared)
 	{
 		var mirrored = ReadStringMembers(path, constName);
@@ -78,7 +128,7 @@ public class TypeScriptMirrorDriftTests
 		var body = ReadObjectBody(path, constName);
 
 		return Regex.Matches(body,
-				@"^\s*(?<member>[A-Za-z][A-Za-z0-9]*)\s*:\s*'(?<value>[^']*)'\s*,",
+				@"(?:^|[{,])\s*(?<member>[A-Za-z][A-Za-z0-9]*)\s*:\s*'(?<value>[^']*)'",
 				RegexOptions.Multiline)
 			.Select(match => match.Groups["value"].Value)
 			.ToList();

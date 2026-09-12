@@ -74,6 +74,9 @@ const ASSERTED_KEYS = new Set([
   'handColor', 'tickColor',
   'renders',
   'transform', 'transformOrigin',
+  'borderRadius', 'borderWidth', 'borderStyle', 'borderColor', 'opacity',
+  'ariaLabel', 'ariaDescription', 'ariaRole', 'ariaDisabled', 'overflow', 'clipPath', 'maskImage',
+  'touchAction', 'refusesEvents',
   'cell', 'cornerRadius', 'glyphEdge', 'arcRadius', 'arcStrokeWidth', 'toggleTrack', 'knobLeft', 'segmentFace',
 ]);
 
@@ -950,6 +953,96 @@ describe('component-profile conformance fixtures: building-blocks tree', () => {
   }
 });
 
+describe('component-profile conformance fixtures: modifier tree', () => {
+  const tree = loadTree('conformance-modifier-tree.json');
+  const layout = loadJson<LayoutFixture>('conformance-modifier-layout.json');
+
+  function normalized(name: string, value: string): string {
+    const probe = document.createElement('div');
+    probe.style.setProperty(name, value);
+    return probe.style.getPropertyValue(name);
+  }
+
+  function pointer(type: string): Event {
+    const event = new Event(type, { bubbles: true }) as Event & { pointerId: number; button: number };
+    event.pointerId = 1;
+    event.button = 0;
+    return event;
+  }
+
+  for (const testCase of layout.cases) {
+    describe(`basis ${testCase.basis}`, () => {
+      let emitted: string[];
+
+      beforeEach(() => {
+        emitted = [];
+        mount(tree, testCase.tile, testCase.basis, testHost({ emit: (_node, name) => emitted.push(name) }));
+      });
+
+      for (const [id, spec] of Object.entries(testCase.nodes)) {
+        it(`resolves ${id}`, () => {
+          const el = byId(id);
+          const style = (name: string) => el.style.getPropertyValue(name);
+          const pixels = (key: string, name: string) => {
+            if (!(key in spec)) return;
+            if (spec[key] === null) expect(style(name)).withContext(`${id}.${key}`).toBe('');
+            else expect(num(style(name))).withContext(`${id}.${key}`).toBeCloseTo(spec[key] as number, 2);
+          };
+          const literal = (key: string, name: string) => {
+            if (!(key in spec)) return;
+            const expected = spec[key] === null ? '' : normalized(name, spec[key] as string);
+            expect(style(name)).withContext(`${id}.${key}`).toBe(expected);
+          };
+          const attribute = (key: string, name: string) => {
+            if (key in spec) expect(el.getAttribute(name)).withContext(`${id}.${key}`).toBe(spec[key] as string | null);
+          };
+
+          pixels('width', 'width');
+          pixels('height', 'height');
+          pixels('padding', 'padding');
+          pixels('borderRadius', 'border-radius');
+          pixels('opacity', 'opacity');
+          literal('background', 'background');
+          literal('overflow', 'overflow');
+          literal('clipPath', 'clip-path');
+          literal('maskImage', 'mask-image');
+          literal('touchAction', 'touch-action');
+          attribute('ariaLabel', 'aria-label');
+          attribute('ariaDescription', 'aria-description');
+          attribute('ariaRole', 'role');
+          attribute('ariaDisabled', 'aria-disabled');
+
+          if ('borderWidth' in spec) {
+            const overlay = el.querySelector(':scope > .widget-modifier-border') as HTMLElement;
+            expect(overlay).withContext(`${id} border overlay`).not.toBeNull();
+            expect(style('outline')).withContext(`${id} outline`).toBe('');
+            expect(num(overlay.style.borderWidth)).withContext(`${id}.borderWidth`).toBeCloseTo(spec.borderWidth as number, 2);
+            expect(overlay.style.borderStyle).withContext(`${id}.borderStyle`).toBe(spec.borderStyle as string);
+            expect(sameColor(overlay.style.borderColor, spec.borderColor as string))
+              .withContext(`${id}.borderColor`).toBeTrue();
+          }
+
+          if ('childBox' in spec) {
+            const box = spec.childBox as { width: number; height: number | null };
+            const child = Array.from(el.children).filter(item => item.hasAttribute('data-node-id'))[0] as HTMLElement;
+            expect(num(child.style.width)).withContext(`${id} child width`).toBeCloseTo(box.width, 2);
+            if (box.height === null) expect(child.style.height).withContext(`${id} child height`).toBe('');
+            else if (child.style.height !== '') {
+              expect(num(child.style.height)).withContext(`${id} child height`).toBeCloseTo(box.height, 2);
+            }
+          }
+
+          if (spec.refusesEvents === true) {
+            el.dispatchEvent(pointer('pointerdown'));
+            el.dispatchEvent(pointer('pointerup'));
+            expect(emitted).withContext(`${id} inside a disabled region`).toEqual([]);
+          }
+        });
+      }
+    });
+  }
+});
+
 describe('component-profile conformance fixtures: coverage', () => {
   const LAYOUT_FILES = [
     'conformance-layout.json',
@@ -961,6 +1054,7 @@ describe('component-profile conformance fixtures: coverage', () => {
     'conformance-history-graph-layout.json',
     'conformance-gauge-layout.json',
     'conformance-building-blocks-layout.json',
+    'conformance-modifier-layout.json',
   ];
 
   it('records every fixture key exactly once, as asserted or as a documented omission', () => {
@@ -988,7 +1082,7 @@ describe('component-profile conformance fixtures: coverage', () => {
       'conformance-clock-formats-tree.json', 'conformance-slider-tree.json',
       'conformance-action-button-tree.json', 'conformance-music-player-tree.json',
       'conformance-history-graph-tree.json', 'conformance-gauge-tree.json',
-      'conformance-building-blocks-tree.json',
+      'conformance-building-blocks-tree.json', 'conformance-modifier-tree.json',
     ];
     for (const name of exercised) expect(() => loadTree(name)).not.toThrow();
   });
