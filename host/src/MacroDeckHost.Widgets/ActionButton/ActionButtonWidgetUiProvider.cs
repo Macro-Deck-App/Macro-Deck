@@ -32,6 +32,7 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 	private readonly IHostLockState _lockState;
 	private readonly WidgetStateSubscriptionTracker _stateSubscriptions;
 	private readonly LabelSubscriptionTracker _labelSubscriptions;
+	private readonly LabelRenderChannel _labelRenders;
 	private readonly IWidgetRenderSignals _renderSignals;
 	private readonly IUiTransport _uiTransport;
 	private readonly IWidgetSampleTextResolver _sampleText;
@@ -47,6 +48,7 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 		IHostLockState lockState,
 		WidgetStateSubscriptionTracker stateSubscriptions,
 		LabelSubscriptionTracker labelSubscriptions,
+		LabelRenderChannel labelRenders,
 		IWidgetRenderSignals renderSignals,
 		IUiTransport uiTransport,
 		IWidgetSampleTextResolver sampleText,
@@ -61,6 +63,7 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 		_lockState = lockState;
 		_stateSubscriptions = stateSubscriptions;
 		_labelSubscriptions = labelSubscriptions;
+		_labelRenders = labelRenders;
 		_renderSignals = renderSignals;
 		_uiTransport = uiTransport;
 		_sampleText = sampleText;
@@ -193,6 +196,7 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 			_labelSubscriptions,
 			_renderSignals,
 			_uiTransport,
+			_labelRenders,
 			interactive,
 			variableScopeWidgetId);
 

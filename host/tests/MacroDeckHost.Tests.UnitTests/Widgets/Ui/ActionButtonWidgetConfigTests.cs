@@ -1033,6 +1033,7 @@ public class ActionButtonWidgetConfigTests
 			null!,
 			new WidgetStateSubscriptionTracker(),
 			new LabelSubscriptionTracker(),
+			new LabelRenderChannel(),
 			null!,
 			null!,
 			null!,
