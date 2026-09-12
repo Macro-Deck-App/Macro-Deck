@@ -136,8 +136,8 @@ Twenty-eight message types. Direction is enforced by the transport: a message ar
 | `session.hello` | plugin → host | `protocolVersion` (int, required), `sessionId` (required), `resumeSessionId`, `instanceId` |
 | `session.welcome` | host → plugin | `sessionId` (required), `resumed` (bool, required) |
 | `session.goodbye` | both | `reason` |
-| `session.ping` | both | empty object |
-| `session.pong` | both | empty object |
+| `session.ping` | both | none - `payload` is omitted; an empty object is also valid |
+| `session.pong` | both | none - `payload` is omitted; an empty object is also valid |
 
 - `session.hello` asserts the version and session id already negotiated over REST; it never re-negotiates. A mismatch is `PROTOCOL_VERSION_UNSUPPORTED` and closes with `4001`.
 - `resumeSessionId` distinguishes a resume from a replacement: presented inside the resume window, the session resumes; absent, the new connection **replaces** the prior session, which is closed with `4000`.
