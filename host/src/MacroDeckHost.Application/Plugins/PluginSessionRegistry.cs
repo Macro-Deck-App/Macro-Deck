@@ -123,7 +123,7 @@ public interface IPluginSessionRegistry
 
 	void Detach(string sessionId, DateTimeOffset at);
 
-	void EndAfterGoodbye(string sessionId, IPluginConnection connection, DateTimeOffset at);
+	void ReleaseConnection(string sessionId, IPluginConnection connection);
 
 	bool TryResume(string pluginId, string? resumeSessionId, DateTimeOffset at, out PluginSessionRecord? record);
 
@@ -260,7 +260,7 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 
 	// No SessionEnded here: goodbye is not a resumable detach. The record must survive until the plugin's
 	// DELETE authenticates against it, or the resume window prunes it; either ends it with Pruned.
-	public void EndAfterGoodbye(string sessionId, IPluginConnection connection, DateTimeOffset at)
+	public void ReleaseConnection(string sessionId, IPluginConnection connection)
 	{
 		lock (_gate)
 		{
@@ -269,7 +269,7 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 			{
 				record.NonResumable = true;
 				record.State = PluginSessionState.Dropped;
-				record.DroppedAt = at;
+				record.DroppedAt = _timeProvider.GetUtcNow();
 				record.Connection = null;
 			}
 		}

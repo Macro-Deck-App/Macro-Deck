@@ -4,14 +4,16 @@ namespace MacroDeck.Plugin.Cli.Building;
 
 internal readonly record struct PluginBuildConfigReadResult(
 	IReadOnlyDictionary<string, PluginBuildTarget>? Targets,
+	IReadOnlyList<string> Include,
 	PluginBuildFailureReason? FailureReason,
 	string? FailureMessage)
 {
-	public static PluginBuildConfigReadResult Ok(IReadOnlyDictionary<string, PluginBuildTarget> targets)
-		=> new(targets, null, null);
+	public static PluginBuildConfigReadResult Ok(IReadOnlyDictionary<string, PluginBuildTarget> targets,
+		IReadOnlyList<string> include)
+		=> new(targets, include, null, null);
 
 	public static PluginBuildConfigReadResult Fail(PluginBuildFailureReason reason, string message)
-		=> new(null, reason, message);
+		=> new(null, [], reason, message);
 }
 
 /// <summary>
@@ -111,7 +113,39 @@ internal static class PluginBuildConfigReader
 			return Invalid("The build configuration declares no targets.");
 		}
 
-		return PluginBuildConfigReadResult.Ok(parsed);
+		var include = new List<string>();
+
+		if (root.TryGetProperty("include", out var includeElement) && includeElement.ValueKind != JsonValueKind.Null)
+		{
+			if (includeElement.ValueKind != JsonValueKind.Array)
+			{
+				return Invalid("The build configuration has an 'include' value that is not an array.");
+			}
+
+			foreach (var entry in includeElement.EnumerateArray())
+			{
+				if (entry.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(entry.GetString()))
+				{
+					return Invalid("Every 'include' entry must be a non-empty string.");
+				}
+
+				if (!IsContainedRelativePath(entry.GetString()!, sourceRoot))
+				{
+					return Invalid($"'include' names a path outside the project directory: '{entry.GetString()}'.");
+				}
+
+				var resolved = Path.Combine(sourceRoot, entry.GetString()!);
+
+				if (!File.Exists(resolved) && !Directory.Exists(resolved))
+				{
+					return Invalid($"'include' names a path that does not exist: '{entry.GetString()}'.");
+				}
+
+				include.Add(entry.GetString()!);
+			}
+		}
+
+		return PluginBuildConfigReadResult.Ok(parsed, include);
 	}
 
 	private static PluginBuildTarget? ReadTarget(string rid,
@@ -204,7 +238,7 @@ internal static class PluginBuildConfigReader
 	/// <summary>The same containment judgement the packer applies to payload entries: relative, no escape
 	/// above the project root. A build recipe must never be able to read or write outside the project it
 	/// belongs to.</summary>
-	private static bool IsContainedRelativePath(string path, string sourceRoot)
+	internal static bool IsContainedRelativePath(string path, string sourceRoot)
 	{
 		if (Path.IsPathRooted(path))
 		{

@@ -258,7 +258,9 @@ socket:
 Delivery is **at-most-once**. There are no sequence numbers and no replay log for messages lost during
 a disconnect; do not expect the host to replay an unacknowledged event after reconnecting. For a
 retryable operation that must not run twice, send an `idempotencyKey`: a repeat while the original is in
-flight gets `DUPLICATE_IDEMPOTENCY_KEY`, a repeat after completion gets the cached result.
+flight gets `DUPLICATE_IDEMPOTENCY_KEY`, a repeat after completion gets the cached result. A cancelled
+invocation caches nothing, so a retry with its key runs again; an invocation that finished despite the
+cancel keeps its result, so a retry replays it instead of running twice.
 
 ## Limits
 
@@ -313,10 +315,10 @@ honour cancellation.
 | `session.goodbye` or `DELETE /api/plugins/sessions/{sessionId}` | Session non-resumable at once |
 | No inbound traffic for 60 s (host pings every 20 s) | Host aborts the socket |
 
-A resume keeps the session id, negotiated version, capability map, declared catalogue and the host-side
-idempotency cache. It drops in-flight invocations, event subscriptions and queued outbound messages. A
-fresh session after expiry is not a resume and may need capability state and lifecycle
-re-initialisation. Reconnect with full-jitter exponential backoff: 1 s initial, 30 s maximum, factor 2.
+A resume keeps the session id, negotiated version, capability map, declared catalogue and the plugin-side
+idempotency cache. It drops in-flight invocations (a retry of one with its idempotency key runs
+again), event subscriptions and queued outbound messages. A fresh session after expiry is not a resume
+and may need capability state and lifecycle re-initialisation. Reconnect with full-jitter exponential backoff: 1 s initial, 30 s maximum, factor 2.
 `MacroDeck.Plugin.Hosting` does all of this for .NET plugins.
 
 ## Security

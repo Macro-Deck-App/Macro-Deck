@@ -161,11 +161,14 @@ public class CapabilityDispatcherTests
 	{
 		var running = new TaskCompletionSource();
 
+		// Completes synchronously on the cancelling thread, so the handler's reply is sent inside Cancel.
 		using var dispatcher = TestSession.Dispatcher(new TestCapabilityHandler("actions",
 			async (_, token) =>
 			{
+				var stopped = new TaskCompletionSource();
+				await using var registration = token.Register(() => stopped.TrySetCanceled(token));
 				running.TrySetResult();
-				await Task.Delay(Timeout.Infinite, token);
+				await stopped.Task;
 				return CapabilityInvocationResult.Ok();
 			}));
 
@@ -173,22 +176,51 @@ public class CapabilityDispatcherTests
 		var dispatch = dispatcher.DispatchAsync(envelope, Reply, CancellationToken.None);
 		await running.Task;
 
-		var cancelled = dispatcher.Cancel(new ProtocolEnvelope
+		var cancelled = dispatcher.Cancel(CancelFor(envelope));
+		await dispatch;
+
+		AssertExactlyOneCancelledResult(cancelled);
+	}
+
+	[Test]
+	public async Task A_cancel_is_answered_even_when_the_handler_ignores_its_token()
+	{
+		var running = new TaskCompletionSource();
+		var release = new TaskCompletionSource();
+
+		using var dispatcher = TestSession.Dispatcher(new TestCapabilityHandler("actions",
+			async (_, _) =>
+			{
+				running.TrySetResult();
+				await release.Task;
+				return CapabilityInvocationResult.Ok();
+			}));
+
+		var envelope = Invoke();
+		var dispatch = dispatcher.DispatchAsync(envelope, Reply, CancellationToken.None);
+		await running.Task;
+
+		var cancelled = dispatcher.Cancel(CancelFor(envelope));
+		release.SetResult();
+		await dispatch;
+
+		AssertExactlyOneCancelledResult(cancelled);
+	}
+
+	private static ProtocolEnvelope CancelFor(ProtocolEnvelope invoke)
+		=> new()
 		{
 			Type = MessageTypes.CapabilityCancel,
 			Id = Guid.CreateVersion7().ToString(),
-			CorrelationId = envelope.Id
-		});
+			CorrelationId = invoke.Id
+		};
 
-		await dispatch;
+	private void AssertExactlyOneCancelledResult(ProtocolEnvelope? fromCancel)
+	{
+		var results = _replies.Concat(fromCancel is null ? [] : [fromCancel]).ToList();
 
-		Assert.Multiple(() =>
-		{
-			Assert.That(cancelled!.Error!.Code, Is.EqualTo(ProtocolErrorCodes.Cancelled));
-
-			// The cancel path owns the single reply, so the handler's own completion must not add one.
-			Assert.That(_replies, Is.Empty);
-		});
+		Assert.That(results, Has.Count.EqualTo(1), "exactly one result per invocation is the contract");
+		Assert.That(results[0].Error?.Code, Is.EqualTo(ProtocolErrorCodes.Cancelled));
 	}
 
 	[Test]
@@ -238,6 +270,138 @@ public class CapabilityDispatcherTests
 			Assert.That(handler.Invocations, Is.EqualTo(1));
 			Assert.That(_replies, Has.Count.EqualTo(2));
 			Assert.That(_replies[1].Error, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_retry_after_a_cancel_the_handler_honoured_runs_again(
+		[Values] bool handlerStopsInsideCancel)
+	{
+		var calls = 0;
+		var running = new TaskCompletionSource();
+		var release = new TaskCompletionSource();
+
+		using var dispatcher = TestSession.Dispatcher(new TestCapabilityHandler("actions",
+			async (_, token) =>
+			{
+				if (Interlocked.Increment(ref calls) > 1)
+				{
+					return CapabilityInvocationResult.Ok();
+				}
+
+				running.TrySetResult();
+
+				if (handlerStopsInsideCancel)
+				{
+					var stopped = new TaskCompletionSource();
+					await using var registration = token.Register(() => stopped.TrySetCanceled(token));
+					await stopped.Task;
+				}
+				else
+				{
+					await release.Task;
+					token.ThrowIfCancellationRequested();
+				}
+
+				return CapabilityInvocationResult.Ok();
+			}));
+
+		var envelope = Invoke(idempotencyKey: "key");
+		var first = dispatcher.DispatchAsync(envelope, Reply, CancellationToken.None);
+		await running.Task;
+
+		dispatcher.Cancel(new ProtocolEnvelope
+		{
+			Type = MessageTypes.CapabilityCancel,
+			Id = Guid.CreateVersion7().ToString(),
+			CorrelationId = envelope.Id
+		});
+		release.TrySetResult();
+		await first;
+		_replies.Clear();
+
+		await dispatcher.DispatchAsync(Invoke(idempotencyKey: "key"), Reply, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(calls, Is.EqualTo(2));
+			Assert.That(Single().Error, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_retry_after_a_cancel_the_handler_ignored_replays_its_result()
+	{
+		var calls = 0;
+		var running = new TaskCompletionSource();
+		var release = new TaskCompletionSource();
+
+		using var dispatcher = TestSession.Dispatcher(new TestCapabilityHandler("actions",
+			async (_, _) =>
+			{
+				Interlocked.Increment(ref calls);
+				running.TrySetResult();
+				await release.Task;
+				return CapabilityInvocationResult.Ok();
+			}));
+
+		var envelope = Invoke(idempotencyKey: "key");
+		var first = dispatcher.DispatchAsync(envelope, Reply, CancellationToken.None);
+		await running.Task;
+
+		var cancelled = dispatcher.Cancel(new ProtocolEnvelope
+		{
+			Type = MessageTypes.CapabilityCancel,
+			Id = Guid.CreateVersion7().ToString(),
+			CorrelationId = envelope.Id
+		});
+		release.TrySetResult();
+		await first;
+
+		await dispatcher.DispatchAsync(Invoke(idempotencyKey: "key"), Reply, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(cancelled!.Error!.Code, Is.EqualTo(ProtocolErrorCodes.Cancelled));
+			Assert.That(calls, Is.EqualTo(1));
+			Assert.That(Single().Error, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_retry_after_the_connection_dropped_mid_invocation_runs_again()
+	{
+		var calls = 0;
+		var running = new TaskCompletionSource();
+		using var connection = new CancellationTokenSource();
+
+		using var dispatcher = TestSession.Dispatcher(new TestCapabilityHandler("actions",
+			async (_, token) =>
+			{
+				if (Interlocked.Increment(ref calls) > 1)
+				{
+					return CapabilityInvocationResult.Ok();
+				}
+
+				running.TrySetResult();
+				await Task.Delay(Timeout.Infinite, token);
+				return CapabilityInvocationResult.Ok();
+			}));
+
+		var first = dispatcher.DispatchAsync(Invoke(idempotencyKey: "key"), Reply, connection.Token);
+		await running.Task;
+
+		await connection.CancelAsync();
+		await first;
+		dispatcher.AbortInFlight();
+		_replies.Clear();
+
+		await dispatcher.DispatchAsync(Invoke(idempotencyKey: "key"), Reply, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(calls, Is.EqualTo(2));
+			Assert.That(Single().Error, Is.Null);
 		});
 	}
 

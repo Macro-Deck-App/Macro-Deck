@@ -70,6 +70,20 @@ public class ExitCodeMappingTests
 	}
 
 	[Test]
+	public void No_PluginManifestError_falls_through_to_internal_error()
+	{
+		Assert.Multiple(() =>
+		{
+			foreach (var error in Enum.GetValues<PluginManifestError>())
+			{
+				Assert.That(PluginManifestErrorExitCode.For(error),
+					Is.Not.EqualTo(ExitCode.InternalError),
+					$"{error} has no explicit exit code mapping.");
+			}
+		});
+	}
+
+	[Test]
 	public void A_missing_manifest_file_is_input_unreadable()
 	{
 		Assert.That(PluginManifestErrorExitCode.For(PluginManifestError.NotFound),

@@ -145,6 +145,7 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
   protected readonly treeNodePressed = signal(false);
 
   protected onNodePressedChange(event: UiNodePressedEvent): void {
+    if (event.pressed && event.nodeId !== this.renderedRoot()?.id) return;
     this.treeNodePressed.set(event.pressed);
     this.pressedChange.emit(event.pressed);
   }

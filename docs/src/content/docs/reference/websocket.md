@@ -423,7 +423,7 @@ A reply sets `correlationId` to the `id` it answers. Five types **require** one:
 - Cancellation is best-effort both ways. `capability.cancel` / `host.cancel` against an unknown correlation is a no-op, never an error (no reply at all).
 - The receiver of a cancel still emits exactly one `capability.result` with a cancelled outcome, unless it had already replied.
 - Delivery is at-most-once: no sequence numbers, no replay buffer. Retry safety comes from `idempotencyKey` only.
-- A repeat key while the original is in flight fails with `DUPLICATE_IDEMPOTENCY_KEY`; after completion it returns the cached result. The cache is host-side and survives a resume; a restarted plugin process re-executes.
+- A repeat key while the original is in flight fails with `DUPLICATE_IDEMPOTENCY_KEY`; after completion it returns the cached result. A cancelled invocation caches nothing, so a retry runs again; one that finished despite the cancel keeps its result. The cache is plugin-side and survives a resume; a restarted plugin process re-executes.
 
 ## Backpressure
 

@@ -139,7 +139,7 @@ internal static class PluginBuilder
 				}
 			}
 
-			// Shared assets first, then each runtime identifier's output on top: a stale 'runtimes/' left in
+			// Declared files first, then each runtime identifier's output on top: a stale 'runtimes/' left in
 			// the project tree must never overwrite what this build just produced.
 			try
 			{
@@ -148,7 +148,27 @@ internal static class PluginBuilder
 					.Append(Path.GetFullPath(request.OutputDirectory))
 					.ToList();
 
-				BuildStaging.CopySharedAssets(sourceRoot, stagingDirectory, excluded, cancellationToken);
+				var declared = configRead.Include.ToList();
+
+				if (manifest.Icon is { } icon &&
+					PluginBuildConfigReader.IsContainedRelativePath(icon, sourceRoot) &&
+					File.Exists(Path.Combine(sourceRoot, icon)))
+				{
+					declared.Add(icon);
+				}
+
+				var skipped = BuildStaging.CopyDeclared(sourceRoot,
+					stagingDirectory,
+					declared,
+					excluded,
+					cancellationToken);
+
+				if (skipped.Count > 0)
+				{
+					warnings.Add(new CliDiagnostic("include-not-packaged",
+						"Declared but not packaged, because build output directories, project and source files, " +
+						$"Properties/ and dot-prefixed paths are never staged: {PathList(skipped)}."));
+				}
 
 				foreach (var selected in selectedRids)
 				{
@@ -156,6 +176,19 @@ internal static class PluginBuilder
 						Path.Combine(stagingDirectory,
 							destinations[selected].Replace('/', Path.DirectorySeparatorChar)),
 						cancellationToken);
+				}
+
+				var unpackaged = BuildStaging.Unpackaged(sourceRoot,
+					request.ManifestPath,
+					stagingDirectory,
+					excluded,
+					cancellationToken);
+
+				if (unpackaged.Count > 0)
+				{
+					warnings.Add(new CliDiagnostic("file-not-packaged",
+						"Not packaged, because neither the manifest nor 'include' in " +
+						$"'{PluginBuildConfigReader.FileName}' declares them: {PathList(unpackaged)}."));
 				}
 			}
 			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -221,6 +254,9 @@ internal static class PluginBuilder
 			BuildStaging.Delete(stagingDirectory);
 		}
 	}
+
+	private static string PathList(IReadOnlyList<string> paths)
+		=> string.Join(", ", paths.Take(10)) + (paths.Count > 10 ? $" and {paths.Count - 10} more" : string.Empty);
 
 	private static string ArtifactFileName(PluginManifest manifest, string? rid)
 	{

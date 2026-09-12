@@ -93,16 +93,19 @@ internal sealed class CapabilityDispatcher(
 		{
 			var result = await RunAsync(payload!, envelope, invocation);
 
-			if (invocation.TryComplete())
+			// A run that finished after its cancel was answered stays cached, or a retry would run it twice.
+			if (result.Error?.Code == ProtocolErrorCodes.Cancelled)
 			{
-				Remember(envelope.IdempotencyKey, result);
-				await reply(ToEnvelope(correlationId, result), connectionToken);
+				Forget(envelope.IdempotencyKey);
 			}
 			else
 			{
-				// Something else already answered - a cancel, or the connection dropping. There is no
-				// result to remember, so the claim has to go or the key stays poisoned.
-				Forget(envelope.IdempotencyKey);
+				Remember(envelope.IdempotencyKey, result);
+			}
+
+			if (invocation.TryComplete())
+			{
+				await reply(ToEnvelope(correlationId, result), connectionToken);
 			}
 		}
 		finally
@@ -215,7 +218,7 @@ internal sealed class CapabilityDispatcher(
 		}
 		catch (OperationCanceledException) when (invocation.Token.IsCancellationRequested)
 		{
-			var timedOut = !invocation.CancelledByPeer;
+			var timedOut = !invocation.CancelledByPeer && !invocation.ConnectionLost;
 
 			return CapabilityInvocationResult.Failed(
 				timedOut ? ProtocolErrorCodes.Timeout : ProtocolErrorCodes.Cancelled,
@@ -275,7 +278,7 @@ internal sealed class CapabilityDispatcher(
 		}
 	}
 
-	/// <summary>Releases a claimed key that produced no result, so a retry is not refused forever.</summary>
+	/// <summary>Releases a claimed key that produced no result or was cancelled, so a retry runs again.</summary>
 	private void Forget(string? key)
 	{
 		if (!string.IsNullOrEmpty(key))
@@ -354,12 +357,14 @@ internal sealed class CapabilityDispatcher(
 	private sealed class Invocation : IDisposable
 	{
 		private readonly CancellationTokenSource _cancellation;
+		private readonly CancellationToken _connectionToken;
 		private int _cancelledByPeer;
 		private int _replied;
 
 		public Invocation(string correlationId, int? deadlineMs, DateTimeOffset now, CancellationToken connectionToken)
 		{
 			CorrelationId = correlationId;
+			_connectionToken = connectionToken;
 			_cancellation = CancellationTokenSource.CreateLinkedTokenSource(connectionToken);
 
 			// The protocol's invoke timeout is the ceiling even when the caller asked for longer: a
@@ -383,6 +388,8 @@ internal sealed class CapabilityDispatcher(
 
 		/// <summary>True when a <c>capability.cancel</c> caused the cancellation, rather than the deadline.</summary>
 		public bool CancelledByPeer => Volatile.Read(ref _cancelledByPeer) == 1;
+
+		public bool ConnectionLost => _connectionToken.IsCancellationRequested;
 
 		/// <summary>Wins the right to send the one reply. Only the first caller gets true.</summary>
 		public bool TryComplete() => Interlocked.Exchange(ref _replied, 1) == 0;

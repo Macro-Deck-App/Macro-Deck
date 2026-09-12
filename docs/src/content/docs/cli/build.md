@@ -78,14 +78,26 @@ runtimes/linux-x64/MyPlugin
 assets/icon.png
 ```
 
+```json
+{
+  "version": 1,
+  "include": ["assets", "data/defaults.json"],
+  "targets": { "...": {} }
+}
+```
+
 - Each target's output is staged under the directory its entrypoint declares, so identically named macOS
   and Linux executables do not overwrite each other.
-- Everything else beside `manifest.json` is copied once into the package root, so a manifest referring to
-  `assets/icon.png` resolves.
-- Excluded: `macrodeck-build.json`, each target's `output` directory, the `--output` directory (unless it is
-  the project directory itself), `bin/`, `obj/`, `.git/`, `.vs/`, `.idea/`, `node_modules/`, `.DS_Store`
-  and any `.macroDeckPlugin` file. **Everything else is packaged, including your sources**, so keep anything
-  you do not want to distribute out of that directory.
+- Besides that output and `manifest.json`, the package holds only the file the manifest's `icon` names and
+  whatever the recipe's `include` lists, each at its project-relative path.
+- An `include` entry is a file or directory relative to the project root and must stay inside it; one that
+  does not exist fails with `build-config-invalid`.
+- Never packaged, not even inside an included directory: project and source files (`*.csproj`, `*.sln`,
+  `*.cs`, `*.resx`, `Properties/`, dotfiles and the like), `macrodeck-build.json`, each target's `output`
+  directory, the `--output` directory, `bin/`, `obj/`, `node_modules/` and any `.macroDeckPlugin` file.
+- A declared path one of these rules drops is named in an `include-not-packaged` warning, and every other
+  file beside the manifest that was left out in a `file-not-packaged` warning, so a forgotten asset never
+  disappears silently.
 - An `--output` directory inside the project, such as `.` or `./artifacts`, is safe to build into repeatedly.
 - Staging happens in a temporary directory outside your project, removed when the command finishes.
 

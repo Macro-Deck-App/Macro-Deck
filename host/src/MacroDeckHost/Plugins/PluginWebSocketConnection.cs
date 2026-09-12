@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net.WebSockets;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Limits;
@@ -6,7 +7,11 @@ using MacroDeckHost.WebSockets;
 
 namespace MacroDeckHost.Plugins;
 
-public sealed class PluginWebSocketConnection : IPluginConnection, IDisposable
+[SuppressMessage("Design",
+	"CA1001:Types that own disposable fields should be disposable",
+	Justification = "Callers may still use this connection after its socket ended; Send and Close must then " +
+		"act as closed, so the lock is never disposed. It holds no unmanaged resource.")]
+public sealed class PluginWebSocketConnection : IPluginConnection
 {
 	private readonly WebSocket _socket;
 	private readonly TimeProvider _timeProvider;
@@ -71,6 +76,4 @@ public sealed class PluginWebSocketConnection : IPluginConnection, IDisposable
 			_sendLock.Release();
 		}
 	}
-
-	public void Dispose() => _sendLock.Dispose();
 }

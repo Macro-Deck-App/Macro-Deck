@@ -156,7 +156,6 @@ public sealed class PluginWebSocketEndpoint
 		}
 		finally
 		{
-			connection.Dispose();
 			socket.Dispose();
 		}
 	}
@@ -506,13 +505,15 @@ public sealed class PluginWebSocketEndpoint
 				_hostAssetSender?.DropSession(pluginId);
 			}
 
-			if (saidGoodbye)
+			if (!saidGoodbye)
 			{
-				_sessionRegistry.EndAfterGoodbye(sessionId, connection, _timeProvider.GetUtcNow());
+				_sessionRegistry.Detach(sessionId, _timeProvider.GetUtcNow());
 			}
 			else
 			{
-				_sessionRegistry.Detach(sessionId, _timeProvider.GetUtcNow());
+				// Not Detach: goodbye must not raise SessionEnded(Detached), which consumers treat as a
+				// drop the plugin may still resume.
+				_sessionRegistry.ReleaseConnection(sessionId, connection);
 			}
 
 			await _mediator.Publish(new PluginSessionsChangedNotification(), CancellationToken.None);

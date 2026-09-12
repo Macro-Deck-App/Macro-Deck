@@ -426,6 +426,46 @@ describe('UiTreeWidgetComponent', () => {
       }
     });
 
+    it('reports no tile press for a button nested in the tree, and tints that button', async () => {
+      const fixture = createFixture({ widgetId: 'w1' });
+      const pressed: boolean[] = [];
+      fixture.componentInstance.pressedChange.subscribe(p => pressed.push(p));
+      handles[0].root.set({
+        id: 'root',
+        type: UiComponents.Stack,
+        properties: {},
+        children: [{ id: 'nested', type: UiComponents.Button, properties: { [UiComponentProperties.Events]: ['press'] } }],
+      });
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const nested = tile(fixture).querySelector('[data-node-id="nested"]') as HTMLElement;
+      expect(nested).withContext('the nested button should render').toBeTruthy();
+
+      nested.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+
+      expect(pressed).not.toContain(true);
+      expect(nested.querySelector('.widget-press-tint-active')).not.toBeNull();
+    });
+
+    it('reports a tile press for a button that is the whole tree', async () => {
+      const fixture = createFixture({ widgetId: 'w1' });
+      const pressed: boolean[] = [];
+      fixture.componentInstance.pressedChange.subscribe(p => pressed.push(p));
+      handles[0].root.set({
+        id: 'root',
+        type: UiComponents.Button,
+        properties: { [UiComponentProperties.Events]: ['press'] },
+      });
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const root = tile(fixture).querySelector('[data-node-id="root"]') as HTMLElement;
+      expect(root).withContext('the root button should render').toBeTruthy();
+
+      root.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+
+      expect(pressed).toEqual([true]);
+    });
+
     it('finishes a press started before the tree claimed the gesture, even once the tree lands mid-press', () => {
       // Regression for finding 8: onPressStart and onPressEnd both used to gate on the *current*
       // treeClaimsGesture() value. Pressing before the tree arrives (root still null, so the wrapper
