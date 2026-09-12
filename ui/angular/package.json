@@ -44,7 +44,7 @@
     "uuid": "^14.0.1"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^22.1.7",
+    "@angular/build": "^22.1.7",
     "@angular/cli": "^22.1.7",
     "@angular/compiler-cli": "^22.1.5",
     "@types/jasmine": "~6.0.0",
