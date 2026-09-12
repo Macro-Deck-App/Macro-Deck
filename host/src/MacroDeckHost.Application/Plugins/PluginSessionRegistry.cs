@@ -258,8 +258,7 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 		}
 	}
 
-	// No SessionEnded here: goodbye is not a resumable detach. The record must survive until the plugin's
-	// DELETE authenticates against it, or the resume window prunes it; either ends it with Pruned.
+	// The record must outlive the connection: the plugin's closing DELETE authenticates against it.
 	public void ReleaseConnection(string sessionId, IPluginConnection connection)
 	{
 		lock (_gate)
