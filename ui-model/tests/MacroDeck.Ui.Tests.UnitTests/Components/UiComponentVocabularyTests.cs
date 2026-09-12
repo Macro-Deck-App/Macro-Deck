@@ -97,8 +97,8 @@ public class UiComponentVocabularyTests
 
 	private static readonly string[] _expectedEvents =
 	[
-		"change", "adjust", "press", "long-press", "press-start", "press-end", "reveal", "drag", "drag-end",
-		"swipe", "pinch", "pinch-end",
+		"change", "adjust", "press", "long-press", "press-start", "press-end", "reveal", "double-press", "drag",
+		"drag-end", "swipe", "pinch", "pinch-end",
 	];
 
 	private static UiSurface WidgetSurface()

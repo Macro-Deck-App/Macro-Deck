@@ -95,6 +95,67 @@ public class VariableHistoryTests
 		Assert.That(raised, Is.EqualTo(2));
 	}
 
+	[Test]
+	public void Graphs_on_different_widgets_share_one_buffer_for_a_global_variable()
+	{
+		var (history, time, _) = Create("42");
+
+		using var first = history.Open(Name, capacity: 10, scopeRefId: "widget-a");
+		Advance(time, 2);
+		using var second = history.Open(Name, capacity: 10, scopeRefId: "widget-b");
+
+		Assert.That(second.Values,
+			Is.EqualTo(first.Values).AsCollection,
+			"a graph added later picks up the history the first one already built");
+	}
+
+	[Test]
+	public void A_widgets_own_variable_gets_its_own_buffer_without_the_global_of_the_same_name()
+	{
+		var (history, time, variables) = Create("1");
+		variables.Upsert(WidgetVariable("widget-a", "7"));
+
+		using var own = history.Open(Name, capacity: 10, scopeRefId: "widget-a");
+		using var global = history.Open(Name, capacity: 10);
+		Advance(time, 2);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(own.Values, Has.All.EqualTo(7d));
+			Assert.That(global.Values, Has.All.EqualTo(1d));
+			Assert.That(own.ScopeRefId, Is.EqualTo("widget-a"));
+			Assert.That(global.ScopeRefId, Is.Null);
+		});
+	}
+
+	[Test]
+	public void A_deleted_widget_variable_never_feeds_the_global_into_that_widgets_buffer()
+	{
+		var (history, time, variables) = Create("1");
+		var own = WidgetVariable("widget-a", "7");
+		variables.Upsert(own);
+
+		using var window = history.Open(Name, capacity: 10, scopeRefId: "widget-a");
+		Advance(time, 1);
+		variables.Remove(own.Id);
+		Advance(time, 2);
+
+		Assert.That(window.Values, Has.None.EqualTo(1d));
+	}
+
+	private static VariableEntity WidgetVariable(string widgetId, string value)
+		=> new()
+		{
+			Id = Guid.NewGuid(),
+			Name = Name,
+			Scope = VariableScope.Widget,
+			ScopeRefId = widgetId,
+			Type = VariableType.Numeric,
+			Classification = VariableClassification.User,
+			Value = value,
+			UpdatedAt = DateTime.UtcNow
+		};
+
 	private static (VariableHistory History, FakeTimeProvider Time, VariableRegistry Variables) Create(string value)
 	{
 		var variables = new VariableRegistry();

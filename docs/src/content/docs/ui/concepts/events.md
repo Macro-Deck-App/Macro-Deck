@@ -134,6 +134,7 @@ hidden one keeps and submits its value. See [Conditional content](/ui/concepts/s
 | `long-press` | `UiComponentEvents.LongPress` | `ui.button` | The press was still held after 600 ms. At most once per interaction, never together with `press`. | None |
 | `press-start` | `UiComponentEvents.PressStart` | `ui.button` | The press began. | None |
 | `press-end` | `UiComponentEvents.PressEnd` | `ui.button` | The press ended, however it ended. Exactly one follows each `press-start`, including a cancelled gesture or the pointer leaving the element. | None |
+| `double-press` | `UiComponentEvents.DoublePress` | `ui.slider` | Two taps completed in quick succession, each without a drag. Sent after the second tap's `change`, never instead of it. | None |
 | `reveal` | `UiComponentEvents.Reveal` | `ui.list` | The user scrolled further down the list. At most twice a second, and only for an index beyond the furthest already sent for that list. | Index of the furthest child in view, a number |
 | `drag` | `UiComponentEvents.Drag` | any node | The pointer moved past the slop. At most ten a second. | `{"x":n,"y":n}`, translation since the start in basis fractions |
 | `drag-end` | `UiComponentEvents.DragEnd` | any node | Once on release, after a `drag` began; not if the node left the tree or became disabled meanwhile. | As `drag`, the final translation |

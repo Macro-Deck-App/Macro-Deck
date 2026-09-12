@@ -78,6 +78,9 @@ public sealed record UiActionPickerInput : UiInput<string>
 }
 
 /// <summary>One variable chosen from the catalog, as the variable name it is stored as.</summary>
+/// <remarks>In the widget editor the renderer lists global variables and the edited widget's own
+/// widget-scoped variables, never another widget's. Without a widget in scope it lists the whole
+/// catalog.</remarks>
 public sealed record UiVariablePickerInput : UiInput<string>
 {
 	/// <summary>Narrows the catalog to variables of these types. Absent offers every type.</summary>

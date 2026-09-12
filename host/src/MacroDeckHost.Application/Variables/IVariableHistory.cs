@@ -11,7 +11,7 @@ public interface IVariableHistory
 	/// values. Sampling for a variable runs only while at least one window on it is open; disposing the
 	/// last one stops it.
 	/// </summary>
-	IVariableHistoryWindow Open(string variableName, int capacity);
+	IVariableHistoryWindow Open(string variableName, int capacity, string? scopeRefId = null);
 }
 
 /// <summary>One holder's view of a variable's rolling window. Disposing it releases the hold.</summary>
@@ -20,6 +20,10 @@ public interface IVariableHistoryWindow : IDisposable
 	/// <summary>The retained values, oldest first. Empty until the variable first reads as an available
 	/// number.</summary>
 	IReadOnlyList<double> Values { get; }
+
+	/// <summary>The widget whose own variable this window samples, or <c>null</c> when it samples the global
+	/// variable of that name. Decided when the window opens.</summary>
+	string? ScopeRefId { get; }
 
 	/// <summary>Raised after a sample changed <see cref="Values" />.</summary>
 	event EventHandler? Changed;

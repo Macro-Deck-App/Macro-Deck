@@ -22,8 +22,20 @@ const SLIDER_ADJUST_THROTTLE_MS = 100;
 
 const SLIDER_SETTLE_TIMEOUT_MS = 1000;
 
+const SLIDER_DOUBLE_TAP_WINDOW_MS = 400;
+
+const SLIDER_TAP_SLOP_PX = 8;
+
+const SLIDER_DOUBLE_TAP_DISTANCE_PX = 24;
+
 export interface UiSliderState {
   pointerId: number | null;
+  tapStartX: number;
+  tapStartY: number;
+  tapMoved: boolean;
+  lastTapAt: number | null;
+  lastTapX: number;
+  lastTapY: number;
   interactionLevel: number | null;
   settledLevel: number | null;
   producerLevelAtRelease: number;
@@ -153,6 +165,26 @@ function endSliderInteraction(commit: boolean, ctx: UiComponentContext<UiSliderS
   paintSliderLevel(node, ctx);
 }
 
+function trackSliderTap(ctx: UiComponentContext<UiSliderState>, wasTap: boolean): void {
+  const state = ctx.state;
+  const node = ctx.current();
+  if (!wasTap || !emitsEvent(node, UiComponentEvents.DoublePress)) {
+    state.lastTapAt = null;
+    return;
+  }
+
+  const now = Date.now();
+  const near = Math.hypot(state.tapStartX - state.lastTapX, state.tapStartY - state.lastTapY) <= SLIDER_DOUBLE_TAP_DISTANCE_PX;
+  if (state.lastTapAt !== null && near && now - state.lastTapAt <= SLIDER_DOUBLE_TAP_WINDOW_MS) {
+    state.lastTapAt = null;
+    ctx.emit(node, UiComponentEvents.DoublePress);
+    return;
+  }
+  state.lastTapAt = now;
+  state.lastTapX = state.tapStartX;
+  state.lastTapY = state.tapStartY;
+}
+
 export const uiSliderComponent: UiComponentDefinition<UiSliderState> = {
   type: UiComponents.Slider,
 
@@ -163,6 +195,12 @@ export const uiSliderComponent: UiComponentDefinition<UiSliderState> = {
   createState(): UiSliderState {
     return {
       pointerId: null,
+      tapStartX: 0,
+      tapStartY: 0,
+      tapMoved: false,
+      lastTapAt: null,
+      lastTapX: 0,
+      lastTapY: 0,
       interactionLevel: null,
       settledLevel: null,
       producerLevelAtRelease: 0,
@@ -191,6 +229,9 @@ export const uiSliderComponent: UiComponentDefinition<UiSliderState> = {
       event.stopPropagation();
 
       state.pointerId = pointer.pointerId;
+      state.tapStartX = pointer.clientX;
+      state.tapStartY = pointer.clientY;
+      state.tapMoved = false;
       state.settleTimer = clearTimer(state.settleTimer);
       state.settledLevel = null;
 
@@ -209,6 +250,9 @@ export const uiSliderComponent: UiComponentDefinition<UiSliderState> = {
       const pointer = event as PointerEvent;
       if (state.pointerId === null || pointer.pointerId !== state.pointerId) return;
       event.preventDefault();
+      if (Math.hypot(pointer.clientX - state.tapStartX, pointer.clientY - state.tapStartY) > SLIDER_TAP_SLOP_PX) {
+        state.tapMoved = true;
+      }
       applySliderLevel(element, pointer, ctx);
     });
 
@@ -218,6 +262,7 @@ export const uiSliderComponent: UiComponentDefinition<UiSliderState> = {
       event.preventDefault();
       event.stopPropagation();
       endSliderInteraction(true, ctx);
+      trackSliderTap(ctx, !state.tapMoved);
     });
 
     element.addEventListener('pointercancel', (event: Event) => {
@@ -226,6 +271,7 @@ export const uiSliderComponent: UiComponentDefinition<UiSliderState> = {
       // A gesture the OS took over is not a value the user chose to land on, so it is dropped rather
       // than committed - the pill reverts to the producer's level.
       endSliderInteraction(false, ctx);
+      state.lastTapAt = null;
     });
   },
 

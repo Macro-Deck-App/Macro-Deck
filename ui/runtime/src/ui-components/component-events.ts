@@ -13,6 +13,8 @@ export const UiComponentEvents = {
 
   Reveal: 'reveal',
 
+  DoublePress: 'double-press',
+
   Drag: 'drag',
 
   DragEnd: 'drag-end',

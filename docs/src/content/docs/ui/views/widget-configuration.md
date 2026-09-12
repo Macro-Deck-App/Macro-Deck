@@ -163,7 +163,7 @@ new UiActionsListEditor { Key = "flows", Binding = Bind.To(flows), CanRun = true
 | --- | --- | --- |
 | `actions-list-editor` | `UiActionsListEditor` | The list of action flows, with triggers, ordering and nesting |
 | `action-picker` | `UiActionPickerInput` | One action from the catalog of everything installed |
-| `variable-picker` | `UiVariablePickerInput` | One variable, optionally narrowed to types (`VariableTypes`) or writable ones (`WritableOnly`) |
+| `variable-picker` | `UiVariablePickerInput` | One variable, optionally narrowed to types (`VariableTypes`) or writable ones (`WritableOnly`). In the widget editor it lists global variables and the edited widget's own widget variables, never another widget's |
 | `device-picker` | `UiDevicePickerInput` | One connected device |
 | `integration-picker` | `UiIntegrationPickerInput` | One integration, or one of its configuration entries |
 | `icon` | `UiIconReferenceInput` | One icon, as a typed provider reference |

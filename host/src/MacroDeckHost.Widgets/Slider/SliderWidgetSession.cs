@@ -6,9 +6,15 @@ using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Patches;
 using MacroDeck.Ui.Runtime;
 using MacroDeck.Ui.Components;
+using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Ui.Sessions.InProcess;
+using MacroDeckHost.Application.Ui.Transport;
+using MacroDeckHost.Application.Ui.Transport.Messages.Actions;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Widgets;
+using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,7 +51,15 @@ internal sealed record SliderVariableBinding(
 	double Step,
 	VariableRegistry Variables,
 	IVariableChangeNotifier Notifier,
-	IServiceScopeFactory ScopeFactory);
+	IServiceScopeFactory ScopeFactory,
+	Guid? WidgetId = null,
+	bool IsDefault = false);
+
+internal sealed record SliderDoublePressBinding(
+	Guid WidgetId,
+	IFolderCache FolderCache,
+	IWidgetTriggerService TriggerService,
+	IUiTransport UiTransport);
 
 /// <summary>
 /// Drives one Slider widget's UI session: follows the bound variable's value and range, holds the user's
@@ -60,7 +74,7 @@ internal sealed record SliderVariableBinding(
 /// then <see cref="Attach" /> once the resulting <see cref="UiView" /> exists.
 /// </para>
 /// </summary>
-internal sealed class SliderWidgetSession : IUiSession
+internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 {
 	// The retired client's SYNC_HOLD_MS, moved to the host: how long a value the user just set is trusted
 	// over what the next few readings report, so a slow-to-update provider does not visibly snap the level
@@ -81,6 +95,7 @@ internal sealed class SliderWidgetSession : IUiSession
 	private readonly IHostLockState _lockState;
 	private readonly TimeProvider _timeProvider;
 	private readonly SliderVariableBinding? _variable;
+	private readonly SliderDoublePressBinding? _doublePress;
 	private readonly bool _interactive;
 	private readonly CancellationTokenSource _lifetime = new();
 
@@ -106,6 +121,10 @@ internal sealed class SliderWidgetSession : IUiSession
 	private DateTimeOffset? _holdUntil;
 	private double _lastMappedValue;
 
+	// Captured inside Dispatch, which never runs concurrently with itself, so the async handler of the
+	// same dispatch reads the origin that belongs to it.
+	private string? _pendingOriginClientId;
+
 	private UiView? _view;
 
 	/// <param name="isWidgetSurface">Whether this is the interactive Widget surface, as opposed to the
@@ -119,7 +138,8 @@ internal sealed class SliderWidgetSession : IUiSession
 		IHostLockState lockState,
 		TimeProvider timeProvider,
 		bool isWidgetSurface,
-		SliderVariableBinding? variable)
+		SliderVariableBinding? variable,
+		SliderDoublePressBinding? doublePress = null)
 	{
 		ArgumentNullException.ThrowIfNull(state);
 		ArgumentNullException.ThrowIfNull(lockState);
@@ -129,6 +149,7 @@ internal sealed class SliderWidgetSession : IUiSession
 		_lockState = lockState;
 		_timeProvider = timeProvider;
 		_variable = variable;
+		_doublePress = doublePress;
 		_interactive = isWidgetSurface && variable is not null;
 	}
 
@@ -137,9 +158,9 @@ internal sealed class SliderWidgetSession : IUiSession
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
 	/// <summary>The event handlers the track node declares, for <see cref="SliderWidgetView.Build" /> to
-	/// attach - empty whenever this surface is not interactive (the Preview surface, or an unbound Widget
-	/// surface), which is what makes an unbound or Preview slider inert against a dispatched event even
-	/// from a stale or hostile client: with no handler registered under either name,
+	/// attach - empty whenever this surface is not interactive (the Preview surface, or a Widget surface with
+	/// no widget to own a default variable), which is what makes such a slider inert against a dispatched
+	/// event even from a stale or hostile client: with no handler registered under either name,
 	/// <see cref="UiView.Dispatch" /> ignores it before any of this session's code runs.</summary>
 	internal IReadOnlyList<UiEventHandler> BuildEvents()
 	{
@@ -148,13 +169,22 @@ internal sealed class SliderWidgetSession : IUiSession
 			return [];
 		}
 
-		return
+		List<UiEventHandler> handlers =
 		[
 			UiEventHandler.On(UiComponentEvents.Adjust, HandleInteraction),
 			UiEventHandler.OnAsync(UiComponentEvents.Adjust, HandleAdjustPushAsync),
 			UiEventHandler.On(UiComponentEvents.Change, HandleInteraction),
 			UiEventHandler.OnAsync(UiComponentEvents.Change, HandleChangePushAsync),
 		];
+
+		if (_doublePress is not null)
+		{
+			handlers.Add(UiEventHandler.On(UiComponentEvents.DoublePress, (UiEventData _) => HandleDoublePress()));
+			handlers.Add(UiEventHandler.OnAsync(UiComponentEvents.DoublePress,
+				(_, ct) => RunDoublePressFlowAsync(_pendingOriginClientId, ct)));
+		}
+
+		return handlers;
 	}
 
 	/// <summary>Finishes construction once the tree built from <see cref="BuildEvents" /> exists as a
@@ -194,10 +224,13 @@ internal sealed class SliderWidgetSession : IUiSession
 		}
 	}
 
-	public void Dispatch(UiEvent uiEvent)
+	public void Dispatch(UiEvent uiEvent) => Dispatch(uiEvent, null);
+
+	public void Dispatch(UiEvent uiEvent, string? originClientId)
 	{
 		lock (_viewSync)
 		{
+			_pendingOriginClientId = originClientId;
 			_view!.Dispatch(uiEvent);
 		}
 	}
@@ -293,12 +326,72 @@ internal sealed class SliderWidgetSession : IUiSession
 		return UiEventOutcome.Accepted;
 	}
 
+	private UiEventOutcome HandleDoublePress()
+	{
+		return _lockState.IsLocked ? UiEventOutcome.Rejected("The host is locked.") : UiEventOutcome.Accepted;
+	}
+
+	private async Task RunDoublePressFlowAsync(string? originClientId, CancellationToken cancellationToken)
+	{
+		Task? push;
+
+		lock (_pushSync)
+		{
+			push = _pushTask;
+		}
+
+		// The second tap's write is still in flight and must land before the flow, even when it fails.
+		if (push is not null)
+		{
+			await Task.WhenAny(push).ConfigureAwait(false);
+		}
+
+		lock (_viewSync)
+		{
+			_heldValue = null;
+			_holdUntil = null;
+		}
+
+		var binding = _doublePress!;
+		var widget = binding.FolderCache.GetAllFolders()
+			.SelectMany(folder => folder.Widgets)
+			.FirstOrDefault(candidate => candidate.Id == binding.WidgetId);
+
+		if (widget is null)
+		{
+			return;
+		}
+
+		var dispatch = await binding.TriggerService
+			.ExecuteAsync(widget,
+				WidgetTriggerTypes.DoublePress,
+				originClientId,
+				originDeviceId: null,
+				cancellationToken)
+			.ConfigureAwait(false);
+
+		if (dispatch.Result is not { } result || string.IsNullOrEmpty(originClientId))
+		{
+			return;
+		}
+
+		var evt = ActionExecutionDtoMapper.ToStatusEvent(result, widget.Id.ToString(), WidgetTriggerTypes.DoublePress);
+
+		if (!ActionExecutionDtoMapper.IsSuccess(evt.Status))
+		{
+			await binding.UiTransport.SendToGroup(UiClientGroups.For(originClientId), evt, cancellationToken)
+				.ConfigureAwait(false);
+		}
+	}
+
 	private bool CanWriteVariable() => Entity()?.CanWrite == true;
 
 	private VariableEntity? Entity()
 		=> _variable is null
 			? null
-			: _variable.Variables.FindByName(VariableScope.Global, null, _variable.Name);
+			: SliderDefaultVariable.Find(_variable.Variables,
+				_variable.WidgetId,
+				_variable.IsDefault ? null : _variable.Name);
 
 	/// <summary>
 	/// Snaps <paramref name="fraction" /> onto the bound variable's own grid, <b>anchored at

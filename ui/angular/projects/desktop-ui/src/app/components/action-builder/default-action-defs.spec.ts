@@ -1,5 +1,22 @@
 import { AppStrings } from '@macro-deck/runtime';
-import { comparisonOperatorOptions } from './default-action-defs';
+import { comparisonOperatorOptions, fixedTriggerTabsFor } from './default-action-defs';
+
+describe('fixedTriggerTabsFor', () => {
+  const t = (key: string): string => key;
+
+  it('gives a widget naming only the double tap exactly that tab, labelled from its localization key', () => {
+    expect(fixedTriggerTabsFor(['onDoublePress'], t)).toEqual([
+      { triggerType: 'onDoublePress', label: AppStrings.ActionBuilder.Trigger.DoublePress },
+    ]);
+  });
+
+  it('keeps the default tabs for a widget naming press triggers, nothing, or only unknown ids', () => {
+    expect(fixedTriggerTabsFor(['onShortPress', 'onLongPress', 'onTouchStart', 'onTouchEnd'], t)).toBeNull();
+    expect(fixedTriggerTabsFor(undefined, t)).toBeNull();
+    expect(fixedTriggerTabsFor([], t)).toBeNull();
+    expect(fixedTriggerTabsFor(['onPluginGesture'], t)).toBeNull();
+  });
+});
 
 describe('comparisonOperatorOptions', () => {
   it('D1: returns the full operator list, in order, an added operator cannot silently displace an existing one', () => {

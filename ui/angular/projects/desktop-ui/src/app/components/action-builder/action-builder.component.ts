@@ -185,6 +185,11 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
   }
 
   @Input()
+  set alwaysShowTabRow(value: boolean) {
+    this.alwaysShowTabRowInput.set(value);
+  }
+
+  @Input()
   set singleEventTrigger(value: boolean) {
     this.singleEventTriggerInput.set(value);
   }
@@ -238,6 +243,7 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
 
   private readonly showToggleTriggersInput = signal(false);
   private readonly triggerTabsInput = signal<TriggerTab[] | null>(null);
+  private readonly alwaysShowTabRowInput = signal(false);
   private readonly allowEventTriggersInput = signal(true);
   private readonly singleEventTriggerInput = signal(false);
   private readonly allowRunInput = signal(true);
@@ -264,7 +270,8 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
   });
 
   readonly showTabRow = computed(() =>
-    this.effectiveTriggerTabs().length > 1 || this.showAddEventTrigger() || !!this.auxTabItem(),
+    this.alwaysShowTabRowInput()
+      || this.effectiveTriggerTabs().length > 1 || this.showAddEventTrigger() || !!this.auxTabItem(),
   );
 
   readonly showAddEventTrigger = computed(() =>

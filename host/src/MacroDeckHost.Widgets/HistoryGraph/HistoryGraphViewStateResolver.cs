@@ -31,12 +31,14 @@ internal sealed class HistoryGraphViewStateResolver
 	private readonly VariableRegistry _variables;
 	private readonly VariableTemplateRenderer _templates;
 	private readonly string? _scopeRefId;
+	private readonly IVariableHistoryWindow? _window;
 	private double _widestSeen;
 
 	public HistoryGraphViewStateResolver(
 		HistoryGraphWidgetData config,
 		VariableRegistry variables,
-		string? scopeRefId = null)
+		string? scopeRefId = null,
+		IVariableHistoryWindow? window = null)
 	{
 		ArgumentNullException.ThrowIfNull(config);
 		ArgumentNullException.ThrowIfNull(variables);
@@ -44,6 +46,7 @@ internal sealed class HistoryGraphViewStateResolver
 		_config = config;
 		_variables = variables;
 		_scopeRefId = scopeRefId;
+		_window = window;
 		_templates = new VariableTemplateRenderer(variables);
 	}
 
@@ -207,7 +210,13 @@ internal sealed class HistoryGraphViewStateResolver
 			return null;
 		}
 
-		var variable = _variables.FindByName(VariableScope.Global, null, name);
+		// With a history window the value reads the variable the curve samples, so the two never disagree.
+		var variable = _window is not null
+			? _variables.FindByName(_window.ScopeRefId is null ? VariableScope.Global : VariableScope.Widget,
+				_window.ScopeRefId,
+				name)
+			: (_scopeRefId is null ? null : _variables.FindByName(VariableScope.Widget, _scopeRefId, name)) ??
+			_variables.FindByName(VariableScope.Global, null, name);
 
 		return variable is not null && _variables.IsAvailable(variable.Id) ? variable : null;
 	}
