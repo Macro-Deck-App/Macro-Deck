@@ -41,6 +41,7 @@ import {
 } from '@shared';
 import { UiNodeComponent } from '../../../ui-render/ui-node.component';
 import { UiRenderContext } from '../../../ui-render/ui-render-context';
+import { deepEqual } from '../../../../util/deep-equal';
 import { WidgetEditorShellComponent } from '../common/widget-editor-shell/widget-editor-shell.component';
 
 const DRAFT_EVENT_NAMES: ReadonlySet<string> = new Set([
@@ -116,9 +117,7 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
 
   private seenTree = false;
 
-  /** The draft the current session was opened with, so `reload` can tell a real change from a reseed
-   * that left the configuration exactly as the tree already has it. */
-  private openedWith: string | null = null;
+  private treeDraft: WidgetData | null = null;
 
   constructor() {
     effect(() => this.context.setRoot(this.root()));
@@ -166,10 +165,9 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
    * Called by the editor page whenever it reseeds this editor.
    */
   reload(): void {
-    // The page reseeds this editor on every live update it adopts too, most of which change nothing the
-    // tree is built from. Reopening then would throw away tree-local state the draft does not carry -
-    // which tab is open, which state is selected - for no gain, so an unchanged draft is left alone.
-    if (JSON.stringify(this.widget.data) === this.openedWith) return;
+    // Reopening throws away tree-local state such as the open tab, so only a draft the tree did not
+    // produce itself is worth it.
+    if (deepEqual(this.widget.data, this.treeDraft)) return;
 
     this.handle()?.close();
     this.handle.set(null);
@@ -181,10 +179,9 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
   }
 
   private async openSession(): Promise<void> {
-    // Read before the await, not after it: `reload` compares against this to decide whether to reopen,
-    // and a draft captured after an awaited catalogue lookup could already be a later one.
+    // Captured before the await: a draft read after the catalogue lookup could already be a later one.
     const widgetData = JSON.stringify(this.widget.data);
-    this.openedWith = widgetData;
+    this.treeDraft = structuredClone(this.widget.data);
 
     const info = await this.widgetTypes.infoFor(this.widget.type);
     if (info && !info.supportsConfigUi) {
@@ -225,6 +222,7 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
     }
 
     Object.assign(data, next);
+    this.treeDraft = structuredClone(this.widget.data);
     this.previewData.set({ ...data });
   }
 }
