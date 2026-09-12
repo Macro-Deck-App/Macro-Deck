@@ -35,7 +35,7 @@ about whether that certificate is still trusted today.
 Expected failures are results, not exceptions. A signature that does not verify is a verdict you
 render, not an exception you catch.
 
-See [the plugin development documentation](https://docs.macro-deck.app/introduction/getting-started/)
+See [the plugin development documentation](https://docs.macro-deck.app/introduction/quickstart/)
 and the published schemas for the
 [certificate](https://schemas.macro-deck.app/macrodeck-certificate-v1.schema.json) and the
 [signature material](https://schemas.macro-deck.app/macrodeck-package-signature-v1.schema.json).

@@ -9,7 +9,7 @@ using MacroDeckHost.Widgets.Configuration;
 namespace MacroDeckHost.Widgets.Clock;
 
 /// <summary>Builds a Clock widget's <c>widget-config</c> tree from its stored data - see ADR 0050 and
-/// <c>docs/src/content/docs/sdk/ui/views/widget-configuration.md</c>.</summary>
+/// <c>docs/src/content/docs/ui/views/widget-configuration.md</c>.</summary>
 internal static class ClockWidgetConfigView
 {
 	public static UiElement Build(JsonElement data)

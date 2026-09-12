@@ -130,4 +130,4 @@ scope here.
 
 - [Issue #411](https://github.com/Macro-Deck-App/Macro-Deck/issues/411),
   [Issue #588](https://github.com/Macro-Deck-App/Macro-Deck/issues/588)
-- [Authentication guide](https://docs.macro-deck.app/sdk/authentication/)
+- [Authentication guide](https://docs.macro-deck.app/reference/authentication/)

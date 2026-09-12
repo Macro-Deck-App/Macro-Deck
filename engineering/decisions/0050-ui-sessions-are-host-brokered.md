@@ -175,4 +175,4 @@ red anywhere.
 - [Issue #541](https://github.com/Macro-Deck-App/Macro-Deck/issues/541),
   [Issue #543](https://github.com/Macro-Deck-App/Macro-Deck/issues/543),
   [Issue #791](https://github.com/Macro-Deck-App/Macro-Deck/issues/791)
-- [Macro Deck UI guide](https://docs.macro-deck.app/sdk/ui/)
+- [Macro Deck UI guide](https://docs.macro-deck.app/ui/)

@@ -85,4 +85,4 @@ rather than maintaining a second plugin-specific subsystem.
 ## References
 
 - [Issue #414](https://github.com/Macro-Deck-App/Macro-Deck/issues/414)
-- [Logging guide](https://docs.macro-deck.app/sdk/logging/)
+- [Logging guide](https://docs.macro-deck.app/features/logging/)
