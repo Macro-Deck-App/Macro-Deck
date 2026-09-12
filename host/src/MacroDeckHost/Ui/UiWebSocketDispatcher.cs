@@ -7,6 +7,7 @@ using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Transport;
+using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
 using MacroDeckHost.Application.Ui.Transport.Messages.Logging;
 using MacroDeckHost.Application.Ui.Transport.Messages.MusicPlayer;
@@ -18,6 +19,7 @@ using MacroDeckHost.Application.Ui.Transport.Messages.Variables;
 using MacroDeckHost.Application.Ui.Transport.Messages.Weather;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Integrations;
 
 namespace MacroDeckHost.Ui;
 
@@ -79,6 +81,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 	private readonly IHostApplicationLifetime _lifetime;
 	private readonly IUiTransport _transport;
 	private readonly WebSocketUiTransport _webSocketTransport;
+	private readonly CompanionDeviceRegistry _companions;
 	private readonly SemaphoreSlim _dispatch = new(1, 1);
 
 	public UiWebSocketDispatcher(
@@ -118,6 +121,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		IHostApplicationLifetime lifetime,
 		IUiTransport transport,
 		WebSocketUiTransport webSocketTransport,
+		CompanionDeviceRegistry companions,
 		CancellationToken connectionCancellation)
 	{
 		_connectionId = connectionId;
@@ -153,6 +157,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		_lifetime = lifetime;
 		_transport = transport;
 		_webSocketTransport = webSocketTransport;
+		_companions = companions;
 	}
 
 	public Task<bool> ConnectedAsync()
@@ -199,6 +204,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		_logSubscriptions.Remove(_connectionId);
 		_deviceConnections.Remove(_connectionId);
 		_uiSessions.DetachConnection(_connectionId);
+		_companions.Disconnected(_connectionId);
 		return Task.CompletedTask;
 	}
 
@@ -266,6 +272,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 				"SendUiEvent" => _uiSessions.SendEvent(Arg<UiSendEventRequest>(payload, 0),
 					_connectionId,
 					_registeredClientId),
+				"ReportCompanionState" => ReportCompanionState(Arg<ReportCompanionStateRequest>(payload, 0)),
 				_ when IsKnown(type) => throw new UiWebSocketDispatchException("forbidden"),
 				_ => throw new UiWebSocketDispatchException("unknown_type")
 			};
@@ -386,6 +393,18 @@ public sealed class UiWebSocketDispatcher : IDisposable
 	private object? DetachUiSession(string sessionId)
 	{
 		_uiSessions.Detach(sessionId, _connectionId);
+		return null;
+	}
+
+	private object? ReportCompanionState(ReportCompanionStateRequest request)
+	{
+		// The device is taken from the token only, so a client can never report state for another device.
+		if (!Guid.TryParse(_principal.FindFirst(AuthDefaults.DeviceClaim)?.Value, out var deviceId))
+		{
+			throw new UiWebSocketDispatchException("forbidden");
+		}
+
+		_companions.Report(_connectionId, deviceId, request);
 		return null;
 	}
 

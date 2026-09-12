@@ -30,6 +30,7 @@ using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Devices;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Variables;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
+using MacroDeckHost.Integrations.Companion;
 using MacroDeckHost.Application.Lifecycle;
 using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Logging;
@@ -461,6 +462,7 @@ public class Startup
 		services.AddSingleton<IShellNotificationBridge>(_ => ShellNotificationBridge.Instance);
 		services.AddSingleton<INotificationHandler<PluginPairingRequestedNotification>,
 			PluginPairingSystemNotificationHandler>();
+		services.AddSingleton<INotificationHandler<DeviceRemovedNotification>, CompanionDeviceRemovedHandler>();
 
 		services.AddSingleton<HostStatePusher>();
 		foreach (var handlerInterface in typeof(HostStatePusher).GetInterfaces()
@@ -634,6 +636,11 @@ public class Startup
 		services.AddSingleton<IOAuthCallbackCoordinator, OAuthCallbackCoordinator>();
 		services.AddSingleton<IConfigFlowManager, ConfigFlowManager>();
 		services.AddSingleton<IIntegrationConfigMutationAdapter, ObsConfigurationMutationAdapter>();
+		services.AddSingleton<IIntegrationConfigMutationAdapter, CompanionConfigurationMutationAdapter>();
+		services.AddSingleton<Func<IIntegrationConfigMutationCoordinator>>(sp =>
+			sp.GetRequiredService<IIntegrationConfigMutationCoordinator>);
+		services.AddSingleton<CompanionDeviceRegistry>();
+		services.AddSingleton<ICompanionGateway>(sp => sp.GetRequiredService<CompanionDeviceRegistry>());
 		services.AddSingleton<IIntegrationConfigMutationCoordinator, IntegrationConfigMutationCoordinator>();
 		services.AddSingleton<IntegrationInitializer>();
 		services.AddSingleton<IIntegrationLifecycle, IntegrationLifecycle>();

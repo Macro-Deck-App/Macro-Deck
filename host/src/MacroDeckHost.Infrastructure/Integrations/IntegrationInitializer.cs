@@ -9,6 +9,7 @@ using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Infrastructure.Widgets;
 using MacroDeckHost.Integrations.Adb;
+using MacroDeckHost.Integrations.Companion;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Scripts;
@@ -40,6 +41,7 @@ public sealed class IntegrationInitializer
 	private readonly IEventBus _eventBus;
 	private readonly IUserNotificationStore _userNotificationStore;
 	private readonly IAdbGateway _adbGateway;
+	private readonly ICompanionGateway _companionGateway;
 	private readonly IVariableBindingStore _bindingStore;
 	private readonly IVariableRefreshSignal _refreshSignal;
 	private readonly IIntegrationHostIssueStore _hostIssueStore;
@@ -62,6 +64,7 @@ public sealed class IntegrationInitializer
 		IEventBus eventBus,
 		IUserNotificationStore userNotificationStore,
 		IAdbGateway adbGateway,
+		ICompanionGateway companionGateway,
 		IVariableBindingStore bindingStore,
 		IVariableRefreshSignal refreshSignal,
 		IIntegrationHostIssueStore hostIssueStore,
@@ -81,6 +84,7 @@ public sealed class IntegrationInitializer
 		_eventBus = eventBus;
 		_userNotificationStore = userNotificationStore;
 		_adbGateway = adbGateway;
+		_companionGateway = companionGateway;
 		_bindingStore = bindingStore;
 		_refreshSignal = refreshSignal;
 		_hostIssueStore = hostIssueStore;
@@ -93,6 +97,9 @@ public sealed class IntegrationInitializer
 	}
 
 	public IReadOnlySet<string> AttemptedIds => _attempted.Keys.ToHashSet(StringComparer.Ordinal);
+
+	public void BindGateways(IIntegration integration)
+		=> IntegrationGatewayBinder.Bind(integration, _adbGateway, _companionGateway, _bindingStore, _refreshSignal);
 
 	public async Task<IntegrationInitializationOutcome> InitializeAsync(
 		IIntegration integration,
@@ -127,11 +134,10 @@ public sealed class IntegrationInitializer
 		// InitializeAsync directly would let such an integration block the fan-out itself on the enumerating
 		// thread, and no timeout below would ever get the chance to fire. Wrapping the call in Task.Run moves
 		// that blocking prologue onto a pool thread so the timeout always gets to run concurrently with it.
-		// IntegrationGatewayBinder.Bind is integration-authored code too (UseGateway), so it goes inside the
-		// same Task.Run rather than running on the enumerating thread ahead of it.
+		// BindGateways runs integration-authored code too (UseGateway), so it goes inside the same Task.Run.
 		var attempt = Task.Run(() =>
 			{
-				IntegrationGatewayBinder.Bind(integration, _adbGateway, _bindingStore, _refreshSignal);
+				BindGateways(integration);
 				return integration.InitializeAsync(context);
 			},
 			CancellationToken.None);

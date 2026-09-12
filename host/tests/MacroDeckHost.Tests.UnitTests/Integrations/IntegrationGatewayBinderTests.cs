@@ -32,6 +32,7 @@ internal sealed class IntegrationGatewayBinderTests
 
 		IntegrationGatewayBinder.Bind(integration,
 			gateway,
+			null!,
 			new NullVariableBindingStore(),
 			new VariableRefreshSignal());
 
@@ -46,6 +47,7 @@ internal sealed class IntegrationGatewayBinderTests
 
 		Assert.DoesNotThrow(() => IntegrationGatewayBinder.Bind(integration,
 			gateway,
+			null!,
 			new NullVariableBindingStore(),
 			new VariableRefreshSignal()));
 	}
@@ -57,7 +59,7 @@ internal sealed class IntegrationGatewayBinderTests
 		var signal = new VariableRefreshSignal();
 		var integration = new RefreshSignalConsumerIntegration();
 
-		IntegrationGatewayBinder.Bind(integration, gateway, new NullVariableBindingStore(), signal);
+		IntegrationGatewayBinder.Bind(integration, gateway, null!, new NullVariableBindingStore(), signal);
 
 		Assert.That(integration.ReceivedSignal, Is.SameAs(signal));
 	}
@@ -181,7 +183,7 @@ internal sealed class IntegrationGatewayBinderTests
 		var store = new NullVariableBindingStore();
 		var integration = new BindingStoreConsumerIntegration();
 
-		IntegrationGatewayBinder.Bind(integration, gateway, store, new VariableRefreshSignal());
+		IntegrationGatewayBinder.Bind(integration, gateway, null!, store, new VariableRefreshSignal());
 
 		Assert.That(integration.ReceivedStore, Is.SameAs(store));
 	}
@@ -217,6 +219,7 @@ internal sealed class IntegrationGatewayBinderTests
 			new RecordingEventBus(),
 			new UserNotificationStore(),
 			gateway,
+			null!,
 			new NullVariableBindingStore(),
 			new VariableRefreshSignal(),
 			new FakeIntegrationHostIssueStore(),

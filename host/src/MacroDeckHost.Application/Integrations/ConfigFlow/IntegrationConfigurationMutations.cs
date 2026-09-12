@@ -62,6 +62,8 @@ public interface IIntegrationConfigMutationAdapter
 	void ReleasePreparation(Guid entryId)
 	{
 	}
+
+	bool CreatesEntriesFromFlow => true;
 }
 
 public sealed record IntegrationConfigMutationOutcome(
@@ -93,6 +95,22 @@ public interface IIntegrationConfigMutationCoordinator
 	Task<IReadOnlyList<IntegrationConfigEntryDescription>> DescribeAsync(
 		string integrationId,
 		CancellationToken cancellationToken);
+
+	Task<IntegrationConfigMutationOutcome> DeleteWithoutStoringDisabledAsync(
+		string integrationId,
+		Guid entryId,
+		CancellationToken cancellationToken)
+		=> DeleteAsync(integrationId, entryId, confirmed: true, cancellationToken);
+
+	Task<IntegrationConfigMutationOutcome> CompleteUnlessDisabledAsync(
+		string integrationId,
+		Guid entryId,
+		string title,
+		IReadOnlyDictionary<string, JsonElement> values,
+		CancellationToken cancellationToken)
+		=> CompleteAsync(integrationId, entryId, title, values, cancellationToken);
+
+	bool CreatesEntriesFromFlow(string integrationId) => true;
 }
 
 public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMutationCoordinator
@@ -130,9 +148,33 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 		string title,
 		IReadOnlyDictionary<string, JsonElement> values,
 		CancellationToken cancellationToken)
+		=> Complete(integrationId, entryId, title, values, unlessDisabled: false, cancellationToken);
+
+	// Checked in the same serialized section as a user's delete, so an entry the host creates on its own
+	// never follows the deletion of the last one.
+	public Task<IntegrationConfigMutationOutcome> CompleteUnlessDisabledAsync(
+		string integrationId,
+		Guid entryId,
+		string title,
+		IReadOnlyDictionary<string, JsonElement> values,
+		CancellationToken cancellationToken)
+		=> Complete(integrationId, entryId, title, values, unlessDisabled: true, cancellationToken);
+
+	private Task<IntegrationConfigMutationOutcome> Complete(
+		string integrationId,
+		Guid entryId,
+		string title,
+		IReadOnlyDictionary<string, JsonElement> values,
+		bool unlessDisabled,
+		CancellationToken cancellationToken)
 		=> Serialized(integrationId,
 			async store =>
 			{
+				if (unlessDisabled && _registry.IsExplicitlyDisabled(integrationId))
+				{
+					return new IntegrationConfigMutationOutcome(false);
+				}
+
 				var existing = await store.Find(entryId);
 				if (existing is not null && !OwnedBy(existing, integrationId))
 				{
@@ -251,6 +293,23 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 				Error: AppStrings.Errors.Config.DeleteConfirmationRequired()));
 		}
 
+		return Delete(integrationId, entryId, storeDisabled: true, cancellationToken);
+	}
+
+	// For an entry the host removes on its own: nobody chose "off", so only a stored "on" is cleared, and
+	// an "off" a user stores meanwhile survives.
+	public Task<IntegrationConfigMutationOutcome> DeleteWithoutStoringDisabledAsync(
+		string integrationId,
+		Guid entryId,
+		CancellationToken cancellationToken)
+		=> Delete(integrationId, entryId, storeDisabled: false, cancellationToken);
+
+	private Task<IntegrationConfigMutationOutcome> Delete(
+		string integrationId,
+		Guid entryId,
+		bool storeDisabled,
+		CancellationToken cancellationToken)
+	{
 		return Serialized(integrationId,
 			async store =>
 			{
@@ -265,7 +324,15 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 				await SynchronizeVariables(integrationId, remaining, cancellationToken);
 				if (!remaining.Any(entry => IsUsable(integrationId, entry)))
 				{
-					_registry.SetEnabled(integrationId, false);
+					if (storeDisabled)
+					{
+						_registry.SetEnabled(integrationId, false);
+					}
+					else
+					{
+						_registry.ClearEnabledChoice(integrationId);
+					}
+
 					await _lifecycle.ShutdownAsync(integrationId, cancellationToken);
 					await _mediator.Publish(new IntegrationStateChangedNotification(integrationId), cancellationToken);
 					_variableInvalidation.MarkStale(integrationId);
@@ -279,6 +346,9 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 			},
 			cancellationToken);
 	}
+
+	public bool CreatesEntriesFromFlow(string integrationId)
+		=> !_adapters.TryGetValue(integrationId, out var adapter) || adapter.CreatesEntriesFromFlow;
 
 	public async Task<IReadOnlyList<IntegrationConfigEntryDescription>> DescribeAsync(
 		string integrationId,
