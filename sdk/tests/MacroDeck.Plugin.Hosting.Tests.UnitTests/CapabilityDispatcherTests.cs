@@ -274,6 +274,101 @@ public class CapabilityDispatcherTests
 	}
 
 	[Test]
+	public async Task A_retry_after_a_cancel_the_handler_honoured_runs_again(
+		[Values] bool handlerStopsInsideCancel)
+	{
+		var calls = 0;
+		var running = new TaskCompletionSource();
+		var release = new TaskCompletionSource();
+
+		using var dispatcher = TestSession.Dispatcher(new TestCapabilityHandler("actions",
+			async (_, token) =>
+			{
+				if (Interlocked.Increment(ref calls) > 1)
+				{
+					return CapabilityInvocationResult.Ok();
+				}
+
+				running.TrySetResult();
+
+				if (handlerStopsInsideCancel)
+				{
+					var stopped = new TaskCompletionSource();
+					await using var registration = token.Register(() => stopped.TrySetCanceled(token));
+					await stopped.Task;
+				}
+				else
+				{
+					await release.Task;
+					token.ThrowIfCancellationRequested();
+				}
+
+				return CapabilityInvocationResult.Ok();
+			}));
+
+		var envelope = Invoke(idempotencyKey: "key");
+		var first = dispatcher.DispatchAsync(envelope, Reply, CancellationToken.None);
+		await running.Task;
+
+		dispatcher.Cancel(new ProtocolEnvelope
+		{
+			Type = MessageTypes.CapabilityCancel,
+			Id = Guid.CreateVersion7().ToString(),
+			CorrelationId = envelope.Id
+		});
+		release.TrySetResult();
+		await first;
+		_replies.Clear();
+
+		await dispatcher.DispatchAsync(Invoke(idempotencyKey: "key"), Reply, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(calls, Is.EqualTo(2));
+			Assert.That(Single().Error, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_retry_after_a_cancel_the_handler_ignored_replays_its_result()
+	{
+		var calls = 0;
+		var running = new TaskCompletionSource();
+		var release = new TaskCompletionSource();
+
+		using var dispatcher = TestSession.Dispatcher(new TestCapabilityHandler("actions",
+			async (_, _) =>
+			{
+				Interlocked.Increment(ref calls);
+				running.TrySetResult();
+				await release.Task;
+				return CapabilityInvocationResult.Ok();
+			}));
+
+		var envelope = Invoke(idempotencyKey: "key");
+		var first = dispatcher.DispatchAsync(envelope, Reply, CancellationToken.None);
+		await running.Task;
+
+		var cancelled = dispatcher.Cancel(new ProtocolEnvelope
+		{
+			Type = MessageTypes.CapabilityCancel,
+			Id = Guid.CreateVersion7().ToString(),
+			CorrelationId = envelope.Id
+		});
+		release.TrySetResult();
+		await first;
+
+		await dispatcher.DispatchAsync(Invoke(idempotencyKey: "key"), Reply, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(cancelled!.Error!.Code, Is.EqualTo(ProtocolErrorCodes.Cancelled));
+			Assert.That(calls, Is.EqualTo(1));
+			Assert.That(Single().Error, Is.Null);
+		});
+	}
+
+	[Test]
 	public async Task A_repeated_idempotency_key_while_the_first_is_in_flight_is_refused()
 	{
 		var running = new TaskCompletionSource();

@@ -93,16 +93,19 @@ internal sealed class CapabilityDispatcher(
 		{
 			var result = await RunAsync(payload!, envelope, invocation);
 
-			if (invocation.TryComplete())
+			// A run that finished after its cancel was answered stays cached, or a retry would run it twice.
+			if (result.Error?.Code == ProtocolErrorCodes.Cancelled)
 			{
-				Remember(envelope.IdempotencyKey, result);
-				await reply(ToEnvelope(correlationId, result), connectionToken);
+				Forget(envelope.IdempotencyKey);
 			}
 			else
 			{
-				// Something else already answered - a cancel, or the connection dropping. There is no
-				// result to remember, so the claim has to go or the key stays poisoned.
-				Forget(envelope.IdempotencyKey);
+				Remember(envelope.IdempotencyKey, result);
+			}
+
+			if (invocation.TryComplete())
+			{
+				await reply(ToEnvelope(correlationId, result), connectionToken);
 			}
 		}
 		finally
@@ -275,7 +278,7 @@ internal sealed class CapabilityDispatcher(
 		}
 	}
 
-	/// <summary>Releases a claimed key that produced no result, so a retry is not refused forever.</summary>
+	/// <summary>Releases a claimed key that produced no result or was cancelled, so a retry runs again.</summary>
 	private void Forget(string? key)
 	{
 		if (!string.IsNullOrEmpty(key))
