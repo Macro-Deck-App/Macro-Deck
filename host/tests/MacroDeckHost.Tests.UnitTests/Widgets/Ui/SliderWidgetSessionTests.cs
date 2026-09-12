@@ -509,7 +509,8 @@ public class SliderWidgetSessionTests
 			Assert.That(created.Classification, Is.EqualTo(VariableClassification.User));
 			Assert.That(created.Type, Is.EqualTo(DomainVariableType.Numeric));
 			Assert.That(initial, Is.EqualTo("10"));
-			Assert.That(registry.FindByName(VariableScope.Widget, widgetId.ToString(), SliderDefaultVariable.Name)!.Value,
+			Assert.That(registry.FindByName(VariableScope.Widget, widgetId.ToString(), SliderDefaultVariable.Name)!
+					.Value,
 				Is.EqualTo("42"),
 				"reopening must never reset the slider's own value");
 		});
@@ -555,7 +556,8 @@ public class SliderWidgetSessionTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(SliderDefaultVariable.Find(registry, widgetId, "vol")?.Scope, Is.EqualTo(VariableScope.Widget));
-			Assert.That(SliderDefaultVariable.Find(registry, Guid.NewGuid(), "vol")?.Scope, Is.EqualTo(VariableScope.Global));
+			Assert.That(SliderDefaultVariable.Find(registry, Guid.NewGuid(), "vol")?.Scope,
+				Is.EqualTo(VariableScope.Global));
 		});
 	}
 

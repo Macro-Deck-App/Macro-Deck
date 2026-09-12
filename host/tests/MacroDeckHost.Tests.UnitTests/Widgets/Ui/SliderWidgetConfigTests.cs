@@ -191,7 +191,8 @@ public class SliderWidgetConfigTests
 			},
 		};
 
-		var session = await Provider().CreateSessionAsync(new UiSessionRequest { Surface = surface, UiModelVersion = 1 },
+		var session = await Provider().CreateSessionAsync(
+			new UiSessionRequest { Surface = surface, UiModelVersion = 1 },
 			CancellationToken.None);
 		var track = Walk(session!.BuildTree().Root).Single(node => node.Type == UiComponents.Slider);
 		await session.DisposeAsync();

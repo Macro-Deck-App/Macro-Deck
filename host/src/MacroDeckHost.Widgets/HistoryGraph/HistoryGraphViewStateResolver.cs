@@ -216,7 +216,7 @@ internal sealed class HistoryGraphViewStateResolver
 				_window.ScopeRefId,
 				name)
 			: (_scopeRefId is null ? null : _variables.FindByName(VariableScope.Widget, _scopeRefId, name)) ??
-				_variables.FindByName(VariableScope.Global, null, name);
+			_variables.FindByName(VariableScope.Global, null, name);
 
 		return variable is not null && _variables.IsAvailable(variable.Id) ? variable : null;
 	}

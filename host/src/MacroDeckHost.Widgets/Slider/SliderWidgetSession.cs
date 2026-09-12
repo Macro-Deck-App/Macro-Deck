@@ -363,7 +363,11 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 		}
 
 		var dispatch = await binding.TriggerService
-			.ExecuteAsync(widget, WidgetTriggerTypes.DoublePress, originClientId, originDeviceId: null, cancellationToken)
+			.ExecuteAsync(widget,
+				WidgetTriggerTypes.DoublePress,
+				originClientId,
+				originDeviceId: null,
+				cancellationToken)
 			.ConfigureAwait(false);
 
 		if (dispatch.Result is not { } result || string.IsNullOrEmpty(originClientId))

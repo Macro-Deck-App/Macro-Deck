@@ -17,7 +17,8 @@ internal static class SliderDefaultVariable
 			? registry.FindByName(VariableScope.Widget, id.ToString(), pickedName ?? Name)
 			: null;
 
-		return widgetScoped ?? (pickedName is null ? null : registry.FindByName(VariableScope.Global, null, pickedName));
+		return widgetScoped ??
+			(pickedName is null ? null : registry.FindByName(VariableScope.Global, null, pickedName));
 	}
 
 	// A user variable, not a host-managed widget one: only user variables take a drag and every Set Variable operation.
@@ -35,7 +36,12 @@ internal static class SliderDefaultVariable
 		await using var scope = scopeFactory.CreateAsyncScope();
 
 		await scope.ServiceProvider.GetRequiredService<IVariableService>()
-			.CreateUserVariable(Name, VariableScope.Widget, widgetId.ToString(), VariableType.Numeric, (decimal)initialValue, null)
+			.CreateUserVariable(Name,
+				VariableScope.Widget,
+				widgetId.ToString(),
+				VariableType.Numeric,
+				(decimal)initialValue,
+				null)
 			.ConfigureAwait(false);
 	}
 }

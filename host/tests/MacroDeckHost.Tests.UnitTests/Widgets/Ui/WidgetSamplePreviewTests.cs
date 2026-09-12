@@ -231,7 +231,8 @@ public class WidgetSamplePreviewTests
 	/// <summary>No variable is chosen either, so opening a history window at all is the failure.</summary>
 	private sealed class UnusedVariableHistory : IVariableHistory
 	{
-		public IVariableHistoryWindow Open(string variableName, int capacity, string? scopeRefId = null) => throw new NotSupportedException();
+		public IVariableHistoryWindow Open(string variableName, int capacity, string? scopeRefId = null) =>
+			throw new NotSupportedException();
 	}
 
 	private sealed class NoWidgetIcons : MacroDeckHost.Application.Widgets.IWidgetIconResources

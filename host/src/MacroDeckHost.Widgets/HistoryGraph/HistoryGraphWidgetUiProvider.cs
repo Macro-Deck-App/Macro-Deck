@@ -76,7 +76,8 @@ public sealed class HistoryGraphWidgetUiProvider : IBuiltInWidgetUiProvider
 		var window = string.IsNullOrEmpty(config.ValueVariable)
 			? EmptyVariableHistoryWindow.Instance
 			: _history.Open(config.ValueVariable, config.HistoryLength, VariableScopeWidgetId(request.Surface));
-		var resolver = new HistoryGraphViewStateResolver(config, _variables, VariableScopeWidgetId(request.Surface), window);
+		var resolver
+			= new HistoryGraphViewStateResolver(config, _variables, VariableScopeWidgetId(request.Surface), window);
 
 		var state = new UiState<HistoryGraphViewState>(resolver.Resolve(window.Values));
 		var view = new UiView(request.Surface,
