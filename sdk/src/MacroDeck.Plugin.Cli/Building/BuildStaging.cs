@@ -37,7 +37,9 @@ internal static class BuildStaging
 		IReadOnlyCollection<string> excludedDirectories,
 		CancellationToken cancellationToken)
 	{
-		var excluded = new HashSet<string>(excludedDirectories.Select(Path.GetFullPath), PathComparer);
+		var excluded = new HashSet<string>(
+			excludedDirectories.Select(path => Path.TrimEndingDirectorySeparator(Path.GetFullPath(path))),
+			PathComparer);
 
 		CopyDirectory(Path.GetFullPath(sourceRoot),
 			Path.GetFullPath(sourceRoot),
@@ -103,6 +105,7 @@ internal static class BuildStaging
 			var name = Path.GetFileName(file);
 
 			if (_excludedFiles.Contains(name, StringComparer.OrdinalIgnoreCase) ||
+				PluginArtifactFiles.HasArtifactExtension(name) ||
 				name.Equals(PluginBuildConfigReader.FileName, StringComparison.OrdinalIgnoreCase) ||
 				(current.Equals(root, StringComparison.Ordinal) &&
 					name.Equals(PluginArtifactFiles.ManifestFileName, StringComparison.OrdinalIgnoreCase)))
