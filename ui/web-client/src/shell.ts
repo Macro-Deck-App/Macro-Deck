@@ -74,8 +74,6 @@ export class Shell {
     this.deckInput = new DeckInput(
       {
         widgets: () => this.client.deck.displayedWidgets,
-        // A tree whose only claimant is a disabled region absorbs the activation; anything else still
-        // takes the tile's trigger path.
         activateWidget: widgetId => activationClaim(this.client.widgetSessions.treeFor(widgetId)) === 'absorbed',
         triggerWidget: (widget: GridWidget) => {
           void this.client.executeTrigger(widget.id, 'onShortPress');
