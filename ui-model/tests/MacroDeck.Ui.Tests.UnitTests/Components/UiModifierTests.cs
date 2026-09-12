@@ -108,7 +108,8 @@ public class UiModifierTests
 		});
 
 		Assert.That(tree.Root.Children.Single().Properties["modifiers"].GetRawText(),
-			Is.EqualTo("""{"accessibilityLabel":"Volume","borderColor":"#ff0000","borderLine":"dashed","borderWidth":{"basis":0.02}}"""));
+			Is.EqualTo(
+				"""{"accessibilityLabel":"Volume","borderColor":"#ff0000","borderLine":"dashed","borderWidth":{"basis":0.02}}"""));
 	}
 
 	[Test]
@@ -155,7 +156,8 @@ public class UiModifierTests
 				new UiMaskStop { Offset = 0, Opacity = 1 },
 				new UiMaskStop { Offset = 1, Opacity = 0 }),
 			Frame = new UiFrame { Width = 0.5, AspectRatio = 1 },
-			Background = UiGradient.Radial(0.5, 0.5,
+			Background = UiGradient.Radial(0.5,
+				0.5,
 				new UiGradientStop { Offset = 0, Color = "#ffffff" },
 				new UiGradientStop { Offset = 1, Color = "#000000" }),
 			Child = new UiTextRun { Key = "label", Text = "On" },
@@ -176,7 +178,8 @@ public class UiModifierTests
 			Assert.That(wrapper.Properties["frame"].GetRawText(),
 				Is.EqualTo("""{"width":{"basis":0.5},"aspectRatio":1}"""));
 			Assert.That(wrapper.Properties["modifiers"].GetRawText(),
-				Is.EqualTo("""{"background":{"radial":{"centerX":0.5,"centerY":0.5,"stops":[{"offset":0,"color":"#ffffff"},{"offset":1,"color":"#000000"}]}}}"""));
+				Is.EqualTo(
+					"""{"background":{"radial":{"centerX":0.5,"centerY":0.5,"stops":[{"offset":0,"color":"#ffffff"},{"offset":1,"color":"#000000"}]}}}"""));
 			Assert.That(wrapper.Children.Single().Properties.ContainsKey("modifiers"), Is.False);
 		});
 	}
@@ -184,19 +187,20 @@ public class UiModifierTests
 	[Test]
 	public void A_wrapper_carries_only_the_fallback_it_was_given_and_nested_wrappers_do_not_multiply()
 	{
-		var tree = Build(
-			new UiModifier
+		var tree = Build(new UiModifier
 			{
 				Key = "given",
 				Padding = 0.05,
-				Fallback = new UiStack { Key = "plain", Children = [new UiTextRun { Key = "plainLabel", Text = "On" }] },
+				Fallback = new UiStack
+					{ Key = "plain", Children = [new UiTextRun { Key = "plainLabel", Text = "On" }] },
 				Child = new UiTextRun { Key = "label", Text = "On" },
 			},
 			new UiModifier
 			{
 				Key = "outer",
 				Padding = 0.05,
-				Child = new UiModifier { Key = "inner", Opacity = 0.5, Child = new UiTextRun { Key = "text", Text = "x" } },
+				Child = new UiModifier
+					{ Key = "inner", Opacity = 0.5, Child = new UiTextRun { Key = "text", Text = "x" } },
 			});
 
 		var given = tree.Root.Children[0];
@@ -322,7 +326,8 @@ public class UiModifierTests
 				Events =
 				[
 					UiEventHandler.On(UiComponentEvents.Press, () => calls.Add("inner")),
-					UiEventHandler.On(UiComponentEvents.Drag, data => calls.Add("drag " + data.Raw!.Value.GetRawText())),
+					UiEventHandler.On(UiComponentEvents.Drag,
+						data => calls.Add("drag " + data.Raw!.Value.GetRawText())),
 				],
 				Child = PressableButton("button", () => calls.Add("child")),
 			},
@@ -430,7 +435,11 @@ public class UiModifierTests
 				Key = "row",
 				Children =
 				[
-					new UiWhen { Key = "maybe", Condition = () => shown.Value, Content = () => PressableButton("button", () => { }) },
+					new UiWhen
+					{
+						Key = "maybe", Condition = () => shown.Value,
+						Content = () => PressableButton("button", () => { })
+					},
 				],
 			},
 		});
@@ -540,7 +549,8 @@ public class UiModifierTests
 			Assert.Throws<ArgumentOutOfRangeException>(() => _ = new UiFrame { MaxHeight = UiLength.OfBasis(0.5, -1) });
 			Assert.Throws<ArgumentOutOfRangeException>(() => _ = new UiMaskStop { Offset = 1.5, Opacity = 1 });
 			Assert.Throws<ArgumentOutOfRangeException>(() => _ = new UiMaskStop { Offset = 0, Opacity = -0.1 });
-			Assert.Throws<ArgumentOutOfRangeException>(() => _ = new UiGradientStop { Offset = double.NaN, Color = "#000000" });
+			Assert.Throws<ArgumentOutOfRangeException>(() => _ = new UiGradientStop
+				{ Offset = double.NaN, Color = "#000000" });
 			Assert.Throws<ArgumentOutOfRangeException>(() =>
 				UiMask.Radial(1.2, 0.5, new UiMaskStop { Offset = 0, Opacity = 1 }));
 			Assert.DoesNotThrow(() => _ = new UiFrame { Width = 0, MinHeight = 0.2, AspectRatio = 1.5 });
@@ -559,7 +569,8 @@ public class UiModifierTests
 			Assert.Throws<ArgumentException>(() => _ = new UiGradientStop { Offset = 0, Color = "red" });
 			Assert.Throws<ArgumentException>(() => _ = new UiGradientStop { Offset = 0, Color = "#fff" });
 			Assert.Throws<ArgumentException>(() => UiBackground.Solid("red"));
-			Assert.Throws<ArgumentException>(() => _ = new UiModifier { Key = "m", Background = "#fff", Child = new UiStack { Key = "s" } });
+			Assert.Throws<ArgumentException>(() => _ = new UiModifier
+				{ Key = "m", Background = "#fff", Child = new UiStack { Key = "s" } });
 			Assert.DoesNotThrow(() => UiBackground.Solid("#A0b1C2"));
 		});
 	}

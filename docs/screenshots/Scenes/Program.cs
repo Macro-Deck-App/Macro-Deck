@@ -66,7 +66,8 @@ internal static partial class Scenes
 	public static IEnumerable<Scene> All() =>
 	[
 		.. TextScenes(), .. TextFieldScenes(), .. ImageScenes(), .. ButtonScenes(), .. SliderScenes(),
-		.. RangeBarScenes(), .. StackScenes(), .. ListScenes(), .. TransformScenes(), .. ModifierScenes(), .. ChartScenes(),
+		.. RangeBarScenes(), .. StackScenes(), .. ListScenes(), .. TransformScenes(), .. ModifierScenes(),
+		.. ChartScenes(),
 		.. TimeScenes(), .. ProgressScenes(), .. ShapeScenes(), .. IconScenes(), .. GridScenes(),
 		.. GaugeScenes(), .. ToggleScenes(), .. SegmentedScenes(), .. DialScenes(), .. ViewScenes(),
 		.. ConceptScenes(),

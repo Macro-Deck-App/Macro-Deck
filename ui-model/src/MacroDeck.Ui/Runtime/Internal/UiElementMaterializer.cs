@@ -138,7 +138,11 @@ internal sealed class UiElementMaterializer
 
 			case IUiRepeatElement repeat:
 			{
-				var scope = CreateStructuralScope(element, structuralPrefix, inputScope, parentDeclarationPath, disabled);
+				var scope = CreateStructuralScope(element,
+					structuralPrefix,
+					inputScope,
+					parentDeclarationPath,
+					disabled);
 				var items = region.AddRegion(scope);
 
 				// The templates run inside the structural scope too: an item's element is part of the
@@ -303,13 +307,19 @@ internal sealed class UiElementMaterializer
 		IReadOnlyList<UiModifier> layers = modifiers is null ? [modifier] : [modifier, .. modifiers];
 		IReadOnlyList<UiValue<bool>>? chain = !modifier.Disabled.IsDeclared
 			? disabled
-			: disabled is null ? [modifier.Disabled] : [.. disabled, modifier.Disabled];
+			: disabled is null
+				? [modifier.Disabled]
+				: [.. disabled, modifier.Disabled];
 
 		if (!modifier.IsWrapper)
 		{
-			if (modifier.MainSize.IsDeclared || modifier.Fill.IsDeclared || modifier.Answer.IsDeclared ||
-				modifier.ColumnSpan.IsDeclared || modifier.RowSpan.IsDeclared ||
-				modifier.Fallback is not null || modifier.RequiredComponentVersion is not null)
+			if (modifier.MainSize.IsDeclared ||
+				modifier.Fill.IsDeclared ||
+				modifier.Answer.IsDeclared ||
+				modifier.ColumnSpan.IsDeclared ||
+				modifier.RowSpan.IsDeclared ||
+				modifier.Fallback is not null ||
+				modifier.RequiredComponentVersion is not null)
 			{
 				throw new UiViewException($"{where} sets only node modifiers, so it emits no node that could carry " +
 					"MainSize, Fill, Answer, ColumnSpan, RowSpan, a Fallback or a component version. Set them on " +
@@ -351,10 +361,14 @@ internal sealed class UiElementMaterializer
 
 		return element switch
 		{
-			UiComponentContainer container => container.MainSize.IsDeclared || container.Fill.IsDeclared ||
-				container.ColumnSpan.IsDeclared || container.RowSpan.IsDeclared,
-			UiComponentLeaf leaf => leaf.MainSize.IsDeclared || leaf.Fill.IsDeclared ||
-				leaf.ColumnSpan.IsDeclared || leaf.RowSpan.IsDeclared,
+			UiComponentContainer container => container.MainSize.IsDeclared ||
+				container.Fill.IsDeclared ||
+				container.ColumnSpan.IsDeclared ||
+				container.RowSpan.IsDeclared,
+			UiComponentLeaf leaf => leaf.MainSize.IsDeclared ||
+				leaf.Fill.IsDeclared ||
+				leaf.ColumnSpan.IsDeclared ||
+				leaf.RowSpan.IsDeclared,
 			_ => false,
 		};
 	}
@@ -520,7 +534,9 @@ internal sealed class UiElementMaterializer
 		return materialized;
 	}
 
-	private static void DeclareModifiers(UiPropertyDeclaration declaration, IReadOnlyList<UiModifier> modifiers, string id)
+	private static void DeclareModifiers(UiPropertyDeclaration declaration,
+		IReadOnlyList<UiModifier> modifiers,
+		string id)
 	{
 		var members = new List<UiModifierMember>();
 
@@ -570,7 +586,8 @@ internal sealed class UiElementMaterializer
 		List<UiEventHandler> modifierHandlers,
 		IReadOnlyList<UiValue<bool>>? disabled)
 	{
-		var index = cells.FindIndex(cell => string.Equals(cell.Key, UiComponentProperties.Events, StringComparison.Ordinal));
+		var index = cells.FindIndex(cell =>
+			string.Equals(cell.Key, UiComponentProperties.Events, StringComparison.Ordinal));
 		var declared = index >= 0
 			? ((UiPropertyCell<IReadOnlyList<string>>)cells[index]).Value
 			: UiValue.None<IReadOnlyList<string>>();

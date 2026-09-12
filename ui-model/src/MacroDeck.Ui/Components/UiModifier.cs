@@ -378,32 +378,56 @@ public sealed record UiFrame
 	/// <summary>A fixed width.</summary>
 	/// <exception cref="ArgumentOutOfRangeException">The length is negative.</exception>
 	[JsonPropertyOrder(0)]
-	public UiLength? Width { get; init => field = UiModifierValidation.NonNegative(value, nameof(Width)); }
+	public UiLength? Width
+	{
+		get;
+		init => field = UiModifierValidation.NonNegative(value, nameof(Width));
+	}
 
 	/// <summary>A fixed height.</summary>
 	/// <exception cref="ArgumentOutOfRangeException">The length is negative.</exception>
 	[JsonPropertyOrder(1)]
-	public UiLength? Height { get; init => field = UiModifierValidation.NonNegative(value, nameof(Height)); }
+	public UiLength? Height
+	{
+		get;
+		init => field = UiModifierValidation.NonNegative(value, nameof(Height));
+	}
 
 	/// <summary>The narrowest the wrapper may be.</summary>
 	/// <exception cref="ArgumentOutOfRangeException">The length is negative.</exception>
 	[JsonPropertyOrder(2)]
-	public UiLength? MinWidth { get; init => field = UiModifierValidation.NonNegative(value, nameof(MinWidth)); }
+	public UiLength? MinWidth
+	{
+		get;
+		init => field = UiModifierValidation.NonNegative(value, nameof(MinWidth));
+	}
 
 	/// <summary>The widest the wrapper may be.</summary>
 	/// <exception cref="ArgumentOutOfRangeException">The length is negative.</exception>
 	[JsonPropertyOrder(3)]
-	public UiLength? MaxWidth { get; init => field = UiModifierValidation.NonNegative(value, nameof(MaxWidth)); }
+	public UiLength? MaxWidth
+	{
+		get;
+		init => field = UiModifierValidation.NonNegative(value, nameof(MaxWidth));
+	}
 
 	/// <summary>The shortest the wrapper may be.</summary>
 	/// <exception cref="ArgumentOutOfRangeException">The length is negative.</exception>
 	[JsonPropertyOrder(4)]
-	public UiLength? MinHeight { get; init => field = UiModifierValidation.NonNegative(value, nameof(MinHeight)); }
+	public UiLength? MinHeight
+	{
+		get;
+		init => field = UiModifierValidation.NonNegative(value, nameof(MinHeight));
+	}
 
 	/// <summary>The tallest the wrapper may be.</summary>
 	/// <exception cref="ArgumentOutOfRangeException">The length is negative.</exception>
 	[JsonPropertyOrder(5)]
-	public UiLength? MaxHeight { get; init => field = UiModifierValidation.NonNegative(value, nameof(MaxHeight)); }
+	public UiLength? MaxHeight
+	{
+		get;
+		init => field = UiModifierValidation.NonNegative(value, nameof(MaxHeight));
+	}
 
 	/// <summary>Width over height, greater than <c>0</c>.</summary>
 	/// <exception cref="ArgumentOutOfRangeException">The ratio is not a finite number above zero.</exception>
@@ -425,18 +449,23 @@ internal static class UiModifierValidation
 			: throw new ArgumentOutOfRangeException(name, value, "The value must lie in 0..1.");
 
 	internal static double Finite(double value, string name)
-		=> double.IsFinite(value) ? value : throw new ArgumentOutOfRangeException(name, value, "The value must be finite.");
+		=> double.IsFinite(value)
+			? value
+			: throw new ArgumentOutOfRangeException(name, value, "The value must be finite.");
 
 	internal static UiLength? NonNegative(UiLength? length, string name)
-		=> length is null || (length.Basis >= 0 && length.MaxOfCross is null or >= 0 && length.MaxOfCell is null or >= 0)
-			? length
-			: throw new ArgumentOutOfRangeException(name, length, "A length must not be negative.");
+		=> length is null ||
+			(length.Basis >= 0 && length.MaxOfCross is null or >= 0 && length.MaxOfCell is null or >= 0)
+				? length
+				: throw new ArgumentOutOfRangeException(name, length, "A length must not be negative.");
 
 	internal static IReadOnlyList<TStop> Stops<TStop>(IReadOnlyList<TStop> stops)
 	{
 		ArgumentNullException.ThrowIfNull(stops);
 
-		return stops.Count >= 2 ? [.. stops] : throw new ArgumentException("A gradient needs at least two stops.", nameof(stops));
+		return stops.Count >= 2
+			? [.. stops]
+			: throw new ArgumentException("A gradient needs at least two stops.", nameof(stops));
 	}
 
 	internal static string HexColor(string value, string name)
@@ -534,8 +563,8 @@ internal sealed class UiBackgroundJsonConverter : JsonConverter<UiBackground>
 	public override UiBackground Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		=> reader.TokenType == JsonTokenType.String
 			? UiBackground.Solid(reader.GetString()!)
-			: UiBackground.Of(JsonSerializer.Deserialize<UiGradient>(ref reader, options)
-				?? throw new JsonException("A background is a colour or a gradient."));
+			: UiBackground.Of(JsonSerializer.Deserialize<UiGradient>(ref reader, options) ??
+				throw new JsonException("A background is a colour or a gradient."));
 
 	public override void Write(Utf8JsonWriter writer, UiBackground value, JsonSerializerOptions options)
 	{

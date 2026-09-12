@@ -39,18 +39,31 @@ internal static partial class Scenes
 	private static IEnumerable<Scene> ModifierScenes()
 	{
 		yield return Tile("modifier-background",
-			new UiModifier { Key = "mod1", Background = "#2b6cee", Child = Centered("tile", new UiImage { Key = "icon", Source = Icon("music-note"), Size = 0.4 }) });
+			new UiModifier
+			{
+				Key = "mod1", Background = "#2b6cee",
+				Child = Centered("tile", new UiImage { Key = "icon", Source = Icon("music-note"), Size = 0.4 })
+			});
 
 		yield return Tile("modifier-linear",
-			new UiModifier { Key = "mod2", Background = Linear(135, "#ff2d55", "#ff9500"), Child = Centered("tile", new UiImage { Key = "icon", Source = Icon("heart"), Size = 0.4 }) });
+			new UiModifier
+			{
+				Key = "mod2", Background = Linear(135, "#ff2d55", "#ff9500"),
+				Child = Centered("tile", new UiImage { Key = "icon", Source = Icon("heart"), Size = 0.4 })
+			});
 
 		yield return Tile("modifier-radial",
-			new UiModifier { Key = "mod3", Background = Radial("#34c759", "#0b3d1a"), Child = Centered("tile", new UiImage { Key = "icon", Source = Icon("power"), Size = 0.4 }) });
+			new UiModifier
+			{
+				Key = "mod3", Background = Radial("#34c759", "#0b3d1a"),
+				Child = Centered("tile", new UiImage { Key = "icon", Source = Icon("power"), Size = 0.4 })
+			});
 
 		yield return Tile("modifier-radius",
 			Swatch(child => new UiModifier { Key = "mod4", Background = "#2b6cee", Radius = 0.12, Child = child }));
 
-		foreach (var line in new[] { UiComponentBorderLines.Solid, UiComponentBorderLines.Dashed, UiComponentBorderLines.Dotted })
+		foreach (var line in new[]
+			{ UiComponentBorderLines.Solid, UiComponentBorderLines.Dashed, UiComponentBorderLines.Dotted })
 		{
 			yield return Tile("modifier-border-" + line,
 				Swatch(child => new UiModifier
@@ -97,7 +110,8 @@ internal static partial class Scenes
 					Events = [UiEventHandler.On(UiComponentEvents.Press, () => { })],
 					Children =
 					[
-						new UiTextRun { Key = "label", Text = "Mute", Size = 0.14, Align = UiComponentAlignments.Center }
+						new UiTextRun
+							{ Key = "label", Text = "Mute", Size = 0.14, Align = UiComponentAlignments.Center }
 					],
 				},
 			});
@@ -116,22 +130,44 @@ internal static partial class Scenes
 			new UiModifier { Key = "faded", Opacity = 0.4, Child = Art("cover") });
 
 		yield return Tile("modifier-clip-bounds",
-			Centered("tile", Framed("clipped", new UiFrame { Width = UiLength.OfBasis(0.7), Height = UiLength.OfBasis(0.7) }, UiComponentClips.Bounds) with { Radius = 0.2 }));
+			Centered("tile",
+				Framed("clipped",
+						new UiFrame { Width = UiLength.OfBasis(0.7), Height = UiLength.OfBasis(0.7) },
+						UiComponentClips.Bounds) with
+					{
+						Radius = 0.2
+					}));
 
 		yield return Tile("modifier-clip-circle",
-			Centered("tile", Framed("clipped", new UiFrame { Width = UiLength.OfBasis(0.7), Height = UiLength.OfBasis(0.7) }, UiComponentClips.Circle)));
+			Centered("tile",
+				Framed("clipped",
+					new UiFrame { Width = UiLength.OfBasis(0.7), Height = UiLength.OfBasis(0.7) },
+					UiComponentClips.Circle)));
 
 		yield return Tile("modifier-clip-capsule",
-			Centered("tile", Framed("clipped", new UiFrame { Width = UiLength.OfBasis(0.9), Height = UiLength.OfBasis(0.45) }, UiComponentClips.Capsule)));
+			Centered("tile",
+				Framed("clipped",
+					new UiFrame { Width = UiLength.OfBasis(0.9), Height = UiLength.OfBasis(0.45) },
+					UiComponentClips.Capsule)));
 
 		yield return Tile("modifier-mask",
 			new UiModifier { Key = "masked", Mask = FadeDown(), Child = Art("cover") });
 
 		yield return Tile("modifier-frame-fixed",
-			Centered("tile", Framed("framed", new UiFrame { Width = UiLength.OfBasis(0.5), Height = UiLength.OfBasis(0.3) })));
+			Centered("tile",
+				Framed("framed", new UiFrame { Width = UiLength.OfBasis(0.5), Height = UiLength.OfBasis(0.3) })));
 
 		yield return Tile("modifier-frame-minmax",
-			Centered("tile", Framed("framed", new UiFrame { MinWidth = UiLength.OfBasis(0.3), MaxWidth = UiLength.OfBasis(0.6), MinHeight = UiLength.OfBasis(0.25), MaxHeight = UiLength.OfBasis(0.4) }) with { Fill = true }),
+			Centered("tile",
+				Framed("framed",
+						new UiFrame
+						{
+							MinWidth = UiLength.OfBasis(0.3), MaxWidth = UiLength.OfBasis(0.6),
+							MinHeight = UiLength.OfBasis(0.25), MaxHeight = UiLength.OfBasis(0.4)
+						}) with
+					{
+						Fill = true
+					}),
 			2);
 
 		yield return Tile("modifier-frame-aspect",
