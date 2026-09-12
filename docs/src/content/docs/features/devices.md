@@ -1,69 +1,88 @@
 ---
 title: Device providers
-description: Registering hardware and custom clients with Macro Deck from an integration or plugin.
+description: Bring hardware or a custom client into Macro Deck with IDeviceProvider - register devices, report presence, render the deck and send presses back.
 ---
 
-A *device provider* brings hardware or a custom client into Macro Deck: a control surface, a macro pad,
-an ESP32 panel, a network-connected client of your own. The provider discovers devices however its
-transport requires and registers them; Macro Deck keeps owning the device model around them -
-persistence, global ids, naming, startup profiles and everything the user sees in device settings.
+A device provider brings hardware or a custom client into Macro Deck: a control surface, a macro pad, an
+ESP32 panel. You discover devices and register them; Macro Deck owns everything else about them -
+persistence, global ids, naming, startup profiles and the device settings the user sees.
 
-The contract is transport- and vendor-agnostic. Nothing in it is specific to any device family, and no
-host-internal service is exposed across the plugin boundary.
-
-## The contract
-
-Implement `IDeviceProvider` on your integration:
+## Quick start
 
 ```csharp
-public sealed class DeckIntegration : IIntegration, IDeviceProvider
-{
-	private IDeviceProviderContext? _devices;
+using MacroDeck.Sdk;
+using MacroDeck.Sdk.Devices;
 
-	public string ProviderName => "Stream Deck";
+public sealed class MacroPadIntegration(IPadWatcher watcher) : IPluginIntegration, IDeviceProvider
+{
+	private readonly IPadWatcher _watcher = watcher;
+
+	public string ProviderName => "Macro Pad";
 
 	public async Task InitializeAsync(IDeviceProviderContext context, CancellationToken cancellationToken = default)
 	{
-		_devices = context;
-
-		foreach (var found in await DiscoverAsync(cancellationToken))
+		foreach (var pad in _watcher.ConnectedPads())
 		{
-			await context.RegisterDeviceAsync(Describe(found), cancellationToken);
+			await context.RegisterDeviceAsync(Describe(pad), cancellationToken);
 		}
+
+		_watcher.Attached += (_, pad) => _ = context.RegisterDeviceAsync(Describe(pad));
+		_watcher.Detached += (_, pad) => _ = context.SetDevicePresenceAsync(pad.SerialNumber, DevicePresence.Offline);
+		_watcher.Start();
 	}
 
-	public Task ShutdownAsync(CancellationToken cancellationToken = default) => StopDiscoveryAsync();
+	public Task ShutdownAsync(CancellationToken cancellationToken = default) => _watcher.StopAsync();
 
-	private static DeviceDescriptor Describe(Hardware hardware)
-		=> new(hardware.SerialNumber,
-			hardware.ProductName,
-			Model: hardware.ProductName,
-			Manufacturer: "Elgato",
-			LayoutReference: "com.example.deck::xl",
-			Capabilities: new DeviceCapabilities { KeyCount = 32, SupportsImages = true });
+	private static DeviceDescriptor Describe(Pad pad)
+		=> new(pad.SerialNumber,
+			pad.ProductName,
+			Model: pad.ProductName,
+			Manufacturer: "Example",
+			LayoutReference: "com.example.macropad::pad-3x2",
+			Capabilities: new DeviceCapabilities { KeyCount = 6, SupportsImages = true });
+
+	// IPluginIntegration members omitted.
 }
 ```
 
-`IDeviceProviderContext` is the whole host surface:
+Every connected pad now shows up in Macro Deck's device settings, where the user can name it and give it
+a startup profile. Unplugging it takes it offline; plugging it back in is the same device.
 
-| Member | Purpose |
+Things to know:
+
+- **`DeviceDescriptor.Id` is the device's identity.** Derive it from something the hardware carries (a
+  serial number), never from an enumeration index or a connection handle.
+- **Every later call takes that provider-local id** - `SetDevicePresenceAsync`, `UpdateDeviceAsync`,
+  `UnregisterDeviceAsync`. The host's global id comes back in `DeviceRegistration.DeviceId`.
+- **Order is fixed.** The host calls `IDeviceProvider.InitializeAsync` after the integration's own
+  `InitializeAsync` (in a plugin, also after its `ILayoutProvider`), and `IDeviceProvider.ShutdownAsync`
+  before the integration stops.
+- **Registration only is complete.** Rendering a deck on the hardware is opt-in - see
+  [Rendering a session](#receiving-and-rendering-a-session).
+
+## Registering a device
+
+| `IDeviceProviderContext` member | What it does |
 | --- | --- |
-| `RegisterDeviceAsync` | Offers a device. Returns the host-assigned global id. |
-| `UpdateDeviceAsync` | Refreshes a registered device's metadata. |
+| `RegisterDeviceAsync` | Offers a device, or re-registers a known provider-local id as the same device. Returns `DeviceRegistration(DeviceId, ProviderDeviceId)`. Throws `ArgumentException` for an empty id or name. |
+| `UpdateDeviceAsync` | Refreshes a registered device's metadata. Unknown devices are ignored. |
 | `SetDevicePresenceAsync` | Reports whether a device is reachable right now. |
-| `UnregisterDeviceAsync` | Withdraws a device from this session. |
+| `UnregisterDeviceAsync` | Withdraws a device from this session. The device is retained. |
 
-`GetDevices()` is optional and reports what the provider currently offers, so the host can recover its
-view after a reconnect without waiting for discovery to run again.
+| `DeviceDescriptor` parameter | Meaning |
+| --- | --- |
+| `Id` | Stable provider-local id. Non-empty, unique within your provider. |
+| `Name` | Proposed name. A name the user has set wins. |
+| `Model`, `Manufacturer` | Shown in device settings. |
+| `LayoutReference` | The layout the device uses - see [Capabilities and layouts](#capabilities-and-layouts). |
+| `Capabilities` | `DeviceCapabilities`: `KeyCount`, `DialCount`, `DisplayCount`, `SupportsImages`, `SupportsText`, plus an `Extra` map for hardware-specific facts. |
+| `Presence` | `Online` (default), `Offline` or `Unknown` at registration. |
+| `Metadata` | Provider-defined, opaque to the host. |
 
-## Identity is yours, the device model is the host's
+The context is safe to keep until `ShutdownAsync` returns. The contract is transport- and vendor-agnostic;
+no host-internal service crosses the plugin boundary.
 
-`DeviceDescriptor.Id` is your own stable id for the hardware - a serial number or equivalent. It is the
-one thing that makes a device *the same device* later, so derive it from something the hardware itself
-carries, never from an enumeration index or a connection handle.
-
-Macro Deck resolves `(your integration or plugin id, that id)` to exactly one device and keeps
-everything else about it:
+## Presence and reconnects
 
 ```text
 Provider starts   -> registers SERIAL-1        -> host mints a device, or finds the existing one
@@ -72,190 +91,244 @@ Hardware returns  -> registers SERIAL-1 again  -> same device: same global id, n
 Host restarts     -> registers SERIAL-1 again  -> still the same device
 ```
 
-Unregistering does **not** delete anything. It ends the runtime registration and takes the device
-offline; the device itself is retained so a reconnect is a reuse rather than a new row in the user's
-device list. Deleting a device for good is the user's decision, taken in Macro Deck's device settings.
-The same applies when your integration stops or your plugin's session drops: its devices go offline and
-stay registered.
+Macro Deck resolves `(your plugin id, Id)` to exactly one device. Re-registering keeps its global id, the
+user's name and its startup profile; the descriptor refreshes the rest.
 
-A provider-registered device never signs in. It holds no credential and no session, so signing it out
-is not offered; presence is whatever the provider last reported.
+**Nothing you do deletes a device.** Unregistering takes it offline and stops offering it; the device stays
+so a reconnect is a reuse, not a new row. The same happens when your integration stops or your plugin's
+session drops, so you do not have to unregister everything on the way out. Deleting a device for good is
+the user's decision, in device settings.
+
+A provider-registered device never signs in: it holds no credential or session, sign-out is not offered,
+and its presence is whatever you last reported.
+
+Implement `GetDevices()` to return what you currently offer; the host reads it to recover its view after a
+reconnect without waiting for discovery. The default returns an empty list.
 
 ## Capabilities and layouts
 
-`DeviceCapabilities` carries the generic facts every device kind shares - how many keys, dials and
-displays it has, whether it can show images or text - plus an `Extra` map for anything specific to your
-hardware. Keep it to what a consumer can act on generically.
+```csharp
+var layout = await layouts.RegisterLayoutAsync(PadLayout, cancellationToken);   // ILayoutProviderContext
+await devices.RegisterDeviceAsync(Describe(pad) with { LayoutReference = layout.LayoutId }, cancellationToken);
+```
 
-`LayoutReference` is an **opaque string**: the host stores it and hands it back without interpreting it.
-It is where a device says which layout it uses, so that the layout abstraction - which describes
-dimensions, regions and their input/output capabilities - stays separate from device discovery. Use the
-qualified id (`your.plugin.id::layout-name`) a [layout provider's](/features/layouts/) `RegisterLayoutAsync`
-returns, so the reference stays unambiguous and resolves to a real layout. The layout does not have to
-come from your own provider - a device may reference a layout owned by another plugin - and an
-unresolvable reference is never an error: the device still registers, and its profile is simply
-unconstrained until a layout with that id is registered.
+`LayoutReference` is an **opaque string**: the host stores it and hands it back unparsed. Use the qualified
+id (`your.plugin.id::layout-name`) that a [layout provider's](/features/layouts/) `RegisterLayoutAsync`
+returns. The layout may belong to another plugin. An unresolvable reference is never an error: the device
+registers, and its profile stays unconstrained until a layout with that id is registered.
 
-## Out-of-process plugins
+Keep `DeviceCapabilities` to facts a consumer can act on generically; geometry and rendering ability belong
+in the layout.
 
-A plugin declares the `device-provider` capability and implements the same `IDeviceProvider`.
-`MacroDeck.Plugin.Hosting` starts the provider once the plugin is connected and its integration has
-initialized, and stops it on shutdown; registrations travel to the host as callbacks on the `devices`
-host API. The provider is always the authenticated plugin - a plugin cannot register or withdraw a
-device in another plugin's name.
-
-Declare `host:devices` in `manifest.json` alongside the other host APIs you use.
-
-## Deck surfaces
-
-A provider that only registers devices is complete as it stands - leaving
-`OnSessionOpenedAsync` at its default no-op keeps a device registration-only forever. To render a
-deck on the hardware and report input back, override it: the host calls it once per registered
-device with an `IDeviceSession`, and that session is the whole rendering and input contract.
-
-### Receiving and rendering a session
+## Receiving and rendering a session
 
 ```csharp
-public async Task OnSessionOpenedAsync(IDeviceSession session, CancellationToken cancellationToken = default)
-{
-	session.SurfaceChanged += (_, e) => Render(session.DeviceId, e.Surface);
-	session.Closed += (_, e) => StopRendering(session.DeviceId);
-
-	// The session already carries the first surface - no separate "initial" event.
-	Render(session.DeviceId, session.CurrentSurface);
-}
-
-// Revisions are per session, so the last one seen is tracked per device rather than per provider.
 private readonly ConcurrentDictionary<string, long> _lastRevisions = new(StringComparer.Ordinal);
 
-private void Render(string deviceId, DeviceSurface surface)
+public Task OnSessionOpenedAsync(IDeviceSession session, CancellationToken cancellationToken = default)
 {
-	// Out-of-order delivery is possible over the transport: drop anything that does not move this
-	// device's own revision forward.
-	if (surface.Revision <= _lastRevisions.GetValueOrDefault(deviceId))
+	session.SurfaceChanged += (_, e) => Render(session.ProviderDeviceId, e.Surface);
+	session.Closed += (_, e) => StopRendering(session.ProviderDeviceId);
+
+	Render(session.ProviderDeviceId, session.CurrentSurface);
+	return Task.CompletedTask;
+}
+
+private void Render(string serial, DeviceSurface surface)
+{
+	if (surface.Revision <= _lastRevisions.GetValueOrDefault(serial))
 	{
 		return;
 	}
 
-	_lastRevisions[deviceId] = surface.Revision;
-	DrawGrid(surface.Layout.Rows, surface.Layout.Columns, surface.Layout.WidgetSpacing);
+	_lastRevisions[serial] = surface.Revision;
+	_watcher.Pad(serial).Clear(surface.Layout.Rows, surface.Layout.Columns, surface.Layout.BackgroundColor);
 
 	foreach (var widget in surface.Widgets)
 	{
-		DrawWidget(widget.PositionX, widget.PositionY, widget.Appearance?.Label, widget.Appearance?.IconId);
+		_watcher.Pad(serial).DrawKey(widget.PositionX, widget.PositionY, widget.Appearance?.Label,
+			widget.Appearance?.BackgroundColor);
 	}
 }
 ```
 
-`CurrentSurface` and `SurfaceChanged` deliver the surface to render. Each one is a **complete
-snapshot** - the profile, the folder, the effective layout, and every widget currently on it -
-never a diff against the last one. `Revision` increases monotonically starting at 1, but only
-*within this session*: a reconnect opens a fresh session with its own revision sequence and a full
-snapshot again, so do not persist a revision across sessions. Drop a surface whose revision is not
-strictly greater than the last one you applied; that is the only signal you get for out-of-order
-delivery.
+The host calls `OnSessionOpenedAsync` once per registered device. Leave it at its default no-op and the
+device stays registration-only forever.
 
-`Layout` is the folder's **effective** grid, already resolved exactly as Macro Deck's own client
-resolves it, so you never walk that chain yourself: rows, columns, spacing and border radius come from
-the folder, then its ancestors, then the profile defaults, while the background is the folder's own
-value or the profile default.
+- **Every surface is a complete snapshot** - profile, folder, effective layout, every widget - never a diff.
+  `CurrentSurface` is the first one; there is no separate "initial" event.
+- **`Revision` starts at 1 and increases within this session only.** A reconnect opens a fresh session with
+  a new sequence and a full snapshot. Drop any surface whose revision is not strictly greater than the last
+  one you applied - it is your only out-of-order signal. Never persist a revision.
+- **`Layout` is already resolved:** rows, columns, spacing and border radius come from the folder, then its
+  ancestors, then the profile defaults; the background is the folder's own or the profile default.
+- **No reflow, clipping or validation.** A 3x2 device given a 5x3 profile gets the full 5x3 grid, positions
+  included; paging, scrolling or cropping is yours. `Layout.LayoutReference` echoes your declared reference
+  byte for byte.
+- **`Widgets`** holds every widget in the folder plus any foreign pinned widget whose scope reaches it, each
+  once. Labels are already resolved and localized - render them as-is.
 
-`LayoutReference` is echoed back byte-identical to whatever you declared on
-`DeviceDescriptor`/`DeviceRegistration`; the host never parses it. There is deliberately **no
-reflow, clipping, or validation** against the device's physical key count: a 3x2 device assigned a
-5x3 profile receives the full 5x3 grid, positions included, and fitting that to the hardware -
-paging, scrolling, cropping, whatever makes sense for your device - is entirely the provider's job.
+## Reporting interactions
 
-`Widgets` includes every widget placed in the folder plus any foreign pinned widget whose scope
-reaches it, each listed exactly once. Every label has already been resolved - variables and
-templates expanded - and localized in the host's active language; render it as-is rather than
-looking it up or translating it yourself.
+```csharp
+var result = await session.SendInteractionAsync(new DeviceInteraction
+{
+	Kind = DeviceInteractionKind.Press,
+	Target = new DeviceInteractionTarget { WidgetId = widget.Id },
+	SurfaceRevision = session.CurrentSurface.Revision
+});
 
-### Reporting interactions
+if (result.ReasonCode == DeviceSessionReasons.WidgetNotOnSurface)
+{
+	Render(session.ProviderDeviceId, session.CurrentSurface);
+}
+```
 
-`SendInteractionAsync` reports hardware input and returns the host's verdict. The host, never the
-plugin, resolves the target widget and runs its actions - a provider never sees a flow definition
-and never executes one. Because of that, a device press only ever navigates *that device*: if the
-widget's action changes folder, the folder change applies to the session that pressed it, and every
-other device or client on the same profile keeps whatever it is currently showing.
+The host resolves the widget and runs its actions; a provider never sees or executes a flow. A press only
+navigates *that* device: a folder change applies to the pressing session, and other devices on the same
+profile keep what they show. `SurfaceRevision` lets the host discard a press aimed at a superseded surface.
 
-A widget id in `DeviceInteraction.Target` must come from the surface you are currently rendering.
-Two outcomes are normal, not failures - nothing ran, the session stays open, and the next valid
-interaction still works:
+The widget id must come from the surface you are rendering. A refusal is normal - nothing ran, the session
+stays open, the next press works:
 
-- `Rejected` with a `DeviceSessionReasons` code, most often `WidgetNotOnSurface` - your press raced
-  a surface push. Re-render the newest surface and press again.
-- `NotSupported` - the kind is part of the contract but has no widget model yet.
+| Result | Meaning |
+| --- | --- |
+| `Accepted` | The host took it. |
+| `Rejected` + `WidgetNotOnSurface` | The press raced a surface push. Re-render the newest surface. |
+| `Rejected` + `HostLocked` | The host is locked and runs nothing until unlocked. |
+| `Rejected` + `TriggerFailed` | The widget was edited or deleted between push and press. |
+| `Rejected` + `SessionNotFound` | The host no longer holds the session; `Closed` follows. |
+| `NotSupported` | A contract kind with no widget model yet. |
 
-Only `Press`, `Release`, `ShortPress` and `LongPress` execute today; every other
-`DeviceInteractionKind` is accepted and reported `NotSupported`.
+Only `Press`, `Release`, `ShortPress` and `LongPress` execute today; every other `DeviceInteractionKind` is
+answered `NotSupported`.
 
-If your hardware reports raw press/release rather than short/long presses itself, send `Press` on
-contact and `Release` on lift; the host synthesizes the rest, matching what the Angular clients do
-for a pointer:
+| You send | The host fires |
+| --- | --- |
+| `Press` | `onTouchStart` immediately, and starts a 600 ms timer. |
+| (timer elapses while held) | `onLongPress`. |
+| `Release` | `onTouchEnd`, plus `onShortPress` if the long press had not fired. |
+| `ShortPress` / `LongPress` | That trigger directly - no synthesis. |
 
-- `Press` fires `onTouchStart` immediately and starts a 600 ms timer.
-- The timer elapsing while the widget is still held fires `onLongPress`.
-- `Release` fires `onTouchEnd`, plus `onShortPress` only if the long press had not already fired.
+Press state is tracked **per widget**: releasing one widget never ends another's press, and a second
+`Press` for a widget already held is ignored (no timer restart, no second `onTouchStart`). If your hardware
+already tells short from long, send `ShortPress`/`LongPress` instead of a `Press`/`Release` pair.
 
-This state is tracked **per widget**, not per device, so releasing one widget never ends another's
-in-flight press, and a second `Press` reported for a widget that is already held is ignored outright
-- it does not restart the timer or fire a second `onTouchStart`. If your hardware already
-distinguishes a short from a long press itself, report `ShortPress` or `LongPress` directly instead
-of a `Press`/`Release` pair; the host does not re-derive what your device already knows, and no
-synthesis happens for those kinds.
+## Fetching icons
 
-### Fetching icons
+```csharp
+var appearance = widget.Appearance;
+if (appearance?.IconId is { } iconId)
+{
+	var cached = _icons.GetValueOrDefault((iconId, appearance.IconVersion));
+	var image = await session.GetIconAsync(iconId, size: 72, knownETag: cached?.ETag);
+	if (image is { NotModified: false })
+	{
+		_icons[(iconId, appearance.IconVersion)] = image;
+	}
+}
+```
 
-`GetIconAsync` fetches the bytes for an icon referenced by `DeviceSurfaceAppearance.IconId`. Pass
-the `knownETag` you already hold to skip the transfer entirely - the result comes back with
-`NotModified` set and empty `Content`. Cache by `IconId` **and** `IconVersion`: re-rendering an
-icon under the same id leaves the id unchanged, and the version is what tells you the bytes moved
-on. Leaving `size` null serves the largest rendered variant, never the original master the icon was
-imported from - a device draws onto a key, and an unbounded master would not fit the transfer limit.
-An icon over that limit throws `DeviceSessionException` with `DeviceSessionReasons.IconTooLarge`;
-the session stays open. The bytes themselves travel over the `host.asset.*` chunked channel, but
-that is transport detail - the single `GetIconAsync` call hides it.
+- **`knownETag`** skips an unchanged transfer: the result has `NotModified` set and empty `Content`.
+- **Cache by `IconId` and `IconVersion`.** Re-rendering an icon keeps its id; the version says the bytes
+  changed.
+- **`size: null`** serves the largest rendered variant, never the imported master.
+- **Too large** throws `DeviceSessionException` with `ReasonCode` `IconTooLarge`; the session stays open.
 
-### Fetching a provider-controlled icon
+The bytes travel the `host.asset.*` chunked channel; `GetIconAsync` hides that.
 
-A widget's icon does not always come from the icon pack: an action can own the icon a widget
-currently renders (album artwork, an avatar, weather imagery). `DeviceSurfaceAppearance.IconId`
-stays GUID-only forever, so a provider-owned icon travels a different way. `HasProviderIcon` is
-true exactly when the currently rendered icon comes from such a provider, in which case `IconId` is
-null. A device provider compiled before this field existed does not know to look for it and simply
-renders label and colour, exactly as it would for an icon-less widget. `IconVersion` keeps its
-documented meaning either way - the content identity of whatever is currently rendered - so a
-caching provider watches the same one key regardless of which kind of icon it turns out to be.
+## Fetching a provider-controlled icon
 
-Fetch the bytes with `GetWidgetIconAsync(widgetId, knownETag)`, addressed by the owning widget's own
-id rather than by an icon id, since a provider-owned icon has no id of its own to fetch by. It
-mirrors `GetIconAsync` in every other respect: pass a `knownETag` you already hold to skip an
-unchanged transfer, and the bytes travel the same `host.asset.*` channel. It returns null when the
-widget has nothing to serve right now - the provider went inactive, answered blank, or the widget id
-is not on this session's current surface - rather than throwing. Default-implemented, the same way
-`IWidgetApi.InvalidateIconAsync` is on the plugin side, so a provider written before this member
-existed keeps compiling and simply never serves a provider-controlled icon.
+```csharp
+if (appearance is { HasProviderIcon: true })
+{
+	var image = await session.GetWidgetIconAsync(widget.Id, knownETag: cachedETag);
+	// null: nothing to serve right now - render label and colour instead.
+}
+```
 
-### Ending a session
+An action can own the icon a widget renders (album artwork, an avatar, weather imagery). `IconId` stays
+GUID-only forever, so such an icon has none: `HasProviderIcon` is true exactly when the rendered icon comes
+from a provider, and `IconId` is then null. `IconVersion` is the content identity of whatever is rendered,
+either kind, so a cache keys on the same value.
 
-`DisposeAsync` closes the session on the host as well, so a provider that stops serving a device is
-not left being pushed to. `Closed` is raised exactly once, whichever side ended the session first -
-your own `DisposeAsync`, a host-initiated close, or the device going away.
+`GetWidgetIconAsync` addresses the owning widget and otherwise mirrors `GetIconAsync` (`knownETag`, same
+channel). It returns null rather than throwing when the provider went inactive, answered blank, or the
+widget is not on the current surface. It is default-implemented to return null, and a provider built
+before `HasProviderIcon` existed simply renders label and colour, as for an icon-less widget.
 
-### For plugins
+## Ending a session
 
-For a plugin this is the `device-provider` capability's `session.open`, `session.surface` and
-`session.close` operations, introduced in **capability version 2**. The host opens a session only
-when the negotiated `device-provider` version is 2 or higher; a plugin that negotiates version 1
-keeps registering, updating and unregistering devices exactly as before and is never sent a session
-operation at all, so an older plugin degrades to registration only rather than failing.
+```csharp
+await session.DisposeAsync();
+```
+
+`DisposeAsync` closes the session on the host too, so you are not pushed to any more. `Closed` is raised
+exactly once, whichever side ends it first - your `DisposeAsync`, a host-initiated close, or the device
+going away. `DeviceSessionClosedEventArgs.Reason` may be null.
+
+## In a plugin
+
+Declare the `device-provider` capability and `host:devices` in [`manifest.json`](/reference/manifest/).
+`MacroDeck.Plugin.Hosting` starts the provider once the plugin is connected and its integration has
+initialized, and stops it on shutdown. The provider is always the authenticated plugin: it cannot register
+or withdraw a device in another plugin's name.
+
+Sessions need `device-provider` **capability version 2**. The host opens a session only when the negotiated
+version is 2 or higher; a plugin that negotiates version 1 keeps registering, updating and unregistering
+as before and is never sent a session operation - it degrades to registration only.
+
+## Testing
+
+```csharp
+using MacroDeck.Plugin.Testing.Fakes;
+using MacroDeck.Sdk.Devices;
+
+[Test]
+public async Task A_replugged_pad_is_the_same_device_and_renders_its_surface()
+{
+	var context = new FakeDeviceProviderContext();
+	var integration = new MacroPadIntegration(new FakePadWatcher("SERIAL-1"));
+
+	await integration.InitializeAsync(context);
+	var firstId = context.AssignedIdOf("SERIAL-1");
+
+	await context.UnregisterDeviceAsync("SERIAL-1");
+	await context.RegisterDeviceAsync(new DeviceDescriptor("SERIAL-1", "Macro Pad"));
+
+	var session = await context.OpenSession(integration, "SERIAL-1");
+	session.PushSurface(new DeviceSurface
+	{
+		Revision = 1,
+		Layout = new DeviceSurfaceLayout { Rows = 2, Columns = 3 },
+		Widgets = []
+	});
+
+	Assert.Multiple(() =>
+	{
+		Assert.That(context.AssignedIdOf("SERIAL-1"), Is.EqualTo(firstId));
+		Assert.That(context.IsOnline("SERIAL-1"), Is.True);
+		Assert.That(session.Interactions, Is.Empty);
+	});
+}
+```
+
+`FakeDeviceProviderContext` keeps the host's identity rules: re-registering a known id is the same device,
+unregistering retains it and only takes it offline. Assert on `Devices`, `IsOnline`, `AssignedIdOf`,
+`Calls` and `Interactions`.
+
+`OpenSession` hands your provider a `FakeDeviceSession` (the device must be registered first). Drive it with
+`PushSurface` and `Close`, script the verdict with `NextResult`, and seed `Icons` / `WidgetIcons`; read back
+`Interactions`, `IconRequests` and `WidgetIconRequests`.
+
+Against a real plugin process, the harness's `DeviceProvider` client (`PluginTestHarness`,
+`PluginSessionView`) invokes `describe`, `devices`, `session.open`, `session.surface` and `session.close`.
+See [Testing](/features/testing/).
 
 ## Over the plugin protocol
 
-A provider is driven from the plugin side for registration, so the host-to-provider direction of the
-`device-provider` capability only has to describe the provider, re-read its catalogue after a
-reconnect, and - from capability version 2 - open, push to, and close a device's rendering session:
+The host-to-provider direction of the `device-provider` capability describes the provider, re-reads its
+catalogue after a reconnect and, from capability version 2, drives rendering sessions:
 
 | Operation | Purpose |
 | --- | --- |
@@ -265,8 +338,7 @@ reconnect, and - from capability version 2 - open, push to, and close a device's
 | `session.surface` | Pushes a new, complete surface to an already-open session. Version 2 only. |
 | `session.close` | Closes an open session. Version 2 only. |
 
-Registration itself - `register`, `update`, `presence`, `unregister` - along with reporting a
-hardware interaction and fetching an icon, travels the other way as the `devices` host API:
+Registration, interactions and icon fetches travel the other way as the `devices` host API:
 
 | Operation | Purpose |
 | --- | --- |
@@ -279,10 +351,10 @@ hardware interaction and fetching an icon, travels the other way as the `devices
 | `widget-icon` | Fetches the bytes behind a widget's currently rendered action-icon-provider icon, over the `host.asset.*` pipeline. |
 | `close` | Closes an open device session at the provider's own request. |
 
-## Testing
+## See also
 
-`MacroDeck.Plugin.Testing` provides `FakeDeviceProviderContext`, which keeps the host's identity rules:
-re-registering a known provider-local id is the same device, and unregistering retains it and only takes
-it offline. Drive your provider against it and assert on `Devices`, `IsOnline` and the recorded `Calls`.
-`MacroDeckTestHost`'s `DeviceProvider` client invokes the capability's `describe` and `devices`
-operations against a plugin under test.
+- [Layout providers](/features/layouts/) - the geometry a `LayoutReference` points at.
+- [Button icons](/features/button-icons/) - where provider-controlled icons come from.
+- [Manifest](/reference/manifest/) - `device-provider` and `host:devices`.
+- [WebSocket reference](/reference/websocket/) - the wire format for the tables above.
+- [Testing](/features/testing/) - the fakes and the test harness.

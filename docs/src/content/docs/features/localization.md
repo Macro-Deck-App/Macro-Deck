@@ -1,305 +1,320 @@
 ---
 title: Localization
-description: Adding Localization/*.resx to a plugin, named placeholders, the generated typed API, the fallback chain, and the MDLOC diagnostics.
+description: Translate a plugin with Localization/*.resx - the generated Strings class, placeholders, plurals, fallback, and the MDLOC diagnostics.
 ---
 
-Macro Deck resolves user-facing text in the reader's own language rather than baking one language into
-whatever a plugin produces. A plugin author never calls into a resolver directly: you add `.resx`
-resources, `MacroDeck.Plugin.Analyzers`' source generator turns them into a typed API that returns a
-deferred reference, and the host resolves that reference for whichever client is actually rendering it.
+You write `Localization/Strings.resx` plus one `Strings.<culture>.resx` per language. The build turns them
+into a typed `Strings` class whose members return a `LocalizedString`, and you assign that anywhere the SDK
+takes `LocalizedText`. The host resolves it in the reader's language.
 
-This is what lets one shared UI session be read in two languages at once, and what lets a language
-change take effect without rebuilding your integration's UI.
+## Quick start
 
-## Add resources
-
-Add `Localization/Strings.resx` to your project - the folder name and the `Strings` base name both
-matter, since the analyzer package globs `Localization/**/*.resx` into `AdditionalFiles` and the base
-name becomes the generated class name.
+`Localization/Strings.resx` - the default language:
 
 ```xml
-<data name="Connect" xml:space="preserve">
-  <value>Connect</value>
+<data name="Actions.LogMessage.Name" xml:space="preserve">
+  <value>Write log message</value>
 </data>
-<data name="ConnectedAs" xml:space="preserve">
+<data name="Actions.LogMessage.Message.Label" xml:space="preserve">
+  <value>Message</value>
+</data>
+```
+
+`Localization/Strings.de.resx` - German:
+
+```xml
+<data name="Actions.LogMessage.Name" xml:space="preserve">
+  <value>Log-Nachricht schreiben</value>
+</data>
+```
+
+The project references the generator and the runtime package (the plugin template already does this):
+
+```xml
+<PackageReference Include="MacroDeck.Plugin.Analyzers" PrivateAssets="all" />
+<PackageReference Include="MacroDeck.Localization" />
+```
+
+Use the generated members:
+
+```csharp
+using MacroDeck.Localization;
+using MacroDeck.Sdk.Actions;
+
+public sealed class LogMessageAction : IActionDefinition
+{
+	public string Id => "log-message";
+
+	public LocalizedText Name => Strings.Actions.LogMessage.Name();
+
+	public IReadOnlyList<ActionParameter> Parameters { get; } =
+	[
+		ActionParameter.Text("message", label: Strings.Actions.LogMessage.Message.Label(), required: true),
+	];
+
+	// Other members omitted.
+}
+```
+
+A German reader sees **Log-Nachricht schreiben**; everyone else sees **Write log message**. The label has
+no German entry, so German readers get **Message**.
+
+- **The folder and base name matter.** The analyzer globs `Localization/**/*.resx`, and the base name
+  `Strings` becomes the class name.
+- **`Strings.resx` is always required**, even for a one-language plugin: every translation is checked
+  against it, and the fallback chain ends there.
+- **A dotted key is a nested class.** `Actions.LogMessage.Name` becomes `Strings.Actions.LogMessage.Name()`.
+- **A translation may leave keys out.** A missing key falls back - see
+  [Choosing the language](#choosing-the-language).
+
+## Placeholders
+
+```xml
+<data name="Status.ConnectedAs" xml:space="preserve">
   <value>Connected as {userName}</value>
 </data>
-```
-
-`Strings.resx`, with no culture suffix, is the **default-language file**: the one every translation is
-checked against, and the last resource the fallback chain tries before giving up. It is always required,
-even if you intend to ship only one language.
-
-### Culture-suffixed siblings
-
-Add one file per translation, named `Strings.<culture>.resx` next to it:
-
-```
-Localization/
-  Strings.resx          # default language
-  Strings.de.resx        # German
-  Strings.zh-Hant-TW.resx # Traditional Chinese, Taiwan
-```
-
-The suffix must be a well-formed BCP-47 name - `de`, `de-DE`, `zh-Hans` or `zh-Hant-TW` are all valid.
-It is checked on its *shape*, not by asking .NET whether the culture exists: under ICU, .NET happily
-manufactures a `CultureInfo` for almost anything that merely looks plausible, which would make a typo in
-a culture name silently unreachable rather than a build error. A malformed suffix is
-[MDLOC005](#mdloc005).
-
-`.resx` is the canonical format because it is the one format [JetBrains Rider's Localization
-Manager](#editing-with-riders-localization-manager) understands - see
-[ADR 0057](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0057-localization-is-a-deferred-reader-resolved-reference.md)
-for the alternatives that lost to it.
-
-## Named placeholders
-
-A placeholder is a bare name in braces, substituted by position of the name, not by argument order:
-
-```
-Connected as {userName}
-```
-
-The generator collects placeholders from the **default-language template only** - a translation may use
-a subset or a superset by mistake, and that mismatch is exactly what
-[MDLOC002](#mdloc002) catches. Two literal braces (`{{`, `}}`) escape to one.
-
-A placeholder's C# and TypeScript type is inferred from where it is used: with nothing else declared, it
-is `string`. Where a narrower type is needed - a limit that should reject `"abc"` at the call site rather
-than at render time - declare it as a bracketed prefix on the entry's `<comment>`:
-
-```xml
-<data name="Validation.TooLong" xml:space="preserve">
-  <value>{field} exceeds {limit} characters</value>
-  <comment>[limit:int] Character limit, not byte length.</comment>
+<data name="Status.Retries" xml:space="preserve">
+  <value>Retry {attempt} of {limit}</value>
+  <comment>[attempt:int][limit:int] Shown while reconnecting.</comment>
 </data>
 ```
 
-Only the bracketed prefix is a declaration; everything after it stays the translator note Rider shows
-next to the value. Supported types are `string`, `int`, `long`, `double` and `bool` - deliberately few,
-so the C# and TypeScript formatters can agree on one unambiguous text form for every value (no thousands
-separators, an invariant decimal point, lowercase booleans) without either side reaching for
-culture-dependent formatting. Declaring a type for a placeholder the template does not use, or declaring
-an unsupported type name, is [MDLOC004](#mdloc004).
-
-## The generated API
-
-Building the project turns `Strings.resx` into a `public static partial class Strings` alongside your
-own code, one method per key returning `LocalizedString`:
-
 ```csharp
-public static LocalizedString Connect();
-public static LocalizedString ConnectedAs(string userName);
+Strings.Status.ConnectedAs(userName: connection.User);  // Connected as manuel
+Strings.Status.Retries(attempt: 2, limit: 5);           // Retry 2 of 5
 ```
 
-A dotted key becomes a nested class - `Configuration.Title` in the resource becomes
-`Strings.Configuration.Title()` in code. Call it wherever an SDK member accepts `LocalizedText` -
-literal strings and `LocalizedString` both convert implicitly, so `Label = "Client ID"` and
-`Label = MyStrings.ClientId()` both compile:
+- A placeholder is a bare name in braces, matched by name, not position - a translation may reorder them.
+- Parameters come from the **default-language** template only. A translation must use exactly the same
+  names ([MDLOC002](#mdloc002)).
+- An undeclared placeholder is `LocalizedText`, so a string literal works and a `Strings.*` member can be
+  nested - it resolves in the same language as the outer sentence.
+- Declare a narrower type as a bracketed prefix on `<comment>`: `string`, `int`, `long`, `double` or
+  `bool`. The rest of the comment stays a translator note. A bad type, or a type for a placeholder the
+  template does not use, is [MDLOC004](#mdloc004).
+- Values are formatted culture-invariantly: no thousands separators, `.` as decimal point, lowercase
+  booleans.
+- `{{` and `}}` escape to one brace. So a value written as `{{ vars.x }}` reaches the user as `{ vars.x }`.
+- A placeholder that gets no value stays literal in the output (`{deviceName}`), not blank.
 
-```csharp
-new UiStringInput { Key = "userName", Label = Strings.ConnectedAs(userName: connection.User) }
-```
-
-**The return type is deliberate.** `Strings.Connect()` returns `LocalizedString`, not `string` - a
-reference to be resolved later, by the host, in whichever culture the reader is on. Assigning it to a
-`string` is a compile error. If it returned already-resolved text, a language change could only take
-effect by rebuilding your UI.
-
-### Reuse `MacroDeckStrings` instead of duplicating common strings
-
-Macro Deck ships its own reusable catalog - `Common.Save`, `Common.Cancel`, `Validation.Required` and
-similar - generated the same way, from the SDK's own `Localization/Strings.resx`, into
-`MacroDeckStrings`:
-
-```csharp
-new UiHeading { Key = "confirm", Text = MacroDeckStrings.Common.Save() }
-```
-
-Use it for anything generic rather than declaring your own copy: a duplicated `Save` key in your own
-catalog is one more string every translator has to keep in sync with Macro Deck's, for text the reader
-already sees translated consistently everywhere else in the app. `MacroDeckStrings` entries live in
-scope `macrodeck`, not `plugin:<your-id>`, so they resolve against Macro Deck's own catalog wherever
-they are used.
-
-### Scope and class name
-
-The generated class's scope defaults to `plugin:<id>`, reading `id` out of your project's
-`manifest.json` - the same identity [MDP1001](/reference/analyzers/#mdp1001) already validates. The
-class name defaults to the resource set's base name (`Strings`). Both are overridable, project-wide,
-through MSBuild properties if you need to:
+## Plurals
 
 ```xml
-<PropertyGroup>
-  <MacroDeckLocalizationScope>plugin:com.example.spotify</MacroDeckLocalizationScope>
-  <MacroDeckLocalizationClassName>SpotifyStrings</MacroDeckLocalizationClassName>
-</PropertyGroup>
-```
-
-A plugin owns exactly `plugin:<its-own-id>` and nothing else - that is what stops one plugin's resources
-from overwriting Macro Deck's own catalog or another plugin's.
-
-## Counting things
-
-A count-dependent sentence is one key, not a word glued onto a number. Declare the forms with `[plural]`
-in the entry's comment, and name them by suffixing the key:
-
-```xml
-<data name="Icons.Count.One" xml:space="preserve">
-  <value>{count} icon</value>
+<data name="Status.Scenes.One" xml:space="preserve">
+  <value>{count} scene</value>
   <comment>[plural]</comment>
 </data>
-<data name="Icons.Count.Other" xml:space="preserve">
-  <value>{count} icons</value>
+<data name="Status.Scenes.Other" xml:space="preserve">
+  <value>{count} scenes</value>
   <comment>[plural]</comment>
 </data>
 ```
 
-**Every form carries the marker**, not just one of them. `.resx` has no notion of a group, so the
-compiler decides per entry whether it is a form; if only `Other` were marked and its siblings inferred,
-a family that carries *only* `One` - a real typo - would be indistinguishable from an ordinary key, and
-[MDLOC007](#mdloc007) could never report it.
-
-The two entries generate **one** member at the base key, taking the count first:
-
 ```csharp
-public static LocalizedString Count(int count);   // Strings.Icons.Count(3)
+Strings.Status.Scenes(3);  // one member at the base key, count first
 ```
 
-The reference it returns carries the base key, `Icons.Count`; whoever resolves it picks the form. So a
-client holding that reference re-picks the form when the language changes, exactly as it re-resolves any
-other key.
+| count | en | de (`eine Szene` / `{count} Szenen`) |
+| --- | --- | --- |
+| `1` | 1 scene | eine Szene |
+| `0` | 0 scenes | 0 Szenen |
+| `3` | 3 scenes | 3 Szenen |
 
-`Other` is required - it is the form every count other than one resolves through, and the one a language
-with no singular/plural distinction would use. `One` is optional. A family missing `Other`, or one whose
-key does not end in a form name, is [MDLOC007](#mdloc007).
-
-**A form may leave the count out of its own text** - `one icon` against `{count} icons` - and that is not
-a placeholder mismatch. A caller cannot know which form its number will select, so `count` is always a
-parameter even when the selected form does not print it, and a form is checked against the family's
-placeholders rather than against the other form's.
-
-Plural is opt-in precisely so keys that merely happen to be named `.One` and `.Other` keep generating the
-ordinary members they always did.
+- **Mark every form** with `[plural]`, not just one. Plural is opt-in, so keys that just happen to end in
+  `.One`/`.Other` stay ordinary members.
+- `Other` is required and `One` optional. A missing `Other`, a marked key not ending in `One`/`Other`, or a
+  base key an ordinary entry already owns is [MDLOC007](#mdloc007).
+- A form may leave `{count}` out of its text (`eine Szene`). `count` is always a parameter, and each form
+  is checked against the family's placeholders, not the other form's.
+- The reference carries the base key (`Status.Scenes`). The reader's side picks the form, and picks it
+  again after a language change.
 
 ### Only `One` and `Other`
 
-The rule is `count == 1`, for every culture. That is deliberately not CLDR. The same choice has to be made
-identically by the host's C# resolver, the Angular clients and the desktop bootstrapper, and .NET ships no
-plural-rule data - so a CLDR implementation would mean three hand-maintained copies of a large rule set
-kept in step by hope. One small rule that is visibly the same in all three fails less quietly. It is
-exactly correct for English, German, Italian, Spanish and French, which all select on `n == 1`. Czech and
-Polish do not - both need `few`/`many` forms this model has no room for - so a plugin targeting those
-locales should phrase its `Other` form to avoid noun-count agreement (a count-agnostic label rather than a
-declined noun) so the same text stays grammatical across every count, rather than relying on a form that
-is only correct for one CLDR bucket. A language that cannot be phrased this way needs the closed set
-extended first, which is what makes the form names a build-time check rather than free text.
+The rule is `count == 1` for every culture. It is not CLDR: the host, the Angular clients and the
+bootstrapper must all pick the same form. The rule is exact for English, German, Italian, Spanish and
+French. Czech and Polish need `few`/`many` forms that this model does not have. For those, phrase `Other`
+so that it avoids noun-count agreement: use a count-agnostic label rather than a declined noun. A language
+that cannot be phrased that way needs the closed set of forms extended first.
 
-## The fallback chain
+## Adding a language
 
-Resolving a reference tries, in order: the requested culture, its neutral culture, the catalog's own
-default language, then Macro Deck's own default (`en`). Duplicates collapse, so `de-DE` against a
-catalog whose default language is `de` tries `de-DE, de, en`.
+```
+Localization/
+  Strings.resx            # default language (manifest: en)
+  Strings.de.resx         # German
+  Strings.pt-BR.resx      # Portuguese, Brazil
+  Strings.zh-Hant-TW.resx # Traditional Chinese, Taiwan
+```
 
-A key no culture in the chain carries never renders blank. It resolves to `[[scope:Key]]` - for example
-`[[plugin:com.example.spotify:Configuration.Title]]` - deliberately conspicuous, because a blank label
-reads as a rendering bug where the bracketed key names exactly what is missing and which catalog should
-have carried it. You will see this shape for a plugin whose catalog has not arrived at the host yet, or
-for a key a plugin update removed.
+- The suffix must be a well-formed BCP-47 name. The check is on its shape, not on whether .NET knows the
+  culture, so `Strings.de_DE.resx` fails with [MDLOC005](#mdloc005).
+- Every key in a translation must also exist in `Strings.resx` ([MDLOC001](#mdloc001)).
+- Nothing else to register - the next build compiles the culture into the generated catalog and adds it to
+  the manifest's [`languages`](#the-manifest-languages-field).
 
-Macro Deck's active language is a single value the host is the sole authority over - there is no
-per-client culture. A plugin never needs to ask what language it is; it only ever produces references,
-declares which cultures it ships and hands over their catalogs on request. See the
-[`localization` capability kind](/reference/websocket/#capabilities) for exactly how the host asks a
-plugin for that.
+## Reuse `MacroDeckStrings` instead of duplicating common strings
 
-That holds for your action names, parameter labels, event and issue descriptors and config-flow text as
-well as for text inside a Macro Deck UI tree: assign a generated `Strings.*` member and it reaches the
-reader in the reader's language. Against a host older than protocol v3 the SDK resolves the reference in
-your own default language before sending it, because those hosts type the field as a plain string - you
-do not have to check for this, but it is why an old host shows your action names the way you wrote them.
+```csharp
+new UiHeading { Key = "confirm", Text = MacroDeckStrings.Common.Save() };
 
-One field is deliberately not localized. `ConfigFlowResult.Complete(title, …)` takes a plain string,
-because the host stores that title as the name of the configured entry and the user can rename it from
-there. Write it in your default language and leave it alone.
+// "{field} is required" with your own label nested in it
+ActionResult.Failed(ActionErrorCodes.InvalidParameter,
+	MacroDeckStrings.Validation.Required(Strings.Actions.LogMessage.Message.Label()));
+```
+
+Macro Deck ships a reusable catalog, generated the same way into `MacroDeckStrings` and already translated
+into every language the app carries: `Common.*` (`Save`, `Cancel`, `Delete`, `Retry`, ...), `States.*`
+(`On`, `Off`, `Muted`, `Active`, ...), `Validation.*` and more. Use it for anything generic rather than
+adding your own `Save` key. Its entries live in scope `macrodeck`, not `plugin:<your-id>`.
+
+That catalog is a published contract: keys are only ever added. A retired key is marked, not deleted - it
+still compiles and resolves, and [MDLOC006](#mdloc006) points to the replacement.
+
+## Localized text in results, issues and flows
+
+```csharp
+ActionResult.Failed(ActionErrorCodes.InvalidParameter, Strings.Errors.MissingMessage());
+VariableWriteResult.Unavailable(Strings.Errors.NotConnected());
+IssueResolution.Failed(Strings.Issues.TokenExpired());
+
+ConfigFlowResult.Complete(title: "Studio PC");  // plain string - not localized
+```
+
+Every user-facing SDK member typed `LocalizedText` takes a `Strings.*` member: action and parameter text,
+event and issue descriptors, result messages, config-flow text, UI trees. `LocalizedText` also takes a
+plain string for text that is already final, such as a device name. A `LocalizedString` does not convert to
+`string` - assigning one to a `string` is a compile error.
+
+`ConfigFlowResult.Complete`'s title is the one deliberate exception. The host stores it as the configured
+entry's name, which the user can rename. Write it in your default language.
+
+## Choosing the language
+
+The host holds one active language, the one set in Macro Deck. There is no per-client culture, and a plugin
+never asks for it. The host resolves each reference by trying the cultures in this order:
+
+| step | `de-AT` reader, plugin default `en` |
+| --- | --- |
+| 1. requested culture | `de-AT` |
+| 2. its neutral culture | `de` |
+| 3. the catalog's default language | `en` |
+| 4. Macro Deck's default | `en` (duplicate, collapsed) |
+
+A key that no culture carries renders as `[[scope:Key]]`, never blank - for example
+`[[plugin:com.example.demo:Status.Scenes]]`. You see this when a key was removed by an update, or when the
+plugin's catalog has not reached the host yet.
+
+Against a host older than protocol v3, the SDK resolves descriptor text (action names, labels) in your
+default language before sending it. You do not need to handle this case.
+
+## Testing translations
+
+```csharp
+using MacroDeck.Localization;
+
+[Test]
+public void German_readers_see_german_text()
+{
+	var registry = new LocalizationCatalogRegistry();
+	registry.Register(Strings.LocalizationCatalog);
+	registry.Register(MacroDeckStrings.LocalizationCatalog);
+	var resolver = new LocalizationResolver(registry);
+
+	Assert.That(resolver.Resolve(Strings.Status.ConnectedAs("manuel"), "de"), Is.EqualTo("Verbunden als manuel"));
+	Assert.That(resolver.Resolve(Strings.Status.Scenes(1), "de"), Is.EqualTo("eine Szene"));
+	Assert.That(resolver.Resolve(Strings.Status.Scenes(3), "fr"), Is.EqualTo("3 scenes")); // falls back
+}
+```
+
+Structural mistakes - a missing default key, mismatched placeholders, a broken plural family - are already
+build diagnostics, so test the wording that matters, not every key.
+
+For bulk editing, [Rider's Localization
+Manager](https://www.jetbrains.com/help/rider/Localizing_Applications.html) shows every key against every
+culture in one grid, highlights missing translations, renames a key across all files, and round-trips CSV for
+translators. The files are plain `.resx`, so any tool works.
 
 ## The manifest `languages` field
 
-The catalog above is what a *running* plugin serves. A store, an update listing or the plugin browser
-needs the same information one step earlier - before anything is installed - so the manifest carries it
-too, as [`languages`](/reference/manifest/#languages):
-
 ```json
-"languages": ["en", "de", "zh-Hant-TW"]
+"languages": ["en", "de", "pt-BR", "zh-Hant-TW"]
 ```
 
-You do not maintain that list. `macrodeck-plugin build` and `macrodeck-plugin pack` derive it from the
-resource set this guide describes, using the same rules the generator does:
+`macrodeck-plugin build` and `pack` derive [`languages`](/reference/manifest/#languages) from the resource
+set - you do not maintain it.
 
-- an unsuffixed `Strings.resx` contributes `en`, the default language every catalog falls back to;
-- each `Strings.<culture>.resx` contributes its own culture, whole - `pt-BR` stays `pt-BR`;
-- a suffix [MDLOC005](#mdloc005) would reject never reaches the manifest.
+- An unsuffixed `Strings.resx` contributes `en`; each `Strings.<culture>.resx` contributes its culture,
+  whole (`zh-Hans` and `zh-Hant` are never shortened to `zh`).
+- A suffix that fails [MDLOC005](#mdloc005) never reaches the manifest.
+- A hand-written `languages` is only carried through when packing a payload directory with no
+  `Localization/` folder. Culture files are compiled into the generated catalog, not into satellite
+  assemblies, so the built output has nothing left to read. If both exist and disagree, the resource files
+  win and `pack` reports what it replaced.
 
-Tags are BCP-47 and are never shortened to two letters: `zh-Hans` and `zh-Hant` are different languages
-to a reader, and both would collapse onto `zh`. Anything that wants a coarser grouping can compute it
-from the full tag.
+## Reference
 
-Deriving it needs the project tree, because a culture-suffixed `.resx` never becomes a satellite assembly
-here - it is compiled into the generated catalog, so a published output has nothing left to read. That is
-the one case where a hand-written `languages` is carried through instead: packing a payload directory
-that has no `Localization/` in it. Where both exist and disagree, the resource files win and `pack`
-reports what it replaced.
+### The generated API
 
-## Diagnostics
+| resx | generated member |
+| --- | --- |
+| `Connect` | `static LocalizedString Connect()` |
+| `Status.ConnectedAs` = `Connected as {userName}` | `Status.ConnectedAs(LocalizedText userName)` |
+| `Status.Retries`, comment `[attempt:int][limit:int]` | `Status.Retries(int attempt, int limit)` |
+| `Status.Scenes.One` / `.Other`, comment `[plural]` | `Status.Scenes(int count)` |
+| (class) | `Strings.LocalizationScope` = `"plugin:<manifest id>"` |
+| (class) | `Strings.LocalizationCatalog` - the compiled `ILocalizationCatalog` |
 
-Every diagnostic here is reported by the same source generator that produces `Strings` - there is
-nothing separate to enable, and no diagnostic fires without a `Localization/*.resx` present to check.
+`Strings` is a `public static partial class` in your project. It returns a reference, not text, so a
+language change never requires rebuilding your UI.
 
-### MDLOC001
+| MSBuild property | default |
+| --- | --- |
+| `MacroDeckLocalizationScope` | `plugin:<id>`, read from `manifest.json` |
+| `MacroDeckLocalizationClassName` | the resource base name, `Strings` |
 
-**A key exists in a translation but not in the default-language file.** The default-language file is
-what every translation is checked against and the last resource the fallback chain tries, so a key that
-lives only in `Strings.de.resx` can never resolve for a reader on any other language. Add the key to
-`Strings.resx` too, even with placeholder default-language text, or remove it from the translation if it
-was added by mistake.
+A plugin owns only `plugin:<its-own-id>`, so it cannot overwrite Macro Deck's catalog or another plugin's.
 
-### MDLOC002
+### Comment prefixes
 
-**A translation's placeholders differ from the default language's.** Placeholders are named, and the
-generated method's parameters come from the default-language template - a translation naming a
-placeholder the default language does not have would render that placeholder literally for every reader
-on that language, and one silently dropping a placeholder would lose the value a caller passed. Make the
-translation use exactly the same placeholder names as the default-language entry; order does not matter.
+| prefix | meaning |
+| --- | --- |
+| `[name:type]` | Placeholder type: `string`, `int`, `long`, `double`, `bool`. |
+| `[plural]` | This entry is one form of a plural family. On every form. |
+| `[removed:guidance]` | Retired key: still generated and resolvable, reports [MDLOC006](#mdloc006). |
 
-### MDLOC003
+### Diagnostics
 
-**The same key is declared twice in one resource file.** Which value wins is left up to file order, an
-implementation detail nobody should depend on. Rename one entry or delete the duplicate.
+All reported by the generator that produces `Strings`. None fire without a `Localization/*.resx`.
 
-### MDLOC004
+#### MDLOC001
 
-**A parameter type declared in a resource comment is not usable** - either the bracketed type name is
-not one of `string`, `int`, `long`, `double` or `bool`, or it declares a type for a placeholder the
-template does not actually use. Fix the declared type, or remove a declaration for a placeholder you
-renamed or deleted.
+A key is in a translation but not in `Strings.resx`. Add it to the default file, or remove it from the
+translation.
 
-### MDLOC005
+#### MDLOC002
 
-**A resource file's culture suffix is not a well-formed culture name.** `Strings.de_DE.resx` (underscore
-instead of hyphen) or a name with the wrong segment shape fails this check even though .NET might
-otherwise accept it as *some* culture - the check is on the name's shape specifically so a typo becomes
-a build error instead of a culture no reader ever asks for. Rename the file to a valid BCP-47 name such
-as `de-DE`.
+A translation's placeholder names differ from the default language's. Use exactly the same names; order
+does not matter.
 
-### MDLOC006
+#### MDLOC003
 
-**Code references a Macro Deck catalog key that has been removed.** Macro Deck's own catalog
-(`MacroDeckStrings`) is a published contract: a key it retires is recorded rather than deleted outright,
-the same way an SDK API is deprecated rather than pulled out from under you - see
-[deprecations](/policies/deprecations/) for the equivalent lifecycle on the rest of the SDK. Update the
-call site to the replacement the diagnostic names.
+The same key is declared twice in one file. Rename or delete one.
 
-A key is retired by prefixing its comment with `[removed:…]`, alongside any parameter declarations:
+#### MDLOC004
+
+A declared placeholder type is not `string`, `int`, `long`, `double` or `bool`, or it names a placeholder
+the template does not use.
+
+#### MDLOC005
+
+A file's culture suffix is not a well-formed BCP-47 name (`Strings.de_DE.resx`). Rename it, for example to
+`de-DE`.
+
+#### MDLOC006
+
+Code uses a `MacroDeckStrings` key retired with `[removed:...]`. Move to the replacement the message names;
+see [deprecations](/policies/deprecations/).
 
 ```xml
 <data name="Common.Submit" xml:space="preserve">
@@ -308,50 +323,22 @@ A key is retired by prefixing its comment with `[removed:…]`, alongside any pa
 </data>
 ```
 
-The member is still generated and the key still resolves, so existing call sites keep compiling and keep
-rendering text. Only the diagnostic is new - deleting the key outright would leave every call site with a
-bare "member does not exist" error and nothing to migrate to.
+#### MDLOC007
 
-### MDLOC007
+A plural family cannot produce a member: a marked key not ending in `One`/`Other`, no `Other` form, or a
+base key an ordinary entry already owns.
 
-**A plural family cannot produce a usable member** - an entry marked `[plural]` whose key does not end in
-`One` or `Other`, a family with no `Other` form to fall back on, or a base key some ordinary entry already
-owns. Rename the entry to end in a form the framework selects, add the missing `Other`, or rename whichever
-of the two collides.
+#### MDLOC008
 
-### MDLOC008
-
-**A key is also the group other keys nest under** - `Filters` alongside `Filters.Date`. A dotted key
-becomes a nested class, so the two would generate a method and a class of the same name in the same
-scope. Rename one of them; `FiltersHeading` beside `Filters.Date` is the usual fix.
-
-## Editing with Rider's Localization Manager
-
-`.resx` was chosen as the canonical format specifically because it is the one format [JetBrains Rider's
-Localization Manager](https://www.jetbrains.com/help/rider/Localizing_Applications.html) understands -
-no other resource format Macro Deck considered has equivalent tooling. Opening `Localization/Strings.resx`
-in Rider gets you:
-
-- **A culture grid** - every key as a row, every `Strings.<culture>.resx` as a column, edited in one
-  place instead of file by file.
-- **Missing-translation highlighting** - a cell Rider flags before you ever run a build, ahead of
-  [MDLOC001](#mdloc001).
-- **CSV export and import** - hand a translator a spreadsheet instead of an XML file, and bring their
-  edits back into the grid.
-- **Coordinated rename** - renaming a key updates it across every culture's file at once, instead of the
-  default-language file drifting out of sync with its translations one entry at a time.
-
-Nothing about the generator or the diagnostics requires Rider - the files are plain `.resx`, editable by
-hand or through any other tool that produces well-formed `.resx` - but the Localization Manager is the
-recommended workflow because it is the tooling this format was picked to unlock.
+A key is also a group other keys nest under (`Filters` beside `Filters.Date`), so it would generate a
+method and a class with the same name. Rename one, for example to `FiltersHeading`.
 
 ## See also
 
-- [SDK reference](/reference/sdk-packages/) - the `MacroDeck.Localization` package.
-- [Analyzers](/reference/analyzers/) - the full MDLOC table alongside every other diagnostic.
-- [WebSocket reference](/reference/websocket/#capabilities) - the `localization` capability kind a
-  remote plugin implements to hand its catalog to the host.
-- [Theming](/ui/concepts/theming/) - `UiText` and where a `LocalizedString` is accepted on a view.
-- [Manifest reference](/reference/manifest/#languages) - the `languages` field packing derives from your
-  resource set.
-- [Compatibility policy](/policies/compatibility/) - what is frozen about the localization surfaces.
+- [SDK packages](/reference/sdk-packages/) - the `MacroDeck.Localization` package.
+- [Analyzers](/reference/analyzers/) - the MDLOC table alongside every other diagnostic.
+- [WebSocket reference](/reference/websocket/#capabilities) - the `localization` capability kind a remote
+  plugin uses to hand its catalog to the host.
+- [Theming](/ui/concepts/theming/) - `UiText` and where a view accepts a `LocalizedString`.
+- [Manifest reference](/reference/manifest/#languages) - the `languages` field.
+- [Compatibility policy](/policies/compatibility/) - what is frozen about localization.
