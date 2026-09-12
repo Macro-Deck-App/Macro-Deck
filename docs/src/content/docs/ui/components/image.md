@@ -20,6 +20,8 @@ new UiImage
 }
 ```
 
+![A weather tile with a small yellow sun icon above the temperature 23° and the caption Sunny](../../../../assets/ui/image.png)
+
 A weather-condition icon that fades to the new one when the condition changes, adapted from the built-in
 Weather widget. `ConditionIcon` is a `UiResource` handle.
 
@@ -40,6 +42,8 @@ Without `Transition`, a new `Source` simply replaces the old image.
 Brightness = 0.6,
 Saturation = 0.55,
 ```
+
+![The same album cover twice: at full colour on the left, darker and less saturated on the right](../../../../assets/ui/image-dimmed.png)
 
 A paused cover, as the built-in Music player draws it. `Brightness` changes the artwork itself and looks the
 same on any background - use it, not a lower `Opacity`, for "the same picture, darker". `Opacity` lets what

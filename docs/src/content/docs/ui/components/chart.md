@@ -22,6 +22,8 @@ new UiChart
 }
 ```
 
+![A wide tile with a thin blue line chart and a faint fill across its bottom third](../../../../assets/ui/chart.png)
+
 A hairline history across the bottom third of the tile, in the reader's accent colour - the chart the
 built-in History Graph widget draws.
 
@@ -57,6 +59,8 @@ is the element's bottom edge and `1` is the band's top.
 ```csharp
 Color = config.AccentColor is { } accent ? UiValue.Of(accent) : UiValue.None<string>(),
 ```
+
+![The same series drawn in green with a taller plot band](../../../../assets/ui/chart-color.png)
 
 `Color` is a literal `#rrggbb` because it encodes data rather than theme. Leave it absent to follow the
 reader's accent colour. See [Colours and text](/ui/concepts/theming/).

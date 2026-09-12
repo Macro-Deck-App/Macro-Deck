@@ -54,6 +54,8 @@ the action receives. Anything else the tree emits is an ordinary event routed ba
 node can be the one that raises it - typically a `ui.button` whose `press` handler dispatches
 `modal.complete` with the picked value as its payload, such as a row in a `ui.list` of choices.
 
+![A device picker dialog: a list of three button rows, each with a device icon, a name and a grey status line](../../../../assets/ui/view-modal.png)
+
 ## What bounds the wait
 
 `Cancelled` is the distinction to check before touching `Value`: a user who dismissed the dialog decided

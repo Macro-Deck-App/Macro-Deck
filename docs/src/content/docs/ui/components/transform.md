@@ -22,6 +22,8 @@ new UiTransform
 }
 ```
 
+![A half-circle gauge filled in blue to 70 percent, with a white needle turned about a pivot near the bottom edge](../../../../assets/ui/transform.png)
+
 A gauge needle pivoting near its bottom edge. Each update is a `set-properties` patch carrying `rotation`
 alone; the reader redraws locally, with no new image per update.
 
@@ -30,6 +32,8 @@ alone; the reader redraws locally, with no new image per update.
 ```csharp
 new UiTransform { Key = "arrow", Rotation = 90, Children = [arrowIcon] }
 ```
+
+![An upward arrow icon rotated 90 degrees so it points right](../../../../assets/ui/transform-rotate.png)
 
 `Rotation` is degrees, clockwise, about the pivot. The pivot defaults to the centre.
 

@@ -38,6 +38,8 @@ new UiStack
 }
 ```
 
+![A tile showing a large bold reading of 23.4 with a smaller grey °C unit beside it on the same baseline](../../../../assets/ui/text.png)
+
 A large live reading with its unit beside it, adapted from the built-in History graph widget.
 
 ## Live numeric readouts

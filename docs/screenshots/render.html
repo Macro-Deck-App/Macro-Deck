@@ -13,7 +13,7 @@
     position: relative;
     overflow: hidden;
     box-sizing: border-box;
-    background: var(--color-bg-tertiary);
+    background: var(--color-bg-secondary);
     color: var(--color-text-primary);
     border-radius: var(--radius);
   }
@@ -33,7 +33,7 @@
   const fixedNow = Date.UTC(2026, 8, 12, 14, 5, 30);
   const host = {
     localization: bundledTranslator,
-    resourceUrl: resource => scene.resources?.[resource?.id] ?? null,
+    resourceUrl: resource => scene.resources?.[resource?.resourceId] ?? null,
     now: () => fixedNow,
     culture: () => 'en-US',
     hourCycle: () => 'h23',
@@ -46,7 +46,7 @@
 
   try {
     renderUiNode(box, scene.root, { width: scene.width, height: scene.height }, null,
-      Math.min(scene.width, scene.height), host);
+      scene.basis ?? Math.min(scene.width, scene.height), host);
     document.title = 'ready';
   } catch (error) {
     document.body.textContent = String(error?.stack ?? error);

@@ -23,6 +23,8 @@ new UiButton
 }
 ```
 
+![A red button tile with a crossed-out microphone icon and the label Mute centred beneath it](../../../../assets/ui/button.png)
+
 A tile with an icon covering its face and a centred label; a completed press calls `ToggleMute`.
 
 ## Handling a press
@@ -49,6 +51,8 @@ Brightness = UiValue.From(() => state.Value.Paused ? 0.6 : 1.0),
 BorderStyle = UiComponentBorderStyles.Breathing,
 BorderColor = "#ff3b30",
 ```
+
+![A button whose face is a zoomed album cover filling the whole tile, with a thin red ring along its edge](../../../../assets/ui/button-artwork.png)
 
 The artwork fills the whole box behind the children, so swapping the face is a property patch rather than
 a rebuilt subtree. `hue-shift` and `rgb` rings cycle their own colours and ignore `BorderColor`.

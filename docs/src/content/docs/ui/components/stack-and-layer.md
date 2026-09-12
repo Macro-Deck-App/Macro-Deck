@@ -37,6 +37,8 @@ new UiStack
 }
 ```
 
+![A row with a square cover on the left and a white title above a grey subtitle filling the rest](../../../../assets/ui/stack.png)
+
 A track row from the built-in music picker: cover art on the left, two lines of text filling the rest.
 
 ## A row with one filling child
@@ -49,7 +51,7 @@ new UiStack
     Children =
     [
         new UiTextRun { Key = "name", Text = "Office", Size = 0.12, Fill = true },
-        new UiTextRun { Key = "temp", Text = "21°", Size = 0.12, MainSize = 0.3 },
+        new UiTextRun { Key = "temp", Text = "21°", Size = 0.12, MainSize = 0.3, Align = UiComponentAlignments.End },
     ],
 }
 ```
@@ -59,6 +61,8 @@ new UiStack
 | Office                   |    21° |
 +--------------------------+--------+
 ```
+
+![A wide tile with Office at the leading edge and 21° at the trailing edge](../../../../assets/ui/stack-fill.png)
 
 `Fill` takes whatever the siblings leave. A text next to a filling sibling needs its own `MainSize`, because
 a reader cannot measure text without a font - see [Sizing](/ui/concepts/sizing/).
@@ -82,6 +86,8 @@ new UiStack
 +-----------------------------------+
 ```
 
+![A wide tile with a sun icon at the leading edge and a bold 21° at the trailing edge](../../../../assets/ui/stack-space-between.png)
+
 `SpaceBetween` puts all free space between children and none at the edges.
 
 ## Lining up a value and its unit
@@ -99,6 +105,8 @@ new UiStack
     ],
 }
 ```
+
+![A large 73 with a small km/h beside it, both sitting on the same baseline](../../../../assets/ui/stack-baseline.png)
 
 `Baseline` puts the runs' text on one line instead of aligning their boxes. Only children that draw text
 take part; anything else in the row aligns to the trailing edge.
@@ -141,6 +149,8 @@ new UiLayer
 |  /\_/\__/\      <- chart (furthest back)
 +----------------------+
 ```
+
+![A history graph tile: a filled line chart along the bottom, CPU and Package labels at the top left, and 42 % drawn over the middle](../../../../assets/ui/layer.png)
 
 The built-in history graph: a chart edge to edge, labels inset over it. Each layer child that needs
 padding, gap, justify or align wraps itself in a `ui.stack`, which also lets two layers inset differently.

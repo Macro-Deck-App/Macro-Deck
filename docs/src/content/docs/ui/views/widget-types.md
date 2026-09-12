@@ -94,6 +94,8 @@ public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, Cancellati
 }
 ```
 
+![A gauge widget tile with the reading 70 km/h above a half-circle gauge and its needle](../../../../assets/ui/view-widget-type.png)
+
 The surface carries the keys [the widget surface](/ui/views/widget/) documents - `widgetId`,
 `widgetType`, `data`, `cornerRadius`, and `ghost` when the tile being drawn is a drag ghost of one that is
 also on screen. The widget's stored data travels with the request rather than being looked up, because you

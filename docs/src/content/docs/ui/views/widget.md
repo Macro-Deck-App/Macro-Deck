@@ -25,6 +25,8 @@ public IReadOnlyList<UiSurfaceDeclaration> Surfaces =>
     [new UiSurfaceDeclaration { Kind = "widget", SessionMode = "shared" }];
 ```
 
+![A two-by-two weather widget: Berlin, 21°, a sun icon, the caption Sunny and a temperature range bar](../../../../assets/ui/view-widget.png)
+
 `UiWidgetSurfaceAttributes` names the keys: `widgetId`, `widgetType`, `data`, `sample` and `ghost`.
 
 An editor preview arrives as a `preview` surface carrying draft configuration instead. A `preview` surface

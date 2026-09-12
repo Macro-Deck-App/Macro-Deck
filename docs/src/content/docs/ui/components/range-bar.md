@@ -24,6 +24,8 @@ new UiRangeBar
 }
 ```
 
+![A thin span fading from blue to red between 20 and 60 percent of the track, with a white marker dot on it](../../../../assets/ui/range-bar.png)
+
 A forecast row: a blue-to-red span from 20 % to 60 % of the track, with today's temperature marked on it.
 
 ## Point marker
@@ -31,6 +33,8 @@ A forecast row: a blue-to-red span from 20 % to 60 % of the track, with today's 
 ```csharp
 Marker = isToday ? UiValue.From(() => state.Value.TodayFraction) : UiValue.None<double>(),
 ```
+
+![A three-day forecast with a low, a blue-to-red range bar and a high per row; only the Today row carries a marker](../../../../assets/ui/range-bar-marker.png)
 
 Leave `Marker` absent and no marker is drawn. The marker is painted in the reader's text colour, not the
 gradient, so it stays visible wherever it lands.

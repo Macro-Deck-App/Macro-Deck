@@ -26,6 +26,8 @@ new UiDynamicText
 }
 ```
 
+![A wide tile showing 10:05 in large bold digits followed by smaller grey seconds :30](../../../../assets/ui/time.png)
+
 New York's time in the viewer's own language and hour cycle, with smaller muted seconds - the built-in
 Clock widget's face. It costs no patch and keeps running while the connection is down.
 
@@ -43,6 +45,8 @@ A zone is an IANA id. Absent (or a null or empty id passed to `InZone`) means th
 ```csharp
 new UiDynamicText { Key = "caption", Value = reference, Format = UiTimeFormats.ZoneName }
 ```
+
+![The time 10:05:30 with the caption New York beneath it](../../../../assets/ui/time-caption.png)
 
 | Format | `America/New_York` | No zone |
 |---|---|---|
@@ -100,6 +104,8 @@ new UiClockDial
     Fallback = new UiDynamicText { Key = "dialFallback", Value = reference, Format = UiTimeFormats.Time },
 }
 ```
+
+![An analogue clock face with twelve tick marks, white hour and minute hands at five past ten, and a blue second hand](../../../../assets/ui/clock-dial.png)
 
 A dial degrades to a dynamic text, which in turn degrades to `ui.text`, so a reader that draws no dial
 still shows the right time. `Color` tints the ticks and the hour and minute hands; the face, second

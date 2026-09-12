@@ -34,6 +34,8 @@ new UiStack
 }
 ```
 
+![A thin blue progress bar a fifth of the way along, with 0:42 under its start and 3:35 under its end](../../../../assets/ui/progress.png)
+
 A track 42 seconds into 3:35, with `0:42` and `3:35` beneath it, both advancing on the reader's clock -
 the built-in Music Player widget's timeline.
 

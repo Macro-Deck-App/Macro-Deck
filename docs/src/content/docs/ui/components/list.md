@@ -31,6 +31,8 @@ new UiList
 }
 ```
 
+![A scrolling list of track rows, each with a cover, a title and an artist line; the last row is cut off at the bottom edge](../../../../assets/ui/list.png)
+
 A windowed result list, adapted from the built-in music picker: it starts with a few rows and grows as the
 user scrolls.
 

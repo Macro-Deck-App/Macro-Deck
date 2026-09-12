@@ -32,6 +32,8 @@ new UiTextField
 }
 ```
 
+![An empty text field showing the grey placeholder "Search songs, albums, artists"](../../../../assets/ui/text-field.png)
+
 A search box that filters as the user types, adapted from the built-in Music player picker.
 
 ## Acting only on the final value

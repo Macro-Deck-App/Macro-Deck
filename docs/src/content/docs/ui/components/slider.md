@@ -26,6 +26,8 @@ new UiSlider
 }
 ```
 
+![A wide tile with a horizontal slider filled in blue to 65 percent and a white thumb at the level](../../../../assets/ui/slider.png)
+
 A horizontal volume track snapping to 5 % steps: `adjust` moves the display while dragging, `change`
 commits the level the user landed on.
 
@@ -58,6 +60,8 @@ not move.
 ```csharp
 Direction = UiComponentDirections.Vertical,
 ```
+
+![A tall tile with a vertical slider filled in blue from the bottom to 40 percent, the thumb at the top of the fill](../../../../assets/ui/slider-vertical.png)
 
 `Direction` is the axis the level travels along, not the element's axis in its parent. Vertical runs
 bottom to top - up is more.

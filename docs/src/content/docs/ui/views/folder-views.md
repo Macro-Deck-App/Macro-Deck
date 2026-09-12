@@ -75,6 +75,8 @@ public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, Cancellati
 }
 ```
 
+![A wide folder view dashboard with three cards: an analogue clock, a CPU history graph at 42 % and a GPU history graph at 67 %](../../../../assets/ui/view-folder.png)
+
 The surface carries `folderId`, `folderName`, `viewId` and `configuration`. The configuration travels with
 the request rather than being looked up, for the same reason a widget's data does: you cannot read Macro
 Deck's stored folders.
