@@ -145,6 +145,74 @@ internal sealed class VoicemeeterIntegrationTests
 	}
 
 	[Test]
+	public void Every_strip_of_the_widest_edition_declares_its_routing_to_every_bus()
+	{
+		var names = VoicemeeterVariables.All.Select(variable => variable.Name).ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(names, Does.Contain("voicemeeter_strip0_a1"));
+			Assert.That(names, Does.Contain("voicemeeter_strip7_a5"));
+			Assert.That(names, Does.Contain("voicemeeter_strip7_b3"));
+			Assert.That(names, Does.Not.Contain("voicemeeter_strip8_a1"));
+			Assert.That(names, Does.Not.Contain("voicemeeter_strip0_b4"));
+			Assert.That(names, Does.Not.Contain("voicemeeter_bus0_a1"));
+			Assert.That(VoicemeeterVariables.All.Single(variable => variable.Name == "voicemeeter_strip0_a1").Type,
+				Is.EqualTo(VariableType.Boolean));
+		});
+	}
+
+	[Test]
+	public async Task A_connected_Voicemeeter_answers_which_buses_a_strip_is_routed_to()
+	{
+		_remote.Run(VoicemeeterEdition.Banana);
+		_remote.UserSets("Strip[1].A2", 1f);
+		_remote.UserSets("Strip[1].A1", 0f);
+		await Connected();
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That((await _integration.ReadAsync("voicemeeter-strip1-a2", CancellationToken.None)).Value,
+				Is.True);
+			Assert.That((await _integration.ReadAsync("voicemeeter-strip1-a1", CancellationToken.None)).Value,
+				Is.False);
+			Assert.That((await _integration.ReadAsync("voicemeeter-strip0-a4", CancellationToken.None)).Value,
+				Is.Null);
+			Assert.That((await _integration.ReadAsync("voicemeeter-strip5-a1", CancellationToken.None)).Value,
+				Is.Null);
+			Assert.That((await _integration.ReadAsync("voicemeeter-bus0-a1", CancellationToken.None)).Value,
+				Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task Routing_follows_the_bus_sends_of_the_running_edition()
+	{
+		_remote.Run(VoicemeeterEdition.Standard);
+		_remote.UserSets("Strip[0].B1", 1f);
+		await Connected();
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That((await _integration.ReadAsync("voicemeeter-strip0-b1", CancellationToken.None)).Value,
+				Is.True);
+			Assert.That((await _integration.ReadAsync("voicemeeter-strip0-a2", CancellationToken.None)).Value,
+				Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_routing_variable_is_not_writable()
+	{
+		_remote.Run(VoicemeeterEdition.Potato);
+		await Connected();
+
+		var result = await _integration.SetValueAsync("voicemeeter-strip0-a1", 1d, CancellationToken.None);
+
+		Assert.That(result.Status, Is.EqualTo(VariableWriteStatus.NotWritable));
+	}
+
+	[Test]
 	public async Task No_variables_are_declared_when_the_remote_api_is_unavailable()
 	{
 		_remote.IsAvailable = false;
