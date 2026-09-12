@@ -49,7 +49,7 @@ The host relays your bytes rather than your objects. A tree or patch is bounded 
 unknown members, member order and number formatting reach the client exactly as you produced them.
 
 Out of process, the same contract is the `ui` capability kind on the plugin protocol - see
-[Capabilities](/features/#macro-deck-ui) for the operations and the
+[the operations below](#over-the-plugin-protocol) and the
 [`ui` host api](/reference/websocket/#host-callbacks) for pushing snapshots, patches and faults back.
 `MacroDeck.Plugin.Hosting` maps that capability onto `IUiProvider` for you: register an integration that
 implements it and the SDK declares the kind, answers `describe` from your `Surfaces`, and drives the
@@ -92,3 +92,22 @@ failure this design exists to prevent.
 An out-of-process provider observes each of these as an error on that call's own `host.result` - the reply
 to the `host.invoke` that carried the payload. So a refusal is always attributable to the update that
 caused it.
+
+## Over the plugin protocol
+
+Over the plugin protocol the same contract is the `ui` capability kind, invoked by the host:
+
+| Operation | Purpose |
+| --- | --- |
+| `describe` | The surfaces this provider can serve, the UI model version it speaks, and the [preview scenarios](/ui/views/developer-preview/) it declares. `previews` is optional: a plugin built against an SDK that predates it omits the key, and the host reads that as none. |
+| `session.open` (config) | A `config` surface carries the entry point being configured in its surface attributes - `integration-config` with the config flow session, `action-config` with the action id and the instance's stored parameters, `folder-view-config` with the folder and its view, or `widget-config` with the widget id, type and stored configuration. `MacroDeck.Plugin.Hosting` routes these to `IUiConfigFlow`/`IUiConfigurableActionDefinition` before it consults `IUiProvider`. |
+| `session.open` | Open a session for one surface. The session id is host-issued; a provider never mints one. |
+| `session.open` (developer preview) | A `developer-preview` surface names one registered preview scenario in its surface attributes. `MacroDeck.Plugin.Hosting` builds that scenario and never consults `IUiProvider`, so a production provider is unreachable from a preview. |
+| `session.snapshot` | Produce the session's current full tree. The tree does not return on the result - it arrives as a separate `host.invoke ui/snapshot`, so one delivery path serves a first attach and a resync alike. |
+| `session.event` | A client acted on a node. `clientId` says which one, and is meaningful only for a shared session. |
+| `session.close` | The host is ending this session. |
+| `modal.result` | How a modal this plugin opened ended. Host-to-plugin because the wait is unbounded by a person - see [action modals](/ui/views/modal/). |
+
+Trees, patches and faults travel the other way through the [`ui` host api](/reference/websocket/#host-callbacks).
+
+Like the other provider-shaped capabilities, `ui` declares the single local id `provider`: the capability *is* the plugin's one UI provider, so there is no per-instance identity to name. The host invokes `kind: "ui", localId: "provider"`.

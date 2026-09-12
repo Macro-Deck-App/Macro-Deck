@@ -167,8 +167,23 @@ layout in another plugin's name, which is what keeps the id-grammar rule above t
 well as in-process.
 
 Declare `host:layouts` in `manifest.json` alongside the other host APIs you use. See
-[Capabilities](/features/#layout-providers) for the exact operations and
 [Capability parity](/reference/capability-parity/) for plugin-specific behaviour.
+
+A provider is driven from the plugin side for registration, so the host-to-provider direction of the
+`layout-provider` capability only has to describe the provider and re-read its catalogue after a
+reconnect:
+
+| Operation | Purpose |
+| --- | --- |
+| `describe` | The provider's declared name. |
+| `layouts` | The provider's current layout catalogue, re-read after a reconnect. |
+
+Registering and withdrawing a layout travels the other way as the `layouts` host API:
+
+| Operation | Purpose |
+| --- | --- |
+| `register` | Registers a layout, or replaces one already registered under the same provider-local id. |
+| `unregister` | Withdraws a layout. Devices still referencing it keep their last-resolved geometry rather than losing their constraint. |
 
 ## Testing
 

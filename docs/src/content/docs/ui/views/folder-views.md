@@ -130,8 +130,27 @@ The second half is a layout capability, `LayoutVisualCapabilities.CustomFolderVi
 That means your view can be registered and still not appear as an option on a particular profile. It is
 not a failure to handle: nothing selects it, so nothing opens a session for it.
 
+## Over the plugin protocol
+
+Registration is driven from the plugin side, so the host-to-provider direction of the
+`folder-view-provider` capability only has to describe the provider and re-read its catalog after a
+reconnect:
+
+| Operation | Purpose |
+| --- | --- |
+| `describe` | The provider's declared name and its current catalog. |
+| `folder-views` | The provider's current folder view catalog, re-read after a reconnect. |
+
+Registering and withdrawing a view travels the other way as the `folder-views` host API:
+
+| Operation | Purpose |
+| --- | --- |
+| `register` | Registers a folder view, or replaces one already registered under the same provider-local id. |
+| `unregister` | Withdraws a folder view. Folders still using it keep their stored id and configuration and show a placeholder until it returns. |
+
+The views themselves are served over the `ui` capability, like every other Macro Deck UI surface.
+
 ## Related documentation
 
 - [Macro Deck UI](/ui/) - the component model a folder view is built from.
-- [Capabilities](/features/) - how `folder-view-provider` is declared.
 - [Layout providers](/features/layouts/) - the same registration shape, one level down.

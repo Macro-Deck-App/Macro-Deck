@@ -137,10 +137,30 @@ nameless - the entry goes only when your integration is uninstalled or stopped.
 A press on a widget of your type runs nothing on the host. Its interactions are the events its own tree
 declares, dispatched over its session; a tile whose tree declares none simply does nothing when pressed.
 
+## Over the plugin protocol
+
+Registration is driven from the plugin side, so the host-to-provider direction of the
+`widget-type-provider` capability only has to describe the provider and re-read its catalog after a
+reconnect:
+
+| Operation | Purpose |
+| --- | --- |
+| `describe` | The provider's declared name and its current catalog. |
+| `widget-types` | The provider's current widget type catalog, re-read after a reconnect. |
+
+Registering and withdrawing a type travels the other way as the `widget-types` host API:
+
+| Operation | Purpose |
+| --- | --- |
+| `register` | Registers a widget type, or replaces one already registered under the same provider-local id. |
+| `unregister` | Withdraws a widget type. Widgets already using it keep their stored type and data and wait for it to return. |
+
+The widgets themselves are drawn, previewed and configured over the `ui` capability, like every other Macro
+Deck UI surface.
+
 ## Related documentation
 
 - [Macro Deck UI](/ui/) - the component model a widget is built from.
 - [The widget surface](/ui/views/widget/) - the attribute keys in full.
 - [Configuring a widget](/ui/views/widget-configuration/) - the two-region configuration tree.
-- [Capabilities](/features/) - how `widget-type-provider` is declared.
 - [Folder views](/ui/views/folder-views/) - the same registration shape, one level up.

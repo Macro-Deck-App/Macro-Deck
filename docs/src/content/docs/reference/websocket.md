@@ -143,7 +143,7 @@ carrying their resource ids in `arguments` instead. A definition's `materializat
 `on-demand`) is a declaration the host validates against the operation it arrived on, so a catalog
 cannot smuggle a variable into the eager set or the other way round.
 
-See [Variables](/features/#variables) for the SDK-side contract these operations mirror.
+See [Variables](/features/variables/) for the SDK-side contract these operations mirror.
 
 ### Host callbacks
 

@@ -251,6 +251,34 @@ when the negotiated `device-provider` version is 2 or higher; a plugin that nego
 keeps registering, updating and unregistering devices exactly as before and is never sent a session
 operation at all, so an older plugin degrades to registration only rather than failing.
 
+## Over the plugin protocol
+
+A provider is driven from the plugin side for registration, so the host-to-provider direction of the
+`device-provider` capability only has to describe the provider, re-read its catalogue after a
+reconnect, and - from capability version 2 - open, push to, and close a device's rendering session:
+
+| Operation | Purpose |
+| --- | --- |
+| `describe` | The provider's declared name and capability version. |
+| `devices` | The provider's current device catalogue, re-read after a reconnect. |
+| `session.open` | Opens a device's session and hands over the first surface to render. Version 2 only. |
+| `session.surface` | Pushes a new, complete surface to an already-open session. Version 2 only. |
+| `session.close` | Closes an open session. Version 2 only. |
+
+Registration itself - `register`, `update`, `presence`, `unregister` - along with reporting a
+hardware interaction and fetching an icon, travels the other way as the `devices` host API:
+
+| Operation | Purpose |
+| --- | --- |
+| `register` | Registers a device, or re-registers a known provider-local id as the same device. |
+| `update` | Refreshes a registered device's metadata. |
+| `presence` | Reports whether a registered device is currently reachable. |
+| `unregister` | Withdraws a device from this session; the device itself is retained. |
+| `interaction` | Reports a hardware interaction from an open device session. |
+| `icon` | Fetches icon bytes referenced by a device's current surface, over the `host.asset.*` pipeline. |
+| `widget-icon` | Fetches the bytes behind a widget's currently rendered action-icon-provider icon, over the `host.asset.*` pipeline. |
+| `close` | Closes an open device session at the provider's own request. |
+
 ## Testing
 
 `MacroDeck.Plugin.Testing` provides `FakeDeviceProviderContext`, which keeps the host's identity rules:
