@@ -316,14 +316,58 @@ describe('Shell', () => {
     expect(root.querySelectorAll('.deck-grid-tile').length).toBe(1);
   });
 
-  it('paints the folder background over the theme default', () => {
-    mount();
-    const coloured = folder('root') as unknown as { background: string };
-    coloured.background = '#101820';
-    client.deck.load([coloured as never]);
-    client.app.set({ probed: true, authenticated: true, connected: true });
+  describe('the folder background', () => {
+    const coloured = (id: string, background: string, viewId = 'macrodeck.widget-grid') =>
+      ({ ...(folder(id) as unknown as Record<string, unknown>), background, viewId }) as never;
 
-    expect((root.querySelector('.deck-grid') as HTMLElement).style.background).toBe('rgb(16, 24, 32)');
+    const showDeck = () => client.app.set({ probed: true, authenticated: true, connected: true });
+
+    it('fills the whole screen, not only the letterboxed grid', () => {
+      mount();
+      client.deck.load([coloured('root', 'rgba(16, 24, 32, 0.5)')]);
+      showDeck();
+
+      expect(root.style.background).toBe('rgba(16, 24, 32, 0.5)');
+      expect((root.querySelector('.deck-grid') as HTMLElement).style.background).toBe('');
+    });
+
+    it('leaves the screen to the theme when the folder has none', () => {
+      mount();
+      client.deck.load([folder('root')]);
+      showDeck();
+
+      expect(root.style.background).toBe('');
+    });
+
+    it('follows the folder the deck walks into', () => {
+      mount();
+      client.deck.load([coloured('root', '#101820'), coloured('other', '#203040')]);
+      showDeck();
+
+      client.deck.openFolder('other');
+
+      expect(root.style.background).toBe('rgb(32, 48, 64)');
+    });
+
+    it('is not left behind when the deck leaves the screen', () => {
+      mount();
+      client.deck.load([coloured('root', '#101820')]);
+      showDeck();
+
+      client.app.set({ authenticated: false, deckRendered: false });
+
+      expect(root.style.background).toBe('');
+    });
+
+    it('is not carried into a folder a provider draws', () => {
+      mount();
+      client.deck.load([coloured('root', '#101820'), coloured('other', '', 'acme.now-playing')]);
+      showDeck();
+
+      client.deck.openFolder('other');
+
+      expect(root.style.background).toBe('');
+    });
   });
 
   it('puts the settings entry on screen, which is the only way to sign out', () => {

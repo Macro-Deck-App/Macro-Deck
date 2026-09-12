@@ -266,6 +266,7 @@ export class Shell {
     const element = screen === 'deck' ? this.deckElement() : this.messageFor(screen);
     this.root.appendChild(element);
     this.current = { screen, element };
+    if (screen !== 'deck') this.root.style.background = '';
 
     // The lock is held only while a deck is actually on screen; the preference outlives the screen.
     this.services.wakeLock.setGate(screen === 'deck');
@@ -344,7 +345,8 @@ export class Shell {
     // Re-applied on every paint, not only at creation: a folder carries its own grid size, corner
     // radius and background, so walking into one keeps the previous folder's otherwise.
     this.grid.configure(geometry, grid.borderRadius);
-    this.grid.setBackground(folder && folder.background ? folder.background : null);
+    // Never on the grid as well: a translucent colour would stack there.
+    this.root.style.background = folder && folder.background ? folder.background : '';
     this.grid.setFocusedWidget(this.deckInput.focusedWidgetId());
 
     this.grid.update(
@@ -358,6 +360,7 @@ export class Shell {
   }
 
   private showFolderView(folderId: string): void {
+    this.root.style.background = '';
     if (this.grid) {
       this.grid.destroy();
       this.grid = null;
