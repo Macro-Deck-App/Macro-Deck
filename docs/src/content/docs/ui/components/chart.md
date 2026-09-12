@@ -1,71 +1,111 @@
 ---
 title: Chart
-description: ui.chart draws a series as a line across the element with the area beneath it filled.
+description: Draws a normalised series as a line with the area beneath it filled.
 ---
 
+A line across the element with the area beneath it filled, drawn from a series you have already
+normalised to `0..1`.
+
 `ui.chart`
-
-## Purpose
-
-`ui.chart` draws a series as a line across the element, with the area beneath the line filled. The series
-arrives already normalised, as fractions in `0..1` of the chart's plot band - a chart carrying raw values
-would drag a scale, an axis, a unit and a rounding rule onto the wire with it, and two readers would
-disagree wherever any of those did. The producer that has the values also has the range they are
-meaningful in, and is the only side that knows whether that range is fixed or follows the data.
-
-## Properties
-
-| Property | Meaning | Absent means |
-|---|---|---|
-| `points` | The series, oldest first, as fractions of the plot band in `0..1` | Nothing is drawn - and equally for an empty series |
-| `color` | The line and fill colour, as `#rrggbb` | **The reader's own accent colour** - how this profile spells "the chart has no colour of its own" |
-| `plotTop` | Where the plot band begins, a fraction of the element's own height in `0..1` | `0` - the band is the whole element |
-| `thickness` | The line's width, a length | Left to the reader |
-
-`color` is a literal colour rather than a theme role because it encodes data, not theme - the same split
-`ui.range-bar`'s `startColor` makes. See [Colours and text](/ui/concepts/theming/). Values outside
-`0..1` in `points` are clamped rather than rejected, so a series that outgrows a fixed scale flattens
-against the top of the band instead of failing the tree.
-
-## Supported children
-
-None. `ui.chart` is a leaf.
-
-## Events and interactions
-
-`ui.chart` declares no events. It is never interactive.
-
-## Layout behaviour
-
-A chart follows the ordinary leaf rule on its parent stack's main axis - `mainSize` or `fill` if declared,
-otherwise its content extent. See [Sizing](/ui/concepts/sizing/). Reserve a live numeric readout's
-width beside a chart with `ui.text`'s `digits` property, or the readout moves the chart every time its
-value gains or loses a digit - see [Text](/ui/components/text/).
-
-**The geometry below is normative**, for the reason `ui.range-bar`'s is: none of it follows from the
-properties, and two readers that disagree on it draw visibly different charts. The fixtures in
-`ui-model/fixtures/component-profile/` pin it, including a dense series and every clamp branch.
-
-- The plot band spans the element's full width and runs from `plotTop` of its height to its bottom edge.
-  `0` in the series is the bottom of that band and `1` is the top.
-- Points sit at equal horizontal spacing with the first on the leading edge and the last on the trailing
-  edge, joined by straight segments with round joins and caps. A series of exactly one point is drawn as a
-  flat line across the whole width at that point's height - a single sample is a value that has held, not a
-  dot.
-- The line is drawn in `color` at `0.9` opacity and `thickness` wide.
-- The area between the line and the element's bottom edge is filled in `color` at `0.16` opacity, with no
-  stroke of its own.
-- An absent or empty series draws nothing at all - neither line nor fill, and in particular not a flat line
-  along the foot of the band, which would read as a real value of zero.
 
 ## Example
 
 ```csharp
+var samples = new UiState<IReadOnlyList<double>>([]);
+
 new UiChart
 {
-    Key = "history",
-    Points = UiValue.From(() => state.Value.Samples),
-    PlotTop = 0.34,
-    Fill = true,
+    Key = "chart",
+    Points = UiValue.From(() => samples.Value),
+    PlotTop = 0.66,
+    Thickness = UiSize.Capped(2d / UiLength.Cell, 2),
 }
 ```
+
+A hairline history across the bottom third of the tile, in the reader's accent colour - the chart the
+built-in History Graph widget draws.
+
+## Appending points
+
+```csharp
+var fraction = Math.Clamp((celsius - 20) / 60, 0, 1);
+samples.Set([.. samples.Peek().TakeLast(59), fraction]);
+```
+
+Keep a rolling window and map each raw value onto your own scale before it reaches the tree. The chart
+carries no axis, unit or range; the producer owns the scale and decides whether it is fixed or follows
+the data.
+
+| Series | Drawn as |
+|---|---|
+| `[]` or absent | Nothing - no line, no fill |
+| `[0.5]` | A flat line across the whole width at half height |
+| `[0, 0.5, 1]` | Rising from the bottom-leading corner to the top-trailing corner of the band |
+| `[1.4, -0.2]` | Clamped to `[1, 0]` |
+
+## A band at the foot of the tile
+
+```csharp
+PlotTop = 0.66,
+```
+
+`PlotTop` moves the top of the plot band down, leaving the space above for labels. `0` in the series
+is the element's bottom edge and `1` is the band's top.
+
+## A colour of its own
+
+```csharp
+Color = config.AccentColor is { } accent ? UiValue.Of(accent) : UiValue.None<string>(),
+```
+
+`Color` is a literal `#rrggbb` because it encodes data rather than theme. Leave it absent to follow the
+reader's accent colour. See [Colours and text](/ui/concepts/theming/).
+
+## Properties
+
+| Property | Values | Default | Meaning |
+|---|---|---|---|
+| `Points` (`points`) | Numbers in `0..1`, oldest first | Nothing is drawn | The series as fractions of the plot band. |
+| `Color` (`color`) | `#rrggbb` | The reader's accent colour | The line and fill colour. |
+| `PlotTop` (`plotTop`) | `0..1` | `0` - the band is the whole element | Where the band starts, as a fraction of the element's height. |
+| `Thickness` (`thickness`) | A length | Left to the reader | The line's width. |
+
+## Events
+
+None. A chart is never interactive.
+
+## Children
+
+None - `ui.chart` is a leaf.
+
+## Layout
+
+A chart follows the ordinary leaf rule on its parent stack's main axis: `mainSize` or `fill` if
+declared, otherwise its content extent. A live numeric readout beside a chart should reserve its width
+with `ui.text`'s `digits`, or the chart shifts whenever the value gains or loses a digit - see
+[Text](/ui/components/text/). Full model: [Sizing](/ui/concepts/sizing/).
+
+## Reader behaviour
+
+The geometry is normative; the fixtures in `ui-model/fixtures/component-profile/` pin it, including a
+dense series and every clamp branch.
+
+- The plot band spans the element's full width and runs from `plotTop` of its height to its bottom edge.
+  `0` is the bottom of the band, `1` the top.
+- Values outside `0..1` are clamped, never rejected.
+- Points sit at equal horizontal spacing, the first on the leading edge and the last on the trailing edge,
+  joined by straight segments with round joins and caps.
+- A single point is a flat line across the whole width at its height, not a dot.
+- The line is drawn in `color` at `0.9` opacity, `thickness` wide.
+- The area between the line and the element's bottom edge is filled in `color` at `0.16` opacity, with no
+  stroke.
+- An absent or empty series draws nothing at all - in particular not a flat line along the foot of the
+  band, which would read as a real zero.
+- An absent `color` means the reader's own accent colour.
+
+## See also
+
+- [Range bar](/ui/components/range-bar/)
+- [Text](/ui/components/text/)
+- [Sizing](/ui/concepts/sizing/)
+- [Colours and text](/ui/concepts/theming/)

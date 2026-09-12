@@ -1,107 +1,145 @@
 ---
 title: Progress
-description: macrodeck.progress-bar and macrodeck.progress-text draw a position that keeps moving, resolved by the reader from one shared reference shape.
+description: Draws a moving playback position as a bar or a time readout, advanced by the reader's own clock.
 ---
+
+A playback timeline and its elapsed, remaining or total time. Both carry a progress reference - where the
+medium was at one instant and how fast it is moving - so a playing track needs no patch until it changes.
 
 `macrodeck.progress-bar`, `macrodeck.progress-text`
 
-## Purpose
+## Example
 
-A playback position has the same problem a clock does, one step further along: it changes every second
-*and* it depends on where playback had reached. Both elements carry a `UiProgressReference` -
-`{"$progress":{"positionMs":42000,"durationMs":215000,"anchor":"2026-08-25T12:00:00.000Z"}}` on the wire -
-which says where the medium was at one instant and how fast it has been moving since. The reader resolves
-`clamp(positionMs + (t - anchor) * rate, 0, durationMs)` on its own synchronised clock, re-evaluating at
-least once a second, so a playing track costs no patch between track changes.
+```csharp
+var position = UiValue.Of(UiProgressReference.Advancing(42_000, DateTimeOffset.UtcNow, durationMs: 215_000));
 
-This is why the two are `macrodeck.*` rather than `ui.*`: a reader cannot draw either from the tree alone.
-It has to know what `$progress` means and advance it on its own clock - see the family split on
-[Components](/ui/components/).
+new UiStack
+{
+    Key = "timeline",
+    Children =
+    [
+        new UiProgressBar { Key = "progress", Value = position, Thickness = 0.02, MainSize = 0.02 },
+        new UiStack
+        {
+            Key = "times",
+            Direction = UiComponentDirections.Horizontal,
+            Justify = UiComponentJustify.SpaceBetween,
+            Children =
+            [
+                new UiProgressText { Key = "elapsed", Value = position, Format = UiProgressFormats.Elapsed, Role = UiComponentTextRoles.Muted },
+                new UiProgressText { Key = "duration", Value = position, Format = UiProgressFormats.Duration, Role = UiComponentTextRoles.Muted, Align = UiComponentAlignments.End },
+            ],
+        },
+    ],
+}
+```
 
-They share one page because they share the one reference shape and the one governing ADR
-([0065](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0065-the-component-profile-authoring-contracts.md)).
-`macrodeck.progress-bar` draws the position as a track; `macrodeck.progress-text` draws one of its
-derivations as a run.
+A track 42 seconds into 3:35, with `0:42` and `3:35` beneath it, both advancing on the reader's clock -
+the built-in Music Player widget's timeline.
 
-`rate` absent means normal speed - the ordinary case, kept key-free - and a halted medium carries `0`, so
-"paused" is a value rather than something a reader infers. `durationMs` absent means unknown: a bar draws
-an empty track and `elapsed`/`remaining`/`duration` resolve to nothing rather than the reader inventing a
-whole.
+## Paused vs playing
+
+```csharp
+UiProgressReference.Advancing(positionMs, now, durationMs)   // rate absent - normal speed
+UiProgressReference.Halted(positionMs, now, durationMs)      // "rate": 0
+```
+
+Paused is a value, not something a reader infers. Send a new reference when playback starts, stops,
+seeks or changes track; while it plays on schedule, keep the previous one - the built-in player re-anchors
+only when the reported position drifts from the predicted one.
+
+## Elapsed and remaining
+
+| Format (`UiProgressFormats`) | 42 s of 215 s | 3,725 s of 7,200 s | No duration |
+|---|---|---|---|
+| `elapsed` (`Elapsed`) | `0:42` | `1:02:05` | The position |
+| `remaining` (`Remaining`) | `2:53` | `57:55` | Empty |
+| `duration` (`Duration`) | `3:35` | `2:00:00` | Empty |
+
+Hours appear only when the value shown reaches one, and every segment below the leading one is padded to
+two digits. A caption bound to `remaining` or `duration` disappears for a live stream rather than counting
+down from nothing.
+
+## A live stream
+
+```csharp
+UiProgressReference.Advancing(positionMs, now)   // no durationMs
+```
+
+With no duration the bar draws an empty track and only `elapsed` has anything to show.
+
+## Fallbacks
+
+```csharp
+Fallback = new UiRangeBar { Key = "progressFallback", Start = 0, End = 42_000d / 215_000 },
+```
+
+Give both a fallback holding the value at the anchor - a `UiRangeBar` for the bar, a `UiTextRun` for the
+text - so an older reader shows the right picture at the wrong second rather than nothing.
 
 ## Properties
 
 ### `macrodeck.progress-bar`
 
-| Property | Meaning | Absent means |
-|---|---|---|
-| `value` | The progress reference the reader resolves | An empty track is drawn |
-| `startColor` | The colour at the start of the filled span, as `#rrggbb` | **The reader's own accent colour** |
-| `endColor` | The colour at the head of the filled span, as `#rrggbb` | **The reader's own accent colour** |
-| `thickness` | The track's thickness on the cross axis, a length | Left to the reader |
-
-`macrodeck.progress-bar`'s geometry is `ui.range-bar`'s, exactly, with the span always beginning at the
-track's start and no marker - the two draw the same picture, and only where the end of the span comes from
-differs. The end is `position(t) / durationMs`, clamped to `0..1`, and it is `0` when the reference carries
-no `durationMs` - a fraction of an unknown whole is not a number a reader may invent. See
-[Range bar](/ui/components/range-bar/) for the shared geometry.
+| Property | Values | Default | Meaning |
+|---|---|---|---|
+| `Value` (`value`) | A progress reference | An empty track | The position to draw. |
+| `StartColor` (`startColor`) | `#rrggbb` | The reader's accent colour | The colour at the start of the filled span. |
+| `EndColor` (`endColor`) | `#rrggbb` | The reader's accent colour | The colour at the head of the filled span. |
+| `Thickness` (`thickness`) | A length | Left to the reader | The track's cross-axis thickness. |
 
 ### `macrodeck.progress-text`
 
-| Property | Meaning | Absent means |
-|---|---|---|
-| `value` | The progress reference the reader resolves | Nothing is drawn |
-| `format` | Which derivation to show - `elapsed`, `remaining` or `duration` | A reader draws nothing for a format it does not know |
-| `size` | The font size, a length | Left to the reader |
-| `minSize` | The floor `size` may shrink to so the run fits its box | The run never shrinks; it ellipsizes instead |
-| `weight` | The font weight | `regular` |
-| `role` | The semantic colour | `primary` |
-| `align` | Alignment within the run's own box | `start` |
+| Property | Values | Default | Meaning |
+|---|---|---|---|
+| `Value` (`value`) | A progress reference | Nothing is drawn | The position to draw. |
+| `Format` (`format`) | `elapsed`, `remaining`, `duration` | - | Which derivation to draw; an unknown value draws nothing. |
+| `Size` (`size`) | A length | Left to the reader | The font size. |
+| `MinSize` (`minSize`) | A length | Never shrinks; ellipsizes instead | The floor `size` may shrink to so the run fits. |
+| `Weight` (`weight`) | A font weight | `regular` | The font weight. |
+| `Role` (`role`) | A text role | `primary` | The semantic colour. |
+| `Align` (`align`) | A `UiComponentAlignments` value | `start` | Alignment within the run's own box. |
 
-Every format is a duration, not a clock time, so none of them takes a zone and none is drawn the way
-`macrodeck.dynamic-text`'s `time` format is - a duration has no day period and no hour cycle to choose
-between. A reader draws hours only when the duration reaches one, so a three-minute track reads `3:07`
-rather than `0:03:07`, and pads every segment below the leading one to two digits. `remaining` and
-`duration` are empty when the reference carries no `durationMs`, so a caption bound to either disappears
-rather than counting down from nothing or showing a whole that does not exist. Digits are drawn with equal
-advance width, so the run does not shift sideways as it counts.
+## Events
 
-## Supported children
+None. Both are read-only - to let the user drag the position, use a [Slider](/ui/components/slider/).
 
-Neither carries children. Both are leaves.
+## Children
 
-## Events and interactions
+None - both are leaves.
 
-Neither declares events. Both are read-only - drag the same position with `ui.slider` instead.
+## Layout
 
-## Layout behaviour
-
-`macrodeck.progress-bar` follows `ui.range-bar`'s layout: the track spans the element's full main-axis
-extent and is `thickness` tall on the cross axis. `macrodeck.progress-text` sizes exactly like `ui.text`:
-its box is its font size, with a line height of one. Both follow the ordinary leaf rule on their parent
-stack's main axis - `mainSize` or `fill` if declared, otherwise content extent. See
+`macrodeck.progress-bar` lays out like `ui.range-bar`: the track spans the element's full main-axis
+extent and is `thickness` tall on the cross axis. `macrodeck.progress-text` sizes like `ui.text`: its box
+is its font size, with a line height of one. Both follow the ordinary leaf rule on their parent stack's
+main axis - `mainSize` or `fill` if declared, otherwise content extent. Full model:
 [Sizing](/ui/concepts/sizing/).
 
-## Example
+## Reader behaviour
 
-```csharp
-new UiProgressBar
-{
-    Key = "progress",
-    Value = UiValue.Of(UiProgressReference.Advancing(42_000, anchor, durationMs: 215_000)),
-    Thickness = 0.05,
-    Fallback = new UiRangeBar { Key = "progressFallback", /* frozen at the anchor position */ },
-}
-```
+These are `macrodeck.*` types because a reader cannot draw them from the tree alone - it must resolve
+`$progress` against its own clock. The governing contract is
+[ADR 0065](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0065-the-component-profile-authoring-contracts.md).
 
-```csharp
-new UiProgressText
-{
-    Key = "remaining",
-    Value = UiValue.Of(UiProgressReference.Advancing(42_000, anchor, durationMs: 215_000)),
-    Format = UiProgressFormats.Remaining,
-    Fallback = new UiTextRun { Key = "remainingFallback", /* the duration composed for the anchor */ },
-}
-```
+- `{"$progress":{"positionMs":42000,"durationMs":215000,"anchor":"2026-08-25T12:00:00.000Z"}}` resolves to
+  `clamp(positionMs + (t - anchor) * rate, 0, durationMs)`, where `t` is now on the reader's
+  host-synchronised clock. With no `durationMs` the upper clamp is dropped.
+- `rate` absent means `1`; `0` means halted.
+- A negative `positionMs` is clamped to zero, not rejected.
+- `positionMs`, `durationMs` and `rate` must be numbers and `anchor` an ISO-8601 instant; a `$progress`
+  member with any other member, or a missing `positionMs` or `anchor`, is rejected.
+- A reader re-evaluates at least once a second. Sub-second interpolation is allowed but not required.
+- The bar's geometry is `ui.range-bar`'s exactly, with the span starting at the track's start and no
+  marker. Its end is `position(t) / durationMs` clamped to `0..1`, and `0` with no `durationMs`.
+- Every format is a duration, not a clock time: no zone, no day period, no hour cycle.
+- `remaining` and `duration` are empty with no `durationMs`.
+- Digits are drawn with equal advance width, so the run does not shift as it counts.
+- A reader draws nothing for a `format` it does not know.
 
-Give both a `Fallback`, for the reason above: a `ui.range-bar` and a `ui.text` holding the value at the
-anchor, so a reader too old for either shows the right picture at the wrong second rather than nothing.
+## See also
+
+- [Range bar](/ui/components/range-bar/) - the shared bar geometry
+- [Time and clock](/ui/components/time/) - the same idea for the current time
+- [Slider](/ui/components/slider/)
+- [Sizing](/ui/concepts/sizing/)

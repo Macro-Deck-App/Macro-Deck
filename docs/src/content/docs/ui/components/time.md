@@ -1,83 +1,58 @@
 ---
 title: Time and clock
-description: macrodeck.dynamic-text and macrodeck.clock-dial draw a time the reader resolves itself from one shared reference shape.
+description: Draws the current time, digitally or as an analogue face, advanced by the reader's own clock.
 ---
+
+A digital time run and an analogue clock face. Both carry a time reference meaning "now, as the reader
+sees it", so the tree is built once and every reader keeps it ticking on its own clock.
 
 `macrodeck.dynamic-text`, `macrodeck.clock-dial`
 
-## Purpose
+## Example
 
-Both draw a time the reader resolves itself, rather than a time the producer already formatted. Each
-carries a `UiTimeReference` - `{"$time":{"zone":"America/New_York"}}` on the wire - which means *now, as
-the reader sees it*: the tree is built once and every renderer advances the display against its own
-synchronised clock. A ticking view therefore costs no patch and no message, and keeps running while the
-connection is down.
+```csharp
+var reference = UiValue.Of(UiTimeReference.InZone("America/New_York"));
 
-This is why the two are `macrodeck.*` rather than `ui.*`: a reader cannot draw either from the tree alone.
-It has to know what `$time` means and advance it on its own clock - see the family split on
-[Components](/ui/components/).
+new UiDynamicText
+{
+    Key = "time",
+    Value = reference,
+    Format = UiTimeFormats.Time,
+    Seconds = true,
+    Size = 0.24,
+    MinSize = 0.13,
+    Weight = UiComponentTextWeights.Bold,
+    Align = UiComponentAlignments.Center,
+}
+```
 
-They are documented on one page because they share the one reference shape and the one governing ADR
-([0065](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0065-the-component-profile-authoring-contracts.md)).
-`macrodeck.dynamic-text` says *which* instant and how to draw it as a run; `macrodeck.clock-dial` draws the
-same reference as an analogue face. Splitting the two is what lets a digital run and a dial share one value
-shape rather than each inventing its own.
+New York's time in the viewer's own language and hour cycle, with smaller muted seconds - the built-in
+Clock widget's face. It costs no patch and keeps running while the connection is down.
 
-Never compose a time out of several nodes. Separator, digit system, writing direction and the position of
-the day period all come from the reader's own language, and for `time` the hour cycle follows the user's
-app-wide time format preference (12-hour, 24-hour or the operating system's) as supplied by the host,
-falling back to the reader's language. A producer that assembles the pieces itself
-gets Korean and right-to-left languages wrong. Where a producer does need a particular shape - a deck is
-a fixed display its owner arranges, and a clock set to a 12-hour face has to stay one on every device it
-is shown on - it picks a `format` that names that shape, never a pattern of its own.
+## Time zones
 
-## Properties
+```csharp
+UiTimeReference.Now()                          // {"$time":{}}
+UiTimeReference.InZone("Europe/Berlin")        // {"$time":{"zone":"Europe/Berlin"}}
+```
 
-### `macrodeck.dynamic-text`
+A zone is an IANA id. Absent (or a null or empty id passed to `InZone`) means the reader's own zone.
 
-| Property | Meaning | Absent means |
+## Captions for the zone
+
+```csharp
+new UiDynamicText { Key = "caption", Value = reference, Format = UiTimeFormats.ZoneName }
+```
+
+| Format | `America/New_York` | No zone |
 |---|---|---|
-| `value` | The time reference the reader resolves | Nothing is drawn |
-| `format` | Which derivation to show - see the table below | A reader draws nothing for a format it does not know |
-| `seconds` | Whether the run includes seconds | It does not |
-| `size` | The font size, a length | Left to the reader |
-| `minSize` | The floor `size` may shrink to so the run fits its box | The run never shrinks; it ellipsizes instead |
-| `weight` | The font weight | `regular` |
-| `role` | The semantic colour | `primary` |
-| `color` | A literal run colour, `#rrggbb`; overrides `role` | The `role` colour |
-| `align` | Alignment within the run's own box | `start` |
+| `zone-name` | `New York` | Empty |
+| `zone-offset` | `UTC-05:00` in winter, `UTC-04:00` in summer | Empty |
 
-Every `time-*` format draws the seconds the way `time` does, and that is normative: they are drawn,
-together with the separator in front of them, at `0.55` of the run's own `size` and in the `muted` role,
-while everything else in the run uses the node's own size and role - including when `color` is set, since
-the seconds' own treatment is part of the format rather than a colour anyone chose. Digits in every format
-are drawn with equal advance width, so the run does not shift sideways as it counts.
+A caption bound to either disappears when the reference has no zone, rather than echoing the reader's
+own zone back.
 
-### `format` values
-
-| value | what the run shows |
-|---|---|
-| `time` | The clock time in the reader's own language; its hour cycle follows the user's app-wide time format preference (12h, 24h or system) when the host supplies one, else the reader's language. The pinned `time-*` formats below are unaffected |
-| `time-12h` | A 12-hour face with the reader's day period; hour `1`-`12` |
-| `time-12h-padded` | The same, hour `01`-`12` |
-| `time-24h` | A 24-hour face, no day period; hour `00`-`23` |
-| `time-24h-unpadded` | A 24-hour face, hour `0`-`23` |
-| `date` | An abbreviated weekday, day and month, ordered and punctuated by the reader's language |
-| `date-day-first` | `31/12/25` - day, month, two-digit year, each padded, `/`-separated |
-| `date-month-first` | `12/31/25` |
-| `date-iso` | `2025-12-31` - ISO 8601 field order, four-digit year |
-| `date-long` | The full weekday and month names with the day, ordered by the reader's language |
-| `zone-name` | The last segment of the reference's IANA id with underscores replaced by spaces, so `America/New_York` reads `New York` |
-| `zone-offset` | The zone's offset from UTC at that instant, `UTC+02:00`, daylight saving included |
-
-`zone-name` and `zone-offset` are both empty when the reference carries no zone, so a caption bound to
-either disappears rather than showing the reader's own zone back to them.
-
-Only `time`, `date` and `zone-name` are drawable by every reader. **Anything else needs
-`requiredComponentVersion: 2` and a fallback**, because negotiation catches an unknown node *type* and
-never an unknown property *value*: a reader that predates one of these formats would draw an empty run
-where a clock belongs. Ask for version 2 and carry a `time`/`date` run as the node's `fallback`, and such
-a reader shows the locale-default clock instead of nothing.
+## A 12/24-hour clock
 
 ```csharp
 new UiDynamicText
@@ -86,75 +61,119 @@ new UiDynamicText
     Value = reference,
     Format = UiTimeFormats.Time24Hour,
     RequiredComponentVersion = 2,
-    Fallback = new UiDynamicText
-    {
-        Key = "timeLocalized",
-        Value = reference,
-        Format = UiTimeFormats.Time,
-    },
+    Fallback = new UiDynamicText { Key = "timeLocalized", Value = reference, Format = UiTimeFormats.Time },
 }
 ```
 
-### `macrodeck.clock-dial`
+Pin a face only when the display must look the same on every device, and always through a named format,
+never a pattern of your own. Every format except `time`, `date` and `zone-name` needs
+`RequiredComponentVersion = 2` and a `time`/`date` fallback: negotiation catches unknown types, not unknown
+values, so an older reader would otherwise draw an empty run.
 
-| Property | Meaning | Absent means |
-|---|---|---|
-| `value` | The time reference the hands are drawn from | Nothing is drawn |
-| `seconds` | Whether the second hand is drawn | It is not |
-| `color` | A literal `#rrggbb` for the dial's text-coloured marks | Every mark keeps the reader's theme |
+| Format (`UiTimeFormats`) | 14:05 on 31 Dec 2025 |
+|---|---|
+| `time` (`Time`) | The reader's language and the user's app-wide 12h/24h/system preference |
+| `time-12h` (`Time12Hour`) | `2:05 PM` - hour `1`-`12`, the reader's day period |
+| `time-12h-padded` (`Time12HourPadded`) | `02:05 PM` - hour `01`-`12` |
+| `time-24h` (`Time24Hour`) | `14:05` - hour `00`-`23` |
+| `time-24h-unpadded` (`Time24HourUnpadded`) | `14:05`, but `9:05` rather than `09:05` - hour `0`-`23` |
 
-`color` reaches every mark the dial would otherwise draw in one of the reader's text colours - both tick
-weights, the hour hand and the minute hand - and stops there. The face, the second hand and the hub keep
-the theme, so the moving hand still reads against a tinted face, and the major and minor ticks stay told
-apart by the stroke and length they already differ by. It carries no version requirement: a reader that
-predates it draws a themed dial, which beats a face that vanished into a fallback.
+## Dates
 
-## Supported children
+| Format (`UiTimeFormats`) | 31 Dec 2025 |
+|---|---|
+| `date` (`Date`) | Abbreviated weekday, day and month, ordered by the reader's language |
+| `date-day-first` (`DateDayFirst`) | `31/12/25` |
+| `date-month-first` (`DateMonthFirst`) | `12/31/25` |
+| `date-iso` (`DateIso`) | `2025-12-31` |
+| `date-long` (`DateLong`) | Full weekday and month names with the day, ordered by the reader's language |
 
-Neither carries children. Both are leaves.
-
-## Events and interactions
-
-Neither declares events. Both are read-only.
-
-## Layout behaviour
-
-`macrodeck.dynamic-text` sizes exactly like `ui.text`: its box is its font size, with a line height of one.
-See [Text](/ui/components/text/) and [Sizing](/ui/concepts/sizing/).
-
-`macrodeck.clock-dial`'s geometry is normative, for the reason `ui.range-bar`'s is: none of it follows from
-the properties, and two readers that disagree on it draw visibly different clocks. Lengths are fractions of
-`d`, the largest square that fits the element's box, centred in it - a dial in a box that is not square is
-centred rather than stretched. A reader re-evaluates at least once a second and computes the hand angles
-from the whole second; a sub-second sweep is deliberately excluded, since it is not derivable from the
-reference and two readers each choosing their own interpolation would disagree. The fixtures in
-`ui-model/fixtures/component-profile/` resolve the face, tick and hand geometry, and state the three hand
-angles for one named instant so a renderer can check itself deterministically.
-
-## Examples
-
-```csharp
-new UiDynamicText
-{
-    Key = "time",
-    Value = UiValue.Of(UiTimeReference.InZone("America/New_York")),
-    Format = UiTimeFormats.Time,
-    Seconds = true,
-    Size = 0.24,
-    MinSize = 0.13,
-    Weight = UiComponentTextWeights.Bold,
-}
-```
+## An analogue face
 
 ```csharp
 new UiClockDial
 {
     Key = "dial",
-    Value = UiValue.Of(UiTimeReference.InZone("America/New_York")),
+    Value = reference,
     Seconds = true,
+    Fill = true,
+    Fallback = new UiDynamicText { Key = "dialFallback", Value = reference, Format = UiTimeFormats.Time },
 }
 ```
 
-Give both a `Fallback` for a reader too old to know either type - a `macrodeck.clock-dial` degrades to
-`macrodeck.dynamic-text`, which in turn degrades to `ui.text`, so a reader that draws no dial but
-understands a dynamic text still shows the right time.
+A dial degrades to a dynamic text, which in turn degrades to `ui.text`, so a reader that draws no dial
+still shows the right time. `Color` tints the ticks and the hour and minute hands; the face, second
+hand and hub keep the theme.
+
+## Properties
+
+### `macrodeck.dynamic-text`
+
+| Property | Values | Default | Meaning |
+|---|---|---|---|
+| `Value` (`value`) | A time reference | Nothing is drawn | The instant to show. |
+| `Format` (`format`) | A `UiTimeFormats` value | - | Which derivation to draw; an unknown value draws nothing. |
+| `Seconds` (`seconds`) | `true`, `false` | `false` | Whether a `time*` run includes seconds. |
+| `Size` (`size`) | A length | Left to the reader | The font size. |
+| `MinSize` (`minSize`) | A length | Never shrinks; ellipsizes instead | The floor `size` may shrink to so the run fits. |
+| `Weight` (`weight`) | A font weight | `regular` | The font weight. |
+| `Role` (`role`) | A text role | `primary` | The semantic colour. |
+| `Color` (`color`) | `#rrggbb` | The `role` colour | A literal run colour that overrides `role`. |
+| `Align` (`align`) | A `UiComponentAlignments` value | `start` | Alignment within the run's own box. |
+
+### `macrodeck.clock-dial`
+
+| Property | Values | Default | Meaning |
+|---|---|---|---|
+| `Value` (`value`) | A time reference | Nothing is drawn | The instant the hands show. |
+| `Seconds` (`seconds`) | `true`, `false` | `false` | Whether the second hand is drawn. |
+| `Color` (`color`) | `#rrggbb` | Every mark keeps the theme | Tints both tick weights and the hour and minute hands. |
+
+## Events
+
+None. Both are read-only.
+
+## Children
+
+None - both are leaves.
+
+## Layout
+
+`macrodeck.dynamic-text` sizes exactly like `ui.text`: its box is its font size, with a line height of
+one. `macrodeck.clock-dial` draws in `d`, the largest square that fits its box, centred rather than
+stretched. Both follow the ordinary leaf rule on their parent stack's main axis. Full model:
+[Sizing](/ui/concepts/sizing/).
+
+## Reader behaviour
+
+These are `macrodeck.*` types because a reader cannot draw them from the tree alone - it must resolve
+`$time` against its own clock. The governing contract is
+[ADR 0065](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0065-the-component-profile-authoring-contracts.md).
+
+- `{"$time":{"zone":"..."}}` means the current instant on the reader's host-synchronised clock, read in
+  that zone. Absent zone means the reader's own zone; an unrecognised zone falls back to the reader's own
+  zone rather than failing the tree.
+- A `$time` member must be an object and defines only `zone`, a string; anything else is rejected.
+  `dynamic-text`'s `value` accepts only a time reference - never a progress reference.
+- Separator, digit system, writing direction and day-period position come from the reader's language.
+  `time`'s hour cycle follows the user's app-wide preference as supplied by the host, falling back to the
+  reader's language; the pinned `time-*` formats ignore it.
+- Every `time*` format draws seconds, with the separator before them, at `0.55` of the run's `size` in
+  the `muted` role - even when `color` is set.
+- Digits are drawn with equal advance width, so the run does not shift as it counts.
+- `zone-name` is the last segment of the IANA id with underscores replaced by spaces; `zone-offset` is
+  `UTC±hh:mm` at that instant. Both are empty with no zone.
+- A reader draws nothing for a `format` it does not know. Only `time`, `date` and `zone-name` are
+  guaranteed at component version 1.
+- A reader that predates dial `color` draws a themed dial; `color` carries no version requirement.
+- A dial re-evaluates at least once a second and computes hand angles from the whole second. No
+  sub-second sweep - it is not derivable from the reference.
+- Dial lengths are fractions of `d`. The fixtures in `ui-model/fixtures/component-profile/` resolve the
+  face, tick and hand geometry and state the three hand angles for one named instant.
+
+## See also
+
+- [Progress](/ui/components/progress/) - the same idea for a playback position
+- [Text](/ui/components/text/)
+- [Components](/ui/components/)
+- [Sizing](/ui/concepts/sizing/)

@@ -1,95 +1,123 @@
 ---
 title: Slider
-description: ui.slider is a draggable level - a rounded track carrying a filled span, and the interactive counterpart of ui.range-bar.
+description: A draggable level on a rounded track, the interactive counterpart of the range bar.
 ---
 
+A draggable level: a rounded track carrying a filled span. It holds a fraction of the track in `0..1`,
+not a value in your own units.
+
 `ui.slider`
-
-## Purpose
-
-`ui.slider` is a draggable level: a rounded track carrying a filled span, and the interactive counterpart
-of `ui.range-bar`. It carries a **level** - a fraction of its track in `0..1` - rather than a value in your
-own units, and the number beside it is an ordinary `ui.text` you patch yourself.
-
-The fraction is what makes the control feel local: a reader snaps and paints the level it computed
-straight away and reconciles with the producer afterwards, so a drag never waits for a round trip. It also
-keeps your units - a track duration, a decibel, a percentage - out of every renderer, along with the job of
-formatting them.
-
-## Properties
-
-| Property | Meaning | Absent means |
-|---|---|---|
-| `level` | The filled fraction of the track, `0..1` | `0` |
-| `step` | The granularity `level` snaps to, in the same fraction space | The level is continuous |
-| `levelColor` | The filled span's colour, as `#rrggbb` | **The reader's own accent colour** |
-| `direction` | The axis the level travels along - `horizontal` or `vertical` | `horizontal` - unlike `ui.stack`, where absent means vertical |
-| `thickness` | The drawn track's thickness on the cross axis, a length | Left to the reader |
-
-`levelColor` is a literal colour rather than a role for the same reason a range bar's `startColor` is - see
-[Colours and text](/ui/concepts/theming/). Its absent meaning is spelled by omitting the key rather
-than by a role, because a colour vocabulary with one member is an absence with extra steps.
-
-When `step` is present, the level is snapped to `round(level / step) * step`, clamped to `0..1`, before it
-is painted or sent. A tie rounds up - stated because the obvious rounding primitive differs by platform,
-and a reader that rounded half to even would paint one grid point while the producer acted on its
-neighbour.
-
-`direction` is the axis the level travels along, not the axis the element occupies in its parent stack.
-`vertical` runs **bottom to top** - up is more.
-
-## Supported children
-
-None. `ui.slider` is a leaf.
-
-## Events and interactions
-
-**Interaction is offered only where it is declared.** A node whose `events` is empty carries no `events`
-property at all and is drawn as a level the user cannot touch - there is deliberately no separate disabled
-property to contradict it.
-
-| Event | When | Payload |
-|---|---|---|
-| `adjust` | An intermediate level, while the user is still working the control | The level, as a bare number |
-| `change` | The level the interaction ended on, sent once | The level, as a bare number |
-
-A reader sends `adjust` no more than ten times a second, and never after the `change` that ended the
-interaction; it sends only the names the node declares. That split is how a producer takes the value the
-user landed on without freezing the display on the way there: act on `change` alone and let `adjust` move
-the level. A seek slider that acted on every intermediate value would drag the audio through every
-waypoint between here and the target; one that ignored them entirely would leave the user pushing a
-control that does not move. See [Events](/ui/concepts/events/) for the shared interaction model.
-
-## Layout behaviour
-
-The element's **whole box** is the interactive surface, and the drawn track is smaller than it - not an
-oversight, but the point: a pill a few units thick on a deck tile is not a target a thumb can hit, so a
-reader that made only the track draggable would draw the right picture and ship an unusable control. A
-pointer anywhere in the box sets the level to its position projected onto `direction`, clamped to `0..1`;
-the cross-axis position is ignored, and a pointer that leaves the box mid-drag keeps controlling the
-element until it is released.
-
-`thickness` only sizes the drawn track, not the element. On its parent stack's main axis the slider follows
-the ordinary rule - `mainSize` or `fill` if declared, otherwise its content extent. See
-[Sizing](/ui/concepts/sizing/).
-
-The track and the thumb are normative geometry a reader implements exactly - the fixtures in
-`ui-model/fixtures/component-profile/` resolve both at two sizes.
 
 ## Example
 
 ```csharp
 new UiSlider
 {
-    Key = "track",
-    Level = UiValue.From(() => (state.Value.Volume - min) / (max - min)),
-    Step = UiValue.From(() => step / (max - min)),
-    Thickness = UiSize.FromBasis(0.12, 0.55),
+    Key = "volume",
     Fill = true,
+    Level = UiValue.From(() => state.Value.Volume / 100.0),
+    Step = 0.05,
+    Thickness = UiSize.FromBasis(0.12, 0.55),
     Events =
     [
-        UiEventHandler.On(UiComponentEvents.Adjust, data => Apply(data, push: false)),
-        UiEventHandler.On(UiComponentEvents.Change, data => Apply(data, push: true)),
+        UiEventHandler.On(UiComponentEvents.Adjust, data => Preview(data)),
+        UiEventHandler.On(UiComponentEvents.Change, data => Apply(data)),
     ],
 }
 ```
+
+A horizontal volume track snapping to 5 % steps: `adjust` moves the display while dragging, `change`
+commits the level the user landed on.
+
+## Reading the level
+
+```csharp
+UiEventOutcome Apply(UiEventData data)
+{
+    if (!data.TryGetDouble(out var level))
+    {
+        return UiEventOutcome.Rejected("The event payload is not a number.");
+    }
+
+    state.Set(state.Value with { Volume = level * 100 });
+    return UiEventOutcome.Accepted;
+}
+```
+
+Both events carry the level as a bare number. Convert it to your own units yourself; a number beside the
+slider is an ordinary `ui.text` you update.
+
+## Adjust or change
+
+Act on `change` alone for anything costly, such as a seek, and let `adjust` just move the level. Acting on
+every `adjust` would drag the target through every waypoint; ignoring both would leave a control that does
+not move.
+
+## Vertical slider
+
+```csharp
+Direction = UiComponentDirections.Vertical,
+```
+
+`Direction` is the axis the level travels along, not the element's axis in its parent. Vertical runs
+bottom to top - up is more.
+
+## Colour and fallback
+
+```csharp
+LevelColor = "#2b6cee",
+Fallback = new UiRangeBar { Key = "trackFallback", Start = 0, End = level, StartColor = "#2b6cee", EndColor = "#2b6cee" },
+```
+
+A reader without `ui.slider` draws the fallback, here the same level as a read-only range bar.
+
+## Properties
+
+| Property | Values | Default (absent) | Meaning |
+|---|---|---|---|
+| `Level` (`level`) | `0..1` | `0` | The filled fraction of the track. |
+| `Step` (`step`) | fraction of the track | Continuous | The granularity the level snaps to. |
+| `LevelColor` (`levelColor`) | `#rrggbb` | The reader's own accent colour | The filled span's colour. |
+| `Direction` (`direction`) | `horizontal`, `vertical` | `horizontal` - unlike `ui.stack` | The axis the level travels along. |
+| `Thickness` (`thickness`) | length | Left to the reader | The drawn track's thickness on the cross axis. |
+
+`LevelColor` is a literal colour, not a theme role - see [Colours and text](/ui/concepts/theming/).
+
+## Events
+
+| Event | Fires when | Payload |
+|---|---|---|
+| `adjust` (`UiComponentEvents.Adjust`) | An intermediate level while the user is still working the control | The level, a bare number |
+| `change` (`UiComponentEvents.Change`) | The interaction ended, sent once | The level, a bare number |
+
+## Children
+
+None. `ui.slider` is a leaf.
+
+## Layout
+
+The element's whole box is the interactive surface; the drawn track is smaller. `Thickness` sizes only the
+drawn track, not the element. On its parent's main axis the slider follows the ordinary rule - `MainSize`
+or `Fill` if declared, otherwise its content extent. See [Sizing](/ui/concepts/sizing/).
+
+## Reader behaviour
+
+- **Interaction only where declared.** A node with no events carries no `events` property and is drawn as
+  a level the user cannot touch; there is no disabled property.
+- **The whole box takes input.** A pointer anywhere in it sets the level to its position projected onto
+  `direction`, clamped to `0..1`; the cross-axis position is ignored. A pointer that leaves the box
+  mid-drag keeps control until release.
+- **Snapping:** with `step` present, the level becomes `round(level / step) * step`, clamped to `0..1`,
+  before it is painted or sent. A tie rounds up.
+- **Paint locally first:** the reader paints the level it computed straight away and reconciles with the
+  producer afterwards.
+- **Rate and order:** `adjust` at most ten times a second, never after the `change` that ended the
+  interaction. Only declared names are sent.
+- **Geometry is normative:** the track and thumb are implemented exactly; the fixtures in
+  `ui-model/fixtures/component-profile/` resolve both at two sizes.
+
+## See also
+
+- [Range bar](/ui/components/range-bar/)
+- [Events](/ui/concepts/events/)
+- [State and bindings](/ui/concepts/state-and-bindings/)
