@@ -1,86 +1,107 @@
 ---
 title: Samples and template
-description: The two companion repositories - a plugin template to start from, and worked sample plugins to read - and when to reach for which.
+description: What the plugin template generates, which sample plugins exist and what each one demonstrates, and how to run one.
 ---
 
-Two repositories sit alongside the main Macro Deck repository. Neither is part of the host: they exist
-so a plugin author has both a starting point and a worked reference.
+Start from the template; read the samples. Both live in their own repositories, not in the Macro Deck
+repository.
 
 | Repository | Use it when |
 | --- | --- |
-| [Macro-Deck-Plugin-Template](https://github.com/Macro-Deck-App/Macro-Deck-Plugin-Template) | You are starting a new plugin and want the project layout, `manifest.json` and `Program.cs` already in place. |
-| [Macro-Deck-Sample-Plugins](https://github.com/Macro-Deck-App/Macro-Deck-Sample-Plugins) | You have a plugin and want to see how a capability is actually implemented against a real host. |
+| [Macro-Deck-Plugin-Template](https://github.com/Macro-Deck-App/Macro-Deck-Plugin-Template) | You are starting a plugin. |
+| [Macro-Deck-Sample-Plugins](https://github.com/Macro-Deck-App/Macro-Deck-Sample-Plugins) | You want to see a capability implemented end to end. |
 
 ## The template
 
-The template repository is the intended way to start a plugin, and
-[`macrodeck-plugin new`](/cli/new/) is the intended way to reach it - it installs the
-template for you, collects the metadata, and writes only the platforms you actually target:
-
 ```bash
-macrodeck-plugin new
+macrodeck-plugin new --name "My Plugin" --id com.example.my-plugin --publisher "Example" --yes
 ```
 
-Compared with invoking the template directly, `new` also fills in the publisher, license, repository and
-homepage, and generates the `macrodeck-build.json` build recipe alongside the manifest, which [`macrodeck-plugin build`](/cli/build/) then consumes to build and package every declared platform.
+```text
+MyPlugin/
+├── MyPlugin.slnx
+├── Directory.Build.props        net10.0, nullable, analyzers for every project
+├── Directory.Packages.props     one MacroDeckSdkVersion for every Macro Deck package
+├── NuGet.config                 nuget.org plus an empty local-feed/
+├── src/MyPlugin/
+│   ├── manifest.json
+│   ├── macrodeck-build.json     one self-contained publish per platform
+│   ├── MyPlugin.csproj
+│   ├── Program.cs               CreatePlugin, logging, localization, one integration
+│   ├── PluginIntegration.cs     IPluginIntegration with one action
+│   ├── LogMessageAction.cs      the example action - replace it
+│   ├── Localization/Strings.resx
+│   ├── Assets/icon.svg          replace with your icon
+│   └── Properties/launchSettings.json   "Macro Deck - Real Host" debug profile
+└── tests/MyPlugin.Tests/        NUnit tests on MacroDeck.Plugin.Testing
+```
 
-The template is still usable on its own if you would rather not install the CLI:
+Every file in `src/MyPlugin/` is explained in [Project setup](/introduction/manual-setup/). `new`
+installs the template if needed, fills in publisher, license, repository and homepage, and writes only
+the platforms you pick - see [`macrodeck-plugin new`](/cli/new/).
+
+Without the CLI, use the template directly:
 
 ```bash
 dotnet new install "MacroDeck.Plugin.Templates@*-*"
+dotnet new macrodeck-plugin -n Acme.LightControl -o Acme.LightControl \
+  --pluginId com.acme.light-control --pluginName "Acme Light Control"
+```
+
+`@*-*` picks the newest prerelease template. `-o` creates the directory; leave it out only when you are
+already in the project directory. Cloning the template repository and renaming by hand also works; its
+README has the rename checklist.
+
+## The samples
+
+Each sample is one self-contained plugin, laid out exactly as `new` scaffolds a project. None needs an
+external service, credentials or network access.
+
+| Sample | Demonstrates |
+| --- | --- |
+| [Weather](https://github.com/Macro-Deck-App/Macro-Deck-Sample-Plugins/tree/main/src/MacroDeck.SampleWeatherPlugin) | The smallest complete plugin: plain and dynamic-options actions, read-only and writable variables, an event, a one-step config flow, a weather provider, a second language (`de`). |
+| [Music player](https://github.com/Macro-Deck-App/Macro-Deck-Sample-Plugins/tree/main/src/MacroDeck.SampleMusicPlayerPlugin) | Transport, artwork, catalogue browsing, output devices, two instances with different capabilities, dynamic event options, action interaction pickers. |
+| [REST API](https://github.com/Macro-Deck-App/Macro-Deck-Sample-Plugins/tree/main/src/MacroDeck.SampleRestApiPlugin) | A typed `HttpClient` through DI, a multi-step config flow with a secret and an OAuth branch, integration issues, notifications, API-backed variables and options. |
+| [Virtual profile](https://github.com/Macro-Deck-App/Macro-Deck-Sample-Plugins/tree/main/src/MacroDeck.SampleVirtualProfilePlugin) | A plugin-owned virtual profile with widget interactions, pushed variable updates, deck navigation, widget appearance, scripts and notifications. |
+
+The samples README has the full capability-by-sample matrix.
+
+## Run a sample
+
+```bash
+git clone https://github.com/Macro-Deck-App/Macro-Deck-Sample-Plugins
+cd Macro-Deck-Sample-Plugins
+dotnet build
+dotnet test
 ```
 
 ```bash
-dotnet new macrodeck-plugin \
-  -n Acme.LightControl \
-  -o Acme.LightControl \
-  --pluginId com.acme.light-control \
-  --pluginName "Acme Light Control"
+macrodeck-plugin run --project src/MacroDeck.SampleWeatherPlugin --stub-host
 ```
 
-`@*-*` selects the newest published template while Macro Deck 3 packages are prerelease builds. The
-standard `-o` option creates a new directory; omit it only when the current directory is already the
-project directory.
+Against a disposable stub host - no Macro Deck needed. To debug one against the desktop app, start its
+**Macro Deck - Real Host** launch profile - see [Debugging plugins](/guides/debugging/).
 
-The generated repository targets `net10.0`, includes the ASP.NET Core framework reference, copies
-`manifest.json` and its icon to the output, and starts through
-`MacroDeckPlugin.CreatePlugin(args)`. Follow the [quickstart](/introduction/quickstart/) to run it.
+```bash
+cd src/MacroDeck.SampleWeatherPlugin
+macrodeck-plugin build --output ../../artifacts
+```
 
-If you prefer to understand and create each file yourself, use
-[Create a plugin manually](/introduction/manual-setup/). Cloning the template repository and
-renaming its project, namespace and manifest fields by hand is also supported; the repository README
-tracks the complete rename checklist.
+Builds and packs every platform, like your own plugin.
 
-## The sample plugins
+## Not in the samples
 
-The sample plugins are worked, out-of-process plugins exercising actions, variables, events, config
-flow, weather and icons together against a real host. They live in their own repository because they
-are published examples rather than part of the host's build, and they are updated there.
+Two things ship as packages in the Macro Deck SDK instead - reference them from your own test project:
 
-Read a sample when the reference tells you *what* a contract is and you want to see *how* it is
-satisfied end to end - what a config flow's steps look like in practice, how a provider-shaped
-capability declares one provider and addresses runtime instances, or how `IPluginCatalogNotifier` is
-used to tell the host a catalogue changed.
-
-## What ships inside this repository instead
-
-Two things a plugin author might expect to find in the samples repository deliberately do not:
-
-- **`MacroDeck.Plugin.Testing`** - the loopback test host, fakes and assertions used to test a plugin
-  without a real Macro Deck. See [testing plugins](/features/testing/).
-- **The conformance suite** - the framework-agnostic contract suite, runnable with
-  `macrodeck-plugin test`, with stable check ids you can gate CI on. See
-  [conformance](/reference/conformance/).
-
-Both are shipped packages, not samples: use them in your own test project rather than copying anything
-out of a sample.
+- **`MacroDeck.Plugin.Testing`** - loopback test host, fakes and assertions. See
+  [Testing plugins](/features/testing/).
+- **The conformance suite** - `macrodeck-plugin test`, with stable check ids for CI. See
+  [Conformance](/reference/conformance/).
 
 ## See also
 
 - [Quickstart](/introduction/quickstart/) - create and run a plugin from the template.
-- [Create a plugin manually](/introduction/manual-setup/) - assemble the same required files
-  yourself.
-- [Debugging plugins](/guides/debugging/) - run the project from an IDE against a real host.
-- [Plugin hosting](/reference/plugin-hosting/) - the builder API and registration modes the template uses.
-- [Contributing an integration](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/development/contributing-integrations.md) - if what you want is an *in-process*
-  integration shipped with the host, rather than a plugin of your own.
+- [Project setup](/introduction/manual-setup/) - every generated file, written by hand.
+- [Plugin hosting](/reference/plugin-hosting/) - the builder API the template uses.
+- [Contributing an integration](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/development/contributing-integrations.md) -
+  for an in-process integration shipped with the host rather than a plugin.

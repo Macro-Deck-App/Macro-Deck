@@ -47,6 +47,6 @@ the process starts, and any override - however it is computed - defeats the heal
 No code-fix providers. Every rule here is meant to prove itself against real plugins first; a code fix is
 a second, separable commitment this package does not make yet.
 
-See [the plugin development documentation](https://docs.macro-deck.app/introduction/getting-started/).
+See [the plugin development documentation](https://docs.macro-deck.app/introduction/quickstart/).
 
 Licensed under Apache-2.0.

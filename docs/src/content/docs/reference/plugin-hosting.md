@@ -11,68 +11,9 @@ For an integration compiled directly into Macro Deck - a contribution to the Mac
 
 The hosting package owns protocol negotiation, sessions, reconnection, heartbeats, dispatch, cancellation, host callbacks, and the reserved runtime endpoints. Plugin code implements integrations and capabilities rather than a second protocol client.
 
-## Create the project
+## Setting up a project
 
-A normal .NET console project is enough:
-
-```xml
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="MacroDeck.Plugin.Hosting" Version="3.0.0" />
-  </ItemGroup>
-</Project>
-```
-
-The hosting package builds on ASP.NET Core. You can use normal DI, configuration, logging, `HttpClientFactory`, hosted services, and middleware.
-
-## Add the manifest
-
-Plugin identity comes from `manifest.json`, not from code:
-
-```json
-{
-  "$schema": "https://schemas.macro-deck.app/plugin-manifest-v1.schema.json",
-  "manifestVersion": 1,
-  "id": "com.example.my-plugin",
-  "name": "My Plugin",
-  "version": "1.0.0",
-  "description": "What the plugin does.",
-  "icon": "assets/icon.svg",
-  "entrypoints": {
-    "win-x64": { "executable": "MyPlugin.exe" },
-    "osx-arm64": { "executable": "MyPlugin" },
-    "linux-x64": { "executable": "MyPlugin" }
-  }
-}
-```
-
-Copy the manifest and referenced assets to the output directory. See the [manifest reference](/reference/manifest/) for all fields and the [plugin CLI](/cli/) for the final `.macroDeckPlugin` artifact.
-
-## Start the plugin
-
-```csharp
-using MacroDeck.Plugin.Hosting;
-
-var plugin = MacroDeckPlugin.CreatePlugin(args)
-    .RegisterIntegration<MyIntegration>()
-    .Build();
-
-await plugin.RunAsync();
-```
-
-`RegisterIntegration<T>()` registers the integration and the capability interfaces it implements. `Build()` validates local configuration before opening a session, including manifest identity, duplicate capability ids, reserved routes, and the DI graph.
-
-## Configure services
-
-The builder exposes the normal ASP.NET Core surfaces for services, configuration, logging, environment, and middleware. Use them when your plugin needs its own dependencies or hosted services.
-
-The underlying `WebApplicationBuilder` and built `WebApplication` remain available as escape hatches. Prefer the Macro Deck APIs when they cover the use case, especially for registration, lifecycle, and protocol behavior.
+The project file, manifest, Program.cs and service registration are on [Project setup](/introduction/manual-setup/).
 
 ## Registration modes
 

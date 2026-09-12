@@ -94,6 +94,6 @@ generate, receive or hold signing keys or certificates, and there is no manual u
 not a step on the way to publishing. See
 [Publishing to the Store](https://docs.macro-deck.app/guides/publishing/).
 
-See [the plugin development documentation](https://docs.macro-deck.app/introduction/getting-started/).
+See [the plugin development documentation](https://docs.macro-deck.app/introduction/quickstart/).
 
 Licensed under Apache-2.0.

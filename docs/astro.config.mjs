@@ -63,10 +63,9 @@ export default defineConfig({
 				{
 					label: 'Get started',
 					items: [
-						'introduction/getting-started',
 						'introduction/quickstart',
 						'introduction/first-action',
-						'introduction/manual-setup',
+						{ label: 'Project setup', slug: 'introduction/manual-setup' },
 						'introduction/samples-and-template',
 					],
 				},
