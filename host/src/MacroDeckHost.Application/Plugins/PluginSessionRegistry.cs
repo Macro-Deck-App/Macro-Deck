@@ -258,6 +258,7 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 		}
 	}
 
+	// The record must outlive the connection: the plugin's closing DELETE authenticates against it.
 	public void ReleaseConnection(string sessionId, IPluginConnection connection)
 	{
 		lock (_gate)
@@ -265,6 +266,9 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 			if (_bySessionId.TryGetValue(sessionId, out var record) &&
 				ReferenceEquals(record.Connection, connection))
 			{
+				record.NonResumable = true;
+				record.State = PluginSessionState.Dropped;
+				record.DroppedAt = _timeProvider.GetUtcNow();
 				record.Connection = null;
 			}
 		}
@@ -576,8 +580,8 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 
 	private static bool IsStale(PluginSessionRecord record, DateTimeOffset now) => record.State switch
 	{
-		PluginSessionState.Dropped => record.NonResumable ||
-			(record.DroppedAt is { } droppedAt && now - droppedAt > ProtocolTimeouts.SessionResumeWindow),
+		PluginSessionState.Dropped =>
+			record.DroppedAt is { } droppedAt && now - droppedAt > ProtocolTimeouts.SessionResumeWindow,
 		PluginSessionState.Awaiting => now - record.CreatedAt > _awaitingSessionLifetime,
 		_ => false
 	};
