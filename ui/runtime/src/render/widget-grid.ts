@@ -137,7 +137,8 @@ export function renderWidgetGrid(
       },
       setPressed: (node, pressed) => {
         const tile = tiles[widgetId];
-        if (tile) {
+        // Any release clears: a root replaced mid-press reports its release under the old root's id.
+        if (tile && (!pressed || node.id === trees(widgetId)?.id)) {
           tile.treePressed = pressed;
           paintPressed(tile);
         }
