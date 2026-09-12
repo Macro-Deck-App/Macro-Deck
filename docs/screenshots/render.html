@@ -1,0 +1,56 @@
+<!doctype html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/reset.css">
+<link rel="stylesheet" href="styles/animations.css">
+<link rel="stylesheet" href="styles/icons.css">
+<link rel="stylesheet" href="styles/widget-metrics.css">
+<link rel="stylesheet" href="styles/renderer.css">
+<link rel="stylesheet" href="styles/widget-border.css">
+<style>
+  html, body { margin: 0; background: transparent; }
+  #box {
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    border-radius: var(--radius);
+  }
+</style>
+<div id="box"></div>
+<script type="module">
+  import { bundledTranslator, renderUiNode } from './runtime.js';
+
+  const name = new URLSearchParams(location.search).get('scene');
+  const scene = await (await fetch(`scenes/${name}.json`)).json();
+  const box = document.getElementById('box');
+  box.style.width = `${scene.width}px`;
+  box.style.height = `${scene.height}px`;
+  box.style.setProperty('--radius', `${scene.radius}px`);
+  box.classList.toggle('light', name.endsWith('-light'));
+
+  // A fixed clock keeps time and progress components identical on every run.
+  const fixedNow = Date.UTC(2026, 8, 12, 14, 5, 30);
+  const host = {
+    localization: bundledTranslator,
+    resourceUrl: resource => scene.resources?.[resource?.resourceId] ?? null,
+    now: () => fixedNow,
+    culture: () => 'en-US',
+    hourCycle: () => 'h23',
+    simpleRendering: () => false,
+    fontFamily: () => null,
+    fontReady: () => true,
+    uiFontKey: () => '',
+    emit: () => {},
+  };
+
+  try {
+    renderUiNode(box, scene.root, { width: scene.width, height: scene.height }, null,
+      scene.basis ?? Math.min(scene.width, scene.height), host);
+    document.title = 'ready';
+  } catch (error) {
+    document.body.textContent = String(error?.stack ?? error);
+    document.title = 'error';
+  }
+</script>

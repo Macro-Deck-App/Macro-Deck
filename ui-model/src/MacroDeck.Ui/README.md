@@ -55,7 +55,7 @@ open: an unrecognised type degrades through a node's fallback rather than failin
 
 See [ADR 0038](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0038-ui-model-and-declarative-dsl.md)
 for the design rationale and
-[the authoring guide](https://docs.macro-deck.app/sdk/ui/)
+[the authoring guide](https://docs.macro-deck.app/ui/)
 for the walkthrough. Test a view with no host and no renderer using `MacroDeck.Ui.Testing`.
 
 References only `MacroDeck.Ui.Model` and `MacroDeck.Localization`, zero `PackageReference`.

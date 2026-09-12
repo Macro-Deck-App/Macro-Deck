@@ -10,7 +10,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "screenshots": "node screenshots/shoot.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.42.0",

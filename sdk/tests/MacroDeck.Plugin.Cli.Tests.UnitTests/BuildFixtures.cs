@@ -94,7 +94,7 @@ internal static class BuildFixtures
 		return manifest.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
 	}
 
-	public static string BuildConfigJson(IReadOnlyList<string> rids)
+	public static string BuildConfigJson(IReadOnlyList<string> rids, IReadOnlyList<string>? include = null)
 	{
 		var targets = new JsonObject();
 
@@ -109,6 +109,11 @@ internal static class BuildFixtures
 		}
 
 		var config = new JsonObject { ["version"] = 1, ["targets"] = targets };
+
+		if (include is not null)
+		{
+			config["include"] = new JsonArray(include.Select(path => (JsonNode?)JsonValue.Create(path)).ToArray());
+		}
 
 		return config.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
 	}
