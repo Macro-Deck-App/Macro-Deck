@@ -47,6 +47,14 @@ public abstract record UiComponentContainer : UiContainer
 	/// </summary>
 	public UiValue<string> Answer { get; init; }
 
+	/// <summary>How many columns this element spans when its parent is a <see cref="UiGrid" />. Absent, or
+	/// below <c>1</c>, means one. Ignored under any other parent.</summary>
+	public UiValue<int> ColumnSpan { get; init; }
+
+	/// <summary>How many rows this element spans when its parent is a <see cref="UiGrid" />. Absent, or below
+	/// <c>1</c>, means one. Ignored under any other parent.</summary>
+	public UiValue<int> RowSpan { get; init; }
+
 	/// <inheritdoc />
 	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
 	{
@@ -57,6 +65,8 @@ public abstract record UiComponentContainer : UiContainer
 		properties.Set(UiComponentProperties.MainSize, MainSize.Value);
 		properties.Set(UiComponentProperties.Fill, Fill);
 		properties.Set(UiComponentProperties.Answer, Answer);
+		properties.Set(UiComponentProperties.ColumnSpan, ColumnSpan);
+		properties.Set(UiComponentProperties.RowSpan, RowSpan);
 	}
 }
 
@@ -71,6 +81,14 @@ public abstract record UiComponentLeaf : UiLeaf
 	/// siblings.</summary>
 	public UiValue<bool> Fill { get; init; }
 
+	/// <summary>How many columns this element spans when its parent is a <see cref="UiGrid" />. Absent, or
+	/// below <c>1</c>, means one. Ignored under any other parent.</summary>
+	public UiValue<int> ColumnSpan { get; init; }
+
+	/// <summary>How many rows this element spans when its parent is a <see cref="UiGrid" />. Absent, or below
+	/// <c>1</c>, means one. Ignored under any other parent.</summary>
+	public UiValue<int> RowSpan { get; init; }
+
 	/// <inheritdoc />
 	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
 	{
@@ -80,6 +98,8 @@ public abstract record UiComponentLeaf : UiLeaf
 
 		properties.Set(UiComponentProperties.MainSize, MainSize.Value);
 		properties.Set(UiComponentProperties.Fill, Fill);
+		properties.Set(UiComponentProperties.ColumnSpan, ColumnSpan);
+		properties.Set(UiComponentProperties.RowSpan, RowSpan);
 	}
 }
 
@@ -1220,5 +1240,397 @@ public sealed record UiList : UiComponentContainer
 		properties.Set(UiComponentProperties.Padding, Padding.Value);
 		properties.Set(UiComponentProperties.Background, Background);
 		properties.Set(UiComponentProperties.Direction, Direction);
+	}
+}
+
+/// <summary>
+/// A filled and stroked outline: a rectangle, rounded rectangle, circle, capsule or path.
+///
+/// <para>
+/// <b>The geometry below is normative</b>, for the reason <see cref="UiRangeBar" />'s is.
+/// </para>
+///
+/// <list type="bullet">
+/// <item><see cref="UiComponentShapes.Rectangle" /> fills the box; <see cref="UiComponentShapes.RoundedRectangle" />
+/// does too, with corners of <see cref="CornerRadius" /> clamped to half the box's smaller side;
+/// <see cref="UiComponentShapes.Circle" /> is inscribed in the smaller side and centred;
+/// <see cref="UiComponentShapes.Capsule" /> fills the box with corners of half its smaller side.</item>
+/// <item>The stroke is centred on the outline, <see cref="StrokeWidth" /> wide, and is never scaled with a
+/// path's box.</item>
+/// <item>A shape value the reader does not know draws nothing. A new shape value raises this type's component
+/// version, so a producer using one sets <see cref="UiElement.RequiredComponentVersion" /> with a
+/// fallback.</item>
+/// </list>
+///
+/// <para>
+/// A reader too old for this type draws <see cref="UiElement.Fallback" />: usually nothing, or a
+/// <see cref="UiStack" /> with the same <see cref="UiStack.Background" />.
+/// </para>
+/// </summary>
+public sealed record UiShape : UiComponentLeaf
+{
+	/// <summary>The outline - see <see cref="UiComponentShapes" />. Absent means
+	/// <see cref="UiComponentShapes.Rectangle" />.</summary>
+	public UiValue<string> Shape { get; init; }
+
+	/// <summary>The corner radius of a <see cref="UiComponentShapes.RoundedRectangle" />. Absent means
+	/// square corners.</summary>
+	public UiSize CornerRadius { get; init; }
+
+	/// <summary>The fill, as <c>#rrggbb</c>. Absent means no fill.</summary>
+	public UiValue<string> Color { get; init; }
+
+	/// <summary>The outline colour, as <c>#rrggbb</c>. Absent means no stroke.</summary>
+	public UiValue<string> StrokeColor { get; init; }
+
+	/// <summary>The outline width. Absent means no stroke.</summary>
+	public UiSize StrokeWidth { get; init; }
+
+	/// <summary>
+	/// The outline of a <see cref="UiComponentShapes.Path" /> shape, as SVG 1.1 path data restricted to the
+	/// absolute commands <c>M L H V C Q A Z</c>, with SVG's own number syntax and implicit repetition. The
+	/// coordinates are in a unit box: <c>0..1</c> spans the element's own width and height, so a path is drawn
+	/// stretched to the box while its stroke keeps its width. Each command carries a whole multiple of its
+	/// arguments (two for <c>M L</c>, one for <c>H V</c>, six for <c>C</c>, four for <c>Q</c>, seven for <c>A</c>,
+	/// none for <c>Z</c>), and the path starts with <c>M</c>. Path data breaking any of this draws nothing.
+	/// </summary>
+	public UiValue<string> Path { get; init; }
+
+	/// <inheritdoc />
+	public override string Type => UiComponents.Shape;
+
+	/// <inheritdoc />
+	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
+	{
+		ArgumentNullException.ThrowIfNull(properties);
+
+		base.DeclareProperties(properties);
+
+		properties.Set(UiComponentProperties.Shape, Shape);
+		properties.Set(UiComponentProperties.CornerRadius, CornerRadius.Value);
+		properties.Set(UiComponentProperties.Color, Color);
+		properties.Set(UiComponentProperties.StrokeColor, StrokeColor);
+		properties.Set(UiComponentProperties.StrokeWidth, StrokeWidth.Value);
+		properties.Set(UiComponentProperties.Path, Path);
+	}
+}
+
+/// <summary>
+/// One glyph of Macro Deck's built-in icon set, named by <see cref="Icon" /> from <see cref="UiIcons" />, drawn
+/// as a single-colour mask centred in a square box of <see cref="Size" />.
+///
+/// <para>
+/// A name the reader does not carry draws nothing. A name added after the first group raises this type's
+/// component version - see <see cref="UiIcons" />. A reader too old for this type draws
+/// <see cref="UiElement.Fallback" />, typically a <see cref="UiTextRun" /> saying what the icon meant.
+/// </para>
+/// </summary>
+public sealed record UiIcon : UiComponentLeaf
+{
+	/// <summary>The glyph's name - see <see cref="UiIcons" />.</summary>
+	public UiValue<string> Icon { get; init; }
+
+	/// <summary>The edge of the square the glyph is drawn in. Absent means the box's smaller side.</summary>
+	public UiSize Size { get; init; }
+
+	/// <summary>The semantic colour - see <see cref="UiComponentTextRoles" />. Absent means
+	/// <see cref="UiComponentTextRoles.Primary" />. Ignored when <see cref="Color" /> is present.</summary>
+	public UiValue<string> Role { get; init; }
+
+	/// <summary>A literal colour, as <c>#rrggbb</c>, overriding <see cref="Role" />.</summary>
+	public UiValue<string> Color { get; init; }
+
+	/// <inheritdoc />
+	public override string Type => UiComponents.Icon;
+
+	/// <inheritdoc />
+	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
+	{
+		ArgumentNullException.ThrowIfNull(properties);
+
+		base.DeclareProperties(properties);
+
+		properties.Set(UiComponentProperties.Icon, Icon);
+		properties.Set(UiComponentProperties.Size, Size.Value);
+		properties.Set(UiComponentProperties.Role, Role);
+		properties.Set(UiComponentProperties.Color, Color);
+	}
+}
+
+/// <summary>
+/// A container laying its children out in equal columns and rows.
+///
+/// <para>
+/// <b>The layout is normative.</b> The content box minus <see cref="Padding" /> is divided into
+/// <see cref="Columns" /> equal columns and as many equal rows, separated by <see cref="Gap" />. Each child in
+/// declaration order takes the first position, scanning row by row from the top left, where its whole
+/// <see cref="UiComponentLeaf.ColumnSpan" /> by <see cref="UiComponentLeaf.RowSpan" /> block is free. A span
+/// below <c>1</c> counts as <c>1</c> and a column span is clamped to <see cref="Columns" />. Every count - columns,
+/// rows and both spans - is held to at most <c>64</c>, so no single value can make a reader's placement unbounded. A child is drawn
+/// across its block; its lengths keep resolving against the widget basis, and its <c>mainSize</c> and
+/// <c>fill</c> mean nothing here. Where the parent leaves the grid's height open - inside a vertical
+/// <see cref="UiList" /> - rows are as tall as a column is wide, and the grid is as tall as its rows need.
+/// </para>
+///
+/// <para>
+/// A reader too old for this type draws <see cref="UiElement.Fallback" />, typically nested
+/// <see cref="UiStack" /> rows.
+/// </para>
+/// </summary>
+public sealed record UiGrid : UiComponentContainer
+{
+	/// <summary>The column count. Absent, or below <c>1</c>, means one.</summary>
+	public UiValue<int> Columns { get; init; }
+
+	/// <summary>The row count. Absent means as many as the children need; present means children that do not
+	/// fit are not drawn.</summary>
+	public UiValue<int> Rows { get; init; }
+
+	/// <summary>The gap between columns and between rows. Absent means none.</summary>
+	public UiSize Gap { get; init; }
+
+	/// <summary>Inner padding on every edge. Absent means none.</summary>
+	public UiSize Padding { get; init; }
+
+	/// <inheritdoc />
+	public override string Type => UiComponents.Grid;
+
+	/// <inheritdoc />
+	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
+	{
+		ArgumentNullException.ThrowIfNull(properties);
+
+		base.DeclareProperties(properties);
+
+		properties.Set(UiComponentProperties.Columns, Columns);
+		properties.Set(UiComponentProperties.Rows, Rows);
+		properties.Set(UiComponentProperties.Gap, Gap.Value);
+		properties.Set(UiComponentProperties.Padding, Padding.Value);
+	}
+}
+
+/// <summary>
+/// A level drawn along an arc: a gauge, or over a full turn a ring.
+///
+/// <para>
+/// <b>The geometry below is normative</b>, for the reason <see cref="UiRangeBar" />'s is.
+/// </para>
+///
+/// <list type="bullet">
+/// <item>Angles are degrees clockwise from twelve o'clock. The sweep is <see cref="EndAngle" /> minus
+/// <see cref="StartAngle" />, signed - a negative sweep runs counterclockwise - with its magnitude clamped to
+/// <c>360</c>.</item>
+/// <item>The arc is centred in the box, <see cref="Thickness" /> wide, with a centreline radius of
+/// <c>(min(width, height) - thickness) / 2</c> and fully rounded caps.</item>
+/// <item>The track covers the whole sweep in the reader's tertiary surface colour. The filled arc runs from
+/// the start over <see cref="Level" /> of the sweep in <see cref="LevelColor" />, or the reader's accent
+/// colour when that is absent. A level of <c>0</c> paints no filled arc.</item>
+/// </list>
+///
+/// <para>
+/// A reader too old for this type draws <see cref="UiElement.Fallback" />, typically a
+/// <see cref="UiRangeBar" /> at the same level.
+/// </para>
+/// </summary>
+public sealed record UiGauge : UiComponentLeaf
+{
+	/// <summary>The filled fraction of the sweep, in <c>0..1</c>. Absent means <c>0</c>.</summary>
+	public UiValue<double> Level { get; init; }
+
+	/// <summary>Where the arc begins. Absent means <c>-135</c>.</summary>
+	public UiValue<double> StartAngle { get; init; }
+
+	/// <summary>Where the arc ends. Absent means <c>135</c>.</summary>
+	public UiValue<double> EndAngle { get; init; }
+
+	/// <summary>The filled arc's colour, as <c>#rrggbb</c>. Absent means the reader's own accent
+	/// colour.</summary>
+	public UiValue<string> LevelColor { get; init; }
+
+	/// <summary>The arc's width.</summary>
+	public UiSize Thickness { get; init; }
+
+	/// <inheritdoc />
+	public override string Type => UiComponents.Gauge;
+
+	/// <inheritdoc />
+	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
+	{
+		ArgumentNullException.ThrowIfNull(properties);
+
+		base.DeclareProperties(properties);
+
+		properties.Set(UiComponentProperties.Level, Level);
+		properties.Set(UiComponentProperties.StartAngle, StartAngle);
+		properties.Set(UiComponentProperties.EndAngle, EndAngle);
+		properties.Set(UiComponentProperties.LevelColor, LevelColor);
+		properties.Set(UiComponentProperties.Thickness, Thickness.Value);
+	}
+}
+
+/// <summary>
+/// An on/off switch.
+///
+/// <para>
+/// <b>The geometry below is normative.</b> A capsule track of <see cref="Size" /> high and <c>1.75</c> times
+/// as wide is centred in the box; when <see cref="Size" /> is absent the track is as high as the box allows,
+/// <c>min(height, width / 1.75)</c>. A knob of diameter <c>0.8 * height</c>, inset <c>0.1 * height</c>, is
+/// painted in the reader's primary text colour at the trailing end when on and the leading end when off. The
+/// track is <see cref="LevelColor" />, or the reader's accent colour, when on and the tertiary surface colour
+/// when off.
+/// </para>
+///
+/// <para>
+/// <b>Interaction is offered only where it is declared.</b> With <see cref="UiComponentEvents.Change" />
+/// declared, the whole box is the press surface: the reader paints the press feedback on touch, and a completed
+/// press flips the drawn state at once and sends <see cref="UiComponentEvents.Change" /> with the new state as
+/// a boolean (read with <c>TryGetBoolean</c>). It holds that state until <see cref="On" /> changes or one second
+/// passes, as <see cref="UiSlider" /> holds its level. A cancelled press sends nothing.
+/// </para>
+///
+/// <para>
+/// A reader too old for this type draws <see cref="UiElement.Fallback" />, typically a
+/// <see cref="UiButton" /> whose label says the state.
+/// </para>
+/// </summary>
+public sealed record UiToggle : UiComponentLeaf
+{
+	/// <summary>Whether the switch is on. Absent means off.</summary>
+	public UiValue<bool> On { get; init; }
+
+	/// <summary>The track's colour when on, as <c>#rrggbb</c>. Absent means the reader's own accent
+	/// colour.</summary>
+	public UiValue<string> LevelColor { get; init; }
+
+	/// <summary>The track's height. Absent means as high as the box allows.</summary>
+	public UiSize Size { get; init; }
+
+	/// <inheritdoc />
+	public override string Type => UiComponents.Toggle;
+
+	/// <inheritdoc />
+	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
+	{
+		ArgumentNullException.ThrowIfNull(properties);
+
+		base.DeclareProperties(properties);
+
+		properties.Set(UiComponentProperties.On, On);
+		properties.Set(UiComponentProperties.LevelColor, LevelColor);
+		properties.Set(UiComponentProperties.Size, Size.Value);
+	}
+}
+
+/// <summary>
+/// A row of segments the user chooses one of. Each child is one segment's content, laid out across an equal
+/// share of the width.
+///
+/// <para>
+/// <b>The geometry below is normative.</b> A capsule track covers the box in the reader's tertiary surface
+/// colour. The selected segment's face is a capsule inset by <c>0.08</c> of the box height, in
+/// <see cref="LevelColor" /> or the reader's accent colour. An absent or out-of-range <see cref="Selected" />
+/// draws no face.
+/// </para>
+///
+/// <para>
+/// <b>The children are content, never controls.</b> A reader never offers a child's own events. With
+/// <see cref="UiComponentEvents.Change" /> declared, a completed press on a segment other than the drawn
+/// selection selects it at once and sends <see cref="UiComponentEvents.Change" /> with its zero-based index as
+/// a JSON number (read with <c>TryGetDouble</c>), holding it as <see cref="UiToggle" /> holds its state.
+/// </para>
+///
+/// <para>
+/// A reader too old for this type draws <see cref="UiElement.Fallback" />, typically a
+/// <see cref="UiStack" /> of buttons.
+/// </para>
+/// </summary>
+public sealed record UiSegmented : UiComponentContainer
+{
+	/// <summary>The zero-based index of the selected segment. Absent means none.</summary>
+	public UiValue<int> Selected { get; init; }
+
+	/// <summary>The selected face's colour, as <c>#rrggbb</c>. Absent means the reader's own accent
+	/// colour.</summary>
+	public UiValue<string> LevelColor { get; init; }
+
+	/// <inheritdoc />
+	public override string Type => UiComponents.Segmented;
+
+	/// <inheritdoc />
+	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
+	{
+		ArgumentNullException.ThrowIfNull(properties);
+
+		base.DeclareProperties(properties);
+
+		properties.Set(UiComponentProperties.Selected, Selected);
+		properties.Set(UiComponentProperties.LevelColor, LevelColor);
+	}
+}
+
+/// <summary>
+/// A rotary level the user turns: <see cref="UiGauge" />'s picture with a thumb, and the rotary counterpart of
+/// <see cref="UiSlider" />.
+///
+/// <para>
+/// <b>The geometry and interaction below are normative.</b>
+/// </para>
+///
+/// <list type="bullet">
+/// <item>The arc and fill are drawn exactly as <see cref="UiGauge" /> draws them. A thumb disc of radius
+/// <c>1.25 * Thickness</c> sits on the arc at <see cref="Level" />, in the reader's primary text colour, ringed
+/// by <c>0.28 * Thickness</c> in the widget's own background colour.</item>
+/// <item>The whole box is the interactive surface. The level follows the pointer's angle about the box
+/// centre, projected onto the sweep, and <b>never jumps across the ends</b>: the reader accumulates the
+/// pointer's turning and clamps it to the sweep, so once the level reaches <c>0</c> or <c>1</c> it stays
+/// there while the pointer turns further - past a gap or past the start of a full turn - and follows again
+/// as soon as the pointer turns back. A press that begins outside the sweep takes the nearer end. A pointer within
+/// <c>0.2</c> of the radius from the centre keeps the current level. A zero sweep offers no
+/// interaction.</item>
+/// <item><see cref="Step" />, adjust and change behave exactly as on <see cref="UiSlider" />.</item>
+/// </list>
+///
+/// <para>
+/// A reader too old for this type draws <see cref="UiElement.Fallback" />: a <see cref="UiSlider" /> with the
+/// same events, or a <see cref="UiRangeBar" /> when the dial declares none.
+/// </para>
+/// </summary>
+public sealed record UiDial : UiComponentLeaf
+{
+	/// <summary>The filled fraction of the sweep, in <c>0..1</c>. Absent means <c>0</c>.</summary>
+	public UiValue<double> Level { get; init; }
+
+	/// <summary>The granularity <see cref="Level" /> snaps to, as on <see cref="UiSlider.Step" />.</summary>
+	public UiValue<double> Step { get; init; }
+
+	/// <summary>Where the arc begins. Absent means <c>-135</c>.</summary>
+	public UiValue<double> StartAngle { get; init; }
+
+	/// <summary>Where the arc ends. Absent means <c>135</c>.</summary>
+	public UiValue<double> EndAngle { get; init; }
+
+	/// <summary>The filled arc's colour, as <c>#rrggbb</c>. Absent means the reader's own accent
+	/// colour.</summary>
+	public UiValue<string> LevelColor { get; init; }
+
+	/// <summary>The arc's width.</summary>
+	public UiSize Thickness { get; init; }
+
+	/// <inheritdoc />
+	public override string Type => UiComponents.Dial;
+
+	/// <inheritdoc />
+	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
+	{
+		ArgumentNullException.ThrowIfNull(properties);
+
+		base.DeclareProperties(properties);
+
+		properties.Set(UiComponentProperties.Level, Level);
+		properties.Set(UiComponentProperties.Step, Step);
+		properties.Set(UiComponentProperties.StartAngle, StartAngle);
+		properties.Set(UiComponentProperties.EndAngle, EndAngle);
+		properties.Set(UiComponentProperties.LevelColor, LevelColor);
+		properties.Set(UiComponentProperties.Thickness, Thickness.Value);
 	}
 }
