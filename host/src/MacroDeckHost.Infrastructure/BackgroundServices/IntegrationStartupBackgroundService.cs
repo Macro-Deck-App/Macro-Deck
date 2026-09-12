@@ -131,6 +131,16 @@ public class IntegrationStartupBackgroundService : HostReadyBackgroundService
 				continue;
 			}
 
+			// Bound for disabled integrations too: their config flow runs without InitializeAsync.
+			try
+			{
+				_initializer.BindGateways(integration);
+			}
+			catch (Exception ex)
+			{
+				_logger.Error(ex, "Failed to bind host gateways to integration '{IntegrationId}'", integration.Id);
+			}
+
 			if (!_registry.IsEnabled(integration.Id))
 			{
 				_logger.Information("Integration '{IntegrationId}' is disabled; skipping initialization",

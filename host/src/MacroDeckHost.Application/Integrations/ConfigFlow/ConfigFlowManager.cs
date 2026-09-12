@@ -306,6 +306,15 @@ public class ConfigFlowManager : IConfigFlowManager
 					result.ExternalUrl,
 					result.ResumeStepId);
 
+			case ConfigFlowResultKind.Complete when _mutations is not null &&
+				!_mutations.CreatesEntriesFromFlow(active.IntegrationId):
+				// An integration that creates its entries itself: completing only closes the flow, so no
+				// entry without the thing it is keyed by can come out of the dialog.
+				_flows.TryRemove(flowId, out _);
+				_oauth.Release(active.OAuthState);
+				await CloseConfigUiSessionsAsync(flowId, cancellationToken);
+				return new ConfigFlowSubmitOutcome(true, result.Kind, null, null, null, null);
+
 			case ConfigFlowResultKind.Complete:
 				await MergeCompletionValues(result.Values,
 					active.Values,

@@ -281,6 +281,7 @@ internal sealed class IntegrationInitializerTests
 			new UserNotificationStore(),
 			null!,
 			null!,
+			null!,
 			new VariableRefreshSignal(),
 			hostIssueStore ?? new FakeIntegrationHostIssueStore(),
 			TestLayoutProviders.Host(),

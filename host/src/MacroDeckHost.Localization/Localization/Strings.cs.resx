@@ -16432,4 +16432,76 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Network.Tls.UploadPairInvalid" xml:space="preserve">
     <value>Certifikát nebo soukromý klíč se nepodařilo načíst. Ověřte, že jde o platný certifikát X.509 ve formátu PEM a odpovídající nešifrovaný soukromý klíč PKCS#8.</value>
   </data>
+  <data name="Integrations.Companion.Name" xml:space="preserve">
+    <value>Macro Deck Companion</value>
+  </data>
+  <data name="Integrations.Companion.Config.ConnectTitle" xml:space="preserve">
+    <value>Připojení zařízení</value>
+  </data>
+  <data name="Integrations.Companion.Config.ConnectDescription" xml:space="preserve">
+    <value>Každý telefon nebo tablet s aplikací Macro Deck Companion má vlastní konfiguraci.</value>
+  </data>
+  <data name="Integrations.Companion.Config.InstructionConnect" xml:space="preserve">
+    <value>Otevřete v zařízení aplikaci Macro Deck Companion a připojte ji k tomuto Macro Decku. Zařízení se zde pak zobrazí samo.</value>
+  </data>
+  <data name="Integrations.Companion.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Nepodařilo se vytvořit jedinečný název proměnné. Přejmenujte konfiguraci a zkuste to znovu.</value>
+  </data>
+  <data name="Integrations.Companion.Variables.BatteryLevelPercent" xml:space="preserve">
+    <value>Stav baterie</value>
+  </data>
+  <data name="Integrations.Companion.Variables.Charging" xml:space="preserve">
+    <value>Nabíjení</value>
+  </data>
+  <data name="Integrations.Companion.Variables.Orientation" xml:space="preserve">
+    <value>Orientace</value>
+  </data>
+  <data name="Integrations.Companion.Variables.ScreenBrightnessPercent" xml:space="preserve">
+    <value>Jas obrazovky</value>
+  </data>
+  <data name="Integrations.Companion.Variables.Model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="Integrations.Companion.Variables.Platform" xml:space="preserve">
+    <value>Platforma</value>
+  </data>
+  <data name="Integrations.Companion.Variables.AppVersion" xml:space="preserve">
+    <value>Verze aplikace</value>
+  </data>
+  <data name="Integrations.Companion.Actions.SetBrightness.Name" xml:space="preserve">
+    <value>Nastavit jas obrazovky</value>
+  </data>
+  <data name="Integrations.Companion.Actions.SetBrightness.Description" xml:space="preserve">
+    <value>Nastaví jas obrazovky zařízení Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.SetOrientation.Name" xml:space="preserve">
+    <value>Nastavit orientaci</value>
+  </data>
+  <data name="Integrations.Companion.Actions.SetOrientation.Description" xml:space="preserve">
+    <value>Uzamkne zařízení Companion na výšku nebo na šířku, případně povolí automatické otáčení.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.Vibrate.Name" xml:space="preserve">
+    <value>Zavibrovat</value>
+  </data>
+  <data name="Integrations.Companion.Actions.Vibrate.Description" xml:space="preserve">
+    <value>Krátce rozvibruje zařízení Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Params.Configuration" xml:space="preserve">
+    <value>Zařízení</value>
+  </data>
+  <data name="Integrations.Companion.Options.Automatic" xml:space="preserve">
+    <value>Automaticky</value>
+  </data>
+  <data name="Integrations.Companion.Options.Portrait" xml:space="preserve">
+    <value>Na výšku</value>
+  </data>
+  <data name="Integrations.Companion.Options.Landscape" xml:space="preserve">
+    <value>Na šířku</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ConfigurationNotFound" xml:space="preserve">
+    <value>Vybrané zařízení Companion již není k dispozici.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.NotConnected" xml:space="preserve">
+    <value>Zařízení Companion není připojeno.</value>
+  </data>
 </root>
