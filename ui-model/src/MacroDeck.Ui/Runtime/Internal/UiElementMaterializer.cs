@@ -308,11 +308,12 @@ internal sealed class UiElementMaterializer
 		if (!modifier.IsWrapper)
 		{
 			if (modifier.MainSize.IsDeclared || modifier.Fill.IsDeclared || modifier.Answer.IsDeclared ||
+				modifier.ColumnSpan.IsDeclared || modifier.RowSpan.IsDeclared ||
 				modifier.Fallback is not null || modifier.RequiredComponentVersion is not null)
 			{
 				throw new UiViewException($"{where} sets only node modifiers, so it emits no node that could carry " +
-					"MainSize, Fill, Answer, a Fallback or a component version. Set them on its child, or " +
-					"assign a wrapper member.");
+					"MainSize, Fill, Answer, ColumnSpan, RowSpan, a Fallback or a component version. Set them on " +
+					"its child, or assign a wrapper member.");
 			}
 
 			MaterializeInto(child,
@@ -329,7 +330,7 @@ internal sealed class UiElementMaterializer
 		if (SizesItselfInParent(child))
 		{
 			throw new UiViewException($"{where} is a wrapper, so its child is laid out inside it and cannot set " +
-				"MainSize or Fill. Set them on the modifier instead.");
+				"MainSize, Fill, ColumnSpan or RowSpan. Set them on the modifier instead.");
 		}
 
 		region.AddNode(MaterializeStructural(modifier,
@@ -350,8 +351,10 @@ internal sealed class UiElementMaterializer
 
 		return element switch
 		{
-			UiComponentContainer container => container.MainSize.IsDeclared || container.Fill.IsDeclared,
-			UiComponentLeaf leaf => leaf.MainSize.IsDeclared || leaf.Fill.IsDeclared,
+			UiComponentContainer container => container.MainSize.IsDeclared || container.Fill.IsDeclared ||
+				container.ColumnSpan.IsDeclared || container.RowSpan.IsDeclared,
+			UiComponentLeaf leaf => leaf.MainSize.IsDeclared || leaf.Fill.IsDeclared ||
+				leaf.ColumnSpan.IsDeclared || leaf.RowSpan.IsDeclared,
 			_ => false,
 		};
 	}

@@ -156,6 +156,22 @@ describe('node modifiers', () => {
       expect(byId('list').querySelector('.widget-modifier-border')).toBeNull();
     });
 
+    it('keeps the border overlay of a toggle across a repaint', () => {
+      const tree = (on: boolean) => node('ui.stack', {}, [
+        node('ui.toggle', { on, events: ['change'], modifiers: { borderWidth: { basis: 0.02 }, borderColor: '#ffffff', radius: { basis: 0.1 } } }, [], 'toggle'),
+      ], 'root');
+      const handle = mount(tree(false));
+
+      handle.update(tree(true), { width: 120, height: 120 }, null);
+
+      const toggle = byId('toggle');
+      const overlay = toggle.querySelector(':scope > .widget-modifier-border') as HTMLElement;
+      expect(overlay).not.toBeNull();
+      expect(overlay.style.borderWidth).toBe('2.4px');
+      expect(toggle.style.getPropertyValue('outline')).toBe('');
+      expect(toggle.querySelector('.widget-toggle-track')).not.toBeNull();
+    });
+
     it('drops the border overlay once the border is gone', () => {
       const tree = (modifiers: Record<string, unknown>) =>
         node('ui.stack', {}, [node('ui.stack', { modifiers }, [], 'card')], 'root');
@@ -235,7 +251,7 @@ describe('node modifiers', () => {
         expect(subject.style.getPropertyValue('background')).withContext(type).toBe(normalized('background', '#123456'));
         expect(subject.style.getPropertyValue('border-radius')).withContext(type).toBe('12px');
         const overlay = subject.querySelector(':scope > .widget-modifier-border') as HTMLElement | null;
-        const overlaid = ['ui.stack', 'ui.button', 'ui.layer', 'ui.transform', 'ui.modifier', 'ui.grid'].includes(type);
+        const overlaid = ['ui.stack', 'ui.button', 'ui.layer', 'ui.transform', 'ui.modifier', 'ui.grid', 'ui.toggle', 'ui.segmented'].includes(type);
         expect(overlay === null).withContext(`${type} overlay`).toBe(!overlaid);
         if (!overlaid) expect(subject.style.getPropertyValue('outline')).withContext(type).toBe('1.2px solid #ffffff');
         else expect(overlay?.style.borderWidth).withContext(type).toBe('1.2px');

@@ -70,8 +70,9 @@ With only these members set, the modifier adds no node: the members land on the 
 object and the id stays the child's. The child must then build to exactly one component node - a `UiWhen`,
 `UiRepeat` or fragment child is rejected when the view is built. Nested modifiers of this kind merge onto
 the same node; setting the same member twice on one node is rejected. Because it produces no node of its
-own, such a modifier cannot set `MainSize`, `Fill`, `Answer`, `Fallback` or `RequiredComponentVersion` -
-set those on the child, or add a wrapper member to make it a `ui.modifier` node.
+own, such a modifier cannot set `MainSize`, `Fill`, `ColumnSpan`, `RowSpan`, `Answer`, `Fallback` or
+`RequiredComponentVersion` - set those on the child, or add a wrapper member to make it a `ui.modifier`
+node.
 
 ## Events on a modifier
 
@@ -100,8 +101,9 @@ child both handle a name, both run: the child first, then the modifiers from the
 The constants live on `UiComponentModifiers` (`GestureSlop`, `SwipeMinDistance`, `SwipeMaxDurationMs`,
 `GestureThrottleMs`). A gesture can be declared on any node, with or without a modifier.
 
-- **Inner controls win.** A pointer that starts inside a descendant that takes a value (a slider, a text
-  field), declares a gesture of its own, or is a `ui.list` belongs to that descendant.
+- **Inner controls win.** A pointer that starts inside a descendant that takes a value (a slider, dial,
+  toggle, segmented control or text field), declares a gesture of its own, or is a `ui.list` belongs to
+  that descendant.
 - **An inner press wins until slop.** Once the pointer travels past `0.04` of the basis, the outer gesture
   takes over and the press ends with `press-end` and no `press`.
 - **Touch action.** A node declaring a gesture turns off the browser's own panning and zooming for its box.
@@ -126,7 +128,7 @@ contract](/ui/concepts/events/#interaction-only-where-declared).
 - **On the wire it is presentation.** `disabled: true` dims the node to `0.4` opacity once - a disabled
   region inside another is not dimmed twice - and marks the subtree `aria-disabled`.
 - **Readers refuse events inside a disabled region**, even when a hand-written tree still declares them, and
-  a slider or text field inside one cannot be edited.
+  a slider, dial, toggle, segmented control or text field inside one cannot be operated.
 - **A disabled region absorbs every press on the tile.** If any node in a deck tile's tree is disabled,
   pressing anywhere on the tile runs none of the tile's own flows. `Disabled` therefore means "a control
   that is unavailable"; to fade something that is only decorative, use `Opacity` instead.
@@ -215,10 +217,12 @@ the surplus is not handed to its siblings. See [Sizing](/ui/concepts/sizing/#fra
 - **`radius` is ignored on the tree root**, because the tile's corner belongs to the surface
   ([ADR 0065](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0065-the-component-profile-authoring-contracts.md#the-corner-radius-is-part-of-the-surface)).
 - **The border is drawn inside the edge.** It takes no space, so the node's content and its
-  children's boxes are unchanged. On a stack, button, layer, list, transform or `ui.modifier` it is a layer
-  above the content, including a button's artwork; on every other node it is an outline, which an older
-  engine may draw with square corners.
+  children's boxes are unchanged. On a stack, button, layer, transform, grid, toggle, segmented control or
+  `ui.modifier` it is a layer above the content, including a button's artwork; on every other node it is an
+  outline, which an older engine may draw with square corners.
 - **Opacity** covers the whole wrapper; a disabled wrapper at `opacity: 0.5` shows at `0.2`.
+- **A fallback is its own node.** A reader drawing a node's fallback draws the fallback's own `modifiers`,
+  not the replaced node's; give the fallback the ones it needs.
 - **Accessibility.** `accessibilityLabel` becomes the node's accessible name and `accessibilityHint` its
   description, the latter with weaker support at the Safari 9 floor. A labelled node that claims a press
   gets the button role, other labelled nodes without a native role the group role; a text field keeps its

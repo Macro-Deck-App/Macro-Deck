@@ -42,7 +42,7 @@ const NATIVE_ROLE_TAGS = ['input', 'textarea', 'select', 'img', 'svg'];
 
 const OVERLAY_BORDER_TYPES: readonly string[] = [
   UiComponents.Stack, UiComponents.Button, UiComponents.Layer, UiComponents.Transform, UiComponents.Modifier,
-  UiComponents.Grid,
+  UiComponents.Grid, UiComponents.Toggle, UiComponents.Segmented,
 ];
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {

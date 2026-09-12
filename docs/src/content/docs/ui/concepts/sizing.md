@@ -104,9 +104,9 @@ new UiModifier
 
 A [modifier](/ui/components/modifier/) with a `Frame` fixes or clamps its own box and centres it in the
 space it is given; `Padding` on a modifier insets its one child. Wrapping moves the child's slot to the
-wrapper: `MainSize` and `Fill` go on the `UiModifier`, and a wrapped child that sets them is rejected when
-the view is built. A filling wrapper's maximum clamps only its own size - the space it gives up is not
-redistributed to its siblings.
+wrapper: `MainSize`, `Fill`, `ColumnSpan` and `RowSpan` go on the `UiModifier`, and a wrapped child that
+sets them is rejected when the view is built. A filling wrapper's maximum clamps only its own size - the
+space it gives up is not redistributed to its siblings.
 
 ## Reference
 

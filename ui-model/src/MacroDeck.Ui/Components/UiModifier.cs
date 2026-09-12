@@ -19,7 +19,8 @@ namespace MacroDeck.Ui.Components;
 /// <see cref="UiViewException" />. The child must be a single element: a <see cref="UiWhen" />, a
 /// <see cref="UiRepeat{TItem}" /> or a <see cref="UiFragment" /> is rejected, and so are
 /// <see cref="UiComponentContainer.MainSize" />, <see cref="UiComponentContainer.Fill" />,
-/// <see cref="UiComponentContainer.Answer" />, a <see cref="UiElement.Fallback" /> or a component version on
+/// <see cref="UiComponentContainer.Answer" />, <see cref="UiComponentContainer.ColumnSpan" />,
+/// <see cref="UiComponentContainer.RowSpan" />, a <see cref="UiElement.Fallback" /> or a component version on
 /// the modifier itself, since there is no node to carry them.
 /// </para>
 ///
@@ -28,8 +29,9 @@ namespace MacroDeck.Ui.Components;
 /// <see cref="Mask" />, <see cref="Frame" />): a <see cref="UiComponents.Modifier" /> node is emitted with its
 /// own id from <see cref="UiElement.Key" />, carrying the wrapper properties, the node modifiers as its own
 /// <see cref="UiComponentProperties.Modifiers" /> and the handlers. Its child must not set
-/// <see cref="UiComponentContainer.MainSize" /> or <see cref="UiComponentContainer.Fill" />; size the wrapper
-/// instead. A reader that does not know the type draws <see cref="UiElement.Fallback" />, and no fallback is
+/// <see cref="UiComponentContainer.MainSize" />, <see cref="UiComponentContainer.Fill" />,
+/// <see cref="UiComponentContainer.ColumnSpan" /> or <see cref="UiComponentContainer.RowSpan" />, since a
+/// parent reads those from its direct child; set them on the wrapper instead. A reader that does not know the type draws <see cref="UiElement.Fallback" />, and no fallback is
 /// invented when none is given.
 /// </para>
 ///

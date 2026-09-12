@@ -237,6 +237,45 @@ public class UiModifierTests
 	}
 
 	[Test]
+	public void A_wrapped_child_that_spans_grid_cells_is_rejected()
+	{
+		Assert.Throws<UiViewException>(() => Build(new UiGrid
+		{
+			Key = "grid",
+			Columns = 3,
+			Children =
+			[
+				new UiModifier
+				{
+					Key = "m",
+					Padding = 0.05,
+					Child = new UiTextRun { Key = "t", Text = "x", ColumnSpan = 2 },
+				},
+			],
+		}));
+	}
+
+	[Test]
+	public void A_node_modifier_that_sets_a_grid_span_is_rejected_because_no_node_carries_it()
+	{
+		Assert.Throws<UiViewException>(() => Build(new UiGrid
+		{
+			Key = "grid",
+			Columns = 3,
+			Children =
+			[
+				new UiModifier
+				{
+					Key = "m",
+					Background = "#112233",
+					RowSpan = 2,
+					Child = new UiTextRun { Key = "t", Text = "x" },
+				},
+			],
+		}));
+	}
+
+	[Test]
 	public void A_reader_without_ui_modifier_negotiates_the_wrapper_to_its_fallback()
 	{
 		var tree = Build(new UiModifier
