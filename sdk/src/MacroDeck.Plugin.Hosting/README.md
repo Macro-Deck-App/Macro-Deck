@@ -57,8 +57,8 @@ Three behaviors changed recently, worth knowing if you built against an earlier 
   config value your own `InitializeAsync` just read, a device that came or went. Fire-and-forget, like
   `IEventPublisher.Publish`: never throws, and a no-op with no open session.
 
-See [the plugin hosting guide](https://docs.macro-deck.app/sdk/hosting/)
-for the full detail on both, and [the capability parity matrix](https://docs.macro-deck.app/sdk/capability-parity/)
+See [the plugin hosting guide](https://docs.macro-deck.app/reference/plugin-hosting/)
+for the full detail on both, and [the capability parity matrix](https://docs.macro-deck.app/reference/capability-parity/)
 for every documented difference from an in-process integration.
 
 Licensed under Apache-2.0.

@@ -1,78 +1,193 @@
 ---
 title: Your first action
-description: Add a minimal action to the template plugin and trigger it from a Macro Deck button.
+description: Add an action with a parameter to the template plugin, trigger it, and show its state on the button.
 ---
 
-If the [Quickstart](/introduction/quickstart/) ends with `Session established`, your generated
-plugin is ready for its first behavior. The examples below use the Quickstart's
-`Acme.LightControl` project; substitute the name and namespace you chose if they differ.
+This continues the [Quickstart](/introduction/quickstart/) project, `Acme.LightControl`. You add a
+**Set brightness** action with a 0-100 slider, trigger it, and then make the button show whether the
+light is on.
 
-## Add the action
+## 1. Add the strings
 
-Create `src/Acme.LightControl/SayHelloAction.cs`:
+Every user-facing string lives in `src/Acme.LightControl/Localization/Strings.resx`. Add these entries
+before `</root>`:
+
+```xml
+<data name="Actions.SetBrightness.Name" xml:space="preserve">
+  <value>Set brightness</value>
+</data>
+<data name="Actions.SetBrightness.Description" xml:space="preserve">
+  <value>Sets the light to a brightness between 0 and 100.</value>
+</data>
+<data name="Actions.SetBrightness.Brightness.Label" xml:space="preserve">
+  <value>Brightness</value>
+</data>
+```
+
+The build turns each key into a method on the generated `Strings` class, for example
+`Strings.Actions.SetBrightness.Name()`. See [Localization](/features/localization/).
+
+## 2. Add the action
+
+Create `src/Acme.LightControl/SetBrightnessAction.cs`:
 
 ```csharp
+using System.Globalization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using Serilog;
 
 namespace Acme.LightControl;
 
-internal sealed class SayHelloAction : IActionDefinition
+public sealed class SetBrightnessAction(ILogger logger) : IActionDefinition
 {
-    public string Id => "say-hello";
+	private double _brightness;
 
-    public LocalizedText Name => "Say hello";
+	public string Id => "set-brightness";
 
-    public LocalizedText Description => "Writes a greeting to the plugin console.";
+	public LocalizedText Name => Strings.Actions.SetBrightness.Name();
 
-    public IReadOnlyList<ActionParameter> Parameters { get; } = [];
+	public LocalizedText Description => Strings.Actions.SetBrightness.Description();
 
-    public IActionExecutor CreateExecutor() => new Executor();
+	public IReadOnlyList<ActionParameter> Parameters { get; } =
+	[
+		ActionParameter.Slider("brightness", 0, 100,
+			label: Strings.Actions.SetBrightness.Brightness.Label(),
+			defaultValue: 100),
+	];
 
-    private sealed class Executor : IActionExecutor
-    {
-        public Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
-        {
-            Console.WriteLine("Hello from Macro Deck!");
-            return ActionResult.SucceededTask;
-        }
-    }
+	public IActionExecutor CreateExecutor() => new Executor(this, logger);
+
+	private sealed class Executor(SetBrightnessAction action, ILogger logger) : IActionExecutor
+	{
+		public Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
+		{
+			var brightness = Convert.ToDouble(
+				context.Parameters.GetValueOrDefault("brightness")?.ToString() ?? "100",
+				CultureInfo.InvariantCulture);
+
+			action._brightness = brightness;
+			logger.Information("Brightness set to {Brightness}", brightness);
+			return ActionResult.SucceededTask;
+		}
+	}
 }
 ```
 
-The action has no parameters. Its executor writes one line and reports success when Macro Deck invokes
-it.
+- `Id` is stored in users' profiles. Never rename it once released.
+- The executor reads the parameter by name from `context.Parameters`.
 
-## Register the action
+## 3. Register it
 
-Open `src/Acme.LightControl/PluginIntegration.cs`. The template already exposes an empty
-`Actions` collection; replace that line:
+In `src/Acme.LightControl/PluginIntegration.cs`:
 
 ```diff
-- public IReadOnlyList<IActionDefinition> Actions { get; } = [];
-+ public IReadOnlyList<IActionDefinition> Actions { get; } = [new SayHelloAction()];
+- Actions = [new LogMessageAction(logger)];
++ Actions = [new LogMessageAction(logger), new SetBrightnessAction(logger)];
 ```
 
-Restart the plugin after changing this collection so the host receives the updated action catalogue.
+```bash
+dotnet build
+```
 
-## Trigger it from Macro Deck
+## 4. Trigger it from a test
 
-Follow [Debugging plugins](/guides/debugging/) to enroll the plugin once and start the
-**Macro Deck - Real Host** profile from your IDE. Then:
+Add to `tests/Acme.LightControl.Tests/PluginIntegrationTests.cs`, inside `PluginIntegrationTests`:
 
-1. Set a breakpoint on `Console.WriteLine("Hello from Macro Deck!");`.
-2. Assign the plugin's **Say hello** action to a Macro Deck button.
-3. Press the button.
+```csharp
+[Test]
+public async Task Set_brightness_logs_the_new_value()
+{
+	await using var harness = CreateHarness();
+	await harness.InitializeIntegrationsAsync();
 
-The debugger stops in `ExecuteAsync`. Continue execution and the IDE console prints:
+	var outcome = await harness.Actions.ExecuteAsync(
+		"set-brightness",
+		new Dictionary<string, object?> { ["brightness"] = 40 });
+
+	Assert.That(outcome.Succeeded, Is.True);
+	Assert.That(harness.Logs.Events.Any(e => e.Message.Contains("Brightness set to 40")), Is.True);
+}
+```
+
+```bash
+dotnet test
+```
 
 ```text
-Hello from Macro Deck!
+Passed!  - Failed:     0, Passed:     8, Skipped:     0, Total:     8
 ```
 
-If the action is not listed, confirm that the plugin reconnected after the code change and is ready;
-the [debugging guide](/guides/debugging/) shows how to inspect readiness and connection diagnostics.
+The harness runs your action through the same capability handler the host calls. See
+[Testing plugins](/features/testing/).
 
-For parameters, failures and asynchronous work, continue with the
-[Actions reference](/sdk/capabilities/#actions) or a
-[worked sample plugin](/introduction/samples-and-template/).
+## 5. Trigger it from a button
+
+Run the plugin against Macro Deck - press F5 in your IDE or run it with the CLI, see
+[Debugging plugins](/guides/debugging/):
+
+```bash
+macrodeck-plugin run --project src/Acme.LightControl
+```
+
+Put **Set brightness** on a button, pick a value, lock the deck and press the button. The plugin output
+shows:
+
+```text
+[plugin]       Brightness set to 40
+```
+
+Restart the plugin after changing its `Actions` so the host receives the new list.
+
+## 6. Optional: show the state on the button
+
+Implement `IStateProviderActionDefinition` so a button can follow the light:
+
+```diff
+- public sealed class SetBrightnessAction(ILogger logger) : IActionDefinition
++ public sealed class SetBrightnessAction(ILogger logger) : IActionDefinition, IStateProviderActionDefinition
+```
+
+```csharp
+public Task<ActionStateSnapshot?> GetActionStateAsync(
+	IReadOnlyDictionary<string, object?> parameters,
+	CancellationToken cancellationToken)
+{
+	ActionStateDefinition[] states =
+	[
+		new("off", MacroDeckStrings.States.Off()),
+		new("on", MacroDeckStrings.States.On()),
+	];
+	return Task.FromResult<ActionStateSnapshot?>(new(states, _brightness > 0 ? "on" : "off"));
+}
+```
+
+Check it in the test:
+
+```csharp
+var state = await harness.Actions.GetActionStateAsync("set-brightness");
+Assert.That(state.Data!.Value.GetProperty("activeStateId").GetString(), Is.EqualTo("on"));
+```
+
+And against the conformance suite, which now checks the state snapshots too:
+
+```bash
+macrodeck-plugin test --project src/Acme.LightControl
+```
+
+```text
+Passed: 27, Failed: 0, Skipped: 22
+Conformant: yes
+...
+[PASS] MDC0309 Every state-provider action's state operation returns a well-formed snapshot (Required)
+[PASS] MDC0310 Every state a state-provider action returns has an id that is a valid declared-kind identifier (Required)
+```
+
+In Macro Deck, a button running **Set brightness** can now show "On" or "Off". See
+[Button states](/features/button-states/).
+
+## Next steps
+
+- [Actions](/features/actions/) - parameter types, failures, long-running work.
+- [Button states](/features/button-states/) - default appearances, polling, expected states.
+- [Features](/features/) - everything else a plugin can offer.

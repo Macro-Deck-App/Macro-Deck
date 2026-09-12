@@ -13,7 +13,7 @@ internal static class DiagnosticDescriptors
 	// now so a rule's help link never has to change later. The trailing slash is required: Create()
 	// appends "#{id}" directly, and without it the anchor would run into the last path segment.
 	private const string HelpBaseUrl =
-		"https://docs.macro-deck.app/sdk/analyzers/";
+		"https://docs.macro-deck.app/reference/analyzers/";
 
 	public static readonly DiagnosticDescriptor InvalidManifestIdentity = Create(DiagnosticIds.InvalidManifestIdentity,
 		title: "manifest.json declares an invalid or missing identity",

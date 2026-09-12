@@ -15,6 +15,6 @@ What is in here:
 To build an out-of-process plugin, reference [`MacroDeck.Plugin.Hosting`](https://www.nuget.org/packages/MacroDeck.Plugin.Hosting)
 as well; it brings this package with it.
 
-See [the plugin development documentation](https://docs.macro-deck.app/introduction/getting-started/).
+See [the plugin development documentation](https://docs.macro-deck.app/introduction/quickstart/).
 
 Licensed under Apache-2.0.

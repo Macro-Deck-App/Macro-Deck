@@ -1,92 +1,189 @@
 ---
 title: macrodeck-plugin validate
-description: Validate a manifest, a version directory or a packed artifact against the real manifest reader, the schema, the permission vocabulary and declared file digests.
+description: Check a manifest, version directory or packed artifact and report every problem in one run.
 ---
 
-Validates a manifest, a version directory, or a packed artifact: the real manifest reader, the embedded
-JSON Schema, the permission vocabulary, and - when the manifest declares `files[]` - declared file digests
-checked against real bytes.
+Checks a manifest, a version directory or a `.macroDeckPlugin` artifact and reports every problem it finds.
 
-| Option | Default | What it does |
+## Examples
+
+Validate a staged payload directory while developing:
+
+```bash
+macrodeck-plugin validate --directory stage
+```
+
+```text
+
+com.example.my-plugin 1.0.0: 0 error(s), 0 warning(s).
+```
+
+Check that a plugin is ready to publish:
+
+```bash
+macrodeck-plugin validate --directory stage --level publication
+```
+
+```text
+error publication-metadata-missing: 'repository' is required to publish to the Macro Deck plugin ecosystem. It is not required to develop or run this plugin locally. [/repository] (publication)
+error entrypoint-not-packed: Entrypoint 'linux-x64' declares 'runtimes/linux-x64/MyPlugin', which is not in the artifact. [/entrypoints/linux-x64/executable] (package)
+error entrypoint-not-packed: Entrypoint 'win-x64' declares 'runtimes/win-x64/MyPlugin.exe', which is not in the artifact. [/entrypoints/win-x64/executable] (package)
+
+com.example.my-plugin 1.0.0: 3 error(s), 0 warning(s).
+```
+
+Validate a packed artifact (defaults to `--level package`):
+
+```bash
+macrodeck-plugin validate --artifact com.example.my-plugin-1.0.0.macroDeckPlugin
+```
+
+```text
+warning publication-metadata-missing: 'repository' is required to publish to the Macro Deck plugin ecosystem. It is not required to develop or run this plugin locally. [/repository] (publication)
+error entrypoint-not-packed: Entrypoint 'linux-x64' declares 'runtimes/linux-x64/MyPlugin', which is not in the artifact. [/entrypoints/linux-x64/executable] (package)
+error entrypoint-not-packed: Entrypoint 'win-x64' declares 'runtimes/win-x64/MyPlugin.exe', which is not in the artifact. [/entrypoints/win-x64/executable] (package)
+
+com.example.my-plugin 1.0.0: 2 error(s), 1 warning(s).
+```
+
+A manifest with several defects - every independent problem is reported at once:
+
+```bash
+macrodeck-plugin validate --directory broken
+```
+
+```text
+error invalid-version: '1.0' is not a valid SemVer version. [/version]
+warning unknown-permission: 'host:everything' is not a known permission. [/permissions/0]
+
+com.example.my-plugin 1.0: 1 error(s), 1 warning(s).
+```
+
+Pointing at the project instead of the build output:
+
+```bash
+cd ~/src/MyPlugin/src/MyPlugin
+macrodeck-plugin validate
+```
+
+```text
+error source-directory: Entrypoint 'osx-arm64' resolves to '~/src/MyPlugin/src/MyPlugin/runtimes/osx-arm64/MyPlugin', which does not exist. This looks like a source directory - validate the build output instead, e.g. bin/Release/net10.0.
+
+~/src/MyPlugin/src/MyPlugin/manifest.json: 1 error(s), 0 warning(s).
+```
+
+Machine-readable output for CI:
+
+```bash
+macrodeck-plugin validate --directory stage --level publication --output json
+```
+
+```json
+{
+  "valid": false,
+  "pluginId": "com.example.my-plugin",
+  "version": "1.0.0",
+  "level": "publication",
+  "problems": [
+    {
+      "severity": "error",
+      "code": "publication-metadata-missing",
+      "message": "'repository' is required to publish to the Macro Deck plugin ecosystem. ...",
+      "pointer": "/repository",
+      "requiredBy": "publication"
+    },
+    ...
+  ]
+}
+```
+
+## Options
+
+| Option | Default | Description |
 | --- | --- | --- |
-| `--manifest <path>` | - | Path to a `manifest.json` file. |
-| `--artifact <path>` | - | Path to a `.macroDeckPlugin` artifact. |
+| `--manifest <path>` | `./manifest.json` | Path to a `manifest.json` file. |
 | `--directory <path>` | - | A version directory containing `manifest.json`. |
+| `--artifact <path>` | - | Path to a `.macroDeckPlugin` artifact. |
+| `--level <development\|package\|publication>` | from the selector | How strictly to validate - see [Levels](#levels). |
 | `--output <text\|json>` | `text` | How to render the result. |
-| `--level <development\|package\|publication>` | implied by the selector | How strictly to validate - see below. |
 
-At most one of `--manifest`/`--artifact`/`--directory` may be given. **Giving none is legal and validates
-`./manifest.json`** in the current directory - the default a plugin's own build output directory
-satisfies without any flag at all.
+Give at most one of `--manifest`, `--directory` and `--artifact` (more is `too-many-selectors`, exit 2). Giving
+none validates `./manifest.json`, so running `validate` inside a plugin's build output needs no flag.
 
-## `--level`
+## Levels
 
-Validates against one of the three cumulative [requirement levels](/reference/manifest/#requirement-categories)
-- `Development ⊂ Package ⊂ Publication` - each a strict superset of the checks the level before it runs:
+The three cumulative [requirement levels](/reference/manifest/#requirement-categories),
+`development ⊂ package ⊂ publication`:
 
-| Level | Adds over the level before | Can exit |
-| --- | --- | --- |
-| `development` | Everything above, unconditionally: the manifest reader, the schema, the permission vocabulary, and declared `files[]` digests when present. This is the floor - what the host itself enforces at install time. | `Success` (0) or `SubjectInvalid` (1). Never fails on missing `publication` metadata; that check does not run at this level. |
-| `package` | Every declared entrypoint checked against real packaged content (not only the current host's RID), a declared `icon` checked the same way, a valid multi-RID entrypoint layout, and every unsatisfied `publication` field reported as a **warning**. | `Success` (0) or `SubjectInvalid` (1) - a payload or layout problem fails it; missing publication metadata alone does not. |
-| `publication` | Package, with unsatisfied `publication` fields promoted from warning to **error**. | `Success` (0) or `SubjectInvalid` (1) - now including missing publication metadata alone. |
+| Level | Adds over the level before |
+| --- | --- |
+| `development` | The manifest reader, the embedded JSON Schema, the permission vocabulary, SemVer `version`, and declared `files[]` digests when present. What the host enforces at install time. |
+| `package` | Every declared entrypoint (every RID, not only the current host's) and a declared `icon` checked against real content; a valid multi-RID layout; missing `publication` fields as warnings. |
+| `publication` | Missing `publication` fields become errors. |
 
-`--level` is implied by the selector when omitted: `--manifest`/`--directory` (still being developed)
-default to `development`; `--artifact` (already packed) defaults to `package`. An unrecognized `--level`
-token is a `UsageError` (2) reported before the manifest is read at all.
+When `--level` is omitted, `--manifest`/`--directory` (or no selector) use `development` and `--artifact` uses
+`package`. An unrecognised level is a usage error (exit 2) reported before the manifest is read:
 
-The `package` and `publication` payload/layout checks (entrypoint and icon presence, layout) are
-suppressed when the subject looks like an unbuilt source tree (a `manifest.json` next to a project file)
-- validating a project root before building does not complain about files that do not exist yet.
+```text
+error usage-error: 'strict' is not a recognized --level. Expected one of: development, package, publication.
+```
 
-## Requirement-related problem codes
+On an unbuilt source tree (a `manifest.json` next to a project file) the `package`/`publication` payload and
+layout checks are skipped, so validating a project root before building does not report files that do not
+exist yet.
 
-| Code | Severity | Level | Meaning |
-| --- | --- | --- | --- |
-| `publication-metadata-missing` | Warning at `package`, error at `publication` | Package and above | A `publication`-required field is missing or blank. |
-| `generated-field-authored` | Warning | Any level, only on an unbuilt source tree | `files` or `signature` is present in a manifest that has not been built or packed yet. An extracted install directory or a packed artifact legitimately carries these, so the warning is suppressed there. |
-| `icon-declared-not-present` | Error | Package and above | The manifest declares `icon`, but it is not present in the packaged content. |
-| `entrypoint-layout-invalid` | Error | Package and above | Two declared entrypoints would stage into the same directory, or one stages at the package root - the same rule [`build`](/cli/build/) hard-fails on (see [Staging layout](/cli/build/#staging-layout)), so `build` and `validate` can never disagree about the same manifest. |
+## What is checked
 
-`entrypoint-not-packed` (pre-existing) now checks **every declared runtime identifier**, not only the
-current host's - the manifest reader itself only ever existence-checks the current RID's own entrypoint,
-so a foreign RID's binary was previously unverified anywhere in `validate`.
+- The schema and permission-vocabulary checks run for every input. An unknown permission is a warning.
+- `version` is checked against SemVer independently of the reader: `1.0` or `v1.0.0` is `invalid-version`.
+- File digests are checked only when the manifest declares `files[]`. Only `--artifact` also flags a file
+  present but not declared, because a bare manifest or directory has no separate file listing.
+- A schema error that is only a follow-on of another reported problem beneath it is suppressed, so one defect
+  never appears twice.
 
-The schema and permission-vocabulary checks run unconditionally for every input shape. The file-digest
-check only runs when the manifest declares `files[]`, and only an artifact input also checks for a file
-present on disk but **not** declared - a bare manifest or directory has no independent file listing to
-compare against. `version` is checked against SemVer independently of the manifest reader's own checks -
-`'1.0'` or `'v1.0.0'` is now an `invalid-version` error even for a manifest that otherwise reads fine,
-which a looser version string could pass before.
+## Problem codes
 
-`validate` reports every independent problem it finds in one run, not just the first - a manifest with
-several unrelated defects no longer needs several rounds of fixing one, rerunning, and finding the next.
-A pure follow-on (a generic "something under here failed" schema hit whose own cause is reported
-separately, at a location beneath it) is suppressed so one defect never shows up as two.
+| Code | Meaning |
+| --- | --- |
+| `malformed` | Not valid JSON; the message names the file with a 1-based line and position. |
+| `invalid-version` | `version` is not SemVer. |
+| `unknown-permission` | A permission outside the vocabulary (warning). |
+| `schema:<keyword>` | A JSON Schema violation, e.g. `schema:required`. |
+| `file-missing`, `file-size-mismatch`, `file-digest-mismatch` | A declared `files[]` entry does not match the real bytes. |
+| `undeclared-file` | A file in the artifact that `files[]` does not declare (`--artifact` only). |
+| `entrypoint-not-packed` | A declared entrypoint, for any RID, is not in the content (`package` and above). |
+| `icon-declared-not-present` | `icon` is declared but not in the content (error, `package` and above). |
+| `entrypoint-layout-invalid` | Two entrypoints stage into the same directory, or one stages at the package root (error, `package` and above) - the same rule [`build`](/cli/build/) enforces, see [Staging layout](/cli/build/#staging-layout). |
+| `publication-metadata-missing` | A `publication`-required field is missing or blank (warning at `package`, error at `publication`). |
+| `generated-field-authored` | `files` or `signature` in a manifest that has not been built or packed yet (warning, unbuilt source tree only). |
+| `source-directory` | The manifest sits next to a project file with no built entrypoint - validate the build output instead. |
+| `not-an-artifact` | `--artifact` is not a ZIP; adds `Did you mean validate --manifest?` when the file is named `manifest.json`. |
+| `manifest-not-found`, `artifact-not-found` | The input does not exist. |
 
-A few common mistakes now get a message that names the actual problem instead of leaking an internal
-exception or reading as "this plugin is broken": a `--artifact` that is not a ZIP at all now says
-`'<path>' is not a .macroDeckPlugin artifact (not a ZIP archive)`, plus `Did you mean validate
---manifest?` when the file is named `manifest.json`; a manifest that is not valid JSON now names the file
-and gives a real 1-based line and position; and running `validate`/`pack` against a source tree - a
-`manifest.json` next to a `.csproj` with no built entrypoint - is now diagnosed as pointing at the wrong
-directory (build the project and validate the output instead) rather than reading as a broken manifest.
-Exit codes for all three are unchanged.
+Other manifest reader failures are reported under their own kebab-case code, e.g. `entrypoint-missing`.
 
-Exit code is `SubjectInvalid` (1) whenever the reader succeeds but finds a problem at any layer,
-`InputUnreadable` (3) when the input itself cannot be read, and `Success` (0) otherwise - see the
-`--level` table above for exactly which problems can produce `SubjectInvalid` at each level.
+## Output
 
-Text output is one line per problem: `error`/`warning`, the problem's code, its message, a schema
-pointer when there is one, and - new - the requiring level in parentheses when the problem is one a
-specific level requires, e.g. `error publication-metadata-missing: ... [/license] (publication)`,
-followed by a one-line summary.
+Text output is one line per problem - severity, code, message, the JSON pointer in `[...]` when there is one,
+and the requiring level in `(...)` when a level requires it - then a summary line. The summary names
+`<id> <version>`, or the resolved absolute path when the manifest could not be read.
 
-`--output json` reports `valid`, `pluginId`, `version`, a **new top-level `level`** (always present -
-the level the run actually used), and `problems[]`. Each problem keeps its four existing keys
-(`severity`, `code`, `message`, `pointer`) and gains a **new `requiredBy`** key, present only for a
-problem a level actually requires (e.g. `"publication"` for `publication-metadata-missing`, omitted for
-a `generated-field-authored` warning, since no level requires a generated field to be *absent*). The
-four pre-existing keys and their meaning are unchanged; `level` and `requiredBy` are additive.
+`--output json` returns `valid`, `pluginId`, `version`, `level` (always present: the level actually used) and
+`problems[]`. Each problem has `severity`, `code`, `message` and `pointer`, plus `requiredBy` only when a level
+requires it (for example absent on `generated-field-authored`).
 
-The summary line names the resolved, absolute path of whatever was validated when the manifest could not
-even be read - an unreadable id is not something to echo back as the heading.
+## Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| `0` | Valid at the chosen level (warnings allowed). |
+| `1` | The manifest was read but has at least one error. |
+| `2` | Usage error: too many selectors, unknown `--level`. |
+| `3` | The input could not be read: missing file, not a ZIP, permissions. |
+
+## See also
+
+- [`inspect`](/cli/inspect/) - describe an artifact without judging it
+- [`pack`](/cli/pack/) - runs the same validation before writing an artifact
+- [`build`](/cli/build/)
+- [Manifest reference](/reference/manifest/)
