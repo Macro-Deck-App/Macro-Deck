@@ -51,9 +51,12 @@ public readonly record struct UiActivationClaim(JsonElement? Claimant, bool Abso
 			return null;
 		}
 
-		if (Declares(node, UiComponentEvents.Press) || Declares(node, UiComponentEvents.LongPress) ||
-			Declares(node, UiComponentEvents.PressStart) || Declares(node, UiComponentEvents.PressEnd) ||
-			Declares(node, UiComponentEvents.Adjust) || Declares(node, UiComponentEvents.Change))
+		if (Declares(node, UiComponentEvents.Press) ||
+			Declares(node, UiComponentEvents.LongPress) ||
+			Declares(node, UiComponentEvents.PressStart) ||
+			Declares(node, UiComponentEvents.PressEnd) ||
+			Declares(node, UiComponentEvents.Adjust) ||
+			Declares(node, UiComponentEvents.Change))
 		{
 			return node;
 		}
@@ -104,7 +107,8 @@ public readonly record struct UiActivationClaim(JsonElement? Claimant, bool Abso
 		}
 
 		var current = Property(node, UiComponentProperties.Selected) is { ValueKind: JsonValueKind.Number } selected &&
-			selected.GetDouble() is var value and >= 0 && value < count
+			selected.GetDouble() is var value and >= 0 &&
+			value < count
 				? (int)Math.Floor(value)
 				: -1;
 

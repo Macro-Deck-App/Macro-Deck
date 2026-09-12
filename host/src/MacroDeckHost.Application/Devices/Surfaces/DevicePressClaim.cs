@@ -58,7 +58,11 @@ public sealed class DevicePressClaim : IAsyncDisposable
 
 	private void DispatchLocked(string triggerType)
 	{
-		if (_disposed || _claimant is not { } node || _tree is null || _broker is null || _sessionId is null ||
+		if (_disposed ||
+			_claimant is not { } node ||
+			_tree is null ||
+			_broker is null ||
+			_sessionId is null ||
 			UiActivationClaim.EventFor(node, triggerType) is not { } uiEvent)
 		{
 			return;

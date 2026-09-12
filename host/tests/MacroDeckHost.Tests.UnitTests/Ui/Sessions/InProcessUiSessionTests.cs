@@ -66,7 +66,8 @@ internal sealed class InProcessUiSessionTests : UiSessionFixture
 		var sessionId = await OpenAsync(ProviderId);
 
 		var tree = await Broker.FirstTreeAsync(sessionId, CancellationToken.None);
-		var dispatched = Broker.DispatchHostEvent(sessionId, new UiSessionEventCommand { NodeId = "root", Name = "press" });
+		var dispatched
+			= Broker.DispatchHostEvent(sessionId, new UiSessionEventCommand { NodeId = "root", Name = "press" });
 		await Broker.CloseAsync(sessionId, "done", CancellationToken.None);
 		await WaitForAsync(() => session.DisposeCalls == 1, "Closing never reached the provider.");
 		await SettleAsync();
@@ -77,8 +78,11 @@ internal sealed class InProcessUiSessionTests : UiSessionFixture
 			Assert.That(JsonDocument.Parse(tree!.Value.Utf8).RootElement.GetProperty("revision").GetInt32(),
 				Is.EqualTo(3));
 			Assert.That(dispatched, Is.True);
-			Assert.That(session.Dispatched.Single().Name, Is.EqualTo("press"), "An event raised just before closing was lost.");
-			Assert.That(Broker.DispatchHostEvent(sessionId, new UiSessionEventCommand { NodeId = "root", Name = "press" }),
+			Assert.That(session.Dispatched.Single().Name,
+				Is.EqualTo("press"),
+				"An event raised just before closing was lost.");
+			Assert.That(Broker.DispatchHostEvent(sessionId,
+					new UiSessionEventCommand { NodeId = "root", Name = "press" }),
 				Is.False,
 				"An ended session still accepted a host event.");
 		});
@@ -95,7 +99,8 @@ internal sealed class InProcessUiSessionTests : UiSessionFixture
 		Registry.SweepDraining();
 		await SettleAsync();
 
-		var dispatched = Broker.DispatchHostEvent(sessionId, new UiSessionEventCommand { NodeId = "root", Name = "press-end" });
+		var dispatched
+			= Broker.DispatchHostEvent(sessionId, new UiSessionEventCommand { NodeId = "root", Name = "press-end" });
 		await WaitForAsync(() => session.Dispatched.Count == 1, "A held press lost its closing event.");
 		await Broker.CloseAsync(sessionId, "done", CancellationToken.None);
 		await WaitForAsync(() => session.DisposeCalls == 1, "Closing never reached the provider.");

@@ -60,14 +60,18 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 	}
 
 	public Task ReleaseAsync(string widgetId)
-		=> Take(widgetId) is { } state ? Settle(state, FinishAsync(widgetId, state, released: true)) : Task.CompletedTask;
+		=> Take(widgetId) is { } state
+			? Settle(state, FinishAsync(widgetId, state, released: true))
+			: Task.CompletedTask;
 
 	/// <summary>
 	/// Ends a press the device never released - navigation away, the device going offline, the session
 	/// closing. Emits <c>onTouchEnd</c> only, and disarms the timer so no phantom long press fires later.
 	/// </summary>
 	public Task CancelAsync(string widgetId)
-		=> Take(widgetId) is { } state ? Settle(state, FinishAsync(widgetId, state, released: false)) : Task.CompletedTask;
+		=> Take(widgetId) is { } state
+			? Settle(state, FinishAsync(widgetId, state, released: false))
+			: Task.CompletedTask;
 
 	public async Task CancelAllAsync()
 	{

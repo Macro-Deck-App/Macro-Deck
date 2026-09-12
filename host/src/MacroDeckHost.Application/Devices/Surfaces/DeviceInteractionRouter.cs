@@ -74,7 +74,10 @@ public sealed class DeviceInteractionRouter
 				await Presses(session).ReleaseAsync(widgetId);
 				return DeviceInteractionOutcome.Accepted;
 			case DeviceInteractionKind.ShortPress:
-				return await ExecuteWholePressAsync(session, widgetId, WidgetTriggerTypes.ShortPress, _shortPressPhases);
+				return await ExecuteWholePressAsync(session,
+					widgetId,
+					WidgetTriggerTypes.ShortPress,
+					_shortPressPhases);
 			case DeviceInteractionKind.LongPress:
 				return await ExecuteWholePressAsync(session, widgetId, WidgetTriggerTypes.LongPress, _longPressPhases);
 			default:

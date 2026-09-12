@@ -13,11 +13,11 @@ internal sealed class DeviceTileTreeClaimTests
 	private const string ActionButtonId = "action-button";
 
 	private const string ClaimingTree = """
-		{"id":"root","type":"ui.stack","children":[
-			{"id":"label","type":"ui.text"},
-			{"id":"mute","type":"ui.button","properties":{"events":["press","long-press","press-start","press-end"]}},
-			{"id":"solo","type":"ui.stack","properties":{"modifiers":{"disabled":true}}}]}
-		""";
+										{"id":"root","type":"ui.stack","children":[
+											{"id":"label","type":"ui.text"},
+											{"id":"mute","type":"ui.button","properties":{"events":["press","long-press","press-start","press-end"]}},
+											{"id":"solo","type":"ui.stack","properties":{"modifiers":{"disabled":true}}}]}
+										""";
 
 	private static readonly string[] _shortPressTriggers = ["onTouchStart", "onTouchEnd", "onShortPress"];
 
@@ -74,10 +74,10 @@ internal sealed class DeviceTileTreeClaimTests
 	public async Task A_disabled_region_absorbs_the_whole_press_so_neither_the_control_nor_the_tiles_flow_runs()
 	{
 		TreeIs("""
-			{"id":"root","type":"ui.stack","children":[
-				{"id":"controls","type":"ui.stack","properties":{"modifiers":{"disabled":true}},"children":[
-					{"id":"mute","type":"ui.button","properties":{"events":["press"]}}]}]}
-			""");
+			   {"id":"root","type":"ui.stack","children":[
+			   	{"id":"controls","type":"ui.stack","properties":{"modifiers":{"disabled":true}},"children":[
+			   		{"id":"mute","type":"ui.button","properties":{"events":["press"]}}]}]}
+			   """);
 
 		await HoldAsync(200);
 
@@ -100,7 +100,8 @@ internal sealed class DeviceTileTreeClaimTests
 		{
 			Assert.That(_fixture.Triggers.TriggerTypes, Is.Empty);
 			Assert.That(SentEvents, Is.EqualTo(new[] { "press-start", "press-end", "press" }));
-			Assert.That(_fixture.UiBroker.HostEvents.Select(sent => (sent.SessionId, sent.Command.NodeId, sent.Command.Revision)).Distinct(),
+			Assert.That(_fixture.UiBroker.HostEvents
+					.Select(sent => (sent.SessionId, sent.Command.NodeId, sent.Command.Revision)).Distinct(),
 				Is.EqualTo(new[] { ("session-1", "mute", (int?)7) }));
 			Assert.That(_fixture.UiOpener.OpenedWidgetIds, Has.Count.EqualTo(1));
 			Assert.That(_fixture.UiBroker.ClosedSessions, Is.EqualTo(new[] { "session-1" }));
@@ -187,9 +188,9 @@ internal sealed class DeviceTileTreeClaimTests
 	public async Task A_segment_of_a_segmented_control_that_claims_nothing_does_not_claim_the_press()
 	{
 		TreeIs("""
-			{"id":"picker","type":"ui.segmented","children":[
-				{"id":"day","type":"ui.stack","properties":{"events":["press"]}}]}
-			""");
+			   {"id":"picker","type":"ui.segmented","children":[
+			   	{"id":"day","type":"ui.stack","properties":{"events":["press"]}}]}
+			   """);
 
 		await HoldAsync(200);
 
