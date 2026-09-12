@@ -82,21 +82,21 @@ each declare `play`. Over the wire the owner is the **plugin**, so an action id 
 every integration in the process.
 
 **Fix.** Rename one. The collision fails `Build()` with the id named rather than making one of the two
-unreachable. [MDP2001](/sdk/analyzers/#mdp2001) reports two statically visible declarations of
+unreachable. [MDP2001](/reference/analyzers/#mdp2001) reports two statically visible declarations of
 one capability kind sharing a constant id, so the common case is caught at compile time.
 
 ### The analyzers flag something you did not expect
 
 | Id | What it means |
 | --- | --- |
-| [MDP1001](/sdk/analyzers/#mdp1001) | `manifest.json` declares no usable `id`, or no `name`/`version` |
-| [MDP1003](/sdk/analyzers/#mdp1003) | The manifest's `icon` has a file extension with no known media type |
-| [MDP1004](/sdk/analyzers/#mdp1004) | Your `IPluginIntegration` restates manifest-owned identity - it must not |
-| [MDP2005](/sdk/analyzers/#mdp2005) | You mapped a route under the reserved `/_macrodeck` prefix |
-| [MDP3002](/sdk/analyzers/#mdp3002) | `.Result`, `.Wait()`, `.GetAwaiter().GetResult()` or `Thread.Sleep` in a handler type |
-| [MDP4001](/sdk/analyzers/#mdp4001) | A singleton whose constructor takes `ICapabilityInvocationContext`, which only resolves inside one invocation's scope |
-| [MDP4002](/sdk/analyzers/#mdp4002) | You are overriding your own listener URL - see [the health section below](#the-supervisor-reports-the-plugin-unhealthy-but-it-is-running-fine) |
-| [MDP5004](/sdk/analyzers/#mdp5004) | Use of an API whose declared removal version this SDK has already reached |
+| [MDP1001](/reference/analyzers/#mdp1001) | `manifest.json` declares no usable `id`, or no `name`/`version` |
+| [MDP1003](/reference/analyzers/#mdp1003) | The manifest's `icon` has a file extension with no known media type |
+| [MDP1004](/reference/analyzers/#mdp1004) | Your `IPluginIntegration` restates manifest-owned identity - it must not |
+| [MDP2005](/reference/analyzers/#mdp2005) | You mapped a route under the reserved `/_macrodeck` prefix |
+| [MDP3002](/reference/analyzers/#mdp3002) | `.Result`, `.Wait()`, `.GetAwaiter().GetResult()` or `Thread.Sleep` in a handler type |
+| [MDP4001](/reference/analyzers/#mdp4001) | A singleton whose constructor takes `ICapabilityInvocationContext`, which only resolves inside one invocation's scope |
+| [MDP4002](/reference/analyzers/#mdp4002) | You are overriding your own listener URL - see [the health section below](#the-supervisor-reports-the-plugin-unhealthy-but-it-is-running-fine) |
+| [MDP5004](/reference/analyzers/#mdp5004) | Use of an API whose declared removal version this SDK has already reached |
 
 Every diagnostic has a stable id and can be suppressed or escalated independently -
 `<NoWarn>MDP2003</NoWarn>`, `-warnaserror:MDP5001`.
@@ -216,7 +216,7 @@ like it came from a browser, or the session token names a different session. `40
 for a plugin that enrolled with a Developer token or paired interactively - a plugin Macro Deck
 installed and launches itself is unaffected. A refusal for that reason carries `reason:
 "developer_mode_disabled"` in the error's `details`, and
-[`GET /api/plugins/protocol`](/sdk/authentication/) reports the switch in
+[`GET /api/plugins/protocol`](/reference/authentication/) reports the switch in
 `pairing.developerModeEnabled` and `enrollment.developerModeEnabled` so a plugin can check before it
 tries.
 
@@ -232,7 +232,7 @@ longer has the matching `credentials.json`.
 **Fix.** Reuse the stored secret if you still have it. Otherwise run the plugin again with Developer
 Mode on: the pairing approval prompt detects the existing registration and offers to **replace the
 development credential**, which rotates the secret host-side and terminates the old session - see
-[Interactive pairing](/sdk/authentication/#self-registering-interactive-pairing) and
+[Interactive pairing](/reference/authentication/#self-registering-interactive-pairing) and
 [Registration is refused as already registered](/guides/debugging/#registration-is-refused-as-already-registered).
 Manually revoking the registration (`DELETE /api/plugins/registration/{pluginId}`, an admin operation)
 is still available but is no longer the recommended path.
@@ -275,7 +275,7 @@ Suspect a hand-rolled client - in particular a JSON stack that emits numbers as 
 ## Pairing
 
 Symptoms specific to the default interactive pairing flow described in
-[Interactive pairing](/sdk/authentication/#self-registering-interactive-pairing).
+[Interactive pairing](/reference/authentication/#self-registering-interactive-pairing).
 
 ### No approval prompt appears
 
@@ -362,7 +362,7 @@ starts and passes it as `ASPNETCORE_URLS`; if you override it in `appsettings.js
 or `UseUrls`, you listen where nobody is probing. There is no error for this - from the supervisor's
 side, a wrong port and a hung process look identical.
 
-**Fix.** Do not set your own listener URL. [MDP4002](/sdk/analyzers/#mdp4002) catches the
+**Fix.** Do not set your own listener URL. [MDP4002](/reference/analyzers/#mdp4002) catches the
 statically visible cases.
 
 Failing that, check that `health.path` in the manifest matches the route you serve (default
@@ -375,7 +375,7 @@ Remember `unhealthyThreshold` has a floor of 2, so a single missed probe never r
 `session.goodbye` and the `4004` close.
 
 **Fix.** Make `ShutdownAsync` fast: stop accepting new work, drain what is bounded, release. Anything
-logged in the final moments may not be flushed - see [logging](/sdk/logging/#shutdown).
+logged in the final moments may not be flushed - see [logging](/features/logging/#shutdown).
 
 ### Your logs never reach the host's log viewer
 
@@ -383,7 +383,7 @@ Work through, in order: `UseMacroDeckLogging()` is actually called; the event's 
 `MacroDeck:Plugin:Logging:MinimumLevel` (default `Information`, independent of the pipeline's own
 minimum); the plugin is connected, because `log.publish` is fire-and-forget with **no replay** and a
 batch lost during an outage is gone; and you are not exceeding the ingestion rate limit, which drops
-excess events rather than closing the session. See [logging](/sdk/logging/).
+excess events rather than closing the session. See [logging](/features/logging/).
 
 ## Installing an artifact
 
@@ -392,7 +392,7 @@ Wire codes from the installation API, and what each means:
 | Code | Cause | Fix |
 | --- | --- | --- |
 | `invalid_archive` | Not a readable ZIP | Repack |
-| `unsafe_entry` | An absolute path, a drive letter, a `..` segment, a reserved Windows device name, an illegal filename character, or a symlink/fifo/socket/device node | Remove it. See [what the installer rejects](/sdk/hosting/#the-macrodeckplugin-artifact) |
+| `unsafe_entry` | An absolute path, a drive letter, a `..` segment, a reserved Windows device name, an illegal filename character, or a symlink/fifo/socket/device node | Remove it. See [what the installer rejects](/reference/plugin-hosting/#the-macrodeckplugin-artifact) |
 | `artifact_too_large`, `artifact_limit_exceeded` | Entry count, byte totals or compression ratio over the limits | Trim the payload |
 | `manifest_missing` | No `manifest.json` at the archive **root** - the root is the version directory, with no wrapper folder | Repack with `macrodeck-plugin pack` |
 | `manifest_invalid` | The reader rejected the manifest | Run `macrodeck-plugin validate --artifact …` for the specifics |
@@ -464,8 +464,8 @@ see [signing](/policies/security/#signing-the-creator-portal-signs-and-the-host-
 ## See also
 
 - [Plugin CLI](/cli/) - every command, option, diagnostic and exit code.
-- [Plugin hosting](/sdk/hosting/) - the artifact format, supervision and shutdown.
-- [Authentication](/sdk/authentication/) - credentials, session exchange and their errors.
-- [Analyzers](/sdk/analyzers/) - all 19 diagnostics with explanations.
-- [Conformance](/sdk/conformance/) - the contract suite, when you want a verdict rather than a
+- [Plugin hosting](/reference/plugin-hosting/) - the artifact format, supervision and shutdown.
+- [Authentication](/reference/authentication/) - credentials, session exchange and their errors.
+- [Analyzers](/reference/analyzers/) - all 19 diagnostics with explanations.
+- [Conformance](/reference/conformance/) - the contract suite, when you want a verdict rather than a
   symptom.

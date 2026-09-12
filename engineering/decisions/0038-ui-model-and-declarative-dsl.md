@@ -82,4 +82,4 @@ reproduce the resulting tree, without imposing a unit-test framework on consumer
 - [Issue #539](https://github.com/Macro-Deck-App/Macro-Deck/issues/539),
   [Issue #540](https://github.com/Macro-Deck-App/Macro-Deck/issues/540),
   [Issue #830](https://github.com/Macro-Deck-App/Macro-Deck/issues/830)
-- [Macro Deck UI guide](https://docs.macro-deck.app/sdk/ui/)
+- [Macro Deck UI guide](https://docs.macro-deck.app/ui/)

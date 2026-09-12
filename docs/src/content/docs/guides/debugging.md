@@ -91,7 +91,7 @@ Do **not** add `ASPNETCORE_URLS`, `applicationUrl`, `UseUrls(...)`, or a `urls` 
 Without an override, the SDK binds the plugin to `http://127.0.0.1:0`, an operating-system-selected
 loopback port. In a managed installation the supervisor supplies the exact listener through
 `ASPNETCORE_URLS` and probes that address. Overriding it makes the plugin listen somewhere the
-supervisor does not expect; [MDP4002](/sdk/analyzers/#mdp4002) catches the statically visible
+supervisor does not expect; [MDP4002](/reference/analyzers/#mdp4002) catches the statically visible
 forms of this mistake.
 
 ## Press F5 and approve the prompt
@@ -252,7 +252,7 @@ When `.UseMacroDeckLogging()` cannot deliver a batch, its default bounded diagno
 The fallback file is not replayed into the host after reconnecting, and `log.publish` has no
 acknowledgement. If an event is missing from the host viewer, check the fallback file, connection
 readiness, the configured log level and whether `.UseMacroDeckLogging()` is actually called. See
-[Logging and health](/sdk/logging/) for queue, rate and size limits.
+[Logging and health](/features/logging/) for queue, rate and size limits.
 
 ## Inspect the plugin's own endpoints
 
@@ -373,9 +373,9 @@ replacement Developer token and perform the one-time enrollment again.
 
 ## See also
 
-- [Plugin hosting](/sdk/hosting/) - registration modes, supervisor environment and reserved routes.
-- [Authentication](/sdk/authentication/) - interactive pairing, Developer tokens, persisted
+- [Plugin hosting](/reference/plugin-hosting/) - registration modes, supervisor environment and reserved routes.
+- [Authentication](/reference/authentication/) - interactive pairing, Developer tokens, persisted
   credentials and session authentication.
-- [Logging and health](/sdk/logging/) - forwarding behaviour, fallback logs and supervisor probes.
+- [Logging and health](/features/logging/) - forwarding behaviour, fallback logs and supervisor probes.
 - [`macrodeck-plugin run`](/cli/run/) - every option and its exact process behaviour.
 - [Troubleshooting](/guides/troubleshooting/) - protocol, analyzer, packaging and runtime error codes.

@@ -72,7 +72,7 @@ signature made before the build could not describe the artifact anyway. Signing 
 set - an unsuffixed `Strings.resx` counts as `en` and each culture-suffixed sibling contributes its own
 BCP-47 tag - so what a store shows before installing matches the catalog the plugin serves once it runs.
 `build` is where this works best, because it still has the project tree; the staged payload it hands to
-`pack` no longer does. See [the localization guide](/sdk/localization/#the-manifest-languages-field).
+`pack` no longer does. See [the localization guide](/features/localization/#the-manifest-languages-field).
 
 **`build` also warns about publication readiness.** It evaluates the manifest at the Publication
 [requirement level](/reference/manifest/#requirement-categories) and reports every unsatisfied

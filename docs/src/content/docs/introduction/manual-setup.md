@@ -59,7 +59,7 @@ reproducible dependency updates. The analyzer package is optional but strongly r
 catches invalid declarations during the build and confirms generated capability metadata. The two
 `Content` items are not optional for this layout. The hosting SDK reads `manifest.json` from the
 content root and resolves the icon relative to that root, so both files must be copied beside the
-build output. See the [analyzer reference](/sdk/analyzers/) for the analyzer and
+build output. See the [analyzer reference](/reference/analyzers/) for the analyzer and
 source-generator rules.
 
 ## Add the manifest and icon
@@ -144,7 +144,7 @@ internal sealed class SayHelloAction : IActionDefinition
 
 An executor reports a stable failure when it cannot complete the action; it must not silently return
 success. Long-running work should also honor `context.CancellationToken`. See the
-[SDK reference](/sdk/) for actions, parameters, results, and the other capability interfaces.
+[SDK reference](/reference/sdk-packages/) for actions, parameters, results, and the other capability interfaces.
 
 ## Add the integration
 
@@ -186,8 +186,8 @@ await plugin.RunAsync();
 
 `Build()` validates the local plugin configuration and reports all discovered problems together.
 `UseMacroDeckLogging()` comes from `MacroDeck.Plugin.Serilog` and forwards the plugin's logs to the
-Macro Deck log viewer while connected. The [hosting guide](/sdk/hosting/) covers configuration,
-dependency injection, registration, and reserved routes; the [logging guide](/sdk/logging/) covers
+Macro Deck log viewer while connected. The [hosting guide](/reference/plugin-hosting/) covers configuration,
+dependency injection, registration, and reserved routes; the [logging guide](/features/logging/) covers
 log forwarding.
 
 ## Build it
@@ -250,4 +250,4 @@ CLI keeps the manifest consistent with the payload and rejects invalid input bef
 - [Quickstart](/introduction/quickstart/) for the recommended template-first path.
 - [Samples and template](/introduction/samples-and-template/) for complete plugin examples.
 - [Debugging plugins](/guides/debugging/) for real-host launch profiles and breakpoints.
-- [Testing plugins](/sdk/testing/) for loopback integration tests and SDK fakes.
+- [Testing plugins](/features/testing/) for loopback integration tests and SDK fakes.

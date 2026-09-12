@@ -23,7 +23,7 @@ A self-registering plugin typically:
 5. Sends `session.hello` and waits for `session.welcome`.
 6. Exchanges capability and host-callback messages until the session ends.
 
-Installed managed plugins skip self-registration and receive launch credentials from the host. See [Authentication](/sdk/authentication/) and [Plugin hosting](/sdk/hosting/).
+Installed managed plugins skip self-registration and receive launch credentials from the host. See [Authentication](/reference/authentication/) and [Plugin hosting](/reference/plugin-hosting/).
 
 ## Envelope
 
@@ -60,15 +60,15 @@ Do not invent custom operation names inside an existing capability kind. Additio
 
 `state.update` is an invalidation signal. It tells the peer to refresh the relevant capability state rather than defining a second per-capability diff protocol.
 
-The `actions` kind gained a `state` operation, additively and inside major `1`, for actions that supply an Action Button's states. It is keyed by the action's *configured parameters*, so the host polls it rather than expecting a push: `state.update` is keyed by declared capability id — the action type — and so cannot name which configured instance changed. See [capabilities](/sdk/capabilities/).
+The `actions` kind gained a `state` operation, additively and inside major `1`, for actions that supply an Action Button's states. It is keyed by the action's *configured parameters*, so the host polls it rather than expecting a push: `state.update` is keyed by declared capability id — the action type — and so cannot name which configured instance changed. See [capabilities](/features/).
 
-The `actions` kind also gained `icon` and `icon.content` operations, the same way and inside the same major, for an action whose configured instance supplies a widget's rendered icon; `ActionDescriptorDto.ProvidesIcon` marks it. `icon` is polled like `state`, answering an identity rather than bytes; `icon.content` fetches the bytes behind that identity only when it changes, uploaded over the same `asset.*` pipeline a plugin uses to send the host any other asset it originates, never inside the capability reply itself. A plugin can also ask the host to re-read a specific action sooner than its next poll through the `widgets` host API's `invalidate-icon` operation. See [capabilities](/sdk/capabilities/) and [Capability parity](/sdk/capability-parity/).
+The `actions` kind also gained `icon` and `icon.content` operations, the same way and inside the same major, for an action whose configured instance supplies a widget's rendered icon; `ActionDescriptorDto.ProvidesIcon` marks it. `icon` is polled like `state`, answering an identity rather than bytes; `icon.content` fetches the bytes behind that identity only when it changes, uploaded over the same `asset.*` pipeline a plugin uses to send the host any other asset it originates, never inside the capability reply itself. A plugin can also ask the host to re-read a specific action sooner than its next poll through the `widgets` host API's `invalidate-icon` operation. See [capabilities](/features/) and [Capability parity](/reference/capability-parity/).
 
 ## Host callbacks
 
 Plugins can call host-owned APIs through the host invocation/result messages. `MacroDeck.Plugin.Hosting` maps these to `IIntegrationContext` APIs.
 
-Some synchronous-looking SDK state is backed by the last snapshot pushed over the protocol. See [Capability parity](/sdk/capability-parity/) before assuming an out-of-process call has the same timing as an in-process integration.
+Some synchronous-looking SDK state is backed by the last snapshot pushed over the protocol. See [Capability parity](/reference/capability-parity/) before assuming an out-of-process call has the same timing as an in-process integration.
 
 A host callback can also hand bytes back to the plugin - today, an icon fetched through the `devices`
 api's `icon` operation, or a widget's currently rendered action-icon-provider icon fetched through the
@@ -109,7 +109,7 @@ Plugin endpoints require plugin-specific credentials and are restricted to the l
 
 Never log plugin secrets, session tokens, enrollment credentials, OAuth credentials, or authorization headers.
 
-See [Security](/policies/security/) and [Authentication](/sdk/authentication/).
+See [Security](/policies/security/) and [Authentication](/reference/authentication/).
 
 ## SDK compatibility metadata
 
@@ -125,8 +125,8 @@ A custom implementation should test at least negotiation, authentication, unknow
 
 ## Related documentation
 
-- [Plugin hosting](/sdk/hosting/)
-- [Capability parity](/sdk/capability-parity/)
+- [Plugin hosting](/reference/plugin-hosting/)
+- [Capability parity](/reference/capability-parity/)
 - [Manifest](/reference/manifest/)
-- [Conformance suite](/sdk/conformance/)
+- [Conformance suite](/reference/conformance/)
 - [Compatibility policy](/policies/compatibility/)

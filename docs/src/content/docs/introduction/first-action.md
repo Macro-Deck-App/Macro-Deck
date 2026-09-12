@@ -74,5 +74,5 @@ If the action is not listed, confirm that the plugin reconnected after the code 
 the [debugging guide](/guides/debugging/) shows how to inspect readiness and connection diagnostics.
 
 For parameters, failures and asynchronous work, continue with the
-[Actions reference](/sdk/capabilities/#actions) or a
+[Actions reference](/features/#actions) or a
 [worked sample plugin](/introduction/samples-and-template/).

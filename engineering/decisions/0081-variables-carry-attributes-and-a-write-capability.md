@@ -176,4 +176,4 @@ all-or-nothing would leave a numeric *user* variable's slider undraggable.
 - [Issue #366](https://github.com/Macro-Deck-App/Macro-Deck/issues/366),
   [Issue #470](https://github.com/Macro-Deck-App/Macro-Deck/issues/470),
   [Issue #760](https://github.com/Macro-Deck-App/Macro-Deck/issues/760)
-- [Variables](https://docs.macro-deck.app/sdk/capabilities/#variables)
+- [Variables](https://docs.macro-deck.app/features/#variables)

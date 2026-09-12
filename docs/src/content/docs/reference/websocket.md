@@ -23,7 +23,7 @@ and drift tests keep the two in step.
 | Encoding | JSON, camelCase, `application/json` |
 
 The host requires the subprotocol and authenticates before accepting the upgrade. See
-[authentication](/sdk/authentication/) for how the session token is obtained.
+[authentication](/reference/authentication/) for how the session token is obtained.
 
 ## The envelope
 
@@ -119,7 +119,7 @@ the UI it produces. It has two operations, both `capability.invoke`:
 The host asks for one culture at a time: a catalog is bounded per culture but not across them, and the
 host only ever needs the active language and its fallback chain, not every culture a plugin ships.
 Entries are bounded by `maxLocalizationCultures`, `maxLocalizationEntries`, `maxLocalizationKeyLength`
-and `maxLocalizationValueLength` below. See [Localization](/sdk/localization/) for how a plugin
+and `maxLocalizationValueLength` below. See [Localization](/features/localization/) for how a plugin
 produces these resources, and `MacroDeck.Plugin.Protocol.Capabilities.Localization` for the exact DTOs.
 
 `variables` is **item-shaped and provider-shaped at once**, and is the only kind that is. Its eager half
@@ -143,7 +143,7 @@ carrying their resource ids in `arguments` instead. A definition's `materializat
 `on-demand`) is a declaration the host validates against the operation it arrived on, so a catalog
 cannot smuggle a variable into the eager set or the other way round.
 
-See [Variables](/sdk/capabilities/#variables) for the SDK-side contract these operations mirror.
+See [Variables](/features/#variables) for the SDK-side contract these operations mirror.
 
 ### Host callbacks
 
@@ -195,7 +195,7 @@ The reply matters here. A refused snapshot or patch comes back as an error on th
 `host.result` - `PAYLOAD_TOO_LARGE`, `RATE_LIMITED`, `INVALID_PAYLOAD`, `SESSION_NOT_FOUND` - so a
 provider always learns that an update did not reach anyone. Unlike every other host api, `ui` is not
 charged to the per-plugin callback throttle; it is bounded per session by `maxUiUpdatesPerSecond` and
-`maxUiUpdateBurst` instead. See [Serving a view](/sdk/ui/views/sessions/).
+`maxUiUpdateBurst` instead. See [Serving a view](/ui/views/sessions/).
 
 The `devices` api is how a device provider registers devices and, once a session is open, reports
 input and fetches icons. All seven operations are `host.invoke`:
@@ -215,7 +215,7 @@ provider-local `deviceId`; they are available to every plugin declaring `device-
 `interaction`, `icon` and `close` are keyed by the `sessionId` the host handed out with `session.open`
 and only apply to a device whose session the host has opened - capability version 2 - and are the reverse direction of the
 capability's own `session.open`/`session.surface`/`session.close` invokes described under
-[capabilities](#capabilities). See [Device providers](/sdk/devices/).
+[capabilities](#capabilities). See [Device providers](/features/devices/).
 
 The `variable-values` api is how a push-capable variable provider delivers values the host did not ask
 for, and how it tells the host its resource catalog changed. Both operations are `host.invoke`:
@@ -228,7 +228,7 @@ for, and how it tells the host its resource catalog changed. Both operations are
 This api is data-carrying rather than an invalidate-then-reread signal, for the same reason `ui` is:
 pushed values are plugin-initiated and asynchronous, and no dedicated message type carries them. It
 covers the catalog half only - a provider's eager variables are polled through `variables`/`get` whatever
-it reports for push. See [Push instead of poll](/sdk/variables/#push-instead-of-poll).
+it reports for push. See [Push instead of poll](/features/variables/#push-instead-of-poll).
 
 ### Events, logs and state
 
@@ -242,7 +242,7 @@ A `LogEventDto` is `{ timestamp, level, messageTemplate, renderedMessage }` plus
 `sourceContext`, a flat string-to-string `properties` map, and a structured `exception`
 (`{ type, message, stackTrace?, inner? }`). It carries nothing identifying - no plugin id, integration
 id, version or process id - because the host already has all four from the authenticated session. See
-[logging](/sdk/logging/).
+[logging](/features/logging/).
 
 ### Assets
 
@@ -422,5 +422,5 @@ them.
   pipeline, reconnection and resume.
 - [asyncapi.yaml](/specs/asyncapi.yaml) - this page, machine-readable.
 - [openapi.yaml](/specs/openapi.yaml) - the REST surface that precedes the upgrade.
-- [Authentication](/sdk/authentication/) - how the session token on the upgrade is obtained.
-- [Plugin hosting](/sdk/hosting/) - the .NET client that implements all of this for you.
+- [Authentication](/reference/authentication/) - how the session token on the upgrade is obtained.
+- [Plugin hosting](/reference/plugin-hosting/) - the .NET client that implements all of this for you.

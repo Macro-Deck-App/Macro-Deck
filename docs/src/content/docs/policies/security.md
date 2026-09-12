@@ -60,7 +60,7 @@ defined today.
 
 ## Credentials
 
-The mechanics are in [the authentication guide](/sdk/authentication/); what matters here is how
+The mechanics are in [the authentication guide](/reference/authentication/); what matters here is how
 they are stored and revoked.
 
 - **Launch bootstrap tokens** (managed plugins) live in memory only, keyed by hash, minted per launch
@@ -98,7 +98,7 @@ reports that state rather than implying protection it does not have. See
 
 By default, a self-registering plugin obtains its per-plugin secret through interactive pairing rather
 than a Developer token. The full mechanics are in
-[the authentication guide](/sdk/authentication/#self-registering-interactive-pairing); this section
+[the authentication guide](/reference/authentication/#self-registering-interactive-pairing); this section
 is the trust model.
 
 - **Loopback only.** The pairing endpoints are ordinary plugin endpoints: served on both listeners, but
@@ -374,8 +374,8 @@ issue describing how to exploit it.
 
 ## See also
 
-- [Authentication](/sdk/authentication/) - credentials, session exchange, and what a plugin must
+- [Authentication](/reference/authentication/) - credentials, session exchange, and what a plugin must
   never do with either.
-- [Plugin hosting](/sdk/hosting/) - the artifact format, the installer's rejection rules, and what
+- [Plugin hosting](/reference/plugin-hosting/) - the artifact format, the installer's rejection rules, and what
   the supervisor injects.
 - [Compatibility policy](/policies/compatibility/) - what is frozen and what may change.

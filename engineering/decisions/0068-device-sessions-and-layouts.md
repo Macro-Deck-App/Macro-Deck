@@ -138,5 +138,5 @@ other way, entirely additive.
 - [Issue #384](https://github.com/Macro-Deck-App/Macro-Deck/issues/384),
   [Issue #584](https://github.com/Macro-Deck-App/Macro-Deck/issues/584),
   [Issue #585](https://github.com/Macro-Deck-App/Macro-Deck/issues/585)
-- [Device providers](../../docs/src/content/docs/sdk/devices.md),
-  [Layout providers](../../docs/src/content/docs/sdk/layouts.md)
+- [Device providers](../../docs/src/content/docs/features/devices.md),
+  [Layout providers](../../docs/src/content/docs/features/layouts.md)

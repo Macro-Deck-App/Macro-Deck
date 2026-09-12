@@ -89,17 +89,17 @@ The generated project is intentionally small:
 - `tests/Acme.LightControl.Tests/` contains the starting test project.
 
 See [Samples and template](/introduction/samples-and-template/) for worked plugins and the
-[SDK reference](/sdk/) for the capability interfaces you can implement.
+[SDK reference](/reference/sdk-packages/) for the capability interfaces you can implement.
 
 ## Next steps
 
 - Add and trigger a button action in [Your first action](/introduction/first-action/).
 - Learn how the generated host, manifest and integration fit together in
-  [Plugin hosting](/sdk/hosting/).
+  [Plugin hosting](/reference/plugin-hosting/).
 - Explore more capabilities in the [sample plugins](/introduction/samples-and-template/).
-- Test plugin behavior with the [testing guide](/sdk/testing/).
+- Test plugin behavior with the [testing guide](/features/testing/).
 - Validate, package and conformance-test a distributable build with
-  [the plugin CLI](/cli/) and the [conformance guide](/sdk/conformance/).
+  [the plugin CLI](/cli/) and the [conformance guide](/reference/conformance/).
 - Set breakpoints and connect to a real Macro Deck host with the
   [debugging guide](/guides/debugging/).
 - If the first run does not reach `Session established`, use

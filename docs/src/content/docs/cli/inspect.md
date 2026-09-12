@@ -35,5 +35,5 @@ pass - a single-platform build reported this way is a legitimate intermediate st
 
 Signature shape is reported as one of `not signed`, `well-formed ed25519 (not cryptographically verified)`,
 `unverifiable (unrecognized algorithm)`, or `invalid ed25519 length` - the same shape-only classification
-the plugin hosting guide's [signing section](/sdk/hosting/#signing) documents; `inspect` never has key material to check the
+the plugin hosting guide's [signing section](/reference/plugin-hosting/#signing) documents; `inspect` never has key material to check the
 signature against.

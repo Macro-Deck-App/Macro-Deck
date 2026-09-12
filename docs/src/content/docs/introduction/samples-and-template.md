@@ -67,10 +67,10 @@ used to tell the host a catalogue changed.
 Two things a plugin author might expect to find in the samples repository deliberately do not:
 
 - **`MacroDeck.Plugin.Testing`** - the loopback test host, fakes and assertions used to test a plugin
-  without a real Macro Deck. See [testing plugins](/sdk/testing/).
+  without a real Macro Deck. See [testing plugins](/features/testing/).
 - **The conformance suite** - the framework-agnostic contract suite, runnable with
   `macrodeck-plugin test`, with stable check ids you can gate CI on. See
-  [conformance](/sdk/conformance/).
+  [conformance](/reference/conformance/).
 
 Both are shipped packages, not samples: use them in your own test project rather than copying anything
 out of a sample.
@@ -81,6 +81,6 @@ out of a sample.
 - [Create a plugin manually](/introduction/manual-setup/) - assemble the same required files
   yourself.
 - [Debugging plugins](/guides/debugging/) - run the project from an IDE against a real host.
-- [Plugin hosting](/sdk/hosting/) - the builder API and registration modes the template uses.
+- [Plugin hosting](/reference/plugin-hosting/) - the builder API and registration modes the template uses.
 - [Contributing an integration](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/development/contributing-integrations.md) - if what you want is an *in-process*
   integration shipped with the host, rather than a plugin of your own.

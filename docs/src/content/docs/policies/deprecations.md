@@ -15,7 +15,7 @@ the registry table below, so an API cannot be removed from the SDK without its l
 1. **Deprecate.** The API gets a standard `[Obsolete]` *and* a `[MacroDeckDeprecated]` carrying the
    version it was deprecated in, the version it will be removed in, and what to do instead. It keeps
    working exactly as before. An entry is added to `SdkDeprecations.Active` and to the table below.
-2. **Warn.** Plugin builds report [MDP5002](/sdk/analyzers/#mdp5002) at every call site. The host reports
+2. **Warn.** Plugin builds report [MDP5002](/reference/analyzers/#mdp5002) at every call site. The host reports
    the same finding, under the same id, to the user running the plugin.
 3. **Remove.** At the declared removal version - never earlier - the member is deleted, and its registry
    entry moves from `Active` to `Removed`. It stays in `Removed`, and in the table below, forever: a
@@ -24,7 +24,7 @@ the registry table below, so an API cannot be removed from the SDK without its l
 
 Removal only ever happens in a major release, and only for an API whose `RemovedIn` names that release.
 An API still present after its declared removal version is itself a bug, reported as
-[MDP5004](/sdk/analyzers/#mdp5004).
+[MDP5004](/reference/analyzers/#mdp5004).
 
 ## Declaring a deprecation
 
@@ -39,7 +39,7 @@ public void SetVariable(string name, object value) { }
 Both attributes, always. `[Obsolete]` is what the compiler, the IDE and every third-party analyzer
 already understand; `[MacroDeckDeprecated]` carries the lifecycle that `[Obsolete]` has nowhere to put.
 Declaring one without the other, or a removal version that is not after the deprecation version, or empty
-guidance, is reported as [MDP5003](/sdk/analyzers/#mdp5003).
+guidance, is reported as [MDP5003](/reference/analyzers/#mdp5003).
 
 The attribute is public, so a plugin may use it on its own surface too - the analyzer rules apply to any
 assembly that declares it.
@@ -106,7 +106,7 @@ the plugin's card. A plugin's state is the *worst* of everything found about it,
 
 ## Diagnostic ids
 
-Compile-time ids are documented in the [Analyzers reference](/sdk/analyzers/). The host reuses `MDP5002` and `MDP5004`
+Compile-time ids are documented in the [Analyzers reference](/reference/analyzers/). The host reuses `MDP5002` and `MDP5004`
 for the same findings, so a warning you saw while building and a row your user sees are visibly the same
 thing. Three ids exist only at run time, because nothing about them is visible at compile time:
 

@@ -5,7 +5,7 @@ description: Launch a plugin exactly as the supervisor composes its environment,
 
 Launches a plugin exactly as the supervisor composes its environment, against the running Macro Deck
 host by default, streaming its output live. This is the fastest way to reproduce what the supervisor
-injects - see [plugin-hosting.md: what the supervisor injects](/sdk/hosting/#what-the-supervisor-injects)
+injects - see [plugin-hosting.md: what the supervisor injects](/reference/plugin-hosting/#what-the-supervisor-injects)
 for the production side of the same table.
 
 `run` starts the plugin as a child process. For breakpoints, child-process attach and the simpler
@@ -70,7 +70,7 @@ Against the stub host, `run` starts a real, in-process `MacroDeckTestHost` - the
 session and WebSocket implementation, not a mock - and points the launched process at it. Every
 `MACRO_DECK_PLUGIN_*` variable and `ASPNETCORE_URLS` are scrubbed from the inherited environment first,
 then set fresh for the resolved mode, exactly mirroring what a managed plugin's supervisor sets - see the
-table in the plugin hosting guide's ["What the supervisor injects"](/sdk/hosting/#what-the-supervisor-injects) section.
+table in the plugin hosting guide's ["What the supervisor injects"](/reference/plugin-hosting/#what-the-supervisor-injects) section.
 
 **In managed mode (`--stub-host` only), `MACRO_DECK_PLUGIN_ID` is read from the manifest, not invented.**
 A real supervisor always launches a plugin whose own `manifest.json` declares the same id it injects, and

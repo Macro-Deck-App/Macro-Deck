@@ -46,7 +46,7 @@ and diagnostics endpoints.
 The integration opts into features by implementing small SDK contracts. Every plugin can contribute
 actions. Optional capability interfaces add variables, events, configuration flows, weather
 stations, music players, virtual profiles, issues and other surfaces. Start with only the capability
-you need; the [SDK reference](/sdk/) and [capability guide](/sdk/capabilities/) cover
+you need; the [SDK reference](/reference/sdk-packages/) and [capability guide](/features/) cover
 the complete set later.
 
 ```mermaid
@@ -82,9 +82,9 @@ flowchart LR
 
 The deeper contracts are still documented, but they are not prerequisites for the quickstart:
 
-- [Plugin hosting](/sdk/hosting/) explains dependency injection, registration modes, process
+- [Plugin hosting](/reference/plugin-hosting/) explains dependency injection, registration modes, process
   supervision and the environment supplied by the host.
-- [Capability parity](/sdk/capability-parity/) records where an out-of-process plugin differs
+- [Capability parity](/reference/capability-parity/) records where an out-of-process plugin differs
   from an integration compiled into the host.
 - [Plugin protocol](/reference/protocol/) and [WebSocket reference](/reference/websocket/) are for
   alternate-language SDKs and protocol-level troubleshooting.

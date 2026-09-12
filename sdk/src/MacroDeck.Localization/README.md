@@ -15,4 +15,4 @@ Plugins add `Localization/Strings.resx` (plus `Strings.de.resx` and friends) and
 `MacroDeck.Plugin.Analyzers`, whose source generator turns those files into a strongly typed API and
 reports `MDLOC001`-`MDLOC006` at build time.
 
-See <https://docs.macro-deck.app/sdk/localization/>.
+See <https://docs.macro-deck.app/features/localization/>.

@@ -5,7 +5,7 @@ description: 'macrodeck-plugin: scaffold, build, validate, inspect, pack, run, t
 
 `macrodeck-plugin` is the `MacroDeck.Plugin.Cli` dotnet tool: validate a manifest, inspect, pack or
 verify a `.macroDeckPlugin` (or other signable) artifact, run a plugin against the running host or a
-disposable stub, and run the [conformance suite](/sdk/conformance/) against it - all without installing Macro
+disposable stub, and run the [conformance suite](/reference/conformance/) against it - all without installing Macro
 Deck itself.
 
 **Nothing here is how a plugin gets signed for the Store.** Store artifacts are signed by the Creator
@@ -149,10 +149,10 @@ this table on a normal exit: it returns the launched plugin's own exit code.
 
 ## See also
 
-- [Testing plugins](/sdk/testing/) - `MacroDeck.Plugin.Testing`, which `run` and `test` are built on.
-- [Conformance](/sdk/conformance/) - the suite `test` runs, and the report shape all three of its formats
+- [Testing plugins](/features/testing/) - `MacroDeck.Plugin.Testing`, which `run` and `test` are built on.
+- [Conformance](/reference/conformance/) - the suite `test` runs, and the report shape all three of its formats
   produce.
-- [Plugin hosting](/sdk/hosting/) - the artifact format `pack`/`validate`/`inspect` read, and what the
+- [Plugin hosting](/reference/plugin-hosting/) - the artifact format `pack`/`validate`/`inspect` read, and what the
   supervisor injects that `run` reproduces.
 - [Publishing to the Store](/guides/publishing/) - how a plugin is actually published and signed, and why
   `keygen` and `sign` are not part of it.

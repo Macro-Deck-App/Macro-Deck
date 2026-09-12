@@ -32,7 +32,7 @@ Deprecated in `3.0.0`, removed in `4.0.0`. All three keep working until then.
 | `WidgetTargetInfo.HasOnOffStates` | `WidgetTargetInfo.States` |
 
 Recompiling against this SDK reports each call site as
-[MDP5002](/sdk/analyzers/#mdp5002). If you build with warnings as errors, that is a build break
+[MDP5002](/reference/analyzers/#mdp5002). If you build with warnings as errors, that is a build break
 at your chosen warning level — the API itself still works.
 
 ### What to use instead
@@ -133,7 +133,7 @@ Four things to get right:
   the value. A user can then style "disconnected" differently from "connected and off". Return `null`
   only when nothing is known at all.
 
-See [capabilities](/sdk/capabilities/) for the full contract.
+See [capabilities](/features/) for the full contract.
 
 ## When a migration guide appears
 
@@ -173,9 +173,9 @@ You are not waiting passively for a guide. The mechanisms that make a future mig
 already running:
 
 - **Reference `MacroDeck.Plugin.Analyzers`.** Deprecated-API use is flagged at every call site as
-  [MDP5002](/sdk/analyzers/#mdp5002), with the removal version and the replacement in the
+  [MDP5002](/reference/analyzers/#mdp5002), with the removal version and the replacement in the
   message, long before the removal happens. Use of an API whose removal version this SDK has already
-  reached is the error [MDP5004](/sdk/analyzers/#mdp5004).
+  reached is the error [MDP5004](/reference/analyzers/#mdp5004).
 - **Read the compatibility report** the host returns in the session response, and the Compatibility tab
   in the desktop app. A state of `update_recommended` or `update_required` is the earliest honest
   signal that a migration is coming for your plugin specifically.

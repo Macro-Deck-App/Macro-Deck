@@ -19,7 +19,7 @@ and any problem it finds stops `pack` before a single byte is written, reported 
 would report it. Every file under `--source` except `manifest.json` itself is then hashed from disk and
 becomes a fresh `files[]` entry - **whatever `files[]` the source manifest already declared is discarded,
 never merged or compared against**. A symlink, an unsafe path, or any of the artifact size/entry limits
-the plugin hosting guide's [`.macroDeckPlugin` artifact section](/sdk/hosting/#the-macrodeckplugin-artifact) documents also stops the pack before
+the plugin hosting guide's [`.macroDeckPlugin` artifact section](/reference/plugin-hosting/#the-macrodeckplugin-artifact) documents also stops the pack before
 writing.
 
 [`build`](/cli/build/) calls this exact implementation once it has staged a payload, so a built package and a

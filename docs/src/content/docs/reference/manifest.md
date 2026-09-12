@@ -43,7 +43,7 @@ invalid at that same level later:
 
 See [`validate --level`](/cli/validate/) for the CLI side of this, and
 [Publishing to the Store](/guides/publishing/) for what the Portal checks. The host itself only ever
-enforces Development - see [Plugin hosting](/sdk/hosting/).
+enforces Development - see [Plugin hosting](/reference/plugin-hosting/).
 
 ### The `x-macrodeck-requirement` annotation
 
@@ -268,7 +268,7 @@ strings are available in:
 **You do not normally write this by hand.** `macrodeck-plugin build` and `macrodeck-plugin pack` derive
 it from the plugin project's `Localization/*.resx` set - the unsuffixed `Strings.resx` counts as `en`,
 and every culture-suffixed sibling contributes its own tag - so the manifest cannot claim a language the
-plugin does not actually ship. See [packing and the localization guide](/sdk/localization/#the-manifest-languages-field).
+plugin does not actually ship. See [packing and the localization guide](/features/localization/#the-manifest-languages-field).
 A value you did write survives when the tooling has nothing to derive from (packing a payload directory
 with no resource files in it); where it *can* derive one and the two disagree, the derived list wins and
 `pack` says so.
@@ -277,7 +277,7 @@ with no resource files in it); where it *can* derive one and the two disagree, t
 reader and both would collapse onto `zh`, as would `pt-BR` and `pt-PT`. A consumer that wants a
 two-letter grouping can derive it from the full tag; nothing can go the other way. The shape accepted is
 a 2–3 letter language, an optional 4-letter script, and an optional 2-letter or 3-digit region - the same
-shape [MDLOC005](/sdk/localization/#mdloc005) checks a resource file's culture suffix against.
+shape [MDLOC005](/features/localization/#mdloc005) checks a resource file's culture suffix against.
 
 An **unrecognised** tag is not an error, for the same reason an unknown `permissions` entry is not: this
 is a declaration a store reads, never something that can make a plugin unrunnable. A **blank** or
@@ -479,7 +479,7 @@ and fails if a declared entrypoint does not appear in the build output.
 
 - [The raw schema](/schemas/plugin-manifest-v1.schema.json) - machine-checkable, with per-field
   descriptions.
-- [Plugin hosting](/sdk/hosting/) - the artifact format, the installer's rules and the on-disk
+- [Plugin hosting](/reference/plugin-hosting/) - the artifact format, the installer's rules and the on-disk
   layout this manifest describes.
 - [Plugin CLI](/cli/) - `build`, `validate`, `inspect` and `pack`.
 - [Security model](/policies/security/) - what signing and permissions do and do not guarantee.

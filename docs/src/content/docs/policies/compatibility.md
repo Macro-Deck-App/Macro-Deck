@@ -44,15 +44,15 @@ or changed in an incompatible way outside the process described under
   [the manifest reference](/reference/manifest/) and
   [ADR 0029](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0029-plugin-packaging-installation-and-supervision.md)
 - The analyzer diagnostic ids (`MDP1001`, …), including the `MDLOC` family (`MDLOC001`-`MDLOC008`) -
-  see [analyzers](/sdk/analyzers/)
-- The conformance check ids (`MDC0305`, …) - see [conformance](/sdk/conformance/)
+  see [analyzers](/reference/analyzers/)
+- The conformance check ids (`MDC0305`, …) - see [conformance](/reference/conformance/)
 - The `.resx` resource contract a plugin's `Localization/*.resx` is compiled against - the
   default-language file, the `Strings.<culture>.resx` naming convention, named placeholders, and the
-  bracketed parameter-type declaration in a `<comment>` - see [Localization](/sdk/localization/)
+  bracketed parameter-type declaration in a `<comment>` - see [Localization](/features/localization/)
 - Macro Deck's own localization catalog keys (`macrodeck:Common.Save`, …), exposed as
   `MacroDeckStrings`. **Additive-only**: a key already shipped is never deleted outright. Retiring one
   goes through the same idea as SDK deprecation - the key keeps resolving, referencing it from a plugin
-  is reported as [MDLOC006](/sdk/analyzers/#mdloc006) naming the replacement, and the record stays
+  is reported as [MDLOC006](/reference/analyzers/#mdloc006) naming the replacement, and the record stays
   for as long as the deprecation lifecycle requires. See [deprecations](/policies/deprecations/) for the
   lifecycle this mirrors.
 
@@ -97,7 +97,7 @@ table, and it **keeps working unchanged** the whole time. Removal happens only i
 [ADR 0037](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0037-sdk-deprecation-is-declared-metadata.md).
 
 You are told twice, in two places: at compile time as
-[MDP5002](/sdk/analyzers/#mdp5002), with the removal version and the replacement in the message,
+[MDP5002](/reference/analyzers/#mdp5002), with the removal version and the replacement in the message,
 and at run time in the desktop app, where the person running your plugin sees the same finding under
 the same id. Nothing is deprecated in the shipped SDK today - the mechanism ships ahead of the first
 deprecation deliberately.
@@ -257,7 +257,7 @@ for the full record, including why the two namespaces are split where they are.
 ## Verifying compatibility yourself
 
 - Run the **conformance suite** against your plugin - `macrodeck-plugin test`. A broken check id is a
-  break; the ids are stable, so gate CI on them. See [conformance](/sdk/conformance/).
+  break; the ids are stable, so gate CI on them. See [conformance](/reference/conformance/).
 - Reference **`MacroDeck.Plugin.Analyzers`**. Its source generator records the deprecated APIs your
   compilation actually references, which is what lets the host report *confirmed* rather than merely
   *inferred* usage. A plugin without it lands in `inferred`, and nothing about it is ever presented to
@@ -277,5 +277,5 @@ protocol major, or it does not happen.
 
 - [Deprecations](/policies/deprecations/) - the lifecycle, the registry, and the evidence model.
 - [Migrations](/policies/migrations/) - what a migration guide will contain, and when one is published.
-- [Conformance](/sdk/conformance/) - the contract suite and its stable check ids.
+- [Conformance](/reference/conformance/) - the contract suite and its stable check ids.
 - [Plugin protocol](/reference/protocol/) - version and capability negotiation in detail.

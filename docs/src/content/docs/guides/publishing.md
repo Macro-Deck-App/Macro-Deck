@@ -29,7 +29,7 @@ locally is build and quality work, not trust work:
 - [`validate --level publication`](/cli/validate/) the manifest before attempting an
   upload - this is the same readiness check the Portal applies, run locally where a failure is cheap.
 - [`pack`](/cli/pack/) a Release build into a `.macroDeckPlugin` artifact.
-- [`test`](/cli/test/) it against the [conformance suite](/sdk/conformance/).
+- [`test`](/cli/test/) it against the [conformance suite](/reference/conformance/).
 
 None of this involves a key. An artifact you pack is unsigned, and that is what the Store expects to
 receive.

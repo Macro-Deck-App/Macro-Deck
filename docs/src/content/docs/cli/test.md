@@ -3,7 +3,7 @@ title: macrodeck-plugin test
 description: Run the conformance suite against a project, executable or artifact and write a text, JSON or Markdown report.
 ---
 
-Runs the [conformance suite](/sdk/conformance/) against a project, executable or artifact, and writes a text,
+Runs the [conformance suite](/reference/conformance/) against a project, executable or artifact, and writes a text,
 JSON or Markdown report.
 
 | Option | Default | What it does |
@@ -35,5 +35,5 @@ naming `--list-checks` as the way to see every valid one.
 Exit code is `Success` (0) when the resulting report's `conformant` is `true`, `SubjectInvalid` (1) when a
 Required check failed, and `InputUnreadable` (3) when the subject itself could not be launched at all -
 distinct from a conformance failure, the same way `validate` distinguishes an unreadable manifest from an
-invalid one. See [conformance.md: the report](/sdk/conformance/#the-report) for the exact shape each format
+invalid one. See [conformance.md: the report](/reference/conformance/#the-report) for the exact shape each format
 produces.
