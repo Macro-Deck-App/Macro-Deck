@@ -20,7 +20,10 @@ describe('AboutSettingsComponent', () => {
     operatingSystem: 'macOS 15 (Arm64)',
   };
 
+  beforeEach(() => localStorage.clear());
+
   afterEach(() => {
+    localStorage.clear();
     delete (window as { macroDeckShell?: unknown }).macroDeckShell;
   });
 
