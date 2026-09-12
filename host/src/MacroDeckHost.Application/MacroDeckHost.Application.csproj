@@ -75,6 +75,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MacroDeckHost.Domain\MacroDeckHost.Domain.csproj" />
     <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Sdk\MacroDeck.Sdk.csproj" />
+    <ProjectReference Include="..\..\..\ui-model\src\MacroDeck.Ui\MacroDeck.Ui.csproj" />
     <ProjectReference Include="..\..\..\protocol\src\MacroDeck.Plugin.Protocol\MacroDeck.Plugin.Protocol.csproj" />
     <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Plugin.Packaging\MacroDeck.Plugin.Packaging.csproj" />
     <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Localization\MacroDeck.Localization.csproj" />

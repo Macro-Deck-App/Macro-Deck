@@ -79,11 +79,12 @@ event, so the events stay the contract, and what reaches the wire is presentatio
 disabled for assistive technology. The reader gate still refuses events inside a disabled region even
 when a hand-written tree declares them; a producer built on the DSL never produces that combination. A
 disabled region absorbs every press on its tile, so the tile's own flow cannot run underneath a control
-shown as unavailable. The host's hardware path runs a tile's triggers without consulting the tree, and
-stays a known gap. An unbound slider declares nothing and is drawn as a level that cannot be moved. A
-component definition's own event list is metadata and never a gate — gating there would either let a
-component emit interactions the producer never opted into, or silence a node whose definition forgot to
-list an event.
+shown as unavailable. The host's hardware path asks the tree of a tile a plugin or integration serves
+the same way, once per press, before it runs the tile's triggers; a built-in tile is not asked, because
+its tree never carries a disabled region and the action button's own claim is those triggers. An unbound
+slider declares nothing and is drawn as a level that cannot be moved. A component definition's own event
+list is metadata and never a gate — gating there would either let a component emit interactions the
+producer never opted into, or silence a node whose definition forgot to list an event.
 
 **An interactive level travels as a fraction of its track, never in the producer's units.** A reader
 snaps and paints locally so the control never waits for a round trip, and a producer's units — a track

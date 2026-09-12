@@ -597,6 +597,7 @@ public sealed class UiSessionRegistry : IDisposable
 
 			unattached = _bySessionId.Values
 				.Where(record => !record.EverAttached &&
+					!record.HeldByHost &&
 					!IsTerminal(record) &&
 					now - record.CreatedAt >= _attachGrace)
 				.Select(record => record.SessionId)
@@ -778,6 +779,7 @@ public sealed class UiSessionRegistry : IDisposable
 		{
 			if (!_bySessionId.TryGetValue(sessionId, out var record) ||
 				record.EverAttached ||
+				record.HeldByHost ||
 				IsTerminal(record))
 			{
 				return;
@@ -795,6 +797,26 @@ public sealed class UiSessionRegistry : IDisposable
 				Reason = UiSessionEndReason.Drained,
 				Message = "No client attached within the grace window."
 			});
+	}
+
+	// A session the host reads itself has no client to wait for, and lives until the host closes it.
+	public bool HoldForHost(string sessionId)
+	{
+		lock (_gate)
+		{
+			if (!_bySessionId.TryGetValue(sessionId, out var record) || IsTerminal(record))
+			{
+				return false;
+			}
+
+			record.HeldByHost = true;
+			if (!record.EverAttached)
+			{
+				DisarmDrain(record);
+			}
+
+			return true;
+		}
 	}
 
 	private sealed class AttachDeadlineCallback
@@ -858,6 +880,8 @@ public sealed class UiSessionRegistry : IDisposable
 		public DateTimeOffset? DetachedAt { get; set; }
 
 		public bool EverAttached { get; set; }
+
+		public bool HeldByHost { get; set; }
 
 		public ITimer? DrainTimer { get; set; }
 	}

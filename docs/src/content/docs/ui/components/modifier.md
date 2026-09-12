@@ -131,7 +131,9 @@ contract](/ui/concepts/events/#interaction-only-where-declared).
   a slider, dial, toggle, segmented control or text field inside one cannot be operated.
 - **A disabled region absorbs every press on the tile.** If any node in a deck tile's tree is disabled,
   pressing anywhere on the tile runs none of the tile's own flows. `Disabled` therefore means "a control
-  that is unavailable"; to fade something that is only decorative, use `Opacity` instead.
+  that is unavailable"; to fade something that is only decorative, use `Opacity` instead. On a hardware
+  deck the host asks a plugin tile's tree once per press. A tree that does not answer within a second, or
+  a plugin already at its limit of open views, absorbs that press as well.
 
 ![A mute button tile, dimmed: the red face, the crossed-out microphone and the Mute label all shown at reduced opacity](../../../../assets/ui/modifier-disabled.png)
 
@@ -143,9 +145,6 @@ Known gaps:
 
 - The web client's keyboard and hardware activation honours the absorption but not the tree's own
   activation.
-- The host's hardware path
-  ([`DeviceInteractionRouter`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/host/src/MacroDeckHost.Application/Devices/Surfaces/DeviceInteractionRouter.cs))
-  runs a tile's triggers without consulting the tree.
 
 ## Properties
 

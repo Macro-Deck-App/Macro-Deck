@@ -9,6 +9,8 @@ using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Application.Ui.Sessions;
+using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Actions;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
@@ -86,6 +88,8 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 		services
 			.AddSingleton<IUiTransportMessageHandler<ExecuteActionButtonTriggerRequest,
 				ExecuteActionButtonTriggerResponse>>(Triggers);
+		services.AddSingleton<IUiSessionBroker>(UiBroker);
+		services.AddSingleton<IWidgetUiSessionOpener>(UiOpener);
 		_services = services.BuildServiceProvider();
 
 		var scopeFactory = _services.GetRequiredService<IServiceScopeFactory>();
@@ -93,7 +97,7 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 			new SingleProviderResolver(Provider),
 			Profiles,
 			Presence,
-			new DeviceInteractionRouter(scopeFactory, LockState, Serilog.Core.Logger.None),
+			new DeviceInteractionRouter(scopeFactory, LockState, Time, Serilog.Core.Logger.None),
 			Focus,
 			Bus,
 			new WidgetStateSubscriptionTracker(),
@@ -129,6 +133,10 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 	public RecordingEventBus Bus { get; }
 
 	public FakeHostLockState LockState { get; }
+
+	public RecordingUiSessionBroker UiBroker { get; } = new();
+
+	public RecordingWidgetUiSessionOpener UiOpener { get; } = new();
 
 	public DeviceSurfaceService Service { get; }
 
@@ -424,6 +432,21 @@ internal sealed class RecordingSurfaceProvider : IDeviceSurfaceProvider
 	{
 		Closes.Add((deviceId, reason));
 		return Task.CompletedTask;
+	}
+}
+
+internal sealed class RecordingWidgetUiSessionOpener : IWidgetUiSessionOpener
+{
+	public List<string?> OpenedWidgetIds { get; } = [];
+
+	public string? RefusalCode { get; set; }
+
+	public UiSessionOpenTicket Open(OpenWidgetUiSessionRequest request, string ownerPrincipal, bool isAdmin)
+	{
+		OpenedWidgetIds.Add(request.WidgetId);
+		return RefusalCode is { } code
+			? UiSessionOpenTicket.Rejected(code, "refused by the test")
+			: UiSessionOpenTicket.Opened($"session-{OpenedWidgetIds.Count}");
 	}
 }
 

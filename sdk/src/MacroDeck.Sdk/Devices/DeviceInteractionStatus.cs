@@ -3,7 +3,9 @@ namespace MacroDeck.Sdk.Devices;
 /// <summary>What the host did with an interaction a provider reported.</summary>
 public enum DeviceInteractionStatus
 {
-	/// <summary>The host resolved the interaction and ran whatever it maps to.</summary>
+	/// <summary>The host resolved the interaction and ran whatever it maps to, or queued it behind the
+	/// UI tree of a tile a plugin or integration serves - see
+	/// <see cref="IDeviceSession.SendInteractionAsync" />.</summary>
 	Accepted,
 
 	/// <summary>

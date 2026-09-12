@@ -193,7 +193,7 @@ stays open, the next press works:
 
 | Result | Meaning |
 | --- | --- |
-| `Accepted` | The host took it. |
+| `Accepted` | The host took it. For a `ShortPress` or `LongPress` on a tile a plugin or integration serves, it can mean *queued*: see below. |
 | `Rejected` + `WidgetNotOnSurface` | The press raced a surface push. Re-render the newest surface. |
 | `Rejected` + `HostLocked` | The host is locked and runs nothing until unlocked. |
 | `Rejected` + `TriggerFailed` | The widget was edited or deleted between push and press. |
@@ -209,6 +209,15 @@ answered `NotSupported`.
 | (timer elapses while held) | `onLongPress`. |
 | `Release` | `onTouchEnd`, plus `onShortPress` if the long press had not fired. |
 | `ShortPress` / `LongPress` | That trigger directly - no synthesis. |
+
+A tile that a plugin or integration serves, rather than a built-in one, answers a press from its own UI tree
+first, exactly as it does on screen: a [disabled region](/ui/components/modifier/) absorbs the press, and a
+control that declares the press receives it instead of the tile's flows. The host asks that tree once per
+press and waits at most a second for it; a tree that does not answer in time absorbs the press. Because the
+tree may arrive over the same connection your report came in on, the host never holds your report for it:
+`Press` and `Release` return at once as always, and a `ShortPress` or `LongPress` whose tree has not answered
+yet is answered `Accepted` and runs afterwards, so a failure of that flow no longer comes back as
+`Rejected` + `TriggerFailed`. Built-in tiles keep the full verdict.
 
 Press state is tracked **per widget**: releasing one widget never ends another's press, and a second
 `Press` for a widget already held is ignored (no timer restart, no second `onTouchStart`). If your hardware

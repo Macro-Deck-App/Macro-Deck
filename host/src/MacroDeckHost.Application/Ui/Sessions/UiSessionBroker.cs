@@ -222,6 +222,27 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 		return new UiSendEventResponse { Accepted = true };
 	}
 
+	public async Task<UiRawJson?> FirstTreeAsync(string sessionId, CancellationToken cancellationToken)
+	{
+		if (!_contexts.TryGetValue(sessionId, out var context) || !_registry.HoldForHost(sessionId))
+		{
+			return null;
+		}
+
+		return await context.FirstTree.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
+	}
+
+	public bool DispatchHostEvent(string sessionId, UiSessionEventCommand command)
+	{
+		if (!_contexts.TryGetValue(sessionId, out var context))
+		{
+			return false;
+		}
+
+		context.ProviderPump.Enqueue(ct => DispatchEventAsync(context, command, ct));
+		return true;
+	}
+
 	public UiSessionIngestResult PublishSnapshot(string providerId, string sessionId, UiRawJson tree)
 		=> Ingest(providerId, sessionId, tree, UiPayloadShape.Tree);
 
@@ -318,6 +339,8 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 	{
 		string[] pending;
 		bool toGroup;
+
+		context.FirstTree.TrySetResult(tree);
 
 		lock (context.Gate)
 		{
@@ -649,6 +672,7 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 
 		context.Ready.TrySetResult(UiSessionOpenTicket.Rejected(e.Code ?? UiSessionErrorCodes.SessionClosed,
 			e.Message ?? "The session ended."));
+		context.FirstTree.TrySetResult(null);
 
 		_ = TearDownAsync(context, e.Reason, e.Message ?? string.Empty);
 	}
@@ -712,6 +736,9 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 		public bool ResyncRequested { get; set; }
 
 		public TaskCompletionSource<UiSessionOpenTicket> Ready { get; } =
+			new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		public TaskCompletionSource<UiRawJson?> FirstTree { get; } =
 			new(TaskCreationOptions.RunContinuationsAsynchronously);
 	}
 }

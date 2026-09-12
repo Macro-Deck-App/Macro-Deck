@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Patches;
 using MacroDeck.Ui.Model.Serialization;
@@ -56,6 +57,50 @@ internal sealed class InProcessUiSessionTests : UiSessionFixture
 			Assert.That(Invoker.Invocations, Is.Empty, "An in-process session produced capability.invoke traffic.");
 			Assert.That(MessagesFor<UiSessionInvalidatedEvent>("c1"), Is.Empty);
 		});
+	}
+
+	[Test]
+	public async Task A_host_reader_gets_the_opening_tree_and_raises_an_event_without_attaching()
+	{
+		var session = AddInProcessProvider(() => TreeAt(3));
+		var sessionId = await OpenAsync(ProviderId);
+
+		var tree = await Broker.FirstTreeAsync(sessionId, CancellationToken.None);
+		var dispatched = Broker.DispatchHostEvent(sessionId, new UiSessionEventCommand { NodeId = "root", Name = "press" });
+		await Broker.CloseAsync(sessionId, "done", CancellationToken.None);
+		await WaitForAsync(() => session.DisposeCalls == 1, "Closing never reached the provider.");
+		await SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(tree, Is.Not.Null);
+			Assert.That(JsonDocument.Parse(tree!.Value.Utf8).RootElement.GetProperty("revision").GetInt32(),
+				Is.EqualTo(3));
+			Assert.That(dispatched, Is.True);
+			Assert.That(session.Dispatched.Single().Name, Is.EqualTo("press"), "An event raised just before closing was lost.");
+			Assert.That(Broker.DispatchHostEvent(sessionId, new UiSessionEventCommand { NodeId = "root", Name = "press" }),
+				Is.False,
+				"An ended session still accepted a host event.");
+		});
+	}
+
+	[Test]
+	public async Task A_session_the_host_reads_outlives_the_attach_grace_until_the_host_closes_it()
+	{
+		var session = AddInProcessProvider(() => TreeAt(1));
+		var sessionId = await OpenAsync(ProviderId);
+		await Broker.FirstTreeAsync(sessionId, CancellationToken.None);
+
+		Time.Advance(TimeSpan.FromMinutes(2));
+		Registry.SweepDraining();
+		await SettleAsync();
+
+		var dispatched = Broker.DispatchHostEvent(sessionId, new UiSessionEventCommand { NodeId = "root", Name = "press-end" });
+		await WaitForAsync(() => session.Dispatched.Count == 1, "A held press lost its closing event.");
+		await Broker.CloseAsync(sessionId, "done", CancellationToken.None);
+		await WaitForAsync(() => session.DisposeCalls == 1, "Closing never reached the provider.");
+
+		Assert.That(dispatched, Is.True);
 	}
 
 	[Test]
