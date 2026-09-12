@@ -3,61 +3,190 @@ title: The UI model
 description: The transport-neutral tree, keys and identity, and how a client and a provider agree on a model version.
 ---
 
-`MacroDeck.Ui.Model` is the wire contract underneath every Macro Deck UI view: a tree of nodes, the
-patches that mutate it, the events a client raises against it, and the resource handles it references.
-`MacroDeck.Ui` is one way to produce that tree - the declarative DSL described throughout this section -
-but the model itself does not assume a DSL produced it. A provider can build and patch a tree by hand
-against `MacroDeck.Ui.Model` directly when that is a better fit than the reactive runtime.
+Every Macro Deck view is a tree of plain JSON nodes; the C# DSL is one way to produce it.
 
-## Trees, nodes and revisions
+## Example
 
-A view is a tree of nodes, each carrying a type (`ui.stack`, `macrodeck.progress-bar`, and so on),
-properties, and children. The tree has a **revision**: every accepted patch advances it by exactly one,
-and a client and its provider agree on the current revision so a patch can be validated against the state
-it was computed from rather than blindly applied. See [Patches](/ui/reference/patches/) for the
-operation vocabulary and what makes a patch valid.
+```csharp
+var surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };
+var volume = new UiState<double>(0.4);
 
-## Node types are open
+var root = new UiStack
+{
+    Key = "volume",
+    Gap = 0.04,
+    Children =
+    [
+        new UiTextRun { Key = "readout", Text = UiText.From(() => $"{volume.Value * 100:0}%") },
+        new UiSlider
+        {
+            Key = "level",
+            Level = UiValue.From(() => volume.Value),
+            Events = [UiEventHandler.On(UiComponentEvents.Change, e =>
+            {
+                if (e.TryGetDouble(out var level)) volume.Value = level;
+            })],
+        },
+    ],
+};
 
-The set of node types a tree may contain is not closed, and a renderer is never required to recognise
-every one it receives. A node carries an optional `fallback` - a subtree in node types the reader is
-expected to understand - and a reader that does not recognise a type renders its `fallback` instead of
-failing or dropping the node. This is what lets the vocabulary grow (a new `ui.*` or `macrodeck.*` type
-shipping in a later Macro Deck release) without breaking an older renderer or an older plugin: the newest
-node degrades gracefully, and the oldest renderer never needs to know it exists.
+UiTree tree = UiViewBuilder.Build(surface, root);
+string json = UiCanonicalJson.Serialize(tree);
+```
 
-## Keys and identity
+```json
+{
+  "revision": 0,
+  "surface": { "kind": "widget", "sessionMode": "shared", "attributes": {} },
+  "root": {
+    "id": "volume",
+    "type": "ui.stack",
+    "properties": { "gap": { "basis": 0.04 } },
+    "children": [
+      { "id": "volume.readout", "type": "ui.text", "properties": { "text": "40%" }, "children": [] },
+      { "id": "volume.level", "type": "ui.slider", "properties": { "events": ["change"], "level": 0.4 }, "children": [] }
+    ]
+  }
+}
+```
 
-Keys are part of the public behavior of a view. Supply stable keys yourself.
+Keys became dot-joined ids, every value was read once, and the handler became nothing more than the name
+`change` in the node's `events`. `UiViewBuilder.Build` gives a one-off tree at revision 0; use a
+[`UiView`](/ui/concepts/reactive-updates/) for a tree that keeps up with its state.
 
-- Structural nodes derive ids from their key path.
-- Top-level input ids are their field keys so submission remains compatible with existing field-based
-  configuration.
-- Inputs inside object/array containers compose their id from the container and child key.
-- Conditions/fragments do not add identity merely by wrapping an existing element.
-- Repeated items use a stable item key, never an array index.
+## A node
 
-Do not generate ids from position. Reordering a list must preserve the identity of surviving items so
-focus, edits, and `move-node` patches remain meaningful.
+```csharp
+new UiSlider
+{
+    Key = "level",
+    Level = UiValue.From(() => volume.Value),
+    RequiredComponentVersion = 2,
+    Fallback = new UiTextRun { Key = "level-text", Text = UiText.From(() => $"{volume.Value * 100:0}%") },
+    Events = [/* change handler as above */],
+}
+```
+
+```json
+{
+  "id": "volume.level",
+  "type": "ui.slider",
+  "requiredComponentVersion": 2,
+  "properties": { "events": ["change"], "level": 0.4 },
+  "children": [],
+  "fallback": { "id": "volume.level-text", "type": "ui.text", "properties": { "text": "40%" }, "children": [] }
+}
+```
+
+| Member | Meaning |
+|---|---|
+| `id` | Stable, unique across the whole tree, including inside `fallback` subtrees. |
+| `type` | The component name, an open vocabulary (`ui.stack`, `macrodeck.progress-bar`, ...). The core model declares and validates none. |
+| `requiredComponentVersion` | The component version the node needs. Omitted means `1`; the DSL emits it only when you set `RequiredComponentVersion`. |
+| `properties` | Arbitrary, unvalidated JSON for the type to interpret. Always written, even when empty. |
+| `children` | In render order. Always written, even when empty. |
+| `fallback` | What a reader draws instead when it does not support `type`. Omitted when absent. |
+
+- **Unknown types never fail.** A reader that does not recognise a type, or whose declared range for it does
+  not cover `requiredComponentVersion` exactly (never clamped), renders `fallback`, negotiating it in turn.
+  With no fallback it renders nothing for that node and its children and carries on with the rest of the
+  tree. This is what lets the vocabulary grow without breaking older renderers or plugins.
+- **Properties are unvalidated.** Check a value's JSON kind before reading it: `"37.5"` can arrive where a
+  number belongs. A property explicitly set to `null` is not the same as an absent one; a patch removes a
+  key through `removedProperties`.
+- **An input's id is the field name it submits as**, so submission stays keyed by name whichever path
+  rendered it.
+
+## Node ids from keys
+
+```csharp
+new UiStack
+{
+    Key = "queue",
+    Children =
+    [
+        new UiWhen { Key = "header-when", Condition = () => showHeader.Value,
+                     Content = () => new UiTextRun { Key = "header", Text = "Up next" } },
+        new UiRepeat<(string Id, string Title)>
+        {
+            Key = "tracks",
+            Items = UiValue.From(() => tracks.Value),
+            KeySelector = track => track.Id,
+            Template = (track, key) => new UiTextRun { Key = key, Text = track.Title },
+        },
+    ],
+}
+```
+
+```text
+queue            ui.stack
+├─ queue.header  ui.text   "Up next"
+├─ queue.t1      ui.text   "Intro"
+├─ queue.t2      ui.text   "Verse"
+└─ queue.t3      ui.text   "Outro"
+```
+
+Keys are public behaviour: supply stable ones yourself.
+
+- A structural node's id is the dot-joined path of keys from the root, including the root's own key.
+- `UiWhen` and `UiFragment` are transparent: no node, no path segment. Wrapping an element never changes
+  its id - `header-when` and `tracks` appear nowhere above.
+- `UiRepeat` is transparent too; each item takes its `KeySelector` key as if it stood directly at the
+  repeat's position. Use a stable item key, never an index.
+- A top-level input's id is its bare key with no prefix (`label`, not `settings.label`), so submission
+  matches field-based configuration. Inside an object or array input container the id is
+  `containerId.key`, and nesting composes.
+- Every composed id is validated as an identifier, and must be unique across the tree. A failure or a
+  duplicate throws `UiViewException` naming the id (and, for a duplicate, both declaration paths).
+
+Never derive ids from position. Reordering must keep surviving items' ids so focus, in-flight edits and
+`move-node` patches stay meaningful.
+
+## Revisions
+
+```json
+{ "fromRevision": 0, "toRevision": 1, "operations": [ { "op": "set-properties", "nodeId": "volume.readout", "properties": { "text": "55%" } } ] }
+```
+
+A tree is built at revision 0, and every accepted patch advances it by exactly one. A patch applies only when
+the reader's current revision equals `fromRevision`, `toRevision` is greater, and `operations` is non-empty.
+It applies atomically: if any operation cannot apply, the reader discards the whole patch and asks for a full
+tree - a resync, never an exception or a closed session. See [Patches](/ui/reference/patches/).
 
 ## The three packages
 
-- **`MacroDeck.Ui.Model`** - the transport-neutral tree, patch, event and resource contracts described on
-  this page. Depend on this alone when you want to build or patch a tree without the DSL.
-- **`MacroDeck.Ui`** - the declarative C# DSL and fine-grained reactive runtime that produces and updates
-  a `MacroDeck.Ui.Model` tree from `UiState` and bindings. Covered by
-  [State and bindings](/ui/concepts/state-and-bindings/) and
-  [Reactive updates](/ui/concepts/reactive-updates/).
-- **`MacroDeck.Ui.Testing`** - a headless renderer/test host for views written against either of the
-  above. See [Custom views](/ui/views/custom/) for a worked test.
+| Package | Use it for |
+|---|---|
+| `MacroDeck.Ui.Model` | The tree, patch, event and resource contracts on this page. Depend on it alone to build or patch a tree by hand. |
+| `MacroDeck.Ui` | The C# DSL and reactive runtime that produce and patch a tree from `UiState`. See [State and bindings](/ui/concepts/state-and-bindings/). |
+| `MacroDeck.Ui.Testing` | A headless renderer and test host for either. See [Custom views](/ui/views/custom/#testing-it). |
 
 All three are public NuGet contracts; see [Compatibility](/ui/reference/compatibility/).
 
 ## Model-version negotiation
 
-A client negotiates the UI model version it speaks with the host **before** any session is opened, not
-per-tree. That is what makes declining cheap: a client too old for the model version a provider would
-render costs nothing - no session is opened, no slot is held - and falls back to whatever
-non-tree representation the surface offers (declared fields for configuration, the built-in grid for a
-folder). See [Serving a view](/ui/views/sessions/) for where this fits in a session's lifecycle, and
-[Compatibility](/ui/reference/compatibility/) for why the model's major version is 3.
+```csharp
+var result = UiCapabilityNegotiator.NegotiateModelVersion(new UiCapabilities
+{
+    UiProtocol = new UiVersionRange { Minimum = 3, Maximum = 9 },
+    SupportsAllComponents = true,
+});
+// IsSupported = true, NegotiatedVersion = 4
+// with Minimum = 1, Maximum = 2: IsSupported = false, FallbackReason = "No overlapping UI model version."
+```
+
+The negotiated version is `min(reader max, UiModelVersions.Current)`, and negotiation fails when that falls
+below `max(reader min, UiModelVersions.Minimum)`. Today `Minimum` is 3 and `Current` is 4.
+
+A client negotiates the model version with the host **before** any session is opened, not per tree. Declining
+is therefore cheap: no session is opened and no slot is held, and the client falls back to the surface's
+non-tree representation (declared fields for configuration, the built-in grid for a folder). The host opens
+each session at `Current` and honours whatever version the provider negotiates down to. Failure is never
+fatal. See [Serving a view](/ui/views/sessions/) for the session lifecycle, and
+[Compatibility](/ui/reference/compatibility/) for the version history.
+
+## See also
+
+- [State and bindings](/ui/concepts/state-and-bindings/)
+- [Reactive updates](/ui/concepts/reactive-updates/)
+- [Patches](/ui/reference/patches/)
