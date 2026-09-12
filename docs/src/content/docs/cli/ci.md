@@ -52,7 +52,7 @@ jobs:
         run: macrodeck-plugin build --source src/HelloDeck --rid ${{ matrix.rid }} --output ./artifacts
 
       - name: Validate for publication
-        run: macrodeck-plugin validate --level publication --manifest src/HelloDeck/manifest.json
+        run: macrodeck-plugin validate --level publication --artifact ./artifacts/*.macroDeckPlugin
 
       - name: Conformance
         run: |

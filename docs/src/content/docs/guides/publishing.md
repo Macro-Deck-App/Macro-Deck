@@ -3,105 +3,181 @@ title: Publishing to the Store
 description: How a plugin reaches the Macro Deck Store - Trusted Publishing from your CI workflow to the Creator Portal, which verifies the publisher and signs the artifact server-side.
 ---
 
-A plugin reaches the Macro Deck Store through **Trusted Publishing**: your CI workflow authenticates to
-the Creator Portal with its own workload identity, the Portal verifies that the workflow is a trusted
-publisher for that plugin, and the Portal signs the artifact itself. **You never generate, receive,
-manage or hold a signing key or a certificate**, and neither does your CI workflow.
+Your CI workflow submits an unsigned artifact to the Creator Portal, and the Portal signs and publishes it - you never hold a signing key.
 
-```text
-Git repository
-    -> trusted CI workflow
-    -> Creator Portal
-    -> publisher / provenance verification
-    -> server-side signing
-    -> publishing
+:::caution[The publishing interface is not available yet]
+The endpoint your workflow calls, the token exchange it performs and the workflow claims the Creator Portal
+checks are not published yet. This page covers everything you can set up today and the trust model the
+submission step will plug into. It does not guess the missing parts.
+:::
+
+## Before you publish
+
+Run each check on the build output, not the project directory:
+
+- **Store metadata is complete** - `description`, `icon`, `license`, `repository`, `compatibility` and
+  `publisher.name` are filled in ([manifest reference](/reference/manifest/#requirement-categories)):
+
+  ```bash
+  macrodeck-plugin validate --level publication --artifact ./artifacts/com.example.hello-deck-1.0.0-linux-x64.macroDeckPlugin
+  ```
+
+  Exit `1` means a field is missing. `build` and `pack` only warn about these fields; the Creator Portal
+  applies the same check at upload.
+- **The artifact passes conformance** ([conformance suite](/reference/conformance/)):
+
+  ```bash
+  macrodeck-plugin test --artifact ./artifacts/com.example.hello-deck-1.0.0-linux-x64.macroDeckPlugin
+  ```
+
+- **`publisher` names your Creator or Organization account.** At upload the Portal checks that
+  `publisher.name` matches the authenticated account and that `publisher.id`, if present, is that account's
+  id. `validate` cannot check this locally because it never contacts a server.
+
+## Publish with Trusted Publishing
+
+Save as `.github/workflows/release.yml`. It uses the same build, validate and conformance steps as
+[CI and automation](/cli/ci/) and runs when you push a version tag:
+
+```yaml
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+          - os: macos-latest
+            rid: osx-arm64
+          - os: ubuntu-latest
+            rid: linux-x64
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install the CLI
+        run: dotnet tool install --global MacroDeck.Plugin.Cli --prerelease
+
+      - name: Unit tests
+        run: dotnet test
+
+      - name: Build the artifact
+        run: macrodeck-plugin build --source src/HelloDeck --rid ${{ matrix.rid }} --output ./artifacts
+
+      - name: Validate for publication
+        run: macrodeck-plugin validate --level publication --artifact ./artifacts/*.macroDeckPlugin
+
+      - name: Conformance
+        run: macrodeck-plugin test --artifact ./artifacts/*.macroDeckPlugin
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plugin-${{ matrix.rid }}
+          path: artifacts/*.macroDeckPlugin
 ```
 
-**The concrete publishing interface is not available yet** - the endpoint your workflow calls, the token
-exchange it performs and the workflow claims the Portal checks are not specified here. This page
-describes the model the trust chain is built for, so that nothing you set up now points the wrong way.
+The workflow stops at an unsigned, validated artifact. Once the Creator Portal publishes its interface,
+a submit step goes after these steps. Until then there is nothing to add, and no key or secret goes in
+your repository.
 
-## What you do
+How the trust chain works:
 
-Prepare the plugin repository and the publishing workflow that will submit from it. Everything you run
-locally is build and quality work, not trust work:
+1. You configure your repository and its workflow as the **trusted publisher** for your plugin in the
+   Creator Portal. The configuration steps are not published yet.
+2. The workflow authenticates with the short-lived workload identity its CI platform issues. That
+   identity proves which repository and which workflow is running. It is not a secret you store.
+3. The Portal checks that the workflow is a trusted publisher for that plugin and verifies the run's
+   provenance.
+4. The Portal signs the artifact server-side. The signed artifact is published once it passes the Store's
+   content review.
 
-- [`validate --level publication`](/cli/validate/) the manifest before attempting an
-  upload - this is the same readiness check the Portal applies, run locally where a failure is cheap.
-- [`pack`](/cli/pack/) a Release build into a `.macroDeckPlugin` artifact.
-- [`test`](/cli/test/) it against the [conformance suite](/reference/conformance/).
+What the workflow must never do:
 
-None of this involves a key. An artifact you pack is unsigned, and that is what the Store expects to
-receive.
+- **Sign anything.** No signing key, certificate or signing credential belongs in your repository, your CI
+  configuration or your CI provider's secret store. If a publishing setup asks you for one, it is not this
+  one.
+- **Replace Trusted Publishing with a manual upload.** Uploading an artifact by hand is not a way to
+  publish or sign a plugin.
 
-### Publication-required metadata
+## Release a new version
 
-Beyond the fields the host itself requires to install and run a plugin, publishing requires
-`description`, `icon`, `license`, `repository`, `compatibility` and `publisher` (with `publisher.name`)
-to be filled in - the full requirement table is in the
-[manifest reference](/reference/manifest/#requirement-categories). `macrodeck-plugin build` and `pack`
-already warn about any of these that are missing; `validate --level publication` is what turns those same
-gaps into a hard failure (exit `SubjectInvalid`, 1), so you can check readiness in one command before
-submitting anything:
+```json
+{
+  "id": "com.example.hello-deck",
+  "version": "1.1.0"
+}
+```
 
 ```bash
-macrodeck-plugin validate --level publication --manifest manifest.json
+git commit -am "Release 1.1.0"
+git tag v1.1.0
+git push origin main v1.1.0
 ```
 
-`publisher` identifies the Creator or Organization account that owns the listing, not free text. At
-upload, the Creator Portal checks that `publisher.name` matches the authenticated Creator/Organization
-account submitting the plugin, and that `publisher.id`, when present, is that account's id - this is a
-Portal-side check, not something `validate` can verify locally, since local development contacts no
-server and needs no Platform access.
+- The artifact version comes from the manifest's `version` (SemVer 2.0), not from the tag. Bump it before
+  tagging. `build` names the artifact `<id>-<version>-<rid>.macroDeckPlugin`.
+- Every release goes through the whole process again. Because the Store distributes the artifact the Portal
+  signed, nobody can silently replace or modify an approved package.
 
-## What your CI workflow does
+## What the Store signs
 
-The workflow authenticates to the Creator Portal using the trusted workload identity its platform issues
-it - the same short-lived, workflow-scoped identity that proves *which repository and which workflow* is
-running, not a secret you stored - and submits the packed artifact.
+```bash
+macrodeck-plugin verify ./downloads/com.example.hello-deck-1.1.0-linux-x64.macroDeckPlugin
+```
 
-The workflow never signs anything. **No signing key, certificate or signing credential belongs in your
-repository, in your CI configuration, or in your CI provider's secret store.** If a publishing setup asks
-you for one, it is not this one.
+- The Creator Portal is the only component that signs Store artifacts. It signs server-side, with keys that
+  exist only in Macro Deck infrastructure. It also issues and revokes certificates. Plugin authors do
+  neither, and the `macrodeck-plugin` CLI cannot do either.
+- An artifact you pack is unsigned. That is what the Store expects to receive.
+- [`verify`](/cli/signing/#verify) checks a signed artifact against the pinned Macro Deck root. It works
+  offline and needs no credentials. A `valid` verdict is a cryptographic fact about the signature at signing
+  time, not a live trust decision, and it does not check revocation. See the
+  [security model](/policies/security/).
+- [`keygen`](/cli/signing/#keygen) and [`sign`](/cli/signing/#sign) are for artifacts distributed outside
+  the Store and for Macro Deck's own infrastructure. They are not part of publishing. Signing a plugin
+  locally does not make it a Store artifact.
 
-## What the Creator Portal does
+## How updates reach users
 
-- Verifies that the submitting workflow is a trusted publisher for that plugin, and verifies the
-  provenance of the workflow run itself.
-- Signs the artifact **server-side**, with keys that exist only in Macro Deck infrastructure. The Creator
-  Portal is the only component that signs Store artifacts.
-- Publishes the signed artifact, once the submission has passed the Store's content review. Because the
-  Store distributes the artifact it signed, an approved package cannot be silently replaced or modified
-  afterwards without going through the process again.
+```text
+installed 1.0.0  <  Store 1.1.0  ->  shown as an update
+```
 
-Certificate issuance and revocation also live in the Creator Portal. Neither is something a plugin author
-performs, and neither is something the `macrodeck-plugin` CLI can do.
+- When the Store catalogue refreshes, Macro Deck compares the installed version with the latest Store
+  version by SemVer. It offers an update only if the Store version is higher. It never offers an update
+  when either version fails to parse.
+- An update is only reported to the user. It is never installed unsigned on their behalf. Once a plugin is
+  installed as signed, an unsigned update to it is refused, even if the user consents.
+- The host verifies every package before install and again before every launch. Editing files after
+  installation stops the plugin from loading.
 
-There is no manual upload step in this flow. Submitting an artifact by hand is not how a plugin is
-published or signed.
+## Removing a plugin from the Store
 
-## Verifying a published artifact
-
-[`macrodeck-plugin verify`](/cli/signing/#verify) checks a signed artifact's embedded signature and
-certificate against the pinned Macro Deck root. It needs no network and no credentials, so it works as a
-local check or as a CI gate on an artifact you downloaded - see [CI usage](/cli/ci/).
-
-Note what a `valid` verdict is and is not: it is a cryptographic fact about the signature and certificate
-chain at signing time, not a live trust decision, and revocation is not checked. See the
-[security model](/policies/security/).
-
-## Signing something yourself is a different thing
-
-The CLI's [`keygen`](/cli/signing/#keygen) and [`sign`](/cli/signing/#sign) commands exist, and
-they keep working - for artifacts distributed outside the Store, and for Macro Deck's own infrastructure.
-They are **not** part of publishing to the Store, they are not a step in normal plugin development, and
-running them is never a prerequisite for getting a plugin published. Signing a plugin locally does not
-make it a Store artifact.
+The signed registry lists removed packages. Macro Deck hides a removed plugin from the Store, stops offering
+it as an update, and fails any new Store install of it. This applies to the plugin id as a whole. How an
+author asks for a removal, and whether a single version can be withdrawn, is not published yet. There is no
+CLI command for it.
 
 ## See also
 
-- [the plugin CLI](/cli/) - `validate`, `pack`, `test` and `verify` in full.
-- [Security model](/policies/security/) - what a signature covers, what the host enforces today, and what
-  it does not.
+- [CI and automation](/cli/ci/) - the same workflow for pull requests.
+- [`macrodeck-plugin validate`](/cli/validate/) - levels and problem codes.
+- [Signing packages](/cli/signing/) - `verify`, and `keygen`/`sign` outside the Store.
+- [Manifest reference](/reference/manifest/) - `publisher` and the publication fields.
+- [Security model](/policies/security/) - what a signature covers and what the host enforces.
 - [ADR 0042](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0042-plugin-signing-and-trusted-publishing.md) -
   why signing is server-side and why creator keys never reach a developer machine or a CI runner.
