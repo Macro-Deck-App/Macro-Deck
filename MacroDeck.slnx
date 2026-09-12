@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/docs/">
+    <Project Path="docs/screenshots/Scenes/Scenes.csproj" />
+  </Folder>
   <Folder Name="/host/" />
   <Folder Name="/host/src/">
     <Project Path="host/src/MacroDeckHost.Application/MacroDeckHost.Application.csproj" />

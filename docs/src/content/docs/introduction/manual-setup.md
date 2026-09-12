@@ -1,70 +1,63 @@
 ---
-title: Manual setup
-description: Assemble a Macro Deck plugin by hand, without the template or CLI scaffolding, then build and run it against a stub or real host.
+title: Project setup
+description: Every file of a Macro Deck plugin project, written by hand - the project file, manifest, entrypoint, integration and build recipe - and how to run it.
 ---
 
-This is the explicit manual alternative to the [Quickstart](/introduction/quickstart/). It creates the
-same small plugin without cloning the template or asking a tool to scaffold files. Use it when you want
-to understand every project component or add plugin hosting to an existing console application.
+A plugin is a .NET 10 console project with a `manifest.json` beside it; this page builds one by hand, or
+explains what [`macrodeck-plugin new`](/cli/new/) generated for you.
 
-You need the .NET 10 SDK. Create this layout in an empty directory, replacing `MyPlugin` with your own
-project name if necessary:
+## The files
 
 ```text
 MyPlugin/
 ├── Assets/
-│   └── icon.svg
-├── MyIntegration.cs
-├── MyPlugin.csproj
-├── Program.cs
-├── SayHelloAction.cs
-└── manifest.json
+│   └── icon.svg            the plugin icon, referenced by manifest.json
+├── MyIntegration.cs        your capabilities
+├── MyPlugin.csproj         a console project with the Macro Deck packages
+├── Program.cs              starts the plugin
+├── macrodeck-build.json    how macrodeck-plugin build builds each platform
+└── manifest.json           who the plugin is
 ```
 
-## Create the project file
+`new` generates the same project under `src/MyPlugin/`, plus a solution, a test project, a
+`Localization/` resource set and central package versions.
 
-A plugin is a normal `net10.0` console project. It references the ASP.NET Core shared framework because
-`MacroDeck.Plugin.Hosting` builds on ASP.NET Core; it is not a `Microsoft.NET.Sdk.Web` project.
-
-Create `MyPlugin.csproj`:
+## Project file
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net10.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <UseAppHost>false</UseAppHost>
-    </PropertyGroup>
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
-        <PackageReference Include="MacroDeck.Plugin.Hosting" Version="3.0.0-*" />
-        <PackageReference Include="MacroDeck.Plugin.Serilog" Version="3.0.0-*" />
-        <PackageReference Include="MacroDeck.Plugin.Analyzers" Version="3.0.0-*" PrivateAssets="all" />
-    </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="MacroDeck.Plugin.Hosting" Version="3.0.0-*" />
+    <PackageReference Include="MacroDeck.Plugin.Serilog" Version="3.0.0-*" />
+    <PackageReference Include="MacroDeck.Plugin.Analyzers" Version="3.0.0-*" PrivateAssets="all" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <Content Include="manifest.json" CopyToOutputDirectory="PreserveNewest" />
-        <Content Include="Assets/icon.svg" CopyToOutputDirectory="PreserveNewest" />
-    </ItemGroup>
+  <ItemGroup>
+    <Content Include="manifest.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets/icon.svg" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 
 </Project>
 ```
 
-`3.0.0-*` selects the newest published Macro Deck 3 preview; pin an exact version when you need
-reproducible dependency updates. The analyzer package is optional but strongly recommended: it
-catches invalid declarations during the build and confirms generated capability metadata. The two
-`Content` items are not optional for this layout. The hosting SDK reads `manifest.json` from the
-content root and resolves the icon relative to that root, so both files must be copied beside the
-build output. See the [analyzer reference](/sdk/analyzers/) for the analyzer and
-source-generator rules.
+- **`Microsoft.NET.Sdk` plus the ASP.NET Core framework reference**, not `Microsoft.NET.Sdk.Web`: the
+  hosting package builds on ASP.NET Core, but a plugin is a headless process.
+- **`3.0.0-*`** picks the newest Macro Deck 3 preview. Pin an exact version for reproducible builds.
+- **`MacroDeck.Plugin.Analyzers`** is optional but recommended: it reports invalid declarations at
+  build time. See [Analyzers](/reference/analyzers/).
+- **Both `Content` items are required.** The SDK reads `manifest.json` from the content root at startup
+  and resolves the icon against it.
 
-## Add the manifest and icon
-
-Create an SVG icon at `Assets/icon.svg`, then create `manifest.json` beside the project file:
+## manifest.json
 
 ```json
 {
@@ -76,105 +69,31 @@ Create an SVG icon at `Assets/icon.svg`, then create `manifest.json` beside the 
   "description": "What the plugin does.",
   "icon": "Assets/icon.svg",
   "entrypoints": {
-    "win-x64": {
-      "executable": "MyPlugin.dll",
-      "runtime": { "kind": "FrameworkDependent", "dotnetVersion": "10.0" }
-    },
-    "osx-arm64": {
-      "executable": "MyPlugin.dll",
-      "runtime": { "kind": "FrameworkDependent", "dotnetVersion": "10.0" }
-    },
-    "linux-x64": {
-      "executable": "MyPlugin.dll",
-      "runtime": { "kind": "FrameworkDependent", "dotnetVersion": "10.0" }
-    }
+    "win-x64": { "executable": "runtimes/win-x64/MyPlugin.exe" },
+    "osx-arm64": { "executable": "runtimes/osx-arm64/MyPlugin" },
+    "linux-x64": { "executable": "runtimes/linux-x64/MyPlugin" }
   }
 }
 ```
 
-Change the reverse-domain `id`, display text, and entrypoint names for your plugin. Keep identity in the
-manifest; the hosting builder has no `WithId`, `WithName`, or `WithVersion` calls. Declare only the
-runtime identifiers you have tested. This minimal project is framework-dependent: `UseAppHost=false`
-keeps the Release output platform-neutral, every declared platform launches the same `MyPlugin.dll`,
-and the target machine must provide .NET 10. For a self-contained artifact, publish separately for each
-RID and point each entrypoint at its matching native executable. The
-[manifest reference](/reference/manifest/) documents every field, entrypoint mode, identifier rule,
-and the published JSON Schema.
+| Field | Rule |
+| --- | --- |
+| `manifestVersion` | Always `1`. |
+| `id` | Reverse-domain, lowercase, at least two segments: `com.example.my-plugin`. |
+| `name` | Display name, 1-128 characters. |
+| `version` | SemVer 2.0. |
+| `entrypoints` | One entry per runtime identifier you have tested; `executable` is relative to the package root. |
 
-## Add one action
+Identity lives only here - the hosting builder has no `WithId`, `WithName` or `WithVersion`. The
+`runtimes/<rid>/` paths are where [`build`](/cli/build/) stages each self-contained publish. Before
+publishing you also need `publisher`, `license`, `repository` and `compatibility`; `build` warns about
+each one that is missing. Every field is in the [manifest reference](/reference/manifest/).
 
-Create `SayHelloAction.cs`:
-
-```csharp
-using MacroDeck.Localization;
-using MacroDeck.Sdk.Actions;
-
-internal sealed class SayHelloAction : IActionDefinition
-{
-    public string Id => "say-hello";
-
-    public LocalizedText Name => "Say hello";
-
-    public LocalizedText Description => "Writes a greeting to the plugin's log.";
-
-    public IReadOnlyList<ActionParameter> Parameters { get; } =
-    [
-        new ActionParameter { Name = "who", Type = ActionParameterType.String, Label = "Who", Required = true }
-    ];
-
-    public IActionExecutor CreateExecutor() => new Executor();
-
-    private sealed class Executor : IActionExecutor
-    {
-        public Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
-        {
-            var who = context.Parameters.TryGetValue("who", out var value) ? value?.ToString() : null;
-
-            if (string.IsNullOrWhiteSpace(who))
-            {
-                return Task.FromResult(ActionResult.Failed(ActionErrorCodes.InvalidParameter, "No name was given."));
-            }
-
-            Console.WriteLine($"Hello, {who}!");
-            return ActionResult.SucceededTask;
-        }
-    }
-}
-```
-
-An executor reports a stable failure when it cannot complete the action; it must not silently return
-success. Long-running work should also honor `context.CancellationToken`. See the
-[SDK reference](/sdk/) for actions, parameters, results, and the other capability interfaces.
-
-## Add the integration
-
-Create `MyIntegration.cs`:
-
-```csharp
-using MacroDeck.Sdk;
-using MacroDeck.Sdk.Actions;
-
-public sealed class MyIntegration : IPluginIntegration
-{
-    public IReadOnlyList<IActionDefinition> Actions { get; } = [new SayHelloAction()];
-
-    public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
-
-    public Task ShutdownAsync() => Task.CompletedTask;
-}
-```
-
-Keep the capability collections complete and side-effect free during construction. The host builds the
-capability catalogue before `InitializeAsync` runs, so connect to external services in `InitializeAsync`
-and release them in `ShutdownAsync`. Constructor injection is available for services such as
-`IHttpClientFactory`, options, and logging.
-
-## Add the entrypoint
-
-Create `Program.cs`:
+## Program.cs
 
 ```csharp
 using MacroDeck.Plugin.Hosting;
+using MacroDeck.Plugin.Serilog;
 
 var plugin = MacroDeckPlugin.CreatePlugin(args)
     .UseMacroDeckLogging()
@@ -184,70 +103,133 @@ var plugin = MacroDeckPlugin.CreatePlugin(args)
 await plugin.RunAsync();
 ```
 
-`Build()` validates the local plugin configuration and reports all discovered problems together.
-`UseMacroDeckLogging()` comes from `MacroDeck.Plugin.Serilog` and forwards the plugin's logs to the
-Macro Deck log viewer while connected. The [hosting guide](/sdk/hosting/) covers configuration,
-dependency injection, registration, and reserved routes; the [logging guide](/sdk/logging/) covers
-log forwarding.
+- `RegisterIntegration<T>()` registers the integration and every capability interface it implements.
+- `Build()` checks the manifest identity, duplicate capability ids, reserved routes and the DI graph,
+  and reports every problem at once.
+- `UseMacroDeckLogging()` forwards the plugin's logs to the Macro Deck log viewer - see
+  [Logging](/features/logging/).
 
-## Build it
+## The integration class
 
-From the project directory, restore packages and compile the plugin:
+```csharp
+using MacroDeck.Sdk;
+using MacroDeck.Sdk.Actions;
 
-```bash
-dotnet build
+public sealed class MyIntegration : IPluginIntegration
+{
+    public IReadOnlyList<IActionDefinition> Actions { get; } = [];
+
+    public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+
+    public Task ShutdownAsync() => Task.CompletedTask;
+}
 ```
 
-The output directory must now contain the framework-dependent launch target `MyPlugin.dll`,
-`manifest.json`, and `Assets/icon.svg`. If either content file is absent, fix the `Content` entries
-before trying to run the plugin.
+The host reads `Actions` (and every other capability list) before `InitializeAsync` runs, so build them
+in the constructor without I/O. Connect to devices or services in `InitializeAsync`, release them in
+`ShutdownAsync`. Fill `Actions` in with [Your first action](/introduction/first-action/).
 
-## Choose a development host
+## Build recipe
 
-For a first run without installing or configuring Macro Deck, install the developer CLI and launch the
-project against its disposable stub host:
+`macrodeck-build.json`, beside the manifest - one target per entrypoint:
+
+```json
+{
+  "version": 1,
+  "targets": {
+    "win-x64": {
+      "executable": "dotnet",
+      "arguments": ["publish", "MyPlugin.csproj", "-c", "Release", "-r", "win-x64",
+                    "--self-contained", "true", "-o", "bin/publish/win-x64"],
+      "output": "bin/publish/win-x64"
+    },
+    "osx-arm64": {
+      "executable": "dotnet",
+      "arguments": ["publish", "MyPlugin.csproj", "-c", "Release", "-r", "osx-arm64",
+                    "--self-contained", "true", "-o", "bin/publish/osx-arm64"],
+      "output": "bin/publish/osx-arm64"
+    },
+    "linux-x64": {
+      "executable": "dotnet",
+      "arguments": ["publish", "MyPlugin.csproj", "-c", "Release", "-r", "linux-x64",
+                    "--self-contained", "true", "-o", "bin/publish/linux-x64"],
+      "output": "bin/publish/linux-x64"
+    }
+  }
+}
+```
+
+A manifest platform without a target fails the build. The format is in [`build`](/cli/build/).
+
+## Services and configuration
+
+The builder exposes the usual ASP.NET Core `Services`, `Configuration`, `Logging` and `Environment`.
+Register services before `Build()`, then take them in the integration's constructor:
+
+```csharp
+using MacroDeck.Plugin.Hosting;
+using MacroDeck.Plugin.Serilog;
+using Microsoft.Extensions.DependencyInjection;
+
+var builder = MacroDeckPlugin.CreatePlugin(args)
+    .UseMacroDeckLogging()
+    .RegisterIntegration<MyIntegration>();
+
+builder.Services.AddHttpClient<WeatherClient>(client =>
+    client.BaseAddress = new Uri("https://api.example.com/"));
+builder.Services.Configure<WeatherOptions>(builder.Configuration.GetSection("Weather"));
+
+var plugin = builder.Build();
+await plugin.RunAsync();
+```
+
+```csharp
+public sealed class MyIntegration(WeatherClient weather, IOptions<WeatherOptions> options)
+    : IPluginIntegration
+{
+    // ...
+}
+```
+
+`builder.WebApplicationBuilder` is there as an escape hatch; prefer the Macro Deck APIs for
+registration and lifecycle. Runtime behaviour - registration modes, lifecycle, reserved routes - is in
+[Plugin hosting](/reference/plugin-hosting/).
+
+## Run it
 
 ```bash
 dotnet tool install --global MacroDeck.Plugin.Cli --prerelease
+```
+
+```bash
 macrodeck-plugin run --project MyPlugin.csproj --stub-host
 ```
 
-The stub uses the real registration, session, and WebSocket implementation and streams the plugin's
-console output. It is the shortest way to verify this manually assembled project.
-
-To set breakpoints while connecting to a running Macro Deck desktop host, follow
-[Debugging plugins](/guides/debugging/). That guide covers pressing F5 and approving the interactive
-pairing prompt, the one-time Developer-token enrollment for headless runs, safe `launchSettings.json`
-profiles for Visual Studio or Rider, and the child-process attach workflow used when the CLI launches
-the plugin. Do not commit a Developer token or paste one into published documentation.
-
-## Package with the CLI
-
-Manual setup stops at the source tree. Do **not** hand-zip the build output to create a
-`.macroDeckPlugin` file. Packaging deliberately stays a CLI operation because `pack`:
-
-- validates the manifest with the host's real reader and the published JSON Schema;
-- checks the permission vocabulary and artifact safety rules;
-- rebuilds `files[]` from the payload that is actually on disk;
-- computes the SHA-256 digest for every packaged file.
-
-Create a Release build and pack its output:
-
-```bash
-dotnet build -c Release
-macrodeck-plugin pack \
-  --source bin/Release/net10.0 \
-  --output MyPlugin-1.0.0.macroDeckPlugin
+```text
+Started a disposable stub host at http://127.0.0.1:52484.
+...
+Session established (negotiated plugin protocol v3).
 ```
 
-A hand-built ZIP can look correct while carrying stale or missing `files[]` entries and digests; the
-CLI keeps the manifest consistent with the payload and rejects invalid input before writing it. See
-[the plugin CLI](/cli/) for `validate`, `pack`, and `inspect`, and the
-[`files[]` manifest reference](/reference/manifest/#files) for the integrity contract.
+A real in-process host, no Macro Deck install needed. Drop `--stub-host` to connect to the running
+desktop app instead - see [`run`](/cli/run/).
 
-## Next steps
+```bash
+macrodeck-plugin build --output ../artifacts
+macrodeck-plugin validate --artifact ../artifacts/com.example.my-plugin-1.0.0.macroDeckPlugin
+```
 
-- [Quickstart](/introduction/quickstart/) for the recommended template-first path.
-- [Samples and template](/introduction/samples-and-template/) for complete plugin examples.
-- [Debugging plugins](/guides/debugging/) for real-host launch profiles and breakpoints.
-- [Testing plugins](/sdk/testing/) for loopback integration tests and SDK fakes.
+Builds every platform, packs one `.macroDeckPlugin` and checks it. Validate the artifact, not the
+source manifest: the `runtimes/` entrypoints only exist once `build` has staged them.
+
+Never zip the output by hand - `build` and [`pack`](/cli/pack/) validate the manifest and write the
+`files[]` digests a hand-made ZIP lacks. For breakpoints against a real host, see
+[Debugging plugins](/guides/debugging/); never commit a Developer token.
+
+## See also
+
+- [Quickstart](/introduction/quickstart/) - the same project, generated.
+- [Samples and template](/introduction/samples-and-template/) - complete plugins to read.
+- [Your first action](/introduction/first-action/) - add behaviour to `MyIntegration`.
+- [Manifest reference](/reference/manifest/) - every field.
+- [Testing plugins](/features/testing/) - test the integration without a host.

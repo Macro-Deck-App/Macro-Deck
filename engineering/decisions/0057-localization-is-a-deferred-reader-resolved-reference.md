@@ -168,5 +168,5 @@ migrated string would have rendered its bracketed key for the width of a round t
 
 - [Issue #326](https://github.com/Macro-Deck-App/Macro-Deck/issues/326),
   [Issue #680](https://github.com/Macro-Deck-App/Macro-Deck/issues/680)
-- [Localization guide](https://docs.macro-deck.app/sdk/localization/),
+- [Localization guide](https://docs.macro-deck.app/features/localization/),
   [Compatibility policy](https://docs.macro-deck.app/policies/compatibility/)

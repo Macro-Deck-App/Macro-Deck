@@ -71,4 +71,4 @@ removal version is itself a build error.
 
 - [Issue #418](https://github.com/Macro-Deck-App/Macro-Deck/issues/418)
 - [Deprecations policy](https://docs.macro-deck.app/policies/deprecations/),
-  [Analyzer reference](https://docs.macro-deck.app/sdk/analyzers/)
+  [Analyzer reference](https://docs.macro-deck.app/reference/analyzers/)

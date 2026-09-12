@@ -141,5 +141,5 @@ asserts all three produce the same check ids and the same verdict.
   [Issue #413](https://github.com/Macro-Deck-App/Macro-Deck/issues/413),
   [Issue #416](https://github.com/Macro-Deck-App/Macro-Deck/issues/416)
 - [Protocol reference](https://docs.macro-deck.app/reference/protocol/),
-  [Plugin hosting guide](https://docs.macro-deck.app/sdk/hosting/),
+  [Plugin hosting guide](https://docs.macro-deck.app/reference/plugin-hosting/),
   [Compatibility policy](https://docs.macro-deck.app/policies/compatibility/)
