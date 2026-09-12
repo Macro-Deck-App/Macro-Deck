@@ -59,6 +59,6 @@ internal static partial class Scenes
 	[
 		.. TextScenes(), .. TextFieldScenes(), .. ImageScenes(), .. ButtonScenes(), .. SliderScenes(),
 		.. RangeBarScenes(), .. StackScenes(), .. ListScenes(), .. TransformScenes(), .. ChartScenes(),
-		.. TimeScenes(), .. ProgressScenes(), .. ViewScenes(),
+		.. TimeScenes(), .. ProgressScenes(), .. ViewScenes(), .. ConceptScenes(),
 	];
 }

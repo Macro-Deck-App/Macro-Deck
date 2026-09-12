@@ -28,6 +28,7 @@
   box.style.width = `${scene.width}px`;
   box.style.height = `${scene.height}px`;
   box.style.setProperty('--radius', `${scene.radius}px`);
+  box.classList.toggle('light', name.endsWith('-light'));
 
   // A fixed clock keeps time and progress components identical on every run.
   const fixedNow = Date.UTC(2026, 8, 12, 14, 5, 30);
