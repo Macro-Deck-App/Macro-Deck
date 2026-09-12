@@ -228,7 +228,7 @@ for, and how it tells the host its resource catalog changed. Both operations are
 This api is data-carrying rather than an invalidate-then-reread signal, for the same reason `ui` is:
 pushed values are plugin-initiated and asynchronous, and no dedicated message type carries them. It
 covers the catalog half only - a provider's eager variables are polled through `variables`/`get` whatever
-it reports for push. See [Push or poll](/sdk/variables/#push-or-poll).
+it reports for push. See [Push instead of poll](/sdk/variables/#push-instead-of-poll).
 
 ### Events, logs and state
 
