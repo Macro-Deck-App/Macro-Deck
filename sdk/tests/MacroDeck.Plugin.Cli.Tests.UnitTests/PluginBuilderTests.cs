@@ -658,7 +658,8 @@ public class PluginBuilderTests
 
 			Assert.Multiple(() =>
 			{
-				Assert.That(entries.Where(entry => entry.EndsWith(".macroDeckPlugin", StringComparison.OrdinalIgnoreCase)),
+				Assert.That(entries.Where(entry =>
+						entry.EndsWith(".macroDeckPlugin", StringComparison.OrdinalIgnoreCase)),
 					Is.Empty);
 				Assert.That(entries, Does.Not.Contain("artifacts/SHA256SUMS"));
 				Assert.That(entries, Does.Contain("assets/icon.png"));
