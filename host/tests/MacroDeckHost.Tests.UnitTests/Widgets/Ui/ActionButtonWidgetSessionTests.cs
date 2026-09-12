@@ -562,7 +562,8 @@ public class ActionButtonWidgetSessionTests
 			Serilog.Log.Logger);
 		await labelService.StartAsync(CancellationToken.None);
 
-		fixture.Signals.RaiseStateChanged(new WidgetStateUpdatedEvent { WidgetId = _widgetId.ToString(), StateId = "b" });
+		fixture.Signals.RaiseStateChanged(
+			new WidgetStateUpdatedEvent { WidgetId = _widgetId.ToString(), StateId = "b" });
 
 		var deadline = DateTime.UtcNow.AddSeconds(15);
 		string? shown;
