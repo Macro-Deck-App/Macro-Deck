@@ -407,6 +407,9 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Variables of this widget</value>
   </data>
+  <data name="ActionBuilder.Trigger.DoublePress" xml:space="preserve">
+    <value>Double Tap</value>
+  </data>
   <data name="ActionBuilder.Trigger.LongPress" xml:space="preserve">
     <value>Long Press</value>
   </data>
@@ -15983,6 +15986,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Choose icon</value>
+  </data>
+  <data name="Widgets.Slider.DefaultVariableDescription" xml:space="preserve">
+    <value>Without a variable, the slider uses its own widget variable slider_value.</value>
   </data>
   <data name="Widgets.Slider.Horizontal" xml:space="preserve">
     <value>Horizontal</value>

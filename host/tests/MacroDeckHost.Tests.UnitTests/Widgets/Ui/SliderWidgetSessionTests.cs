@@ -1,5 +1,8 @@
 using System.Globalization;
+using System.Text.Json;
 using MacroDeck.Localization;
+using MacroDeck.Sdk.Ui;
+using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Variables;
@@ -8,15 +11,21 @@ using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
 using MacroDeck.Ui.Testing;
 using MacroDeck.Ui.Components;
+using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Widgets;
+using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
+using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Tests.UnitTests.Triggers;
 using MacroDeckHost.Widgets.Slider;
 using Microsoft.Extensions.DependencyInjection;
 using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;
@@ -426,6 +435,199 @@ public class SliderWidgetSessionTests
 		await slider.DisposeAsync();
 	}
 
+	[Test]
+	public async Task A_double_tap_runs_its_flow_after_the_second_taps_own_write_and_the_slider_shows_the_result()
+	{
+		var slider = Writable(min: 0, max: 100, step: 0, value: 50, doublePressFlow: true);
+		var writesWhenTheFlowRan = -1;
+		slider.Trigger.OnExecute = () =>
+		{
+			writesWhenTheFlowRan = slider.Provider.Writes.Count;
+			slider.Report("20");
+		};
+
+		slider.Host.ById("slider.track").Raise(UiComponentEvents.Change, 0.8);
+		var result = slider.Host.ById("slider.track").Raise(UiComponentEvents.DoublePress);
+		await slider.Host.SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.IsAccepted, Is.True);
+			Assert.That(slider.Trigger.Calls, Is.EqualTo(new[] { WidgetTriggerTypes.DoublePress }));
+			Assert.That(writesWhenTheFlowRan, Is.EqualTo(1), "the flow must run after the tap's own write landed");
+			Assert.That(slider.Value, Is.EqualTo("20"));
+			Assert.That(slider.Host.ById("slider.track").Number("level"), Is.EqualTo(0.2).Within(1e-9));
+		});
+
+		await slider.DisposeAsync();
+	}
+
+	[Test]
+	public async Task A_double_tap_while_the_host_is_locked_is_rejected_and_runs_no_flow()
+	{
+		var slider = Writable(min: 0, max: 100, step: 0, value: 50, locked: true, doublePressFlow: true);
+
+		var result = slider.Host.ById("slider.track").Raise(UiComponentEvents.DoublePress);
+		await slider.Host.SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.IsAccepted, Is.False);
+			Assert.That(slider.Trigger.Calls, Is.Empty);
+		});
+
+		await slider.DisposeAsync();
+	}
+
+	[Test]
+	public async Task A_slider_without_a_double_tap_flow_declares_exactly_the_events_it_always_has()
+	{
+		var slider = Writable(min: 0, max: 100, step: 0, value: 50);
+
+		Assert.That(slider.Session.BuildEvents().Select(handler => handler.Name).Distinct(),
+			Is.EquivalentTo(new[] { UiComponentEvents.Adjust, UiComponentEvents.Change }));
+
+		await slider.DisposeAsync();
+	}
+
+	[Test]
+	public async Task An_unbound_deck_tile_gets_its_own_slider_value_once_and_takes_input_through_it()
+	{
+		var registry = new VariableRegistry();
+		var provider = ProviderWith(registry);
+		var widgetId = Guid.NewGuid();
+
+		var events = await OpenAsync(provider, UiSurfaceKinds.Widget, widgetId, new { min = 10 });
+		var created = registry.FindByName(VariableScope.Widget, widgetId.ToString(), SliderDefaultVariable.Name);
+		var initial = created?.Value;
+		created!.Value = "42";
+		await OpenAsync(provider, UiSurfaceKinds.Widget, widgetId, new { min = 10 });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(events, Is.EquivalentTo(new[] { UiComponentEvents.Adjust, UiComponentEvents.Change }));
+			Assert.That(created.Classification, Is.EqualTo(VariableClassification.User));
+			Assert.That(created.Type, Is.EqualTo(DomainVariableType.Numeric));
+			Assert.That(initial, Is.EqualTo("10"));
+			Assert.That(registry.FindByName(VariableScope.Widget, widgetId.ToString(), SliderDefaultVariable.Name)!.Value,
+				Is.EqualTo("42"),
+				"reopening must never reset the slider's own value");
+		});
+	}
+
+	[Test]
+	public async Task The_editor_preview_never_creates_slider_value_and_takes_no_input()
+	{
+		var registry = new VariableRegistry();
+		var widgetId = Guid.NewGuid();
+
+		var events = await OpenAsync(ProviderWith(registry),
+			UiSurfaceKinds.Preview,
+			widgetId,
+			new { },
+			UiWidgetSurfaceAttributes.VariableScopeWidgetId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(events, Is.Empty);
+			Assert.That(registry.FindByName(VariableScope.Widget, widgetId.ToString(), SliderDefaultVariable.Name),
+				Is.Null);
+		});
+	}
+
+	[Test]
+	public void A_global_slider_value_never_captures_a_slider_using_its_default()
+	{
+		var registry = new VariableRegistry();
+		registry.Upsert(NumericUserVariable(SliderDefaultVariable.Name, VariableScope.Global, null));
+
+		Assert.That(SliderDefaultVariable.Find(registry, Guid.NewGuid(), pickedName: null), Is.Null);
+	}
+
+	[Test]
+	public void A_picked_name_resolves_the_widgets_own_variable_before_a_global_of_the_same_name()
+	{
+		var registry = new VariableRegistry();
+		var widgetId = Guid.NewGuid();
+		registry.Upsert(NumericUserVariable("vol", VariableScope.Global, null));
+		registry.Upsert(NumericUserVariable("vol", VariableScope.Widget, widgetId.ToString()));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(SliderDefaultVariable.Find(registry, widgetId, "vol")?.Scope, Is.EqualTo(VariableScope.Widget));
+			Assert.That(SliderDefaultVariable.Find(registry, Guid.NewGuid(), "vol")?.Scope, Is.EqualTo(VariableScope.Global));
+		});
+	}
+
+	private static VariableEntity NumericUserVariable(string name, VariableScope scope, string? scopeRefId)
+		=> new()
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = scope,
+			ScopeRefId = scopeRefId,
+			Type = DomainVariableType.Numeric,
+			Classification = VariableClassification.User,
+			Value = "5",
+			UpdatedAt = DateTime.UtcNow
+		};
+
+	private static async Task<IReadOnlyList<string>> OpenAsync(
+		SliderWidgetUiProvider provider,
+		string kind,
+		Guid widgetId,
+		object data,
+		string widgetIdAttribute = UiWidgetSurfaceAttributes.WidgetId)
+	{
+		var surface = new UiSurface
+		{
+			Kind = kind,
+			SessionMode = UiSessionModes.Shared,
+			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+			{
+				[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data),
+				[widgetIdAttribute] = JsonSerializer.SerializeToElement(widgetId.ToString()),
+			},
+		};
+
+		var session = await provider.CreateSessionAsync(new UiSessionRequest { Surface = surface, UiModelVersion = 1 },
+			CancellationToken.None);
+		var track = Walk(session!.BuildTree().Root).Single(node => node.Type == UiComponents.Slider);
+		await session.DisposeAsync();
+
+		return track.Properties.TryGetValue("events", out var declared)
+			? declared.EnumerateArray().Select(name => name.GetString()!).ToList()
+			: [];
+	}
+
+	private static IEnumerable<UiNode> Walk(UiNode node) => node.Children.SelectMany(Walk).Prepend(node);
+
+	private static SliderWidgetUiProvider ProviderWith(VariableRegistry registry)
+	{
+		var integrations = new ConfigurableIntegrationRegistry([]);
+		var scopeFactory = new ServiceCollection()
+			.AddSingleton(registry)
+			.AddSingleton(new VariableCatalogProviders(integrations))
+			.AddSingleton<IUserVariableStore>(new NullUserVariableStore())
+			.AddSingleton<Mediator.IMediator>(new RecordingMediator())
+			.AddSingleton<IVariableRefreshSignal>(new VariableRefreshSignal())
+			.AddSingleton<IMusicPlayerPollNudge>(new MusicPlayerPollNudge(integrations))
+			.AddScoped<IVariableService, VariableService>()
+			.BuildServiceProvider()
+			.GetRequiredService<IServiceScopeFactory>();
+
+		return new SliderWidgetUiProvider(new SliderWidgetConfigTests.FakeWidgetIconResources(),
+			new FakeHostLockState(),
+			new SliderWidgetConfigTests.PassThroughSampleText(),
+			TimeProvider.System,
+			registry,
+			new VariableChangeNotifier(),
+			scopeFactory,
+			new RecordingTriggerService(),
+			new StubFolderCache(),
+			new NullUiTransport());
+	}
+
 	private static SliderUnderTest Writable(
 		double min,
 		double max,
@@ -435,7 +637,8 @@ public class SliderWidgetSessionTests
 		bool locked = false,
 		double configMin = 0,
 		double configMax = 100,
-		double configStep = 0)
+		double configStep = 0,
+		bool doublePressFlow = false)
 		=> SliderUnderTest.Build(entity =>
 			{
 				entity.Classification = VariableClassification.Integration;
@@ -450,7 +653,8 @@ public class SliderWidgetSessionTests
 			configMin,
 			configMax,
 			configStep,
-			locked);
+			locked,
+			doublePressFlow: doublePressFlow);
 
 	private static SliderUnderTest ReadOnlyIntegrationOwned(double min, double max, double step, string value)
 		=> SliderUnderTest.Build(entity =>
@@ -498,11 +702,13 @@ public class SliderWidgetSessionTests
 			VariableRegistry registry,
 			VariableChangeNotifier notifier,
 			FakeTimeProvider timeProvider,
-			VariableEntity? entity)
+			VariableEntity? entity,
+			RecordingTriggerService trigger)
 		{
 			Host = host;
 			Session = session;
 			Provider = provider;
+			Trigger = trigger;
 			Registry = registry;
 			Notifier = notifier;
 			TimeProvider = timeProvider;
@@ -516,6 +722,8 @@ public class SliderWidgetSessionTests
 		public SliderWidgetSession Session { get; }
 
 		public RecordingVariableProvider Provider { get; }
+
+		public RecordingTriggerService Trigger { get; }
 
 		public VariableRegistry Registry { get; }
 
@@ -543,7 +751,8 @@ public class SliderWidgetSessionTests
 			double configMax,
 			double configStep,
 			bool locked = false,
-			string? bindingName = null)
+			string? bindingName = null,
+			bool doublePressFlow = false)
 		{
 			var registry = new VariableRegistry();
 			var provider = new RecordingVariableProvider(registry);
@@ -590,11 +799,23 @@ public class SliderWidgetSessionTests
 				scopeFactory);
 			var state = new UiState<SliderWidgetReadout>(SliderWidgetReadout.Empty);
 
+			var trigger = new RecordingTriggerService();
+			SliderDoublePressBinding? doublePress = null;
+
+			if (doublePressFlow)
+			{
+				var widget = new WidgetEntity { Id = Guid.NewGuid(), Type = WidgetTypeIds.Slider, Data = "{}" };
+				var folderCache = new StubFolderCache();
+				widget.FolderId = folderCache.AddFolder(widget).Id;
+				doublePress = new SliderDoublePressBinding(widget.Id, folderCache, trigger, new NullUiTransport());
+			}
+
 			var session = new SliderWidgetSession(state,
 				new FakeHostLockState { IsLocked = locked },
 				timeProvider,
 				isWidgetSurface: true,
-				binding);
+				binding,
+				doublePress);
 
 			var config = new SliderWidgetData
 			{
@@ -616,8 +837,50 @@ public class SliderWidgetSessionTests
 				registry,
 				notifier,
 				timeProvider,
-				stored);
+				stored,
+				trigger);
 		}
+	}
+
+	internal sealed class RecordingTriggerService : IWidgetTriggerService
+	{
+		public List<string> Calls { get; } = [];
+
+		public Action? OnExecute { get; set; }
+
+		public Task<ActionExecutionDispatch> ExecuteAsync(
+			WidgetEntity widget,
+			string triggerType,
+			string? originClientId,
+			Guid? originDeviceId,
+			CancellationToken cancellationToken)
+		{
+			Calls.Add(triggerType);
+			OnExecute?.Invoke();
+
+			return Task.FromResult(new ActionExecutionDispatch(Guid.NewGuid(), null));
+		}
+	}
+
+	internal sealed class NullUiTransport : IUiTransport
+	{
+		public Task Send<T>(T message, CancellationToken cancellationToken = default)
+			where T : class
+			=> Task.CompletedTask;
+
+		public Task SendToGroup<T>(string group, T message, CancellationToken cancellationToken = default)
+			where T : class
+			=> Task.CompletedTask;
+
+		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
+			where T : class
+			=> Task.CompletedTask;
+
+		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
+			=> Task.CompletedTask;
+
+		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
+			=> Task.CompletedTask;
 	}
 
 	/// <summary>The owning integration of an integration-classified variable, recording what

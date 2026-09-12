@@ -706,6 +706,9 @@ public sealed record UiProgressText : UiComponentLeaf
 /// <item>Every intermediate level is sent as <see cref="UiComponentEvents.Adjust" />, no more than ten times
 /// a second; the level the interaction ended on is sent once as <see cref="UiComponentEvents.Change" />. A
 /// reader sends only the names the node declares.</item>
+/// <item>Two taps completed in quick succession, each without a drag, additionally send
+/// <see cref="UiComponentEvents.DoublePress" /> after the second tap's <see cref="UiComponentEvents.Change" />.
+/// The taps still set the level like any other interaction.</item>
 /// </list>
 /// </summary>
 public sealed record UiSlider : UiComponentLeaf

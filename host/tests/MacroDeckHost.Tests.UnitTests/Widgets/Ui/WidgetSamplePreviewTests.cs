@@ -13,6 +13,7 @@ using MacroDeckHost.Widgets.Slider;
 using MacroDeckHost.Widgets.Weather;
 using MacroDeck.Sdk.Weather;
 using Microsoft.Extensions.DependencyInjection;
+using MacroDeckHost.Tests.UnitTests.Triggers;
 
 namespace MacroDeckHost.Tests.UnitTests.Widgets.Ui;
 
@@ -104,7 +105,10 @@ public class WidgetSamplePreviewTests
 			TimeProvider.System,
 			new VariableRegistry(),
 			new VariableChangeNotifier(),
-			scopeFactory);
+			scopeFactory,
+			new SliderWidgetSessionTests.RecordingTriggerService(),
+			new StubFolderCache(),
+			new SliderWidgetSessionTests.NullUiTransport());
 
 		var sample = await Tree(provider, sample: true);
 
@@ -227,7 +231,7 @@ public class WidgetSamplePreviewTests
 	/// <summary>No variable is chosen either, so opening a history window at all is the failure.</summary>
 	private sealed class UnusedVariableHistory : IVariableHistory
 	{
-		public IVariableHistoryWindow Open(string variableName, int capacity) => throw new NotSupportedException();
+		public IVariableHistoryWindow Open(string variableName, int capacity, string? scopeRefId = null) => throw new NotSupportedException();
 	}
 
 	private sealed class NoWidgetIcons : MacroDeckHost.Application.Widgets.IWidgetIconResources

@@ -85,7 +85,12 @@ public static class UiComponentEvents
 	/// </summary>
 	public const string Reveal = "reveal";
 
+	/// <summary>Two taps on a <see cref="UiSlider" /> completed in quick succession, each without a drag.
+	/// Carries no payload. Sent after the second tap's <see cref="Change" />, never instead of it, so a reader
+	/// that does not implement it still leaves both taps as ordinary level changes.</summary>
+	public const string DoublePress = "double-press";
+
 	/// <summary>The event names this profile ships.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
-		[Change, Adjust, Press, LongPress, PressStart, PressEnd, Reveal];
+		[Change, Adjust, Press, LongPress, PressStart, PressEnd, Reveal, DoublePress];
 }

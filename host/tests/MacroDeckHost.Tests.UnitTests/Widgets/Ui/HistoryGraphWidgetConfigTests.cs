@@ -281,7 +281,7 @@ public class HistoryGraphWidgetConfigTests
 
 	private sealed class NullVariableHistory : MacroDeckHost.Application.Variables.IVariableHistory
 	{
-		public MacroDeckHost.Application.Variables.IVariableHistoryWindow Open(string variableName, int capacity)
+		public MacroDeckHost.Application.Variables.IVariableHistoryWindow Open(string variableName, int capacity, string? scopeRefId = null)
 			=> EmptyVariableHistoryWindow.Instance;
 	}
 

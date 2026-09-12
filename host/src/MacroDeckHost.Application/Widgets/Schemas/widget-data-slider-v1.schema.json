@@ -3,7 +3,7 @@
   "$id": "https://schemas.macro-deck.app/widget-data-slider-v1.schema.json",
   "title": "Macro Deck Slider widget data (v1)",
   "description": "Describes the JSON stored in WidgetEntity.Data for a Slider widget (WidgetType.Slider).",
-  "$comment": "No top-level 'required': a freshly created widget's data is a near-empty JSON object, and every property here has to stay optional so it keeps validating. additionalProperties is deliberately left unset (defaults to true) on this schema and on every nested object - an older or newer client, or a plugin-driven flow, may write extension keys this schema does not know about, and rejecting them would make the widget unsavable. Unlike the other widget types, Slider data has no 'flows' key - a slider two-way binds to a writable numeric variable through 'valueVariable' and does not run press-trigger flows. Profiles written before that binding existed still carry 'action'; it validates and is simply no longer read.",
+  "$comment": "No top-level 'required': a freshly created widget's data is a near-empty JSON object, and every property here has to stay optional so it keeps validating. additionalProperties is deliberately left unset (defaults to true) on this schema and on every nested object - an older or newer client, or a plugin-driven flow, may write extension keys this schema does not know about, and rejecting them would make the widget unsavable. A slider two-way binds to a writable numeric variable through 'valueVariable' and runs no press-trigger flows; its only flows are the optional double-tap ones under 'flows'. Profiles written before that binding existed still carry 'action'; it validates and is simply no longer read.",
   "type": "object",
   "properties": {
     "label": {
@@ -72,7 +72,7 @@
     },
     "valueVariable": {
       "type": ["string", "null"],
-      "description": "Name of the variable the slider displays and writes. The level and value text follow the variable's live changes, and a drag writes back to it; a variable whose owner declares no write capability is display-only and the slider is inert on drag. Absent or null leaves the slider unbound."
+      "description": "Name of the variable the slider displays and writes. The level and value text follow the variable's live changes, and a drag writes back to it; a variable whose owner declares no write capability is display-only and the slider is inert on drag. Absent or null makes the slider use its own widget-scoped numeric user variable 'slider_value', created the first time the widget is shown on a deck or opened in the editor."
     },
     "min": {
       "type": ["number", "null"],
@@ -85,9 +85,20 @@
     "step": {
       "type": ["number", "null"],
       "description": "Grid granularity, used only where the bound variable declares no step of its own. See min for why the fallback is per field."
+    },
+    "flows": {
+      "anyOf": [
+        { "type": "string" },
+        { "type": "array", "items": { "$ref": "#/$defs/actionFlow" } }
+      ],
+      "description": "Action flows stored the same way as an Action Button's; the slider runs only the 'onDoublePress' one, on a double tap. Stored on the wire as a nested JSON string; the editor may show it inlined as an array. Both forms are accepted here."
     }
   },
   "$defs": {
+    "actionFlow": {
+      "type": "object",
+      "description": "One action-flow entry (a trigger and its action blocks). Its internal structure is deliberately not validated here - deep flow validation is out of scope for this schema."
+    },
     "widgetBorder": {
       "type": "object",
       "description": "Outline drawn along the inner edge of the widget.",

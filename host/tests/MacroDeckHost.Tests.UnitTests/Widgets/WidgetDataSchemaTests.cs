@@ -72,6 +72,7 @@ public class WidgetDataSchemaTests
 	[TestCase(WidgetTypeIds.Weather)]
 	[TestCase(WidgetTypeIds.HistoryGraph)]
 	[TestCase(WidgetTypeIds.Clock)]
+	[TestCase(WidgetTypeIds.Slider)]
 	public void Flows_as_a_nested_JSON_string_validates(string type)
 	{
 		var problems = Validate(type, """{"flows":"[{\"triggerType\":\"onShortPress\",\"children\":[]}]"}""");

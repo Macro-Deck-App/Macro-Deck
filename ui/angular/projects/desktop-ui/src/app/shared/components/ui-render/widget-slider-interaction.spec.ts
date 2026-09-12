@@ -53,6 +53,88 @@ function fillOf(rendered: RenderedTree): HTMLElement {
 describe('ui.slider interaction', () => {
   afterEach(() => TestBed.resetTestingModule());
 
+  describe('double tap', () => {
+    const DOUBLE_TAP_EVENTS = ['adjust', 'change', 'double-press'];
+
+    beforeEach(() => {
+      jasmine.clock().install();
+      jasmine.clock().mockDate(new Date(2026, 0, 1));
+    });
+
+    afterEach(() => jasmine.clock().uninstall());
+
+    async function tapAt(rendered: RenderedTree, fraction: number): Promise<void> {
+      const surface = surfaceOf(rendered);
+      const rect = surface.getBoundingClientRect();
+      const x = rect.left + fraction * rect.width;
+      const y = rect.top + rect.height / 2;
+      down(surface, x, y);
+      up(surface, x, y);
+      await tick(rendered);
+    }
+
+    function namesExceptAdjust(rendered: RenderedTree): string[] {
+      return rendered.events.map(event => event.name).filter(name => name !== 'adjust');
+    }
+
+    it('sends double-press after the second of two quick taps, each tap still sending its own change', async () => {
+      const rendered = await renderTree(sliderNode({}, DOUBLE_TAP_EVENTS), withBasis(200));
+
+      await tapAt(rendered, 0.3);
+      jasmine.clock().tick(150);
+      await tapAt(rendered, 0.3);
+
+      expect(namesExceptAdjust(rendered)).toEqual(['change', 'change', 'double-press']);
+      expect(rendered.events[rendered.events.length - 1].data).toBeUndefined();
+    });
+
+    it('sends no double-press for two taps further apart than a double tap', async () => {
+      const rendered = await renderTree(sliderNode({}, DOUBLE_TAP_EVENTS), withBasis(200));
+
+      await tapAt(rendered, 0.3);
+      jasmine.clock().tick(600);
+      await tapAt(rendered, 0.3);
+
+      expect(namesExceptAdjust(rendered)).toEqual(['change', 'change']);
+    });
+
+    it('sends no double-press for two quick taps far apart on the track', async () => {
+      const rendered = await renderTree(sliderNode({}, DOUBLE_TAP_EVENTS), withBasis(200));
+
+      await tapAt(rendered, 0.1);
+      jasmine.clock().tick(150);
+      await tapAt(rendered, 0.9);
+
+      expect(namesExceptAdjust(rendered)).toEqual(['change', 'change']);
+    });
+
+    it('does not count a drag as a tap', async () => {
+      const rendered = await renderTree(sliderNode({}, DOUBLE_TAP_EVENTS), withBasis(200));
+      const surface = surfaceOf(rendered);
+      const rect = surface.getBoundingClientRect();
+      const y = rect.top + rect.height / 2;
+
+      down(surface, rect.left + 0.1 * rect.width, y);
+      move(surface, rect.left + 0.6 * rect.width, y);
+      up(surface, rect.left + 0.6 * rect.width, y);
+      await tick(rendered);
+      jasmine.clock().tick(100);
+      await tapAt(rendered, 0.6);
+
+      expect(namesExceptAdjust(rendered)).toEqual(['change', 'change']);
+    });
+
+    it('never sends double-press when the node does not declare it', async () => {
+      const rendered = await renderTree(sliderNode(), withBasis(200));
+
+      await tapAt(rendered, 0.3);
+      jasmine.clock().tick(150);
+      await tapAt(rendered, 0.3);
+
+      expect(namesExceptAdjust(rendered)).toEqual(['change', 'change']);
+    });
+  });
+
   it('sends a level of 0.25 for a press a quarter of the way along the track (regression: the widget ' +
     'renderer emits nothing at all without the drag wiring)', async () => {
     const rendered = await renderTree(sliderNode(), withBasis(200));

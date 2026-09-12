@@ -10,6 +10,8 @@ public static class WidgetTriggerTypes
 
 	public const string TouchEnd = "onTouchEnd";
 
+	public const string DoublePress = "onDoublePress";
+
 	public const string StateChange = "onStateChange";
 
 	public const string Event = "onEvent";

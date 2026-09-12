@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Enums;
+using MacroDeckHost.Widgets.HistoryGraph;
 using static MacroDeckHost.Tests.UnitTests.Widgets.Ui.HistoryGraphTestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Widgets.Ui;
@@ -398,6 +399,52 @@ public class HistoryGraphViewStateResolverTests
 			Assert.That(Resolver(new { valueVariable = Metric }, Registry()).Resolve(_nothing).Unit.IsEmpty,
 				Is.True,
 				"a variable that declares no unit renders none, rather than the last one any graph showed");
+		});
+	}
+
+	[TestCase(null, "73")]
+	[TestCase("widget-a", "5")]
+	public void The_value_reads_the_same_variable_its_history_window_samples(string? windowScope, string expected)
+	{
+		var variables = Registry(value: "73")
+			.WithVariable(Metric, "5", VariableType.Numeric, scope: VariableScope.Widget, scopeRefId: "widget-a");
+		var resolver = new HistoryGraphViewStateResolver(Config(new { valueVariable = Metric }),
+			variables,
+			"widget-a",
+			new ScopedWindow(windowScope));
+
+		Assert.That(resolver.Resolve(_nothing).Value, Is.EqualTo(expected));
+	}
+
+	private sealed class ScopedWindow(string? scopeRefId) : IVariableHistoryWindow
+	{
+		public IReadOnlyList<double> Values => [];
+
+		public string? ScopeRefId => scopeRefId;
+
+		public event EventHandler? Changed
+		{
+			add { }
+			remove { }
+		}
+
+		public void Dispose()
+		{
+		}
+	}
+
+	[Test]
+	public void The_graphs_own_widget_variable_wins_over_a_global_of_the_same_name_and_no_other_widget_is_read()
+	{
+		var variables = Registry(value: "73")
+			.WithVariable(Metric, "5", VariableType.Numeric, scope: VariableScope.Widget, scopeRefId: "widget-a");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Resolver(new { valueVariable = Metric }, variables, "widget-a").Resolve(_nothing).Value,
+				Is.EqualTo("5"));
+			Assert.That(Resolver(new { valueVariable = Metric }, variables, "widget-b").Resolve(_nothing).Value,
+				Is.EqualTo("73"));
 		});
 	}
 

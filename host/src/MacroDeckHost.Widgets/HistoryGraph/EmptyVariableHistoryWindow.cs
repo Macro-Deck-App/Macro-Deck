@@ -6,6 +6,8 @@ namespace MacroDeckHost.Widgets.HistoryGraph;
 /// an unconfigured card costs nothing rather than being a special case in the session.</summary>
 internal sealed class EmptyVariableHistoryWindow : IVariableHistoryWindow
 {
+	public string? ScopeRefId => null;
+
 	public static readonly EmptyVariableHistoryWindow Instance = new();
 
 	private EmptyVariableHistoryWindow()

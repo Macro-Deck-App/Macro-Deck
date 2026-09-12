@@ -93,6 +93,11 @@ A reader without `ui.slider` draws the fallback, here the same level as a read-o
 |---|---|---|
 | `adjust` (`UiComponentEvents.Adjust`) | An intermediate level while the user is still working the control | The level, a bare number |
 | `change` (`UiComponentEvents.Change`) | The interaction ended, sent once | The level, a bare number |
+| `double-press` (`UiComponentEvents.DoublePress`) | A second tap completed shortly after the first, neither one a drag | None |
+
+Declare `double-press` for an action on a double tap, such as resetting to a home level. Each tap is still an
+ordinary interaction and sends its own `change` first, so the handler sees the level the second tap set and
+replaces it. A reader that predates `double-press` never sends it, and the taps stay plain level changes.
 
 ## Children
 
@@ -117,6 +122,9 @@ or `Fill` if declared, otherwise its content extent. See [Sizing](/ui/concepts/s
   producer afterwards.
 - **Rate and order:** `adjust` at most ten times a second, never after the `change` that ended the
   interaction. Only declared names are sent.
+- **Double tap:** with `double-press` declared, a tap released within 400 ms of the previous one and starting
+  within 24 px of it, neither moving more than a few pixels, sends `double-press` right after its `change`.
+  A drag or a cancelled gesture in between starts over.
 - **Geometry is normative:** the track and thumb are implemented exactly; the fixtures in
   `ui-model/fixtures/component-profile/` resolve both at two sizes.
 

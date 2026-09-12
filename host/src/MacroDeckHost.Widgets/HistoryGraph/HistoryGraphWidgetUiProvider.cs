@@ -73,10 +73,10 @@ public sealed class HistoryGraphWidgetUiProvider : IBuiltInWidgetUiProvider
 				HistoryGraphWidgetView.Build(new UiState<HistoryGraphViewState>(sampleState), sampleConfig)));
 		}
 
-		var resolver = new HistoryGraphViewStateResolver(config, _variables, VariableScopeWidgetId(request.Surface));
 		var window = string.IsNullOrEmpty(config.ValueVariable)
 			? EmptyVariableHistoryWindow.Instance
-			: _history.Open(config.ValueVariable, config.HistoryLength);
+			: _history.Open(config.ValueVariable, config.HistoryLength, VariableScopeWidgetId(request.Surface));
+		var resolver = new HistoryGraphViewStateResolver(config, _variables, VariableScopeWidgetId(request.Surface), window);
 
 		var state = new UiState<HistoryGraphViewState>(resolver.Resolve(window.Values));
 		var view = new UiView(request.Surface,
