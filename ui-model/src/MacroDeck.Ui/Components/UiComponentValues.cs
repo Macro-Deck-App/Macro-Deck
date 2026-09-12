@@ -507,7 +507,13 @@ public static class UiIcons
 	/// <summary>The names <c>ui.icon</c> component version 1 draws.</summary>
 	public static readonly IReadOnlyList<string> Version1 =
 	[
-		ActionButtonType, AlertTriangle, AlignBottom, AlignCenter, AlignLeft, AlignMiddle, AlignRight, AlignTop, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Bell, BracesX, Bug, Chart, Check, ChevronRight, Clipboard, ClockType, Code, Copy, Crosshair, DeviceDesktop, DeviceFloppy, DevicePhone, DeviceTablet, Disc, Discord, DotsVertical, Download, ExternalLink, FileText, Folder, FolderPlus, Globe, Grid, Heart, HistoryGraphType, Image, Info, Layers, ListPlay, Lock, LogOut, MessageSquare, Minus, Moon, MusicNote, MusicPlayerType, Pause, Pencil, Pin, PinOff, Play, Plus, Power, Puzzle, Refresh, Scissors, Search, Settings, Sidebar, Sliders, Star, Store, Sun, Trash, Undo, Unlock, Upload, User, WeatherType, Wifi, X, Zap,
+		ActionButtonType, AlertTriangle, AlignBottom, AlignCenter, AlignLeft, AlignMiddle, AlignRight, AlignTop,
+		ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Bell, BracesX, Bug, Chart, Check, ChevronRight, Clipboard, ClockType,
+		Code, Copy, Crosshair, DeviceDesktop, DeviceFloppy, DevicePhone, DeviceTablet, Disc, Discord, DotsVertical,
+		Download, ExternalLink, FileText, Folder, FolderPlus, Globe, Grid, Heart, HistoryGraphType, Image, Info, Layers,
+		ListPlay, Lock, LogOut, MessageSquare, Minus, Moon, MusicNote, MusicPlayerType, Pause, Pencil, Pin, PinOff,
+		Play, Plus, Power, Puzzle, Refresh, Scissors, Search, Settings, Sidebar, Sliders, Star, Store, Sun, Trash, Undo,
+		Unlock, Upload, User, WeatherType, Wifi, X, Zap,
 	];
 
 	/// <summary>Every name any version of <c>ui.icon</c> draws.</summary>

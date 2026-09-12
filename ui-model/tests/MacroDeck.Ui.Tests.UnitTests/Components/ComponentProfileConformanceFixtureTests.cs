@@ -115,7 +115,8 @@ public class ComponentProfileConformanceFixtureTests
 			Assert.That(nodes["conformance.path"].Fallback,
 				Is.Null,
 				"drawing nothing is an allowed degradation for a decorative shape");
-			Assert.That(nodes["conformance"].Properties.ContainsKey("rows"), Is.True,
+			Assert.That(nodes["conformance"].Properties.ContainsKey("rows"),
+				Is.True,
 				"a declared row count is what makes the grid drop children that do not fit");
 		});
 	}
