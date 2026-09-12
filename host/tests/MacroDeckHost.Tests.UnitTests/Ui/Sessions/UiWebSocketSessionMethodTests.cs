@@ -206,6 +206,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			lifetime: null!,
 			transport: Transport,
 			webSocketTransport: null!,
+			companions: null!,
 			connectionCancellation: CancellationToken.None);
 
 	private UiWebSocketDispatcher DispatcherFor(
@@ -244,6 +245,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			lifetime: null!,
 			transport: null!,
 			webSocketTransport: null!,
+			companions: null!,
 			connectionCancellation: CancellationToken.None);
 
 	/// <summary>Stands in for the real catalog handler: this test asserts the route exists, not what the

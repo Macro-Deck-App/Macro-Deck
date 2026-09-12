@@ -60,6 +60,7 @@ internal sealed class IntegrationLifecycleTests
 			new FakeNotificationStore(),
 			null!,
 			null!,
+			null!,
 			new VariableRefreshSignal(),
 			new FakeIntegrationHostIssueStore(),
 			TestLayoutProviders.Host(),

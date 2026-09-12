@@ -16423,4 +16423,76 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Settings.Network.Tls.UploadPairInvalid" xml:space="preserve">
     <value>Nie udało się wczytać certyfikatu lub klucza prywatnego. Sprawdź, czy jest to prawidłowy certyfikat X.509 w formacie PEM i pasujący, niezaszyfrowany klucz prywatny PKCS#8.</value>
   </data>
+  <data name="Integrations.Companion.Name" xml:space="preserve">
+    <value>Macro Deck Companion</value>
+  </data>
+  <data name="Integrations.Companion.Config.ConnectTitle" xml:space="preserve">
+    <value>Łączenie urządzenia</value>
+  </data>
+  <data name="Integrations.Companion.Config.ConnectDescription" xml:space="preserve">
+    <value>Każdy telefon lub tablet z aplikacją Macro Deck Companion ma własną konfigurację.</value>
+  </data>
+  <data name="Integrations.Companion.Config.InstructionConnect" xml:space="preserve">
+    <value>Otwórz aplikację Macro Deck Companion na urządzeniu i połącz ją z tym Macro Deckiem. Urządzenie pojawi się tutaj samo.</value>
+  </data>
+  <data name="Integrations.Companion.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Nie udało się utworzyć unikatowej nazwy zmiennej. Zmień nazwę konfiguracji i spróbuj ponownie.</value>
+  </data>
+  <data name="Integrations.Companion.Variables.BatteryLevelPercent" xml:space="preserve">
+    <value>Poziom baterii</value>
+  </data>
+  <data name="Integrations.Companion.Variables.Charging" xml:space="preserve">
+    <value>Ładowanie</value>
+  </data>
+  <data name="Integrations.Companion.Variables.Orientation" xml:space="preserve">
+    <value>Orientacja</value>
+  </data>
+  <data name="Integrations.Companion.Variables.ScreenBrightnessPercent" xml:space="preserve">
+    <value>Jasność ekranu</value>
+  </data>
+  <data name="Integrations.Companion.Variables.Model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="Integrations.Companion.Variables.Platform" xml:space="preserve">
+    <value>Platforma</value>
+  </data>
+  <data name="Integrations.Companion.Variables.AppVersion" xml:space="preserve">
+    <value>Wersja aplikacji</value>
+  </data>
+  <data name="Integrations.Companion.Actions.SetBrightness.Name" xml:space="preserve">
+    <value>Ustaw jasność ekranu</value>
+  </data>
+  <data name="Integrations.Companion.Actions.SetBrightness.Description" xml:space="preserve">
+    <value>Ustawia jasność ekranu urządzenia Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.SetOrientation.Name" xml:space="preserve">
+    <value>Ustaw orientację</value>
+  </data>
+  <data name="Integrations.Companion.Actions.SetOrientation.Description" xml:space="preserve">
+    <value>Blokuje urządzenie Companion w pionie lub w poziomie albo pozwala mu obracać się automatycznie.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.Vibrate.Name" xml:space="preserve">
+    <value>Wibruj</value>
+  </data>
+  <data name="Integrations.Companion.Actions.Vibrate.Description" xml:space="preserve">
+    <value>Uruchamia krótką wibrację urządzenia Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Params.Configuration" xml:space="preserve">
+    <value>Urządzenie</value>
+  </data>
+  <data name="Integrations.Companion.Options.Automatic" xml:space="preserve">
+    <value>Automatycznie</value>
+  </data>
+  <data name="Integrations.Companion.Options.Portrait" xml:space="preserve">
+    <value>Pionowo</value>
+  </data>
+  <data name="Integrations.Companion.Options.Landscape" xml:space="preserve">
+    <value>Poziomo</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ConfigurationNotFound" xml:space="preserve">
+    <value>Wybrane urządzenie Companion nie jest już dostępne.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.NotConnected" xml:space="preserve">
+    <value>Urządzenie Companion nie jest połączone.</value>
+  </data>
 </root>
