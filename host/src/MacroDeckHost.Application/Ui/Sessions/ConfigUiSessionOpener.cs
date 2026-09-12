@@ -94,8 +94,16 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 		// the reason WidgetUiSessionOpener gives: the broker's ownership check compares against the real
 		// owner, and a synthetic id would fail it on the first patch. What the session is for is already
 		// on the surface, which is where a provider reads it from.
-		var providerId = _widgetTypes.TryResolve(widget.Type, out var entry) && !entry.IsBuiltIn
-			? entry.ProviderId
+		var isPluginType = _widgetTypes.TryResolve(widget.Type, out var entry) && !entry.IsBuiltIn;
+
+		if (isPluginType && !entry!.Descriptor.HasConfiguration)
+		{
+			return UiSessionOpenTicket.Rejected(Rejection.WidgetTypeHasNoConfiguration.Code,
+				Rejection.WidgetTypeHasNoConfiguration.Message);
+		}
+
+		var providerId = isPluginType
+			? entry!.ProviderId
 			: WidgetUiProviderRegistry.ConfigProviderIdFor(widgetId, ownerPrincipal);
 
 		var surface = new UiSurface
@@ -313,6 +321,9 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 
 		public static readonly Rejection NoSuchWidget =
 			new(UiSessionErrorCodes.ProviderUnavailable, "That widget does not exist.");
+
+		public static readonly Rejection WidgetTypeHasNoConfiguration =
+			new(UiSessionErrorCodes.ProviderRejected, "That widget type has nothing to configure.");
 	}
 
 	/// <summary>The JSON object <paramref name="json" /> holds, or <c>null</c> when it holds none - as

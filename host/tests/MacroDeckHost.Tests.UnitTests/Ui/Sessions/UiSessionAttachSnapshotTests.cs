@@ -1,4 +1,5 @@
 using MacroDeck.Ui.Model.Surfaces;
+using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 
 namespace MacroDeckHost.Tests.UnitTests.Ui.Sessions;
@@ -75,6 +76,30 @@ internal sealed class UiSessionAttachSnapshotTests : UiSessionFixture
 			Assert.That(provider.SnapshotRequests,
 				Is.EqualTo(1),
 				"The provider was asked to build a tree it had already been asked for.");
+		});
+	}
+
+	[Test]
+	public async Task A_session_its_provider_declines_is_never_asked_for_a_tree()
+	{
+		var provider = AddProvider();
+		provider.Gate = new TaskCompletionSource();
+		provider.OpenOutcome = UiSessionOpenOutcome.Reject(UiSessionErrorCodes.ProviderRejected, "not served here");
+
+		var ticket = Broker.Open(ProviderId, Surface(), DeviceA);
+		var attach = Attach(ticket.SessionId, "c1");
+
+		provider.Gate.SetResult();
+		var settled = await ticket.Ready;
+		await SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(attach.Accepted, Is.True);
+			Assert.That(settled.Code, Is.EqualTo(UiSessionErrorCodes.ProviderRejected));
+			Assert.That(provider.SnapshotRequests,
+				Is.Zero,
+				"A session the provider declined was asked for a tree it no longer knows about.");
 		});
 	}
 

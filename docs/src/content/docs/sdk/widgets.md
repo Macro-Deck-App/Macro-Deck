@@ -122,6 +122,9 @@ later `widget` surface.
 You need no second contract for this: your widget already is an `IUiProvider`, so it declares one more
 surface and branches on the entry point.
 
+Leave `HasConfiguration` off and no `config` surface is ever opened for your type: editing one of its widgets
+shows the preview and the JSON view, and nothing else.
+
 ## When your integration is not running
 
 A widget keeps its type and its data whether or not anything provides them. It is stored, exported and
