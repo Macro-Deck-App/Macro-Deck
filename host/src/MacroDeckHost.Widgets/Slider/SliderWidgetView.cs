@@ -23,15 +23,16 @@ internal static class SliderWidgetView
 		UiState<SliderWidgetReadout> state,
 		UiResource? icon,
 		IReadOnlyList<UiEventHandler> sliderEvents,
-		int cornerRadius = WidgetSafeArea.DefaultCornerRadius)
+		int cornerRadius = WidgetSafeArea.DefaultCornerRadius,
+		SliderLabelBinding? label = null)
 	{
 		ArgumentNullException.ThrowIfNull(config);
 		ArgumentNullException.ThrowIfNull(state);
 		ArgumentNullException.ThrowIfNull(sliderEvents);
 
 		var children = config.IsVertical
-			? BuildVerticalChildren(config, state, icon, sliderEvents)
-			: BuildHorizontalChildren(config, state, icon, sliderEvents);
+			? BuildVerticalChildren(config, state, icon, sliderEvents, label)
+			: BuildHorizontalChildren(config, state, icon, sliderEvents, label);
 
 		return new UiStack
 		{
@@ -71,7 +72,8 @@ internal static class SliderWidgetView
 		SliderWidgetData config,
 		UiState<SliderWidgetReadout> state,
 		UiResource? icon,
-		IReadOnlyList<UiEventHandler> sliderEvents)
+		IReadOnlyList<UiEventHandler> sliderEvents,
+		SliderLabelBinding? label)
 	{
 		var hasLead = HasLead(config, icon);
 		var hasValue = config.ShowValue;
@@ -83,7 +85,7 @@ internal static class SliderWidgetView
 
 			if (hasLead)
 			{
-				headerChildren.Add(Lead(config, icon));
+				headerChildren.Add(Lead(config, icon, label));
 			}
 
 			if (hasValue)
@@ -114,7 +116,8 @@ internal static class SliderWidgetView
 		SliderWidgetData config,
 		UiState<SliderWidgetReadout> state,
 		UiResource? icon,
-		IReadOnlyList<UiEventHandler> sliderEvents)
+		IReadOnlyList<UiEventHandler> sliderEvents,
+		SliderLabelBinding? label)
 	{
 		var children = new List<UiElement>();
 
@@ -126,7 +129,7 @@ internal static class SliderWidgetView
 				Direction = UiComponentDirections.Horizontal,
 				Align = UiComponentAlignments.Center,
 				Justify = UiComponentJustify.Center,
-				Children = [Lead(config, icon)],
+				Children = [Lead(config, icon, label)],
 			});
 		}
 
@@ -143,7 +146,7 @@ internal static class SliderWidgetView
 	private static bool HasLead(SliderWidgetData config, UiResource? icon)
 		=> icon is not null || (config.ShowLabel && config.Label is not null);
 
-	private static UiStack Lead(SliderWidgetData config, UiResource? icon)
+	private static UiStack Lead(SliderWidgetData config, UiResource? icon, SliderLabelBinding? labelBinding)
 	{
 		var children = new List<UiElement>();
 
@@ -157,7 +160,7 @@ internal static class SliderWidgetView
 			children.Add(new UiTextRun
 			{
 				Key = "label",
-				Text = UiText.Of(label),
+				Text = labelBinding is null ? UiText.Of(label) : UiText.From(() => labelBinding.Text.Value),
 				Size = 0.11,
 				MinSize = 0.075,
 				Weight = UiComponentTextWeights.Medium,
