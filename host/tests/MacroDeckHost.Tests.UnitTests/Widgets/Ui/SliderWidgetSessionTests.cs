@@ -569,7 +569,9 @@ public class SliderWidgetSessionTests
 		var strip = TextUserVariable("strip_name", "Strip A");
 		registry.Upsert(strip);
 
-		var session = await OpenLabelledAsync(ProviderWith(registry, notifier), Guid.NewGuid(), "{{ vars.strip_name }}");
+		var session = await OpenLabelledAsync(ProviderWith(registry, notifier),
+			Guid.NewGuid(),
+			"{{ vars.strip_name }}");
 		var initial = LabelText(session);
 
 		strip.Value = "Mic";
@@ -636,7 +638,9 @@ public class SliderWidgetSessionTests
 			UpdatedAt = DateTime.UtcNow
 		};
 
-	private static async Task<IUiSession> OpenLabelledAsync(SliderWidgetUiProvider provider, Guid widgetId, string label)
+	private static async Task<IUiSession> OpenLabelledAsync(SliderWidgetUiProvider provider,
+		Guid widgetId,
+		string label)
 	{
 		var surface = new UiSurface
 		{
@@ -700,7 +704,8 @@ public class SliderWidgetSessionTests
 
 	private static IEnumerable<UiNode> Walk(UiNode node) => node.Children.SelectMany(Walk).Prepend(node);
 
-	private static SliderWidgetUiProvider ProviderWith(VariableRegistry registry, VariableChangeNotifier? notifier = null)
+	private static SliderWidgetUiProvider ProviderWith(VariableRegistry registry,
+		VariableChangeNotifier? notifier = null)
 	{
 		var integrations = new ConfigurableIntegrationRegistry([]);
 		var scopeFactory = new ServiceCollection()
