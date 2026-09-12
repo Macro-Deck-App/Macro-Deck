@@ -123,6 +123,8 @@ public interface IPluginSessionRegistry
 
 	void Detach(string sessionId, DateTimeOffset at);
 
+	void EndAfterGoodbye(string sessionId, IPluginConnection connection, DateTimeOffset at);
+
 	bool TryResume(string pluginId, string? resumeSessionId, DateTimeOffset at, out PluginSessionRecord? record);
 
 	void MakeNonResumable(string sessionId);
@@ -253,6 +255,23 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 				{
 					PluginId = pluginId, SessionId = sessionId, Reason = PluginSessionEndReason.Detached
 				});
+		}
+	}
+
+	// No SessionEnded here: goodbye is not a resumable detach. The record must survive until the plugin's
+	// DELETE authenticates against it, or the resume window prunes it; either ends it with Pruned.
+	public void EndAfterGoodbye(string sessionId, IPluginConnection connection, DateTimeOffset at)
+	{
+		lock (_gate)
+		{
+			if (_bySessionId.TryGetValue(sessionId, out var record) &&
+				ReferenceEquals(record.Connection, connection))
+			{
+				record.NonResumable = true;
+				record.State = PluginSessionState.Dropped;
+				record.DroppedAt = at;
+				record.Connection = null;
+			}
 		}
 	}
 
@@ -562,8 +581,8 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 
 	private static bool IsStale(PluginSessionRecord record, DateTimeOffset now) => record.State switch
 	{
-		PluginSessionState.Dropped => record.NonResumable ||
-			(record.DroppedAt is { } droppedAt && now - droppedAt > ProtocolTimeouts.SessionResumeWindow),
+		PluginSessionState.Dropped =>
+			record.DroppedAt is { } droppedAt && now - droppedAt > ProtocolTimeouts.SessionResumeWindow,
 		PluginSessionState.Awaiting => now - record.CreatedAt > _awaitingSessionLifetime,
 		_ => false
 	};

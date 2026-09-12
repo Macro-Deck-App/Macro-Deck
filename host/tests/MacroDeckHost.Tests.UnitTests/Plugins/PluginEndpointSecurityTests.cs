@@ -667,6 +667,61 @@ public class PluginEndpointSecurityTests
 	}
 
 	[Test]
+	public async Task After_goodbye_the_plugin_is_unreachable_and_its_delete_still_succeeds()
+	{
+		var (pluginId, secret) = await EnrollPluginAsync();
+		var session = await CreateSessionAndReadAsync(pluginId, secret);
+		var sessionRegistry = _host.Services.GetRequiredService<IPluginSessionRegistry>();
+
+		using var socket = await ConnectWebSocketAsync(request
+			=> request.Headers["Authorization"] = $"Bearer {session.SessionToken}");
+		await SendEnvelopeAsync(socket,
+			new ProtocolEnvelope
+			{
+				Type = MessageTypes.SessionHello,
+				Id = Guid.CreateVersion7().ToString(),
+				Payload = JsonSerializer.SerializeToElement(new SessionHelloPayload
+						{ ProtocolVersion = session.NegotiatedVersion, SessionId = session.SessionId },
+					PluginProtocolJson.Options)
+			});
+		Assert.That((await ReceiveEnvelopeAsync(socket))?.Type, Is.EqualTo(MessageTypes.SessionWelcome));
+
+		await SendEnvelopeAsync(socket,
+			new ProtocolEnvelope
+			{
+				Type = MessageTypes.SessionGoodbye,
+				Id = Guid.CreateVersion7().ToString(),
+				Payload = JsonSerializer.SerializeToElement(new { reason = "shutting down" })
+			});
+		Assert.That(await ReceiveNonStateEnvelopeOrCloseAsync(socket), Is.Null, "the host closes after goodbye");
+		await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
+
+		var deadline = DateTime.UtcNow.AddSeconds(10);
+		while (State() == PluginSessionState.Connected && DateTime.UtcNow < deadline)
+		{
+			await Task.Delay(20);
+		}
+
+		Assert.That(State(), Is.EqualTo(PluginSessionState.Dropped));
+
+		var sent = await sessionRegistry.SendToPlugin(pluginId,
+			new ProtocolEnvelope { Type = MessageTypes.SessionPing, Id = Guid.CreateVersion7().ToString() });
+		var delete = await Send(HttpMethod.Delete,
+			$"/api/plugins/sessions/{session.SessionId}",
+			FakeConnectionShape.Loopback,
+			bearerToken: session.SessionToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(sent, Is.False);
+			Assert.That(delete.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
+		});
+
+		PluginSessionState? State() => sessionRegistry.Snapshot()
+			.FirstOrDefault(s => s.SessionId == session.SessionId)?.State;
+	}
+
+	[Test]
 	public async Task Ws_capability_result_for_an_unrecognised_correlation_is_reported_as_correlation_unknown()
 	{
 		var (pluginId, secret) = await EnrollPluginAsync();

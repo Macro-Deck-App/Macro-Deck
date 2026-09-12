@@ -506,7 +506,11 @@ public sealed class PluginWebSocketEndpoint
 				_hostAssetSender?.DropSession(pluginId);
 			}
 
-			if (!saidGoodbye)
+			if (saidGoodbye)
+			{
+				_sessionRegistry.EndAfterGoodbye(sessionId, connection, _timeProvider.GetUtcNow());
+			}
+			else
 			{
 				_sessionRegistry.Detach(sessionId, _timeProvider.GetUtcNow());
 			}

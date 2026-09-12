@@ -553,6 +553,9 @@ internal sealed class ReplayablePluginSessionRegistry : IPluginSessionRegistry
 
 	public void Detach(string sessionId, DateTimeOffset at) => _inner.Detach(sessionId, at);
 
+	public void EndAfterGoodbye(string sessionId, IPluginConnection connection, DateTimeOffset at)
+		=> _inner.EndAfterGoodbye(sessionId, connection, at);
+
 	public bool TryResume(string pluginId, string? resumeSessionId, DateTimeOffset at, out PluginSessionRecord? record)
 		=> _inner.TryResume(pluginId, resumeSessionId, at, out record);
 
