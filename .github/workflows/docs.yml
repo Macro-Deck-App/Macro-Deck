@@ -62,6 +62,7 @@ jobs:
   deploy:
     name: Deploy documentation site
     if: github.event_name == 'workflow_dispatch' && inputs.deploy
+    environment: production
     needs: build
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
