@@ -85,6 +85,8 @@ export default defineConfig({
 						'features/virtual-profiles',
 						{ label: 'Devices', slug: 'features/devices' },
 						{ label: 'Layouts', slug: 'features/layouts' },
+						{ label: 'Widget types', link: '/ui/views/widget-types/' },
+						{ label: 'Folder views', link: '/ui/views/folder-views/' },
 						'features/integration-issues',
 						'features/settings-migrations',
 						'features/localization',
