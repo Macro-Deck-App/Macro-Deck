@@ -11,11 +11,14 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { ActionParameterDef, ActionParameterType, AppStrings, LocalizedText, resolveLocalizedText } from '@macro-deck/runtime';
+import { ActionParameterDef, ActionParameterType, AppStrings, HotkeyValue, KeyboardComboValue, KeyboardSequenceValue, LocalizedText, isHotkeyValue, resolveLocalizedText } from '@macro-deck/runtime';
 import { ButtonComponent, CheckboxComponent, LocalizationService, LocalizedTextPipe, TranslatePipe } from '@shared';
 import { SelectComponent, SelectOption } from '../forms/select/select.component';
 import { MultiSelectComponent, MultiSelectOption } from '../forms/multi-select/multi-select.component';
 import { WidgetTargetPickerComponent } from '../forms/widget-target-picker/widget-target-picker.component';
+import { HotkeyRecorderComponent } from '../forms/hotkey-recorder/hotkey-recorder.component';
+import { KeyboardComboEditorComponent } from '../forms/keyboard-combo-editor/keyboard-combo-editor.component';
+import { KeyboardSequenceEditorComponent } from '../forms/keyboard-sequence-editor/keyboard-sequence-editor.component';
 import { ComboboxOption } from '../forms/combobox/combobox.component';
 import { ActionOptionsService } from '../../services/action-options.service';
 
@@ -30,6 +33,9 @@ import { ActionOptionsService } from '../../services/action-options.service';
     ButtonComponent,
     MultiSelectComponent,
     WidgetTargetPickerComponent,
+    HotkeyRecorderComponent,
+    KeyboardComboEditorComponent,
+    KeyboardSequenceEditorComponent,
     LocalizedTextPipe,
     TranslatePipe,
   ],
@@ -97,6 +103,15 @@ import { ActionOptionsService } from '../../services/action-options.service';
             (valueChange)="emit($event)"
             (filterChange)="loadWidgetOptions($event)"
             (opened)="loadWidgetOptions()" />
+        }
+        @case ('hotkey') {
+          <shared-hotkey-recorder [value]="hotkeyValue" (valueChange)="emit($event)" />
+        }
+        @case ('keyboard-combo') {
+          <shared-keyboard-combo-editor [value]="keyboardComboValue" (valueChange)="emit($event)" />
+        }
+        @case ('keyboard-sequence') {
+          <shared-keyboard-sequence-editor [value]="keyboardSequenceValue" (valueChange)="emit($event)" />
         }
         @case ('multiselect') {
           <shared-multi-select
@@ -176,7 +191,8 @@ export class ConfigFieldComponent {
   protected readonly clearStoredSecretLabel = computed(() =>
     this.localization.translateKey(AppStrings.ConfigFlow.ClearStoredSecret));
 
-  get controlType(): 'secret' | 'choice' | 'boolean' | 'number' | 'multiselect' | 'widget-target' | 'text' {
+  get controlType(): 'secret' | 'choice' | 'boolean' | 'number' | 'multiselect' | 'widget-target' | 'hotkey'
+    | 'keyboard-combo' | 'keyboard-sequence' | 'text' {
     switch (this.field.type) {
       case ActionParameterType.Password:
       case ActionParameterType.Secret:
@@ -191,6 +207,12 @@ export class ConfigFieldComponent {
         return 'multiselect';
       case ActionParameterType.WidgetTarget:
         return 'widget-target';
+      case ActionParameterType.Hotkey:
+        return 'hotkey';
+      case ActionParameterType.KeyboardCombo:
+        return 'keyboard-combo';
+      case ActionParameterType.KeyboardSequence:
+        return 'keyboard-sequence';
       default:
         return 'text';
     }
@@ -222,6 +244,21 @@ export class ConfigFieldComponent {
 
   get arrayValue(): string[] {
     return Array.isArray(this.value) ? this.value : [];
+  }
+
+  get hotkeyValue(): HotkeyValue | null {
+    return isHotkeyValue(this.value) ? this.value : null;
+  }
+
+  get keyboardComboValue(): KeyboardComboValue | null {
+    return isHotkeyValue(this.value) ? this.value : null;
+  }
+
+  get keyboardSequenceValue(): KeyboardSequenceValue | null {
+    const v = this.value;
+    return v && typeof v === 'object' && !Array.isArray(v) && Array.isArray((v as { steps?: unknown }).steps)
+      ? v as KeyboardSequenceValue
+      : null;
   }
 
   emit(value: unknown): void {

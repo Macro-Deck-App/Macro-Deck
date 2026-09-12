@@ -4,6 +4,9 @@ import { By } from '@angular/platform-browser';
 import { ActionParameterDef, ActionParameterType } from '@macro-deck/runtime';
 import { ConfigFieldComponent } from './config-field.component';
 import { WidgetTargetPickerComponent } from '../forms/widget-target-picker/widget-target-picker.component';
+import { HotkeyRecorderComponent } from '../forms/hotkey-recorder/hotkey-recorder.component';
+import { KeyboardComboEditorComponent } from '../forms/keyboard-combo-editor/keyboard-combo-editor.component';
+import { KeyboardSequenceEditorComponent } from '../forms/keyboard-sequence-editor/keyboard-sequence-editor.component';
 import { ActionOptionsService } from '../../services/action-options.service';
 import { provideLocalizationTesting } from '../../../testing/localization-test-support';
 
@@ -37,6 +40,54 @@ describe('ConfigFieldComponent', () => {
     fixture = TestBed.createComponent(ConfigFieldComponent);
     component = fixture.componentInstance;
   });
+
+  it('submits the structured combo a keyboard combo field records, not display text', () => {
+    component.field = field(ActionParameterType.KeyboardCombo);
+    const emitted: unknown[] = [];
+    component.valueChange.subscribe(v => emitted.push(v));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('input.cf-input')).toBeNull();
+    fixture.debugElement.query(By.directive(KeyboardComboEditorComponent))
+      .componentInstance.valueChange.emit({ modifiers: [], key: '+' });
+
+    expect(emitted).toEqual([{ modifiers: [], key: '+' }]);
+  });
+
+  it('pre-fills the combo editor with a stored combo', () => {
+    component.field = field(ActionParameterType.KeyboardCombo);
+    component.value = { modifiers: ['ctrl'], key: 'a' };
+    fixture.detectChanges();
+
+    expect(fixture.debugElement.query(By.directive(KeyboardComboEditorComponent)).componentInstance.value)
+      .toEqual({ modifiers: ['ctrl'], key: 'a' });
+  });
+
+  it('renders the hotkey recorder and keyboard sequence editor for their field types', () => {
+    component.field = field(ActionParameterType.Hotkey);
+    fixture.detectChanges();
+    expect(fixture.debugElement.query(By.directive(HotkeyRecorderComponent))).toBeTruthy();
+
+    const sequenceFixture = TestBed.createComponent(ConfigFieldComponent);
+    sequenceFixture.componentInstance.field = field(ActionParameterType.KeyboardSequence);
+    sequenceFixture.detectChanges();
+    expect(sequenceFixture.debugElement.query(By.directive(KeyboardSequenceEditorComponent))).toBeTruthy();
+  });
+
+  for (const [type, value] of [
+    [ActionParameterType.Hotkey, '+'],
+    [ActionParameterType.Hotkey, {}],
+    [ActionParameterType.KeyboardCombo, '+'],
+    [ActionParameterType.KeyboardSequence, '+'],
+    [ActionParameterType.KeyboardSequence, { steps: {} }],
+  ] as const) {
+    it(`starts the ${type} editor empty for a value of the wrong shape (${JSON.stringify(value)})`, () => {
+      component.field = field(type);
+      component.value = value;
+      expect(() => fixture.detectChanges()).not.toThrow();
+      expect(fixture.nativeElement.querySelector('input.cf-input')).toBeNull();
+    });
+  }
 
   it('renders a text input for string fields', () => {
     component.field = field(ActionParameterType.String);
