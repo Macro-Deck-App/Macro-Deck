@@ -156,7 +156,6 @@ public sealed class PluginWebSocketEndpoint
 		}
 		finally
 		{
-			connection.Dispose();
 			socket.Dispose();
 		}
 	}
@@ -509,6 +508,12 @@ public sealed class PluginWebSocketEndpoint
 			if (!saidGoodbye)
 			{
 				_sessionRegistry.Detach(sessionId, _timeProvider.GetUtcNow());
+			}
+			else
+			{
+				// Not Detach: a detached goodbye session is stale at once, and the prune in session
+				// authentication would then answer the plugin's closing DELETE with 401.
+				_sessionRegistry.ReleaseConnection(sessionId, connection);
 			}
 
 			await _mediator.Publish(new PluginSessionsChangedNotification(), CancellationToken.None);
