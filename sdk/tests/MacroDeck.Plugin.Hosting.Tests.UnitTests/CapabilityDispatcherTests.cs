@@ -161,11 +161,14 @@ public class CapabilityDispatcherTests
 	{
 		var running = new TaskCompletionSource();
 
+		// Completes synchronously on the cancelling thread, so the handler's reply is sent inside Cancel.
 		using var dispatcher = TestSession.Dispatcher(new TestCapabilityHandler("actions",
 			async (_, token) =>
 			{
+				var stopped = new TaskCompletionSource();
+				await using var registration = token.Register(() => stopped.TrySetCanceled(token));
 				running.TrySetResult();
-				await Task.Delay(Timeout.Infinite, token);
+				await stopped.Task;
 				return CapabilityInvocationResult.Ok();
 			}));
 
@@ -173,22 +176,51 @@ public class CapabilityDispatcherTests
 		var dispatch = dispatcher.DispatchAsync(envelope, Reply, CancellationToken.None);
 		await running.Task;
 
-		var cancelled = dispatcher.Cancel(new ProtocolEnvelope
+		var cancelled = dispatcher.Cancel(CancelFor(envelope));
+		await dispatch;
+
+		AssertExactlyOneCancelledResult(cancelled);
+	}
+
+	[Test]
+	public async Task A_cancel_is_answered_even_when_the_handler_ignores_its_token()
+	{
+		var running = new TaskCompletionSource();
+		var release = new TaskCompletionSource();
+
+		using var dispatcher = TestSession.Dispatcher(new TestCapabilityHandler("actions",
+			async (_, _) =>
+			{
+				running.TrySetResult();
+				await release.Task;
+				return CapabilityInvocationResult.Ok();
+			}));
+
+		var envelope = Invoke();
+		var dispatch = dispatcher.DispatchAsync(envelope, Reply, CancellationToken.None);
+		await running.Task;
+
+		var cancelled = dispatcher.Cancel(CancelFor(envelope));
+		release.SetResult();
+		await dispatch;
+
+		AssertExactlyOneCancelledResult(cancelled);
+	}
+
+	private static ProtocolEnvelope CancelFor(ProtocolEnvelope invoke)
+		=> new()
 		{
 			Type = MessageTypes.CapabilityCancel,
 			Id = Guid.CreateVersion7().ToString(),
-			CorrelationId = envelope.Id
-		});
+			CorrelationId = invoke.Id
+		};
 
-		await dispatch;
+	private void AssertExactlyOneCancelledResult(ProtocolEnvelope? fromCancel)
+	{
+		var results = _replies.Concat(fromCancel is null ? [] : [fromCancel]).ToList();
 
-		Assert.Multiple(() =>
-		{
-			Assert.That(cancelled!.Error!.Code, Is.EqualTo(ProtocolErrorCodes.Cancelled));
-
-			// The cancel path owns the single reply, so the handler's own completion must not add one.
-			Assert.That(_replies, Is.Empty);
-		});
+		Assert.That(results, Has.Count.EqualTo(1), "exactly one result per invocation is the contract");
+		Assert.That(results[0].Error?.Code, Is.EqualTo(ProtocolErrorCodes.Cancelled));
 	}
 
 	[Test]
