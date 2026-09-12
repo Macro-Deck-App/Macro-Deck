@@ -99,7 +99,7 @@ A localization reference resolves in each reader's own active language.
 | `Role` (`role`) | `UiComponentTextRoles`: `primary`, `secondary`, `muted` | `primary` | The semantic colour, ignored when `Color` is set. |
 | `Color` (`color`) | `#rrggbb` | `Role` decides | A literal colour that overrides `Role`. |
 | `Align` (`align`) | `UiComponentAlignments`: `start`, `center`, `end`, `stretch`, `baseline` | `start` | Alignment within the run's own box. |
-| `MaxLines` (`maxLines`) | `int` | One | How many lines the run may occupy before it ellipsizes. |
+| `MaxLines` (`maxLines`) | `int` | One; no limit when `Wrap` is true | How many lines the run may occupy before it ellipsizes. |
 | `Wrap` (`wrap`) | `bool` | One line, ellipsized | Whether the run may break across lines at all. |
 | `FontFace` (`fontFace`) | Font catalogue identifier | The reader's default face | The typeface, from Macro Deck's font catalogue. |
 | `Digits` (`digits`) | `double`, digit widths | Exactly as wide as the content | How many digit widths the run reserves. |
