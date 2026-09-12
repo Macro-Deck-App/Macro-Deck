@@ -172,7 +172,9 @@ The build recipe `build` reads. The manifest describes what a plugin is; this fi
 
 - `executable` and `arguments` are separate values and never go through a shell.
 - An optional `workingDirectory`, relative to the project root, runs the tool from somewhere else.
-- `output` and `workingDirectory` must stay inside the project directory.
+- An optional top-level `include` lists files and directories beyond the build output that belong in the
+  package - see [`build`](/cli/build/#staging-layout).
+- `output`, `workingDirectory` and `include` must stay inside the project directory.
 - Nothing here is .NET-specific: any toolchain can be described the same way.
 - Generated targets publish **self-contained** Release builds. An entrypoint with no `runtime` block must
   not be a `.dll`.
