@@ -77,7 +77,10 @@ function forecastTree(dayCount: number): UiNode {
 }
 
 describe('shared-ui-widget-node', () => {
-  afterEach(() => TestBed.resetTestingModule());
+  afterEach(() => {
+    TestBed.resetTestingModule();
+    localStorage.clear();
+  });
 
   describe('range bar', () => {
     it('gives the filled span the track\'s own rounded ends', async () => {

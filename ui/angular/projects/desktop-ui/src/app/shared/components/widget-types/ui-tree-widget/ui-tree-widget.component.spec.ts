@@ -111,6 +111,8 @@ describe('UiTreeWidgetComponent', () => {
     });
   });
 
+  afterEach(() => localStorage.clear());
+
   describe('layout', () => {
     it("gives the tree the widget's real box so a non-square tile is filled edge to edge", async () => {
       const fixture = createFixture({ widgetId: 'w-1', width: 240, height: 80 });

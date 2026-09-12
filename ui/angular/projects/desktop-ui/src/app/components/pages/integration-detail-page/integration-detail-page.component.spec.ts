@@ -144,6 +144,8 @@ describe('IntegrationDetailPageComponent', () => {
     input.dispatchEvent(new Event('input'));
   }
 
+  afterEach(() => localStorage.clear());
+
   beforeEach(() => {
     // The localization catalog is cached in localStorage; a language another spec switched to must
     // not leak into these expectations.
