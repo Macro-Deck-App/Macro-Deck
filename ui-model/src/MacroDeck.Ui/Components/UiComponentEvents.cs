@@ -118,6 +118,8 @@ public static class UiComponentEvents
 
 	/// <summary>The event names this profile ships.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
-		[Change, Adjust, Press, LongPress, PressStart, PressEnd, Reveal, DoublePress, Drag, DragEnd, Swipe, Pinch,
-		PinchEnd];
+	[
+		Change, Adjust, Press, LongPress, PressStart, PressEnd, Reveal, DoublePress, Drag, DragEnd, Swipe, Pinch,
+		PinchEnd
+	];
 }
