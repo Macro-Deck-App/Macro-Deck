@@ -93,8 +93,10 @@ nothing is passed through a shell:
 ```
 
 A target may also carry an optional `workingDirectory`, relative to the project root, for a toolchain that
-must run from somewhere other than the directory holding the manifest. Every path in the file - `output` and
-`workingDirectory` alike - must stay inside the project directory.
+must run from somewhere other than the directory holding the manifest. An optional top-level `include` lists
+the files and directories beyond the build output that belong in the package - see
+[`build`](/cli/build/#staging-layout). Every path in the file - `output`, `workingDirectory` and `include`
+alike - must stay inside the project directory.
 
 Nothing about that shape is .NET-specific - a plugin built with another toolchain writes its own
 `executable`/`arguments`/`output` and is equally buildable. Generated projects publish **self-contained**:

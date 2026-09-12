@@ -39,14 +39,27 @@ runtimes/linux-x64/MyPlugin
 assets/icon.png
 ```
 
-Everything else beside `manifest.json` is copied once into the package root, so a manifest referring to
-`assets/icon.png` resolves. `macrodeck-build.json`, each target's configured `output` directory, the
-`--output` directory (unless it is the project directory itself), and `bin/`, `obj/`, `.git/`, `.vs/`,
-`.idea/`, `node_modules/`, `.DS_Store` and any `.macroDeckPlugin` file are excluded - **everything else is
-packaged, including your sources**, so keep anything you do not want to distribute out of the directory
-holding the manifest. An `--output` directory inside the project, such as the default `.` or `./artifacts`,
-is therefore safe to build into repeatedly. Staging happens in a temporary directory outside your project
-and is removed when the command finishes.
+Besides each target's output and `manifest.json`, the package holds only the file the manifest's `icon`
+names and whatever the build recipe's `include` lists, each at its project-relative path:
+
+```json
+{
+  "version": 1,
+  "include": ["assets", "data/defaults.json"],
+  "targets": { "...": {} }
+}
+```
+
+Each `include` entry is a file or directory relative to the project root and must stay inside it; one that
+does not exist fails the build. Project and source files (`*.csproj`, `*.sln`, `*.cs`, `*.resx`,
+`Properties/`, dotfiles and the like) are never packaged, not even inside an included directory, because
+the publish output already carries everything compiled from them. Neither are `macrodeck-build.json`, each
+target's configured `output` directory, the `--output` directory, `bin/`, `obj/`, `node_modules/` or any
+`.macroDeckPlugin` file. A path you declared that one of these rules drops is named in an
+`include-not-packaged` warning, and every other file beside the manifest that was left out is named in a
+`file-not-packaged` warning, so a forgotten asset never disappears silently. An `--output` directory inside the project, such as the default
+`.` or `./artifacts`, is therefore safe to build into repeatedly. Staging happens in a temporary directory
+outside your project and is removed when the command finishes.
 
 ## Every requested runtime identifier must produce its entrypoint
 
