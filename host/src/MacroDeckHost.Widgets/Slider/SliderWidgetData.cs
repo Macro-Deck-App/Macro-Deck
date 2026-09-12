@@ -1,6 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Widgets;
+using MacroDeckHost.Widgets.Configuration;
 
 namespace MacroDeckHost.Widgets.Slider;
 
@@ -43,6 +45,8 @@ public sealed record SliderWidgetData
 	/// <see cref="Min" /> for why the fallback is per field.</summary>
 	public double Step { get; init; } = 1;
 
+	public bool HasDoublePressFlow { get; init; }
+
 	public static SliderWidgetData Parse(JsonElement data)
 	{
 		if (data.ValueKind != JsonValueKind.Object)
@@ -64,8 +68,24 @@ public sealed record SliderWidgetData
 			Min = ReadDouble(data, "min") ?? 0,
 			Max = ReadDouble(data, "max") ?? 100,
 			Step = ReadDouble(data, "step") ?? 1,
+			HasDoublePressFlow = HasFlowFor(data, WidgetTriggerTypes.DoublePress),
 		};
 	}
+
+	private static bool HasFlowFor(JsonElement data, string triggerType)
+		=> WidgetConfigJson.ReadFlows(data)
+			.EnumerateArray()
+			.Any(flow => flow.ValueKind == JsonValueKind.Object &&
+				flow.TryGetProperty("triggerType", out var type) &&
+				type.ValueKind == JsonValueKind.String &&
+				string.Equals(type.GetString(), triggerType, StringComparison.OrdinalIgnoreCase) &&
+				flow.TryGetProperty("children", out var children) &&
+				children.ValueKind == JsonValueKind.Array &&
+				children.EnumerateArray().Any(IsEnabledBlock));
+
+	private static bool IsEnabledBlock(JsonElement block)
+		=> block.ValueKind == JsonValueKind.Object &&
+			!(block.TryGetProperty("disabled", out var disabled) && disabled.ValueKind == JsonValueKind.True);
 
 	private static WidgetIconReference? ReadIcon(JsonElement data)
 	{

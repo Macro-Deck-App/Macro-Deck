@@ -407,6 +407,9 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Variablen dieses Widgets</value>
   </data>
+  <data name="ActionBuilder.Trigger.DoublePress" xml:space="preserve">
+    <value>Doppeltippen</value>
+  </data>
   <data name="ActionBuilder.Trigger.LongPress" xml:space="preserve">
     <value>Langer Druck</value>
   </data>
@@ -15983,6 +15986,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Symbol auswählen</value>
+  </data>
+  <data name="Widgets.Slider.DefaultVariableDescription" xml:space="preserve">
+    <value>Ohne Variable nutzt der Schieberegler seine eigene Widget-Variable slider_value.</value>
   </data>
   <data name="Widgets.Slider.Horizontal" xml:space="preserve">
     <value>Horizontal</value>

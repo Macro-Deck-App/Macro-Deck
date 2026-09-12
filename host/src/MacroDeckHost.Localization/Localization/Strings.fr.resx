@@ -408,6 +408,9 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Variables de ce widget</value>
   </data>
+  <data name="ActionBuilder.Trigger.DoublePress" xml:space="preserve">
+    <value>Double appui</value>
+  </data>
   <data name="ActionBuilder.Trigger.LongPress" xml:space="preserve">
     <value>Appui long</value>
   </data>
@@ -15985,6 +15988,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Choisir une icône</value>
+  </data>
+  <data name="Widgets.Slider.DefaultVariableDescription" xml:space="preserve">
+    <value>Sans variable, le curseur utilise sa propre variable de widget slider_value.</value>
   </data>
   <data name="Widgets.Slider.Horizontal" xml:space="preserve">
     <value>Horizontal</value>

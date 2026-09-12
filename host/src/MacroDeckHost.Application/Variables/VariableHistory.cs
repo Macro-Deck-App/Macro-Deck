@@ -40,19 +40,25 @@ public sealed class VariableHistory : IVariableHistory, IDisposable
 		_timeProvider = timeProvider;
 	}
 
-	public IVariableHistoryWindow Open(string variableName, int capacity)
+	public IVariableHistoryWindow Open(string variableName, int capacity, string? scopeRefId = null)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(variableName);
 
 		var bounded = Math.Max(1, capacity);
 		Window window;
 
+		var widgetScope = scopeRefId is not null &&
+			_variables.FindByName(VariableScope.Widget, scopeRefId, variableName) is not null
+				? scopeRefId
+				: null;
+		var key = widgetScope is null ? variableName : $"{widgetScope}/{variableName}";
+
 		lock (_gate)
 		{
-			if (!_entries.TryGetValue(variableName, out var entry))
+			if (!_entries.TryGetValue(key, out var entry))
 			{
-				entry = new Entry(variableName);
-				_entries[variableName] = entry;
+				entry = new Entry(variableName, widgetScope);
+				_entries[key] = entry;
 			}
 
 			entry.Capacity = Math.Max(entry.Capacity, bounded);
@@ -185,7 +191,9 @@ public sealed class VariableHistory : IVariableHistory, IDisposable
 	{
 		value = 0;
 
-		var variable = _variables.FindByName(VariableScope.Global, null, entry.Name);
+		var variable = entry.ScopeRefId is null
+			? _variables.FindByName(VariableScope.Global, null, entry.Name)
+			: _variables.FindByName(VariableScope.Widget, entry.ScopeRefId, entry.Name);
 
 		if (variable is null || !_variables.IsAvailable(variable.Id))
 		{
@@ -198,9 +206,15 @@ public sealed class VariableHistory : IVariableHistory, IDisposable
 
 	private sealed class Entry
 	{
-		public Entry(string name) => Name = name;
+		public Entry(string name, string? scopeRefId)
+		{
+			Name = name;
+			ScopeRefId = scopeRefId;
+		}
 
 		public string Name { get; }
+
+		public string? ScopeRefId { get; }
 
 		public List<double> Values { get; } = [];
 
@@ -223,6 +237,8 @@ public sealed class VariableHistory : IVariableHistory, IDisposable
 			_owner = owner;
 			Entry = entry;
 		}
+
+		public string? ScopeRefId => Entry.ScopeRefId;
 
 		public event EventHandler? Changed;
 

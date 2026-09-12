@@ -5,6 +5,7 @@ using MacroDeck.Ui.Config.Options;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Runtime;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
@@ -14,14 +15,11 @@ using MacroDeckHost.Widgets.Configuration;
 namespace MacroDeckHost.Widgets.Slider;
 
 /// <summary>
-/// Builds a Slider widget's <c>widget-config</c> tree from its stored data - see ADR 0050. Slider has no
-/// <c>flows</c> region: it two-way binds a writable numeric variable instead of running press-trigger flows
-/// (see <c>widget-data-slider-v1.schema.json</c>), so its <see cref="UiWidgetEditor" /> holds the binding
-/// panel rather than an actions list.
+/// Builds a Slider widget's <c>widget-config</c> tree from its stored data - see ADR 0050.
 /// </summary>
 internal static class SliderWidgetConfigView
 {
-	public static UiElement Build(JsonElement data, VariableRegistry variables)
+	public static UiElement Build(JsonElement data, VariableRegistry variables, Guid? widgetId = null)
 	{
 		ArgumentNullException.ThrowIfNull(variables);
 
@@ -47,6 +45,7 @@ internal static class SliderWidgetConfigView
 		var min = new UiState<double>(WidgetConfigJson.ReadDouble(data, "min") ?? 0);
 		var max = new UiState<double>(WidgetConfigJson.ReadDouble(data, "max") ?? 100);
 		var step = new UiState<double>(WidgetConfigJson.ReadDouble(data, "step") ?? 1);
+		var flows = new UiState<JsonElement>(WidgetConfigJson.ReadFlows(data));
 
 		return new UiWidgetConfiguration
 		{
@@ -56,6 +55,63 @@ internal static class SliderWidgetConfigView
 				Key = "properties",
 				Children =
 				[
+					new UiHeading
+					{
+						Key = "binding-heading", Text = AppStrings.Widgets.Editor.Binding(),
+					},
+					new UiVariablePickerInput
+					{
+						Key = "valueVariable",
+						Label = AppStrings.Widgets.Slider.ValueVariable(),
+						Placeholder = AppStrings.Widgets.Slider.SelectVariablePlaceholder(),
+						Description = AppStrings.Widgets.Slider.DefaultVariableDescription(),
+						Binding = Bind.To(valueVariable),
+						VariableTypes = UiValue.Of<IReadOnlyList<string>>(["numeric"]),
+						WritableOnly = true,
+					},
+					// One row, the way the original binding form laid the three bounds out: each is a
+					// short number and a column apiece would push the region three rows taller.
+					new UiConfigStack
+					{
+						Key = "range",
+						Direction = "horizontal",
+						Children =
+						[
+							WhenUnbound("min",
+								variables,
+								widgetId,
+								valueVariable,
+								entity => entity.Min,
+								() => new UiNumberInput
+								{
+									Key = "min",
+									Label = AppStrings.Widgets.Slider.Minimum(),
+									Binding = Bind.To(min),
+								}),
+							WhenUnbound("max",
+								variables,
+								widgetId,
+								valueVariable,
+								entity => entity.Max,
+								() => new UiNumberInput
+								{
+									Key = "max",
+									Label = AppStrings.Widgets.Slider.Maximum(),
+									Binding = Bind.To(max),
+								}),
+							WhenUnbound("step",
+								variables,
+								widgetId,
+								valueVariable,
+								entity => entity.Step,
+								() => new UiNumberInput
+								{
+									Key = "step",
+									Label = AppStrings.Widgets.Slider.Step(),
+									Binding = Bind.To(step),
+								}),
+						],
+					},
 					new UiHeading
 					{
 						Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance(),
@@ -122,58 +178,12 @@ internal static class SliderWidgetConfigView
 				Key = "editor",
 				Children =
 				[
-					new UiHeading
+					new UiActionsListEditor
 					{
-						Key = "binding-heading", Text = AppStrings.Widgets.Editor.Binding(),
-					},
-					new UiVariablePickerInput
-					{
-						Key = "valueVariable",
-						Label = AppStrings.Widgets.Slider.ValueVariable(),
-						Placeholder = AppStrings.Widgets.Slider.SelectVariablePlaceholder(),
-						Binding = Bind.To(valueVariable),
-						VariableTypes = UiValue.Of<IReadOnlyList<string>>(["numeric"]),
-						WritableOnly = true,
-					},
-					// One row, the way the original binding form laid the three bounds out: each is a
-					// short number and a column apiece would push the region three rows taller.
-					new UiConfigStack
-					{
-						Key = "range",
-						Direction = "horizontal",
-						Children =
-						[
-							WhenUnbound("min",
-								variables,
-								valueVariable,
-								entity => entity.Min,
-								() => new UiNumberInput
-								{
-									Key = "min",
-									Label = AppStrings.Widgets.Slider.Minimum(),
-									Binding = Bind.To(min),
-								}),
-							WhenUnbound("max",
-								variables,
-								valueVariable,
-								entity => entity.Max,
-								() => new UiNumberInput
-								{
-									Key = "max",
-									Label = AppStrings.Widgets.Slider.Maximum(),
-									Binding = Bind.To(max),
-								}),
-							WhenUnbound("step",
-								variables,
-								valueVariable,
-								entity => entity.Step,
-								() => new UiNumberInput
-								{
-									Key = "step",
-									Label = AppStrings.Widgets.Slider.Step(),
-									Binding = Bind.To(step),
-								}),
-						],
+						Key = "flows",
+						Binding = Bind.To(flows),
+						CanRun = true,
+						Triggers = UiValue.Of<IReadOnlyList<string>>([WidgetTriggerTypes.DoublePress]),
 					},
 				],
 			},
@@ -181,7 +191,8 @@ internal static class SliderWidgetConfigView
 	}
 
 	/// <summary>
-	/// The field is in the tree exactly while a variable is bound and declares no bound of its own for it -
+	/// The field is in the tree while no variable is picked, since the default <c>slider_value</c> declares no
+	/// range, and while the picked variable declares no bound of its own for it -
 	/// the schema's own per-field rule, that <c>min</c>/<c>max</c>/<c>step</c> are used only where the bound
 	/// variable declares no such bound itself.
 	///
@@ -197,6 +208,7 @@ internal static class SliderWidgetConfigView
 	private static UiWhen WhenUnbound(
 		string key,
 		VariableRegistry variables,
+		Guid? widgetId,
 		UiState<string> valueVariable,
 		Func<VariableEntity, double?> ownBound,
 		Func<UiElement> content)
@@ -206,9 +218,13 @@ internal static class SliderWidgetConfigView
 			Condition = () =>
 			{
 				var name = valueVariable.Value;
-				var entity = string.IsNullOrEmpty(name)
-					? null
-					: variables.FindByName(VariableScope.Global, null, name);
+
+				if (string.IsNullOrEmpty(name))
+				{
+					return true;
+				}
+
+				var entity = SliderDefaultVariable.Find(variables, widgetId, name);
 
 				return entity is not null && ownBound(entity) is null;
 			},

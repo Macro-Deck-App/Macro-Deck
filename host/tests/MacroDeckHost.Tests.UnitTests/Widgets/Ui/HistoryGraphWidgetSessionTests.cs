@@ -420,6 +420,8 @@ public class HistoryGraphWidgetSessionTests
 
 	private sealed class StubWindow : IVariableHistoryWindow
 	{
+		public string? ScopeRefId => null;
+
 		private readonly List<double> _values = [];
 
 		// The real window locks its buffer; this one has to as well, or a sample read racing a push would

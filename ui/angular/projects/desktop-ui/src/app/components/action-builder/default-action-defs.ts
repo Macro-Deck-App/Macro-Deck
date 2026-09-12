@@ -29,6 +29,23 @@ export function toggleTriggerTab(t: Translator): TriggerTab {
 
 export const TOGGLE_TRIGGER_TYPE = 'onStateChange';
 
+export function widgetTriggerCatalog(t: Translator): readonly TriggerTab[] {
+  return [
+    ...defaultTriggerTabs(t),
+    toggleTriggerTab(t),
+    { triggerType: 'onDoublePress', label: t(AppStrings.ActionBuilder.Trigger.DoublePress) },
+  ];
+}
+
+export function fixedTriggerTabsFor(triggers: readonly string[] | undefined, t: Translator): TriggerTab[] | null {
+  const named = triggers ?? [];
+  const presses = new Set(defaultTriggerTabs(t).map(tab => tab.triggerType));
+  if (named.length === 0 || named.some(trigger => presses.has(trigger))) return null;
+
+  const tabs = widgetTriggerCatalog(t).filter(tab => named.includes(tab.triggerType));
+  return tabs.length > 0 ? tabs : null;
+}
+
 export function comparisonOperatorOptions(t: Translator): ReadonlyArray<{ label: string; value: ComparisonOperator }> {
   const C = AppStrings.ActionBuilder.Comparison;
   return [

@@ -408,6 +408,9 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Variables de este widget</value>
   </data>
+  <data name="ActionBuilder.Trigger.DoublePress" xml:space="preserve">
+    <value>Doble toque</value>
+  </data>
   <data name="ActionBuilder.Trigger.LongPress" xml:space="preserve">
     <value>Pulsación larga</value>
   </data>
@@ -15985,6 +15988,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Elegir icono</value>
+  </data>
+  <data name="Widgets.Slider.DefaultVariableDescription" xml:space="preserve">
+    <value>Sin variable, el control deslizante usa su propia variable de widget slider_value.</value>
   </data>
   <data name="Widgets.Slider.Horizontal" xml:space="preserve">
     <value>Horizontal</value>

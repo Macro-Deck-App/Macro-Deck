@@ -84,7 +84,7 @@ public class UiComponentVocabularyTests
 	];
 
 	private static readonly string[] _expectedEvents =
-		["change", "adjust", "press", "long-press", "press-start", "press-end", "reveal"];
+		["change", "adjust", "press", "long-press", "press-start", "press-end", "reveal", "double-press"];
 
 	private static UiSurface WidgetSurface()
 		=> new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };

@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, output } f
 import type { VariableType } from '@macro-deck/runtime';
 import { ButtonComponent, TranslatePipe, VariableService } from '@shared';
 import { VariablePickerComponent } from '../../variable-picker/variable-picker.component';
+import { UiRenderContext } from '../../ui-render/ui-render-context';
 
 @Component({
   selector: 'shared-node-variable-picker',
@@ -39,6 +40,7 @@ import { VariablePickerComponent } from '../../variable-picker/variable-picker.c
 })
 export class NodeVariablePickerComponent {
   private readonly variableService = inject(VariableService);
+  private readonly context = inject(UiRenderContext);
 
   readonly value = input('');
   readonly variableTypes = input<VariableType[] | undefined>(undefined);
@@ -47,7 +49,10 @@ export class NodeVariablePickerComponent {
   readonly valueChange = output<string>();
 
   protected readonly pickerVariables = computed(() => {
-    const all = this.variableService.variables();
+    const scopeRefId = this.context.scopeRefId;
+    const all = scopeRefId
+      ? this.variableService.visibleForContext('widget', scopeRefId)
+      : this.variableService.variables();
     return this.writableOnly() ? all.filter(variable => variable.canWrite === true) : all;
   });
 }

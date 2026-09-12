@@ -200,6 +200,28 @@ describe('shared-ui-node the five new configuration node types (issue #837)', ()
       expect(rendered.events).toEqual([{ nodeId: 'n', name: 'change', data: 'writableText' }]);
     });
 
+    it('in a widget editor offers only globals and that widget\'s own variables; without a scope, everything', async () => {
+      const own = makeVariable({ name: 'own', type: 'numeric', scope: 'widget', scopeRefId: 'widget-a' });
+      const foreign = makeVariable({ name: 'foreign', type: 'numeric', scope: 'widget', scopeRefId: 'widget-b' });
+      const global = makeVariable({ name: 'global', type: 'numeric' });
+      const visibleForContext = jasmine.createSpy('visibleForContext').and.returnValue([own, global]);
+      const root: UiNode = { id: 'n', type: 'variable-picker', properties: { events: ['change'] } };
+      const rendered = await renderTree(root, null, [
+        { provide: VariableService, useValue: { variables: signal([own, foreign, global]), visibleForContext } },
+      ]);
+      const pickerNames = (): string[] =>
+        (rendered.fixture.debugElement.query(By.directive(VariablePickerComponent))
+          .componentInstance as VariablePickerComponent).variables.map(v => v.name);
+
+      expect(pickerNames()).toEqual(['own', 'foreign', 'global']);
+
+      rendered.fixture.componentRef.setInput('scopeRefId', 'widget-a');
+      await tick(rendered);
+
+      expect(visibleForContext).toHaveBeenCalledWith('widget', 'widget-a');
+      expect(pickerNames()).toEqual(['own', 'global']);
+    });
+
     it('shows a chip once a variable is picked, and clearing it emits an empty string', async () => {
       const root: UiNode = { id: 'n', type: 'variable-picker', properties: { value: 'myVar', events: ['change'] } };
       const rendered = await renderTree(root);

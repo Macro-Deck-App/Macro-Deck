@@ -169,6 +169,7 @@ export const AppStrings = {
 			VariablesOfThisWidget: 'macrodeck.app:ActionBuilder.Toolbar.VariablesOfThisWidget',
 		},
 		Trigger: {
+			DoublePress: 'macrodeck.app:ActionBuilder.Trigger.DoublePress',
 			LongPress: 'macrodeck.app:ActionBuilder.Trigger.LongPress',
 			OnStateChange: 'macrodeck.app:ActionBuilder.Trigger.OnStateChange',
 			ShortPress: 'macrodeck.app:ActionBuilder.Trigger.ShortPress',
@@ -6496,6 +6497,7 @@ export const AppStrings = {
 		Slider: {
 			ChangeIcon: 'macrodeck.app:Widgets.Slider.ChangeIcon',
 			ChooseIcon: 'macrodeck.app:Widgets.Slider.ChooseIcon',
+			DefaultVariableDescription: 'macrodeck.app:Widgets.Slider.DefaultVariableDescription',
 			Horizontal: 'macrodeck.app:Widgets.Slider.Horizontal',
 			LegacyActionBindingNotice: 'macrodeck.app:Widgets.Slider.LegacyActionBindingNotice',
 			Maximum: 'macrodeck.app:Widgets.Slider.Maximum',
@@ -6704,6 +6706,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:ActionBuilder.Toolbar.SaveFirstTooltip': 'Save first - a run acts on the saved version',
 	'macrodeck.app:ActionBuilder.Toolbar.Variables': 'Variables',
 	'macrodeck.app:ActionBuilder.Toolbar.VariablesOfThisWidget': 'Variables of this widget',
+	'macrodeck.app:ActionBuilder.Trigger.DoublePress': 'Double Tap',
 	'macrodeck.app:ActionBuilder.Trigger.LongPress': 'Long Press',
 	'macrodeck.app:ActionBuilder.Trigger.OnStateChange': 'On State Change',
 	'macrodeck.app:ActionBuilder.Trigger.ShortPress': 'Short Press',
@@ -11895,6 +11898,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Widgets.SamplePreview.WeatherLocation': 'Sample city',
 	'macrodeck.app:Widgets.Slider.ChangeIcon': 'Change icon',
 	'macrodeck.app:Widgets.Slider.ChooseIcon': 'Choose icon',
+	'macrodeck.app:Widgets.Slider.DefaultVariableDescription': 'Without a variable, the slider uses its own widget variable slider_value.',
 	'macrodeck.app:Widgets.Slider.Horizontal': 'Horizontal',
 	'macrodeck.app:Widgets.Slider.LegacyActionBindingNotice': 'This slider still carries an action binding from an older version. It is no longer used and is removed the next time you save.',
 	'macrodeck.app:Widgets.Slider.Maximum': 'Maximum',

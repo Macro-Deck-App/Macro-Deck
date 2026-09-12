@@ -2,7 +2,9 @@ using System.Text.Json;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
+using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.HostLocking;
+using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Widgets;
@@ -22,6 +24,9 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 	private readonly VariableRegistry _variables;
 	private readonly IVariableChangeNotifier _variableNotifier;
 	private readonly IServiceScopeFactory _scopeFactory;
+	private readonly IWidgetTriggerService _triggerService;
+	private readonly IFolderCache _folderCache;
+	private readonly IUiTransport _uiTransport;
 
 	public SliderWidgetUiProvider(IWidgetIconResources iconResources,
 		IHostLockState lockState,
@@ -29,8 +34,14 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 		TimeProvider timeProvider,
 		VariableRegistry variables,
 		IVariableChangeNotifier variableNotifier,
-		IServiceScopeFactory scopeFactory)
+		IServiceScopeFactory scopeFactory,
+		IWidgetTriggerService triggerService,
+		IFolderCache folderCache,
+		IUiTransport uiTransport)
 	{
+		_triggerService = triggerService;
+		_folderCache = folderCache;
+		_uiTransport = uiTransport;
 		_iconResources = iconResources;
 		_lockState = lockState;
 		_sampleText = sampleText;
@@ -64,7 +75,17 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 			}
 
 			var configData = WidgetConfigSurfaces.Data(request.Surface);
-			var configView = new UiView(request.Surface, SliderWidgetConfigView.Build(configData, _variables));
+			var configWidgetId = WidgetConfigSurfaces.WidgetId(request.Surface);
+			var configured = SliderWidgetData.Parse(configData);
+
+			if (configured.ValueVariable is null && configWidgetId is { } configOwner)
+			{
+				await SliderDefaultVariable.EnsureAsync(configOwner, configured.Min, _variables, _scopeFactory)
+					.ConfigureAwait(false);
+			}
+
+			var configView = new UiView(request.Surface,
+				SliderWidgetConfigView.Build(configData, _variables, configWidgetId));
 
 			return new WidgetConfigSession(configView);
 		}
@@ -88,19 +109,33 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 		var state = new UiState<SliderWidgetReadout>(SliderWidgetReadout.Empty);
 		var isWidgetSurface = request.Surface.Kind == UiSurfaceKinds.Widget;
 
-		var variable = config.ValueVariable is { } name
-			? new SliderVariableBinding(name,
+		var scopeWidgetId = SurfaceGuid(request.Surface,
+			isWidgetSurface ? UiWidgetSurfaceAttributes.WidgetId : UiWidgetSurfaceAttributes.VariableScopeWidgetId);
+
+		if (isWidgetSurface && config.ValueVariable is null && scopeWidgetId is { } owner)
+		{
+			await SliderDefaultVariable.EnsureAsync(owner, config.Min, _variables, _scopeFactory).ConfigureAwait(false);
+		}
+
+		var variable = config.ValueVariable is not null || scopeWidgetId is not null
+			? new SliderVariableBinding(config.ValueVariable ?? SliderDefaultVariable.Name,
 				config.Min,
 				config.Max,
 				config.Step,
 				_variables,
 				_variableNotifier,
-				_scopeFactory)
+				_scopeFactory,
+				scopeWidgetId,
+				IsDefault: config.ValueVariable is null)
 			: null;
 
-		var session = new SliderWidgetSession(state, _lockState, _timeProvider, isWidgetSurface, variable);
+		var doublePress = isWidgetSurface && config.HasDoublePressFlow && scopeWidgetId is { } widgetId
+			? new SliderDoublePressBinding(widgetId, _folderCache, _triggerService, _uiTransport)
+			: null;
 
-		var element = SliderWidgetView.Build(config,
+		var session = new SliderWidgetSession(state, _lockState, _timeProvider, isWidgetSurface, variable, doublePress);
+
+		var element = SliderWidgetView.Build(variable is null ? config : config with { ValueVariable = variable.Name },
 			state,
 			icon,
 			session.BuildEvents(),
@@ -111,6 +146,13 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 
 		return session;
 	}
+
+	private static Guid? SurfaceGuid(UiSurface surface, string attribute)
+		=> surface.Attributes.TryGetValue(attribute, out var id) &&
+			id.ValueKind == JsonValueKind.String &&
+			Guid.TryParse(id.GetString(), out var widgetId)
+				? widgetId
+				: null;
 
 	private static JsonElement DataElement(UiSurface surface)
 		=> surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;

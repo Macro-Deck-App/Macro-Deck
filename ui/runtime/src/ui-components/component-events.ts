@@ -12,6 +12,8 @@ export const UiComponentEvents = {
   PressEnd: 'press-end',
 
   Reveal: 'reveal',
+
+  DoublePress: 'double-press',
 } as const;
 
 export const UI_COMPONENT_EVENTS_WELL_KNOWN: readonly string[] = Object.values(UiComponentEvents);
