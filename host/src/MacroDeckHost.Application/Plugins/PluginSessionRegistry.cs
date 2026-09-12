@@ -123,6 +123,8 @@ public interface IPluginSessionRegistry
 
 	void Detach(string sessionId, DateTimeOffset at);
 
+	void ReleaseConnection(string sessionId, IPluginConnection connection);
+
 	bool TryResume(string pluginId, string? resumeSessionId, DateTimeOffset at, out PluginSessionRecord? record);
 
 	void MakeNonResumable(string sessionId);
@@ -253,6 +255,18 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 				{
 					PluginId = pluginId, SessionId = sessionId, Reason = PluginSessionEndReason.Detached
 				});
+		}
+	}
+
+	public void ReleaseConnection(string sessionId, IPluginConnection connection)
+	{
+		lock (_gate)
+		{
+			if (_bySessionId.TryGetValue(sessionId, out var record) &&
+				ReferenceEquals(record.Connection, connection))
+			{
+				record.Connection = null;
+			}
 		}
 	}
 

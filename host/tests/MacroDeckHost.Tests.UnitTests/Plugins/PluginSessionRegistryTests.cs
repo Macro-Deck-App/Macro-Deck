@@ -69,6 +69,44 @@ public class PluginSessionRegistryTests
 	}
 
 	[Test]
+	public async Task A_Released_Connection_Receives_Nothing_While_The_Session_Stays_Closable()
+	{
+		var record = NewRecord();
+		await _registry.Create(record);
+		var connection = new FakePluginConnection();
+		_registry.TryAttach(record.SessionId, connection, null);
+
+		_registry.ReleaseConnection(record.SessionId, connection);
+
+		var delivered = await _registry.SendToPlugin(record.PluginId,
+			new ProtocolEnvelope { Type = MessageTypes.SessionPing, Id = "1" });
+		var listed = _registry.Snapshot().Any(session => session.SessionId == record.SessionId);
+		var terminated = await _registry.Terminate(record.SessionId, 1000, "Closed by the plugin.");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(delivered, Is.False);
+			Assert.That(listed, Is.True);
+			Assert.That(terminated, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task Releasing_A_Replaced_Connection_Leaves_The_Newer_One_Attached()
+	{
+		var record = NewRecord();
+		await _registry.Create(record);
+		var oldConnection = new FakePluginConnection("old");
+		_registry.TryAttach(record.SessionId, oldConnection, null);
+		var newConnection = new FakePluginConnection("new");
+		_registry.TryAttach(record.SessionId, newConnection, null);
+
+		_registry.ReleaseConnection(record.SessionId, oldConnection);
+
+		Assert.That(_registry.IsCurrentConnection(record.SessionId, newConnection), Is.True);
+	}
+
+	[Test]
 	public void IsCurrentConnection_Is_False_For_An_Unknown_Session()
 	{
 		Assert.That(_registry.IsCurrentConnection("unknown-session", new FakePluginConnection()), Is.False);
