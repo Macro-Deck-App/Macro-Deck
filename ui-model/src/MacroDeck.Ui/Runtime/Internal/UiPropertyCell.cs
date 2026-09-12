@@ -95,6 +95,8 @@ internal sealed class UiPropertyCell<T> : UiPropertyCell
 		: base(key)
 		=> _value = value;
 
+	internal UiValue<T> Value => _value;
+
 	internal override JsonElement? EvaluateInitial()
 	{
 		Evaluate();

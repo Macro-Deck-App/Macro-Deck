@@ -4,6 +4,7 @@ import { UiComponentEvents } from './component-events';
 import { nodeGapPx, nodeIsHorizontal, nodePaddingPx, stackBackground } from './style';
 import type { UiComponentContext, UiComponentDefinition } from '../ui-framework/component-registry';
 import { px } from './px.util';
+import { nodeModifierOwns } from '../render/node-modifiers';
 
 const LIST_REVEAL_THROTTLE_MS = 500;
 
@@ -71,7 +72,7 @@ export const uiListComponent: UiComponentDefinition<UiListState> = {
     ctx.setClass(element, 'widget-list-horizontal', horizontal);
     ctx.setStyle(element, 'gap', px(gap));
     ctx.setStyle(element, 'padding', px(padding));
-    ctx.setStyle(element, 'background', stackBackground(node) ?? null);
+    if (!nodeModifierOwns(node, ctx, 'background')) ctx.setStyle(element, 'background', stackBackground(node) ?? null);
     // The main axis is unbounded, so only the cross axis takes an extent from the box.
     ctx.setStyle(element, 'width', px(ctx.box.width));
     ctx.setStyle(element, 'height', px(ctx.box.height));

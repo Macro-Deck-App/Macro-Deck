@@ -104,6 +104,7 @@ export default defineConfig({
 								{ label: 'All components', slug: 'ui/components' },
 								'ui/components/stack-and-layer',
 								'ui/components/transform',
+								'ui/components/modifier',
 								'ui/components/list',
 								'ui/components/text',
 								'ui/components/image',

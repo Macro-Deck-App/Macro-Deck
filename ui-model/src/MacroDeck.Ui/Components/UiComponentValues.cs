@@ -13,6 +13,121 @@ public static class UiComponentDirections
 	public static readonly IReadOnlyList<string> WellKnown = [Vertical, Horizontal];
 }
 
+/// <summary>
+/// The member keys of a node's <see cref="UiComponentProperties.Modifiers" /> object, and the normative
+/// constants a reader applies when it draws them or recognises the gestures that go with them.
+///
+/// <para>
+/// Every member is geometry-free: none of them changes the node's box, its padding or its size in the parent,
+/// so a reader that ignores the whole object still lays the tree out identically. Anything that does change
+/// geometry lives on <see cref="UiComponents.Modifier" /> instead, which is negotiated.
+/// </para>
+/// </summary>
+public static class UiComponentModifiers
+{
+	/// <summary>The node's background: either <c>#rrggbb</c>, or a gradient spelled
+	/// <c>{"linear":{"angle":deg,"stops":[{"offset","color"}]}}</c> or
+	/// <c>{"radial":{"centerX","centerY","stops":[...]}}</c> - see <see cref="UiBackground" />. Replaces any
+	/// background the component paints itself.</summary>
+	public const string Background = "background";
+
+	/// <summary>The corner radius, as a <see cref="UiLength" />. Does not clip content; the wrapper's
+	/// <see cref="UiComponentClips.Bounds" /> does. Ignored on the tree root, whose corner is the
+	/// surface's.</summary>
+	public const string Radius = "radius";
+
+	/// <summary>The border's width, as a <see cref="UiLength" />, drawn inside the node's edge without taking
+	/// space. Absent means no border.</summary>
+	public const string BorderWidth = "borderWidth";
+
+	/// <summary>The border's colour, as <c>#rrggbb</c>. Absent means the reader's own foreground
+	/// colour.</summary>
+	public const string BorderColor = "borderColor";
+
+	/// <summary>The border's line style - see <see cref="UiComponentBorderLines" />. Absent means
+	/// <see cref="UiComponentBorderLines.Solid" />.</summary>
+	public const string BorderLine = "borderLine";
+
+	/// <summary>The name assistive technology announces for the node, as localized text.</summary>
+	public const string AccessibilityLabel = "accessibilityLabel";
+
+	/// <summary>A longer description assistive technology may announce after the label, as localized
+	/// text.</summary>
+	public const string AccessibilityHint = "accessibilityHint";
+
+	/// <summary>
+	/// <c>true</c> when the node and everything inside it, fallbacks included, must not be worked. Written only
+	/// as <c>true</c>; absent means enabled. A reader dims this node alone by <see cref="DimOpacity" /> and
+	/// emits no event from anywhere inside it. A producer built on the DSL also stops declaring events inside
+	/// it, and <see cref="Runtime.UiView.Dispatch" /> ignores any event aimed there, so an older reader that
+	/// ignores the member still cannot work the region.
+	/// </summary>
+	public const string Disabled = "disabled";
+
+	/// <summary>The member keys this profile ships.</summary>
+	public static readonly IReadOnlyList<string> WellKnown =
+	[
+		Background, Radius, BorderWidth, BorderColor, BorderLine, AccessibilityLabel, AccessibilityHint,
+		Disabled,
+	];
+
+	/// <summary>The opacity a reader multiplies a node's own opacity by when that node's own
+	/// <see cref="Disabled" /> is <c>true</c>. Applied once per disabled node, never compounded down a nested
+	/// region.</summary>
+	public const double DimOpacity = 0.4;
+
+	/// <summary>How far a pointer travels, as a fraction of the widget basis, before a gesture begins and an
+	/// inner press is cancelled.</summary>
+	public const double GestureSlop = 0.04;
+
+	/// <summary>The shortest travel along the dominant axis, as a fraction of the widget basis, that counts as
+	/// a <see cref="UiComponentEvents.Swipe" />.</summary>
+	public const double SwipeMinDistance = 0.2;
+
+	/// <summary>The longest a movement may take, in milliseconds, to count as a
+	/// <see cref="UiComponentEvents.Swipe" />.</summary>
+	public const int SwipeMaxDurationMs = 500;
+
+	/// <summary>The shortest interval, in milliseconds, between two <see cref="UiComponentEvents.Drag" /> or
+	/// two <see cref="UiComponentEvents.Pinch" /> events from one gesture.</summary>
+	public const int GestureThrottleMs = 100;
+}
+
+/// <summary>The shapes a <see cref="UiComponents.Modifier" /> clips its child to.</summary>
+public static class UiComponentClips
+{
+	/// <summary>The wrapper's own box, rounded by the wrapper's own
+	/// <see cref="UiComponentModifiers.Radius" /> when it carries one.</summary>
+	public const string Bounds = "bounds";
+
+	/// <summary>The largest circle centred in the wrapper's box.</summary>
+	public const string Circle = "circle";
+
+	/// <summary>The wrapper's box with fully rounded ends along its longer side.</summary>
+	public const string Capsule = "capsule";
+
+	/// <summary>The clips this profile ships. A reader clips nothing for one it does not know, rather than
+	/// failing the tree.</summary>
+	public static readonly IReadOnlyList<string> WellKnown = [Bounds, Circle, Capsule];
+}
+
+/// <summary>The line styles of a <see cref="UiComponentModifiers.BorderLine" />.</summary>
+public static class UiComponentBorderLines
+{
+	/// <summary>A continuous line. What absence means.</summary>
+	public const string Solid = "solid";
+
+	/// <summary>A dashed line.</summary>
+	public const string Dashed = "dashed";
+
+	/// <summary>A dotted line.</summary>
+	public const string Dotted = "dotted";
+
+	/// <summary>The line styles this profile ships. A reader draws a solid line for one it does not know,
+	/// rather than failing the tree.</summary>
+	public static readonly IReadOnlyList<string> WellKnown = [Solid, Dashed, Dotted];
+}
+
 /// <summary>How a <see cref="UiStack" /> distributes free space along its main axis.</summary>
 public static class UiComponentJustify
 {

@@ -66,10 +66,16 @@ public static class UiComponents
 	/// shifts them together about a pivot.</summary>
 	public const string Transform = "ui.transform";
 
+	/// <summary>A wrapper around exactly one child that pads, frames, clips, masks or fades it - see
+	/// <see cref="UiModifier" />. Component version 1. Negotiated like any other type: a reader that does not
+	/// know it draws the node's explicit <see cref="Dsl.UiElement.Fallback" />, or its own placeholder for an
+	/// unsupported node when there is none.</summary>
+	public const string Modifier = "ui.modifier";
+
 	/// <summary>The types the core framework ships. Not exhaustive of what a renderer may meet - see the
 	/// type's remarks.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
 	[
-		Stack, Text, Image, RangeBar, Slider, Button, Layer, Chart, TextField, List, Transform,
+		Stack, Text, Image, RangeBar, Slider, Button, Layer, Chart, TextField, List, Transform, Modifier,
 	];
 }

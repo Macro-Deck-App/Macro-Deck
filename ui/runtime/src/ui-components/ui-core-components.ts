@@ -4,6 +4,7 @@ import { uiChartComponent } from './ui-chart.component';
 import { uiImageComponent } from './ui-image.component';
 import { uiLayerComponent } from './ui-layer.component';
 import { uiListComponent } from './ui-list.component';
+import { uiModifierComponent } from './ui-modifier.component';
 import { uiRangeBarComponent } from './ui-range-bar.component';
 import { uiSliderComponent } from './ui-slider.component';
 import { uiStackComponent } from './ui-stack.component';
@@ -23,4 +24,5 @@ export const UI_CORE_COMPONENTS: readonly UiComponentDefinition[] = [
   uiTextFieldComponent,
   uiListComponent,
   uiTransformComponent,
+  uiModifierComponent,
 ];

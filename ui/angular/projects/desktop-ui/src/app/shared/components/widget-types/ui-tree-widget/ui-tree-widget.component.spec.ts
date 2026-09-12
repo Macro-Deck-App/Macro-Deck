@@ -608,6 +608,85 @@ describe('UiTreeWidgetComponent', () => {
     });
   });
 
+  describe('disabled regions', () => {
+    const pressNode = (id: string): UiNode =>
+      ({ id, type: UiComponents.Button, properties: { [UiComponentProperties.Events]: ['press'] } });
+    const disabledRegion = (children: UiNode[]): UiNode => ({
+      id: 'region',
+      type: UiComponents.Stack,
+      properties: { [UiComponentProperties.Modifiers]: { disabled: true } },
+      children,
+    });
+
+    it('skips a disabled region and activates the enabled node after it', () => {
+      const fixture = createFixture({ widgetId: 'w1' });
+      handles[0].root.set({
+        id: 'root', type: UiComponents.Stack, children: [disabledRegion([pressNode('inner')]), pressNode('button')],
+      } as UiNode);
+      fixture.detectChanges();
+
+      fixture.componentInstance.activateFromInput();
+
+      expect(handles[0].sent.map(event => event.nodeId)).toEqual(['button']);
+    });
+
+    it("runs the tile's trigger for a keyboard activation of a tree that only drags", () => {
+      const fixture = createFixture({ widgetId: 'w1' });
+      handles[0].root.set({
+        id: 'root', type: UiComponents.Modifier, properties: { [UiComponentProperties.Events]: ['drag', 'drag-end'] },
+        children: [textNode(1)],
+      } as UiNode);
+      fixture.detectChanges();
+      const triggers: string[] = [];
+      fixture.componentInstance.trigger.subscribe(t => triggers.push(t));
+
+      fixture.componentInstance.activateFromInput();
+
+      expect(triggers).toEqual(['onTouchStart', 'onTouchEnd', 'onShortPress']);
+      expect(handles[0].sent).toEqual([]);
+    });
+
+    it('absorbs an activation, with no press flash, when only a disabled region claims the tile', () => {
+      const fixture = createFixture({ widgetId: 'w1' });
+      handles[0].root.set({ id: 'root', type: UiComponents.Stack, children: [disabledRegion([pressNode('inner')])] } as UiNode);
+      fixture.detectChanges();
+      const triggers: string[] = [];
+      const pressed: boolean[] = [];
+      fixture.componentInstance.trigger.subscribe(t => triggers.push(t));
+      fixture.componentInstance.pressedChange.subscribe(p => pressed.push(p));
+
+      fixture.componentInstance.activateFromInput();
+
+      expect(triggers).toEqual([]);
+      expect(pressed).toEqual([]);
+      expect(handles[0].sent).toEqual([]);
+    });
+
+    it('absorbs a pointer press on a tile whose tree holds a disabled region', () => {
+      jasmine.clock().install();
+      try {
+        const fixture = createFixture({ widgetId: 'w1' });
+        handles[0].root.set({ id: 'root', type: UiComponents.Stack, children: [disabledRegion([])] } as UiNode);
+        fixture.detectChanges();
+        const triggers: string[] = [];
+        const pressed: boolean[] = [];
+        fixture.componentInstance.trigger.subscribe(t => triggers.push(t));
+        fixture.componentInstance.pressedChange.subscribe(p => pressed.push(p));
+
+        const el = tile(fixture);
+        el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        jasmine.clock().tick(700);
+        el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+        jasmine.clock().tick(PRESS_FEEDBACK_MIN_VISIBLE_MS);
+
+        expect(triggers).toEqual([]);
+        expect(pressed).toEqual([]);
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
+  });
+
   describe('the generic widget event path (ui.slider is its first user)', () => {
     function sliderRoot(events: string[] = ['adjust', 'change']): UiNode {
       return {

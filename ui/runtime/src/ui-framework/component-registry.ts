@@ -3,6 +3,7 @@ import { UiComponentBox, UiIntrinsicMetrics } from './layout';
 import { UiComponentRange } from './ui-capabilities';
 import { UiRenderHost } from '../render/ui-render-host';
 import { TextFit } from '../render/text-fit';
+import type { UiModifierInputs } from '../render/node-modifiers';
 import { UI_CORE_COMPONENTS as CORE_DEFINITIONS } from '../ui-components/ui-core-components';
 import { MACRO_DECK_COMPONENTS as MACRO_DECK_DEFINITIONS } from '../macrodeck-components/macrodeck-components';
 
@@ -50,6 +51,8 @@ export interface UiComponentContext<TState = unknown> {
 
   pressTint(node: UiNode): void;
 
+  isDisabled(): boolean;
+
   repaint(): void;
 
   state: TState;
@@ -67,6 +70,8 @@ export interface UiComponentDefinition<TState = unknown> {
   bind?(ctx: UiComponentContext<TState>): void;
 
   paint(node: UiNode, ctx: UiComponentContext<TState>): void;
+
+  modifierInputs?(node: UiNode, ctx: UiComponentContext<TState>): UiModifierInputs;
 
   release?(ctx: UiComponentContext<TState>): void;
 

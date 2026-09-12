@@ -55,7 +55,7 @@ export function bindPressGesture<TState>(
     // A node declaring no press event offers no interaction at all: it must not claim the pointer, must
     // not stop the event and must paint no tint, so whatever wraps this tree keeps working exactly as
     // if this node were not here.
-    if (!nodeClaimsGesture(current)) return;
+    if (!nodeClaimsGesture(current) || ctx.isDisabled()) return;
 
     const pointer = event as PointerEvent;
     // A second finger already mid-press, or a right-click, must never start one.
@@ -97,6 +97,17 @@ export function bindPressGesture<TState>(
     }
     endPress(committed);
   };
+
+  element.addEventListener('widget-gesture-cancel', () => {
+    const pointerId = state.pointerId;
+    if (pointerId === null) return;
+    endPress(false);
+    try {
+      (element as HTMLElement).releasePointerCapture(pointerId);
+    } catch {
+      // A synthetic pointer holds no capture to release.
+    }
+  });
 
   element.addEventListener('pointerup', finish(true));
   element.addEventListener('pointercancel', finish(false));

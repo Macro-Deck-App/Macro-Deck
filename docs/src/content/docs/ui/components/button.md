@@ -38,7 +38,8 @@ Events =
 ```
 
 Declare only the names you handle. Declaring just `Press` is how you say the button has no long-press
-behaviour. A button with no events is still drawn, but accepts nothing - there is no disabled property.
+behaviour. A button with no events is still drawn, but accepts nothing. To show it as unavailable as well,
+wrap it in a [modifier](/ui/components/modifier/#disabled) with `Disabled`.
 Use `PressStart` and `PressEnd` to drive something for as long as the finger is down.
 
 ## Artwork and ring

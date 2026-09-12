@@ -22,6 +22,10 @@ cross axis.
 | `ui.text-field` | A line the user types | [Text field](/ui/components/text-field/) |
 | `ui.list` | A container that scrolls and asks for more | [List](/ui/components/list/) |
 | `ui.transform` | Rotates, scales and shifts its children together about a pivot | [Transform](/ui/components/transform/) |
+| `ui.modifier` | Pads, fades, clips, masks or frames its one child | [Modifier](/ui/components/modifier/) |
+
+Any node can also carry a `modifiers` object - background, border, radius, accessibility text and
+`disabled` - and the gesture events. See [Modifier](/ui/components/modifier/).
 
 ## `macrodeck.*`
 

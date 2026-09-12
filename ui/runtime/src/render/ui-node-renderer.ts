@@ -1,5 +1,5 @@
 import { UiComponentBox } from '../ui-framework/layout';
-import { nodeClaimsGesture } from '../ui-framework/node-gestures';
+import { nodeClaimsGesture, nodeDeclaresGesture, nodeIsDisabledRegion } from '../ui-framework/node-gestures';
 import { emitsEvent } from '../ui-framework/node-properties.util';
 import { isUnsupportedResolution, resolveRenderableNode } from '../ui-framework/node-resolution.util';
 import { UiNode } from '../ui-framework/ui-node.interface';
@@ -18,6 +18,8 @@ import {
   setStyle as writeStyle,
 } from './dom-writes';
 import { createTextFitScope, MountedFit, TextFit, TextFitScope } from './text-fit';
+import { MODIFIER_BORDER_PART, planNodeModifiers, UiModifierPlan } from './node-modifiers';
+import { bindNodeGestures } from './node-gesture-recognizer';
 
 export interface UiNodeRenderHandle {
   element(): Element | null;
@@ -57,7 +59,7 @@ export function renderUiNode(
 ): UiNodeRenderHandle {
   const registry = options?.registry ?? DEFAULT_UI_COMPONENT_REGISTRY;
   const timers = options?.timers ?? REAL_TIMERS;
-  return renderInScope(container, node, box, crossExtent, initialBasis, host, registry, timers, createTextFitScope());
+  return renderInScope(container, node, box, crossExtent, initialBasis, host, registry, timers, createTextFitScope(), () => false);
 }
 
 function renderInScope(
@@ -70,6 +72,7 @@ function renderInScope(
   registry: UiComponentRegistry,
   timers: UiRenderTimers,
   scope: TextFitScope,
+  parentDisabled: () => boolean,
 ): UiNodeRenderHandle {
   function setStyle(element: HTMLElement | SVGElement, name: string, value: string | null): void {
     if (writeStyle(element, name, value)) scope.markDirty();
@@ -108,8 +111,15 @@ function renderInScope(
 
   let timeTimer: unknown = null;
 
+  let modifierWrites: UiModifierPlan = { styles: {}, attributes: {} };
+  let releaseGestures: (() => void) | null = null;
+
+  function isDisabled(): boolean {
+    return parentDisabled() || nodeIsDisabledRegion(renderNode);
+  }
+
   function emit(target: UiNode, name: string, payload?: unknown): void {
-    if (!emitsEvent(target, name)) return;
+    if (!emitsEvent(target, name) || isDisabled()) return;
     host.emit(target, name, payload);
   }
 
@@ -139,6 +149,9 @@ function renderInScope(
     clearTimeTick();
     dropFit();
     if (activeDefinition?.release) activeDefinition.release(ctx);
+    if (releaseGestures !== null) releaseGestures();
+    releaseGestures = null;
+    modifierWrites = { styles: {}, attributes: {} };
     for (const name in parts) {
       if (Object.prototype.hasOwnProperty.call(parts, name)) delete parts[name];
     }
@@ -232,7 +245,7 @@ function renderInScope(
       }
 
       next.push(renderInScope(
-        parent, entry.child, entry.box, entry.crossExtent, basis, host, registry, timers, scope));
+        parent, entry.child, entry.box, entry.crossExtent, basis, host, registry, timers, scope, isDisabled));
     }
 
     let cursor: Node | null = before;
@@ -254,6 +267,13 @@ function renderInScope(
   function paintWithFits(current: UiNode, definition: UiComponentDefinition<unknown> | undefined, type: string): void {
     const outermost = scope.enter();
     try {
+      const element = root!;
+      // Cleared before the paint and written after it, so a component that owns the same property
+      // again once a member is gone repaints it without the two writers toggling it on every paint.
+      const planned = planNodeModifiers(current, ctx, element, host.localization, definition?.modifierInputs?.(current, ctx), parentDisabled());
+      for (const name in modifierWrites.styles) if (!(name in planned.styles)) setStyle(element, name, null);
+      for (const name in modifierWrites.attributes) if (!(name in planned.attributes)) setAttribute(element, name, null);
+      if (planned.border === undefined) dropPart(MODIFIER_BORDER_PART);
       if (definition) {
         definition.paint(current, ctx);
       } else {
@@ -262,6 +282,17 @@ function renderInScope(
         setAttribute(root!, 'title', type);
         sizeTo(root!, resolved);
       }
+      for (const name in planned.styles) setStyle(element, name, planned.styles[name]);
+      for (const name in planned.attributes) setAttribute(element, name, planned.attributes[name]);
+      if (planned.border !== undefined) {
+        const overlay = part(MODIFIER_BORDER_PART, 'div');
+        setClassName(overlay, 'widget-modifier-border');
+        setStyle(overlay, 'border-width', planned.border.width);
+        setStyle(overlay, 'border-style', planned.border.line);
+        setStyle(overlay, 'border-color', planned.border.color);
+      }
+      modifierWrites = planned;
+      if (releaseGestures === null && nodeDeclaresGesture(current)) releaseGestures = bindNodeGestures(element, ctx);
     } finally {
       scope.leave();
     }
@@ -273,7 +304,7 @@ function renderInScope(
   }
 
   function pressTint(target: UiNode): void {
-    const claims = nodeClaimsGesture(target);
+    const claims = nodeClaimsGesture(target) && !isDisabled();
     setClass(root!, 'widget-pressable', claims);
     if (!claims) {
       dropPart('tint');
@@ -309,6 +340,7 @@ function renderInScope(
     keepFit,
     emit,
     pressTint,
+    isDisabled,
     repaint(): void {
       if (root !== null) render(lastNode, lastBox, lastCross);
     },

@@ -85,7 +85,33 @@ public static class UiComponentEvents
 	/// </summary>
 	public const string Reveal = "reveal";
 
+	/// <summary>A drag in progress on any node that declares it. The payload is the cumulative translation
+	/// since the gesture began, as <c>{"x":n,"y":n}</c> in fractions of the widget basis, x growing right and
+	/// y growing down. Begins once the pointer has travelled <see cref="UiComponentModifiers.GestureSlop" />,
+	/// and is sent no more often than every <see cref="UiComponentModifiers.GestureThrottleMs" />
+	/// milliseconds. A reader that does not implement it sends nothing, and the node stays inert.</summary>
+	public const string Drag = "drag";
+
+	/// <summary>The end of a drag, with the same payload as <see cref="Drag" /> carrying the final
+	/// translation. Sent at most once after a drag began: not when the node leaves the tree or becomes
+	/// disabled mid-gesture, since no event leaves a disabled region.</summary>
+	public const string DragEnd = "drag-end";
+
+	/// <summary>A quick flick, sent on release. The payload is the dominant direction as a bare string:
+	/// <c>left</c>, <c>right</c>, <c>up</c> or <c>down</c>. Only a movement of at least
+	/// <see cref="UiComponentModifiers.SwipeMinDistance" /> of the basis within
+	/// <see cref="UiComponentModifiers.SwipeMaxDurationMs" /> milliseconds counts.</summary>
+	public const string Swipe = "swipe";
+
+	/// <summary>A two-pointer pinch in progress. The payload is the scale since the gesture began as a bare
+	/// number, <c>1</c> meaning unchanged. Throttled like <see cref="Drag" />.</summary>
+	public const string Pinch = "pinch";
+
+	/// <summary>The end of a pinch, with the final scale as a bare number. Sent at most once after a pinch
+	/// began, and not when the node leaves the tree or becomes disabled mid-gesture.</summary>
+	public const string PinchEnd = "pinch-end";
+
 	/// <summary>The event names this profile ships.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
-		[Change, Adjust, Press, LongPress, PressStart, PressEnd, Reveal];
+		[Change, Adjust, Press, LongPress, PressStart, PressEnd, Reveal, Drag, DragEnd, Swipe, Pinch, PinchEnd];
 }

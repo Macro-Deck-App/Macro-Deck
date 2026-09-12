@@ -1,0 +1,176 @@
+{
+  "cases": [
+    {
+      "basis": 240,
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "nodes": {
+        "conformance.card": {
+          "width": 240,
+          "height": 60.0,
+          "background": "#224466",
+          "borderRadius": 24.0,
+          "opacity": null,
+          "ariaLabel": "Weather",
+          "ariaDescription": "macrodeck.app:Conformance.CardHint",
+          "ariaRole": "group",
+          "ariaDisabled": null,
+          "borderWidth": 4.8,
+          "borderStyle": "dashed",
+          "borderColor": "#ff8800"
+        },
+        "conformance.linear": {
+          "background": "linear-gradient(135deg, #000000 0%, #ffffff 100%)",
+          "borderRadius": null,
+          "ariaRole": null
+        },
+        "conformance.radial": {
+          "background": "radial-gradient(at 25% 75%, #ff0000 0%, #0000ff 50%, #00ff00 100%)",
+          "borderWidth": 2.4,
+          "borderStyle": "dotted",
+          "borderColor": "#00ff00"
+        },
+        "conformance.press": {
+          "height": 48.0,
+          "borderRadius": 5.76,
+          "opacity": 0.4,
+          "ariaLabel": "Play",
+          "ariaRole": "button",
+          "ariaDisabled": "true",
+          "refusesEvents": true
+        },
+        "conformance.wrapper": {
+          "width": 216.0,
+          "height": 108.0,
+          "padding": 12.0,
+          "childBox": {
+            "width": 192.0,
+            "height": 84.0
+          },
+          "background": "#113355",
+          "opacity": 0.5,
+          "borderRadius": 9999,
+          "overflow": "hidden",
+          "clipPath": null,
+          "maskImage": "linear-gradient(180deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%)",
+          "touchAction": "none"
+        },
+        "conformance.circle": {
+          "width": 240,
+          "height": 60.0,
+          "childBox": {
+            "width": 240,
+            "height": 60.0
+          },
+          "clipPath": "circle(50% at 50% 50%)",
+          "overflow": null,
+          "opacity": null,
+          "borderRadius": null,
+          "maskImage": "radial-gradient(at 50% 50%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.25) 100%)",
+          "touchAction": null
+        },
+        "conformance.bounds": {
+          "width": 240,
+          "childBox": {
+            "width": 240,
+            "height": null
+          },
+          "overflow": "hidden",
+          "borderRadius": 12.0,
+          "clipPath": null,
+          "borderWidth": 4.8,
+          "borderStyle": "solid",
+          "borderColor": "#ffffff"
+        }
+      }
+    },
+    {
+      "basis": 120,
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "nodes": {
+        "conformance.card": {
+          "width": 120,
+          "height": 30.0,
+          "background": "#224466",
+          "borderRadius": 12.0,
+          "opacity": null,
+          "ariaLabel": "Weather",
+          "ariaDescription": "macrodeck.app:Conformance.CardHint",
+          "ariaRole": "group",
+          "ariaDisabled": null,
+          "borderWidth": 2.4,
+          "borderStyle": "dashed",
+          "borderColor": "#ff8800"
+        },
+        "conformance.linear": {
+          "background": "linear-gradient(135deg, #000000 0%, #ffffff 100%)",
+          "borderRadius": null,
+          "ariaRole": null
+        },
+        "conformance.radial": {
+          "background": "radial-gradient(at 25% 75%, #ff0000 0%, #0000ff 50%, #00ff00 100%)",
+          "borderWidth": 1.2,
+          "borderStyle": "dotted",
+          "borderColor": "#00ff00"
+        },
+        "conformance.press": {
+          "height": 24.0,
+          "borderRadius": 2.88,
+          "opacity": 0.4,
+          "ariaLabel": "Play",
+          "ariaRole": "button",
+          "ariaDisabled": "true",
+          "refusesEvents": true
+        },
+        "conformance.wrapper": {
+          "width": 108.0,
+          "height": 54.0,
+          "padding": 6.0,
+          "childBox": {
+            "width": 96.0,
+            "height": 42.0
+          },
+          "background": "#113355",
+          "opacity": 0.5,
+          "borderRadius": 9999,
+          "overflow": "hidden",
+          "clipPath": null,
+          "maskImage": "linear-gradient(180deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%)",
+          "touchAction": "none"
+        },
+        "conformance.circle": {
+          "width": 120,
+          "height": 30.0,
+          "childBox": {
+            "width": 120,
+            "height": 30.0
+          },
+          "clipPath": "circle(50% at 50% 50%)",
+          "overflow": null,
+          "opacity": null,
+          "borderRadius": null,
+          "maskImage": "radial-gradient(at 50% 50%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.25) 100%)",
+          "touchAction": null
+        },
+        "conformance.bounds": {
+          "width": 120,
+          "childBox": {
+            "width": 120,
+            "height": null
+          },
+          "overflow": "hidden",
+          "borderRadius": 6.0,
+          "clipPath": null,
+          "borderWidth": 2.4,
+          "borderStyle": "solid",
+          "borderColor": "#ffffff"
+        }
+      }
+    }
+  ]
+}

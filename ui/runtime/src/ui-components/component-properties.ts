@@ -44,11 +44,15 @@ export const UiComponentProperties = {
   Points: 'points',
   PlotTop: 'plotTop',
   Digits: 'digits',
-  Placeholder: 'placeholder',
   Answer: 'answer',
+  Placeholder: 'placeholder',
   Rotation: 'rotation',
   OriginX: 'originX',
   OriginY: 'originY',
+  Modifiers: 'modifiers',
+  Frame: 'frame',
+  Clip: 'clip',
+  Mask: 'mask',
 } as const;
 
 export const UI_COMPONENT_PROPERTIES_WELL_KNOWN: readonly string[] =

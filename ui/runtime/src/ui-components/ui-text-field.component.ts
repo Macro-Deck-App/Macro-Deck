@@ -103,7 +103,7 @@ export const uiTextFieldComponent: UiComponentDefinition<UiTextFieldState> = {
     const element = ctx.element as HTMLInputElement;
     ctx.setClassName(element, 'widget-text-field');
 
-    const editable = nodeClaimsValue(node);
+    const editable = nodeClaimsValue(node) && !ctx.isDisabled();
     element.readOnly = !editable;
     ctx.setAttribute(element, 'placeholder',
       nodeText(node, UiComponentProperties.Placeholder, ctx.host.localization) ?? '');

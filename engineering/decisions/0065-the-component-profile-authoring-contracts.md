@@ -73,11 +73,17 @@ a colour would trade a right clock in the wrong colour for no clock at all.
 ### Interaction is declaration-driven
 
 A node's `events` property lists the names its producer accepts, and a reader offers exactly those and
-nothing else. There is deliberately **no `disabled` property**: a second source of truth for "may the
-user touch this" is one that can contradict the first. An unbound slider declares nothing and is drawn as
-a level that cannot be moved. A component definition's own event list is metadata and never a gate —
-gating there would either let a component emit interactions the producer never opted into, or silence a
-node whose definition forgot to list an event.
+nothing else. **`disabled` is producer shorthand, not a second source of truth** for "may the user touch
+this", which could contradict the first: the DSL stops a disabled subtree and its fallback declaring any
+event, so the events stay the contract, and what reaches the wire is presentation - dimmed once, marked
+disabled for assistive technology. The reader gate still refuses events inside a disabled region even
+when a hand-written tree declares them; a producer built on the DSL never produces that combination. A
+disabled region absorbs every press on its tile, so the tile's own flow cannot run underneath a control
+shown as unavailable. The host's hardware path runs a tile's triggers without consulting the tree, and
+stays a known gap. An unbound slider declares nothing and is drawn as a level that cannot be moved. A
+component definition's own event list is metadata and never a gate — gating there would either let a
+component emit interactions the producer never opted into, or silence a node whose definition forgot to
+list an event.
 
 **An interactive level travels as a fraction of its track, never in the producer's units.** A reader
 snaps and paints locally so the control never waits for a round trip, and a producer's units — a track
@@ -114,6 +120,13 @@ Artwork adjustment is `brightness` and `saturation` rather than one combined "di
 multipliers say what they do and each renderer maps them onto its own image filter; they are deliberately
 not `opacity`, which lets the ground show through, and the saturation result is normative down to its
 luma coefficients so two readers do not desaturate the same cover to different greys.
+
+Universal modifiers split on the same line. Background, radius, border, accessibility text and `disabled`
+change no geometry, so they are one `modifiers` property on any node. Padding, opacity, clip, mask and frame
+are a type, `ui.modifier`, because a reader ignoring them would draw content that should be hidden or
+move its siblings; it has no default fallback, since only the producer knows what plainer picture is still
+right. Padding is therefore a wrapper rather than a property: on an arbitrary node it changes that
+component's own geometry.
 
 A button's artwork is a **property of the button, not an image child**: a stack cannot express "this
 child fills the box and the others sit over it", and the alternatives put a second layout model into the
@@ -184,6 +197,7 @@ curve turned out not to be the same as being readable.
   [#748](https://github.com/Macro-Deck-App/Macro-Deck/issues/748),
   [#749](https://github.com/Macro-Deck-App/Macro-Deck/issues/749)),
   [Issue #401](https://github.com/Macro-Deck-App/Macro-Deck/issues/401),
-  [Issue #828](https://github.com/Macro-Deck-App/Macro-Deck/issues/828)
+  [Issue #828](https://github.com/Macro-Deck-App/Macro-Deck/issues/828),
+  [Issue #776](https://github.com/Macro-Deck-App/Macro-Deck/issues/776) (universal modifiers)
 - [ADR 0064](0064-components-are-a-registry-over-two-namespaces.md)
 - [`ui-model/fixtures/component-profile/README.md`](../../ui-model/fixtures/component-profile/README.md)

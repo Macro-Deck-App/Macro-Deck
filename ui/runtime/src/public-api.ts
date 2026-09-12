@@ -450,11 +450,30 @@ export {
 } from './client-target/client-target';
 export {
   containsTickingNode,
+  activationClaim,
   findInteractiveNode,
   nodeClaimsValue,
   nodeClaimsGesture,
+  nodeDeclaresGesture,
+  nodeIsDisabledRegion,
   treeClaimsGesture,
+  type UiActivationClaim,
 } from './ui-framework/node-gestures';
+export {
+  UI_COMPONENT_BORDER_LINES_WELL_KNOWN,
+  UI_COMPONENT_CLIPS_WELL_KNOWN,
+  UI_COMPONENT_MODIFIERS_WELL_KNOWN,
+  UI_GESTURE_SLOP,
+  UI_GESTURE_THROTTLE_MS,
+  UI_MODIFIER_DIM_OPACITY,
+  UI_SWIPE_MAX_DURATION_MS,
+  UI_SWIPE_MIN_DISTANCE,
+  UiComponentBorderLines,
+  UiComponentClips,
+  UiComponentModifiers,
+} from './ui-components/component-modifiers';
+export { resolveFrame, type UiResolvedFrame } from './ui-framework/frame';
+export { WIDGET_GESTURE_CANCEL_EVENT } from './render/node-gesture-recognizer';
 export { chartPaths, type UiChartPaths } from './ui-components/chart';
 export {
   dialAngles,

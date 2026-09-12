@@ -257,6 +257,13 @@ exactly once, because no plugin served a component surface and a UI tree is buil
 persisted. See
 [ADR 0064](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0064-components-are-a-registry-over-two-namespaces.md).
 
+#### What did not need a UI model major
+
+New component types and properties are additive. The [modifiers](/ui/components/modifier/) added a
+`modifiers` property an older reader ignores, five gesture event names it never sends, and the `ui.modifier`
+type it answers with the node's `fallback`; `UiModelVersions` did not move. See
+[UI model compatibility](/ui/reference/compatibility/#additions-that-moved-no-version).
+
 ### What "maintained per major" means in practice
 
 - **Within an SDK major**, nothing frozen is removed or changed incompatibly. A minor or patch may add,

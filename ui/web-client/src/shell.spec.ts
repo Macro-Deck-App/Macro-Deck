@@ -436,6 +436,39 @@ describe('Shell', () => {
     expect(root.querySelector('.wc-panel-logo')).toBeNull();
   });
 
+  describe('keyboard activation', () => {
+    const disabledOnly: UiNode = {
+      id: 'root', type: 'ui.stack', properties: {},
+      children: [{ id: 'region', type: 'ui.stack', properties: { modifiers: { disabled: true } }, children: [
+        { id: 'button', type: 'ui.button', properties: { events: ['press'] } },
+      ] }],
+    } as UiNode;
+
+    it('runs no tile flow for a tile whose only claimant sits in a disabled region', async () => {
+      const widgetSessions = new WidgetSessions(new FakeConnection(), client.sessions);
+      (client as unknown as { widgetSessions: WidgetSessions }).widgetSessions = widgetSessions;
+      const executed: string[] = [];
+      spyOn(client, 'executeTrigger').and.callFake((widgetId: string) => {
+        executed.push(widgetId);
+        return Promise.resolve() as never;
+      });
+      const target = { ...DEFAULT_WEB_CLIENT_TARGET, hardwareInput: { keys: [{ key: 'Enter', event: { kind: 'activate' as const } }] } };
+      client.deck.load([folderWithWidgets('root', ['w1'])]);
+      new Shell(root, client, host, { ...services(), target });
+      client.app.set({ probed: true, authenticated: true, connected: true, deckRendered: true });
+      widgetSessions.sync([gridWidget('w1', 0, 0)]);
+      await settle();
+
+      client.sessions.treeUpdated('s1', 1, disabledOnly);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      expect(executed).toEqual([]);
+
+      client.sessions.treeUpdated('s1', 2, tree('clock'));
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      expect(executed).toEqual(['w1']);
+    });
+  });
+
   describe('per-widget session repaints', () => {
     let scheduler: SyncScheduler;
     let widgetSessions: WidgetSessions;

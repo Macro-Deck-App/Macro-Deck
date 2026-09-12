@@ -70,9 +70,13 @@ other spelling rather than passing it to its styling layer, so the property beha
 | `UiRangeBar.StartColor`, `.EndColor` | `#rrggbb` | no fill; the span needs both |
 | `UiDynamicText.Role` / `.Color`, `UiProgressText.Role` | as `UiTextRun` | as `UiTextRun` |
 | `UiClockDial.Color` | `#rrggbb` for the text-coloured marks | the marks keep the theme colours |
+| `UiModifier.Background` | `#rrggbb`, or a linear or radial gradient of `#rrggbb` stops | the node's own background |
+| `UiModifier.BorderColor` | `#rrggbb` | the reader's choice |
 
-A view paints no background unless a stack, list or button sets one; the surface behind it belongs to the
-reader and follows its theme.
+A gradient is data like any other literal: each stop is `#rrggbb` and none of them follows the theme.
+
+A view paints no background unless a stack, list, button or modifier sets one; the surface behind it
+belongs to the reader and follows its theme.
 
 ## Text
 

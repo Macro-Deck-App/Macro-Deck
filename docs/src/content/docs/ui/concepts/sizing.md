@@ -90,6 +90,24 @@ new UiStack { Key = "card", Padding = UiSize.FromBasis(0.06), Gap = UiSize.FromB
 
 `Padding` insets every edge, `Gap` separates neighbours. Both are lengths like any other; absent means none.
 
+## Frames and wrapping
+
+```csharp
+new UiModifier
+{
+    Key = "art",
+    Fill = true,
+    Frame = new UiFrame { MaxWidth = UiLength.OfBasis(0.6), AspectRatio = 1 },
+    Child = new UiImage { Key = "cover", Source = cover },
+}
+```
+
+A [modifier](/ui/components/modifier/) with a `Frame` fixes or clamps its own box and centres it in the
+space it is given; `Padding` on a modifier insets its one child. Wrapping moves the child's slot to the
+wrapper: `MainSize` and `Fill` go on the `UiModifier`, and a wrapped child that sets them is rejected when
+the view is built. A filling wrapper's maximum clamps only its own size - the space it gives up is not
+redistributed to its siblings.
+
 ## Reference
 
 | Length | Resolves to |
@@ -105,6 +123,7 @@ new UiStack { Key = "card", Padding = UiSize.FromBasis(0.06), Gap = UiSize.FromB
 | `MainSize` | every element | Extent along the parent stack's main axis. Wins over `Fill`. |
 | `Fill` | every element | Takes an even share of the parent's leftover main-axis space. |
 | `Gap`, `Padding` | stack, button, list | Space between children, and inside every edge. |
+| `Padding`, `Frame` | modifier | Inset of the one child, and the wrapper's own fixed or clamped box. |
 | `Thickness` | slider, range and progress bar | Extent on the cross axis. |
 
 Reader rules:

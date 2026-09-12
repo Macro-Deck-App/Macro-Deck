@@ -264,10 +264,15 @@ public sealed class UiView
 				$"No node with id '{@event.NodeId}' is in the tree at revision {_tree.Revision}.");
 		}
 
+		if (target.IsDisabled)
+		{
+			return UiDispatchResult.Ignored($"The node '{target.Node.Id}' is inside a disabled region.");
+		}
+
 		var element = target.Element;
 		var isChange = string.Equals(@event.Name, _changeEvent, StringComparison.Ordinal);
 		var input = element as IUiInputElement;
-		var handlers = HandlersFor(element, @event.Name);
+		var handlers = HandlersFor(target, @event.Name);
 
 		// An input recognises change whether or not it advertises it: a read-only binding advertises nothing,
 		// and a client writing through one has to be told it was refused rather than that nothing here answers
@@ -478,13 +483,13 @@ public sealed class UiView
 		return null;
 	}
 
-	/// <summary>The handlers <paramref name="element" /> registered for <paramref name="name" />, in declaration
+	/// <summary>The handlers <paramref name="target" /> registered for <paramref name="name" />, in declaration
 	/// order.</summary>
-	private static List<UiEventHandler> HandlersFor(UiElement element, string name)
+	private static List<UiEventHandler> HandlersFor(UiMaterializedNode target, string name)
 	{
 		var handlers = new List<UiEventHandler>();
 
-		foreach (var handler in element.Events)
+		foreach (var handler in target.Element.Events.Concat(target.ModifierHandlers))
 		{
 			if (string.Equals(handler.Name, name, StringComparison.Ordinal))
 			{
