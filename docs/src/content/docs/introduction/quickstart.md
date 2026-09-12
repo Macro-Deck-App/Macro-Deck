@@ -143,7 +143,7 @@ Built linux-x64, osx-arm64, win-x64.
 Packed com.acme.light-control 1.0.0 -> ../../artifacts/com.acme.light-control-1.0.0.macroDeckPlugin (1041 entries, 342566335 bytes uncompressed).
 ```
 
-`build` needs the directory holding `manifest.json`; keep `--output` outside it. Add
+`build` needs the directory holding `manifest.json`. Add
 `--rid osx-arm64` to build one platform only.
 
 ```bash

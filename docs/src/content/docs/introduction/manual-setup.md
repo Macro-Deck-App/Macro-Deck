@@ -219,8 +219,7 @@ macrodeck-plugin build --output ../artifacts
 macrodeck-plugin validate --artifact ../artifacts/com.example.my-plugin-1.0.0.macroDeckPlugin
 ```
 
-Builds every platform, packs one `.macroDeckPlugin` and checks it. Keep `--output` outside the folder
-holding `manifest.json`, or the next build packages the old artifact. Validate the artifact, not the
+Builds every platform, packs one `.macroDeckPlugin` and checks it. Validate the artifact, not the
 source manifest: the `runtimes/` entrypoints only exist once `build` has staged them.
 
 Never zip the output by hand - `build` and [`pack`](/cli/pack/) validate the manifest and write the
