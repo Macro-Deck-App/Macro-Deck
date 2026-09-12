@@ -265,6 +265,7 @@ describe('UiSessionService widget sessions', () => {
     }
 
     expect(handle.root()).toBeNull();
+    expect(handle.rejection()).toBeNull();
   });
 
   it('never toasts when a widget session faults, even after showing a tree', async () => {
@@ -281,5 +282,186 @@ describe('UiSessionService widget sessions', () => {
 
     expect(handle.root()).toBeNull();
     expect(toast.show).not.toHaveBeenCalled();
+  });
+});
+
+describe('UiSessionService sessions that end before or while they are shown', () => {
+  let api: jasmine.SpyObj<ApiService>;
+  let toast: jasmine.SpyObj<ToastService>;
+  let invalidated: Subject<{ sessionId: string; code: string; message: string; retryable: boolean }>;
+  let treeUpdated: Subject<{ sessionId: string; revision: number; tree: unknown }>;
+  let patched: Subject<{ sessionId: string; fromRevision: number; toRevision: number; patch: unknown }>;
+  let latestSessionId: string;
+
+  const accepted = (sessionId: string) => ({
+    accepted: true, sessionId, surfaceKind: 'config', sessionMode: 'exclusive', revision: 0,
+  });
+  const refused = (sessionId: string) => ({
+    accepted: false, sessionId, code: 'SESSION_NOT_FOUND', message: 'gone', surfaceKind: '', sessionMode: '', revision: 0,
+  });
+
+  const request = {
+    kind: 'config' as const,
+    entryPoint: UiConfigEntryPoints.WidgetConfig,
+    widgetId: 'w1',
+    configUiModelVersion: 0,
+  };
+
+  const showTree = (sessionId: string) =>
+    treeUpdated.next({ sessionId, revision: 1, tree: { id: 'root', type: 'ui.stack' } });
+  const sendUnappliablePatch = (sessionId: string) =>
+    patched.next({ sessionId, fromRevision: 7, toRevision: 8, patch: { operations: [] } });
+  const end = (sessionId: string, retryable: boolean) =>
+    invalidated.next({ sessionId, code: 'PROVIDER_REJECTED', message: 'declined', retryable });
+
+  beforeEach(() => {
+    invalidated = new Subject();
+    treeUpdated = new Subject();
+    patched = new Subject();
+    let opened = 0;
+
+    api = jasmine.createSpyObj<ApiService>('ApiService', [
+      'openConfigUiSession',
+      'attachUiSession',
+      'closeUiSession',
+      'sendUiEvent',
+      'onUiSessionTreeUpdated',
+      'onUiSessionPatched',
+      'onUiSessionInvalidated',
+      'onUiSessionClosed',
+    ]);
+    api.onUiSessionTreeUpdated.and.returnValue(treeUpdated);
+    api.onUiSessionPatched.and.returnValue(patched);
+    api.onUiSessionInvalidated.and.returnValue(invalidated);
+    api.onUiSessionClosed.and.returnValue(NEVER);
+    api.openConfigUiSession.and.callFake(() => {
+      latestSessionId = `config-session-${++opened}`;
+      return Promise.resolve({ accepted: true, sessionId: latestSessionId });
+    });
+    api.attachUiSession.and.callFake(sessionId => Promise.resolve(accepted(sessionId)));
+
+    toast = jasmine.createSpyObj<ToastService>('ToastService', ['show']);
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        UiSessionService,
+        { provide: ApiService, useValue: api },
+        { provide: ToastService, useValue: toast },
+        {
+          provide: LocalizationService,
+          useValue: { translateKey: (key: string) => key, translate: (key: string) => key },
+        },
+      ],
+    });
+  });
+
+  it('ends in a rejection when the provider declines before the first attach, instead of waiting forever', async () => {
+    api.attachUiSession.and.callFake(sessionId => Promise.resolve(refused(sessionId)));
+
+    const handle = TestBed.inject(UiSessionService).open(request);
+    await settle();
+
+    expect(handle.rejection()).toEqual({ code: 'SESSION_NOT_FOUND', message: 'gone' });
+    expect(handle.root()).toBeNull();
+    expect(toast.show).not.toHaveBeenCalled();
+  });
+
+  it('ends in a rejection carrying what the host said when the session ends before any tree', async () => {
+    const handle = TestBed.inject(UiSessionService).open(request);
+    await settle();
+
+    end(latestSessionId, false);
+
+    expect(handle.rejection()).toEqual({ code: 'PROVIDER_REJECTED', message: 'declined' });
+  });
+
+  it('ends in a rejection when reopening never produces a tree', async () => {
+    const handle = TestBed.inject(UiSessionService).open(request);
+    await settle();
+
+    for (let attempt = 0; attempt < 8; attempt++) {
+      end(latestSessionId, true);
+      await settle();
+    }
+
+    expect(handle.rejection()).not.toBeNull();
+  });
+
+  it('keeps the shown tree when a re-attach after a failed patch gets no answer at all', async () => {
+    const handle = TestBed.inject(UiSessionService).open(request);
+    await settle();
+    showTree(latestSessionId);
+    api.attachUiSession.and.resolveTo(null);
+
+    sendUnappliablePatch(latestSessionId);
+    await settle();
+
+    expect(handle.root()).not.toBeNull();
+    expect(handle.rejection()).toBeNull();
+    expect(toast.show).not.toHaveBeenCalled();
+  });
+
+  it('reports a lost view once, and no rejection, when a refused re-attach is followed by the end of the session', async () => {
+    const handle = TestBed.inject(UiSessionService).open(request);
+    await settle();
+    showTree(latestSessionId);
+    api.attachUiSession.and.callFake(sessionId => Promise.resolve(refused(sessionId)));
+
+    sendUnappliablePatch(latestSessionId);
+    await settle();
+    end(latestSessionId, false);
+    await settle();
+
+    expect(toast.show).toHaveBeenCalledTimes(1);
+    expect(handle.rejection()).toBeNull();
+    expect(handle.root()).toBeNull();
+  });
+
+  it('never blanks the tree when a refused re-attach arrives before the session is reopened', async () => {
+    const handle = TestBed.inject(UiSessionService).open(request);
+    await settle();
+    const first = latestSessionId;
+    showTree(first);
+    api.attachUiSession.and.callFake(sessionId =>
+      Promise.resolve(sessionId === first ? refused(sessionId) : accepted(sessionId)));
+
+    sendUnappliablePatch(first);
+    await settle();
+    expect(handle.root()).not.toBeNull();
+
+    end(first, true);
+    await settle();
+
+    expect(api.openConfigUiSession).toHaveBeenCalledTimes(2);
+    expect(handle.root()).not.toBeNull();
+    expect(toast.show).not.toHaveBeenCalled();
+  });
+
+  it('ignores a refused answer about a session it has already replaced', async () => {
+    const handle = TestBed.inject(UiSessionService).open(request);
+    await settle();
+    const first = latestSessionId;
+    showTree(first);
+
+    let answerStaleAttach!: (answer: ReturnType<typeof refused>) => void;
+    api.attachUiSession.and.returnValue(new Promise(resolve => { answerStaleAttach = resolve; }));
+    sendUnappliablePatch(first);
+    await settle();
+
+    api.attachUiSession.and.callFake(sessionId => Promise.resolve(accepted(sessionId)));
+    end(first, true);
+    await settle();
+    answerStaleAttach(refused(first));
+    await settle();
+
+    expect(toast.show).not.toHaveBeenCalled();
+    expect(handle.root()).not.toBeNull();
+
+    end(latestSessionId, false);
+    await settle();
+
+    expect(toast.show).toHaveBeenCalledTimes(1);
+    expect(handle.root()).toBeNull();
   });
 });

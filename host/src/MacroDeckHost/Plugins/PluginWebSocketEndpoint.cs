@@ -511,8 +511,8 @@ public sealed class PluginWebSocketEndpoint
 			}
 			else
 			{
-				// Not Detach: a detached goodbye session is stale at once, and the prune in session
-				// authentication would then answer the plugin's closing DELETE with 401.
+				// Not Detach: goodbye must not raise SessionEnded(Detached), which consumers treat as a
+				// drop the plugin may still resume.
 				_sessionRegistry.ReleaseConnection(sessionId, connection);
 			}
 
