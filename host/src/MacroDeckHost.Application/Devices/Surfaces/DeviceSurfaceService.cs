@@ -86,7 +86,8 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 			Online = _providerPresence.IsOnline(deviceId)
 		};
 		session.Presses = new DeviceSurfacePressTracker(_timeProvider,
-			(widgetId, triggerType) => _interactions.ExecuteTriggerAsync(session, widgetId, triggerType));
+			widgetId => _interactions.ClaimAsync(session, widgetId),
+			(widgetId, triggerType, claim) => _interactions.ExecuteTriggerAsync(session, widgetId, triggerType, claim));
 
 		if (!_sessions.TryAdd(deviceId, session))
 		{

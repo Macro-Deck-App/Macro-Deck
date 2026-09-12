@@ -44,11 +44,17 @@ public sealed record UiSessionOpenTicket
 }
 
 // No member here awaits a provider, which is what lets every realtime operation satisfy ADR 0062. The only
-// exception is UiSessionOpenTicket.Ready, which a caller opts into explicitly and which
+// exceptions are UiSessionOpenTicket.Ready and FirstTreeAsync, which a caller opts into explicitly and which
 // no realtime operation awaits.
 public interface IUiSessionBroker : IUiSessionSink
 {
 	UiSessionOpenTicket Open(string providerId, UiSurface surface, string ownerPrincipal);
+
+	// For a host-side reader no client attaches to. Null when the session ended before its first tree.
+	Task<UiRawJson?> FirstTreeAsync(string sessionId, CancellationToken cancellationToken);
+
+	// Raised by the host itself, so unlike SendEvent it needs no attached connection.
+	bool DispatchHostEvent(string sessionId, UiSessionEventCommand command);
 
 	Task<UiSessionOpenTicket> OpenAsync(string providerId,
 		UiSurface surface,

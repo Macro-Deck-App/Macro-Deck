@@ -1,4 +1,6 @@
+using System.Text;
 using MacroDeck.Plugin.Hosting.Capabilities.DeviceProvider;
+using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeck.Plugin.Protocol.Capabilities;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Versioning;
@@ -144,9 +146,69 @@ internal sealed class DeviceSessionParityContractTests : CapabilityContractFixtu
 		using var providers = new RemoteDeviceProviderRegistry(SessionRegistry, Invoker, sessionOwners);
 		using var world = new DeviceSurfaceWorld(providers.Resolve(PluginId)!, PluginId);
 		_world = world;
+		router = CreateRouter(world, sessionOwners);
 
+		var deviceId = await world.RegisterAndOpenAsync(ProviderDeviceId);
+
+		Assert.That(await RunAsync(world, provider, deviceId), Is.EqualTo(_expectedObservations));
+	}
+
+	[Test]
+	public async Task A_whole_press_on_a_plugin_served_tile_is_accepted_across_the_wire_while_its_tree_is_pending()
+	{
+		var provider = new WalkthroughProvider();
+		var sessionOwners = new RemoteDeviceSessionRegistry();
+
+		PluginCallbackRouter? router = null;
+		HostInvokeHandler = (_, payload, cancellationToken)
+			=> router!.RouteAsync(PluginId, Guid.NewGuid().ToString(), payload, cancellationToken);
+
+		await ConnectAsync([
+				new DeviceProviderCapabilityHandler([provider],
+					TestMetadata.Default,
+					CreatePluginHostInvoker(),
+					PluginHostAssets)
+			],
+			[Provider()],
+			[CapabilityKinds.DeviceProvider],
+			negotiatedCapabilityVersion: 2);
+
+		var tree = new PendingTreeUiSessionBroker();
+		using var providers = new RemoteDeviceProviderRegistry(SessionRegistry, Invoker, sessionOwners);
+		using var world = new DeviceSurfaceWorld(providers.Resolve(PluginId)!,
+			PluginId,
+			services =>
+			{
+				services.AddSingleton<IUiSessionBroker>(tree);
+				services.AddSingleton<IWidgetUiSessionOpener>(new AcceptingWidgetUiSessionOpener());
+			});
+		_world = world;
+		world.Profiles.GetFoldersForProfile(ContractDeck.ProfileId)
+			.Single(folder => folder.Id == ContractDeck.FolderId)
+			.Widgets.Single().Type = "com.example.contract.meter";
+		router = CreateRouter(world, sessionOwners);
+
+		await world.RegisterAndOpenAsync(ProviderDeviceId);
+		await WaitForAsync(() => provider.Surfaces.Count == 1, "the provider never received its first surface");
+
+		var result = await provider.SendAsync(DeviceInteractionKind.ShortPress, ContractDeck.WidgetId.ToString());
+		var ranBeforeTheTree = world.Triggers.Requests.Count;
+		tree.Tree.SetResult(new UiRawJson(Encoding.UTF8.GetBytes(
+			"""{"revision":1,"surface":{"kind":"widget"},"root":{"id":"label","type":"ui.text"}}""")));
+		await WaitForAsync(() => world.Triggers.Requests.Count == 1, "the queued press never ran the tile's flow");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(DeviceInteractionStatus.Accepted));
+			Assert.That(ranBeforeTheTree, Is.Zero);
+			Assert.That(world.Triggers.Requests.Single().TriggerType, Is.EqualTo("onShortPress"));
+		});
+	}
+
+	private PluginCallbackRouter CreateRouter(DeviceSurfaceWorld world, RemoteDeviceSessionRegistry sessionOwners)
+	{
 		var services = new ServiceCollection().BuildServiceProvider();
-		router = new PluginCallbackRouter(SessionRegistry,
+		return new PluginCallbackRouter(SessionRegistry,
 			Invoker,
 			services.GetRequiredService<IServiceScopeFactory>(),
 			Notifications,
@@ -169,10 +231,6 @@ internal sealed class DeviceSessionParityContractTests : CapabilityContractFixtu
 			world.Service,
 			sessionOwners,
 			HostAssetSender);
-
-		var deviceId = await world.RegisterAndOpenAsync(ProviderDeviceId);
-
-		Assert.That(await RunAsync(world, provider, deviceId), Is.EqualTo(_expectedObservations));
 	}
 
 	private DeviceSurfaceWorld? _world;

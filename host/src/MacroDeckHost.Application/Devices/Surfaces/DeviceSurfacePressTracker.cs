@@ -18,13 +18,18 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 	public static readonly TimeSpan LongPressThreshold = TimeSpan.FromMilliseconds(600);
 
 	private readonly TimeProvider _timeProvider;
-	private readonly Func<string, string, Task> _execute;
+	private readonly Func<string, Task<DevicePressClaim>> _claim;
+	private readonly Func<string, string, DevicePressClaim, Task> _execute;
 	private readonly Lock _sync = new();
 	private readonly Dictionary<string, PressState> _presses = new(StringComparer.Ordinal);
 
-	public DeviceSurfacePressTracker(TimeProvider timeProvider, Func<string, string, Task> execute)
+	public DeviceSurfacePressTracker(
+		TimeProvider timeProvider,
+		Func<string, Task<DevicePressClaim>> claim,
+		Func<string, string, DevicePressClaim, Task> execute)
 	{
 		_timeProvider = timeProvider;
+		_claim = claim;
 		_execute = execute;
 	}
 
@@ -34,6 +39,7 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 	/// </summary>
 	public Task PressAsync(string widgetId)
 	{
+		PressState state;
 		lock (_sync)
 		{
 			if (_presses.ContainsKey(widgetId))
@@ -41,7 +47,7 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 				return Task.CompletedTask;
 			}
 
-			var state = new PressState();
+			state = new PressState();
 			state.Timer = _timeProvider.CreateTimer(_ => OnLongPressElapsed(widgetId, state),
 				null,
 				LongPressThreshold,
@@ -49,29 +55,23 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 			_presses[widgetId] = state;
 		}
 
-		return _execute(widgetId, WidgetTriggerTypes.TouchStart);
+		state.Resolve(_claim(widgetId));
+		return Settle(state, Enqueue(widgetId, state, WidgetTriggerTypes.TouchStart));
 	}
 
-	public async Task ReleaseAsync(string widgetId)
-	{
-		if (Take(widgetId) is not { } state)
-		{
-			return;
-		}
-
-		await _execute(widgetId, WidgetTriggerTypes.TouchEnd);
-		if (!state.LongPressFired)
-		{
-			await _execute(widgetId, WidgetTriggerTypes.ShortPress);
-		}
-	}
+	public Task ReleaseAsync(string widgetId)
+		=> Take(widgetId) is { } state
+			? Settle(state, FinishAsync(widgetId, state, released: true))
+			: Task.CompletedTask;
 
 	/// <summary>
 	/// Ends a press the device never released - navigation away, the device going offline, the session
 	/// closing. Emits <c>onTouchEnd</c> only, and disarms the timer so no phantom long press fires later.
 	/// </summary>
 	public Task CancelAsync(string widgetId)
-		=> Take(widgetId) is null ? Task.CompletedTask : _execute(widgetId, WidgetTriggerTypes.TouchEnd);
+		=> Take(widgetId) is { } state
+			? Settle(state, FinishAsync(widgetId, state, released: false))
+			: Task.CompletedTask;
 
 	public async Task CancelAllAsync()
 	{
@@ -94,9 +94,72 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 			foreach (var state in _presses.Values)
 			{
 				state.Timer?.Dispose();
+				_ = CloseAfterAsync(state.Tail, state);
 			}
 
 			_presses.Clear();
+		}
+	}
+
+	// A plugin's device reports and its tile's tree share one serial connection, so a press that waited
+	// here for the tree would starve the very tree it waits for. The phases still run in order behind it.
+	private static Task Settle(PressState state, Task work) => state.Claim.IsCompleted ? work : Task.CompletedTask;
+
+	private static async Task CloseAfterAsync(Task tail, PressState state)
+	{
+		await tail;
+		await (await state.Claim).DisposeAsync();
+	}
+
+	private async Task FinishAsync(string widgetId, PressState state, bool released)
+	{
+		try
+		{
+			await Enqueue(widgetId, state, WidgetTriggerTypes.TouchEnd);
+			if (released && !state.LongPressFired)
+			{
+				await Enqueue(widgetId, state, WidgetTriggerTypes.ShortPress);
+			}
+		}
+		finally
+		{
+			await (await state.Claim).DisposeAsync();
+		}
+	}
+
+	private Task Enqueue(string widgetId, PressState state, string triggerType)
+	{
+		(Task Previous, TaskCompletionSource Done) slot;
+		lock (_sync)
+		{
+			slot = Reserve(state);
+		}
+
+		return RunAsync(widgetId, state, triggerType, slot);
+	}
+
+	private static (Task Previous, TaskCompletionSource Done) Reserve(PressState state)
+	{
+		var done = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var previous = state.Tail;
+		state.Tail = done.Task;
+		return (previous, done);
+	}
+
+	private async Task RunAsync(
+		string widgetId,
+		PressState state,
+		string triggerType,
+		(Task Previous, TaskCompletionSource Done) slot)
+	{
+		try
+		{
+			await slot.Previous;
+			await _execute(widgetId, triggerType, await state.Claim);
+		}
+		finally
+		{
+			slot.Done.TrySetResult();
 		}
 	}
 
@@ -116,6 +179,7 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 
 	private void OnLongPressElapsed(string widgetId, PressState state)
 	{
+		(Task Previous, TaskCompletionSource Done) slot;
 		lock (_sync)
 		{
 			if (!_presses.TryGetValue(widgetId, out var current) || !ReferenceEquals(current, state))
@@ -126,15 +190,40 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 			state.LongPressFired = true;
 			state.Timer?.Dispose();
 			state.Timer = null;
+
+			// Reserved under the same lock a release takes the press with, so the long press can never land
+			// behind that release's touch end or after its claim was closed.
+			slot = Reserve(state);
 		}
 
-		_ = _execute(widgetId, WidgetTriggerTypes.LongPress);
+		_ = RunAsync(widgetId, state, WidgetTriggerTypes.LongPress, slot);
 	}
 
 	private sealed class PressState
 	{
+		private readonly TaskCompletionSource<DevicePressClaim> _claim =
+			new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		public Task<DevicePressClaim> Claim => _claim.Task;
+
+		public Task Tail = Task.CompletedTask;
+
 		public ITimer? Timer;
 
 		public bool LongPressFired;
+
+		public void Resolve(Task<DevicePressClaim> claim) => _ = ResolveAsync(claim);
+
+		private async Task ResolveAsync(Task<DevicePressClaim> claim)
+		{
+			try
+			{
+				_claim.TrySetResult(await claim);
+			}
+			catch (Exception exception) when (exception is not OutOfMemoryException)
+			{
+				_claim.TrySetResult(DevicePressClaim.Absorbing(null, null));
+			}
+		}
 	}
 }

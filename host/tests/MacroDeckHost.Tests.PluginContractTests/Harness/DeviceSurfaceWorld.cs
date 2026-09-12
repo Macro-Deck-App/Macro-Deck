@@ -24,7 +24,10 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 {
 	private readonly ServiceProvider _services;
 
-	public DeviceSurfaceWorld(IDeviceSurfaceProvider provider, string providerId)
+	public DeviceSurfaceWorld(
+		IDeviceSurfaceProvider provider,
+		string providerId,
+		Action<IServiceCollection>? configure = null)
 	{
 		Provider = provider;
 		ProviderId = providerId;
@@ -43,6 +46,7 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 		services
 			.AddSingleton<IUiTransportMessageHandler<ExecuteActionButtonTriggerRequest,
 				ExecuteActionButtonTriggerResponse>>(Triggers);
+		configure?.Invoke(services);
 		_services = services.BuildServiceProvider();
 
 		var scopeFactory = _services.GetRequiredService<IServiceScopeFactory>();
@@ -50,7 +54,7 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 			new SingleProviderResolver(provider, providerId),
 			Profiles,
 			Presence,
-			new DeviceInteractionRouter(scopeFactory, new CallbackFakeHostLockState(), Serilog.Core.Logger.None),
+			new DeviceInteractionRouter(scopeFactory, new CallbackFakeHostLockState(), Time, Serilog.Core.Logger.None),
 			new NoFocusRules(),
 			new NoEventBus(),
 			new WidgetStateSubscriptionTracker(),

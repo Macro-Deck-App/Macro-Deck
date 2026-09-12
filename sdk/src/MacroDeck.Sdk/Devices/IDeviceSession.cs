@@ -38,7 +38,10 @@ public interface IDeviceSession : IAsyncDisposable
 	/// The host's verdict. A <see cref="DeviceInteractionStatus.Rejected" /> result - a stale widget id -
 	/// and a <see cref="DeviceInteractionStatus.NotSupported" /> one - a kind with no widget model yet -
 	/// are both normal outcomes rather than failures: nothing ran, the session stays open, and the next
-	/// valid interaction still works.
+	/// valid interaction still works. A whole press (<see cref="DeviceInteractionKind.ShortPress" /> or
+	/// <see cref="DeviceInteractionKind.LongPress" />) on a tile a plugin or integration serves may be
+	/// answered <see cref="DeviceInteractionStatus.Accepted" /> while it is still queued behind that
+	/// tile's UI tree, so a failure of the flow it runs afterwards is not reported here.
 	/// </returns>
 	Task<DeviceInteractionResult> SendInteractionAsync(
 		DeviceInteraction interaction,

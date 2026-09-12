@@ -25,8 +25,41 @@ internal sealed class RecordingUiSessionBroker : IUiSessionBroker
 
 	public void CloseWidgetSessions(Guid widgetId, string reason) => ClosedWidgets.Add(widgetId);
 
+	public UiRawJson? Tree { get; set; }
+
+	public TaskCompletionSource<UiRawJson?>? PendingTree { get; set; }
+
+	public List<(string SessionId, UiSessionEventCommand Command)> HostEvents { get; } = [];
+
+	public List<string> ClosedSessions { get; } = [];
+
+	public async Task<UiRawJson?> FirstTreeAsync(string sessionId, CancellationToken cancellationToken)
+	{
+		if (Tree is { } tree)
+		{
+			return tree;
+		}
+
+		if (PendingTree is { } pending)
+		{
+			return await pending.Task.WaitAsync(cancellationToken);
+		}
+
+		await Task.Delay(Timeout.Infinite, cancellationToken);
+		return null;
+	}
+
+	public bool DispatchHostEvent(string sessionId, UiSessionEventCommand command)
+	{
+		HostEvents.Add((sessionId, command));
+		return true;
+	}
+
 	public Task CloseAsync(string sessionId, string reason, CancellationToken cancellationToken)
-		=> Task.CompletedTask;
+	{
+		ClosedSessions.Add(sessionId);
+		return Task.CompletedTask;
+	}
 
 	public bool CloseOwned(string? sessionId, string principal, string reason) => false;
 
