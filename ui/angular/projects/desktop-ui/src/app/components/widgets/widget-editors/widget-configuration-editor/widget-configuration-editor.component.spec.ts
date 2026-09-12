@@ -254,6 +254,36 @@ describe('WidgetConfigurationEditorComponent', () => {
     expect(fixture.nativeElement.querySelector('.widget-config-rejected')).toBeTruthy();
   });
 
+  describe('a type that declares no configuration', () => {
+    const pluginType = 'com.example.gauges::plain' as WidgetType;
+
+    for (const [label, info] of [
+      ['a plugin type', typeInfo({ id: pluginType, isBuiltIn: false, supportsConfigUi: false, configUiModelVersion: 0 })],
+      ['a built-in type', typeInfo({ supportsConfigUi: false, configUiModelVersion: 0 })],
+    ] as const) {
+      it(`opens no config session for ${label} and shows the preview straight away`, async () => {
+        const fixture = await createFixture(widget({ type: info.id }), info);
+
+        expect(opens.filter(r => r.kind === 'config').length).toBe(0);
+        expect(fixture.componentInstance.ready()).toBeTrue();
+        expect(fixture.nativeElement.querySelector('.widget-config-rejected')).toBeNull();
+        expect(fixture.nativeElement.querySelector('.preview-widget')).toBeTruthy();
+      });
+    }
+
+    it('opens no config session when the page reseeds it with a new draft either', async () => {
+      const info = typeInfo({ id: pluginType, isBuiltIn: false, supportsConfigUi: false, configUiModelVersion: 0 });
+      const fixture = await createFixture(widget({ type: pluginType, data: { label: 'Before' } as WidgetData }), info);
+
+      fixture.componentRef.setInput('widget', widget({ type: pluginType, data: { label: 'After' } as WidgetData }));
+      fixture.componentInstance.reload();
+      await settle(fixture);
+
+      expect(opens.filter(r => r.kind === 'config').length).toBe(0);
+      expect(fixture.componentInstance.ready()).toBeTrue();
+    });
+  });
+
   it('renders the properties region exclusively in the sidebar and the editor region exclusively in the main pane', async () => {
     const fixture = await createFixture();
     configHandle().root.set(configRoot([

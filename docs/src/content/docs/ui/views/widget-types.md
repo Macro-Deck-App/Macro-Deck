@@ -128,6 +128,9 @@ Build it with the [widget configuration view](/ui/views/widget-configuration/), 
 Deck lays out around your tree. What the user enters is stored with the widget and handed back on every
 later `widget` surface. No second contract is needed - one more surface on the same `IUiProvider`.
 
+Without `HasConfiguration`, no `config` surface is ever opened for your type: editing one of its widgets
+shows the preview and the JSON view, and nothing else.
+
 ## When your integration is not running
 
 ```csharp

@@ -105,10 +105,11 @@ class LiveUiSessionHandle implements UiSessionHandle {
     this.subscription.add(this.api.onUiSessionPatched().subscribe(event => this.onPatched(event)));
     this.subscription.add(this.api.onUiSessionInvalidated().subscribe(event => {
       if (event.sessionId !== this.sessionId) return;
-      if (event.retryable) this.reopen(); else this.onFaulted();
+      const rejection = { code: event.code, message: event.message };
+      if (event.retryable) this.reopen(rejection); else this.onFaulted(rejection);
     }));
     this.subscription.add(this.api.onUiSessionClosed().subscribe(event => {
-      if (event.sessionId === this.sessionId) this.onFaulted();
+      if (event.sessionId === this.sessionId) this.onFaulted({ message: event.reason });
     }));
 
     void this.start();
@@ -146,7 +147,7 @@ class LiveUiSessionHandle implements UiSessionHandle {
 
     this.rejection.set(null);
     this.sessionId = opened.sessionId;
-    await this.attach();
+    await this.attach(true);
   }
 
   private openSession(): Promise<{ accepted: boolean; sessionId: string; code?: string; message?: string } | null> {
@@ -159,11 +160,19 @@ class LiveUiSessionHandle implements UiSessionHandle {
     }
   }
 
-  private async attach(): Promise<void> {
-    if (this.closed || !this.sessionId) return;
+  private async attach(first = false): Promise<void> {
+    const sessionId = this.sessionId;
+    if (this.closed || !sessionId) return;
 
-    const attached = await this.api.attachUiSession(this.sessionId);
-    if (this.closed || !attached?.accepted) return;
+    const attached = await this.api.attachUiSession(sessionId);
+    if (this.closed || this.sessionId !== sessionId || !attached) return;
+
+    if (!attached.accepted) {
+      // Only a first attach can learn of its session's end this way: the host sends the terminal event
+      // to attached connections alone, so a refused re-attach still gets that event and lets it decide.
+      if (first) this.onFaulted({ code: attached.code, message: attached.message });
+      return;
+    }
 
     this.revision.set(attached.revision);
     // The tree itself arrives via a tree-updated notification pushed as a side effect of attaching -
@@ -205,11 +214,11 @@ class LiveUiSessionHandle implements UiSessionHandle {
     this.revision.set(event.toRevision);
   }
 
-  private reopen(): void {
+  private reopen(rejection: UiSessionRejection): void {
     if (this.closed) return;
 
     if (this.reopens >= MAX_REOPENS_WITHOUT_A_TREE) {
-      this.onFaulted();
+      this.onFaulted(rejection);
       return;
     }
 
@@ -218,11 +227,12 @@ class LiveUiSessionHandle implements UiSessionHandle {
     void this.start();
   }
 
-  private onFaulted(): void {
+  private onFaulted(rejection: UiSessionRejection = {}): void {
     if (this.closed) return;
 
     const wasShowingTree = this.hadTree && this.root() !== null;
     this.root.set(null);
+    if (!this.hadTree) this.rejection.set(rejection);
 
     if (wasShowingTree && this.request.kind === 'config') {
       this.toast.show(this.localization.translateKey(AppStrings.ConfigUi.ViewUnavailable), { variant: 'error' });

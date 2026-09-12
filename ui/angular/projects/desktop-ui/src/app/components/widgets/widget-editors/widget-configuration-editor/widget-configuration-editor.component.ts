@@ -94,9 +94,11 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
   protected readonly root = computed<UiNode | null>(() => this.handle()?.root() ?? null);
   protected readonly rejection = computed(() => this.handle()?.rejection() ?? null);
 
+  private readonly noConfiguration = signal(false);
+
   /** Until the host answers with a tree there is only the preview to paint, and the single-pane
    * fallback below would show it alone before the real split layout replaced it. */
-  readonly ready = computed(() => this.root() !== null || this.rejection() !== null);
+  readonly ready = computed(() => this.root() !== null || this.rejection() !== null || this.noConfiguration());
 
   protected readonly propertiesRegion = computed<UiNode | null>(
     () => findRegion(this.root(), UiConfigPrimitives.WidgetProperties));
@@ -185,6 +187,10 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
     this.openedWith = widgetData;
 
     const info = await this.widgetTypes.infoFor(this.widget.type);
+    if (info && !info.supportsConfigUi) {
+      this.noConfiguration.set(true);
+      return;
+    }
 
     this.handle.set(this.uiSessions.open({
       kind: 'config',
