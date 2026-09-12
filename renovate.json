@@ -186,14 +186,15 @@
       "groupName": "js test stack"
     },
     {
-      "description": "One TypeScript version across every workspace; Angular constrains which one.",
+      "description": "One TypeScript version across every workspace; Angular constrains which one. Held below 7 because TypeScript 7 dropped the es5 target the web-client legacy build needs.",
       "matchManagers": [
         "npm"
       ],
       "matchPackageNames": [
         "typescript"
       ],
-      "groupName": "typescript"
+      "groupName": "typescript",
+      "allowedVersions": "<7.0.0"
     },
     {
       "description": "Web-client legacy build chain: babel, browserslist data, polyfills and the es5 gate.",
