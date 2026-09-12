@@ -55,9 +55,6 @@ Build from the repository root and overwrite the previous artifact.
 The artifact is named `<id>-<version>.macroDeckPlugin`, or `<id>-<version>-<rid>.macroDeckPlugin` with
 `--rid`.
 
-**Put `--output` outside the directory holding `manifest.json`.** An `artifacts/` folder beside the
-manifest is packaged into the next build.
-
 ## What gets built
 
 `manifest.entrypoints` decides what to build; `macrodeck-build.json` decides how.
@@ -85,9 +82,11 @@ assets/icon.png
   and Linux executables do not overwrite each other.
 - Everything else beside `manifest.json` is copied once into the package root, so a manifest referring to
   `assets/icon.png` resolves.
-- Excluded: `macrodeck-build.json`, each target's `output` directory, `bin/`, `obj/`, `.git/`, `.vs/`,
-  `.idea/`, `node_modules/` and `.DS_Store`. **Everything else is packaged, including your sources**, so
-  keep anything you do not want to distribute out of that directory.
+- Excluded: `macrodeck-build.json`, each target's `output` directory, the `--output` directory (unless it is
+  the project directory itself), `bin/`, `obj/`, `.git/`, `.vs/`, `.idea/`, `node_modules/`, `.DS_Store`
+  and any `.macroDeckPlugin` file. **Everything else is packaged, including your sources**, so keep anything
+  you do not want to distribute out of that directory.
+- An `--output` directory inside the project, such as `.` or `./artifacts`, is safe to build into repeatedly.
 - Staging happens in a temporary directory outside your project, removed when the command finishes.
 
 ## Entrypoint checks

@@ -79,7 +79,7 @@ internal static class PluginPacker
 		var sourceRoot = Path.GetFullPath(sourceDirectory);
 		var fullManifestPath = Path.GetFullPath(manifestPath);
 
-		var payloadResult = CollectPayloadEntries(sourceRoot, fullManifestPath);
+		var payloadResult = CollectPayloadEntries(sourceRoot, Path.GetFullPath(outputPath));
 		if (payloadResult.Rejection is { } rejection)
 		{
 			return rejection;
@@ -282,12 +282,20 @@ internal static class PluginPacker
 
 	private static (IReadOnlyList<PayloadEntry> Entries, PluginPackResult? Rejection) CollectPayloadEntries(
 		string sourceRoot,
-		string fullManifestPath)
+		string fullOutputPath)
 	{
 		var entries = new List<PayloadEntry>();
 
 		foreach (var absolutePath in Directory.EnumerateFiles(sourceRoot, "*", SearchOption.AllDirectories))
 		{
+			if (PluginArtifactFiles.HasArtifactExtension(absolutePath) ||
+				string.Equals(absolutePath,
+					fullOutputPath,
+					OperatingSystem.IsLinux() ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase))
+			{
+				continue;
+			}
+
 			var relativePath = Path.GetRelativePath(sourceRoot, absolutePath).Replace(Path.DirectorySeparatorChar, '/');
 
 			// The archive's manifest.json is always the recomputed one built from --manifest's content,

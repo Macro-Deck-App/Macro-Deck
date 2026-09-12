@@ -637,10 +637,45 @@ public class PluginBuilderTests
 		}
 	}
 
+	[Test]
+	public async Task Building_twice_into_an_output_directory_inside_the_project_never_packs_the_first_artifact()
+	{
+		var rids = ManifestFixtures.PickForeignRids(2);
+		var project = BuildFixtures.WriteProject(rids);
+		var artifacts = Path.Combine(project, "artifacts") + Path.DirectorySeparatorChar;
+
+		try
+		{
+			var runner = new FakePluginBuildRunner { OnRun = BuildFixtures.ProducingOutput(project, rids) };
+
+			var first = await BuildAsync(project, runner, output: artifacts);
+			await File.WriteAllTextAsync(Path.Combine(artifacts, "SHA256SUMS"), "checksums");
+			var second = await BuildAsync(project, runner, rid: rids[0], output: artifacts);
+
+			Assert.That(first.Success && second.Success, Is.True, first.FailureMessage ?? second.FailureMessage);
+
+			var entries = ArtifactEntries(second.Pack!.OutputPath!);
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(entries.Where(entry =>
+						entry.EndsWith(".macroDeckPlugin", StringComparison.OrdinalIgnoreCase)),
+					Is.Empty);
+				Assert.That(entries, Does.Not.Contain("artifacts/SHA256SUMS"));
+				Assert.That(entries, Does.Contain("assets/icon.png"));
+			});
+		}
+		finally
+		{
+			Delete(project);
+		}
+	}
+
 	private Task<PluginBuildResult> BuildAsync(string project,
 		IPluginBuildRunner runner,
 		string? rid = null,
-		bool force = false)
+		bool force = false,
+		string? output = null)
 	{
 		return PluginBuilder.BuildAsync(new PluginBuildRequest
 			{
@@ -648,7 +683,7 @@ public class PluginBuilderTests
 				ManifestPath = Path.Combine(project, "manifest.json"),
 				BuildConfigPath = Path.Combine(project, "macrodeck-build.json"),
 				Rid = rid,
-				OutputDirectory = _output,
+				OutputDirectory = output ?? _output,
 				Force = force,
 				StagingRoot = _stagingRoot
 			},

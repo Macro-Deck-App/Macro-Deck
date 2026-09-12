@@ -72,6 +72,8 @@ describe('SettingsModalComponent', () => {
   let api: jasmine.SpyObj<ApiService>;
   let narrowQuery: FakeMediaQueryList;
 
+  afterEach(() => localStorage.clear());
+
   beforeEach(async () => {
     localStorage.clear();
     localStorage.setItem('md.localization.translations', JSON.stringify(ENGLISH_SETTINGS_LABELS));

@@ -54,6 +54,46 @@ public class PluginPackerTests
 	}
 
 	[Test]
+	public async Task PackAsync_into_the_source_tree_never_packs_its_own_output_or_an_earlier_artifact()
+	{
+		var directory = ManifestFixtures.WriteValidManifestDirectory();
+		var outputPath = Path.Combine(directory, "plugin.macroDeckPlugin");
+		var renamedOutputPath = Path.Combine(directory, "out", "plugin.zip");
+
+		try
+		{
+			var first = await PluginPacker.PackAsync(directory,
+				Path.Combine(directory, "manifest.json"),
+				_ => outputPath,
+				force: false);
+			var second = await PluginPacker.PackAsync(directory,
+				Path.Combine(directory, "manifest.json"),
+				_ => renamedOutputPath,
+				force: false);
+			var third = await PluginPacker.PackAsync(directory,
+				Path.Combine(directory, "manifest.json"),
+				_ => renamedOutputPath,
+				force: true);
+
+			Assert.That(first.Success && second.Success && third.Success, Is.True);
+
+			using var archive = ZipFile.OpenRead(renamedOutputPath);
+			var entries = archive.Entries.Select(entry => entry.FullName).ToList();
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(entries, Does.Not.Contain("plugin.macroDeckPlugin"));
+				Assert.That(entries, Does.Not.Contain("out/plugin.zip"));
+				Assert.That(entries, Does.Contain(ManifestFixtures.EntrypointFileName));
+			});
+		}
+		finally
+		{
+			Directory.Delete(directory, recursive: true);
+		}
+	}
+
+	[Test]
 	public async Task PackAsync_output_inspects_clean_through_the_independent_reader_and_its_file_digests_verify()
 	{
 		var directory = ManifestFixtures.WriteValidManifestDirectory();

@@ -56,6 +56,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 	private readonly LabelSubscriptionTracker _labelSubscriptions;
 	private readonly IWidgetRenderSignals _renderSignals;
 	private readonly IUiTransport _uiTransport;
+	private readonly LabelRenderChannel _labelRenders;
 	private readonly bool _interactive;
 	private readonly string? _variableScopeWidgetId;
 
@@ -145,6 +146,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		LabelSubscriptionTracker labelSubscriptions,
 		IWidgetRenderSignals renderSignals,
 		IUiTransport uiTransport,
+		LabelRenderChannel labelRenders,
 		bool interactive,
 		string? variableScopeWidgetId = null)
 	{
@@ -163,6 +165,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		ArgumentNullException.ThrowIfNull(labelSubscriptions);
 		ArgumentNullException.ThrowIfNull(renderSignals);
 		ArgumentNullException.ThrowIfNull(uiTransport);
+		ArgumentNullException.ThrowIfNull(labelRenders);
 
 		_configState = configState;
 		_activeState = activeState;
@@ -179,6 +182,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		_labelSubscriptions = labelSubscriptions;
 		_renderSignals = renderSignals;
 		_uiTransport = uiTransport;
+		_labelRenders = labelRenders;
 		_interactive = interactive;
 		_variableScopeWidgetId = variableScopeWidgetId;
 		_activeStateIsExplicit = configState.Peek().StoredActiveStateId is not null;
@@ -498,7 +502,8 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 	/// <summary>Writes <paramref name="stateId" /> as the active state and, for a label that is not a
 	/// Liquid template, its raw text too - a template's resolved text arrives only through
 	/// <see cref="OnLabelSignal" />, never computed here, so the tree never carries anything but a fully
-	/// resolved string. Also re-keys the label-subscription tracker registration to the new state. Callers
+	/// resolved string. Also re-keys the label-subscription tracker registration to the new state and, for a
+	/// template, queues a render of it. Callers
 	/// are already holding <see cref="_viewSync" /> - synchronously from <see cref="Dispatch" /> for a
 	/// press, or explicitly in <see cref="OnStateSignal" /> for an external one.</summary>
 	private void ApplyActiveState(string? stateId)
@@ -547,6 +552,8 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		if (newState is not null)
 		{
 			_labelSubscriptions.Add(_connectionId, widgetKey, newState);
+			// Enqueue after Add: the render only resolves states that are subscribed when it runs.
+			_labelRenders.Enqueue(_widget.Id);
 		}
 
 		_subscribedLabelState = newState;
@@ -571,13 +578,13 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 	{
 		var pushedState = LabelGroups.Normalize(evt.State);
 
-		if (!string.Equals(pushedState, _subscribedLabelState, StringComparison.Ordinal))
-		{
-			return;
-		}
-
 		lock (_viewSync)
 		{
+			if (_disposed || !string.Equals(pushedState, _subscribedLabelState, StringComparison.Ordinal))
+			{
+				return;
+			}
+
 			using (_view!.Batch())
 			{
 				_labelText.Value = evt.Text;
@@ -626,9 +633,10 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 					_labelText.Value = rawLabel;
 				}
 			}
+
+			RekeyLabelSubscription(stateId, isLiquid);
 		}
 
-		RekeyLabelSubscription(stateId, isLiquid);
 		ScheduleIconResolution();
 	}
 

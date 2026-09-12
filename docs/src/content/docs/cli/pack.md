@@ -70,7 +70,7 @@ plain text.
 
 1. Validates the manifest with the same validator as [`validate`](/cli/validate/). Any error stops `pack`
    before a byte is written.
-2. Hashes every file under `--source` except `manifest.json` into a fresh `files[]`. Any `files[]` the source
+2. Hashes every file under `--source` except `manifest.json`, the `--output` file and any `.macroDeckPlugin` file into a fresh `files[]`. Any `files[]` the source
    manifest declared is discarded, never merged.
 3. Stops on a symlink, an unsafe path, or any artifact size or entry limit from the
    [`.macroDeckPlugin` artifact section](/reference/plugin-hosting/#the-macrodeckplugin-artifact).
