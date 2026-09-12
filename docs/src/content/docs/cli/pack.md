@@ -16,10 +16,10 @@ reader `validate` uses, then recomputes `files[]` from what is actually on disk.
 
 A bad manifest never becomes an artifact: the same `ManifestValidator` `validate` runs is the first step,
 and any problem it finds stops `pack` before a single byte is written, reported the same way `validate`
-would report it. Every file under `--source` except `manifest.json` itself is then hashed from disk and
-becomes a fresh `files[]` entry - **whatever `files[]` the source manifest already declared is discarded,
-never merged or compared against**. A symlink, an unsafe path, or any of the artifact size/entry limits
-the plugin hosting guide's [`.macroDeckPlugin` artifact section](/sdk/hosting/#the-macrodeckplugin-artifact) documents also stops the pack before
+would report it. Every file under `--source` except `manifest.json` itself, the `--output` file and any
+`.macroDeckPlugin` file is then hashed from disk and becomes a fresh `files[]` entry - **whatever `files[]`
+the source manifest already declared is discarded, never merged or compared against**. A symlink, an unsafe
+path, or any of the artifact size/entry limits the plugin hosting guide's [`.macroDeckPlugin` artifact section](/sdk/hosting/#the-macrodeckplugin-artifact) documents also stops the pack before
 writing.
 
 [`build`](/cli/build/) calls this exact implementation once it has staged a payload, so a built package and a

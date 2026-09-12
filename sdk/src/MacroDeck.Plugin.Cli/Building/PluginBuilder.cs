@@ -145,6 +145,7 @@ internal static class PluginBuilder
 			{
 				var excluded = targets.Values
 					.Select(target => Path.GetFullPath(Path.Combine(sourceRoot, target.Output)))
+					.Append(Path.GetFullPath(request.OutputDirectory))
 					.ToList();
 
 				BuildStaging.CopySharedAssets(sourceRoot, stagingDirectory, excluded, cancellationToken);

@@ -40,11 +40,13 @@ assets/icon.png
 ```
 
 Everything else beside `manifest.json` is copied once into the package root, so a manifest referring to
-`assets/icon.png` resolves. `macrodeck-build.json`, each target's configured `output` directory, and
-`bin/`, `obj/`, `.git/`, `.vs/`, `.idea/`, `node_modules/` and `.DS_Store` are excluded - **everything else
-is packaged, including your sources**, so keep anything you do not want to distribute out of the directory
-holding the manifest. Staging happens in a temporary directory outside your project and is removed when the
-command finishes.
+`assets/icon.png` resolves. `macrodeck-build.json`, each target's configured `output` directory, the
+`--output` directory (unless it is the project directory itself), and `bin/`, `obj/`, `.git/`, `.vs/`,
+`.idea/`, `node_modules/`, `.DS_Store` and any `.macroDeckPlugin` file are excluded - **everything else is
+packaged, including your sources**, so keep anything you do not want to distribute out of the directory
+holding the manifest. An `--output` directory inside the project, such as the default `.` or `./artifacts`,
+is therefore safe to build into repeatedly. Staging happens in a temporary directory outside your project
+and is removed when the command finishes.
 
 ## Every requested runtime identifier must produce its entrypoint
 
