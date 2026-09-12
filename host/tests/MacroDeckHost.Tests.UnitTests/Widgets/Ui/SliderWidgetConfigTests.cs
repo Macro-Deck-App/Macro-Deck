@@ -171,6 +171,14 @@ public class SliderWidgetConfigTests
 		Assert.That(host.ByType(UiConfigPrimitives.ActionsListEditor), Has.Count.EqualTo(1));
 	}
 
+	[Test]
+	public void The_label_field_is_not_literal_only_so_it_offers_the_variable_helper()
+	{
+		var host = Render(new { label = "Volume" }, Registry());
+
+		Assert.That(host.ById("label").HasProperty(UiConfigProperties.LiteralOnly), Is.False);
+	}
+
 	[TestCase(UiSurfaceKinds.Widget, true)]
 	[TestCase(UiSurfaceKinds.Preview, false)]
 	public async Task A_stored_double_tap_flow_makes_only_the_deck_tile_declare_double_press(string kind, bool expected)

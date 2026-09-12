@@ -121,7 +121,6 @@ internal static class SliderWidgetConfigView
 						Key = "label",
 						Label = AppStrings.Widgets.Editor.Label(),
 						Binding = Bind.To(label),
-						LiteralOnly = true,
 					},
 					new UiBooleanInput
 					{
