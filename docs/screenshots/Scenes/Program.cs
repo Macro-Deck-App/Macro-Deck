@@ -14,7 +14,8 @@ foreach (var scene in Scenes.All())
 {
 	var tree = UiViewBuilder.Build(surface, scene.Root);
 	var resources = JsonSerializer.Serialize(Scenes.Resources);
-	var json = $$"""{"width":{{scene.Width}},"height":{{scene.Height}},"radius":{{scene.Radius}},"basis":{{scene.Basis}},"resources":{{resources}},"root":{{UiCanonicalJson.Serialize(tree.Root)}}}""";
+	var json
+		= $$"""{"width":{{scene.Width}},"height":{{scene.Height}},"radius":{{scene.Radius}},"basis":{{scene.Basis}},"resources":{{resources}},"root":{{UiCanonicalJson.Serialize(tree.Root)}}}""";
 	File.WriteAllText(Path.Combine(outDir, scene.Name + ".json"), json);
 }
 
@@ -34,7 +35,12 @@ internal static partial class Scenes
 	public static UiSize TilePadding => UiSize.Of(UiLength.Capped(SafeArea / UiLength.Cell, SafeArea));
 
 	public static Scene Tile(string name, UiElement root, int columns = 1, int rows = 1)
-		=> new(name, CellPx * columns, CellPx * rows, (int)(CornerRadius * Scale), Math.Min(columns, rows) * CellPx, root);
+		=> new(name,
+			CellPx * columns,
+			CellPx * rows,
+			(int)(CornerRadius * Scale),
+			Math.Min(columns, rows) * CellPx,
+			root);
 
 	// A dialog's lengths follow the box Macro Deck hands it, which is larger than the part a scene shows.
 	public static Scene Dialog(string name, UiElement root, int width, int height, int basis = 600)
@@ -42,7 +48,8 @@ internal static partial class Scenes
 
 	public static UiResource Icon(string name, string color = "#ffffff")
 	{
-		var svg = File.ReadAllText(Path.Combine(IconDir, name + ".svg")).Replace("#000", color, StringComparison.Ordinal);
+		var svg = File.ReadAllText(Path.Combine(IconDir, name + ".svg"))
+			.Replace("#000", color, StringComparison.Ordinal);
 		return Svg(name + color, svg);
 	}
 
@@ -53,7 +60,8 @@ internal static partial class Scenes
 	}
 
 	public static UiResource Cover(string id, string from, string to)
-		=> Svg(id, $"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{from}"/><stop offset="1" stop-color="{to}"/></linearGradient></defs><rect width="100" height="100" fill="url(#g)"/><circle cx="50" cy="50" r="22" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/><circle cx="50" cy="50" r="5" fill="#ffffff" fill-opacity="0.5"/></svg>""");
+		=> Svg(id,
+			$"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{from}"/><stop offset="1" stop-color="{to}"/></linearGradient></defs><rect width="100" height="100" fill="url(#g)"/><circle cx="50" cy="50" r="22" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/><circle cx="50" cy="50" r="5" fill="#ffffff" fill-opacity="0.5"/></svg>""");
 
 	public static IEnumerable<Scene> All() =>
 	[

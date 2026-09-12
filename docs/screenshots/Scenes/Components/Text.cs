@@ -24,34 +24,45 @@ internal static partial class Scenes
 
 	private static IEnumerable<Scene> TextScenes()
 	{
-		yield return Tile("text", Centered("tile", new UiStack
-		{
-			Key = "reading",
-			Direction = UiComponentDirections.Horizontal,
-			Align = UiComponentAlignments.Baseline,
-			Gap = 0.02,
-			Children =
-			[
-				new UiTextRun { Key = "value", Text = "23.4", Size = 0.24, Weight = UiComponentTextWeights.Bold, Digits = 3 },
-				new UiTextRun
+		yield return Tile("text",
+			Centered("tile",
+				new UiStack
 				{
-					Key = "unit",
-					Text = "°C",
-					Size = 0.1,
-					Weight = UiComponentTextWeights.SemiBold,
-					Role = UiComponentTextRoles.Secondary,
-				},
-			],
-		}));
+					Key = "reading",
+					Direction = UiComponentDirections.Horizontal,
+					Align = UiComponentAlignments.Baseline,
+					Gap = 0.02,
+					Children =
+					[
+						new UiTextRun
+						{
+							Key = "value", Text = "23.4", Size = 0.24, Weight = UiComponentTextWeights.Bold, Digits = 3
+						},
+						new UiTextRun
+						{
+							Key = "unit",
+							Text = "°C",
+							Size = 0.1,
+							Weight = UiComponentTextWeights.SemiBold,
+							Role = UiComponentTextRoles.Secondary,
+						},
+					],
+				}));
 	}
 
 	private static IEnumerable<Scene> TextFieldScenes()
 	{
-		yield return Dialog("text-field", new UiStack
-		{
-			Key = "picker",
-			Padding = UiSize.FromBasis(0.03),
-			Children = [new UiTextField { Key = "search", Placeholder = "Search songs, albums, artists", Size = 0.045 }],
-		}, 600, 110);
+		yield return Dialog("text-field",
+			new UiStack
+			{
+				Key = "picker",
+				Padding = UiSize.FromBasis(0.03),
+				Children =
+				[
+					new UiTextField { Key = "search", Placeholder = "Search songs, albums, artists", Size = 0.045 }
+				],
+			},
+			600,
+			110);
 	}
 }

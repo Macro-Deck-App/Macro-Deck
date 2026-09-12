@@ -15,30 +15,34 @@ internal static partial class Scenes
 			new("t4", "Cantaloupe Island", "Herbie Hancock - Empyrean Isles", "#ff2d55", "#4a1030"),
 		];
 
-		yield return Dialog("list", new UiStack
-		{
-			Key = "dialog",
-			Padding = UiSize.FromBasis(0.02),
-			Children =
-			[
-				new UiList
-				{
-					Key = "results",
-					Fill = true,
-					Gap = UiSize.FromBasis(0.015),
-					Events = [UiEventHandler.On(UiComponentEvents.Reveal, () => { })],
-					Children =
-					[
-						new UiRepeat<CatalogItem>
-						{
-							Key = "rows",
-							Items = UiValue.Of(items),
-							KeySelector = item => item.Id,
-							Template = (item, _) => TrackRow(item.Id, item.Title, item.Subtitle, item.From, item.To),
-						},
-					],
-				},
-			],
-		}, 600, 330);
+		yield return Dialog("list",
+			new UiStack
+			{
+				Key = "dialog",
+				Padding = UiSize.FromBasis(0.02),
+				Children =
+				[
+					new UiList
+					{
+						Key = "results",
+						Fill = true,
+						Gap = UiSize.FromBasis(0.015),
+						Events = [UiEventHandler.On(UiComponentEvents.Reveal, () => { })],
+						Children =
+						[
+							new UiRepeat<CatalogItem>
+							{
+								Key = "rows",
+								Items = UiValue.Of(items),
+								KeySelector = item => item.Id,
+								Template
+									= (item, _) => TrackRow(item.Id, item.Title, item.Subtitle, item.From, item.To),
+							},
+						],
+					},
+				],
+			},
+			600,
+			330);
 	}
 }
