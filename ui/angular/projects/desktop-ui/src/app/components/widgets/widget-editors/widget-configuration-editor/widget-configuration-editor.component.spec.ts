@@ -226,6 +226,40 @@ describe('WidgetConfigurationEditorComponent', () => {
 
       expect(next.data).toEqual({ label: 'After' } as WidgetData);
     });
+
+    async function editLabel(fixture: ComponentFixture<WidgetConfigurationEditorComponent>, value: string): Promise<void> {
+      const label = stringField('label', 'Before');
+      configHandle().root.set(configRoot([propertiesRegion([label])]));
+      await settle(fixture);
+      fixture.debugElement.injector.get(UiNodeEventBus).emit(label, UiConfigEvents.Change, value);
+      await settle(fixture);
+    }
+
+    it('keeps the session, and with it the open tab, when saving reseeds the draft the tree itself produced', async () => {
+      const fixture = await createFixture(widget({ data: { label: 'Before' } as WidgetData }));
+      const first = configHandle();
+      await editLabel(fixture, 'Edited');
+
+      fixture.componentRef.setInput('widget', widget({ data: { label: 'Edited' } as WidgetData }));
+      fixture.componentInstance.reload();
+      await settle(fixture);
+
+      expect(opens.filter(r => r.kind === 'config').length).toBe(1);
+      expect(first.closed).toBeFalse();
+    });
+
+    it('still reopens after an edit when the reseeded draft differs from what the tree produced', async () => {
+      const fixture = await createFixture(widget({ data: { label: 'Before' } as WidgetData }));
+      await editLabel(fixture, 'Edited');
+
+      fixture.componentRef.setInput('widget', widget({ data: { label: 'From JSON' } as WidgetData }));
+      fixture.componentInstance.reload();
+      await settle(fixture);
+
+      const configOpens = opens.filter(r => r.kind === 'config');
+      expect(configOpens.length).toBe(2);
+      expect(configOpens[1]).toEqual(jasmine.objectContaining({ widgetData: JSON.stringify({ label: 'From JSON' }) }));
+    });
   });
 
   it('is not ready until the host answers, so the page never reveals the preview-only fallback', async () => {
