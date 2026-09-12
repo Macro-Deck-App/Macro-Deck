@@ -1,60 +1,121 @@
 ---
 title: macrodeck-plugin pack
-description: Build a .macroDeckPlugin artifact from a payload directory, validating the manifest and recomputing file digests first.
+description: Build a .macroDeckPlugin artifact from a payload directory, validating the manifest first.
 ---
 
-Builds a `.macroDeckPlugin` artifact from a source tree: validates the manifest first with the exact same
-reader `validate` uses, then recomputes `files[]` from what is actually on disk.
+Packs a payload directory into a `.macroDeckPlugin` artifact, validating the manifest and recomputing
+`files[]` from disk first.
 
-| Option | Default | What it does |
+## Examples
+
+Pack a staged payload directory:
+
+```bash
+macrodeck-plugin pack --source stage
+```
+
+```text
+warning entrypoint-not-packed: Entrypoint 'linux-x64' declares 'runtimes/linux-x64/MyPlugin', which is not in the artifact.
+warning entrypoint-not-packed: Entrypoint 'win-x64' declares 'runtimes/win-x64/MyPlugin.exe', which is not in the artifact.
+warning publication-metadata-missing: 'repository' is required to publish to the Macro Deck plugin ecosystem. It is not required to develop or run this plugin locally.
+Packed com.example.my-plugin 1.0.0 -> com.example.my-plugin-1.0.0.macroDeckPlugin (346 entries, 118565046 bytes uncompressed).
+```
+
+Write to a chosen path, overwrite it, and print the digest to sign:
+
+```bash
+macrodeck-plugin pack --source stage --output dist/my-plugin.macroDeckPlugin --force --show-digest
+```
+
+```text
+...
+Created output directory '~/src/MyPlugin/dist'.
+Packed com.example.my-plugin 1.0.0 -> dist/my-plugin.macroDeckPlugin (346 entries, 118565046 bytes uncompressed).
+Digest to sign (base64): bWFjcm8tZGVjay1wbHVnaW4vMQpjb20uZXhhbXBsZS5teS1wbHVnaW4K...
+```
+
+Packing again without `--force`:
+
+```text
+error output-exists: '~/src/MyPlugin/com.example.my-plugin-1.0.0.macroDeckPlugin' already exists. Pass --force to overwrite it.
+```
+
+A bad manifest never becomes an artifact - it is reported exactly as `validate` would:
+
+```bash
+macrodeck-plugin pack --source broken
+```
+
+```text
+error invalid-version: '1.0' is not a valid SemVer version. [/version]
+warning unknown-permission: 'host:everything' is not a known permission. [/permissions/0]
+
+com.example.my-plugin 1.0: 1 error(s), 1 warning(s).
+```
+
+## Options
+
+| Option | Default | Description |
 | --- | --- | --- |
 | `--source <dir>` | `.` | The payload directory to pack. |
-| `--manifest <path>` | `<source>/manifest.json` | Path to the manifest to pack. |
-| `--output <path>` | `<id>-<version>.macroDeckPlugin` | Where to write the artifact. A file path, not a format selector - `pack` has no `--output text\|json`, since a file path and a format flag under the same name would collide. |
+| `--manifest <path>` | `<source>/manifest.json` | The manifest to pack. |
+| `--output <path>` | `<id>-<version>.macroDeckPlugin` | Where to write the artifact. |
 | `--force` | off | Overwrite an existing output file. |
-| `--show-digest` | off | Also print the packed manifest's signable digest, base64-encoded - the exact bytes a signature is computed over, re-derived from the artifact `pack` just wrote. |
+| `--show-digest` | off | Also print the packed manifest's signable digest, base64-encoded, re-read from the written artifact. |
 
-A bad manifest never becomes an artifact: the same `ManifestValidator` `validate` runs is the first step,
-and any problem it finds stops `pack` before a single byte is written, reported the same way `validate`
-would report it. Every file under `--source` except `manifest.json` itself is then hashed from disk and
-becomes a fresh `files[]` entry - **whatever `files[]` the source manifest already declared is discarded,
-never merged or compared against**. A symlink, an unsafe path, or any of the artifact size/entry limits
-the plugin hosting guide's [`.macroDeckPlugin` artifact section](/reference/plugin-hosting/#the-macrodeckplugin-artifact) documents also stops the pack before
-writing.
+`--output` is a file path, not a format selector: `pack` has no `--output text|json`, and its report is always
+plain text.
 
-[`build`](/cli/build/) calls this exact implementation once it has staged a payload, so a built package and a
-packed one are the same kind of artifact; `pack` remains the right command whenever you already have a
-payload directory, from a custom build system or any other workflow.
+## What pack does
 
-`pack` checks the same entrypoint-presence rule `inspect` does: every entrypoint the manifest declares is
-checked against what is actually being packed, and a missing one prints `warning entrypoint-not-packed: …`
-per runtime identifier - exit code stays `Success` (0), since packing only the platform you happen to be
-building on is a legitimate intermediate state, not a defect worth failing the build over. `build` holds a
-stronger contract and turns that warning into a failure for every runtime identifier it was asked to build.
-`pack` also
-warns (`warning source-looks-like-debug-build`) when `--source` looks like a Debug build
-(`bin/Debug/...`) - pack a Release build for distribution instead - and reports when it had to create a
-missing output directory, rather than doing so silently.
+1. Validates the manifest with the same validator as [`validate`](/cli/validate/). Any error stops `pack`
+   before a byte is written.
+2. Hashes every file under `--source` except `manifest.json` into a fresh `files[]`. Any `files[]` the source
+   manifest declared is discarded, never merged.
+3. Stops on a symlink, an unsafe path, or any artifact size or entry limit from the
+   [`.macroDeckPlugin` artifact section](/reference/plugin-hosting/#the-macrodeckplugin-artifact).
+4. Writes the archive, creating the output directory if needed and saying so.
 
-Like [`build`](/cli/build/), `pack` evaluates the manifest at the Publication requirement level and reports
-every unsatisfied `publication` field as a `publication-metadata-missing` warning - exit code stays
-`Success` (0); a publication-incomplete but structurally sound plugin still packs. `pack` takes no
-`--level` flag; this check always runs.
+[`build`](/cli/build/) calls this same implementation after staging, so built and packed artifacts are the
+same kind. Use `pack` when a custom build system already produced the payload.
 
-**`languages` is derived where it can be.** When the manifest sits in a project tree, `pack` derives
-[`languages`](/reference/manifest/#languages) from that project's `Localization/*.resx` set, exactly as
-[`build`](/cli/build/) does. When it does not - a staged or published payload directory, which no longer
-carries the `.resx` those tags come from - whatever the manifest declares is carried through untouched,
-since that value is then the only remaining record of what went into the build. Where `pack` can derive a
-list *and* the manifest declares a different one, the derived list wins and the replacement is reported as
-a `languages-recomputed` warning rather than done silently; the exit code stays `Success` (0).
+## Warnings
 
-**`signature` passes through untouched.** `pack` itself never signs anything - it preserves whatever
-`signature` the source manifest already had rather than dropping it, but since `files[]` was just
-recomputed, a manifest that was signed before packing carries a signature that no longer matches its own
-digest. A packed artifact is meant to be unsigned: that is what the Creator Portal expects to receive,
-and it is what anything that signs one - the Portal, or [`sign`](/cli/signing/#sign) for a non-Store artifact - signs
-afterwards, against the packed artifact's own manifest.
+None of these change the exit code:
 
-`pack` has no output-format flag; its report is always plain text, and a validation failure is rendered the
-same way `validate --output text` would render it regardless of anything else on the command line.
+| Code | When |
+| --- | --- |
+| `entrypoint-not-packed` | A declared entrypoint, per RID, is not in the payload. `build` turns this into a failure for every RID it builds. |
+| `publication-metadata-missing` | A `publication` field is missing; always evaluated at the Publication level, and `pack` has no `--level`. |
+| `generated-field-authored` | The source manifest in an unbuilt project tree already has `files` or `signature`. |
+| `languages-recomputed` | The derived `languages` list replaced a different declared one. |
+| `source-looks-like-debug-build` | `--source` looks like `bin/Debug/...`; pack a Release build for distribution. |
+
+## Languages
+
+When the manifest sits in a project tree, `pack` derives [`languages`](/reference/manifest/#languages) from
+the project's `Localization/*.resx`, as `build` does, and the derived list wins (`languages-recomputed`). A
+staged payload without the `.resx` keeps whatever the manifest declares.
+
+## Signature
+
+`pack` never signs. It passes any existing `signature` through, but since `files[]` was recomputed that
+signature no longer matches. A packed artifact is meant to be unsigned: the Creator Portal, or
+[`sign`](/cli/signing/#sign) for a non-Store artifact, signs it afterwards.
+
+## Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| `0` | Packed (warnings allowed). |
+| `1` | Invalid manifest, `source-entry-rejected` or `limit-exceeded`. |
+| `2` | `output-exists` without `--force`. |
+| `3` | `source-not-found`, or the manifest could not be read. |
+| `70` | `write-failed`. |
+
+## See also
+
+- [`build`](/cli/build/)
+- [`validate`](/cli/validate/)
+- [`inspect`](/cli/inspect/)
+- [`signing`](/cli/signing/)
