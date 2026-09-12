@@ -3,59 +3,108 @@ title: Plugin hosting
 description: Build and run an out-of-process .NET plugin with MacroDeck.Plugin.Hosting.
 ---
 
-`MacroDeck.Plugin.Hosting` turns a .NET application into an out-of-process Macro Deck plugin. It handles the plugin protocol, connection lifecycle, dependency injection, capability dispatch, and host callbacks so plugin code can focus on integrations.
+```csharp
+var plugin = MacroDeckPlugin.CreatePlugin(args)
+    .UseMacroDeckLogging()
+    .UseLocalization(Strings.LocalizationCatalog)
+    .RegisterIntegration<PluginIntegration>()
+    .Build();
 
-For an integration compiled directly into Macro Deck - a contribution to the Macro Deck repository rather than a plugin - see [Contributing an integration](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/development/contributing-integrations.md).
+await plugin.RunAsync();
+```
+
+`MacroDeck.Plugin.Hosting` turns a .NET application into an out-of-process Macro Deck plugin. The project
+file, manifest and `Program.cs` are on [Project setup](/introduction/manual-setup/). For an integration
+compiled into Macro Deck itself, see
+[Contributing an integration](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/development/contributing-integrations.md).
 
 ## What the SDK does for you
 
-The hosting package owns protocol negotiation, sessions, reconnection, heartbeats, dispatch, cancellation, host callbacks, and the reserved runtime endpoints. Plugin code implements integrations and capabilities rather than a second protocol client.
+Protocol negotiation, sessions, reconnection, heartbeats, backpressure, dispatch, cancellation, host
+callbacks and the reserved runtime endpoints. Plugin code implements integrations and capabilities, never
+a second protocol client.
 
-## Setting up a project
+## Builder API
 
-The project file, manifest, Program.cs and service registration are on [Project setup](/introduction/manual-setup/).
+| Member | Does |
+| --- | --- |
+| `MacroDeckPlugin.CreatePlugin(args)` / `CreatePlugin()` | Starts a `PluginHostBuilder`, optionally reading configuration from the command line. |
+| `RegisterIntegration<T>()` | Registers the integration as a DI singleton plus a handler per capability interface it implements. The only supported door - raw `AddSingleton` is flagged by MDP2004. |
+| `RegisterIntegration<T>(Func<IServiceProvider, T>)` | Same, built by a factory. |
+| `RegisterCapabilityHandler<T>()` | Adds a handler for one capability kind. |
+| `UseLocalization(catalog)` | Publishes the plugin's strings and declares the `localization` capability. The catalog scope must be `plugin:<plugin-id>`. |
+| `UseRegistrationMode(mode)` | Forces a [registration mode](#registration-modes) instead of inferring it. |
+| `ConfigureServices((ctx, services) => ...)` | Registers services, in the order added. |
+| `Configure((ctx, app) => ...)` | Adds middleware, in order, after the SDK's reserved-path middleware. |
+| `UseStartup<T>()` | An `IPluginStartup` class for both halves, built once with `ActivatorUtilities`. |
+| `Services`, `Configuration`, `Logging`, `Environment`, `WebApplicationBuilder` | The underlying ASP.NET Core builder. |
+| `Build()` | Validates locally and returns a `PluginApplication`; throws `PluginConfigurationException` listing every problem. |
+| `PluginApplication.RunAsync()` / `StartAsync()` / `StopAsync()` | Runs the plugin. Exposes `Services`, `Configuration`, `Metadata`, `Logger`, `WebApplication`. |
 
 ## Registration modes
 
-Plugins run in one of two modes.
+```csharp
+builder.UseRegistrationMode(PluginRegistrationMode.SelfRegistering);
+```
 
-### Managed
+| Mode | Started by | Credentials |
+| --- | --- | --- |
+| `Managed` | The Macro Deck supervisor, for an installed plugin. | Id and secret injected in the environment. The plugin never calls the registration endpoint, never enrolls and persists nothing. |
+| `SelfRegistering` | A developer or tooling, on the same machine as the host. | Interactive pairing by default: the plugin requests approval, the desktop app prompts, and the approved secret is stored locally and reused. A Developer token (`EnrollmentToken`) is the headless fallback for CI and unattended setups; it skips the prompt but still needs **Developer Mode** on the host. Not for installed store artifacts. |
 
-An installed plugin is launched and supervised by Macro Deck. The host supplies launch credentials and listener configuration. The plugin does not enroll itself or persist a host credential.
-
-Managed plugins should not override the host-provided listener configuration. The supervisor uses the plugin's reserved health endpoint to observe the process.
-
-### Self-registering / development
-
-A plugin started by a developer enrolls through interactive pairing by default: it requests approval, the desktop app shows a prompt, and the plugin stores the resulting plugin registration secret locally on approval. A Developer token remains available as the headless/automation fallback for CI runners and other unattended setups with no one to approve a prompt - it removes the approval step, not the requirement that **Developer Mode** be enabled on the host. This mode is intended for development and tooling, not for installed store artifacts.
-
-See [Authentication](/reference/authentication/) for the credential flow.
+Left unset, the mode is inferred: an id plus a secret in configuration means managed. A managed plugin
+must not override the host-provided listener; the supervisor observes it through the reserved health
+endpoint. See [Authentication](/reference/authentication/).
 
 ## What the supervisor injects
 
-A managed launch receives the listener/session bootstrap information required by the hosting runtime. Treat those values as host-owned launch configuration. Do not replace the listener URL or persist launch credentials for later runs.
+A managed launch gets these environment variables. The launcher first scrubs every inherited
+`MACRO_DECK_PLUGIN_*` variable and `ASPNETCORE_URLS`. Treat them as host-owned: do not replace the
+listener URL or persist credentials for later runs.
+
+| Variable | Option (`MacroDeck:Plugin:*`) | Value |
+| --- | --- | --- |
+| `MACRO_DECK_PLUGIN_MODE` | `Mode` | `Managed` |
+| `MACRO_DECK_PLUGIN_HOST_URL` | `HostUrl` | `http://127.0.0.1:<host port>` |
+| `MACRO_DECK_PLUGIN_ID` | `Id` | Plugin id |
+| `MACRO_DECK_PLUGIN_SECRET` | `Secret` | Plugin secret |
+| `MACRO_DECK_PLUGIN_DATA_DIRECTORY` | `DataDirectory` | Plugin state directory that survives updates and rollbacks |
+| `MACRO_DECK_PLUGIN_INSTANCE_ID` | `InstanceId` | New id per launch |
+| `MACRO_DECK_PLUGIN_LAUNCH_ID` | `LaunchId` | Launch id, for diagnostics and log correlation only |
+| `MACRO_DECK_PLUGIN_HOST_PROCESS_ID` | `HostProcessId` | Host pid |
+| `MACRO_DECK_PLUGIN_HOST_STARTED_AT` | `HostStartedAt` | Host start time, UTC round-trip format |
+| `ASPNETCORE_URLS` | - | `http://127.0.0.1:<health port>` |
+
+The SDK also reads, but the supervisor does not set: `MACRO_DECK_PLUGIN_ENROLLMENT_TOKEN`
+(`EnrollmentToken`), `MACRO_DECK_PLUGIN_STATE_DIRECTORY` (`StateDirectory`, where a self-registering plugin
+keeps its credentials), `MACRO_DECK_PLUGIN_PAIRING` (`PairingEnabled`, default `true`) and
+`MACRO_DECK_PLUGIN_PAIRING_TIMEOUT` (`PairingTimeout`). `HostUrl` defaults to `http://127.0.0.1:8193`. All
+of `PluginHostOptions` binds from `MacroDeck:Plugin`, so `appsettings.json` and the command line work too.
 
 ## Lifecycle
 
-Integrations initialize after a Macro Deck session is established, because `IIntegrationContext` host APIs require a live connection.
+```
+connect -> session established -> InitializeAsync
+  resume            -> integrations keep running
+  session lost      -> ShutdownAsync -> new session -> InitializeAsync
+shutdown requested  -> ShutdownAsync -> process exits
+```
 
-A resumed session continues the existing integration lifecycle. A fresh session after the previous one is lost can cause integrations to shut down and initialize again. `InitializeAsync` and `ShutdownAsync` should therefore be safe to run across session replacement rather than assuming exactly one initialization per process lifetime.
-
-Capability invocations can run concurrently. Protect mutable shared plugin state just as you would in a concurrently used ASP.NET Core service.
+- Integrations initialise only after a session exists, because `IIntegrationContext` host APIs need a live
+  connection.
+- `InitializeAsync` and `ShutdownAsync` may run more than once per process; make them safe across session
+  replacement.
+- Capability invocations run concurrently. Protect mutable shared state as in any concurrently used ASP.NET
+  Core service.
 
 ## What to expect at shutdown
 
-For a managed plugin, Macro Deck first requests graceful shutdown through the protocol. The plugin should honor cancellation and allow hosted services/integrations to stop cleanly. The supervisor may terminate the process if it does not exit within the configured grace period.
+1. Macro Deck requests graceful shutdown over the protocol.
+2. The plugin honours cancellation; hosted services and integrations stop.
+3. If it has not exited within the grace period (`shutdown.gracefulTimeoutSeconds`), the supervisor kills
+   the process.
 
 ### A managed plugin exits when its host does
-
-Graceful shutdown only happens when Macro Deck is asked to stop and given time to finish. If the host process is killed instead - it crashes, or it is force-terminated after failing to stop in time - no shutdown request is ever sent. A plugin cannot tell that apart from a dropped connection, so it would reconnect indefinitely and keep running in the background long after Macro Deck is gone.
-
-A managed plugin therefore watches the host process that launched it, and stops itself once that process is gone. The check runs about every five seconds, so expect a managed plugin to exit within a few seconds of an unexpected host death rather than instantly. It is a normal application stop: hosted services and `ShutdownAsync` run as usual.
-
-**Self-registering plugins are not affected.** A plugin you started yourself is an independent process that Macro Deck did not launch, and it keeps running when the host goes away - which is what you want while developing against a host you restart repeatedly.
-
-To override the default in either direction, set `ExitWhenHostProcessDies`:
 
 ```csharp
 builder.Services.Configure<PluginHostOptions>(options =>
@@ -64,65 +113,82 @@ builder.Services.Configure<PluginHostOptions>(options =>
 });
 ```
 
-`false` keeps a managed plugin alive after its host dies, which is occasionally useful when attaching a debugger to a plugin across a host restart. `true` opts a self-registering plugin into the same watch. Leaving it unset - the default - watches only in managed mode.
+If the host crashes or is force-killed, no shutdown request is sent and a dropped connection looks the same
+as a restart. So a managed plugin watches the host process that launched it and stops itself, as a normal
+application stop (hosted services and `ShutdownAsync` run), within a few seconds - the check runs about
+every five seconds.
 
-The host identifies itself to the plugin by both process id and process start time. Process ids are reused, so a plugin that only knew the id could exit because an unrelated process happened to inherit it. If a host does not supply that information, as an older Macro Deck or `macrodeck plugin run` does not, the watch is simply disabled and the plugin runs exactly as before.
+| `ExitWhenHostProcessDies` | Managed | Self-registering |
+| --- | --- | --- |
+| unset (default) | Watches | Keeps running |
+| `true` | Watches | Watches |
+| `false` | Keeps running (useful to keep a debugger attached across a host restart) | Keeps running |
+
+The host is identified by pid **and** start time, since pids are reused. If a host does not supply both, as
+an older Macro Deck or `macrodeck plugin run` does not, the watch is disabled.
 
 ## `IIntegrationContext`
 
-The integration context provides host capabilities such as variables, configuration, deck navigation, scripts, widgets, events, notifications, and action interactions.
-
-For an out-of-process plugin these are protocol calls or cached protocol state rather than direct in-process references. Avoid high-frequency loops that repeatedly call host APIs when a cached or event-driven design is possible.
-
-See [Capabilities](/features/) and [Capability parity](/reference/capability-parity/) for behavior that differs from an in-process integration.
+Host capabilities: variables, configuration, deck navigation, scripts, widgets, events, notifications and
+action interactions. Out of process these are protocol calls or cached protocol state, so prefer cached or
+event-driven designs to tight loops over host APIs. See [Capabilities](/features/) and
+[Capability parity](/reference/capability-parity/).
 
 ## Reserved routes
 
-`/_macrodeck/*` is reserved by the hosting runtime for health and runtime endpoints. Do not map plugin routes under that prefix.
+| Route | Answers |
+| --- | --- |
+| `/_macrodeck/health` | Liveness - as soon as the process serves, regardless of session. |
+| `/_macrodeck/ready` | Readiness - only once a session is open. |
+| `/_macrodeck/info` | The plugin's metadata and mode. |
+| `/_macrodeck/diagnostics` | Connection state, queue depths, capability counts. |
 
-A plugin's own application listener defaults to loopback. Publishing custom plugin HTTP endpoints to the network is separate from the Macro Deck plugin protocol and should be an explicit security decision.
+All of `/_macrodeck/*` is reserved (`/_macrodeckery` is not). Do not map routes there: middleware added
+with `Configure` runs after the SDK's and cannot answer them, and a constant path there is analyzer error
+MDP2005. The plugin's own listener defaults to loopback; exposing custom endpoints to the network is a
+separate, explicit security decision.
 
 ## Errors and connection loss
 
-The hosting runtime owns protocol reconnection, heartbeats, backpressure, and session framing. Plugin capability code should report domain/provider failures through the relevant SDK result types and honor cancellation tokens.
+| Option | Default | Effect |
+| --- | --- | --- |
+| `FailFastOnFirstConnect` | `false` | Stop instead of retrying when the host is unreachable at startup. |
+| `StopApplicationOnFatalProtocolError` | on when managed, off when self-registering | Stop on an unsupported version, a session replaced by another instance, or repeated authentication failures. |
+| `MaxAuthenticationFailures` | `3` (1-100) | Consecutive failures before giving up. A stored secret is never discarded automatically. |
 
-Do not implement a second connection loop around the hosting runtime.
+Report domain and provider failures through the SDK result types and honour cancellation tokens. Do not
+wrap the hosting runtime in a second connection loop.
 
 ## Logging
 
-Use normal application logging for plugin diagnostics. `MacroDeck.Plugin.Serilog` can forward Serilog events into Macro Deck's log pipeline. See [Logging](/features/logging/).
-
-Never log plugin credentials, OAuth tokens, authorization headers, or other reusable secrets.
+Use normal application logging; `MacroDeck.Plugin.Serilog` forwards Serilog into Macro Deck's log
+pipeline. See [Logging](/features/logging/). Never log credentials, OAuth tokens, authorization headers or
+other reusable secrets.
 
 ## Signing
 
-Signing belongs to the packaged artifact/publishing workflow, not to the runtime hosting API. Artifacts
-published to the Store are signed by the Creator Portal, server-side, and no signing key ever reaches a
-plugin author or a CI workflow - see [Publishing to the Store](/guides/publishing/). Check a signed
-artifact with the CLI's [`verify`](/cli/signing/#verify) command, and see the
-[security model](/policies/security/) for the trust model behind it and what host-side enforcement still
-does not do.
+Signing belongs to packaging and publishing, not the hosting API. Store artifacts are signed server-side by
+the Creator Portal; no signing key reaches a plugin author or CI - see
+[Publishing to the Store](/guides/publishing/). Check an artifact with [`verify`](/cli/signing/#verify); the
+trust model and what the host still does not enforce are in the [security model](/policies/security/).
 
 ## The .macroDeckPlugin artifact
 
-Installed plugins are distributed as `.macroDeckPlugin` ZIP artifacts containing `manifest.json` and the declared platform payload. The hosting runtime itself does not define installation/activation policy; the shared packaging contract and Macro Deck installer do.
+A ZIP containing `manifest.json` and the declared platform payload. A development process can run straight
+from its build output; installed plugins come as artifacts - create and validate them with
+[the plugin CLI](/cli/). Installation and activation policy belongs to the packaging contract and the
+installer, not the hosting runtime.
 
-The installer enforces only the Development [manifest requirement level](/reference/manifest/#requirement-categories) - the Package and Publication levels are tooling-side (`macrodeck-plugin build`/`pack`/`validate` and the Creator Portal) and are never applied at install time, so publishing metadata a plugin has not filled in yet never blocks a local install.
+The installer enforces only the Development
+[manifest requirement level](/reference/manifest/#requirement-categories). Package and Publication are
+tooling-side (`build`, `pack`, `validate`, the Creator Portal), so missing publishing metadata never blocks a
+local install.
 
 ## Testing
 
-Use `MacroDeck.Plugin.Testing` for host-facing tests and the conformance suite:
-
-- [Testing plugins](/features/testing/)
-- [Conformance suite](/reference/conformance/)
-
-Test observable capability behavior and lifecycle assumptions rather than protocol internals already owned by the hosting package.
-
-## Packaging
-
-A development process can run directly from its build output. Installed plugins are distributed as `.macroDeckPlugin` artifacts with the manifest and platform entrypoints.
-
-See [the plugin CLI](/cli/) for creating and validating the artifact.
+Use `MacroDeck.Plugin.Testing` - see [Testing plugins](/features/testing/) and the
+[Conformance suite](/reference/conformance/). Test observable capability behaviour and lifecycle
+assumptions, not protocol internals the hosting package owns.
 
 ## Related reference
 
