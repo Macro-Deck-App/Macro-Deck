@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 
-import { findUnknownIconNames } from './verify-icon-names.mjs';
+import { findIconContractProblems, findUnknownIconNames } from './verify-icon-names.mjs';
 
 const ICON_DIR = 'ui/runtime/styles/icons';
 const UTILITIES = 'ui/runtime/styles/icons.css';
@@ -68,4 +68,57 @@ test('reports where the reference is, so it can be found without a search', () =
 	assert.equal(unknown.length, 1);
 	assert.equal(unknown[0].line, 2);
 	assert.match(unknown[0].file, /sample\.html$/);
+});
+
+const RUNTIME_TYPES = 'ui/runtime/src/ui-components/ui-component-types.ts';
+const RUNTIME_ICON = 'ui/runtime/src/ui-components/ui-icon.component.ts';
+const SDK_VALUES = 'ui-model/src/MacroDeck.Ui/Components/UiComponentValues.cs';
+const GLYPHS = [
+	'.icon-xs { width: 14px; }',
+	".icon-crosshair {\n  mask-image: url('./icons/crosshair.svg');\n}",
+	".icon-wifi {\n  mask-image: url('./icons/wifi-solid-full.svg');\n}",
+].join('\n');
+
+function contract({ runtime = ["'crosshair', 'wifi'"], sdk = 'Crosshair, Wifi', maximum = 'UI_ICON_VERSIONS.length' } = {}) {
+	const root = fixture('', { utilities: GLYPHS });
+	mkdirSync(join(root, 'ui/runtime/src/ui-components'), { recursive: true });
+	mkdirSync(join(root, 'ui-model/src/MacroDeck.Ui/Components'), { recursive: true });
+	writeFileSync(join(root, RUNTIME_TYPES),
+		`export const UI_ICON_VERSIONS: readonly (readonly string[])[] = [\n${runtime.map(g => `  [${g}],`).join('\n')}\n];\n`);
+	writeFileSync(join(root, RUNTIME_ICON), `version: { minimum: 1, maximum: ${maximum} },`);
+	writeFileSync(join(root, SDK_VALUES),
+		'public const string Crosshair = "crosshair";\npublic const string Wifi = "wifi";\n'
+		+ `public static readonly IReadOnlyList<string> Version1 =\n[\n${sdk},\n];`);
+	return root;
+}
+
+test('accepts published icon groups that both sides agree on and that all draw', () => {
+	assert.deepEqual(findIconContractProblems(contract()), []);
+});
+
+test('rejects a published size modifier, which would paint a filled square', () => {
+	const problems = findIconContractProblems(contract({ runtime: ["'crosshair', 'wifi', 'xs'"] }));
+	assert.equal(problems.length, 2);
+	assert.match(problems[0], /"xs" is a size modifier/);
+});
+
+test('rejects a published name with no glyph behind it', () => {
+	const problems = findIconContractProblems(contract({ runtime: ["'crosshair', 'wifi'", "'chevron-down'"] }));
+	assert.deepEqual(problems, ['group 2: "chevron-down" has no glyph class in ui/runtime/styles/icons.css']);
+});
+
+test('rejects a first group the producer and the reader disagree on', () => {
+	const problems = findIconContractProblems(contract({ sdk: 'Crosshair' }));
+	assert.equal(problems.length, 1);
+	assert.match(problems[0], /Version1 and .* group 1 differ/);
+});
+
+test('rejects a reader whose maximum version does not follow the group count', () => {
+	const problems = findIconContractProblems(contract({ maximum: '1' }));
+	assert.equal(problems.length, 1);
+	assert.match(problems[0], /maximum version/);
+});
+
+test('leaves an unpublished app glyph free, so a new app icon is not public by accident', () => {
+	assert.deepEqual(findIconContractProblems(contract({ runtime: ["'crosshair'"], sdk: 'Crosshair' })), []);
 });

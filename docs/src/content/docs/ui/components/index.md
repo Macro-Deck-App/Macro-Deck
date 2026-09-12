@@ -22,6 +22,13 @@ cross axis.
 | `ui.text-field` | A line the user types | [Text field](/ui/components/text-field/) |
 | `ui.list` | A container that scrolls and asks for more | [List](/ui/components/list/) |
 | `ui.transform` | Rotates, scales and shifts its children together about a pivot | [Transform](/ui/components/transform/) |
+| `ui.shape` | A filled and stroked rectangle, rounded rectangle, circle, capsule or path | [Shape](/ui/components/shape/) |
+| `ui.icon` | One glyph of Macro Deck's built-in icon set, drawn by name | [Icon](/ui/components/icon/) |
+| `ui.grid` | Lays children out in equal columns and rows, with spans | [Grid](/ui/components/grid/) |
+| `ui.gauge` | A read-only level drawn along an arc or ring | [Gauge](/ui/components/gauge/) |
+| `ui.toggle` | An on/off switch the user flips | [Toggle](/ui/components/toggle/) |
+| `ui.segmented` | A row of segments the user chooses one of | [Segmented](/ui/components/segmented/) |
+| `ui.dial` | A rotary level the user turns | [Dial](/ui/components/dial/) |
 
 ## `macrodeck.*`
 

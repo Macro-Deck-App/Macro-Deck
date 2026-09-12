@@ -49,6 +49,20 @@ export const UiComponentProperties = {
   Rotation: 'rotation',
   OriginX: 'originX',
   OriginY: 'originY',
+  Shape: 'shape',
+  CornerRadius: 'cornerRadius',
+  StrokeColor: 'strokeColor',
+  StrokeWidth: 'strokeWidth',
+  Path: 'path',
+  Icon: 'icon',
+  Columns: 'columns',
+  Rows: 'rows',
+  ColumnSpan: 'columnSpan',
+  RowSpan: 'rowSpan',
+  StartAngle: 'startAngle',
+  EndAngle: 'endAngle',
+  On: 'on',
+  Selected: 'selected',
 } as const;
 
 export const UI_COMPONENT_PROPERTIES_WELL_KNOWN: readonly string[] =

@@ -300,5 +300,7 @@ export function scanDomApis(roots) {
 /** Whether `bundle` references `api` at all. A dotted name is matched on its last segment. */
 export function referencesApi(bundle, api) {
   const name = api.slice(api.lastIndexOf('.') + 1);
-  return new RegExp(`\\b${name}\\b`).test(bundle);
+  // Quoted data such as the ui.icon name 'clipboard' calls no API, so strings count only as a bracket access.
+  const code = bundle.replace(/'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"/g, '""');
+  return new RegExp(`\\b${name}\\b`).test(code) || new RegExp(`\\[\\s*['"]${name}['"]\\s*\\]`).test(bundle);
 }

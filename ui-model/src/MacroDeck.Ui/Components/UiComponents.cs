@@ -66,10 +66,33 @@ public static class UiComponents
 	/// shifts them together about a pivot.</summary>
 	public const string Transform = "ui.transform";
 
+	/// <summary>A rectangle, rounded rectangle, circle, capsule or path, filled and stroked.</summary>
+	public const string Shape = "ui.shape";
+
+	/// <summary>One glyph of Macro Deck's built-in icon set, drawn by name - see <see cref="UiIcons" />.</summary>
+	public const string Icon = "ui.icon";
+
+	/// <summary>A container laying its children out in equal rows and columns, with spans.</summary>
+	public const string Grid = "ui.grid";
+
+	/// <summary>A level drawn as an arc: a gauge or, over a full turn, a ring.</summary>
+	public const string Gauge = "ui.gauge";
+
+	/// <summary>An on/off switch the user flips.</summary>
+	public const string Toggle = "ui.toggle";
+
+	/// <summary>A row of segments the user chooses one of: a container whose children are the segments'
+	/// content.</summary>
+	public const string Segmented = "ui.segmented";
+
+	/// <summary>A rotary level the user turns: the interactive counterpart of <see cref="Gauge" />.</summary>
+	public const string Dial = "ui.dial";
+
 	/// <summary>The types the core framework ships. Not exhaustive of what a renderer may meet - see the
 	/// type's remarks.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
 	[
 		Stack, Text, Image, RangeBar, Slider, Button, Layer, Chart, TextField, List, Transform,
+		Shape, Icon, Grid, Gauge, Toggle, Segmented, Dial,
 	];
 }

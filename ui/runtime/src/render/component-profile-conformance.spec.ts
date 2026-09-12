@@ -74,6 +74,7 @@ const ASSERTED_KEYS = new Set([
   'handColor', 'tickColor',
   'renders',
   'transform', 'transformOrigin',
+  'cell', 'cornerRadius', 'glyphEdge', 'arcRadius', 'arcStrokeWidth', 'toggleTrack', 'knobLeft', 'segmentFace',
 ]);
 
 const ROLE_COLOR: Record<string, string> = {
@@ -881,6 +882,74 @@ describe('component-profile conformance fixtures: gauge tree', () => {
   }
 });
 
+describe('component-profile conformance fixtures: building-blocks tree', () => {
+  const tree = loadTree('conformance-building-blocks-tree.json');
+  const layout = loadJson<LayoutFixture>('conformance-building-blocks-layout.json');
+  type Rect = { left: number; top: number; width: number; height: number };
+  const arcRadius = (el: Element) => num((el.querySelector('.widget-gauge-track')!.getAttribute('d') ?? '').split(' A ')[1]);
+
+  for (const testCase of layout.cases) {
+    describe(`basis ${testCase.basis}`, () => {
+      beforeEach(() => mount(tree, testCase.tile, testCase.basis));
+
+      for (const [id, spec] of Object.entries(testCase.nodes)) {
+        it(`resolves ${id}`, () => {
+          const el = byId(id);
+          const cell = spec.cell as Rect;
+          expect(num(el.style.left)).withContext(`${id}.cell.left`).toBeCloseTo(cell.left, 2);
+          expect(num(el.style.top)).withContext(`${id}.cell.top`).toBeCloseTo(cell.top, 2);
+          const width = el.style.width !== '' ? num(el.style.width) : num(el.getAttribute('width') ?? '');
+          const height = el.style.height !== '' ? num(el.style.height) : num(el.getAttribute('height') ?? '');
+          expect(width).withContext(`${id}.cell.width`).toBeCloseTo(cell.width, 2);
+          expect(height).withContext(`${id}.cell.height`).toBeCloseTo(cell.height, 2);
+
+          if ('cornerRadius' in spec) {
+            expect(el.querySelector('path')!.getAttribute('d')).withContext(`${id}.cornerRadius`)
+              .toContain(`A ${spec.cornerRadius} ${spec.cornerRadius} 0 0 1`);
+          }
+          if ('strokeWidth' in spec) {
+            expect(num(el.querySelector('path')!.getAttribute('stroke-width') ?? '')).withContext(`${id}.strokeWidth`)
+              .toBeCloseTo(spec.strokeWidth as number, 2);
+          }
+          if ('glyphEdge' in spec) {
+            expect(num((el.querySelector('.widget-icon-glyph') as HTMLElement).style.width))
+              .withContext(`${id}.glyphEdge`).toBeCloseTo(spec.glyphEdge as number, 2);
+          }
+          if ('arcRadius' in spec) {
+            expect(arcRadius(el)).withContext(`${id}.arcRadius`).toBeCloseTo(spec.arcRadius as number, 2);
+          }
+          if ('arcStrokeWidth' in spec) {
+            expect(num(el.querySelector('.widget-gauge-track')!.getAttribute('stroke-width') ?? ''))
+              .withContext(`${id}.arcStrokeWidth`).toBeCloseTo(spec.arcStrokeWidth as number, 2);
+          }
+          if ('thumbRadius' in spec) {
+            expect(num(el.querySelector('.widget-dial-thumb')!.getAttribute('r') ?? ''))
+              .withContext(`${id}.thumbRadius`).toBeCloseTo(spec.thumbRadius as number, 2);
+          }
+          if ('toggleTrack' in spec) {
+            const track = el.querySelector('.widget-toggle-track') as HTMLElement;
+            const rect = spec.toggleTrack as Rect;
+            expect(num(track.style.left)).withContext(`${id}.toggleTrack.left`).toBeCloseTo(rect.left, 2);
+            expect(num(track.style.top)).withContext(`${id}.toggleTrack.top`).toBeCloseTo(rect.top, 2);
+            expect(num(track.style.width)).withContext(`${id}.toggleTrack.width`).toBeCloseTo(rect.width, 2);
+            expect(num(track.style.height)).withContext(`${id}.toggleTrack.height`).toBeCloseTo(rect.height, 2);
+          }
+          if ('knobLeft' in spec) {
+            expect(num((el.querySelector('.widget-toggle-knob') as HTMLElement).style.left))
+              .withContext(`${id}.knobLeft`).toBeCloseTo(spec.knobLeft as number, 2);
+          }
+          if ('segmentFace' in spec) {
+            const face = el.querySelector('.widget-segmented-face') as HTMLElement;
+            const rect = spec.segmentFace as Rect;
+            expect(num(face.style.left)).withContext(`${id}.segmentFace.left`).toBeCloseTo(rect.left, 2);
+            expect(num(face.style.width)).withContext(`${id}.segmentFace.width`).toBeCloseTo(rect.width, 2);
+          }
+        });
+      }
+    });
+  }
+});
+
 describe('component-profile conformance fixtures: coverage', () => {
   const LAYOUT_FILES = [
     'conformance-layout.json',
@@ -891,6 +960,7 @@ describe('component-profile conformance fixtures: coverage', () => {
     'conformance-music-player-layout.json',
     'conformance-history-graph-layout.json',
     'conformance-gauge-layout.json',
+    'conformance-building-blocks-layout.json',
   ];
 
   it('records every fixture key exactly once, as asserted or as a documented omission', () => {
@@ -918,6 +988,7 @@ describe('component-profile conformance fixtures: coverage', () => {
       'conformance-clock-formats-tree.json', 'conformance-slider-tree.json',
       'conformance-action-button-tree.json', 'conformance-music-player-tree.json',
       'conformance-history-graph-tree.json', 'conformance-gauge-tree.json',
+      'conformance-building-blocks-tree.json',
     ];
     for (const name of exercised) expect(() => loadTree(name)).not.toThrow();
   });
