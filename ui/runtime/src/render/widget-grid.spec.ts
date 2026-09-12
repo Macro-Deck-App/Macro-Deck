@@ -349,6 +349,41 @@ describe('runtime widget grid', () => {
     expect(tile.classList.contains('deck-grid-tile-pressed')).toBeTrue();
   });
 
+  it('leaves the tile alone when a button nested in the tree is pressed, and tints that button', () => {
+    const handle = mount();
+    handle.update([widget('a', 0, 0)], () => ({
+      id: 'root',
+      type: 'ui.stack',
+      properties: {},
+      children: [{ id: 'nested', type: 'ui.button', properties: { events: ['press'] } }],
+    }) as UiNode);
+    const tile = container.querySelector('.deck-grid-tile') as HTMLElement;
+    const button = container.querySelector('[data-node-id="nested"]') as HTMLElement;
+
+    button.dispatchEvent(pointer('pointerdown'));
+
+    expect(tile.classList.contains('deck-grid-tile-pressed')).toBeFalse();
+    expect(button.querySelector('.widget-press-tint-active')).not.toBeNull();
+  });
+
+  it('releases the tile when the pressed root is replaced mid-press', () => {
+    jasmine.clock().install();
+    jasmine.clock().mockDate();
+    try {
+      const handle = mount();
+      handle.update([widget('a', 0, 0)], () => pressable());
+      const tile = container.querySelector('.deck-grid-tile') as HTMLElement;
+      (container.querySelector('.widget-button') as HTMLElement).dispatchEvent(pointer('pointerdown'));
+
+      handle.update([widget('a', 0, 0)], () => tree('clock'));
+      jasmine.clock().tick(PRESS_FEEDBACK_MIN_VISIBLE_MS);
+
+      expect(tile.classList.contains('deck-grid-tile-pressed')).toBeFalse();
+    } finally {
+      jasmine.clock().uninstall();
+    }
+  });
+
   it('releases a press the pointer dragged out of, whatever pointer the leave carries', () => {
     jasmine.clock().install();
     jasmine.clock().mockDate();

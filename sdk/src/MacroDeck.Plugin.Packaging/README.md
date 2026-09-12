@@ -22,6 +22,6 @@ This package has no dependency on the host; it depends only on
 [`MacroDeck.Plugin.Protocol`](https://www.nuget.org/packages/MacroDeck.Plugin.Protocol) for the wire
 types a manifest's declared compatibility range is checked against.
 
-See [the plugin development documentation](https://docs.macro-deck.app/introduction/getting-started/).
+See [the plugin development documentation](https://docs.macro-deck.app/introduction/quickstart/).
 
 Licensed under Apache-2.0.

@@ -136,4 +136,4 @@ A consumer that genuinely needs "did this plugin declare kind X" reads
 - [Issue #268](https://github.com/Macro-Deck-App/Macro-Deck/issues/268),
   [Issue #408](https://github.com/Macro-Deck-App/Macro-Deck/issues/408),
   [Issue #413](https://github.com/Macro-Deck-App/Macro-Deck/issues/413)
-- [Capabilities reference](https://docs.macro-deck.app/sdk/capabilities/)
+- [Capabilities reference](https://docs.macro-deck.app/features/)

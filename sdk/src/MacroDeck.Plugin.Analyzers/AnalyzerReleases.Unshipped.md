@@ -23,5 +23,5 @@ MDLOC008 | MacroDeck.Localization | Error | LocalizationGenerator
 ; Rule ID | New Category | New Severity | Old Category | Old Severity | Notes table (RS2000/RS2001, on
 ; via EnforceExtendedAnalyzerRules) rejects a row whose New/Old Category and New/Old Severity columns are
 ; identical - RS2007 "invalid entry" - and MDP2004 changed neither its category nor its severity, only
-; what it matches and what it says. See https://docs.macro-deck.app/sdk/analyzers/#mdp2004 and this
+; what it matches and what it says. See https://docs.macro-deck.app/reference/analyzers/#mdp2004 and this
 ; rule's own DiagnosticDescriptors.RawIntegrationRegistration.description for the rehoming, instead.

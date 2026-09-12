@@ -3,79 +3,157 @@ title: macrodeck-plugin new
 description: Scaffold a new plugin project from the official template, interactively or from a script.
 ---
 
-Scaffolds a new plugin project from the official
-[plugin template](https://github.com/Macro-Deck-App/Macro-Deck-Plugin-Template), installing that template
-first if it is not already there. Run with no options it walks an interactive wizard; given enough options
-it runs without prompting at all, which is what makes it usable from a script or an IDE integration.
+`new` creates a plugin project from the official
+[plugin template](https://github.com/Macro-Deck-App/Macro-Deck-Plugin-Template), with a `manifest.json`
+and `macrodeck-build.json` ready for [`build`](/cli/build/).
+
+## Examples
 
 ```bash
 macrodeck-plugin new
 ```
 
-| Option | Default | What it does |
+Walks an interactive wizard. Use it when starting a plugin by hand.
+
+```bash
+macrodeck-plugin new --name "Spotify Controller" --publisher "Example Publisher" \
+  --repository https://github.com/example/spotify-controller --yes
+```
+
+```text
+Created plugin project at '~/src/SpotifyController'.
+Manifest: ~/src/SpotifyController/src/SpotifyController/manifest.json
+Build configuration: ~/src/SpotifyController/src/SpotifyController/macrodeck-build.json
+```
+
+No prompts; the id (`com.example.spotify-controller`), project name and output directory are derived. Use
+it from a script or an IDE integration.
+
+```bash
+macrodeck-plugin new --name "Spotify Controller" --id com.example.spotify-controller \
+  --publisher "Example Publisher" --non-interactive
+```
+
+No prompts and no guessing: a missing required value fails instead of being defaulted. Use it in CI.
+
+```text
+$ macrodeck-plugin new --name "Spotify Controller" --publisher "Example Publisher" --non-interactive
+error missing-required-option: --id must be supplied when running non-interactively.
+```
+
+```bash
+macrodeck-plugin new --name "Acme Light Control" --publisher Acme --platform win-x64 --yes
+```
+
+```text
+Created plugin project at '~/src/AcmeLightControl'.
+...
+warning publication-metadata-missing: 'repository' is required to publish to the Macro Deck plugin ecosystem. It is not required to develop or run this plugin locally.
+```
+
+A Windows-only plugin. After scaffolding, `new` warns about each field still missing for publication.
+
+## Options
+
+| Option | Default | Description |
 | --- | --- | --- |
 | `--name <name>` | prompted | The plugin's display name. Required. |
-| `--id <id>` | prompted | The reverse-domain plugin id, validated by the same rule the manifest uses. Required, though `--yes` takes the id derived from `--name`. |
+| `--id <id>` | prompted | The reverse-domain plugin id, checked by the manifest's rule. Required unless `--yes`. |
 | `--publisher <name>` | prompted | The publisher's display name. Required. |
 | `--description <text>` | `A Macro Deck plugin.` | Written to `manifest.description`. |
-| `--repository <url>` | omitted | Absolute `http`/`https` URL. Omitted from the manifest when not given. |
-| `--homepage <url>` | omitted | Absolute `http`/`https` URL. The wizard offers the repository URL as the prompt default; omitted from the manifest when not given. |
-| `--license <spdx>` | `MIT` | Carried into `manifest.license` verbatim. |
-| `--platform <rid>` | `win-x64`, `osx-arm64`, `linux-x64` | A target runtime identifier. Repeat for each platform. |
+| `--repository <url>` | omitted | Absolute `http`/`https` URL. |
+| `--homepage <url>` | omitted | Absolute `http`/`https` URL; the wizard offers the repository URL. |
+| `--license <spdx>` | `MIT` | Written to `manifest.license` verbatim. |
+| `--platform <rid>` | `win-x64`, `osx-arm64`, `linux-x64` | A target runtime identifier; repeat for each platform. |
 | `--project-name <name>` | derived from `--name` | The C# project and assembly name. |
-| `--output <dir>` | `./<project name>` | Directory to scaffold into. |
-| `-y`, `--yes` | off | Never prompt; accept every value the wizard would have offered as a default. |
-| `--non-interactive` | off | Never prompt; a required value that was not supplied is a usage error rather than being defaulted. |
-| `--template-version <v>` | latest prerelease | Install this exact template version instead. |
-| `--skip-template-install` | off | Never probe or install the template; it must already be present. |
-| `--no-restore` | off | Skip the NuGet restore `dotnet new` would otherwise run. |
+| `--output <dir>` | `./<project name>` | Directory to scaffold into; must not exist or be empty. |
+| `-y`, `--yes` | off | Never prompt; accept every default the wizard would offer. |
+| `--non-interactive` | off | Never prompt; a missing required value is a usage error. |
+| `--template-version <v>` | latest prerelease | Install this exact template version. |
+| `--skip-template-install` | off | Never probe or install the template; it must already be installed. |
+| `--no-restore` | off | Skip the NuGet restore `dotnet new` would run. |
 
-`--platform` accepts `win-x64`, `win-arm64`, `osx-arm64`, `osx-x64`, `linux-x64` and `linux-arm64`.
-Anything else is a usage error, and at least one platform must be selected. The wizard's own platform
-prompt offers only `win-x64`, `osx-arm64` and `linux-x64` - the RIDs Macro Deck currently ships builds
-for - while `--platform` still accepts all six. It renders as a checkbox list, or as a numbered list on a
-terminal without ANSI support.
+## Prompting
 
-**Interactive or not.** The wizard runs only when stdin is a terminal and neither `--yes` nor
-`--non-interactive` was given. Options you already passed become the offered defaults, so the wizard fills
-gaps rather than re-asking everything. Without a terminal, a missing required value is a
-`missing-required-option` usage error instead of a prompt that would hang a CI job.
+The wizard runs only when stdin is a terminal and neither `--yes` nor `--non-interactive` is given. Options
+you pass become the wizard's defaults, so it only fills gaps, then asks `Create plugin? [Y/n]`.
 
-The two suppressing flags differ in what they do about a value you did not pass. `--yes` accepts whatever
-the wizard would have offered - so `--name "Acme Light Control" --publisher Acme --yes` is enough, and the
-plugin id, project name and output directory are all derived. `--non-interactive` defaults nothing it
-would otherwise have prompted for, so the same command without `--id` fails; use it when a script should
-break rather than silently scaffold a plugin under a guessed id.
+Without a terminal, a missing required value is a `missing-required-option` usage error rather than a
+prompt that would hang a CI job.
 
-**Template handling.** `new` first probes whether the template is installed, and only reaches the network
-when it is not - so a second run is offline and fast. When it does install, it uses
-`MacroDeck.Plugin.Templates@*-*`; the `*-*` matters because only `-preview` versions are published ahead
-of the 3.0 release. An install failure surfaces the underlying `dotnet` output as the diagnostic's detail.
+| | Missing `--id` | Missing `--name` or `--publisher` |
+| --- | --- | --- |
+| `--yes` | derived from `--name` as `com.example.<kebab-name>` | usage error |
+| `--non-interactive` | usage error | usage error |
 
-**What gets written.** Optional manifest fields are omitted entirely when you did not supply a value -
-never written as an empty string - with `license` the deliberate exception, since `MIT` is an intentional
-default. `publisher` carries only `name`; its `id`, `email` and `url` are not part of this command.
-The initial `version` is always `1.0.0`.
+## Platforms
 
-Only the platforms you selected are emitted, into both `manifest.entrypoints` and the generated
-`macrodeck-build.json`, so a scaffolded plugin never claims support for a platform you did not ask for.
-Entrypoints use the RID-specific layout publication expects:
+```bash
+macrodeck-plugin new --name "Acme Light Control" --publisher Acme --yes \
+  --platform win-x64 --platform win-arm64
+```
+
+- `--platform` accepts `win-x64`, `win-arm64`, `osx-arm64`, `osx-x64`, `linux-x64` and `linux-arm64`.
+  Anything else fails with `unknown-platform`; selecting none fails with `no-platform-selected`.
+- The wizard offers only `win-x64`, `osx-arm64` and `linux-x64`, the platforms Macro Deck ships builds
+  for, as a checkbox list (a numbered list on a terminal without ANSI support).
+- Only the selected platforms are written to `manifest.entrypoints` and `macrodeck-build.json`.
+
+## Template handling
+
+`new` checks whether the template is installed and only reaches the network if it is not, so later runs
+work offline. It installs `MacroDeck.Plugin.Templates@*-*` (the `*-*` picks up `-preview` versions) or
+the exact `--template-version`. If the install fails, the error carries the `dotnet` output.
+
+## Generated files
+
+```text
+SpotifyController/
+  SpotifyController.slnx
+  src/SpotifyController/
+    manifest.json
+    macrodeck-build.json
+    SpotifyController.csproj
+    Program.cs
+    PluginIntegration.cs
+    Assets/icon.svg
+    Localization/Strings.resx
+    ...
+  tests/SpotifyController.Tests/
+```
+
+`manifest.json` and `macrodeck-build.json` sit in `src/<ProjectName>/`, so run `build` there (or pass
+`--source`).
+
+### manifest.json
 
 ```json
-"entrypoints": {
-  "win-x64": { "executable": "runtimes/win-x64/SpotifyController.exe" },
-  "osx-arm64": { "executable": "runtimes/osx-arm64/SpotifyController" },
-  "linux-x64": { "executable": "runtimes/linux-x64/SpotifyController" }
+{
+  "id": "com.example.spotify-controller",
+  "name": "Spotify Controller",
+  "version": "1.0.0",
+  "description": "A Macro Deck plugin.",
+  "entrypoints": {
+    "win-x64": { "executable": "runtimes/win-x64/SpotifyController.exe" },
+    "osx-arm64": { "executable": "runtimes/osx-arm64/SpotifyController" },
+    "linux-x64": { "executable": "runtimes/linux-x64/SpotifyController" }
+  },
+  "publisher": { "name": "Example Publisher" },
+  "license": "MIT",
+  "repository": "https://github.com/example/spotify-controller"
 }
 ```
 
-The `runtimes/<rid>/` prefix is what keeps a macOS and a Linux build - which produce identically named
-executables - from colliding inside one multi-platform package.
+- Optional fields you did not supply are left out entirely, never written as empty strings. `license` is
+  the exception: `MIT` is a deliberate default.
+- `publisher` carries only `name`; set its `id`, `email` and `url` by hand.
+- `version` always starts at `1.0.0`.
+- Entrypoints use the `runtimes/<rid>/` layout, which keeps identically named macOS and Linux executables
+  apart in one multi-platform package.
 
-**`macrodeck-build.json`** is written next to `manifest.json` and holds the build recipe [`build`](/cli/build/)
-reads, which the runtime manifest deliberately does not: a manifest describes what a plugin *is*, never how
-to build it. Each target names its tool and arguments as separate values rather than one shell string, so
-nothing is passed through a shell:
+### macrodeck-build.json
+
+The build recipe `build` reads. The manifest describes what a plugin is; this file says how to build it.
 
 ```json
 {
@@ -92,15 +170,28 @@ nothing is passed through a shell:
 }
 ```
 
-A target may also carry an optional `workingDirectory`, relative to the project root, for a toolchain that
-must run from somewhere other than the directory holding the manifest. Every path in the file - `output` and
-`workingDirectory` alike - must stay inside the project directory.
+- `executable` and `arguments` are separate values and never go through a shell.
+- An optional `workingDirectory`, relative to the project root, runs the tool from somewhere else.
+- An optional top-level `include` lists files and directories beyond the build output that belong in the
+  package - see [`build`](/cli/build/#staging-layout).
+- `output`, `workingDirectory` and `include` must stay inside the project directory.
+- Nothing here is .NET-specific: any toolchain can be described the same way.
+- Generated targets publish **self-contained** Release builds. An entrypoint with no `runtime` block must
+  not be a `.dll`.
 
-Nothing about that shape is .NET-specific - a plugin built with another toolchain writes its own
-`executable`/`arguments`/`output` and is equally buildable. Generated projects publish **self-contained**:
-an entrypoint with no `runtime` block must not be a `.dll`, and self-contained output is also what makes
-the per-RID layout meaningful.
+## Exit codes
 
-Exit code is `Success` (0), `UsageError` (2) for invalid input or a non-empty output directory,
-`InputUnreadable` (3) when `dotnet` is missing or the template could not be installed, `SubjectInvalid` (1)
-when the template itself failed to generate, and `Cancelled` (4) if you decline the confirmation.
+| Code | When |
+| --- | --- |
+| 0 | The project was created. |
+| 1 | The template itself failed to generate (`template-create-failed`). |
+| 2 | Invalid input, a missing required value, or a non-empty `--output` directory (`output-exists`). |
+| 3 | `dotnet` is missing (`dotnet-not-found`) or the template could not be installed (`template-install-failed`). |
+| 4 | You declined the confirmation. |
+| 70 | Writing or rewriting the generated files failed. |
+
+## See also
+
+- [`build`](/cli/build/) - build and package the scaffolded project.
+- [`run`](/cli/run/) - run it against a stub host.
+- [Manifest reference](/reference/manifest/).

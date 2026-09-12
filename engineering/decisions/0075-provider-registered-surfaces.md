@@ -163,5 +163,5 @@ every modal a snapshot, and a plugin's could never be anything else.
 - [Issue #750](https://github.com/Macro-Deck-App/Macro-Deck/issues/750),
   [Issue #785](https://github.com/Macro-Deck-App/Macro-Deck/issues/785),
   [Issue #843](https://github.com/Macro-Deck-App/Macro-Deck/issues/843)
-- [Folder views](../../docs/src/content/docs/sdk/folder-views.md),
-  [Macro Deck UI guide](../../docs/src/content/docs/sdk/ui/index.md)
+- [Folder views](../../docs/src/content/docs/ui/views/folder-views.md),
+  [Macro Deck UI guide](../../docs/src/content/docs/ui/index.md)

@@ -311,6 +311,71 @@ public class PluginDeveloperModeGateTests
 	}
 
 	[Test]
+	public async Task A_plugin_that_said_goodbye_can_still_close_its_session()
+	{
+		await SetDeveloperMode(true);
+		var token = await CreateTokenAsync();
+		var pluginId = NewPluginId();
+		var secret = await EnrollAndReadSecretAsync(pluginId, token.Plaintext);
+		var (socket, sessionId, sessionToken) = await ConnectWithSessionAsync(pluginId, secret);
+		using var connectedSocket = socket;
+
+		var goodbye = new ProtocolEnvelope
+		{
+			Type = MessageTypes.SessionGoodbye,
+			Id = Guid.CreateVersion7().ToString(),
+			Payload = JsonSerializer.SerializeToElement(new SessionGoodbyePayload { Reason = "Shutting down." },
+				PluginProtocolJson.Options)
+		};
+		await socket.SendAsync(ProtocolEnvelopeWriter.WriteToUtf8Bytes(goodbye),
+			WebSocketMessageType.Text,
+			true,
+			CancellationToken.None);
+
+		while (await ReceiveEnvelopeAsync(socket) is not null)
+		{
+		}
+
+		_uiTransport.GroupMessages.Clear();
+		await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
+		await WaitForConnectionTeardownAsync();
+
+		var closed = await Send(HttpMethod.Delete,
+			$"/api/plugins/sessions/{sessionId}",
+			shape: FakeConnectionShape.Loopback,
+			bearerToken: sessionToken);
+
+		Assert.That(closed.StatusCode,
+			Is.EqualTo(HttpStatusCode.NoContent),
+			await closed.Content.ReadAsStringAsync());
+	}
+
+	[Test]
+	public async Task A_plugin_that_said_goodbye_no_longer_receives_host_messages()
+	{
+		await SetDeveloperMode(true);
+		var token = await CreateTokenAsync();
+		var pluginId = NewPluginId();
+		var secret = await EnrollAndReadSecretAsync(pluginId, token.Plaintext);
+		using var socket = await ConnectAsync(pluginId, secret);
+
+		await SayGoodbyeAndCloseAsync(socket);
+
+		var sessions = _host.Services.GetRequiredService<IPluginSessionRegistry>();
+		var ping = new ProtocolEnvelope { Type = MessageTypes.SessionPing, Id = Guid.CreateVersion7().ToString() };
+		var deadline = DateTime.UtcNow.AddSeconds(10);
+		while (await sessions.SendToPlugin(pluginId, ping))
+		{
+			if (DateTime.UtcNow >= deadline)
+			{
+				Assert.Fail("Host messages were still reported as delivered to a plugin that said goodbye.");
+			}
+
+			await Task.Delay(20);
+		}
+	}
+
+	[Test]
 	public async Task Turning_developer_mode_off_and_on_again_keeps_every_stored_credential()
 	{
 		await SetDeveloperMode(true);
@@ -500,6 +565,11 @@ public class PluginDeveloperModeGateTests
 			});
 
 	private async Task<WebSocket> ConnectAsync(string pluginId, string secret)
+		=> (await ConnectWithSessionAsync(pluginId, secret)).Socket;
+
+	private async Task<(WebSocket Socket, string SessionId, string SessionToken)> ConnectWithSessionAsync(
+		string pluginId,
+		string secret)
 	{
 		var response = await CreateSessionAsync(pluginId, secret);
 		Assert.That(response.StatusCode,
@@ -536,7 +606,7 @@ public class PluginDeveloperModeGateTests
 
 		Assert.That((await ReceiveEnvelopeAsync(socket))?.Type, Is.EqualTo(MessageTypes.SessionWelcome));
 
-		return socket;
+		return (socket, sessionId, sessionToken);
 	}
 
 	private static async Task<ProtocolEnvelope?> ReceiveEnvelopeAsync(WebSocket socket)
@@ -561,6 +631,40 @@ public class PluginDeveloperModeGateTests
 		}
 
 		return ProtocolEnvelopeReader.Read(accumulated.ToArray()).Envelope;
+	}
+
+	private static async Task SayGoodbyeAndCloseAsync(WebSocket socket)
+	{
+		var goodbye = new ProtocolEnvelope
+		{
+			Type = MessageTypes.SessionGoodbye,
+			Id = Guid.CreateVersion7().ToString(),
+			Payload = JsonSerializer.SerializeToElement(new SessionGoodbyePayload { Reason = "Shutting down." },
+				PluginProtocolJson.Options)
+		};
+		await socket.SendAsync(ProtocolEnvelopeWriter.WriteToUtf8Bytes(goodbye),
+			WebSocketMessageType.Text,
+			true,
+			CancellationToken.None);
+
+		while (await ReceiveEnvelopeAsync(socket) is not null)
+		{
+		}
+
+		await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
+	}
+
+	private async Task WaitForConnectionTeardownAsync()
+	{
+		var deadline = DateTime.UtcNow.AddSeconds(10);
+		while (_uiTransport.GroupMessages.Count == 0 && DateTime.UtcNow < deadline)
+		{
+			await Task.Delay(20);
+		}
+
+		// The endpoint publishes the sessions change as the last step before it tears the connection
+		// down, so the teardown itself is only reached a moment later.
+		await Task.Delay(500);
 	}
 
 	private static StartupReadiness CompletedStartupReadiness()

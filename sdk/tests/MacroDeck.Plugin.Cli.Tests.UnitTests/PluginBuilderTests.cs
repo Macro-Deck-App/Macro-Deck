@@ -2,6 +2,7 @@ using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using MacroDeck.Plugin.Cli.Building;
+using MacroDeck.Plugin.Cli.Manifests;
 
 namespace MacroDeck.Plugin.Cli.Tests.UnitTests;
 
@@ -84,6 +85,9 @@ public class PluginBuilderTests
 
 		try
 		{
+			await File.WriteAllTextAsync(Path.Combine(project, "macrodeck-build.json"),
+				BuildFixtures.BuildConfigJson(rids, ["README.md"]));
+
 			var runner = new FakePluginBuildRunner { OnRun = BuildFixtures.ProducingOutput(project, rids) };
 
 			var result = await BuildAsync(project, runner);
@@ -136,6 +140,129 @@ public class PluginBuilderTests
 
 				// The exclusion is targeted, not "drop everything that is not build output".
 				Assert.That(entries, Does.Contain("assets/icon.png"));
+			});
+		}
+		finally
+		{
+			Delete(project);
+		}
+	}
+
+	[Test]
+	public async Task A_template_shaped_project_packages_no_sources_and_validates_as_built_output()
+	{
+		var rids = ManifestFixtures.PickForeignRids(1);
+		var project = BuildFixtures.WriteProject(rids);
+
+		try
+		{
+			foreach (var file in (string[])
+				[
+					"Acme.LightControl.csproj", "Program.cs", "PluginIntegration.cs", "LogMessageAction.cs",
+					"Localization/Strings.resx", "Properties/launchSettings.json"
+				])
+			{
+				var path = Path.Combine(project, file);
+				Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+				await File.WriteAllTextAsync(path, "source");
+			}
+
+			var runner = new FakePluginBuildRunner { OnRun = BuildFixtures.ProducingOutput(project, rids) };
+
+			var result = await BuildAsync(project, runner);
+			var entries = ArtifactEntries(result.Pack!.OutputPath!);
+			var validation = await ManifestValidator.ValidateArtifactAsync(result.Pack.OutputPath!);
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(result.Success, Is.True, result.FailureMessage);
+				Assert.That(entries.Where(entry => entry.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ||
+						entry.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) ||
+						entry.EndsWith(".resx", StringComparison.OrdinalIgnoreCase)),
+					Is.Empty);
+				Assert.That(entries, Does.Not.Contain("Properties/launchSettings.json"));
+				Assert.That(entries, Does.Contain("assets/icon.png"));
+				Assert.That(validation.Problems.Select(problem => problem.Code),
+					Does.Not.Contain("generated-field-authored"));
+				Assert.That(result.Warnings.Where(warning => warning.Code == "file-not-packaged")
+						.Select(warning => warning.Message),
+					Has.None.Contains(".cs").And.None.Contains("launchSettings"));
+			});
+		}
+		finally
+		{
+			Delete(project);
+		}
+	}
+
+	[Test]
+	public async Task Only_declared_and_included_files_ship_and_every_other_file_is_named_in_a_warning()
+	{
+		var rids = ManifestFixtures.PickForeignRids(1);
+		var project = BuildFixtures.WriteProject(rids);
+
+		try
+		{
+			Directory.CreateDirectory(Path.Combine(project, "web"));
+			await File.WriteAllTextAsync(Path.Combine(project, "web", "index.html"), "<html />");
+			Directory.CreateDirectory(Path.Combine(project, "web", ".well-known"));
+			await File.WriteAllTextAsync(Path.Combine(project, "web", ".well-known", "x.json"), "{}");
+			await File.WriteAllTextAsync(Path.Combine(project, "data.json"), "{}");
+			await File.WriteAllTextAsync(Path.Combine(project, "Program.cs"), "source");
+			await File.WriteAllTextAsync(Path.Combine(project, "macrodeck-build.json"),
+				BuildFixtures.BuildConfigJson(rids, ["web"]));
+
+			var runner = new FakePluginBuildRunner { OnRun = BuildFixtures.ProducingOutput(project, rids) };
+
+			var result = await BuildAsync(project, runner);
+			var entries = ArtifactEntries(result.Pack!.OutputPath!);
+			var warning = result.Warnings.Single(diagnostic => diagnostic.Code == "file-not-packaged");
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(result.Success, Is.True, result.FailureMessage);
+				Assert.That(entries, Does.Contain("web/index.html").And.Contain("assets/icon.png"));
+				Assert.That(entries, Does.Not.Contain("README.md").And.Not.Contain("data.json"));
+
+				Assert.That(warning.Message, Does.Contain("README.md").And.Contain("data.json"));
+				Assert.That(warning.Message, Does.Not.Contain("Program.cs").And.Not.Contain("web/index.html"));
+				Assert.That(entries, Does.Not.Contain("web/.well-known/x.json"));
+				Assert.That(result.Warnings.Single(diagnostic => diagnostic.Code == "include-not-packaged").Message,
+					Does.Contain("web/.well-known/x.json"));
+			});
+		}
+		finally
+		{
+			Delete(project);
+		}
+	}
+
+	[Test]
+	public async Task An_include_outside_the_project_or_missing_from_it_is_refused_before_anything_is_built()
+	{
+		var rids = ManifestFixtures.PickForeignRids(1);
+		var project = BuildFixtures.WriteProject(rids);
+
+		try
+		{
+			await File.WriteAllTextAsync(Path.Combine(project, "macrodeck-build.json"),
+				BuildFixtures.BuildConfigJson(rids, ["../secrets"]));
+
+			var runner = new FakePluginBuildRunner { OnRun = BuildFixtures.ProducingOutput(project, rids) };
+
+			var outside = await BuildAsync(project, runner);
+
+			await File.WriteAllTextAsync(Path.Combine(project, "macrodeck-build.json"),
+				BuildFixtures.BuildConfigJson(rids, ["missing-assets"]));
+
+			var missing = await BuildAsync(project, runner);
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(outside.FailureReason, Is.EqualTo(PluginBuildFailureReason.BuildConfigInvalid));
+				Assert.That(missing.FailureReason, Is.EqualTo(PluginBuildFailureReason.BuildConfigInvalid));
+				Assert.That(missing.FailureMessage, Does.Contain("missing-assets"));
+				Assert.That(runner.Invocations, Is.Empty);
 			});
 		}
 		finally
