@@ -91,6 +91,8 @@
 .widget-button,
 .widget-layer,
 .widget-transform,
+.widget-grid,
+.widget-segmented,
 .widget-list,
 .widget-text,
 .widget-image {
@@ -448,6 +450,96 @@
   transition: none;
 }
 
+.widget-shape,
+.widget-gauge,
+.widget-dial {
+  display: block;
+  overflow: visible;
+}
+
+.widget-gauge-track,
+.widget-gauge-fill {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.widget-gauge-track {
+  stroke: var(--color-bg-tertiary);
+}
+
+.widget-dial {
+  touch-action: none;
+}
+
+.widget-dial-thumb {
+  fill: var(--color-text-primary);
+  stroke: var(--color-bg-secondary);
+}
+
+.widget-grid,
+.widget-icon,
+.widget-toggle,
+.widget-segmented {
+  position: relative;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+}
+
+.widget-grid > *,
+.widget-icon-glyph,
+.widget-toggle-track,
+.widget-toggle-knob,
+.widget-segmented-track,
+.widget-segmented-face,
+.widget-segmented-content > * {
+  position: absolute;
+}
+
+.widget-toggle,
+.widget-segmented {
+  touch-action: none;
+}
+
+.widget-toggle-track {
+  transition: background 120ms linear;
+}
+
+.widget-toggle-knob {
+  border-radius: 50%;
+  background: var(--color-text-primary);
+  transition: left 120ms ease-out;
+}
+
+.widget-segmented-track {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--color-bg-tertiary);
+}
+
+.widget-segmented-face {
+  transition: left 120ms ease-out;
+}
+
+.widget-segmented-content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.widget-segmented-content > * {
+  top: 0;
+}
+
+.widget-segmented-content .widget-pressable {
+  cursor: inherit;
+}
+
 .widget-node-unsupported {
   background: var(--color-bg-tertiary);
   opacity: 0.35;
@@ -465,7 +557,10 @@
   .widget-artwork-eased > img,
   .widget-progress-fill,
   .widget-slider-fill,
-  .widget-slider-thumb {
+  .widget-slider-thumb,
+  .widget-toggle-track,
+  .widget-toggle-knob,
+  .widget-segmented-face {
     transition: none;
   }
 }

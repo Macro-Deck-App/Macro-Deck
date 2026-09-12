@@ -10331,6 +10331,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Voicemeeter.Variables.ChannelMuted" xml:space="preserve">
     <value>Kanál ztlumen</value>
   </data>
+  <data name="Integrations.Voicemeeter.Variables.StripRouted" xml:space="preserve">
+    <value>Směrováno na {bus}</value>
+  </data>
   <data name="Integrations.Weather.Config.CelsiusOption" xml:space="preserve">
     <value>Celsius (°C)</value>
   </data>

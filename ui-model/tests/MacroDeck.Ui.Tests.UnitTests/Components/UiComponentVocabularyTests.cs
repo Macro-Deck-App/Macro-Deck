@@ -25,7 +25,8 @@ public class UiComponentVocabularyTests
 	private static readonly string[] _expectedCoreComponents =
 	[
 		"ui.stack", "ui.text", "ui.image", "ui.range-bar", "ui.slider", "ui.button", "ui.layer",
-		"ui.chart", "ui.text-field", "ui.list", "ui.transform",
+		"ui.chart", "ui.text-field", "ui.list", "ui.transform", "ui.shape", "ui.icon", "ui.grid", "ui.gauge",
+		"ui.toggle", "ui.segmented", "ui.dial",
 	];
 
 	private static readonly string[] _expectedMacroDeckComponents =
@@ -41,8 +42,26 @@ public class UiComponentVocabularyTests
 		"transition", "fit", "zoom", "offsetX", "offsetY", "opacity", "brightness", "saturation", "start",
 		"end", "startColor", "endColor", "marker", "thickness", "value", "format", "seconds", "level",
 		"step", "levelColor", "borderStyle", "borderColor", "corner", "points", "plotTop", "digits",
-		"answer", "placeholder", "rotation", "originX", "originY",
+		"answer", "placeholder", "rotation", "originX", "originY", "shape", "cornerRadius", "strokeColor",
+		"strokeWidth", "path", "icon", "columns", "rows", "columnSpan", "rowSpan", "startAngle", "endAngle",
+		"on", "selected",
 	];
+
+	private static readonly string[] _expectedIconsVersion1 =
+	[
+		"action-button-type", "alert-triangle", "align-bottom", "align-center", "align-left",
+		"align-middle", "align-right", "align-top", "arrow-down", "arrow-left", "arrow-right",
+		"arrow-up", "bell", "braces-x", "bug", "chart", "check", "chevron-right", "clipboard",
+		"clock-type", "code", "copy", "crosshair", "device-desktop", "device-floppy", "device-phone",
+		"device-tablet", "disc", "discord", "dots-vertical", "download", "external-link", "file-text",
+		"folder", "folder-plus", "globe", "grid", "heart", "history-graph-type", "image", "info",
+		"layers", "list-play", "lock", "log-out", "message-square", "minus", "moon", "music-note",
+		"music-player-type", "pause", "pencil", "pin", "pin-off", "play", "plus", "power", "puzzle",
+		"refresh", "scissors", "search", "settings", "sidebar", "sliders", "star", "store", "sun",
+		"trash", "undo", "unlock", "upload", "user", "weather-type", "wifi", "x", "zap",
+	];
+
+	private static readonly string[] _expectedShapes = ["rectangle", "rounded-rectangle", "circle", "capsule", "path"];
 
 	private static readonly string[] _expectedTimeFormats =
 	[
@@ -71,12 +90,12 @@ public class UiComponentVocabularyTests
 		=> new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };
 
 	[Test]
-	public void The_core_component_set_is_the_eleven_ui_names()
+	public void The_core_component_set_is_the_eighteen_ui_names()
 	{
 		Assert.Multiple(() =>
 		{
 			Assert.That(UiComponents.WellKnown, Is.EqualTo(_expectedCoreComponents).AsCollection);
-			Assert.That(UiComponents.WellKnown.Distinct(StringComparer.Ordinal).Count(), Is.EqualTo(11));
+			Assert.That(UiComponents.WellKnown.Distinct(StringComparer.Ordinal).Count(), Is.EqualTo(18));
 
 			foreach (var type in UiComponents.WellKnown)
 			{
@@ -430,6 +449,77 @@ public class UiComponentVocabularyTests
 						},
 					],
 				},
+				new UiGrid
+				{
+					Key = "grid",
+					Columns = 3,
+					Rows = 2,
+					Gap = 0.02,
+					Padding = 0.03,
+					Children =
+					[
+						new UiShape
+						{
+							Key = "shape",
+							Shape = UiComponentShapes.Path,
+							CornerRadius = 0.05,
+							Color = "#2b6cee",
+							StrokeColor = "#ffffff",
+							StrokeWidth = UiSize.Capped(0.01, 2),
+							Path = "M0 0 L1 0 L0.5 1 Z",
+							ColumnSpan = 2,
+							RowSpan = 2,
+						},
+						new UiIcon
+						{
+							Key = "icon",
+							Icon = UiIcons.Play,
+							Size = 0.2,
+							Role = UiComponentTextRoles.Secondary,
+							Color = "#ffcc00",
+						},
+						new UiSegmented
+						{
+							Key = "segmented",
+							Selected = 1,
+							LevelColor = "#34c759",
+							Events = [UiEventHandler.On(UiComponentEvents.Change, static () => { })],
+							Children =
+							[
+								new UiTextRun { Key = "day", Text = "Day" },
+								new UiTextRun { Key = "night", Text = "Night" },
+							],
+						},
+					],
+				},
+				new UiGauge
+				{
+					Key = "gauge",
+					Level = 0.7,
+					StartAngle = -120,
+					EndAngle = 120,
+					LevelColor = "#ff9500",
+					Thickness = 0.06,
+				},
+				new UiToggle
+				{
+					Key = "toggle",
+					On = true,
+					LevelColor = "#34c759",
+					Size = 0.12,
+					Events = [UiEventHandler.On(UiComponentEvents.Change, static () => { })],
+				},
+				new UiDial
+				{
+					Key = "dial",
+					Level = 0.3,
+					Step = 0.05,
+					StartAngle = 0,
+					EndAngle = 360,
+					LevelColor = "#5856d6",
+					Thickness = 0.05,
+					Events = [UiEventHandler.On(UiComponentEvents.Adjust, static () => { })],
+				},
 				new UiTextField
 				{
 					Key = "search",
@@ -455,6 +545,62 @@ public class UiComponentVocabularyTests
 				},
 			],
 		};
+
+	[Test]
+	public void The_shape_set_is_frozen()
+	{
+		Assert.That(UiComponentShapes.WellKnown, Is.EqualTo(_expectedShapes).AsCollection);
+	}
+
+	[Test]
+	public void The_first_icon_group_is_frozen_and_names_only_glyphs()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(UiIcons.Version1, Is.EqualTo(_expectedIconsVersion1).AsCollection);
+			Assert.That(UiIcons.WellKnown, Is.SupersetOf(UiIcons.Version1));
+			Assert.That(UiIcons.WellKnown, Has.None.AnyOf("xs", "sm", "md", "lg", "xl", "2xl", "wifi-solid-full"));
+		});
+	}
+
+	[Test]
+	public void An_icon_name_reports_the_component_version_that_draws_it()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(UiIcons.VersionOf("play"), Is.EqualTo(1));
+			Assert.That(UiIcons.VersionOf("wifi"), Is.EqualTo(1));
+			Assert.That(UiIcons.VersionOf("xs"), Is.Null);
+			Assert.That(UiIcons.VersionOf("not-an-icon"), Is.Null);
+		});
+	}
+
+	[Test]
+	public void Grid_spans_reach_the_wire_only_when_declared()
+	{
+		var tree = UiViewBuilder.Build(WidgetSurface(),
+			new UiGrid
+			{
+				Key = "root",
+				Columns = 2,
+				Children =
+				[
+					new UiTextRun { Key = "plain", Text = "a" },
+					new UiStack { Key = "wide", ColumnSpan = 2, RowSpan = 3 },
+				],
+			});
+
+		var plain = tree.Root.Children[0].Properties;
+		var wide = tree.Root.Children[1].Properties;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(plain.ContainsKey("columnSpan"), Is.False);
+			Assert.That(plain.ContainsKey("rowSpan"), Is.False);
+			Assert.That(wide["columnSpan"].GetInt32(), Is.EqualTo(2));
+			Assert.That(wide["rowSpan"].GetInt32(), Is.EqualTo(3));
+		});
+	}
 
 	[Test]
 	public void A_list_emits_its_direction_only_when_one_is_declared()

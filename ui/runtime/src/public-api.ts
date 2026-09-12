@@ -449,13 +449,28 @@ export {
   type WebClientTargetCapabilities,
 } from './client-target/client-target';
 export {
+  activationFor,
   containsTickingNode,
   findInteractiveNode,
   nodeClaimsValue,
   nodeClaimsGesture,
   treeClaimsGesture,
+  type UiNodeActivation,
 } from './ui-framework/node-gestures';
 export { chartPaths, type UiChartPaths } from './ui-components/chart';
+export {
+  arcMetrics,
+  arcPath,
+  arcPoint,
+  arcSweep,
+  dialTravelOnMove,
+  dialTravelOnPress,
+  pointerAngle,
+  type ArcMetrics,
+  type ArcSweep,
+} from './ui-components/arc';
+export { layoutGridCells, placeGridChildren, type UiGridCell, type UiGridPlacement } from './ui-components/grid-layout';
+export { isShapePathData, shapeOutline } from './ui-components/ui-shape.component';
 export {
   dialAngles,
   dialHands,
@@ -470,6 +485,10 @@ export {
   UI_COMPONENT_BUTTON_CORNERS_WELL_KNOWN,
   UI_COMPONENT_IMAGE_TRANSITIONS_WELL_KNOWN,
   UI_COMPONENTS_WELL_KNOWN,
+  UI_COMPONENT_SHAPES_WELL_KNOWN,
+  UI_ICON_VERSIONS,
+  UI_ICONS_WELL_KNOWN,
+  UiComponentShapes,
   UiComponentAlignments,
   UiComponentBorderStyles,
   UiComponentButtonCorners,

@@ -10331,6 +10331,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Voicemeeter.Variables.ChannelMuted" xml:space="preserve">
     <value>Canal en sourdine</value>
   </data>
+  <data name="Integrations.Voicemeeter.Variables.StripRouted" xml:space="preserve">
+    <value>Routé vers {bus}</value>
+  </data>
   <data name="Integrations.Weather.Config.CelsiusOption" xml:space="preserve">
     <value>Celsius (°C)</value>
   </data>

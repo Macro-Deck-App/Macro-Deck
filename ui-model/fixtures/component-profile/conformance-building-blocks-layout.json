@@ -1,0 +1,170 @@
+{
+  "cases": [
+    {
+      "basis": 240,
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "nodes": {
+        "conformance.shape": {
+          "cell": {
+            "left": 9.6,
+            "top": 9.6,
+            "width": 145.6,
+            "height": 70.4
+          },
+          "cornerRadius": 12.0,
+          "strokeWidth": 2.4
+        },
+        "conformance.icon": {
+          "cell": {
+            "left": 160.0,
+            "top": 9.6,
+            "width": 70.4,
+            "height": 70.4
+          },
+          "glyphEdge": 28.8
+        },
+        "conformance.gauge": {
+          "cell": {
+            "left": 9.6,
+            "top": 84.8,
+            "width": 70.4,
+            "height": 145.6
+          },
+          "arcRadius": 30.4,
+          "arcStrokeWidth": 9.6
+        },
+        "conformance.toggle": {
+          "cell": {
+            "left": 84.8,
+            "top": 84.8,
+            "width": 70.4,
+            "height": 70.4
+          },
+          "toggleTrack": {
+            "left": 14.2,
+            "top": 23.2,
+            "width": 42.0,
+            "height": 24.0
+          },
+          "knobLeft": 20.4
+        },
+        "conformance.segmented": {
+          "cell": {
+            "left": 160.0,
+            "top": 84.8,
+            "width": 70.4,
+            "height": 70.4
+          },
+          "segmentFace": {
+            "left": 40.832,
+            "width": 23.936
+          }
+        },
+        "conformance.dial": {
+          "cell": {
+            "left": 84.8,
+            "top": 160.0,
+            "width": 70.4,
+            "height": 70.4
+          },
+          "arcRadius": 30.4,
+          "thumbRadius": 12.0
+        },
+        "conformance.path": {
+          "cell": {
+            "left": 160.0,
+            "top": 160.0,
+            "width": 70.4,
+            "height": 70.4
+          }
+        }
+      }
+    },
+    {
+      "basis": 120,
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "nodes": {
+        "conformance.shape": {
+          "cell": {
+            "left": 4.8,
+            "top": 4.8,
+            "width": 72.8,
+            "height": 35.2
+          },
+          "cornerRadius": 6.0,
+          "strokeWidth": 1.2
+        },
+        "conformance.icon": {
+          "cell": {
+            "left": 80.0,
+            "top": 4.8,
+            "width": 35.2,
+            "height": 35.2
+          },
+          "glyphEdge": 14.4
+        },
+        "conformance.gauge": {
+          "cell": {
+            "left": 4.8,
+            "top": 42.4,
+            "width": 35.2,
+            "height": 72.8
+          },
+          "arcRadius": 15.2,
+          "arcStrokeWidth": 4.8
+        },
+        "conformance.toggle": {
+          "cell": {
+            "left": 42.4,
+            "top": 42.4,
+            "width": 35.2,
+            "height": 35.2
+          },
+          "toggleTrack": {
+            "left": 7.1,
+            "top": 11.6,
+            "width": 21.0,
+            "height": 12.0
+          },
+          "knobLeft": 10.2
+        },
+        "conformance.segmented": {
+          "cell": {
+            "left": 80.0,
+            "top": 42.4,
+            "width": 35.2,
+            "height": 35.2
+          },
+          "segmentFace": {
+            "left": 20.416,
+            "width": 11.968
+          }
+        },
+        "conformance.dial": {
+          "cell": {
+            "left": 42.4,
+            "top": 80.0,
+            "width": 35.2,
+            "height": 35.2
+          },
+          "arcRadius": 15.2,
+          "thumbRadius": 6.0
+        },
+        "conformance.path": {
+          "cell": {
+            "left": 80.0,
+            "top": 80.0,
+            "width": 35.2,
+            "height": 35.2
+          }
+        }
+      }
+    }
+  ]
+}

@@ -15,7 +15,18 @@ import {
   signal,
 } from '@angular/core';
 
-import { ActionButtonTriggerType, emitsEvent, nodeEvents, UiNode, UiNodeEvent, type UiComponentBox, UiComponentEvents, WidgetData } from '@macro-deck/runtime';
+import {
+  ActionButtonTriggerType,
+  activationFor,
+  emitsEvent,
+  findInteractiveNode,
+  treeClaimsGesture,
+  UiNode,
+  UiNodeEvent,
+  type UiComponentBox,
+  UiComponentEvents,
+  WidgetData,
+} from '@macro-deck/runtime';
 import { ApiService, ConnectionState } from '../../../transport';
 import { UiSessionHandle, UiSessionOpenRequest, UiSessionService } from '../../../services/ui-session.service';
 import { PressFeedback } from '../../../util/press-feedback';
@@ -79,7 +90,7 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
 
   readonly rejected = computed(() => this.handleSignal()?.rejection() != null);
 
-  protected readonly treeClaimsGesture = computed(() => hasInteractiveNode(this.renderedRoot()));
+  protected readonly treeClaimsGesture = computed(() => treeClaimsGesture(this.renderedRoot()));
 
   private openedForWidgetId: string | undefined;
   private previewDebounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -203,6 +214,11 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
 
     const interactive = findInteractiveNode(this.renderedRoot());
     if (interactive !== null) {
+      const activation = activationFor(interactive);
+      if (activation !== null) {
+        this.onTreeEvent({ nodeId: interactive.id, name: activation.name, data: activation.payload });
+        return;
+      }
       for (const name of [UiComponentEvents.PressStart, UiComponentEvents.PressEnd, UiComponentEvents.Press]) {
         // The same gate UiNodeEventBus.emit applies: a node never raises an event it did not declare.
         if (emitsEvent(interactive, name)) {
@@ -274,21 +290,6 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
       this.longPressTimeout = null;
     }
   }
-}
-
-function hasInteractiveNode(node: UiNode | null): boolean {
-  return findInteractiveNode(node) !== null;
-}
-
-function findInteractiveNode(node: UiNode | null): UiNode | null {
-  if (node === null) return null;
-  if (nodeEvents(node).length > 0) return node;
-
-  for (const child of node.children ?? []) {
-    const found = findInteractiveNode(child);
-    if (found !== null) return found;
-  }
-  return null;
 }
 
 function isRealChange(change: SimpleChange | undefined): boolean {

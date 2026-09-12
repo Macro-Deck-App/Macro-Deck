@@ -390,3 +390,136 @@ public static class UiComponentBorderStyles
 	public static readonly IReadOnlyList<string> WellKnown =
 		[Static, Heartbeat, Breathing, Blink, Comet, Ants, HueShift, Rgb];
 }
+
+/// <summary>The outlines a <see cref="UiShape" /> draws. Adding one raises <c>ui.shape</c>'s component version,
+/// because a reader draws nothing for a value it does not know.</summary>
+public static class UiComponentShapes
+{
+	/// <summary>The whole box.</summary>
+	public const string Rectangle = "rectangle";
+
+	/// <summary>The whole box with corners of <see cref="UiShape.CornerRadius" />.</summary>
+	public const string RoundedRectangle = "rounded-rectangle";
+
+	/// <summary>A circle inscribed in the smaller side of the box, centred.</summary>
+	public const string Circle = "circle";
+
+	/// <summary>The whole box with corners of half its smaller side.</summary>
+	public const string Capsule = "capsule";
+
+	/// <summary>The outline <see cref="UiShape.Path" /> describes.</summary>
+	public const string Path = "path";
+
+	/// <summary>The outlines this profile ships.</summary>
+	public static readonly IReadOnlyList<string> WellKnown = [Rectangle, RoundedRectangle, Circle, Capsule, Path];
+}
+
+/// <summary>
+/// The glyphs of Macro Deck's built-in icon set a <see cref="UiIcon" /> may name. Additive only: a name is never
+/// removed or renamed, because a plugin compiled against it would otherwise draw nothing.
+///
+/// <para>
+/// <b>Names are negotiated per group.</b> A reader draws a glyph only for a name in the groups it carries, so
+/// every name added after the first group belongs to a new group that raises <c>ui.icon</c>'s component version.
+/// A producer using a name sets <see cref="Dsl.UiElement.RequiredComponentVersion" /> to
+/// <see cref="VersionOf" /> that name when it is above 1, with a <see cref="Dsl.UiElement.Fallback" />.
+/// </para>
+/// </summary>
+public static class UiIcons
+{
+	public const string ActionButtonType = "action-button-type";
+	public const string AlertTriangle = "alert-triangle";
+	public const string AlignBottom = "align-bottom";
+	public const string AlignCenter = "align-center";
+	public const string AlignLeft = "align-left";
+	public const string AlignMiddle = "align-middle";
+	public const string AlignRight = "align-right";
+	public const string AlignTop = "align-top";
+	public const string ArrowDown = "arrow-down";
+	public const string ArrowLeft = "arrow-left";
+	public const string ArrowRight = "arrow-right";
+	public const string ArrowUp = "arrow-up";
+	public const string Bell = "bell";
+	public const string BracesX = "braces-x";
+	public const string Bug = "bug";
+	public const string Chart = "chart";
+	public const string Check = "check";
+	public const string ChevronRight = "chevron-right";
+	public const string Clipboard = "clipboard";
+	public const string ClockType = "clock-type";
+	public const string Code = "code";
+	public const string Copy = "copy";
+	public const string Crosshair = "crosshair";
+	public const string DeviceDesktop = "device-desktop";
+	public const string DeviceFloppy = "device-floppy";
+	public const string DevicePhone = "device-phone";
+	public const string DeviceTablet = "device-tablet";
+	public const string Disc = "disc";
+	public const string Discord = "discord";
+	public const string DotsVertical = "dots-vertical";
+	public const string Download = "download";
+	public const string ExternalLink = "external-link";
+	public const string FileText = "file-text";
+	public const string Folder = "folder";
+	public const string FolderPlus = "folder-plus";
+	public const string Globe = "globe";
+	public const string Grid = "grid";
+	public const string Heart = "heart";
+	public const string HistoryGraphType = "history-graph-type";
+	public const string Image = "image";
+	public const string Info = "info";
+	public const string Layers = "layers";
+	public const string ListPlay = "list-play";
+	public const string Lock = "lock";
+	public const string LogOut = "log-out";
+	public const string MessageSquare = "message-square";
+	public const string Minus = "minus";
+	public const string Moon = "moon";
+	public const string MusicNote = "music-note";
+	public const string MusicPlayerType = "music-player-type";
+	public const string Pause = "pause";
+	public const string Pencil = "pencil";
+	public const string Pin = "pin";
+	public const string PinOff = "pin-off";
+	public const string Play = "play";
+	public const string Plus = "plus";
+	public const string Power = "power";
+	public const string Puzzle = "puzzle";
+	public const string Refresh = "refresh";
+	public const string Scissors = "scissors";
+	public const string Search = "search";
+	public const string Settings = "settings";
+	public const string Sidebar = "sidebar";
+	public const string Sliders = "sliders";
+	public const string Star = "star";
+	public const string Store = "store";
+	public const string Sun = "sun";
+	public const string Trash = "trash";
+	public const string Undo = "undo";
+	public const string Unlock = "unlock";
+	public const string Upload = "upload";
+	public const string User = "user";
+	public const string WeatherType = "weather-type";
+	public const string Wifi = "wifi";
+	public const string X = "x";
+	public const string Zap = "zap";
+
+	/// <summary>The names <c>ui.icon</c> component version 1 draws.</summary>
+	public static readonly IReadOnlyList<string> Version1 =
+	[
+		ActionButtonType, AlertTriangle, AlignBottom, AlignCenter, AlignLeft, AlignMiddle, AlignRight, AlignTop,
+		ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Bell, BracesX, Bug, Chart, Check, ChevronRight, Clipboard, ClockType,
+		Code, Copy, Crosshair, DeviceDesktop, DeviceFloppy, DevicePhone, DeviceTablet, Disc, Discord, DotsVertical,
+		Download, ExternalLink, FileText, Folder, FolderPlus, Globe, Grid, Heart, HistoryGraphType, Image, Info, Layers,
+		ListPlay, Lock, LogOut, MessageSquare, Minus, Moon, MusicNote, MusicPlayerType, Pause, Pencil, Pin, PinOff,
+		Play, Plus, Power, Puzzle, Refresh, Scissors, Search, Settings, Sidebar, Sliders, Star, Store, Sun, Trash, Undo,
+		Unlock, Upload, User, WeatherType, Wifi, X, Zap,
+	];
+
+	/// <summary>Every name any version of <c>ui.icon</c> draws.</summary>
+	public static readonly IReadOnlyList<string> WellKnown = Version1;
+
+	/// <summary>The <c>ui.icon</c> component version that first draws <paramref name="name" />, or
+	/// <see langword="null" /> when no version does.</summary>
+	public static int? VersionOf(string name) => Version1.Contains(name, StringComparer.Ordinal) ? 1 : null;
+}

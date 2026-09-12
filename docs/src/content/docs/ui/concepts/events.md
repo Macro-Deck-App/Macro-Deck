@@ -127,8 +127,8 @@ hidden one keeps and submits its value. See [Conditional content](/ui/concepts/s
 
 | Name | Constant | Declared by | Fires | Payload |
 |---|---|---|---|---|
-| `change` | `UiComponentEvents.Change` | `ui.slider`, `ui.text-field` | The value the user settled on - released the drag, left the field, pressed Enter. Always sent when an interaction ends, even if equal to the last `adjust`. | The value: a number (slider), a string (text field) |
-| `adjust` | `UiComponentEvents.Adjust` | `ui.slider`, `ui.text-field` | Continuously while the user works the control - every drag step or keystroke. At most ten a second, never after the `change` that ended it. | Same as `change` |
+| `change` | `UiComponentEvents.Change` | `ui.slider`, `ui.dial`, `ui.text-field`, `ui.toggle`, `ui.segmented` | The value the user settled on - released the drag, left the field, pressed Enter, flipped the switch, chose a segment. Always sent when an interaction ends, even if equal to the last `adjust`. | The value: a number, the level fraction (slider, dial); a string (text field); a boolean, the new state, read with `TryGetBoolean` (toggle); a number, the zero-based segment index, read with `TryGetDouble` (segmented) |
+| `adjust` | `UiComponentEvents.Adjust` | `ui.slider`, `ui.dial`, `ui.text-field` | Continuously while the user works the control - every drag step or keystroke. At most ten a second, never after the `change` that ended it. | Same as `change` |
 | `press` | `UiComponentEvents.Press` | `ui.button` | A press completed without being held past the long-press threshold. The primary name a reader implements first. | None |
 | `long-press` | `UiComponentEvents.LongPress` | `ui.button` | The press was still held after 600 ms. At most once per interaction, never together with `press`. | None |
 | `press-start` | `UiComponentEvents.PressStart` | `ui.button` | The press began. | None |
