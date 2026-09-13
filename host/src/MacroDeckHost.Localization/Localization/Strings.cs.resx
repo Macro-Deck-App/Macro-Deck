@@ -456,6 +456,9 @@
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Proměnné widgetu</value>
   </data>
+  <data name="Auth.ForgotPasswordHint" xml:space="preserve">
+    <value>Zapomenuté heslo? Lze ho obnovit na počítači, na kterém běží Macro Deck, v Nastavení &gt; Zabezpečení.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Heslo</value>
   </data>
@@ -13274,6 +13277,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Security.PasswordsMismatch" xml:space="preserve">
     <value>Hesla se neshodují.</value>
+  </data>
+  <data name="Settings.Security.ResetPasswordAction" xml:space="preserve">
+    <value>Obnovit heslo</value>
+  </data>
+  <data name="Settings.Security.ResetPasswordDescription" xml:space="preserve">
+    <value>Na počítači, na kterém běží Macro Deck, lze nastavit nové heslo bez zadání současného. Všechny vzdálené relace se tím odhlásí.</value>
   </data>
   <data name="Settings.Security.SignOutAction" xml:space="preserve">
     <value>Odhlásit</value>

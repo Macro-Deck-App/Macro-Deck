@@ -21,4 +21,6 @@ public interface IDeviceEnrollmentStore
 
 	/// <summary>Drops everything that has expired.</summary>
 	void PurgeExpired(DateTime now);
+
+	void Clear();
 }

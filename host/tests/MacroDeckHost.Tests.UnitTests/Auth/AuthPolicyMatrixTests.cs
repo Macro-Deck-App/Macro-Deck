@@ -156,6 +156,60 @@ public class AuthPolicyMatrixTests
 	}
 
 	[Test]
+	public async Task Password_reset_is_refused_off_the_loopback_listener_even_with_an_admin_token()
+	{
+		var anonymous = await SendJson(HttpMethod.Post, "/api/auth/reset-password", new { newPassword = "short" });
+		var remote = await SendJson(HttpMethod.Post,
+			"/api/auth/reset-password",
+			new { newPassword = "short" },
+			_adminToken);
+		var loopback = await SendJson(HttpMethod.Post,
+			"/api/auth/reset-password",
+			new { newPassword = "short" },
+			loopback: true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(anonymous.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+			Assert.That(remote.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+			Assert.That(loopback.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+		});
+	}
+
+	[Test]
+	public async Task A_foreign_page_cannot_drive_a_password_reset_across_origins()
+	{
+		using var preflight = new HttpRequestMessage(HttpMethod.Options, "/api/auth/reset-password");
+		preflight.Headers.Add(FakeConnectionStartupFilter.ShapeHeader, nameof(FakeConnectionShape.Loopback));
+		preflight.Headers.Add("Origin", "https://attacker.example");
+		preflight.Headers.Add("Access-Control-Request-Method", "POST");
+		preflight.Headers.Add("Access-Control-Request-Headers", "content-type");
+		var preflightResponse = await _client.SendAsync(preflight);
+
+		using var simple = new HttpRequestMessage(HttpMethod.Post, "/api/auth/reset-password")
+		{
+			Content = new StringContent("{\"newPassword\":\"newpassword1\"}",
+				global::System.Text.Encoding.UTF8,
+				"text/plain")
+		};
+		simple.Headers.Add(FakeConnectionStartupFilter.ShapeHeader, nameof(FakeConnectionShape.Loopback));
+		simple.Headers.Add("Origin", "https://attacker.example");
+		var simpleResponse = await _client.SendAsync(simple);
+
+		var login = await SendJson(HttpMethod.Post,
+			"/api/auth/login",
+			new { username = "admin", password = "password123", scope = "client" });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(preflightResponse.Headers.Contains("Access-Control-Allow-Origin"), Is.False);
+			Assert.That(simpleResponse.StatusCode, Is.Not.EqualTo(HttpStatusCode.NoContent));
+			Assert.That(simpleResponse.Headers.Contains("Access-Control-Allow-Origin"), Is.False);
+			Assert.That(login.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+		});
+	}
+
+	[Test]
 	public async Task A_page_open_in_the_users_browser_gets_no_loopback_trust()
 	{
 		var crossSite = await SendFromBrowser(HttpMethod.Get,

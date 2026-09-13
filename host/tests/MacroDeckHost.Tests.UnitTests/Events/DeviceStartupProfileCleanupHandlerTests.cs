@@ -66,6 +66,8 @@ public class DeviceStartupProfileCleanupHandlerTests
 
 		public Task<Result<DeviceError>> LogoutDevice(Guid id) => throw new NotSupportedException();
 
+		public Task EndAllSessions() => throw new NotSupportedException();
+
 		public Task<Result<DeviceError>> RemoveDevice(Guid id) => throw new NotSupportedException();
 
 		public Task<Result<DeviceEntity, DeviceError>> SetStartupProfile(Guid id, string? profileId)

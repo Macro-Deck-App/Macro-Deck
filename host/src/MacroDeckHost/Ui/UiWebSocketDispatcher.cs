@@ -82,6 +82,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 	private readonly IUiTransport _transport;
 	private readonly WebSocketUiTransport _webSocketTransport;
 	private readonly CompanionDeviceRegistry _companions;
+	private readonly AccessTokenCutoff _accessTokenCutoff;
 	private readonly SemaphoreSlim _dispatch = new(1, 1);
 
 	public UiWebSocketDispatcher(
@@ -122,6 +123,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		IUiTransport transport,
 		WebSocketUiTransport webSocketTransport,
 		CompanionDeviceRegistry companions,
+		AccessTokenCutoff accessTokenCutoff,
 		CancellationToken connectionCancellation)
 	{
 		_connectionId = connectionId;
@@ -158,11 +160,12 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		_transport = transport;
 		_webSocketTransport = webSocketTransport;
 		_companions = companions;
+		_accessTokenCutoff = accessTokenCutoff;
 	}
 
 	public Task<bool> ConnectedAsync()
 	{
-		if (_lifetime.ApplicationStopping.IsCancellationRequested)
+		if (_lifetime.ApplicationStopping.IsCancellationRequested || _accessTokenCutoff.Rejects(_principal))
 		{
 			return Task.FromResult(false);
 		}

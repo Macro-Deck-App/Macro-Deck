@@ -55,6 +55,11 @@ export function createLoginForm(client: Client): { element: HTMLElement } {
   });
   form.appendChild(submit.element);
 
+  const hint = document.createElement('p');
+  hint.className = 'wc-login-hint';
+  hint.textContent = t(ClientAppStrings.Auth.ForgotPasswordHint);
+  form.appendChild(hint);
+
   let submitting = false;
 
   const setSubmitting = (value: boolean): void => {

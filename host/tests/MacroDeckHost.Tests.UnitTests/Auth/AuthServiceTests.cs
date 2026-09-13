@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Security.Claims;
 using MacroDeckHost.Infrastructure.Auth;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Devices;
@@ -19,6 +20,8 @@ public class AuthServiceTests
 	private FakeOnboardingPreferences _preferences = null!;
 	private AuthService _service = null!;
 	private PairingCodeStore _pairingCodes = null!;
+	private DeviceConnectionTracker _connections = null!;
+	private AccessTokenCutoff _cutoff = null!;
 
 	private static readonly DeviceRegistration _phone = new(null,
 		null,
@@ -40,13 +43,15 @@ public class AuthServiceTests
 		var readiness = new StartupReadiness();
 		readiness.MarkCachesReady();
 		readiness.MarkVariablesReady();
+		_connections = new DeviceConnectionTracker(new RecordingEventBus(), _time);
+		_cutoff = new AccessTokenCutoff();
 		_service = new AuthService(_users,
 			_tokens,
 			new FakePasswordHasher(),
 			new FakeAccessTokenIssuer(_time),
 			new DeviceService(new InMemoryDeviceRepository(),
 				_tokens,
-				new DeviceConnectionTracker(new RecordingEventBus(), _time),
+				_connections,
 				new RecordingUiTransport(),
 				new RecordingMediator(),
 				_time,
@@ -57,6 +62,7 @@ public class AuthServiceTests
 				new FakeIntegrationRegistry()),
 			new DeviceEnrollmentStore(),
 			_pairingCodes,
+			_cutoff,
 			_preferences,
 			_time,
 			NullLogger<AuthService>.Instance);
@@ -466,6 +472,83 @@ public class AuthServiceTests
 			Assert.That(_tokens.Tokens[0].RevokedAt, Is.Not.Null);
 			Assert.That(oldLogin.Error, Is.EqualTo(AuthError.InvalidCredentials));
 			Assert.That(newLogin.Success, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task ResetPassword_sets_a_new_password_without_the_old_one_and_ends_every_session()
+	{
+		await _service.Setup("admin", "password123");
+		await _service.Login("admin", "password123", AuthScope.Client);
+		var issuedBefore = new ClaimsPrincipal(new ClaimsIdentity(
+			[new Claim("iat", _time.GetUtcNow().ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture))],
+			"test"));
+
+		var tooShort = await _service.ResetPassword("short");
+		var ok = await _service.ResetPassword("newpassword1");
+		var oldLogin = await _service.Login("admin", "password123", AuthScope.Client);
+		var newLogin = await _service.Login("admin", "newpassword1", AuthScope.Client);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(tooShort.Error, Is.EqualTo(AuthError.ValidationError));
+			Assert.That(ok.Success, Is.True);
+			Assert.That(_tokens.Tokens[0].RevokedAt, Is.Not.Null);
+			Assert.That(_cutoff.Rejects(issuedBefore), Is.True);
+			Assert.That(oldLogin.Error, Is.EqualTo(AuthError.InvalidCredentials));
+			Assert.That(newLogin.Success, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task ResetPassword_without_an_account_is_a_validation_error()
+	{
+		var result = await _service.ResetPassword("newpassword1");
+
+		Assert.That(result.Error, Is.EqualTo(AuthError.ValidationError));
+	}
+
+	[Test]
+	public async Task ResetPassword_drops_device_connections_keeps_the_desktop_and_lets_the_device_sign_in_again()
+	{
+		await _service.Setup("admin", "password123");
+		var first = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		var deviceId = first.Data!.DeviceId!.Value;
+		var deviceAborts = 0;
+		var desktopAborts = 0;
+		_connections.Attach("device-connection", deviceId, () => deviceAborts++);
+		_connections.Attach("desktop-connection", null, () => desktopAborts++);
+
+		await _service.ResetPassword("newpassword1");
+		var again = await _service.Login("admin",
+			"newpassword1",
+			AuthScope.Client,
+			_phone with { DeviceId = deviceId, DeviceSecret = first.Data.IssuedDeviceSecret });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(deviceAborts, Is.EqualTo(1));
+			Assert.That(desktopAborts, Is.Zero);
+			Assert.That(_connections.IsRevoked(deviceId), Is.False);
+			Assert.That(again.Data?.DeviceId, Is.EqualTo(deviceId));
+		});
+	}
+
+	[Test]
+	public async Task ResetPassword_voids_the_pairing_code_and_outstanding_enrollments()
+	{
+		await _service.Setup("admin", "password123");
+		var code = _pairingCodes.Current(_time.GetUtcNow().UtcDateTime).Code;
+		var enrollment = await _service.CreateDeviceEnrollment(TimeSpan.FromMinutes(5));
+
+		await _service.ResetPassword("newpassword1");
+		var byCode = await _service.RedeemDeviceEnrollment(code, _phone);
+		var byToken = await _service.RedeemDeviceEnrollment(enrollment.Data!.Token, _phone);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(byCode.Error, Is.EqualTo(AuthError.InvalidCredentials));
+			Assert.That(byToken.Error, Is.EqualTo(AuthError.InvalidCredentials));
 		});
 	}
 

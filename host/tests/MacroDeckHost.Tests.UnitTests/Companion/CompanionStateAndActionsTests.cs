@@ -211,5 +211,6 @@ internal sealed class CompanionStateAndActionsTests
 			transport: null!,
 			webSocketTransport: null!,
 			companions: harness.DeviceRegistry,
+			accessTokenCutoff: new AccessTokenCutoff(),
 			connectionCancellation: CancellationToken.None);
 }

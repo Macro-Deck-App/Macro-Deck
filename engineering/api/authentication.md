@@ -27,6 +27,8 @@ Public listeners never inherit loopback trust, even when reached through a local
 
 See [ADR 0003](../decisions/0003-loopback-trust-token-scopes-and-device-identity.md) and [ADR 0030](../decisions/0030-android-usb-connections-over-adb.md).
 
+Resetting the account password (`POST /api/auth/reset-password`) is loopback-only and asks for no current password: sitting at this machine is the proof of ownership, the same as for first-run setup. A network client with an admin token is refused, and the route is excluded from CORS because loopback trust needs no credentials. A reset revokes every refresh token, refuses every access token issued before it (by its `iat`, in JWT validation and when a WebSocket ticket is redeemed), closes every device's live connection, and voids the pairing code and outstanding enrollment credentials. Known limits: the cutoff is held in memory, so after a host restart within the access-token lifetime a pre-reset access token is accepted again until it expires (its refresh token stays revoked); an already open WebSocket of a token session without a device keeps its rights until it disconnects; and a login that verified the old password just before the reset can finish after it, as with a password change.
+
 Backup download, import, restore, recovery-key reveal, and recovery-key regeneration are loopback-only: each one reads or writes the reusable plaintext secret described below, so a network client must never reach it. Backup list, create, delete, settings, and recovery-key *state* (whether a recovery key exists, not its value) stay available on the public listener, since they do not expose that content. See [ADR 0047](../decisions/0047-secrets-backups-and-restore.md).
 
 ## JWT clients

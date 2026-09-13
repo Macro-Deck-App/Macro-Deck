@@ -65,6 +65,23 @@ describe('LoginFormComponent', () => {
     expect(element.querySelectorAll('shared-checkbox').length).toBe(0);
   });
 
+  it('tells someone who forgot the password where to reset it', () => {
+    TestBed.configureTestingModule({
+      imports: [LoginFormComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        ...provideLocalizationTesting(),
+        { provide: AuthService, useValue: authStub },
+      ],
+    });
+    const fixture = TestBed.createComponent(LoginFormComponent);
+    fixture.componentRef.setInput('scope', 'client');
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('.login-hint')?.textContent)
+      .toContain('Forgot your password?');
+  });
+
   it('shows the auth error message on a failed login', async () => {
     authStub.login.and.resolveTo({ ok: false, message: 'Invalid username or password.' });
     const component = createComponent();

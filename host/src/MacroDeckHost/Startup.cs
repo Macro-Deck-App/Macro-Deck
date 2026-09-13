@@ -405,6 +405,7 @@ public class Startup
 
 		services.AddSingleton(TimeProvider.System);
 		services.AddSingleton<LoginThrottle>();
+		services.AddSingleton<AccessTokenCutoff>();
 		services.AddSingleton<FailedLoginNotificationTracker>();
 		services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
 		services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();

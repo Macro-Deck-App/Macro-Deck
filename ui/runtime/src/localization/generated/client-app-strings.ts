@@ -7,6 +7,7 @@ export const ClientAppStringsScope = 'macrodeck.app' as const;
 /** Fully qualified localization keys, as the host's catalog serves them. */
 export const ClientAppStrings = {
 	Auth: {
+		ForgotPasswordHint: 'macrodeck.app:Auth.ForgotPasswordHint',
 		Password: 'macrodeck.app:Auth.Password',
 		SignIn: 'macrodeck.app:Auth.SignIn',
 		SignInFailed: 'macrodeck.app:Auth.SignInFailed',
@@ -330,6 +331,7 @@ type LocalizationKeyLeaves<T> = T extends string ? T
 
 /** The default-language text of every key, as the fallback before the host answers. */
 export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
+	'macrodeck.app:Auth.ForgotPasswordHint': 'Forgot your password? Reset it on the computer running Macro Deck, under Settings > Security.',
 	'macrodeck.app:Auth.Password': 'Password',
 	'macrodeck.app:Auth.SignIn': 'Sign in',
 	'macrodeck.app:Auth.SignInFailed': 'Login failed',

@@ -63,5 +63,7 @@ public interface IAuthService
 
 	Task<Result<AuthError>> ChangePassword(string currentPassword, string newPassword);
 
+	Task<Result<AuthError>> ResetPassword(string newPassword);
+
 	Task<Result<AuthError>> ChangeUsername(string currentPassword, string newUsername);
 }

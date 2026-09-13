@@ -456,6 +456,9 @@
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Zmienne widżetu</value>
   </data>
+  <data name="Auth.ForgotPasswordHint" xml:space="preserve">
+    <value>Zapomniane hasło? Można je zresetować na komputerze, na którym działa Macro Deck, w Ustawienia &gt; Bezpieczeństwo.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Hasło</value>
   </data>
@@ -13274,6 +13277,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Settings.Security.PasswordsMismatch" xml:space="preserve">
     <value>Hasła nie są zgodne.</value>
+  </data>
+  <data name="Settings.Security.ResetPasswordAction" xml:space="preserve">
+    <value>Zresetuj hasło</value>
+  </data>
+  <data name="Settings.Security.ResetPasswordDescription" xml:space="preserve">
+    <value>Na komputerze, na którym działa Macro Deck, można ustawić nowe hasło bez podawania obecnego. Spowoduje to wylogowanie wszystkich sesji zdalnych.</value>
   </data>
   <data name="Settings.Security.SignOutAction" xml:space="preserve">
     <value>Wyloguj</value>
