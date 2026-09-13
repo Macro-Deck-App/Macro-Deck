@@ -144,11 +144,10 @@ public class SystemController : ControllerBase
 	public Task<GetLockStateResponse> GetLockState(CancellationToken ct)
 		=> _getLockState.Handle(new GetLockStateRequest(), ct).AsTask();
 
-	// Client scope, never anonymous: a companion syncs these on connect to wake this computer later.
 	[HttpGet("wake-on-lan")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
 	public GetWakeOnLanResponse GetWakeOnLan()
-		=> new() { MacAddresses = [.. WakeOnLanPlanner.MacAddresses(_interfaces.GetInterfaces())] };
+		=> new(Environment.MachineName, WakeOnLanPlanner.MacAddresses(_interfaces.GetInterfaces()));
 
 	[HttpGet("fonts/{faceId}/file")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
@@ -173,3 +172,5 @@ public class SystemController : ControllerBase
 				? "font/otf"
 				: "font/ttf";
 }
+
+public record GetWakeOnLanResponse(string InstanceName, IReadOnlyList<string> MacAddresses);

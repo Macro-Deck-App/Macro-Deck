@@ -4,8 +4,6 @@ public static class WakeOnLanPlanner
 {
 	private const int MacAddressBytes = 6;
 
-	// The interfaces a companion can reach this host on are the ones discovery advertises, so the
-	// same filter decides which network cards a magic packet should address.
 	public static IReadOnlyList<string> MacAddresses(IReadOnlyList<NetworkInterfaceSnapshot> interfaces)
 		=> interfaces
 			.Where(ServiceAdvertisementPlanner.IsLanInterface)

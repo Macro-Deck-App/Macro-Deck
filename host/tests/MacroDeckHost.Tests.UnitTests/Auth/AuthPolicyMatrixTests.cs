@@ -106,7 +106,6 @@ public class AuthPolicyMatrixTests
 
 		Assert.Multiple(() =>
 		{
-			// The network cards of the host are not handed to someone who has not signed in.
 			Assert.That(wakeOnLan.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
 			Assert.That(folders.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
 			Assert.That(filesystem.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
