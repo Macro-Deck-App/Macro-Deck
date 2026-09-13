@@ -11,7 +11,8 @@ public sealed class GetConnectSessionRequestMessageHandler
 	private readonly IConnectSessionService _sessionService;
 	private readonly IConnectAvatarCache _avatarCache;
 
-	public GetConnectSessionRequestMessageHandler(IConnectSessionService sessionService, IConnectAvatarCache avatarCache)
+	public GetConnectSessionRequestMessageHandler(IConnectSessionService sessionService,
+		IConnectAvatarCache avatarCache)
 	{
 		_sessionService = sessionService;
 		_avatarCache = avatarCache;

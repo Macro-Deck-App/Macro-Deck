@@ -73,7 +73,8 @@ public class ConnectZitadelTests
 				Is.EqualTo(new Uri("https://auth.macro-deck.app/device?user_code=DKDK-LSVH")));
 			Assert.That(authorization.ExpiresIn, Is.EqualTo(TimeSpan.FromSeconds(300)));
 			Assert.That(authorization.Interval, Is.EqualTo(TimeSpan.FromSeconds(5)));
-			Assert.That(handler.Uris, Is.EqualTo(new[] { "https://auth.macro-deck.app/oauth/v2/device_authorization" }));
+			Assert.That(handler.Uris,
+				Is.EqualTo(new[] { "https://auth.macro-deck.app/oauth/v2/device_authorization" }));
 			Assert.That(handler.Bodies[0], Does.Contain("client_id=390578325090796895"));
 			Assert.That(handler.Bodies[0], Does.Contain("scope=openid+profile+offline_access"));
 		});
@@ -84,7 +85,8 @@ public class ConnectZitadelTests
 	{
 		var idToken = ConnectJwt.Create("user-1", audiences: [ProjectId]);
 
-		Assert.Throws<ConnectAuthTransientException>(() => ConnectIdTokenReader.Read(idToken, null, TimeProvider.System));
+		Assert.Throws<ConnectAuthTransientException>(() =>
+			ConnectIdTokenReader.Read(idToken, null, TimeProvider.System));
 	}
 
 	[Test]
@@ -92,7 +94,8 @@ public class ConnectZitadelTests
 	{
 		var idToken = ConnectJwt.Create("user-1", issuer: "https://accounts.macro-deck.app/");
 
-		Assert.Throws<ConnectAuthTransientException>(() => ConnectIdTokenReader.Read(idToken, null, TimeProvider.System));
+		Assert.Throws<ConnectAuthTransientException>(() =>
+			ConnectIdTokenReader.Read(idToken, null, TimeProvider.System));
 	}
 
 	private static ConnectIdentityClient Client(StubHandler handler) => new(handler);
@@ -120,9 +123,12 @@ public class ConnectZitadelTests
 			CancellationToken cancellationToken)
 		{
 			Uris.Add(request.RequestUri!.ToString());
-			Bodies.Add(request.Content is null ? string.Empty : await request.Content.ReadAsStringAsync(cancellationToken));
+			Bodies.Add(request.Content is null
+				? string.Empty
+				: await request.Content.ReadAsStringAsync(cancellationToken));
 
-			return new HttpResponseMessage(_status) { Content = new StringContent(_body, Encoding.UTF8, "application/json") };
+			return new HttpResponseMessage(_status)
+				{ Content = new StringContent(_body, Encoding.UTF8, "application/json") };
 		}
 	}
 }

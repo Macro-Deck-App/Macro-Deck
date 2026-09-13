@@ -308,7 +308,8 @@ public sealed partial class ConnectAvatarCache : IConnectAvatarCache, IDisposabl
 		foreach (var file in Directory.EnumerateFiles(_directory))
 		{
 			var name = Path.GetFileName(file);
-			if (file != keep && (name.StartsWith("avatar-", StringComparison.Ordinal) ||
+			if (file != keep &&
+				(name.StartsWith("avatar-", StringComparison.Ordinal) ||
 					name.StartsWith("tmp-", StringComparison.Ordinal)))
 			{
 				TryDelete(file);

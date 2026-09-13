@@ -147,7 +147,8 @@ public class ConnectSignInFlowTests
 		{
 			Assert.That(outcome.Result, Is.EqualTo(ConnectSignInResult.Completed));
 			Assert.That(outcome.Claims!.DisplayName, Is.EqualTo("Ada Lovelace"));
-			Assert.That(outcome.Claims.PictureUrl, Is.EqualTo("https://auth.macro-deck.app/assets/v1/org-1/users/user-1/avatar"));
+			Assert.That(outcome.Claims.PictureUrl,
+				Is.EqualTo("https://auth.macro-deck.app/assets/v1/org-1/users/user-1/avatar"));
 			Assert.That(outcome.Tokens!.RefreshToken, Is.Not.Empty);
 		});
 	}
