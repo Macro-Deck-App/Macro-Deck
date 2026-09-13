@@ -36,8 +36,36 @@ internal sealed class InMemoryRefreshTokenRepository : IRefreshTokenRepository
 {
 	public List<RefreshTokenEntity> Tokens { get; } = [];
 
+	public Func<Task>? BeforeNextRevoke { get; set; }
+
 	public Task<RefreshTokenEntity?> GetByTokenHash(string tokenHash)
 		=> Task.FromResult(Tokens.FirstOrDefault(t => t.TokenHash == tokenHash));
+
+	public Task<RefreshTokenEntity?> GetById(Guid id)
+		=> Task.FromResult(Tokens.FirstOrDefault(t => t.Id == id));
+
+	public async Task<bool> TryRevoke(Guid id,
+		DateTime revokedAt,
+		Guid? replacedById = null,
+		bool rotatedByGrace = false)
+	{
+		if (BeforeNextRevoke is { } concurrentRequest)
+		{
+			BeforeNextRevoke = null;
+			await concurrentRequest();
+		}
+
+		var token = Tokens.FirstOrDefault(t => t.Id == id && t.RevokedAt is null);
+		if (token is null)
+		{
+			return false;
+		}
+
+		token.RevokedAt = revokedAt;
+		token.ReplacedById = replacedById;
+		token.RotatedByGrace = rotatedByGrace;
+		return true;
+	}
 
 	public Task Create(RefreshTokenEntity token)
 	{

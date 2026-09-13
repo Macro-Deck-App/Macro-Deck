@@ -39,6 +39,10 @@ public static class AuthDefaults
 	// Reuse detection only sees a rotated token while its row exists: this is that window. See ADR 0083.
 	public static readonly TimeSpan RevokedRefreshTokenRetention = TimeSpan.FromDays(30);
 
+	// The just-rotated token is accepted once this soon after rotation, so a lost response does not sign out
+	// every device. Accepted cost: a stolen token replayed this soon, before its owner, is not detected.
+	public static readonly TimeSpan RefreshTokenReuseGrace = TimeSpan.FromSeconds(60);
+
 	public static readonly TimeSpan PairingCodeLifetime = TimeSpan.FromMinutes(15);
 
 	/// <summary>

@@ -757,23 +757,51 @@ public class AuthPolicyMatrixTests
 	}
 
 	[Test]
-	public async Task Refresh_rotates_and_rejects_a_reused_cookie()
+	public async Task Refresh_accepts_one_retry_of_a_lost_rotation_and_treats_a_second_as_reuse()
 	{
-		var login = await SendJson(HttpMethod.Post,
-			"/api/auth/login",
-			new { username = "admin", password = "password123", scope = "client" });
-		var refreshCookie = ExtractCookie(login, "md_refresh");
+		var refreshCookie = await LoginRefreshCookie();
+		var otherSession = await LoginRefreshCookie();
 
 		var refresh = await Send(HttpMethod.Post, "/api/auth/refresh", cookie: refreshCookie);
+		var retry = await Send(HttpMethod.Post, "/api/auth/refresh", cookie: refreshCookie);
 		var reuse = await Send(HttpMethod.Post, "/api/auth/refresh", cookie: refreshCookie);
+		var other = await Send(HttpMethod.Post, "/api/auth/refresh", cookie: otherSession);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(refreshCookie, Is.Not.Null);
 			Assert.That(refresh.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(retry.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 			Assert.That(reuse.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+			Assert.That(other.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
 		});
 	}
+
+	[Test]
+	public async Task Refresh_treats_the_token_a_retry_rotated_away_as_reuse()
+	{
+		var refreshCookie = await LoginRefreshCookie();
+
+		var refresh = await Send(HttpMethod.Post, "/api/auth/refresh", cookie: refreshCookie);
+		var retry = await Send(HttpMethod.Post, "/api/auth/refresh", cookie: refreshCookie);
+		var rotatedAway = await Send(HttpMethod.Post,
+			"/api/auth/refresh",
+			cookie: ExtractCookie(refresh, "md_refresh"));
+		var retried = await Send(HttpMethod.Post, "/api/auth/refresh", cookie: ExtractCookie(retry, "md_refresh"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(retry.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(rotatedAway.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+			Assert.That(retried.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+		});
+	}
+
+	private async Task<string?> LoginRefreshCookie()
+		=> ExtractCookie(await SendJson(HttpMethod.Post,
+				"/api/auth/login",
+				new { username = "admin", password = "password123", scope = "client" }),
+			"md_refresh");
 
 	[Test]
 	public async Task Access_cookie_authenticates_media_gets_but_never_mutations()

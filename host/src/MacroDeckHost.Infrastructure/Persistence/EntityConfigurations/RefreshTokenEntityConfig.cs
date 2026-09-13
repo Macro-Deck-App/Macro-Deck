@@ -22,5 +22,6 @@ public class RefreshTokenEntityConfig : BaseEntityConfig<RefreshTokenEntity>
 		builder.Property(x => x.ExpiresAt).HasColumnName(ColumnPrefix + "expires_at");
 		builder.Property(x => x.RevokedAt).HasColumnName(ColumnPrefix + "revoked_at");
 		builder.Property(x => x.ReplacedById).HasColumnName(ColumnPrefix + "replaced_by_id");
+		builder.Property(x => x.RotatedByGrace).HasColumnName(ColumnPrefix + "rotated_by_grace");
 	}
 }

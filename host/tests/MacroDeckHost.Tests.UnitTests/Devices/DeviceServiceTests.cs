@@ -10,6 +10,7 @@ using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Triggers;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace MacroDeckHost.Tests.UnitTests.Devices;
 
@@ -484,7 +485,8 @@ public class DeviceServiceTests
 			new DeviceEnrollmentStore(),
 			new PairingCodeStore(),
 			new FakeOnboardingPreferences(),
-			_time);
+			_time,
+			NullLogger<AuthService>.Instance);
 		await authService.Setup("admin", "password123");
 		var device = new DeviceRegistration(null,
 			null,

@@ -50,6 +50,8 @@ instead of at their original expiry.
 
 - Reuse detection sees a rotated token for 30 days, the window it effectively had under the 30 day
   lifetime. A rotated token that returns later is refused as invalid, and does not revoke every session.
+- Amended by issue #815: the token rotated out most recently is accepted once more within
+  `AuthDefaults.RefreshTokenReuseGrace` of its rotation, so a lost rotation response does not count as reuse.
 - An attacker on the LAN who keeps sending wrong codes can hold pairing by code at `429` for as long as
   they keep doing it. Password login is unaffected and is the fallback.
 - A stolen refresh token is useful for up to a year of inactivity instead of 30 days. Signing the device

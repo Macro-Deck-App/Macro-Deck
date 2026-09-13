@@ -15,7 +15,10 @@ public class RefreshTokenRepository : IRefreshTokenRepository
 	}
 
 	public Task<RefreshTokenEntity?> GetByTokenHash(string tokenHash)
-		=> _context.RefreshTokens.FirstOrDefaultAsync(t => t.TokenHash == tokenHash);
+		=> _context.RefreshTokens.AsNoTracking().FirstOrDefaultAsync(t => t.TokenHash == tokenHash);
+
+	public Task<RefreshTokenEntity?> GetById(Guid id)
+		=> _context.RefreshTokens.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
 
 	public async Task Create(RefreshTokenEntity token)
 	{
@@ -28,6 +31,18 @@ public class RefreshTokenRepository : IRefreshTokenRepository
 		_context.RefreshTokens.Update(token);
 		await _context.SaveChangesAsync();
 	}
+
+	public async Task<bool> TryRevoke(Guid id,
+		DateTime revokedAt,
+		Guid? replacedById = null,
+		bool rotatedByGrace = false)
+		=> await _context.RefreshTokens
+				.Where(t => t.Id == id && t.RevokedAt == null)
+				.ExecuteUpdateAsync(s => s
+					.SetProperty(t => t.RevokedAt, revokedAt)
+					.SetProperty(t => t.ReplacedById, replacedById)
+					.SetProperty(t => t.RotatedByGrace, rotatedByGrace)) ==
+			1;
 
 	public Task RevokeAllForUser(Guid userId, DateTime revokedAt)
 		=> _context.RefreshTokens

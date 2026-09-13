@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace MacroDeckHost.Application.Auth;
 
@@ -18,6 +19,7 @@ public class AuthService : IAuthService
 	private readonly PairingCodeStore _pairingCodes;
 	private readonly IAppPreferenceService _appPreferences;
 	private readonly TimeProvider _timeProvider;
+	private readonly ILogger<AuthService> _logger;
 
 	public AuthService(
 		IUserRepository userRepository,
@@ -28,7 +30,8 @@ public class AuthService : IAuthService
 		IDeviceEnrollmentStore deviceEnrollments,
 		PairingCodeStore pairingCodes,
 		IAppPreferenceService appPreferences,
-		TimeProvider timeProvider)
+		TimeProvider timeProvider,
+		ILogger<AuthService> logger)
 	{
 		_userRepository = userRepository;
 		_refreshTokenRepository = refreshTokenRepository;
@@ -39,6 +42,7 @@ public class AuthService : IAuthService
 		_pairingCodes = pairingCodes;
 		_appPreferences = appPreferences;
 		_timeProvider = timeProvider;
+		_logger = logger;
 	}
 
 	public Task<bool> IsSetupComplete() => _userRepository.AnyExists();
@@ -187,17 +191,20 @@ public class AuthService : IAuthService
 			return Result.Fail<LoginResult, AuthError>(AuthError.InvalidRefreshToken, "Invalid refresh token.");
 		}
 
-		if (token.RevokedAt is not null)
+		var inGrace = token.RevokedAt is not null;
+		var rotating = token;
+		if (inGrace)
 		{
 			if (token.ReplacedById is null)
 			{
 				return Result.Fail<LoginResult, AuthError>(AuthError.InvalidRefreshToken, "Invalid refresh token.");
 			}
 
-			// A rotated-out token coming back means it leaked or the client state diverged:
-			// kill every session for the user instead of trusting either party.
-			await _refreshTokenRepository.RevokeAllForUser(token.UserId, now);
-			return Result.Fail<LoginResult, AuthError>(AuthError.RefreshTokenReused, "Refresh token was already used.");
+			rotating = await GraceSuccessor(token, now);
+			if (rotating is null)
+			{
+				return await RevokeAllAsReuse(token.UserId, now);
+			}
 		}
 
 		var user = await _userRepository.GetSingle();
@@ -206,20 +213,72 @@ public class AuthService : IAuthService
 			return Result.Fail<LoginResult, AuthError>(AuthError.InvalidRefreshToken, "Invalid refresh token.");
 		}
 
-		var result = await IssueTokens(user, token.Scope, token.DeviceId);
+		var result = await IssueTokens(user, rotating.Scope, rotating.DeviceId);
+		if (!await _refreshTokenRepository.TryRevoke(rotating.Id, now, result.RefreshTokenId, inGrace))
+		{
+			if (inGrace)
+			{
+				return await RevokeAllAsReuse(token.UserId, now);
+			}
 
-		token.RevokedAt = now;
-		token.ReplacedById = result.RefreshTokenId;
-		await _refreshTokenRepository.Update(token);
+			var raced = await _refreshTokenRepository.GetById(token.Id);
+			if (raced is { RotatedByGrace: true })
+			{
+				return await RevokeAllAsReuse(token.UserId, now);
+			}
 
-		var startupProfileId = token.DeviceId is { } deviceId
+			if (raced?.ReplacedById is null)
+			{
+				await _refreshTokenRepository.TryRevoke(result.RefreshTokenId, now);
+				return Result.Fail<LoginResult, AuthError>(AuthError.InvalidRefreshToken, "Invalid refresh token.");
+			}
+
+			// Two refreshes of the same live token raced: both callers keep a working token, so neither is
+			// handed one that a later refresh would read as reuse.
+		}
+
+		if (inGrace)
+		{
+			AuthLog.RotationRetryAccepted(_logger,
+				token.Id,
+				(now - token.RevokedAt!.Value).TotalSeconds,
+				token.UserId,
+				token.DeviceId);
+		}
+
+		var startupProfileId = rotating.DeviceId is { } deviceId
 			? await _deviceService.ResolveStartupProfileId(deviceId)
 			: null;
 
 		return Result.Ok<LoginResult, AuthError>(result.Login with
 		{
-			DeviceId = token.DeviceId, StartupProfileId = startupProfileId
+			DeviceId = rotating.DeviceId, StartupProfileId = startupProfileId
 		});
+	}
+
+	private async Task<RefreshTokenEntity?> GraceSuccessor(RefreshTokenEntity token, DateTime now)
+	{
+		if (token.RotatedByGrace || now - token.RevokedAt > AuthDefaults.RefreshTokenReuseGrace)
+		{
+			return null;
+		}
+
+		var successor = await _refreshTokenRepository.GetById(token.ReplacedById!.Value);
+		return successor is { RevokedAt: null } &&
+			successor.ExpiresAt >= now &&
+			successor.UserId == token.UserId &&
+			successor.DeviceId == token.DeviceId &&
+			successor.Scope == token.Scope
+				? successor
+				: null;
+	}
+
+	private async Task<Result<LoginResult, AuthError>> RevokeAllAsReuse(Guid userId, DateTime now)
+	{
+		// A rotated-out token coming back means it leaked or the client state diverged:
+		// kill every session for the user instead of trusting either party.
+		await _refreshTokenRepository.RevokeAllForUser(userId, now);
+		return Result.Fail<LoginResult, AuthError>(AuthError.RefreshTokenReused, "Refresh token was already used.");
 	}
 
 	public async Task Logout(string rawRefreshToken)
