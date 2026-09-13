@@ -96,17 +96,83 @@ pub const DOWNLOAD_PAGE_URL: &str = "https://macro-deck.app/download";
 pub enum UpdateInstallStrategy {
     InApp,
     ExternalDownload,
+    Apt,
 }
 
-fn install_strategy_for(target_os: &str) -> UpdateInstallStrategy {
+impl UpdateInstallStrategy {
+    pub(crate) fn installs_in_app(self) -> bool {
+        self == Self::InApp
+    }
+}
+
+const APT_REPOSITORY_HOST: &str = "packages.macro-deck.app";
+
+fn install_strategy_for(target_os: &str, apt_managed: bool) -> UpdateInstallStrategy {
     match target_os {
+        "linux" if apt_managed => UpdateInstallStrategy::Apt,
         "linux" => UpdateInstallStrategy::ExternalDownload,
         _ => UpdateInstallStrategy::InApp,
     }
 }
 
 pub(crate) fn install_strategy() -> UpdateInstallStrategy {
-    install_strategy_for(std::env::consts::OS)
+    let os = std::env::consts::OS;
+    install_strategy_for(os, os == "linux" && installed_from_apt_repository())
+}
+
+fn installed_from_apt_repository() -> bool {
+    if std::env::var_os("APPIMAGE").is_some() {
+        return false;
+    }
+    let mut files = vec![std::path::PathBuf::from("/etc/apt/sources.list")];
+    if let Ok(entries) = std::fs::read_dir("/etc/apt/sources.list.d") {
+        files.extend(entries.flatten().map(|entry| entry.path()));
+    }
+    files.iter().any(|path| {
+        std::fs::read_to_string(path).is_ok_and(|text| source_file_uses_repo(path, &text))
+    })
+}
+
+// apt itself reads only these two extensions, so backups such as .list.distUpgrade are not sources.
+fn source_file_uses_repo(path: &std::path::Path, text: &str) -> bool {
+    match path.extension().and_then(|extension| extension.to_str()) {
+        Some("list") => list_uses_repo(text),
+        Some("sources") => sources_uses_repo(text),
+        _ => false,
+    }
+}
+
+fn list_uses_repo(text: &str) -> bool {
+    text.lines().map(str::trim_start).any(|line| {
+        line.split_whitespace().next() == Some("deb") && line.contains(APT_REPOSITORY_HOST)
+    })
+}
+
+fn sources_uses_repo(text: &str) -> bool {
+    let mut stanzas = vec![Vec::new()];
+    for line in text.lines().map(str::trim) {
+        if line.is_empty() {
+            stanzas.push(Vec::new());
+        } else if !line.starts_with('#') {
+            stanzas.last_mut().expect("starts non-empty").push(line);
+        }
+    }
+    stanzas.iter().any(|fields| {
+        fields
+            .iter()
+            .any(|field| field.contains(APT_REPOSITORY_HOST))
+            && !fields.iter().any(|field| disables_stanza(field))
+    })
+}
+
+fn disables_stanza(field: &str) -> bool {
+    field.split_once(':').is_some_and(|(key, value)| {
+        key.trim().eq_ignore_ascii_case("Enabled")
+            && matches!(
+                value.trim().to_ascii_lowercase().as_str(),
+                "no" | "false" | "off" | "disable"
+            )
+    })
 }
 
 // The decision seam for #715: this has to run BEFORE resolve_update, so that
@@ -129,12 +195,10 @@ pub(crate) enum PeriodicAction {
 pub(crate) fn periodic_action(mode: UpdateMode, strategy: UpdateInstallStrategy) -> PeriodicAction {
     match (mode, strategy) {
         (UpdateMode::Off, _) => PeriodicAction::Skip,
-        (UpdateMode::NotifyOnly, UpdateInstallStrategy::ExternalDownload) => {
-            PeriodicAction::Check(CheckAction::ExternalNotify)
-        }
-        (UpdateMode::Automatic, UpdateInstallStrategy::ExternalDownload) => {
-            PeriodicAction::Check(CheckAction::ExternalNotify)
-        }
+        (
+            UpdateMode::NotifyOnly | UpdateMode::Automatic,
+            UpdateInstallStrategy::ExternalDownload | UpdateInstallStrategy::Apt,
+        ) => PeriodicAction::Check(CheckAction::ExternalNotify),
         (UpdateMode::NotifyOnly, UpdateInstallStrategy::InApp) => {
             PeriodicAction::Check(CheckAction::ConfirmThenInstall)
         }
@@ -151,6 +215,7 @@ fn external_download_refusal(strategy: UpdateInstallStrategy) -> Option<String> 
             keys::UPDATE_LINUX_NOT_SUPPORTED,
             &[("downloadPageUrl", DOWNLOAD_PAGE_URL)],
         )),
+        UpdateInstallStrategy::Apt => Some(localization::t(keys::UPDATE_APT_MANAGED)),
     }
 }
 
@@ -1034,6 +1099,16 @@ async fn confirm_then_download_and_install(app: &AppHandle, update: Update) {
 }
 
 fn notify_external_download(app: &AppHandle, update: &Update) {
+    if install_strategy() == UpdateInstallStrategy::Apt {
+        app.dialog()
+            .message(localization::t_args(
+                keys::UPDATE_APT_AVAILABLE,
+                &[("version", &update.version)],
+            ))
+            .title(localization::t(keys::UPDATE_AVAILABLE_TITLE))
+            .blocking_show();
+        return;
+    }
     let open = app
         .dialog()
         .message(localization::t_args(
@@ -1105,6 +1180,7 @@ async fn perform_install(app: &AppHandle, update: Update, bytes: Vec<u8>) -> Res
 mod tests {
     use super::*;
     use crate::update_state::UpdatePhase;
+    use std::path::Path;
 
     fn snapshot(
         phase: UpdatePhase,
@@ -1225,26 +1301,109 @@ mod tests {
     #[test]
     fn install_strategy_is_external_download_on_linux() {
         assert_eq!(
-            install_strategy_for("linux"),
+            install_strategy_for("linux", false),
             UpdateInstallStrategy::ExternalDownload
+        );
+    }
+
+    #[test]
+    fn install_strategy_is_apt_on_linux_installed_from_the_apt_repository() {
+        assert_eq!(
+            install_strategy_for("linux", true),
+            UpdateInstallStrategy::Apt
         );
     }
 
     #[test]
     fn install_strategy_is_in_app_on_windows_and_macos() {
         assert_eq!(
-            install_strategy_for("windows"),
+            install_strategy_for("windows", false),
             UpdateInstallStrategy::InApp
         );
-        assert_eq!(install_strategy_for("macos"), UpdateInstallStrategy::InApp);
+        assert_eq!(
+            install_strategy_for("macos", true),
+            UpdateInstallStrategy::InApp
+        );
     }
 
     #[test]
     fn an_unknown_target_keeps_the_in_app_strategy() {
         assert_eq!(
-            install_strategy_for("freebsd"),
+            install_strategy_for("freebsd", false),
             UpdateInstallStrategy::InApp
         );
+    }
+
+    #[test]
+    fn only_the_in_app_strategy_can_install() {
+        assert!(UpdateInstallStrategy::InApp.installs_in_app());
+        assert!(!UpdateInstallStrategy::ExternalDownload.installs_in_app());
+        assert!(!UpdateInstallStrategy::Apt.installs_in_app());
+    }
+
+    const README_SOURCE: &str = "Types: deb\nURIs: https://packages.macro-deck.app\nSuites: stable\nComponents: main\nArchitectures: amd64\nSigned-By: /etc/apt/keyrings/macro-deck.asc\n";
+
+    #[test]
+    fn the_documented_deb822_source_is_the_apt_repository() {
+        assert!(source_file_uses_repo(
+            Path::new("/etc/apt/sources.list.d/macro-deck.sources"),
+            README_SOURCE
+        ));
+    }
+
+    #[test]
+    fn a_one_line_list_entry_is_the_apt_repository() {
+        assert!(source_file_uses_repo(
+            Path::new("/etc/apt/sources.list.d/macro-deck.list"),
+            "deb\t[signed-by=/etc/apt/keyrings/macro-deck.asc] https://packages.macro-deck.app stable main\n"
+        ));
+    }
+
+    #[test]
+    fn a_commented_out_list_entry_is_not_a_source() {
+        assert!(!list_uses_repo(
+            "# deb https://packages.macro-deck.app stable main # disabled on upgrade\n"
+        ));
+    }
+
+    #[test]
+    fn a_disabled_deb822_stanza_is_not_a_source() {
+        for value in ["no", "False", "off", "disable"] {
+            let text = format!("{README_SOURCE}Enabled: {value}\n");
+            assert!(!sources_uses_repo(&text), "Enabled: {value}");
+        }
+    }
+
+    #[test]
+    fn a_disabled_stanza_does_not_hide_an_enabled_one() {
+        let text = format!("Enabled: no\n{README_SOURCE}\n{README_SOURCE}");
+        assert!(sources_uses_repo(&text));
+    }
+
+    #[test]
+    fn a_release_upgrade_backup_is_not_a_source() {
+        assert!(!source_file_uses_repo(
+            Path::new("/etc/apt/sources.list.d/macro-deck.sources.distUpgrade"),
+            README_SOURCE
+        ));
+    }
+
+    #[test]
+    fn other_repositories_are_not_the_apt_repository() {
+        assert!(!sources_uses_repo(
+            "Types: deb\nURIs: http://deb.debian.org/debian\nSuites: trixie\nComponents: main\n"
+        ));
+        assert!(!list_uses_repo(
+            "deb http://archive.ubuntu.com/ubuntu noble main\n"
+        ));
+    }
+
+    #[test]
+    fn an_apt_install_is_refused_with_the_apt_command_instead_of_the_download_page() {
+        let reason = external_download_refusal(UpdateInstallStrategy::Apt)
+            .expect("an apt install must refuse the in-app install");
+        assert!(reason.contains("sudo apt update && sudo apt upgrade"));
+        assert!(!reason.contains(DOWNLOAD_PAGE_URL));
     }
 
     #[test]
@@ -1292,6 +1451,10 @@ mod tests {
         assert_eq!(
             serde_json::to_value(UpdateInstallStrategy::ExternalDownload).unwrap(),
             "externalDownload"
+        );
+        assert_eq!(
+            serde_json::to_value(UpdateInstallStrategy::Apt).unwrap(),
+            "apt"
         );
     }
 
@@ -1696,6 +1859,20 @@ mod tests {
                 UpdateInstallStrategy::ExternalDownload
             ),
             PeriodicAction::Check(CheckAction::ExternalNotify)
+        );
+    }
+
+    #[test]
+    fn an_apt_install_is_only_ever_notified_and_off_stays_off() {
+        for mode in [UpdateMode::NotifyOnly, UpdateMode::Automatic] {
+            assert_eq!(
+                periodic_action(mode, UpdateInstallStrategy::Apt),
+                PeriodicAction::Check(CheckAction::ExternalNotify)
+            );
+        }
+        assert_eq!(
+            periodic_action(UpdateMode::Off, UpdateInstallStrategy::Apt),
+            PeriodicAction::Skip
         );
     }
 

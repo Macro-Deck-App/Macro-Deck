@@ -82,7 +82,7 @@ declare global {
     version: string | null;
     notes: string | null;
     error: string | null;
-    installStrategy: 'inApp' | 'externalDownload';
+    installStrategy: 'inApp' | 'externalDownload' | 'apt';
     downloadUrl: string;
     publishedAt: string | null;
     channel: 'stable' | 'beta';
@@ -123,7 +123,7 @@ declare global {
     publishedAt: string | null;
     channel: string | null;
     betaInstalled: boolean;
-    installStrategy: 'inApp' | 'externalDownload';
+    installStrategy: 'inApp' | 'externalDownload' | 'apt';
     downloadUrl: string | null;
     partialCheck: string | null;
     error: string | null;

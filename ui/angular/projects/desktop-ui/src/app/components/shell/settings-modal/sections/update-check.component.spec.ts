@@ -153,6 +153,20 @@ describe('UpdateCheckComponent', () => {
     expect(text).toContain('View details');
   });
 
+  it('tells an APT install to update through apt rather than the website', async () => {
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ phase: 'available', version: '3.1.0', installStrategy: 'apt' })),
+      onUpdateState: () => Promise.resolve(() => {}),
+    });
+
+    const fixture = await createFixture();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('Version 3.1.0 is available');
+    expect(text).toContain('sudo apt update && sudo apt upgrade');
+    expect(text).not.toContain('website');
+  });
+
   it('opens the update modal from "View details"', async () => {
     setShell({
       getUpdateState: () => Promise.resolve(makeState({ phase: 'available', version: '3.1.0' })),

@@ -931,6 +931,15 @@ Výstup hostitele:
   <data name="Bootstrapper.Update.AlreadyInProgress" xml:space="preserve">
     <value>Aktualizace se již instaluje.</value>
   </data>
+  <data name="Bootstrapper.Update.AptAvailable" xml:space="preserve">
+    <value>Je k dispozici Macro Deck {version}.
+
+Macro Deck byl nainstalován z repozitáře APT. Po zveřejnění nové verze v repozitáři spusťte sudo apt update &amp;&amp; sudo apt upgrade. Beta verze jsou dostupné pouze v sadě beta.</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Bootstrapper.Update.AptManaged" xml:space="preserve">
+    <value>Macro Deck byl nainstalován z repozitáře APT a aktualizuje se přes apt. Spusťte sudo apt update &amp;&amp; sudo apt upgrade.</value>
+  </data>
   <data name="Bootstrapper.Update.AvailableTitle" xml:space="preserve">
     <value>K dispozici je aktualizace</value>
   </data>
@@ -13325,6 +13334,10 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Startup.Unsupported" xml:space="preserve">
     <value>Automatické spouštění je dostupné pouze v nainstalované aplikaci Macro Deck.</value>
+  </data>
+  <data name="Settings.Update.AvailableApt" xml:space="preserve">
+    <value>Je dostupná verze {version}. Po jejím zveřejnění v repozitáři APT spusťte sudo apt update &amp;&amp; sudo apt upgrade. Beta verze jsou dostupné pouze v sadě beta.</value>
+    <comment>[version:string]</comment>
   </data>
   <data name="Settings.Update.AvailableExternal" xml:space="preserve">
     <value>Je dostupná verze {version}. Stáhněte ji z webu Macro Deck a aktualizujte svou instalaci AppImage, DEB nebo RPM.</value>

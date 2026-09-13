@@ -95,6 +95,9 @@ export class UpdateCheckComponent {
           : t(AppStrings.Settings.Update.UpToDateNoVersion);
       }
       case 'available':
+        if (this.updates.aptManaged()) {
+          return t(AppStrings.Settings.Update.AvailableApt, { version: this.updates.version() });
+        }
         return this.updates.externalDownload()
           ? t(AppStrings.Settings.Update.AvailableExternal, { version: this.updates.version() })
           : t(AppStrings.Settings.Update.AvailableInApp, { version: this.updates.version() });

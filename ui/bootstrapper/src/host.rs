@@ -16,7 +16,6 @@ use tauri::Manager;
 use crate::localization::{self, keys};
 use crate::logging::{self, LogTail};
 use crate::update_state::UpdateSnapshot;
-use crate::updater::UpdateInstallStrategy;
 
 pub const BUILD_CHANNEL: &str = env!("MACRODECK_BUILD_CHANNEL");
 
@@ -1040,7 +1039,7 @@ async fn report_update_state_as(app: &AppHandle, snapshot: &UpdateSnapshot, phas
             .as_ref()
             .and_then(|progress| progress.percent),
         error: snapshot.error.as_deref(),
-        can_install: snapshot.install_strategy != UpdateInstallStrategy::ExternalDownload,
+        can_install: snapshot.install_strategy.installs_in_app(),
     };
 
     match post_update_state(port, &body).await {

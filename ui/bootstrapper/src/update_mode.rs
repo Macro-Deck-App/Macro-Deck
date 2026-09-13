@@ -16,7 +16,7 @@ use serde::Serialize;
 use tauri::{AppHandle, Manager};
 
 use crate::logging;
-use crate::updater::{self, UpdateInstallStrategy};
+use crate::updater;
 
 const STORE_FILE_NAME: &str = "update-mode";
 
@@ -55,7 +55,7 @@ impl UpdateModeStatus {
     fn for_mode(mode: UpdateMode) -> Self {
         Self {
             mode,
-            automatic_supported: updater::install_strategy() == UpdateInstallStrategy::InApp,
+            automatic_supported: updater::install_strategy().installs_in_app(),
         }
     }
 }

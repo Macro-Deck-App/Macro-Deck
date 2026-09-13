@@ -247,6 +247,20 @@ describe('UpdateModalComponent', () => {
     expect(openExternal).toHaveBeenCalledWith('https://macro-deck.app/download');
   });
 
+  it('points an APT install to apt, with neither Install nor the download page', async () => {
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ installStrategy: 'apt' })),
+      onUpdateState: () => Promise.resolve(() => {}),
+    });
+
+    const fixture = await createFixture();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('sudo apt update && sudo apt upgrade');
+    expect(text).not.toContain('Open download page');
+    expect(text).not.toContain('Download & install');
+  });
+
   it('shows the cancel action and the keep-in-background note while downloading', async () => {
     setShell({
       getUpdateState: () => Promise.resolve(
