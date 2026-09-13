@@ -78,7 +78,8 @@ public sealed class CompanionCommandRequests
 		{
 			return await send(key.RequestId);
 		}
-		catch (Exception ex) when (ex is not OperationCanceledException && !TryFinish(key, pending, State.Pending, null))
+		catch (Exception ex) when (ex is not OperationCanceledException &&
+			!TryFinish(key, pending, State.Pending, null))
 		{
 			return true;
 		}

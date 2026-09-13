@@ -100,7 +100,11 @@ public sealed class CompanionScreenshotsController : ControllerBase
 			_ => CompanionCommandFailure.Failed
 		};
 		return DeviceId() is { } deviceId &&
-			_requests.TryComplete(deviceId, requestId, CompanionCommandResult.Failed(failure), kind, afterRunning: false)
+			_requests.TryComplete(deviceId,
+				requestId,
+				CompanionCommandResult.Failed(failure),
+				kind,
+				afterRunning: false)
 				? NoContent()
 				: NotFound();
 	}

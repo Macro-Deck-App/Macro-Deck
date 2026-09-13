@@ -221,7 +221,8 @@ internal sealed class CompanionDeviceControlTests
 
 		var running = Screenshot(harness, device, TakeScreenshotAction.DeckMode);
 		var reply = Controller(harness, device)
-			.ScreenshotFailed(SentCommand(harness).RequestId!, new CompanionScreenshotFailedRequest { Reason = reason });
+			.ScreenshotFailed(SentCommand(harness).RequestId!,
+				new CompanionScreenshotFailedRequest { Reason = reason });
 		var result = await running.WaitAsync(TimeSpan.FromSeconds(5));
 
 		Assert.Multiple(() =>
@@ -333,7 +334,8 @@ internal sealed class CompanionDeviceControlTests
 		var device = harness.AddDevice("Phone");
 		var slots = new[]
 		{
-			"in_focus", "network_type", "network_metered", "network_validated", "network_name", "cpu_usage_percent", "memory_used_percent"
+			"in_focus", "network_type", "network_metered", "network_validated", "network_name", "cpu_usage_percent",
+			"memory_used_percent"
 		};
 		await harness.ReportAsync("connection-1", device);
 		var notReported = new List<VariableReading>();
@@ -539,7 +541,9 @@ internal sealed class CompanionDeviceControlTests
 			Assert.That(runningAfterPendingDeadline, Is.True);
 			Assert.That(done, Is.InstanceOf<NoContentResult>());
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
-			Assert.That(harness.Transport.GroupMessages, Has.Count.EqualTo(1), "no cancelRequest for a claimed request");
+			Assert.That(harness.Transport.GroupMessages,
+				Has.Count.EqualTo(1),
+				"no cancelRequest for a claimed request");
 		});
 	}
 
@@ -630,7 +634,9 @@ internal sealed class CompanionDeviceControlTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(claimScreenshot, Is.InstanceOf<NoContentResult>(), "a device that answers commands claims screenshots");
+			Assert.That(claimScreenshot,
+				Is.InstanceOf<NoContentResult>(),
+				"a device that answers commands claims screenshots");
 			Assert.That(commandRouteForScreenshot, Is.InstanceOf<NotFoundResult>());
 			Assert.That(screenshotRouteForCommand, Is.InstanceOf<NotFoundResult>());
 			Assert.That(completedByWrongKind, Is.False);
@@ -776,7 +782,8 @@ internal sealed class CompanionDeviceControlTests
 				capabilities = new[] { "focus" },
 				requestableCapabilities = new[]
 				{
-					"screenOn", "screenOn", "focus", "screenshotDeck", "memory", "rootShell", "screenOff", "screenshotFull"
+					"screenOn", "screenOn", "focus", "screenshotDeck", "memory", "rootShell", "screenOff",
+					"screenshotFull"
 				}
 			}),
 			CancellationToken.None);
@@ -836,7 +843,8 @@ internal sealed class CompanionDeviceControlTests
 		var requestId = SentCommand(harness).RequestId!;
 		Controller(harness, device).Claim(requestId);
 		await cancellation.CancelAsync();
-		Controller(harness, device).CommandFailed(requestId, new CompanionScreenshotFailedRequest { Reason = "failed" });
+		Controller(harness, device)
+			.CommandFailed(requestId, new CompanionScreenshotFailedRequest { Reason = "failed" });
 		var result = await running.WaitAsync(TimeSpan.FromSeconds(5));
 
 		Assert.Multiple(() =>
@@ -980,7 +988,8 @@ internal sealed class CompanionDeviceControlTests
 			{
 				Assert.That(claimed, Is.InstanceOf<NotFoundResult>(), $"attempt {attempt}");
 				Assert.CatchAsync<InvalidOperationException>(async () =>
-					await running.WaitAsync(TimeSpan.FromSeconds(5)), $"attempt {attempt}");
+						await running.WaitAsync(TimeSpan.FromSeconds(5)),
+					$"attempt {attempt}");
 			}
 		}
 	}
@@ -1085,7 +1094,8 @@ internal sealed class CompanionDeviceControlTests
 	private static void AssertCancelledOnce(CompanionHarness harness, string requestId)
 	{
 		var cancels = harness.Transport.GroupMessages
-			.Select((sent, index) => (Command: (CompanionCommandEvent)sent.Message, Token: harness.Transport.GroupTokens[index]))
+			.Select((sent, index) => (Command: (CompanionCommandEvent)sent.Message,
+				Token: harness.Transport.GroupTokens[index]))
 			.Where(sent => sent.Command.Command == "cancelRequest")
 			.ToList();
 		Assert.That(cancels, Has.Count.EqualTo(1));

@@ -34,7 +34,8 @@ public sealed class CompanionIntegration
 
 	public CompanionIntegration()
 	{
-		Actions = CompanionActions.Create(new CompanionTargetResolver(RuntimeSnapshot, () => _gateway), () => _variables);
+		Actions = CompanionActions.Create(new CompanionTargetResolver(RuntimeSnapshot, () => _gateway),
+			() => _variables);
 	}
 
 	public string Id => IntegrationId;

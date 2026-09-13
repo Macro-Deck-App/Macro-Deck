@@ -99,7 +99,9 @@ internal sealed class TakeScreenshotAction : IDynamicOptionsActionDefinition
 					AppStrings.Integrations.Adb.Errors.FolderRequired());
 			}
 
-			var capability = mode == DeckMode ? CompanionCapabilities.ScreenshotDeck : CompanionCapabilities.ScreenshotFull;
+			var capability = mode == DeckMode
+				? CompanionCapabilities.ScreenshotDeck
+				: CompanionCapabilities.ScreenshotFull;
 			var (unavailable, prompt, _) = CompanionCapabilities.Require(gateway, deviceId, capability);
 			if (unavailable is not null)
 			{
@@ -111,7 +113,9 @@ internal sealed class TakeScreenshotAction : IDynamicOptionsActionDefinition
 				context.CancellationToken);
 			if (result.Png is not { } png)
 			{
-				return CompanionCapabilities.Failed(result.Failure ?? CompanionCommandFailure.Failed, capability, prompt);
+				return CompanionCapabilities.Failed(result.Failure ?? CompanionCommandFailure.Failed,
+					capability,
+					prompt);
 			}
 
 			string path;

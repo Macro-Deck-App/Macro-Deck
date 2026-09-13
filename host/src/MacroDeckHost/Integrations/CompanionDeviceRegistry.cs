@@ -111,7 +111,9 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 		CancellationToken cancellationToken)
 	{
 		var result = await _requests.RequestAsync(deviceId,
-			command.Command == CompanionCommand.Screenshot ? CompanionRequestKind.Screenshot : CompanionRequestKind.Command,
+			command.Command == CompanionCommand.Screenshot
+				? CompanionRequestKind.Screenshot
+				: CompanionRequestKind.Command,
 			_states.TryGetValue(deviceId, out var state) && state.AnswersCommands,
 			requestId => SendAsync(deviceId, command with { RequestId = requestId }, cancellationToken),
 			requestId => _ = CancelOnDeviceAsync(deviceId, requestId),
@@ -136,7 +138,10 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 		}
 		catch (Exception ex)
 		{
-			_logger.Warning(ex, "Could not cancel Companion request {RequestId} on device {DeviceId}", requestId, deviceId);
+			_logger.Warning(ex,
+				"Could not cancel Companion request {RequestId} on device {DeviceId}",
+				requestId,
+				deviceId);
 		}
 	}
 
