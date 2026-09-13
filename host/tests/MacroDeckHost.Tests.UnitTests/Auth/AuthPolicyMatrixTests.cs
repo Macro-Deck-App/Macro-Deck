@@ -156,6 +156,66 @@ public class AuthPolicyMatrixTests
 	}
 
 	[Test]
+	public async Task A_page_open_in_the_users_browser_gets_no_loopback_trust()
+	{
+		var crossSite = await SendFromBrowser(HttpMethod.Get, "/api/auth/pairing-code", "https://attacker.example", "cross-site");
+		var sameSite = await SendFromBrowser(HttpMethod.Post, "/api/auth/device-enrollment", "http://localhost:3000", "same-site");
+		var foreignOriginOnly = await SendFromBrowser(HttpMethod.Get, "/api/folders", "https://attacker.example", null);
+		var foreignSetup = await SendFromBrowser(HttpMethod.Post, "/api/auth/setup", "https://attacker.example", "cross-site");
+		var desktopUi = await SendFromBrowser(HttpMethod.Get, "/api/auth/pairing-code", "http://localhost", "same-origin");
+		var devProxy = await SendFromBrowser(HttpMethod.Get, "/api/auth/pairing-code", "http://localhost:4200", "same-origin");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(crossSite.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+			Assert.That(sameSite.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+			Assert.That(foreignOriginOnly.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+			Assert.That(foreignSetup.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+			Assert.That(desktopUi.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(devProxy.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+		});
+	}
+
+	[Test]
+	public async Task The_loopback_listener_grants_no_cross_origin_access()
+	{
+		using var preflight = new HttpRequestMessage(HttpMethod.Options, "/api/folders");
+		preflight.Headers.Add(FakeConnectionStartupFilter.ShapeHeader, nameof(FakeConnectionShape.Loopback));
+		preflight.Headers.Add("Origin", "https://attacker.example");
+		preflight.Headers.Add("Access-Control-Request-Method", "GET");
+		var preflightResponse = await _client.SendAsync(preflight);
+		var read = await SendFromBrowser(HttpMethod.Get, "/api/folders", "https://attacker.example", "cross-site");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(preflightResponse.Headers.Contains("Access-Control-Allow-Origin"), Is.False);
+			Assert.That(read.Headers.Contains("Access-Control-Allow-Origin"), Is.False);
+		});
+	}
+
+	private async Task<HttpResponseMessage> SendFromBrowser(
+		HttpMethod method,
+		string path,
+		string origin,
+		string? secFetchSite)
+	{
+		using var request = new HttpRequestMessage(method, path);
+		if (method == HttpMethod.Post)
+		{
+			request.Content = JsonContent.Create(new { username = "attacker", password = "password123" });
+		}
+
+		request.Headers.Add(FakeConnectionStartupFilter.ShapeHeader, nameof(FakeConnectionShape.Loopback));
+		request.Headers.Add("Origin", origin);
+		if (secFetchSite is not null)
+		{
+			request.Headers.Add("Sec-Fetch-Site", secFetchSite);
+		}
+
+		return await _client.SendAsync(request);
+	}
+
+	[Test]
 	public async Task Device_provisioning_is_refused_off_the_loopback_listener_even_with_an_admin_token()
 	{
 		// Issue #727. These actions drive a device physically attached to this machine and write to its

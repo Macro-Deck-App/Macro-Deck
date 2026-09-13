@@ -286,7 +286,11 @@ public class PluginPairingEndpointTests
 		// browser always sends Origin on unsafe methods. This is what makes that comment enforceable:
 		// if TryReject (or an equivalent Origin/browser check) were ever added to this controller, these
 		// requests would start failing instead of the real desktop app breaking silently.
-		var originHeader = new Dictionary<string, string> { ["Origin"] = "https://localhost:4200" };
+		var originHeader = new Dictionary<string, string>
+		{
+			["Origin"] = "https://localhost:4200",
+			["Sec-Fetch-Site"] = "same-origin"
+		};
 
 		var (_, approveChallenge) = NewPkcePair();
 		var approveCreated = await CreatePairingRequestAsync($"com.example.origin{Guid.NewGuid():N}", approveChallenge);
