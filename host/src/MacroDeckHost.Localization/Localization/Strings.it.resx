@@ -12921,6 +12921,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Settings.Network.Description" xml:space="preserve">
     <value>La porta su cui Macro Deck resta in ascolto per telefoni, tablet e browser sulla tua rete.</value>
   </data>
+  <data name="Settings.Network.IdentityDescription" xml:space="preserve">
+    <value>L'app Macro Deck mostra lo stesso codice quando un telefono o un tablet si connette digitando l'indirizzo di questo computer. Accedi lì solo se i due corrispondono.</value>
+  </data>
   <data name="Settings.Network.DiscoveryDescription" xml:space="preserve">
     <value>Permette all'app Macro Deck su smartphone e tablet di trovare automaticamente questo computer. Gli altri dispositivi nella rete ne vedono il nome e la versione.</value>
   </data>
@@ -13533,6 +13536,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Shell.ConnectionPanel.NoInterfaces" xml:space="preserve">
     <value>Nessuna interfaccia di rete trovata</value>
+  </data>
+  <data name="Shell.ConnectionPanel.Identity" xml:space="preserve">
+    <value>Identità</value>
+  </data>
+  <data name="Shell.ConnectionPanel.IdentityUnavailable" xml:space="preserve">
+    <value>Non disponibile</value>
   </data>
   <data name="Shell.ConnectionPanel.PairingCode" xml:space="preserve">
     <value>Codice di abbinamento</value>

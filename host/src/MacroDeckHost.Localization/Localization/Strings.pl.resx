@@ -12921,6 +12921,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Settings.Network.Description" xml:space="preserve">
     <value>Port, na którym Macro Deck nasłuchuje połączeń z telefonów, tabletów i przeglądarek w sieci.</value>
   </data>
+  <data name="Settings.Network.IdentityDescription" xml:space="preserve">
+    <value>Aplikacja Macro Deck pokazuje ten sam kod, gdy telefon lub tablet łączy się przez wpisanie adresu tego komputera. Należy się tam zalogować tylko wtedy, gdy oba kody są zgodne.</value>
+  </data>
   <data name="Settings.Network.DiscoveryDescription" xml:space="preserve">
     <value>Umożliwia aplikacji Macro Deck na telefonach i tabletach automatyczne znalezienie tego komputera. Inne urządzenia w sieci widzą jego nazwę i wersję.</value>
   </data>
@@ -13533,6 +13536,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Shell.ConnectionPanel.NoInterfaces" xml:space="preserve">
     <value>Nie znaleziono interfejsów sieciowych</value>
+  </data>
+  <data name="Shell.ConnectionPanel.Identity" xml:space="preserve">
+    <value>Tożsamość</value>
+  </data>
+  <data name="Shell.ConnectionPanel.IdentityUnavailable" xml:space="preserve">
+    <value>Niedostępna</value>
   </data>
   <data name="Shell.ConnectionPanel.PairingCode" xml:space="preserve">
     <value>Kod parowania</value>

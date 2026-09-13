@@ -12921,6 +12921,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.Network.Description" xml:space="preserve">
     <value>The port Macro Deck listens on for phones, tablets and browsers on your network.</value>
   </data>
+  <data name="Settings.Network.IdentityDescription" xml:space="preserve">
+    <value>The Macro Deck app shows the same code when a phone or tablet connects by typing this computer's address. Sign in there only if both match.</value>
+  </data>
   <data name="Settings.Network.DiscoveryDescription" xml:space="preserve">
     <value>Lets the Macro Deck app on phones and tablets find this computer automatically. Other devices on the network can see its name and version.</value>
   </data>
@@ -13533,6 +13536,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Shell.ConnectionPanel.NoInterfaces" xml:space="preserve">
     <value>No network interfaces found</value>
+  </data>
+  <data name="Shell.ConnectionPanel.Identity" xml:space="preserve">
+    <value>Identity</value>
+  </data>
+  <data name="Shell.ConnectionPanel.IdentityUnavailable" xml:space="preserve">
+    <value>Not available</value>
   </data>
   <data name="Shell.ConnectionPanel.PairingCode" xml:space="preserve">
     <value>Pairing code</value>

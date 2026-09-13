@@ -317,4 +317,19 @@ describe('ConnectionPanelComponent', () => {
       jasmine.clock().uninstall();
     }
   });
+
+  it('shows the host identity fingerprint next to the pairing code', async () => {
+    const element = await renderPanel({ identityFingerprint: '3208 E004 6ED3 EE6B 4E75 1027' });
+
+    expect(element.querySelector('.cp-identity .cp-fingerprint')?.textContent?.trim())
+      .toBe('3208 E004 6ED3 EE6B 4E75 1027');
+  });
+
+  it('says the identity is unavailable when the host cannot load its key', async () => {
+    const element = await renderPanel({ identityFingerprint: null });
+
+    expect(element.querySelector('.cp-identity .cp-fingerprint')).toBeNull();
+    expect(element.querySelector('.cp-identity .cp-muted')).not.toBeNull();
+  });
+
 });

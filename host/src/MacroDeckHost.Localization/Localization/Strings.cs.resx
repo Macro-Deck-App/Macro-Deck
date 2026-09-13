@@ -12921,6 +12921,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Network.Description" xml:space="preserve">
     <value>Port, na kterém Macro Deck naslouchá telefonům, tabletům a prohlížečům v lokální síti.</value>
   </data>
+  <data name="Settings.Network.IdentityDescription" xml:space="preserve">
+    <value>Aplikace Macro Deck zobrazí stejný kód, když se telefon nebo tablet připojí zadáním adresy tohoto počítače. Přihlásit se tam je vhodné jen tehdy, když se oba kódy shodují.</value>
+  </data>
   <data name="Settings.Network.DiscoveryDescription" xml:space="preserve">
     <value>Umožňuje aplikaci Macro Deck v telefonech a tabletech automaticky najít tento počítač. Ostatní zařízení v síti vidí jeho název a verzi.</value>
   </data>
@@ -13533,6 +13536,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Shell.ConnectionPanel.NoInterfaces" xml:space="preserve">
     <value>Nebyla nalezena žádná síťová rozhraní</value>
+  </data>
+  <data name="Shell.ConnectionPanel.Identity" xml:space="preserve">
+    <value>Identita</value>
+  </data>
+  <data name="Shell.ConnectionPanel.IdentityUnavailable" xml:space="preserve">
+    <value>Nedostupná</value>
   </data>
   <data name="Shell.ConnectionPanel.PairingCode" xml:space="preserve">
     <value>Párovací kód</value>

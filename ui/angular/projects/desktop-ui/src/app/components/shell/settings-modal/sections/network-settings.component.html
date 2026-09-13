@@ -108,6 +108,18 @@
         [checked]="discoveryEnabled()"
         (changed)="setDiscoveryEnabled($event)" />
     </shared-settings-row>
+
+    <shared-settings-row
+      [label]="'macrodeck.app:Shell.ConnectionPanel.Identity' | translate"
+      [description]="'macrodeck.app:Settings.Network.IdentityDescription' | translate">
+      @if (identityLoaded()) {
+        @if (identityFingerprint(); as fingerprint) {
+          <span class="network__fingerprint">{{ fingerprint }}</span>
+        } @else {
+          <span class="network__muted">{{ 'macrodeck.app:Shell.ConnectionPanel.IdentityUnavailable' | translate }}</span>
+        }
+      }
+    </shared-settings-row>
   </shared-settings-section>
 
   @if (loaded() && networkState(); as state) {
