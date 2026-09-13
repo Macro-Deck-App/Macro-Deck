@@ -2,6 +2,8 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
+using MacroDeckHost.Application.Network.Discovery;
+using MacroDeckHost.Application.Network.Tls;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
@@ -22,6 +24,8 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 	private readonly IUiTransport _transport;
 	private readonly IIntegrationRegistry _registry;
 	private readonly CompanionCommandRequests _requests;
+	private readonly INetworkInterfaceSnapshotProvider _interfaces;
+	private readonly IHostNameProvider _hostNames;
 	private readonly ILogger _logger;
 	private readonly Lock _connectionGate = new();
 	private readonly Dictionary<string, Guid> _connections = new(StringComparer.Ordinal);
@@ -36,13 +40,17 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 		IUiTransport transport,
 		IIntegrationRegistry registry,
 		CompanionCommandRequests requests,
+		INetworkInterfaceSnapshotProvider interfaces,
+		IHostNameProvider hostNames,
 		ILogger logger)
 	{
+		_hostNames = hostNames;
 		_scopeFactory = scopeFactory;
 		_coordinator = coordinator;
 		_transport = transport;
 		_registry = registry;
 		_requests = requests;
+		_interfaces = interfaces;
 		_logger = logger;
 		_registry.AvailabilityChanged += OnAvailabilityChanged;
 	}
@@ -59,9 +67,32 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 		}
 
 		StateChanged?.Invoke(this, deviceId);
+		if (firstOfConnection)
+		{
+			// Off the dispatcher's path: reading the network adapters can block.
+			WakeOnLanSent = Task.Run(() => SendWakeOnLanAsync(connectionId));
+		}
+
 		if (firstOfConnection || _failedCreations.TryRemove(deviceId, out _))
 		{
 			_creations[deviceId] = Task.Run(() => EnsureConfigurationAsync(deviceId));
+		}
+	}
+
+	private async Task SendWakeOnLanAsync(string connectionId)
+	{
+		try
+		{
+			await _transport.SendToConnection(connectionId,
+				new CompanionWakeOnLanEvent
+				{
+					InstanceName = _hostNames.MachineName,
+					MacAddresses = [.. WakeOnLanPlanner.MacAddresses(_interfaces.GetInterfaces())]
+				});
+		}
+		catch (Exception ex)
+		{
+			_logger.Warning(ex, "Could not send the Wake-on-LAN addresses to connection {ConnectionId}", connectionId);
 		}
 	}
 
@@ -217,6 +248,8 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 			gate.Release();
 		}
 	}
+
+	internal Task WakeOnLanSent { get; private set; } = Task.CompletedTask;
 
 	internal Task CreationFor(Guid deviceId) => _creations.GetValueOrDefault(deviceId) ?? Task.CompletedTask;
 

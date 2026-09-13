@@ -81,7 +81,8 @@ internal sealed class NetworkInterfaceSnapshotProvider : INetworkInterfaceSnapsh
 					properties.UnicastAddresses
 						.Select(address => address.Address)
 						.Where(address => address.AddressFamily == AddressFamily.InterNetwork)
-						.ToList()));
+						.ToList(),
+					Convert.ToHexString(nic.GetPhysicalAddress().GetAddressBytes())));
 			}
 			catch (NetworkInformationException)
 			{

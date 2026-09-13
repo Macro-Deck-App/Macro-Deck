@@ -57,7 +57,7 @@ public static class ServiceAdvertisementPlanner
 			advertised);
 	}
 
-	private static bool IsLanInterface(NetworkInterfaceSnapshot nic)
+	internal static bool IsLanInterface(NetworkInterfaceSnapshot nic)
 		=> nic.IsUp &&
 			nic.Index > 0 &&
 			nic.Type is not (NetworkInterfaceType.Loopback
@@ -67,7 +67,7 @@ public static class ServiceAdvertisementPlanner
 			!VirtualDescriptionMarkers.Any(marker =>
 				nic.Description.Contains(marker, StringComparison.OrdinalIgnoreCase));
 
-	private static bool IsLanAddress(IPAddress address)
+	internal static bool IsLanAddress(IPAddress address)
 	{
 		if (address.AddressFamily != AddressFamily.InterNetwork || IPAddress.IsLoopback(address))
 		{
