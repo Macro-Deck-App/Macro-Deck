@@ -238,6 +238,10 @@ internal sealed class RecordingUiTransport : IUiTransport
 
 	public List<(string Group, object Message)> GroupMessages { get; } = new();
 
+	public List<CancellationToken> GroupTokens { get; } = new();
+
+	public Func<CancellationToken, Task>? GroupSendGate { get; set; }
+
 	public List<object> Broadcasts { get; } = new();
 
 	public bool FailSends { get; set; }
@@ -259,8 +263,9 @@ internal sealed class RecordingUiTransport : IUiTransport
 		where T : class
 	{
 		GroupMessages.Add((group, message));
+		GroupTokens.Add(cancellationToken);
 
-		return Task.CompletedTask;
+		return GroupSendGate?.Invoke(cancellationToken) ?? Task.CompletedTask;
 	}
 }
 

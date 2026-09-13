@@ -21,6 +21,7 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 	private readonly Func<IIntegrationConfigMutationCoordinator> _coordinator;
 	private readonly IUiTransport _transport;
 	private readonly IIntegrationRegistry _registry;
+	private readonly CompanionCommandRequests _requests;
 	private readonly ILogger _logger;
 	private readonly Lock _connectionGate = new();
 	private readonly Dictionary<string, Guid> _connections = new(StringComparer.Ordinal);
@@ -34,12 +35,14 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 		Func<IIntegrationConfigMutationCoordinator> coordinator,
 		IUiTransport transport,
 		IIntegrationRegistry registry,
+		CompanionCommandRequests requests,
 		ILogger logger)
 	{
 		_scopeFactory = scopeFactory;
 		_coordinator = coordinator;
 		_transport = transport;
 		_registry = registry;
+		_requests = requests;
 		_logger = logger;
 		_registry.AvailabilityChanged += OnAvailabilityChanged;
 	}
@@ -76,6 +79,7 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 		}
 
 		_creations.TryRemove(deviceId, out _);
+		_requests.FailDevice(deviceId, CompanionCommandFailure.NotConnected);
 		StateChanged?.Invoke(this, deviceId);
 	}
 
@@ -94,10 +98,46 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 			{
 				Command = command.Command,
 				BrightnessPercent = command.BrightnessPercent,
-				Orientation = command.Orientation
+				Orientation = command.Orientation,
+				RequestId = command.RequestId,
+				ScreenshotMode = command.ScreenshotMode
 			},
 			cancellationToken);
 		return true;
+	}
+
+	public async Task<CompanionCommandResult> RequestAsync(Guid deviceId,
+		CompanionCommand command,
+		CancellationToken cancellationToken)
+	{
+		var result = await _requests.RequestAsync(deviceId,
+			command.Command == CompanionCommand.Screenshot ? CompanionRequestKind.Screenshot : CompanionRequestKind.Command,
+			_states.TryGetValue(deviceId, out var state) && state.AnswersCommands,
+			requestId => SendAsync(deviceId, command with { RequestId = requestId }, cancellationToken),
+			requestId => _ = CancelOnDeviceAsync(deviceId, requestId),
+			cancellationToken);
+		if (result.IsUnconfirmed)
+		{
+			_logger.Information("Companion device {DeviceId} claimed {Command} but never confirmed it",
+				deviceId,
+				command.Command);
+		}
+
+		return result;
+	}
+
+	private async Task CancelOnDeviceAsync(Guid deviceId, string requestId)
+	{
+		try
+		{
+			await SendAsync(deviceId,
+				new CompanionCommand(CompanionCommand.CancelRequest, RequestId: requestId),
+				CancellationToken.None);
+		}
+		catch (Exception ex)
+		{
+			_logger.Warning(ex, "Could not cancel Companion request {RequestId} on device {DeviceId}", requestId, deviceId);
+		}
 	}
 
 	public async Task<bool> ResumeAutoCreationAsync(CancellationToken cancellationToken)
@@ -156,6 +196,7 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 			}
 
 			_creations.TryRemove(deviceId, out _);
+			_requests.FailDevice(deviceId, CompanionCommandFailure.Removed);
 			if (wasConnected)
 			{
 				StateChanged?.Invoke(this, deviceId);
@@ -253,13 +294,35 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 	private SemaphoreSlim GateFor(Guid deviceId) => _deviceGates.GetOrAdd(deviceId, _ => new SemaphoreSlim(1, 1));
 
 	private static CompanionDeviceState Sanitize(ReportCompanionStateRequest report)
-		=> new(Percent(report.BatteryLevelPercent),
+	{
+		var capabilities = (report.Capabilities ?? [])
+			.Where(CompanionCapabilities.All.Contains)
+			.ToHashSet(StringComparer.Ordinal);
+		return new CompanionDeviceState(Percent(report.BatteryLevelPercent),
 			report.Charging,
 			report.Orientation is "portrait" or "landscape" ? report.Orientation : null,
 			Percent(report.ScreenBrightnessPercent),
 			Text(report.Model),
 			Text(report.Platform),
-			Text(report.AppVersion));
+			Text(report.AppVersion))
+		{
+			Capabilities = capabilities,
+			AnswersCommands = report.RequestableCapabilities is not null,
+			RequestableCapabilities = (report.RequestableCapabilities ?? [])
+				.Where(capability => CompanionCapabilities.Requestable.Contains(capability) &&
+					!capabilities.Contains(capability))
+				.ToHashSet(StringComparer.Ordinal),
+			InFocus = report.InFocus,
+			NetworkType = report.NetworkType is "wifi" or "cellular" or "ethernet" or "vpn" or "none"
+				? report.NetworkType
+				: null,
+			NetworkMetered = report.NetworkMetered,
+			NetworkValidated = report.NetworkValidated,
+			NetworkName = Text(report.NetworkName),
+			CpuUsagePercent = Percent(report.CpuUsagePercent),
+			MemoryUsedPercent = Percent(report.MemoryUsedPercent)
+		};
+	}
 
 	private static int? Percent(int? value) => value is { } percent ? Math.Clamp(percent, 0, 100) : null;
 

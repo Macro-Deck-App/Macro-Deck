@@ -30,7 +30,7 @@ internal sealed class CompanionDeviceRemovalTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(variablesBefore, Has.Count.EqualTo(8));
+			Assert.That(variablesBefore, Has.Count.EqualTo(15));
 			Assert.That(variablesAfter, Is.Empty);
 			Assert.That(explicitlyDisabledAfterRemoval, Is.False);
 			Assert.That(storedChoiceAfterRemoval, Is.False);

@@ -1,5 +1,6 @@
 using System.Globalization;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Companion.Actions;
@@ -13,7 +14,8 @@ internal static class CompanionActions
 	private const string Portrait = "portrait";
 	private const string Landscape = "landscape";
 
-	public static IReadOnlyList<IActionDefinition> Create(CompanionTargetResolver resolver) =>
+	public static IReadOnlyList<IActionDefinition> Create(CompanionTargetResolver resolver,
+		Func<IVariableApi?> variables) =>
 	[
 		new CompanionAction("set-brightness",
 			AppStrings.Integrations.Companion.Actions.SetBrightness.Name(),
@@ -58,7 +60,29 @@ internal static class CompanionActions
 			AppStrings.Integrations.Companion.Actions.Vibrate.Description(),
 			[],
 			resolver,
-			_ => new CompanionCommand(CompanionCommand.Vibrate))
+			_ => new CompanionCommand(CompanionCommand.Vibrate)),
+		new CompanionAction("screen-on",
+			AppStrings.Integrations.Companion.Actions.ScreenOn.Name(),
+			AppStrings.Integrations.Companion.Actions.ScreenOn.Description(),
+			[],
+			resolver,
+			_ => new CompanionCommand(CompanionCommand.ScreenOn),
+			CompanionCapabilities.ScreenOn),
+		new CompanionAction("screen-off",
+			AppStrings.Integrations.Companion.Actions.ScreenOff.Name(),
+			AppStrings.Integrations.Companion.Actions.ScreenOff.Description(),
+			[],
+			resolver,
+			_ => new CompanionCommand(CompanionCommand.ScreenOff),
+			CompanionCapabilities.ScreenOff),
+		new CompanionAction("focus-host",
+			AppStrings.Integrations.Companion.Actions.FocusHost.Name(),
+			AppStrings.Integrations.Companion.Actions.FocusHost.Description(),
+			[],
+			resolver,
+			_ => new CompanionCommand(CompanionCommand.Focus),
+			CompanionCapabilities.Focus),
+		new TakeScreenshotAction(resolver, variables)
 	];
 
 	private static int? ReadPercent(object? raw)

@@ -16504,4 +16504,88 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Companion.Errors.NotConnected" xml:space="preserve">
     <value>El dispositivo Companion no está conectado.</value>
   </data>
+  <data name="Integrations.Companion.Variables.InFocus" xml:space="preserve">
+    <value>En primer plano</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkType" xml:space="preserve">
+    <value>Tipo de red</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkMetered" xml:space="preserve">
+    <value>Red de uso medido</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkValidated" xml:space="preserve">
+    <value>Acceso a Internet</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkName" xml:space="preserve">
+    <value>Nombre de la red</value>
+  </data>
+  <data name="Integrations.Companion.Variables.CpuUsagePercent" xml:space="preserve">
+    <value>Uso de CPU</value>
+  </data>
+  <data name="Integrations.Companion.Variables.MemoryUsedPercent" xml:space="preserve">
+    <value>Uso de memoria</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOn.Name" xml:space="preserve">
+    <value>Encender pantalla</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOn.Description" xml:space="preserve">
+    <value>Enciende la pantalla de un dispositivo Companion y muestra este Macro Deck.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOff.Name" xml:space="preserve">
+    <value>Apagar pantalla</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOff.Description" xml:space="preserve">
+    <value>Apaga la pantalla de un dispositivo Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.FocusHost.Name" xml:space="preserve">
+    <value>Traer al frente</value>
+  </data>
+  <data name="Integrations.Companion.Actions.FocusHost.Description" xml:space="preserve">
+    <value>Muestra el deck de este Macro Deck en primer plano en un dispositivo Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.TakeScreenshot.Name" xml:space="preserve">
+    <value>Hacer captura de pantalla</value>
+  </data>
+  <data name="Integrations.Companion.Actions.TakeScreenshot.Description" xml:space="preserve">
+    <value>Captura el deck o toda la pantalla de un dispositivo Companion y la guarda como archivo PNG.</value>
+  </data>
+  <data name="Integrations.Companion.Params.ScreenshotMode" xml:space="preserve">
+    <value>Captura</value>
+  </data>
+  <data name="Integrations.Companion.Options.Deck" xml:space="preserve">
+    <value>Deck</value>
+  </data>
+  <data name="Integrations.Companion.Options.FullScreen" xml:space="preserve">
+    <value>Pantalla completa</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenOnUnavailable" xml:space="preserve">
+    <value>Este dispositivo no puede encender la pantalla. En Android, activa la conexión en segundo plano y permite mostrar sobre otras apps en los ajustes de la app Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenOffUnavailable" xml:space="preserve">
+    <value>Este dispositivo no puede apagar la pantalla. En Android, activa el administrador de dispositivos o el servicio de accesibilidad en los ajustes de la app Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.FocusUnavailable" xml:space="preserve">
+    <value>Este dispositivo no puede traer Macro Deck al frente ahora. Abre la app Companion o, en Android, activa la conexión en segundo plano y permite mostrar sobre otras apps en sus ajustes.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.DeckNotOnScreen" xml:space="preserve">
+    <value>El deck de este Macro Deck no está en la pantalla del dispositivo, así que no se puede capturar.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.FullScreenshotUnavailable" xml:space="preserve">
+    <value>Este dispositivo no puede capturar toda la pantalla. En Android, activa la captura de pantalla o el servicio de accesibilidad en los ajustes de la app Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenshotTimedOut" xml:space="preserve">
+    <value>El dispositivo Companion no envió la captura de pantalla a tiempo.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.PermissionDeclined" xml:space="preserve">
+    <value>El permiso se rechazó en el dispositivo Companion. Actívalo en los ajustes de la app Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.PermissionTimedOut" xml:space="preserve">
+    <value>El dispositivo Companion no concedió el permiso a tiempo.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.CommandFailed" xml:space="preserve">
+    <value>El dispositivo Companion no pudo ejecutar el comando.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenshotFailed" xml:space="preserve">
+    <value>El dispositivo Companion no pudo hacer la captura de pantalla.</value>
+  </data>
 </root>

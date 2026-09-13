@@ -639,6 +639,7 @@ public class Startup
 		services.AddSingleton<IIntegrationConfigMutationAdapter, CompanionConfigurationMutationAdapter>();
 		services.AddSingleton<Func<IIntegrationConfigMutationCoordinator>>(sp =>
 			sp.GetRequiredService<IIntegrationConfigMutationCoordinator>);
+		services.AddSingleton<CompanionCommandRequests>();
 		services.AddSingleton<CompanionDeviceRegistry>();
 		services.AddSingleton<ICompanionGateway>(sp => sp.GetRequiredService<CompanionDeviceRegistry>());
 		services.AddSingleton<IIntegrationConfigMutationCoordinator, IntegrationConfigMutationCoordinator>();

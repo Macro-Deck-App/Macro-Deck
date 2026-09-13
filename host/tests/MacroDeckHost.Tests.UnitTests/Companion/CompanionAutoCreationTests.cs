@@ -138,7 +138,7 @@ internal sealed class CompanionAutoCreationTests
 		{
 			Assert.That(parsed, Is.True);
 			Assert.That(identity.Key, Is.EqualTo("phone_1234"));
-			Assert.That(variables, Has.Count.EqualTo(8));
+			Assert.That(variables, Has.Count.EqualTo(15));
 			Assert.That(variables.All(variable =>
 					variable.Name.StartsWith("companion_phone_1234_", StringComparison.Ordinal)),
 				Is.True);

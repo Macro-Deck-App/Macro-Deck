@@ -18,7 +18,9 @@ using MacroDeckHost.Infrastructure;
 using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Companion;
+using MacroDeckHost.Tests.UnitTests.Adb;
 using MacroDeckHost.Tests.UnitTests.Auth;
+using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -62,8 +64,14 @@ internal sealed class CompanionHarness
 			new VariablePollingInvalidationSignal(),
 			[Adapter],
 			Logger));
-		DeviceRegistry = new CompanionDeviceRegistry(ScopeFactory, () => Coordinator, Transport, Registry, Logger);
-		Context = new IntegrationContext(null!,
+		Requests = new CompanionCommandRequests(Time);
+		DeviceRegistry = new CompanionDeviceRegistry(ScopeFactory,
+			() => Coordinator,
+			Transport,
+			Registry,
+			Requests,
+			Logger);
+		Context = new IntegrationContext(VariableApi,
 			null!,
 			new IntegrationConfig(IntegrationId, ScopeFactory),
 			null!,
@@ -94,6 +102,9 @@ internal sealed class CompanionHarness
 	public CompanionConfigurationMutationAdapter Adapter { get; }
 	public GatedCoordinator Coordinator { get; }
 	public RecordingUiTransport Transport { get; } = new();
+	public FakeTimeProvider Time { get; } = new();
+	public CompanionCommandRequests Requests { get; }
+	public RecordingVariableApi VariableApi { get; } = new();
 	public CompanionDeviceRegistry DeviceRegistry { get; }
 	public IntegrationContext Context { get; }
 
@@ -118,9 +129,10 @@ internal sealed class CompanionHarness
 	public async Task<VariableReading> ReadAsync(Guid entryId, string slot)
 		=> await Integration.ReadAsync($"entry-{entryId:N}-{slot.Replace('_', '-')}");
 
-	public static ReportCompanionStateRequest Report(string appVersion = "1.0.0")
+	public static ReportCompanionStateRequest Report(string appVersion = "1.0.0", params string[] capabilities)
 		=> new()
 		{
+			Capabilities = [.. capabilities],
 			BatteryLevelPercent = 80,
 			Charging = true,
 			Orientation = "portrait",

@@ -16504,4 +16504,88 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Companion.Errors.NotConnected" xml:space="preserve">
     <value>Urządzenie Companion nie jest połączone.</value>
   </data>
+  <data name="Integrations.Companion.Variables.InFocus" xml:space="preserve">
+    <value>Na pierwszym planie</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkType" xml:space="preserve">
+    <value>Typ sieci</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkMetered" xml:space="preserve">
+    <value>Sieć taryfowa</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkValidated" xml:space="preserve">
+    <value>Dostęp do internetu</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkName" xml:space="preserve">
+    <value>Nazwa sieci</value>
+  </data>
+  <data name="Integrations.Companion.Variables.CpuUsagePercent" xml:space="preserve">
+    <value>Użycie procesora</value>
+  </data>
+  <data name="Integrations.Companion.Variables.MemoryUsedPercent" xml:space="preserve">
+    <value>Użycie pamięci</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOn.Name" xml:space="preserve">
+    <value>Włącz ekran</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOn.Description" xml:space="preserve">
+    <value>Włącza ekran urządzenia Companion i wyświetla ten Macro Deck.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOff.Name" xml:space="preserve">
+    <value>Wyłącz ekran</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOff.Description" xml:space="preserve">
+    <value>Wyłącza ekran urządzenia Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.FocusHost.Name" xml:space="preserve">
+    <value>Przenieś na pierwszy plan</value>
+  </data>
+  <data name="Integrations.Companion.Actions.FocusHost.Description" xml:space="preserve">
+    <value>Wyświetla deck tego Macro Deck na pierwszym planie urządzenia Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.TakeScreenshot.Name" xml:space="preserve">
+    <value>Zrób zrzut ekranu</value>
+  </data>
+  <data name="Integrations.Companion.Actions.TakeScreenshot.Description" xml:space="preserve">
+    <value>Przechwytuje deck lub cały ekran urządzenia Companion i zapisuje obraz jako plik PNG.</value>
+  </data>
+  <data name="Integrations.Companion.Params.ScreenshotMode" xml:space="preserve">
+    <value>Przechwytywanie</value>
+  </data>
+  <data name="Integrations.Companion.Options.Deck" xml:space="preserve">
+    <value>Deck</value>
+  </data>
+  <data name="Integrations.Companion.Options.FullScreen" xml:space="preserve">
+    <value>Cały ekran</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenOnUnavailable" xml:space="preserve">
+    <value>To urządzenie nie może włączyć ekranu. W systemie Android należy w ustawieniach aplikacji Companion włączyć połączenie w tle i zezwolić na wyświetlanie nad innymi aplikacjami.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenOffUnavailable" xml:space="preserve">
+    <value>To urządzenie nie może wyłączyć ekranu. W systemie Android należy w ustawieniach aplikacji Companion włączyć administratora urządzenia lub usługę ułatwień dostępu.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.FocusUnavailable" xml:space="preserve">
+    <value>To urządzenie nie może teraz przenieść Macro Deck na pierwszy plan. Należy otworzyć aplikację Companion lub w systemie Android włączyć w jej ustawieniach połączenie w tle i zezwolić na wyświetlanie nad innymi aplikacjami.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.DeckNotOnScreen" xml:space="preserve">
+    <value>Deck tego Macro Deck nie jest wyświetlany na ekranie urządzenia, więc nie można go przechwycić.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.FullScreenshotUnavailable" xml:space="preserve">
+    <value>To urządzenie nie może przechwycić całego ekranu. W systemie Android należy w ustawieniach aplikacji Companion włączyć przechwytywanie ekranu lub usługę ułatwień dostępu.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenshotTimedOut" xml:space="preserve">
+    <value>Urządzenie Companion nie przesłało zrzutu ekranu na czas.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.PermissionDeclined" xml:space="preserve">
+    <value>Uprawnienie zostało odrzucone na urządzeniu Companion. Należy je włączyć w ustawieniach aplikacji Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.PermissionTimedOut" xml:space="preserve">
+    <value>Urządzenie Companion nie przyznało uprawnienia na czas.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.CommandFailed" xml:space="preserve">
+    <value>Urządzenie Companion nie mogło wykonać polecenia.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenshotFailed" xml:space="preserve">
+    <value>Urządzenie Companion nie mogło wykonać zrzutu ekranu.</value>
+  </data>
 </root>
