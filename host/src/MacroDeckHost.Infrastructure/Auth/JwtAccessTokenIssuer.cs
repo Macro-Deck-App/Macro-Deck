@@ -11,11 +11,13 @@ public class JwtAccessTokenIssuer : IAccessTokenIssuer
 
 	private readonly ISigningKeyProvider _signingKeyProvider;
 	private readonly TimeProvider _timeProvider;
+	private readonly AccessTokenCutoff _cutoff;
 
-	public JwtAccessTokenIssuer(ISigningKeyProvider signingKeyProvider, TimeProvider timeProvider)
+	public JwtAccessTokenIssuer(ISigningKeyProvider signingKeyProvider, TimeProvider timeProvider, AccessTokenCutoff cutoff)
 	{
 		_signingKeyProvider = signingKeyProvider;
 		_timeProvider = timeProvider;
+		_cutoff = cutoff;
 	}
 
 	public AccessToken Issue(Guid userId, string username, AuthScope scope, Guid? deviceId)
@@ -40,7 +42,9 @@ public class JwtAccessTokenIssuer : IAccessTokenIssuer
 			Audience = AuthDefaults.Audience,
 			NotBefore = now,
 			Expires = expiresAt,
-			IssuedAt = now,
+			// iat has one-second resolution, so a token minted in the same second as a password reset would
+			// be refused by the cutoff for its whole life. nbf and exp stay on the real clock.
+			IssuedAt = _cutoff.IssuedAtFor(now),
 			Claims = claims,
 			SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(_signingKeyProvider.GetKey()),
 				SecurityAlgorithms.HmacSha256)

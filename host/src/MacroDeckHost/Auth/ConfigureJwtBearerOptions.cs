@@ -39,6 +39,16 @@ public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions
 		};
 		options.Events = new JwtBearerEvents
 		{
+			OnTokenValidated = context =>
+			{
+				if (context.Principal is { } principal &&
+					context.HttpContext.RequestServices.GetService<AccessTokenCutoff>()?.Rejects(principal) == true)
+				{
+					context.Fail("The access token was issued before the password was reset.");
+				}
+
+				return Task.CompletedTask;
+			},
 			OnChallenge = context =>
 			{
 				context.Response.Headers.CacheControl = "no-store";

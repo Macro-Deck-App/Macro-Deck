@@ -12,6 +12,7 @@ type AuthStub = {
   trusted: ReturnType<typeof signal<boolean>>;
   changeUsername: jasmine.Spy;
   changePassword: jasmine.Spy;
+  resetPassword: jasmine.Spy;
   logout: jasmine.Spy;
 };
 
@@ -56,7 +57,8 @@ describe('SecuritySettingsComponent - lock screen setting (issue #462)', () => {
       state: signal<AuthState>('authenticated'),
       trusted: signal(false),
       changeUsername: jasmine.createSpy('changeUsername'),
-      changePassword: jasmine.createSpy('changePassword'),
+      changePassword: jasmine.createSpy('changePassword').and.resolveTo({ ok: true }),
+      resetPassword: jasmine.createSpy('resetPassword').and.resolveTo({ ok: true }),
       logout: jasmine.createSpy('logout').and.resolveTo(undefined),
     };
 
@@ -159,6 +161,51 @@ describe('SecuritySettingsComponent - lock screen setting (issue #462)', () => {
       const text = (fixture.nativeElement as HTMLElement).textContent;
       expect(text).toContain('Export your backup recovery key');
       expect(text).toContain('Some key ring files are still readable');
+    });
+  });
+
+  describe('setting a new password', () => {
+    function currentPasswordField(fixture: ComponentFixture<SecuritySettingsComponent>): Element | null {
+      return (fixture.nativeElement as HTMLElement).querySelector('shared-input[name="currentPassword"]');
+    }
+
+    it('lets the computer running Macro Deck reset the password without the current one', async () => {
+      auth.trusted.set(true);
+      const fixture = await create();
+      const component = fixture.componentInstance;
+
+      component.newPassword.set('newpassword1');
+      component.newPasswordConfirm.set('newpassword1');
+      await component.submitPassword();
+
+      expect(currentPasswordField(fixture)).toBeNull();
+      expect(auth.resetPassword).toHaveBeenCalledWith('newpassword1');
+      expect(auth.changePassword).not.toHaveBeenCalled();
+      expect(component.passwordChanged()).toBeTrue();
+    });
+
+    it('keeps asking a remote session for the current password', async () => {
+      auth.trusted.set(false);
+      const fixture = await create();
+      const component = fixture.componentInstance;
+
+      component.newPassword.set('newpassword1');
+      component.newPasswordConfirm.set('newpassword1');
+      expect(component.canSubmitPassword()).toBeFalse();
+
+      component.currentPassword.set('password123');
+      await component.submitPassword();
+
+      expect(currentPasswordField(fixture)).not.toBeNull();
+      expect(auth.changePassword).toHaveBeenCalledWith('password123', 'newpassword1');
+      expect(auth.resetPassword).not.toHaveBeenCalled();
+    });
+
+    it('shows which account the password belongs to', async () => {
+      const fixture = await create();
+
+      expect((fixture.nativeElement as HTMLElement).querySelector('.sec-current-username')?.textContent)
+        .toContain('admin');
     });
   });
 

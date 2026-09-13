@@ -17,6 +17,11 @@
   <shared-settings-section
     [heading]="'macrodeck.app:Settings.Security.UsernameHeading' | translate"
     [description]="'macrodeck.app:Settings.Security.UsernameDescription' | translate">
+    @if (currentUsername(); as username) {
+      <shared-settings-row [label]="'macrodeck.app:Auth.Username' | translate">
+        <span class="sec-current-username">{{ username }}</span>
+      </shared-settings-row>
+    }
     <form class="sec-form" (submit)="$event.preventDefault(); submitUsername()">
       @if (usernameError(); as message) {
         <shared-error-banner [message]="message" (dismiss)="usernameError.set(null)"></shared-error-banner>
@@ -62,7 +67,9 @@
 
   <shared-settings-section
     [heading]="'macrodeck.app:Settings.Security.PasswordHeading' | translate"
-    [description]="'macrodeck.app:Settings.Security.PasswordDescription' | translate">
+    [description]="(trusted()
+      ? 'macrodeck.app:Settings.Security.ResetPasswordDescription'
+      : 'macrodeck.app:Settings.Security.PasswordDescription') | translate">
     <form class="sec-form" (submit)="$event.preventDefault(); submitPassword()">
       @if (passwordError(); as message) {
         <shared-error-banner [message]="message" (dismiss)="passwordError.set(null)"></shared-error-banner>
@@ -71,17 +78,19 @@
         <p class="sec-success">{{ 'macrodeck.app:Settings.Security.PasswordChanged' | translate }}</p>
       }
 
-      <label class="sec-field">
-        <span class="sec-label">{{ 'macrodeck.app:Settings.Security.CurrentPasswordLabel' | translate }}</span>
-        <shared-input
-          name="currentPassword"
-          type="password"
-          [placeholder]="'macrodeck.app:Settings.Security.CurrentPasswordLabel' | translate"
-          [disabled]="passwordSubmitting()"
-          [ngModel]="currentPassword()"
-          (ngModelChange)="currentPassword.set($event)">
-        </shared-input>
-      </label>
+      @if (!trusted()) {
+        <label class="sec-field">
+          <span class="sec-label">{{ 'macrodeck.app:Settings.Security.CurrentPasswordLabel' | translate }}</span>
+          <shared-input
+            name="currentPassword"
+            type="password"
+            [placeholder]="'macrodeck.app:Settings.Security.CurrentPasswordLabel' | translate"
+            [disabled]="passwordSubmitting()"
+            [ngModel]="currentPassword()"
+            (ngModelChange)="currentPassword.set($event)">
+          </shared-input>
+        </label>
+      }
 
       <label class="sec-field">
         <span class="sec-label">{{ 'macrodeck.app:Settings.Security.NewPasswordLabel' | translate }}</span>
@@ -121,7 +130,9 @@
           variant="primary"
           [disabled]="!canSubmitPassword()"
           [loading]="passwordSubmitting()">
-          {{ 'macrodeck.app:Settings.Security.ChangePasswordAction' | translate }}
+          {{ (trusted()
+            ? 'macrodeck.app:Settings.Security.ResetPasswordAction'
+            : 'macrodeck.app:Settings.Security.ChangePasswordAction') | translate }}
         </shared-button>
       </div>
     </form>

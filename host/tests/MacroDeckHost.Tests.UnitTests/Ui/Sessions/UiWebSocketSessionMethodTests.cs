@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Claims;
 using System.Text.Json;
 using MacroDeck.Ui.Model.Surfaces;
@@ -12,6 +13,7 @@ using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
 using MacroDeckHost.Tests.UnitTests.Triggers;
 using MacroDeckHost.Ui;
+using Microsoft.Extensions.Hosting;
 
 namespace MacroDeckHost.Tests.UnitTests.Ui.Sessions;
 
@@ -37,6 +39,27 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			Assert.That(response.Accepted, Is.False, "An admin scope attached to another device's session.");
 			Assert.That(response.Code, Is.EqualTo(UiSessionErrorCodes.SessionForbidden));
 			Assert.That(MessagesFor("c-admin"), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_ticket_whose_token_predates_a_password_reset_cannot_connect_but_the_desktop_can()
+	{
+		var cutoff = new AccessTokenCutoff();
+		var resetAt = Time.GetUtcNow();
+		cutoff.Set(resetAt.UtcDateTime);
+		using var stale = CutoffDispatcherFor("c-stale",
+			cutoff,
+			new Claim("iat", resetAt.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture)));
+		using var desktop = CutoffDispatcherFor("c-desktop", cutoff);
+
+		var staleConnected = await stale.ConnectedAsync();
+		var desktopConnected = await desktop.ConnectedAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(staleConnected, Is.False);
+			Assert.That(desktopConnected, Is.True);
 		});
 	}
 
@@ -170,6 +193,59 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 	private UiWebSocketDispatcher DispatcherFor(string connectionId, params Claim[] claims)
 		=> DispatcherFor(connectionId, null, claims);
 
+	private UiWebSocketDispatcher CutoffDispatcherFor(
+		string connectionId,
+		AccessTokenCutoff cutoff,
+		params Claim[] claims)
+		=> new(connectionId: connectionId,
+			principal: new ClaimsPrincipal(new ClaimsIdentity(claims, "test")),
+			abort: static () => { },
+			labelText: null!,
+			subscriptions: null!,
+			widgetState: null!,
+			widgetStateSubscriptions: null!,
+			variableInterest: null!,
+			variableBroadcaster: null!,
+			getMusicPlayerInstances: null!,
+			getMusicPlayerState: null!,
+			getWeatherInstances: null!,
+			getWeatherState: null!,
+			getVariableCatalogProviders: null!,
+			discoverCatalogVariables: null!,
+			resolveCatalogVariable: null!,
+			reportFolderChanged: null!,
+			listUiPreviews: null!,
+			logSubscriptions: null!,
+			logFileReader: null!,
+			deviceConnections: new DeviceConnectionTracker(new RecordingEventBus(), Time),
+			musicPlayerClientSync: null!,
+			uiSessions: Broker,
+			configUiSessions: null!,
+			widgetUiSessions: null!,
+			uiPreviewSessions: null!,
+			folderUiSessions: null!,
+			getFolderViews: null!,
+			modalUiSessions: null!,
+			lifetime: new RunningLifetime(),
+			transport: Transport,
+			webSocketTransport: null!,
+			companions: null!,
+			accessTokenCutoff: cutoff,
+			connectionCancellation: CancellationToken.None);
+
+	private sealed class RunningLifetime : IHostApplicationLifetime
+	{
+		public CancellationToken ApplicationStarted => CancellationToken.None;
+
+		public CancellationToken ApplicationStopping => CancellationToken.None;
+
+		public CancellationToken ApplicationStopped => CancellationToken.None;
+
+		public void StopApplication()
+		{
+		}
+	}
+
 	/// <summary>A dispatcher wired with the collaborators <c>RegisterClient</c> actually touches, so a
 	/// test can take a connection through the same registration a real client performs before it sends
 	/// anything.</summary>
@@ -207,6 +283,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			transport: Transport,
 			webSocketTransport: null!,
 			companions: null!,
+			accessTokenCutoff: new AccessTokenCutoff(),
 			connectionCancellation: CancellationToken.None);
 
 	private UiWebSocketDispatcher DispatcherFor(
@@ -246,6 +323,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			transport: null!,
 			webSocketTransport: null!,
 			companions: null!,
+			accessTokenCutoff: new AccessTokenCutoff(),
 			connectionCancellation: CancellationToken.None);
 
 	/// <summary>Stands in for the real catalog handler: this test asserts the route exists, not what the

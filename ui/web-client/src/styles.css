@@ -846,6 +846,13 @@ body,
   color: var(--color-text-secondary);
 }
 
+.wc-login-hint {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  margin: 0;
+  text-align: center;
+}
+
 /*
  * The host's lock screen sits over the deck rather than replacing it (issues #462, #257): the deck
  * keeps its sessions and its state and comes straight back when the machine is unlocked.

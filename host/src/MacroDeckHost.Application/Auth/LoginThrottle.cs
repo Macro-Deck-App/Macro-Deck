@@ -70,6 +70,19 @@ public class LoginThrottle
 
 	public void RegisterSuccess(string key) => _entries.TryRemove(key, out _);
 
+	public void ClearUsername(string username)
+	{
+		var name = username.Trim();
+		foreach (var key in _entries.Keys)
+		{
+			var separator = key.IndexOf('|');
+			if (separator >= 0 && string.Equals(key[(separator + 1)..].Trim(), name, StringComparison.OrdinalIgnoreCase))
+			{
+				_entries.TryRemove(key, out _);
+			}
+		}
+	}
+
 	private void PruneStaleEntries()
 	{
 		var cutoff = _timeProvider.GetUtcNow() - _entryLifetime;

@@ -46,4 +46,6 @@ internal sealed class FakeEnrollmentAuthService : IAuthService
 
 	public Task<Result<AuthError>> ChangeUsername(string currentPassword, string newUsername)
 		=> throw new NotSupportedException();
+
+	public Task<Result<AuthError>> ResetPassword(string newPassword) => throw new NotSupportedException();
 }

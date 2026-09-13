@@ -586,6 +586,7 @@ export {
   type LoginRequest,
   type PairingCodeResponse,
   type RedeemDeviceEnrollmentRequest,
+  type ResetPasswordRequest,
   type SetupRequest,
   type TokenResponse,
 } from './protocol/messages/auth';

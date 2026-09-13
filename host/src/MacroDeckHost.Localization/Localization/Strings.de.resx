@@ -455,6 +455,9 @@
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Widget-Variablen</value>
   </data>
+  <data name="Auth.ForgotPasswordHint" xml:space="preserve">
+    <value>Passwort vergessen? Setze es auf dem Computer, auf dem Macro Deck läuft, unter Einstellungen &gt; Sicherheit zurück.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Passwort</value>
   </data>
@@ -13272,6 +13275,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Settings.Security.PasswordsMismatch" xml:space="preserve">
     <value>Die Passwörter stimmen nicht überein.</value>
+  </data>
+  <data name="Settings.Security.ResetPasswordAction" xml:space="preserve">
+    <value>Passwort zurücksetzen</value>
+  </data>
+  <data name="Settings.Security.ResetPasswordDescription" xml:space="preserve">
+    <value>Du bist am Computer, auf dem Macro Deck läuft, und kannst daher ein neues Passwort ohne das aktuelle festlegen. Dabei werden alle Remote-Sitzungen abgemeldet.</value>
   </data>
   <data name="Settings.Security.SignOutAction" xml:space="preserve">
     <value>Abmelden</value>

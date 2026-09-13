@@ -405,6 +405,7 @@ public class Startup
 
 		services.AddSingleton(TimeProvider.System);
 		services.AddSingleton<LoginThrottle>();
+		services.AddSingleton<AccessTokenCutoff>();
 		services.AddSingleton<FailedLoginNotificationTracker>();
 		services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
 		services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
@@ -839,6 +840,8 @@ public class Startup
 				// action on it is gated on LoopbackConnection.IsTrusted and needs no credentials, so
 				// without this any page the user has open could drive a device attached to this machine.
 				!context.Request.Path.StartsWithSegments("/api/client-targets") &&
+				// Same reason again: a loopback password reset needs no credentials at all.
+				!context.Request.Path.StartsWithSegments("/api/auth/reset-password") &&
 				!context.Request.Path.StartsWithSegments("/api/ui-websocket/tickets"),
 			branch => branch.UseCors("AllowAny"));
 

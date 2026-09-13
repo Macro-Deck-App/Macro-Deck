@@ -484,6 +484,7 @@ public class DeviceServiceTests
 			_service,
 			new DeviceEnrollmentStore(),
 			new PairingCodeStore(),
+			new AccessTokenCutoff(),
 			new FakeOnboardingPreferences(),
 			_time,
 			NullLogger<AuthService>.Instance);
