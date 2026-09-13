@@ -158,12 +158,23 @@ public class AuthPolicyMatrixTests
 	[Test]
 	public async Task A_page_open_in_the_users_browser_gets_no_loopback_trust()
 	{
-		var crossSite = await SendFromBrowser(HttpMethod.Get, "/api/auth/pairing-code", "https://attacker.example", "cross-site");
-		var sameSite = await SendFromBrowser(HttpMethod.Post, "/api/auth/device-enrollment", "http://localhost:3000", "same-site");
+		var crossSite = await SendFromBrowser(HttpMethod.Get,
+			"/api/auth/pairing-code",
+			"https://attacker.example",
+			"cross-site");
+		var sameSite = await SendFromBrowser(HttpMethod.Post,
+			"/api/auth/device-enrollment",
+			"http://localhost:3000",
+			"same-site");
 		var foreignOriginOnly = await SendFromBrowser(HttpMethod.Get, "/api/folders", "https://attacker.example", null);
-		var foreignSetup = await SendFromBrowser(HttpMethod.Post, "/api/auth/setup", "https://attacker.example", "cross-site");
-		var desktopUi = await SendFromBrowser(HttpMethod.Get, "/api/auth/pairing-code", "http://localhost", "same-origin");
-		var devProxy = await SendFromBrowser(HttpMethod.Get, "/api/auth/pairing-code", "http://localhost:4200", "same-origin");
+		var foreignSetup
+			= await SendFromBrowser(HttpMethod.Post, "/api/auth/setup", "https://attacker.example", "cross-site");
+		var desktopUi
+			= await SendFromBrowser(HttpMethod.Get, "/api/auth/pairing-code", "http://localhost", "same-origin");
+		var devProxy = await SendFromBrowser(HttpMethod.Get,
+			"/api/auth/pairing-code",
+			"http://localhost:4200",
+			"same-origin");
 
 		Assert.Multiple(() =>
 		{
