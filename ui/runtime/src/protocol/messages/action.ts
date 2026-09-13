@@ -51,8 +51,8 @@ export interface ActionParameterDef {
   literalOnly?: boolean;
   validationRegex?: string;
   maxLength?: number;
-  min?: number;
-  max?: number;
+  min?: number | null;
+  max?: number | null;
   step?: number;
   showSlider?: boolean;
   options?: ActionParameterOption[];
