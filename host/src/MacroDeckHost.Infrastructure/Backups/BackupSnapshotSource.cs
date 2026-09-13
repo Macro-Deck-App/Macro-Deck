@@ -55,6 +55,9 @@ public sealed class BackupSnapshotSource : IBackupSnapshotSource
 		await source.OpenAsync(cancellationToken);
 		await destination.OpenAsync(cancellationToken);
 		source.BackupDatabase(destination);
+		// The copy inherits WAL; rollback mode writes the strip into the archived file itself instead of a
+		// -wal sidecar only a checkpoint on close would fold in, and keeps archives in their old format.
+		await SetRollbackJournal(destination, cancellationToken);
 		await StripConnectCredential(destination, cancellationToken);
 
 		await using var check = destination.CreateCommand();
@@ -89,6 +92,13 @@ public sealed class BackupSnapshotSource : IBackupSnapshotSource
 		{
 			// A snapshot taken before either table existed has nothing to strip.
 		}
+	}
+
+	private static async Task SetRollbackJournal(SqliteConnection destination, CancellationToken ct)
+	{
+		await using var command = destination.CreateCommand();
+		command.CommandText = "PRAGMA journal_mode=DELETE;";
+		await command.ExecuteNonQueryAsync(ct);
 	}
 
 	public string ReadSchemaVersion(string databasePath)

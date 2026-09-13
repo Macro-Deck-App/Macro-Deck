@@ -120,6 +120,14 @@ public class ConnectCredentialIsolationTests
 		var snapshot = Path.Combine(_dataDir, "snapshot.db");
 		await source.CopyDatabase(snapshot);
 
+		using (var copy = new SqliteConnection($"Data Source={snapshot};Pooling=False"))
+		{
+			copy.Open();
+			using var mode = copy.CreateCommand();
+			mode.CommandText = "PRAGMA journal_mode;";
+			Assert.That(mode.ExecuteScalar(), Is.EqualTo("delete"), "the snapshot kept the live WAL journal");
+		}
+
 		using var destination = new MemoryStream();
 		await new BackupArchiveWriter().Write(destination,
 			new BackupArchiveWriteRequest(Manifest(), source.Plan(), snapshot),
@@ -155,7 +163,13 @@ public class ConnectCredentialIsolationTests
 		await _store.Save(new ConnectCredential(Marker(), "sub-elsewhere", "Ada", null, DateTimeOffset.UnixEpoch));
 
 		var foreignDatabase = Path.Combine(_dataDir, "foreign.db");
-		File.Copy(_paths.DatabasePath, foreignDatabase);
+		using (var live = new SqliteConnection($"Data Source={_paths.DatabasePath};Pooling=False"))
+		{
+			live.Open();
+			using var copy = live.CreateCommand();
+			copy.CommandText = $"VACUUM INTO '{foreignDatabase.Replace("'", "''")}';";
+			copy.ExecuteNonQuery();
+		}
 
 		await _store.Clear();
 
