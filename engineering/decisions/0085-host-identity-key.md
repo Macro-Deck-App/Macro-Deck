@@ -38,6 +38,13 @@ desktop app shows it in the connection panel next to the QR code and in the netw
 cannot be loaded. The anonymous challenge does not carry it. Its strength depends on the user comparing every
 group, so clients must ask for a full comparison and never show a partial fingerprint.
 
+**Connect QR code.** The connect payload behind `https://connect.macro-deck.app/<base64 JSON>` carries an
+optional `fingerprint`: the same value without spaces, 24 uppercase hex characters. It is additive, so
+`payloadVersion` stays 2, and it is left out while the key cannot be loaded. The desktop app adds it from
+`identityFingerprint` when it builds the code. The companion app checks a scanned host against it
+automatically, so a device that took over the host's address cannot get its key pinned by a scan of the real
+host's code.
+
 **Key lifetime.** The key is created only when the file is absent, and renewed only when unprotecting it
 fails with a cryptographic error; the unreadable file is kept as `host-identity.key.unreadable-<utc>`. An I/O
 or access error never renews; a failed load is retried at most every five seconds and logged once until it
