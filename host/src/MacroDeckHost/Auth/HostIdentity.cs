@@ -32,7 +32,6 @@ public static class HostIdentityMessage
 		return $"{address}:{port}";
 	}
 
-	// What a person compares by eye: the first 12 bytes of SHA-256 over the raw point, as six groups of four.
 	public static string Fingerprint(byte[] publicKey)
 	{
 		var hex = Convert.ToHexString(SHA256.HashData(publicKey), 0, 12);

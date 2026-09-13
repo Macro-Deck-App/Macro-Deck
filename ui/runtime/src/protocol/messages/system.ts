@@ -39,7 +39,6 @@ export interface GetConnectionInfoResponse {
   endpoints: ConnectionEndpoint[];
   publicListenerUnavailable: boolean;
   version: string;
-  // Six groups of four hex digits, null while the host identity key cannot be loaded.
   identityFingerprint?: string | null;
 }
 

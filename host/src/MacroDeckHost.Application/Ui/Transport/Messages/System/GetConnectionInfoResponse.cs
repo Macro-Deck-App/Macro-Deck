@@ -19,6 +19,5 @@ public class GetConnectionInfoResponse
 
 	public string Version { get; set; } = string.Empty;
 
-	// Null while the host identity key cannot be loaded.
 	public string? IdentityFingerprint { get; set; }
 }

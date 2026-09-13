@@ -35,7 +35,8 @@ then compares a fingerprint: SHA-256 over the raw 65-byte point, the first 12 by
 groups of four separated by single spaces (`3208 E004 6ED3 EE6B 4E75 1027` for the shared vector). The
 desktop app shows it in the connection panel next to the QR code and in the network settings, from the
 `identityFingerprint` field of the admin-only `GET /api/system/connection-info`, which is null while the key
-cannot be loaded. The anonymous challenge does not carry it.
+cannot be loaded. The anonymous challenge does not carry it. Its strength depends on the user comparing every
+group, so clients must ask for a full comparison and never show a partial fingerprint.
 
 **Key lifetime.** The key is created only when the file is absent, and renewed only when unprotecting it
 fails with a cryptographic error; the unreadable file is kept as `host-identity.key.unreadable-<utc>`. An I/O
