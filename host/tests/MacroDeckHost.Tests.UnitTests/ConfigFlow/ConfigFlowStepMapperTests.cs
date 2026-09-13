@@ -42,6 +42,24 @@ public class ConfigFlowStepMapperTests
 	}
 
 	[Test]
+	public void Map_KeepsAStepFieldsVisibilityCondition()
+	{
+		var step = new ConfigFlowStep
+		{
+			StepId = "device",
+			Fields = [ActionParameter.Text("brand"), ActionParameter.Text("model").OnlyWhen("brand", "razer", "logitech")]
+		};
+
+		var field = ConfigFlowStepMapper.Map(step).Fields[1];
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(field.VisibleWhen?.ParameterName, Is.EqualTo("brand"));
+			Assert.That(field.VisibleWhen?.Values, Is.EqualTo(new[] { "razer", "logitech" }));
+		});
+	}
+
+	[Test]
 	public void Map_WithoutLinks_ProducesEmptyLinkList()
 	{
 		var step = new ConfigFlowStep { StepId = "connection", Fields = [ActionParameter.Text("host")] };

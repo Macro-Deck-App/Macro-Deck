@@ -206,6 +206,34 @@ describe('ConfigFlowDialogComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('shared-config-field').length).toBe(1);
   });
 
+  it('shows only the fields whose OnlyWhen condition matches and follows a changed value', async () => {
+    const fixture = await renderWith(stepWith(undefined, {
+      fields: [
+        { name: 'brand', type: 'string', label: 'Brand' } as never,
+        { name: 'model1', type: 'string', label: 'Model 1', visibleWhen: { parameterName: 'brand', values: ['option1'] } } as never,
+        { name: 'model2', type: 'string', label: 'Model 2', visibleWhen: { parameterName: 'brand', values: ['option2'] } } as never,
+      ],
+    }));
+    const flow = TestBed.inject(ConfigFlowService);
+    const fieldsText = async (): Promise<string> => {
+      fixture.detectChanges();
+      await fixture.whenStable();
+      return fixture.nativeElement.querySelector('.cfd-fields').textContent;
+    };
+
+    flow.setValue('brand', 'option1');
+    let text = await fieldsText();
+    expect(fixture.nativeElement.querySelectorAll('shared-config-field').length).toBe(2);
+    expect(text).toContain('Model 1');
+    expect(text).not.toContain('Model 2');
+
+    flow.setValue('brand', 'option2');
+    text = await fieldsText();
+    expect(fixture.nativeElement.querySelectorAll('shared-config-field').length).toBe(2);
+    expect(text).toContain('Model 2');
+    expect(text).not.toContain('Model 1');
+  });
+
   it('shows no switch when the step declares no advanced fields', async () => {
     const fixture = await renderWith(stepWith([]));
 
