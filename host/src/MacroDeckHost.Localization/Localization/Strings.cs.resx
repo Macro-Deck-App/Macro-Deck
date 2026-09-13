@@ -11458,6 +11458,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Akce „{name}“ selhala</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.HostIdentityRenewed" xml:space="preserve">
+    <value>Tento počítač má novou identitu</value>
+  </data>
+  <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
+    <value>Klíč identity tohoto počítače byl nahrazen. Pro další používání spárovaných telefonů a tabletů je nutné na každém z nich znovu naskenovat QR kód tohoto počítače.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Neúspěšný pokus o přihlášení</value>
   </data>

@@ -11458,6 +11458,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Akcja „{name}” nie powiodła się</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.HostIdentityRenewed" xml:space="preserve">
+    <value>Ten komputer ma nową tożsamość</value>
+  </data>
+  <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
+    <value>Klucz tożsamości tego komputera został zastąpiony. Aby dalej korzystać ze sparowanych telefonów i tabletów, należy ponownie zeskanować na każdym z nich kod QR tego komputera.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Nieudana próba logowania</value>
   </data>

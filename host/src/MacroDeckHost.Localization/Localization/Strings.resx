@@ -11458,6 +11458,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>"{name}" failed</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.HostIdentityRenewed" xml:space="preserve">
+    <value>This computer has a new identity</value>
+  </data>
+  <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
+    <value>This computer's identity key was replaced. On every paired phone or tablet, scan this computer's QR code again to keep using it.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Failed login attempt</value>
   </data>

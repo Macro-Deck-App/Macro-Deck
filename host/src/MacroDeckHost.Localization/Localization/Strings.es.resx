@@ -11458,6 +11458,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>"{name}" falló</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.HostIdentityRenewed" xml:space="preserve">
+    <value>Este ordenador tiene una nueva identidad</value>
+  </data>
+  <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
+    <value>Se ha sustituido la clave de identidad de este ordenador. En cada teléfono o tableta vinculado, vuelve a escanear el código QR de este ordenador para seguir usándolo.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Intento de inicio de sesión fallido</value>
   </data>

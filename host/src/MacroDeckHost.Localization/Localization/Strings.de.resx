@@ -11456,6 +11456,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>„{name}“ fehlgeschlagen</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.HostIdentityRenewed" xml:space="preserve">
+    <value>Dieser Computer hat eine neue Identität</value>
+  </data>
+  <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
+    <value>Der Identitätsschlüssel dieses Computers wurde ersetzt. Scanne auf jedem gekoppelten Handy oder Tablet den QR-Code dieses Computers erneut, um es weiter zu verwenden.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Fehlgeschlagener Anmeldeversuch</value>
   </data>
