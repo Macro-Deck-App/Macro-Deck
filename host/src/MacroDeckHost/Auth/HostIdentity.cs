@@ -55,10 +55,20 @@ public static class HostIdentityMessage
 
 public static class HostIdentityRateLimit
 {
-	public const string PolicyName = "host-identity";
+	public const int PerAddressLimit = 30;
+	public const int PerNetworkLimit = 300;
+	public static readonly TimeSpan Window = TimeSpan.FromSeconds(10);
+	private static readonly PathString ChallengePath = "/api/auth/identity";
 
-	// An IPv6 host usually owns a whole /64 and can pick any address in it, so the /64 is one caller.
-	public static string PartitionKey(IPAddress? address)
+	// Per address, plus a ceiling per IPv6 /64 against a caller rotating through its addresses; either refuses.
+	public static PartitionedRateLimiter<HttpContext> Create()
+		=> PartitionedRateLimiter.CreateChained(
+			PartitionedRateLimiter.Create<HttpContext, string>(context =>
+				Partition(context, AddressKey(context.Connection.RemoteIpAddress), PerAddressLimit)),
+			PartitionedRateLimiter.Create<HttpContext, string>(context =>
+				Partition(context, NetworkKey(context.Connection.RemoteIpAddress), PerNetworkLimit)));
+
+	public static string AddressKey(IPAddress? address)
 	{
 		if (address is null)
 		{
@@ -67,20 +77,20 @@ public static class HostIdentityRateLimit
 
 		if (address.IsIPv4MappedToIPv6)
 		{
-			address = address.MapToIPv4();
+			return address.MapToIPv4().ToString();
 		}
 
-		return address.AddressFamily == AddressFamily.InterNetworkV6
-			? $"{Convert.ToHexString(address.GetAddressBytes(), 0, 8)}/64"
-			: address.ToString();
+		return new IPAddress(address.GetAddressBytes()).ToString();
 	}
 
-	public static RateLimitPartition<string> Partition(HttpContext context)
-		=> RateLimitPartition.GetFixedWindowLimiter(PartitionKey(context.Connection.RemoteIpAddress),
-			_ => new FixedWindowRateLimiterOptions
-			{
-				PermitLimit = 30,
-				Window = TimeSpan.FromSeconds(10),
-				QueueLimit = 0
-			});
+	public static string? NetworkKey(IPAddress? address)
+		=> address is { AddressFamily: AddressFamily.InterNetworkV6, IsIPv4MappedToIPv6: false }
+			? $"{Convert.ToHexString(address.GetAddressBytes(), 0, 8)}/64"
+			: null;
+
+	private static RateLimitPartition<string> Partition(HttpContext context, string? key, int permits)
+		=> key is null || !context.Request.Path.StartsWithSegments(ChallengePath)
+			? RateLimitPartition.GetNoLimiter(string.Empty)
+			: RateLimitPartition.GetFixedWindowLimiter(key,
+				_ => new FixedWindowRateLimiterOptions { PermitLimit = permits, Window = Window, QueueLimit = 0 });
 }

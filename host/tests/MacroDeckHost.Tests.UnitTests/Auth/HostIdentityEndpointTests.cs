@@ -166,27 +166,57 @@ public class HostIdentityEndpointTests
 	}
 
 	[Test]
-	public async Task Addresses_in_one_ipv6_64_share_the_challenge_limit()
+	public async Task Another_address_in_the_same_ipv6_64_is_served_after_one_hits_its_limit()
 	{
-		var prefix = $"2001:db8:{Interlocked.Increment(ref _remoteCounter):x}:0";
-		for (var i = 1; i <= 30; i++)
+		var prefix = NextIpv6Prefix();
+		var statuses = new List<HttpStatusCode>();
+		for (var i = 0; i <= HostIdentityRateLimit.PerAddressLimit; i++)
+		{
+			statuses.Add((await _client.SendAsync(Challenge(new { nonce = Nonce() }, LocalIp, $"{prefix}::1"))).StatusCode);
+		}
+
+		var neighbour = await _client.SendAsync(Challenge(new { nonce = Nonce() }, LocalIp, $"{prefix}::2"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(statuses[^1], Is.EqualTo(HttpStatusCode.TooManyRequests));
+			Assert.That(neighbour.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+		});
+	}
+
+	[Test]
+	public async Task One_ipv6_64_rotating_through_addresses_hits_the_network_ceiling()
+	{
+		var prefix = NextIpv6Prefix();
+		for (var i = 1; i <= HostIdentityRateLimit.PerNetworkLimit; i++)
 		{
 			await _client.SendAsync(Challenge(new { nonce = Nonce() }, LocalIp, $"{prefix}::{i:x}"));
 		}
 
-		var sameNetwork = await _client.SendAsync(Challenge(new { nonce = Nonce() }, LocalIp, $"{prefix}::ffff"));
+		var fresh = await _client.SendAsync(Challenge(new { nonce = Nonce() }, LocalIp, $"{prefix}::ffff"));
 
-		Assert.That(sameNetwork.StatusCode, Is.EqualTo(HttpStatusCode.TooManyRequests));
+		Assert.That(fresh.StatusCode, Is.EqualTo(HttpStatusCode.TooManyRequests));
 	}
+
+	[TestCase("fe80::1%4", "fe80::1%5", true)]
+	[TestCase("fe80::1", "fe80::2", false)]
+	[TestCase("::ffff:192.168.1.50", "192.168.1.50", true)]
+	[TestCase("192.168.1.50", "192.168.1.51", false)]
+	public void Each_address_is_its_own_caller(string first, string second, bool shared)
+		=> Assert.That(HostIdentityRateLimit.AddressKey(IPAddress.Parse(first)) ==
+			HostIdentityRateLimit.AddressKey(IPAddress.Parse(second)),
+			Is.EqualTo(shared));
 
 	[TestCase("2001:db8:1:2::1", "2001:db8:1:2:ffff::9", true)]
 	[TestCase("2001:db8:1:2::1", "2001:db8:1:3::1", false)]
-	[TestCase("::ffff:192.168.1.50", "192.168.1.50", true)]
-	[TestCase("192.168.1.50", "192.168.1.51", false)]
-	public void Callers_are_limited_per_ipv4_address_or_ipv6_64(string first, string second, bool shared)
-		=> Assert.That(HostIdentityRateLimit.PartitionKey(IPAddress.Parse(first)) ==
-			HostIdentityRateLimit.PartitionKey(IPAddress.Parse(second)),
+	public void Ipv6_addresses_share_a_ceiling_per_64(string first, string second, bool shared)
+		=> Assert.That(HostIdentityRateLimit.NetworkKey(IPAddress.Parse(first)) ==
+			HostIdentityRateLimit.NetworkKey(IPAddress.Parse(second)),
 			Is.EqualTo(shared));
+
+	[Test]
+	public void Ipv4_callers_have_no_network_ceiling()
+		=> Assert.That(HostIdentityRateLimit.NetworkKey(IPAddress.Parse("::ffff:192.168.1.50")), Is.Null);
 
 	[Test]
 	public async Task Login_redeem_and_refresh_carry_the_key_the_challenge_proves()
@@ -229,6 +259,8 @@ public class HostIdentityEndpointTests
 
 		return request;
 	}
+
+	private static string NextIpv6Prefix() => $"2001:db8:{Interlocked.Increment(ref _remoteCounter):x}:0";
 
 	private static string NextRemote() => $"10.20.{Interlocked.Increment(ref _remoteCounter) / 250}.{_remoteCounter % 250 + 1}";
 

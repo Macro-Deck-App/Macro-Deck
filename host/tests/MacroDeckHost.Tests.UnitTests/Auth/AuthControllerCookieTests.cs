@@ -43,6 +43,17 @@ public class AuthControllerCookieTests
 	}
 
 	[Test]
+	public async Task A_host_shutting_down_still_refreshes_without_a_host_key()
+	{
+		var controller = RefreshController(new DisposedHostIdentity());
+
+		var result = await controller.Refresh();
+
+		var body = (TokenResponse)((OkObjectResult)result).Value!;
+		Assert.That(body.HostKey, Is.Null);
+	}
+
+	[Test]
 	public async Task Refresh_carries_the_host_key()
 	{
 		var identity = new FixedHostIdentity();
@@ -354,6 +365,15 @@ public class AuthControllerCookieTests
 
 		public ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default)
 			=> ValueTask.FromException<byte[]>(new HostIdentityUnavailableException("unreadable"));
+	}
+
+	private sealed class DisposedHostIdentity : IHostIdentityKeyProvider
+	{
+		public ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default)
+			=> ValueTask.FromException<byte[]>(new ObjectDisposedException("provider"));
+
+		public ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default)
+			=> ValueTask.FromException<byte[]>(new ObjectDisposedException("provider"));
 	}
 
 	private sealed class FixedHostIdentity : IHostIdentityKeyProvider

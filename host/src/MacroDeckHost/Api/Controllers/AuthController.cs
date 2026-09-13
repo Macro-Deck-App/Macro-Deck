@@ -9,7 +9,6 @@ using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Localization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
 
 namespace MacroDeckHost.Api.Controllers;
 
@@ -299,7 +298,6 @@ public class AuthController : ControllerBase
 
 	[HttpPost("identity")]
 	[AllowAnonymous]
-	[EnableRateLimiting(HostIdentityRateLimit.PolicyName)]
 	public async Task<IActionResult> ProveIdentity(HostIdentityChallenge body)
 	{
 		if (!HostIdentityMessage.TryParseNonce(body.Nonce, out _))
@@ -400,13 +398,15 @@ public class AuthController : ControllerBase
 	}
 
 	// A host that cannot load its identity still signs people in; the app treats the exchange as legacy.
+	// No request token: the refresh token is already rotated here, and that must never become an error.
 	private async Task<string?> HostKeyOrNull()
 	{
 		try
 		{
-			return Convert.ToBase64String(await _hostIdentity.GetPublicKey(HttpContext.RequestAborted));
+			return Convert.ToBase64String(await _hostIdentity.GetPublicKey());
 		}
-		catch (HostIdentityUnavailableException)
+		catch (Exception e) when (e is HostIdentityUnavailableException or ObjectDisposedException
+			or OperationCanceledException)
 		{
 			return null;
 		}

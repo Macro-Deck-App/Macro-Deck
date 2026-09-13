@@ -185,7 +185,7 @@ public class Startup
 		services.AddRateLimiter(options =>
 		{
 			options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-			options.AddPolicy(HostIdentityRateLimit.PolicyName, HostIdentityRateLimit.Partition);
+			options.GlobalLimiter = HostIdentityRateLimit.Create();
 		});
 
 		services.AddSingleton<IConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();
