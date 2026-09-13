@@ -834,14 +834,15 @@ public class Startup
 		// controller requires, needs no credentials, so without this exclusion any website the developer
 		// happens to have open could cross-origin read pending pairing requests - leaking plugin ids and
 		// executable paths - and POST an approval.
-		app.UseWhen(context => !ProtocolConstants.All.Any(path => context.Request.Path.StartsWithSegments(path)) &&
+		// The loopback listener grants trust without credentials, so it never answers with a CORS grant:
+		// the desktop UI is same-origin with it, and no other page may read or preflight it.
+		app.UseWhen(context => !LoopbackConnection.IsLoopbackListener(context) &&
+				!ProtocolConstants.All.Any(path => context.Request.Path.StartsWithSegments(path)) &&
 				!context.Request.Path.StartsWithSegments("/api/plugin-pairing") &&
 				// api/client-targets is excluded for exactly the reason api/plugin-pairing is: every
 				// action on it is gated on LoopbackConnection.IsTrusted and needs no credentials, so
 				// without this any page the user has open could drive a device attached to this machine.
 				!context.Request.Path.StartsWithSegments("/api/client-targets") &&
-				// Same reason again: a loopback password reset needs no credentials at all.
-				!context.Request.Path.StartsWithSegments("/api/auth/reset-password") &&
 				!context.Request.Path.StartsWithSegments("/api/ui-websocket/tickets"),
 			branch => branch.UseCors("AllowAny"));
 
