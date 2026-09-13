@@ -6,6 +6,7 @@ using System.Text.Json;
 using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Auth;
 using MacroDeckHost.Infrastructure.Persistence;
 using MacroDeckHost.Ui;
 using Microsoft.AspNetCore.Hosting;
@@ -17,7 +18,6 @@ using Serilog;
 
 namespace MacroDeckHost.Tests.UnitTests.Auth;
 
-// Expectations come from the wire contract in the companion app's docs/integration/macro-deck-host.md.
 [NonParallelizable]
 public class HostIdentityEndpointTests
 {
@@ -166,6 +166,29 @@ public class HostIdentityEndpointTests
 	}
 
 	[Test]
+	public async Task Addresses_in_one_ipv6_64_share_the_challenge_limit()
+	{
+		var prefix = $"2001:db8:{Interlocked.Increment(ref _remoteCounter):x}:0";
+		for (var i = 1; i <= 30; i++)
+		{
+			await _client.SendAsync(Challenge(new { nonce = Nonce() }, LocalIp, $"{prefix}::{i:x}"));
+		}
+
+		var sameNetwork = await _client.SendAsync(Challenge(new { nonce = Nonce() }, LocalIp, $"{prefix}::ffff"));
+
+		Assert.That(sameNetwork.StatusCode, Is.EqualTo(HttpStatusCode.TooManyRequests));
+	}
+
+	[TestCase("2001:db8:1:2::1", "2001:db8:1:2:ffff::9", true)]
+	[TestCase("2001:db8:1:2::1", "2001:db8:1:3::1", false)]
+	[TestCase("::ffff:192.168.1.50", "192.168.1.50", true)]
+	[TestCase("192.168.1.50", "192.168.1.51", false)]
+	public void Callers_are_limited_per_ipv4_address_or_ipv6_64(string first, string second, bool shared)
+		=> Assert.That(HostIdentityRateLimit.PartitionKey(IPAddress.Parse(first)) ==
+			HostIdentityRateLimit.PartitionKey(IPAddress.Parse(second)),
+			Is.EqualTo(shared));
+
+	[Test]
 	public async Task Login_redeem_and_refresh_carry_the_key_the_challenge_proves()
 	{
 		var proof = await Prove(Nonce(), LocalIp);
@@ -207,7 +230,6 @@ public class HostIdentityEndpointTests
 		return request;
 	}
 
-	// Every test caller gets its own address so the rate limit never leaks between tests.
 	private static string NextRemote() => $"10.20.{Interlocked.Increment(ref _remoteCounter) / 250}.{_remoteCounter % 250 + 1}";
 
 	private static string Nonce(int length = 32) => Convert.ToBase64String(RandomNumberGenerator.GetBytes(length));

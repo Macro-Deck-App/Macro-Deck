@@ -57,8 +57,26 @@ public static class HostIdentityRateLimit
 {
 	public const string PolicyName = "host-identity";
 
+	// An IPv6 host usually owns a whole /64 and can pick any address in it, so the /64 is one caller.
+	public static string PartitionKey(IPAddress? address)
+	{
+		if (address is null)
+		{
+			return "unknown";
+		}
+
+		if (address.IsIPv4MappedToIPv6)
+		{
+			address = address.MapToIPv4();
+		}
+
+		return address.AddressFamily == AddressFamily.InterNetworkV6
+			? $"{Convert.ToHexString(address.GetAddressBytes(), 0, 8)}/64"
+			: address.ToString();
+	}
+
 	public static RateLimitPartition<string> Partition(HttpContext context)
-		=> RateLimitPartition.GetFixedWindowLimiter(context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+		=> RateLimitPartition.GetFixedWindowLimiter(PartitionKey(context.Connection.RemoteIpAddress),
 			_ => new FixedWindowRateLimiterOptions
 			{
 				PermitLimit = 30,
