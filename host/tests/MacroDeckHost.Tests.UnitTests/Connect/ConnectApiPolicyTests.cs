@@ -21,7 +21,7 @@ namespace MacroDeckHost.Tests.UnitTests.Connect;
 [NonParallelizable]
 public class ConnectApiPolicyTests
 {
-	private const string AvatarUrl = "https://accounts.macro-deck.app/avatars/0123456789abcdef0123456789abcdef.png";
+	private const string AvatarUrl = "https://auth.macro-deck.app/assets/v1/org-1/users/sub-1/avatar";
 
 	private static readonly byte[] _avatarBytes = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3];
 
@@ -61,7 +61,7 @@ public class ConnectApiPolicyTests
 					services.RemoveAll<StartupReadiness>();
 					services.AddSingleton(CompletedStartupReadiness());
 
-					// Without these, a sign-out would reach out to accounts.macro-deck.app from a unit test.
+					// Without these, a sign-out would reach out to the identity provider from a unit test.
 					services.RemoveAll<IConnectSessionService>();
 					services.RemoveAll<IConnectSignInFlow>();
 					services.RemoveAll<IConnectIdentityClient>();
@@ -215,7 +215,7 @@ public class ConnectApiPolicyTests
 			Assert.That(json.GetProperty("status").GetString(), Is.EqualTo("signedOut"));
 			Assert.That(json.GetProperty("account").ValueKind, Is.EqualTo(JsonValueKind.Null));
 			Assert.That(json.GetProperty("accountManagementUrl").GetString(),
-				Is.EqualTo("https://accounts.macro-deck.app/"));
+				Is.EqualTo("https://auth.macro-deck.app/ui/console/users/me"));
 		});
 	}
 
@@ -233,15 +233,23 @@ public class ConnectApiPolicyTests
 		var missing = await Send(HttpMethod.Get, "/api/connect/avatar", bearerToken: _adminToken);
 		var missingBody = await missing.Content.ReadAsByteArrayAsync();
 
+		_session.Current = SignedIn("https://lh3.googleusercontent.com/a/picture");
+		var foreignSessionBody = await (await Send(HttpMethod.Get, "/api/connect/session", bearerToken: _adminToken))
+			.Content.ReadAsStringAsync();
+
 		Assert.Multiple(() =>
 		{
 			Assert.That(avatar.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 			Assert.That(avatar.Content.Headers.ContentType?.MediaType, Is.EqualTo("image/png"));
+			Assert.That(avatar.Headers.GetValues("X-Content-Type-Options"), Is.EquivalentTo(new[] { "nosniff" }));
 			Assert.That(bytes, Is.EqualTo(_avatarBytes));
-			Assert.That(sessionBody, Does.Not.Contain("accounts.macro-deck.app/avatars/"));
+			Assert.That(sessionBody, Does.Not.Contain("/assets/"));
 			Assert.That(sessionBody, Does.Contain("\"avatarAvailable\":true"));
 			Assert.That(missing.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
 			Assert.That(missingBody, Is.Empty);
+			Assert.That(foreignSessionBody,
+				Does.Contain("\"avatarAvailable\":false"),
+				"a picture the host will not fetch must not be announced");
 		});
 	}
 
@@ -307,8 +315,11 @@ public class ConnectApiPolicyTests
 			HttpRequestMessage request,
 			CancellationToken cancellationToken)
 		{
+			var content = new ByteArrayContent(_avatarBytes);
+			content.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+
 			var response = request.RequestUri?.ToString() == AvatarUrl
-				? new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(_avatarBytes) }
+				? new HttpResponseMessage(HttpStatusCode.OK) { Content = content }
 				: new HttpResponseMessage(HttpStatusCode.NotFound);
 
 			return Task.FromResult(response);

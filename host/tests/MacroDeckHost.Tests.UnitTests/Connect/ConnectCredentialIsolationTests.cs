@@ -8,6 +8,7 @@ using MacroDeckHost.Application.Connect;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Secrets;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.Backups;
 using MacroDeckHost.Infrastructure.Backups.Restore;
@@ -86,6 +87,25 @@ public class ConnectCredentialIsolationTests
 		{
 			Assert.That(await _store.Load(), Is.Null);
 			Assert.That(FilesContaining(marker), Is.Empty);
+		});
+	}
+
+	[TestCase("")]
+	[TestCase("https://accounts.macro-deck.app/")]
+	public async Task A_credential_from_the_previous_identity_provider_is_dropped_on_load(string storedIssuer)
+	{
+		await _store.Save(new ConnectCredential(Marker(), "sub-1", "Ada", null, DateTimeOffset.UnixEpoch));
+
+		using (var scope = _provider.CreateScope())
+		{
+			await scope.ServiceProvider.GetRequiredService<IAppPreferenceRepository>()
+				.SetValue(AppPreferenceService.ConnectCredentialIssuerKey, storedIssuer);
+		}
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(await _store.Load(), Is.Null);
+			Assert.That(ConnectSecretRows(), Is.Zero, "the old refresh token was kept");
 		});
 	}
 

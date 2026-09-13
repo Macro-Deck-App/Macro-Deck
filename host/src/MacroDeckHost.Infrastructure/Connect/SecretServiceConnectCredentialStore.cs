@@ -35,6 +35,14 @@ public sealed class SecretServiceConnectCredentialStore : IConnectCredentialStor
 			return null;
 		}
 
+		// A refresh token from another issuer can never be redeemed here, and must not be sent to try.
+		if (await ReadValue(preferences, AppPreferenceService.ConnectCredentialIssuerKey) != ConnectEndpoints.Issuer)
+		{
+			_logger.Information("Dropped a Macro Deck Connect credential issued by a previous identity provider");
+			await DropPointer(preferences, secrets, secretId.Value);
+			return null;
+		}
+
 		string? refreshToken;
 		try
 		{
@@ -81,6 +89,7 @@ public sealed class SecretServiceConnectCredentialStore : IConnectCredentialStor
 			await preferences.SetValue(AppPreferenceService.ConnectCredentialSecretIdKey, created.ToString("D"));
 		}
 
+		await preferences.SetValue(AppPreferenceService.ConnectCredentialIssuerKey, ConnectEndpoints.Issuer);
 		await preferences.SetValue(AppPreferenceService.ConnectCredentialSubjectKey, credential.Subject);
 		await preferences.SetValue(AppPreferenceService.ConnectCredentialCachedDisplayNameKey,
 			credential.CachedDisplayName ?? string.Empty);
@@ -107,6 +116,7 @@ public sealed class SecretServiceConnectCredentialStore : IConnectCredentialStor
 		await preferences.SetValue(AppPreferenceService.ConnectCredentialCachedDisplayNameKey, string.Empty);
 		await preferences.SetValue(AppPreferenceService.ConnectCredentialCachedPictureUrlKey, string.Empty);
 		await preferences.SetValue(AppPreferenceService.ConnectCredentialIssuedAtKey, string.Empty);
+		await preferences.SetValue(AppPreferenceService.ConnectCredentialIssuerKey, string.Empty);
 	}
 
 	private static async Task DropPointer(
@@ -120,6 +130,7 @@ public sealed class SecretServiceConnectCredentialStore : IConnectCredentialStor
 		await preferences.SetValue(AppPreferenceService.ConnectCredentialCachedDisplayNameKey, string.Empty);
 		await preferences.SetValue(AppPreferenceService.ConnectCredentialCachedPictureUrlKey, string.Empty);
 		await preferences.SetValue(AppPreferenceService.ConnectCredentialIssuedAtKey, string.Empty);
+		await preferences.SetValue(AppPreferenceService.ConnectCredentialIssuerKey, string.Empty);
 	}
 
 	private static async Task<Guid?> ReadSecretId(IAppPreferenceRepository preferences)
