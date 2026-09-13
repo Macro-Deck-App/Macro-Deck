@@ -6,6 +6,8 @@ public interface IRemotePluginIntegrationRegistrar
 
 	Task UnregisterAsync(string pluginId, CancellationToken cancellationToken = default);
 
+	Task ForgetAsync(string pluginId, CancellationToken cancellationToken = default);
+
 	Task ApplyRefreshedSnapshotAsync(
 		string pluginId,
 		RemotePluginCapabilitySnapshot snapshot,

@@ -831,28 +831,15 @@ public class RemotePluginIntegrationRegistrarTests
 	}
 
 	[Test]
-	public async Task Unregistering_a_plugin_removes_its_localization_scope()
+	public async Task Forgetting_a_plugin_removes_its_localization_scope()
 	{
 		var pluginId = "com.example.plugin";
-		_invoker.ActionsDescribeResult = new ActionCatalogPayload { Actions = [] };
-		var scope = LocalizationScope.ForPlugin(pluginId);
-
-		_invoker.LocalizationDescribeResult =
-			new LocalizationDescribeResult { Scope = scope, DefaultCulture = "en", Cultures = ["en"] };
-		_invoker.LocalizationCatalogsByCulture["en"] = new LocalizationCatalogResult
-		{
-			Culture = "en", Entries = new Dictionary<string, string>(StringComparer.Ordinal) { ["Connect"] = "Connect" }
-		};
-
-		await ConnectSessionAsync(pluginId,
-			[Action("play"), Provider(CapabilityKinds.Localization)],
-			Accepted(CapabilityKinds.Actions, CapabilityKinds.Localization));
-		await _registrar.RegisterAsync(pluginId);
-
+		var scope = await RegisterLocalizedPluginAsync(pluginId);
 		var resolver = new LocalizationResolver(_localizationCatalogs);
 		var before = resolver.Resolve(new LocalizedString(new LocalizationKey(scope, "Connect")), "en");
+		var notificationsBefore = _mediator.Published.OfType<LocalizationCatalogChangedNotification>().Count();
 
-		await _registrar.UnregisterAsync(pluginId);
+		await _registrar.ForgetAsync(pluginId);
 
 		var after = resolver.Resolve(new LocalizedString(new LocalizationKey(scope, "Connect")), "en");
 
@@ -860,6 +847,70 @@ public class RemotePluginIntegrationRegistrarTests
 		{
 			Assert.That(before, Is.EqualTo("Connect"));
 			Assert.That(after, Does.Contain("[["));
+			Assert.That(_mediator.Published.OfType<LocalizationCatalogChangedNotification>().Count(),
+				Is.EqualTo(notificationsBefore + 1));
+		});
+	}
+
+	[Test]
+	public async Task Unregistering_a_plugin_keeps_its_localization_scope_for_trees_still_showing_it()
+	{
+		var pluginId = "com.example.plugin";
+		var scope = await RegisterLocalizedPluginAsync(pluginId);
+		var notificationsBefore = _mediator.Published.OfType<LocalizationCatalogChangedNotification>().Count();
+
+		await _registrar.UnregisterAsync(pluginId);
+
+		var resolver = new LocalizationResolver(_localizationCatalogs);
+		Assert.Multiple(() =>
+		{
+			Assert.That(resolver.Resolve(new LocalizedString(new LocalizationKey(scope, "Connect")), "en"),
+				Is.EqualTo("Connect"));
+			Assert.That(_integrationRegistry.Registered.Any(i => i.Id == pluginId), Is.False);
+			Assert.That(_mediator.Published.OfType<LocalizationCatalogChangedNotification>().Count(),
+				Is.EqualTo(notificationsBefore));
+		});
+	}
+
+	[Test]
+	public async Task A_reconnecting_plugin_replaces_its_retained_localization_catalog()
+	{
+		var pluginId = "com.example.plugin";
+		var scope = await RegisterLocalizedPluginAsync(pluginId);
+		await _registrar.UnregisterAsync(pluginId);
+
+		_invoker.LocalizationCatalogsByCulture["en"] = new LocalizationCatalogResult
+		{
+			Culture = "en", Entries = new Dictionary<string, string>(StringComparer.Ordinal) { ["Connect"] = "Link" }
+		};
+		await _registrar.RegisterAsync(pluginId);
+
+		var resolver = new LocalizationResolver(_localizationCatalogs);
+		Assert.That(resolver.Resolve(new LocalizedString(new LocalizationKey(scope, "Connect")), "en"),
+			Is.EqualTo("Link"));
+	}
+
+	[Test]
+	public async Task A_culture_refresh_skips_a_retained_catalog_of_an_absent_plugin_and_refreshes_the_rest()
+	{
+		var absentScope = await RegisterLocalizedPluginAsync("com.example.absent");
+		var liveScope = await RegisterLocalizedPluginAsync("com.example.live");
+		await _registrar.UnregisterAsync("com.example.absent");
+		_invoker.AbsentPluginIds.Add("com.example.absent");
+		_invoker.LocalizationCatalogsByCulture["en"] = new LocalizationCatalogResult
+		{
+			Culture = "en", Entries = new Dictionary<string, string>(StringComparer.Ordinal) { ["Connect"] = "Link" }
+		};
+
+		await _registrar.RefreshLocalizationCatalogsAsync();
+
+		var resolver = new LocalizationResolver(_localizationCatalogs);
+		Assert.Multiple(() =>
+		{
+			Assert.That(resolver.Resolve(new LocalizedString(new LocalizationKey(liveScope, "Connect")), "en"),
+				Is.EqualTo("Link"));
+			Assert.That(resolver.Resolve(new LocalizedString(new LocalizationKey(absentScope, "Connect")), "en"),
+				Is.EqualTo("Connect"));
 		});
 	}
 
@@ -947,7 +998,7 @@ public class RemotePluginIntegrationRegistrarTests
 		var layout = await _layoutRegistry.Register(pluginId,
 			new LayoutDescriptor("stream-deck-xl", "Stream Deck XL", []));
 
-		await _registrar.UnregisterAsync(pluginId);
+		await _registrar.ForgetAsync(pluginId);
 
 		Assert.Multiple(() =>
 		{
@@ -972,10 +1023,17 @@ public class RemotePluginIntegrationRegistrarTests
 		public Dictionary<string, LocalizationCatalogResult> LocalizationCatalogsByCulture { get; } =
 			new(StringComparer.Ordinal);
 
+		public HashSet<string> AbsentPluginIds { get; } = new(StringComparer.Ordinal);
+
 		public Task<JsonElement?> InvokeAsync(string pluginId,
 			CapabilityInvokeRequest request,
 			CancellationToken cancellationToken)
 		{
+			if (AbsentPluginIds.Contains(pluginId))
+			{
+				throw RemoteCapabilityException.CreateRetryable(ProtocolErrorCodes.Timeout, "No attached connection.");
+			}
+
 			if (request.Kind == CapabilityKinds.Localization &&
 				request.Operation == CapabilityOperations.Localization.Describe)
 			{

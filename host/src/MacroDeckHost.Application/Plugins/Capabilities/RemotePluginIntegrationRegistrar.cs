@@ -222,12 +222,11 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		return true;
 	}
 
+	// The localization catalog deliberately outlives the adapter: a tree still on a deck references it
+	// while the plugin is only disconnected, and a client without the scope paints raw keys.
 	public async Task UnregisterAsync(string pluginId, CancellationToken cancellationToken = default)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(pluginId);
-
-		var scope = LocalizationScope.ForPlugin(pluginId);
-		var hadLocalizationCatalog = _localizationCatalogs.Unregister(scope);
 
 		// WidgetTypeProviderHost.StopAsync, FolderViewProviderHost.StopAsync and LayoutProviderHost.StopAsync
 		// only ever run from IntegrationLifecycle, which this path - uninstall among its callers - does not
@@ -238,8 +237,14 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		await _layoutRegistry.UnregisterAll(pluginId, cancellationToken).ConfigureAwait(false);
 
 		await _integrationRegistry.UnregisterAsync(pluginId).ConfigureAwait(false);
+	}
 
-		if (hadLocalizationCatalog)
+	public async Task ForgetAsync(string pluginId, CancellationToken cancellationToken = default)
+	{
+		await UnregisterAsync(pluginId, cancellationToken).ConfigureAwait(false);
+
+		var scope = LocalizationScope.ForPlugin(pluginId);
+		if (_localizationCatalogs.Unregister(scope))
 		{
 			await PublishLocalizationCatalogChangedAsync(scope, cancellationToken).ConfigureAwait(false);
 		}

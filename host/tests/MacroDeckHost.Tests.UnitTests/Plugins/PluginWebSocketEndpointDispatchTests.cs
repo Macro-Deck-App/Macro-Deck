@@ -701,6 +701,9 @@ public class PluginWebSocketEndpointDispatchTests
 		public Task UnregisterAsync(string pluginId, CancellationToken cancellationToken = default)
 			=> Task.CompletedTask;
 
+		public Task ForgetAsync(string pluginId, CancellationToken cancellationToken = default)
+			=> Task.CompletedTask;
+
 		public Task RegisterInstalledButStoppedAsync(CancellationToken cancellationToken = default)
 			=> Task.CompletedTask;
 
@@ -735,6 +738,9 @@ public class PluginWebSocketEndpointDispatchTests
 			UnregisteredPluginIds.Add(pluginId);
 			return Task.CompletedTask;
 		}
+
+		public Task ForgetAsync(string pluginId, CancellationToken cancellationToken = default)
+			=> UnregisterAsync(pluginId, cancellationToken);
 
 		public Task RegisterInstalledButStoppedAsync(CancellationToken cancellationToken = default)
 			=> Task.CompletedTask;
