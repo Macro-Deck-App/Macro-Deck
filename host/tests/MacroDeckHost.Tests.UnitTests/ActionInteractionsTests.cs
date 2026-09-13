@@ -229,9 +229,16 @@ internal sealed class RecordingUiTransport : IUiTransport
 	public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 		where T : class
 	{
+		if (FailConnectionSends)
+		{
+			throw new InvalidOperationException("transport unavailable");
+		}
+
 		ConnectionMessages.Add((connectionId, message));
 		return Task.CompletedTask;
 	}
+
+	public bool FailConnectionSends { get; set; }
 
 	public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
 		=> Task.CompletedTask;

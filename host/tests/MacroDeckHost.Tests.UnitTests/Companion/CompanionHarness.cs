@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Network.Discovery;
+using MacroDeckHost.Application.Network.Tls;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Secrets;
@@ -72,7 +73,8 @@ internal sealed class CompanionHarness
 			Registry,
 			Requests,
 			Interfaces,
-			Logger);
+			HostNames,
+			new LoggerConfiguration().WriteTo.Sink(Sink).CreateLogger());
 		Context = new IntegrationContext(VariableApi,
 			null!,
 			new IntegrationConfig(IntegrationId, ScopeFactory),
@@ -105,6 +107,8 @@ internal sealed class CompanionHarness
 	public GatedCoordinator Coordinator { get; }
 	public RecordingUiTransport Transport { get; } = new();
 	public FixedInterfaces Interfaces { get; } = new();
+	public FixedHostNames HostNames { get; } = new();
+	public CapturingSink Sink { get; } = new();
 	public FakeTimeProvider Time { get; } = new();
 	public CompanionCommandRequests Requests { get; }
 	public RecordingVariableApi VariableApi { get; } = new();
@@ -127,6 +131,7 @@ internal sealed class CompanionHarness
 	{
 		DeviceRegistry.Report(connectionId, deviceId, report ?? Report());
 		await DeviceRegistry.CreationFor(deviceId).WaitAsync(TimeSpan.FromSeconds(5));
+		await DeviceRegistry.WakeOnLanSent.WaitAsync(TimeSpan.FromSeconds(5));
 	}
 
 	public async Task<VariableReading> ReadAsync(Guid entryId, string slot)
@@ -245,6 +250,13 @@ internal sealed class CompanionHarness
 		public List<NetworkInterfaceSnapshot> Interfaces { get; } = [];
 
 		public IReadOnlyList<NetworkInterfaceSnapshot> GetInterfaces() => Interfaces;
+	}
+
+	internal sealed class FixedHostNames : IHostNameProvider
+	{
+		public string MachineName => "studio-pc";
+
+		public IReadOnlyList<string> GetHostNames() => [MachineName];
 	}
 
 	internal sealed class MemoryStateStore : IIntegrationStateStore
