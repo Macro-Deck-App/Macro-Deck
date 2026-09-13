@@ -133,13 +133,24 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 			? new SliderDoublePressBinding(widgetId, _folderCache, _triggerService, _uiTransport)
 			: null;
 
-		var session = new SliderWidgetSession(state, _lockState, _timeProvider, isWidgetSurface, variable, doublePress);
+		var label = config.ShowLabel && VariableTemplateRenderer.ContainsLiquid(config.Label)
+			? new SliderLabelBinding(config.Label!, _variables, _variableNotifier, scopeWidgetId?.ToString())
+			: null;
+
+		var session = new SliderWidgetSession(state,
+			_lockState,
+			_timeProvider,
+			isWidgetSurface,
+			variable,
+			doublePress,
+			label);
 
 		var element = SliderWidgetView.Build(variable is null ? config : config with { ValueVariable = variable.Name },
 			state,
 			icon,
 			session.BuildEvents(),
-			WidgetSafeArea.RadiusOf(request.Surface));
+			WidgetSafeArea.RadiusOf(request.Surface),
+			label);
 		var view = new UiView(request.Surface, element);
 
 		session.Attach(view);

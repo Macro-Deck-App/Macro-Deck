@@ -14,6 +14,7 @@ public class IntegrationRegistry : IIntegrationRegistry
 {
 	private readonly ConcurrentDictionary<string, IIntegration> _integrations = new();
 	private readonly ConcurrentDictionary<string, bool> _enabledState;
+	private readonly ConcurrentDictionary<string, long> _disabledVersions = new();
 	private readonly ConcurrentDictionary<string, IntegrationOrigin> _origins = new();
 	private readonly ConcurrentDictionary<string, IntegrationMetadata> _metadata = new();
 	private readonly IServiceScopeFactory _serviceScopeFactory;
@@ -114,6 +115,11 @@ public class IntegrationRegistry : IIntegrationRegistry
 		}
 
 		_enabledState[integrationId] = enabled;
+		if (!enabled)
+		{
+			_disabledVersions.AddOrUpdate(integrationId, 1, (_, version) => version + 1);
+		}
+
 		_stateStore.Save(_enabledState);
 
 		_logger.Information("Integration '{IntegrationId}' {State}",
@@ -122,6 +128,28 @@ public class IntegrationRegistry : IIntegrationRegistry
 
 		AvailabilityChanged?.Invoke(this,
 			new IntegrationAvailabilityChangedEventArgs { IntegrationId = integrationId, IsAvailable = enabled });
+	}
+
+	public bool IsExplicitlyDisabled(string integrationId)
+		=> _enabledState.TryGetValue(integrationId, out var enabled) && !enabled;
+
+	public long DisabledVersion(string integrationId) => _disabledVersions.GetValueOrDefault(integrationId);
+
+	// Both clears are compare-and-remove, so a choice a concurrent SetEnabled has just stored survives.
+	public bool ClearDisabledChoice(string integrationId) => ClearChoice(integrationId, false);
+
+	public void ClearEnabledChoice(string integrationId) => ClearChoice(integrationId, true);
+
+	private bool ClearChoice(string integrationId, bool storedChoice)
+	{
+		if (!_enabledState.TryRemove(new KeyValuePair<string, bool>(integrationId, storedChoice)))
+		{
+			return false;
+		}
+
+		_stateStore.Save(_enabledState);
+		_logger.Information("Integration '{IntegrationId}' no longer has a stored choice", integrationId);
+		return true;
 	}
 
 	public Task<IntegrationRegistrationResult> RegisterAsync(

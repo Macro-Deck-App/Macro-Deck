@@ -561,6 +561,106 @@ public class SliderWidgetSessionTests
 		});
 	}
 
+	[Test]
+	public async Task A_label_template_shows_the_variables_value_and_follows_its_changes()
+	{
+		var registry = new VariableRegistry();
+		var notifier = new VariableChangeNotifier();
+		var strip = TextUserVariable("strip_name", "Strip A");
+		registry.Upsert(strip);
+
+		var session = await OpenLabelledAsync(ProviderWith(registry, notifier),
+			Guid.NewGuid(),
+			"{{ vars.strip_name }}");
+		var initial = LabelText(session);
+
+		strip.Value = "Mic";
+		notifier.Publish("strip_name");
+		var updated = LabelText(session);
+		await session.DisposeAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(initial, Is.EqualTo("Strip A"));
+			Assert.That(updated, Is.EqualTo("Mic"));
+		});
+	}
+
+	[Test]
+	public async Task A_label_template_resolves_a_widget_scoped_variable_in_the_widgets_own_scope()
+	{
+		var widgetId = Guid.NewGuid();
+		var registry = new VariableRegistry();
+		registry.Upsert(NumericUserVariable("gain", VariableScope.Widget, widgetId.ToString()));
+
+		var session = await OpenLabelledAsync(ProviderWith(registry), widgetId, "Gain {{ vars.gain }}");
+		var text = LabelText(session);
+		await session.DisposeAsync();
+
+		Assert.That(text, Is.EqualTo("Gain 5"));
+	}
+
+	[Test]
+	public async Task A_label_template_naming_a_missing_variable_is_rendered_rather_than_shown_raw()
+	{
+		var session = await OpenLabelledAsync(ProviderWith(new VariableRegistry()),
+			Guid.NewGuid(),
+			"Gain {{ vars.nothing_here }}");
+		var text = LabelText(session);
+		await session.DisposeAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(text, Does.StartWith("Gain"));
+			Assert.That(text, Does.Not.Contain("{{"));
+		});
+	}
+
+	[Test]
+	public async Task A_plain_label_is_shown_verbatim()
+	{
+		var session = await OpenLabelledAsync(ProviderWith(new VariableRegistry()), Guid.NewGuid(), "Volume");
+		var text = LabelText(session);
+		await session.DisposeAsync();
+
+		Assert.That(text, Is.EqualTo("Volume"));
+	}
+
+	private static VariableEntity TextUserVariable(string name, string value)
+		=> new()
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = DomainVariableType.Text,
+			Classification = VariableClassification.User,
+			Value = value,
+			UpdatedAt = DateTime.UtcNow
+		};
+
+	private static async Task<IUiSession> OpenLabelledAsync(SliderWidgetUiProvider provider,
+		Guid widgetId,
+		string label)
+	{
+		var surface = new UiSurface
+		{
+			Kind = UiSurfaceKinds.Widget,
+			SessionMode = UiSessionModes.Shared,
+			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+			{
+				[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { label, showLabel = true }),
+				[UiWidgetSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(widgetId.ToString()),
+			},
+		};
+
+		return (await provider.CreateSessionAsync(new UiSessionRequest { Surface = surface, UiModelVersion = 1 },
+			CancellationToken.None))!;
+	}
+
+	private static string? LabelText(IUiSession session)
+		=> Walk(session.BuildTree().Root).Single(node => node.Id == "slider.header.lead.label").Properties["text"]
+			.GetString();
+
 	private static VariableEntity NumericUserVariable(string name, VariableScope scope, string? scopeRefId)
 		=> new()
 		{
@@ -604,7 +704,8 @@ public class SliderWidgetSessionTests
 
 	private static IEnumerable<UiNode> Walk(UiNode node) => node.Children.SelectMany(Walk).Prepend(node);
 
-	private static SliderWidgetUiProvider ProviderWith(VariableRegistry registry)
+	private static SliderWidgetUiProvider ProviderWith(VariableRegistry registry,
+		VariableChangeNotifier? notifier = null)
 	{
 		var integrations = new ConfigurableIntegrationRegistry([]);
 		var scopeFactory = new ServiceCollection()
@@ -623,7 +724,7 @@ public class SliderWidgetSessionTests
 			new SliderWidgetConfigTests.PassThroughSampleText(),
 			TimeProvider.System,
 			registry,
-			new VariableChangeNotifier(),
+			notifier ?? new VariableChangeNotifier(),
 			scopeFactory,
 			new RecordingTriggerService(),
 			new StubFolderCache(),

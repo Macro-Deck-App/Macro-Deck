@@ -37,4 +37,14 @@ public interface IIntegrationRegistry
 		IntegrationMetadata? metadata = null);
 
 	Task<bool> UnregisterAsync(string integrationId);
+
+	bool IsExplicitlyDisabled(string integrationId) => false;
+
+	long DisabledVersion(string integrationId) => 0;
+
+	bool ClearDisabledChoice(string integrationId) => false;
+
+	void ClearEnabledChoice(string integrationId)
+	{
+	}
 }
