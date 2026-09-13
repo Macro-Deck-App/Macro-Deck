@@ -1,3 +1,6 @@
+using MacroDeckHost.Application.Devices.Surfaces;
+using MacroDeck.Sdk.Widgets;
+using MacroDeck.Localization;
 using System.Text.Json;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Nodes;
@@ -29,6 +32,10 @@ internal sealed class WidgetUiSessionTests
 	private WidgetUiProviderRegistry _widgetProviders = null!;
 	private UiSessionBroker _broker = null!;
 	private WidgetUiSessionOpener _opener = null!;
+	private WidgetTypeRegistry _widgetTypes = null!;
+	private StubIntegrationRegistry _integrations = null!;
+	private NoPluginConnections _connections = null!;
+	private UnavailableWidgetSessionRecovery _recovery = null!;
 
 	[SetUp]
 	public void SetUp()
@@ -52,19 +59,29 @@ internal sealed class WidgetUiSessionTests
 				new StubBuiltInWidgetUiProvider(WidgetTypeIds.ActionButton)
 			],
 			() => _broker,
-			Serilog.Core.Logger.None);
+			Serilog.Core.Logger.None,
+			new UnavailableWidgetUiProvider());
+
+		_widgetTypes = new WidgetTypeRegistry(new RecordingMediator());
+		_integrations = new StubIntegrationRegistry();
+		_connections = new NoPluginConnections();
+		var availability = new WidgetProviderAvailability(_widgetTypes, _integrations, _connections);
+		_recovery = new UnavailableWidgetSessionRecovery(_registry, availability, _integrations);
 
 		_opener = new WidgetUiSessionOpener(_folders,
 			new EmptyProfileCache(),
-			new WidgetDataSchemaProvider(new WidgetTypeRegistry(new RecordingMediator())),
-			new WidgetTypeRegistry(new RecordingMediator()),
+			new WidgetDataSchemaProvider(_widgetTypes),
+			_widgetTypes,
 			_registry,
-			_broker);
+			_broker,
+			availability,
+			_recovery);
 	}
 
 	[TearDown]
 	public void TearDown()
 	{
+		_recovery.Dispose();
 		_broker.Dispose();
 		_registry.Dispose();
 	}
@@ -532,6 +549,172 @@ internal sealed class WidgetUiSessionTests
 			Assert.That(ticket.Code, Is.EqualTo(UiSessionErrorCodes.ProviderUnavailable));
 			Assert.That(_registry.SessionsForProvider(providerId), Is.Empty);
 		});
+	}
+
+	private const string GaugeOwner = "com.example.gauges";
+	private const string GaugeType = GaugeOwner + "::gauge";
+
+	[Test]
+	public async Task A_widget_whose_plugin_is_gone_is_served_a_placeholder_naming_the_plugin_id()
+	{
+		var widget = AddWidget(GaugeType, "{}");
+
+		var ticket = OpenLive(widget, DeviceA);
+		var tree = await TreeOf(ticket);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ticket.Accepted, Is.True, ticket.Message);
+			Assert.That(tree, Does.Contain("Deck.UnavailableWidget.Tile"));
+			Assert.That(tree, Does.Contain(GaugeOwner));
+		});
+	}
+
+	[Test]
+	public async Task The_placeholder_names_the_plugin_by_its_integration_name_while_it_is_installed()
+	{
+		_integrations.Add(new FakeIntegration { Id = GaugeOwner });
+		var widget = AddWidget(GaugeType, "{}");
+
+		var tree = await TreeOf(OpenLive(widget, DeviceA));
+
+		Assert.That(tree, Does.Contain("Test Integration"));
+	}
+
+	[Test]
+	public async Task A_registered_type_of_a_disconnected_plugin_gets_the_placeholder()
+	{
+		await RegisterGauge();
+		_integrations.PluginOrigins.Add(GaugeOwner);
+		var widget = AddWidget(GaugeType, "{}");
+
+		var ticket = OpenLive(widget, DeviceA);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ticket.Accepted, Is.True, ticket.Message);
+			Assert.That(PlaceholderSessions(widget), Has.Count.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task A_connected_plugin_is_asked_for_its_own_widget_rather_than_given_a_placeholder()
+	{
+		await RegisterGauge();
+		_integrations.PluginOrigins.Add(GaugeOwner);
+		_connections.Connected.Add(GaugeOwner);
+		var widget = AddWidget(GaugeType, "{}");
+
+		OpenLive(widget, DeviceA);
+
+		Assert.That(PlaceholderSessions(widget), Is.Empty);
+	}
+
+	[Test]
+	public void Every_principal_shares_one_placeholder_provider_but_keeps_its_own_session()
+	{
+		var widget = AddWidget(GaugeType, "{}");
+
+		var first = OpenLive(widget, DeviceA);
+		var second = OpenLive(widget, DeviceB);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(second.SessionId, Is.Not.EqualTo(first.SessionId));
+			Assert.That(PlaceholderSessions(widget), Has.Count.EqualTo(2));
+		});
+	}
+
+	[Test]
+	public void A_placeholder_session_belongs_to_its_widget_so_deleting_or_reconfiguring_it_reaches_the_session()
+	{
+		var widget = AddWidget(GaugeType, "{}");
+
+		var ticket = OpenLive(widget, DeviceA);
+
+		Assert.That(_registry.SessionsForWidget(widget.Id.ToString()).Select(session => session.SessionId),
+			Does.Contain(ticket.SessionId));
+	}
+
+	[Test]
+	public async Task Only_the_placeholder_whose_provider_came_back_is_released_for_a_reopen()
+	{
+		var gauge = AddWidget(GaugeType, "{}");
+		var other = AddWidget("com.example.other::dial", "{}");
+		var gaugeTicket = OpenLive(gauge, DeviceA);
+		var otherTicket = OpenLive(other, DeviceA);
+
+		await RegisterGauge();
+		_recovery.Reevaluate();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_registry.WasEnded(gaugeTicket.SessionId), Is.True);
+			Assert.That(_registry.WasEnded(otherTicket.SessionId), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_hardware_press_on_a_placeholder_is_not_absorbed()
+	{
+		var widget = AddWidget(GaugeType, "{}");
+
+		using var tree = JsonDocument.Parse(await TreeOf(OpenLive(widget, $"device:{Guid.NewGuid():N}")));
+		var claim = UiActivationClaim.Of(tree.RootElement);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(claim.Claimant, Is.Null);
+			Assert.That(claim.Absorbed, Is.False);
+		});
+	}
+
+	[Test]
+	public void A_picker_sample_and_an_editor_draft_of_an_unavailable_type_keep_their_own_placeholder()
+	{
+		var sample = _opener.Open(new OpenWidgetUiSessionRequest { WidgetType = GaugeType, Sample = true },
+			DeviceA,
+			isAdmin: true);
+		var draft = _opener.Open(new OpenWidgetUiSessionRequest { WidgetType = GaugeType },
+			DeviceA,
+			isAdmin: true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(sample.Accepted, Is.True, sample.Message);
+			Assert.That(draft.Accepted, Is.True, draft.Message);
+			Assert.That(draft.SessionId, Is.Not.EqualTo(sample.SessionId));
+		});
+	}
+
+	[Test]
+	public void Deleting_the_widget_drops_its_cached_placeholder_adapter()
+	{
+		var widget = AddWidget(GaugeType, "{}");
+		var providerId = WidgetUiProviderRegistry.UnavailableProviderIdFor(widget.Id, ghost: false);
+		var before = _widgetProviders.Resolve(providerId);
+
+		_widgetProviders.EvictWidget(widget.Id);
+
+		Assert.That(_widgetProviders.Resolve(providerId), Is.Not.SameAs(before));
+	}
+
+	private UiSessionOpenTicket OpenLive(WidgetEntity widget, string principal)
+		=> _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString() }, principal, isAdmin: false);
+
+	private IReadOnlyList<UiSessionSnapshot> PlaceholderSessions(WidgetEntity widget)
+		=> _registry.SessionsForProvider(WidgetUiProviderRegistry.UnavailableProviderIdFor(widget.Id, ghost: false));
+
+	private Task<WidgetTypeRegistration> RegisterGauge()
+		=> _widgetTypes.Register(GaugeOwner,
+			new WidgetTypeDescriptor("gauge", LocalizedText.FromLiteral("Gauge"), HasConfiguration: false));
+
+	private async Task<string> TreeOf(UiSessionOpenTicket ticket)
+	{
+		var tree = await _broker.FirstTreeAsync(ticket.SessionId, CancellationToken.None);
+		Assert.That(tree, Is.Not.Null, "the placeholder produced no tree");
+		using var document = JsonDocument.Parse(tree!.Value.Utf8);
+		return document.RootElement.GetRawText();
 	}
 
 	private WidgetEntity AddWidget(string type, string? data)

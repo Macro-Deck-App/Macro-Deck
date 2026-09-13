@@ -374,7 +374,10 @@ internal sealed class StubIntegrationRegistry : IIntegrationRegistry
 			new IntegrationAvailabilityChangedEventArgs { IntegrationId = integrationId, IsAvailable = enabled });
 	}
 
-	public IntegrationOrigin GetOrigin(string integrationId) => IntegrationOrigin.BuiltIn;
+	public HashSet<string> PluginOrigins { get; } = new(StringComparer.Ordinal);
+
+	public IntegrationOrigin GetOrigin(string integrationId)
+		=> PluginOrigins.Contains(integrationId) ? IntegrationOrigin.Plugin : IntegrationOrigin.BuiltIn;
 
 	public Task<IntegrationRegistrationResult> RegisterAsync(IIntegration integration,
 		IntegrationOrigin origin = IntegrationOrigin.BuiltIn,
@@ -589,4 +592,11 @@ internal sealed class ReplayablePluginSessionRegistry : IPluginSessionRegistry
 		string pluginId,
 		IReadOnlyList<DeclaredCapability> declaredCapabilities)
 		=> _inner.UpdateDeclaredCapabilities(pluginId, declaredCapabilities);
+}
+
+internal sealed class NoPluginConnections : MacroDeckHost.Application.Plugins.Capabilities.IRemotePluginConnectionState
+{
+	public HashSet<string> Connected { get; } = new(StringComparer.Ordinal);
+
+	public bool IsConnected(string pluginId) => Connected.Contains(pluginId);
 }

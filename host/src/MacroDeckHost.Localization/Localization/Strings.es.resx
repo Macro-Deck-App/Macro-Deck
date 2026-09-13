@@ -1284,6 +1284,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Deck.ResizeFailed" xml:space="preserve">
     <value>No se pudo cambiar el tamaño de la cuadrícula</value>
   </data>
+  <data name="Deck.UnavailableWidget.Tile" xml:space="preserve">
+    <value>Proporcionado por {plugin}, no disponible por ahora</value>
+  </data>
   <data name="Deck.Unlock" xml:space="preserve">
     <value>Desbloquear</value>
   </data>
@@ -15461,6 +15464,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Widgets.Editor.ProviderOwnStatesHeading" xml:space="preserve">
     <value>Esta acción proporciona sus propios estados de botón.</value>
+  </data>
+  <data name="Widgets.Editor.ProviderUnavailableMessage" xml:space="preserve">
+    <value>Este widget viene de {plugin}, que no está disponible por ahora. Su configuración se conserva y vuelve cuando el plugin se reconecte.</value>
   </data>
   <data name="Widgets.Editor.RemoveRule" xml:space="preserve">
     <value>Quitar regla</value>

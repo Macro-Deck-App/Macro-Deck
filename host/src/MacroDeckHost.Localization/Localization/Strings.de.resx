@@ -1283,6 +1283,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Deck.ResizeFailed" xml:space="preserve">
     <value>Das Raster konnte nicht angepasst werden</value>
   </data>
+  <data name="Deck.UnavailableWidget.Tile" xml:space="preserve">
+    <value>Von {plugin} bereitgestellt, derzeit nicht verfügbar</value>
+  </data>
   <data name="Deck.Unlock" xml:space="preserve">
     <value>Entsperren</value>
   </data>
@@ -15459,6 +15462,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Widgets.Editor.ProviderOwnStatesHeading" xml:space="preserve">
     <value>Diese Aktion stellt eigene Button-Status bereit.</value>
+  </data>
+  <data name="Widgets.Editor.ProviderUnavailableMessage" xml:space="preserve">
+    <value>Dieses Widget stammt von {plugin}, das derzeit nicht verfügbar ist. Seine Einstellungen bleiben erhalten und sind wieder da, sobald sich das Plugin erneut verbindet.</value>
   </data>
   <data name="Widgets.Editor.RemoveRule" xml:space="preserve">
     <value>Regel entfernen</value>

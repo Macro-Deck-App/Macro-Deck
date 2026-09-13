@@ -32,6 +32,7 @@ export interface UiSessionHandle {
   readonly root: Signal<UiNode | null>;
   readonly revision: Signal<number>;
   readonly rejection: Signal<UiSessionRejection | null>;
+  readonly generation: Signal<number>;
   send(event: UiNodeEvent): void;
   close(): void;
 }
@@ -68,6 +69,7 @@ class NullUiSessionHandle implements UiSessionHandle {
   readonly root = signal<UiNode | null>(null);
   readonly revision = signal(0);
   readonly rejection = signal<UiSessionRejection | null>(null);
+  readonly generation = signal(0);
 
   send(): void {
     // No session was ever opened; nothing to send to.
@@ -84,6 +86,7 @@ class LiveUiSessionHandle implements UiSessionHandle {
   readonly root = signal<UiNode | null>(null);
   readonly revision = signal(0);
   readonly rejection = signal<UiSessionRejection | null>(null);
+  readonly generation = signal(0);
 
   private sessionId: string | null = null;
   private closed = false;
@@ -147,6 +150,7 @@ class LiveUiSessionHandle implements UiSessionHandle {
 
     this.rejection.set(null);
     this.sessionId = opened.sessionId;
+    this.generation.update(value => value + 1);
     await this.attach(true);
   }
 

@@ -17,6 +17,7 @@ class FakeUiSessionHandle implements UiSessionHandle {
   readonly root = signal<UiNode | null>(null);
   readonly revision = signal(0);
   readonly rejection = signal<UiSessionRejection | null>(null);
+  readonly generation = signal(0);
   readonly sent: UiNodeEvent[] = [];
   closed = false;
 
@@ -225,6 +226,22 @@ describe('WidgetConfigurationEditorComponent', () => {
       await settle(fixture);
 
       expect(next.data).toEqual({ label: 'After' } as WidgetData);
+    });
+
+    it('treats the tree a reopened session brings as a first tree, so a returning provider leaves the draft untouched', async () => {
+      const edited = widget({ data: { label: 'Before' } as WidgetData });
+      const fixture = await createFixture(edited);
+      configHandle().generation.set(1);
+      configHandle().root.set(configRoot([propertiesRegion([stringField('notice', 'Provided by a missing plugin')])]));
+      await settle(fixture);
+
+      configHandle().generation.set(2);
+      configHandle().root.set(configRoot([
+        propertiesRegion([stringField('label', 'Before'), stringField('seededByProvider', 'default')]),
+      ]));
+      await settle(fixture);
+
+      expect(edited.data).toEqual({ label: 'Before' } as WidgetData);
     });
 
     async function editLabel(fixture: ComponentFixture<WidgetConfigurationEditorComponent>, value: string): Promise<void> {

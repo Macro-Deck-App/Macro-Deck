@@ -1284,6 +1284,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Deck.ResizeFailed" xml:space="preserve">
     <value>Impossibile ridimensionare la griglia</value>
   </data>
+  <data name="Deck.UnavailableWidget.Tile" xml:space="preserve">
+    <value>Fornito da {plugin}, al momento non disponibile</value>
+  </data>
   <data name="Deck.Unlock" xml:space="preserve">
     <value>Sblocca</value>
   </data>
@@ -15461,6 +15464,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Widgets.Editor.ProviderOwnStatesHeading" xml:space="preserve">
     <value>Questa azione fornisce i propri stati del pulsante.</value>
+  </data>
+  <data name="Widgets.Editor.ProviderUnavailableMessage" xml:space="preserve">
+    <value>Questo widget proviene da {plugin}, che al momento non è disponibile. Le sue impostazioni restano salvate e tornano quando il plugin si riconnette.</value>
   </data>
   <data name="Widgets.Editor.RemoveRule" xml:space="preserve">
     <value>Rimuovi regola</value>

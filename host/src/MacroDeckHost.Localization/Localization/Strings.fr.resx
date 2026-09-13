@@ -1284,6 +1284,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Deck.ResizeFailed" xml:space="preserve">
     <value>Échec du redimensionnement de la grille</value>
   </data>
+  <data name="Deck.UnavailableWidget.Tile" xml:space="preserve">
+    <value>Fourni par {plugin}, indisponible pour le moment</value>
+  </data>
   <data name="Deck.Unlock" xml:space="preserve">
     <value>Déverrouiller</value>
   </data>
@@ -15461,6 +15464,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Widgets.Editor.ProviderOwnStatesHeading" xml:space="preserve">
     <value>Cette action fournit ses propres états de bouton.</value>
+  </data>
+  <data name="Widgets.Editor.ProviderUnavailableMessage" xml:space="preserve">
+    <value>Ce widget provient de {plugin}, qui est indisponible pour le moment. Ses réglages sont conservés et reviennent quand le plugin se reconnecte.</value>
   </data>
   <data name="Widgets.Editor.RemoveRule" xml:space="preserve">
     <value>Retirer la règle</value>

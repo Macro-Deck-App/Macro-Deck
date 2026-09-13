@@ -44,6 +44,7 @@ public class GeneratedTypeScriptDriftTests
 	[
 		"Auth.",
 		"Deck.FolderView.",
+		"Deck.UnavailableWidget.",
 		"Errors.Auth.",
 		"Errors.Folder.",
 		"Feedback.",

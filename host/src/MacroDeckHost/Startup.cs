@@ -249,7 +249,10 @@ public class Startup
 		services.AddSingleton(provider => new WidgetUiProviderRegistry(provider.GetRequiredService<IFolderCache>(),
 			provider.GetRequiredService<IEnumerable<IBuiltInWidgetUiProvider>>(),
 			provider.GetRequiredService<IUiSessionSink>,
-			provider.GetRequiredService<Serilog.ILogger>()));
+			provider.GetRequiredService<Serilog.ILogger>(),
+			new UnavailableWidgetUiProvider()));
+		services.AddSingleton<IWidgetProviderAvailability, WidgetProviderAvailability>();
+		services.AddSingleton<UnavailableWidgetSessionRecovery>();
 		services.AddSingleton<IUiPreviewSource, WidgetUiPreviewSource>();
 		services.AddSingleton(provider => new UiPreviewProviderRegistry(
 			provider.GetRequiredService<IEnumerable<IUiPreviewSource>>(),

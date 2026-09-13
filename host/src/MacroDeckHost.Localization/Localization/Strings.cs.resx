@@ -1284,6 +1284,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Deck.ResizeFailed" xml:space="preserve">
     <value>Změna velikosti mřížky se nezdařila</value>
   </data>
+  <data name="Deck.UnavailableWidget.Tile" xml:space="preserve">
+    <value>Poskytovatel: {plugin} - momentálně nedostupný</value>
+  </data>
   <data name="Deck.Unlock" xml:space="preserve">
     <value>Odemknout</value>
   </data>
@@ -15461,6 +15464,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Widgets.Editor.ProviderOwnStatesHeading" xml:space="preserve">
     <value>Tato akce poskytuje vlastní stavy tlačítka.</value>
+  </data>
+  <data name="Widgets.Editor.ProviderUnavailableMessage" xml:space="preserve">
+    <value>Poskytovatel tohoto widgetu ({plugin}) je momentálně nedostupný. Nastavení zůstává zachováno a obnoví se po opětovném připojení pluginu.</value>
   </data>
   <data name="Widgets.Editor.RemoveRule" xml:space="preserve">
     <value>Odebrat pravidlo</value>

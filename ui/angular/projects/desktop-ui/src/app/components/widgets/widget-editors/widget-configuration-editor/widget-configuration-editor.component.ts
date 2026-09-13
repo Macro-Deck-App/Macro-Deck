@@ -116,6 +116,7 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
     () => widgetTileBorder(this.widget.type, this.previewData(), this.previewTree()?.treeRoot() ?? null));
 
   private seenTree = false;
+  private treeGeneration = 0;
 
   private treeDraft: WidgetData | null = null;
 
@@ -135,6 +136,13 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
     effect(() => {
       const root = this.root();
       if (!root) return;
+
+      // A tree from a newly opened session carries provider defaults the draft never had.
+      const generation = this.handle()?.generation() ?? 0;
+      if (generation !== this.treeGeneration) {
+        this.treeGeneration = generation;
+        this.seenTree = false;
+      }
 
       if (!this.seenTree) {
         this.seenTree = true;
