@@ -18,4 +18,7 @@ public class GetConnectionInfoResponse
 	public bool PublicListenerUnavailable { get; set; }
 
 	public string Version { get; set; } = string.Empty;
+
+	// Null while the host identity key cannot be loaded.
+	public string? IdentityFingerprint { get; set; }
 }

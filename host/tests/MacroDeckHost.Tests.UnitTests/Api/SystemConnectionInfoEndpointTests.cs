@@ -1,5 +1,7 @@
 using System.Net;
+using System.Security.Cryptography;
 using System.Text.Json;
+using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
@@ -130,6 +132,38 @@ public class SystemConnectionInfoEndpointTests
 		await host.StopAsync();
 	}
 
+	[Test]
+	public async Task Connection_info_carries_the_fingerprint_of_the_identity_key()
+	{
+		var identity = new FixedIdentity();
+		using var host = await StartHost(PublicEndpointSet.HttpOnly(PublicHttpPort), identity);
+		using var client = host.GetTestClient();
+
+		var body = JsonDocument.Parse(await client.GetStringAsync("/api/system/connection-info")).RootElement;
+
+		var hex = Convert.ToHexString(SHA256.HashData(identity.Point))[..24];
+		var expected = string.Join(' ', hex.Chunk(4).Select(group => new string(group)));
+		Assert.That(body.GetProperty("identityFingerprint").GetString(), Is.EqualTo(expected));
+		await host.StopAsync();
+	}
+
+	[Test]
+	public async Task Connection_info_reports_no_fingerprint_while_the_identity_key_is_unavailable()
+	{
+		using var host = await StartHost(PublicEndpointSet.HttpOnly(PublicHttpPort), new UnavailableIdentity());
+		using var client = host.GetTestClient();
+
+		var response = await client.GetAsync("/api/system/connection-info");
+		var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(body.GetProperty("identityFingerprint").ValueKind, Is.EqualTo(JsonValueKind.Null));
+		});
+		await host.StopAsync();
+	}
+
 	private static async Task<List<(string Address, int Port, bool Ssl)>> GetEndpoints(PublicEndpointSet configured)
 	{
 		using var host = await StartHost(configured);
@@ -153,7 +187,8 @@ public class SystemConnectionInfoEndpointTests
 		return endpoints;
 	}
 
-	private static async Task<IHost> StartHost(PublicEndpointSet publicEndpoints)
+	private static async Task<IHost> StartHost(PublicEndpointSet publicEndpoints,
+		IHostIdentityKeyProvider? identity = null)
 	{
 		var listenerState = new FakeHostListenerState { PublicEndpoints = publicEndpoints };
 
@@ -171,6 +206,11 @@ public class SystemConnectionInfoEndpointTests
 					services.AddSingleton(CompletedStartupReadiness());
 					services.RemoveAll<IHostListenerState>();
 					services.AddSingleton<IHostListenerState>(listenerState);
+					if (identity is not null)
+					{
+						services.RemoveAll<IHostIdentityKeyProvider>();
+						services.AddSingleton(identity);
+					}
 				});
 			})
 			.StartAsync();
@@ -197,5 +237,25 @@ public class SystemConnectionInfoEndpointTests
 				});
 				next(app);
 			};
+	}
+
+	private sealed class FixedIdentity : IHostIdentityKeyProvider
+	{
+		public byte[] Point { get; } = [0x04, .. RandomNumberGenerator.GetBytes(64)];
+
+		public ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default)
+			=> ValueTask.FromResult(Point);
+
+		public ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default)
+			=> throw new NotSupportedException();
+	}
+
+	private sealed class UnavailableIdentity : IHostIdentityKeyProvider
+	{
+		public ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default)
+			=> ValueTask.FromException<byte[]>(new HostIdentityUnavailableException("unreadable"));
+
+		public ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default)
+			=> ValueTask.FromException<byte[]>(new HostIdentityUnavailableException("unreadable"));
 	}
 }

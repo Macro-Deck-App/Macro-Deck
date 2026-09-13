@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Auth;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -35,6 +36,7 @@ public class SystemController : ControllerBase
 
 	private readonly IFontCatalog _fontCatalog;
 	private readonly IHostListenerState _listenerState;
+	private readonly IHostIdentityKeyProvider _hostIdentity;
 
 	public SystemController(
 		IUiTransportMessageHandler<GetVersionRequest, GetVersionResponse> getVersion,
@@ -47,7 +49,8 @@ public class SystemController : ControllerBase
 			getRunningApplications,
 		IUiTransportMessageHandler<GetLockStateRequest, GetLockStateResponse> getLockState,
 		IFontCatalog fontCatalog,
-		IHostListenerState listenerState)
+		IHostListenerState listenerState,
+		IHostIdentityKeyProvider hostIdentity)
 	{
 		_getVersion = getVersion;
 		_getAboutInfo = getAboutInfo;
@@ -58,6 +61,7 @@ public class SystemController : ControllerBase
 		_getLockState = getLockState;
 		_fontCatalog = fontCatalog;
 		_listenerState = listenerState;
+		_hostIdentity = hostIdentity;
 	}
 
 	[HttpGet("version")]
@@ -91,7 +95,7 @@ public class SystemController : ControllerBase
 	}
 
 	[HttpGet("connection-info")]
-	public GetConnectionInfoResponse GetConnectionInfo()
+	public async Task<GetConnectionInfoResponse> GetConnectionInfo()
 	{
 		var endpoints = GetReachableIpv4Addresses()
 			.SelectMany(address => _listenerState.PublicEndpoints.Endpoints,
@@ -108,8 +112,21 @@ public class SystemController : ControllerBase
 			InstanceName = Environment.MachineName,
 			Endpoints = endpoints,
 			PublicListenerUnavailable = !_listenerState.PublicListenerAvailable,
-			Version = HostVersion.Current
+			Version = HostVersion.Current,
+			IdentityFingerprint = await IdentityFingerprintOrNull()
 		};
+	}
+
+	private async Task<string?> IdentityFingerprintOrNull()
+	{
+		try
+		{
+			return HostIdentityMessage.Fingerprint(await _hostIdentity.GetPublicKey(HttpContext.RequestAborted));
+		}
+		catch (Exception e) when (e is HostIdentityUnavailableException or ObjectDisposedException)
+		{
+			return null;
+		}
 	}
 
 	private static List<string> GetReachableIpv4Addresses()
