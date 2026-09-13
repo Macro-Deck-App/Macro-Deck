@@ -332,7 +332,6 @@ describe('ConnectionPanelComponent', () => {
     expect(element.querySelector('.cp-identity .cp-muted')).not.toBeNull();
   });
 
-
   function connectPayload(overrides: Partial<GetConnectionInfoResponse>): Record<string, unknown> {
     const url = fixture.componentInstance['buildConnectUrl']({ ...info, ...overrides }, '482915');
     return JSON.parse(atob(url.replace('https://connect.macro-deck.app/', ''))) as Record<string, unknown>;
@@ -350,5 +349,4 @@ describe('ConnectionPanelComponent', () => {
 
     expect('fingerprint' in payload).toBeFalse();
   });
-
 });
