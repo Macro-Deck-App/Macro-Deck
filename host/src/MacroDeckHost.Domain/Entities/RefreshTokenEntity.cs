@@ -17,4 +17,6 @@ public class RefreshTokenEntity : BaseEntity
 	public DateTime? RevokedAt { get; set; }
 
 	public Guid? ReplacedById { get; set; }
+
+	public bool RotatedByGrace { get; set; }
 }

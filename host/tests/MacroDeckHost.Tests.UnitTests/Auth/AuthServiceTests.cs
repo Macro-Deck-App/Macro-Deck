@@ -3,9 +3,11 @@ using MacroDeckHost.Infrastructure.Auth;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Triggers;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace MacroDeckHost.Tests.UnitTests.Auth;
 
@@ -56,7 +58,8 @@ public class AuthServiceTests
 			new DeviceEnrollmentStore(),
 			_pairingCodes,
 			_preferences,
-			_time);
+			_time,
+			NullLogger<AuthService>.Instance);
 	}
 
 	[Test]
@@ -218,6 +221,7 @@ public class AuthServiceTests
 		var otherSession = await _service.Login("admin", "password123", AuthScope.Admin);
 		await _service.Refresh(login.Data!.RefreshToken);
 
+		_time.Advance(AuthDefaults.RefreshTokenReuseGrace + TimeSpan.FromSeconds(1));
 		var reuse = await _service.Refresh(login.Data.RefreshToken);
 		var otherAfterReuse = await _service.Refresh(otherSession.Data!.RefreshToken);
 
@@ -225,6 +229,202 @@ public class AuthServiceTests
 		{
 			Assert.That(reuse.Error, Is.EqualTo(AuthError.RefreshTokenReused));
 			Assert.That(otherAfterReuse.Error, Is.EqualTo(AuthError.InvalidRefreshToken));
+			Assert.That(_tokens.Tokens.All(t => t.RevokedAt is not null), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task A_lost_rotation_can_be_retried_once_with_the_previous_token_inside_the_grace_window()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		var otherSession = await _service.Login("admin", "password123", AuthScope.Admin);
+		var lost = await _service.Refresh(login.Data!.RefreshToken);
+
+		_time.Advance(TimeSpan.FromSeconds(30));
+		var retry = await _service.Refresh(login.Data.RefreshToken);
+		var other = await _service.Refresh(otherSession.Data!.RefreshToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(retry.Success, Is.True);
+			Assert.That(retry.Data!.RefreshToken,
+				Is.Not.EqualTo(login.Data.RefreshToken).And.Not.EqualTo(lost.Data!.RefreshToken));
+			Assert.That(retry.Data.Scope, Is.EqualTo(AuthScope.Client));
+			Assert.That(retry.Data.DeviceId, Is.EqualTo(login.Data.DeviceId));
+			Assert.That(other.Success, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task The_previous_token_presented_a_second_time_revokes_every_session()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		var otherSession = await _service.Login("admin", "password123", AuthScope.Admin);
+		await _service.Refresh(login.Data!.RefreshToken);
+
+		var retry = await _service.Refresh(login.Data.RefreshToken);
+		var secondRetry = await _service.Refresh(login.Data.RefreshToken);
+		var retried = await _service.Refresh(retry.Data!.RefreshToken);
+		var other = await _service.Refresh(otherSession.Data!.RefreshToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(retry.Success, Is.True);
+			Assert.That(secondRetry.Error, Is.EqualTo(AuthError.RefreshTokenReused));
+			Assert.That(retried.Success, Is.False);
+			Assert.That(other.Success, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task An_older_ancestor_revokes_every_session_even_inside_the_grace_window()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		var second = await _service.Refresh(login.Data!.RefreshToken);
+		var third = await _service.Refresh(second.Data!.RefreshToken);
+
+		var ancestor = await _service.Refresh(login.Data.RefreshToken);
+		var current = await _service.Refresh(third.Data!.RefreshToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ancestor.Error, Is.EqualTo(AuthError.RefreshTokenReused));
+			Assert.That(current.Success, Is.False);
+		});
+	}
+
+	[TestCase(true, TestName = "The_previous_token_whose_successor_belongs_to_another_device_revokes_every_session")]
+	[TestCase(false, TestName = "The_previous_token_whose_successor_has_another_scope_revokes_every_session")]
+	public async Task The_previous_token_whose_successor_does_not_match_revokes_every_session(bool otherDevice)
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		var rotated = await _service.Refresh(login.Data!.RefreshToken);
+		var successor = TokenRow(rotated.Data!.RefreshToken);
+		if (otherDevice)
+		{
+			successor.DeviceId = Guid.NewGuid();
+		}
+		else
+		{
+			successor.Scope = AuthScope.Admin;
+		}
+
+		var retry = await _service.Refresh(login.Data.RefreshToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(retry.Error, Is.EqualTo(AuthError.RefreshTokenReused));
+			Assert.That(_tokens.Tokens.All(t => t.RevokedAt is not null), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task The_previous_token_does_not_bring_back_a_successor_that_was_logged_out()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		var rotated = await _service.Refresh(login.Data!.RefreshToken);
+		await _service.Logout(rotated.Data!.RefreshToken);
+
+		var retry = await _service.Refresh(login.Data.RefreshToken);
+
+		Assert.That(retry.Error, Is.EqualTo(AuthError.RefreshTokenReused));
+	}
+
+	[Test]
+	public async Task The_token_a_retry_rotated_away_revokes_every_session_when_it_comes_back()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		var rotated = await _service.Refresh(login.Data!.RefreshToken);
+		var replayed = await _service.Refresh(login.Data.RefreshToken);
+
+		var owner = await _service.Refresh(rotated.Data!.RefreshToken);
+		var replayer = await _service.Refresh(replayed.Data!.RefreshToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(replayed.Success, Is.True);
+			Assert.That(owner.Error, Is.EqualTo(AuthError.RefreshTokenReused));
+			Assert.That(replayer.Success, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task Two_refreshes_of_the_same_live_token_racing_both_succeed()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		Result<LoginResult, AuthError>? winner = null;
+		_tokens.BeforeNextRevoke = async () => winner = await _service.Refresh(login.Data!.RefreshToken);
+
+		var loser = await _service.Refresh(login.Data!.RefreshToken);
+		var winnerNext = await _service.Refresh(winner!.Data!.RefreshToken);
+		var loserNext = await _service.Refresh(loser.Data!.RefreshToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(winner.Success, Is.True);
+			Assert.That(loser.Success, Is.True);
+			Assert.That(winnerNext.Success, Is.True);
+			Assert.That(loserNext.Success, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task The_owner_refreshing_while_its_predecessor_is_replayed_revokes_every_session()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		var rotated = await _service.Refresh(login.Data!.RefreshToken);
+		Result<LoginResult, AuthError>? replay = null;
+		_tokens.BeforeNextRevoke = async () => replay = await _service.Refresh(login.Data.RefreshToken);
+
+		var owner = await _service.Refresh(rotated.Data!.RefreshToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(replay!.Success, Is.True);
+			Assert.That(owner.Error, Is.EqualTo(AuthError.RefreshTokenReused));
+			Assert.That(_tokens.Tokens.All(t => t.RevokedAt is not null), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task A_refresh_racing_a_logout_of_the_same_token_leaves_no_live_session()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		_tokens.BeforeNextRevoke = () => _service.Logout(login.Data!.RefreshToken);
+
+		var refresh = await _service.Refresh(login.Data!.RefreshToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(refresh.Error, Is.EqualTo(AuthError.InvalidRefreshToken));
+			Assert.That(_tokens.Tokens.All(t => t.RevokedAt is not null), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task Two_racing_retries_of_a_lost_rotation_are_accepted_only_once()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		await _service.Refresh(login.Data!.RefreshToken);
+		Result<LoginResult, AuthError>? first = null;
+		_tokens.BeforeNextRevoke = async () => first = await _service.Refresh(login.Data.RefreshToken);
+
+		var second = await _service.Refresh(login.Data.RefreshToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first!.Success, Is.True);
+			Assert.That(second.Error, Is.EqualTo(AuthError.RefreshTokenReused));
 			Assert.That(_tokens.Tokens.All(t => t.RevokedAt is not null), Is.True);
 		});
 	}
@@ -472,6 +672,9 @@ public class AuthServiceTests
 			Assert.That(_tokens.Tokens.Any(t => t.TokenHash == TokenHasher.Hash(rotated.Data!.RefreshToken)), Is.True);
 		});
 	}
+
+	private Domain.Entities.RefreshTokenEntity TokenRow(string rawToken)
+		=> _tokens.Tokens.Single(t => t.TokenHash == TokenHasher.Hash(rawToken));
 
 	private static string WrongCode(string code, int offset)
 		=> ((int.Parse(code, CultureInfo.InvariantCulture) + offset) % 1_000_000)
