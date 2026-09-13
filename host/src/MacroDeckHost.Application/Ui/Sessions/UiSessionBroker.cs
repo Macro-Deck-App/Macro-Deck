@@ -536,9 +536,11 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 		try
 		{
 			var timeout = Task.Delay(ProtocolTimeouts.CapabilityInvoke, _timeProvider, CancellationToken.None);
-			var winner = await Task.WhenAny(context.Ready.Task, timeout).ConfigureAwait(false);
+			await Task.WhenAny(context.Ready.Task, timeout).ConfigureAwait(false);
 
-			if (winner == timeout)
+			// Asks whether Ready completed, not which task WhenAny saw first: Ready continues asynchronously,
+			// so a timer firing inline can win the race after the session has already opened.
+			if (!context.Ready.Task.IsCompleted)
 			{
 				// Only bites while the session is still waiting for its provider. A session already ended
 				// for another reason is gone from the registry, so a dead provider is never reported twice
