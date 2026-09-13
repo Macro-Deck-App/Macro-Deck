@@ -64,7 +64,7 @@ public sealed class WebNowPlayingIntegration
 
 	public IReadOnlyList<IActionDefinition> Actions { get; }
 
-	public string IconMimeType => "image/svg+xml";
+	public string IconMimeType => "image/png";
 
 	public IReadOnlyList<VariableDefinition> Variables => WebNowPlayingVariables.All;
 
@@ -239,7 +239,7 @@ public sealed class WebNowPlayingIntegration
 	{
 		var assembly = typeof(WebNowPlayingIntegration).Assembly;
 		var name = assembly.GetManifestResourceNames()
-			.First(n => n.EndsWith("webnowplaying-icon.svg", StringComparison.Ordinal));
+			.First(n => n.EndsWith("webnowplaying-icon.png", StringComparison.Ordinal));
 		using var stream = assembly.GetManifestResourceStream(name)!;
 		using var memory = new MemoryStream();
 		stream.CopyTo(memory);
