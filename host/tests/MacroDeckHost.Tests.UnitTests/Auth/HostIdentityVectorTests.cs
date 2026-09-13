@@ -55,6 +55,11 @@ public class HostIdentityVectorTests
 		=> Assert.That(HostIdentityMessage.Fingerprint(Convert.FromBase64String(Field("publicKey"))),
 			Is.EqualTo(Field("fingerprint")));
 
+	[Test]
+	public void The_connect_payload_fingerprint_is_the_same_value_without_spaces()
+		=> Assert.That(Field("fingerprint").Replace(" ", string.Empty, StringComparison.Ordinal),
+			Is.EqualTo(Field("compactFingerprint")).And.Match("^[0-9A-F]{24}$"));
+
 	private static bool Verifies(string message)
 	{
 		var point = Convert.FromBase64String(Field("publicKey"));

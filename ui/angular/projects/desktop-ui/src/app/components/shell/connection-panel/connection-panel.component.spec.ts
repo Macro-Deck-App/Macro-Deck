@@ -332,4 +332,23 @@ describe('ConnectionPanelComponent', () => {
     expect(element.querySelector('.cp-identity .cp-muted')).not.toBeNull();
   });
 
+
+  function connectPayload(overrides: Partial<GetConnectionInfoResponse>): Record<string, unknown> {
+    const url = fixture.componentInstance['buildConnectUrl']({ ...info, ...overrides }, '482915');
+    return JSON.parse(atob(url.replace('https://connect.macro-deck.app/', ''))) as Record<string, unknown>;
+  }
+
+  it('carries the compact host key fingerprint in the connect payload', () => {
+    const payload = connectPayload({ identityFingerprint: '3208 E004 6ED3 EE6B 4E75 1027' });
+
+    expect(payload['fingerprint']).toBe('3208E0046ED3EE6B4E751027');
+    expect(payload['payloadVersion']).toBe(2);
+  });
+
+  it('leaves the fingerprint out of the connect payload while the identity key is unavailable', () => {
+    const payload = connectPayload({ identityFingerprint: null });
+
+    expect('fingerprint' in payload).toBeFalse();
+  });
+
 });

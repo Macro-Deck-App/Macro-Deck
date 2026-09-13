@@ -4,5 +4,6 @@
   "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
   "message": "macrodeck-host-identity/v1\nBF/LFTKcXP+NHq9gTqEqTI5T+YissLlEpv48Me1pYWcpoR7EyfEfZcxwi3NUqxwV7ggy3y5kH5ce6oMVrbK5wB4=\n192.168.1.20:8193\nAAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
   "signature": "MEUCIBeCUvyqm/qv8MQFEvELRtOX3LVcfv6i12jnGPShq6r7AiEAucDDHXvryJyj5AXgokivIz5FKRaqqyRTObfndjqh/0A=",
-  "fingerprint": "3208 E004 6ED3 EE6B 4E75 1027"
+  "fingerprint": "3208 E004 6ED3 EE6B 4E75 1027",
+  "compactFingerprint": "3208E0046ED3EE6B4E751027"
 }

@@ -189,6 +189,7 @@ export class ConnectionPanelComponent {
       endpoints: info.endpoints,
       token,
       version: info.version,
+      ...(info.identityFingerprint ? { fingerprint: info.identityFingerprint.replaceAll(' ', '') } : {}),
     };
     const base64 = btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(payload))));
     return `https://connect.macro-deck.app/${base64}`;
