@@ -188,7 +188,9 @@ public class AuthPolicyMatrixTests
 
 		using var simple = new HttpRequestMessage(HttpMethod.Post, "/api/auth/reset-password")
 		{
-			Content = new StringContent("{\"newPassword\":\"newpassword1\"}", global::System.Text.Encoding.UTF8, "text/plain")
+			Content = new StringContent("{\"newPassword\":\"newpassword1\"}",
+				global::System.Text.Encoding.UTF8,
+				"text/plain")
 		};
 		simple.Headers.Add(FakeConnectionStartupFilter.ShapeHeader, nameof(FakeConnectionShape.Loopback));
 		simple.Headers.Add("Origin", "https://attacker.example");
