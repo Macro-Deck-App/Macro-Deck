@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using MacroDeckHost.Application.Configuration;
-using MacroDeckHost.Application.Network.Discovery;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
@@ -36,7 +35,6 @@ public class SystemController : ControllerBase
 
 	private readonly IFontCatalog _fontCatalog;
 	private readonly IHostListenerState _listenerState;
-	private readonly INetworkInterfaceSnapshotProvider _interfaces;
 
 	public SystemController(
 		IUiTransportMessageHandler<GetVersionRequest, GetVersionResponse> getVersion,
@@ -49,10 +47,8 @@ public class SystemController : ControllerBase
 			getRunningApplications,
 		IUiTransportMessageHandler<GetLockStateRequest, GetLockStateResponse> getLockState,
 		IFontCatalog fontCatalog,
-		IHostListenerState listenerState,
-		INetworkInterfaceSnapshotProvider interfaces)
+		IHostListenerState listenerState)
 	{
-		_interfaces = interfaces;
 		_getVersion = getVersion;
 		_getAboutInfo = getAboutInfo;
 		_getSystemFonts = getSystemFonts;
@@ -144,11 +140,6 @@ public class SystemController : ControllerBase
 	public Task<GetLockStateResponse> GetLockState(CancellationToken ct)
 		=> _getLockState.Handle(new GetLockStateRequest(), ct).AsTask();
 
-	[HttpGet("wake-on-lan")]
-	[Authorize(Policy = AuthPolicies.ClientAccess)]
-	public GetWakeOnLanResponse GetWakeOnLan()
-		=> new(Environment.MachineName, WakeOnLanPlanner.MacAddresses(_interfaces.GetInterfaces()));
-
 	[HttpGet("fonts/{faceId}/file")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
 	public IActionResult GetFontFile(string? faceId)
@@ -172,5 +163,3 @@ public class SystemController : ControllerBase
 				? "font/otf"
 				: "font/ttf";
 }
-
-public record GetWakeOnLanResponse(string InstanceName, IReadOnlyList<string> MacAddresses);

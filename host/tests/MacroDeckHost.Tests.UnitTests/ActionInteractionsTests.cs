@@ -228,13 +228,18 @@ internal sealed class RecordingUiTransport : IUiTransport
 {
 	public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 		where T : class
-		=> Task.CompletedTask;
+	{
+		ConnectionMessages.Add((connectionId, message));
+		return Task.CompletedTask;
+	}
 
 	public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
 		=> Task.CompletedTask;
 
 	public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
 		=> Task.CompletedTask;
+
+	public List<(string ConnectionId, object Message)> ConnectionMessages { get; } = new();
 
 	public List<(string Group, object Message)> GroupMessages { get; } = new();
 

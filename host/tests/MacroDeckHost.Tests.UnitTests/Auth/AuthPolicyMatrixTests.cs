@@ -102,11 +102,9 @@ public class AuthPolicyMatrixTests
 		var pluginTokens = await Send(HttpMethod.Get, "/api/plugin-tokens");
 		var pluginSessions = await Send(HttpMethod.Get, "/api/plugin-sessions");
 		var localization = await Send(HttpMethod.Get, "/api/localization");
-		var wakeOnLan = await Send(HttpMethod.Get, "/api/system/wake-on-lan");
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(wakeOnLan.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
 			Assert.That(folders.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
 			Assert.That(filesystem.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
 			Assert.That(iconImage.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
@@ -330,7 +328,6 @@ public class AuthPolicyMatrixTests
 			_clientToken);
 		var version = await Send(HttpMethod.Get, "/api/system/version", _clientToken);
 		var serverTime = await Send(HttpMethod.Get, "/api/system/time", _clientToken);
-		var wakeOnLan = await Send(HttpMethod.Get, "/api/system/wake-on-lan", _clientToken);
 		var integrationIcon = await Send(HttpMethod.Get, "/api/integrations/unknown/icon", _clientToken);
 		var filesystem = await SendJson(HttpMethod.Post, "/api/filesystem/list", new { path = "" }, _clientToken);
 		var reveal = await SendJson(HttpMethod.Post, $"/api/secrets/{Guid.NewGuid()}/reveal", new { }, _clientToken);
@@ -385,7 +382,6 @@ public class AuthPolicyMatrixTests
 			Assert.That(createVariable.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(version.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 			Assert.That(serverTime.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-			Assert.That(wakeOnLan.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 			Assert.That(integrationIcon.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
 			Assert.That(filesystem.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(reveal.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));

@@ -3,6 +3,7 @@ using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.MusicPlayer;
+using MacroDeckHost.Application.Network.Discovery;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Secrets;
@@ -70,6 +71,7 @@ internal sealed class CompanionHarness
 			Transport,
 			Registry,
 			Requests,
+			Interfaces,
 			Logger);
 		Context = new IntegrationContext(VariableApi,
 			null!,
@@ -102,6 +104,7 @@ internal sealed class CompanionHarness
 	public CompanionConfigurationMutationAdapter Adapter { get; }
 	public GatedCoordinator Coordinator { get; }
 	public RecordingUiTransport Transport { get; } = new();
+	public FixedInterfaces Interfaces { get; } = new();
 	public FakeTimeProvider Time { get; } = new();
 	public CompanionCommandRequests Requests { get; }
 	public RecordingVariableApi VariableApi { get; } = new();
@@ -235,6 +238,13 @@ internal sealed class CompanionHarness
 		public Task<IReadOnlyList<IntegrationConfigEntryDescription>> DescribeAsync(string integrationId,
 			CancellationToken cancellationToken)
 			=> Inner.DescribeAsync(integrationId, cancellationToken);
+	}
+
+	internal sealed class FixedInterfaces : INetworkInterfaceSnapshotProvider
+	{
+		public List<NetworkInterfaceSnapshot> Interfaces { get; } = [];
+
+		public IReadOnlyList<NetworkInterfaceSnapshot> GetInterfaces() => Interfaces;
 	}
 
 	internal sealed class MemoryStateStore : IIntegrationStateStore
