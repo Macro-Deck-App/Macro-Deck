@@ -7,6 +7,7 @@ internal sealed class CompanionAction : IDynamicOptionsActionDefinition
 {
 	private readonly CompanionTargetResolver _resolver;
 	private readonly Func<IReadOnlyDictionary<string, object>, CompanionCommand?> _command;
+	private readonly string? _capability;
 
 	public CompanionAction(
 		string id,
@@ -14,7 +15,8 @@ internal sealed class CompanionAction : IDynamicOptionsActionDefinition
 		LocalizedText description,
 		IReadOnlyList<ActionParameter> parameters,
 		CompanionTargetResolver resolver,
-		Func<IReadOnlyDictionary<string, object>, CompanionCommand?> command)
+		Func<IReadOnlyDictionary<string, object>, CompanionCommand?> command,
+		string? capability = null)
 	{
 		Id = id;
 		Name = name;
@@ -22,6 +24,7 @@ internal sealed class CompanionAction : IDynamicOptionsActionDefinition
 		Parameters = [CompanionTargetResolver.Parameter(), .. parameters];
 		_resolver = resolver;
 		_command = command;
+		_capability = capability;
 	}
 
 	public string Id { get; }
@@ -32,7 +35,7 @@ internal sealed class CompanionAction : IDynamicOptionsActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _command);
+	public IActionExecutor CreateExecutor() => new Executor(_resolver, _command, _capability);
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -43,12 +46,15 @@ internal sealed class CompanionAction : IDynamicOptionsActionDefinition
 	{
 		private readonly CompanionTargetResolver _resolver;
 		private readonly Func<IReadOnlyDictionary<string, object>, CompanionCommand?> _command;
+		private readonly string? _capability;
 
 		public Executor(CompanionTargetResolver resolver,
-			Func<IReadOnlyDictionary<string, object>, CompanionCommand?> command)
+			Func<IReadOnlyDictionary<string, object>, CompanionCommand?> command,
+			string? capability)
 		{
 			_resolver = resolver;
 			_command = command;
+			_capability = capability;
 		}
 
 		public async Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
@@ -61,6 +67,23 @@ internal sealed class CompanionAction : IDynamicOptionsActionDefinition
 			if (_command(context.Parameters) is not { } command)
 			{
 				return CompanionTargetResolver.InvalidParameter();
+			}
+
+			if (_capability is { } capability)
+			{
+				var (unavailable, prompt, awaitResult) = CompanionCapabilities.Require(gateway, deviceId, capability);
+				if (unavailable is not null)
+				{
+					return unavailable;
+				}
+
+				if (awaitResult)
+				{
+					var result = await gateway.RequestAsync(deviceId, command, context.CancellationToken);
+					return result.Failure is { } failure
+						? CompanionCapabilities.Failed(failure, capability, prompt)
+						: ActionResult.Success();
+				}
 			}
 
 			return await gateway.SendAsync(deviceId, command, context.CancellationToken)

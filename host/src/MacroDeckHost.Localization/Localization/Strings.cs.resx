@@ -16564,4 +16564,88 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Companion.Errors.NotConnected" xml:space="preserve">
     <value>Zařízení Companion není připojeno.</value>
   </data>
+  <data name="Integrations.Companion.Variables.InFocus" xml:space="preserve">
+    <value>V popředí</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkType" xml:space="preserve">
+    <value>Typ sítě</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkMetered" xml:space="preserve">
+    <value>Měřená síť</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkValidated" xml:space="preserve">
+    <value>Přístup k internetu</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkName" xml:space="preserve">
+    <value>Název sítě</value>
+  </data>
+  <data name="Integrations.Companion.Variables.CpuUsagePercent" xml:space="preserve">
+    <value>Využití CPU</value>
+  </data>
+  <data name="Integrations.Companion.Variables.MemoryUsedPercent" xml:space="preserve">
+    <value>Využití paměti</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOn.Name" xml:space="preserve">
+    <value>Zapnout obrazovku</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOn.Description" xml:space="preserve">
+    <value>Zapne obrazovku zařízení Companion a zobrazí tento Macro Deck.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOff.Name" xml:space="preserve">
+    <value>Vypnout obrazovku</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOff.Description" xml:space="preserve">
+    <value>Vypne obrazovku zařízení Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.FocusHost.Name" xml:space="preserve">
+    <value>Přenést do popředí</value>
+  </data>
+  <data name="Integrations.Companion.Actions.FocusHost.Description" xml:space="preserve">
+    <value>Zobrazí deck tohoto Macro Decku v popředí zařízení Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.TakeScreenshot.Name" xml:space="preserve">
+    <value>Pořídit snímek obrazovky</value>
+  </data>
+  <data name="Integrations.Companion.Actions.TakeScreenshot.Description" xml:space="preserve">
+    <value>Zachytí deck nebo celou obrazovku zařízení Companion a uloží snímek jako soubor PNG.</value>
+  </data>
+  <data name="Integrations.Companion.Params.ScreenshotMode" xml:space="preserve">
+    <value>Zachycení</value>
+  </data>
+  <data name="Integrations.Companion.Options.Deck" xml:space="preserve">
+    <value>Deck</value>
+  </data>
+  <data name="Integrations.Companion.Options.FullScreen" xml:space="preserve">
+    <value>Celá obrazovka</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenOnUnavailable" xml:space="preserve">
+    <value>Toto zařízení nemůže zapnout obrazovku. V systému Android je třeba v nastavení aplikace Companion zapnout připojení na pozadí a povolit zobrazení přes jiné aplikace.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenOffUnavailable" xml:space="preserve">
+    <value>Toto zařízení nemůže vypnout obrazovku. V systému Android je třeba v nastavení aplikace Companion povolit správce zařízení nebo službu usnadnění přístupu.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.FocusUnavailable" xml:space="preserve">
+    <value>Toto zařízení nyní nemůže přenést Macro Deck do popředí. Je třeba otevřít aplikaci Companion, nebo v systému Android v jejím nastavení zapnout připojení na pozadí a povolit zobrazení přes jiné aplikace.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.DeckNotOnScreen" xml:space="preserve">
+    <value>Deck tohoto Macro Decku není na obrazovce zařízení, a proto jej nelze zachytit.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.FullScreenshotUnavailable" xml:space="preserve">
+    <value>Toto zařízení nemůže zachytit celou obrazovku. V systému Android je třeba v nastavení aplikace Companion povolit záznam obrazovky nebo službu usnadnění přístupu.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenshotTimedOut" xml:space="preserve">
+    <value>Zařízení Companion neodeslalo snímek obrazovky včas.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.PermissionDeclined" xml:space="preserve">
+    <value>Oprávnění bylo na zařízení Companion odmítnuto. Je třeba ho zapnout v nastavení aplikace Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.PermissionTimedOut" xml:space="preserve">
+    <value>Zařízení Companion neudělilo oprávnění včas.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.CommandFailed" xml:space="preserve">
+    <value>Zařízení Companion nemohlo provést příkaz.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenshotFailed" xml:space="preserve">
+    <value>Zařízení Companion nemohlo pořídit snímek obrazovky.</value>
+  </data>
 </root>

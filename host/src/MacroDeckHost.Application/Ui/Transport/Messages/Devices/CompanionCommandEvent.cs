@@ -7,4 +7,8 @@ public class CompanionCommandEvent
 	public int? BrightnessPercent { get; set; }
 
 	public string? Orientation { get; set; }
+
+	public string? RequestId { get; set; }
+
+	public string? ScreenshotMode { get; set; }
 }

@@ -16565,4 +16565,88 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Companion.Errors.NotConnected" xml:space="preserve">
     <value>The Companion device is not connected.</value>
   </data>
+  <data name="Integrations.Companion.Variables.InFocus" xml:space="preserve">
+    <value>In focus</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkType" xml:space="preserve">
+    <value>Network type</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkMetered" xml:space="preserve">
+    <value>Metered network</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkValidated" xml:space="preserve">
+    <value>Internet access</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkName" xml:space="preserve">
+    <value>Network name</value>
+  </data>
+  <data name="Integrations.Companion.Variables.CpuUsagePercent" xml:space="preserve">
+    <value>CPU usage</value>
+  </data>
+  <data name="Integrations.Companion.Variables.MemoryUsedPercent" xml:space="preserve">
+    <value>Memory usage</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOn.Name" xml:space="preserve">
+    <value>Turn screen on</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOn.Description" xml:space="preserve">
+    <value>Turns on the screen of a Companion device and shows this Macro Deck.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOff.Name" xml:space="preserve">
+    <value>Turn screen off</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOff.Description" xml:space="preserve">
+    <value>Turns off the screen of a Companion device.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.FocusHost.Name" xml:space="preserve">
+    <value>Bring to front</value>
+  </data>
+  <data name="Integrations.Companion.Actions.FocusHost.Description" xml:space="preserve">
+    <value>Shows the deck of this Macro Deck in front on a Companion device.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.TakeScreenshot.Name" xml:space="preserve">
+    <value>Take screenshot</value>
+  </data>
+  <data name="Integrations.Companion.Actions.TakeScreenshot.Description" xml:space="preserve">
+    <value>Captures the deck or the whole screen of a Companion device and saves it as a PNG file.</value>
+  </data>
+  <data name="Integrations.Companion.Params.ScreenshotMode" xml:space="preserve">
+    <value>Capture</value>
+  </data>
+  <data name="Integrations.Companion.Options.Deck" xml:space="preserve">
+    <value>Deck</value>
+  </data>
+  <data name="Integrations.Companion.Options.FullScreen" xml:space="preserve">
+    <value>Full screen</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenOnUnavailable" xml:space="preserve">
+    <value>This device cannot turn its screen on. On Android, turn on the background connection and allow display over other apps in the Companion app's settings.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenOffUnavailable" xml:space="preserve">
+    <value>This device cannot turn its screen off. On Android, enable device admin or the accessibility service in the Companion app's settings.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.FocusUnavailable" xml:space="preserve">
+    <value>This device cannot bring Macro Deck to the front right now. Open the Companion app, or on Android turn on the background connection and allow display over other apps in its settings.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.DeckNotOnScreen" xml:space="preserve">
+    <value>The deck of this Macro Deck is not on the device's screen, so it cannot be captured.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.FullScreenshotUnavailable" xml:space="preserve">
+    <value>This device cannot capture its full screen. On Android, enable screen capture or the accessibility service in the Companion app's settings.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenshotTimedOut" xml:space="preserve">
+    <value>The Companion device did not send the screenshot in time.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.PermissionDeclined" xml:space="preserve">
+    <value>The permission was declined on the Companion device. Turn it on in the Companion app's settings.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.PermissionTimedOut" xml:space="preserve">
+    <value>The Companion device did not allow the permission in time.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.CommandFailed" xml:space="preserve">
+    <value>The Companion device could not run the command.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenshotFailed" xml:space="preserve">
+    <value>The Companion device could not take the screenshot.</value>
+  </data>
 </root>

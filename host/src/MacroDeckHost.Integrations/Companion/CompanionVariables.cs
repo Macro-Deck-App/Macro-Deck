@@ -17,7 +17,14 @@ internal static class CompanionVariables
 		new("screen_brightness_percent", VariableType.Numeric, 0),
 		new("model", VariableType.Text, null),
 		new("platform", VariableType.Text, null),
-		new("app_version", VariableType.Text, null)
+		new("app_version", VariableType.Text, null),
+		new("in_focus", VariableType.Boolean, null),
+		new("network_type", VariableType.Text, null),
+		new("network_metered", VariableType.Boolean, null),
+		new("network_validated", VariableType.Boolean, null),
+		new("network_name", VariableType.Text, null),
+		new("cpu_usage_percent", VariableType.Numeric, 0),
+		new("memory_used_percent", VariableType.Numeric, 0)
 	];
 
 	public static IReadOnlyList<VariableDefinition> Templates { get; } =
@@ -86,6 +93,13 @@ internal static class CompanionVariables
 		"model" => state.Model,
 		"platform" => state.Platform,
 		"app_version" => state.AppVersion,
+		"in_focus" => state.InFocus,
+		"network_type" => state.NetworkType,
+		"network_metered" => state.NetworkMetered,
+		"network_validated" => state.NetworkValidated,
+		"network_name" => state.NetworkName,
+		"cpu_usage_percent" => state.CpuUsagePercent,
+		"memory_used_percent" => state.MemoryUsedPercent,
 		_ => null
 	};
 
@@ -99,6 +113,13 @@ internal static class CompanionVariables
 		"model" => AppStrings.Integrations.Companion.Variables.Model(),
 		"platform" => AppStrings.Integrations.Companion.Variables.Platform(),
 		"app_version" => AppStrings.Integrations.Companion.Variables.AppVersion(),
+		"in_focus" => AppStrings.Integrations.Companion.Variables.InFocus(),
+		"network_type" => AppStrings.Integrations.Companion.Variables.NetworkType(),
+		"network_metered" => AppStrings.Integrations.Companion.Variables.NetworkMetered(),
+		"network_validated" => AppStrings.Integrations.Companion.Variables.NetworkValidated(),
+		"network_name" => AppStrings.Integrations.Companion.Variables.NetworkName(),
+		"cpu_usage_percent" => AppStrings.Integrations.Companion.Variables.CpuUsagePercent(),
+		"memory_used_percent" => AppStrings.Integrations.Companion.Variables.MemoryUsedPercent(),
 		_ => default
 	};
 

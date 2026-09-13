@@ -28,12 +28,14 @@ public sealed class CompanionIntegration
 
 	private ICompanionGateway? _gateway;
 	private IVariableRefreshSignal? _refreshSignal;
+	private IVariableApi? _variables;
 	private IIntegrationContext? _context;
 	private CompanionRuntime[] _runtimes = [];
 
 	public CompanionIntegration()
 	{
-		Actions = CompanionActions.Create(new CompanionTargetResolver(RuntimeSnapshot, () => _gateway));
+		Actions = CompanionActions.Create(new CompanionTargetResolver(RuntimeSnapshot, () => _gateway),
+			() => _variables);
 	}
 
 	public string Id => IntegrationId;
@@ -79,6 +81,7 @@ public sealed class CompanionIntegration
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
 		_context = context;
+		_variables = context.Variables;
 		if (_gateway is { } gateway)
 		{
 			gateway.StateChanged -= OnStateChanged;
@@ -98,6 +101,7 @@ public sealed class CompanionIntegration
 
 		Volatile.Write(ref _runtimes, []);
 		_context = null;
+		_variables = null;
 		IsInitialized = false;
 		return Task.CompletedTask;
 	}

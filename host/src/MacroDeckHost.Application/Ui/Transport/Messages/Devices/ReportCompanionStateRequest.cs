@@ -15,4 +15,22 @@ public class ReportCompanionStateRequest
 	public string? Platform { get; set; }
 
 	public string? AppVersion { get; set; }
+
+	public List<string>? Capabilities { get; set; }
+
+	public List<string>? RequestableCapabilities { get; set; }
+
+	public bool? InFocus { get; set; }
+
+	public string? NetworkType { get; set; }
+
+	public bool? NetworkMetered { get; set; }
+
+	public bool? NetworkValidated { get; set; }
+
+	public string? NetworkName { get; set; }
+
+	public int? CpuUsagePercent { get; set; }
+
+	public int? MemoryUsedPercent { get; set; }
 }

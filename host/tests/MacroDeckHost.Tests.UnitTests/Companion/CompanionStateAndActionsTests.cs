@@ -158,7 +158,7 @@ internal sealed class CompanionStateAndActionsTests
 		});
 	}
 
-	private static async Task<ActionResult> ExecuteAsync(CompanionHarness harness,
+	internal static async Task<ActionResult> ExecuteAsync(CompanionHarness harness,
 		string actionId,
 		Guid device,
 		params (string Name, object Value)[] parameters)
@@ -174,10 +174,10 @@ internal sealed class CompanionStateAndActionsTests
 		return await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext { Parameters = values });
 	}
 
-	private static JsonElement Payload(object value) =>
+	internal static JsonElement Payload(object value) =>
 		JsonSerializer.SerializeToElement(value, UiWebSocketProtocol.Json);
 
-	private static UiWebSocketDispatcher Dispatcher(CompanionHarness harness, ClaimsPrincipal principal)
+	internal static UiWebSocketDispatcher Dispatcher(CompanionHarness harness, ClaimsPrincipal principal)
 		=> new(connectionId: "connection-1",
 			principal: principal,
 			abort: static () => { },

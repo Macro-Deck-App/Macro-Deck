@@ -16564,4 +16564,88 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Companion.Errors.NotConnected" xml:space="preserve">
     <value>L'appareil Companion n'est pas connecté.</value>
   </data>
+  <data name="Integrations.Companion.Variables.InFocus" xml:space="preserve">
+    <value>Au premier plan</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkType" xml:space="preserve">
+    <value>Type de réseau</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkMetered" xml:space="preserve">
+    <value>Réseau limité</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkValidated" xml:space="preserve">
+    <value>Accès à Internet</value>
+  </data>
+  <data name="Integrations.Companion.Variables.NetworkName" xml:space="preserve">
+    <value>Nom du réseau</value>
+  </data>
+  <data name="Integrations.Companion.Variables.CpuUsagePercent" xml:space="preserve">
+    <value>Utilisation du processeur</value>
+  </data>
+  <data name="Integrations.Companion.Variables.MemoryUsedPercent" xml:space="preserve">
+    <value>Utilisation de la mémoire</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOn.Name" xml:space="preserve">
+    <value>Allumer l'écran</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOn.Description" xml:space="preserve">
+    <value>Allume l'écran d'un appareil Companion et affiche ce Macro Deck.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOff.Name" xml:space="preserve">
+    <value>Éteindre l'écran</value>
+  </data>
+  <data name="Integrations.Companion.Actions.ScreenOff.Description" xml:space="preserve">
+    <value>Éteint l'écran d'un appareil Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.FocusHost.Name" xml:space="preserve">
+    <value>Mettre au premier plan</value>
+  </data>
+  <data name="Integrations.Companion.Actions.FocusHost.Description" xml:space="preserve">
+    <value>Affiche le deck de ce Macro Deck au premier plan sur un appareil Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Actions.TakeScreenshot.Name" xml:space="preserve">
+    <value>Prendre une capture d'écran</value>
+  </data>
+  <data name="Integrations.Companion.Actions.TakeScreenshot.Description" xml:space="preserve">
+    <value>Capture le deck ou tout l'écran d'un appareil Companion et l'enregistre en fichier PNG.</value>
+  </data>
+  <data name="Integrations.Companion.Params.ScreenshotMode" xml:space="preserve">
+    <value>Capture</value>
+  </data>
+  <data name="Integrations.Companion.Options.Deck" xml:space="preserve">
+    <value>Deck</value>
+  </data>
+  <data name="Integrations.Companion.Options.FullScreen" xml:space="preserve">
+    <value>Plein écran</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenOnUnavailable" xml:space="preserve">
+    <value>Cet appareil ne peut pas allumer son écran. Sur Android, active la connexion en arrière-plan et autorise la superposition à d'autres applications dans les réglages de l'application Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenOffUnavailable" xml:space="preserve">
+    <value>Cet appareil ne peut pas éteindre son écran. Sur Android, active l'administrateur de l'appareil ou le service d'accessibilité dans les réglages de l'application Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.FocusUnavailable" xml:space="preserve">
+    <value>Cet appareil ne peut pas mettre Macro Deck au premier plan pour le moment. Ouvre l'application Companion ou, sur Android, active la connexion en arrière-plan et autorise la superposition à d'autres applications dans ses réglages.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.DeckNotOnScreen" xml:space="preserve">
+    <value>Le deck de ce Macro Deck n'est pas à l'écran de l'appareil, il ne peut donc pas être capturé.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.FullScreenshotUnavailable" xml:space="preserve">
+    <value>Cet appareil ne peut pas capturer tout son écran. Sur Android, active la capture d'écran ou le service d'accessibilité dans les réglages de l'application Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenshotTimedOut" xml:space="preserve">
+    <value>L'appareil Companion n'a pas envoyé la capture d'écran à temps.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.PermissionDeclined" xml:space="preserve">
+    <value>L'autorisation a été refusée sur l'appareil Companion. Active-la dans les réglages de l'application Companion.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.PermissionTimedOut" xml:space="preserve">
+    <value>L'appareil Companion n'a pas accordé l'autorisation à temps.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.CommandFailed" xml:space="preserve">
+    <value>L'appareil Companion n'a pas pu exécuter la commande.</value>
+  </data>
+  <data name="Integrations.Companion.Errors.ScreenshotFailed" xml:space="preserve">
+    <value>L'appareil Companion n'a pas pu prendre la capture d'écran.</value>
+  </data>
 </root>
