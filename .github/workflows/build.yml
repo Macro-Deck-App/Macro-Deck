@@ -366,7 +366,7 @@ jobs:
     # more portable artifacts, this avoids linuxdeploy regressions caused by
     # newer ELF features on the ubuntu-latest (24.04) image, and keeps the
     # declared libc6 floor in tauri.linux.conf.json's deb.depends accurate.
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     # The signing and updater credentials this job reads are production environment secrets.
     environment: production
     needs: [prepare, test-host, build-ui, publish-host]
@@ -560,7 +560,7 @@ jobs:
 
   package-windows:
     name: Package Windows (NSIS)
-    runs-on: blacksmith-4vcpu-windows-2025
+    runs-on: blacksmith-2vcpu-windows-2025
     # The signing and updater credentials this job reads are production environment secrets.
     environment: production
     needs: [prepare, test-host, test-host-windows, build-ui, publish-host]

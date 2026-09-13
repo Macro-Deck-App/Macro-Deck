@@ -427,7 +427,7 @@ jobs:
 
   bootstrapper:
     name: Bootstrapper build & tests
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: blacksmith-2vcpu-ubuntu-2204
     steps:
       - uses: actions/checkout@v5
 
@@ -469,7 +469,7 @@ jobs:
   # such as the native file picker would reach a release build unbuilt (issue #864).
   bootstrapper-windows:
     name: Bootstrapper build & tests (Windows)
-    runs-on: blacksmith-4vcpu-windows-2025
+    runs-on: blacksmith-2vcpu-windows-2025
     steps:
       - uses: actions/checkout@v5
 
@@ -502,7 +502,7 @@ jobs:
 
   installer-hooks:
     name: Installer hooks & firewall rule (Windows)
-    runs-on: blacksmith-4vcpu-windows-2025
+    runs-on: blacksmith-2vcpu-windows-2025
     steps:
       - uses: actions/checkout@v5
 
