@@ -3,10 +3,10 @@ namespace MacroDeckHost.Application.Auth;
 public interface IHostIdentityKeyProvider
 {
 	// The uncompressed P-256 point, 0x04 followed by X and Y: 65 bytes.
-	byte[] PublicKey { get; }
+	ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default);
 
 	// ECDSA P-256 over SHA-256, DER encoded.
-	byte[] Sign(ReadOnlySpan<byte> message);
+	ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default);
 }
 
 public sealed class HostIdentityUnavailableException : Exception

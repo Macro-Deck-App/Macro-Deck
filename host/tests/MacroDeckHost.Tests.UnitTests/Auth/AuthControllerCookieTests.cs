@@ -51,7 +51,7 @@ public class AuthControllerCookieTests
 		var result = await controller.Refresh();
 
 		var body = (TokenResponse)((OkObjectResult)result).Value!;
-		Assert.That(body.HostKey, Is.EqualTo(Convert.ToBase64String(identity.PublicKey)));
+		Assert.That(body.HostKey, Is.EqualTo(Convert.ToBase64String(identity.PublicKeyBytes)));
 	}
 
 	private static AuthController RefreshController(IHostIdentityKeyProvider identity)
@@ -349,17 +349,18 @@ public class AuthControllerCookieTests
 
 	private sealed class UnavailableHostIdentity : IHostIdentityKeyProvider
 	{
-		public byte[] PublicKey => throw new HostIdentityUnavailableException("unreadable");
+		public ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default)
+			=> ValueTask.FromException<byte[]>(new HostIdentityUnavailableException("unreadable"));
 
-		public byte[] Sign(ReadOnlySpan<byte> message) => throw new HostIdentityUnavailableException("unreadable");
+		public ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default)
+			=> ValueTask.FromException<byte[]>(new HostIdentityUnavailableException("unreadable"));
 	}
 
 	private sealed class FixedHostIdentity : IHostIdentityKeyProvider
 	{
-		private readonly ECDsa _key =
-			ECDsa.Create(ECCurve.NamedCurves.nistP256);
+		private readonly ECDsa _key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
-		public byte[] PublicKey
+		public byte[] PublicKeyBytes
 		{
 			get
 			{
@@ -368,9 +369,10 @@ public class AuthControllerCookieTests
 			}
 		}
 
-		public byte[] Sign(ReadOnlySpan<byte> message)
-			=> _key.SignData(message,
-				HashAlgorithmName.SHA256,
-				DSASignatureFormat.Rfc3279DerSequence);
+		public ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default)
+			=> ValueTask.FromResult(PublicKeyBytes);
+
+		public ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default)
+			=> ValueTask.FromResult(_key.SignData(message, HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence));
 	}
 }

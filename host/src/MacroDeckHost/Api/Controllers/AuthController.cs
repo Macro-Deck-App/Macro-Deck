@@ -190,7 +190,7 @@ public class AuthController : ControllerBase
 		_failedLoginTracker.Reset();
 		SetAuthCookies(result.Data);
 
-		return Ok(ToTokenResponse(result.Data));
+		return Ok(await ToTokenResponse(result.Data));
 	}
 
 	/// <summary>
@@ -272,7 +272,7 @@ public class AuthController : ControllerBase
 
 		SetAuthCookies(result.Data);
 
-		return Ok(ToTokenResponse(result.Data));
+		return Ok(await ToTokenResponse(result.Data));
 	}
 
 	[HttpPost("refresh")]
@@ -294,13 +294,13 @@ public class AuthController : ControllerBase
 
 		SetAuthCookies(result.Data);
 
-		return Ok(ToTokenResponse(result.Data));
+		return Ok(await ToTokenResponse(result.Data));
 	}
 
 	[HttpPost("identity")]
 	[AllowAnonymous]
 	[EnableRateLimiting(HostIdentityRateLimit.PolicyName)]
-	public IActionResult ProveIdentity(HostIdentityChallenge body)
+	public async Task<IActionResult> ProveIdentity(HostIdentityChallenge body)
 	{
 		if (!HostIdentityMessage.TryParseNonce(body.Nonce, out _))
 		{
@@ -318,8 +318,9 @@ public class AuthController : ControllerBase
 		var endpoint = HostIdentityMessage.CanonicalAuthority(localAddress, HttpContext.Connection.LocalPort);
 		try
 		{
-			var publicKey = Convert.ToBase64String(_hostIdentity.PublicKey);
-			var signature = _hostIdentity.Sign(HostIdentityMessage.Build(publicKey, endpoint, body.Nonce!));
+			var publicKey = Convert.ToBase64String(await _hostIdentity.GetPublicKey(HttpContext.RequestAborted));
+			var signature = await _hostIdentity.Sign(HostIdentityMessage.Build(publicKey, endpoint, body.Nonce!),
+				HttpContext.RequestAborted);
 			return Ok(new HostIdentityProof(publicKey, endpoint, Convert.ToBase64String(signature)));
 		}
 		catch (HostIdentityUnavailableException)
@@ -382,7 +383,7 @@ public class AuthController : ControllerBase
 		return Ok(new PairingCodeResponse(code.Code, code.ExpiresAt.ToString("O")));
 	}
 
-	private TokenResponse ToTokenResponse(LoginResult login)
+	private async Task<TokenResponse> ToTokenResponse(LoginResult login)
 	{
 		var expiresIn = (int)(login.AccessTokenExpiresAt - _timeProvider.GetUtcNow().UtcDateTime).TotalSeconds;
 
@@ -395,15 +396,15 @@ public class AuthController : ControllerBase
 			AuthDefaults.ScopeClaimValue(login.Scope),
 			login.Username,
 			device,
-			HostKeyOrNull());
+			await HostKeyOrNull());
 	}
 
 	// A host that cannot load its identity still signs people in; the app treats the exchange as legacy.
-	private string? HostKeyOrNull()
+	private async Task<string?> HostKeyOrNull()
 	{
 		try
 		{
-			return Convert.ToBase64String(_hostIdentity.PublicKey);
+			return Convert.ToBase64String(await _hostIdentity.GetPublicKey(HttpContext.RequestAborted));
 		}
 		catch (HostIdentityUnavailableException)
 		{

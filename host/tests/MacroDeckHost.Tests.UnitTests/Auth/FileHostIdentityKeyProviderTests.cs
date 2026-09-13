@@ -1,15 +1,16 @@
 using System.Security.Cryptography;
 using MacroDeckHost.Application.Auth;
-using MacroDeckHost.Application.Persistence.Repositories;
-using MacroDeckHost.Application.Services;
-using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Application.Notifications;
+using MacroDeckHost.Application.Persistence.Repositories;
+using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Infrastructure.Auth;
 using MacroDeckHost.Infrastructure.Notifications;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 
 namespace MacroDeckHost.Tests.UnitTests.Auth;
 
@@ -20,6 +21,8 @@ public class FileHostIdentityKeyProviderTests
 	private EphemeralDataProtectionProvider _protection = null!;
 	private InMemoryPreferences _preferences = null!;
 	private UserNotificationStore _notifications = null!;
+	private ManualTimeProvider _time = null!;
+	private ErrorCountingSink _log = null!;
 
 	private string KeyPath => Path.Combine(_paths.KeysDirectory, FileHostIdentityKeyProvider.KeyFileName);
 
@@ -31,6 +34,8 @@ public class FileHostIdentityKeyProviderTests
 		_protection = new EphemeralDataProtectionProvider();
 		_preferences = new InMemoryPreferences();
 		_notifications = new UserNotificationStore();
+		_time = new ManualTimeProvider();
+		_log = new ErrorCountingSink();
 	}
 
 	[TearDown]
@@ -45,10 +50,10 @@ public class FileHostIdentityKeyProviderTests
 	}
 
 	[Test]
-	public void The_same_key_comes_back_after_a_restart()
+	public async Task The_same_key_comes_back_after_a_restart()
 	{
-		var first = NewProvider().PublicKey;
-		var second = NewProvider().PublicKey;
+		var first = await NewProvider().GetPublicKey();
+		var second = await NewProvider().GetPublicKey();
 
 		Assert.Multiple(() =>
 		{
@@ -59,9 +64,9 @@ public class FileHostIdentityKeyProviderTests
 	}
 
 	[Test]
-	public void The_first_key_on_an_existing_host_is_created_silently_and_recorded()
+	public async Task The_first_key_on_an_existing_host_is_created_silently_and_recorded()
 	{
-		NewProvider().Sign("message"u8);
+		await NewProvider().Sign("message"u8.ToArray());
 
 		Assert.Multiple(() =>
 		{
@@ -71,36 +76,53 @@ public class FileHostIdentityKeyProviderTests
 	}
 
 	[Test]
-	public void A_key_recreated_after_one_was_issued_tells_the_user_to_pair_again()
+	public async Task A_key_recreated_after_one_was_issued_tells_the_user_to_pair_again()
 	{
-		NewProvider().Sign("message"u8);
+		await NewProvider().Sign("message"u8.ToArray());
 		File.Delete(KeyPath);
 
-		NewProvider().Sign("message"u8);
+		await NewProvider().Sign("message"u8.ToArray());
 
 		Assert.That(_notifications.Snapshot().Single().Kind, Is.EqualTo(UserNotificationKind.Security));
 	}
 
 	[Test]
-	public void An_unprotectable_key_is_renewed_and_the_old_file_is_kept_aside()
+	public async Task An_unprotectable_key_is_renewed_and_the_old_file_is_kept_aside()
 	{
-		File.WriteAllBytes(KeyPath, [1, 2, 3]);
+		await File.WriteAllBytesAsync(KeyPath, [1, 2, 3]);
 
-		var provider = NewProvider();
-		var publicKey = provider.PublicKey;
+		var publicKey = await NewProvider().GetPublicKey();
+		var reloaded = await NewProvider().GetPublicKey();
 
 		var aside = Directory.GetFiles(_paths.KeysDirectory, "host-identity.key.unreadable-*");
 		Assert.Multiple(() =>
 		{
 			Assert.That(aside, Has.Length.EqualTo(1));
 			Assert.That(File.ReadAllBytes(aside[0]), Is.EqualTo(new byte[] { 1, 2, 3 }));
-			Assert.That(NewProvider().PublicKey, Is.EqualTo(publicKey));
+			Assert.That(reloaded, Is.EqualTo(publicKey));
 			Assert.That(_notifications.Snapshot().Single().Kind, Is.EqualTo(UserNotificationKind.Security));
 		});
 	}
 
 	[Test]
-	public void An_access_error_is_never_renewed_and_a_later_call_recovers()
+	public async Task A_key_on_another_curve_is_treated_as_unreadable()
+	{
+		using var p384 = ECDsa.Create(ECCurve.NamedCurves.nistP384);
+		var protector = _protection.CreateProtector("MacroDeck.Auth.HostIdentityKey");
+		await File.WriteAllBytesAsync(KeyPath, protector.Protect(p384.ExportPkcs8PrivateKey()));
+
+		var publicKey = await NewProvider().GetPublicKey();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(publicKey, Has.Length.EqualTo(65));
+			Assert.That(Directory.GetFiles(_paths.KeysDirectory, "host-identity.key.unreadable-*"),
+				Has.Length.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task An_access_error_is_never_renewed_retried_at_most_every_interval_and_logged_once()
 	{
 		if (OperatingSystem.IsWindows())
 		{
@@ -108,28 +130,64 @@ public class FileHostIdentityKeyProviderTests
 			return;
 		}
 
-		var original = NewProvider().PublicKey;
+		var original = await NewProvider().GetPublicKey();
 		File.SetUnixFileMode(KeyPath, UnixFileMode.None);
 		var provider = NewProvider();
 
-		Assert.Throws<HostIdentityUnavailableException>(() => _ = provider.PublicKey);
+		Assert.ThrowsAsync<HostIdentityUnavailableException>(async () => await provider.GetPublicKey());
+		_time.Advance(FileHostIdentityKeyProvider.RetryInterval);
+		Assert.ThrowsAsync<HostIdentityUnavailableException>(async () => await provider.GetPublicKey());
+
+		File.SetUnixFileMode(KeyPath, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+		Assert.ThrowsAsync<HostIdentityUnavailableException>(async () => await provider.GetPublicKey(),
+			"no new attempt before the interval has passed");
+
 		Assert.Multiple(() =>
 		{
 			Assert.That(Directory.GetFiles(_paths.KeysDirectory, "*.unreadable-*"), Is.Empty);
 			Assert.That(_notifications.Snapshot(), Is.Empty);
+			Assert.That(_log.Errors, Is.EqualTo(1));
 		});
 
-		File.SetUnixFileMode(KeyPath, UnixFileMode.UserRead | UnixFileMode.UserWrite);
-		Assert.That(provider.PublicKey, Is.EqualTo(original));
+		_time.Advance(FileHostIdentityKeyProvider.RetryInterval);
+		Assert.That(await provider.GetPublicKey(), Is.EqualTo(original));
 	}
 
 	[Test]
-	public void A_signature_verifies_with_the_published_point()
+	public async Task Providers_creating_the_key_at_the_same_time_end_up_with_the_one_on_disk()
+	{
+		var providers = Enumerable.Range(0, 8).Select(_ => NewProvider()).ToList();
+
+		await Task.WhenAll(providers.Select(provider => Task.Run(async () =>
+		{
+			try
+			{
+				await provider.GetPublicKey();
+			}
+			catch (HostIdentityUnavailableException)
+			{
+				// Lost the race for the key file; it retries after the interval.
+			}
+		})));
+		_time.Advance(FileHostIdentityKeyProvider.RetryInterval);
+
+		var keys = new List<byte[]>();
+		foreach (var provider in providers)
+		{
+			keys.Add(await provider.GetPublicKey());
+		}
+
+		var onDisk = await NewProvider().GetPublicKey();
+		Assert.That(keys, Has.All.EqualTo(onDisk), "a key that appeared meanwhile is loaded, never replaced");
+	}
+
+	[Test]
+	public async Task A_signature_verifies_with_the_published_point()
 	{
 		var provider = NewProvider();
-		var point = provider.PublicKey;
+		var point = await provider.GetPublicKey();
 
-		var signature = provider.Sign("message"u8);
+		var signature = await provider.Sign("message"u8.ToArray());
 
 		using var verifier = ECDsa.Create(new ECParameters
 		{
@@ -155,8 +213,8 @@ public class FileHostIdentityKeyProviderTests
 			services.GetRequiredService<IServiceScopeFactory>(),
 			_notifications,
 			TestLocalization.Resolver,
-			TimeProvider.System,
-			new LoggerConfiguration().CreateLogger());
+			_time,
+			new LoggerConfiguration().WriteTo.Sink(_log).CreateLogger());
 	}
 
 	private sealed class InMemoryPreferences : IAppPreferenceRepository
@@ -164,14 +222,38 @@ public class FileHostIdentityKeyProviderTests
 		public Dictionary<string, string> Values { get; } = [];
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(Values.TryGetValue(key, out var value)
-				? new AppPreferenceEntity { Key = key, Value = value }
-				: null);
+		{
+			lock (Values)
+			{
+				return Task.FromResult(Values.TryGetValue(key, out var value)
+					? new AppPreferenceEntity { Key = key, Value = value }
+					: null);
+			}
+		}
 
 		public Task SetValue(string key, string value)
 		{
-			Values[key] = value;
+			lock (Values)
+			{
+				Values[key] = value;
+			}
+
 			return Task.CompletedTask;
+		}
+	}
+
+	private sealed class ErrorCountingSink : ILogEventSink
+	{
+		private int _errors;
+
+		public int Errors => Volatile.Read(ref _errors);
+
+		public void Emit(LogEvent logEvent)
+		{
+			if (logEvent.Level == LogEventLevel.Error)
+			{
+				Interlocked.Increment(ref _errors);
+			}
 		}
 	}
 }
