@@ -430,7 +430,7 @@ public sealed class PluginInstaller : IPluginInstaller
 
 			await _supervisor.Forget(pluginId, cancellationToken);
 
-			await _integrationRegistrar.UnregisterAsync(pluginId, cancellationToken);
+			await _integrationRegistrar.ForgetAsync(pluginId, cancellationToken);
 
 			PluginInstallerLog.Uninstalled(_logger, pluginId, request.KeepData);
 			return PluginInstallResult.Ok(pluginId,

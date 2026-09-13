@@ -20,6 +20,9 @@ internal sealed class FakeIntegrationRegistrar : IRemotePluginIntegrationRegistr
 		return Task.CompletedTask;
 	}
 
+	public Task ForgetAsync(string pluginId, CancellationToken cancellationToken = default)
+		=> UnregisterAsync(pluginId, cancellationToken);
+
 	public Task RegisterInstalledButStoppedAsync(CancellationToken cancellationToken = default)
 		=> Task.CompletedTask;
 
