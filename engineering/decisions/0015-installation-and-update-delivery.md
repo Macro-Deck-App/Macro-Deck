@@ -127,6 +127,36 @@ the push is gated on `makepkg` producing a package that actually contains `usr/b
 An AUR install is a package-manager-owned install, so it inherits the notification-only rule above
 with no bootstrapper change at all.
 
+### Debian and Ubuntu get a signed APT repository serving the same DEB
+
+`https://packages.macro-deck.app` is an APT repository
+([#708](https://github.com/Macro-Deck-App/Macro-Deck/issues/708)) that serves the released DEB byte
+for byte: package `macro-deck`, `amd64`, component `main`, in two suites. `stable` carries stable
+releases; `beta` carries prereleases and every stable release. No downgrade guard is needed, unlike
+the AUR: apt ranks every version in the index and dpkg sorts `3.0.0~beta.N` below `3.0.0`, so Beta
+installations graduate on their own. [`publish-apt.yml`](../../.github/workflows/publish-apt.yml) runs
+after the release exists and is isolated from it like the AUR job.
+
+The repository is rebuilt from what is already published, never from local state. Each run reads
+every suite's index through the S3 API, appends the new version and re-signs both suites, so `stable`
+exists, empty, before the first stable release. Only a missing object counts as an empty index; any
+other read failure fails the run rather than publish an index that lost its history. A version already
+published with a different SHA-256 is refused rather than replaced, because clients have its hash. Pool
+files spell a version's `~` as `.`, so that no URL depends on how the CDN decodes a percent-encoded
+tilde.
+
+CI signs with a dedicated signing subkey of the Macro Deck key and holds nothing else: the job
+refuses key material that includes the primary, which can certify and revoke, or any other secret
+subkey. Clients trust the key through `Signed-By` on the served `/gpg.asc`. Before any upload, the job
+verifies the signed tree with the real apt against that served key, on Debian so it is the strict
+`sqv` verifier, which means a subkey missing from the published key fails CI rather than every client.
+Indices are published with `Acquire-By-Hash`; the content-addressed copies and the pool files are
+immutable and never deleted, and the signed `Release` files are written last, so a client holding
+either the old or the new `InRelease` finds every index it names. The job then downloads the new
+version from the live URL.
+
+An APT install is a package-manager-owned install and keeps the notification-only rule above.
+
 ### Exactly one Windows installer step elevates
 
 `installer/firewall.nsh` builds a single `cmd.exe` command that deletes any rule scoped to the host's
@@ -165,8 +195,14 @@ installed copy, because single-instance would otherwise make that launch exit im
 
 - Linux users update through their own package manager or by replacing the AppImage — never an elevation
   prompt, never an in-place write Macro Deck performs. The experience is intentionally less smooth than
-  on Windows and macOS; that is the cost of respecting each distribution's ownership model. If signed APT
-  and DNF repositories ship later, the package manager should own delivery for those installs.
+  on Windows and macOS; that is the cost of respecting each distribution's ownership model. The APT
+  repository is where the package manager owns delivery entirely; a DNF repository would follow it.
+- The APT repository's URL, suite names, package name, `Origin` and `Label` (both `Macro Deck`) and
+  its key are permanent: changing any of them makes apt refuse or prompt on every client. The key
+  expires on 2030-08-03, and extending it means users download `/gpg.asc` again; a leaked CI subkey is
+  revoked and replaced under the same primary. Publishing needs the R2 token to reach the repository's
+  bucket, and a manual `dry_run` proves the secrets before a release relies on them. A publish that
+  queued behind another can be dropped by the concurrency group; a manual run at that version recovers it.
 - The two AUR package names are a permanent commitment: once someone has installed `macro-deck-bin`,
   renaming it strands them. Publishing them also depends on an AUR maintainer account and a key the
   release pipeline holds; until that exists the job still renders and builds every release, and only
