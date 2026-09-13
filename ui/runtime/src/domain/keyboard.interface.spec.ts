@@ -28,6 +28,17 @@ describe('keyFromEvent', () => {
     expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'Unidentified', code: 'MediaTrackNext' })))
       .toBe('MediaTrackNext');
   });
+
+  it('records numpad keys as the numpad key, whatever character NumLock makes them produce', () => {
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: '1', code: 'Numpad1' }))).toBe('Numpad1');
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'End', code: 'Numpad1' }))).toBe('Numpad1');
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: '+', code: 'NumpadAdd' }))).toBe('NumpadAdd');
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'NumpadEnter' }))).toBe('NumpadEnter');
+  });
+
+  it('falls back to the produced character for numpad keys the host has no name for', () => {
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: '=', code: 'NumpadEqual' }))).toBe('=');
+  });
 });
 
 describe('supportedKeyGroups', () => {
