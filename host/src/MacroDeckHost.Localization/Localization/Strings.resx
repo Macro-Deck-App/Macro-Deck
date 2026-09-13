@@ -1283,6 +1283,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Deck.ResizeFailed" xml:space="preserve">
     <value>Failed to resize the grid</value>
   </data>
+  <data name="Deck.UnavailableWidget.Tile" xml:space="preserve">
+    <value>Provided by {plugin}, currently unavailable</value>
+  </data>
   <data name="Deck.Unlock" xml:space="preserve">
     <value>Unlock</value>
   </data>
@@ -15462,6 +15465,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.Editor.ProviderOwnStatesHeading" xml:space="preserve">
     <value>This action provides its own button states.</value>
+  </data>
+  <data name="Widgets.Editor.ProviderUnavailableMessage" xml:space="preserve">
+    <value>This widget comes from {plugin}, which is currently unavailable. Its settings are kept and come back when the plugin reconnects.</value>
   </data>
   <data name="Widgets.Editor.RemoveRule" xml:space="preserve">
     <value>Remove rule</value>

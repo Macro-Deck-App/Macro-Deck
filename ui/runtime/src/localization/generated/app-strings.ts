@@ -532,6 +532,9 @@ export const AppStrings = {
 			UnavailableBody: 'macrodeck.app:Deck.FolderView.UnavailableBody',
 			UnavailableHeading: 'macrodeck.app:Deck.FolderView.UnavailableHeading',
 		},
+		UnavailableWidget: {
+			Tile: 'macrodeck.app:Deck.UnavailableWidget.Tile',
+		},
 	},
 	Developer: {
 		ActionCount: 'macrodeck.app:Developer.ActionCount',
@@ -6358,6 +6361,7 @@ export const AppStrings = {
 			ProviderMultiStatesHeading: 'macrodeck.app:Widgets.Editor.ProviderMultiStatesHeading',
 			ProviderNoStatesYet: 'macrodeck.app:Widgets.Editor.ProviderNoStatesYet',
 			ProviderOwnStatesHeading: 'macrodeck.app:Widgets.Editor.ProviderOwnStatesHeading',
+			ProviderUnavailableMessage: 'macrodeck.app:Widgets.Editor.ProviderUnavailableMessage',
 			RemoveRule: 'macrodeck.app:Widgets.Editor.RemoveRule',
 			RemoveStateConfirm: 'macrodeck.app:Widgets.Editor.RemoveStateConfirm',
 			RemoveStateHeading: 'macrodeck.app:Widgets.Editor.RemoveStateHeading',
@@ -7056,6 +7060,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Deck.PinWidgetsFailed': 'Failed to pin the widgets',
 	'macrodeck.app:Deck.ReadOnly': 'Read-only',
 	'macrodeck.app:Deck.ResizeFailed': 'Failed to resize the grid',
+	'macrodeck.app:Deck.UnavailableWidget.Tile': 'Provided by {plugin}, currently unavailable',
 	'macrodeck.app:Deck.Unlock': 'Unlock',
 	'macrodeck.app:Deck.UnpinWidgetsFailed': 'Failed to unpin the widgets',
 	'macrodeck.app:Deck.WidgetExported': 'Widget exported',
@@ -11819,6 +11824,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Widgets.Editor.ProviderMultiStatesHeading': 'This action supports multiple states.',
 	'macrodeck.app:Widgets.Editor.ProviderNoStatesYet': 'This action has not returned any states yet - keeping the last known ones.',
 	'macrodeck.app:Widgets.Editor.ProviderOwnStatesHeading': 'This action provides its own button states.',
+	'macrodeck.app:Widgets.Editor.ProviderUnavailableMessage': 'This widget comes from {plugin}, which is currently unavailable. Its settings are kept and come back when the plugin reconnects.',
 	'macrodeck.app:Widgets.Editor.RemoveRule': 'Remove rule',
 	'macrodeck.app:Widgets.Editor.RemoveStateConfirm': '{name} is used by a mapping rule or is the fallback state. Removing it will update the mapping to no longer reference it. Continue?',
 	'macrodeck.app:Widgets.Editor.RemoveStateHeading': 'Remove state',

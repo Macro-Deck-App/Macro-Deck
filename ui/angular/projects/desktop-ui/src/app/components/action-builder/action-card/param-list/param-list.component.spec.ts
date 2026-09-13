@@ -458,6 +458,7 @@ describe('ParamListComponent node event forwarding', () => {
       // Never rejected here: these tests are about a session that opened, and the parameter list
       // reads this only to tell "no tree yet" from "no provider".
       rejection: signal<UiSessionRejection | null>(null),
+      generation: signal(0),
       send,
       close: () => {},
     };

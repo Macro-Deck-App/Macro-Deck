@@ -35,14 +35,20 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 	private readonly IFolderCache _folderCache;
 	private readonly IWidgetTypeRegistry _widgetTypes;
 	private readonly IUiSessionBroker _broker;
+	private readonly IWidgetProviderAvailability _availability;
+	private readonly UnavailableWidgetSessionRecovery _recovery;
 
 	public ConfigUiSessionOpener(IIntegrationRegistry integrations,
 		IConfigFlowManager configFlows,
 		IFolderViewRegistry folderViews,
 		IFolderCache folderCache,
 		IWidgetTypeRegistry widgetTypes,
-		IUiSessionBroker broker)
+		IUiSessionBroker broker,
+		IWidgetProviderAvailability availability,
+		UnavailableWidgetSessionRecovery recovery)
 	{
+		_availability = availability;
+		_recovery = recovery;
 		_integrations = integrations;
 		_configFlows = configFlows;
 		_folderViews = folderViews;
@@ -90,27 +96,27 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 			return UiSessionOpenTicket.Rejected(Rejection.NoSuchWidget.Code, Rejection.NoSuchWidget.Message);
 		}
 
+		var missing = _availability.Check(widget.Type);
+
 		// A type a provider owns configures itself, so the session opens under the provider's own id for
 		// the reason WidgetUiSessionOpener gives: the broker's ownership check compares against the real
 		// owner, and a synthetic id would fail it on the first patch. What the session is for is already
 		// on the surface, which is where a provider reads it from.
 		var isPluginType = _widgetTypes.TryResolve(widget.Type, out var entry) && !entry.IsBuiltIn;
 
-		if (isPluginType && !entry!.Descriptor.HasConfiguration)
+		if (missing is null && isPluginType && !entry!.Descriptor.HasConfiguration)
 		{
 			return UiSessionOpenTicket.Rejected(Rejection.WidgetTypeHasNoConfiguration.Code,
 				Rejection.WidgetTypeHasNoConfiguration.Message);
 		}
 
-		var providerId = isPluginType
-			? entry!.ProviderId
-			: WidgetUiProviderRegistry.ConfigProviderIdFor(widgetId, ownerPrincipal);
+		var providerId = missing is not null
+			? WidgetUiProviderRegistry.UnavailableConfigProviderIdFor(widgetId)
+			: isPluginType
+				? entry!.ProviderId
+				: WidgetUiProviderRegistry.ConfigProviderIdFor(widgetId, ownerPrincipal);
 
-		var surface = new UiSurface
-		{
-			Kind = UiSurfaceKinds.Config,
-			SessionMode = UiSessionModes.Exclusive,
-			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 			{
 				[UiConfigSurfaceAttributes.EntryPoint] = JsonSerializer.SerializeToElement(request.EntryPoint),
 				[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(widgetId.ToString()),
@@ -123,10 +129,22 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 					= TryParseObject(request.WidgetData) ?? ParseConfiguration(widget.Data),
 				[UiConfigSurfaceAttributes.WidgetWidth] = JsonSerializer.SerializeToElement(widget.Width),
 				[UiConfigSurfaceAttributes.WidgetHeight] = JsonSerializer.SerializeToElement(widget.Height)
-			}
+			};
+
+		var surface = new UiSurface
+		{
+			Kind = UiSurfaceKinds.Config,
+			SessionMode = UiSessionModes.Exclusive,
+			Attributes = missing is null ? attributes : UnavailableWidgetUiProvider.Naming(attributes, missing.Name)
 		};
 
-		return _broker.Open(providerId, surface, ownerPrincipal);
+		if (missing is null)
+		{
+			return _broker.Open(providerId, surface, ownerPrincipal);
+		}
+
+		var placeholder = _broker.Open(providerId, surface, ownerPrincipal);
+		return _recovery.Track(placeholder, widget.Type) ? placeholder : OpenWidgetConfig(request, ownerPrincipal);
 	}
 
 	private WidgetEntity? FindWidget(Guid widgetId)

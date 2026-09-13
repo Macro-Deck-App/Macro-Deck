@@ -12,6 +12,7 @@ class FakeUiSessionHandle implements UiSessionHandle {
   readonly root = signal<UiNode | null>(null);
   readonly revision = signal(0);
   readonly rejection = signal<UiSessionRejection | null>(null);
+  readonly generation = signal(0);
   closed = false;
   readonly sent: UiNodeEvent[] = [];
 

@@ -24,6 +24,8 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 	private readonly IWidgetTypeRegistry _widgetTypes;
 	private readonly UiSessionRegistry _registry;
 	private readonly IUiSessionBroker _broker;
+	private readonly IWidgetProviderAvailability _availability;
+	private readonly UnavailableWidgetSessionRecovery _recovery;
 
 	public WidgetUiSessionOpener(
 		IFolderCache folderCache,
@@ -31,8 +33,12 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 		IWidgetDataSchemaProvider schemas,
 		IWidgetTypeRegistry widgetTypes,
 		UiSessionRegistry registry,
-		IUiSessionBroker broker)
+		IUiSessionBroker broker,
+		IWidgetProviderAvailability availability,
+		UnavailableWidgetSessionRecovery recovery)
 	{
+		_availability = availability;
+		_recovery = recovery;
 		_folderCache = folderCache;
 		_profileCache = profileCache;
 		_schemas = schemas;
@@ -65,6 +71,29 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 		{
 			return UiSessionOpenTicket.Rejected(UiSessionErrorCodes.ProviderUnavailable,
 				"That widget does not exist.");
+		}
+
+		if (_availability.Check(widget.Type) is { } missing)
+		{
+			var placeholderId = WidgetUiProviderRegistry.UnavailableProviderIdFor(widgetId, request.Ghost);
+
+			if (FindExisting(placeholderId, ownerPrincipal) is { } shown)
+			{
+				return shown;
+			}
+
+			var placeholder = _broker.Open(placeholderId,
+				new UiSurface
+				{
+					Kind = UiSurfaceKinds.Widget,
+					SessionMode = UiSessionModes.Shared,
+					Attributes = UnavailableWidgetUiProvider.Naming(
+						BuildLiveAttributes(widgetId, widget, folder, request.Ghost),
+						missing.Name)
+				},
+				ownerPrincipal);
+
+			return _recovery.Track(placeholder, widget.Type) ? placeholder : OpenLive(request, ownerPrincipal);
 		}
 
 		// A type a provider owns is served by that provider, so the session opens under the provider's own
@@ -110,6 +139,41 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 				"Only an admin session may preview a widget.");
 		}
 
+		var draft = request.Data ?? _emptyObject;
+		var sample = request.Sample;
+		var scope = VariableScopeOf(request);
+
+		if (_availability.Check(_widgetTypes.Resolve(request.WidgetType) ?? request.WidgetType) is { } missing &&
+			draft.ValueKind == JsonValueKind.Object)
+		{
+			var placeholderType = request.WidgetType ?? string.Empty;
+			var placeholderId = WidgetUiProviderRegistry.UnavailablePreviewProviderIdFor(placeholderType);
+
+			if (FindExistingSurface(placeholderId,
+					ownerPrincipal,
+					UiSurfaceKinds.Preview,
+					candidate => IsFlagged(candidate, UiWidgetSurfaceAttributes.Sample) == sample &&
+						Matches(candidate, UiWidgetSurfaceAttributes.VariableScopeWidgetId, scope?.ToString())) is { } shown)
+			{
+				return shown;
+			}
+
+			var placeholder = _broker.Open(placeholderId,
+				new UiSurface
+				{
+					Kind = UiSurfaceKinds.Preview,
+					SessionMode = UiSessionModes.Shared,
+					Attributes = UnavailableWidgetUiProvider.Naming(
+						BuildPreviewAttributes(placeholderType, draft, sample, scope),
+						missing.Name)
+				},
+				ownerPrincipal);
+
+			return _recovery.Track(placeholder, placeholderType)
+				? placeholder
+				: OpenPreview(request, ownerPrincipal, isAdmin);
+		}
+
 		// Clients have always spelled a widget type in kebab-case ("action-button") while the stored id
 		// reads "ActionButton"; the registry resolves either, so a multi-word type is previewable.
 		if (_widgetTypes.Resolve(request.WidgetType) is not { } widgetType)
@@ -118,7 +182,6 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 				"That widget type does not exist.");
 		}
 
-		var draft = request.Data ?? _emptyObject;
 		if (draft.ValueKind != JsonValueKind.Object)
 		{
 			return UiSessionOpenTicket.Rejected(UiSessionErrorCodes.InvalidPayload,
@@ -133,17 +196,13 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 
 		// A scope naming no stored widget is dropped rather than refused: a widget being created has no
 		// id to name yet, and that preview has to keep opening exactly as it did.
-		var variableScope = Guid.TryParse(request.VariableScopeWidgetId, out var scopeWidgetId) &&
-			FindWidget(scopeWidgetId) is not null
-				? scopeWidgetId
-				: (Guid?)null;
 
 		var owner = ProviderOwnerOf(widgetType);
 
 		var providerId = owner ??
 			(request.Sample
 				? WidgetUiProviderRegistry.SamplePreviewProviderIdFor(widgetType, ownerPrincipal)
-				: WidgetUiProviderRegistry.PreviewProviderIdFor(widgetType, ownerPrincipal, variableScope));
+				: WidgetUiProviderRegistry.PreviewProviderIdFor(widgetType, ownerPrincipal, scope));
 
 		// The three things a preview's synthetic id encodes are matched off the surface instead, so a
 		// provider's picker sample and an editor's draft of the same type keep their own sessions.
@@ -156,7 +215,7 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 					IsFlagged(candidate, UiWidgetSurfaceAttributes.Sample) == request.Sample &&
 					Matches(candidate,
 						UiWidgetSurfaceAttributes.VariableScopeWidgetId,
-						variableScope?.ToString()));
+						scope?.ToString()));
 
 		if (existing is { } opened)
 		{
@@ -167,11 +226,16 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 		{
 			Kind = UiSurfaceKinds.Preview,
 			SessionMode = UiSessionModes.Shared,
-			Attributes = BuildPreviewAttributes(widgetType, draft, request.Sample, variableScope)
+			Attributes = BuildPreviewAttributes(widgetType, draft, request.Sample, scope)
 		};
 
 		return _broker.Open(providerId, surface, ownerPrincipal);
 	}
+
+	private Guid? VariableScopeOf(OpenWidgetUiSessionRequest request)
+		=> Guid.TryParse(request.VariableScopeWidgetId, out var scopeWidgetId) && FindWidget(scopeWidgetId) is not null
+			? scopeWidgetId
+			: null;
 
 	private WidgetEntity? FindWidget(Guid widgetId)
 		=> _folderCache.GetAllFolders().SelectMany(folder => folder.Widgets).FirstOrDefault(w => w.Id == widgetId);

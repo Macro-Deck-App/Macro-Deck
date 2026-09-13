@@ -1284,6 +1284,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Deck.ResizeFailed" xml:space="preserve">
     <value>Nie udało się zmienić rozmiaru siatki</value>
   </data>
+  <data name="Deck.UnavailableWidget.Tile" xml:space="preserve">
+    <value>Dostawca: {plugin} - obecnie niedostępny</value>
+  </data>
   <data name="Deck.Unlock" xml:space="preserve">
     <value>Odblokuj</value>
   </data>
@@ -15461,6 +15464,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Widgets.Editor.ProviderOwnStatesHeading" xml:space="preserve">
     <value>Ta akcja dostarcza własne stany przycisku.</value>
+  </data>
+  <data name="Widgets.Editor.ProviderUnavailableMessage" xml:space="preserve">
+    <value>Dostawca tego widżetu ({plugin}) jest obecnie niedostępny. Ustawienia zostają zachowane i wrócą po ponownym połączeniu wtyczki.</value>
   </data>
   <data name="Widgets.Editor.RemoveRule" xml:space="preserve">
     <value>Usuń regułę</value>

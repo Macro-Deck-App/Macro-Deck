@@ -24,6 +24,9 @@ export const ClientAppStrings = {
 			UnavailableBody: 'macrodeck.app:Deck.FolderView.UnavailableBody',
 			UnavailableHeading: 'macrodeck.app:Deck.FolderView.UnavailableHeading',
 		},
+		UnavailableWidget: {
+			Tile: 'macrodeck.app:Deck.UnavailableWidget.Tile',
+		},
 	},
 	Errors: {
 		Auth: {
@@ -340,6 +343,7 @@ export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Deck.FolderView.OpenIntegrations': 'Open integrations',
 	'macrodeck.app:Deck.FolderView.UnavailableBody': 'Nothing currently provides “{viewId}”. The folder keeps its settings, so enabling the integration again restores it - or pick another folder view.',
 	'macrodeck.app:Deck.FolderView.UnavailableHeading': 'This folder view is unavailable',
+	'macrodeck.app:Deck.UnavailableWidget.Tile': 'Provided by {plugin}, currently unavailable',
 	'macrodeck.app:Errors.Auth.ChangePasswordFailed': 'Changing the password failed',
 	'macrodeck.app:Errors.Auth.ChangeUsernameFailed': 'Changing the username failed',
 	'macrodeck.app:Errors.Auth.LoginFailed': 'Login failed',

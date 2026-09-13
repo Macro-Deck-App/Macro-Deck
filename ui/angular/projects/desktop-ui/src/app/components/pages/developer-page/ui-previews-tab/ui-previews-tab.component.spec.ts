@@ -17,6 +17,7 @@ class FakeUiSessionHandle implements UiSessionHandle {
   readonly root = signal(null);
   readonly revision = signal(0);
   readonly rejection = signal(null);
+  readonly generation = signal(0);
 
   send(): void {}
 

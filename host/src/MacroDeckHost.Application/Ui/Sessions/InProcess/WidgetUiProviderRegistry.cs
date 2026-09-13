@@ -1,3 +1,4 @@
+using MacroDeck.Sdk.Ui;
 using System.Collections.Concurrent;
 using MacroDeckHost.Application.Caching;
 using Serilog;
@@ -11,11 +12,13 @@ public sealed class WidgetUiProviderRegistry
 	private const string PreviewPrefix = "widget-preview:";
 	private const string SamplePreviewPrefix = "widget-preview-sample:";
 	private const string GhostSuffix = ":ghost";
+	private const string UnavailablePrefix = "widget-unavailable:";
 
 	private readonly IFolderCache _folderCache;
 	private readonly IEnumerable<IBuiltInWidgetUiProvider> _providers;
 	private readonly Func<IUiSessionSink> _sink;
 	private readonly ILogger _logger;
+	private readonly IUiProvider? _unavailable;
 
 	private readonly ConcurrentDictionary<string, InProcessUiSessionProvider> _adapters = new(StringComparer.Ordinal);
 
@@ -23,12 +26,14 @@ public sealed class WidgetUiProviderRegistry
 		IFolderCache folderCache,
 		IEnumerable<IBuiltInWidgetUiProvider> providers,
 		Func<IUiSessionSink> sink,
-		ILogger logger)
+		ILogger logger,
+		IUiProvider? unavailable = null)
 	{
 		_folderCache = folderCache;
 		_providers = providers;
 		_sink = sink;
 		_logger = logger;
+		_unavailable = unavailable;
 	}
 
 	public static string ProviderIdFor(Guid widgetId, string principal) => $"widget:{widgetId:N}:{principal}";
@@ -58,8 +63,24 @@ public sealed class WidgetUiProviderRegistry
 	public static string SamplePreviewProviderIdFor(string widgetType, string principal)
 		=> $"widget-preview-sample:{widgetType}:{principal}";
 
+	// Principal-free: a hardware press opens under a fresh principal every time, and a per-principal id
+	// would leave one cached adapter behind per press.
+	public static string UnavailableProviderIdFor(Guid widgetId, bool ghost)
+		=> ghost ? $"{UnavailablePrefix}ghost:{widgetId:N}" : $"{UnavailablePrefix}live:{widgetId:N}";
+
+	public static string UnavailableConfigProviderIdFor(Guid widgetId) => $"{UnavailablePrefix}config:{widgetId:N}";
+
+	public static string UnavailablePreviewProviderIdFor(string widgetType) => $"{UnavailablePrefix}preview:{widgetType}";
+
 	public IUiSessionProvider? Resolve(string providerId)
 	{
+		// Checked first and by prefix alone: a qualified type in a preview id contains "::", which the
+		// first-colon parsing below would cut apart.
+		if (providerId.StartsWith(UnavailablePrefix, StringComparison.Ordinal))
+		{
+			return _unavailable is null ? null : Adapter(providerId, _unavailable);
+		}
+
 		if (TryParseLive(providerId, out var widgetId))
 		{
 			var type = FindWidgetType(widgetId);
@@ -95,11 +116,18 @@ public sealed class WidgetUiProviderRegistry
 	{
 		var liveOrGhostPrefix = LivePrefix + widgetId.ToString("N") + ":";
 		var configPrefix = ConfigPrefix + widgetId.ToString("N") + ":";
+		string[] placeholders =
+		[
+			UnavailableProviderIdFor(widgetId, ghost: false),
+			UnavailableProviderIdFor(widgetId, ghost: true),
+			UnavailableConfigProviderIdFor(widgetId)
+		];
 
 		foreach (var key in _adapters.Keys)
 		{
 			if (!key.StartsWith(liveOrGhostPrefix, StringComparison.Ordinal) &&
-				!key.StartsWith(configPrefix, StringComparison.Ordinal))
+				!key.StartsWith(configPrefix, StringComparison.Ordinal) &&
+				!placeholders.Contains(key, StringComparer.Ordinal))
 			{
 				continue;
 			}
@@ -127,15 +155,13 @@ public sealed class WidgetUiProviderRegistry
 	{
 		var provider = _providers.FirstOrDefault(candidate =>
 			string.Equals(candidate.WidgetTypeId, widgetType, StringComparison.Ordinal));
-		if (provider is null)
-		{
-			return null;
-		}
+		return provider is null ? null : Adapter(providerId, provider);
+	}
 
-		return _adapters.GetOrAdd(providerId,
+	private InProcessUiSessionProvider Adapter(string providerId, IUiProvider provider)
+		=> _adapters.GetOrAdd(providerId,
 			static (id, state) => new InProcessUiSessionProvider(id, state.Provider, state.Sink(), state.Logger),
 			(Provider: provider, Sink: _sink, Logger: _logger));
-	}
 
 	private string? FindWidgetType(Guid widgetId)
 		=> _folderCache.GetAllFolders()

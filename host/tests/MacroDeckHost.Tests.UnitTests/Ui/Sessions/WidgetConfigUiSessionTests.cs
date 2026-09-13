@@ -59,14 +59,10 @@ internal sealed class WidgetConfigUiSessionTests
 		_widgetProviders = new WidgetUiProviderRegistry(_folders,
 			[_weatherProvider],
 			() => _broker,
-			Serilog.Core.Logger.None);
+			Serilog.Core.Logger.None,
+			new UnavailableWidgetUiProvider());
 
-		_opener = new ConfigUiSessionOpener(new StubIntegrationRegistry(),
-			new ThrowingConfigFlowManager(),
-			TestFolderViewProviders.Registry(),
-			_folders,
-			new WidgetTypeRegistry(new RecordingMediator()),
-			_broker);
+		_opener = NewOpener(new WidgetTypeRegistry(new RecordingMediator()));
 	}
 
 	[TearDown]
@@ -281,12 +277,7 @@ internal sealed class WidgetConfigUiSessionTests
 		var widgetTypes = new WidgetTypeRegistry(new RecordingMediator());
 		var registration = await widgetTypes.Register("com.example.gauges",
 			new WidgetTypeDescriptor("plain", LocalizedText.FromLiteral("Plain"), HasConfiguration: false));
-		var opener = new ConfigUiSessionOpener(new StubIntegrationRegistry(),
-			new ThrowingConfigFlowManager(),
-			TestFolderViewProviders.Registry(),
-			_folders,
-			widgetTypes,
-			_broker);
+		var opener = NewOpener(widgetTypes);
 		var widget = AddWidget(registration.WidgetTypeId, "{}");
 
 		var ticket = opener.Open(new OpenConfigUiSessionRequest
@@ -300,6 +291,39 @@ internal sealed class WidgetConfigUiSessionTests
 			Assert.That(ticket.Accepted, Is.False);
 			Assert.That(ticket.Code, Is.EqualTo(UiSessionErrorCodes.ProviderRejected));
 		});
+	}
+
+	[Test]
+	public async Task A_widget_whose_plugin_is_gone_opens_a_notice_in_place_of_its_settings()
+	{
+		var widget = AddWidget("com.example.gauges::gauge", "{\"threshold\":42}");
+
+		var ticket = Open(widget.Id);
+		var tree = await _broker.FirstTreeAsync(ticket.SessionId, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ticket.Accepted, Is.True, ticket.Message);
+			Assert.That(tree, Is.Not.Null);
+			Assert.That(JsonDocument.Parse(tree!.Value.Utf8).RootElement.GetRawText(),
+				Does.Contain("Widgets.Editor.ProviderUnavailableMessage"));
+			Assert.That(widget.Data, Is.EqualTo("{\"threshold\":42}"));
+		});
+	}
+
+	private ConfigUiSessionOpener NewOpener(IWidgetTypeRegistry widgetTypes)
+	{
+		var integrations = new StubIntegrationRegistry();
+		var availability = new WidgetProviderAvailability(widgetTypes, integrations, new NoPluginConnections());
+
+		return new ConfigUiSessionOpener(integrations,
+			new ThrowingConfigFlowManager(),
+			TestFolderViewProviders.Registry(),
+			_folders,
+			widgetTypes,
+			_broker,
+			availability,
+			new UnavailableWidgetSessionRecovery(_registry, availability, integrations));
 	}
 
 	private UiSessionOpenTicket Open(Guid widgetId, string? draft = null)
