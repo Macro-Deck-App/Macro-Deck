@@ -153,7 +153,8 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 					ownerPrincipal,
 					UiSurfaceKinds.Preview,
 					candidate => IsFlagged(candidate, UiWidgetSurfaceAttributes.Sample) == sample &&
-						Matches(candidate, UiWidgetSurfaceAttributes.VariableScopeWidgetId, scope?.ToString())) is { } shown)
+						Matches(candidate, UiWidgetSurfaceAttributes.VariableScopeWidgetId, scope?.ToString())) is
+				{ } shown)
 			{
 				return shown;
 			}

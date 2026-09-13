@@ -117,19 +117,19 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 				: WidgetUiProviderRegistry.ConfigProviderIdFor(widgetId, ownerPrincipal);
 
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-			{
-				[UiConfigSurfaceAttributes.EntryPoint] = JsonSerializer.SerializeToElement(request.EntryPoint),
-				[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(widgetId.ToString()),
-				[UiConfigSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widget.Type),
-				// The editor's own draft wins over the stored record, the way a folder view's configuration
-				// does: the surface renders a transaction the tree does not own, and the draft is what is
-				// being edited. Absent or unparseable falls back to what the widget is saved with, so a
-				// client that sends nothing keeps getting exactly the tree it got before.
-				[UiConfigSurfaceAttributes.WidgetData]
-					= TryParseObject(request.WidgetData) ?? ParseConfiguration(widget.Data),
-				[UiConfigSurfaceAttributes.WidgetWidth] = JsonSerializer.SerializeToElement(widget.Width),
-				[UiConfigSurfaceAttributes.WidgetHeight] = JsonSerializer.SerializeToElement(widget.Height)
-			};
+		{
+			[UiConfigSurfaceAttributes.EntryPoint] = JsonSerializer.SerializeToElement(request.EntryPoint),
+			[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(widgetId.ToString()),
+			[UiConfigSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widget.Type),
+			// The editor's own draft wins over the stored record, the way a folder view's configuration
+			// does: the surface renders a transaction the tree does not own, and the draft is what is
+			// being edited. Absent or unparseable falls back to what the widget is saved with, so a
+			// client that sends nothing keeps getting exactly the tree it got before.
+			[UiConfigSurfaceAttributes.WidgetData]
+				= TryParseObject(request.WidgetData) ?? ParseConfiguration(widget.Data),
+			[UiConfigSurfaceAttributes.WidgetWidth] = JsonSerializer.SerializeToElement(widget.Width),
+			[UiConfigSurfaceAttributes.WidgetHeight] = JsonSerializer.SerializeToElement(widget.Height)
+		};
 
 		var surface = new UiSurface
 		{

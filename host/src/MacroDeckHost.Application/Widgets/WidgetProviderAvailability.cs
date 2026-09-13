@@ -48,8 +48,9 @@ public sealed class WidgetProviderAvailability : IWidgetProviderAvailability
 		}
 
 		var name = _integrations.Integrations
-			.FirstOrDefault(integration => string.Equals(integration.Id, owner, StringComparison.Ordinal))
-			?.Name ?? LocalizedText.FromLiteral(owner);
+				.FirstOrDefault(integration => string.Equals(integration.Id, owner, StringComparison.Ordinal))
+				?.Name ??
+			LocalizedText.FromLiteral(owner);
 
 		return new UnavailableWidgetProvider(owner, name);
 	}

@@ -70,7 +70,8 @@ public sealed class WidgetUiProviderRegistry
 
 	public static string UnavailableConfigProviderIdFor(Guid widgetId) => $"{UnavailablePrefix}config:{widgetId:N}";
 
-	public static string UnavailablePreviewProviderIdFor(string widgetType) => $"{UnavailablePrefix}preview:{widgetType}";
+	public static string UnavailablePreviewProviderIdFor(string widgetType) =>
+		$"{UnavailablePrefix}preview:{widgetType}";
 
 	public IUiSessionProvider? Resolve(string providerId)
 	{
