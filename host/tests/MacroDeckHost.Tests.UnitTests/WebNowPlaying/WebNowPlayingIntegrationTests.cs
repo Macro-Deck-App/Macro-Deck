@@ -40,7 +40,8 @@ internal sealed class WebNowPlayingIntegrationTests
 		var readings = new Dictionary<string, object?>();
 		foreach (var variable in integration.Variables)
 		{
-			readings[variable.ResolvedId!] = (await integration.ReadAsync(variable.ResolvedId!, CancellationToken.None)).Value;
+			readings[variable.ResolvedId!]
+				= (await integration.ReadAsync(variable.ResolvedId!, CancellationToken.None)).Value;
 		}
 
 		Assert.Multiple(() =>
@@ -258,7 +259,8 @@ internal sealed class WebNowPlayingIntegrationTests
 
 			Assert.Multiple(() =>
 			{
-				Assert.That(issues.Select(issue => issue.Id), Is.EqualTo(new[] { WebNowPlayingIntegration.PortInUseIssueId }));
+				Assert.That(issues.Select(issue => issue.Id),
+					Is.EqualTo(new[] { WebNowPlayingIntegration.PortInUseIssueId }));
 				Assert.That(integration.GetInstances(), Is.Empty);
 			});
 		}
@@ -301,8 +303,8 @@ internal sealed class WebNowPlayingIntegrationTests
 				migration.ClaimedActionSources.Contains("WebNowPlaying Plugin")))
 			.ToList();
 
-		var migrated = await claimants.Single().Migrations.Single().MigrateActionAsync(
-			new ForeignAction(TypeName: "jbcarreon123.WebNowPlayingPlugin.Actions.PlayPauseAction",
+		var migrated = await claimants.Single().Migrations.Single().MigrateActionAsync(new ForeignAction(
+				TypeName: "jbcarreon123.WebNowPlayingPlugin.Actions.PlayPauseAction",
 				ActionSource: "WebNowPlaying Plugin",
 				DisplayName: null,
 				Configuration: null,
@@ -325,11 +327,35 @@ internal sealed class WebNowPlayingIntegrationTests
 		int volume = 50,
 		long activeAt = 1000,
 		int canSkipNext = 1)
-		=> $"0 {id} " + string.Join('|',
-			portId ?? id, "YouTube", title, "Rick", "Album", "https://example.test/cover.png",
-			0, 30, 200, volume, 0, 1, 0, 0, 7,
-			1, 1, canSkipNext, 1, 1, 1, 1, 1,
-			1, 1, activeAt) + "|";
+		=> $"0 {id} " +
+			string.Join('|',
+				portId ?? id,
+				"YouTube",
+				title,
+				"Rick",
+				"Album",
+				"https://example.test/cover.png",
+				0,
+				30,
+				200,
+				volume,
+				0,
+				1,
+				0,
+				0,
+				7,
+				1,
+				1,
+				canSkipNext,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				activeAt) +
+			"|";
 
 	private static async Task<WebNowPlayingIntegration> StartAsync()
 	{
@@ -341,7 +367,8 @@ internal sealed class WebNowPlayingIntegrationTests
 	private static IMusicPlayer Player(WebNowPlayingIntegration integration)
 		=> integration.GetPlayer(WebNowPlayingIntegration.InstanceId)!;
 
-	private static async Task<ClientWebSocket> ConnectAsync(WebNowPlayingIntegration integration, string origin = ExtensionOrigin)
+	private static async Task<ClientWebSocket> ConnectAsync(WebNowPlayingIntegration integration,
+		string origin = ExtensionOrigin)
 	{
 		var socket = new ClientWebSocket();
 		socket.Options.SetRequestHeader("Origin", origin);

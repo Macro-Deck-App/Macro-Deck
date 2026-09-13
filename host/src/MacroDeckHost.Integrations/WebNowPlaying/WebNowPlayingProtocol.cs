@@ -113,7 +113,9 @@ internal static class WebNowPlayingProtocol
 			return false;
 		}
 
-		message = new WebNowPlayingMessage((WebNowPlayingMessageType)type, id, parts.Length == 3 ? parts[2] : string.Empty);
+		message = new WebNowPlayingMessage((WebNowPlayingMessageType)type,
+			id,
+			parts.Length == 3 ? parts[2] : string.Empty);
 		return true;
 	}
 

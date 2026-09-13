@@ -145,7 +145,8 @@ public sealed class WebNowPlayingIntegration
 				: null,
 			WebNowPlayingVariables.VolumeId => player.Volume,
 			"webnowplaying-shuffle-enabled" => player.Shuffle,
-			"webnowplaying-repeat-mode" => WebNowPlayingMusicPlayer.ToRepeatMode(player.Repeat).ToString().ToLowerInvariant(),
+			"webnowplaying-repeat-mode" => WebNowPlayingMusicPlayer.ToRepeatMode(player.Repeat).ToString()
+				.ToLowerInvariant(),
 			"webnowplaying-rating" => player.Rating,
 			_ => null
 		};

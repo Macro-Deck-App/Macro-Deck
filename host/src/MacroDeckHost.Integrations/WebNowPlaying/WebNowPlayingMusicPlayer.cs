@@ -70,7 +70,10 @@ internal sealed class WebNowPlayingMusicPlayer(WebNowPlayingPlayers players) : I
 			cancellationToken);
 
 	public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
-		=> SendAsync(player => player.CanSetShuffle, WebNowPlayingEvent.SetShuffle, _ => enabled ? 1 : 0, cancellationToken);
+		=> SendAsync(player => player.CanSetShuffle,
+			WebNowPlayingEvent.SetShuffle,
+			_ => enabled ? 1 : 0,
+			cancellationToken);
 
 	public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
 	{

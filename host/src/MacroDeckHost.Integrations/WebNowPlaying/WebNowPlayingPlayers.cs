@@ -47,7 +47,8 @@ internal sealed class WebNowPlayingPlayers
 		{
 			_connections.Remove(connection);
 
-			foreach (var id in _players.Where(pair => pair.Value.Connection == connection).Select(pair => pair.Key).ToList())
+			foreach (var id in _players.Where(pair => pair.Value.Connection == connection).Select(pair => pair.Key)
+				.ToList())
 			{
 				_players.Remove(id);
 			}
@@ -136,12 +137,15 @@ internal sealed class WebNowPlayingPlayers
 	{
 		lock (_gate)
 		{
-			var playing = _players.Values.Where(entry => entry.Player.State == WebNowPlayingProtocol.StatePlaying).ToList();
+			var playing = _players.Values.Where(entry => entry.Player.State == WebNowPlayingProtocol.StatePlaying)
+				.ToList();
 			var active = playing.Where(entry => entry.Player.Volume > 0).MaxBy(entry => entry.Player.ActiveAt) ??
 				playing.MaxBy(entry => entry.Player.ActiveAt) ??
 				_players.Values.MaxBy(entry => entry.Player.ActiveAt);
 
-			return active is null ? null : new WebNowPlayingActivePlayer(active.Player, active.Connection, active.ArtworkId);
+			return active is null
+				? null
+				: new WebNowPlayingActivePlayer(active.Player, active.Connection, active.ArtworkId);
 		}
 	}
 

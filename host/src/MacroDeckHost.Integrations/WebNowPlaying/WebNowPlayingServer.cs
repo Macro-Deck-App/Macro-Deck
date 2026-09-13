@@ -166,8 +166,11 @@ internal sealed class WebNowPlayingServer : IDisposable
 
 			await ReceiveAsync(connection, cancellationToken);
 		}
-		catch (Exception ex) when (ex is OperationCanceledException or IOException or WebSocketException
-			or SocketException or ObjectDisposedException)
+		catch (Exception ex) when (ex is OperationCanceledException
+			or IOException
+			or WebSocketException
+			or SocketException
+			or ObjectDisposedException)
 		{
 			_logger.Debug("WebNowPlaying connection ended: {Message}", ex.Message);
 		}
@@ -239,7 +242,8 @@ internal sealed class WebNowPlayingServer : IDisposable
 			!string.Equals(headers.GetValueOrDefault("Upgrade"), "websocket", StringComparison.OrdinalIgnoreCase) ||
 			!IsAllowedOrigin(headers.GetValueOrDefault("Origin")))
 		{
-			await stream.WriteAsync("HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"u8.ToArray(),
+			await stream.WriteAsync(
+				"HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"u8.ToArray(),
 				cancellationToken);
 			return false;
 		}
