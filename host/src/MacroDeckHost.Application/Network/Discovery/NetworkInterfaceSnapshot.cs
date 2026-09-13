@@ -9,7 +9,8 @@ public sealed record NetworkInterfaceSnapshot(
 	string Description,
 	NetworkInterfaceType Type,
 	bool IsUp,
-	IReadOnlyList<IPAddress> Ipv4Addresses);
+	IReadOnlyList<IPAddress> Ipv4Addresses,
+	string PhysicalAddress = "");
 
 public interface INetworkInterfaceSnapshotProvider
 {

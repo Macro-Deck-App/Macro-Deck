@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using MacroDeckHost.Application.Configuration;
+using MacroDeckHost.Application.Network.Discovery;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
@@ -35,6 +36,7 @@ public class SystemController : ControllerBase
 
 	private readonly IFontCatalog _fontCatalog;
 	private readonly IHostListenerState _listenerState;
+	private readonly INetworkInterfaceSnapshotProvider _interfaces;
 
 	public SystemController(
 		IUiTransportMessageHandler<GetVersionRequest, GetVersionResponse> getVersion,
@@ -47,8 +49,10 @@ public class SystemController : ControllerBase
 			getRunningApplications,
 		IUiTransportMessageHandler<GetLockStateRequest, GetLockStateResponse> getLockState,
 		IFontCatalog fontCatalog,
-		IHostListenerState listenerState)
+		IHostListenerState listenerState,
+		INetworkInterfaceSnapshotProvider interfaces)
 	{
+		_interfaces = interfaces;
 		_getVersion = getVersion;
 		_getAboutInfo = getAboutInfo;
 		_getSystemFonts = getSystemFonts;
@@ -139,6 +143,12 @@ public class SystemController : ControllerBase
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
 	public Task<GetLockStateResponse> GetLockState(CancellationToken ct)
 		=> _getLockState.Handle(new GetLockStateRequest(), ct).AsTask();
+
+	// Client scope, never anonymous: a companion syncs these on connect to wake this computer later.
+	[HttpGet("wake-on-lan")]
+	[Authorize(Policy = AuthPolicies.ClientAccess)]
+	public GetWakeOnLanResponse GetWakeOnLan()
+		=> new() { MacAddresses = [.. WakeOnLanPlanner.MacAddresses(_interfaces.GetInterfaces())] };
 
 	[HttpGet("fonts/{faceId}/file")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
