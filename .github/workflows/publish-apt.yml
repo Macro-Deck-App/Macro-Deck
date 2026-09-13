@@ -1,0 +1,255 @@
+name: Publish APT
+
+# Publishes the DEB of an already-released version to the signed APT repository. This must stay the
+# only place the APT signing key is used, and it runs on Debian so apt, gpg and sqv are the real ones.
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Version to publish, without the leading v. Its GitHub release must already exist.
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to publish, without the leading v
+        type: string
+        required: true
+      dry_run:
+        description: Build, sign and verify the repository against the published indices without uploading
+        type: boolean
+        default: false
+
+concurrency:
+  group: publish-apt
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish to the APT repository
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    container: debian:trixie
+    environment: production
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ inputs.version }}
+      DRY_RUN: ${{ inputs.dry_run == true }}
+      # A release rehearses when a secret is missing so a fork or a pre-setup run still passes; a manual
+      # run exists to publish, so it fails instead.
+      REQUIRE_CREDENTIALS: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run != true }}
+      REPO_URL: https://packages.macro-deck.app
+      PRIMARY_KEY: 8A56E8EE20B19288C51CA2BAC84516870F90820D
+      SIGNING_KEY: E94B3581C35F942E34FE721238F015B35C1A577C
+      AWS_DEFAULT_REGION: auto
+      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+    steps:
+      - name: Install packaging tools
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends apt-utils awscli ca-certificates curl gh gnupg nodejs
+
+      - uses: actions/checkout@v5
+
+      - name: Resolve the release
+        run: |
+          set -euo pipefail
+          gh release download "v${VERSION}" --repo "$GITHUB_REPOSITORY" --pattern '*.deb' --pattern '*.deb.sha256' --dir release
+          mapfile -t debs < <(find release -name '*.deb')
+          mapfile -t sidecars < <(find release -name '*.deb.sha256')
+          if [ "${#debs[@]}" -ne 1 ] || [ "${#sidecars[@]}" -ne 1 ]; then
+            echo "Release v${VERSION} must carry exactly one DEB and one DEB checksum sidecar." >&2
+            exit 1
+          fi
+          # The sidecar names the file before GitHub renamed it on upload, so only the hash is compared.
+          expected=$(awk '{print $1}' "${sidecars[0]}")
+          actual=$(sha256sum "${debs[0]}" | awk '{print $1}')
+          if [ "$expected" != "$actual" ]; then
+            echo "${debs[0]} does not match its checksum sidecar." >&2
+            exit 1
+          fi
+          {
+            echo "DEB=${debs[0]}"
+            echo "DEB_SHA256=$actual"
+            echo "DEB_VERSION=$(node ci/scripts/make-apt-index.mjs deb-version "$VERSION")"
+          } >> "$GITHUB_ENV"
+
+      - name: Configure the signing key
+        id: credentials
+        env:
+          APT_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+          APT_GPG_PASSPHRASE: ${{ secrets.APT_GPG_PASSPHRASE }}
+          HAS_R2: ${{ secrets.R2_ACCOUNT_ID != '' && secrets.R2_ACCESS_KEY_ID != '' && secrets.R2_SECRET_ACCESS_KEY != '' && secrets.APT_R2_BUCKET != '' }}
+        run: |
+          set -euo pipefail
+          export GNUPGHOME="${RUNNER_TEMP}/gnupg"
+          install -d -m 700 "$GNUPGHOME"
+          echo "GNUPGHOME=$GNUPGHOME" >> "$GITHUB_ENV"
+          keyring="${RUNNER_TEMP}/macro-deck.asc"
+          echo "KEYRING=$keyring" >> "$GITHUB_ENV"
+
+          has_key=false
+          if [ -n "$APT_GPG_PRIVATE_KEY" ] && [ -n "$APT_GPG_PASSPHRASE" ]; then
+            has_key=true
+          fi
+          upload=false
+          if [ "$has_key" = true ] && [ "$HAS_R2" = true ] && [ "$DRY_RUN" != true ]; then
+            upload=true
+          elif [ "$REQUIRE_CREDENTIALS" = true ]; then
+            echo "Publishing needs APT_GPG_PRIVATE_KEY, APT_GPG_PASSPHRASE, APT_R2_BUCKET and the R2 credentials." >&2
+            exit 1
+          else
+            echo "::warning::Not uploading: this run builds, signs and verifies the repository only."
+            echo "The APT upload was skipped: dry run or missing secrets." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "upload=$upload" >> "$GITHUB_OUTPUT"
+          echo "read=$HAS_R2" >> "$GITHUB_OUTPUT"
+
+          if [ "$has_key" != true ]; then
+            gpg --batch --passphrase '' --quick-gen-key 'Macro Deck APT rehearsal' ed25519 sign 1d
+            rehearsal=$(gpg --with-colons --list-secret-keys | awk -F: '$1 == "fpr" { print $10; exit }')
+            gpg --armor --export "$rehearsal" > "$keyring"
+            echo "SIGNING_KEY=$rehearsal" >> "$GITHUB_ENV"
+            echo "PASSPHRASE_FILE=" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          passphrase="${RUNNER_TEMP}/apt-passphrase"
+          install -m 600 /dev/null "$passphrase"
+          printf '%s' "$APT_GPG_PASSPHRASE" > "$passphrase"
+          echo "PASSPHRASE_FILE=$passphrase" >> "$GITHUB_ENV"
+          printf '%s\n' "$APT_GPG_PRIVATE_KEY" | gpg --batch --pinentry-mode loopback --passphrase-file "$passphrase" --import
+
+          # CI may hold the signing subkey and nothing else: not the primary, which can certify and
+          # revoke, and not the encryption subkey, which reads mail sent to the security address.
+          secrets=$(gpg --with-colons --list-secret-keys "$PRIMARY_KEY")
+          if ! awk -F: -v primary="$PRIMARY_KEY" -v signing="$SIGNING_KEY" '
+            $1 == "sec" { record = "sec"; stub = $15; next }
+            $1 == "ssb" { record = "ssb"; stub = $15; caps = $12; next }
+            $1 == "fpr" && record == "sec" { primary_ok = ($10 == primary && stub == "#") }
+            $1 == "fpr" && record == "ssb" && stub != "#" { held++; signing_ok = ($10 == signing && caps ~ /s/) }
+            { record = "" }
+            END { exit !(primary_ok && held == 1 && signing_ok) }
+          ' <<< "$secrets"; then
+            echo "APT_GPG_PRIVATE_KEY must hold only the signing subkey ${SIGNING_KEY} of ${PRIMARY_KEY}." >&2
+            exit 1
+          fi
+
+          # Clients trust what is served, so the tree is verified against the served key, never the secret.
+          curl -fsS --retry 3 "${REPO_URL}/gpg.asc" -o "$keyring"
+          if ! gpg --show-keys --with-colons "$keyring" | awk -F: -v signing="$SIGNING_KEY" '$1 == "fpr" && $10 == signing { found = 1 } END { exit !found }'; then
+            echo "${REPO_URL}/gpg.asc does not carry the signing subkey ${SIGNING_KEY}." >&2
+            exit 1
+          fi
+
+      - name: Fetch the published indices
+        env:
+          READ: ${{ steps.credentials.outputs.read }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          APT_R2_BUCKET: ${{ secrets.APT_R2_BUCKET }}
+        run: |
+          set -euo pipefail
+          for suite in $(node ci/scripts/make-apt-index.mjs suites); do
+            mkdir -p "index/$suite"
+            out="index/$suite/Packages"
+            if [ "$READ" != true ]; then
+              : > "$out"
+              continue
+            fi
+            # Read through the API rather than the CDN, and treat only a missing object as empty: an
+            # index built on a failed read would publish a repository that lost every older version.
+            if ! error=$(aws s3api get-object --bucket "$APT_R2_BUCKET" --key "dists/$suite/main/binary-amd64/Packages" \
+              --endpoint-url "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com" "$out" 2>&1 >/dev/null); then
+              if [[ "$error" != *NoSuchKey* ]]; then
+                echo "$error" >&2
+                exit 1
+              fi
+              echo "$suite has no published index yet."
+              : > "$out"
+            fi
+          done
+
+      - name: Build and sign the repository
+        run: ci/scripts/build-apt-repo.sh repo "$DEB" "$VERSION" index "$SIGNING_KEY" "$PASSPHRASE_FILE"
+
+      - name: Verify the repository with apt
+        run: |
+          set -euo pipefail
+          receiving=" $(node ci/scripts/make-apt-index.mjs suites "$VERSION") "
+          for suite in $(node ci/scripts/make-apt-index.mjs suites); do
+            if [[ "$receiving" == *" $suite "* ]]; then
+              ci/scripts/check-apt-repo.sh "file:${PWD}/repo" "$KEYRING" "$suite" "$DEB_VERSION"
+            else
+              ci/scripts/check-apt-repo.sh "file:${PWD}/repo" "$KEYRING" "$suite"
+            fi
+          done
+
+      - name: Upload the repository
+        if: ${{ steps.credentials.outputs.upload == 'true' }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          APT_R2_BUCKET: ${{ secrets.APT_R2_BUCKET }}
+        run: |
+          set -euo pipefail
+          endpoint="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          immutable='public, max-age=31536000, immutable'
+          put() {
+            local key=$1 type=$2 cache=$3
+            shift 3
+            aws s3 cp "repo/$key" "s3://${APT_R2_BUCKET}/$key" --content-type "$type" --cache-control "$cache" \
+              --endpoint-url "$endpoint" --no-progress "$@"
+            aws s3api head-object --bucket "$APT_R2_BUCKET" --key "$key" --endpoint-url "$endpoint" > /dev/null
+          }
+
+          # A pool file is served as immutable, so an existing one may only be the very same file.
+          pool=$(node ci/scripts/make-apt-index.mjs pool-path macro-deck "$DEB_VERSION" amd64)
+          if published=$(aws s3api head-object --bucket "$APT_R2_BUCKET" --key "$pool" --endpoint-url "$endpoint" \
+            --query 'Metadata.sha256' --output text 2> head-error); then
+            if [ "$published" != "$DEB_SHA256" ]; then
+              echo "$pool is already published with different content." >&2
+              exit 1
+            fi
+            echo "$pool is already published."
+          elif grep -q '(404)' head-error; then
+            put "$pool" application/vnd.debian.binary-package "$immutable" --metadata "sha256=${DEB_SHA256}"
+          else
+            cat head-error >&2
+            exit 1
+          fi
+
+          # Content-addressed indices first and the signed Release files last, so a client holding
+          # either the old or the new InRelease finds every index it names.
+          while IFS= read -r -d '' file; do
+            put "${file#repo/}" application/octet-stream "$immutable"
+          done < <(find repo/dists -path '*/by-hash/*' -type f -print0)
+          for suite in $(node ci/scripts/make-apt-index.mjs suites); do
+            put "dists/$suite/main/binary-amd64/Packages" text/plain no-cache
+            put "dists/$suite/main/binary-amd64/Packages.gz" application/gzip no-cache
+          done
+          for suite in $(node ci/scripts/make-apt-index.mjs suites); do
+            put "dists/$suite/Release" text/plain no-cache
+            put "dists/$suite/Release.gpg" text/plain no-cache
+            put "dists/$suite/InRelease" text/plain no-cache
+          done
+          echo "Published \`macro-deck ${DEB_VERSION}\` to the APT repository." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify the published repository
+        if: ${{ steps.credentials.outputs.upload == 'true' }}
+        run: |
+          set -euo pipefail
+          for suite in $(node ci/scripts/make-apt-index.mjs suites "$VERSION"); do
+            ci/scripts/check-apt-repo.sh "$REPO_URL" "$KEYRING" "$suite" "$DEB_VERSION"
+          done
+
+      - name: Remove the signing key
+        if: always()
+        run: |
+          gpgconf --kill gpg-agent || true
+          rm -rf "${RUNNER_TEMP}/gnupg" "${RUNNER_TEMP}/apt-passphrase"

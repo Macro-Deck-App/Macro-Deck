@@ -21,6 +21,28 @@ The Macro Deck host runs on:
 - macOS
 - Linux
 
+### Debian and Ubuntu
+
+Macro Deck is available from its APT repository for 64-bit x86 systems:
+
+```bash
+sudo install -d -m 0755 /etc/apt/keyrings
+sudo curl -fsSLo /etc/apt/keyrings/macro-deck.asc https://packages.macro-deck.app/gpg.asc
+sudo tee /etc/apt/sources.list.d/macro-deck.sources > /dev/null <<'EOF'
+Types: deb
+URIs: https://packages.macro-deck.app
+Suites: stable
+Components: main
+Architectures: amd64
+Signed-By: /etc/apt/keyrings/macro-deck.asc
+EOF
+sudo apt update
+sudo apt install macro-deck
+```
+
+Updates then arrive with `sudo apt upgrade`. Use `Suites: beta` to receive prereleases as well. The
+stable suite carries packages from the first stable Macro Deck 3 release on.
+
 ## What makes Macro Deck different
 
 ### Flexible by design
