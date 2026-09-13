@@ -11,6 +11,8 @@ class FakeConnection {
   readonly calls: Array<{ type: string; payload: unknown }> = [];
   accept = true;
   attach = true;
+  holdAttach = false;
+  private heldAttaches: Array<{ resolve: (value: unknown) => void; reject: (reason: unknown) => void }> = [];
   private next = 0;
 
   request<T>(type: string, payload?: unknown): Promise<T> {
@@ -19,9 +21,24 @@ class FakeConnection {
       return Promise.resolve({ accepted: this.accept, sessionId: `s${++this.next}` } as unknown as T);
     }
     if (type === 'AttachUiSession') {
+      if (this.holdAttach) {
+        return new Promise<T>((resolve, reject) => this.heldAttaches.push({ resolve: resolve as (value: unknown) => void, reject }));
+      }
       return Promise.resolve({ accepted: this.attach } as unknown as T);
     }
     return Promise.resolve(undefined as T);
+  }
+
+  answerHeldAttach(accepted: boolean): void {
+    this.heldAttaches.shift()!.resolve({ accepted });
+  }
+
+  dropHeldAttach(): void {
+    this.heldAttaches.shift()!.reject(new Error('connection closed'));
+  }
+
+  opens(): number {
+    return this.calls.filter(call => call.type === 'OpenWidgetUiSession').length;
   }
 }
 
@@ -164,12 +181,92 @@ describe('WidgetSessions', () => {
     expect((attached[0].payload as Array<{ sessionId: string }>)[0].sessionId).toBe('s1');
   });
 
-  it('keeps no session it could not attach to, so the next change asks again', async () => {
+  it('opens again when the attach is refused, because the session ended before it could attach', async () => {
     connection.attach = false;
+    sessions.sync([widget('w1')]);
+    for (let round = 0; round < 4; round++) await settle();
+
+    expect(connection.opens()).toBe(4);
+    expect(sessions.treeFor('w1')).toBeUndefined();
+    for (let index = 1; index <= 4; index++) expect(sessions.widgetFor(`s${index}`)).toBeUndefined();
+
+    connection.attach = true;
+    sessions.sync([widget('w1')]);
+    await settle();
+    expect(connection.opens()).toBe(5);
+    expect(sessions.widgetFor('s5')).toBe('w1');
+  });
+
+  it('opens again when the session ends between the open answer and the attach answer', async () => {
+    connection.holdAttach = true;
     sessions.sync([widget('w1')]);
     await settle();
 
-    expect(sessions.treeFor('w1')).toBeUndefined();
+    expect(sessions.widgetFor('s1')).toBe('w1');
+    store.invalidated('s1');
+    sessions.sessionClosed('s1');
+    sessions.sync([widget('w1')]);
+    connection.holdAttach = false;
+    connection.answerHeldAttach(true);
+    await settle();
+
+    expect(connection.opens()).toBe(2);
+    expect(sessions.widgetFor('s1')).toBeUndefined();
+    expect(sessions.widgetFor('s2')).toBe('w1');
+    store.treeUpdated('s2', 1, tree('Lights'));
+    expect(sessions.treeFor('w1')!.properties!['text']).toBe('Lights');
+    sessions.sendEvent('w1', 'root', 'press');
+    const sent = connection.calls.filter(call => call.type === 'SendUiEvent');
+    expect((sent[0].payload as Array<{ sessionId: string }>)[0].sessionId).toBe('s2');
+  });
+
+  it('counts the retries afresh once a session delivered a tree', async () => {
+    connection.holdAttach = true;
+    sessions.sync([widget('w1')]);
+    for (let refusal = 0; refusal < 3; refusal++) {
+      await settle();
+      connection.answerHeldAttach(false);
+    }
+    await settle();
+    connection.answerHeldAttach(true);
+    await settle();
+    expect(connection.opens()).toBe(4);
+    store.treeUpdated('s4', 1, tree('Lights'));
+
+    store.invalidated('s4');
+    sessions.sessionClosed('s4');
+    sessions.sync([widget('w1')]);
+    await settle();
+    connection.answerHeldAttach(false);
+    await settle();
+
+    expect(connection.opens()).toBe(6);
+  });
+
+  it('does not reopen a widget that left the deck during the handshake', async () => {
+    connection.holdAttach = true;
+    sessions.sync([widget('w1')]);
+    await settle();
+
+    sessions.sync([]);
+    connection.answerHeldAttach(true);
+    await settle();
+
+    expect(connection.opens()).toBe(1);
+    expect(sessions.widgetFor('s1')).toBeUndefined();
+    expect(connection.calls.filter(call => call.type === 'CloseUiSession').length).toBe(1);
+  });
+
+  it('does not reopen on its own when the connection drops during the handshake', async () => {
+    connection.holdAttach = true;
+    sessions.sync([widget('w1')]);
+    await settle();
+
+    sessions.reset();
+    connection.dropHeldAttach();
+    await settle();
+
+    expect(connection.opens()).toBe(1);
     expect(sessions.widgetFor('s1')).toBeUndefined();
   });
 
