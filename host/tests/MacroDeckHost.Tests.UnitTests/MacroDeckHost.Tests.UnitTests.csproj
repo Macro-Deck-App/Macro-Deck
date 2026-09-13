@@ -10,6 +10,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+    <None Update="Auth/host-identity-vector.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
         <PackageReference Include="coverlet.collector" />
         <PackageReference Include="Microsoft.AspNetCore.TestHost" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />

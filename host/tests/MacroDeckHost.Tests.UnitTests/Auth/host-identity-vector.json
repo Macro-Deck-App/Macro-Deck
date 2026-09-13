@@ -1,0 +1,7 @@
+{
+  "publicKey": "BF/LFTKcXP+NHq9gTqEqTI5T+YissLlEpv48Me1pYWcpoR7EyfEfZcxwi3NUqxwV7ggy3y5kH5ce6oMVrbK5wB4=",
+  "endpoint": "192.168.1.20:8193",
+  "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+  "message": "macrodeck-host-identity/v1\nBF/LFTKcXP+NHq9gTqEqTI5T+YissLlEpv48Me1pYWcpoR7EyfEfZcxwi3NUqxwV7ggy3y5kH5ce6oMVrbK5wB4=\n192.168.1.20:8193\nAAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+  "signature": "MEUCIBeCUvyqm/qv8MQFEvELRtOX3LVcfv6i12jnGPShq6r7AiEAucDDHXvryJyj5AXgokivIz5FKRaqqyRTObfndjqh/0A="
+}

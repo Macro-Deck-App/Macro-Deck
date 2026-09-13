@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json.Serialization;
 using MacroDeck.Localization;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Notifications;
@@ -8,6 +9,7 @@ using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Localization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace MacroDeckHost.Api.Controllers;
 
@@ -44,7 +46,12 @@ public record TokenResponse(
 	int ExpiresInSeconds,
 	string Scope,
 	string Username,
-	DeviceCredential? Device = null);
+	DeviceCredential? Device = null,
+	[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? HostKey = null);
+
+public record HostIdentityChallenge(string? Nonce);
+
+public record HostIdentityProof(string PublicKey, string Endpoint, string Signature);
 
 public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
 
@@ -69,6 +76,7 @@ public class AuthController : ControllerBase
 	private readonly FailedLoginNotificationTracker _failedLoginTracker;
 	private readonly IAppPreferenceService _preferences;
 	private readonly ILocalizationResolver _localization;
+	private readonly IHostIdentityKeyProvider _hostIdentity;
 
 	public AuthController(
 		IAuthService authService,
@@ -78,7 +86,8 @@ public class AuthController : ControllerBase
 		IUserNotificationStore userNotificationStore,
 		FailedLoginNotificationTracker failedLoginTracker,
 		IAppPreferenceService preferences,
-		ILocalizationResolver localization)
+		ILocalizationResolver localization,
+		IHostIdentityKeyProvider hostIdentity)
 	{
 		_authService = authService;
 		_loginThrottle = loginThrottle;
@@ -88,6 +97,7 @@ public class AuthController : ControllerBase
 		_failedLoginTracker = failedLoginTracker;
 		_preferences = preferences;
 		_localization = localization;
+		_hostIdentity = hostIdentity;
 	}
 
 	[HttpGet("status")]
@@ -287,6 +297,37 @@ public class AuthController : ControllerBase
 		return Ok(ToTokenResponse(result.Data));
 	}
 
+	[HttpPost("identity")]
+	[AllowAnonymous]
+	[EnableRateLimiting(HostIdentityRateLimit.PolicyName)]
+	public IActionResult ProveIdentity(HostIdentityChallenge body)
+	{
+		if (!HostIdentityMessage.TryParseNonce(body.Nonce, out _))
+		{
+			return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Invalid nonce.");
+		}
+
+		// Taken from this host's own socket, never from the request, so a relay signs the real host's
+		// endpoint and not its own.
+		var localAddress = HttpContext.Connection.LocalIpAddress;
+		if (localAddress is null)
+		{
+			return Problem(statusCode: StatusCodes.Status503ServiceUnavailable, title: "No local endpoint.");
+		}
+
+		var endpoint = HostIdentityMessage.CanonicalAuthority(localAddress, HttpContext.Connection.LocalPort);
+		try
+		{
+			var publicKey = Convert.ToBase64String(_hostIdentity.PublicKey);
+			var signature = _hostIdentity.Sign(HostIdentityMessage.Build(publicKey, endpoint, body.Nonce!));
+			return Ok(new HostIdentityProof(publicKey, endpoint, Convert.ToBase64String(signature)));
+		}
+		catch (HostIdentityUnavailableException)
+		{
+			return Problem(statusCode: StatusCodes.Status503ServiceUnavailable, title: "Host identity unavailable.");
+		}
+	}
+
 	[HttpPost("logout")]
 	[AllowAnonymous]
 	public async Task<IActionResult> Logout()
@@ -353,7 +394,21 @@ public class AuthController : ControllerBase
 			Math.Max(expiresIn, 0),
 			AuthDefaults.ScopeClaimValue(login.Scope),
 			login.Username,
-			device);
+			device,
+			HostKeyOrNull());
+	}
+
+	// A host that cannot load its identity still signs people in; the app treats the exchange as legacy.
+	private string? HostKeyOrNull()
+	{
+		try
+		{
+			return Convert.ToBase64String(_hostIdentity.PublicKey);
+		}
+		catch (HostIdentityUnavailableException)
+		{
+			return null;
+		}
 	}
 
 	/// <summary>A device that told us nothing about itself still gets registered, as an unknown one.</summary>

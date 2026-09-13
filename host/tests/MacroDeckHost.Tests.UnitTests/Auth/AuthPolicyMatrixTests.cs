@@ -138,6 +138,17 @@ public class AuthPolicyMatrixTests
 	}
 
 	[Test]
+	public async Task The_identity_challenge_is_anonymous()
+	{
+		var challenge = await SendJson(HttpMethod.Post,
+			"/api/auth/identity",
+			new { nonce = Convert.ToBase64String(new byte[32]) });
+
+		Assert.That(challenge.StatusCode,
+			Is.Not.EqualTo(HttpStatusCode.Unauthorized).And.Not.EqualTo(HttpStatusCode.Forbidden));
+	}
+
+	[Test]
 	public async Task Setup_is_forbidden_on_the_public_port_and_conflicts_once_complete()
 	{
 		var publicSetup = await SendJson(HttpMethod.Post,
