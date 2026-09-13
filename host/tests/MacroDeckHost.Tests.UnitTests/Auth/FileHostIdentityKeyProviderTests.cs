@@ -166,7 +166,6 @@ public class FileHostIdentityKeyProviderTests
 			}
 			catch (HostIdentityUnavailableException)
 			{
-				// Lost the race for the key file; it retries after the interval.
 			}
 		})));
 		_time.Advance(FileHostIdentityKeyProvider.RetryInterval);
@@ -180,6 +179,47 @@ public class FileHostIdentityKeyProviderTests
 		var onDisk = await NewProvider().GetPublicKey();
 		Assert.That(keys, Has.All.EqualTo(onDisk), "a key that appeared meanwhile is loaded, never replaced");
 	}
+
+	[Test]
+	public async Task A_held_lock_makes_an_existing_key_unavailable_until_released_and_then_loads_it()
+	{
+		var original = await NewProvider().GetPublicKey();
+		var provider = NewProvider();
+
+		await using (HoldLock())
+		{
+			Assert.ThrowsAsync<HostIdentityUnavailableException>(async () => await provider.GetPublicKey());
+		}
+
+		_time.Advance(FileHostIdentityKeyProvider.RetryInterval);
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(await provider.GetPublicKey(), Is.EqualTo(original));
+			Assert.That(Directory.GetFiles(_paths.KeysDirectory, "*.tmp"), Is.Empty);
+			Assert.That(_notifications.Snapshot(), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_held_lock_keeps_a_missing_key_from_being_created_until_released()
+	{
+		var provider = NewProvider();
+
+		await using (HoldLock())
+		{
+			Assert.ThrowsAsync<HostIdentityUnavailableException>(async () => await provider.GetPublicKey());
+			Assert.That(File.Exists(KeyPath), Is.False);
+		}
+
+		_time.Advance(FileHostIdentityKeyProvider.RetryInterval);
+		var created = await provider.GetPublicKey();
+
+		Assert.That(await NewProvider().GetPublicKey(), Is.EqualTo(created));
+	}
+
+	private FileStream HoldLock()
+		=> new($"{KeyPath}.lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
 
 	[Test]
 	public async Task A_signature_verifies_with_the_published_point()
