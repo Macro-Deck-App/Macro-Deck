@@ -52,7 +52,9 @@ recovers. Loading and creating hold an exclusive handle on `keys/host-identity.k
 processes on one data directory never replace each other's key. Setting `DOTNET_SYSTEM_IO_DISABLEFILELOCKING` makes that handle
 take no lock on Unix and removes this guarantee. `identity.issued` in `app_preference` records
 that a key was ever issued: creating a key while it is set, or renewing one, raises a Security notification
-telling the user to scan the QR code again on every paired device. The first key after an upgrade is silent.
+telling the user to scan the QR code again on every paired device. The first key after an upgrade is silent. The flag and the notification are recorded after the key is already in use, with a
+bounded retry, so a busy database never makes the key unavailable; a flag that cannot be read counts as
+issued, so a new key is announced rather than kept silent.
 The key travels in the Accounts backup group; the flag never does, and a restore from an archive without the
 key keeps the current one.
 
