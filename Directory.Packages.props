@@ -69,7 +69,7 @@
          IDE older than what 5.x itself requires, for no benefit to a source analyzer that only needs the
          4.x surface. -->
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.6.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" />
     <!-- Transitive pin: Microsoft.CodeAnalysis.CSharp 4.14.0's netstandard2.0 dependency group floors
          both at 9.0.0; CentralPackageTransitivePinningEnabled pins a transitive package to the version
          declared here only when one is declared, so leaving these out would not fail the build, just
