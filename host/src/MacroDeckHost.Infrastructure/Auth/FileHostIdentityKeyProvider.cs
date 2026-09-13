@@ -20,6 +20,8 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 	public static readonly TimeSpan RetryInterval = TimeSpan.FromSeconds(5);
 	private const string RenewedDedupeKey = "host-identity-renewed";
 	private const string P256Oid = "1.2.840.10045.3.1.7";
+	private const int FlagAttempts = 8;
+	private static readonly TimeSpan FlagRetryDelay = TimeSpan.FromMilliseconds(250);
 
 	private readonly SemaphoreSlim _loadGate = new(1, 1);
 	private readonly Lock _signGate = new();
@@ -160,13 +162,6 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 
 	private async Task<ECDsa> CreateForMissingFile()
 	{
-		bool issuedBefore;
-		using (var scope = _scopeFactory.CreateScope())
-		{
-			issuedBefore = await scope.ServiceProvider.GetRequiredService<IAppPreferenceRepository>()
-				.GetByKey(AppPreferenceService.HostIdentityIssuedKey) is not null;
-		}
-
 		var key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 		if (!TryStoreNew(key))
 		{
@@ -174,17 +169,7 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 			return Import(await File.ReadAllBytesAsync(_keyFilePath));
 		}
 
-		if (issuedBefore)
-		{
-			_logger.Warning(
-				"The host identity key was missing and has been recreated; paired devices must scan the QR code again");
-			await RaiseRenewedNotification();
-		}
-		else
-		{
-			await SetIssued();
-		}
-
+		RecordCreationInBackground(renewed: false);
 		return key;
 	}
 
@@ -205,9 +190,7 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 			return Import(await File.ReadAllBytesAsync(_keyFilePath));
 		}
 
-		await SetIssued();
-		await RaiseRenewedNotification();
-
+		RecordCreationInBackground(renewed: true);
 		return key;
 	}
 
@@ -252,18 +235,69 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 		}
 	}
 
-	private async Task SetIssued()
+	// The key is usable as soon as its file is written: the flag and the notification are bookkeeping, and a
+	// database busy with other startup writers must not make the key unavailable.
+	private void RecordCreationInBackground(bool renewed) => _ = Task.Run(() => RecordCreation(renewed));
+
+	private async Task RecordCreation(bool renewed)
 	{
-		using var scope = _scopeFactory.CreateScope();
-		await scope.ServiceProvider.GetRequiredService<IAppPreferenceRepository>()
-			.SetValue(AppPreferenceService.HostIdentityIssuedKey, "true");
+		if (renewed || await WasIssuedBefore())
+		{
+			_logger.Warning("A new host identity key was created; paired devices must scan the QR code again");
+			await RaiseRenewedNotification();
+		}
+
+		await WithFlagRetry(async preferences =>
+				await preferences.SetValue(AppPreferenceService.HostIdentityIssuedKey, "true"),
+			"The host identity flag could not be saved; a later missing key would be recreated without a notification");
+	}
+
+	// An unreadable flag counts as issued: a needless notification is cheaper than a silent loss of every pin.
+	private async Task<bool> WasIssuedBefore()
+	{
+		var issued = true;
+		await WithFlagRetry(async preferences =>
+				issued = await preferences.GetByKey(AppPreferenceService.HostIdentityIssuedKey) is not null,
+			"The host identity flag could not be read; the new key is announced as a renewal");
+		return issued;
+	}
+
+	private async Task WithFlagRetry(Func<IAppPreferenceRepository, Task> operation, string failureMessage)
+	{
+		for (var attempt = 1;; attempt++)
+		{
+			try
+			{
+				using var scope = _scopeFactory.CreateScope();
+				await operation(scope.ServiceProvider.GetRequiredService<IAppPreferenceRepository>());
+				return;
+			}
+			catch (Exception) when (attempt < FlagAttempts)
+			{
+				await Task.Delay(FlagRetryDelay * attempt);
+			}
+			catch (Exception e)
+			{
+				_logger.Warning(e, failureMessage);
+				return;
+			}
+		}
 	}
 
 	private async Task RaiseRenewedNotification()
 	{
-		using var scope = _scopeFactory.CreateScope();
-		var culture = (await scope.ServiceProvider.GetRequiredService<IAppPreferenceService>().GetLocalization())
-			.Culture;
+		string? culture = null;
+		try
+		{
+			using var scope = _scopeFactory.CreateScope();
+			culture = (await scope.ServiceProvider.GetRequiredService<IAppPreferenceService>().GetLocalization())
+				.Culture;
+		}
+		catch (Exception e)
+		{
+			_logger.Warning(e, "The interface language could not be read; the identity notification uses the default");
+		}
+
 		_notifications.Raise(new UserNotificationDraft
 		{
 			Severity = UserNotificationSeverity.Warning,

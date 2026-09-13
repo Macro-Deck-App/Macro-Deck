@@ -7,6 +7,7 @@ using MacroDeckHost.Infrastructure.Auth;
 using MacroDeckHost.Infrastructure.Notifications;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Core;
@@ -68,21 +69,20 @@ public class FileHostIdentityKeyProviderTests
 	{
 		await NewProvider().Sign("message"u8.ToArray());
 
-		Assert.Multiple(() =>
-		{
-			Assert.That(_notifications.Snapshot(), Is.Empty, "devices paired before the upgrade are unpinned");
-			Assert.That(_preferences.Values, Does.ContainKey("identity.issued"));
-		});
+		await Eventually(() => _preferences.Has("identity.issued"));
+		Assert.That(_notifications.Snapshot(), Is.Empty, "devices paired before the upgrade are unpinned");
 	}
 
 	[Test]
 	public async Task A_key_recreated_after_one_was_issued_tells_the_user_to_pair_again()
 	{
 		await NewProvider().Sign("message"u8.ToArray());
+		await Eventually(() => _preferences.Has("identity.issued"));
 		File.Delete(KeyPath);
 
 		await NewProvider().Sign("message"u8.ToArray());
 
+		await Eventually(() => _notifications.Snapshot().Count == 1);
 		Assert.That(_notifications.Snapshot().Single().Kind, Is.EqualTo(UserNotificationKind.Security));
 	}
 
@@ -93,6 +93,7 @@ public class FileHostIdentityKeyProviderTests
 
 		var publicKey = await NewProvider().GetPublicKey();
 		var reloaded = await NewProvider().GetPublicKey();
+		await Eventually(() => _notifications.Snapshot().Count == 1);
 
 		var aside = Directory.GetFiles(_paths.KeysDirectory, "host-identity.key.unreadable-*");
 		Assert.Multiple(() =>
@@ -102,6 +103,46 @@ public class FileHostIdentityKeyProviderTests
 			Assert.That(reloaded, Is.EqualTo(publicKey));
 			Assert.That(_notifications.Snapshot().Single().Kind, Is.EqualTo(UserNotificationKind.Security));
 		});
+	}
+
+	[Test]
+	public async Task A_renewal_while_the_database_is_locked_is_available_at_once_and_still_announced()
+	{
+		await File.WriteAllBytesAsync(KeyPath, [1, 2, 3]);
+		_preferences.FailingWrites = int.MaxValue;
+
+		var publicKey = await NewProvider().GetPublicKey();
+
+		await Eventually(() => _notifications.Snapshot().Count == 1);
+		Assert.Multiple(() =>
+		{
+			Assert.That(publicKey, Has.Length.EqualTo(65), "no retry interval without a key");
+			Assert.That(_notifications.Snapshot().Single().Kind, Is.EqualTo(UserNotificationKind.Security));
+			Assert.That(_log.Errors, Is.Zero);
+		});
+	}
+
+	[Test]
+	public async Task A_flag_write_that_hits_a_locked_database_once_is_retried()
+	{
+		await File.WriteAllBytesAsync(KeyPath, [1, 2, 3]);
+		_preferences.FailingWrites = 1;
+
+		await NewProvider().GetPublicKey();
+
+		await Eventually(() => _preferences.Has("identity.issued"));
+		Assert.That(_notifications.Snapshot(), Has.Count.EqualTo(1));
+	}
+
+	[Test]
+	public async Task A_first_key_whose_flag_cannot_be_read_is_announced_rather_than_silent()
+	{
+		_preferences.FailingReads = int.MaxValue;
+
+		var publicKey = await NewProvider().GetPublicKey();
+
+		Assert.That(publicKey, Has.Length.EqualTo(65));
+		await Eventually(() => _notifications.Snapshot().Count == 1);
 	}
 
 	[Test]
@@ -257,14 +298,46 @@ public class FileHostIdentityKeyProviderTests
 			new LoggerConfiguration().WriteTo.Sink(_log).CreateLogger());
 	}
 
+	private static async Task Eventually(Func<bool> condition)
+	{
+		var deadline = DateTime.UtcNow.AddSeconds(15);
+		while (!condition())
+		{
+			if (DateTime.UtcNow > deadline)
+			{
+				Assert.Fail("The condition was not met within 15 seconds.");
+			}
+
+			await Task.Delay(20);
+		}
+	}
+
 	private sealed class InMemoryPreferences : IAppPreferenceRepository
 	{
 		public Dictionary<string, string> Values { get; } = [];
+
+		public int FailingReads { get; set; }
+
+		public int FailingWrites { get; set; }
+
+		public bool Has(string key)
+		{
+			lock (Values)
+			{
+				return Values.ContainsKey(key);
+			}
+		}
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
 		{
 			lock (Values)
 			{
+				if (FailingReads > 0)
+				{
+					FailingReads--;
+					throw Locked();
+				}
+
 				return Task.FromResult(Values.TryGetValue(key, out var value)
 					? new AppPreferenceEntity { Key = key, Value = value }
 					: null);
@@ -275,12 +348,22 @@ public class FileHostIdentityKeyProviderTests
 		{
 			lock (Values)
 			{
+				if (FailingWrites > 0)
+				{
+					FailingWrites--;
+					throw Locked();
+				}
+
 				Values[key] = value;
 			}
 
 			return Task.CompletedTask;
 		}
 	}
+
+	private static DbUpdateException Locked()
+		=> new("An error occurred while saving the entity changes.",
+			new InvalidOperationException("SQLite Error 5: 'database is locked'."));
 
 	private sealed class ErrorCountingSink : ILogEventSink
 	{
