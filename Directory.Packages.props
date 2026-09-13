@@ -4,7 +4,7 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Cronos" Version="0.11.0" />
+    <PackageVersion Include="Cronos" Version="0.13.0" />
     <PackageVersion Include="Evolve" Version="3.2.0" />
     <PackageVersion Include="Mediator.Abstractions" Version="3.1.0-rc.1" />
     <PackageVersion Include="Mediator.SourceGenerator" Version="3.1.0-rc.1" />
