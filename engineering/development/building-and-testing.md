@@ -24,7 +24,7 @@ Platform-specific test projects live beside the cross-platform host tests. Run t
 
 Database schema changes require a new Evolve migration under `host/src/MacroDeckHost.Infrastructure/Persistence/DatabaseMigrations/`. The migration, not the EF entity definition, is the schema change.
 
-C# formatting is also checked with the repository Rider/ReSharper settings. Use the repository cleanup/formatting configuration and ensure it leaves no diff. On a pull request from this repository, CI applies the cleanup itself and pushes the result to your branch, so pull before continuing to work on it. A fork's pull request cannot be written to, and there the job reports the diff and fails instead.
+C# formatting follows the repository Rider/ReSharper settings in `MacroDeck.slnx.DotSettings`. The build enforces `.editorconfig` and analyzer style rules; the finer ReSharper layout is not a CI gate. Run Rider's Code Cleanup with the Reformat Code profile before committing, or trigger the manual `Cleanup C# code` workflow on a branch for a full sweep.
 
 ## Angular
 
