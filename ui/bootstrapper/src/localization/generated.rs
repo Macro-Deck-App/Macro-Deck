@@ -50,6 +50,8 @@ pub mod keys {
     pub const TRAY_SHOW: &str = "Bootstrapper.Tray.Show";
     pub const UPDATE_ALL_FEEDS_FAILED: &str = "Bootstrapper.Update.AllFeedsFailed";
     pub const UPDATE_ALREADY_IN_PROGRESS: &str = "Bootstrapper.Update.AlreadyInProgress";
+    pub const UPDATE_APT_AVAILABLE: &str = "Bootstrapper.Update.AptAvailable";
+    pub const UPDATE_APT_MANAGED: &str = "Bootstrapper.Update.AptManaged";
     pub const UPDATE_AVAILABLE_TITLE: &str = "Bootstrapper.Update.AvailableTitle";
     pub const UPDATE_BACKUP_FAILED: &str = "Bootstrapper.Update.BackupFailed";
     pub const UPDATE_BACKUP_GENERIC_FAILURE: &str = "Bootstrapper.Update.BackupGenericFailure";
@@ -116,6 +118,8 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Tray.Show", "Zobrazit"),
         ("Bootstrapper.Update.AllFeedsFailed", "nepodařilo se zkontrolovat aktualizace v žádném zdroji ({reasons})"),
         ("Bootstrapper.Update.AlreadyInProgress", "Aktualizace se již instaluje."),
+        ("Bootstrapper.Update.AptAvailable", "Je k dispozici Macro Deck {version}.\n\nMacro Deck byl nainstalován z repozitáře APT. Po zveřejnění nové verze v repozitáři spusťte sudo apt update && sudo apt upgrade. Beta verze jsou dostupné pouze v sadě beta."),
+        ("Bootstrapper.Update.AptManaged", "Macro Deck byl nainstalován z repozitáře APT a aktualizuje se přes apt. Spusťte sudo apt update && sudo apt upgrade."),
         ("Bootstrapper.Update.AvailableTitle", "K dispozici je aktualizace"),
         ("Bootstrapper.Update.BackupFailed", "Macro Deck se nepodařilo vytvořit zálohu před aktualizací, takže aktualizace nebyla nainstalována. {error}"),
         ("Bootstrapper.Update.BackupGenericFailure", "Záloha před aktualizací se nezdařila."),
@@ -179,6 +183,8 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Tray.Show", "Anzeigen"),
         ("Bootstrapper.Update.AllFeedsFailed", "Updates konnten auf keinem Feed geprüft werden ({reasons})"),
         ("Bootstrapper.Update.AlreadyInProgress", "Es wird bereits ein Update installiert."),
+        ("Bootstrapper.Update.AptAvailable", "Macro Deck {version} ist verfügbar.\n\nMacro Deck wurde aus seinem APT-Repository installiert. Führe sudo apt update && sudo apt upgrade aus, sobald die neue Version dort veröffentlicht ist. Beta-Versionen kommen nur über die Beta-Suite."),
+        ("Bootstrapper.Update.AptManaged", "Macro Deck wurde aus seinem APT-Repository installiert und wird über apt aktualisiert. Führe sudo apt update && sudo apt upgrade aus."),
         ("Bootstrapper.Update.AvailableTitle", "Update verfügbar"),
         ("Bootstrapper.Update.BackupFailed", "Macro Deck konnte vor dem Update keine Sicherung erstellen, daher wurde das Update nicht installiert. {error}"),
         ("Bootstrapper.Update.BackupGenericFailure", "Die Sicherung vor dem Update ist fehlgeschlagen."),
@@ -242,6 +248,8 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Tray.Show", "Show"),
         ("Bootstrapper.Update.AllFeedsFailed", "could not check for updates on any feed ({reasons})"),
         ("Bootstrapper.Update.AlreadyInProgress", "An update is already being installed."),
+        ("Bootstrapper.Update.AptAvailable", "Macro Deck {version} is available.\n\nMacro Deck was installed from its APT repository, so run sudo apt update && sudo apt upgrade once the new version is published there. Beta versions arrive only through the beta suite."),
+        ("Bootstrapper.Update.AptManaged", "Macro Deck was installed from its APT repository and is updated by apt. Run sudo apt update && sudo apt upgrade."),
         ("Bootstrapper.Update.AvailableTitle", "Update available"),
         ("Bootstrapper.Update.BackupFailed", "Macro Deck could not create a backup before updating, so the update was not installed. {error}"),
         ("Bootstrapper.Update.BackupGenericFailure", "The backup before the update failed."),
@@ -305,6 +313,8 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Tray.Show", "Mostrar"),
         ("Bootstrapper.Update.AllFeedsFailed", "no se pudieron buscar actualizaciones en ningún feed ({reasons})"),
         ("Bootstrapper.Update.AlreadyInProgress", "Ya se está instalando una actualización."),
+        ("Bootstrapper.Update.AptAvailable", "Macro Deck {version} está disponible.\n\nMacro Deck se instaló desde su repositorio APT: ejecuta sudo apt update && sudo apt upgrade cuando la nueva versión esté publicada allí. Las versiones beta solo llegan a través de la suite beta."),
+        ("Bootstrapper.Update.AptManaged", "Macro Deck se instaló desde su repositorio APT y se actualiza con apt. Ejecuta sudo apt update && sudo apt upgrade."),
         ("Bootstrapper.Update.AvailableTitle", "Actualización disponible"),
         ("Bootstrapper.Update.BackupFailed", "Macro Deck no pudo crear una copia de seguridad antes de actualizar, por lo que la actualización no se instaló. {error}"),
         ("Bootstrapper.Update.BackupGenericFailure", "La copia de seguridad previa a la actualización falló."),
@@ -368,6 +378,8 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Tray.Show", "Afficher"),
         ("Bootstrapper.Update.AllFeedsFailed", "impossible de vérifier les mises à jour sur aucun flux ({reasons})"),
         ("Bootstrapper.Update.AlreadyInProgress", "Une mise à jour est déjà en cours d'installation."),
+        ("Bootstrapper.Update.AptAvailable", "Macro Deck {version} est disponible.\n\nMacro Deck a été installé depuis son dépôt APT : exécute sudo apt update && sudo apt upgrade dès que la nouvelle version y est publiée. Les versions bêta n'arrivent que par la suite beta."),
+        ("Bootstrapper.Update.AptManaged", "Macro Deck a été installé depuis son dépôt APT et se met à jour avec apt. Exécute sudo apt update && sudo apt upgrade."),
         ("Bootstrapper.Update.AvailableTitle", "Mise à jour disponible"),
         ("Bootstrapper.Update.BackupFailed", "Macro Deck n'a pas pu créer de sauvegarde avant la mise à jour, celle-ci n'a donc pas été installée. {error}"),
         ("Bootstrapper.Update.BackupGenericFailure", "La sauvegarde avant la mise à jour a échoué."),
@@ -431,6 +443,8 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Tray.Show", "Mostra"),
         ("Bootstrapper.Update.AllFeedsFailed", "impossibile controllare gli aggiornamenti su nessun feed ({reasons})"),
         ("Bootstrapper.Update.AlreadyInProgress", "È già in corso l'installazione di un aggiornamento."),
+        ("Bootstrapper.Update.AptAvailable", "Macro Deck {version} è disponibile.\n\nMacro Deck è stato installato dal suo repository APT: esegui sudo apt update && sudo apt upgrade quando la nuova versione vi sarà pubblicata. Le versioni beta arrivano solo tramite la suite beta."),
+        ("Bootstrapper.Update.AptManaged", "Macro Deck è stato installato dal suo repository APT e viene aggiornato tramite apt. Esegui sudo apt update && sudo apt upgrade."),
         ("Bootstrapper.Update.AvailableTitle", "Aggiornamento disponibile"),
         ("Bootstrapper.Update.BackupFailed", "Macro Deck non è riuscito a creare un backup prima dell'aggiornamento, quindi l'aggiornamento non è stato installato. {error}"),
         ("Bootstrapper.Update.BackupGenericFailure", "Il backup precedente all'aggiornamento non è riuscito."),
@@ -494,6 +508,8 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Tray.Show", "Pokaż"),
         ("Bootstrapper.Update.AllFeedsFailed", "nie udało się sprawdzić aktualizacji w żadnym źródle ({reasons})"),
         ("Bootstrapper.Update.AlreadyInProgress", "Aktualizacja jest już instalowana."),
+        ("Bootstrapper.Update.AptAvailable", "Dostępny jest Macro Deck {version}.\n\nMacro Deck został zainstalowany z repozytorium APT. Po opublikowaniu nowej wersji w repozytorium uruchom sudo apt update && sudo apt upgrade. Wersje beta są dostępne tylko w gałęzi beta."),
+        ("Bootstrapper.Update.AptManaged", "Macro Deck został zainstalowany z repozytorium APT i jest aktualizowany przez apt. Uruchom sudo apt update && sudo apt upgrade."),
         ("Bootstrapper.Update.AvailableTitle", "Dostępna aktualizacja"),
         ("Bootstrapper.Update.BackupFailed", "Macro Deck nie mógł utworzyć kopii zapasowej przed aktualizacją, więc aktualizacja nie została zainstalowana. {error}"),
         ("Bootstrapper.Update.BackupGenericFailure", "Kopia zapasowa przed aktualizacją nie powiodła się."),

@@ -930,6 +930,15 @@ Host output:
   <data name="Bootstrapper.Update.AlreadyInProgress" xml:space="preserve">
     <value>An update is already being installed.</value>
   </data>
+  <data name="Bootstrapper.Update.AptAvailable" xml:space="preserve">
+    <value>Macro Deck {version} is available.
+
+Macro Deck was installed from its APT repository, so run sudo apt update &amp;&amp; sudo apt upgrade once the new version is published there. Beta versions arrive only through the beta suite.</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Bootstrapper.Update.AptManaged" xml:space="preserve">
+    <value>Macro Deck was installed from its APT repository and is updated by apt. Run sudo apt update &amp;&amp; sudo apt upgrade.</value>
+  </data>
   <data name="Bootstrapper.Update.AvailableTitle" xml:space="preserve">
     <value>Update available</value>
   </data>
@@ -13325,6 +13334,10 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Settings.Startup.Unsupported" xml:space="preserve">
     <value>Automatic startup is only available in the installed Macro Deck app.</value>
+  </data>
+  <data name="Settings.Update.AvailableApt" xml:space="preserve">
+    <value>Version {version} is available. Run sudo apt update &amp;&amp; sudo apt upgrade once it is published in the APT repository. Beta versions arrive only through the beta suite.</value>
+    <comment>[version:string]</comment>
   </data>
   <data name="Settings.Update.AvailableExternal" xml:space="preserve">
     <value>Version {version} is available. Download it from the Macro Deck website to update your AppImage, DEB or RPM install.</value>

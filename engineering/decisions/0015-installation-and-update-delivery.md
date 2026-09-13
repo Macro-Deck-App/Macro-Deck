@@ -155,7 +155,10 @@ immutable and never deleted, and the signed `Release` files are written last, so
 either the old or the new `InRelease` finds every index it names. The job then downloads the new
 version from the live URL.
 
-An APT install is a package-manager-owned install and keeps the notification-only rule above.
+An APT install is a package-manager-owned install and keeps the notification-only rule above. The
+bootstrapper recognises it from the apt sources
+([`updater.rs`](../../ui/bootstrapper/src/updater.rs)) and reports the `apt` install strategy, so the
+notification names `sudo apt update && sudo apt upgrade` instead of the download page.
 
 ### Exactly one Windows installer step elevates
 

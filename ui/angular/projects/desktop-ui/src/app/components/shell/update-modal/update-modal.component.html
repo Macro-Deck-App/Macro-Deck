@@ -57,6 +57,13 @@
       @case ('failed') {
         <p class="update-modal__status update-modal__status--error">{{ failureMessage() }}</p>
       }
+      @case ('available') {
+        @if (updates.aptManaged()) {
+          <p class="update-modal__status">
+            {{ appStrings.Settings.Update.AvailableApt | translate:{ version: updates.version() } }}
+          </p>
+        }
+      }
     }
   </div>
 
@@ -79,7 +86,7 @@
         <shared-button variant="secondary" (click)="later()">
           {{ appStrings.Update.Details.LaterAction | translate }}
         </shared-button>
-        @if (updates.canInstall()) {
+        @if (updates.canInstall() && !updates.aptManaged()) {
           @if (updates.externalDownload()) {
             <shared-button variant="primary" (click)="openDownloadPage()">
               {{ appStrings.Settings.Update.OpenDownloadPageAction | translate }}

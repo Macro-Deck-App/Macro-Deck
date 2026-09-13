@@ -390,6 +390,8 @@ export const AppStrings = {
 		Update: {
 			AllFeedsFailed: 'macrodeck.app:Bootstrapper.Update.AllFeedsFailed',
 			AlreadyInProgress: 'macrodeck.app:Bootstrapper.Update.AlreadyInProgress',
+			AptAvailable: 'macrodeck.app:Bootstrapper.Update.AptAvailable',
+			AptManaged: 'macrodeck.app:Bootstrapper.Update.AptManaged',
 			AvailableTitle: 'macrodeck.app:Bootstrapper.Update.AvailableTitle',
 			BackupFailed: 'macrodeck.app:Bootstrapper.Update.BackupFailed',
 			BackupGenericFailure: 'macrodeck.app:Bootstrapper.Update.BackupGenericFailure',
@@ -5420,6 +5422,7 @@ export const AppStrings = {
 			Unsupported: 'macrodeck.app:Settings.Startup.Unsupported',
 		},
 		Update: {
+			AvailableApt: 'macrodeck.app:Settings.Update.AvailableApt',
 			AvailableExternal: 'macrodeck.app:Settings.Update.AvailableExternal',
 			AvailableInApp: 'macrodeck.app:Settings.Update.AvailableInApp',
 			BetaToggleDescription: 'macrodeck.app:Settings.Update.BetaToggleDescription',
@@ -6945,6 +6948,8 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Bootstrapper.Tray.Show': 'Show',
 	'macrodeck.app:Bootstrapper.Update.AllFeedsFailed': 'could not check for updates on any feed ({reasons})',
 	'macrodeck.app:Bootstrapper.Update.AlreadyInProgress': 'An update is already being installed.',
+	'macrodeck.app:Bootstrapper.Update.AptAvailable': 'Macro Deck {version} is available.\n\nMacro Deck was installed from its APT repository, so run sudo apt update && sudo apt upgrade once the new version is published there. Beta versions arrive only through the beta suite.',
+	'macrodeck.app:Bootstrapper.Update.AptManaged': 'Macro Deck was installed from its APT repository and is updated by apt. Run sudo apt update && sudo apt upgrade.',
 	'macrodeck.app:Bootstrapper.Update.AvailableTitle': 'Update available',
 	'macrodeck.app:Bootstrapper.Update.BackupFailed': 'Macro Deck could not create a backup before updating, so the update was not installed. {error}',
 	'macrodeck.app:Bootstrapper.Update.BackupGenericFailure': 'The backup before the update failed.',
@@ -11125,6 +11130,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Settings.Startup.StartWithSystemDescription': 'Launch Macro Deck automatically after you sign in.',
 	'macrodeck.app:Settings.Startup.StartWithSystemLabel': 'Start with system',
 	'macrodeck.app:Settings.Startup.Unsupported': 'Automatic startup is only available in the installed Macro Deck app.',
+	'macrodeck.app:Settings.Update.AvailableApt': 'Version {version} is available. Run sudo apt update && sudo apt upgrade once it is published in the APT repository. Beta versions arrive only through the beta suite.',
 	'macrodeck.app:Settings.Update.AvailableExternal': 'Version {version} is available. Download it from the Macro Deck website to update your AppImage, DEB or RPM install.',
 	'macrodeck.app:Settings.Update.AvailableInApp': 'Version {version} is available.',
 	'macrodeck.app:Settings.Update.BetaToggleDescription': 'Get preview versions before they are released to everyone.',

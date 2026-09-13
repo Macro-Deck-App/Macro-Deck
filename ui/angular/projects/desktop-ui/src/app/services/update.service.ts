@@ -58,6 +58,7 @@ export class UpdateService {
   readonly isDownloading = computed(() => this.phase() === 'downloading' || this.installRequested());
   readonly canInstall = computed(() => this.phase() === 'available' || this.phase() === 'downloaded');
   readonly externalDownload = computed(() => this.installStrategy() === 'externalDownload');
+  readonly aptManaged = computed(() => this.installStrategy() === 'apt');
   readonly installFailed = computed(() => this.phase() === 'failed' && this.installAttempted());
   readonly checkFailed = computed(() => this.phase() === 'failed' && this.failure() === 'check');
 
