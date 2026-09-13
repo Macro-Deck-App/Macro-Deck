@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.RateLimiting;
 
@@ -29,6 +30,13 @@ public static class HostIdentityMessage
 		}
 
 		return $"{address}:{port}";
+	}
+
+	// What a person compares by eye: the first 12 bytes of SHA-256 over the raw point, as six groups of four.
+	public static string Fingerprint(byte[] publicKey)
+	{
+		var hex = Convert.ToHexString(SHA256.HashData(publicKey), 0, 12);
+		return string.Join(' ', Enumerable.Range(0, 6).Select(group => hex.Substring(group * 4, 4)));
 	}
 
 	// Canonical means standard alphabet, padded, and exactly what re-encoding the bytes produces.

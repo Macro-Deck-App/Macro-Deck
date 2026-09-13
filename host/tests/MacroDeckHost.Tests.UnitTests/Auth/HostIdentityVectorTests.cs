@@ -50,6 +50,11 @@ public class HostIdentityVectorTests
 		});
 	}
 
+	[Test]
+	public void The_fingerprint_is_the_first_twelve_hash_bytes_in_six_groups()
+		=> Assert.That(HostIdentityMessage.Fingerprint(Convert.FromBase64String(Field("publicKey"))),
+			Is.EqualTo(Field("fingerprint")));
+
 	private static bool Verifies(string message)
 	{
 		var point = Convert.FromBase64String(Field("publicKey"));
