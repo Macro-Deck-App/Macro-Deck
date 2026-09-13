@@ -241,7 +241,18 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 
 	private async Task RecordCreation(bool renewed)
 	{
-		if (renewed || await WasIssuedBefore())
+		var announce = renewed;
+		if (!renewed)
+		{
+			if (await WasIssuedBefore() is not { } issued)
+			{
+				return;
+			}
+
+			announce = issued;
+		}
+
+		if (announce)
 		{
 			_logger.Warning("A new host identity key was created; paired devices must scan the QR code again");
 			await RaiseRenewedNotification();
@@ -253,16 +264,18 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 	}
 
 	// An unreadable flag counts as issued: a needless notification is cheaper than a silent loss of every pin.
-	private async Task<bool> WasIssuedBefore()
+	// Null while the host is shutting down.
+	private async Task<bool?> WasIssuedBefore()
 	{
 		var issued = true;
-		await WithFlagRetry(async preferences =>
+		var completed = await WithFlagRetry(async preferences =>
 				issued = await preferences.GetByKey(AppPreferenceService.HostIdentityIssuedKey) is not null,
 			"The host identity flag could not be read; the new key is announced as a renewal");
-		return issued;
+		return completed ? issued : null;
 	}
 
-	private async Task WithFlagRetry(Func<IAppPreferenceRepository, Task> operation, string failureMessage)
+	// False when the host is shutting down: its services are gone, so retrying would only log noise.
+	private async Task<bool> WithFlagRetry(Func<IAppPreferenceRepository, Task> operation, string failureMessage)
 	{
 		for (var attempt = 1;; attempt++)
 		{
@@ -270,16 +283,21 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 			{
 				using var scope = _scopeFactory.CreateScope();
 				await operation(scope.ServiceProvider.GetRequiredService<IAppPreferenceRepository>());
-				return;
+				return true;
+			}
+			catch (ObjectDisposedException)
+			{
+				_logger.Debug("The host is shutting down; the host identity flag is not recorded");
+				return false;
 			}
 			catch (Exception) when (attempt < FlagAttempts)
 			{
-				await Task.Delay(FlagRetryDelay * attempt);
+				await Task.Delay(FlagRetryDelay * attempt, _timeProvider);
 			}
 			catch (Exception e)
 			{
 				_logger.Warning(e, failureMessage);
-				return;
+				return true;
 			}
 		}
 	}
@@ -292,6 +310,10 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 			using var scope = _scopeFactory.CreateScope();
 			culture = (await scope.ServiceProvider.GetRequiredService<IAppPreferenceService>().GetLocalization())
 				.Culture;
+		}
+		catch (ObjectDisposedException)
+		{
+			_logger.Debug("The host is shutting down; the identity notification uses the default language");
 		}
 		catch (Exception e)
 		{

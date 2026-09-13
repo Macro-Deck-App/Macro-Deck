@@ -146,6 +146,25 @@ public class FileHostIdentityKeyProviderTests
 	}
 
 	[Test]
+	public async Task A_host_shutting_down_stops_the_bookkeeping_without_a_database_warning()
+	{
+		var services = NewServices();
+		var provider = NewProvider(services);
+		await services.DisposeAsync();
+
+		var publicKey = await provider.GetPublicKey();
+
+		await Eventually(() => _log.Debugs >= 1);
+		Assert.Multiple(() =>
+		{
+			Assert.That(publicKey, Has.Length.EqualTo(65));
+			Assert.That(_log.Warnings, Is.Zero);
+			Assert.That(_preferences.Has("identity.issued"), Is.False);
+			Assert.That(_notifications.Snapshot(), Is.Empty);
+		});
+	}
+
+	[Test]
 	public async Task A_key_on_another_curve_is_treated_as_unreadable()
 	{
 		using var p384 = ECDsa.Create(ECCurve.NamedCurves.nistP384);
@@ -282,33 +301,34 @@ public class FileHostIdentityKeyProviderTests
 			Is.True);
 	}
 
-	private FileHostIdentityKeyProvider NewProvider()
-	{
-		var services = new ServiceCollection()
+	private ServiceProvider NewServices()
+		=> new ServiceCollection()
 			.AddSingleton<IAppPreferenceRepository>(_preferences)
 			.AddSingleton(TestLocalization.Preferences)
 			.BuildServiceProvider();
 
-		return new FileHostIdentityKeyProvider(_protection,
+	private FileHostIdentityKeyProvider NewProvider(ServiceProvider? services = null)
+		=> new(_protection,
 			_paths,
-			services.GetRequiredService<IServiceScopeFactory>(),
+			(services ?? NewServices()).GetRequiredService<IServiceScopeFactory>(),
 			_notifications,
 			TestLocalization.Resolver,
 			_time,
-			new LoggerConfiguration().WriteTo.Sink(_log).CreateLogger());
-	}
+			new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Sink(_log).CreateLogger());
 
-	private static async Task Eventually(Func<bool> condition)
+	// Background bookkeeping waits on the fake clock, so each round advances it past any retry delay.
+	private async Task Eventually(Func<bool> condition)
 	{
-		var deadline = DateTime.UtcNow.AddSeconds(15);
-		while (!condition())
+		for (var round = 0; !condition(); round++)
 		{
-			if (DateTime.UtcNow > deadline)
+			if (round == 500)
 			{
-				Assert.Fail("The condition was not met within 15 seconds.");
+				Assert.Fail("The condition was not met.");
 			}
 
-			await Task.Delay(20);
+			var scheduled = _time.ScheduledCount;
+			await Task.WhenAny(_time.WaitForScheduleAsync(scheduled), Task.Delay(10));
+			_time.Advance(TimeSpan.FromSeconds(2));
 		}
 	}
 
@@ -368,14 +388,28 @@ public class FileHostIdentityKeyProviderTests
 	private sealed class ErrorCountingSink : ILogEventSink
 	{
 		private int _errors;
+		private int _warnings;
+		private int _debugs;
 
 		public int Errors => Volatile.Read(ref _errors);
 
+		public int Warnings => Volatile.Read(ref _warnings);
+
+		public int Debugs => Volatile.Read(ref _debugs);
+
 		public void Emit(LogEvent logEvent)
 		{
-			if (logEvent.Level == LogEventLevel.Error)
+			switch (logEvent.Level)
 			{
-				Interlocked.Increment(ref _errors);
+				case LogEventLevel.Error:
+					Interlocked.Increment(ref _errors);
+					break;
+				case LogEventLevel.Warning:
+					Interlocked.Increment(ref _warnings);
+					break;
+				case LogEventLevel.Debug:
+					Interlocked.Increment(ref _debugs);
+					break;
 			}
 		}
 	}
