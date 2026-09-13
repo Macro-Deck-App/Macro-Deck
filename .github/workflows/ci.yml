@@ -257,7 +257,7 @@ jobs:
             runner: blacksmith-2vcpu-windows-2025
             project: host/tests/MacroDeckHost.Tests.UnitTests.Windows
           - name: macOS
-            runner: macos-self-hosted
+            runner: blacksmith-6vcpu-macos-26
             project: host/tests/MacroDeckHost.Tests.UnitTests.MacOS
     steps:
       - uses: actions/checkout@v5
