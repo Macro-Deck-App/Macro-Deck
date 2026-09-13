@@ -9,6 +9,11 @@ public sealed class ConnectIdentityClient : IConnectIdentityClient, IDisposable
 {
 	public const string HttpClientName = "macrodeck-connect";
 
+	private static readonly HashSet<string> _deadCredentialErrors = new(StringComparer.Ordinal)
+	{
+		"Errors.User.RefreshToken.Invalid", "Errors.OIDCSession.RefreshTokenInvalid", "Errors.User.NotActive"
+	};
+
 	private readonly HttpClient _http;
 	private readonly bool _ownsClient;
 
@@ -57,8 +62,6 @@ public sealed class ConnectIdentityClient : IConnectIdentityClient, IDisposable
 			verificationUri,
 			ReadUri(root, "verification_uri_complete") ?? verificationUri,
 			TimeSpan.FromSeconds(ReadInt(root, "expires_in") ?? 900),
-			// The issuer sends interval as a JSON string rather than a number, which ReadInt tolerates and
-			// a direct GetInt32 would not.
 			TimeSpan.FromSeconds(ReadInt(root, "interval") ?? 5));
 	}
 
@@ -108,14 +111,34 @@ public sealed class ConnectIdentityClient : IConnectIdentityClient, IDisposable
 		};
 	}
 
-	public Task<ConnectTokenResponse> Refresh(string refreshToken, CancellationToken cancellationToken)
-		=> RequestToken(new Dictionary<string, string>(StringComparer.Ordinal)
+	public async Task<ConnectTokenResponse> Refresh(string refreshToken, CancellationToken cancellationToken)
+	{
+		using var response = await Post(ConnectEndpoints.TokenEndpoint,
+			new Dictionary<string, string>(StringComparer.Ordinal)
 			{
 				["grant_type"] = "refresh_token",
 				["refresh_token"] = refreshToken,
 				["client_id"] = ConnectEndpoints.ClientId
 			},
 			cancellationToken);
+		var body = await ReadBody(response, cancellationToken);
+
+		if (response.IsSuccessStatusCode)
+		{
+			return ReadTokens(body);
+		}
+
+		// ZITADEL answers a dead credential with invalid_request carrying its message key, never invalid_grant.
+		// Only these keys mean the credential is gone; Errors.Internal and the rest are its own outages.
+		if (response.StatusCode is HttpStatusCode.BadRequest &&
+			ReadError(body) is ("invalid_request", { } key) &&
+			_deadCredentialErrors.Contains(key))
+		{
+			throw new ConnectAuthRejectedException("Macro Deck Connect rejected the credential.");
+		}
+
+		throw Classify(response, body);
+	}
 
 	public async Task Revoke(string refreshToken, CancellationToken cancellationToken)
 	{
@@ -141,21 +164,6 @@ public sealed class ConnectIdentityClient : IConnectIdentityClient, IDisposable
 		{
 			_http.Dispose();
 		}
-	}
-
-	private async Task<ConnectTokenResponse> RequestToken(
-		Dictionary<string, string> form,
-		CancellationToken cancellationToken)
-	{
-		using var response = await Post(ConnectEndpoints.TokenEndpoint, form, cancellationToken);
-		var body = await ReadBody(response, cancellationToken);
-
-		if (!response.IsSuccessStatusCode)
-		{
-			throw Classify(response, body);
-		}
-
-		return ReadTokens(body);
 	}
 
 	private static ConnectTokenResponse ReadTokens(string body)

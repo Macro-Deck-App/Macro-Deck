@@ -9,9 +9,14 @@ public sealed class GetConnectSessionRequestMessageHandler
 	: IUiTransportMessageHandler<GetConnectSessionRequest, GetConnectSessionResponse>
 {
 	private readonly IConnectSessionService _sessionService;
+	private readonly IConnectAvatarCache _avatarCache;
 
-	public GetConnectSessionRequestMessageHandler(IConnectSessionService sessionService)
-		=> _sessionService = sessionService;
+	public GetConnectSessionRequestMessageHandler(IConnectSessionService sessionService,
+		IConnectAvatarCache avatarCache)
+	{
+		_sessionService = sessionService;
+		_avatarCache = avatarCache;
+	}
 
 	// Must never trigger a refresh: this handler only reads the current snapshot. Refreshing here would
 	// change state, broadcast a change notification, and re-enter this very handler through the client's
@@ -21,6 +26,7 @@ public sealed class GetConnectSessionRequestMessageHandler
 	{
 		var snapshot = _sessionService.Current;
 		var account = snapshot.Account;
+		var avatarVersion = _avatarCache.Version;
 
 		return new ValueTask<GetConnectSessionResponse>(new GetConnectSessionResponse
 		{
@@ -32,8 +38,8 @@ public sealed class GetConnectSessionRequestMessageHandler
 				{
 					Subject = account.Subject,
 					DisplayName = account.DisplayName,
-					AvatarAvailable = account.PictureUrl is not null,
-					AvatarVersion = ConnectEndpoints.AvatarVersionOf(account.PictureUrl),
+					AvatarAvailable = avatarVersion is not null,
+					AvatarVersion = avatarVersion,
 					CreatorUsername = account.CreatorUsername,
 					Roles = account.Roles
 				},

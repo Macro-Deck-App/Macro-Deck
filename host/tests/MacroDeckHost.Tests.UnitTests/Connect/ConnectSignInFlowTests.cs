@@ -13,8 +13,8 @@ public class ConnectSignInFlowTests
 {
 	private static readonly ConnectDeviceAuthorization _authorization = new("device-code-1",
 		"3389-5291",
-		new Uri("https://accounts.macro-deck.app/device"),
-		new Uri("https://accounts.macro-deck.app/device?user_code=3389-5291"),
+		new Uri("https://auth.macro-deck.app/device"),
+		new Uri("https://auth.macro-deck.app/device?user_code=3389-5291"),
 		TimeSpan.FromMinutes(15),
 		TimeSpan.FromSeconds(7));
 
@@ -137,7 +137,7 @@ public class ConnectSignInFlowTests
 	{
 		await using var fixture = new Fixture();
 		fixture.Identity.DisplayName = "Ada Lovelace";
-		fixture.Identity.Picture = "https://accounts.macro-deck.app/avatars/abc.png";
+		fixture.Identity.Picture = "https://auth.macro-deck.app/assets/v1/org-1/users/user-1/avatar";
 		fixture.Identity.PollResults.Enqueue(new ConnectDevicePollResult(ConnectDevicePollStatus.Success));
 
 		await fixture.Flow.Begin();
@@ -147,7 +147,8 @@ public class ConnectSignInFlowTests
 		{
 			Assert.That(outcome.Result, Is.EqualTo(ConnectSignInResult.Completed));
 			Assert.That(outcome.Claims!.DisplayName, Is.EqualTo("Ada Lovelace"));
-			Assert.That(outcome.Claims.PictureUrl, Is.EqualTo("https://accounts.macro-deck.app/avatars/abc.png"));
+			Assert.That(outcome.Claims.PictureUrl,
+				Is.EqualTo("https://auth.macro-deck.app/assets/v1/org-1/users/user-1/avatar"));
 			Assert.That(outcome.Tokens!.RefreshToken, Is.Not.Empty);
 		});
 	}

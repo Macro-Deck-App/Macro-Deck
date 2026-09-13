@@ -58,6 +58,7 @@ public partial class AppPreferenceService : IAppPreferenceService
 	public const string ConnectCredentialCachedDisplayNameKey = "connect.credentialCachedDisplayName";
 	public const string ConnectCredentialCachedPictureUrlKey = "connect.credentialCachedPictureUrl";
 	public const string ConnectCredentialIssuedAtKey = "connect.credentialIssuedAt";
+	public const string ConnectCredentialIssuerKey = "connect.credentialIssuer";
 	public const string ConnectSuspensionRetryNotBeforeKey = "connect.suspensionRetryNotBefore";
 
 	public const string BackupScheduleFrequencyKey = "backups.schedule.frequency";

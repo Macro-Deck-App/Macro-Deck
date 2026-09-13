@@ -4,10 +4,11 @@ Status: Accepted
 
 ## Context
 
-Macro Deck Connect is the first cloud identity the application signs in to. Identity registers Macro
-Deck 3 as a public OIDC client with no secret, requires PKCE, and issues ten-minute access tokens
-alongside a refresh token that rotates on every use and expires 180 days after it was last used.
-Reusing a redeemed refresh token revokes the whole authorization.
+Macro Deck Connect is the first cloud identity the application signs in to. Identity is a self-hosted
+ZITADEL instance (the platform's own OpenIddict server until issue #811). It registers Macro Deck 3 as
+a public OIDC client with no secret and issues short-lived access tokens alongside a refresh token that
+rotates on every use. The refresh token's idle and absolute lifetimes are set in the ZITADEL
+configuration, outside this repository.
 
 The governing requirement is not the login. It is that a user who has not opened Macro Deck for
 several weeks, or who starts it while Identity is unreachable, is not signed out. Refresh failures
@@ -53,9 +54,15 @@ Failure classification is closed and biased toward keeping the session:
 
 - `invalid_grant` is terminal. The credential is deleted and interactive sign-in is required. This
   covers a revoked, reused or expired token, a rotated security stamp from a password or role change
-  or an admin sign-out, and a deleted or locked-out account.
+  or an admin sign-out, and a deleted or locked-out account. ZITADEL does not answer `invalid_grant`
+  for a dead credential: it answers a 400 `invalid_request` carrying its message key. On the refresh
+  grant exactly `Errors.User.RefreshToken.Invalid`, `Errors.OIDCSession.RefreshTokenInvalid` and
+  `Errors.User.NotActive` are terminal; every other key, `Errors.Internal` included, is an outage on
+  its side and stays transient.
 - `access_denied` means the account is suspended. Refreshing **stops** and the credential is
   **kept**, because suspension does not revoke the authorization and must recover when lifted.
+  ZITADEL never sends it on a refresh: a locked or deactivated account arrives as
+  `Errors.User.NotActive` and is terminal, so this branch is kept but unused.
 - Everything else is transient: the session stays signed in, connectivity flips to offline, and the
   credential is never touched.
 
@@ -89,9 +96,15 @@ written, and `connect.` preference keys are refused on restore.
   [ADR 0047](0047-secrets-backups-and-restore.md) does: the ring is wrapped by a key held in
   the platform keystore, and stays readable on disk only where no keystore is available or the
   installation is portable.
-- A session survives arbitrary offline time but not more than 180 days without launching, because the
-  sliding window is only re-based by a successful refresh. An unconditional guarantee would require a
-  server-side change.
+- A session survives offline time only within the refresh token's idle lifetime, because the sliding
+  window is only re-based by a successful refresh, and never past its absolute lifetime, which forces a
+  new sign-in however often the host refreshes. Both come from the ZITADEL configuration.
+- Moving the issuer invalidates every stored credential. The store records the issuer next to the
+  credential and drops one from another issuer on load, so an update ends in a plain signed-out state
+  and the old refresh token is never sent to the new issuer.
+- The avatar is proxied from the issuer's public asset route only. ZITADEL keeps the picture URL
+  stable when the picture is replaced, so the host versions its cached copy by a hash of the bytes and
+  downloads it again hourly while signed in.
 - A suspended account needs a retry floor that survives restarts; without one, relaunching the app
   repeatedly becomes an unbounded retry loop by another route.
 - Copying a data directory to a second installation gives both the same refresh token. They rotate it

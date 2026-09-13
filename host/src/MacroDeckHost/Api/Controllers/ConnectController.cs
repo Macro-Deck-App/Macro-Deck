@@ -48,11 +48,12 @@ public class ConnectController : ControllerBase
 	[Authorize(Policy = AuthPolicies.Admin)]
 	public async Task<IActionResult> GetAvatar(CancellationToken ct)
 	{
-		var stream = await _avatarCache.GetAvatar(ct);
+		var avatar = await _avatarCache.GetAvatar(ct);
 
-		if (stream is not null)
+		if (avatar is not null)
 		{
-			return File(stream, "image/png");
+			Response.Headers.XContentTypeOptions = "nosniff";
+			return File(avatar.Content, avatar.ContentType);
 		}
 
 		// No avatar means no image at all - never a placeholder, never a 200 with an empty body. The length

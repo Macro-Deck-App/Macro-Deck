@@ -28,8 +28,6 @@ internal sealed class FakeConnectIdentityClient : IConnectIdentityClient
 
 	public string? CreatorUsername { get; set; }
 
-	public IReadOnlyList<string> Roles { get; set; } = [];
-
 	public Queue<Func<ConnectTokenResponse>> Results { get; } = new();
 
 	public Func<Task>? BeforeRefresh { get; set; }
@@ -52,8 +50,8 @@ internal sealed class FakeConnectIdentityClient : IConnectIdentityClient
 
 	public ConnectDeviceAuthorization DeviceAuthorization { get; set; } = new("device-code-1",
 		"1234-5678",
-		new Uri("https://accounts.macro-deck.app/device"),
-		new Uri("https://accounts.macro-deck.app/device?user_code=1234-5678"),
+		new Uri("https://auth.macro-deck.app/device"),
+		new Uri("https://auth.macro-deck.app/device?user_code=1234-5678"),
 		TimeSpan.FromMinutes(15),
 		TimeSpan.FromSeconds(5));
 
@@ -272,7 +270,6 @@ internal sealed class FakeConnectIdentityClient : IConnectIdentityClient
 				DisplayName,
 				Picture,
 				CreatorUsername,
-				Roles,
 				null,
 				now + TimeSpan.FromHours(1)),
 			_accessTokenLifetime);

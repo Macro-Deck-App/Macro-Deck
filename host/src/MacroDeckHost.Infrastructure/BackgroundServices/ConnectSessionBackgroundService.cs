@@ -6,8 +6,8 @@ namespace MacroDeckHost.Infrastructure.BackgroundServices;
 
 public sealed class ConnectSessionBackgroundService : HostReadyBackgroundService
 {
-	// The refresh token slides on every use over a 180-day window, so an installation that never asks for
-	// a token still has to touch the endpoint often enough to keep the authorization alive.
+	// The refresh token's idle lifetime slides on every use, so an installation that never asks for a token
+	// still has to touch the endpoint often enough to keep the authorization alive.
 	private static readonly TimeSpan _keepAliveInterval = TimeSpan.FromHours(24);
 
 	private readonly ConnectSessionService _sessionService;

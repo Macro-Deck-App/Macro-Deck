@@ -6,8 +6,8 @@ namespace MacroDeckHost.Infrastructure.Connect;
 
 public sealed class ConnectSessionService : IConnectSessionService, IAsyncDisposable
 {
-	// The access token lives ten minutes, so the margin has to stay well under half of that: a five
-	// minute margin would refresh at the halfway point of every token and double the rotation rate.
+	// The margin has to stay well under half of the shortest access token lifetime, or every token would be
+	// refreshed at its halfway point and double the rotation rate.
 	internal static readonly TimeSpan RefreshMargin = TimeSpan.FromMinutes(1);
 
 	// A restart must not burn a refresh-token rotation for nothing. A credential younger than this is
@@ -291,7 +291,7 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 	}
 
 	/// <summary>
-	/// Forces one refresh attempt, sliding the 180-day window even when nothing else would have asked for
+	/// Forces one refresh attempt, sliding the refresh token's idle window even when nothing else would have asked for
 	/// a token. Never throws: a keep-alive failure is already reflected in the published snapshot.
 	/// </summary>
 	internal async Task KeepAlive(CancellationToken cancellationToken)
@@ -680,7 +680,7 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 	}
 
 	private static ConnectAccount ToAccount(ConnectIdTokenClaims claims)
-		=> new(claims.Subject, claims.DisplayName, claims.PictureUrl, claims.CreatorUsername, claims.Roles);
+		=> new(claims.Subject, claims.DisplayName, claims.PictureUrl, claims.CreatorUsername, []);
 
 	private static TimeSpan DefaultJitter(TimeSpan span)
 		=> span * (0.8 + (Random.Shared.NextDouble() * 0.4));

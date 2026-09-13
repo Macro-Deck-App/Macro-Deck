@@ -596,6 +596,9 @@ public class Startup
 
 		services.AddHttpClient(ConnectIdentityClient.HttpClientName, client => { })
 			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15));
+		services.AddHttpClient(ConnectAvatarCache.HttpClientName)
+			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15))
+			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
 		services.AddSingleton<IConnectIdentityClient, ConnectIdentityClient>();
 		services.AddSingleton<IConnectCredentialStore, SecretServiceConnectCredentialStore>();
 		services.AddSingleton<IConnectSuspensionFloor, ConnectSuspensionFloor>();
