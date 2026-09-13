@@ -47,7 +47,10 @@ public class ConfigFlowStepMapperTests
 		var step = new ConfigFlowStep
 		{
 			StepId = "device",
-			Fields = [ActionParameter.Text("brand"), ActionParameter.Text("model").OnlyWhen("brand", "razer", "logitech")]
+			Fields =
+			[
+				ActionParameter.Text("brand"), ActionParameter.Text("model").OnlyWhen("brand", "razer", "logitech")
+			]
 		};
 
 		var field = ConfigFlowStepMapper.Map(step).Fields[1];
