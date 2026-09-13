@@ -21,6 +21,8 @@ Loopback trust is a transport property, not simply `remote IP == 127.0.0.1`.
 
 A request is trusted only when it arrives through the private listener and satisfies the host's loopback/Host-header checks. The Host-header restriction is required to prevent DNS-rebinding attacks from turning an arbitrary local browser request into an admin request.
 
+Loopback trust needs no credentials, so a web page open in the user's browser must never borrow it. A request that a browser marks as coming from another site (`Sec-Fetch-Site` of `cross-site` or `same-site`), or, from a browser that sends no `Sec-Fetch-Site`, one whose `Origin` differs from the request's own origin, is not trusted and authenticates like any other client. The loopback listener also never answers with a CORS grant, so a foreign page can neither read its responses nor pass a preflight. The desktop UI is same-origin with the listener, and the `ng serve` proxy keeps it same-origin during development; native callers send neither header and are unaffected.
+
 Public listeners never inherit loopback trust, even when reached through a local address. Transport mechanisms such as ADB reverse tunnels therefore terminate on the public listener and authenticate like any other client.
 
 See [ADR 0003](../decisions/0003-loopback-trust-token-scopes-and-device-identity.md) and [ADR 0030](../decisions/0030-android-usb-connections-over-adb.md).
