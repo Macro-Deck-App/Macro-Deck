@@ -59,8 +59,9 @@ public class AccessTokenCutoffTests
 	}
 
 	private static ClaimsPrincipal IssuedAt(DateTime at)
-		=> new(new ClaimsIdentity(
-			[new Claim("iat", new DateTimeOffset(at).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture))],
+		=> new(new ClaimsIdentity([
+				new Claim("iat", new DateTimeOffset(at).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture))
+			],
 			"test"));
 
 	private sealed class FixedKey : ISigningKeyProvider

@@ -13,7 +13,9 @@ public class JwtAccessTokenIssuer : IAccessTokenIssuer
 	private readonly TimeProvider _timeProvider;
 	private readonly AccessTokenCutoff _cutoff;
 
-	public JwtAccessTokenIssuer(ISigningKeyProvider signingKeyProvider, TimeProvider timeProvider, AccessTokenCutoff cutoff)
+	public JwtAccessTokenIssuer(ISigningKeyProvider signingKeyProvider,
+		TimeProvider timeProvider,
+		AccessTokenCutoff cutoff)
 	{
 		_signingKeyProvider = signingKeyProvider;
 		_timeProvider = timeProvider;
