@@ -38,7 +38,7 @@
     <PackageVersion Include="SkiaSharp.SceneGraph" Version="3.119.4" />
     <PackageVersion Include="SkiaSharp.Skottie" Version="3.119.4" />
     <PackageVersion Include="Svg.Skia" Version="5.1.1" />
-    <PackageVersion Include="Serilog" Version="4.3.0" />
+    <PackageVersion Include="Serilog" Version="4.4.0" />
     <PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
