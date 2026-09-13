@@ -56,6 +56,8 @@ instead of at their original expiry.
   they keep doing it. Password login is unaffected and is the fallback.
 - A stolen refresh token is useful for up to a year of inactivity instead of 30 days. Signing the device
   out in the devices list, or changing the password, still revokes it at once.
+- The connect link's format changed to payload version 3 in [ADR 0085](0085-compact-connect-link.md);
+  the code travels in its token field.
 - The code is held in memory only. A host restart invalidates it, and the panel mints a new one when it
   is next opened.
 - A device kept alive by a live refresh token keeps its row, and is only purged as stale once that token
