@@ -134,7 +134,8 @@ listener serves.
   HTTP endpoint and the user signs in again there. The asymmetry only ever refuses to downgrade a secure
   session.
 - The connect payload behind the QR code carries an endpoint list with a per-entry flag rather than one
-  port and one global flag, and gained a payload version at the same time.
+  port and one global flag, and gained a payload version at the same time. Payload version 3 replaced
+  the JSON form, see [ADR 0085](0085-compact-connect-link.md).
 - The firewall rule needs no change: it is program-scoped with no port filter, deliberately, so a second
   listener on the same executable is already covered.
 - An installation whose certificate-source marker is lost keeps its old certificate, because the marker
