@@ -25,8 +25,6 @@ public class BackupComponentGroupsTests
 			// It records what this installation has already shown its user, so a restore must neither
 			// resurrect a finished wizard nor erase one that is still owed.
 			Assert.That(BackupComponentGroups.IsRestorablePreferenceKey("onboarding.pending"), Is.False);
-			// Whether this installation ever issued a host identity decides if a missing key is announced
-			// as a renewal, and that is a fact about this installation, not about the archive.
 			Assert.That(BackupComponentGroups.IsRestorablePreferenceKey("identity.issued"), Is.False);
 			Assert.That(BackupComponentGroups.IsRestorablePreferenceKey("Onboarding.Pending"), Is.False);
 			Assert.That(BackupComponentGroups.IsRestorablePreferenceKey("appearance.themeMode"), Is.True);

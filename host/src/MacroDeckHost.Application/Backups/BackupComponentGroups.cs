@@ -104,10 +104,6 @@ public static class BackupComponentGroups
 		"connect."
 	];
 
-	/// <summary>
-	/// Files a restore keeps when the archive does not carry them, instead of removing them with the rest of
-	/// their group. An archive taken before the host identity key existed must not unpair every device.
-	/// </summary>
 	public static readonly IReadOnlyList<string> KeptWhenMissingFromArchive = ["keys/host-identity.key"];
 
 	public static IReadOnlyList<BackupComponentGroup> AllIds => [.. All.Select(definition => definition.Id)];
