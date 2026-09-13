@@ -82,7 +82,7 @@ public static class BackupComponentGroups
 			[]),
 		new(BackupComponentGroup.Accounts,
 			[BackupComponentGroup.Profiles],
-			[File("keys/auth-signing.key")],
+			[File("keys/auth-signing.key"), File("keys/host-identity.key")],
 			["app_user", "refresh_token", "device"])
 	];
 
@@ -93,14 +93,22 @@ public static class BackupComponentGroups
 	/// is what the key ring's KEK store is keyed by.
 	/// The onboarding flag is excluded for the same reason: it tracks what this installation has already
 	/// shown its user, so a restore must neither resurrect a finished wizard nor erase one still owed.
+	/// The identity flag records whether this installation ever issued a host identity key.
 	/// </summary>
 	public static readonly IReadOnlyList<string> PreferenceKeyDenyPrefixes =
 	[
 		"backups.recoveryKey",
 		"telemetry.installationId",
 		"onboarding.",
+		"identity.",
 		"connect."
 	];
+
+	/// <summary>
+	/// Files a restore keeps when the archive does not carry them, instead of removing them with the rest of
+	/// their group. An archive taken before the host identity key existed must not unpair every device.
+	/// </summary>
+	public static readonly IReadOnlyList<string> KeptWhenMissingFromArchive = ["keys/host-identity.key"];
 
 	public static IReadOnlyList<BackupComponentGroup> AllIds => [.. All.Select(definition => definition.Id)];
 
