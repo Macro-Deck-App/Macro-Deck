@@ -14,7 +14,8 @@ import {
 
 import { AppStrings, ConfigFlowStepDto, Strings, UiConfigEvents, UiConfigProperties, emitsEvent, nodeString, nodeText, resolveLocalizedText } from '@macro-deck/runtime';
 import { ButtonComponent, LocalizationService, LocalizedTextPipe, ModalComponent, ToggleSwitchComponent, TranslatePipe, dismissModal } from '@shared';
-import type { UiNode, UiNodeEvent } from '@macro-deck/runtime';
+import type { ActionParameterDef, UiNode, UiNodeEvent } from '@macro-deck/runtime';
+import { isFieldVisible } from '../../domain/parameter-visibility.util';
 import { ConfigFlowService } from '../../services/config-flow.service';
 import { ExternalLinkService } from '../../services/external-link.service';
 import { CopyValueComponent } from '../copy-value/copy-value.component';
@@ -106,14 +107,16 @@ const COPY_FALLBACK_Z_INDEX = 1100;
         }
         <div class="cfd-fields">
           @for (field of step.fields; track field.name) {
-            <shared-config-field
-              [field]="field"
-              [value]="flow.values()[field.name]"
-              [error]="flow.fieldErrors()[field.name] || null"
-              [secretStored]="flow.storedSecretFields().has(field.name)"
-              (clearSecret)="flow.clearStoredSecret(field.name)"
-              (valueChange)="flow.setValue(field.name, $event)">
-            </shared-config-field>
+            @if (isVisible(field, step)) {
+              <shared-config-field
+                [field]="field"
+                [value]="flow.values()[field.name]"
+                [error]="flow.fieldErrors()[field.name] || null"
+                [secretStored]="flow.storedSecretFields().has(field.name)"
+                (clearSecret)="flow.clearStoredSecret(field.name)"
+                (valueChange)="flow.setValue(field.name, $event)">
+              </shared-config-field>
+            }
           }
         </div>
         @if (step.advancedFields?.length) {
@@ -126,14 +129,16 @@ const COPY_FALLBACK_Z_INDEX = 1100;
             @if (showAdvanced()) {
               <div class="cfd-fields">
                 @for (field of step.advancedFields; track field.name) {
-                  <shared-config-field
-                    [field]="field"
-                    [value]="flow.values()[field.name]"
-                    [error]="flow.fieldErrors()[field.name] || null"
-                    [secretStored]="flow.storedSecretFields().has(field.name)"
-                    (clearSecret)="flow.clearStoredSecret(field.name)"
-                    (valueChange)="flow.setValue(field.name, $event)">
-                  </shared-config-field>
+                  @if (isVisible(field, step)) {
+                    <shared-config-field
+                      [field]="field"
+                      [value]="flow.values()[field.name]"
+                      [error]="flow.fieldErrors()[field.name] || null"
+                      [secretStored]="flow.storedSecretFields().has(field.name)"
+                      (clearSecret)="flow.clearStoredSecret(field.name)"
+                      (valueChange)="flow.setValue(field.name, $event)">
+                    </shared-config-field>
+                  }
                 }
               </div>
             }
@@ -182,12 +187,18 @@ export class ConfigFlowDialogComponent implements OnChanges {
 
   protected readonly showAdvanced = computed(() => {
     if (this.advancedOpened()) return true;
+    const step = this.flow.step();
+    if (!step) return false;
     const values = this.flow.values();
-    return (this.flow.step()?.advancedFields ?? []).some(field => {
+    return (step.advancedFields ?? []).some(field => {
       const value = values[field.name];
-      return value !== undefined && value !== null && value !== '' && value !== false;
+      return value !== undefined && value !== null && value !== '' && value !== false && this.isVisible(field, step);
     });
   });
+
+  protected isVisible(field: ActionParameterDef, step: ConfigFlowStepDto): boolean {
+    return isFieldVisible(field, [...step.fields, ...(step.advancedFields ?? [])], this.flow.values());
+  }
 
   async ngOnChanges(changes: SimpleChanges): Promise<void> {
     if (changes['integrationId'] && this.integrationId) {

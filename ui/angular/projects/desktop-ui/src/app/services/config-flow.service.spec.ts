@@ -163,6 +163,22 @@ describe('ConfigFlowService', () => {
     expect(service.canSubmit()).toBeTrue();
   });
 
+  it('does not require a required field while its OnlyWhen condition hides it', () => {
+    service.step.set({
+      stepId: 'device',
+      fields: [
+        { name: 'brand', type: ActionParameterType.String, description: '', required: true },
+        { name: 'model1', type: ActionParameterType.String, description: '', required: true, visibleWhen: { parameterName: 'brand', values: ['option1'] } },
+        { name: 'model2', type: ActionParameterType.String, description: '', required: true, visibleWhen: { parameterName: 'brand', values: ['option2'] } },
+      ],
+    });
+    service.values.set({ brand: 'option1', model1: 'm1' });
+    expect(service.canSubmit()).toBeTrue();
+
+    service.setValue('brand', 'option2');
+    expect(service.canSubmit()).toBeFalse();
+  });
+
   it('edits with non-secret initial values while retaining a stored password without exposing it', async () => {
     await service.start('obs', { entryId: 'entry-a' });
 

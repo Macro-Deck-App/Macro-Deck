@@ -151,8 +151,28 @@ new ConfigFlowStep
 
 Fields are `ActionParameter`s, so they render with the same controls as action parameters: `Text`, `Url`,
 `Number`, `Choice`, `Toggle`, `Secret` and the rest. Keep `AdvancedFields` for escape hatches - an own
-OAuth client id, a non-default endpoint - not for normal setup. Continue is gated on the visible fields
-only, and the section opens by itself when one of its fields already has a value.
+OAuth client id, a non-default endpoint - not for normal setup. The section opens by itself when one of its
+fields already has a value.
+
+`OnlyWhen` works on step fields the way it does on [action parameters](/features/actions/#declaring-parameters):
+a field shows only while the named field of the same step holds one of the listed values (compared
+case-insensitively), and the dialog re-evaluates as the user picks, without a step round trip. A field whose
+named field is still empty stays hidden.
+
+```csharp
+Fields =
+[
+	ActionParameter.Choice("brand", brands, label: Strings.Setup.Brand(), required: true),
+	ActionParameter.Choice("razerModel", razerModels, label: Strings.Setup.Model(), required: true)
+		.OnlyWhen("brand", "razer"),
+	ActionParameter.Choice("logitechModel", logitechModels, label: Strings.Setup.Model(), required: true)
+		.OnlyWhen("brand", "logitech")
+]
+```
+
+Continue is gated on the fields that are shown: neither a closed advanced section nor a required field hidden
+by `OnlyWhen` blocks it. A hidden field keeps its value and is still submitted, so read the field that
+decides, not the presence of a value. Hosts up to 3.0.0-beta.4 ignore `OnlyWhen` here and show every field.
 
 `ActionParameter.WidgetTarget` works here too, with the same picker actions use. A flow belongs to an
 integration rather than a widget, so "This widget" (`$self`) is not offered and the field yields a

@@ -3,6 +3,7 @@ import { filter, take } from 'rxjs';
 import { ActionParameterType, AppStrings, ConfigFlowAuthorizedNotification, ConfigFlowStepDto, LocalizedText, UiConfigEntryPoints, resolveLocalizedText } from '@macro-deck/runtime';
 import { ApiService, LocalizationService, UiSessionHandle, UiSessionService } from '@shared';
 import type { UiNode, UiNodeEvent } from '@macro-deck/runtime';
+import { isFieldVisible } from '../domain/parameter-visibility.util';
 import { ExternalLinkService } from './external-link.service';
 
 @Injectable({ providedIn: 'root' })
@@ -36,8 +37,9 @@ export class ConfigFlowService {
     const step = this.step();
     if (!step) return false;
     const values = this.values();
+    const siblings = [...step.fields, ...(step.advancedFields ?? [])];
     return step.fields.every(field => {
-      if (!field.required) return true;
+      if (!field.required || !isFieldVisible(field, siblings, values)) return true;
       const value = values[field.name];
       if (this.storedSecretFields().has(field.name)) return true;
       if (Array.isArray(value)) return value.length > 0;

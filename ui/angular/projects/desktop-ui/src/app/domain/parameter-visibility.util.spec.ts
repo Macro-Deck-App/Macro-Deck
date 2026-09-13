@@ -1,5 +1,5 @@
-import { ActionBlockParameter } from '@macro-deck/runtime';
-import { isParameterVisible } from './parameter-visibility.util';
+import { ActionBlockParameter, ActionParameterDef } from '@macro-deck/runtime';
+import { isFieldVisible, isParameterVisible } from './parameter-visibility.util';
 
 function param(
   name: string,
@@ -55,5 +55,38 @@ describe('isParameterVisible', () => {
   it('treats a missing sibling list as visible', () => {
     const target = param('jsonBody', '', { parameterName: 'bodyType', values: ['json'] });
     expect(isParameterVisible(target, undefined)).toBeTrue();
+  });
+});
+
+describe('isFieldVisible', () => {
+  const brand: Pick<ActionParameterDef, 'name' | 'visibleWhen'> = { name: 'brand' };
+  const model: Pick<ActionParameterDef, 'name' | 'visibleWhen'> = {
+    name: 'model',
+    visibleWhen: { parameterName: 'brand', values: ['option1'] },
+  };
+  const fields = [brand, model];
+
+  it('shows a field with no condition', () => {
+    expect(isFieldVisible(brand, fields, {})).toBeTrue();
+  });
+
+  it('shows a field whose referenced field holds a listed value', () => {
+    expect(isFieldVisible(model, fields, { brand: 'option1' })).toBeTrue();
+  });
+
+  it('hides a field whose referenced field holds another value', () => {
+    expect(isFieldVisible(model, fields, { brand: 'option2' })).toBeFalse();
+  });
+
+  it('hides a field whose referenced field has no value yet', () => {
+    expect(isFieldVisible(model, fields, {})).toBeFalse();
+  });
+
+  it('compares values case-insensitively', () => {
+    expect(isFieldVisible(model, fields, { brand: 'OPTION1' })).toBeTrue();
+  });
+
+  it('shows a field whose condition names no field of the step', () => {
+    expect(isFieldVisible(model, [model], { brand: 'option2' })).toBeTrue();
   });
 });
