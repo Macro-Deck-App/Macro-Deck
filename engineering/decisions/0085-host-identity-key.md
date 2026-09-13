@@ -15,8 +15,9 @@ the stored password. A replayed refresh token also revokes every session of the 
 PKCS#8 wrapped by Data Protection (`MacroDeck.Auth.HostIdentityKey`). Its public identity is the 65-byte
 uncompressed point, base64. P-256 needs no new dependency on .NET, Android API 23 or iOS 15; Ed25519 would.
 
-**Challenge.** `POST /api/auth/identity` is anonymous, rate limited per remote IPv4 address or IPv6 /64
-(30 per 10 seconds, then `429`), and not on the locked-host allow-list. The request is `{ "nonce": "<base64, 16 to 64 bytes>" }`
+**Challenge.** `POST /api/auth/identity` is anonymous, rate limited per remote address (30 per 10 seconds;
+IPv4-mapped addresses count as IPv4, link-local ones without their zone) and, as a ceiling against a caller
+rotating addresses, per IPv6 /64 (300 per 10 seconds); either limit answers `429`, and not on the locked-host allow-list. The request is `{ "nonce": "<base64, 16 to 64 bytes>" }`
 in canonical standard base64 with padding, anything else is `400`. The answer is
 `{ "publicKey", "endpoint", "signature" }`: a DER signature over the UTF-8 message
 `macrodeck-host-identity/v1\n<publicKey>\n<endpoint>\n<nonce>`. The endpoint is the canonical authority of
@@ -33,7 +34,8 @@ signs people in as before, and the challenge answers `503`.
 fails with a cryptographic error; the unreadable file is kept as `host-identity.key.unreadable-<utc>`. An I/O
 or access error never renews; a failed load is retried at most every five seconds and logged once until it
 recovers. Loading and creating hold an exclusive handle on `keys/host-identity.key.lock`, so two
-processes on one data directory never replace each other's key. `identity.issued` in `app_preference` records
+processes on one data directory never replace each other's key. Setting `DOTNET_SYSTEM_IO_DISABLEFILELOCKING` makes that handle
+take no lock on Unix and removes this guarantee. `identity.issued` in `app_preference` records
 that a key was ever issued: creating a key while it is set, or renewing one, raises a Security notification
 telling the user to scan the QR code again on every paired device. The first key after an upgrade is silent.
 The key travels in the Accounts backup group; the flag never does, and a restore from an archive without the
