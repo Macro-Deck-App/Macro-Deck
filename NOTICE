@@ -14,3 +14,6 @@ Used for rasterizing SVG icons. Licensed under the MIT License.
 
 SkiaSharp.Skottie (https://github.com/mono/SkiaSharp)
 Used for rendering Lottie animations to frames on import. Licensed under the MIT License.
+
+WebNowPlaying icon (https://github.com/keifufu/WebNowPlaying)
+The WebNowPlaying integration icon is adapted from its logo. Copyright (c) 2024 keifufu. Licensed under the MIT License.

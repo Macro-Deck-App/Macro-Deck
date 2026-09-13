@@ -10475,6 +10475,60 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Weather.Variables.TemperatureDisplayName" xml:space="preserve">
     <value>Température</value>
   </data>
+  <data name="Integrations.WebNowPlaying.Issues.PortInUseDescription" xml:space="preserve">
+    <value>Une autre application écoute déjà sur le port {port}, l'extension de navigateur WebNowPlaying ne peut donc pas se connecter à Macro Deck. Ferme cette application, par exemple Macro Deck 2 avec le plugin WebNowPlaying, puis désactive et réactive cette intégration.</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Issues.PortInUseTitle" xml:space="preserve">
+    <value>Le port de WebNowPlaying est déjà utilisé</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Migration.EnableIntegration" xml:space="preserve">
+    <value>Active l'intégration WebNowPlaying dans Macro Deck, puis active l'adaptateur Macro Deck (port 8698) dans les paramètres Adaptateurs de l'extension de navigateur WebNowPlaying.</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Variables.AlbumArtUrl" xml:space="preserve">
+    <value>URL de la pochette d'album</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Variables.CurrentAlbum" xml:space="preserve">
+    <value>Album</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Variables.CurrentArtist" xml:space="preserve">
+    <value>Artiste</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Variables.CurrentPosition" xml:space="preserve">
+    <value>Position</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Variables.CurrentTrackName" xml:space="preserve">
+    <value>Nom du morceau</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Variables.IsConnected" xml:space="preserve">
+    <value>Extension du navigateur connectée</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Variables.IsPlaying" xml:space="preserve">
+    <value>En cours de lecture</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Variables.PlaybackState" xml:space="preserve">
+    <value>État de lecture</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Variables.PlayerName" xml:space="preserve">
+    <value>Lecteur</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Variables.ProgressPercentage" xml:space="preserve">
+    <value>Progression</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Variables.Rating" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Variables.RepeatMode" xml:space="preserve">
+    <value>Mode de répétition</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Variables.ShuffleEnabled" xml:space="preserve">
+    <value>Lecture aléatoire activée</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Variables.TrackDuration" xml:space="preserve">
+    <value>Durée</value>
+  </data>
+  <data name="Integrations.WebNowPlaying.Variables.Volume" xml:space="preserve">
+    <value>Volume</value>
+  </data>
   <data name="Integrations.Widgets.Actions.AlignCenter" xml:space="preserve">
     <value>Centré</value>
   </data>

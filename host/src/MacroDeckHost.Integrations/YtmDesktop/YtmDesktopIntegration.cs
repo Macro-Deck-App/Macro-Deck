@@ -9,7 +9,6 @@ using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
-using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.MusicPlayer.Actions;
 using MacroDeck.Sdk.Variables;
@@ -26,7 +25,6 @@ public sealed class YtmDesktopIntegration
 		IEventProvider,
 		IIntegrationIconProvider,
 		IIntegrationIssueProvider,
-		IMigrationProvider,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.ytmdesktop";
@@ -73,8 +71,6 @@ public sealed class YtmDesktopIntegration
 	public IReadOnlyList<EventDefinition> EventDefinitions => YtmDesktopEventDefinitions.All;
 
 	public bool AllowsMultipleConfigurations => false;
-
-	public IReadOnlyList<IIntegrationMigration> Migrations { get; } = [new YtmDesktopMacroDeck2Migration()];
 
 	public byte[] GetIcon() => _icon;
 
