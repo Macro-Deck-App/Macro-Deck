@@ -137,8 +137,8 @@ export interface ActionBlockParameter {
   validationRegex?: string;
   maxLength?: number;
   options?: { label: string; value: ParameterValue }[];
-  min?: number;
-  max?: number;
+  min?: number | null;
+  max?: number | null;
   step?: number;
   showSlider?: boolean;
   dynamicOptions?: boolean;
