@@ -32,13 +32,17 @@ public class RefreshTokenRepository : IRefreshTokenRepository
 		await _context.SaveChangesAsync();
 	}
 
-	public async Task<bool> TryRevoke(Guid id, DateTime revokedAt, Guid? replacedById = null, bool rotatedByGrace = false)
+	public async Task<bool> TryRevoke(Guid id,
+		DateTime revokedAt,
+		Guid? replacedById = null,
+		bool rotatedByGrace = false)
 		=> await _context.RefreshTokens
-			.Where(t => t.Id == id && t.RevokedAt == null)
-			.ExecuteUpdateAsync(s => s
-				.SetProperty(t => t.RevokedAt, revokedAt)
-				.SetProperty(t => t.ReplacedById, replacedById)
-				.SetProperty(t => t.RotatedByGrace, rotatedByGrace)) == 1;
+				.Where(t => t.Id == id && t.RevokedAt == null)
+				.ExecuteUpdateAsync(s => s
+					.SetProperty(t => t.RevokedAt, revokedAt)
+					.SetProperty(t => t.ReplacedById, replacedById)
+					.SetProperty(t => t.RotatedByGrace, rotatedByGrace)) ==
+			1;
 
 	public Task RevokeAllForUser(Guid userId, DateTime revokedAt)
 		=> _context.RefreshTokens

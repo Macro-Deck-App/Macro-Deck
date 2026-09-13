@@ -44,7 +44,10 @@ internal sealed class InMemoryRefreshTokenRepository : IRefreshTokenRepository
 	public Task<RefreshTokenEntity?> GetById(Guid id)
 		=> Task.FromResult(Tokens.FirstOrDefault(t => t.Id == id));
 
-	public async Task<bool> TryRevoke(Guid id, DateTime revokedAt, Guid? replacedById = null, bool rotatedByGrace = false)
+	public async Task<bool> TryRevoke(Guid id,
+		DateTime revokedAt,
+		Guid? replacedById = null,
+		bool rotatedByGrace = false)
 	{
 		if (BeforeNextRevoke is { } concurrentRequest)
 		{
