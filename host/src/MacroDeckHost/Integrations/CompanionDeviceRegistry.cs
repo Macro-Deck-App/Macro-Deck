@@ -8,6 +8,7 @@ using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
 using MacroDeckHost.Application.Ui.Transport.Messages.Integrations;
+using MacroDeckHost.Application.Ui.Transport.Messages.Licensing;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Integrations.Companion;
 using ILogger = Serilog.ILogger;
@@ -93,6 +94,39 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 		catch (Exception ex)
 		{
 			_logger.Warning(ex, "Could not send the Wake-on-LAN addresses to connection {ConnectionId}", connectionId);
+		}
+	}
+
+	public Task SendLicenseAsync(CompanionLicenseEvent license, string? submittingConnectionId)
+		=> SendToCompanionsAsync(license, submittingConnectionId);
+
+	public Task SendLicenseRevokedAsync(CompanionLicenseRevokedEvent revoked)
+		=> SendToCompanionsAsync(revoked, null);
+
+	private async Task SendToCompanionsAsync<T>(T message, string? submittingConnectionId)
+		where T : class
+	{
+		List<string> targets;
+		lock (_connectionGate)
+		{
+			targets = [.. _connections.Keys];
+		}
+
+		if (submittingConnectionId is not null && !targets.Contains(submittingConnectionId))
+		{
+			targets.Add(submittingConnectionId);
+		}
+
+		foreach (var connectionId in targets)
+		{
+			try
+			{
+				await _transport.SendToConnection(connectionId, message);
+			}
+			catch (Exception ex)
+			{
+				_logger.Warning(ex, "Could not send {Message} to connection {ConnectionId}", typeof(T).Name, connectionId);
+			}
 		}
 	}
 

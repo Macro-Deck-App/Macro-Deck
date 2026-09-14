@@ -107,6 +107,7 @@ import {
   GetConnectSessionResponse,
   GetDataDirectoryResponse,
   CompleteOnboardingResponse,
+  CompanionLicenseStatus,
   GetDeveloperSettingsResponse,
   GetOnboardingStateResponse,
   GetDeviceSetupResponse,
@@ -1084,6 +1085,18 @@ export class ApiService {
 
   updateDeveloperSettings(request: UpdateDeveloperSettingsRequest): Promise<UpdateDeveloperSettingsResponse> {
     return this.http('PUT', '/api/settings/developer', request);
+  }
+
+  getCompanionLicense(): Promise<CompanionLicenseStatus> {
+    return this.http('GET', '/api/settings/license');
+  }
+
+  issueTestCompanionLicense(): Promise<CompanionLicenseStatus> {
+    return this.http('POST', '/api/settings/license/test');
+  }
+
+  revokeTestCompanionLicense(): Promise<CompanionLicenseStatus> {
+    return this.http('DELETE', '/api/settings/license/test');
   }
 
   getLockScreenSettings(): Promise<GetLockScreenSettingsResponse> {

@@ -1,0 +1,68 @@
+<div class="license-settings">
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.License.Heading' | translate"
+    [description]="'macrodeck.app:Settings.License.Description' | translate">
+    <shared-settings-row [label]="'macrodeck.app:Settings.License.StatusLabel' | translate">
+      <span class="license-settings__value" data-testid="license-status">
+        {{ (status()?.licensed ? 'macrodeck.app:Settings.License.Licensed' : 'macrodeck.app:Settings.License.NotLicensed') | translate }}
+      </span>
+    </shared-settings-row>
+    @if (status()?.licensed) {
+      @if (status()?.isTest) {
+        <p class="license-settings__test-marker" data-testid="license-test-marker">
+          <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+          {{ 'macrodeck.app:Settings.License.TestMarker' | translate }}
+        </p>
+      }
+      <shared-settings-row [label]="'macrodeck.app:Settings.License.LicenseIdLabel' | translate">
+        <span class="license-settings__value license-settings__value--mono">{{ status()?.licenseId ?? '-' }}</span>
+      </shared-settings-row>
+      <shared-settings-row [label]="'macrodeck.app:Settings.License.SourceLabel' | translate">
+        <span class="license-settings__value">{{ sourceLabel() }}</span>
+      </shared-settings-row>
+      <shared-settings-row [label]="'macrodeck.app:Settings.License.KeyIdLabel' | translate">
+        <span class="license-settings__value license-settings__value--mono">{{ status()?.keyId ?? '-' }}</span>
+      </shared-settings-row>
+      <shared-settings-row [label]="'macrodeck.app:Settings.License.IssuedAtLabel' | translate">
+        <span class="license-settings__value">{{ issuedAt() }}</span>
+      </shared-settings-row>
+    }
+    @if (status()?.testLicenseStored) {
+      <shared-settings-row [label]="'macrodeck.app:Settings.License.IssueTestLabel' | translate">
+        <shared-button
+          variant="secondary"
+          data-testid="revoke-test-license"
+          [disabled]="revoking()"
+          (click)="revokeTestLicense()">
+          {{ 'macrodeck.app:Settings.License.RevokeTestAction' | translate }}
+        </shared-button>
+      </shared-settings-row>
+    }
+    @if (revokeFailed()) {
+      <p class="license-settings__error">{{ 'macrodeck.app:Settings.License.RevokeTestFailed' | translate }}</p>
+    }
+  </shared-settings-section>
+
+  @if (developerMode()) {
+    <shared-settings-section
+      [heading]="'macrodeck.app:Settings.License.IssueTestLabel' | translate"
+      [description]="'macrodeck.app:Settings.License.IssueTestDescription' | translate">
+      <shared-settings-row [label]="'macrodeck.app:Settings.License.IssueTestLabel' | translate">
+        <shared-button
+          variant="secondary"
+          data-testid="issue-test-license"
+          [disabled]="issuing()"
+          (click)="issueTestLicense()">
+          {{ 'macrodeck.app:Settings.License.IssueTestAction' | translate }}
+        </shared-button>
+      </shared-settings-row>
+      @if (issueFailed()) {
+        <p class="license-settings__error">{{ 'macrodeck.app:Settings.License.IssueTestFailed' | translate }}</p>
+      }
+    </shared-settings-section>
+  }
+
+  @if (loadFailed()) {
+    <p class="license-settings__error">{{ 'macrodeck.app:Settings.License.LoadFailed' | translate }}</p>
+  }
+</div>

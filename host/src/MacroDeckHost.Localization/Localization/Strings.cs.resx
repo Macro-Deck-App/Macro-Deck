@@ -12868,6 +12868,69 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Language.TimeFormatLabel" xml:space="preserve">
     <value>Formát času</value>
   </data>
+  <data name="Settings.License.Description" xml:space="preserve">
+    <value>Licence Macro Deck Companion, kterou tento hostitel má. Hostitel ji předává každé připojené aplikaci Companion.</value>
+  </data>
+  <data name="Settings.License.Heading" xml:space="preserve">
+    <value>Licence Companion</value>
+  </data>
+  <data name="Settings.License.IssueTestAction" xml:space="preserve">
+    <value>Vydat testovací licenci</value>
+  </data>
+  <data name="Settings.License.IssueTestDescription" xml:space="preserve">
+    <value>Vydá licenci podepsanou testovacím klíčem pro vyzkoušení licencování aplikace Companion s ladicím sestavením. Přijímá se pouze při zapnutém režimu pro vývojáře.</value>
+  </data>
+  <data name="Settings.License.IssueTestFailed" xml:space="preserve">
+    <value>Testovací licenci se nepodařilo vydat.</value>
+  </data>
+  <data name="Settings.License.IssueTestLabel" xml:space="preserve">
+    <value>Testovací licence</value>
+  </data>
+  <data name="Settings.License.IssuedAtLabel" xml:space="preserve">
+    <value>Vydáno</value>
+  </data>
+  <data name="Settings.License.KeyIdLabel" xml:space="preserve">
+    <value>Podpisový klíč</value>
+  </data>
+  <data name="Settings.License.LicenseIdLabel" xml:space="preserve">
+    <value>ID licence</value>
+  </data>
+  <data name="Settings.License.Licensed" xml:space="preserve">
+    <value>Licencováno</value>
+  </data>
+  <data name="Settings.License.LoadFailed" xml:space="preserve">
+    <value>Stav licence se nepodařilo načíst.</value>
+  </data>
+  <data name="Settings.License.NotLicensed" xml:space="preserve">
+    <value>Bez licence</value>
+  </data>
+  <data name="Settings.License.RevokeTestAction" xml:space="preserve">
+    <value>Zrušit testovací licenci</value>
+  </data>
+  <data name="Settings.License.RevokeTestFailed" xml:space="preserve">
+    <value>Testovací licenci se nepodařilo zrušit.</value>
+  </data>
+  <data name="Settings.License.Source.AppStore" xml:space="preserve">
+    <value>App Store</value>
+  </data>
+  <data name="Settings.License.Source.AppStoreLegacy" xml:space="preserve">
+    <value>App Store (předchozí aplikace)</value>
+  </data>
+  <data name="Settings.License.Source.GooglePlay" xml:space="preserve">
+    <value>Google Play</value>
+  </data>
+  <data name="Settings.License.Source.Test" xml:space="preserve">
+    <value>Test</value>
+  </data>
+  <data name="Settings.License.SourceLabel" xml:space="preserve">
+    <value>Zakoupeno přes</value>
+  </data>
+  <data name="Settings.License.StatusLabel" xml:space="preserve">
+    <value>Stav</value>
+  </data>
+  <data name="Settings.License.TestMarker" xml:space="preserve">
+    <value>Testovací licence. Platí pouze při zapnutém režimu pro vývojáře a odemyká pouze ladicí sestavení aplikace Companion.</value>
+  </data>
   <data name="Settings.Logging.Description" xml:space="preserve">
     <value>Nastavte, jak podrobně Macro Deck zaznamenává svůj běh.</value>
   </data>
