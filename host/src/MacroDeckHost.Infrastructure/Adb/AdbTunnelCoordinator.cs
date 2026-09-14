@@ -208,6 +208,23 @@ internal sealed class AdbTunnelCoordinator
 		}
 	}
 
+	public async Task ReleaseOwnedTunnelsAsync(TimeSpan perDeviceTimeout,
+		TimeSpan totalBudget,
+		CancellationToken cancellationToken)
+	{
+		_deviceState.Clear();
+
+		// Without an adb path nothing can be removed. Keeping the marker lets a startup stale sweep still
+		// remove an unclean run's tunnels once ADB is enabled.
+		if (string.IsNullOrEmpty(_executablePath))
+		{
+			return;
+		}
+
+		await RemoveOwnedTunnelsAsync(perDeviceTimeout, totalBudget, cancellationToken);
+		_ownershipMarker.Delete();
+	}
+
 	private async Task<AdbTunnel> ReconcileDeviceAsync(
 		string executablePath,
 		string serial,

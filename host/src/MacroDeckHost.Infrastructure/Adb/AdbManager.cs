@@ -425,6 +425,7 @@ public sealed class AdbManager : IAdbManager, IDisposable
 
 		if (!settings.Enabled)
 		{
+			await ReleaseOwnedTunnelsAsync(cancellationToken);
 			_tunnelCoordinator.SetExecutablePath(null);
 			SetSnapshot(AdbStatus.Disabled, []);
 			return;
@@ -529,6 +530,10 @@ public sealed class AdbManager : IAdbManager, IDisposable
 					: device)
 				.ToList();
 		}
+		else
+		{
+			await ReleaseOwnedTunnelsAsync(cancellationToken);
+		}
 
 		DiffAndRaise(_knownDevices, merged);
 		_knownDevices = merged.ToDictionary(device => device.Serial, StringComparer.Ordinal);
@@ -549,6 +554,11 @@ public sealed class AdbManager : IAdbManager, IDisposable
 				_staleTunnelsCleaned),
 			merged);
 	}
+
+	private Task ReleaseOwnedTunnelsAsync(CancellationToken cancellationToken)
+		=> _tunnelCoordinator.ReleaseOwnedTunnelsAsync(_staleSweepPerDeviceTimeout,
+			_staleSweepTotalBudget,
+			cancellationToken);
 
 	private async Task ProbePropertiesCoreAsync(CancellationToken cancellationToken)
 	{
