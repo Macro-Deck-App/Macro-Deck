@@ -31,7 +31,8 @@ public class DeviceRegistrationTests
 			new FakeDeviceDeckNavigator(),
 			CompletedStartupReadiness(),
 			new ProviderDevicePresenceTracker(),
-			new FakeIntegrationRegistry());
+			new FakeIntegrationRegistry(),
+			TestScreenSaverProviders.Registry());
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{

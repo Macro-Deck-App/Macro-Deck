@@ -287,6 +287,7 @@ internal sealed class IntegrationInitializerTests
 			TestLayoutProviders.Host(),
 			TestFolderViewProviders.Host(),
 			TestWidgetTypeProviders.Host(),
+			TestScreenSaverProviders.Host(),
 			TestDeviceProviders.Host(),
 			timeProvider,
 			new LoggerConfiguration().CreateLogger());

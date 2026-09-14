@@ -36,6 +36,12 @@ public sealed record OpenConfigUiSessionRequest
 	/// <summary>The widget being configured. Only on <c>widget-config</c>.</summary>
 	public string? WidgetId { get; init; }
 
+	public string? DeviceId { get; init; }
+
+	public string? ScreenSaverId { get; init; }
+
+	public string? ScreenSaverConfiguration { get; init; }
+
 	/// <summary>The configuration to seed the surface with, as JSON object text. Only on
 	/// <c>widget-config</c>; absent starts from the widget's stored configuration. The editor owns the
 	/// draft and may be holding one the widget has not been saved with yet - a JSON-mode edit, above all -
@@ -138,6 +144,21 @@ public sealed record OpenFolderUiSessionResponse
 	/// <c>FolderViewNavigation</c>. Absent when the view could not be resolved, in which case the client
 	/// shows its own navigation around the placeholder.</summary>
 	public string? Navigation { get; init; }
+}
+
+public sealed record OpenScreenSaverUiSessionResponse
+{
+	public required bool Accepted { get; init; }
+
+	public required string SessionId { get; init; }
+
+	public string? Code { get; init; }
+
+	public string? Message { get; init; }
+
+	public string ScreenSaverId { get; init; } = string.Empty;
+
+	public bool Interactive { get; init; }
 }
 
 public sealed record UiSendEventRequest

@@ -303,6 +303,7 @@ public class IntegrationOverviewCapabilitiesTests
 					(CapabilityKinds.LayoutProvider, "Layouts"),
 					(CapabilityKinds.FolderViewProvider, "Folder Views"),
 					(CapabilityKinds.WidgetTypeProvider, "Widgets"),
+					(CapabilityKinds.ScreenSaverProvider, "Screensavers"),
 					(CapabilityKinds.Migration, "Migration")
 				}));
 

@@ -11,6 +11,7 @@ using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Profiles;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Weather;
+using MacroDeck.Sdk.ScreenSavers;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions;
 using MacroDeckHost.Localization;
@@ -54,6 +55,8 @@ public static class ProvidedCapabilityCatalog
 			integration => integration is IFolderViewProvider),
 		(CapabilityKinds.WidgetTypeProvider, AppStrings.Integrations.Capability.WidgetTypeProvider(),
 			integration => integration is IWidgetTypeProvider),
+		(CapabilityKinds.ScreenSaverProvider, AppStrings.Integrations.Capability.ScreenSaverProvider(),
+			integration => integration is IScreenSaverProvider),
 
 		// The only row that asks for more than the interface: every remote adapter implements
 		// IMigrationProvider unconditionally, and a built-in that declares no migration has nothing to

@@ -94,6 +94,7 @@ x-macrodeck-capability-kinds:
   - folder-view-provider
   - migration
   - widget-type-provider
+  - screensaver-provider
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Compatibility.PluginCompatibilityStates.All (ascending severity)
 x-macrodeck-compatibility-states:

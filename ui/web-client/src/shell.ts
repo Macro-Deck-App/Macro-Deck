@@ -14,6 +14,8 @@ import { Client } from './client';
 import { DeckInput } from './deck-input';
 import { DeckRepaintQueue } from './deck-repaint';
 import { FolderView } from './folder-view';
+import { IdleTimer, type IdleTimerClock } from './idle-timer';
+import { ScreenSaver } from './screensaver';
 import { ModalHost } from './modal';
 import { RenderingModeStore } from './rendering-mode';
 import { ServerClock } from './server-clock';
@@ -36,6 +38,7 @@ export interface ShellServices {
   pwa: Pwa;
   clock: ServerClock;
   schedule?(callback: () => void): void;
+  idleClock?: IdleTimerClock;
 }
 
 // The deck is built once and kept rather than rebuilt per screen change: a deck that has painted
@@ -49,6 +52,8 @@ export class Shell {
   private readonly deckInput: DeckInput;
   private readonly deviceSetup: DeviceSetupService;
   private folderView: FolderView | null = null;
+  private screenSaver: ScreenSaver | null = null;
+  private readonly idleTimer: IdleTimer;
   private readonly settings: ClientSettingsHandle | null;
   private lockScreen: HTMLElement | null = null;
   private reconnectingPanel: HTMLElement | null = null;
@@ -112,8 +117,23 @@ export class Shell {
       this.repaintQueue.widget(widgetId);
     });
     this.client.hostLock.state.subscribe(() => this.paintOverlays());
+    this.idleTimer = new IdleTimer(() => this.showScreenSaver(), document, services.idleClock);
+    // Any change to the settings ends a showing screensaver: what it draws is fixed at open time.
+    this.client.deviceScreenSaver.subscribe(() => {
+      this.hideScreenSaver();
+      this.armIdleTimer();
+    });
+    this.client.screenSaverRequests.subscribe(requests => {
+      if (requests > 0 && this.client.app.screen.get() === 'deck' && !this.client.hostLock.showLockScreen()) {
+        this.hideScreenSaver();
+        this.showScreenSaver();
+      }
+    });
     this.wasConnected = this.client.app.conditions.get().connected;
-    this.client.app.conditions.subscribe(conditions => this.onConnectedChanged(conditions.connected));
+    this.client.app.conditions.subscribe(conditions => {
+      this.onConnectedChanged(conditions.connected);
+      this.armIdleTimer();
+    });
     this.client.executionFeedback.failures.subscribe(failure => {
       if (failure !== null) showToast(failure.message, { kind: 'error' });
     });
@@ -198,10 +218,12 @@ export class Shell {
   private paintOverlays(): void {
     if (this.client.hostLock.showLockScreen()) {
       this.removeReconnectingPanel();
+      this.hideScreenSaver();
       this.paintLockScreen();
       return;
     }
     this.removeLockScreen();
+    this.armIdleTimer();
 
     // Only over a deck: a sign-out disconnects the socket too, and a "reconnecting" panel over the
     // sign-in form would be both wrong and impossible to get past.
@@ -269,6 +291,7 @@ export class Shell {
 
     // The lock is held only while a deck is actually on screen; the preference outlives the screen.
     this.services.wakeLock.setGate(screen === 'deck');
+    this.armIdleTimer();
 
     // Every standing confirmation is about the session that just ended, and leaving one over the
     // sign-in card shows the next person what the last one was doing.
@@ -385,6 +408,50 @@ export class Shell {
     if (this.folderView === null) return;
     this.folderView.destroy();
     this.folderView = null;
+  }
+
+  private armIdleTimer(): void {
+    const settings = this.client.deviceScreenSaver.get();
+    const canShow = this.client.app.screen.get() === 'deck'
+      && this.client.app.conditions.get().connected
+      && !this.client.hostLock.showLockScreen();
+
+    if (!canShow) {
+      this.idleTimer.configure(null);
+      this.hideScreenSaver();
+      return;
+    }
+    if (!settings.enabled || settings.idleSeconds <= 0) {
+      this.idleTimer.configure(null);
+      return;
+    }
+    if (this.screenSaver !== null && this.screenSaver.isShowing()) return;
+    this.idleTimer.configure(settings.idleSeconds * 1000);
+  }
+
+  private showScreenSaver(): void {
+    if (this.screenSaver === null) {
+      this.screenSaver = new ScreenSaver({
+        connection: this.client.connection,
+        sessions: this.client.sessions,
+        localization: this.client.localization,
+        host: this.host,
+        onDismiss: () => {
+          this.services.wakeLock.setForced(false);
+          this.armIdleTimer();
+        },
+      });
+      this.root.appendChild(this.screenSaver.element);
+    }
+    this.idleTimer.configure(null);
+    this.services.wakeLock.setForced(true);
+    this.screenSaver.show();
+  }
+
+  private hideScreenSaver(): void {
+    if (this.screenSaver === null) return;
+    this.screenSaver.hide();
+    this.services.wakeLock.setForced(false);
   }
 
 }

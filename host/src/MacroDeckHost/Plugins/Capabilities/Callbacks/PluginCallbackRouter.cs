@@ -14,6 +14,7 @@ using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Devices.Surfaces;
 using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.FolderViews;
+using MacroDeckHost.Application.ScreenSavers;
 using MacroDeck.Sdk.Ui;
 using MacroDeckHost.Application.Ui.Transport.Messages.Modals;
 using MacroDeckHost.Application.Ui.Transport;
@@ -64,6 +65,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	private readonly ILayoutRegistry _layoutRegistry;
 	private readonly IFolderViewRegistry _folderViewRegistry;
 	private readonly IWidgetTypeRegistry _widgetTypeRegistry;
+	private readonly IScreenSaverRegistry _screenSaverRegistry;
 	private readonly IModalInteractionCoordinator _modals;
 	private readonly IUiTransport _transport;
 	private readonly IDeviceSurfaceService? _deviceSurfaces;
@@ -98,6 +100,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		ILayoutRegistry layoutRegistry,
 		IFolderViewRegistry folderViewRegistry,
 		IWidgetTypeRegistry widgetTypeRegistry,
+		IScreenSaverRegistry screenSaverRegistry,
 		IModalInteractionCoordinator modals,
 		IUiTransport transport,
 		HostCallbackThrottle throttle,
@@ -130,6 +133,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		_deviceRegistry = deviceRegistry;
 		_layoutRegistry = layoutRegistry;
 		_folderViewRegistry = folderViewRegistry;
+		_screenSaverRegistry = screenSaverRegistry;
 		_widgetTypeRegistry = widgetTypeRegistry;
 		_modals = modals;
 		_transport = transport;
@@ -189,6 +193,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				HostApis.Layouts => await RouteLayoutsAsync(pluginId, payload, cancellationToken),
 				HostApis.FolderViews => await RouteFolderViewsAsync(pluginId, payload, cancellationToken),
 				HostApis.WidgetTypes => await RouteWidgetTypesAsync(pluginId, payload, cancellationToken),
+				HostApis.ScreenSavers => await RouteScreenSaversAsync(pluginId, payload, cancellationToken),
 				_ => HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
 					$"The host has no api '{payload.Api}'.")
 			};
@@ -714,6 +719,56 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				HostOperations.ActionInteractions.ShowModal,
 				pluginId,
 				exception);
+		}
+	}
+
+	private async Task<HostCallbackResult> RouteScreenSaversAsync(
+		string pluginId,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		// The provider is the authenticated plugin, never anything the payload claims.
+		try
+		{
+			switch (payload.Operation)
+			{
+				case HostOperations.ScreenSavers.Register:
+				{
+					var arguments = Deserialize<ScreenSaversRegisterArguments>(payload.Arguments);
+					if (arguments is null)
+					{
+						return MissingArguments();
+					}
+
+					var registration = await _screenSaverRegistry.Register(pluginId,
+						ScreenSaverDescriptorMapper.ToDescriptor(arguments.ScreenSaver),
+						cancellationToken);
+
+					return HostCallbackResult.Ok(new ScreenSaversRegisterResult
+					{
+						ScreenSaverId = registration.ScreenSaverId, ProviderId = registration.ProviderId
+					});
+				}
+
+				case HostOperations.ScreenSavers.Unregister:
+				{
+					var arguments = Deserialize<ScreenSaversUnregisterArguments>(payload.Arguments);
+					if (arguments is null)
+					{
+						return MissingArguments();
+					}
+
+					await _screenSaverRegistry.Unregister(pluginId, arguments.ScreenSaverId, cancellationToken);
+					return HostCallbackResult.Ok();
+				}
+
+				default:
+					return UnknownOperation(payload);
+			}
+		}
+		catch (ArgumentException exception)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, exception.Message);
 		}
 	}
 

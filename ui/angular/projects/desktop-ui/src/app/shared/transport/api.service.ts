@@ -85,6 +85,8 @@ import {
   ExportProfileRequest,
   ExportWidgetsRequest,
   FolderViewCatalogChangedEvent,
+  ScreenSaverCatalogChangedEvent,
+  GetScreenSaversResponse,
   GetAboutInfoResponse,
   GetActionButtonStateOptionsRequest,
   GetActionButtonStateOptionsResponse,
@@ -233,6 +235,9 @@ import {
   SanitizeVariableNameResponse,
   SetDeviceStartupProfileRequest,
   SetDeviceStartupProfileResponse,
+  SetDeviceScreenSaverRequest,
+  SetDeviceScreenSaverResponse,
+  ShowDeviceScreenSaverResponse,
   SetFolderFocusRuleRequest,
   SetFolderFocusRuleResponse,
   SetIntegrationEnabledRequest,
@@ -727,6 +732,14 @@ export class ApiService {
 
   setDeviceStartupProfile(id: string, request: SetDeviceStartupProfileRequest): Promise<SetDeviceStartupProfileResponse> {
     return this.http('PATCH', `/api/devices/${encodeURIComponent(id)}/startup-profile`, request);
+  }
+
+  setDeviceScreenSaver(id: string, request: SetDeviceScreenSaverRequest): Promise<SetDeviceScreenSaverResponse> {
+    return this.http('PATCH', `/api/devices/${encodeURIComponent(id)}/screensaver`, request);
+  }
+
+  showDeviceScreenSaver(id: string): Promise<ShowDeviceScreenSaverResponse> {
+    return this.http('POST', `/api/devices/${encodeURIComponent(id)}/screensaver/show`);
   }
 
   openProfileOnDevice(id: string, request: OpenProfileOnDeviceRequest): Promise<OpenProfileOnDeviceResponse> {
@@ -1592,6 +1605,10 @@ export class ApiService {
     return this.invokeResult<GetFolderViewsResponse>('GetFolderViews', {});
   }
 
+  getScreenSavers(): Promise<GetScreenSaversResponse | null> {
+    return this.invokeResult<GetScreenSaversResponse>('GetScreenSavers', {});
+  }
+
   listUiPreviews(): Promise<ListUiPreviewsResponse | null> {
     return this.invokeResult<ListUiPreviewsResponse>('ListUiPreviews', {});
   }
@@ -1602,6 +1619,10 @@ export class ApiService {
 
   onFolderViewCatalogChanged(): Observable<FolderViewCatalogChangedEvent> {
     return this.onNotification<FolderViewCatalogChangedEvent>('FolderViewCatalogChangedEvent');
+  }
+
+  onScreenSaverCatalogChanged(): Observable<ScreenSaverCatalogChangedEvent> {
+    return this.onNotification<ScreenSaverCatalogChangedEvent>('ScreenSaverCatalogChangedEvent');
   }
 
   onWidgetTypeCatalogChanged(): Observable<WidgetTypeCatalogChangedEvent> {

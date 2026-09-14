@@ -302,6 +302,21 @@ public static class CapabilityOperations
 	}
 
 	/// <summary>
+	/// A screensaver provider is driven from the plugin side exactly like a folder view provider - it
+	/// registers and withdraws screensavers through the <c>screensavers</c> host api - so the host-to-provider
+	/// direction only describes the provider and re-reads its catalog after a reconnect. The screensavers
+	/// themselves are served over the <c>ui</c> capability.
+	/// </summary>
+	public static class ScreenSaverProvider
+	{
+		public const string Describe = "describe";
+
+		public const string ScreenSavers = "screensavers";
+
+		public static readonly IReadOnlyList<string> All = [Describe, ScreenSavers];
+	}
+
+	/// <summary>
 	/// A widget type provider is driven from the plugin side - it registers and withdraws types through
 	/// the <c>widget-types</c> host api - so the host-to-provider direction only has to describe the
 	/// provider and re-read its catalog after a reconnect. The widgets themselves are served over the
@@ -334,6 +349,7 @@ public static class CapabilityOperations
 			[Handshake.CapabilityKinds.DeviceProvider] = DeviceProvider.All,
 			[Handshake.CapabilityKinds.LayoutProvider] = LayoutProvider.All,
 			[Handshake.CapabilityKinds.FolderViewProvider] = FolderViewProvider.All,
+			[Handshake.CapabilityKinds.ScreenSaverProvider] = ScreenSaverProvider.All,
 			[Handshake.CapabilityKinds.WidgetTypeProvider] = WidgetTypeProvider.All,
 		};
 

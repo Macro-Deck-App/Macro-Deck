@@ -27,10 +27,11 @@ public sealed class WeatherUiProvider : IUiProvider
 
 | Kind | What it is | Who opens it | Session mode | Page |
 | --- | --- | --- | --- | --- |
-| `config` | An integration's config flow, a configured action instance, a folder's view settings, or a widget's settings | The user, from a configuration dialog | exclusive | [Serving a configuration view](/ui/views/configuration/), [Configuring a widget](/ui/views/widget-configuration/) |
+| `config` | An integration's config flow, a configured action instance, a folder's view settings, a widget's settings, or a device's screensaver settings | The user, from a configuration dialog | exclusive | [Serving a configuration view](/ui/views/configuration/), [Configuring a widget](/ui/views/widget-configuration/) |
 | `widget` | A deck widget | Every client showing the deck | shared | [Deck widget views](/ui/views/widget/) |
 | `preview` | A read-only rendering of a widget's unsaved draft, such as in the editor or the widget picker | The widget editor | shared | [Deck widget views](/ui/views/widget/) |
 | `folder` | A whole folder that selected a custom view | Every client showing the folder | shared | [Folder views](/ui/views/folder-views/) |
+| `screensaver` | What a device shows after sitting idle | The device itself, when its idle timer fires | shared | [Screensavers](/ui/views/screensavers/) |
 | `dialog` | A modal an action opened | The action | exclusive | [Modal views](/ui/views/modal/) |
 | `developer-preview` | One `[UiPreview]` scenario | Developer Tools | exclusive | [Developer preview](/ui/views/developer-preview/) |
 

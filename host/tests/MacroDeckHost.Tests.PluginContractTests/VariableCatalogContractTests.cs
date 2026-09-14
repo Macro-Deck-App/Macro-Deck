@@ -6,6 +6,7 @@ using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.FolderViews;
 using MacroDeckHost.Application.Ui.Modals;
 using MacroDeckHost.Application.Layouts;
+using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Variables;
@@ -318,6 +319,7 @@ internal sealed class VariableCatalogContractTests : CapabilityContractFixture
 			new LayoutRegistry(Mediator),
 			new FolderViewRegistry(Mediator),
 			new WidgetTypeRegistry(Mediator),
+			new ScreenSaverRegistry(Mediator),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			new NullUiTransport(),
 			new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),

@@ -284,6 +284,30 @@ public class RemoteIntegrationContextTests
 	}
 
 	[Test]
+	public async Task ScreenSaver_registrations_send_the_declared_Api_Operation_pair()
+	{
+		var screenSavers = new RemoteScreenSaverProviderContext(_invoker, Serilog.Core.Logger.None);
+		var descriptor = new MacroDeck.Sdk.ScreenSavers.ScreenSaverDescriptor("clock", LocalizedText.FromLiteral("Clock"));
+
+		var expected = new (Func<Task> Call, string Operation)[]
+		{
+			(() => screenSavers.RegisterScreenSaverAsync(descriptor), HostOperations.ScreenSavers.Register),
+			(() => screenSavers.UnregisterScreenSaverAsync("clock"), HostOperations.ScreenSavers.Unregister)
+		};
+
+		foreach (var (call, operation) in expected)
+		{
+			await call();
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(_invoker.LastApi, Is.EqualTo(HostApis.ScreenSavers));
+				Assert.That(_invoker.LastOperation, Is.EqualTo(operation));
+			});
+		}
+	}
+
+	[Test]
 	public async Task WidgetType_registrations_send_the_declared_Api_Operation_pair()
 	{
 		var widgetTypes = new RemoteWidgetTypeProviderContext(_invoker);
@@ -386,6 +410,14 @@ public class RemoteIntegrationContextTests
 		foreach (var operation in HostOperations.WidgetTypes.All)
 		{
 			covered.Add((HostApis.WidgetTypes, operation));
+		}
+
+		// screensavers is handed to a screensaver provider rather than reached through
+		// IIntegrationContext, so it is covered by
+		// ScreenSaver_registrations_send_the_declared_Api_Operation_pair above.
+		foreach (var operation in HostOperations.ScreenSavers.All)
+		{
+			covered.Add((HostApis.ScreenSavers, operation));
 		}
 
 		var declared = HostApis.All.SelectMany(api => HostOperations.For(api).Select(operation => (api, operation)));

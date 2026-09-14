@@ -1,0 +1,38 @@
+<div class="screensaver-picker">
+  <span class="screensaver-picker-label">
+    {{ 'macrodeck.app:Settings.Devices.ScreenSaver.Label' | translate }}
+  </span>
+
+  <shared-select
+    [attr.aria-label]="'macrodeck.app:Settings.Devices.ScreenSaver.Label' | translate"
+    [options]="options()"
+    [ngModel]="screenSaverId()"
+    (ngModelChange)="onSelect($event)" />
+
+  @if (selected(); as entry) {
+    @if (description(entry); as text) {
+      <p class="screensaver-picker-description">{{ text }}</p>
+    }
+  }
+
+  @if (showConfiguration()) {
+    <shared-button type="button" variant="secondary" class="screensaver-picker-options" (click)="optionsOpen.set(true)">
+      {{ 'macrodeck.app:Settings.Devices.ScreenSaver.Options' | translate }}
+    </shared-button>
+  }
+</div>
+
+@if (optionsOpen() && showConfiguration()) {
+  <shared-modal
+    [heading]="'macrodeck.app:Settings.Devices.ScreenSaver.Configuration' | translate"
+    size="small"
+    [showFooter]="false"
+    (close)="optionsOpen.set(false)">
+    <div class="screensaver-picker-configuration">
+      <shared-ui-tree [root]="root()" (nodeEvent)="onNodeEvent($event)" />
+      <shared-button-group align="end">
+        <shared-button type="button" variant="primary" (click)="optionsOpen.set(false)">{{ 'macrodeck:Common.Done' | translate }}</shared-button>
+      </shared-button-group>
+    </div>
+  </shared-modal>
+}

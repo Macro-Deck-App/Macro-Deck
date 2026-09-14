@@ -149,7 +149,7 @@ internal static class MusicPlayerWidgetConfigView
 	/// <summary>The known instances plus "first available", and - when <paramref name="selected" /> names
 	/// none of them - a synthetic entry carrying it, labelled unavailable, so a saved selection whose
 	/// player no longer exists stays visible rather than silently resetting to "first available".</summary>
-	private static List<UiOption> InstanceOptions(IMusicPlayerRegistry registry, string selected)
+	internal static List<UiOption> InstanceOptions(IMusicPlayerRegistry registry, string selected)
 	{
 		var instances = registry.GetInstances();
 

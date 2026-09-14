@@ -40,6 +40,7 @@ public class CapabilityOperationStabilityTests
 			[CapabilityKinds.LayoutProvider] = ["describe", "layouts"],
 			[CapabilityKinds.FolderViewProvider] = ["describe", "folder-views"],
 			[CapabilityKinds.WidgetTypeProvider] = ["describe", "widget-types"],
+			[CapabilityKinds.ScreenSaverProvider] = ["describe", "screensavers"],
 		};
 
 	[Test]

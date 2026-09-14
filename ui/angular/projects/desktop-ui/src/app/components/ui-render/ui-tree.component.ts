@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, forwardRef, inject, input, output } from '@angular/core';
 
 import { UiNode, UiNodeEvent, UiComponentBox } from '@macro-deck/runtime';
 import { UiNodeEventBus } from '@shared';
@@ -8,7 +8,9 @@ import { UiRenderContext } from './ui-render-context';
 @Component({
   selector: 'shared-ui-tree',
   standalone: true,
-  imports: [UiNodeComponent],
+  // forwardRef: ui-node reaches back here through the shared barrel, so a chunk that evaluates this
+  // file first would otherwise capture UiNodeComponent as undefined.
+  imports: [forwardRef(() => UiNodeComponent)],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [UiNodeEventBus, UiRenderContext],
   template: `

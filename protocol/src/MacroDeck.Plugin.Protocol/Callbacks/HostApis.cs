@@ -38,10 +38,12 @@ public static class HostApis
 
 	public const string WidgetTypes = "widget-types";
 
+	public const string ScreenSavers = "screensavers";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Variables, UserVariables, Config, Deck, Scripts, Widgets, Notifications, ActionInteractions, Ui,
-		Devices, VariableValues, Layouts, FolderViews, WidgetTypes,
+		Devices, VariableValues, Layouts, FolderViews, WidgetTypes, ScreenSavers,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

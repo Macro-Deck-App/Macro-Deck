@@ -82,6 +82,66 @@ public class SetDeviceStartupProfileRequestMessageHandler
 	}
 }
 
+public class SetDeviceScreenSaverRequestMessageHandler
+	: IUiTransportMessageHandler<SetDeviceScreenSaverRequest, SetDeviceScreenSaverResponse>
+{
+	private readonly IDeviceService _service;
+
+	public SetDeviceScreenSaverRequestMessageHandler(IDeviceService service)
+	{
+		_service = service;
+	}
+
+	public async ValueTask<SetDeviceScreenSaverResponse> Handle(
+		SetDeviceScreenSaverRequest request,
+		CancellationToken cancellationToken)
+	{
+		var result = await _service.SetScreenSaver(request.Id,
+			request.Enabled,
+			request.IdleSeconds,
+			request.ScreenSaverId,
+			request.Configuration);
+		if (!result.Success || result.Data is null)
+		{
+			return new SetDeviceScreenSaverResponse
+			{
+				Success = false,
+				Error = new TransportError
+					{ Code = result.Error!.Value.ToString(), Message = result.ErrorMessage ?? string.Empty }
+			};
+		}
+
+		return new SetDeviceScreenSaverResponse { Success = true, Device = await _service.ToDto(result.Data) };
+	}
+}
+
+public class ShowDeviceScreenSaverRequestMessageHandler
+	: IUiTransportMessageHandler<ShowDeviceScreenSaverRequest, ShowDeviceScreenSaverResponse>
+{
+	private readonly IDeviceService _service;
+
+	public ShowDeviceScreenSaverRequestMessageHandler(IDeviceService service)
+	{
+		_service = service;
+	}
+
+	public async ValueTask<ShowDeviceScreenSaverResponse> Handle(
+		ShowDeviceScreenSaverRequest request,
+		CancellationToken cancellationToken)
+	{
+		var result = await _service.ShowScreenSaver(request.Id);
+
+		return result.Success
+			? new ShowDeviceScreenSaverResponse { Success = true }
+			: new ShowDeviceScreenSaverResponse
+			{
+				Success = false,
+				Error = new TransportError
+					{ Code = result.Error!.Value.ToString(), Message = result.ErrorMessage ?? string.Empty }
+			};
+	}
+}
+
 public class LogoutDeviceRequestMessageHandler : IUiTransportMessageHandler<LogoutDeviceRequest, LogoutDeviceResponse>
 {
 	private readonly IDeviceService _service;

@@ -30,7 +30,11 @@ public static class UiSurfaceKinds
 	/// that serves a production surface must never be reached by a developer preview.</summary>
 	public const string DeveloperPreview = "developer-preview";
 
+	/// <summary>A screensaver surface: what a device shows in place of the deck after sitting idle, rendered by
+	/// a screensaver provider. Opened by the device itself when its own idle timer fires.</summary>
+	public const string ScreenSaver = "screensaver";
+
 	/// <summary>The kinds this package ships names for. Not exhaustive - see the type's remarks.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
-		[Config, Widget, Dialog, Preview, Folder, DeveloperPreview];
+		[Config, Widget, Dialog, Preview, Folder, DeveloperPreview, ScreenSaver];
 }

@@ -10,6 +10,8 @@ public record SetDeviceStartupProfileBody(string? ProfileId);
 
 public record OpenProfileOnDeviceBody(string ProfileId);
 
+public record SetDeviceScreenSaverBody(bool Enabled, int IdleSeconds, string? ScreenSaverId, string? Configuration);
+
 [ApiController]
 [Route("api/devices")]
 public class DevicesController : ControllerBase
@@ -25,13 +27,21 @@ public class DevicesController : ControllerBase
 	private readonly IUiTransportMessageHandler<OpenProfileOnDeviceRequest, OpenProfileOnDeviceResponse>
 		_openProfileOnDevice;
 
+	private readonly IUiTransportMessageHandler<SetDeviceScreenSaverRequest, SetDeviceScreenSaverResponse>
+		_setScreenSaver;
+
+	private readonly IUiTransportMessageHandler<ShowDeviceScreenSaverRequest, ShowDeviceScreenSaverResponse>
+		_showScreenSaver;
+
 	public DevicesController(
 		IUiTransportMessageHandler<GetDevicesRequest, GetDevicesResponse> getDevices,
 		IUiTransportMessageHandler<RenameDeviceRequest, RenameDeviceResponse> renameDevice,
 		IUiTransportMessageHandler<LogoutDeviceRequest, LogoutDeviceResponse> logoutDevice,
 		IUiTransportMessageHandler<RemoveDeviceRequest, RemoveDeviceResponse> removeDevice,
 		IUiTransportMessageHandler<SetDeviceStartupProfileRequest, SetDeviceStartupProfileResponse> setStartupProfile,
-		IUiTransportMessageHandler<OpenProfileOnDeviceRequest, OpenProfileOnDeviceResponse> openProfileOnDevice)
+		IUiTransportMessageHandler<OpenProfileOnDeviceRequest, OpenProfileOnDeviceResponse> openProfileOnDevice,
+		IUiTransportMessageHandler<SetDeviceScreenSaverRequest, SetDeviceScreenSaverResponse> setScreenSaver,
+		IUiTransportMessageHandler<ShowDeviceScreenSaverRequest, ShowDeviceScreenSaverResponse> showScreenSaver)
 	{
 		_getDevices = getDevices;
 		_renameDevice = renameDevice;
@@ -39,6 +49,8 @@ public class DevicesController : ControllerBase
 		_removeDevice = removeDevice;
 		_setStartupProfile = setStartupProfile;
 		_openProfileOnDevice = openProfileOnDevice;
+		_setScreenSaver = setScreenSaver;
+		_showScreenSaver = showScreenSaver;
 	}
 
 	[HttpGet]
@@ -56,6 +68,25 @@ public class DevicesController : ControllerBase
 		CancellationToken ct)
 		=> _setStartupProfile.Handle(new SetDeviceStartupProfileRequest { Id = id, ProfileId = body.ProfileId }, ct)
 			.AsTask();
+
+	[HttpPatch("{id:guid}/screensaver")]
+	public Task<SetDeviceScreenSaverResponse> SetScreenSaver(
+		Guid id,
+		SetDeviceScreenSaverBody body,
+		CancellationToken ct)
+		=> _setScreenSaver.Handle(new SetDeviceScreenSaverRequest
+			{
+				Id = id,
+				Enabled = body.Enabled,
+				IdleSeconds = body.IdleSeconds,
+				ScreenSaverId = body.ScreenSaverId,
+				Configuration = body.Configuration
+			},
+			ct).AsTask();
+
+	[HttpPost("{id:guid}/screensaver/show")]
+	public Task<ShowDeviceScreenSaverResponse> ShowScreenSaver(Guid id, CancellationToken ct)
+		=> _showScreenSaver.Handle(new ShowDeviceScreenSaverRequest { Id = id }, ct).AsTask();
 
 	[HttpPost("{id:guid}/open-profile")]
 	public Task<OpenProfileOnDeviceResponse> OpenProfileOnDevice(

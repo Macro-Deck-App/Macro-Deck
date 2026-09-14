@@ -21,6 +21,7 @@ public class IntegrationLifecycle : IIntegrationLifecycle
 	private readonly IntegrationInitializer _initializer;
 	private readonly LayoutProviderHost _layoutProviders;
 	private readonly FolderViewProviderHost _folderViewProviders;
+	private readonly ScreenSaverProviderHost _screenSaverProviders;
 	private readonly WidgetTypeProviderHost _widgetTypeProviders;
 	private readonly DeviceProviderHost _deviceProviders;
 	private readonly TimeProvider _timeProvider;
@@ -35,6 +36,7 @@ public class IntegrationLifecycle : IIntegrationLifecycle
 		LayoutProviderHost layoutProviders,
 		FolderViewProviderHost folderViewProviders,
 		WidgetTypeProviderHost widgetTypeProviders,
+		ScreenSaverProviderHost screenSaverProviders,
 		DeviceProviderHost deviceProviders,
 		TimeProvider timeProvider,
 		ILogger logger)
@@ -46,6 +48,7 @@ public class IntegrationLifecycle : IIntegrationLifecycle
 		_initializer = initializer;
 		_layoutProviders = layoutProviders;
 		_folderViewProviders = folderViewProviders;
+		_screenSaverProviders = screenSaverProviders;
 		_widgetTypeProviders = widgetTypeProviders;
 		_deviceProviders = deviceProviders;
 		_timeProvider = timeProvider;
@@ -65,6 +68,7 @@ public class IntegrationLifecycle : IIntegrationLifecycle
 			await _widgetTypeProviders.StopAsync(integration, cancellationToken);
 			await _layoutProviders.StopAsync(integration, cancellationToken);
 			await _folderViewProviders.StopAsync(integration, cancellationToken);
+			await _screenSaverProviders.StopAsync(integration, cancellationToken);
 			await _deviceProviders.StopAsync(integration, cancellationToken);
 			await IntegrationShutdownRunner.RunAsync(integration, _timeProvider, cancellationToken);
 			_logger.Information("Integration '{IntegrationId}' stopped before its configuration is rewritten",
@@ -106,6 +110,7 @@ public class IntegrationLifecycle : IIntegrationLifecycle
 			await _widgetTypeProviders.StopAsync(integration, cancellationToken);
 			await _layoutProviders.StopAsync(integration, cancellationToken);
 			await _folderViewProviders.StopAsync(integration, cancellationToken);
+			await _screenSaverProviders.StopAsync(integration, cancellationToken);
 			await _deviceProviders.StopAsync(integration, cancellationToken);
 			await IntegrationShutdownRunner.RunAsync(integration, _timeProvider, cancellationToken);
 

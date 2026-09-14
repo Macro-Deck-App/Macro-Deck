@@ -22,6 +22,10 @@ export interface Device {
   createdAt: string;
   startupProfileId?: string;
   startupProfileName?: string;
+  screenSaverEnabled?: boolean;
+  screenSaverIdleSeconds?: number;
+  screenSaverId?: string;
+  screenSaverConfiguration?: string;
 
   providerId?: string;
   providerName?: LocalizedText;
@@ -51,6 +55,19 @@ export interface SetDeviceStartupProfileResponse extends ResultResponse {
   device?: Device;
 }
 
+export interface SetDeviceScreenSaverRequest {
+  enabled: boolean;
+  idleSeconds: number;
+  screenSaverId: string | null;
+  configuration: string | null;
+}
+
+export interface SetDeviceScreenSaverResponse extends ResultResponse {
+  device?: Device;
+}
+
+export interface ShowDeviceScreenSaverResponse extends ResultResponse {}
+
 export interface OpenProfileOnDeviceRequest {
   profileId: string;
 }
@@ -70,6 +87,11 @@ export interface DeviceRemovedEvent {
 }
 
 export interface DeviceSessionRevokedEvent {}
+
+export interface DeviceScreenSaverChangedEvent {
+  enabled: boolean;
+  idleSeconds: number;
+}
 
 export interface DeviceLoginInfo {
   deviceId?: string;

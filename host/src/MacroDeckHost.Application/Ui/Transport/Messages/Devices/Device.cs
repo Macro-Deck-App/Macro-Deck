@@ -25,6 +25,14 @@ public class Device
 
 	public string? StartupProfileName { get; set; }
 
+	public bool ScreenSaverEnabled { get; set; }
+
+	public int ScreenSaverIdleSeconds { get; set; }
+
+	public string? ScreenSaverId { get; set; }
+
+	public string? ScreenSaverConfiguration { get; set; }
+
 	public DateTime LastSeenAt { get; set; }
 
 	public DateTime CreatedAt { get; set; }

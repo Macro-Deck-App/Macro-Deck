@@ -12,6 +12,7 @@ using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
 using MacroDeckHost.Application.Ui.Transport.Messages.Logging;
 using MacroDeckHost.Application.Ui.Transport.Messages.MusicPlayer;
 using MacroDeckHost.Application.Ui.Transport.Messages.FolderViews;
+using MacroDeckHost.Application.Ui.Transport.Messages.ScreenSavers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Modals;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiPreviews;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
@@ -48,6 +49,13 @@ public sealed class UiWebSocketDispatcher : IDisposable
 	private readonly IUiTransportMessageHandler<GetWeatherStateRequest, GetWeatherStateResponse> _getWeatherState;
 
 	private readonly IUiTransportMessageHandler<GetFolderViewsRequest, GetFolderViewsResponse> _getFolderViews;
+
+	private readonly IUiTransportMessageHandler<GetScreenSaversRequest, GetScreenSaversResponse> _getScreenSavers;
+
+	private readonly IUiTransportMessageHandler<GetDeviceScreenSaverRequest, GetDeviceScreenSaverResponse>
+		_getDeviceScreenSaver;
+
+	private readonly IScreenSaverUiSessionOpener _screenSaverUiSessions;
 
 	private readonly IUiTransportMessageHandler<GetVariableCatalogProvidersRequest, GetVariableCatalogProvidersResponse>
 		_getVariableCatalogProviders;
@@ -100,6 +108,9 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		IUiTransportMessageHandler<GetMusicPlayerStateRequest, GetMusicPlayerStateResponse> getMusicPlayerState,
 		IUiTransportMessageHandler<GetWeatherInstancesRequest, GetWeatherInstancesResponse> getWeatherInstances,
 		IUiTransportMessageHandler<GetFolderViewsRequest, GetFolderViewsResponse> getFolderViews,
+		IUiTransportMessageHandler<GetScreenSaversRequest, GetScreenSaversResponse> getScreenSavers,
+		IUiTransportMessageHandler<GetDeviceScreenSaverRequest, GetDeviceScreenSaverResponse> getDeviceScreenSaver,
+		IScreenSaverUiSessionOpener screenSaverUiSessions,
 		IUiTransportMessageHandler<GetWeatherStateRequest, GetWeatherStateResponse> getWeatherState,
 		IUiTransportMessageHandler<GetVariableCatalogProvidersRequest, GetVariableCatalogProvidersResponse>
 			getVariableCatalogProviders,
@@ -140,6 +151,9 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		_getMusicPlayerState = getMusicPlayerState;
 		_getWeatherInstances = getWeatherInstances;
 		_getFolderViews = getFolderViews;
+		_getScreenSavers = getScreenSavers;
+		_getDeviceScreenSaver = getDeviceScreenSaver;
+		_screenSaverUiSessions = screenSaverUiSessions;
 		_getWeatherState = getWeatherState;
 		_getVariableCatalogProviders = getVariableCatalogProviders;
 		_discoverCatalogVariables = discoverCatalogVariables;
@@ -238,6 +252,11 @@ public sealed class UiWebSocketDispatcher : IDisposable
 					cancellationToken),
 				"GetWeatherInstances" => await _getWeatherInstances.Handle(new(), cancellationToken),
 				"GetFolderViews" => await _getFolderViews.Handle(new(), cancellationToken),
+				"GetScreenSavers" => await _getScreenSavers.Handle(new(), cancellationToken),
+				"GetDeviceScreenSaver" => await _getDeviceScreenSaver.Handle(
+					new GetDeviceScreenSaverRequest { DeviceId = DeviceId() },
+					cancellationToken),
+				"OpenScreenSaverUiSession" => await _screenSaverUiSessions.OpenAsync(DeviceId(), cancellationToken),
 				"GetWeatherState" => await _getWeatherState.Handle(new() { InstanceId = Arg<string?>(payload, 0) },
 					cancellationToken),
 				"GetVariableCatalogProviders" => await _getVariableCatalogProviders.Handle(new(), cancellationToken),
@@ -413,6 +432,9 @@ public sealed class UiWebSocketDispatcher : IDisposable
 
 	private bool IsAdmin => _principal.HasClaim(AuthDefaults.ScopeClaim, AuthDefaults.AdminScope);
 	private string OwnerPrincipal() => _principal.FindFirst(AuthDefaults.DeviceClaim)?.Value ?? string.Empty;
+
+	private Guid? DeviceId()
+		=> Guid.TryParse(_principal.FindFirst(AuthDefaults.DeviceClaim)?.Value, out var id) ? id : null;
 
 	private static bool IsKnown(string type) => type is "RenderLabelPreview"
 		or "SubscribeLogs"

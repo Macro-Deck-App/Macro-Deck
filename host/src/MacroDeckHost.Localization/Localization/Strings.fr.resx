@@ -1296,6 +1296,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Deck.ResizeFailed" xml:space="preserve">
     <value>Échec du redimensionnement de la grille</value>
   </data>
+  <data name="Deck.ScreenSaver.Announcement" xml:space="preserve">
+    <value>Économiseur d'écran. Touche l'écran pour revenir au deck.</value>
+  </data>
   <data name="Deck.UnavailableWidget.Tile" xml:space="preserve">
     <value>Fourni par {plugin}, indisponible pour le moment</value>
   </data>
@@ -3927,6 +3930,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.Capability.MusicPlayer" xml:space="preserve">
     <value>Lecteur de musique</value>
+  </data>
+  <data name="Integrations.Capability.ScreenSaverProvider" xml:space="preserve">
+    <value>Économiseurs d'écran</value>
   </data>
   <data name="Integrations.Capability.Variables" xml:space="preserve">
     <value>Variables</value>
@@ -11874,6 +11880,18 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Profil par défaut</value>
     <comment>The name the one profile a fresh install starts with is created under. Stored as data from there on, so it is written in the language active at that moment and is not re-translated when the language changes.</comment>
   </data>
+  <data name="ScreenSavers.Clock.Description" xml:space="preserve">
+    <value>Heure et date, dérivant lentement sur l'écran.</value>
+  </data>
+  <data name="ScreenSavers.Clock.Name" xml:space="preserve">
+    <value>Horloge</value>
+  </data>
+  <data name="ScreenSavers.NowPlaying.Description" xml:space="preserve">
+    <value>Pochette, titre et artiste du morceau en cours, sinon l'horloge.</value>
+  </data>
+  <data name="ScreenSavers.NowPlaying.Name" xml:space="preserve">
+    <value>Lecture en cours</value>
+  </data>
   <data name="Scripts.ActionsTabLabel" xml:space="preserve">
     <value>Actions</value>
   </data>
@@ -12814,6 +12832,65 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Settings.Devices.RenameModalHeading" xml:space="preserve">
     <value>Renommer l'appareil</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Configuration" xml:space="preserve">
+    <value>Configuration</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Options" xml:space="preserve">
+    <value>Options…</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Enabled" xml:space="preserve">
+    <value>Afficher un économiseur d'écran</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.IdleTimeout" xml:space="preserve">
+    <value>Démarrer après</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Label" xml:space="preserve">
+    <value>Économiseur d'écran</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Line" xml:space="preserve">
+    <value>Économiseur d'écran : {value}</value>
+    <comment>[value:string]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.MenuAction" xml:space="preserve">
+    <value>Économiseur d'écran…</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Minutes.One" xml:space="preserve">
+    <value>{count} minute</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Minutes.Other" xml:space="preserve">
+    <value>{count} minutes</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.ModalDescription" xml:space="preserve">
+    <value>{name} affiche l'économiseur d'écran après un moment d'inactivité. Le premier toucher ramène le deck.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.ModalHeading" xml:space="preserve">
+    <value>Économiseur d'écran</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Off" xml:space="preserve">
+    <value>Désactivé</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.SaveFailed" xml:space="preserve">
+    <value>Impossible d'enregistrer les réglages de l'économiseur d'écran</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.StartDisabledTitle" xml:space="preserve">
+    <value>L'appareil doit être en ligne pour démarrer l'économiseur d'écran</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.StartFailed" xml:space="preserve">
+    <value>Impossible de démarrer l'économiseur d'écran sur l'appareil</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.StartNow" xml:space="preserve">
+    <value>Démarrer maintenant</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Summary" xml:space="preserve">
+    <value>{name} après {timeout}</value>
+    <comment>[name:string][timeout:string]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Unavailable" xml:space="preserve">
+    <value>Indisponible</value>
   </data>
   <data name="Settings.Devices.SignedOutMarker" xml:space="preserve">
     <value>Déconnecté</value>

@@ -66,6 +66,7 @@ internal sealed class IntegrationLifecycleTests
 			TestLayoutProviders.Host(),
 			TestFolderViewProviders.Host(),
 			TestWidgetTypeProviders.Host(),
+			TestScreenSaverProviders.Host(),
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			Serilog.Log.Logger);
@@ -78,6 +79,7 @@ internal sealed class IntegrationLifecycleTests
 			TestLayoutProviders.Host(),
 			TestFolderViewProviders.Host(),
 			TestWidgetTypeProviders.Host(),
+			TestScreenSaverProviders.Host(),
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			Serilog.Log.Logger);

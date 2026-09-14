@@ -7,11 +7,13 @@ using MacroDeck.Plugin.Protocol.Capabilities.DeviceProvider;
 using MacroDeck.Plugin.Protocol.Capabilities.FolderViewProvider;
 using MacroDeck.Plugin.Protocol.Capabilities.LayoutProvider;
 using MacroDeck.Plugin.Protocol.Capabilities.Variables;
+using MacroDeck.Plugin.Protocol.Capabilities.ScreenSaverProvider;
 using MacroDeck.Plugin.Protocol.Capabilities.WidgetTypeProvider;
 using MacroDeck.Sdk.Devices;
 using MacroDeck.Sdk.FolderViews;
 using MacroDeck.Sdk.Layouts;
 using MacroDeck.Sdk.MusicPlayer;
+using MacroDeck.Sdk.ScreenSavers;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
 
@@ -82,6 +84,8 @@ internal static class HostInvokeDispatcher
 				HostApis.FolderViews => await FolderViewsAsync(context, payload, cancellationToken)
 					.ConfigureAwait(false),
 				HostApis.WidgetTypes => await WidgetTypesAsync(context, payload, cancellationToken)
+					.ConfigureAwait(false),
+				HostApis.ScreenSavers => await ScreenSaversAsync(context, payload, cancellationToken)
 					.ConfigureAwait(false),
 				_ => HostInvokeOutcome.Failed(ProtocolErrorCodes.CapabilityUnsupported,
 					$"'{payload.Api}' is not a host API this test host knows.")
@@ -246,6 +250,35 @@ internal static class HostInvokeDispatcher
 
 	private static FolderViewDescriptor ToDescriptor(FolderViewDescriptorDto dto)
 		=> new(dto.Id, dto.Name, dto.Description, dto.Navigation, dto.HasConfiguration, dto.Metadata);
+
+	private static async Task<HostInvokeOutcome> ScreenSaversAsync(
+		FakeIntegrationContext context,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		if (string.Equals(payload.Operation, HostOperations.ScreenSavers.Register, StringComparison.Ordinal))
+		{
+			var arguments = Require<ScreenSaversRegisterArguments>(payload);
+			var registration = await context.ScreenSavers
+				.RegisterScreenSaverAsync(ToDescriptor(arguments.ScreenSaver), cancellationToken)
+				.ConfigureAwait(false);
+
+			return HostInvokeOutcome.Ok(new ScreenSaversRegisterResult
+			{
+				ScreenSaverId = registration.ScreenSaverId, ProviderId = registration.ProviderId
+			});
+		}
+
+		var unregister = Require<ScreenSaversUnregisterArguments>(payload);
+		await context.ScreenSavers
+			.UnregisterScreenSaverAsync(unregister.ScreenSaverId, cancellationToken)
+			.ConfigureAwait(false);
+
+		return HostInvokeOutcome.Ok((JsonElement?)null);
+	}
+
+	private static ScreenSaverDescriptor ToDescriptor(ScreenSaverDescriptorDto dto)
+		=> new(dto.Id, dto.Name, dto.Description, dto.HasConfiguration, dto.Interactive, dto.Metadata);
 
 	private static async Task<HostInvokeOutcome> WidgetTypesAsync(
 		FakeIntegrationContext context,

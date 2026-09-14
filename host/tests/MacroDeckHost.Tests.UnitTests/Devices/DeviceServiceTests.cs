@@ -4,7 +4,9 @@ using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
+using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
+using MacroDeckHost.Application.Ui.Transport.Messages.ScreenSavers;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Tests.UnitTests.Auth;
@@ -53,7 +55,8 @@ public class DeviceServiceTests
 			_deckNavigator,
 			_readiness,
 			_providerPresence,
-			new FakeIntegrationRegistry());
+			new FakeIntegrationRegistry(),
+			TestScreenSaverProviders.Registry());
 	}
 
 	private async Task<DeviceEntity> SeedDevice(bool withLiveToken)
@@ -134,6 +137,99 @@ public class DeviceServiceTests
 		var result = await _service.Rename(Guid.NewGuid(), "New name");
 
 		Assert.That(result.Error, Is.EqualTo(DeviceError.NotFound));
+	}
+
+	[Test]
+	public async Task A_new_device_has_no_screensaver_until_one_is_turned_on()
+	{
+		var device = await SeedDevice(withLiveToken: false);
+
+		var dto = await _service.ToDto(device);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(dto.ScreenSaverEnabled, Is.False);
+			Assert.That(dto.ScreenSaverId, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task SetScreenSaver_stores_the_settings_and_tells_the_device_itself()
+	{
+		var device = await SeedDevice(withLiveToken: false);
+
+		var result = await _service.SetScreenSaver(device.Id, true, 120, null, "{\"album\":\"a\"}");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(result.Data!.ScreenSaverEnabled, Is.True);
+			Assert.That(result.Data.ScreenSaverIdleSeconds, Is.EqualTo(120));
+			Assert.That(result.Data.ScreenSaverId, Is.Null);
+			Assert.That(result.Data.ScreenSaverConfiguration, Is.EqualTo("{\"album\":\"a\"}"));
+			Assert.That(_transport.GroupMessages.Select(sent => sent.Group),
+				Does.Contain(UiDeviceGroups.For(device.Id)));
+			Assert.That(_transport.GroupMessages.Select(sent => sent.Message).OfType<DeviceScreenSaverChangedEvent>()
+					.Single().IdleSeconds,
+				Is.EqualTo(120));
+			Assert.That(_mediator.Published.OfType<DeviceChangedNotification>(), Is.Not.Empty);
+		});
+	}
+
+	[Test]
+	public async Task ShowScreenSaver_of_an_offline_device_fails_with_offline_and_pushes_nothing()
+	{
+		var device = await SeedDevice(withLiveToken: false);
+
+		var result = await _service.ShowScreenSaver(device.Id);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(DeviceError.Offline));
+			Assert.That(_transport.GroupMessages, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task ShowScreenSaver_tells_the_online_device_to_show_it_now()
+	{
+		var device = await SeedDevice(withLiveToken: false);
+		_tracker.Attach("conn-1", device.Id, () => { });
+		_tracker.Register("conn-1", "tab-1");
+
+		var result = await _service.ShowScreenSaver(device.Id);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(_transport.GroupMessages.Single().Group, Is.EqualTo(UiDeviceGroups.For(device.Id)));
+			Assert.That(_transport.GroupMessages.Single().Message, Is.TypeOf<ShowDeviceScreenSaverEvent>());
+		});
+	}
+
+	[Test]
+	public async Task SetScreenSaver_of_a_missing_device_fails_with_not_found()
+	{
+		var result = await _service.SetScreenSaver(Guid.NewGuid(), true, 60, null, null);
+
+		Assert.That(result.Error, Is.EqualTo(DeviceError.NotFound));
+	}
+
+	[Test]
+	public async Task SetScreenSaver_rejects_a_new_selection_nothing_provides_but_keeps_an_unchanged_one()
+	{
+		var device = await SeedDevice(withLiveToken: false);
+		device.ScreenSaverId = "com.example.gone::photos";
+
+		var rejected = await _service.SetScreenSaver(device.Id, true, 60, "com.example.other::x", null);
+		var kept = await _service.SetScreenSaver(device.Id, true, 60, "com.example.gone::photos", null);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(rejected.Error, Is.EqualTo(DeviceError.ValidationError));
+			Assert.That(kept.Success, Is.True);
+			Assert.That(kept.Data!.ScreenSaverIdleSeconds, Is.EqualTo(60));
+		});
 	}
 
 	[Test]
@@ -244,7 +340,8 @@ public class DeviceServiceTests
 			_deckNavigator,
 			new StartupReadiness(),
 			_providerPresence,
-			new FakeIntegrationRegistry());
+			new FakeIntegrationRegistry(),
+			TestScreenSaverProviders.Registry());
 
 		var result = await notReadyService.ResolveStartupProfileId(device.Id);
 

@@ -132,6 +132,24 @@ provider-local id is the same device, and unregistering keeps the device and onl
 `OpenSession` hands your provider a `FakeDeviceSession` to push surfaces to and read interactions from.
 `InitializeIntegrationsAsync` does not initialize device providers, so call `InitializeAsync` yourself.
 
+## Testing screensavers
+
+```csharp
+var screenSavers = new FakeScreenSaverProviderContext();
+var provider = new PhotoIntegration();
+
+await provider.InitializeAsync(screenSavers);
+
+Assert.That(screenSavers.ScreenSavers.ContainsKey("photos"), Is.True);
+Assert.That(screenSavers.Calls.Last().Kind, Is.EqualTo(ScreenSaverProviderCallKind.Register));
+```
+
+`FakeScreenSaverProviderContext` keeps the host's identity rules: registering again under a known
+provider-local id replaces the screensaver, and unregistering an unknown id is a silent no-op. `Calls`
+records every `ScreenSaverProviderCall` in order. `harness.Context.ScreenSavers` is the same fake behind a
+whole harness, and `harness.ScreenSaverProvider`, a `ScreenSaverProviderTestClient`, drives the `screensaver-provider`
+capability with `GetScreenSaversAsync`, the way the host reads your catalog after a reconnect. See [Screensavers](/ui/views/screensavers/).
+
 ## Time and waiting
 
 ```csharp

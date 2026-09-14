@@ -20,7 +20,9 @@ using MacroDeckHost.Application.Connect;
 using MacroDeckHost.Infrastructure.Connect;
 using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Devices;
+using MacroDeck.Sdk.ScreenSavers;
 using MacroDeckHost.Application.FolderViews;
+using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Ui.Modals;
 using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.Devices.Surfaces;
@@ -122,6 +124,7 @@ using MacroDeckHost.Widgets.ActionButton;
 using MacroDeckHost.Widgets.Clock;
 using MacroDeckHost.Widgets.HistoryGraph;
 using MacroDeckHost.Widgets.MusicPlayer;
+using MacroDeckHost.Widgets.ScreenSavers;
 using MacroDeckHost.Widgets.DeveloperPreviews;
 using MacroDeckHost.Widgets.Preview;
 using MacroDeckHost.Widgets.Slider;
@@ -267,6 +270,9 @@ public class Startup
 		services.AddSingleton<IBuiltInIntegrationUiProvider, WeatherDetailsUiProvider>();
 		services.AddSingleton<IBuiltInIntegrationUiProvider, MusicPlayerPickerUiProvider>();
 		services.AddSingleton<IBuiltInIntegrationUiProvider, MusicPlayerDevicePickerUiProvider>();
+		services.AddSingleton<BuiltInScreenSaverProvider>();
+		services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => provider.GetRequiredService<BuiltInScreenSaverProvider>());
+		services.AddSingleton<IScreenSaverProvider>(provider => provider.GetRequiredService<BuiltInScreenSaverProvider>());
 		services.AddSingleton<UiSessionBroker>();
 		services.AddSingleton<IUiSessionBroker>(provider => provider.GetRequiredService<UiSessionBroker>());
 		services.AddSingleton<IUiSessionSink>(provider => provider.GetRequiredService<UiSessionBroker>());
@@ -359,6 +365,11 @@ public class Startup
 		services.AddSingleton<LayoutProviderHost>();
 		services.AddSingleton<IFolderViewRegistry, FolderViewRegistry>();
 		services.AddSingleton<FolderViewProviderHost>();
+		services.AddSingleton<IScreenSaverRegistry>(provider => new ScreenSaverRegistry(
+			provider.GetRequiredService<IPublisher>(),
+			provider.GetRequiredService<IEnumerable<IScreenSaverProvider>>()));
+		services.AddSingleton<ScreenSaverProviderHost>();
+		services.AddSingleton<IScreenSaverUiSessionOpener, ScreenSaverUiSessionOpener>();
 		services.AddSingleton<WidgetTypeProviderHost>();
 		services.AddSingleton<DeviceLayoutConstraintTracker>();
 		services.AddSingleton<IPluginDeviceRegistry, PluginDeviceRegistry>();

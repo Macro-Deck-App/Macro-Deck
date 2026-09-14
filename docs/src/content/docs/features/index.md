@@ -52,6 +52,7 @@ public sealed class ObsIntegration : IPluginIntegration, IVariableProvider, IEve
 | [Macro Deck UI](/ui/) | `IUiProvider` | Draw configuration views, widgets and folder views. |
 | [Widget types](/ui/views/widget-types/) | `IWidgetTypeProvider` | Add deck widgets beside Macro Deck's own. |
 | [Folder views](/ui/views/folder-views/) | `IFolderViewProvider` | Replace a folder's button grid with your own rendering. |
+| [Screensavers](/ui/views/screensavers/) | `IScreenSaverProvider` | Show something of your own on a device that has sat idle. |
 
 ## Host APIs
 

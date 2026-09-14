@@ -1,6 +1,7 @@
 using System.Reflection;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.FolderViews;
+using MacroDeckHost.Application.Ui.Transport.Messages.ScreenSavers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
 using MacroDeckHost.Application.Ui.Transport.Messages.MusicPlayer;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiPreviews;
@@ -34,6 +35,10 @@ public class UiHubHandlerAllowlistTests
 		// Reads IFolderViewRegistry's in-memory catalog. No provider is consulted: a provider pushes its
 		// registrations, so what the picker needs is already host-local by the time it is asked for.
 		typeof(GetFolderViewsRequest),
+
+		// Same for IScreenSaverRegistry's catalog, and a device's own stored settings.
+		typeof(GetScreenSaversRequest),
+		typeof(GetDeviceScreenSaverRequest),
 
 		// Reads the first-party preview scan and the per-connection plugin capability snapshots, both
 		// host-local. No provider is consulted and no scenario is built - a plugin's previews arrived with

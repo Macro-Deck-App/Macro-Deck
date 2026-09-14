@@ -19,6 +19,7 @@ public class HostApiStabilityTests
 		"folder-views",
 		"layouts",
 		"notifications",
+		"screensavers",
 		"scripts",
 		"ui",
 		"user-variables",
@@ -46,6 +47,7 @@ public class HostApiStabilityTests
 			[HostApis.Layouts] = ["register", "unregister"],
 			[HostApis.FolderViews] = ["register", "unregister"],
 			[HostApis.WidgetTypes] = ["register", "unregister"],
+			[HostApis.ScreenSavers] = ["register", "unregister"],
 		};
 
 	[Test]

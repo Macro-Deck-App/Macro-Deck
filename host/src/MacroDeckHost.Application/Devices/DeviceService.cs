@@ -6,6 +6,8 @@ using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Profiles;
+using MacroDeckHost.Application.ScreenSavers;
+using MacroDeckHost.Application.Ui.Transport.Messages.ScreenSavers;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
@@ -29,6 +31,7 @@ public class DeviceService : IDeviceService
 	private readonly StartupReadiness _readiness;
 	private readonly ProviderDevicePresenceTracker _providerPresence;
 	private readonly IIntegrationRegistry _integrationRegistry;
+	private readonly IScreenSaverRegistry _screenSavers;
 
 	public DeviceService(
 		IDeviceRepository deviceRepository,
@@ -41,7 +44,8 @@ public class DeviceService : IDeviceService
 		IDeviceDeckNavigator deckNavigator,
 		StartupReadiness readiness,
 		ProviderDevicePresenceTracker providerPresence,
-		IIntegrationRegistry integrationRegistry)
+		IIntegrationRegistry integrationRegistry,
+		IScreenSaverRegistry screenSavers)
 	{
 		_deviceRepository = deviceRepository;
 		_refreshTokenRepository = refreshTokenRepository;
@@ -54,6 +58,7 @@ public class DeviceService : IDeviceService
 		_readiness = readiness;
 		_providerPresence = providerPresence;
 		_integrationRegistry = integrationRegistry;
+		_screenSavers = screenSavers;
 	}
 
 	public async Task<DeviceRegistrationResult> RegisterOrReuse(DeviceRegistration registration, DateTime now)
@@ -170,6 +175,63 @@ public class DeviceService : IDeviceService
 		device.StartupProfileId = profileId;
 		await _deviceRepository.Update(device);
 
+		await _mediator.Publish(new DeviceChangedNotification(id));
+
+		return Result.Ok<DeviceEntity, DeviceError>(device);
+	}
+
+	public async Task<Result<DeviceError>> ShowScreenSaver(Guid id)
+	{
+		var device = await _deviceRepository.GetById(id);
+		if (device is null)
+		{
+			return Result.Fail<DeviceError>(DeviceError.NotFound, "Device not found.");
+		}
+
+		if (_connectionTracker.OnlineDeviceConnectionCounts().GetValueOrDefault(id) <= 0)
+		{
+			return Result.Fail<DeviceError>(DeviceError.Offline, "The device is offline.");
+		}
+
+		await _uiTransport.SendToGroup(UiDeviceGroups.For(id), new ShowDeviceScreenSaverEvent());
+
+		return Result.Ok<DeviceError>();
+	}
+
+	public async Task<Result<DeviceEntity, DeviceError>> SetScreenSaver(
+		Guid id,
+		bool enabled,
+		int idleSeconds,
+		string? screenSaverId,
+		string? configuration)
+	{
+		var device = await _deviceRepository.GetById(id);
+		if (device is null)
+		{
+			return Result.Fail<DeviceEntity, DeviceError>(DeviceError.NotFound, "Device not found.");
+		}
+
+		var validated = DeviceScreenSaverSettings.Validate(_screenSavers,
+			enabled,
+			idleSeconds,
+			screenSaverId,
+			configuration,
+			device.ScreenSaverId);
+		if (!validated.Success)
+		{
+			return Result.Fail<DeviceEntity, DeviceError>(validated.Error!.Value, validated.ErrorMessage ?? string.Empty);
+		}
+
+		var requested = validated.Data;
+		device.ScreenSaverEnabled = requested.Enabled;
+		device.ScreenSaverIdleSeconds = requested.IdleSeconds;
+		device.ScreenSaverId = requested.ScreenSaverId;
+		device.ScreenSaverConfiguration = requested.Configuration;
+		await _deviceRepository.Update(device);
+
+		await _uiTransport.SendToGroup(UiDeviceGroups.For(id),
+			new DeviceScreenSaverChangedEvent
+				{ Enabled = requested.Enabled, IdleSeconds = requested.IdleSeconds });
 		await _mediator.Publish(new DeviceChangedNotification(id));
 
 		return Result.Ok<DeviceEntity, DeviceError>(device);
@@ -456,6 +518,10 @@ public class DeviceService : IDeviceService
 			HasActiveSession = !entity.IsProviderDevice && hasActiveSession,
 			StartupProfileId = entity.StartupProfileId,
 			StartupProfileName = startupProfileName,
+			ScreenSaverEnabled = entity.ScreenSaverEnabled,
+			ScreenSaverIdleSeconds = entity.ScreenSaverIdleSeconds,
+			ScreenSaverId = entity.ScreenSaverId,
+			ScreenSaverConfiguration = entity.ScreenSaverConfiguration,
 			LastSeenAt = DateTime.SpecifyKind(online ? now : entity.LastSeenAt, DateTimeKind.Utc),
 			CreatedAt = DateTime.SpecifyKind(entity.CreatedAt, DateTimeKind.Utc),
 			ProviderId = entity.ProviderId,

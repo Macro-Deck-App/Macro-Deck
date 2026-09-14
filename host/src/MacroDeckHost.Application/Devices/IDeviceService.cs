@@ -28,6 +28,15 @@ public interface IDeviceService
 
 	Task<Result<DeviceEntity, DeviceError>> SetStartupProfile(Guid id, string? profileId);
 
+	Task<Result<DeviceError>> ShowScreenSaver(Guid id);
+
+	Task<Result<DeviceEntity, DeviceError>> SetScreenSaver(
+		Guid id,
+		bool enabled,
+		int idleSeconds,
+		string? screenSaverId,
+		string? configuration);
+
 	Task<string?> ResolveStartupProfileId(Guid deviceId);
 
 	Task<Result<DeviceError>> OpenProfileOnDevice(Guid id, string profileId);
