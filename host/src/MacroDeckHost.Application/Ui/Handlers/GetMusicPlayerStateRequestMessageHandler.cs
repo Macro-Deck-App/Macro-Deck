@@ -20,12 +20,7 @@ public class GetMusicPlayerStateRequestMessageHandler
 		GetMusicPlayerStateRequest request,
 		CancellationToken cancellationToken)
 	{
-		var instanceId = request.InstanceId;
-		if (instanceId is null)
-		{
-			var instances = _registry.GetInstances();
-			instanceId = instances.Count > 0 ? instances[0].InstanceId : null;
-		}
+		var instanceId = request.InstanceId ?? MusicPlayerFocus.Resolve(_registry.GetInstances(), _cache.ActiveInstanceId);
 
 		var player = instanceId is null ? null : _registry.GetPlayer(instanceId);
 		if (instanceId is null || player is null)

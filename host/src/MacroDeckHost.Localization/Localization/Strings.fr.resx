@@ -15927,8 +15927,8 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.Music.Artist" xml:space="preserve">
     <value>Artiste</value>
   </data>
-  <data name="Widgets.Music.FirstAvailable" xml:space="preserve">
-    <value>Premier disponible</value>
+  <data name="Widgets.Music.ActivePlayer" xml:space="preserve">
+    <value>Lecteur actif</value>
   </data>
   <data name="Widgets.Music.FullCover" xml:space="preserve">
     <value>Pochette pleine</value>

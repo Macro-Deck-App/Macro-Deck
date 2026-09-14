@@ -8,6 +8,8 @@ public interface IMusicPlayerStateCache
 
 	IReadOnlyList<MusicPlayerStatePayload> GetAll();
 
+	string? ActiveInstanceId { get; }
+
 	void Record(string instanceId, MusicPlayerStatePayload payload);
 
 	void Forget(IReadOnlySet<string> keep);

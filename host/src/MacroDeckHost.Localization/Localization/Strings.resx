@@ -15928,8 +15928,8 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Music.Artist" xml:space="preserve">
     <value>Artist</value>
   </data>
-  <data name="Widgets.Music.FirstAvailable" xml:space="preserve">
-    <value>First available</value>
+  <data name="Widgets.Music.ActivePlayer" xml:space="preserve">
+    <value>Active player</value>
   </data>
   <data name="Widgets.Music.FullCover" xml:space="preserve">
     <value>Full cover</value>

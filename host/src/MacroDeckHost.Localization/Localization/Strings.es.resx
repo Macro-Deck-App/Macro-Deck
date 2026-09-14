@@ -15927,8 +15927,8 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.Music.Artist" xml:space="preserve">
     <value>Artista</value>
   </data>
-  <data name="Widgets.Music.FirstAvailable" xml:space="preserve">
-    <value>Primero disponible</value>
+  <data name="Widgets.Music.ActivePlayer" xml:space="preserve">
+    <value>Reproductor activo</value>
   </data>
   <data name="Widgets.Music.FullCover" xml:space="preserve">
     <value>Portada completa</value>

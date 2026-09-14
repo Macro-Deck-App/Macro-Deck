@@ -23,13 +23,14 @@ internal sealed class MusicPlayerTestHarness
 		Now = new DateTimeOffset(2026, 8, 25, 12, 0, 0, TimeSpan.Zero),
 	};
 
+	private readonly StubRegistry _registry = new();
 	private readonly StubStateCache _stateCache = new();
 	private readonly StubArtworkService _artwork = new();
 	private readonly MusicPlayerViewStateResolver _resolver;
 
 	public MusicPlayerTestHarness()
 	{
-		_resolver = new MusicPlayerViewStateResolver(new StubRegistry(),
+		_resolver = new MusicPlayerViewStateResolver(_registry,
 			_stateCache,
 			_artwork,
 			new StubPaletteExtractor(),
@@ -44,6 +45,15 @@ internal sealed class MusicPlayerTestHarness
 	public int ArtworkFetches => _artwork.Fetches;
 
 	public void Record(MusicPlayerStatePayload payload) => _stateCache.Record(InstanceId, payload);
+
+	public void RecordSecond(MusicPlayerStatePayload payload)
+	{
+		_registry.HasSecondInstance = true;
+		payload.InstanceId = StubRegistry.SecondInstanceId;
+		_stateCache.Record(StubRegistry.SecondInstanceId, payload);
+	}
+
+	public void Focus(string? instanceId) => _stateCache.ActiveInstanceId = instanceId;
 
 
 	public void Advance(TimeSpan by) => _time.Advance(by);
@@ -61,6 +71,10 @@ internal sealed class MusicPlayerTestHarness
 
 internal sealed class StubRegistry : IMusicPlayerRegistry
 {
+	internal const string SecondInstanceId = "ytm.1";
+
+	public bool HasSecondInstance { get; set; }
+
 	public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances() =>
 	[
 		new(MusicPlayerTestHarness.InstanceId,
@@ -68,6 +82,12 @@ internal sealed class StubRegistry : IMusicPlayerRegistry
 			LocalizedText.FromLiteral("Spotify"),
 			"Spotify",
 			false),
+		.. HasSecondInstance
+			? new MusicPlayerInstanceDescriptor[]
+			{
+				new(SecondInstanceId, "app.macro-deck.ytm", LocalizedText.FromLiteral("YouTube Music"), "YouTube Music", false),
+			}
+			: [],
 	];
 
 	public IMusicPlayer? GetPlayer(string instanceId) => null;
@@ -83,6 +103,8 @@ internal sealed class StubStateCache : IMusicPlayerStateCache
 		=> _states.GetValueOrDefault(instanceId);
 
 	public IReadOnlyList<MusicPlayerStatePayload> GetAll() => _states.Values.ToList();
+
+	public string? ActiveInstanceId { get; set; }
 
 	public void Record(string instanceId, MusicPlayerStatePayload payload) => _states[instanceId] = payload;
 

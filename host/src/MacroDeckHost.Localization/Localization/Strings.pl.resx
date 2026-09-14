@@ -15927,8 +15927,8 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Music.Artist" xml:space="preserve">
     <value>Wykonawca</value>
   </data>
-  <data name="Widgets.Music.FirstAvailable" xml:space="preserve">
-    <value>Pierwszy dostępny</value>
+  <data name="Widgets.Music.ActivePlayer" xml:space="preserve">
+    <value>Aktywny odtwarzacz</value>
   </data>
   <data name="Widgets.Music.FullCover" xml:space="preserve">
     <value>Pełna okładka</value>

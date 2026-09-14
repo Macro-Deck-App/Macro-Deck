@@ -15927,8 +15927,8 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.Music.Artist" xml:space="preserve">
     <value>Artista</value>
   </data>
-  <data name="Widgets.Music.FirstAvailable" xml:space="preserve">
-    <value>Primo disponibile</value>
+  <data name="Widgets.Music.ActivePlayer" xml:space="preserve">
+    <value>Player attivo</value>
   </data>
   <data name="Widgets.Music.FullCover" xml:space="preserve">
     <value>Copertina intera</value>
