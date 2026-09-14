@@ -29,7 +29,7 @@ All multi-byte numbers are big-endian.
 | Endpoints | see below |
 | Token length `t` | 1 byte |
 | Token, ASCII digits (the pairing code), empty when there is none | `t` bytes |
-| Identity fingerprint, optional | 12 bytes |
+| Identity fingerprint, optional: the first 12 bytes of SHA-256 over the host identity key ([ADR 0086](../decisions/0086-host-identity-key.md)) | 12 bytes |
 
 Each endpoint:
 
@@ -71,4 +71,22 @@ Link:
 
 ```
 https://connect.macro-deck.app/00787172632801624942269912819229797295560829628531296980019243009025920025600192430090259200513015881438614641053
+```
+
+With the identity fingerprint `3208 E004 6ED3 EE6B 4E75 1027` of the shared host identity test vector
+([host-identity-vector.json](../../host/tests/MacroDeckHost.Tests.UnitTests/Auth/host-identity-vector.json))
+appended after the token, the same host gives these bytes (57):
+
+```
+03 13 43 6F 6D 70 61 6E 69 6F 6E 20 74 65 73 74 20 68 6F 73 74 02
+00 C0 A8 01 0A 20 01 00
+00 C0 A8 01 0A 20 02 01
+06 34 38 32 39 31 35
+32 08 E0 04 6E D3 EE 6B 4E 75 10 27
+```
+
+Link:
+
+```
+https://connect.macro-deck.app/00787172632801624942269912819229797295560829628531296980019243009025920025600192430090259200513015881438614641136180227201134542542747029968039
 ```

@@ -248,6 +248,22 @@ describe('ConnectionPanelComponent', () => {
         '00787172632801624942269912819229797295560829628531296980019243009025920025600192430090259200513015881438614641053');
     });
 
+    it('matches the conformance vector with the identity fingerprint in engineering/api/connect-link.md', () => {
+      const link = encodeConnectLink({ ...referenceHost, identityFingerprint: '3208 E004 6ED3 EE6B 4E75 1027' }, '482915');
+
+      expect(link).toBe(prefix +
+        '00787172632801624942269912819229797295560829628531296980019243009025920025600192430090259200513015881438614641136180227201134542542747029968039');
+      expect(linkBytes(link).slice(-12)).toEqual([0x32, 0x08, 0xE0, 0x04, 0x6E, 0xD3, 0xEE, 0x6B, 0x4E, 0x75, 0x10, 0x27]);
+    });
+
+    it('ends at the token while the identity key is unavailable or the fingerprint is malformed', () => {
+      const withoutKey = encodeConnectLink({ ...referenceHost, identityFingerprint: null }, '482915');
+      const malformed = encodeConnectLink({ ...referenceHost, identityFingerprint: '3208 E004' }, '482915');
+
+      expect(withoutKey).toBe(encodeConnectLink(referenceHost, '482915'));
+      expect(malformed).toBe(withoutKey);
+    });
+
     it('fits a far smaller QR code than the version 2 link did', () => {
       expect(create(encodeConnectLink(referenceHost, '482915'), { errorCorrectionLevel: 'L' }).version)
         .toBeLessThanOrEqual(5);
