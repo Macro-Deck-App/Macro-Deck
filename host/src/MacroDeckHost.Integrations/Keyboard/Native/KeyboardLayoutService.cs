@@ -22,7 +22,12 @@ public sealed class KeyboardLayoutService : IKeyboardLayoutService
 			["command"] = KeyModifier.Meta,
 			["win"] = KeyModifier.Meta,
 			["windows"] = KeyModifier.Meta,
-			["super"] = KeyModifier.Meta
+			["super"] = KeyModifier.Meta,
+			["rightctrl"] = KeyModifier.RightControl,
+			["rightcontrol"] = KeyModifier.RightControl,
+			["rightshift"] = KeyModifier.RightShift,
+			["rightalt"] = KeyModifier.RightAlt,
+			["rightmeta"] = KeyModifier.RightMeta
 		};
 
 	public bool TryResolveKey(string name, out KeyCode key)
@@ -63,10 +68,15 @@ public sealed class KeyboardLayoutService : IKeyboardLayoutService
 
 	public IReadOnlyList<KeyCode> ExpandModifiers(KeyModifier modifiers)
 	{
-		var result = new List<KeyCode>(4);
+		var result = new List<KeyCode>(8);
 		if (modifiers.HasFlag(KeyModifier.Control))
 		{
 			result.Add(KeyCode.LeftControl);
+		}
+
+		if (modifiers.HasFlag(KeyModifier.RightControl))
+		{
+			result.Add(KeyCode.RightControl);
 		}
 
 		if (modifiers.HasFlag(KeyModifier.Shift))
@@ -74,14 +84,29 @@ public sealed class KeyboardLayoutService : IKeyboardLayoutService
 			result.Add(KeyCode.LeftShift);
 		}
 
+		if (modifiers.HasFlag(KeyModifier.RightShift))
+		{
+			result.Add(KeyCode.RightShift);
+		}
+
 		if (modifiers.HasFlag(KeyModifier.Alt))
 		{
 			result.Add(KeyCode.LeftAlt);
 		}
 
+		if (modifiers.HasFlag(KeyModifier.RightAlt))
+		{
+			result.Add(KeyCode.RightAlt);
+		}
+
 		if (modifiers.HasFlag(KeyModifier.Meta))
 		{
 			result.Add(KeyCode.LeftMeta);
+		}
+
+		if (modifiers.HasFlag(KeyModifier.RightMeta))
+		{
+			result.Add(KeyCode.RightMeta);
 		}
 
 		return result;

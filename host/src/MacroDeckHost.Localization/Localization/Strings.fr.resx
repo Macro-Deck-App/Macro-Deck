@@ -11138,6 +11138,10 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Keyboard.Media.VolumeUp" xml:space="preserve">
     <value>Volume +</value>
   </data>
+  <data name="Keyboard.Modifier.Right" xml:space="preserve">
+    <value>{modifier} droit</value>
+    <comment>[modifier:string]</comment>
+  </data>
   <data name="Migration.CredentialChoice.EnterKeyButton" xml:space="preserve">
     <value>Saisir la clé de déchiffrement</value>
   </data>
@@ -11361,10 +11365,6 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Migration.Warning.IntegrationAlreadyConfigured" xml:space="preserve">
     <value>La configuration déjà présente ici a été conservée, donc rien de Macro Deck 2 ne lui a été appliqué - pas même les réglages qui lui manquent. Pour migrer cette configuration à la place, supprime celle qui existe et relance la migration.</value>
-  </data>
-  <data name="Migration.Warning.Keyboard.RightModifierNotSupported" xml:space="preserve">
-    <value>Ce raccourci nécessitait spécifiquement la touche {modifier} droite ; Macro Deck 3 appuie toujours sur la touche {modifier} gauche.</value>
-    <comment>[modifier:string]</comment>
   </data>
   <data name="Migration.Warning.LongPressReleaseNotMigrated" xml:space="preserve">
     <value>Les actions exécutées à la fin d'un appui long sont migrées désactivées, car Macro Deck 3 n'a pas ce type de déclencheur.</value>

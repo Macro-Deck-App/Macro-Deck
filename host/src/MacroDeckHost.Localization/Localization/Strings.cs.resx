@@ -11138,6 +11138,10 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Keyboard.Media.VolumeUp" xml:space="preserve">
     <value>Zvýšit hlasitost</value>
   </data>
+  <data name="Keyboard.Modifier.Right" xml:space="preserve">
+    <value>Pravý {modifier}</value>
+    <comment>[modifier:string]</comment>
+  </data>
   <data name="Migration.CredentialChoice.EnterKeyButton" xml:space="preserve">
     <value>Zadat dešifrovací klíč</value>
   </data>
@@ -11361,10 +11365,6 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Migration.Warning.IntegrationAlreadyConfigured" xml:space="preserve">
     <value>Zdejší stávající konfigurace byla zachována, takže se z Macro Deck 2 nepřeneslo nic - ani nastavení, která chybí. Pokud se má přenést konfigurace z Macro Deck 2, je potřeba stávající odstranit a migraci spustit znovu.</value>
-  </data>
-  <data name="Migration.Warning.Keyboard.RightModifierNotSupported" xml:space="preserve">
-    <value>Tato klávesová zkratka vyžadovala konkrétně pravou klávesu {modifier}; Macro Deck 3 vždy stiskne levou klávesu {modifier}.</value>
-    <comment>[modifier:string]</comment>
   </data>
   <data name="Migration.Warning.LongPressReleaseNotMigrated" xml:space="preserve">
     <value>Akce spouštěné při uvolnění dlouhého stisku se migrují vypnuté, protože Macro Deck 3 takový spouštěč nemá.</value>

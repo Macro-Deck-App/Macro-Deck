@@ -11,7 +11,17 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { AppStrings, KEYBOARD_MODIFIERS, KeyboardComboValue, formatCombo, keyFromEvent, modifierLabel, supportedKeyGroups } from '@macro-deck/runtime';
+import {
+  AppStrings,
+  KEYBOARD_MODIFIERS,
+  KeyboardComboValue,
+  RIGHT_KEYBOARD_MODIFIERS,
+  formatCombo,
+  keyFromEvent,
+  modifierLabel,
+  sidedModifier,
+  supportedKeyGroups,
+} from '@macro-deck/runtime';
 import { LocalizationService, SegmentedControlComponent, SegmentedOption, TranslatePipe } from '@shared';
 import { HotkeyCaptureService } from '../../../services/hotkey-capture.service';
 import { SelectComponent, SelectOption } from '../select/select.component';
@@ -80,7 +90,13 @@ export class KeyboardComboEditorComponent implements OnDestroy {
   @Input() value: KeyboardComboValue | null = null;
   @Output() valueChange = new EventEmitter<KeyboardComboValue>();
 
-  readonly modifiers = KEYBOARD_MODIFIERS;
+  @Input() sidedModifiers = false;
+
+  private static readonly allModifiers: readonly string[] = [...KEYBOARD_MODIFIERS, ...RIGHT_KEYBOARD_MODIFIERS];
+
+  get modifiers(): readonly string[] {
+    return this.sidedModifiers ? KeyboardComboEditorComponent.allModifiers : KEYBOARD_MODIFIERS;
+  }
 
   readonly keyGroups = computed(() => supportedKeyGroups(key => this.localization.translateKey(key)));
   readonly keyOptions = computed<SelectOption[]>(() => this.keyGroups().flatMap(group =>
@@ -109,12 +125,15 @@ export class KeyboardComboEditorComponent implements OnDestroy {
   }
 
   get preview(): string {
-    return formatCombo(this.currentModifiers, this.key);
+    return formatCombo(this.currentModifiers, this.key, this.translate);
   }
 
   label(modifier: string): string {
-    return modifierLabel(modifier);
+    return modifierLabel(modifier, this.translate);
   }
+
+  private readonly translate = (key: string, args?: Record<string, unknown>) =>
+    this.localization.translateKey(key, args);
 
   ngOnDestroy(): void {
     this.stopRecording();
@@ -143,7 +162,7 @@ export class KeyboardComboEditorComponent implements OnDestroy {
 
     this.recording.set(true);
     this.capture.start(click.currentTarget as HTMLElement, {
-      key: event => this.record(event),
+      key: (event, held) => this.record(event, held),
       cancel: () => this.recording.set(false),
     });
   }
@@ -161,14 +180,16 @@ export class KeyboardComboEditorComponent implements OnDestroy {
     this.emit(this.currentModifiers, key);
   }
 
-  private record(event: KeyboardEvent): void {
+  private record(event: KeyboardEvent, held: ReadonlySet<string>): void {
     const modifiers: string[] = [];
     if (event.ctrlKey) modifiers.push('Ctrl');
     if (event.shiftKey) modifiers.push('Shift');
-    if (event.altKey) modifiers.push('Alt');
+    // AltGr layouts report AltGraph instead of altKey for the right Alt key.
+    if (event.altKey || (this.sidedModifiers && held.has('AltRight'))) modifiers.push('Alt');
     if (event.metaKey) modifiers.push('Meta');
+    const recorded = this.sidedModifiers ? modifiers.map(modifier => sidedModifier(modifier, held)) : modifiers;
 
-    this.emit(modifiers.length > 0 ? modifiers : this.currentModifiers, keyFromEvent(event));
+    this.emit(recorded.length > 0 ? recorded : this.currentModifiers, keyFromEvent(event));
     this.stopRecording();
   }
 

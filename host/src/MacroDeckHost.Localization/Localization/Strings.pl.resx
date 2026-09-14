@@ -11138,6 +11138,10 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Keyboard.Media.VolumeUp" xml:space="preserve">
     <value>Zwiększ głośność</value>
   </data>
+  <data name="Keyboard.Modifier.Right" xml:space="preserve">
+    <value>Prawy {modifier}</value>
+    <comment>[modifier:string]</comment>
+  </data>
   <data name="Migration.CredentialChoice.EnterKeyButton" xml:space="preserve">
     <value>Wprowadź klucz odszyfrowywania</value>
   </data>
@@ -11361,10 +11365,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Migration.Warning.IntegrationAlreadyConfigured" xml:space="preserve">
     <value>Istniejąca tu konfiguracja została zachowana, więc nie zastosowano niczego z Macro Deck 2 - nawet ustawień, których brakuje. Aby przenieść tamtą konfigurację, należy usunąć istniejącą i uruchomić migrację ponownie.</value>
-  </data>
-  <data name="Migration.Warning.Keyboard.RightModifierNotSupported" xml:space="preserve">
-    <value>Ten skrót wymagał konkretnie prawego klawisza {modifier}; Macro Deck 3 zawsze naciska lewy klawisz {modifier}.</value>
-    <comment>[modifier:string]</comment>
   </data>
   <data name="Migration.Warning.LongPressReleaseNotMigrated" xml:space="preserve">
     <value>Akcje uruchamiane po zwolnieniu długiego naciśnięcia są migrowane jako wyłączone, ponieważ Macro Deck 3 nie ma takiego wyzwalacza.</value>

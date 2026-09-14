@@ -201,7 +201,7 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 			KeyCode.Enter => 36, KeyCode.Tab => 48, KeyCode.Space => 49, KeyCode.Backspace => 51,
 			KeyCode.Escape => 53, KeyCode.CapsLock => 57,
 
-			KeyCode.LeftMeta => 55, KeyCode.RightMeta => 55,
+			KeyCode.LeftMeta => 55, KeyCode.RightMeta => 54,
 			KeyCode.LeftShift => 56, KeyCode.RightShift => 60,
 			KeyCode.LeftAlt => 58, KeyCode.RightAlt => 61,
 			KeyCode.LeftControl => 59, KeyCode.RightControl => 62,

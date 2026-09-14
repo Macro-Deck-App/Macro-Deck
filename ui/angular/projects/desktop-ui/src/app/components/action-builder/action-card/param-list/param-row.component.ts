@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { ActionBlock, ActionBlockParameter, AppStrings, ComparisonOperator, EventDefinition, HotkeyValue, KeyboardComboValue, KeyboardSequenceValue, ParameterValue, SecretReference, WIDGET_APPEARANCE_RESET, WIDGET_INTEGRATION_ID, WidgetIconRef, defaultParameterValue, iconPackRef, iconPackReferenceOf, isEventFilterParameter, isEventReference, isHotkeyValue, isRunScriptWidgetTargetParam, isSecretReference, isStateOperator, isVariableReference, variableTokenText } from '@macro-deck/runtime';
+import { ActionBlock, ActionBlockParameter, AppStrings, ComparisonOperator, EventDefinition, HotkeyValue, KEYBOARD_INTEGRATION_ID, KeyboardComboValue, KeyboardSequenceValue, ParameterValue, SecretReference, WIDGET_APPEARANCE_RESET, WIDGET_INTEGRATION_ID, WidgetIconRef, defaultParameterValue, iconPackRef, iconPackReferenceOf, isEventFilterParameter, isEventReference, isHotkeyValue, isRunScriptWidgetTargetParam, isSecretReference, isStateOperator, isVariableReference, variableTokenText } from '@macro-deck/runtime';
 import { ButtonComponent, CheckboxComponent, InputComponent, LocalizationService, OverlayPanelComponent, ToggleSwitchComponent, TranslatePipe } from '@shared';
 import type { SecretKind, VariableType } from '@macro-deck/runtime';
 import { normalizeHttpsUrl } from '../../../../domain/url-input.util';
@@ -218,6 +218,12 @@ export class ParamRowComponent implements OnInit, OnChanges {
 
   get hotkeyValue(): HotkeyValue | null {
     return isHotkeyValue(this.param.value) ? this.param.value : null;
+  }
+
+  // Only the host's own keyboard actions understand right-hand modifier names; plugins and event
+  // filters keep the generic vocabulary.
+  get sidedModifiers(): boolean {
+    return this.block?.integrationId === KEYBOARD_INTEGRATION_ID && !this.eventId;
   }
 
   get keyboardComboValue(): KeyboardComboValue | null {

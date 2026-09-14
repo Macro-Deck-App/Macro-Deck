@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 
 import { shellBridge } from '../util/shell-bridge';
 
-const BARE_MODIFIERS = new Set(['Control', 'Shift', 'Alt', 'Meta']);
+const BARE_MODIFIERS = new Set(['Control', 'Shift', 'Alt', 'AltGraph', 'Meta']);
 
 export interface HotkeyCaptureHandlers {
-  key: (event: KeyboardEvent) => void;
+  key: (event: KeyboardEvent, heldModifierCodes: ReadonlySet<string>) => void;
   cancel: () => void;
 }
 
@@ -18,6 +18,7 @@ export interface HotkeyCaptureHandlers {
 export class HotkeyCaptureService {
   private host: HTMLElement | null = null;
   private handlers: HotkeyCaptureHandlers | null = null;
+  private readonly heldModifierCodes = new Set<string>();
 
   get active(): boolean {
     return this.handlers !== null;
@@ -29,6 +30,7 @@ export class HotkeyCaptureService {
     this.host = host;
     this.handlers = handlers;
     document.addEventListener('keydown', this.onKeyDown, true);
+    document.addEventListener('keyup', this.onKeyUp, true);
     document.addEventListener('mousedown', this.onPointerDown, true);
     window.addEventListener('blur', this.onWindowBlur);
     this.setShellCapture(true);
@@ -41,7 +43,9 @@ export class HotkeyCaptureService {
 
     this.host = null;
     this.handlers = null;
+    this.heldModifierCodes.clear();
     document.removeEventListener('keydown', this.onKeyDown, true);
+    document.removeEventListener('keyup', this.onKeyUp, true);
     document.removeEventListener('mousedown', this.onPointerDown, true);
     window.removeEventListener('blur', this.onWindowBlur);
     this.setShellCapture(false);
@@ -63,6 +67,7 @@ export class HotkeyCaptureService {
     event.stopImmediatePropagation();
 
     if (BARE_MODIFIERS.has(event.key)) {
+      this.heldModifierCodes.add(event.code);
       return;
     }
 
@@ -71,8 +76,13 @@ export class HotkeyCaptureService {
       return;
     }
 
+    const held = new Set(this.heldModifierCodes);
     this.stop();
-    handlers.key(event);
+    handlers.key(event, held);
+  };
+
+  private readonly onKeyUp = (event: KeyboardEvent): void => {
+    this.heldModifierCodes.delete(event.code);
   };
 
   private readonly onPointerDown = (event: MouseEvent): void => {

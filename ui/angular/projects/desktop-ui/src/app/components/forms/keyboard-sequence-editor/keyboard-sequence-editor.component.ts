@@ -47,6 +47,10 @@ export class KeyboardSequenceEditorComponent {
   @Input() variables: Variable[] = [];
   @Input() scope: VariableScope = 'global';
   @Input() scopeRefId?: string;
+  @Input() sidedModifiers = false;
+
+  private readonly translate = (key: string, args?: Record<string, unknown>) =>
+    this.localization.translateKey(key, args);
 
   steps: KeyboardStepValue[] = [];
   repeat = 1;
@@ -177,7 +181,7 @@ export class KeyboardSequenceEditorComponent {
   private describeStep(step: KeyboardStepValue): string {
     switch (step.type) {
       case 'keyCombo': {
-        const combo = formatCombo(step.modifiers, step.key) || '∅';
+        const combo = formatCombo(step.modifiers, step.key, this.translate) || '∅';
         return step.repeat && step.repeat > 1 ? `${combo} ×${step.repeat}` : combo;
       }
       case 'text':
@@ -186,9 +190,9 @@ export class KeyboardSequenceEditorComponent {
         return this.localization.translateKey(
           AppStrings.Forms.KeyboardSequenceEditor.WaitMilliseconds, { milliseconds: step.milliseconds });
       case 'keyDown':
-        return `↓ ${formatCombo(step.modifiers, step.key) || '∅'}`;
+        return `↓ ${formatCombo(step.modifiers, step.key, this.translate) || '∅'}`;
       case 'keyUp':
-        return `↑ ${formatCombo(step.modifiers, step.key) || '∅'}`;
+        return `↑ ${formatCombo(step.modifiers, step.key, this.translate) || '∅'}`;
     }
   }
 
