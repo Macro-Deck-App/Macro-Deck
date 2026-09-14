@@ -11138,6 +11138,10 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Keyboard.Media.VolumeUp" xml:space="preserve">
     <value>Volume Up</value>
   </data>
+  <data name="Keyboard.Modifier.Right" xml:space="preserve">
+    <value>Right {modifier}</value>
+    <comment>[modifier:string]</comment>
+  </data>
   <data name="Migration.CredentialChoice.EnterKeyButton" xml:space="preserve">
     <value>Enter the decryption key</value>
   </data>
@@ -11361,10 +11365,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Migration.Warning.IntegrationAlreadyConfigured" xml:space="preserve">
     <value>Its existing configuration here was kept, so nothing from Macro Deck 2 was applied to it - not even settings it is missing. To migrate that configuration instead, remove the existing one and run this again.</value>
-  </data>
-  <data name="Migration.Warning.Keyboard.RightModifierNotSupported" xml:space="preserve">
-    <value>This hotkey required the right {modifier} key specifically; Macro Deck 3 always presses the left {modifier} key.</value>
-    <comment>[modifier:string]</comment>
   </data>
   <data name="Migration.Warning.LongPressReleaseNotMigrated" xml:space="preserve">
     <value>Actions that ran when a long press ended are migrated switched off, because Macro Deck 3 has no such trigger</value>

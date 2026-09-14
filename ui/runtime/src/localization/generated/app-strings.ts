@@ -4606,6 +4606,9 @@ export const AppStrings = {
 			VolumeDown: 'macrodeck.app:Keyboard.Media.VolumeDown',
 			VolumeUp: 'macrodeck.app:Keyboard.Media.VolumeUp',
 		},
+		Modifier: {
+			Right: 'macrodeck.app:Keyboard.Modifier.Right',
+		},
 	},
 	Layouts: {
 		Compatibility: {
@@ -4705,9 +4708,6 @@ export const AppStrings = {
 				EmbedsDropped: 'macrodeck.app:Migration.Warning.Discord.EmbedsDropped',
 				RichPresenceTimingNotMigrated: 'macrodeck.app:Migration.Warning.Discord.RichPresenceTimingNotMigrated',
 				WebhookUrlNotMigrated: 'macrodeck.app:Migration.Warning.Discord.WebhookUrlNotMigrated',
-			},
-			Keyboard: {
-				RightModifierNotSupported: 'macrodeck.app:Migration.Warning.Keyboard.RightModifierNotSupported',
 			},
 			Obs: {
 				DefaultConnectionNotMigrated: 'macrodeck.app:Migration.Warning.Obs.DefaultConnectionNotMigrated',
@@ -10446,6 +10446,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Keyboard.Media.Stop': 'Stop',
 	'macrodeck.app:Keyboard.Media.VolumeDown': 'Volume Down',
 	'macrodeck.app:Keyboard.Media.VolumeUp': 'Volume Up',
+	'macrodeck.app:Keyboard.Modifier.Right': 'Right {modifier}',
 	'macrodeck.app:Layouts.Compatibility.ConflictingDevices': 'Devices disagree on this profile\'s grid: {deviceNames}.',
 	'macrodeck.app:Layouts.Compatibility.ExceedsLayout': '{deviceName} locks this grid to {columns} x {rows}; the current grid is larger.',
 	'macrodeck.app:Layouts.Grid.ColumnsLockedByDevice': '{deviceName} locks columns to {columns}.',
@@ -10524,7 +10525,6 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Migration.Warning.IconPackMissing': 'Macro Deck 2 no longer holds the icon pack this button points at, so it keeps its colours but arrives without its image',
 	'macrodeck.app:Migration.Warning.IconPackNotCreated': 'An icon pack could not be created here, so its icons are not migrated',
 	'macrodeck.app:Migration.Warning.IntegrationAlreadyConfigured': 'Its existing configuration here was kept, so nothing from Macro Deck 2 was applied to it - not even settings it is missing. To migrate that configuration instead, remove the existing one and run this again.',
-	'macrodeck.app:Migration.Warning.Keyboard.RightModifierNotSupported': 'This hotkey required the right {modifier} key specifically; Macro Deck 3 always presses the left {modifier} key.',
 	'macrodeck.app:Migration.Warning.LongPressReleaseNotMigrated': 'Actions that ran when a long press ended are migrated switched off, because Macro Deck 3 has no such trigger',
 	'macrodeck.app:Migration.Warning.Obs.DefaultConnectionNotMigrated': 'This action used Macro Deck 2\'s default OBS connection. Choose which configured OBS connection it should use.',
 	'macrodeck.app:Migration.Warning.Obs.NamedConnectionNotMigrated': 'This action used the Macro Deck 2 OBS connection named \'{name}\'. Choose the matching configured connection.',

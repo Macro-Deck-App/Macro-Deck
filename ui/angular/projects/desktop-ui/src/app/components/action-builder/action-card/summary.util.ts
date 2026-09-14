@@ -5,7 +5,7 @@ type Translator = (key: string, args?: Record<string, unknown>) => string;
 function displayValue(value: ParameterValue, t: Translator): string {
   if (isVariableReference(value)) return `{{ vars.${value.$var} }}`;
   if (value === null || value === undefined || value === '') return '-';
-  if (isHotkeyValue(value)) return formatCombo(value.modifiers, value.key) || '-';
+  if (isHotkeyValue(value)) return formatCombo(value.modifiers, value.key, t) || '-';
   if (isKeyboardSequence(value)) {
     return t(AppStrings.ActionBuilder.Summary.StepCount, { count: value.steps.length });
   }

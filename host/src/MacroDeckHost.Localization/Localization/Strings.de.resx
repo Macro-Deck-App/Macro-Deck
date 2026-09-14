@@ -11136,6 +11136,10 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Keyboard.Media.VolumeUp" xml:space="preserve">
     <value>Lauter</value>
   </data>
+  <data name="Keyboard.Modifier.Right" xml:space="preserve">
+    <value>{modifier} rechts</value>
+    <comment>[modifier:string]</comment>
+  </data>
   <data name="Migration.CredentialChoice.EnterKeyButton" xml:space="preserve">
     <value>Entschlüsselungsschlüssel eingeben</value>
   </data>
@@ -11359,10 +11363,6 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Migration.Warning.IntegrationAlreadyConfigured" xml:space="preserve">
     <value>Ihre bestehende Konfiguration hier wurde behalten, also wurde nichts aus Macro Deck 2 übernommen - auch keine Einstellungen, die ihr fehlen. Wenn stattdessen die alte Konfiguration übernommen werden soll, entferne die bestehende und starte die Migration erneut.</value>
-  </data>
-  <data name="Migration.Warning.Keyboard.RightModifierNotSupported" xml:space="preserve">
-    <value>Dieser Hotkey erforderte ausdrücklich die rechte {modifier}-Taste; Macro Deck 3 drückt immer die linke {modifier}-Taste.</value>
-    <comment>[modifier:string]</comment>
   </data>
   <data name="Migration.Warning.LongPressReleaseNotMigrated" xml:space="preserve">
     <value>Aktionen, die beim Loslassen eines langen Drucks ausgeführt wurden, werden deaktiviert migriert, da Macro Deck 3 keinen solchen Auslöser kennt.</value>

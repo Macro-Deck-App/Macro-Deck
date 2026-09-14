@@ -84,47 +84,32 @@ internal sealed class WindowsUtilsMacroDeck2Migration : IIntegrationMigration
 		}
 
 		var modifiers = new List<string>();
-		var warnings = new List<LocalizedText>();
-		AddModifier(config, modifiers, warnings, "ctrl", "lctrl", "rctrl", "ctrl", "Ctrl");
-		AddModifier(config, modifiers, warnings, "shift", "lshift", "rshift", "shift", "Shift");
-		AddModifier(config, modifiers, warnings, "alt", "lalt", "ralt", "alt", "Alt");
-		AddModifier(config, modifiers, warnings, null, "lwin", "rwin", "meta", "Windows");
+		AddModifier(config, modifiers, "ctrl", "lctrl", "rctrl", "ctrl", "RightCtrl");
+		AddModifier(config, modifiers, "shift", "lshift", "rshift", "shift", "RightShift");
+		AddModifier(config, modifiers, "alt", "lalt", "ralt", "alt", "RightAlt");
+		AddModifier(config, modifiers, null, "lwin", "rwin", "meta", "RightMeta");
 
 		var parameters = Parameters(("combo", ComboJson(modifiers, key)));
-		return new ActionMigrationResult(KeyboardIntegrationId,
-			"press-key",
-			action.DisplayName ?? "Hotkey",
-			parameters,
-			warnings.Count > 0 ? warnings : null);
+		return new ActionMigrationResult(KeyboardIntegrationId, "press-key", action.DisplayName ?? "Hotkey", parameters);
 	}
 
 	private static void AddModifier(
 		JsonElement config,
 		List<string> modifiers,
-		List<LocalizedText> warnings,
 		string? genericProperty,
 		string leftProperty,
 		string rightProperty,
 		string modifierName,
-		string modifierDisplayName)
+		string rightModifierName)
 	{
 		var generic = genericProperty is not null && ReadBool(config, genericProperty);
-		var left = ReadBool(config, leftProperty);
-		var right = ReadBool(config, rightProperty);
-
-		if (!generic && !left && !right)
+		if (generic || ReadBool(config, leftProperty))
 		{
-			return;
+			modifiers.Add(modifierName);
 		}
-
-		modifiers.Add(modifierName);
-
-		// Macro Deck 3's hotkey combo has no left/right distinction and always presses the left key, so a
-		// hotkey that specifically required the right-hand modifier no longer does.
-		if (right && !left && !generic)
+		else if (ReadBool(config, rightProperty))
 		{
-			warnings.Add(
-				AppStrings.Migration.Warning.Keyboard.RightModifierNotSupported(modifier: modifierDisplayName));
+			modifiers.Add(rightModifierName);
 		}
 	}
 

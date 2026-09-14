@@ -28,6 +28,7 @@
           @case ('keyCombo') {
             <shared-keyboard-combo-editor
               [value]="comboValue(step)"
+              [sidedModifiers]="sidedModifiers"
               (valueChange)="onComboChange($index, $event)" />
             <label class="kse-inline">
               <span>{{ 'macrodeck.app:Forms.KeyboardSequenceEditor.Repeat' | translate }}</span>
@@ -38,11 +39,13 @@
           @case ('keyDown') {
             <shared-keyboard-combo-editor
               [value]="comboValue(step)"
+              [sidedModifiers]="sidedModifiers"
               (valueChange)="onComboChange($index, $event)" />
           }
           @case ('keyUp') {
             <shared-keyboard-combo-editor
               [value]="comboValue(step)"
+              [sidedModifiers]="sidedModifiers"
               (valueChange)="onComboChange($index, $event)" />
           }
           @case ('text') {
