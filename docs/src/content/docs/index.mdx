@@ -1,26 +1,53 @@
 ---
-title: Macro Deck Developer Docs
-description: Build, test, package and publish plugins for Macro Deck 3.
+title: Macro Deck Docs
+description: Install and use Macro Deck 3, and build, test, package and publish plugins for it.
 template: splash
 head:
   # Without this the tab repeats the site title twice.
   - tag: title
-    content: Macro Deck Developer Docs
+    content: Macro Deck Docs
 hero:
   image:
     file: ../../assets/macro-deck-logo.svg
   tagline: Start building something great!
   actions:
+    - text: Install Macro Deck
+      link: /guide/installation/
+      icon: right-arrow
     - text: Build your first plugin
       link: /introduction/quickstart/
       icon: right-arrow
-    - text: Plugin template
-      link: https://github.com/Macro-Deck-App/Macro-Deck-Plugin-Template
-      icon: external
       variant: minimal
 ---
 
 import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## Use Macro Deck
+
+<CardGrid>
+	<LinkCard
+		title="Installation"
+		href="/guide/installation/"
+		description="Install Macro Deck on Windows, macOS or Linux."
+	/>
+	<LinkCard
+		title="Getting started"
+		href="/guide/getting-started/"
+		description="Set up your account, connect a device and build your first button."
+	/>
+	<LinkCard
+		title="Concepts"
+		href="/guide/concepts/"
+		description="Profiles, folders, widgets, actions, variables and events."
+	/>
+	<LinkCard
+		title="Compatibility"
+		href="/guide/compatibility/"
+		description="Supported operating systems, devices and browsers."
+	/>
+</CardGrid>
+
+## Build plugins
 
 <CardGrid>
 	<LinkCard

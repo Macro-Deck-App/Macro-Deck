@@ -1,0 +1,134 @@
+---
+interface Props {
+	packages: ('windows' | 'macos' | 'appimage' | 'deb' | 'rpm')[];
+}
+
+const { packages } = Astro.props;
+const releasesPage = 'https://github.com/Macro-Deck-App/Macro-Deck/releases';
+---
+
+<div data-downloads={packages.join(' ')}>
+	<p data-status>
+		Loading the latest releases. You can also download them from
+		<a href={releasesPage}>GitHub Releases</a>.
+	</p>
+</div>
+
+<script>
+	const api = 'https://api.github.com/repos/Macro-Deck-App/Macro-Deck/releases?per_page=30';
+	const releasesPage = 'https://github.com/Macro-Deck-App/Macro-Deck/releases';
+	const packages: Record<string, { label: string; suffix: string }> = {
+		windows: { label: '.exe', suffix: '-setup.exe' },
+		macos: { label: '.dmg', suffix: '.dmg' },
+		appimage: { label: '.AppImage', suffix: '.AppImage' },
+		deb: { label: '.deb', suffix: '.deb' },
+		rpm: { label: '.rpm', suffix: '.rpm' },
+	};
+
+	function architecture(assetName: string) {
+		if (/aarch64|arm64/i.test(assetName)) return 'ARM64';
+		if (/x64|amd64|x86_64/i.test(assetName)) return 'x64';
+		return 'Other';
+	}
+
+	type Release = {
+		tag_name: string;
+		name: string;
+		html_url: string;
+		draft: boolean;
+		prerelease: boolean;
+		published_at: string;
+		assets: { name: string; browser_download_url: string }[];
+	};
+
+	function el<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string) {
+		const node = document.createElement(tag);
+		if (text) node.textContent = text;
+		return node;
+	}
+
+	function link(href: string, text: string) {
+		const a = el('a', text);
+		a.href = href;
+		return a;
+	}
+
+	function row(...cells: (string | Node | Node[])[]) {
+		const tr = el('tr');
+		for (const content of cells) {
+			const td = el('td');
+			if (Array.isArray(content)) {
+				content.forEach((node, i) => td.append(...(i > 0 ? [' · ', node] : [node])));
+			} else {
+				td.append(content);
+			}
+			tr.append(td);
+		}
+		return tr;
+	}
+
+	function table(keys: string, channels: [string, Release | undefined][]) {
+		const result = el('table');
+		const head = el('tr');
+		head.append(el('th', 'Channel'), el('th', 'Version'), el('th', 'Architecture'), el('th', 'Download'));
+		result.append(el('thead'), el('tbody'));
+		result.tHead!.append(head);
+		for (const [channel, release] of channels) {
+			if (!release) {
+				result.tBodies[0].append(row(channel, 'Not released yet', '', ''));
+				continue;
+			}
+			const byArchitecture = new Map<string, Node[]>();
+			for (const pkg of keys.split(' ').map((key) => packages[key])) {
+				for (const asset of release.assets.filter((a) => a.name.endsWith(pkg.suffix))) {
+					const arch = architecture(asset.name);
+					byArchitecture.set(arch, [
+						...(byArchitecture.get(arch) ?? []),
+						link(asset.browser_download_url, pkg.label),
+					]);
+				}
+			}
+			for (const [arch, links] of byArchitecture) {
+				result.tBodies[0].append(
+					row(channel, link(release.html_url, release.tag_name.replace(/^v/, '')), arch, links),
+				);
+			}
+		}
+		return result;
+	}
+
+	async function loadChannels(): Promise<[string, Release | undefined][]> {
+		const response = await fetch(api, { headers: { Accept: 'application/vnd.github+json' } });
+		if (!response.ok) throw new Error(String(response.status));
+		// Macro Deck 2 shares this repository; its releases are not offered here.
+		const releases = ((await response.json()) as Release[]).filter(
+			(r) => !r.draft && Number.parseInt(r.tag_name.replace(/^v/, ''), 10) >= 3,
+		);
+		const stable = releases.find((r) => !r.prerelease);
+		const beta = releases.find((r) => r.prerelease);
+		const channels: [string, Release | undefined][] = [['Stable', stable]];
+		if (beta && (!stable || Date.parse(beta.published_at) > Date.parse(stable.published_at))) {
+			channels.push(['Beta', beta]);
+		}
+		return channels;
+	}
+
+	const roots = document.querySelectorAll<HTMLElement>('[data-downloads]');
+	loadChannels().then(
+		(channels) => {
+			roots.forEach((root) => root.replaceChildren(table(root.dataset.downloads!, channels)));
+			if (!channels[0][1]) return;
+			// Pages mark content that only applies until the first stable release with these attributes.
+			document.querySelectorAll<HTMLElement>('[data-hide-when-stable]').forEach((e) => (e.hidden = true));
+			document.querySelectorAll<HTMLElement>('[data-prefer-stable] [role="tab"]').forEach((tab) => {
+				if (tab.textContent?.trim() === 'Stable') tab.click();
+			});
+		},
+		() =>
+			roots.forEach((root) => {
+				const message = el('p', 'The latest releases could not be loaded. Download them from ');
+				message.append(link(releasesPage, 'GitHub Releases'), '.');
+				root.replaceChildren(message);
+			}),
+	);
+</script>
