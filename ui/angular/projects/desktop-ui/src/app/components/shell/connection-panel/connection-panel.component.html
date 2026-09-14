@@ -40,6 +40,15 @@
             </div>
           }
 
+          <div class="cp-section cp-identity">
+            <span class="cp-label">{{ appStrings.Shell.ConnectionPanel.Identity | translate }}</span>
+            @if (info.identityFingerprint; as fingerprint) {
+              <span class="cp-fingerprint">{{ fingerprint }}</span>
+            } @else {
+              <span class="cp-value cp-muted">{{ appStrings.Shell.ConnectionPanel.IdentityUnavailable | translate }}</span>
+            }
+          </div>
+
           <div class="cp-section">
             <span class="cp-label">{{ appStrings.Shell.ConnectionPanel.Instance | translate }}</span>
             <span class="cp-value">{{ info.instanceName }}</span>

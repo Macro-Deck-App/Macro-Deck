@@ -174,11 +174,19 @@ public class Startup
 			// unprotect it, so leaving it registered would destroy the real key on the way past a lock
 			// that is meant to be temporary.
 			services.AddSingleton<ISigningKeyProvider, EphemeralSigningKeyProvider>();
+			services.AddSingleton<IHostIdentityKeyProvider, LockedHostIdentityKeyProvider>();
 		}
 		else
 		{
 			services.AddSingleton<ISigningKeyProvider, FileSigningKeyProvider>();
+			services.AddSingleton<IHostIdentityKeyProvider, FileHostIdentityKeyProvider>();
 		}
+
+		services.AddRateLimiter(options =>
+		{
+			options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+			options.GlobalLimiter = HostIdentityRateLimit.Create();
+		});
 
 		services.AddSingleton<IConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();
 		services.AddAuthentication(AuthDefaults.PolicySchemeName)
@@ -857,6 +865,7 @@ public class Startup
 		app.UseStaticFiles(SpaCachingApplicationBuilderExtensions.CreateSpaStaticFileOptions());
 		app.UseWebSockets();
 		app.UseRouting();
+		app.UseRateLimiter();
 		app.UseAuthentication();
 		app.UseAuthorization();
 		app.UseEndpoints(endpoints =>

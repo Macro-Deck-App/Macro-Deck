@@ -25,6 +25,7 @@ public class BackupComponentGroupsTests
 			// It records what this installation has already shown its user, so a restore must neither
 			// resurrect a finished wizard nor erase one that is still owed.
 			Assert.That(BackupComponentGroups.IsRestorablePreferenceKey("onboarding.pending"), Is.False);
+			Assert.That(BackupComponentGroups.IsRestorablePreferenceKey("identity.issued"), Is.False);
 			Assert.That(BackupComponentGroups.IsRestorablePreferenceKey("Onboarding.Pending"), Is.False);
 			Assert.That(BackupComponentGroups.IsRestorablePreferenceKey("appearance.themeMode"), Is.True);
 			Assert.That(BackupComponentGroups.IsRestorablePreferenceKey("lock.clientLockScreen"), Is.True);

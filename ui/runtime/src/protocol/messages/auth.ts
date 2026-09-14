@@ -28,6 +28,8 @@ export interface TokenResponse {
   scope: AuthScope;
   username: string;
   device?: DeviceCredential;
+  // Base64 of the host identity public key (uncompressed P-256 point), absent when the host cannot load it.
+  hostKey?: string;
 }
 
 export interface ChangePasswordRequest {

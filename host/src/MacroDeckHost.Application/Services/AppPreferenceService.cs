@@ -43,6 +43,10 @@ public partial class AppPreferenceService : IAppPreferenceService
 	// already has an account never starts owing an onboarding wizard after an update.
 	public const string OnboardingPendingKey = "onboarding.pending";
 
+	// Written only by the host identity key provider, and never taken from a backup: it records whether
+	// this installation ever handed out an identity, so a key missing later is reported as a renewal.
+	public const string HostIdentityIssuedKey = "identity.issued";
+
 	// Written and read only by the backup recovery key service. Deliberately outside BackupSettings so
 	// a settings update can never point the installation at a secret row that does not exist, which
 	// would orphan every backup already taken.
