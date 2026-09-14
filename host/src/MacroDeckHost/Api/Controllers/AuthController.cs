@@ -432,6 +432,8 @@ public class AuthController : ControllerBase
 		// ever refuses to downgrade a secure session.
 		var secure = Request.IsHttps;
 
+		var now = _timeProvider.GetUtcNow().UtcDateTime;
+
 		// Named per listener: cookies ignore the port, so an installed host and a second one on the same
 		// machine would otherwise keep overwriting each other's cookie, and whichever wrote last would
 		// make the other's <img> requests fail with a token signed by the wrong key.
@@ -443,7 +445,10 @@ public class AuthController : ControllerBase
 				Secure = secure,
 				SameSite = SameSiteMode.Strict,
 				Path = "/",
-				Expires = new DateTimeOffset(login.AccessTokenExpiresAt, TimeSpan.Zero)
+				Expires = new DateTimeOffset(login.AccessTokenExpiresAt, TimeSpan.Zero),
+				// Expires is judged by the device clock: a device running ahead of this host would drop the
+				// cookie on arrival and every <img> request would go unauthenticated. Max-Age is relative.
+				MaxAge = Remaining(login.AccessTokenExpiresAt, now)
 			});
 		Response.Cookies.Append(AuthDefaults.RefreshCookieFor(AuthCookies.ListenerPort(HttpContext)),
 			login.RefreshToken,
@@ -453,9 +458,13 @@ public class AuthController : ControllerBase
 				Secure = secure,
 				SameSite = SameSiteMode.Strict,
 				Path = "/api/auth",
-				Expires = new DateTimeOffset(login.RefreshTokenExpiresAt, TimeSpan.Zero)
+				Expires = new DateTimeOffset(login.RefreshTokenExpiresAt, TimeSpan.Zero),
+				MaxAge = Remaining(login.RefreshTokenExpiresAt, now)
 			});
 	}
+
+	private static TimeSpan Remaining(DateTime expiresAt, DateTime now)
+		=> expiresAt > now ? expiresAt - now : TimeSpan.Zero;
 
 	private void DeleteAuthCookies()
 	{

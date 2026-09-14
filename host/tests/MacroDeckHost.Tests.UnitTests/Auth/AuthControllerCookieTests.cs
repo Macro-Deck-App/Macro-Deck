@@ -45,12 +45,43 @@ public class AuthControllerCookieTests
 		});
 	}
 
-	private static async Task<List<string>> RefreshAndCaptureCookies(bool https)
+	[Test]
+	public async Task Auth_cookies_state_a_lifetime_that_does_not_depend_on_the_device_clock()
 	{
+		var host = new ManualTimeProvider();
+		var now = host.Now.UtcDateTime;
+
+		var setCookies = await RefreshAndCaptureCookies(https: false, host, now.AddMinutes(15), now.AddDays(30));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(setCookies[0], Does.Contain("max-age=900").IgnoreCase);
+			Assert.That(setCookies[1], Does.Contain("max-age=2592000").IgnoreCase);
+		});
+	}
+
+	[Test]
+	public async Task A_token_that_has_already_expired_gets_cookies_that_expire_at_once()
+	{
+		var host = new ManualTimeProvider();
+		var past = host.Now.UtcDateTime.AddMinutes(-1);
+
+		var setCookies = await RefreshAndCaptureCookies(https: false, host, past, past);
+
+		Assert.That(setCookies, Has.All.Contain("max-age=0").IgnoreCase);
+	}
+
+	private static async Task<List<string>> RefreshAndCaptureCookies(bool https,
+		TimeProvider? clock = null,
+		DateTime? accessExpiresAt = null,
+		DateTime? refreshExpiresAt = null)
+	{
+		clock ??= TimeProvider.System;
+		var now = clock.GetUtcNow().UtcDateTime;
 		var login = new LoginResult("access-token",
-			DateTime.UtcNow.AddMinutes(15),
+			accessExpiresAt ?? now.AddMinutes(15),
 			"refresh-token",
-			DateTime.UtcNow.AddDays(30),
+			refreshExpiresAt ?? now.AddDays(30),
 			AuthScope.Client,
 			"manuel");
 		var httpContext = new DefaultHttpContext();
@@ -59,7 +90,7 @@ public class AuthControllerCookieTests
 		var controller = new AuthController(new StubAuthService(login),
 			new LoginThrottle(TimeProvider.System),
 			new PairingCodeStore(),
-			TimeProvider.System,
+			clock,
 			new UserNotificationStore(),
 			new FailedLoginNotificationTracker(),
 			TestLocalization.Preferences,
