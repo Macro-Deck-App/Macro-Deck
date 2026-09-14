@@ -14,6 +14,10 @@ namespace MacroDeck.Plugin.Testing.Fakes;
 public sealed class FakeEventPublisher : IEventPublisher
 {
 	private readonly ConcurrentQueue<PublishedEvent> _published = new();
+	private IReadOnlyList<EventBinding> _bindings = [];
+
+	/// <summary>Raised synchronously by <see cref="SetBindings" />.</summary>
+	public event Action? BindingsChanged;
 
 	/// <summary>Every event published so far, in arrival order.</summary>
 	public IReadOnlyList<PublishedEvent> Published => [.. _published];
@@ -31,6 +35,19 @@ public sealed class FakeEventPublisher : IEventPublisher
 			Parameters = Serialize(parameters),
 			PublishedAt = DateTimeOffset.UtcNow
 		});
+	}
+
+	/// <summary>What <see cref="SetBindings" /> last set; empty until then.</summary>
+	public IReadOnlyList<EventBinding> GetBindings() => _bindings;
+
+	/// <summary>
+	/// Replaces the bound triggers and raises <see cref="BindingsChanged" />, standing in for a user who
+	/// binds, edits or removes a trigger in the editor.
+	/// </summary>
+	public void SetBindings(params EventBinding[] bindings)
+	{
+		_bindings = bindings;
+		BindingsChanged?.Invoke();
 	}
 
 	private static JsonElement? Serialize(IReadOnlyDictionary<string, object?>? parameters)

@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Infrastructure.BackgroundServices;
 using MacroDeckHost.Infrastructure.Integrations;
@@ -267,10 +268,32 @@ internal sealed class IntegrationInitializerTests
 		}
 	}
 
+	[Test]
+	public async Task Reinitializing_an_integration_does_not_multiply_its_BindingsChanged()
+	{
+		using var serviceProvider = BuildScopeServices();
+		var index = new EventSubscriptionIndex(new StubFolderCache(), new StubAutomationCache());
+		using var tracker = new EventBindingTracker(index, Serilog.Core.Logger.None);
+		var initializer = CreateInitializer(serviceProvider, TimeProvider.System, bindingTracker: tracker);
+		var integration = new BindingAwareIntegration();
+
+		await initializer.InitializeAsync(integration, "Hotkeys");
+		await initializer.InitializeAsync(integration, "Hotkeys");
+		index.ReindexAutomation(Guid.NewGuid(),
+			EventBindingTrackerTests.Flows(integration.Id, "hotkey-pressed", EventBindingTrackerTests.Combo("F3")),
+			enabled: true);
+		await tracker.FlushAsync();
+		await integration.FirstRaise.Task.WaitAsync(TimeSpan.FromSeconds(5));
+		await Task.Delay(TimeSpan.FromMilliseconds(200));
+
+		Assert.That(integration.RaisedCount, Is.EqualTo(1));
+	}
+
 	private static IntegrationInitializer CreateInitializer(
 		ServiceProvider serviceProvider,
 		TimeProvider timeProvider,
-		IIntegrationHostIssueStore? hostIssueStore = null)
+		IIntegrationHostIssueStore? hostIssueStore = null,
+		IEventBindingTracker? bindingTracker = null)
 		=> new(serviceProvider.GetRequiredService<IServiceScopeFactory>(),
 			new FakeDeckNavigator(),
 			new FakeScriptApi(),
@@ -278,6 +301,7 @@ internal sealed class IntegrationInitializerTests
 			new FakeWidgetIconInvalidator(),
 			new FakeUserVariableApi(),
 			new RecordingEventBus(),
+			bindingTracker ?? new StubEventBindingTracker(),
 			new UserNotificationStore(),
 			null!,
 			null!,
@@ -297,6 +321,35 @@ internal sealed class IntegrationInitializerTests
 			.AddSingleton(TestLocalization.Resolver)
 			.AddSingleton(TestLocalization.Preferences)
 			.BuildServiceProvider();
+
+	private sealed class BindingAwareIntegration : IIntegration
+	{
+		private int _raised;
+
+		public string Id => "com.hotkeys";
+		public LocalizedText Name => Id;
+		public string Version => "1.0.0";
+		public IReadOnlyList<IActionDefinition> Actions => [];
+		public bool IsInitialized { get; private set; }
+		public int RaisedCount => Volatile.Read(ref _raised);
+		public TaskCompletionSource FirstRaise { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			context.Events.BindingsChanged -= OnBindingsChanged;
+			context.Events.BindingsChanged += OnBindingsChanged;
+			IsInitialized = true;
+			return Task.CompletedTask;
+		}
+
+		public Task ShutdownAsync() => Task.CompletedTask;
+
+		private void OnBindingsChanged()
+		{
+			Interlocked.Increment(ref _raised);
+			FirstRaise.TrySetResult();
+		}
+	}
 
 	private sealed class ScenarioIntegration : IIntegration
 	{

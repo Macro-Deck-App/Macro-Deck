@@ -117,6 +117,7 @@ internal sealed class CompanionConfigFlowTests
 			null!,
 			null!,
 			null!,
+			null!,
 			harness.DeviceRegistry,
 			null!,
 			harness.RefreshSignal,

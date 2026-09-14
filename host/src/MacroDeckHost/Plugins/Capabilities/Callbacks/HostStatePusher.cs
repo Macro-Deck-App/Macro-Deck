@@ -4,6 +4,7 @@ using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Plugins;
+using MacroDeckHost.Application.Triggers;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Widgets;
@@ -15,7 +16,8 @@ public sealed class HostStatePusher(
 	IPluginSessionRegistry sessionRegistry,
 	IDeckNavigator deckNavigator,
 	IScriptApi scriptApi,
-	IWidgetApi widgetApi) :
+	IWidgetApi widgetApi,
+	IEventBindingTracker bindingTracker) :
 	INotificationHandler<FolderCreatedNotification>,
 	INotificationHandler<FolderUpdatedNotification>,
 	INotificationHandler<FolderDeletedNotification>,
@@ -32,12 +34,27 @@ public sealed class HostStatePusher(
 	INotificationHandler<WidgetPositionsUpdatedNotification>,
 	INotificationHandler<WidgetsCreatedNotification>,
 	INotificationHandler<WidgetsUpdatedNotification>,
-	INotificationHandler<WidgetsDeletedNotification>
+	INotificationHandler<WidgetsDeletedNotification>,
+	IDisposable
 {
+	private readonly SemaphoreSlim _eventBindingsPush = new(1, 1);
+	private int _subscribedToBindings;
+
+	public void Dispose() => _eventBindingsPush.Dispose();
+
 	public Task PushAllAsync(string pluginId, CancellationToken cancellationToken = default)
-		=> Task.WhenAll(PushDeckAsync(pluginId, cancellationToken),
+	{
+		// Subscribed on the first registration: no plugin can receive a push before it has registered.
+		if (Interlocked.Exchange(ref _subscribedToBindings, 1) == 0)
+		{
+			bindingTracker.Subscribe(PushEventBindingsIfConnectedAsync);
+		}
+
+		return Task.WhenAll(PushDeckAsync(pluginId, cancellationToken),
 			PushScriptsAsync(pluginId, cancellationToken),
-			PushWidgetsAsync(pluginId, cancellationToken));
+			PushWidgetsAsync(pluginId, cancellationToken),
+			PushEventBindingsAsync(pluginId, cancellationToken));
+	}
 
 	public ValueTask Handle(FolderCreatedNotification notification, CancellationToken cancellationToken)
 		=> BroadcastDeckAsync(cancellationToken);
@@ -140,6 +157,31 @@ public sealed class HostStatePusher(
 				WidgetStateWireCompatibility.ToWirePayload(widgetApi.GetWidgets(),
 					sessionRegistry.GetNegotiatedVersion(pluginId))),
 			cancellationToken);
+
+	private Task PushEventBindingsIfConnectedAsync(string pluginId, IReadOnlyList<EventBindingDto> _)
+	{
+		var connected = sessionRegistry.Snapshot()
+			.Any(session => session.State == PluginSessionState.Connected && session.PluginId == pluginId);
+
+		return connected ? PushEventBindingsAsync(pluginId, CancellationToken.None) : Task.CompletedTask;
+	}
+
+	// Read and sent under one lock so a registration push and a change push cannot overtake each other
+	// and leave the plugin holding the older list.
+	private async Task PushEventBindingsAsync(string pluginId, CancellationToken cancellationToken)
+	{
+		await _eventBindingsPush.WaitAsync(cancellationToken);
+		try
+		{
+			await sessionRegistry.SendToPlugin(pluginId,
+				BuildEnvelope(HostApis.EventBindings, bindingTracker.BindingsFor(pluginId)),
+				cancellationToken);
+		}
+		finally
+		{
+			_eventBindingsPush.Release();
+		}
+	}
 
 	private async Task BroadcastAsync(ProtocolEnvelope envelope, CancellationToken cancellationToken)
 	{

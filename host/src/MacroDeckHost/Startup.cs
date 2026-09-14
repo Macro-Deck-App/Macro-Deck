@@ -346,6 +346,7 @@ public class Startup
 
 		services.AddSingleton<IWidgetVariableIndex, WidgetVariableIndex>();
 		services.AddSingleton<IEventSubscriptionIndex, EventSubscriptionIndex>();
+		services.AddSingleton<IEventBindingTracker, EventBindingTracker>();
 		services.AddSingleton<EventSampleStore>();
 		services.AddSingleton<IEventBus, EventBus>();
 		services.AddSingleton<IEventRegistry, EventRegistry>();

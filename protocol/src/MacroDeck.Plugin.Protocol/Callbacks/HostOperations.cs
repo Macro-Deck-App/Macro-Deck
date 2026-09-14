@@ -195,6 +195,12 @@ public static class HostOperations
 		public static readonly IReadOnlyList<string> All = [Register, Unregister];
 	}
 
+	/// <summary>The <c>event-bindings</c> host api is push-only, so it declares no operations.</summary>
+	public static class EventBindings
+	{
+		public static readonly IReadOnlyList<string> All = [];
+	}
+
 	private static readonly Dictionary<string, IReadOnlyList<string>> _byApi =
 		new(StringComparer.Ordinal)
 		{
@@ -212,6 +218,7 @@ public static class HostOperations
 			[HostApis.Layouts] = Layouts.All,
 			[HostApis.FolderViews] = FolderViews.All,
 			[HostApis.WidgetTypes] = WidgetTypes.All,
+			[HostApis.EventBindings] = EventBindings.All,
 		};
 
 	public static IReadOnlyList<string> For(string api) => _byApi[api];
