@@ -228,6 +228,16 @@ export interface DeveloperSettingsChangedEvent {
   enabled: boolean;
 }
 
+export interface CompanionLicenseStatus {
+  licensed: boolean;
+  licenseId: string | null;
+  source: string | null;
+  keyId: string | null;
+  issuedAt: number | null;
+  isTest: boolean;
+  testLicenseStored: boolean;
+}
+
 /**
  * The first-launch onboarding wizard (issue #893). Armed by account setup and cleared once the user
  * skips or finishes it, so the wizard is owed exactly once per installation.

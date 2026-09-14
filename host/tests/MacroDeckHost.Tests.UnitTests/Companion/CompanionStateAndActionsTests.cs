@@ -3,6 +3,7 @@ using System.Text.Json;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Application.Auth;
+using MacroDeckHost.Application.Licensing;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
 using MacroDeckHost.Integrations;
@@ -177,7 +178,9 @@ internal sealed class CompanionStateAndActionsTests
 	internal static JsonElement Payload(object value) =>
 		JsonSerializer.SerializeToElement(value, UiWebSocketProtocol.Json);
 
-	internal static UiWebSocketDispatcher Dispatcher(CompanionHarness harness, ClaimsPrincipal principal)
+	internal static UiWebSocketDispatcher Dispatcher(CompanionHarness harness,
+		ClaimsPrincipal principal,
+		ICompanionLicenseService? licenses = null)
 		=> new(connectionId: "connection-1",
 			principal: principal,
 			abort: static () => { },
@@ -211,6 +214,7 @@ internal sealed class CompanionStateAndActionsTests
 			transport: null!,
 			webSocketTransport: null!,
 			companions: harness.DeviceRegistry,
+			licenses: licenses!,
 			accessTokenCutoff: new AccessTokenCutoff(),
 			connectionCancellation: CancellationToken.None);
 }

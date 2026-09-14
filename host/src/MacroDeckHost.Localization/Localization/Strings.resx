@@ -12868,6 +12868,69 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.Language.TimeFormatLabel" xml:space="preserve">
     <value>Time format</value>
   </data>
+  <data name="Settings.License.Description" xml:space="preserve">
+    <value>The Macro Deck Companion license this host holds. The host hands it to every Companion app that connects.</value>
+  </data>
+  <data name="Settings.License.Heading" xml:space="preserve">
+    <value>Companion license</value>
+  </data>
+  <data name="Settings.License.IssueTestAction" xml:space="preserve">
+    <value>Issue test license</value>
+  </data>
+  <data name="Settings.License.IssueTestDescription" xml:space="preserve">
+    <value>Issue a license signed with the test key to try the Companion app's licensing with a debug build. It is accepted only while Developer Mode is on.</value>
+  </data>
+  <data name="Settings.License.IssueTestFailed" xml:space="preserve">
+    <value>The test license could not be issued.</value>
+  </data>
+  <data name="Settings.License.IssueTestLabel" xml:space="preserve">
+    <value>Test license</value>
+  </data>
+  <data name="Settings.License.IssuedAtLabel" xml:space="preserve">
+    <value>Issued</value>
+  </data>
+  <data name="Settings.License.KeyIdLabel" xml:space="preserve">
+    <value>Signing key</value>
+  </data>
+  <data name="Settings.License.LicenseIdLabel" xml:space="preserve">
+    <value>License ID</value>
+  </data>
+  <data name="Settings.License.Licensed" xml:space="preserve">
+    <value>Licensed</value>
+  </data>
+  <data name="Settings.License.LoadFailed" xml:space="preserve">
+    <value>The license status could not be loaded.</value>
+  </data>
+  <data name="Settings.License.NotLicensed" xml:space="preserve">
+    <value>Not licensed</value>
+  </data>
+  <data name="Settings.License.RevokeTestAction" xml:space="preserve">
+    <value>Revoke test license</value>
+  </data>
+  <data name="Settings.License.RevokeTestFailed" xml:space="preserve">
+    <value>The test license could not be revoked.</value>
+  </data>
+  <data name="Settings.License.Source.AppStore" xml:space="preserve">
+    <value>App Store</value>
+  </data>
+  <data name="Settings.License.Source.AppStoreLegacy" xml:space="preserve">
+    <value>App Store (previous app)</value>
+  </data>
+  <data name="Settings.License.Source.GooglePlay" xml:space="preserve">
+    <value>Google Play</value>
+  </data>
+  <data name="Settings.License.Source.Test" xml:space="preserve">
+    <value>Test</value>
+  </data>
+  <data name="Settings.License.SourceLabel" xml:space="preserve">
+    <value>Purchased through</value>
+  </data>
+  <data name="Settings.License.StatusLabel" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Settings.License.TestMarker" xml:space="preserve">
+    <value>Test license. It is only valid while Developer Mode is on and unlocks only debug builds of the Companion app.</value>
+  </data>
   <data name="Settings.Logging.Description" xml:space="preserve">
     <value>Control how much detail Macro Deck records while it runs.</value>
   </data>

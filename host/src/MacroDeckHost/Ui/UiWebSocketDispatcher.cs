@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Devices;
+using MacroDeckHost.Application.Licensing;
 using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Rendering;
@@ -9,6 +10,7 @@ using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
+using MacroDeckHost.Application.Ui.Transport.Messages.Licensing;
 using MacroDeckHost.Application.Ui.Transport.Messages.Logging;
 using MacroDeckHost.Application.Ui.Transport.Messages.MusicPlayer;
 using MacroDeckHost.Application.Ui.Transport.Messages.FolderViews;
@@ -82,6 +84,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 	private readonly IUiTransport _transport;
 	private readonly WebSocketUiTransport _webSocketTransport;
 	private readonly CompanionDeviceRegistry _companions;
+	private readonly ICompanionLicenseService _licenses;
 	private readonly AccessTokenCutoff _accessTokenCutoff;
 	private readonly SemaphoreSlim _dispatch = new(1, 1);
 
@@ -123,6 +126,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		IUiTransport transport,
 		WebSocketUiTransport webSocketTransport,
 		CompanionDeviceRegistry companions,
+		ICompanionLicenseService licenses,
 		AccessTokenCutoff accessTokenCutoff,
 		CancellationToken connectionCancellation)
 	{
@@ -160,6 +164,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		_transport = transport;
 		_webSocketTransport = webSocketTransport;
 		_companions = companions;
+		_licenses = licenses;
 		_accessTokenCutoff = accessTokenCutoff;
 	}
 
@@ -276,6 +281,8 @@ public sealed class UiWebSocketDispatcher : IDisposable
 					_connectionId,
 					_registeredClientId),
 				"ReportCompanionState" => ReportCompanionState(Arg<ReportCompanionStateRequest>(payload, 0)),
+				"SyncCompanionLicense" => await SyncCompanionLicense(Arg<SyncCompanionLicenseRequest?>(payload, 0),
+					cancellationToken),
 				_ when IsKnown(type) => throw new UiWebSocketDispatchException("forbidden"),
 				_ => throw new UiWebSocketDispatchException("unknown_type")
 			};
@@ -410,6 +417,17 @@ public sealed class UiWebSocketDispatcher : IDisposable
 
 		_companions.Report(_connectionId, deviceId, request);
 		return null;
+	}
+
+	private async Task<SyncCompanionLicenseResponse> SyncCompanionLicense(SyncCompanionLicenseRequest? request,
+		CancellationToken cancellationToken)
+	{
+		if (!Guid.TryParse(_principal.FindFirst(AuthDefaults.DeviceClaim)?.Value, out _))
+		{
+			throw new UiWebSocketDispatchException("forbidden");
+		}
+
+		return await _licenses.SyncAsync(_connectionId, request ?? new SyncCompanionLicenseRequest(), cancellationToken);
 	}
 
 	private bool IsAdmin => _principal.HasClaim(AuthDefaults.ScopeClaim, AuthDefaults.AdminScope);

@@ -990,6 +990,7 @@ export {
   type GetAppearanceSettingsResponse,
   type GetAutostartSettingsResponse,
   type GetDataDirectoryResponse,
+  type CompanionLicenseStatus,
   type GetDeveloperSettingsResponse,
   type GetLockScreenSettingsResponse,
   type GetLoggingSettingsResponse,

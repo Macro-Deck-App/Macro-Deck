@@ -230,6 +230,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			transport: Transport,
 			webSocketTransport: null!,
 			companions: null!,
+			licenses: null!,
 			accessTokenCutoff: cutoff,
 			connectionCancellation: CancellationToken.None);
 
@@ -283,6 +284,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			transport: Transport,
 			webSocketTransport: null!,
 			companions: null!,
+			licenses: null!,
 			accessTokenCutoff: new AccessTokenCutoff(),
 			connectionCancellation: CancellationToken.None);
 
@@ -323,6 +325,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			transport: null!,
 			webSocketTransport: null!,
 			companions: null!,
+			licenses: null!,
 			accessTokenCutoff: new AccessTokenCutoff(),
 			connectionCancellation: CancellationToken.None);
 

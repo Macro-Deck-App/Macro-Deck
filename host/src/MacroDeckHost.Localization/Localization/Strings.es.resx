@@ -12868,6 +12868,69 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Settings.Language.TimeFormatLabel" xml:space="preserve">
     <value>Formato de hora</value>
   </data>
+  <data name="Settings.License.Description" xml:space="preserve">
+    <value>La licencia de Macro Deck Companion que tiene este host. El host la entrega a cada aplicación Companion que se conecta.</value>
+  </data>
+  <data name="Settings.License.Heading" xml:space="preserve">
+    <value>Licencia de Companion</value>
+  </data>
+  <data name="Settings.License.IssueTestAction" xml:space="preserve">
+    <value>Emitir licencia de prueba</value>
+  </data>
+  <data name="Settings.License.IssueTestDescription" xml:space="preserve">
+    <value>Emite una licencia firmada con la clave de prueba para probar las licencias de la aplicación Companion con una compilación de depuración. Solo se acepta mientras el modo desarrollador está activado.</value>
+  </data>
+  <data name="Settings.License.IssueTestFailed" xml:space="preserve">
+    <value>No se pudo emitir la licencia de prueba.</value>
+  </data>
+  <data name="Settings.License.IssueTestLabel" xml:space="preserve">
+    <value>Licencia de prueba</value>
+  </data>
+  <data name="Settings.License.IssuedAtLabel" xml:space="preserve">
+    <value>Emitida</value>
+  </data>
+  <data name="Settings.License.KeyIdLabel" xml:space="preserve">
+    <value>Clave de firma</value>
+  </data>
+  <data name="Settings.License.LicenseIdLabel" xml:space="preserve">
+    <value>ID de licencia</value>
+  </data>
+  <data name="Settings.License.Licensed" xml:space="preserve">
+    <value>Con licencia</value>
+  </data>
+  <data name="Settings.License.LoadFailed" xml:space="preserve">
+    <value>No se pudo cargar el estado de la licencia.</value>
+  </data>
+  <data name="Settings.License.NotLicensed" xml:space="preserve">
+    <value>Sin licencia</value>
+  </data>
+  <data name="Settings.License.RevokeTestAction" xml:space="preserve">
+    <value>Revocar licencia de prueba</value>
+  </data>
+  <data name="Settings.License.RevokeTestFailed" xml:space="preserve">
+    <value>No se pudo revocar la licencia de prueba.</value>
+  </data>
+  <data name="Settings.License.Source.AppStore" xml:space="preserve">
+    <value>App Store</value>
+  </data>
+  <data name="Settings.License.Source.AppStoreLegacy" xml:space="preserve">
+    <value>App Store (aplicación anterior)</value>
+  </data>
+  <data name="Settings.License.Source.GooglePlay" xml:space="preserve">
+    <value>Google Play</value>
+  </data>
+  <data name="Settings.License.Source.Test" xml:space="preserve">
+    <value>Prueba</value>
+  </data>
+  <data name="Settings.License.SourceLabel" xml:space="preserve">
+    <value>Comprada a través de</value>
+  </data>
+  <data name="Settings.License.StatusLabel" xml:space="preserve">
+    <value>Estado</value>
+  </data>
+  <data name="Settings.License.TestMarker" xml:space="preserve">
+    <value>Licencia de prueba. Solo es válida mientras el modo desarrollador está activado y solo desbloquea las compilaciones de depuración de la aplicación Companion.</value>
+  </data>
   <data name="Settings.Logging.Description" xml:space="preserve">
     <value>Controla cuánto detalle registra Macro Deck mientras se ejecuta.</value>
   </data>
