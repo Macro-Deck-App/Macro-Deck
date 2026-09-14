@@ -152,6 +152,9 @@ const COPY_FALLBACK_Z_INDEX = 1100;
         } @else if (flow.waitingForAuth()) {
           <shared-button variant="secondary" (click)="onClose()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
         } @else {
+          @if (!root && flow.canGoBack()) {
+            <shared-button variant="secondary" [disabled]="flow.submitting()" (click)="flow.back()">{{ 'macrodeck:Common.Back' | translate }}</shared-button>
+          }
           <shared-button variant="secondary" (click)="onClose()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
           <shared-button
             variant="primary"

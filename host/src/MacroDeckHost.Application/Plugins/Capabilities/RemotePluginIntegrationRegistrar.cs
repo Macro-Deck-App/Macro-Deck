@@ -252,7 +252,7 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 
 	public async Task ForgetAsync(string pluginId, CancellationToken cancellationToken = default)
 	{
-		await UnregisterAsync(pluginId, cancellationToken).ConfigureAwait(false);
+		await UnregisterForGoodAsync(pluginId, cancellationToken).ConfigureAwait(false);
 
 		var scope = LocalizationScope.ForPlugin(pluginId);
 		if (_localizationCatalogs.Unregister(scope))
@@ -881,7 +881,7 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 				continue;
 			}
 
-			await UnregisterAsync(integration.Id, cancellationToken).ConfigureAwait(false);
+			await UnregisterForGoodAsync(integration.Id, cancellationToken).ConfigureAwait(false);
 			_logger.Warning("Unregistered integration '{PluginId}': its installation is no longer on disk",
 				integration.Id);
 		}
@@ -891,10 +891,15 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		=> _sessionRegistry.Snapshot()
 			.Any(session => string.Equals(session.PluginId, pluginId, StringComparison.Ordinal));
 
+	private bool HasSessionOtherThan(string pluginId, string sessionId)
+		=> _sessionRegistry.Snapshot()
+			.Any(session => string.Equals(session.PluginId, pluginId, StringComparison.Ordinal) &&
+				!string.Equals(session.SessionId, sessionId, StringComparison.Ordinal));
+
 	private IEnumerable<InstalledPlugin> InstalledPlugins()
 		=> _installationCatalog.Discover().Where(plugin => plugin.Versions.Count > 0);
 
-	private async Task RegisterDetachedAsync(InstalledPlugin installed)
+	private async Task<bool> RegisterDetachedAsync(InstalledPlugin installed)
 	{
 		var snapshot = _snapshotStore.GetSnapshot(installed.PluginId);
 		var displayName = PluginDisplayNameResolver.Resolve(session: null,
@@ -924,7 +929,11 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			_logger.Warning("Could not register a detached adapter for installed plugin '{PluginId}': {Reason}",
 				installed.PluginId,
 				registration.Describe());
+			return false;
 		}
+
+		await PublishCatalogChangedAsync(installed.PluginId, CancellationToken.None).ConfigureAwait(false);
+		return true;
 	}
 
 	public void Dispose()
@@ -956,14 +965,31 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			return;
 		}
 
-		_ = UnregisterPrunedAsync(e.PluginId);
+		_ = UnregisterPrunedAsync(e.PluginId, e.SessionId);
 	}
 
-	private async Task UnregisterPrunedAsync(string pluginId)
+	private async Task UnregisterPrunedAsync(string pluginId, string endedSessionId)
 	{
 		try
 		{
+			if (HasSessionOtherThan(pluginId, endedSessionId))
+			{
+				return;
+			}
+
+			var installed = InstalledPlugins()
+				.FirstOrDefault(candidate => string.Equals(candidate.PluginId, pluginId, StringComparison.Ordinal));
+			if (installed is null)
+			{
+				await UnregisterForGoodAsync(pluginId, CancellationToken.None).ConfigureAwait(false);
+				return;
+			}
+
 			await UnregisterAsync(pluginId).ConfigureAwait(false);
+			if (!await RegisterDetachedAsync(installed).ConfigureAwait(false))
+			{
+				await PublishCatalogChangedAsync(pluginId, CancellationToken.None).ConfigureAwait(false);
+			}
 		}
 		catch (Exception exception) when (exception is not OutOfMemoryException)
 		{
@@ -1057,6 +1083,20 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		await using var scope = _serviceScopeFactory.CreateAsyncScope();
 		var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 		await mediator.Publish(new IntegrationStateChangedNotification(pluginId), cancellationToken)
+			.ConfigureAwait(false);
+	}
+
+	private async Task UnregisterForGoodAsync(string pluginId, CancellationToken cancellationToken)
+	{
+		await UnregisterAsync(pluginId, cancellationToken).ConfigureAwait(false);
+		await PublishCatalogChangedAsync(pluginId, cancellationToken).ConfigureAwait(false);
+	}
+
+	private async Task PublishCatalogChangedAsync(string pluginId, CancellationToken cancellationToken)
+	{
+		await using var scope = _serviceScopeFactory.CreateAsyncScope();
+		var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+		await mediator.Publish(new IntegrationCatalogChangedNotification(pluginId), cancellationToken)
 			.ConfigureAwait(false);
 	}
 

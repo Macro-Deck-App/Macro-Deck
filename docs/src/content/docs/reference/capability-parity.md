@@ -21,7 +21,7 @@ A plugin implements the same SDK contracts as an in-process integration, but the
 | Action interactions | Yes | Differs | Interaction callbacks such as pickers work only while their action execution is live. |
 | Action modals | Yes | Differs | Opening answers at once with a modal id, and the answer arrives later - see [Action modals](#action-modals). |
 | Variables | Yes | Differs | Eager half snapshot-backed, catalog half live, scalar wire types only - see [Snapshot-backed state](#snapshot-backed-state). |
-| Events | Yes | Same | Catalog, options and publication work; the catalog is snapshot-backed. |
+| Events | Yes | Differs | Catalog, options and publication work; the catalog is snapshot-backed, and `GetBindings()` serves the last `event-bindings` push, so it is empty until the host has pushed once. |
 | Integration icon | Yes | Differs | Uploaded and cached as an asset instead of read synchronously, so a replacement shows after a new asset commit. |
 | Config flows | Yes | Differs | Flow sessions work; OAuth and session context cross as invocation state, not as a live host object. |
 | Music players | Yes | Same | Instances, state, controls, artwork, catalog, devices and transfer work; state reads can degrade to unavailable, but catalog and device failures stay real failures. |

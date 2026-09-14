@@ -37,6 +37,8 @@ internal sealed class HostStateCache(PluginConnectionState connectionState)
 	/// </summary>
 	public event Action? ConfigChanged;
 
+	public event Action? EventBindingsChanged;
+
 	/// <summary>Applies one <c>host.state</c> push, replacing whatever was cached for its API.</summary>
 	public void Apply(ProtocolEnvelope envelope)
 	{
@@ -51,6 +53,10 @@ internal sealed class HostStateCache(PluginConnectionState connectionState)
 		if (string.Equals(api, Protocol.Callbacks.HostApis.Config, StringComparison.Ordinal))
 		{
 			ConfigChanged?.Invoke();
+		}
+		else if (string.Equals(api, Protocol.Callbacks.HostApis.EventBindings, StringComparison.Ordinal))
+		{
+			EventBindingsChanged?.Invoke();
 		}
 	}
 

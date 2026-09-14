@@ -39,6 +39,7 @@ export interface GetConnectionInfoResponse {
   endpoints: ConnectionEndpoint[];
   publicListenerUnavailable: boolean;
   version: string;
+  identityFingerprint?: string | null;
 }
 
 export type ApplicationIdentityKind = 'ExecutablePath' | 'ProcessName' | 'BundleId';

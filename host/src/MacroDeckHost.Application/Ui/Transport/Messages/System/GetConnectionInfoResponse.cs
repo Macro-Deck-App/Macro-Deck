@@ -18,4 +18,6 @@ public class GetConnectionInfoResponse
 	public bool PublicListenerUnavailable { get; set; }
 
 	public string Version { get; set; } = string.Empty;
+
+	public string? IdentityFingerprint { get; set; }
 }

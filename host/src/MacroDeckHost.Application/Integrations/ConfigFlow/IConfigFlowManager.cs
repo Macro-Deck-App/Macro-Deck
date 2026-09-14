@@ -51,6 +51,7 @@ public interface IConfigFlowManager
 		string stepId,
 		IReadOnlyDictionary<string, JsonElement> values,
 		IReadOnlyCollection<string> clearedSecretFields,
+		int? stepIndex,
 		CancellationToken cancellationToken);
 
 	Task AbandonAsync(Guid flowId, CancellationToken cancellationToken);

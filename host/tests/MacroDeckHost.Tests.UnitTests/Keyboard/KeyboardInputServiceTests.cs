@@ -33,6 +33,21 @@ public class KeyboardInputServiceTests
 	}
 
 	[Test]
+	public async Task PressCombo_with_right_alt_presses_the_right_hand_key_not_the_left()
+	{
+		await _service.PressComboAsync(KeyModifier.RightAlt, KeyCode.F1);
+
+		Assert.That(_provider.Events,
+			Is.EqualTo(new[]
+			{
+				(KeyCode.RightAlt, true),
+				(KeyCode.F1, true),
+				(KeyCode.F1, false),
+				(KeyCode.RightAlt, false)
+			}));
+	}
+
+	[Test]
 	public async Task PressCombo_orders_multiple_modifiers_and_reverses_on_release()
 	{
 		await _service.PressComboAsync(KeyModifier.Control | KeyModifier.Shift, KeyCode.S);

@@ -6,6 +6,7 @@ changelog:
       - wontfix
       - ai-slop
       - flaky-test
+      - internal
       - area:ci
       - area:e2e
 

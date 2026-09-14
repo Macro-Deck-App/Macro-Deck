@@ -11142,6 +11142,10 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Keyboard.Media.VolumeUp" xml:space="preserve">
     <value>Lauter</value>
   </data>
+  <data name="Keyboard.Modifier.Right" xml:space="preserve">
+    <value>{modifier} rechts</value>
+    <comment>[modifier:string]</comment>
+  </data>
   <data name="Migration.CredentialChoice.EnterKeyButton" xml:space="preserve">
     <value>Entschlüsselungsschlüssel eingeben</value>
   </data>
@@ -11366,10 +11370,6 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Migration.Warning.IntegrationAlreadyConfigured" xml:space="preserve">
     <value>Ihre bestehende Konfiguration hier wurde behalten, also wurde nichts aus Macro Deck 2 übernommen - auch keine Einstellungen, die ihr fehlen. Wenn stattdessen die alte Konfiguration übernommen werden soll, entferne die bestehende und starte die Migration erneut.</value>
   </data>
-  <data name="Migration.Warning.Keyboard.RightModifierNotSupported" xml:space="preserve">
-    <value>Dieser Hotkey erforderte ausdrücklich die rechte {modifier}-Taste; Macro Deck 3 drückt immer die linke {modifier}-Taste.</value>
-    <comment>[modifier:string]</comment>
-  </data>
   <data name="Migration.Warning.LongPressReleaseNotMigrated" xml:space="preserve">
     <value>Aktionen, die beim Loslassen eines langen Drucks ausgeführt wurden, werden deaktiviert migriert, da Macro Deck 3 keinen solchen Auslöser kennt.</value>
   </data>
@@ -11464,6 +11464,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Notifications.ActionFailed" xml:space="preserve">
     <value>„{name}“ fehlgeschlagen</value>
     <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.HostIdentityRenewed" xml:space="preserve">
+    <value>Dieser Computer hat eine neue Identität</value>
+  </data>
+  <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
+    <value>Der Identitätsschlüssel dieses Computers wurde ersetzt. Scanne auf jedem gekoppelten Handy oder Tablet den QR-Code dieses Computers erneut, um es weiter zu verwenden.</value>
   </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Fehlgeschlagener Anmeldeversuch</value>
@@ -12993,6 +12999,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.Network.Description" xml:space="preserve">
     <value>Der Port, über den Smartphones, Tablets und Browser in deinem Netzwerk Macro Deck erreichen.</value>
   </data>
+  <data name="Settings.Network.IdentityDescription" xml:space="preserve">
+    <value>Die Macro-Deck-App zeigt denselben Code, wenn sich ein Handy oder Tablet über die eingetippte Adresse dieses Computers verbindet. Melde dich dort nur an, wenn beide übereinstimmen.</value>
+  </data>
   <data name="Settings.Network.DiscoveryDescription" xml:space="preserve">
     <value>Damit die Macro Deck App auf Smartphones und Tablets diesen Computer automatisch findet. Andere Geräte im Netzwerk sehen seinen Namen und seine Version.</value>
   </data>
@@ -13611,6 +13620,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Shell.ConnectionPanel.NoInterfaces" xml:space="preserve">
     <value>Keine Netzwerkschnittstellen gefunden</value>
+  </data>
+  <data name="Shell.ConnectionPanel.Identity" xml:space="preserve">
+    <value>Identität</value>
+  </data>
+  <data name="Shell.ConnectionPanel.IdentityUnavailable" xml:space="preserve">
+    <value>Nicht verfügbar</value>
   </data>
   <data name="Shell.ConnectionPanel.PairingCode" xml:space="preserve">
     <value>Kopplungscode</value>
@@ -15987,8 +16002,8 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Music.Artist" xml:space="preserve">
     <value>Künstler</value>
   </data>
-  <data name="Widgets.Music.FirstAvailable" xml:space="preserve">
-    <value>Erster verfügbarer</value>
+  <data name="Widgets.Music.ActivePlayer" xml:space="preserve">
+    <value>Aktiver Player</value>
   </data>
   <data name="Widgets.Music.FullCover" xml:space="preserve">
     <value>Vollflächiges Cover</value>

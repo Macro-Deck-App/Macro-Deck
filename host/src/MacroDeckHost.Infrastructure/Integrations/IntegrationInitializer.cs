@@ -39,6 +39,7 @@ public sealed class IntegrationInitializer
 	private readonly IWidgetIconInvalidator _widgetIconInvalidator;
 	private readonly IUserVariableApi _userVariableApi;
 	private readonly IEventBus _eventBus;
+	private readonly IEventBindingTracker _bindingTracker;
 	private readonly IUserNotificationStore _userNotificationStore;
 	private readonly IAdbGateway _adbGateway;
 	private readonly ICompanionGateway _companionGateway;
@@ -54,6 +55,7 @@ public sealed class IntegrationInitializer
 	private readonly ILogger _logger;
 
 	private readonly ConcurrentDictionary<string, byte> _attempted = new(StringComparer.Ordinal);
+	private readonly ConcurrentDictionary<string, IntegrationEventPublisher> _eventPublishers = new(StringComparer.Ordinal);
 
 	public IntegrationInitializer(
 		IServiceScopeFactory serviceScopeFactory,
@@ -63,6 +65,7 @@ public sealed class IntegrationInitializer
 		IWidgetIconInvalidator widgetIconInvalidator,
 		IUserVariableApi userVariableApi,
 		IEventBus eventBus,
+		IEventBindingTracker bindingTracker,
 		IUserNotificationStore userNotificationStore,
 		IAdbGateway adbGateway,
 		ICompanionGateway companionGateway,
@@ -84,6 +87,7 @@ public sealed class IntegrationInitializer
 		_widgetIconInvalidator = widgetIconInvalidator;
 		_userVariableApi = userVariableApi;
 		_eventBus = eventBus;
+		_bindingTracker = bindingTracker;
 		_userNotificationStore = userNotificationStore;
 		_adbGateway = adbGateway;
 		_companionGateway = companionGateway;
@@ -116,13 +120,16 @@ public sealed class IntegrationInitializer
 		var widgetApi = new IntegrationWidgetApi(integration.Id, _widgetApi, _widgetIconInvalidator);
 		var config = new IntegrationConfig(integration.Id, _serviceScopeFactory);
 
+		var events = _eventPublishers.GetOrAdd(integration.Id,
+			id => new IntegrationEventPublisher(id, _eventBus, _bindingTracker, _logger));
+
 		var context = new IntegrationContext(variableApi,
 			_userVariableApi,
 			config,
 			_deckNavigator,
 			_scriptApi,
 			widgetApi,
-			new IntegrationEventPublisher(integration.Id, _eventBus, _logger),
+			events,
 			new IntegrationUserNotifier(integration.Id, integrationName, _userNotificationStore, _logger));
 
 		// IIntegration.IsInitialized has no setter, so it is the SDK's own word on whether initialization

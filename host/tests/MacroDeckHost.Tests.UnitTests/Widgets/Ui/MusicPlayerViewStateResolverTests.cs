@@ -184,6 +184,49 @@ public class MusicPlayerViewStateResolverTests
 		});
 	}
 
+	[Test]
+	public async Task An_unbound_widget_follows_the_player_the_host_marks_active()
+	{
+		var harness = new MusicPlayerTestHarness();
+		harness.Record(Playing(positionMs: 1_000));
+		harness.RecordSecond(Playing(positionMs: 5_000, trackName: "Flim"));
+		harness.Focus(StubRegistry.SecondInstanceId);
+
+		var state = await harness.ResolveAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(state.TrackName, Is.EqualTo("Flim"));
+			Assert.That(state.InstanceMissing, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task An_unbound_widget_shows_the_first_player_while_none_is_active()
+	{
+		var harness = new MusicPlayerTestHarness();
+		harness.Record(Playing(positionMs: 1_000));
+		harness.RecordSecond(Playing(positionMs: 5_000, trackName: "Flim"));
+
+		var state = await harness.ResolveAsync();
+
+		Assert.That(state.TrackName, Is.EqualTo("Windowlicker"));
+	}
+
+	[Test]
+	public async Task A_bound_widget_ignores_the_active_player()
+	{
+		var harness = new MusicPlayerTestHarness();
+		harness.Record(Playing(positionMs: 1_000));
+		harness.RecordSecond(Playing(positionMs: 5_000, trackName: "Flim"));
+		harness.Focus(StubRegistry.SecondInstanceId);
+
+		var state = await harness.ResolveAsync(
+			config: new MusicPlayerWidgetData { InstanceId = MusicPlayerTestHarness.InstanceId });
+
+		Assert.That(state.TrackName, Is.EqualTo("Windowlicker"));
+	}
+
 	private static MusicPlayerStatePayload Playing(
 		long positionMs,
 		string trackName = "Windowlicker",

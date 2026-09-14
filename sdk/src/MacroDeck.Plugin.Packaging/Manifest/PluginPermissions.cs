@@ -44,6 +44,7 @@ public static class PluginPermissions
 
 	public const string HostWidgetTypes = "host:widget-types";
 
+	public const string HostEventBindings = "host:event-bindings";
 	public const string HostScreenSavers = "host:screensavers";
 
 	public const string EventsPublish = "events:publish";
@@ -62,7 +63,7 @@ public static class PluginPermissions
 	[
 		HostVariables, HostUserVariables, HostConfig, HostDeck, HostScripts, HostWidgets,
 		HostNotifications, HostActionInteractions, HostDevices, HostVariableValues, HostLayouts,
-		HostFolderViews, HostWidgetTypes, HostScreenSavers, EventsPublish, AssetsUpload, NetOutbound, FileSystemUserFiles,
+		HostFolderViews, HostWidgetTypes, HostEventBindings, HostScreenSavers, EventsPublish, AssetsUpload, NetOutbound, FileSystemUserFiles,
 		ProcessSpawn, DeviceUsb,
 	];
 

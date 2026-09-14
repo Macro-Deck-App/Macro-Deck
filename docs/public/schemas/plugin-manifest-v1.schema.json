@@ -102,7 +102,7 @@
       },
       "uniqueItems": true,
       "x-macrodeck-requirement": "recommended",
-      "description": "The permission vocabulary this plugin declares it wants. Declared, validated for shape, persisted and exposed only - nothing in the host enforces these today. Deliberately not an enum: an unknown permission is advisory, not invalid, so a manifest naming a permission this host does not yet know about still installs. The reader rejects a duplicated permission string. Known values as of this schema: host:variables, host:user-variables, host:config, host:deck, host:scripts, host:widgets, host:notifications, host:action-interactions, host:devices, host:variable-values, host:layouts, host:folder-views, host:widget-types, host:screensavers, events:publish, assets:upload, net:outbound, fs:user-files, process:spawn, device:usb."
+      "description": "The permission vocabulary this plugin declares it wants. Declared, validated for shape, persisted and exposed only - nothing in the host enforces these today. Deliberately not an enum: an unknown permission is advisory, not invalid, so a manifest naming a permission this host does not yet know about still installs. The reader rejects a duplicated permission string. Known values as of this schema: host:variables, host:user-variables, host:config, host:deck, host:scripts, host:widgets, host:notifications, host:action-interactions, host:devices, host:variable-values, host:layouts, host:folder-views, host:widget-types, host:event-bindings, host:screensavers, events:publish, assets:upload, net:outbound, fs:user-files, process:spawn, device:usb."
     },
     "languages": {
       "type": "array",

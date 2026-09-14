@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Infrastructure.Adb;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Serilog;
 
 namespace MacroDeckHost.Tests.UnitTests.Adb;
@@ -109,6 +111,81 @@ public class AdbManagerLifecycleTests
 			Assert.That(harness.Runner.Invocations.Any(argv => argv.Contains("kill-server")), Is.False);
 			Assert.That(harness.Manager.Status.Enabled, Is.False);
 		});
+	}
+
+	[TestCase(false, true, TestName = "Turning off ADB removes the tunnel Macro Deck created")]
+	[TestCase(true, false, TestName = "Turning off USB connections removes the tunnel Macro Deck created")]
+	public async Task Switching_off_removes_only_the_recorded_tunnel(bool enabled, bool usbConnectionsEnabled)
+	{
+		using var harness = ConnectedDevice();
+		await harness.Manager.RefreshNowAsync(CancellationToken.None);
+		var devicePort = AdbUsbTunnelPorts.DeviceSideCandidates[0];
+		Assert.That(harness.Manager.Devices.Single().Tunnel?.Established, Is.True, "precondition: tunnel created");
+
+		harness.PreferenceService.AdbSettings = harness.PreferenceService.AdbSettings with
+		{
+			Enabled = enabled, UsbConnectionsEnabled = usbConnectionsEnabled
+		};
+		await harness.Manager.ApplySettingsAsync(CancellationToken.None);
+		await harness.Manager.RefreshNowAsync(CancellationToken.None);
+
+		var removeCalls = harness.Runner.Invocations.Where(argv => argv.Contains("--remove")).ToList();
+		Assert.That(removeCalls,
+			Is.EqualTo(new[] { new[] { "-s", Serial, "reverse", "--remove", "tcp:" + devicePort } }),
+			"exactly the recorded mapping is removed, once, and nothing else on the device is touched");
+	}
+
+	[Test]
+	public async Task Turning_usb_connections_back_on_recreates_the_tunnel()
+	{
+		using var harness = ConnectedDevice();
+		await harness.Manager.RefreshNowAsync(CancellationToken.None);
+
+		harness.PreferenceService.AdbSettings = harness.PreferenceService.AdbSettings with { UsbConnectionsEnabled = false };
+		await harness.Manager.ApplySettingsAsync(CancellationToken.None);
+		harness.Runner.Invocations.Clear();
+
+		harness.PreferenceService.AdbSettings = harness.PreferenceService.AdbSettings with { UsbConnectionsEnabled = true };
+		await harness.Manager.ApplySettingsAsync(CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(harness.Runner.Invocations.Any(argv => argv.Contains("--no-rebind")), Is.True);
+			Assert.That(harness.Manager.Devices.Single().Tunnel?.Established, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task Tunnels_left_by_an_unclean_run_are_still_removed_after_starting_with_adb_disabled()
+	{
+		var paths = new TestPaths();
+		new AdbOwnershipMarker(paths, new LoggerConfiguration().CreateLogger())
+			.Write(new AdbOwnershipState(1, false, [new AdbOwnedTunnel(Serial, 8194, 8193)], DateTimeOffset.UtcNow));
+		using var harness = ConnectedDevice(paths);
+		harness.PreferenceService.AdbSettings = harness.PreferenceService.AdbSettings with { Enabled = false };
+
+		await harness.Manager.ApplySettingsAsync(CancellationToken.None);
+		Assert.That(harness.Runner.Invocations.Any(argv => argv.Contains("--remove")), Is.False);
+
+		harness.PreferenceService.AdbSettings = harness.PreferenceService.AdbSettings with { Enabled = true };
+		await harness.Manager.ApplySettingsAsync(CancellationToken.None);
+
+		Assert.That(harness.Runner.Invocations,
+			Has.Some.EqualTo(new[] { "-s", Serial, "reverse", "--remove", "tcp:8194" }));
+	}
+
+	private static AdbManagerHarness ConnectedDevice(TestPaths? paths = null)
+	{
+		var harness = new AdbManagerHarness(paths: paths);
+		harness.Runner.When(argv => argv.Contains("--list"),
+			new AdbProcessResult(true, 0, "UsbFfs tcp:8195 tcp:9999\n", string.Empty, false));
+		harness.Runner.When(argv => argv.Count == 2 && argv[0] == "devices",
+			new AdbProcessResult(true,
+				0,
+				$"List of devices attached\n{Serial} device product:p model:Pixel transport_id:1\n",
+				string.Empty,
+				false));
+		return harness;
 	}
 
 	[Test]

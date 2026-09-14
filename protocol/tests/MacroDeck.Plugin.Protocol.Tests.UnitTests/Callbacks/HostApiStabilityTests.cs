@@ -16,6 +16,7 @@ public class HostApiStabilityTests
 		"config",
 		"deck",
 		"devices",
+		"event-bindings",
 		"folder-views",
 		"layouts",
 		"notifications",
@@ -47,6 +48,7 @@ public class HostApiStabilityTests
 			[HostApis.Layouts] = ["register", "unregister"],
 			[HostApis.FolderViews] = ["register", "unregister"],
 			[HostApis.WidgetTypes] = ["register", "unregister"],
+			[HostApis.EventBindings] = [],
 			[HostApis.ScreenSavers] = ["register", "unregister"],
 		};
 

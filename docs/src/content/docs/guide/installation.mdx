@@ -1,0 +1,106 @@
+---
+title: Installation
+description: Install Macro Deck on Windows, macOS or Linux.
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components';
+import Downloads from '../../../components/Downloads.astro';
+
+Macro Deck runs on the computer you want to control. Your phone, tablet or browser then connects to
+it over your network. Check [Compatibility](/guide/compatibility/) for the supported systems.
+
+Jump to your platform:
+
+- [Windows](#windows)
+- [macOS](#macos)
+- [Linux](#linux)
+
+Stable releases are recommended for everyday use. Beta releases get new features first, but may
+contain incomplete or unstable functionality.
+
+## Windows
+
+<Downloads packages={['windows']} />
+
+Download the installer and run it.
+
+## macOS
+
+<Downloads packages={['macos']} />
+
+Download the disk image, open it and move **Macro Deck** into your Applications folder. Macro Deck
+requires macOS 11 or later on an Apple silicon Mac.
+
+## Linux
+
+### Debian and Ubuntu
+
+Install from the Macro Deck APT repository to receive updates through `apt`. The beta suite also
+receives every stable release.
+
+<div data-hide-when-stable>
+
+:::note
+There is no stable release of Macro Deck 3 yet, so the stable suite is still empty. Use the beta
+suite for now.
+:::
+
+</div>
+
+<div data-prefer-stable>
+<Tabs>
+<TabItem label="Beta">
+
+```bash
+sudo install -d -m 0755 /etc/apt/keyrings
+sudo curl -fsSLo /etc/apt/keyrings/macro-deck.asc https://packages.macro-deck.app/gpg.asc
+sudo tee /etc/apt/sources.list.d/macro-deck.sources > /dev/null <<'EOF'
+Types: deb
+URIs: https://packages.macro-deck.app
+Suites: beta
+Components: main
+Architectures: amd64
+Signed-By: /etc/apt/keyrings/macro-deck.asc
+EOF
+sudo apt update
+sudo apt install macro-deck
+```
+
+</TabItem>
+<TabItem label="Stable">
+
+```bash
+sudo install -d -m 0755 /etc/apt/keyrings
+sudo curl -fsSLo /etc/apt/keyrings/macro-deck.asc https://packages.macro-deck.app/gpg.asc
+sudo tee /etc/apt/sources.list.d/macro-deck.sources > /dev/null <<'EOF'
+Types: deb
+URIs: https://packages.macro-deck.app
+Suites: stable
+Components: main
+Architectures: amd64
+Signed-By: /etc/apt/keyrings/macro-deck.asc
+EOF
+sudo apt update
+sudo apt install macro-deck
+```
+
+</TabItem>
+</Tabs>
+</div>
+
+Updates then arrive with `sudo apt upgrade`.
+
+Alternatively, run the AppImage, which updates itself, or install the Debian package directly,
+which then does not receive updates.
+
+<Downloads packages={['deb', 'appimage']} />
+
+### Other distributions
+
+Install the RPM package or run the AppImage. Macro Deck is not in the AUR yet.
+
+<Downloads packages={['rpm', 'appimage']} />
+
+## Next steps
+
+Continue with [Getting started](/guide/getting-started/).

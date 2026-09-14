@@ -11144,6 +11144,10 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Keyboard.Media.VolumeUp" xml:space="preserve">
     <value>Zwiększ głośność</value>
   </data>
+  <data name="Keyboard.Modifier.Right" xml:space="preserve">
+    <value>Prawy {modifier}</value>
+    <comment>[modifier:string]</comment>
+  </data>
   <data name="Migration.CredentialChoice.EnterKeyButton" xml:space="preserve">
     <value>Wprowadź klucz odszyfrowywania</value>
   </data>
@@ -11368,10 +11372,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Migration.Warning.IntegrationAlreadyConfigured" xml:space="preserve">
     <value>Istniejąca tu konfiguracja została zachowana, więc nie zastosowano niczego z Macro Deck 2 - nawet ustawień, których brakuje. Aby przenieść tamtą konfigurację, należy usunąć istniejącą i uruchomić migrację ponownie.</value>
   </data>
-  <data name="Migration.Warning.Keyboard.RightModifierNotSupported" xml:space="preserve">
-    <value>Ten skrót wymagał konkretnie prawego klawisza {modifier}; Macro Deck 3 zawsze naciska lewy klawisz {modifier}.</value>
-    <comment>[modifier:string]</comment>
-  </data>
   <data name="Migration.Warning.LongPressReleaseNotMigrated" xml:space="preserve">
     <value>Akcje uruchamiane po zwolnieniu długiego naciśnięcia są migrowane jako wyłączone, ponieważ Macro Deck 3 nie ma takiego wyzwalacza.</value>
   </data>
@@ -11466,6 +11466,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Notifications.ActionFailed" xml:space="preserve">
     <value>Akcja „{name}” nie powiodła się</value>
     <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.HostIdentityRenewed" xml:space="preserve">
+    <value>Ten komputer ma nową tożsamość</value>
+  </data>
+  <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
+    <value>Klucz tożsamości tego komputera został zastąpiony. Aby dalej korzystać ze sparowanych telefonów i tabletów, należy ponownie zeskanować na każdym z nich kod QR tego komputera.</value>
   </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Nieudana próba logowania</value>
@@ -12995,6 +13001,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Settings.Network.Description" xml:space="preserve">
     <value>Port, na którym Macro Deck nasłuchuje połączeń z telefonów, tabletów i przeglądarek w sieci.</value>
   </data>
+  <data name="Settings.Network.IdentityDescription" xml:space="preserve">
+    <value>Aplikacja Macro Deck pokazuje ten sam kod, gdy telefon lub tablet łączy się przez wpisanie adresu tego komputera. Należy się tam zalogować tylko wtedy, gdy oba kody są zgodne.</value>
+  </data>
   <data name="Settings.Network.DiscoveryDescription" xml:space="preserve">
     <value>Umożliwia aplikacji Macro Deck na telefonach i tabletach automatyczne znalezienie tego komputera. Inne urządzenia w sieci widzą jego nazwę i wersję.</value>
   </data>
@@ -13613,6 +13622,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Shell.ConnectionPanel.NoInterfaces" xml:space="preserve">
     <value>Nie znaleziono interfejsów sieciowych</value>
+  </data>
+  <data name="Shell.ConnectionPanel.Identity" xml:space="preserve">
+    <value>Tożsamość</value>
+  </data>
+  <data name="Shell.ConnectionPanel.IdentityUnavailable" xml:space="preserve">
+    <value>Niedostępna</value>
   </data>
   <data name="Shell.ConnectionPanel.PairingCode" xml:space="preserve">
     <value>Kod parowania</value>
@@ -15989,8 +16004,8 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Music.Artist" xml:space="preserve">
     <value>Wykonawca</value>
   </data>
-  <data name="Widgets.Music.FirstAvailable" xml:space="preserve">
-    <value>Pierwszy dostępny</value>
+  <data name="Widgets.Music.ActivePlayer" xml:space="preserve">
+    <value>Aktywny odtwarzacz</value>
   </data>
   <data name="Widgets.Music.FullCover" xml:space="preserve">
     <value>Pełna okładka</value>

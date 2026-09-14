@@ -137,7 +137,7 @@ public static class StagedRestoreApplier
 		var rollbackRoot = Path.Combine(document.StagingDirectory, RollbackDirectoryName);
 		Directory.CreateDirectory(rollbackRoot);
 
-		foreach (var relative in CurrentFilesOwnedBy(paths, selected))
+		foreach (var relative in CurrentFilesOwnedBy(paths, selected, document))
 		{
 			var entry = new RestoreJournalEntry { RelativePath = relative };
 			var current = Path.Combine(paths.DataRootDirectory, ToNativePath(relative));
@@ -264,8 +264,11 @@ public static class StagedRestoreApplier
 	}
 
 	private static IEnumerable<string> CurrentFilesOwnedBy(IMacroDeckPaths paths,
-		HashSet<Domain.Enums.BackupComponentGroup> selected)
+		HashSet<Domain.Enums.BackupComponentGroup> selected,
+		PendingRestoreDocument document)
 	{
+		var archived = document.Files.Select(file => file.RelativePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
 		if (!Directory.Exists(paths.DataRootDirectory))
 		{
 			yield break;
@@ -275,6 +278,12 @@ public static class StagedRestoreApplier
 		{
 			var relative = Path.GetRelativePath(paths.DataRootDirectory, absolute).Replace('\\', '/');
 			if (BackupComponentGroups.IsExcluded(relative))
+			{
+				continue;
+			}
+
+			if (BackupComponentGroups.KeptWhenMissingFromArchive.Contains(relative, StringComparer.OrdinalIgnoreCase) &&
+				!archived.Contains(relative))
 			{
 				continue;
 			}

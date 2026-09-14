@@ -57,6 +57,7 @@ internal sealed class IntegrationLifecycleTests
 			new FakeWidgetIconInvalidator(),
 			new FakeUserVariableApi(),
 			new RecordingEventBus(),
+			new StubEventBindingTracker(),
 			new FakeNotificationStore(),
 			null!,
 			null!,

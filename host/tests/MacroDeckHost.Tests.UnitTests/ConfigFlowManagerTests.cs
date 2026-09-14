@@ -479,6 +479,48 @@ public class ConfigFlowManagerTests
 		return secretId;
 	}
 
+	[Test]
+	public async Task Going_back_drops_the_values_and_secrets_of_the_abandoned_branch()
+	{
+		var manager = CreateManager(new BranchingConfigFlowIntegration(), _listenerState);
+		var flowId = (await manager.StartAsync("cf-branch", CancellationToken.None)).FlowId;
+
+		await manager.SubmitAsync(flowId, "brand", Values(("brand", JsonValue("a"))), [], 0, CancellationToken.None);
+		await manager.SubmitAsync(flowId, "a", Values(("aKey", JsonValue("a-secret"))), [], 1, CancellationToken.None);
+		var failed = await manager.SubmitAsync(flowId,
+			"brand",
+			Values(("brand", JsonValue("unknown"))),
+			[],
+			0,
+			CancellationToken.None);
+		await manager.SubmitAsync(flowId, "brand", Values(("brand", JsonValue("b"))), [], 0, CancellationToken.None);
+		await manager.SubmitAsync(flowId, "b", Values(("bName", JsonValue("studio"))), [], 1, CancellationToken.None);
+		var done = await manager.SubmitAsync(flowId, "confirm", Values(), [], 2, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(failed.Kind, Is.EqualTo(ConfigFlowResultKind.Error));
+			Assert.That(done.Kind, Is.EqualTo(ConfigFlowResultKind.Complete));
+			Assert.That(_store.Created.Single().Values.Keys, Is.EquivalentTo(new[] { "brand", "bName" }));
+			Assert.That(_secretService.Count, Is.Zero);
+		});
+	}
+
+	[Test]
+	public async Task A_client_that_sends_no_step_index_keeps_every_submitted_value()
+	{
+		var manager = CreateManager(new BranchingConfigFlowIntegration(), _listenerState);
+		var flowId = (await manager.StartAsync("cf-branch", CancellationToken.None)).FlowId;
+
+		await manager.SubmitAsync(flowId, "brand", Values(("brand", JsonValue("a"))), CancellationToken.None);
+		await manager.SubmitAsync(flowId, "a", Values(("aKey", JsonValue("a-secret"))), CancellationToken.None);
+		await manager.SubmitAsync(flowId, "brand", Values(("brand", JsonValue("b"))), CancellationToken.None);
+		await manager.SubmitAsync(flowId, "b", Values(("bName", JsonValue("studio"))), CancellationToken.None);
+		await manager.SubmitAsync(flowId, "confirm", Values(), CancellationToken.None);
+
+		Assert.That(_store.Created.Single().Values.Keys, Is.EquivalentTo(new[] { "brand", "aKey", "bName" }));
+	}
+
 	private async Task<ConfigFlowSubmitOutcome> CompleteFlow(Guid? flowId = null)
 	{
 		if (flowId is null)
@@ -568,6 +610,45 @@ public class ConfigFlowManagerTests
 			Disposed = true;
 			return ValueTask.CompletedTask;
 		}
+	}
+
+	private sealed class BranchingConfigFlowIntegration : IIntegration, IConfigFlowProvider
+	{
+		public string Id => "cf-branch";
+		public LocalizedText Name => "Branching Config Flow Integration";
+		public string Version => "1.0.0";
+		public IReadOnlyList<IActionDefinition> Actions => [];
+
+		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task ShutdownAsync() => Task.CompletedTask;
+		public IConfigFlow CreateConfigFlow() => new BranchingConfigFlow();
+		public bool IsInitialized => true;
+	}
+
+	private sealed class BranchingConfigFlow : IConfigFlow
+	{
+		public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
+			=> Task.FromResult(ConfigFlowResult.Step(BrandStep()));
+
+		public Task<ConfigFlowResult> SubmitAsync(
+			string stepId,
+			IReadOnlyDictionary<string, object?> input,
+			IConfigFlowContext context,
+			CancellationToken cancellationToken)
+			=> Task.FromResult(stepId switch
+			{
+				"brand" => (input.GetValueOrDefault("brand") as string) switch
+				{
+					"a" => ConfigFlowResult.Step(new ConfigFlowStep { StepId = "a", Fields = [ActionParameter.Password("aKey")] }),
+					"b" => ConfigFlowResult.Step(new ConfigFlowStep { StepId = "b", Fields = [ActionParameter.Text("bName")] }),
+					_ => ConfigFlowResult.Error(BrandStep(), "Unknown brand")
+				},
+				"a" or "b" => ConfigFlowResult.Step(new ConfigFlowStep { StepId = "confirm", Fields = [] }),
+				_ => ConfigFlowResult.Complete("Branch")
+			});
+
+		private static ConfigFlowStep BrandStep()
+			=> new() { StepId = "brand", Fields = [ActionParameter.Text("brand")] };
 	}
 
 	private sealed class OAuthConfigFlowIntegration : IIntegration, IConfigFlowProvider

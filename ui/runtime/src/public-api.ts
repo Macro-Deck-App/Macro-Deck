@@ -33,6 +33,7 @@ export {
   WIDGET_APPEARANCE_ACTION_IDS,
   WIDGET_APPEARANCE_RESET,
   WIDGET_INTEGRATION_ID,
+  KEYBOARD_INTEGRATION_ID,
   WIDGET_TARGET_SELF,
 } from './domain/action-builder.interface';
 export {
@@ -154,6 +155,8 @@ export {
   type KeyUpStepValue,
   metaKeyLabel,
   modifierLabel,
+  RIGHT_KEYBOARD_MODIFIERS,
+  sidedModifier,
   supportedKeyGroups,
   type TextStepValue,
 } from './domain/keyboard.interface';
@@ -796,6 +799,7 @@ export {
   type GetIntegrationsResponse,
   type IntegrationIssuesChangedEvent,
   type IntegrationIssueSeverity,
+  type IntegrationsChangedEvent,
   type IpcIntegration,
   type IpcIntegrationActionCapability,
   type IpcIntegrationIssue,

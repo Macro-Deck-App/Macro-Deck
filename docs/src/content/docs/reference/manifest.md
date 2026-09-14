@@ -185,7 +185,7 @@ Recommended. Array of unique strings. Known vocabulary, one per host callback su
 
 | Group | Permissions |
 | --- | --- |
-| Host | `host:variables`, `host:user-variables`, `host:config`, `host:deck`, `host:scripts`, `host:widgets`, `host:notifications`, `host:action-interactions`, `host:devices`, `host:variable-values`, `host:layouts`, `host:folder-views`, `host:widget-types`, `host:screensavers` |
+| Host | `host:variables`, `host:user-variables`, `host:config`, `host:deck`, `host:scripts`, `host:widgets`, `host:notifications`, `host:action-interactions`, `host:devices`, `host:variable-values`, `host:layouts`, `host:folder-views`, `host:widget-types`, `host:event-bindings`, `host:screensavers` |
 | Other | `events:publish`, `assets:upload`, `net:outbound`, `fs:user-files`, `process:spawn`, `device:usb` |
 
 - Unknown permission: warning (`unknown-permission`), still installs. Not an enum on purpose.

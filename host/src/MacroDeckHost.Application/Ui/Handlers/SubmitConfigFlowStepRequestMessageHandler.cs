@@ -31,6 +31,7 @@ public class SubmitConfigFlowStepRequestMessageHandler
 			request.StepId,
 			request.Values,
 			request.ClearedSecretFields,
+			request.StepIndex,
 			cancellationToken);
 
 		if (!outcome.FlowFound)

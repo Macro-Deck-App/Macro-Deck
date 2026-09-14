@@ -170,6 +170,162 @@ public class RemotePluginIntegrationRegistrarTests
 			kind => CapabilityNegotiationResult.Accept(kind, 1),
 			StringComparer.Ordinal);
 
+	private List<string> CatalogChanges()
+		=> [.. _mediator.Published.OfType<IntegrationCatalogChangedNotification>().Select(n => n.IntegrationId)];
+
+	[Test]
+	public async Task Registering_an_installed_plugin_detached_announces_the_catalogue_change()
+	{
+		var pluginId = "com.example.plugin";
+		_installationCatalog.Plugins.Add(Installed(pluginId));
+
+		await _registrar.RegisterInstalledDetachedAsync(pluginId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_integrationRegistry.Registered.Select(i => i.Id), Does.Contain(pluginId));
+			Assert.That(CatalogChanges(), Is.EqualTo(new[] { pluginId }));
+			Assert.That(_mediator.Published.OfType<IntegrationStateChangedNotification>(), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Re_declaring_capabilities_never_announces_a_removal()
+	{
+		var pluginId = "com.example.plugin";
+		_invoker.ActionsDescribeResult = new ActionCatalogPayload { Actions = [] };
+		await ConnectSessionAsync(pluginId, [Action("play")], Accepted(CapabilityKinds.Actions));
+		await _registrar.RegisterAsync(pluginId);
+
+		await _registrar.UnregisterAsync(pluginId);
+		await _registrar.RegisterAsync(pluginId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(CatalogChanges(), Is.Empty);
+			Assert.That(_integrationRegistry.Registered.Select(i => i.Id), Does.Contain(pluginId));
+		});
+	}
+
+	[Test]
+	public async Task Forgetting_a_plugin_announces_its_removal()
+	{
+		var pluginId = "com.example.plugin";
+		_installationCatalog.Plugins.Add(Installed(pluginId));
+		await _registrar.RegisterInstalledDetachedAsync(pluginId);
+		_mediator.Published.Clear();
+
+		await _registrar.ForgetAsync(pluginId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_integrationRegistry.Registered.Select(i => i.Id), Does.Not.Contain(pluginId));
+			Assert.That(CatalogChanges(), Is.EqualTo(new[] { pluginId }));
+		});
+	}
+
+	[Test]
+	public async Task Sweeping_a_vanished_installation_announces_its_removal()
+	{
+		var vanished = "com.example.vanished";
+		_installationCatalog.Plugins.Add(Installed(vanished));
+		await _registrar.RegisterInstalledButStoppedAsync();
+		_installationCatalog.Plugins.RemoveAll(plugin => plugin.PluginId == vanished);
+		_mediator.Published.Clear();
+
+		await _registrar.UnregisterVanishedInstallationsAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_integrationRegistry.Registered.Select(i => i.Id), Does.Not.Contain(vanished));
+			Assert.That(CatalogChanges(), Is.EqualTo(new[] { vanished }));
+		});
+	}
+
+	private static async Task<bool> WithinASecond(Func<bool> condition)
+	{
+		for (var attempt = 0; attempt < 100 && !condition(); attempt++)
+		{
+			await Task.Delay(10);
+		}
+
+		return condition();
+	}
+
+	private async Task<string> RegisterRunningPluginAsync(string pluginId, string version)
+	{
+		_invoker.ActionsDescribeResult = new ActionCatalogPayload { Actions = [] };
+		var sessionId = await ConnectSessionAsync(pluginId,
+			[Action("play")],
+			Accepted(CapabilityKinds.Actions),
+			declaredVersion: version);
+		await _registrar.RegisterAsync(pluginId);
+		return sessionId;
+	}
+
+	[Test]
+	public async Task An_installed_plugin_whose_process_stops_stays_listed_as_stopped()
+	{
+		var pluginId = "com.example.plugin";
+		_installationCatalog.Plugins.Add(Installed(pluginId));
+		await RegisterRunningPluginAsync(pluginId, "1.0.0");
+		var running = _integrationRegistry.Registered.Single(i => i.Id == pluginId);
+		_mediator.Published.Clear();
+
+		await _sessionRegistry.TerminateForPlugin(pluginId, 1000, "stopped");
+
+		Assert.That(await WithinASecond(() => CatalogChanges().Count > 0), Is.True);
+		Assert.Multiple(() =>
+		{
+			var listed = _integrationRegistry.Registered.SingleOrDefault(i => i.Id == pluginId);
+			Assert.That(listed, Is.Not.Null);
+			Assert.That(listed, Is.Not.SameAs(running));
+			Assert.That(CatalogChanges(), Is.EqualTo(new[] { pluginId }));
+			Assert.That(_mediator.Published.OfType<IntegrationStateChangedNotification>(), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_developer_build_whose_session_ends_is_removed_and_announced()
+	{
+		var pluginId = "com.example.dev-build";
+		await RegisterRunningPluginAsync(pluginId, "0.1.0");
+		_mediator.Published.Clear();
+
+		await _sessionRegistry.TerminateForPlugin(pluginId, 1000, "stopped");
+
+		Assert.That(await WithinASecond(() => CatalogChanges().Count > 0), Is.True);
+		Assert.Multiple(() =>
+		{
+			Assert.That(_integrationRegistry.Registered.Select(i => i.Id), Does.Not.Contain(pluginId));
+			Assert.That(CatalogChanges(), Is.EqualTo(new[] { pluginId }));
+		});
+	}
+
+	[Test]
+	public async Task Upgrading_a_running_plugin_keeps_it_listed_and_ends_on_the_new_adapter()
+	{
+		var pluginId = "com.example.plugin";
+		_installationCatalog.Plugins.Add(Installed(pluginId));
+		await RegisterRunningPluginAsync(pluginId, "1.0.0");
+		var oldAdapter = _integrationRegistry.Registered.Single(i => i.Id == pluginId);
+
+		await _sessionRegistry.TerminateForPlugin(pluginId, 1000, "upgrade");
+		Assert.That(await WithinASecond(() => CatalogChanges().Count > 0), Is.True);
+		var listedWhileRestarting = _integrationRegistry.Registered.Select(i => i.Id).ToList();
+
+		await RegisterRunningPluginAsync(pluginId, "1.0.1");
+
+		var lastSignal = _mediator.Published.Last(notification =>
+			notification is IntegrationStateChangedNotification or IntegrationCatalogChangedNotification);
+		Assert.Multiple(() =>
+		{
+			Assert.That(listedWhileRestarting, Does.Contain(pluginId));
+			Assert.That(lastSignal, Is.EqualTo(new IntegrationStateChangedNotification(pluginId)));
+			Assert.That(_integrationRegistry.Registered.Single(i => i.Id == pluginId), Is.Not.SameAs(oldAdapter));
+		});
+	}
+
 	[Test]
 	public async Task A_valid_session_registers_an_adapter_and_publishes_state_changed()
 	{

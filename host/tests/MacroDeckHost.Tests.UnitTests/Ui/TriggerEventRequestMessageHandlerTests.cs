@@ -260,6 +260,8 @@ public class TriggerEventRequestMessageHandlerTests
 
 		public IReadOnlyList<EventSubscription> FindByProvider(string providerId) => [];
 
+		public IReadOnlyCollection<string> ProviderIds() => [];
+
 		public void Rebuild()
 		{
 		}

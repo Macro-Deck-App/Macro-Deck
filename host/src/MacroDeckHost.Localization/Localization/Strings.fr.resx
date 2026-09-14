@@ -11144,6 +11144,10 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Keyboard.Media.VolumeUp" xml:space="preserve">
     <value>Volume +</value>
   </data>
+  <data name="Keyboard.Modifier.Right" xml:space="preserve">
+    <value>{modifier} droit</value>
+    <comment>[modifier:string]</comment>
+  </data>
   <data name="Migration.CredentialChoice.EnterKeyButton" xml:space="preserve">
     <value>Saisir la clé de déchiffrement</value>
   </data>
@@ -11368,10 +11372,6 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Migration.Warning.IntegrationAlreadyConfigured" xml:space="preserve">
     <value>La configuration déjà présente ici a été conservée, donc rien de Macro Deck 2 ne lui a été appliqué - pas même les réglages qui lui manquent. Pour migrer cette configuration à la place, supprime celle qui existe et relance la migration.</value>
   </data>
-  <data name="Migration.Warning.Keyboard.RightModifierNotSupported" xml:space="preserve">
-    <value>Ce raccourci nécessitait spécifiquement la touche {modifier} droite ; Macro Deck 3 appuie toujours sur la touche {modifier} gauche.</value>
-    <comment>[modifier:string]</comment>
-  </data>
   <data name="Migration.Warning.LongPressReleaseNotMigrated" xml:space="preserve">
     <value>Les actions exécutées à la fin d'un appui long sont migrées désactivées, car Macro Deck 3 n'a pas ce type de déclencheur.</value>
   </data>
@@ -11466,6 +11466,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Notifications.ActionFailed" xml:space="preserve">
     <value>« {name} » a échoué</value>
     <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.HostIdentityRenewed" xml:space="preserve">
+    <value>Cet ordinateur a une nouvelle identité</value>
+  </data>
+  <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
+    <value>La clé d'identité de cet ordinateur a été remplacée. Sur chaque téléphone ou tablette associé, scanne à nouveau le code QR de cet ordinateur pour continuer à l'utiliser.</value>
   </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Tentative de connexion échouée</value>
@@ -12995,6 +13001,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Settings.Network.Description" xml:space="preserve">
     <value>Le port sur lequel Macro Deck écoute pour les téléphones, tablettes et navigateurs de ton réseau.</value>
   </data>
+  <data name="Settings.Network.IdentityDescription" xml:space="preserve">
+    <value>L'app Macro Deck affiche le même code quand un téléphone ou une tablette se connecte en saisissant l'adresse de cet ordinateur. Connecte-toi seulement si les deux correspondent.</value>
+  </data>
   <data name="Settings.Network.DiscoveryDescription" xml:space="preserve">
     <value>Permet à l'app Macro Deck sur téléphones et tablettes de trouver cet ordinateur automatiquement. Les autres appareils du réseau voient son nom et sa version.</value>
   </data>
@@ -13613,6 +13622,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Shell.ConnectionPanel.NoInterfaces" xml:space="preserve">
     <value>Aucune interface réseau trouvée</value>
+  </data>
+  <data name="Shell.ConnectionPanel.Identity" xml:space="preserve">
+    <value>Identité</value>
+  </data>
+  <data name="Shell.ConnectionPanel.IdentityUnavailable" xml:space="preserve">
+    <value>Indisponible</value>
   </data>
   <data name="Shell.ConnectionPanel.PairingCode" xml:space="preserve">
     <value>Code d’appairage</value>
@@ -15989,8 +16004,8 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.Music.Artist" xml:space="preserve">
     <value>Artiste</value>
   </data>
-  <data name="Widgets.Music.FirstAvailable" xml:space="preserve">
-    <value>Premier disponible</value>
+  <data name="Widgets.Music.ActivePlayer" xml:space="preserve">
+    <value>Lecteur actif</value>
   </data>
   <data name="Widgets.Music.FullCover" xml:space="preserve">
     <value>Pochette pleine</value>

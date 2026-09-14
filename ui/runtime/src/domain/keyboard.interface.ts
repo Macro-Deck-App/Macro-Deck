@@ -52,6 +52,20 @@ export interface KeyboardSequenceValue {
 
 export const KEYBOARD_MODIFIERS = ['Ctrl', 'Shift', 'Alt', 'Meta'] as const;
 
+export const RIGHT_KEYBOARD_MODIFIERS = ['RightCtrl', 'RightShift', 'RightAlt', 'RightMeta'] as const;
+
+const MODIFIER_CODES = new Map<string, { left: string; right: string }>([
+  ['Ctrl', { left: 'ControlLeft', right: 'ControlRight' }],
+  ['Shift', { left: 'ShiftLeft', right: 'ShiftRight' }],
+  ['Alt', { left: 'AltLeft', right: 'AltRight' }],
+  ['Meta', { left: 'MetaLeft', right: 'MetaRight' }],
+]);
+
+export function sidedModifier(modifier: string, heldCodes: ReadonlySet<string>): string {
+  const codes = MODIFIER_CODES.get(modifier);
+  return codes && heldCodes.has(codes.right) && !heldCodes.has(codes.left) ? `Right${modifier}` : modifier;
+}
+
 export function isApplePlatform(): boolean {
   const platform = (typeof navigator !== 'undefined' ? navigator.platform : '').toLowerCase();
   return platform.includes('mac');
@@ -71,12 +85,16 @@ export function metaKeyLabel(): string {
   return 'Meta';
 }
 
-export function modifierLabel(modifier: string): string {
+export function modifierLabel(modifier: string, t: KeyboardTranslator): string {
+  const base = modifier.startsWith('Right') ? modifier.slice('Right'.length) : '';
+  if (MODIFIER_CODES.has(base)) {
+    return t(AppStrings.Keyboard.Modifier.Right, { modifier: modifierLabel(base, t) });
+  }
   return modifier === 'Meta' ? metaKeyLabel() : modifier;
 }
 
-export function formatCombo(modifiers: string[], key: string): string {
-  return [...modifiers.map(modifierLabel), key].filter(Boolean).join(' + ');
+export function formatCombo(modifiers: string[], key: string, t: KeyboardTranslator): string {
+  return [...modifiers.map(modifier => modifierLabel(modifier, t)), key].filter(Boolean).join(' + ');
 }
 
 export interface KeyOption {
@@ -93,7 +111,7 @@ function range(values: string[]): KeyOption[] {
   return values.map(v => ({ value: v, label: v }));
 }
 
-export type KeyboardTranslator = (key: string) => string;
+export type KeyboardTranslator = (key: string, args?: Record<string, unknown>) => string;
 
 export function supportedKeyGroups(t: KeyboardTranslator): KeyGroup[] {
   const G = AppStrings.Keyboard.Group;

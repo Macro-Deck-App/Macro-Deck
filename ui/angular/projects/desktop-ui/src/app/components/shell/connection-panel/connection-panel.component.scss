@@ -133,6 +133,14 @@
   user-select: all;
 }
 
+.cp-fingerprint {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  color: var(--color-text-primary);
+  user-select: all;
+}
+
 .cp-muted {
   color: var(--color-text-muted);
   font-style: italic;

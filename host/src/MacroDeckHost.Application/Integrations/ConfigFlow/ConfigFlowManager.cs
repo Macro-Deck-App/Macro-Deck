@@ -206,19 +206,37 @@ public class ConfigFlowManager : IConfigFlowManager
 		string stepId,
 		IReadOnlyDictionary<string, JsonElement> values,
 		CancellationToken cancellationToken)
-		=> await SubmitAsync(flowId, stepId, values, [], cancellationToken);
+		=> await SubmitAsync(flowId, stepId, values, [], null, cancellationToken);
+
+	public Task<ConfigFlowSubmitOutcome> SubmitAsync(
+		Guid flowId,
+		string stepId,
+		IReadOnlyDictionary<string, JsonElement> values,
+		IReadOnlyCollection<string> clearedSecretFields,
+		CancellationToken cancellationToken)
+		=> SubmitAsync(flowId, stepId, values, clearedSecretFields, null, cancellationToken);
 
 	public async Task<ConfigFlowSubmitOutcome> SubmitAsync(
 		Guid flowId,
 		string stepId,
 		IReadOnlyDictionary<string, JsonElement> values,
 		IReadOnlyCollection<string> clearedSecretFields,
+		int? stepIndex,
 		CancellationToken cancellationToken)
 	{
 		if (!_flows.TryGetValue(flowId, out var active))
 		{
 			return new ConfigFlowSubmitOutcome(false, ConfigFlowResultKind.Error, null, null, null, null);
 		}
+
+		if (stepIndex is { } index && index >= 0 && index < active.History.Count)
+		{
+			active.History[index].RestoreInto(active);
+			active.History.RemoveRange(index, active.History.Count - index);
+			active.PendingSnapshot = null;
+		}
+
+		var snapshot = active.PendingSnapshot ??= FlowSnapshot.Capture(active);
 
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var secretService = scope.ServiceProvider.GetRequiredService<ISecretService>();
@@ -285,6 +303,8 @@ public class ConfigFlowManager : IConfigFlowManager
 		switch (result.Kind)
 		{
 			case ConfigFlowResultKind.Step:
+				active.History.Add(snapshot);
+				active.PendingSnapshot = null;
 				return new ConfigFlowSubmitOutcome(true, result.Kind, result.NextStep, null, null, null);
 
 			case ConfigFlowResultKind.Error:
@@ -581,6 +601,35 @@ public class ConfigFlowManager : IConfigFlowManager
 		public HashSet<string> SecretFields { get; } = new();
 
 		public HashSet<string> ReplacedSecretFields { get; } = new();
+
+		public List<FlowSnapshot> History { get; } = new();
+
+		public FlowSnapshot? PendingSnapshot { get; set; }
+	}
+
+	private sealed record FlowSnapshot(
+		Dictionary<string, JsonElement> Values,
+		HashSet<string> SecretFields,
+		HashSet<string> ReplacedSecretFields)
+	{
+		public static FlowSnapshot Capture(ActiveFlow active)
+			=> new(new Dictionary<string, JsonElement>(active.Values, StringComparer.Ordinal),
+				new HashSet<string>(active.SecretFields, StringComparer.Ordinal),
+				new HashSet<string>(active.ReplacedSecretFields, StringComparer.Ordinal));
+
+		public void RestoreInto(ActiveFlow active)
+		{
+			active.Values.Clear();
+			foreach (var (key, value) in Values)
+			{
+				active.Values[key] = value;
+			}
+
+			active.SecretFields.Clear();
+			active.SecretFields.UnionWith(SecretFields);
+			active.ReplacedSecretFields.Clear();
+			active.ReplacedSecretFields.UnionWith(ReplacedSecretFields);
+		}
 	}
 
 	private sealed class PublicListenerUnavailableException()
