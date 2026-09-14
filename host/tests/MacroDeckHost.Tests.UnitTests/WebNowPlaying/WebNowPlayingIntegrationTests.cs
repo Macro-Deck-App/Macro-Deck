@@ -103,6 +103,62 @@ internal sealed class WebNowPlayingIntegrationTests
 		});
 	}
 
+	[TestCase(true)]
+	[TestCase(false)]
+	public async Task A_cover_from_a_Chromium_tab_reaches_its_player_although_the_cover_header_wraps_the_id(
+		bool coverFirst)
+	{
+		const long chromiumPlayerId = 11469944219998;
+		using var integration = await StartAsync();
+		using var extension = await ConnectAsync(integration);
+		byte[] cover = [0x89, 0x50, 0x4E, 0x47, 42];
+
+		if (coverFirst)
+		{
+			await SendCoverAsync(extension, unchecked((uint)chromiumPlayerId), cover);
+			await SendTextAsync(extension, Added(chromiumPlayerId));
+		}
+		else
+		{
+			await SendTextAsync(extension, Added(chromiumPlayerId));
+			await EventuallyAsync(integration, s => s.TrackName is not null);
+			await SendCoverAsync(extension, unchecked((uint)chromiumPlayerId), cover);
+		}
+
+		var state = await EventuallyAsync(integration, s => s.ArtworkId is not null);
+		var artwork = state.ArtworkId is null ? null : await Player(integration).GetArtworkAsync(state.ArtworkId);
+
+		Assert.That(artwork?.Data, Is.EqualTo(cover));
+	}
+
+	[Test]
+	public async Task A_cover_stays_with_its_own_browser_when_another_browser_has_a_player_with_the_same_low_32_bits()
+	{
+		const long playerId = 11469944219998;
+		const long otherBrowsersPlayerId = playerId + (1L << 32);
+		using var integration = await StartAsync();
+		using var otherBrowser = await ConnectAsync(integration);
+		using var extension = await ConnectAsync(integration);
+		byte[] cover = [0x89, 0x50, 0x4E, 0x47, 42];
+
+		await SendTextAsync(otherBrowser, Added(otherBrowsersPlayerId, title: "Other", activeAt: 1000));
+		await EventuallyAsync(integration, s => s.TrackName == "Other");
+		await SendCoverAsync(extension, unchecked((uint)playerId), cover);
+		await SendTextAsync(extension, Added(playerId, title: "Own", activeAt: 2000));
+		var own = await EventuallyAsync(integration, s => s.TrackName == "Own" && s.ArtworkId is not null);
+		var ownArtwork = own.ArtworkId is null ? null : await Player(integration).GetArtworkAsync(own.ArtworkId);
+
+		await SendTextAsync(extension, $"2 {playerId}");
+		var other = await EventuallyAsync(integration, s => s.TrackName == "Other");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ownArtwork?.Data, Is.EqualTo(cover));
+			Assert.That(other.TrackName, Is.EqualTo("Other"));
+			Assert.That(other.ArtworkId, Is.Null);
+		});
+	}
+
 	[Test]
 	public async Task Playback_commands_reach_the_extension_in_the_adapter_format()
 	{
