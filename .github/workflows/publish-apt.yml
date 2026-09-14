@@ -30,6 +30,10 @@ jobs:
     name: Publish to the APT repository
     runs-on: blacksmith-2vcpu-ubuntu-2404
     container: debian:trixie
+    # A container job runs steps with sh, which is dash on Debian and rejects the bash syntax used here.
+    defaults:
+      run:
+        shell: bash
     environment: production
     permissions:
       contents: read
