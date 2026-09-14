@@ -105,6 +105,35 @@ public class StagedRestoreApplierTests
 			"plugin installs fail without their staging directory");
 	}
 
+	[Test]
+	public void KeepsTheHostIdentityKeyWhenTheArchiveHasNone()
+	{
+		Write("keys/auth-signing.key", "current-signing");
+		Write("keys/host-identity.key", "current-identity");
+		Stage([BackupComponentGroup.Accounts], ("keys/auth-signing.key", "restored-signing"));
+
+		StagedRestoreApplier.ApplyPending(_paths);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Read("keys/auth-signing.key"), Is.EqualTo("restored-signing"));
+			Assert.That(Read("keys/host-identity.key"),
+				Is.EqualTo("current-identity"),
+				"an archive from before the identity key existed must not unpair every device");
+		});
+	}
+
+	[Test]
+	public void RestoresTheHostIdentityKeyWhenTheArchiveHasOne()
+	{
+		Write("keys/host-identity.key", "current-identity");
+		Stage([BackupComponentGroup.Accounts], ("keys/host-identity.key", "restored-identity"));
+
+		StagedRestoreApplier.ApplyPending(_paths);
+
+		Assert.That(Read("keys/host-identity.key"), Is.EqualTo("restored-identity"));
+	}
+
 	private string MarkerPath => Path.Combine(_paths.RestoreStagingDirectory, PendingRestoreDocument.FileName);
 
 	private PendingRestoreDocument Stage(BackupComponentGroup[] components,

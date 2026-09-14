@@ -67,6 +67,40 @@ describe('HotkeyCaptureService', () => {
     expect(service.active).toBeTrue();
   });
 
+  it('waits for a real key while AltGr is held', () => {
+    arm();
+    press({ key: 'AltGraph', code: 'AltRight' });
+
+    expect(recorded).toEqual([]);
+    expect(service.active).toBeTrue();
+  });
+
+  it('reports which modifier keys are still held when the key is pressed', () => {
+    const held: string[][] = [];
+    service.start(host, { key: (_event, codes) => held.push([...codes]), cancel: () => canceled++ });
+
+    press({ key: 'Shift', code: 'ShiftLeft', shiftKey: true });
+    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'Shift', code: 'ShiftLeft', bubbles: true }));
+    press({ key: 'Alt', code: 'AltRight', altKey: true });
+    press({ key: 'a', code: 'KeyA', altKey: true });
+
+    expect(held).toEqual([['AltRight']]);
+  });
+
+  it('starts every capture with no modifier held', () => {
+    const held: string[][] = [];
+    const handlers = { key: (_event: KeyboardEvent, codes: ReadonlySet<string>) => held.push([...codes]), cancel: () => canceled++ };
+
+    service.start(host, handlers);
+    press({ key: 'Alt', code: 'AltRight', altKey: true });
+    window.dispatchEvent(new Event('blur'));
+
+    service.start(host, handlers);
+    press({ key: 'a', code: 'KeyA' });
+
+    expect(held).toEqual([[]]);
+  });
+
   it('cancels on Escape without letting it reach anything else', () => {
     arm();
     const event = press({ key: 'Escape', code: 'Escape' });

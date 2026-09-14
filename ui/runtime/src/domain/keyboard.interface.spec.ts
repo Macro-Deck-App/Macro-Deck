@@ -1,5 +1,25 @@
+import { AppStrings } from '../localization/generated/app-strings';
 import { bundledTranslator as t } from '../localization/bundled-translator';
-import { isSelectionModifierEvent, keyFromEvent, supportedKeyGroups } from './keyboard.interface';
+import { formatCombo, isSelectionModifierEvent, keyFromEvent, sidedModifier, supportedKeyGroups } from './keyboard.interface';
+
+describe('formatCombo', () => {
+  const translate = (key: string, args?: Record<string, unknown>): string =>
+    key === AppStrings.Keyboard.Modifier.Right ? `Right ${args?.['modifier']}` : key;
+
+  it('labels right-hand modifiers through the translator and generic ones as before', () => {
+    expect(formatCombo(['Ctrl', 'RightAlt'], 'F1', translate)).toBe('Ctrl + Right Alt + F1');
+  });
+});
+
+describe('sidedModifier', () => {
+  it('names the right-hand modifier only when the right key alone is held', () => {
+    expect(sidedModifier('Alt', new Set(['AltRight']))).toBe('RightAlt');
+    expect(sidedModifier('Ctrl', new Set(['ControlRight']))).toBe('RightCtrl');
+    expect(sidedModifier('Alt', new Set(['AltLeft']))).toBe('Alt');
+    expect(sidedModifier('Alt', new Set(['AltLeft', 'AltRight']))).toBe('Alt');
+    expect(sidedModifier('Alt', new Set())).toBe('Alt');
+  });
+});
 
 describe('keyFromEvent', () => {
   it('maps the spacebar to the canonical "Space" key name', () => {

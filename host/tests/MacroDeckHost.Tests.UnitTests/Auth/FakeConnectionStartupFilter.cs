@@ -18,6 +18,8 @@ public enum FakeConnectionShape
 public sealed class FakeConnectionStartupFilter : IStartupFilter
 {
 	public const string ShapeHeader = "X-Test-Connection-Shape";
+	public const string LocalIpHeader = "X-Test-Local-Ip";
+	public const string RemoteIpHeader = "X-Test-Remote-Ip";
 
 	public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
 		=> app =>
@@ -50,6 +52,16 @@ public sealed class FakeConnectionStartupFilter : IStartupFilter
 						context.Connection.LocalPort = HostEndpoints.PublicPort;
 						context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.50");
 						break;
+				}
+
+				if (context.Request.Headers.TryGetValue(LocalIpHeader, out var localIp))
+				{
+					context.Connection.LocalIpAddress = IPAddress.Parse(localIp.ToString());
+				}
+
+				if (context.Request.Headers.TryGetValue(RemoteIpHeader, out var remoteIp))
+				{
+					context.Connection.RemoteIpAddress = IPAddress.Parse(remoteIp.ToString());
 				}
 
 				await nextMiddleware();

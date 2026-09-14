@@ -11,6 +11,7 @@ using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Persistence;
+using MacroDeckHost.Plugins.Capabilities.Callbacks;
 using Mediator;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -69,6 +70,7 @@ public class HostStatePushTests
 
 		_connection = new RecordingPluginConnection();
 		Assert.That(registry.TryAttach("session-1", _connection, instanceId: null), Is.True);
+		await _host.Services.GetRequiredService<HostStatePusher>().PushAllAsync("com.example.state");
 	}
 
 	[OneTimeTearDown]

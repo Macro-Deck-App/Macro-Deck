@@ -64,7 +64,7 @@ public class WidgetBatchNotificationFanOutTests
 		_sessionRegistry = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
 		_pluginConnection = new FakePluginConnection();
 		_statePusher
-			= new HostStatePusher(_sessionRegistry, new EmptyDeckNavigator(), new EmptyScriptApi(), _widgetApi, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), Serilog.Core.Logger.None);
+			= new HostStatePusher(_sessionRegistry, new EmptyDeckNavigator(), new EmptyScriptApi(), _widgetApi, new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), Serilog.Core.Logger.None);
 		_folderCache = new MutableFolderCache();
 
 		var services = new ServiceCollection();
@@ -121,6 +121,7 @@ public class WidgetBatchNotificationFanOutTests
 	[TearDown]
 	public void TearDown()
 	{
+		_statePusher.Dispose();
 		_variableScope.Dispose();
 		_variableServices.Dispose();
 	}
@@ -476,6 +477,8 @@ public class WidgetBatchNotificationFanOutTests
 		public EventSubscription? Find(EventTarget target) => null;
 
 		public IReadOnlyList<EventSubscription> FindByProvider(string providerId) => [];
+
+		public IReadOnlyCollection<string> ProviderIds() => [];
 
 		public event Action? Changed
 		{

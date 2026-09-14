@@ -48,6 +48,24 @@ describe('NetworkSettingsComponent', () => {
     discoveryEnabled: true,
   };
 
+  const connectionInfo = {
+    instanceName: 'Test Instance',
+    endpoints: [],
+    publicListenerUnavailable: false,
+    version: '3.0.0-test',
+    identityFingerprint: '3208 E004 6ED3 EE6B 4E75 1027' as string | null,
+  };
+
+  async function renderIdentity(): Promise<HTMLElement> {
+    const fixture = TestBed.createComponent(NetworkSettingsComponent);
+    fixture.detectChanges();
+    for (let i = 0; i < 10; i++) {
+      await fixture.whenStable();
+    }
+    fixture.detectChanges();
+    return fixture.nativeElement as HTMLElement;
+  }
+
   function installApi(state: Partial<GetNetworkSettingsResponse> = {}): GetNetworkSettingsResponse {
     const resolved = { ...defaults, ...state };
     api.getNetworkSettings.and.resolveTo(resolved);
@@ -65,11 +83,13 @@ describe('NetworkSettingsComponent', () => {
   beforeEach(async () => {
     api = jasmine.createSpyObj<ApiService>('ApiService', [
       'getNetworkSettings',
+      'getConnectionInfo',
       'updateNetworkSettings',
       'restartApplication',
       'onNotification',
     ]);
     api.onNotification.and.returnValue(EMPTY);
+    api.getConnectionInfo.and.resolveTo(connectionInfo);
     installApi();
     api.restartApplication.and.resolveTo({ success: true, supported: true, error: null });
 
@@ -297,4 +317,20 @@ describe('NetworkSettingsComponent', () => {
     expect(fixture.componentInstance.tlsBusy()).toBeTrue();
     expect(api.updateNetworkSettings).not.toHaveBeenCalled();
   });
+
+  it('shows the host identity fingerprint', async () => {
+    const element = await renderIdentity();
+
+    expect(element.querySelector('.network__fingerprint')?.textContent?.trim()).toBe('3208 E004 6ED3 EE6B 4E75 1027');
+  });
+
+  it('says the identity is unavailable when the host cannot load its key', async () => {
+    api.getConnectionInfo.and.resolveTo({ ...connectionInfo, identityFingerprint: null });
+
+    const element = await renderIdentity();
+
+    expect(element.querySelector('.network__fingerprint')).toBeNull();
+    expect(element.querySelector('.network__muted')).not.toBeNull();
+  });
+
 });

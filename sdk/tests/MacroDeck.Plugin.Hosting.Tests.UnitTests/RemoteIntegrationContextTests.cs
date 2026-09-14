@@ -45,7 +45,7 @@ public class RemoteIntegrationContextTests
 			new RemoteDeckNavigator(_invoker, stateCache, new PluginConnectionState(), Serilog.Core.Logger.None),
 			new RemoteScriptApi(_invoker, stateCache),
 			new RemoteWidgetApi(_invoker, new PluginConnectionState(), stateCache),
-			new RemoteEventPublisher(new PluginConnectionState(), Serilog.Core.Logger.None),
+			new RemoteEventPublisher(new PluginConnectionState(), stateCache, Serilog.Core.Logger.None),
 			new RemoteUserNotifier(_invoker, Serilog.Core.Logger.None));
 	}
 
@@ -476,6 +476,60 @@ public class RemoteIntegrationContextTests
 			Assert.That(deck.GetFolders().Select(f => f.Id), Is.EqualTo(new[] { "f1" }));
 			Assert.That(scripts.GetScripts().Select(s => s.Id), Is.EqualTo(new[] { "s1" }));
 			Assert.That(widgets.Exists("w1"), Is.True);
+		});
+	}
+
+	[Test]
+	public void Event_bindings_are_empty_before_the_host_pushed_any()
+		=> Assert.That(_context.Events.GetBindings(), Is.Empty);
+
+	[Test]
+	public async Task An_event_bindings_push_is_served_by_GetBindings_and_raises_BindingsChanged()
+	{
+		var stateCache = new HostStateCache(new PluginConnectionState());
+		var events = new RemoteEventPublisher(new PluginConnectionState(), stateCache, Serilog.Core.Logger.None);
+		var changed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		events.BindingsChanged += () => changed.TrySetResult();
+		var combo = JsonSerializer.SerializeToElement(new { modifiers = new[] { "Ctrl", "Shift" }, key = "F3" });
+
+		stateCache.Apply(StatePush(HostApis.EventBindings,
+			new[]
+			{
+				new EventBindingDto
+				{
+					EventId = "hotkey-pressed",
+					Parameters = new Dictionary<string, EventBindingValueDto>
+					{
+						["combo"] = new() { Value = combo, Operator = "==" },
+						["repeat"] = new() { Operator = "isNotEmpty" }
+					}
+				}
+			}));
+
+		await changed.Task.WaitAsync(TimeSpan.FromSeconds(5));
+		var binding = events.GetBindings().Single();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(binding.EventId, Is.EqualTo("hotkey-pressed"));
+			Assert.That(binding.Parameters["combo"].Operator, Is.EqualTo("=="));
+			Assert.That(binding.Parameters["combo"].Value!.Value.GetProperty("key").GetString(), Is.EqualTo("F3"));
+			Assert.That(binding.Parameters["combo"].Value!.Value.GetProperty("modifiers")[1].GetString(),
+				Is.EqualTo("Shift"));
+			Assert.That(binding.Parameters["repeat"].Value, Is.Null);
+		});
+	}
+
+	[Test]
+	public void A_host_state_api_the_plugin_does_not_know_is_cached_without_disturbing_the_known_ones()
+	{
+		var stateCache = new HostStateCache(new PluginConnectionState());
+		stateCache.Apply(StatePush(HostApis.Scripts, new List<Script> { new() { Id = "s1", Name = "Script 1" } }));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(() => stateCache.Apply(StatePush("a-future-api", new[] { new { anything = 1 } })), Throws.Nothing);
+			Assert.That(stateCache.GetList<Script>(HostApis.Scripts).Select(script => script.Id), Is.EqualTo(new[] { "s1" }));
 		});
 	}
 

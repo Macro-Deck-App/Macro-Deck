@@ -103,6 +103,8 @@ export const WIDGET_TARGET_SELF = '$self';
 
 export const WIDGET_INTEGRATION_ID = 'app.macro-deck.widget';
 
+export const KEYBOARD_INTEGRATION_ID = 'app.macro-deck.keyboard';
+
 export const WIDGET_APPEARANCE_RESET = '$reset';
 
 // Not every `set-*` action of the widget integration is an appearance action: `set-state` writes the

@@ -128,6 +128,20 @@ public class LockedHostGateTests
 	}
 
 	[Test]
+	public async Task The_identity_challenge_answers_with_the_lock_marker_and_never_creates_a_key()
+	{
+		var response = await _client.PostAsJsonAsync(new Uri("/api/auth/identity", UriKind.Relative),
+			new { nonce = Convert.ToBase64String(new byte[32]) });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.ServiceUnavailable));
+			Assert.That(response.Headers.GetValues("X-MacroDeck-Locked"), Is.EqualTo(new[] { "true" }));
+			Assert.That(File.Exists(Path.Combine(_paths.KeysDirectory, "host-identity.key")), Is.False);
+		});
+	}
+
+	[Test]
 	public async Task The_status_endpoint_reports_the_lock_without_needing_a_token()
 	{
 		var status = await _client.GetFromJsonAsync<LockedStatus>(new Uri("/api/key-ring/status", UriKind.Relative));

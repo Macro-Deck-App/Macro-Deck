@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Cryptography;
 using MacroDeckHost.Api.Controllers;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Auth;
@@ -31,6 +32,67 @@ public class AuthControllerCookieTests
 	}
 
 	[Test]
+	public async Task A_host_that_cannot_load_its_identity_still_refreshes_without_a_host_key()
+	{
+		var controller = RefreshController(new UnavailableHostIdentity());
+
+		var result = await controller.Refresh();
+
+		var body = (TokenResponse)((OkObjectResult)result).Value!;
+		Assert.That(body.HostKey, Is.Null);
+	}
+
+	[Test]
+	public async Task A_host_shutting_down_still_refreshes_without_a_host_key()
+	{
+		var controller = RefreshController(new DisposedHostIdentity());
+
+		var result = await controller.Refresh();
+
+		var body = (TokenResponse)((OkObjectResult)result).Value!;
+		Assert.That(body.HostKey, Is.Null);
+	}
+
+	[Test]
+	public async Task Refresh_carries_the_host_key()
+	{
+		var identity = new FixedHostIdentity();
+		var controller = RefreshController(identity);
+
+		var result = await controller.Refresh();
+
+		var body = (TokenResponse)((OkObjectResult)result).Value!;
+		Assert.That(body.HostKey, Is.EqualTo(Convert.ToBase64String(identity.PublicKeyBytes)));
+	}
+
+	private static AuthController RefreshController(IHostIdentityKeyProvider identity)
+	{
+		var login = new LoginResult("access-token",
+			DateTime.UtcNow.AddMinutes(15),
+			"refresh-token",
+			DateTime.UtcNow.AddDays(30),
+			AuthScope.Client,
+			"manuel");
+		var httpContext = new DefaultHttpContext();
+		httpContext.Request.Host = new HostString("192.168.20.13", 8193);
+		var controller = new AuthController(new StubAuthService(login),
+			new LoginThrottle(TimeProvider.System),
+			new PairingCodeStore(),
+			TimeProvider.System,
+			new UserNotificationStore(),
+			new FailedLoginNotificationTracker(),
+			TestLocalization.Preferences,
+			TestLocalization.Resolver,
+			identity)
+		{
+			ControllerContext = new ControllerContext { HttpContext = httpContext }
+		};
+		controller.Request.Headers.Cookie = $"{AuthDefaults.RefreshCookieFor(8193)}=raw-token";
+
+		return controller;
+	}
+
+	[Test]
 	public async Task Auth_cookies_are_marked_secure_only_when_the_request_arrived_over_https()
 	{
 		var overHttps = await RefreshAndCaptureCookies(https: true);
@@ -45,12 +107,43 @@ public class AuthControllerCookieTests
 		});
 	}
 
-	private static async Task<List<string>> RefreshAndCaptureCookies(bool https)
+	[Test]
+	public async Task Auth_cookies_state_a_lifetime_that_does_not_depend_on_the_device_clock()
 	{
+		var host = new ManualTimeProvider();
+		var now = host.Now.UtcDateTime;
+
+		var setCookies = await RefreshAndCaptureCookies(https: false, host, now.AddMinutes(15), now.AddDays(30));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(setCookies[0], Does.Contain("max-age=900").IgnoreCase);
+			Assert.That(setCookies[1], Does.Contain("max-age=2592000").IgnoreCase);
+		});
+	}
+
+	[Test]
+	public async Task A_token_that_has_already_expired_gets_cookies_that_expire_at_once()
+	{
+		var host = new ManualTimeProvider();
+		var past = host.Now.UtcDateTime.AddMinutes(-1);
+
+		var setCookies = await RefreshAndCaptureCookies(https: false, host, past, past);
+
+		Assert.That(setCookies, Has.All.Contain("max-age=0").IgnoreCase);
+	}
+
+	private static async Task<List<string>> RefreshAndCaptureCookies(bool https,
+		TimeProvider? clock = null,
+		DateTime? accessExpiresAt = null,
+		DateTime? refreshExpiresAt = null)
+	{
+		clock ??= TimeProvider.System;
+		var now = clock.GetUtcNow().UtcDateTime;
 		var login = new LoginResult("access-token",
-			DateTime.UtcNow.AddMinutes(15),
+			accessExpiresAt ?? now.AddMinutes(15),
 			"refresh-token",
-			DateTime.UtcNow.AddDays(30),
+			refreshExpiresAt ?? now.AddDays(30),
 			AuthScope.Client,
 			"manuel");
 		var httpContext = new DefaultHttpContext();
@@ -59,11 +152,12 @@ public class AuthControllerCookieTests
 		var controller = new AuthController(new StubAuthService(login),
 			new LoginThrottle(TimeProvider.System),
 			new PairingCodeStore(),
-			TimeProvider.System,
+			clock,
 			new UserNotificationStore(),
 			new FailedLoginNotificationTracker(),
 			TestLocalization.Preferences,
-			TestLocalization.Resolver)
+			TestLocalization.Resolver,
+			new FixedHostIdentity())
 		{
 			ControllerContext = new ControllerContext { HttpContext = httpContext }
 		};
@@ -123,7 +217,8 @@ public class AuthControllerCookieTests
 			store,
 			new FailedLoginNotificationTracker(),
 			TestLocalization.Preferences,
-			TestLocalization.Resolver)
+			TestLocalization.Resolver,
+			new FixedHostIdentity())
 		{
 			ControllerContext = new ControllerContext
 			{
@@ -159,7 +254,8 @@ public class AuthControllerCookieTests
 			store,
 			new FailedLoginNotificationTracker(),
 			TestLocalization.Preferences,
-			TestLocalization.Resolver)
+			TestLocalization.Resolver,
+			new FixedHostIdentity())
 		{
 			ControllerContext = new ControllerContext
 			{
@@ -197,7 +293,8 @@ public class AuthControllerCookieTests
 			store,
 			new FailedLoginNotificationTracker(),
 			new FakeLocalizationPreferences { Culture = "de" },
-			TestLocalization.Resolver)
+			TestLocalization.Resolver,
+			new FixedHostIdentity())
 		{
 			ControllerContext = new ControllerContext
 			{
@@ -294,5 +391,43 @@ public class AuthControllerCookieTests
 			=> throw new NotSupportedException();
 
 		public Task<Result<AuthError>> ResetPassword(string newPassword) => throw new NotSupportedException();
+	}
+
+	private sealed class UnavailableHostIdentity : IHostIdentityKeyProvider
+	{
+		public ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default)
+			=> ValueTask.FromException<byte[]>(new HostIdentityUnavailableException("unreadable"));
+
+		public ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default)
+			=> ValueTask.FromException<byte[]>(new HostIdentityUnavailableException("unreadable"));
+	}
+
+	private sealed class DisposedHostIdentity : IHostIdentityKeyProvider
+	{
+		public ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default)
+			=> ValueTask.FromException<byte[]>(new ObjectDisposedException("provider"));
+
+		public ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default)
+			=> ValueTask.FromException<byte[]>(new ObjectDisposedException("provider"));
+	}
+
+	private sealed class FixedHostIdentity : IHostIdentityKeyProvider
+	{
+		private readonly ECDsa _key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+		public byte[] PublicKeyBytes
+		{
+			get
+			{
+				var point = _key.ExportParameters(false).Q;
+				return [0x04, .. point.X!, .. point.Y!];
+			}
+		}
+
+		public ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default)
+			=> ValueTask.FromResult(PublicKeyBytes);
+
+		public ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default)
+			=> ValueTask.FromResult(_key.SignData(message, HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence));
 	}
 }

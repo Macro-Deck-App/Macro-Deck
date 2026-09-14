@@ -1,6 +1,7 @@
 namespace MacroDeck.Plugin.Protocol.Callbacks;
 
-/// <summary>The host APIs a plugin can reach through <c>host.invoke</c>. <c>events</c> is deliberately
+/// <summary>The host APIs a plugin can reach through <c>host.invoke</c>, plus the push-only ones the host
+/// serves over <c>host.state</c> alone (<see cref="EventBindings" />). <c>events</c> is deliberately
 /// absent - <c>IEventPublisher.Publish</c> already has a dedicated message type, <c>event.publish</c>,
 /// so routing it through the generic callback pair would just be a second way to say the same thing.
 /// <c>ui</c> is present for the opposite reason - a UI provider's snapshots, patches and faults are
@@ -38,10 +39,14 @@ public static class HostApis
 
 	public const string WidgetTypes = "widget-types";
 
+	/// <summary>Push-only: the triggers bound to the receiving plugin's own events, sent as <c>host.state</c>
+	/// on registration and whenever that set changes. It has no <c>host.invoke</c> operations.</summary>
+	public const string EventBindings = "event-bindings";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Variables, UserVariables, Config, Deck, Scripts, Widgets, Notifications, ActionInteractions, Ui,
-		Devices, VariableValues, Layouts, FolderViews, WidgetTypes,
+		Devices, VariableValues, Layouts, FolderViews, WidgetTypes, EventBindings,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

@@ -8,6 +8,7 @@ import { ApiService, IconImageService, VariableService } from '@shared';
 import { ActionOptionsService, ResolvedActionParameterOption } from '../../../../services/action-options.service';
 import { ActionFlowStore } from '../../services/action-flow.store';
 import { WidgetTargetPickerComponent } from '../../../forms/widget-target-picker/widget-target-picker.component';
+import { KeyboardComboEditorComponent } from '../../../forms/keyboard-combo-editor/keyboard-combo-editor.component';
 import { ParamRowComponent } from './param-row.component';
 
 function fakeApiService(): ApiService {
@@ -1548,5 +1549,56 @@ describe('ParamRowComponent options reload (issue #806)', () => {
     await openDropdown();
 
     expect(api.getActionParameterOptions).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('ParamRowComponent right-hand modifier keys', () => {
+  let fixture: ComponentFixture<ParamRowComponent>;
+
+  function modifierToggles(integrationId: string, eventId?: string): string[] {
+    render(integrationId, eventId);
+    return Array.from(fixture.nativeElement.querySelectorAll('.kce-mod') as NodeListOf<HTMLElement>)
+      .map(toggle => toggle.textContent!.trim());
+  }
+
+  function render(integrationId: string, eventId?: string): KeyboardComboEditorComponent {
+    const store = jasmine.createSpyObj<ActionFlowStore>(
+      'ActionFlowStore', ['updateParam', 'updateEventParamOperator', 'errorsFor', 'pickerVariables', 'cacheParamLabel']);
+    store.errorsFor.and.returnValue([]);
+    store.pickerVariables.and.returnValue([]);
+
+    TestBed.configureTestingModule({
+      imports: [ParamRowComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: ApiService, useValue: fakeApiService() },
+        { provide: ActionFlowStore, useValue: store },
+      ],
+    });
+
+    fixture = TestBed.createComponent(ParamRowComponent);
+    fixture.componentRef.setInput('blockId', 'block-1');
+    fixture.componentRef.setInput('param', {
+      name: 'combo', type: 'keyboard-combo', label: 'Keys', value: { modifiers: [], key: '' },
+    } as ActionBlockParameter);
+    fixture.componentRef.setInput('block', { integrationId, actionId: 'press-key' } as ActionBlock);
+    if (eventId) fixture.componentRef.setInput('eventId', eventId);
+    fixture.detectChanges();
+
+    return fixture.debugElement.query(By.directive(KeyboardComboEditorComponent)).componentInstance;
+  }
+
+  afterEach(() => fixture.destroy());
+
+  it('offers them for the host keyboard actions', () => {
+    expect(modifierToggles('app.macro-deck.keyboard')).toContain('Right Alt');
+  });
+
+  it('keeps a plugin action parameter to the generic names its plugin understands', () => {
+    expect(modifierToggles('plugin.example').length).toBe(4);
+  });
+
+  it('keeps an event filter to the generic names plugins publish', () => {
+    expect(modifierToggles('app.macro-deck.keyboard', 'plugin.example.hotkey-pressed').length).toBe(4);
   });
 });

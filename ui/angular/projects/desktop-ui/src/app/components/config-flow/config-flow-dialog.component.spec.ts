@@ -8,9 +8,11 @@ import { ExternalLinkService } from '../../services/external-link.service';
 import { ConfigFlowDialogComponent } from './config-flow-dialog.component';
 
 let setValues: Array<[string, unknown]>;
+let backCalls = 0;
 
 function seedEnglishChrome(): void {
   localStorage.setItem('md.localization.translations', JSON.stringify({
+    'macrodeck:Common.Back': 'Back',
     'macrodeck:Common.Continue': 'Continue',
     'macrodeck:ConfigFlow.SetUpIntegration': 'Set up integration',
   }));
@@ -31,6 +33,8 @@ function makeFlowStub(step: ConfigFlowStepDto | null) {
     fieldErrors: signal<Record<string, string>>({}),
     storedSecretFields,
     canSubmit: signal(true),
+    canGoBack: signal(false),
+    back: () => { backCalls++; },
     setValue: (name: string, value: unknown) => {
       setValues.push([name, value]);
       values.update(current => ({ ...current, [name]: value }));
@@ -155,6 +159,40 @@ describe('ConfigFlowDialogComponent', () => {
     await fixture.whenStable();
 
     expect(continueButton.querySelector('button')?.disabled).toBeFalse();
+  });
+
+  it('offers Back only once an earlier step exists and hands the click to the flow', async () => {
+    const fixture = await renderWith(stepWith([]));
+    const flow = TestBed.inject(ConfigFlowService) as unknown as ReturnType<typeof makeFlowStub>;
+    const backButton = (): HTMLElement | undefined =>
+      Array.from(fixture.nativeElement.querySelectorAll('shared-button') as NodeListOf<HTMLElement>).find(
+        b => b.textContent?.trim() === 'Back',
+      );
+
+    expect(backButton()).toBeUndefined();
+
+    backCalls = 0;
+    flow.canGoBack.set(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const button = backButton();
+    expect(button).toBeTruthy();
+    button!.querySelector('button')!.click();
+    expect(backCalls).toBe(1);
+  });
+
+  it('offers no Back on the UI-tree path even when the flow has history', async () => {
+    const root: UiNode = { id: 'flow', type: 'flow', properties: { events: ['submit', 'cancel'] }, children: [] };
+    const { fixture, flow } = await renderWithRoot(stepWith([]), root);
+    flow.canGoBack.set(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const back = Array.from(fixture.nativeElement.querySelectorAll('shared-button') as NodeListOf<HTMLElement>).find(
+      b => b.textContent?.trim() === 'Back',
+    );
+    expect(back).toBeUndefined();
   });
 
   it('renders one link per config-flow link using its own label', async () => {

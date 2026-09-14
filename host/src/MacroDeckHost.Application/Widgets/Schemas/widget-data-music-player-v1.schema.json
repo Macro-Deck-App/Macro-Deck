@@ -8,7 +8,7 @@
   "properties": {
     "instanceId": {
       "type": ["string", "null"],
-      "description": "Which music player instance this widget displays. Empty or null means the first available instance."
+      "description": "Which music player instance this widget displays. Empty or null means the player that most recently started playing or changed track, otherwise the first available instance."
     },
     "coverStyle": {
       "enum": ["small", "full", null],

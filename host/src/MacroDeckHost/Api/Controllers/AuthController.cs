@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json.Serialization;
 using MacroDeck.Localization;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Notifications;
@@ -44,7 +45,12 @@ public record TokenResponse(
 	int ExpiresInSeconds,
 	string Scope,
 	string Username,
-	DeviceCredential? Device = null);
+	DeviceCredential? Device = null,
+	[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? HostKey = null);
+
+public record HostIdentityChallenge(string? Nonce);
+
+public record HostIdentityProof(string PublicKey, string Endpoint, string Signature);
 
 public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
 
@@ -71,6 +77,7 @@ public class AuthController : ControllerBase
 	private readonly FailedLoginNotificationTracker _failedLoginTracker;
 	private readonly IAppPreferenceService _preferences;
 	private readonly ILocalizationResolver _localization;
+	private readonly IHostIdentityKeyProvider _hostIdentity;
 
 	public AuthController(
 		IAuthService authService,
@@ -80,7 +87,8 @@ public class AuthController : ControllerBase
 		IUserNotificationStore userNotificationStore,
 		FailedLoginNotificationTracker failedLoginTracker,
 		IAppPreferenceService preferences,
-		ILocalizationResolver localization)
+		ILocalizationResolver localization,
+		IHostIdentityKeyProvider hostIdentity)
 	{
 		_authService = authService;
 		_loginThrottle = loginThrottle;
@@ -90,6 +98,7 @@ public class AuthController : ControllerBase
 		_failedLoginTracker = failedLoginTracker;
 		_preferences = preferences;
 		_localization = localization;
+		_hostIdentity = hostIdentity;
 	}
 
 	[HttpGet("status")]
@@ -182,7 +191,7 @@ public class AuthController : ControllerBase
 		_failedLoginTracker.Reset();
 		SetAuthCookies(result.Data);
 
-		return Ok(ToTokenResponse(result.Data));
+		return Ok(await ToTokenResponse(result.Data));
 	}
 
 	/// <summary>
@@ -264,7 +273,7 @@ public class AuthController : ControllerBase
 
 		SetAuthCookies(result.Data);
 
-		return Ok(ToTokenResponse(result.Data));
+		return Ok(await ToTokenResponse(result.Data));
 	}
 
 	[HttpPost("refresh")]
@@ -286,7 +295,38 @@ public class AuthController : ControllerBase
 
 		SetAuthCookies(result.Data);
 
-		return Ok(ToTokenResponse(result.Data));
+		return Ok(await ToTokenResponse(result.Data));
+	}
+
+	[HttpPost("identity")]
+	[AllowAnonymous]
+	public async Task<IActionResult> ProveIdentity(HostIdentityChallenge body)
+	{
+		if (!HostIdentityMessage.TryParseNonce(body.Nonce, out _))
+		{
+			return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Invalid nonce.");
+		}
+
+		// Taken from this host's own socket, never from the request, so a relay signs the real host's
+		// endpoint and not its own.
+		var localAddress = HttpContext.Connection.LocalIpAddress;
+		if (localAddress is null)
+		{
+			return Problem(statusCode: StatusCodes.Status503ServiceUnavailable, title: "No local endpoint.");
+		}
+
+		var endpoint = HostIdentityMessage.CanonicalAuthority(localAddress, HttpContext.Connection.LocalPort);
+		try
+		{
+			var publicKey = Convert.ToBase64String(await _hostIdentity.GetPublicKey(HttpContext.RequestAborted));
+			var signature = await _hostIdentity.Sign(HostIdentityMessage.Build(publicKey, endpoint, body.Nonce!),
+				HttpContext.RequestAborted);
+			return Ok(new HostIdentityProof(publicKey, endpoint, Convert.ToBase64String(signature)));
+		}
+		catch (HostIdentityUnavailableException)
+		{
+			return Problem(statusCode: StatusCodes.Status503ServiceUnavailable, title: "Host identity unavailable.");
+		}
 	}
 
 	[HttpPost("logout")]
@@ -369,7 +409,7 @@ public class AuthController : ControllerBase
 		return Ok(new PairingCodeResponse(code.Code, code.ExpiresAt.ToString("O")));
 	}
 
-	private TokenResponse ToTokenResponse(LoginResult login)
+	private async Task<TokenResponse> ToTokenResponse(LoginResult login)
 	{
 		var expiresIn = (int)(login.AccessTokenExpiresAt - _timeProvider.GetUtcNow().UtcDateTime).TotalSeconds;
 
@@ -381,7 +421,23 @@ public class AuthController : ControllerBase
 			Math.Max(expiresIn, 0),
 			AuthDefaults.ScopeClaimValue(login.Scope),
 			login.Username,
-			device);
+			device,
+			await HostKeyOrNull());
+	}
+
+	// A host that cannot load its identity still signs people in; the app treats the exchange as legacy.
+	// No request token: the refresh token is already rotated here, and that must never become an error.
+	private async Task<string?> HostKeyOrNull()
+	{
+		try
+		{
+			return Convert.ToBase64String(await _hostIdentity.GetPublicKey());
+		}
+		catch (Exception e) when (e is HostIdentityUnavailableException or ObjectDisposedException
+			or OperationCanceledException)
+		{
+			return null;
+		}
 	}
 
 	/// <summary>A device that told us nothing about itself still gets registered, as an unknown one.</summary>
@@ -432,6 +488,8 @@ public class AuthController : ControllerBase
 		// ever refuses to downgrade a secure session.
 		var secure = Request.IsHttps;
 
+		var now = _timeProvider.GetUtcNow().UtcDateTime;
+
 		// Named per listener: cookies ignore the port, so an installed host and a second one on the same
 		// machine would otherwise keep overwriting each other's cookie, and whichever wrote last would
 		// make the other's <img> requests fail with a token signed by the wrong key.
@@ -443,7 +501,10 @@ public class AuthController : ControllerBase
 				Secure = secure,
 				SameSite = SameSiteMode.Strict,
 				Path = "/",
-				Expires = new DateTimeOffset(login.AccessTokenExpiresAt, TimeSpan.Zero)
+				Expires = new DateTimeOffset(login.AccessTokenExpiresAt, TimeSpan.Zero),
+				// Expires is judged by the device clock: a device running ahead of this host would drop the
+				// cookie on arrival and every <img> request would go unauthenticated. Max-Age is relative.
+				MaxAge = Remaining(login.AccessTokenExpiresAt, now)
 			});
 		Response.Cookies.Append(AuthDefaults.RefreshCookieFor(AuthCookies.ListenerPort(HttpContext)),
 			login.RefreshToken,
@@ -453,9 +514,13 @@ public class AuthController : ControllerBase
 				Secure = secure,
 				SameSite = SameSiteMode.Strict,
 				Path = "/api/auth",
-				Expires = new DateTimeOffset(login.RefreshTokenExpiresAt, TimeSpan.Zero)
+				Expires = new DateTimeOffset(login.RefreshTokenExpiresAt, TimeSpan.Zero),
+				MaxAge = Remaining(login.RefreshTokenExpiresAt, now)
 			});
 	}
+
+	private static TimeSpan Remaining(DateTime expiresAt, DateTime now)
+		=> expiresAt > now ? expiresAt - now : TimeSpan.Zero;
 
 	private void DeleteAuthCookies()
 	{

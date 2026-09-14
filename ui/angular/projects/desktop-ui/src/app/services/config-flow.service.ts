@@ -6,6 +6,13 @@ import type { UiNode, UiNodeEvent } from '@macro-deck/runtime';
 import { isFieldVisible } from '../domain/parameter-visibility.util';
 import { ExternalLinkService } from './external-link.service';
 
+interface StepSnapshot {
+  step: ConfigFlowStepDto;
+  values: Record<string, unknown>;
+  storedSecretFields: ReadonlySet<string>;
+  clearedSecretFields: ReadonlySet<string>;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ConfigFlowService {
   private readonly api = inject(ApiService);
@@ -25,6 +32,7 @@ export class ConfigFlowService {
   readonly message = signal<string | null>(null);
   readonly storedSecretFields = signal<ReadonlySet<string>>(new Set());
   private readonly clearedSecretFields = signal<ReadonlySet<string>>(new Set());
+  private readonly history = signal<StepSnapshot[]>([]);
 
   readonly starting = signal(false);
   readonly submitting = signal(false);
@@ -32,6 +40,8 @@ export class ConfigFlowService {
   readonly done = signal(false);
 
   readonly waitingForAuth = signal(false);
+
+  readonly canGoBack = computed(() => this.history().length > 0);
 
   readonly canSubmit = computed(() => {
     const step = this.step();
@@ -114,11 +124,24 @@ export class ConfigFlowService {
     await this.submitStep(step.stepId, this.values());
   }
 
+  back(): void {
+    const snapshot = this.history().at(-1);
+    if (!snapshot || this.submitting()) return;
+    this.history.update(current => current.slice(0, -1));
+    this.step.set(snapshot.step);
+    this.values.set(snapshot.values);
+    this.storedSecretFields.set(snapshot.storedSecretFields);
+    this.clearedSecretFields.set(snapshot.clearedSecretFields);
+    this.fieldErrors.set({});
+    this.message.set(null);
+  }
+
   private async submitStep(stepId: string, values: Record<string, unknown>): Promise<void> {
     const flowId = this.flowId();
     const integrationId = this.integrationId();
     if (!flowId || !integrationId) return;
 
+    const previous = this.snapshot();
     this.submitting.set(true);
     this.message.set(null);
     this.fieldErrors.set({});
@@ -129,6 +152,7 @@ export class ConfigFlowService {
         stepId,
         values,
         clearedSecretFields: [...this.clearedSecretFields()],
+        stepIndex: this.history().length,
       });
 
       if (response.error) {
@@ -138,7 +162,10 @@ export class ConfigFlowService {
 
       switch (response.kind) {
         case 'Step':
-          if (response.step) this.applyStep(response.step);
+          if (response.step) {
+            if (previous) this.history.update(current => [...current, previous]);
+            this.applyStep(response.step);
+          }
           break;
         case 'Error':
           if (response.step) this.step.set(response.step);
@@ -194,6 +221,7 @@ export class ConfigFlowService {
     this.message.set(null);
     this.storedSecretFields.set(new Set());
     this.clearedSecretFields.set(new Set());
+    this.history.set([]);
     this.starting.set(false);
     this.submitting.set(false);
     this.notSupported.set(false);
@@ -218,6 +246,17 @@ export class ConfigFlowService {
         .map(([field, message]) => [field, resolveLocalizedText(message, this.localization)])
         .filter((entry): entry is [string, string] => Boolean(entry[1])),
     );
+  }
+
+  private snapshot(): StepSnapshot | null {
+    const step = this.step();
+    if (!step) return null;
+    return {
+      step,
+      values: this.values(),
+      storedSecretFields: this.storedSecretFields(),
+      clearedSecretFields: this.clearedSecretFields(),
+    };
   }
 
   private applyStep(step: ConfigFlowStepDto, initialValues: Record<string, unknown> = {}): void {

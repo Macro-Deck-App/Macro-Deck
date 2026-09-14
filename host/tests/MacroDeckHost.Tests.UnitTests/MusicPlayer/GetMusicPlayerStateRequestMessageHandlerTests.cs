@@ -76,6 +76,22 @@ internal sealed class GetMusicPlayerStateRequestMessageHandlerTests
 	}
 
 	[Test]
+	public async Task Handle_WithoutAnInstanceId_FollowsThePlayerThatLastStartedPlaying()
+	{
+		const string second = "sinusbot::b";
+		var cache = new MusicPlayerStateCache();
+		cache.Record(InstanceId, new MusicPlayerStatePayload { InstanceId = InstanceId, IsConnected = true });
+		cache.Record(second, new MusicPlayerStatePayload { InstanceId = second, IsConnected = true, IsPlaying = true });
+		var handler = new GetMusicPlayerStateRequestMessageHandler(
+			new StubRegistry(InstanceId, new HangingMusicPlayer(), second),
+			cache);
+
+		var response = await handler.Handle(new GetMusicPlayerStateRequest(), CancellationToken.None);
+
+		Assert.That(response.State?.InstanceId, Is.EqualTo(second));
+	}
+
+	[Test]
 	public void Forget_DropsInstancesThatAreNoLongerRegistered()
 	{
 		var cache = new MusicPlayerStateCache();
@@ -95,18 +111,26 @@ internal sealed class GetMusicPlayerStateRequestMessageHandlerTests
 	{
 		private readonly string _instanceId;
 		private readonly IMusicPlayer? _player;
+		private readonly string? _secondInstanceId;
 
-		public StubRegistry(string instanceId, IMusicPlayer? player)
+		public StubRegistry(string instanceId, IMusicPlayer? player, string? secondInstanceId = null)
 		{
 			_instanceId = instanceId;
 			_player = player;
+			_secondInstanceId = secondInstanceId;
 		}
 
 		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances()
-			=> [new(_instanceId, "spotify", "Spotify", "Spotify", false)];
+			=>
+			[
+				new(_instanceId, "spotify", "Spotify", "Spotify", false),
+				.. _secondInstanceId is null
+					? []
+					: new MusicPlayerInstanceDescriptor[] { new(_secondInstanceId, "sinusbot", "SinusBot", "SinusBot", false) },
+			];
 
 		public IMusicPlayer? GetPlayer(string instanceId)
-			=> instanceId == _instanceId ? _player : null;
+			=> instanceId == _instanceId || instanceId == _secondInstanceId ? _player : null;
 
 		public IMusicPlayer? DefaultPlayer => _player;
 	}

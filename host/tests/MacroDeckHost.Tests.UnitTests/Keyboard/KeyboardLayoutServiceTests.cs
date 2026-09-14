@@ -108,4 +108,21 @@ public class KeyboardLayoutServiceTests
 		var keys = _layout.ExpandModifiers(KeyModifier.Control | KeyModifier.Alt);
 		Assert.That(keys, Is.EquivalentTo([KeyCode.LeftControl, KeyCode.LeftAlt]));
 	}
+
+	[Test]
+	public void Right_hand_modifier_names_press_the_right_hand_keys()
+	{
+		var modifiers = _layout.ResolveModifiers(["RightCtrl", "RightShift", "RightAlt", "RightMeta"]);
+
+		Assert.That(_layout.ExpandModifiers(modifiers),
+			Is.EquivalentTo([KeyCode.RightControl, KeyCode.RightShift, KeyCode.RightAlt, KeyCode.RightMeta]));
+	}
+
+	[Test]
+	public void A_combo_can_hold_the_left_and_the_right_key_of_the_same_modifier()
+	{
+		var modifiers = _layout.ResolveModifiers(["Alt", "RightAlt"]);
+
+		Assert.That(_layout.ExpandModifiers(modifiers), Is.EquivalentTo([KeyCode.LeftAlt, KeyCode.RightAlt]));
+	}
 }

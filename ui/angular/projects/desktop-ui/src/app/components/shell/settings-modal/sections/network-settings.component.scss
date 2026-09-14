@@ -38,3 +38,17 @@
   display: flex;
   justify-content: flex-end;
 }
+
+.network__fingerprint {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  user-select: all;
+}
+
+.network__muted {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}

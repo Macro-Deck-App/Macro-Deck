@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, EMPTY, exhaustMap, from, timer } from 'rxjs';
-import { AppStrings, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IpcProvidedCapability, IntegrationIssuesChangedEvent, IpcIntegrationActionCapability, IpcIntegrationVariableCapability, VariableCatalogNode, IpcIntegrationIssue, PluginCompatibilityReport, resolveLocalizedText } from '@macro-deck/runtime';
+import { AppStrings, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IpcProvidedCapability, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationVariableCapability, VariableCatalogNode, IpcIntegrationIssue, PluginCompatibilityReport, resolveLocalizedText } from '@macro-deck/runtime';
 import { ApiService, ErrorBannerComponent, InputComponent, LocalizationService, LocalizedTextPipe, ModalComponent, ToastService, ToggleSwitchComponent, ButtonComponent, TranslatePipe, VariableService } from '@shared';
 import { ConfigFlowDialogComponent } from '../../config-flow/config-flow-dialog.component';
 import { DetailPageComponent } from '../../detail-page/detail-page.component';
@@ -92,6 +92,7 @@ export class IntegrationDetailPageComponent implements OnInit {
   protected readonly capabilities = signal<GetIntegrationCapabilitiesResponse | null>(null);
   protected readonly capabilitiesLoading = signal(false);
   protected readonly capabilitiesError = signal<string | null>(null);
+  private capabilitiesRequest = 0;
 
   protected readonly activeTab = signal<DetailTab>('overview');
   protected readonly actionSearch = signal('');
@@ -357,6 +358,14 @@ export class IntegrationDetailPageComponent implements OnInit {
         this.issuesError.set(null);
       });
 
+    this.api.onNotification<IntegrationsChangedEvent>('IntegrationsChangedEvent')
+      .pipe(takeUntilDestroyed())
+      .subscribe(event => {
+        if (event.integrationId === this.integrationId()) {
+          void this.loadCapabilities();
+        }
+      });
+
     // Connection states may change without a configuration mutation. Exhausting rather than
     // overlapping requests keeps a slow/offline OBS endpoint from building up refresh work.
     timer(2000, 2000)
@@ -582,18 +591,28 @@ export class IntegrationDetailPageComponent implements OnInit {
       return;
     }
 
-    this.capabilitiesLoading.set(true);
+    const request = ++this.capabilitiesRequest;
+    const hasSnapshot = this.capabilities() !== null;
+    if (!hasSnapshot) {
+      this.capabilitiesLoading.set(true);
+    }
     this.capabilitiesError.set(null);
     try {
       const response = await this.api.getIntegrationCapabilities(id);
-      this.capabilities.set(response);
+      if (request === this.capabilitiesRequest) {
+        this.capabilities.set(response);
+      }
     } catch (error) {
       // Same rule as the issue list: a failed load must not render as an empty catalog, which would
       // read as "this integration declares nothing" when the truth is "we don't know".
       console.error('Failed to load integration capabilities:', error);
-      this.capabilitiesError.set(this.localization.translateKey(AppStrings.Integrations.Detail.LoadCapabilitiesFailed));
+      if (request === this.capabilitiesRequest && !hasSnapshot) {
+        this.capabilitiesError.set(this.localization.translateKey(AppStrings.Integrations.Detail.LoadCapabilitiesFailed));
+      }
     } finally {
-      this.capabilitiesLoading.set(false);
+      if (request === this.capabilitiesRequest) {
+        this.capabilitiesLoading.set(false);
+      }
     }
   }
 

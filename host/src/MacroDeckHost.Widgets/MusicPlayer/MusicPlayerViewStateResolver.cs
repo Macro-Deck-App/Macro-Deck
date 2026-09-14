@@ -85,7 +85,7 @@ internal sealed class MusicPlayerViewStateResolver
 
 		var instanceId = missing
 			? instances[0].InstanceId
-			: configured ?? (instances.Count > 0 ? instances[0].InstanceId : null);
+			: configured ?? MusicPlayerFocus.Resolve(instances, _stateCache.ActiveInstanceId);
 
 		var descriptor = instanceId is null
 			? null

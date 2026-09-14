@@ -13,6 +13,8 @@ public interface IEventSubscriptionIndex
 
 	IReadOnlyList<EventSubscription> FindByProvider(string providerId);
 
+	IReadOnlyCollection<string> ProviderIds();
+
 	event Action? Changed;
 
 	void Rebuild();
@@ -65,6 +67,20 @@ public sealed class EventSubscriptionIndex : IEventSubscriptionIndex
 		}
 
 		return matches;
+	}
+
+	public IReadOnlyCollection<string> ProviderIds()
+	{
+		var providers = new HashSet<string>(StringComparer.Ordinal);
+		foreach (var eventId in _snapshot.ByEventId.Keys)
+		{
+			if (QualifiedId.TryParse(eventId, out var id))
+			{
+				providers.Add(id.OwnerId);
+			}
+		}
+
+		return providers;
 	}
 
 	public void Rebuild()

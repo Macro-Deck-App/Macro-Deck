@@ -58,6 +58,9 @@ export class NetworkSettingsComponent {
 
   readonly networkState = signal<GetNetworkSettingsResponse | null>(null);
 
+  readonly identityLoaded = signal(false);
+  readonly identityFingerprint = signal<string | null>(null);
+
   readonly restartRequired = this.restartNotice.required;
   readonly canRestart = this.restartNotice.canRestart;
   readonly restarting = this.restartNotice.restarting;
@@ -95,6 +98,7 @@ export class NetworkSettingsComponent {
 
   constructor() {
     void this.load();
+    void this.loadIdentity();
   }
 
   async save(): Promise<void> {
@@ -182,6 +186,16 @@ export class NetworkSettingsComponent {
       this.error.set(this.localization.translateKey(AppStrings.Settings.Network.LoadFailed));
     } finally {
       this.loaded.set(true);
+    }
+  }
+
+  private async loadIdentity(): Promise<void> {
+    try {
+      this.identityFingerprint.set((await this.api.getConnectionInfo()).identityFingerprint ?? null);
+    } catch {
+      this.identityFingerprint.set(null);
+    } finally {
+      this.identityLoaded.set(true);
     }
   }
 
