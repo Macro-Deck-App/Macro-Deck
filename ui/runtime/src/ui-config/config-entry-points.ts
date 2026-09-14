@@ -3,4 +3,5 @@ export const UiConfigEntryPoints = {
   ActionConfig: 'action-config',
   FolderViewConfig: 'folder-view-config',
   WidgetConfig: 'widget-config',
+  ScreenSaverConfig: 'screensaver-config',
 } as const;

@@ -1295,6 +1295,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Deck.ResizeFailed" xml:space="preserve">
     <value>Failed to resize the grid</value>
   </data>
+  <data name="Deck.ScreenSaver.Announcement" xml:space="preserve">
+    <value>Screensaver. Touch the screen to return to the deck.</value>
+  </data>
   <data name="Deck.UnavailableWidget.Tile" xml:space="preserve">
     <value>Provided by {plugin}, currently unavailable</value>
   </data>
@@ -3927,6 +3930,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Capability.MusicPlayer" xml:space="preserve">
     <value>Music Player</value>
+  </data>
+  <data name="Integrations.Capability.ScreenSaverProvider" xml:space="preserve">
+    <value>Screensavers</value>
   </data>
   <data name="Integrations.Capability.Variables" xml:space="preserve">
     <value>Variables</value>
@@ -11880,6 +11886,18 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Default Profile</value>
     <comment>The name the one profile a fresh install starts with is created under. Stored as data from there on, so it is written in the language active at that moment and is not re-translated when the language changes.</comment>
   </data>
+  <data name="ScreenSavers.Clock.Description" xml:space="preserve">
+    <value>Time and date, drifting slowly across the screen.</value>
+  </data>
+  <data name="ScreenSavers.Clock.Name" xml:space="preserve">
+    <value>Clock</value>
+  </data>
+  <data name="ScreenSavers.NowPlaying.Description" xml:space="preserve">
+    <value>Cover, title and artist of the current track, the clock when nothing is playing.</value>
+  </data>
+  <data name="ScreenSavers.NowPlaying.Name" xml:space="preserve">
+    <value>Now playing</value>
+  </data>
   <data name="Scripts.ActionsTabLabel" xml:space="preserve">
     <value>Actions</value>
   </data>
@@ -12820,6 +12838,65 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Settings.Devices.RenameModalHeading" xml:space="preserve">
     <value>Rename device</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Configuration" xml:space="preserve">
+    <value>Configuration</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Options" xml:space="preserve">
+    <value>Options…</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Enabled" xml:space="preserve">
+    <value>Show a screensaver</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.IdleTimeout" xml:space="preserve">
+    <value>Start after</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Label" xml:space="preserve">
+    <value>Screensaver</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Line" xml:space="preserve">
+    <value>Screensaver: {value}</value>
+    <comment>[value:string]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.MenuAction" xml:space="preserve">
+    <value>Screensaver…</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Minutes.One" xml:space="preserve">
+    <value>{count} minute</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Minutes.Other" xml:space="preserve">
+    <value>{count} minutes</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.ModalDescription" xml:space="preserve">
+    <value>{name} shows the screensaver after sitting idle for a while. The first touch brings the deck back.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.ModalHeading" xml:space="preserve">
+    <value>Screensaver</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.SaveFailed" xml:space="preserve">
+    <value>Could not save the screensaver settings</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.StartDisabledTitle" xml:space="preserve">
+    <value>The device must be online to start the screensaver</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.StartFailed" xml:space="preserve">
+    <value>Could not start the screensaver on the device</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.StartNow" xml:space="preserve">
+    <value>Start now</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Summary" xml:space="preserve">
+    <value>{name} after {timeout}</value>
+    <comment>[name:string][timeout:string]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Unavailable" xml:space="preserve">
+    <value>Unavailable</value>
   </data>
   <data name="Settings.Devices.SignedOutMarker" xml:space="preserve">
     <value>Signed out</value>

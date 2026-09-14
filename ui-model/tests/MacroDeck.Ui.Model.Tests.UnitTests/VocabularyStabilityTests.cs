@@ -18,7 +18,7 @@ public class VocabularyStabilityTests
 	private static readonly string[] _twoSessionModes = ["shared", "exclusive"];
 
 	private static readonly string[] _surfaceKinds =
-		["config", "widget", "dialog", "preview", "folder", "developer-preview"];
+		["config", "widget", "dialog", "preview", "folder", "developer-preview", "screensaver"];
 
 	private static readonly int[] _supportedVersions = [3, 4];
 

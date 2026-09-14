@@ -41,6 +41,7 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 		Layouts = new FakeLayoutProviderContext();
 		FolderViews = new FakeFolderViewProviderContext();
 		WidgetTypes = new FakeWidgetTypeProviderContext();
+		ScreenSavers = new FakeScreenSaverProviderContext();
 	}
 
 	/// <summary>The plugin's own variables - see <see cref="FakeVariableApi" />.</summary>
@@ -115,6 +116,12 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 	/// <c>IWidgetTypeProviderContext</c>, and an out-of-process provider reaches the host over the wire.
 	/// </summary>
 	public FakeWidgetTypeProviderContext WidgetTypes { get; }
+
+	/// <summary>
+	/// The screensaver catalog fake for this context. Not part of <see cref="IIntegrationContext" /> for the
+	/// same reason <see cref="FolderViews" /> is not.
+	/// </summary>
+	public FakeScreenSaverProviderContext ScreenSavers { get; }
 
 	/// <inheritdoc />
 	IVariableApi IIntegrationContext.Variables => Variables;

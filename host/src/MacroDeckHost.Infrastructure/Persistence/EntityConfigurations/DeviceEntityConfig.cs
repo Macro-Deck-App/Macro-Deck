@@ -26,6 +26,10 @@ public class DeviceEntityConfig : BaseEntityConfig<DeviceEntity>
 		builder.Property(x => x.AppVersion).HasColumnName(ColumnPrefix + "app_version");
 		builder.Property(x => x.LastSeenAt).HasColumnName(ColumnPrefix + "last_seen_at");
 		builder.Property(x => x.StartupProfileId).HasColumnName(ColumnPrefix + "startup_profile_id");
+		builder.Property(x => x.ScreenSaverEnabled).HasColumnName(ColumnPrefix + "screensaver_enabled");
+		builder.Property(x => x.ScreenSaverIdleSeconds).HasColumnName(ColumnPrefix + "screensaver_idle_seconds");
+		builder.Property(x => x.ScreenSaverId).HasColumnName(ColumnPrefix + "screensaver_id");
+		builder.Property(x => x.ScreenSaverConfiguration).HasColumnName(ColumnPrefix + "screensaver_configuration");
 		builder.Property(x => x.ProviderId).HasColumnName(ColumnPrefix + "provider_id");
 		builder.Property(x => x.ProviderDeviceId).HasColumnName(ColumnPrefix + "provider_device_id");
 		builder.Property(x => x.Model).HasColumnName(ColumnPrefix + "model");

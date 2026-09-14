@@ -59,6 +59,19 @@ public static class UiConfigSurfaceAttributes
 	/// sessions. Only on <see cref="UiConfigEntryPoints.WidgetConfig" />.</summary>
 	public const string WidgetId = "widgetId";
 
+	/// <summary>The device whose screensaver is being configured. Only on
+	/// <see cref="UiConfigEntryPoints.ScreenSaverConfig" />.</summary>
+	public const string DeviceId = "deviceId";
+
+	/// <summary>The qualified id of the screensaver being configured, so a provider offering several declines
+	/// one it does not configure rather than guessing. Only on
+	/// <see cref="UiConfigEntryPoints.ScreenSaverConfig" />.</summary>
+	public const string ScreenSaverId = "screenSaverId";
+
+	/// <summary>The screensaver's currently stored configuration, as the JSON object it is stored as. Only on
+	/// <see cref="UiConfigEntryPoints.ScreenSaverConfig" />; absent reads as empty.</summary>
+	public const string ScreenSaverConfiguration = "screenSaverConfiguration";
+
 	/// <summary>The widget's type, so a provider serving several declines one it does not configure rather
 	/// than guessing. Only on <see cref="UiConfigEntryPoints.WidgetConfig" />.</summary>
 	public const string WidgetType = "widgetType";

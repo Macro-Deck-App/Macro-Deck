@@ -7,6 +7,7 @@ using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.ConfigFlow;
+using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using MacroDeckHost.Application.Widgets;
@@ -32,6 +33,7 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 	private readonly IIntegrationRegistry _integrations;
 	private readonly IConfigFlowManager _configFlows;
 	private readonly IFolderViewRegistry _folderViews;
+	private readonly IScreenSaverRegistry _screenSavers;
 	private readonly IFolderCache _folderCache;
 	private readonly IWidgetTypeRegistry _widgetTypes;
 	private readonly IUiSessionBroker _broker;
@@ -41,6 +43,7 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 	public ConfigUiSessionOpener(IIntegrationRegistry integrations,
 		IConfigFlowManager configFlows,
 		IFolderViewRegistry folderViews,
+		IScreenSaverRegistry screenSavers,
 		IFolderCache folderCache,
 		IWidgetTypeRegistry widgetTypes,
 		IUiSessionBroker broker,
@@ -52,6 +55,7 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 		_integrations = integrations;
 		_configFlows = configFlows;
 		_folderViews = folderViews;
+		_screenSavers = screenSavers;
 		_folderCache = folderCache;
 		_widgetTypes = widgetTypes;
 		_broker = broker;
@@ -177,6 +181,11 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 			return TryResolveFolderViewConfig(request, out providerId, out rejection);
 		}
 
+		if (string.Equals(request.EntryPoint, UiConfigEntryPoints.ScreenSaverConfig, StringComparison.Ordinal))
+		{
+			return TryResolveScreenSaverConfig(request, out providerId, out rejection);
+		}
+
 		rejection = Rejection.UnknownEntryPoint;
 		return false;
 	}
@@ -277,6 +286,31 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 		return true;
 	}
 
+	private bool TryResolveScreenSaverConfig(
+		OpenConfigUiSessionRequest request,
+		out string providerId,
+		out Rejection? rejection)
+	{
+		providerId = string.Empty;
+
+		if (string.IsNullOrEmpty(request.ScreenSaverId) ||
+			!_screenSavers.TryResolve(request.ScreenSaverId, out var entry))
+		{
+			rejection = Rejection.NoSuchScreenSaver;
+			return false;
+		}
+
+		if (!entry.Descriptor.HasConfiguration)
+		{
+			rejection = Rejection.ScreenSaverHasNoConfiguration;
+			return false;
+		}
+
+		providerId = entry.ProviderId;
+		rejection = null;
+		return true;
+	}
+
 	private static Dictionary<string, JsonElement> BuildAttributes(
 		OpenConfigUiSessionRequest request,
 		string? flowSessionId,
@@ -305,6 +339,16 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 			// target is an in-process action or one behind a plugin socket.
 			var maskedParameters = ActionParameterSecretMasking.Mask(action.Parameters, request.Parameters);
 			attributes[UiConfigSurfaceAttributes.Parameters] = JsonSerializer.SerializeToElement(maskedParameters);
+		}
+
+		if (string.Equals(request.EntryPoint, UiConfigEntryPoints.ScreenSaverConfig, StringComparison.Ordinal))
+		{
+			attributes[UiConfigSurfaceAttributes.DeviceId] =
+				JsonSerializer.SerializeToElement(request.DeviceId ?? string.Empty);
+			attributes[UiConfigSurfaceAttributes.ScreenSaverId] =
+				JsonSerializer.SerializeToElement(request.ScreenSaverId ?? string.Empty);
+			attributes[UiConfigSurfaceAttributes.ScreenSaverConfiguration] =
+				ParseConfiguration(request.ScreenSaverConfiguration);
 		}
 
 		if (string.Equals(request.EntryPoint, UiConfigEntryPoints.FolderViewConfig, StringComparison.Ordinal))
@@ -336,6 +380,12 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 
 		public static readonly Rejection FolderViewHasNoConfiguration =
 			new(UiSessionErrorCodes.ProviderRejected, "That folder view has nothing to configure.");
+
+		public static readonly Rejection NoSuchScreenSaver =
+			new(UiSessionErrorCodes.ProviderUnavailable, "That screensaver is not available.");
+
+		public static readonly Rejection ScreenSaverHasNoConfiguration =
+			new(UiSessionErrorCodes.ProviderRejected, "That screensaver has nothing to configure.");
 
 		public static readonly Rejection NoSuchWidget =
 			new(UiSessionErrorCodes.ProviderUnavailable, "That widget does not exist.");

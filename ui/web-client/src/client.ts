@@ -40,6 +40,7 @@ import {
   store,
   type ThemeMode,
   type TokenResponse,
+  type DeviceScreenSaverChangedEvent,
   type UiModalOpenedEvent,
   widgetFromWire,
   WidgetType,
@@ -123,6 +124,11 @@ export class Client {
   readonly sessions = new UiSessionStore();
   readonly widgetSessions: WidgetSessions;
   readonly hostLock: HostLock;
+  private readonly deviceScreenSaverStore: WritableStore<DeviceScreenSaverChangedEvent> =
+    store<DeviceScreenSaverChangedEvent>({ enabled: false, idleSeconds: 0 });
+  readonly deviceScreenSaver: ReadableStore<DeviceScreenSaverChangedEvent> = this.deviceScreenSaverStore;
+  private readonly screenSaverRequestStore: WritableStore<number> = store<number>(0);
+  readonly screenSaverRequests: ReadableStore<number> = this.screenSaverRequestStore;
   readonly executionFeedback = new ExecutionFeedback(
     this.localization,
     () => this.translate(ClientAppStrings.Errors.Folder.ActionRunFailed));
@@ -228,6 +234,7 @@ export class Client {
         // A lock or unlock that happened while the socket was down arrived as an event nobody
         // received, so the state is re-read rather than assumed.
         void this.hostLock.load();
+        void this.loadDeviceScreenSaver();
         // Everything that changed while this client was away arrived as events nobody received, so a
         // reconnect re-reads the deck rather than trusting what is on screen. The first connect is not
         // one of those, unless `start()`'s own read never landed - a folder read that failed leaves
@@ -657,6 +664,25 @@ export class Client {
     this.modal.set(null);
   }
 
+  private loadDeviceScreenSaver(): Promise<void> {
+    return this.connection.request<DeviceScreenSaverChangedEvent>('GetDeviceScreenSaver', []).then(
+      settings => {
+        if (settings) {
+          this.applyDeviceScreenSaver(settings.enabled === true,
+            typeof settings.idleSeconds === 'number' ? settings.idleSeconds : 0);
+        }
+      },
+      () => undefined);
+  }
+
+  // A re-read on reconnect that changes nothing must not read as a change: every subscriber treats one
+  // as a reason to start the idle countdown over.
+  private applyDeviceScreenSaver(enabled: boolean, idleSeconds: number): void {
+    const current = this.deviceScreenSaverStore.get();
+    if (current.enabled === enabled && current.idleSeconds === idleSeconds) return;
+    this.deviceScreenSaverStore.set({ enabled, idleSeconds });
+  }
+
   translate(qualifiedKey: string, args?: Record<string, unknown>): string {
     const separator = qualifiedKey.indexOf(':');
     if (separator < 0) return `[[${qualifiedKey}]]`;
@@ -1058,6 +1084,13 @@ export class Client {
       case 'LocalizationCatalogChangedEvent':
         // Both mean the same thing here: what this client holds is stale, so ask for it again.
         void this.loadLocalization();
+        break;
+      case 'ShowDeviceScreenSaverEvent':
+        this.screenSaverRequestStore.set(this.screenSaverRequestStore.get() + 1);
+        break;
+      case 'DeviceScreenSaverChangedEvent':
+        this.applyDeviceScreenSaver(body['enabled'] === true,
+          typeof body['idleSeconds'] === 'number' ? body['idleSeconds'] : 0);
         break;
       case 'DeviceSessionRevokedEvent':
         // Only ever pushed to the device being signed out. Treated as a lost session rather than a

@@ -43,10 +43,16 @@ public static class HostApis
 	/// on registration and whenever that set changes. It has no <c>host.invoke</c> operations.</summary>
 	public const string EventBindings = "event-bindings";
 
+	/// <summary>
+	/// The <c>screensavers</c> host api: a screensaver provider registers and withdraws the screensavers it
+	/// offers.
+	/// </summary>
+	public const string ScreenSavers = "screensavers";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Variables, UserVariables, Config, Deck, Scripts, Widgets, Notifications, ActionInteractions, Ui,
-		Devices, VariableValues, Layouts, FolderViews, WidgetTypes, EventBindings,
+		Devices, VariableValues, Layouts, FolderViews, WidgetTypes, EventBindings, ScreenSavers,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

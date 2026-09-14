@@ -87,6 +87,36 @@ describe('wake lock', () => {
     expect(lock.currentStatus()).toBe('off');
   });
 
+  it('is held for a screensaver whatever the preference says, and let go with it', async () => {
+    const lock = wakeLock('web-client', backend);
+    lock.setGate(true);
+    expect(requests.length).toBe(0);
+
+    lock.setForced(true);
+    expect(requests.length).toBe(1);
+    requests[0].resolve(handle());
+    await settle();
+    expect(lock.currentStatus()).toBe('active');
+
+    lock.setForced(false);
+    expect(released).toBe(1);
+    expect(lock.enabled()).toBeFalse();
+    expect(lock.currentStatus()).toBe('off');
+  });
+
+  it('does not ask again for a screensaver on a device that refused', async () => {
+    const lock = wakeLock('web-client', backend);
+    lock.setEnabled(true);
+    lock.setGate(true);
+    requests[0].reject();
+    await settle();
+    expect(lock.currentStatus()).toBe('denied');
+
+    lock.setForced(true);
+
+    expect(requests.length).toBe(1);
+  });
+
   it('drops a lock that arrived after the deck was already left', async () => {
     const lock = wakeLock('web-client', backend);
     lock.setEnabled(true);

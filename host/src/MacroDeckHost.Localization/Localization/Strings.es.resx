@@ -1296,6 +1296,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Deck.ResizeFailed" xml:space="preserve">
     <value>No se pudo cambiar el tamaño de la cuadrícula</value>
   </data>
+  <data name="Deck.ScreenSaver.Announcement" xml:space="preserve">
+    <value>Salvapantallas. Toca la pantalla para volver al deck.</value>
+  </data>
   <data name="Deck.UnavailableWidget.Tile" xml:space="preserve">
     <value>Proporcionado por {plugin}, no disponible por ahora</value>
   </data>
@@ -3927,6 +3930,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Integrations.Capability.MusicPlayer" xml:space="preserve">
     <value>Reproductor de música</value>
+  </data>
+  <data name="Integrations.Capability.ScreenSaverProvider" xml:space="preserve">
+    <value>Salvapantallas</value>
   </data>
   <data name="Integrations.Capability.Variables" xml:space="preserve">
     <value>Variables</value>
@@ -11880,6 +11886,18 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>Perfil predeterminado</value>
     <comment>The name the one profile a fresh install starts with is created under. Stored as data from there on, so it is written in the language active at that moment and is not re-translated when the language changes.</comment>
   </data>
+  <data name="ScreenSavers.Clock.Description" xml:space="preserve">
+    <value>Hora y fecha, desplazándose lentamente por la pantalla.</value>
+  </data>
+  <data name="ScreenSavers.Clock.Name" xml:space="preserve">
+    <value>Reloj</value>
+  </data>
+  <data name="ScreenSavers.NowPlaying.Description" xml:space="preserve">
+    <value>Carátula, título y artista de la pista actual; el reloj cuando no suena nada.</value>
+  </data>
+  <data name="ScreenSavers.NowPlaying.Name" xml:space="preserve">
+    <value>Reproduciendo</value>
+  </data>
   <data name="Scripts.ActionsTabLabel" xml:space="preserve">
     <value>Acciones</value>
   </data>
@@ -12820,6 +12838,65 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Settings.Devices.RenameModalHeading" xml:space="preserve">
     <value>Cambiar nombre del dispositivo</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Configuration" xml:space="preserve">
+    <value>Configuración</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Options" xml:space="preserve">
+    <value>Opciones…</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Enabled" xml:space="preserve">
+    <value>Mostrar un salvapantallas</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.IdleTimeout" xml:space="preserve">
+    <value>Iniciar tras</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Label" xml:space="preserve">
+    <value>Salvapantallas</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Line" xml:space="preserve">
+    <value>Salvapantallas: {value}</value>
+    <comment>[value:string]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.MenuAction" xml:space="preserve">
+    <value>Salvapantallas…</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Minutes.One" xml:space="preserve">
+    <value>{count} minuto</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Minutes.Other" xml:space="preserve">
+    <value>{count} minutos</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.ModalDescription" xml:space="preserve">
+    <value>{name} muestra el salvapantallas tras un rato sin actividad. El primer toque devuelve el deck.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.ModalHeading" xml:space="preserve">
+    <value>Salvapantallas</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Off" xml:space="preserve">
+    <value>Desactivado</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.SaveFailed" xml:space="preserve">
+    <value>No se pudo guardar la configuración del salvapantallas</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.StartDisabledTitle" xml:space="preserve">
+    <value>El dispositivo debe estar en línea para iniciar el salvapantallas</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.StartFailed" xml:space="preserve">
+    <value>No se pudo iniciar el salvapantallas en el dispositivo</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.StartNow" xml:space="preserve">
+    <value>Iniciar ahora</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Summary" xml:space="preserve">
+    <value>{name} tras {timeout}</value>
+    <comment>[name:string][timeout:string]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Unavailable" xml:space="preserve">
+    <value>No disponible</value>
   </data>
   <data name="Settings.Devices.SignedOutMarker" xml:space="preserve">
     <value>Sesión cerrada</value>

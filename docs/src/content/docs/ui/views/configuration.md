@@ -210,6 +210,7 @@ A `config` surface names its entry point in `UiConfigSurfaceAttributes.EntryPoin
 | `IntegrationConfig` (`integration-config`) | `IntegrationId`, `ConfigFlowSessionId` | `IUiConfigFlow.CreateUiSessionAsync` |
 | `ActionConfig` (`action-config`) | `ActionId`, `Parameters` | `IUiConfigurableActionDefinition.CreateConfigurationSessionAsync` |
 | `FolderViewConfig` (`folder-view-config`) | `FolderId`, `FolderViewId`, `FolderViewConfiguration` | Your `IUiProvider` - see [Folder views](/ui/views/folder-views/) |
+| `ScreenSaverConfig` (`screensaver-config`) | `DeviceId`, `ScreenSaverId`, `ScreenSaverConfiguration` | Your `IUiProvider` - see [Screensavers](/ui/views/screensavers/#configuration) |
 | `WidgetConfig` (`widget-config`) | `WidgetId`, `WidgetType`, `WidgetData`, `WidgetWidth`, `WidgetHeight` | Your `IUiProvider` - see [Configuring a widget](/ui/views/widget-configuration/) |
 
 Out of process, `MacroDeck.Plugin.Hosting` routes `integration-config` and `action-config` to the flow or

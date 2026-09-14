@@ -7,6 +7,7 @@ using MacroDeck.Plugin.Protocol.Capabilities;
 using MacroDeck.Plugin.Protocol.Capabilities.DeviceProvider;
 using MacroDeck.Plugin.Protocol.Capabilities.FolderViewProvider;
 using MacroDeck.Plugin.Protocol.Capabilities.LayoutProvider;
+using MacroDeck.Plugin.Protocol.Capabilities.ScreenSaverProvider;
 using MacroDeck.Plugin.Protocol.Capabilities.Localization;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Errors;
@@ -16,6 +17,7 @@ using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.FolderViews;
 using MacroDeckHost.Application.Layouts;
+using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Notifications;
@@ -61,6 +63,7 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 	private readonly ILayoutRegistry _layoutRegistry;
 	private readonly IFolderViewRegistry _folderViewRegistry;
 	private readonly IWidgetTypeRegistry _widgetTypeRegistry;
+	private readonly IScreenSaverRegistry _screenSaverRegistry;
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
 	private readonly RemoteVariableSubscriptions? _variableSubscriptions;
@@ -87,6 +90,7 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		ILayoutRegistry layoutRegistry,
 		IFolderViewRegistry folderViewRegistry,
 		IWidgetTypeRegistry widgetTypeRegistry,
+		IScreenSaverRegistry screenSaverRegistry,
 		TimeProvider timeProvider,
 		ILogger logger,
 		RemoteVariableSubscriptions? variableSubscriptions = null)
@@ -108,6 +112,7 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		_layoutRegistry = layoutRegistry;
 		_folderViewRegistry = folderViewRegistry;
 		_widgetTypeRegistry = widgetTypeRegistry;
+		_screenSaverRegistry = screenSaverRegistry;
 		_timeProvider = timeProvider;
 		_logger = logger;
 		_variableSubscriptions = variableSubscriptions;
@@ -219,6 +224,11 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			await RegisterProviderFolderViewsAsync(pluginId, cancellationToken).ConfigureAwait(false);
 		}
 
+		if (acceptedKinds.Contains(CapabilityKinds.ScreenSaverProvider))
+		{
+			await RegisterProviderScreenSaversAsync(pluginId, cancellationToken).ConfigureAwait(false);
+		}
+
 		return true;
 	}
 
@@ -234,6 +244,7 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		// all survive its uninstall until the next host restart.
 		await _widgetTypeRegistry.UnregisterAll(pluginId, cancellationToken).ConfigureAwait(false);
 		await _folderViewRegistry.UnregisterAll(pluginId, cancellationToken).ConfigureAwait(false);
+		await _screenSaverRegistry.UnregisterAll(pluginId, cancellationToken).ConfigureAwait(false);
 		await _layoutRegistry.UnregisterAll(pluginId, cancellationToken).ConfigureAwait(false);
 
 		await _integrationRegistry.UnregisterAsync(pluginId).ConfigureAwait(false);
@@ -358,6 +369,51 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		{
 			_logger.Warning(exception,
 				"Could not read the folder views of plugin '{PluginId}' after it connected",
+				pluginId);
+		}
+	}
+
+	private async Task RegisterProviderScreenSaversAsync(string pluginId, CancellationToken cancellationToken)
+	{
+		try
+		{
+			var data = await _invoker.InvokeAsync(pluginId,
+					new CapabilityInvokeRequest
+					{
+						Kind = CapabilityKinds.ScreenSaverProvider,
+						LocalId = ProviderCapabilityId.LocalId,
+						Operation = CapabilityOperations.ScreenSaverProvider.ScreenSavers
+					},
+					cancellationToken)
+				.ConfigureAwait(false);
+
+			var result = data?.Deserialize<ScreenSaverProviderScreenSaversResult>(PluginProtocolJson.Options);
+			if (result is null)
+			{
+				return;
+			}
+
+			foreach (var screenSaver in result.ScreenSavers)
+			{
+				try
+				{
+					await _screenSaverRegistry.Register(pluginId,
+							ScreenSaverDescriptorMapper.ToDescriptor(screenSaver),
+							cancellationToken)
+						.ConfigureAwait(false);
+				}
+				catch (ArgumentException exception)
+				{
+					_logger.Warning(exception,
+						"Rejected a screensaver declared by plugin '{PluginId}' after it connected",
+						pluginId);
+				}
+			}
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			_logger.Warning(exception,
+				"Could not read the screensavers of plugin '{PluginId}' after it connected",
 				pluginId);
 		}
 	}

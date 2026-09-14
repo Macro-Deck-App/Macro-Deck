@@ -1,5 +1,5 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
-import { AppStrings, Device, DeviceChangedEvent, DeviceRemovedEvent, OpenProfileOnDeviceResponse, RemoveDeviceResponse, SetDeviceStartupProfileResponse } from '@macro-deck/runtime';
+import { AppStrings, Device, DeviceChangedEvent, DeviceRemovedEvent, OpenProfileOnDeviceResponse, RemoveDeviceResponse, SetDeviceScreenSaverRequest, SetDeviceScreenSaverResponse, SetDeviceStartupProfileResponse, ShowDeviceScreenSaverResponse } from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
 
 @Injectable({ providedIn: 'root' })
@@ -66,6 +66,18 @@ export class DeviceService {
       this.upsertLocal(response.device);
     }
     return response;
+  }
+
+  async setScreenSaver(id: string, request: SetDeviceScreenSaverRequest): Promise<SetDeviceScreenSaverResponse> {
+    const response = await this.api.setDeviceScreenSaver(id, request);
+    if (response.success && response.device) {
+      this.upsertLocal(response.device);
+    }
+    return response;
+  }
+
+  showScreenSaver(id: string): Promise<ShowDeviceScreenSaverResponse> {
+    return this.api.showDeviceScreenSaver(id);
   }
 
   async logout(id: string): Promise<boolean> {

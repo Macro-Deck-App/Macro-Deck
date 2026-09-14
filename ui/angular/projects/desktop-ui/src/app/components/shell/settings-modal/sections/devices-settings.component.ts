@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { formatRelativeTime } from '../relative-time.util';
-import { AppStrings, Device, DeviceClientType, DeviceFormFactor } from '@macro-deck/runtime';
-import { AuthService, ButtonComponent, ButtonGroupComponent, DeviceIdentityService, ErrorBannerComponent, InputComponent, LocalizationService, LocalizedTextPipe, ModalComponent, ProfileService, ToastService, TranslatePipe, dismissModal, LocalizationKey } from '@shared';
+import { AppStrings, BUILT_IN_CLOCK_SCREENSAVER_ID, Device, DeviceClientType, DeviceFormFactor, resolveLocalizedText } from '@macro-deck/runtime';
+import { AuthService, ButtonComponent, ButtonGroupComponent, DeviceIdentityService, ErrorBannerComponent, InputComponent, LocalizationService, LocalizedTextPipe, ModalComponent, ProfileService, ScreenSaverService, ToastService, ToggleSwitchComponent, TranslatePipe, dismissModal, LocalizationKey } from '@shared';
 import { EmptyStateComponent } from '../../../feedback/empty-state/empty-state.component';
 import { SelectComponent, SelectOption } from '../../../forms/select/select.component';
 import { ConfirmationModalComponent } from '../../../overlay/confirmation-modal/confirmation-modal.component';
 import { DropdownMenuComponent } from '../../../overlay/dropdown-menu/dropdown-menu.component';
+import { ScreenSaverPickerComponent } from '../../../widgets/screensaver-picker/screensaver-picker.component';
 import { DeviceService } from '../../../../services/device.service';
 
 const FORM_FACTOR_ICONS: Record<DeviceFormFactor, string> = {
@@ -26,6 +27,8 @@ const CLIENT_TYPE_LABEL_KEYS: Record<DeviceClientType, LocalizationKey> = {
 
 export type DeviceSessionState = 'online' | 'offline' | 'signedOut';
 
+const SCREENSAVER_IDLE_MINUTES = [1, 2, 5, 10, 15, 30, 60];
+
 @Component({
   selector: 'app-devices-settings',
   standalone: true,
@@ -40,6 +43,8 @@ export type DeviceSessionState = 'online' | 'offline' | 'signedOut';
     InputComponent,
     ModalComponent,
     SelectComponent,
+    ScreenSaverPickerComponent,
+    ToggleSwitchComponent,
     TranslatePipe,
     LocalizedTextPipe,
   ],
@@ -54,6 +59,7 @@ export class DevicesSettingsComponent implements OnInit {
   private readonly profileService = inject(ProfileService);
   private readonly toastService = inject(ToastService);
   private readonly localization = inject(LocalizationService);
+  private readonly screenSavers = inject(ScreenSaverService);
 
   readonly thisDeviceId = computed(() => this.authService.currentDeviceId() ?? this.deviceIdentity.deviceId);
 
@@ -82,13 +88,104 @@ export class DevicesSettingsComponent implements OnInit {
   readonly openProfileDevice = signal<Device | null>(null);
   readonly openProfileDraft = signal('');
 
+  readonly screenSaverDevice = signal<Device | null>(null);
+  readonly screenSaverEnabledDraft = signal(false);
+  readonly screenSaverIdleDraft = signal('300');
+  readonly screenSaverIdDraft = signal('');
+  readonly screenSaverConfigurationDraft = signal<string | null>(null);
+
+  readonly idleOptions = computed<SelectOption[]>(() =>
+    SCREENSAVER_IDLE_MINUTES.map(minutes => ({ value: String(minutes * 60), label: this.minutesLabel(minutes) })));
+
   readonly profileOptions = computed<SelectOption[]>(() => [
     { value: '', label: this.localization.translateKey(AppStrings.Settings.Devices.DefaultFirstProfileOption) },
     ...this.profileService.sortedProfiles().map(p => ({ value: p.id, label: p.name })),
   ]);
 
   async ngOnInit(): Promise<void> {
-    await this.deviceService.load();
+    await Promise.all([this.deviceService.load(), this.screenSavers.load()]);
+  }
+
+  canHaveScreenSaver(device: Device): boolean {
+    return device.clientType !== 'provider' && device.clientType !== 'admin-ui';
+  }
+
+  screenSaverLabel(device: Device): string {
+    const value = device.screenSaverEnabled
+      ? this.localization.translateKey(AppStrings.Settings.Devices.ScreenSaver.Summary, {
+        name: this.screenSaverName(device.screenSaverId ?? BUILT_IN_CLOCK_SCREENSAVER_ID),
+        timeout: this.minutesLabel(Math.max(1, Math.round((device.screenSaverIdleSeconds ?? 0) / 60))),
+      })
+      : this.localization.translateKey(AppStrings.Settings.Devices.ScreenSaver.Off);
+    return this.localization.translateKey(AppStrings.Settings.Devices.ScreenSaver.Line, { value });
+  }
+
+  openScreenSaverSettings(device: Device): void {
+    this.openMenuDeviceId.set(null);
+    this.screenSaverDevice.set(device);
+    this.screenSaverEnabledDraft.set(device.screenSaverEnabled === true);
+    this.screenSaverIdleDraft.set(String(device.screenSaverIdleSeconds || 300));
+    this.screenSaverIdDraft.set(device.screenSaverId ?? BUILT_IN_CLOCK_SCREENSAVER_ID);
+    this.screenSaverConfigurationDraft.set(device.screenSaverConfiguration ?? null);
+  }
+
+  cancelScreenSaver(): void {
+    dismissModal(this.modal, () => {
+      this.screenSaverDevice.set(null);
+      this.screenSaverConfigurationDraft.set(null);
+    });
+  }
+
+  async commitScreenSaver(): Promise<void> {
+    if (await this.saveScreenSaver()) {
+      this.cancelScreenSaver();
+    }
+  }
+
+  async startScreenSaverNow(): Promise<void> {
+    const device = this.screenSaverDevice();
+    if (!device || !(await this.saveScreenSaver())) {
+      return;
+    }
+    const response = await this.deviceService.showScreenSaver(device.id);
+    if (!response.success) {
+      this.toastService.show(
+        response.error?.message ?? this.localization.translateKey(AppStrings.Settings.Devices.ScreenSaver.StartFailed),
+        { variant: 'error' },
+      );
+    }
+  }
+
+  private async saveScreenSaver(): Promise<boolean> {
+    const device = this.screenSaverDevice();
+    if (!device) {
+      return false;
+    }
+    const response = await this.deviceService.setScreenSaver(device.id, {
+      enabled: this.screenSaverEnabledDraft(),
+      idleSeconds: Number(this.screenSaverIdleDraft()) || 300,
+      screenSaverId: this.screenSaverIdDraft() || null,
+      configuration: this.screenSaverConfigurationDraft(),
+    });
+    if (!response.success) {
+      this.toastService.show(
+        response.error?.message ?? this.localization.translateKey(AppStrings.Settings.Devices.ScreenSaver.SaveFailed),
+        { variant: 'error' },
+      );
+      return false;
+    }
+    return true;
+  }
+
+  private screenSaverName(id: string): string {
+    const entry = this.screenSavers.find(id);
+    return entry
+      ? resolveLocalizedText(entry.name, this.localization) || id
+      : this.localization.translateKey(AppStrings.Settings.Devices.ScreenSaver.Unavailable);
+  }
+
+  private minutesLabel(minutes: number): string {
+    return this.localization.translateKey(AppStrings.Settings.Devices.ScreenSaver.Minutes, { count: minutes });
   }
 
   isThisDevice(device: Device): boolean {

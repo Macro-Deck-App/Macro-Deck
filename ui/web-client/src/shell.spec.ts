@@ -427,6 +427,232 @@ describe('Shell', () => {
     });
   });
 
+  describe('screensaver', () => {
+    let pending: Array<{ callback: () => void; delayMs: number }>;
+    let opens: number;
+    let lock: WakeLock;
+    let idleClock: { set(callback: () => void, delayMs: number): unknown; clear(handle: unknown): void };
+
+    const fire = () => { const entry = pending.shift(); if (entry) entry.callback(); };
+
+    const settings = (enabled: boolean, idleSeconds = 60) =>
+      (client as unknown as { onNotification(type: string, payload: unknown): void })
+        .onNotification('DeviceScreenSaverChangedEvent', { enabled, idleSeconds });
+
+    const showDeck = () => {
+      client.deck.load([folderWithWidgets('root', ['w1'])]);
+      client.app.set({ probed: true, authenticated: true, connected: true, deckRendered: true });
+    };
+
+    // One clock per spec: a shell from an earlier spec keeps its timer on the document, and a shared
+    // clock would let it push into this spec's queue.
+    beforeEach(() => {
+      const queue: Array<{ callback: () => void; delayMs: number }> = [];
+      pending = queue;
+      idleClock = {
+        set: (callback, delayMs) => { const entry = { callback, delayMs }; queue.push(entry); return entry; },
+        clear: handle => { const at = queue.indexOf(handle as never); if (at >= 0) queue.splice(at, 1); },
+      };
+      opens = 0;
+      lock = new WakeLock('web-client', null);
+      (client as unknown as { connection: unknown }).connection = {
+        request: (type: string) => {
+          if (type === 'OpenScreenSaverUiSession') {
+            opens++;
+            return Promise.resolve({ accepted: true, sessionId: `ss${opens}`, screenSaverId: 'x::clock', interactive: false });
+          }
+          return Promise.resolve(undefined);
+        },
+        state: { subscribe: () => () => undefined, get: () => 'connected' },
+      };
+    });
+
+    const mountWithIdle = () => new Shell(root, client, host, { ...services(), wakeLock: lock, idleClock });
+
+    // A showing screensaver holds a capture-phase key listener on the document, and only a real settings
+    // change hides it: toggled so a spec that never turned it on still tears its screensaver down.
+    afterEach(() => { settings(true); settings(false); });
+
+    it('shows nothing for a device that never turned it on', () => {
+      mountWithIdle();
+      showDeck();
+
+      expect(pending.length).toBe(0);
+      expect(root.querySelector('.wc-screensaver')).toBeNull();
+    });
+
+    it('covers the deck after the idle time and holds the screen awake', async () => {
+      mountWithIdle();
+      showDeck();
+      settings(true, 60);
+
+      expect(pending[0].delayMs).toBe(60000);
+      fire();
+      await settle();
+
+      const overlay = root.querySelector('.wc-screensaver') as HTMLElement;
+      expect(overlay).not.toBeNull();
+      expect(overlay.hidden).toBeFalse();
+      expect(opens).toBe(1);
+    });
+
+    it('gives the deck back on the first touch without pressing the tile underneath', async () => {
+      const executed: string[] = [];
+      spyOn(client, 'executeTrigger').and.callFake((widgetId: string) => {
+        executed.push(widgetId);
+        return Promise.resolve() as never;
+      });
+      mountWithIdle();
+      showDeck();
+      settings(true, 60);
+      fire();
+      await settle();
+      const overlay = root.querySelector('.wc-screensaver') as HTMLElement;
+
+      overlay.dispatchEvent(pointerEvent('pointerdown'));
+      overlay.dispatchEvent(pointerEvent('pointerup'));
+
+      expect(overlay.classList).toContain('wc-screensaver-deaf');
+      expect(executed).toEqual([]);
+      expect(pending.length).withContext('the timer is armed again').toBe(1);
+    });
+
+    it('lets a mouse release land on the deck after the dismiss without pressing the tile', async () => {
+      const executed: string[] = [];
+      spyOn(client, 'executeTrigger').and.callFake((widgetId: string) => {
+        executed.push(widgetId);
+        return Promise.resolve() as never;
+      });
+      mountWithIdle();
+      showDeck();
+      settings(true, 60);
+      fire();
+      await settle();
+      const overlay = root.querySelector('.wc-screensaver') as HTMLElement;
+      const tile = root.querySelector('.wc-deck [class*=tile]') as HTMLElement;
+
+      overlay.dispatchEvent(pointerEvent('pointerdown'));
+      tile.dispatchEvent(pointerEvent('pointerup'));
+      tile.dispatchEvent(new Event('click', { bubbles: true }));
+
+      expect(overlay.classList).toContain('wc-screensaver-deaf');
+      expect(executed).toEqual([]);
+    });
+
+    it('is dismissed by a key that then activates no tile', async () => {
+      const executed: string[] = [];
+      spyOn(client, 'executeTrigger').and.callFake((widgetId: string) => {
+        executed.push(widgetId);
+        return Promise.resolve() as never;
+      });
+      const target = { ...DEFAULT_WEB_CLIENT_TARGET, hardwareInput: { keys: [{ key: 'Enter', event: { kind: 'activate' as const } }] } };
+      new Shell(root, client, host, { ...services(), wakeLock: lock, idleClock, target });
+      showDeck();
+      settings(true, 60);
+      fire();
+      await settle();
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+
+      expect((root.querySelector('.wc-screensaver') as HTMLElement).classList).toContain('wc-screensaver-deaf');
+      expect(executed).toEqual([]);
+    });
+
+    it('goes away when the setting is turned off while it shows', async () => {
+      mountWithIdle();
+      showDeck();
+      settings(true, 60);
+      fire();
+      await settle();
+
+      settings(false);
+
+      expect((root.querySelector('.wc-screensaver') as HTMLElement).hidden).toBeTrue();
+      expect(pending.length).toBe(0);
+    });
+
+    it('starts over on a settings change, so the next showing uses the new selection', async () => {
+      mountWithIdle();
+      showDeck();
+      settings(true, 60);
+      fire();
+      await settle();
+      expect(opens).toBe(1);
+
+      settings(true, 30);
+
+      expect((root.querySelector('.wc-screensaver') as HTMLElement).hidden).toBeTrue();
+      expect(pending[0].delayMs).toBe(30000);
+    });
+
+    it('shows the screensaver at once when the host asks for it, schedule or not', async () => {
+      mountWithIdle();
+      showDeck();
+
+      (client as unknown as { onNotification(type: string, payload: unknown): void })
+        .onNotification('ShowDeviceScreenSaverEvent', {});
+      await settle();
+
+      expect((root.querySelector('.wc-screensaver') as HTMLElement).hidden).toBeFalse();
+      expect(opens).toBe(1);
+    });
+
+    it('starts a showing screensaver over when the host asks for it again', async () => {
+      mountWithIdle();
+      showDeck();
+      const show = () => (client as unknown as { onNotification(type: string, payload: unknown): void })
+        .onNotification('ShowDeviceScreenSaverEvent', {});
+
+      show();
+      await settle();
+      show();
+      await settle();
+
+      expect((root.querySelector('.wc-screensaver') as HTMLElement).hidden).toBeFalse();
+      expect(opens).toBe(2);
+    });
+
+    it('keeps a screensaver the host started on a device with the setting off through a reconnect', async () => {
+      mountWithIdle();
+      showDeck();
+
+      (client as unknown as { onNotification(type: string, payload: unknown): void })
+        .onNotification('ShowDeviceScreenSaverEvent', {});
+      await settle();
+      client.app.set({ probed: true, authenticated: true, connected: true, deckRendered: true });
+      await settle();
+
+      expect((root.querySelector('.wc-screensaver') as HTMLElement).hidden).toBeFalse();
+      expect(pending.length).toBe(0);
+    });
+
+    it('ignores a request to show it while the host lock screen is up', async () => {
+      mountWithIdle();
+      showDeck();
+      client.hostLock.apply({ locked: true, lockScreenEnabled: true, supported: true });
+
+      (client as unknown as { onNotification(type: string, payload: unknown): void })
+        .onNotification('ShowDeviceScreenSaverEvent', {});
+      await settle();
+
+      expect((root.querySelector('.wc-screensaver') as HTMLElement | null)?.hidden ?? true).toBeTrue();
+      expect(opens).toBe(0);
+    });
+
+    it('yields to the host lock screen', async () => {
+      mountWithIdle();
+      showDeck();
+      settings(true, 60);
+      fire();
+      await settle();
+
+      client.hostLock.apply({ locked: true, lockScreenEnabled: true, supported: true });
+
+      expect((root.querySelector('.wc-screensaver') as HTMLElement).hidden).toBeTrue();
+      expect(root.querySelector('.wc-lock-screen')).not.toBeNull();
+    });
+  });
+
   it('shows the Macro Deck mark above every waiting screen', () => {
     mount();
     client.app.set({ probed: true, setupRequired: true });

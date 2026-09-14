@@ -15,6 +15,8 @@ using MacroDeck.Sdk.Widgets;
 using MacroDeck.Plugin.Testing.Fakes;
 using MacroDeck.Sdk.Devices;
 using MacroDeck.Sdk.Layouts;
+using MacroDeck.Sdk.ScreenSavers;
+using MacroDeck.Plugin.Protocol.Errors;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeck.Plugin.Hosting.Tests.UnitTests;
@@ -42,6 +44,7 @@ public class IntegrationLifecycleHostedServiceTests
 			new FakeLayoutProviderContext(),
 			new FakeFolderViewProviderContext(),
 			new FakeWidgetTypeProviderContext(),
+			new FakeScreenSaverProviderContext(),
 			connectionState,
 			stateCache,
 			Serilog.Core.Logger.None);
@@ -145,6 +148,7 @@ public class IntegrationLifecycleHostedServiceTests
 			new FakeLayoutProviderContext(),
 			new FakeFolderViewProviderContext(),
 			new FakeWidgetTypeProviderContext(),
+			new FakeScreenSaverProviderContext(),
 			connectionState,
 			stateCache,
 			Serilog.Core.Logger.None);
@@ -183,6 +187,7 @@ public class IntegrationLifecycleHostedServiceTests
 			layouts,
 			new FakeFolderViewProviderContext(),
 			new FakeWidgetTypeProviderContext(),
+			new FakeScreenSaverProviderContext(),
 			connectionState,
 			stateCache,
 			Serilog.Core.Logger.None);
@@ -228,6 +233,76 @@ public class IntegrationLifecycleHostedServiceTests
 		}
 
 		public Task ShutdownAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+	}
+
+	[Test]
+	public async Task A_screensaver_provider_on_a_host_without_screensavers_still_starts_its_device_provider()
+	{
+		var connectionState = new PluginConnectionState();
+		var stateCache = new HostStateCache(new PluginConnectionState());
+		var integration = new ScreenSaverAndDeviceProvidingIntegration();
+		var devices = new FakeDeviceProviderContext();
+		var screenSavers = new RemoteScreenSaverProviderContext(new UnsupportedApiHostInvoker(),
+			Serilog.Core.Logger.None);
+
+		var service = new IntegrationLifecycleHostedService([integration],
+			TestMetadata.Default,
+			new NoOpIntegrationContext(),
+			devices,
+			new NoOpHostInvoker(),
+			new ServiceCollection().BuildServiceProvider(),
+			new FakeLayoutProviderContext(),
+			new FakeFolderViewProviderContext(),
+			new FakeWidgetTypeProviderContext(),
+			screenSavers,
+			connectionState,
+			stateCache,
+			Serilog.Core.Logger.None);
+
+		await service.StartAsync(CancellationToken.None);
+		connectionState.RaiseConnected(resumed: false);
+		await WaitForAsync(() => integration.DeviceContext is not null);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(integration.Registration, Is.Not.Null);
+			Assert.That(integration.Registration!.ScreenSaverId, Is.Empty);
+			Assert.That(integration.DeviceContext, Is.SameAs(devices));
+		});
+	}
+
+	private sealed class ScreenSaverAndDeviceProvidingIntegration : TestIntegration, IScreenSaverProvider, IDeviceProvider
+	{
+		public ScreenSaverRegistration? Registration { get; private set; }
+
+		public IDeviceProviderContext? DeviceContext { get; private set; }
+
+		async Task IScreenSaverProvider.InitializeAsync(
+			IScreenSaverProviderContext context,
+			CancellationToken cancellationToken)
+			=> Registration = await context.RegisterScreenSaverAsync(
+				new ScreenSaverDescriptor("clock", MacroDeck.Localization.LocalizedText.FromLiteral("Clock")),
+				cancellationToken);
+
+		public Task InitializeAsync(IDeviceProviderContext context, CancellationToken cancellationToken = default)
+		{
+			DeviceContext = context;
+			return Task.CompletedTask;
+		}
+
+		public Task ShutdownAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+	}
+
+	private sealed class UnsupportedApiHostInvoker : IHostInvoker
+	{
+		public Task<System.Text.Json.JsonElement?> InvokeAsync(string api,
+			string operation,
+			object? arguments,
+			CancellationToken cancellationToken)
+			=> throw HostInvocationException.CreateNonRetryable(ProtocolErrorCodes.CapabilityUnsupported,
+				$"'{api}' is not a host api this host knows.");
+
+		public bool TryComplete(ProtocolEnvelope result) => false;
 	}
 
 	private sealed class DeviceProvidingIntegration : TestIntegration, IDeviceProvider

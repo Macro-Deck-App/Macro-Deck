@@ -48,6 +48,9 @@
                 {{ 'macrodeck.app:Settings.Devices.StartupProfilePrefix' | translate }}
                 <span [class.devices-startup-warning]="isStartupProfileUnavailable(device)">{{ startupProfileLabel(device) }}</span>
               </span>
+              @if (canHaveScreenSaver(device)) {
+                <span class="devices-startup-line devices-screensaver-line">{{ screenSaverLabel(device) }}</span>
+              }
             </div>
 
             <span
@@ -78,6 +81,12 @@
                       <span class="icon icon-grid icon-sm"></span>
                       <span>{{ 'macrodeck.app:Settings.Devices.StartupProfileMenuAction' | translate }}</span>
                     </button>
+                    @if (canHaveScreenSaver(device)) {
+                      <button type="button" class="devices-menu-item devices-menu-screensaver" (click)="openScreenSaverSettings(device)">
+                        <span class="icon icon-device-desktop icon-sm"></span>
+                        <span>{{ 'macrodeck.app:Settings.Devices.ScreenSaver.MenuAction' | translate }}</span>
+                      </button>
+                    }
                     <button
                       type="button"
                       class="devices-menu-item devices-menu-open"
@@ -156,6 +165,48 @@
       <shared-button-group class="form-actions" align="end">
         <shared-button type="button" variant="secondary" (click)="cancelStartupProfile()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
         <shared-button type="button" variant="primary" (click)="commitStartupProfile()">{{ 'macrodeck:Common.Save' | translate }}</shared-button>
+      </shared-button-group>
+    </div>
+  </shared-modal>
+}
+
+@if (screenSaverDevice(); as device) {
+  <shared-modal [heading]="'macrodeck.app:Settings.Devices.ScreenSaver.ModalHeading' | translate" size="small" [showFooter]="false" (close)="cancelScreenSaver()">
+    <div class="device-form">
+      <p class="device-form-desc">
+        {{ 'macrodeck.app:Settings.Devices.ScreenSaver.ModalDescription' | translate:{ name: device.name } }}
+      </p>
+      <label class="form-group devices-screensaver-toggle">
+        <span class="form-label">{{ 'macrodeck.app:Settings.Devices.ScreenSaver.Enabled' | translate }}</span>
+        <shared-toggle-switch
+          [checked]="screenSaverEnabledDraft()"
+          (changed)="screenSaverEnabledDraft.set($event)" />
+      </label>
+      @if (screenSaverEnabledDraft()) {
+        <label class="form-group">
+          <span class="form-label">{{ 'macrodeck.app:Settings.Devices.ScreenSaver.IdleTimeout' | translate }}</span>
+          <shared-select
+            [options]="idleOptions()"
+            [ngModel]="screenSaverIdleDraft()"
+            (ngModelChange)="screenSaverIdleDraft.set($event)">
+          </shared-select>
+        </label>
+        <app-screensaver-picker
+          [deviceId]="device.id"
+          [(screenSaverId)]="screenSaverIdDraft"
+          [(configuration)]="screenSaverConfigurationDraft" />
+      }
+
+      <shared-button-group class="form-actions" align="end">
+        <shared-button
+          type="button"
+          variant="secondary"
+          class="devices-screensaver-start"
+          [disabled]="!device.online"
+          [title]="!device.online ? ('macrodeck.app:Settings.Devices.ScreenSaver.StartDisabledTitle' | translate) : ''"
+          (click)="startScreenSaverNow()">{{ 'macrodeck.app:Settings.Devices.ScreenSaver.StartNow' | translate }}</shared-button>
+        <shared-button type="button" variant="secondary" (click)="cancelScreenSaver()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button type="button" variant="primary" (click)="commitScreenSaver()">{{ 'macrodeck:Common.Save' | translate }}</shared-button>
       </shared-button-group>
     </div>
   </shared-modal>

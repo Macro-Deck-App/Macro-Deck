@@ -39,7 +39,7 @@ internal sealed class UiProviderParityContractTests : UiContractFixture
 	/// opener ever produces - a shared session admits a second client where an exclusive one refuses it,
 	/// which is precisely the sort of difference this suite exists to catch.</summary>
 	private static string Mode(string kind)
-		=> kind is UiSurfaceKinds.Widget or UiSurfaceKinds.Preview or UiSurfaceKinds.Folder
+		=> kind is UiSurfaceKinds.Widget or UiSurfaceKinds.Preview or UiSurfaceKinds.Folder or UiSurfaceKinds.ScreenSaver
 			? UiSessionModes.Shared
 			: UiSessionModes.Exclusive;
 
@@ -69,6 +69,7 @@ internal sealed class UiProviderParityContractTests : UiContractFixture
 	[TestCase(UiSurfaceKinds.Widget)]
 	[TestCase(UiSurfaceKinds.Preview)]
 	[TestCase(UiSurfaceKinds.Folder)]
+	[TestCase(UiSurfaceKinds.ScreenSaver)]
 	public async Task The_same_session_script_produces_identical_client_observations_for_both_provider_kinds(
 		string surfaceKind)
 	{

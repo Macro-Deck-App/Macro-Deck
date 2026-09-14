@@ -19,7 +19,10 @@ public static class UiConfigEntryPoints
 	/// <summary>One placed widget, configured from the widget editor.</summary>
 	public const string WidgetConfig = "widget-config";
 
+	/// <summary>One device's selected screensaver, configured from the device's own settings.</summary>
+	public const string ScreenSaverConfig = "screensaver-config";
+
 	/// <summary>The entry points this package ships names for. Not exhaustive - see the type's summary.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
-		[IntegrationConfig, ActionConfig, FolderViewConfig, WidgetConfig];
+		[IntegrationConfig, ActionConfig, FolderViewConfig, WidgetConfig, ScreenSaverConfig];
 }

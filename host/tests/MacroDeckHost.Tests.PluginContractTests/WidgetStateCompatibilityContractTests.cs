@@ -243,6 +243,7 @@ internal sealed class WidgetStateCompatibilityContractTests
 				layoutRegistry: null!,
 				folderViewRegistry: null!,
 				widgetTypeRegistry: null!,
+				screenSaverRegistry: null!,
 				modals: null!,
 				transport: null!,
 				throttle: new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),

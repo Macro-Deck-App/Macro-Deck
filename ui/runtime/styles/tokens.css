@@ -179,6 +179,7 @@
    * modal that hosts them, but below toasts.
    */
   --z-popover:      1150;
+  --z-screensaver:  1190;
   --z-toast:        1200;
 
   /*

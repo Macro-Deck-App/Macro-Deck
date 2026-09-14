@@ -6,8 +6,11 @@ using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.FolderViews;
+using MacroDeck.Localization;
+using MacroDeck.Plugin.Protocol.Capabilities.ScreenSaverProvider;
 using MacroDeckHost.Application.Ui.Modals;
 using MacroDeckHost.Application.Layouts;
+using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Plugins;
@@ -47,7 +50,8 @@ public class PluginCallbackRouterTests
 		HostCallbackThrottle throttle,
 		FakeHostLockState? lockState = null,
 		FakeScriptApi? scriptApi = null,
-		FakePluginDeviceRegistry? deviceRegistry = null)
+		FakePluginDeviceRegistry? deviceRegistry = null,
+		ScreenSaverRegistry? screenSavers = null)
 	{
 		var services = new ServiceCollection();
 		services.AddSingleton<IVariableService>(variableService);
@@ -68,6 +72,7 @@ public class PluginCallbackRouterTests
 			new LayoutRegistry(new RecordingMediator()),
 			new FolderViewRegistry(new RecordingMediator()),
 			new WidgetTypeRegistry(new RecordingMediator()),
+			screenSavers ?? new ScreenSaverRegistry(new RecordingMediator()),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			new RecordingUiTransport(),
 			throttle,
@@ -88,14 +93,16 @@ public class PluginCallbackRouterTests
 		int throttleCapacity = 100,
 		FakeHostLockState? lockState = null,
 		FakeScriptApi? scriptApi = null,
-		FakePluginDeviceRegistry? deviceRegistry = null)
+		FakePluginDeviceRegistry? deviceRegistry = null,
+		ScreenSaverRegistry? screenSavers = null)
 		=> Router(_variableService,
 			_actionInteractions,
 			_invoker,
 			new HostCallbackThrottle(_time, throttleCapacity, refillPerSecond: 100),
 			lockState,
 			scriptApi,
-			deviceRegistry);
+			deviceRegistry,
+			screenSavers);
 
 	// ---- security: ownership containment -----------------------------------------------------
 
@@ -123,6 +130,56 @@ public class PluginCallbackRouterTests
 			Assert.That(result.Error, Is.Null);
 			Assert.That(registry.AssignedIdOf("plugin.a", "SERIAL-1"), Is.Not.Null);
 			Assert.That(registry.AssignedIdOf("plugin.b", "SERIAL-1"), Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_registers_and_withdraws_screensavers_in_its_own_name_only()
+	{
+		var screenSavers = new ScreenSaverRegistry(new RecordingMediator());
+		var router = Router(screenSavers: screenSavers);
+
+		var registered = await router.RouteAsync("plugin.a",
+			"c1",
+			new HostInvokePayload
+			{
+				Api = HostApis.ScreenSavers,
+				Operation = HostOperations.ScreenSavers.Register,
+				Arguments = Arg(new ScreenSaversRegisterArguments
+				{
+					ScreenSaver = new ScreenSaverDescriptorDto { Id = "photos", Name = LocalizedText.FromLiteral("Photos") }
+				})
+			},
+			CancellationToken.None);
+		var id = registered.Data!.Value.Deserialize<ScreenSaversRegisterResult>(PluginProtocolJson.Options)!;
+
+		await router.RouteAsync("plugin.b",
+			"c2",
+			new HostInvokePayload
+			{
+				Api = HostApis.ScreenSavers,
+				Operation = HostOperations.ScreenSavers.Unregister,
+				Arguments = Arg(new ScreenSaversUnregisterArguments { ScreenSaverId = "photos" })
+			},
+			CancellationToken.None);
+		var stillThere = screenSavers.TryResolve(id.ScreenSaverId, out _);
+
+		await router.RouteAsync("plugin.a",
+			"c1",
+			new HostInvokePayload
+			{
+				Api = HostApis.ScreenSavers,
+				Operation = HostOperations.ScreenSavers.Unregister,
+				Arguments = Arg(new ScreenSaversUnregisterArguments { ScreenSaverId = "photos" })
+			},
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registered.Error, Is.Null);
+			Assert.That(id.ScreenSaverId, Is.EqualTo("plugin.a::photos"));
+			Assert.That(stillThere, Is.True, "another plugin must not withdraw it");
+			Assert.That(screenSavers.TryResolve(id.ScreenSaverId, out _), Is.False);
 		});
 	}
 

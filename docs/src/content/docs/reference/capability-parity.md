@@ -29,6 +29,7 @@ A plugin implements the same SDK contracts as an in-process integration, but the
 | Virtual profiles | Yes | Differs | Catalogs and widget interactions work; the catalog is snapshot-backed and interaction delivery is fire-and-forget. |
 | Device providers | Yes | Same | Full parity from capability version 2, but sessions are always re-opened, never resumed - see [Device provider sessions](#device-provider-sessions). |
 | Folder view providers | Yes | Same | Registered through the `folder-views` host API; see [Provider catalogues across a disconnect](#provider-catalogues-across-a-disconnect). |
+| Screensaver providers | Yes | Same | Registered through the `screensavers` host API; see [Provider catalogues across a disconnect](#provider-catalogues-across-a-disconnect). |
 | Widget type providers | Yes | Same | Widgets of the type are drawn, previewed and configured through the provider's own `ui` sessions, one per widget per viewer, with no separate rendering path. |
 | Layout providers | Yes | Same | Registered through the `layouts` host API; see [Provider catalogues across a disconnect](#provider-catalogues-across-a-disconnect). |
 | Migrations | Yes | Same | `describe`, `migrate-action` and `migrate-configuration` work; the declared list is snapshot-backed - see [Migrations](#migrations). |
@@ -123,11 +124,12 @@ Registration, updates, presence and unregistration cross as host callbacks. The 
 
 ## Provider catalogues across a disconnect
 
-Folder view, widget type and layout providers register and withdraw through host callbacks, and the host reads each catalogue back when the plugin connects, so a reconnect restores it without waiting for discovery.
+Folder view, screensaver, widget type and layout providers register and withdraw through host callbacks, and the host reads each catalogue back when the plugin connects, so a reconnect restores it without waiting for discovery.
 
 | Provider | Losing the session | Withdrawing |
 | --- | --- | --- |
 | Folder view | Folders keep their stored view id and configuration and show Macro Deck's placeholder until the view returns. | Same as losing the session. |
+| Screensaver | Devices keep their stored screensaver id and configuration and show Macro Deck's clock until the screensaver returns. | Same as losing the session. |
 | Widget type | The catalogue entry stays, so widgets keep their name and default data while the plugin restarts. | Only uninstalling or stopping the integration withdraws a type, and never deletes a placed widget. |
 | Layout | Devices using its layouts keep their last-resolved geometry instead of becoming unconstrained. | - |
 

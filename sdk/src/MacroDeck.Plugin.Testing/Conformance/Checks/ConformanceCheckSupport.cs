@@ -53,6 +53,8 @@ internal static class ConformanceCheckSupport
 		_ when string.Equals(kind, CapabilityKinds.Ui, StringComparison.Ordinal) => CapabilityOperations.Ui.Describe,
 		_ when string.Equals(kind, CapabilityKinds.WidgetTypeProvider, StringComparison.Ordinal) =>
 			CapabilityOperations.WidgetTypeProvider.Describe,
+		_ when string.Equals(kind, CapabilityKinds.ScreenSaverProvider, StringComparison.Ordinal) =>
+			CapabilityOperations.ScreenSaverProvider.Describe,
 		_ => null
 	};
 

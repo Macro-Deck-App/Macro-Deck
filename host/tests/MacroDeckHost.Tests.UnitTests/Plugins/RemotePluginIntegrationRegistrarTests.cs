@@ -20,6 +20,7 @@ using MacroDeckHost.Application.Plugins.Assets;
 using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -57,6 +58,7 @@ public class RemotePluginIntegrationRegistrarTests
 	private LayoutRegistry _layoutRegistry = null!;
 	private FolderViewRegistry _folderViewRegistry = null!;
 	private WidgetTypeRegistry _widgetTypeRegistry = null!;
+	private ScreenSaverRegistry _screenSaverRegistry = null!;
 	private RemotePluginIntegrationRegistrar _registrar = null!;
 
 	[SetUp]
@@ -79,6 +81,7 @@ public class RemotePluginIntegrationRegistrarTests
 		_layoutRegistry = new LayoutRegistry(new RecordingMediator());
 		_folderViewRegistry = new FolderViewRegistry(new RecordingMediator());
 		_widgetTypeRegistry = new WidgetTypeRegistry(new RecordingMediator());
+		_screenSaverRegistry = new ScreenSaverRegistry(new RecordingMediator());
 
 		var services = new ServiceCollection();
 		services.AddSingleton<IMediator>(_mediator);
@@ -102,6 +105,7 @@ public class RemotePluginIntegrationRegistrarTests
 			_layoutRegistry,
 			_folderViewRegistry,
 			_widgetTypeRegistry,
+			_screenSaverRegistry,
 			_time,
 			Serilog.Log.Logger);
 	}
@@ -1153,6 +1157,8 @@ public class RemotePluginIntegrationRegistrarTests
 			new FolderViewDescriptor("dashboard", LocalizedText.FromLiteral("Dashboard")));
 		var layout = await _layoutRegistry.Register(pluginId,
 			new LayoutDescriptor("stream-deck-xl", "Stream Deck XL", []));
+		var screenSaver = await _screenSaverRegistry.Register(pluginId,
+			new MacroDeck.Sdk.ScreenSavers.ScreenSaverDescriptor("photos", LocalizedText.FromLiteral("Photos")));
 
 		await _registrar.ForgetAsync(pluginId);
 
@@ -1161,6 +1167,7 @@ public class RemotePluginIntegrationRegistrarTests
 			Assert.That(_widgetTypeRegistry.IsRegistered(widgetType.WidgetTypeId), Is.False);
 			Assert.That(_folderViewRegistry.TryResolve(folderView.FolderViewId, out _), Is.False);
 			Assert.That(_layoutRegistry.TryResolve(layout.LayoutId, out _), Is.False);
+			Assert.That(_screenSaverRegistry.TryResolve(screenSaver.ScreenSaverId, out _), Is.False);
 		});
 	}
 

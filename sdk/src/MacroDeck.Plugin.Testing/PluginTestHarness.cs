@@ -73,6 +73,7 @@ public sealed class PluginTestHarness : IAsyncDisposable, ICapabilityInvoker
 		LayoutProvider = new LayoutProviderTestClient(this);
 		FolderViewProvider = new FolderViewProviderTestClient(this);
 		WidgetTypeProvider = new WidgetTypeProviderTestClient(this);
+		ScreenSaverProvider = new ScreenSaverProviderTestClient(this);
 		Issues = new IssuesTestClient(this);
 	}
 
@@ -127,6 +128,9 @@ public sealed class PluginTestHarness : IAsyncDisposable, ICapabilityInvoker
 
 	/// <summary>The <c>widget-type-provider</c> capability.</summary>
 	public WidgetTypeProviderTestClient WidgetTypeProvider { get; }
+
+	/// <summary>The <c>screensaver-provider</c> capability.</summary>
+	public ScreenSaverProviderTestClient ScreenSaverProvider { get; }
 
 	/// <summary>The <c>issues</c> capability.</summary>
 	public IssuesTestClient Issues { get; }

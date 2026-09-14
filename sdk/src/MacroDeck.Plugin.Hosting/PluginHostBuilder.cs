@@ -17,6 +17,7 @@ using MacroDeck.Sdk.Devices;
 using MacroDeck.Sdk.Identity;
 using MacroDeck.Plugin.Hosting.Capabilities.Ui;
 using MacroDeck.Sdk.FolderViews;
+using MacroDeck.Sdk.ScreenSavers;
 using MacroDeck.Sdk.Layouts;
 using MacroDeck.Sdk.Widgets;
 using Microsoft.AspNetCore.Builder;
@@ -470,6 +471,7 @@ public sealed class PluginHostBuilder
 		Services.TryAddSingleton<IDeviceProviderContext, RemoteDeviceProviderContext>();
 		Services.TryAddSingleton<ILayoutProviderContext, RemoteLayoutProviderContext>();
 		Services.TryAddSingleton<IFolderViewProviderContext, RemoteFolderViewProviderContext>();
+		Services.TryAddSingleton<IScreenSaverProviderContext, RemoteScreenSaverProviderContext>();
 		Services.TryAddSingleton<IWidgetTypeProviderContext, RemoteWidgetTypeProviderContext>();
 		Services.TryAddSingleton<ModalResultStore>();
 		Services.TryAddSingleton<IIntegrationContext, RemoteIntegrationContext>();

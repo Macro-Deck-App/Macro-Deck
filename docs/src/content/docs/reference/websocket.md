@@ -188,7 +188,7 @@ Capabilities are first declared on the `POST /api/plugins/sessions` request; `ca
 
 | Shape | Field | Type | Required | Meaning |
 | --- | --- | --- | --- | --- |
-| `DeclaredCapability` | `kind` | string | yes | One of the sixteen kinds below. |
+| `DeclaredCapability` | `kind` | string | yes | One of the seventeen kinds below. |
 | | `localId` | string | yes | The capability's id within the plugin. |
 | | `versionRange` | `{minimum, maximum}` | yes | Integer capability versions the plugin serves. |
 | | `displayName` | string | no | Human-readable name. |
@@ -199,7 +199,7 @@ Capabilities are first declared on the `POST /api/plugins/sessions` request; `ca
 
 Negotiation fails **non-fatally**: an unsupported or unknown kind comes back rejected with a reason, and the session proceeds degraded.
 
-The sixteen `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
+The seventeen `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
 
 ```json
 {"type":"capability.invoke","id":"01a09528-bc57-7b85-bed4-952327ffedcd",
@@ -259,7 +259,7 @@ The only kind that is **item-shaped and provider-shaped at once**. The eager hal
 | `host.cancel` | plugin → host | `reason` - best-effort cancellation of a `host.invoke` |
 | `host.state` | host → plugin | `api` (required), `data` - the list a plugin's synchronous members serve from |
 
-APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `notifications`, `action-interactions`, `ui`, `devices`, `variable-values`, `layouts`, `folder-views`, `widget-types`, and the push-only `event-bindings`. There is no `events` api; use `event.publish`. A plugin ignores a `host.state` api it does not know.
+APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `notifications`, `action-interactions`, `ui`, `devices`, `variable-values`, `layouts`, `folder-views`, `widget-types`, `screensavers`, and the push-only `event-bindings`. There is no `events` api; use `event.publish`. A plugin ignores a `host.state` api it does not know.
 
 `host.state` for `config` has no `data`: it means "your config changed, re-read it". Built from the schema:
 

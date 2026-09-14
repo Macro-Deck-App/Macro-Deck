@@ -183,6 +183,19 @@ public static class HostOperations
 	}
 
 	/// <summary>
+	/// The <c>screensavers</c> host api: a screensaver provider registers and withdraws the screensavers it
+	/// offers.
+	/// </summary>
+	public static class ScreenSavers
+	{
+		public const string Register = "register";
+
+		public const string Unregister = "unregister";
+
+		public static readonly IReadOnlyList<string> All = [Register, Unregister];
+	}
+
+	/// <summary>
 	/// The <c>widget-types</c> host api: a widget type provider registers and withdraws the widget types
 	/// it offers.
 	/// </summary>
@@ -217,6 +230,7 @@ public static class HostOperations
 			[HostApis.VariableValues] = VariableValues.All,
 			[HostApis.Layouts] = Layouts.All,
 			[HostApis.FolderViews] = FolderViews.All,
+			[HostApis.ScreenSavers] = ScreenSavers.All,
 			[HostApis.WidgetTypes] = WidgetTypes.All,
 			[HostApis.EventBindings] = EventBindings.All,
 		};

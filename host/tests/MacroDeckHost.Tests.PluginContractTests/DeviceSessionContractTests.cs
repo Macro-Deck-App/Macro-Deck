@@ -22,6 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MacroDeckHost.Application.FolderViews;
 using MacroDeckHost.Application.Ui.Modals;
 using MacroDeckHost.Application.Layouts;
+using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Widgets;
 
 namespace MacroDeckHost.Tests.PluginContractTests;
@@ -93,6 +94,7 @@ internal sealed class DeviceSessionContractTests : CapabilityContractFixture
 			new LayoutRegistry(new RecordingMediator()),
 			new FolderViewRegistry(new RecordingMediator()),
 			new WidgetTypeRegistry(new RecordingMediator()),
+			new ScreenSaverRegistry(new RecordingMediator()),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			new NullUiTransport(),
 			new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),

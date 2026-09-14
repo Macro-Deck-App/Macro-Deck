@@ -255,7 +255,7 @@ GET /api/plugins/protocol HTTP/1.1
 ```json
 {
   "supportedVersions": [1, 2, 3],
-  "capabilityKinds": ["actions", "events", "variables", "icons", "config-flow", "music-player", "weather", "virtual-profiles", "issues", "ui", "localization", "device-provider", "layout-provider", "folder-view-provider", "migration", "widget-type-provider"],
+  "capabilityKinds": ["actions", "events", "variables", "icons", "config-flow", "music-player", "weather", "virtual-profiles", "issues", "ui", "localization", "device-provider", "layout-provider", "folder-view-provider", "migration", "widget-type-provider", "screensaver-provider"],
   "limits": { "maxMessageBytes": 262144, "maxSessionsPerPlugin": 1 },
   "timeouts": { "handshake": "00:00:10", "sessionResumeWindow": "00:01:00" },
   "pairing": { "supported": true, "requestLifetimeSeconds": 30, "pollIntervalSeconds": 1 }

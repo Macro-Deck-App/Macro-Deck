@@ -46,6 +46,7 @@ export class WakeLock {
   private status: WakeLockStatus;
   private enabledPreference: boolean;
   private gate = false;
+  private forced = false;
   private pending = false;
   private sentinel: WakeLockHandle | null = null;
   private releasingHandle: WakeLockHandle | null = null;
@@ -110,6 +111,21 @@ export class WakeLock {
     this.notify();
   }
 
+  // Held while a screensaver shows whatever the preference says: a screensaver on a display the OS
+  // then turns off is pointless. A refusal stays a refusal, the same as for the preference.
+  setForced(on: boolean): void {
+    if (this.forced === on) return;
+    this.forced = on;
+
+    if (!on && !this.enabledPreference) {
+      this.releaseSentinel();
+      this.setIdleStatusIfOperable();
+      this.notify();
+      return;
+    }
+    this.runGuard();
+  }
+
   setGate(active: boolean): void {
     if (this.gate === active) return;
     this.gate = active;
@@ -151,7 +167,7 @@ export class WakeLock {
   }
 
   private shouldAcquire(): boolean {
-    return this.enabledPreference
+    return (this.enabledPreference || this.forced)
       && this.gate
       && !document.hidden
       && this.sentinel === null

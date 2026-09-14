@@ -8,6 +8,9 @@ export interface OpenConfigUiSessionRequest {
   folderViewId?: string;
   folderViewConfiguration?: string;
   widgetId?: string;
+  deviceId?: string;
+  screenSaverId?: string;
+  screenSaverConfiguration?: string;
   // The draft being edited, as JSON object text. Absent starts the surface from the widget's stored
   // configuration, which is not the same thing while the editor holds unsaved changes.
   widgetData?: string;

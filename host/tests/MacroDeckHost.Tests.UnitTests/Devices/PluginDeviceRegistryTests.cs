@@ -69,7 +69,8 @@ public class PluginDeviceRegistryTests
 			new FakeDeviceDeckNavigator(),
 			readiness,
 			_presence,
-			new FakeIntegrationRegistry());
+			new FakeIntegrationRegistry(),
+			TestScreenSaverProviders.Registry());
 	}
 
 	private static DeviceDescriptor Descriptor(

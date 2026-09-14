@@ -685,6 +685,7 @@ export {
   type DeviceLoginInfo,
   type DeviceRemovedEvent,
   type DeviceSessionRevokedEvent,
+  type DeviceScreenSaverChangedEvent,
   type GetDevicesResponse,
   type LogoutDeviceResponse,
   type OpenProfileOnDeviceRequest,
@@ -694,6 +695,9 @@ export {
   type RenameDeviceResponse,
   type SetDeviceStartupProfileRequest,
   type SetDeviceStartupProfileResponse,
+  type SetDeviceScreenSaverRequest,
+  type SetDeviceScreenSaverResponse,
+  type ShowDeviceScreenSaverResponse,
 } from './protocol/messages/device';
 export {
   type ReportFolderChangedRequest,
@@ -742,6 +746,15 @@ export {
   type GetFolderViewsResponse,
   type IpcFolderView,
 } from './protocol/messages/folder-view';
+export { BUILT_IN_CLOCK_SCREENSAVER_ID } from './protocol/messages/screensaver';
+export type {
+  IpcScreenSaver,
+  GetScreenSaversRequest,
+  GetScreenSaversResponse,
+  ScreenSaverCatalogChangedEvent,
+  GetDeviceScreenSaverResponse,
+  OpenScreenSaverUiSessionResponse,
+} from './protocol/messages/screensaver';
 export { type GetHostSessionResponse } from './protocol/messages/host';
 export {
   type CancelIconImportBatchResponse,

@@ -1296,6 +1296,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Deck.ResizeFailed" xml:space="preserve">
     <value>Nie udało się zmienić rozmiaru siatki</value>
   </data>
+  <data name="Deck.ScreenSaver.Announcement" xml:space="preserve">
+    <value>Wygaszacz ekranu. Dotknięcie ekranu przywraca deck.</value>
+  </data>
   <data name="Deck.UnavailableWidget.Tile" xml:space="preserve">
     <value>Dostawca: {plugin} - obecnie niedostępny</value>
   </data>
@@ -3927,6 +3930,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Capability.MusicPlayer" xml:space="preserve">
     <value>Odtwarzacz muzyki</value>
+  </data>
+  <data name="Integrations.Capability.ScreenSaverProvider" xml:space="preserve">
+    <value>Wygaszacze ekranu</value>
   </data>
   <data name="Integrations.Capability.Variables" xml:space="preserve">
     <value>Zmienne</value>
@@ -11880,6 +11886,18 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Profil domyślny</value>
     <comment>The name the one profile a fresh install starts with is created under. Stored as data from there on, so it is written in the language active at that moment and is not re-translated when the language changes.</comment>
   </data>
+  <data name="ScreenSavers.Clock.Description" xml:space="preserve">
+    <value>Godzina i data, powoli przesuwające się po ekranie.</value>
+  </data>
+  <data name="ScreenSavers.Clock.Name" xml:space="preserve">
+    <value>Zegar</value>
+  </data>
+  <data name="ScreenSavers.NowPlaying.Description" xml:space="preserve">
+    <value>Okładka, tytuł i wykonawca bieżącego utworu, w przeciwnym razie zegar.</value>
+  </data>
+  <data name="ScreenSavers.NowPlaying.Name" xml:space="preserve">
+    <value>Teraz odtwarzane</value>
+  </data>
   <data name="Scripts.ActionsTabLabel" xml:space="preserve">
     <value>Akcje</value>
   </data>
@@ -12820,6 +12838,65 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Settings.Devices.RenameModalHeading" xml:space="preserve">
     <value>Zmień nazwę urządzenia</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Configuration" xml:space="preserve">
+    <value>Konfiguracja</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Options" xml:space="preserve">
+    <value>Opcje…</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Enabled" xml:space="preserve">
+    <value>Pokazuj wygaszacz ekranu</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.IdleTimeout" xml:space="preserve">
+    <value>Uruchom po</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Label" xml:space="preserve">
+    <value>Wygaszacz ekranu</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Line" xml:space="preserve">
+    <value>Wygaszacz ekranu: {value}</value>
+    <comment>[value:string]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.MenuAction" xml:space="preserve">
+    <value>Wygaszacz ekranu…</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Minutes.One" xml:space="preserve">
+    <value>{count} min</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Minutes.Other" xml:space="preserve">
+    <value>{count} min</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.ModalDescription" xml:space="preserve">
+    <value>Urządzenie {name} pokaże wygaszacz ekranu po chwili bez aktywności. Pierwsze dotknięcie przywraca deck.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.ModalHeading" xml:space="preserve">
+    <value>Wygaszacz ekranu</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Off" xml:space="preserve">
+    <value>Wyłączony</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.SaveFailed" xml:space="preserve">
+    <value>Nie udało się zapisać ustawień wygaszacza ekranu</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.StartDisabledTitle" xml:space="preserve">
+    <value>Urządzenie musi być online, aby uruchomić wygaszacz ekranu</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.StartFailed" xml:space="preserve">
+    <value>Nie udało się uruchomić wygaszacza ekranu na urządzeniu</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.StartNow" xml:space="preserve">
+    <value>Uruchom teraz</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Summary" xml:space="preserve">
+    <value>{name} po {timeout}</value>
+    <comment>[name:string][timeout:string]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Unavailable" xml:space="preserve">
+    <value>Niedostępny</value>
   </data>
   <data name="Settings.Devices.SignedOutMarker" xml:space="preserve">
     <value>Wylogowano</value>

@@ -31,6 +31,14 @@ public class DeviceEntity : BaseEntity
 	// Virtual profile IDs use integrationId::localId, so this cannot be a Guid.
 	public string? StartupProfileId { get; set; }
 
+	public bool ScreenSaverEnabled { get; set; }
+
+	public int ScreenSaverIdleSeconds { get; set; } = 300;
+
+	public string? ScreenSaverId { get; set; }
+
+	public string? ScreenSaverConfiguration { get; set; }
+
 	/// <summary>The integration or plugin id that registered this device; null for a client device.</summary>
 	public string? ProviderId { get; set; }
 

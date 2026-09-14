@@ -1,7 +1,7 @@
 import { WritableSignal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Device, Profile } from '@macro-deck/runtime';
-import { AuthService, DeviceIdentityService, ProfileService, ToastService } from '@shared';
+import { AuthService, DeviceIdentityService, ProfileService, ScreenSaverService, ToastService } from '@shared';
 import { DeviceService } from '../../../../services/device.service';
 import { DevicesSettingsComponent } from './devices-settings.component';
 import { provideLocalizationTesting } from '../../../../../testing/localization-test-support';
@@ -38,6 +38,8 @@ function profile(id: string, name: string): Profile {
   };
 }
 
+const CLOCK = { id: 'app.macro-deck.screensavers::clock', providerId: 'app.macro-deck.screensavers', name: { literal: 'Clock' }, hasConfiguration: true, interactive: false, isBuiltIn: true };
+
 describe('DevicesSettingsComponent', () => {
   let fixture: ComponentFixture<DevicesSettingsComponent>;
   let deviceServiceSpy: jasmine.SpyObj<DeviceService>;
@@ -52,7 +54,7 @@ describe('DevicesSettingsComponent', () => {
     profiles: Profile[] = [],
   ): void {
     deviceServiceSpy = jasmine.createSpyObj<DeviceService>(
-      'DeviceService', ['load', 'rename', 'logout', 'remove', 'setStartupProfile', 'openProfile']);
+      'DeviceService', ['load', 'rename', 'logout', 'remove', 'setStartupProfile', 'openProfile', 'setScreenSaver', 'showScreenSaver']);
     authServiceSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout']);
     devicesSignal = signal<Device[]>(devices);
     loadErrorSignal = signal<string | null>(null);
@@ -65,6 +67,8 @@ describe('DevicesSettingsComponent', () => {
     deviceServiceSpy.remove.and.resolveTo({ success: true });
     deviceServiceSpy.setStartupProfile.and.resolveTo({ success: true });
     deviceServiceSpy.openProfile.and.resolveTo({ success: true });
+    deviceServiceSpy.setScreenSaver.and.resolveTo({ success: true });
+    deviceServiceSpy.showScreenSaver.and.resolveTo({ success: true });
 
     TestBed.configureTestingModule({
       imports: [DevicesSettingsComponent],
@@ -75,6 +79,14 @@ describe('DevicesSettingsComponent', () => {
         { provide: DeviceIdentityService, useValue: { deviceId: thisDeviceId } },
         { provide: AuthService, useValue: authServiceSpy },
         { provide: ProfileService, useValue: { sortedProfiles: () => profiles } },
+        {
+          provide: ScreenSaverService,
+          useValue: {
+            load: () => Promise.resolve(),
+            screenSavers: signal([CLOCK]),
+            find: (id: string | null | undefined) => (id === CLOCK.id ? CLOCK : undefined),
+          },
+        },
       ],
     });
     Object.defineProperty(authServiceSpy, 'currentDeviceId', { value: signal(liveDeviceId) });
@@ -566,6 +578,81 @@ describe('DevicesSettingsComponent', () => {
       expect(deviceServiceSpy.openProfile).toHaveBeenCalledWith('d1', 'p1');
       expect(toastSpy).toHaveBeenCalledWith('The device is offline.', { variant: 'error' });
       expect(fixture.componentInstance.openProfileDevice()).toBeNull();
+    });
+  });
+
+  describe('screensaver', () => {
+    it('is offered for a client that renders a deck and not for a provider device', async () => {
+      configure([device('d1', { clientType: 'web-client' }), device('d2', { clientType: 'provider', providerId: 'p' })]);
+      fixture = await create();
+
+      const component = fixture.componentInstance;
+      expect(component.canHaveScreenSaver(component.devices()[0])).toBeTrue();
+      expect(component.canHaveScreenSaver(component.devices()[1])).toBeFalse();
+      expect(fixture.nativeElement.querySelectorAll('.devices-screensaver-line').length).toBe(1);
+    });
+
+    it('reads as off until a device turns it on', async () => {
+      configure([device('d1')]);
+      fixture = await create();
+
+      const line = fixture.nativeElement.querySelector('.devices-screensaver-line')?.textContent as string;
+      expect(line).toContain('Off');
+    });
+
+    it('starting it now saves the draft first and then asks the device to show it', async () => {
+      configure([device('d1', { online: true })]);
+      fixture = await create();
+      const component = fixture.componentInstance;
+
+      component.openScreenSaverSettings(component.devices()[0]);
+      component.screenSaverEnabledDraft.set(true);
+      await component.startScreenSaverNow();
+
+      expect(deviceServiceSpy.setScreenSaver).toHaveBeenCalledTimes(1);
+      expect(deviceServiceSpy.showScreenSaver).toHaveBeenCalledWith('d1');
+      expect(component.screenSaverDevice()).not.toBeNull();
+    });
+
+    it('opens the configuration of a screensaver that has one in its own dialog', async () => {
+      configure([device('d1', { screenSaverEnabled: true, screenSaverId: CLOCK.id })]);
+      fixture = await create();
+      const component = fixture.componentInstance;
+
+      component.openScreenSaverSettings(component.devices()[0]);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const options = fixture.nativeElement.querySelector('.screensaver-picker-options');
+      expect(options).not.toBeNull();
+      expect(fixture.nativeElement.querySelector('.screensaver-picker-configuration')).toBeNull();
+
+      (options as HTMLElement).click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('.screensaver-picker-configuration')).not.toBeNull();
+    });
+
+    it('saves what was picked through the device service', async () => {
+      configure([device('d1', { screenSaverEnabled: true, screenSaverIdleSeconds: 120 })]);
+      fixture = await create();
+      const component = fixture.componentInstance;
+
+      component.openScreenSaverSettings(component.devices()[0]);
+      expect(component.screenSaverIdleDraft()).toBe('120');
+      component.screenSaverIdDraft.set(CLOCK.id);
+      component.screenSaverConfigurationDraft.set('{"showSeconds":true}');
+      await component.commitScreenSaver();
+
+      expect(deviceServiceSpy.setScreenSaver).toHaveBeenCalledWith('d1', {
+        enabled: true,
+        idleSeconds: 120,
+        screenSaverId: CLOCK.id,
+        configuration: '{"showSeconds":true}',
+      });
     });
   });
 });

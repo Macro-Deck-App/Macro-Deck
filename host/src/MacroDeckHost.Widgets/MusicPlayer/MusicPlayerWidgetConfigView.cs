@@ -146,7 +146,7 @@ internal static class MusicPlayerWidgetConfigView
 			: picker;
 	}
 
-	private static List<UiOption> InstanceOptions(IMusicPlayerRegistry registry, string selected)
+	internal static List<UiOption> InstanceOptions(IMusicPlayerRegistry registry, string selected)
 	{
 		var instances = registry.GetInstances();
 

@@ -73,6 +73,15 @@ public class DeviceStartupProfileCleanupHandlerTests
 		public Task<Result<DeviceEntity, DeviceError>> SetStartupProfile(Guid id, string? profileId)
 			=> throw new NotSupportedException();
 
+		public Task<Result<DeviceError>> ShowScreenSaver(Guid id) => throw new NotSupportedException();
+
+		public Task<Result<DeviceEntity, DeviceError>> SetScreenSaver(Guid id,
+			bool enabled,
+			int idleSeconds,
+			string? screenSaverId,
+			string? configuration)
+			=> throw new NotSupportedException();
+
 		public Task<string?> ResolveStartupProfileId(Guid deviceId) => throw new NotSupportedException();
 
 		public Task<Result<DeviceError>> OpenProfileOnDevice(Guid id, string profileId)

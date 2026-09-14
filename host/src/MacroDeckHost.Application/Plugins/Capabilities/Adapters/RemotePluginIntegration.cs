@@ -23,6 +23,7 @@ using MacroDeck.Sdk.Devices;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.FolderViews;
+using MacroDeck.Sdk.ScreenSavers;
 using MacroDeck.Sdk.Layouts;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Profiles;
@@ -47,6 +48,7 @@ public abstract class RemotePluginIntegration :
 	IDeviceProvider,
 	ILayoutProvider,
 	IFolderViewProvider,
+	IScreenSaverProvider,
 	IWidgetTypeProvider,
 	IIntegrationIssueProvider
 {
@@ -398,6 +400,11 @@ public abstract class RemotePluginIntegration :
 	// than through a host-run InitializeAsync.
 	Task IFolderViewProvider.InitializeAsync(
 		IFolderViewProviderContext context,
+		CancellationToken cancellationToken)
+		=> Task.CompletedTask;
+
+	Task IScreenSaverProvider.InitializeAsync(
+		IScreenSaverProviderContext context,
 		CancellationToken cancellationToken)
 		=> Task.CompletedTask;
 

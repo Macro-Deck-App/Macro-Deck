@@ -5,6 +5,7 @@ using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Devices;
 using MacroDeck.Sdk.FolderViews;
+using MacroDeck.Sdk.ScreenSavers;
 using MacroDeck.Sdk.Layouts;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
@@ -54,6 +55,7 @@ internal sealed class IntegrationLifecycleHostedService(
 	ILayoutProviderContext layoutContext,
 	IFolderViewProviderContext folderViewContext,
 	IWidgetTypeProviderContext widgetTypeContext,
+	IScreenSaverProviderContext screenSaverContext,
 	PluginConnectionState connectionState,
 	HostStateCache hostStateCache,
 	ILogger logger) : IHostedService, IDisposable
@@ -151,6 +153,11 @@ internal sealed class IntegrationLifecycleHostedService(
 						await folderViewProvider.InitializeAsync(folderViewContext);
 					}
 
+					if (integration is IScreenSaverProvider screenSaverProvider)
+					{
+						await screenSaverProvider.InitializeAsync(screenSaverContext);
+					}
+
 					// A device provider starts after the integration it belongs to: discovery may well
 					// depend on whatever InitializeAsync configured.
 					if (integration is IDeviceProvider provider)
@@ -201,9 +208,8 @@ internal sealed class IntegrationLifecycleHostedService(
 					await provider.ShutdownAsync();
 				}
 
-				// None of ILayoutProvider, IFolderViewProvider or IWidgetTypeProvider has a ShutdownAsync of
-				// its own - a provider releases whatever InitializeAsync acquired from the integration's
-				// own ShutdownAsync below.
+				// None of the layout, folder view, screensaver or widget type providers has a ShutdownAsync of
+				// its own: a provider releases whatever InitializeAsync acquired from the integration's own.
 				await integration.ShutdownAsync();
 			}
 			catch (Exception exception) when (exception is not OutOfMemoryException)

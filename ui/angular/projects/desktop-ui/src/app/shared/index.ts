@@ -14,6 +14,7 @@ export { DeckMarqueeService } from './services/deck-marquee.service';
 export { CLIENT_TYPE, DeviceIdentityService } from './services/device-identity.service';
 export { DismissibleHintService } from './services/dismissible-hint.service';
 export { FolderViewService } from './services/folder-view.service';
+export { ScreenSaverService } from './services/screensaver.service';
 export { FolderService } from './services/folder.service';
 export { IconImageService } from './services/icon-image.service';
 export { IconPrefetchService } from './services/icon-prefetch.service';

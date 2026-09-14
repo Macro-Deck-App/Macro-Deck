@@ -1295,6 +1295,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Deck.ResizeFailed" xml:space="preserve">
     <value>Das Raster konnte nicht angepasst werden</value>
   </data>
+  <data name="Deck.ScreenSaver.Announcement" xml:space="preserve">
+    <value>Bildschirmschoner. Berühre den Bildschirm, um zum Deck zurückzukehren.</value>
+  </data>
   <data name="Deck.UnavailableWidget.Tile" xml:space="preserve">
     <value>Von {plugin} bereitgestellt, derzeit nicht verfügbar</value>
   </data>
@@ -3926,6 +3929,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Capability.MusicPlayer" xml:space="preserve">
     <value>Musikplayer</value>
+  </data>
+  <data name="Integrations.Capability.ScreenSaverProvider" xml:space="preserve">
+    <value>Bildschirmschoner</value>
   </data>
   <data name="Integrations.Capability.Variables" xml:space="preserve">
     <value>Variablen</value>
@@ -11878,6 +11884,18 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Standardprofil</value>
     <comment>The name the one profile a fresh install starts with is created under. Stored as data from there on, so it is written in the language active at that moment and is not re-translated when the language changes.</comment>
   </data>
+  <data name="ScreenSavers.Clock.Description" xml:space="preserve">
+    <value>Uhrzeit und Datum, langsam über den Bildschirm wandernd.</value>
+  </data>
+  <data name="ScreenSavers.Clock.Name" xml:space="preserve">
+    <value>Uhr</value>
+  </data>
+  <data name="ScreenSavers.NowPlaying.Description" xml:space="preserve">
+    <value>Cover, Titel und Interpret des laufenden Titels, sonst die Uhr.</value>
+  </data>
+  <data name="ScreenSavers.NowPlaying.Name" xml:space="preserve">
+    <value>Aktuelle Wiedergabe</value>
+  </data>
   <data name="Scripts.ActionsTabLabel" xml:space="preserve">
     <value>Aktionen</value>
   </data>
@@ -12818,6 +12836,65 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Settings.Devices.RenameModalHeading" xml:space="preserve">
     <value>Gerät umbenennen</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Configuration" xml:space="preserve">
+    <value>Konfiguration</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Options" xml:space="preserve">
+    <value>Optionen…</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Enabled" xml:space="preserve">
+    <value>Bildschirmschoner anzeigen</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.IdleTimeout" xml:space="preserve">
+    <value>Starten nach</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Label" xml:space="preserve">
+    <value>Bildschirmschoner</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Line" xml:space="preserve">
+    <value>Bildschirmschoner: {value}</value>
+    <comment>[value:string]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.MenuAction" xml:space="preserve">
+    <value>Bildschirmschoner…</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Minutes.One" xml:space="preserve">
+    <value>{count} Minute</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Minutes.Other" xml:space="preserve">
+    <value>{count} Minuten</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.ModalDescription" xml:space="preserve">
+    <value>{name} zeigt den Bildschirmschoner nach einer Weile ohne Eingabe. Die erste Berührung holt das Deck zurück.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.ModalHeading" xml:space="preserve">
+    <value>Bildschirmschoner</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Off" xml:space="preserve">
+    <value>Aus</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.SaveFailed" xml:space="preserve">
+    <value>Die Bildschirmschoner-Einstellungen konnten nicht gespeichert werden</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.StartDisabledTitle" xml:space="preserve">
+    <value>Das Gerät muss online sein, um den Bildschirmschoner zu starten</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.StartFailed" xml:space="preserve">
+    <value>Der Bildschirmschoner konnte auf dem Gerät nicht gestartet werden</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.StartNow" xml:space="preserve">
+    <value>Jetzt starten</value>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Summary" xml:space="preserve">
+    <value>{name} nach {timeout}</value>
+    <comment>[name:string][timeout:string]</comment>
+  </data>
+  <data name="Settings.Devices.ScreenSaver.Unavailable" xml:space="preserve">
+    <value>Nicht verfügbar</value>
   </data>
   <data name="Settings.Devices.SignedOutMarker" xml:space="preserve">
     <value>Abgemeldet</value>

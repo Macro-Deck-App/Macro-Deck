@@ -131,6 +131,7 @@ internal sealed class IntegrationGatewayBinderTests
 			TestLayoutProviders.Host(),
 			TestFolderViewProviders.Host(),
 			TestWidgetTypeProviders.Host(),
+			TestScreenSaverProviders.Host(),
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			new LoggerConfiguration().CreateLogger());
@@ -162,6 +163,7 @@ internal sealed class IntegrationGatewayBinderTests
 			TestLayoutProviders.Host(),
 			TestFolderViewProviders.Host(),
 			TestWidgetTypeProviders.Host(),
+			TestScreenSaverProviders.Host(),
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			new LoggerConfiguration().CreateLogger());
@@ -227,6 +229,7 @@ internal sealed class IntegrationGatewayBinderTests
 			TestLayoutProviders.Host(),
 			TestFolderViewProviders.Host(),
 			TestWidgetTypeProviders.Host(),
+			TestScreenSaverProviders.Host(),
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			new LoggerConfiguration().CreateLogger());

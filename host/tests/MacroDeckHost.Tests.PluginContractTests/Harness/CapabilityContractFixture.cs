@@ -20,6 +20,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Mediator;
 using MacroDeckHost.Application.FolderViews;
 using MacroDeckHost.Application.Layouts;
+using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Widgets;
 
 namespace MacroDeckHost.Tests.PluginContractTests.Harness;
@@ -119,6 +120,7 @@ internal abstract class CapabilityContractFixture
 			new LayoutRegistry(Mediator),
 			new FolderViewRegistry(Mediator),
 			new WidgetTypeRegistry(Mediator),
+			new ScreenSaverRegistry(Mediator),
 			Time,
 			Serilog.Log.Logger);
 	}

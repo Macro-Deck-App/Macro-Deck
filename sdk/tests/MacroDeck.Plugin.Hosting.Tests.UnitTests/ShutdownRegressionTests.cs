@@ -60,6 +60,7 @@ public class ShutdownRegressionTests
 			new FakeLayoutProviderContext(),
 			new FakeFolderViewProviderContext(),
 			new FakeWidgetTypeProviderContext(),
+			new FakeScreenSaverProviderContext(),
 			state,
 			stateCache,
 			Serilog.Core.Logger.None);
