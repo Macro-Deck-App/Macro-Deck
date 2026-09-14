@@ -82,7 +82,7 @@
                       <span>{{ 'macrodeck.app:Settings.Devices.StartupProfileMenuAction' | translate }}</span>
                     </button>
                     @if (canHaveScreenSaver(device)) {
-                      <button type="button" class="devices-menu-item devices-menu-screensaver" (click)="startScreenSaver(device)">
+                      <button type="button" class="devices-menu-item devices-menu-screensaver" (click)="openScreenSaverSettings(device)">
                         <span class="icon icon-device-desktop icon-sm"></span>
                         <span>{{ 'macrodeck.app:Settings.Devices.ScreenSaver.MenuAction' | translate }}</span>
                       </button>

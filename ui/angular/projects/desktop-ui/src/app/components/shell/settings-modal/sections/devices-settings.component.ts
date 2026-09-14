@@ -120,7 +120,7 @@ export class DevicesSettingsComponent implements OnInit {
     return this.localization.translateKey(AppStrings.Settings.Devices.ScreenSaver.Line, { value });
   }
 
-  startScreenSaver(device: Device): void {
+  openScreenSaverSettings(device: Device): void {
     this.openMenuDeviceId.set(null);
     this.screenSaverDevice.set(device);
     this.screenSaverEnabledDraft.set(device.screenSaverEnabled === true);

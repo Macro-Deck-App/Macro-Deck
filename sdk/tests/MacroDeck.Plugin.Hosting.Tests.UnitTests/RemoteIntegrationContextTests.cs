@@ -412,9 +412,6 @@ public class RemoteIntegrationContextTests
 			covered.Add((HostApis.WidgetTypes, operation));
 		}
 
-		// screensavers is handed to a screensaver provider rather than reached through
-		// IIntegrationContext, so it is covered by
-		// ScreenSaver_registrations_send_the_declared_Api_Operation_pair above.
 		foreach (var operation in HostOperations.ScreenSavers.All)
 		{
 			covered.Add((HostApis.ScreenSavers, operation));

@@ -605,7 +605,7 @@ describe('DevicesSettingsComponent', () => {
       fixture = await create();
       const component = fixture.componentInstance;
 
-      component.startScreenSaver(component.devices()[0]);
+      component.openScreenSaverSettings(component.devices()[0]);
       component.screenSaverEnabledDraft.set(true);
       await component.startScreenSaverNow();
 
@@ -619,7 +619,7 @@ describe('DevicesSettingsComponent', () => {
       fixture = await create();
       const component = fixture.componentInstance;
 
-      component.startScreenSaver(component.devices()[0]);
+      component.openScreenSaverSettings(component.devices()[0]);
       fixture.detectChanges();
       await fixture.whenStable();
       fixture.detectChanges();
@@ -641,7 +641,7 @@ describe('DevicesSettingsComponent', () => {
       fixture = await create();
       const component = fixture.componentInstance;
 
-      component.startScreenSaver(component.devices()[0]);
+      component.openScreenSaverSettings(component.devices()[0]);
       expect(component.screenSaverIdleDraft()).toBe('120');
       component.screenSaverIdDraft.set(CLOCK.id);
       component.screenSaverConfigurationDraft.set('{"showSeconds":true}');

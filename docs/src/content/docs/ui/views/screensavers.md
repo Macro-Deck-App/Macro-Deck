@@ -124,8 +124,8 @@ session as an event; input anywhere else still dismisses the screensaver, and so
 
 ## Configuration
 
-With `HasConfiguration`, picking your screensaver in a device's settings opens a `config` surface with the
-`screensaver-config` entry point. Build it with the [configuration view](/ui/views/configuration/). It
+With `HasConfiguration`, a device's screensaver settings offer an Options button for your screensaver. It
+opens a `config` surface with the `screensaver-config` entry point in its own dialog. Build it with the [configuration view](/ui/views/configuration/). It
 carries `deviceId`, `screenSaverId` and `screenSaverConfiguration`; the values are stored with the device
 and handed back on every later `screensaver` surface.
 
