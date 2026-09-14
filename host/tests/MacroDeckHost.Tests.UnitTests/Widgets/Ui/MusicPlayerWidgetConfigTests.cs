@@ -187,6 +187,8 @@ public class MusicPlayerWidgetConfigTests
 
 		public IReadOnlyList<MusicPlayerStatePayload> GetAll() => [];
 
+		public string? ActiveInstanceId => null;
+
 		public void Record(string instanceId, MusicPlayerStatePayload payload)
 		{
 		}

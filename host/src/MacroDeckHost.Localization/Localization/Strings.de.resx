@@ -15910,8 +15910,8 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Music.Artist" xml:space="preserve">
     <value>Künstler</value>
   </data>
-  <data name="Widgets.Music.FirstAvailable" xml:space="preserve">
-    <value>Erster verfügbarer</value>
+  <data name="Widgets.Music.ActivePlayer" xml:space="preserve">
+    <value>Aktiver Player</value>
   </data>
   <data name="Widgets.Music.FullCover" xml:space="preserve">
     <value>Vollflächiges Cover</value>

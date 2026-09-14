@@ -15912,8 +15912,8 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Music.Artist" xml:space="preserve">
     <value>Umělec</value>
   </data>
-  <data name="Widgets.Music.FirstAvailable" xml:space="preserve">
-    <value>První dostupný</value>
+  <data name="Widgets.Music.ActivePlayer" xml:space="preserve">
+    <value>Aktivní přehrávač</value>
   </data>
   <data name="Widgets.Music.FullCover" xml:space="preserve">
     <value>Celý obal</value>
