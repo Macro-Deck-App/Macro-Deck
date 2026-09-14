@@ -110,6 +110,7 @@ export default defineConfig({
 										'features/button-icons',
 										'features/variables',
 										'features/events',
+										'features/deck',
 										'features/setup-flows',
 										'features/music-players',
 										'features/weather',

@@ -34,7 +34,7 @@ public class DeviceServiceTests
 		_devices = new InMemoryDeviceRepository();
 		_tokens = new InMemoryRefreshTokenRepository();
 		_time = new ManualTimeProvider();
-		_tracker = new DeviceConnectionTracker(new RecordingEventBus(), _time);
+		_tracker = new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
 		_transport = new RecordingUiTransport();
 		_mediator = new RecordingMediator();
 		_profileRegistry = new FakeProfileRegistry();

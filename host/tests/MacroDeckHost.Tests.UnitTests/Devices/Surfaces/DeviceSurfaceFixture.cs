@@ -103,8 +103,11 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 			new WidgetStateSubscriptionTracker(),
 			new LabelSubscriptionTracker(),
 			Time,
+			DeckClients,
 			Serilog.Core.Logger.None);
 	}
+
+	public MacroDeckHost.Application.Deck.DeckClientTracker DeckClients { get; } = new(Serilog.Core.Logger.None);
 
 	public ManualTimeProvider Time { get; }
 

@@ -36,7 +36,7 @@ public class PluginDeviceRegistryTests
 		_devices = new InMemoryDeviceRepository();
 		_tokens = new InMemoryRefreshTokenRepository();
 		_time = new ManualTimeProvider();
-		_tracker = new DeviceConnectionTracker(new RecordingEventBus(), _time);
+		_tracker = new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
 		_presence = new ProviderDevicePresenceTracker();
 		_profileRegistry = new FakeProfileRegistry();
 
@@ -153,7 +153,7 @@ public class PluginDeviceRegistryTests
 		// Everything the host holds in memory is gone; only the persisted devices survive.
 		var afterRestart = new PluginDeviceRegistry(_scopeFactory,
 			new ProviderDevicePresenceTracker(),
-			new DeviceConnectionTracker(new RecordingEventBus(), _time),
+			new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None)),
 			new LayoutRegistry(new RecordingMediator()),
 			_time);
 

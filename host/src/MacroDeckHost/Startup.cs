@@ -685,6 +685,7 @@ public class Startup
 		services.AddSingleton<IIntegrationHostIssueStore, IntegrationHostIssueStore>();
 		services.AddSingleton<IVariablePollingInvalidationSignal, VariablePollingInvalidationSignal>();
 		services.AddSingleton<IVariableRefreshSignal, VariableRefreshSignal>();
+		services.AddSingleton<DeckClientTracker>();
 		services.AddSingleton<IDeckNavigator, DeckNavigator>();
 		services.AddSingleton<IDeviceDeckNavigator>(sp => (DeckNavigator)sp.GetRequiredService<IDeckNavigator>());
 		services.AddSingleton<IApplicationFocusCoordinator, ApplicationFocusCoordinator>();

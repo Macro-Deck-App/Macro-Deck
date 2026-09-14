@@ -43,7 +43,7 @@ public class AuthServiceTests
 		var readiness = new StartupReadiness();
 		readiness.MarkCachesReady();
 		readiness.MarkVariablesReady();
-		_connections = new DeviceConnectionTracker(new RecordingEventBus(), _time);
+		_connections = new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
 		_cutoff = new AccessTokenCutoff();
 		_service = new AuthService(_users,
 			_tokens,

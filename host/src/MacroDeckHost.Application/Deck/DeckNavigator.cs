@@ -13,6 +13,7 @@ public sealed class DeckNavigator : IDeckNavigator, IDeviceDeckNavigator
 	private readonly IFolderCache _folderCache;
 	private readonly IProfileCache _profileCache;
 	private readonly IProfileRegistry _profileRegistry;
+	private readonly DeckClientTracker _clients;
 
 	// Resolved lazily: the surface service reports folder changes through the focus coordinator, which
 	// navigates through this navigator, so the two cannot be constructed as a straight dependency.
@@ -23,13 +24,21 @@ public sealed class DeckNavigator : IDeckNavigator, IDeviceDeckNavigator
 		IFolderCache folderCache,
 		IProfileCache profileCache,
 		IProfileRegistry profileRegistry,
-		Func<IDeviceSurfaceService> deviceSurfaces)
+		Func<IDeviceSurfaceService> deviceSurfaces,
+		DeckClientTracker clients)
 	{
 		_transport = transport;
 		_folderCache = folderCache;
 		_profileCache = profileCache;
 		_profileRegistry = profileRegistry;
 		_deviceSurfaces = deviceSurfaces;
+		_clients = clients;
+	}
+
+	public event EventHandler<DeckClientChangedEventArgs>? ClientChanged
+	{
+		add => _clients.ClientChanged += value;
+		remove => _clients.ClientChanged -= value;
 	}
 
 	public Task ChangeFolderAsync(string folderId,
@@ -169,6 +178,8 @@ public sealed class DeckNavigator : IDeckNavigator, IDeviceDeckNavigator
 			.OrderBy(folder => folder.Label, StringComparer.OrdinalIgnoreCase)
 			.ToList();
 	}
+
+	public IReadOnlyList<DeckClient> GetClients() => _clients.Snapshot();
 
 	public IReadOnlyList<DeckProfile> GetProfiles()
 		=> _profileRegistry.GetProfiles()

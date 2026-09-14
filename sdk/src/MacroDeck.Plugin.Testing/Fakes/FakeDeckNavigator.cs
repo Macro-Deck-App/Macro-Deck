@@ -37,8 +37,9 @@ public sealed record DeckNavigationCall
 /// <summary>
 /// In-memory <see cref="IDeckNavigator" />. The four navigation methods never fail - they just record
 /// what was asked for, in <see cref="Calls" /> - since there is no real deck here that could refuse.
-/// <see cref="GetFolders" /> and <see cref="GetProfiles" /> return whatever <see cref="SeedFolders" />
-/// and <see cref="SeedProfiles" /> last set, empty until then.
+/// <see cref="GetFolders" />, <see cref="GetProfiles" /> and <see cref="GetClients" /> return whatever
+/// <see cref="SeedFolders" />, <see cref="SeedProfiles" /> and <see cref="SeedClients" /> last set, empty until
+/// then; <see cref="RaiseClientChanged" /> moves a client and raises <see cref="ClientChanged" />.
 /// </summary>
 public sealed class FakeDeckNavigator : IDeckNavigator
 {
@@ -46,6 +47,10 @@ public sealed class FakeDeckNavigator : IDeckNavigator
 	private readonly List<DeckNavigationCall> _calls = [];
 	private IReadOnlyList<DeckFolder> _folders = [];
 	private IReadOnlyList<DeckProfile> _profiles = [];
+	private IReadOnlyList<DeckClient> _clients = [];
+
+	/// <inheritdoc />
+	public event EventHandler<DeckClientChangedEventArgs>? ClientChanged;
 
 	/// <summary>Every navigation call recorded so far, in call order.</summary>
 	public IReadOnlyList<DeckNavigationCall> Calls
@@ -75,6 +80,30 @@ public sealed class FakeDeckNavigator : IDeckNavigator
 		{
 			_profiles = [.. profiles];
 		}
+	}
+
+	/// <summary>Sets what <see cref="GetClients" /> returns, without raising <see cref="ClientChanged" />.</summary>
+	public void SeedClients(params DeckClient[] clients)
+	{
+		lock (_gate)
+		{
+			_clients = [.. clients];
+		}
+	}
+
+	/// <summary>
+	/// Puts <paramref name="client" /> into <see cref="GetClients" />, replacing the entry with the same
+	/// client id, then raises <see cref="ClientChanged" /> with the given previous position, the way the
+	/// host reports a client that was first seen (both <c>null</c>) or moved.
+	/// </summary>
+	public void RaiseClientChanged(DeckClient client, string? previousProfileId = null, string? previousFolderId = null)
+	{
+		lock (_gate)
+		{
+			_clients = [.. _clients.Where(existing => existing.ClientId != client.ClientId), client];
+		}
+
+		ClientChanged?.Invoke(this, new DeckClientChangedEventArgs(client, previousProfileId, previousFolderId));
 	}
 
 	/// <inheritdoc />
@@ -124,6 +153,15 @@ public sealed class FakeDeckNavigator : IDeckNavigator
 		lock (_gate)
 		{
 			return _profiles;
+		}
+	}
+
+	/// <inheritdoc />
+	public IReadOnlyList<DeckClient> GetClients()
+	{
+		lock (_gate)
+		{
+			return _clients;
 		}
 	}
 

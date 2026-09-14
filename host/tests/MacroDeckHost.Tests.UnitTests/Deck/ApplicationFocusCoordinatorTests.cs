@@ -35,7 +35,7 @@ public class ApplicationFocusCoordinatorTests
 		await _profileCache.InitializeCache();
 		_folderCache = new FolderCache(_profileCache);
 		_time = new ManualTimeProvider();
-		_tracker = new DeviceConnectionTracker(new RecordingEventBus(), _time);
+		_tracker = new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
 		_navigator = new RecordingDeviceDeckNavigator();
 		_logSink = new RecordingLogSink();
 		_providerPresence = new ProviderDevicePresenceTracker();

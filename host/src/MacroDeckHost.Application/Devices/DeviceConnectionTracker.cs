@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Triggers.Providers;
 
@@ -24,13 +25,15 @@ public sealed class DeviceConnectionTracker
 
 	private readonly IEventBus _bus;
 	private readonly TimeProvider _timeProvider;
+	private readonly DeckClientTracker _deckClients;
 
 	private volatile IReadOnlyDictionary<Guid, string> _deviceNames = new Dictionary<Guid, string>();
 
-	public DeviceConnectionTracker(IEventBus bus, TimeProvider timeProvider)
+	public DeviceConnectionTracker(IEventBus bus, TimeProvider timeProvider, DeckClientTracker deckClients)
 	{
 		_bus = bus;
 		_timeProvider = timeProvider;
+		_deckClients = deckClients;
 	}
 
 	public void Attach(string connectionId, Guid? deviceId, Action abort)
@@ -134,6 +137,7 @@ public sealed class DeviceConnectionTracker
 		foreach (var (deviceId, clientId) in due)
 		{
 			Publish(EventIds.ClientDisconnected, deviceId, clientId);
+			RemoveDeckClient(deviceId, clientId);
 		}
 	}
 
@@ -230,6 +234,16 @@ public sealed class DeviceConnectionTracker
 		{
 			_deviceNames = new Dictionary<Guid, string>(_deviceNames) { [deviceId] = name };
 		}
+	}
+
+	private void RemoveDeckClient(Guid? deviceId, string? clientId)
+	{
+		var change = deviceId is { } id
+			? _deckClients.RemoveDevice(id)
+			: string.IsNullOrEmpty(clientId)
+				? null
+				: _deckClients.Remove(clientId);
+		_deckClients.Publish(change);
 	}
 
 	private ConnectionEntry GetOrAdd(string connectionId)

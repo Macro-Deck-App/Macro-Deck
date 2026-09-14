@@ -26,7 +26,7 @@ public class HostStatePusherEventBindingTests
 		_registry = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
 		_connection = new FakePluginConnection();
 		_tracker = new CapturingTracker();
-		_pusher = new HostStatePusher(_registry, new FakeDeckNavigator(), new FakeScriptApi(), new FakeWidgetApi(), _tracker);
+		_pusher = new HostStatePusher(_registry, new FakeDeckNavigator(), new FakeScriptApi(), new FakeWidgetApi(), _tracker, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), Serilog.Core.Logger.None);
 
 		await _registry.Create(new PluginSessionRecord
 		{

@@ -41,7 +41,7 @@ public class PluginWebSocketEndpointDispatchTests
 		var invoker = new FakePluginCapabilityInvoker();
 		var throttle = new LoginThrottle(TimeProvider.System);
 		var statePusher
-			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker());
+			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), Serilog.Core.Logger.None);
 		var endpoint = new PluginWebSocketEndpoint(registry,
 			invoker,
 			new FakeRemotePluginIntegrationRegistrar(),
@@ -74,7 +74,7 @@ public class PluginWebSocketEndpointDispatchTests
 		var snapshotStore = new InMemorySnapshotStore();
 		var throttle = new LoginThrottle(TimeProvider.System);
 		var statePusher
-			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker());
+			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), Serilog.Core.Logger.None);
 		var endpoint = new PluginWebSocketEndpoint(registry,
 			invoker,
 			registrar,
@@ -611,7 +611,7 @@ public class PluginWebSocketEndpointDispatchTests
 		var invoker = new FakePluginCapabilityInvoker();
 		var throttle = new LoginThrottle(TimeProvider.System);
 		var statePusher
-			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker());
+			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), Serilog.Core.Logger.None);
 
 		var sink = new CapturingLogSink();
 		var capturingLogger = new LoggerConfiguration().MinimumLevel.Is(minimumLevel).WriteTo.Sink(sink).CreateLogger();
