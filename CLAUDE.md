@@ -102,8 +102,9 @@ behaviour, never a restatement of the signature.
 
 ## Documentation
 
-`docs/` is the published Astro/Starlight developer site: public plugin, SDK, protocol, and
-compatibility documentation only, no standalone internal files. `engineering/` is internal
+`docs/` is the published Astro/Starlight site: a user guide under `guide/` for people using Macro
+Deck, and public plugin, SDK, protocol, and compatibility documentation for developers. No
+standalone internal files. `engineering/` is internal
 architecture, workflow, and ADRs. ADRs use
 [`0000-template.md`](engineering/decisions/0000-template.md) and exist only for project-wide
 decisions that are costly to reverse.
@@ -111,8 +112,15 @@ decisions that are costly to reverse.
 Link to code, config, or schemas instead of restating them: if a document would have to change
 whenever an implementation detail or CI job name changes, reference the source instead.
 
-Update documentation only for a change to a public developer contract, the security/trust model, a
-contributor workflow, a release operation, or an architecture decision.
+Update developer documentation only for a change to a public developer contract, the security/trust
+model, a contributor workflow, a release operation, or an architecture decision.
+
+Keep the user guide (`docs/src/content/docs/guide/`) current in the same change: when you change
+something a user sees or does (installation and packages, supported platforms and devices, settings
+and their labels, setup steps, limitations, troubleshooting symptoms), update the affected guide pages
+and, if the UI changed visibly, their screenshots under `docs/src/assets/guide/`. Take screenshots
+from a disposable instance as described in
+[`docs/README.md`](docs/README.md#user-guide-screenshots).
 
 Package-local `README.md` files are NuGet `PackageReadmeFile` assets. Do not remove, rename, merge,
 or move them during documentation cleanup unless you update package metadata and verify the
