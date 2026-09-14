@@ -11,6 +11,8 @@ public sealed class DeviceEnrollmentStore : IDeviceEnrollmentStore
 
 	public bool TryConsume(string tokenHash, out DateTime expiresAt) => _tokens.TryRemove(tokenHash, out expiresAt);
 
+	public void Clear() => _tokens.Clear();
+
 	public void PurgeExpired(DateTime now)
 	{
 		foreach (var (hash, expiresAt) in _tokens)

@@ -86,6 +86,26 @@ describe('validateActionFlows legacy Widget font sizes', () => {
   });
 });
 
+describe('validateActionFlows number bounds', () => {
+  function numberFlow(value: number, min: number | null, max: number | null): ActionFlow {
+    return flow(block({
+      blockType: 'app.macro-deck.mouse.click',
+      parameters: [{ name: 'x', type: 'number', label: 'X', value, min, max }],
+    }));
+  }
+
+  it('accepts negative and positive values when the host sends no bounds as null', () => {
+    expect(validateActionFlows([numberFlow(-1080, null, null)]).valid).toBeTrue();
+    expect(validateActionFlows([numberFlow(500, null, null)]).valid).toBeTrue();
+  });
+
+  it('still enforces a declared bound, including zero', () => {
+    expect(validateActionFlows([numberFlow(0, 1, 10_000)]).errors[0].message).toBe('X must be at least 1');
+    expect(validateActionFlows([numberFlow(-1, 0, null)]).errors[0].message).toBe('X must be at least 0');
+    expect(validateActionFlows([numberFlow(10_001, 1, 10_000)]).errors[0].message).toBe('X must be at most 10000');
+  });
+});
+
 describe('validateActionFlows for a widget target', () => {
   function widgetAction(value: string): ActionFlow {
     return flow(block({

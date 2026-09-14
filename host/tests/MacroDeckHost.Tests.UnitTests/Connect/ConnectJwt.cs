@@ -10,17 +10,16 @@ internal static class ConnectJwt
 		string subject,
 		string? name = "Ada Lovelace",
 		string? picture = null,
-		string? creatorUsername = null,
-		IReadOnlyList<string>? roles = null,
+		string? preferredUsername = null,
 		string? nonce = null,
 		DateTimeOffset? expires = null,
 		string issuer = ConnectEndpoints.Issuer,
-		string audience = ConnectEndpoints.ClientId)
+		string[]? audiences = null)
 	{
 		var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
 		{
 			["iss"] = issuer,
-			["aud"] = audience,
+			["aud"] = audiences ?? [ConnectEndpoints.ClientId],
 			["sub"] = subject,
 			["exp"] = (expires ?? DateTimeOffset.UtcNow.AddYears(10)).ToUnixTimeSeconds()
 		};
@@ -35,18 +34,9 @@ internal static class ConnectJwt
 			payload["picture"] = picture;
 		}
 
-		if (creatorUsername is not null)
+		if (preferredUsername is not null)
 		{
-			payload["macrodeck:creator-username"] = creatorUsername;
-		}
-
-		if (roles is { Count: 1 })
-		{
-			payload["role"] = roles[0];
-		}
-		else if (roles is { Count: > 1 })
-		{
-			payload["role"] = roles;
+			payload["preferred_username"] = preferredUsername;
 		}
 
 		if (nonce is not null)

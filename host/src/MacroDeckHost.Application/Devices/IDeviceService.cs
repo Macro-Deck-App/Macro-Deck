@@ -22,6 +22,8 @@ public interface IDeviceService
 
 	Task<Result<DeviceError>> LogoutDevice(Guid id);
 
+	Task EndAllSessions();
+
 	Task<Result<DeviceError>> RemoveDevice(Guid id);
 
 	Task<Result<DeviceEntity, DeviceError>> SetStartupProfile(Guid id, string? profileId);

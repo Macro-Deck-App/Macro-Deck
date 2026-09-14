@@ -15,6 +15,7 @@ import {
   CancelRestoreResponse,
   ChangePasswordRequest,
   ChangeUsernameRequest,
+  ResetPasswordRequest,
   CloneSecretResponse,
   CommitRestoreRequest,
   CommitRestoreResponse,
@@ -709,6 +710,10 @@ export class ApiService {
 
   changeUsername(request: ChangeUsernameRequest): Promise<void> {
     return this.http('POST', '/api/auth/change-username', request);
+  }
+
+  resetPassword(request: ResetPasswordRequest): Promise<void> {
+    return this.http('POST', '/api/auth/reset-password', request);
   }
 
   // Devices (issue #250, admin-only)

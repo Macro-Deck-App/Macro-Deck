@@ -456,6 +456,9 @@
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Variables del widget</value>
   </data>
+  <data name="Auth.ForgotPasswordHint" xml:space="preserve">
+    <value>¿Olvidaste tu contraseña? Restablécela en el ordenador donde se ejecuta Macro Deck, en Configuración &gt; Seguridad.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Contraseña</value>
   </data>
@@ -13283,6 +13286,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Settings.Security.PasswordsMismatch" xml:space="preserve">
     <value>Las contraseñas no coinciden.</value>
+  </data>
+  <data name="Settings.Security.ResetPasswordAction" xml:space="preserve">
+    <value>Restablecer contraseña</value>
+  </data>
+  <data name="Settings.Security.ResetPasswordDescription" xml:space="preserve">
+    <value>Estás en el ordenador donde se ejecuta Macro Deck, así que puedes establecer una nueva contraseña sin la actual. Esto cierra todas las sesiones remotas.</value>
   </data>
   <data name="Settings.Security.SignOutAction" xml:space="preserve">
     <value>Cerrar sesión</value>

@@ -21,8 +21,8 @@ internal sealed class FakeConnectSessionService : IConnectSessionService
 		StartSignInCount++;
 		SessionChanged?.Invoke(this, Current);
 
-		return Task.FromResult(new ConnectSignInStart(new Uri("https://accounts.macro-deck.app/device"),
-			new Uri("https://accounts.macro-deck.app/device?user_code=1234-5678"),
+		return Task.FromResult(new ConnectSignInStart(new Uri("https://auth.macro-deck.app/device"),
+			new Uri("https://auth.macro-deck.app/device?user_code=1234-5678"),
 			"1234-5678",
 			DateTimeOffset.UnixEpoch));
 	}
@@ -41,4 +41,18 @@ internal sealed class FakeConnectSessionService : IConnectSessionService
 
 	public Task<string> GetAccessToken(CancellationToken cancellationToken = default)
 		=> Task.FromResult("access-token");
+
+	public void Publish(ConnectSessionSnapshot snapshot)
+	{
+		Current = snapshot;
+		SessionChanged?.Invoke(this, snapshot);
+	}
+
+	public static ConnectSessionSnapshot SignedIn(string? pictureUrl, string subject = "sub-1")
+		=> new(ConnectAccountStatus.SignedIn,
+			ConnectConnectivity.Ok,
+			new ConnectAccount(subject, "Ada Lovelace", pictureUrl, null, []),
+			null,
+			null,
+			null);
 }

@@ -1,4 +1,4 @@
-# ADR 0085: The host proves its identity to the companion app
+# ADR 0086: The host proves its identity to the companion app
 
 Status: Accepted
 

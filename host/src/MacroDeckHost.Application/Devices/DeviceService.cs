@@ -274,6 +274,21 @@ public class DeviceService : IDeviceService
 		return Result.Ok<DeviceError>();
 	}
 
+	public async Task EndAllSessions()
+	{
+		foreach (var device in await _deviceRepository.GetAll())
+		{
+			if (device.IsProviderDevice)
+			{
+				continue;
+			}
+
+			await _uiTransport.SendToGroup(UiDeviceGroups.For(device.Id), new DeviceSessionRevokedEvent());
+			_connectionTracker.AbortDevice(device.Id);
+			await _mediator.Publish(new DeviceChangedNotification(device.Id));
+		}
+	}
+
 	public async Task<Result<DeviceError>> RemoveDevice(Guid id)
 	{
 		var device = await _deviceRepository.GetById(id);

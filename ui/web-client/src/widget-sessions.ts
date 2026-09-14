@@ -14,11 +14,16 @@ interface OpenResponse {
 }
 
 export const WIDGET_SESSION_MEMO_CAPACITY = 120;
+const MAX_REOPENS_WITHOUT_A_TREE = 3;
+
+type HandshakeOutcome = 'live' | 'refused' | 'ended';
 
 export class WidgetSessions {
   private readonly sessionByWidget: { [widgetId: string]: string } = {};
   private readonly widgetBySession: { [sessionId: string]: string } = {};
   private readonly opening: { [widgetId: string]: true } = {};
+  private readonly wanted: { [widgetId: string]: true } = {};
+  private readonly reopens: { [widgetId: string]: number } = {};
 
   private readonly lastTree: { [widgetId: string]: UiNode } = {};
   private readonly memoOrder: string[] = [];
@@ -26,7 +31,13 @@ export class WidgetSessions {
   constructor(
     private readonly connection: SessionOpener,
     private readonly sessions: UiSessionStore,
-  ) {}
+  ) {
+    this.sessions.onChange(sessionId => {
+      if (sessionId === null || !this.sessions.has(sessionId)) return;
+      const widgetId = this.widgetBySession[sessionId];
+      if (widgetId !== undefined) delete this.reopens[widgetId];
+    });
+  }
 
   treeFor(widgetId: string): UiNode | undefined {
     const sessionId = this.sessionByWidget[widgetId];
@@ -56,12 +67,14 @@ export class WidgetSessions {
   }
 
   sync(widgets: readonly GridWidget[]): void {
-    const wanted: { [widgetId: string]: true } = {};
-    for (let index = 0; index < widgets.length; index++) wanted[widgets[index].id] = true;
+    for (const widgetId in this.wanted) {
+      if (Object.prototype.hasOwnProperty.call(this.wanted, widgetId)) delete this.wanted[widgetId];
+    }
+    for (let index = 0; index < widgets.length; index++) this.wanted[widgets[index].id] = true;
 
     for (const widgetId in this.sessionByWidget) {
       if (!Object.prototype.hasOwnProperty.call(this.sessionByWidget, widgetId)) continue;
-      if (wanted[widgetId]) continue;
+      if (this.wanted[widgetId]) continue;
       this.close(widgetId);
     }
 
@@ -76,6 +89,7 @@ export class WidgetSessions {
     for (const widgetId in this.sessionByWidget) {
       if (Object.prototype.hasOwnProperty.call(this.sessionByWidget, widgetId)) {
         delete this.sessionByWidget[widgetId];
+        delete this.reopens[widgetId];
       }
     }
     for (const sessionId in this.widgetBySession) {
@@ -102,23 +116,58 @@ export class WidgetSessions {
   private async open(widget: GridWidget): Promise<void> {
     this.opening[widget.id] = true;
     try {
-      const response = await this.connection.request<OpenResponse>(
-        'OpenWidgetUiSession', args({ widgetId: widget.id }));
-      if (!response || response.accepted !== true || typeof response.sessionId !== 'string') return;
-
-      // Opening a session does not subscribe to it. Until it is attached the host pushes nothing at
-      // all, which is a widget that renders perfectly and shows nothing.
-      const attached = await this.connection.request<OpenResponse>(
-        'AttachUiSession', args({ sessionId: response.sessionId }));
-      if (!attached || attached.accepted !== true) return;
-
-      this.sessionByWidget[widget.id] = response.sessionId;
-      this.widgetBySession[response.sessionId] = widget.id;
-    } catch {
-      // A refused or dropped session leaves the tile empty; the next deck change asks again.
+      while (await this.handshake(widget) === 'ended' && this.wanted[widget.id]) {
+        const reopens = (this.reopens[widget.id] ?? 0) + 1;
+        if (reopens > MAX_REOPENS_WITHOUT_A_TREE) return;
+        this.reopens[widget.id] = reopens;
+      }
     } finally {
       delete this.opening[widget.id];
     }
+  }
+
+  // The host tells only attached connections when a session ends, so a session that dies between
+  // the open and the attach shows up as a refused attach, or as ids that vanished under this handshake.
+  private async handshake(widget: GridWidget): Promise<HandshakeOutcome> {
+    let response: OpenResponse | undefined;
+    try {
+      response = await this.connection.request<OpenResponse>(
+        'OpenWidgetUiSession', args({ widgetId: widget.id }));
+    } catch {
+      return 'refused';
+    }
+    if (!response || response.accepted !== true || typeof response.sessionId !== 'string') return 'refused';
+
+    const sessionId = response.sessionId;
+    this.sessionByWidget[widget.id] = sessionId;
+    this.widgetBySession[sessionId] = widget.id;
+    if (!this.wanted[widget.id]) {
+      this.close(widget.id);
+      return 'refused';
+    }
+
+    // Opening a session does not subscribe to it. Until it is attached the host pushes nothing at
+    // all, which is a widget that renders perfectly and shows nothing.
+    let attached: OpenResponse | undefined;
+    try {
+      attached = await this.connection.request<OpenResponse>(
+        'AttachUiSession', args({ sessionId }));
+    } catch {
+      this.forget(widget.id, sessionId);
+      return 'refused';
+    }
+
+    if (this.widgetBySession[sessionId] !== widget.id) return 'ended';
+    if (!attached || attached.accepted !== true) {
+      this.forget(widget.id, sessionId);
+      return 'ended';
+    }
+    return 'live';
+  }
+
+  private forget(widgetId: string, sessionId: string): void {
+    if (this.widgetBySession[sessionId] === widgetId) delete this.widgetBySession[sessionId];
+    if (this.sessionByWidget[widgetId] === sessionId) delete this.sessionByWidget[widgetId];
   }
 
   private remember(widgetId: string, tree: UiNode): void {
@@ -147,6 +196,7 @@ export class WidgetSessions {
   private close(widgetId: string): void {
     const sessionId = this.sessionByWidget[widgetId];
     delete this.sessionByWidget[widgetId];
+    delete this.reopens[widgetId];
     if (sessionId === undefined) return;
     delete this.widgetBySession[sessionId];
     this.sessions.invalidated(sessionId);

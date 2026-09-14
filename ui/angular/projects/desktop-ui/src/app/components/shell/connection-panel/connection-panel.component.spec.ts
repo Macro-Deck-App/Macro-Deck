@@ -2,8 +2,9 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ConnectionEndpoint, GetConnectionInfoResponse } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
-import { ConnectionPanelComponent } from './connection-panel.component';
+import { ConnectionPanelComponent, encodeConnectLink } from './connection-panel.component';
 import { EMPTY } from 'rxjs';
+import { create } from 'qrcode';
 
 describe('ConnectionPanelComponent', () => {
   let fixture: ComponentFixture<ConnectionPanelComponent>;
@@ -224,21 +225,61 @@ describe('ConnectionPanelComponent', () => {
     expect(openSpy).toHaveBeenCalledWith('https://192.168.1.10:8194', '_blank', 'noopener,noreferrer');
   });
 
-  it('encodes every endpoint with its own ssl flag in the connect payload', async () => {
-    const panel = TestBed.createComponent(ConnectionPanelComponent);
-    api.getConnectionInfo.and.resolveTo({ ...info, endpoints: [https, http] });
-    panel.componentRef.setInput('isOpen', true);
-    panel.detectChanges();
-    await panel.whenStable();
-
-    const url = panel.componentInstance['buildConnectUrl']({ ...info, endpoints: [https, http] }, '');
-    const payload = JSON.parse(atob(url.replace('https://connect.macro-deck.app/', ''))) as {
-      payloadVersion: number;
-      endpoints: ConnectionEndpoint[];
+  describe('connect link v3', () => {
+    const prefix = 'https://connect.macro-deck.app/';
+    const referenceHost: GetConnectionInfoResponse = {
+      ...info,
+      instanceName: 'Companion test host',
+      endpoints: [http, https],
     };
 
-    expect(payload.payloadVersion).toBe(2);
-    expect(payload.endpoints).toEqual([https, http]);
+    function linkBytes(url: string): number[] {
+      const digits = url.slice(prefix.length);
+      const bytes: number[] = [];
+      for (let i = 0; i < digits.length; i += 5) {
+        const value = Number(digits.slice(i, i + 5));
+        bytes.push(...(digits.length - i === 3 ? [value] : [value >> 8, value & 0xff]));
+      }
+      return bytes;
+    }
+
+    it('matches the conformance vector in engineering/api/connect-link.md', () => {
+      expect(encodeConnectLink(referenceHost, '482915')).toBe(prefix +
+        '00787172632801624942269912819229797295560829628531296980019243009025920025600192430090259200513015881438614641053');
+    });
+
+    it('fits a far smaller QR code than the version 2 link did', () => {
+      expect(create(encodeConnectLink(referenceHost, '482915'), { errorCorrectionLevel: 'L' }).version)
+        .toBeLessThanOrEqual(5);
+    });
+
+    it('writes hostnames as text and skips addresses it cannot describe, with an empty token', () => {
+      const link = encodeConnectLink({
+        ...info,
+        instanceName: 'H',
+        endpoints: [
+          { address: 'fe80::1', port: 8193, ssl: false },
+          { address: 'deck.local', port: 8194, ssl: true },
+          { address: '300.1.1.1', port: 8193, ssl: false },
+          { address: 'a'.repeat(256), port: 8193, ssl: false },
+        ],
+      }, '');
+
+      expect(link).toMatch(/^https:\/\/connect\.macro-deck\.app\/\d+$/);
+      expect(linkBytes(link)).toEqual([
+        3, 1, 0x48, 1,
+        2, 10, ...Array.from('deck.local', (c) => c.charCodeAt(0)), 0x20, 0x02, 1,
+        0,
+      ]);
+    });
+
+    it('cuts an overlong instance name on a character boundary', () => {
+      const bytes = linkBytes(encodeConnectLink({ ...info, instanceName: 'ü'.repeat(200), endpoints: [] }, ''));
+
+      expect(bytes[1]).toBe(254);
+      expect(new TextDecoder('utf-8', { fatal: true }).decode(new Uint8Array(bytes.slice(2, 2 + bytes[1]))))
+        .toBe('ü'.repeat(127));
+    });
   });
   it('puts the code minted on open into the connect payload and shows it grouped', async () => {
     const buildConnectUrl = spyOn(
@@ -330,23 +371,5 @@ describe('ConnectionPanelComponent', () => {
 
     expect(element.querySelector('.cp-identity .cp-fingerprint')).toBeNull();
     expect(element.querySelector('.cp-identity .cp-muted')).not.toBeNull();
-  });
-
-  function connectPayload(overrides: Partial<GetConnectionInfoResponse>): Record<string, unknown> {
-    const url = fixture.componentInstance['buildConnectUrl']({ ...info, ...overrides }, '482915');
-    return JSON.parse(atob(url.replace('https://connect.macro-deck.app/', ''))) as Record<string, unknown>;
-  }
-
-  it('carries the compact host key fingerprint in the connect payload', () => {
-    const payload = connectPayload({ identityFingerprint: '3208 E004 6ED3 EE6B 4E75 1027' });
-
-    expect(payload['fingerprint']).toBe('3208E0046ED3EE6B4E751027');
-    expect(payload['payloadVersion']).toBe(2);
-  });
-
-  it('leaves the fingerprint out of the connect payload while the identity key is unavailable', () => {
-    const payload = connectPayload({ identityFingerprint: null });
-
-    expect('fingerprint' in payload).toBeFalse();
   });
 });

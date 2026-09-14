@@ -8,6 +8,7 @@ using MacroDeckHost.Application.Connect;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Secrets;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.Backups;
 using MacroDeckHost.Infrastructure.Backups.Restore;
@@ -89,6 +90,25 @@ public class ConnectCredentialIsolationTests
 		});
 	}
 
+	[TestCase("")]
+	[TestCase("https://accounts.macro-deck.app/")]
+	public async Task A_credential_from_the_previous_identity_provider_is_dropped_on_load(string storedIssuer)
+	{
+		await _store.Save(new ConnectCredential(Marker(), "sub-1", "Ada", null, DateTimeOffset.UnixEpoch));
+
+		using (var scope = _provider.CreateScope())
+		{
+			await scope.ServiceProvider.GetRequiredService<IAppPreferenceRepository>()
+				.SetValue(AppPreferenceService.ConnectCredentialIssuerKey, storedIssuer);
+		}
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(await _store.Load(), Is.Null);
+			Assert.That(ConnectSecretRows(), Is.Zero, "the old refresh token was kept");
+		});
+	}
+
 	[Test]
 	public async Task A_backup_archive_carries_no_connect_credential()
 	{
@@ -99,6 +119,14 @@ public class ConnectCredentialIsolationTests
 		var source = new BackupSnapshotSource(_paths);
 		var snapshot = Path.Combine(_dataDir, "snapshot.db");
 		await source.CopyDatabase(snapshot);
+
+		using (var copy = new SqliteConnection($"Data Source={snapshot};Pooling=False"))
+		{
+			copy.Open();
+			using var mode = copy.CreateCommand();
+			mode.CommandText = "PRAGMA journal_mode;";
+			Assert.That(mode.ExecuteScalar(), Is.EqualTo("delete"), "the snapshot kept the live WAL journal");
+		}
 
 		using var destination = new MemoryStream();
 		await new BackupArchiveWriter().Write(destination,
@@ -135,7 +163,13 @@ public class ConnectCredentialIsolationTests
 		await _store.Save(new ConnectCredential(Marker(), "sub-elsewhere", "Ada", null, DateTimeOffset.UnixEpoch));
 
 		var foreignDatabase = Path.Combine(_dataDir, "foreign.db");
-		File.Copy(_paths.DatabasePath, foreignDatabase);
+		using (var live = new SqliteConnection($"Data Source={_paths.DatabasePath};Pooling=False"))
+		{
+			live.Open();
+			using var copy = live.CreateCommand();
+			copy.CommandText = $"VACUUM INTO '{foreignDatabase.Replace("'", "''")}';";
+			copy.ExecuteNonQuery();
+		}
 
 		await _store.Clear();
 

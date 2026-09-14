@@ -347,6 +347,16 @@ describe('ParamRowComponent host-backed option labels', () => {
     expect(component.showsExternalVariablePicker).toBeFalse();
   });
 
+  it('shows a slider only for a number parameter with both bounds declared', () => {
+    const slider: ActionBlockParameter = { name: 'volume', type: 'number', label: 'Volume', value: 5, showSlider: true };
+
+    component.param = { ...slider, min: 0, max: 10 };
+    expect(component.hasSlider).toBeTrue();
+
+    component.param = { ...slider, min: null, max: null };
+    expect(component.hasSlider).toBeFalse();
+  });
+
   it('offers the reset sentinel for a colour parameter that supports reset', () => {
     component.param = { name: 'color', type: 'color', label: 'Color', value: '', supportsReset: true };
 

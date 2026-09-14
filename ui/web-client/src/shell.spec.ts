@@ -159,6 +159,14 @@ describe('Shell', () => {
     expect(root.querySelectorAll('input:not([type="password"])').length).toBe(1);
   });
 
+  it('tells someone who forgot the password where to reset it', () => {
+    mount();
+    client.app.set({ probed: true });
+
+    expect(root.querySelector('.wc-login-hint')?.textContent)
+      .toBe(text(ClientAppStrings.Auth.ForgotPasswordHint));
+  });
+
   it('does not leave a dialog standing over the screen that replaced it', () => {
     mount();
     client.app.set({ probed: true, authenticated: true, deckRendered: true });

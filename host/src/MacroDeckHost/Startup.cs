@@ -413,6 +413,7 @@ public class Startup
 
 		services.AddSingleton(TimeProvider.System);
 		services.AddSingleton<LoginThrottle>();
+		services.AddSingleton<AccessTokenCutoff>();
 		services.AddSingleton<FailedLoginNotificationTracker>();
 		services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
 		services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
@@ -604,6 +605,9 @@ public class Startup
 
 		services.AddHttpClient(ConnectIdentityClient.HttpClientName, client => { })
 			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15));
+		services.AddHttpClient(ConnectAvatarCache.HttpClientName)
+			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15))
+			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
 		services.AddSingleton<IConnectIdentityClient, ConnectIdentityClient>();
 		services.AddSingleton<IConnectCredentialStore, SecretServiceConnectCredentialStore>();
 		services.AddSingleton<IConnectSuspensionFloor, ConnectSuspensionFloor>();
@@ -838,7 +842,10 @@ public class Startup
 		// controller requires, needs no credentials, so without this exclusion any website the developer
 		// happens to have open could cross-origin read pending pairing requests - leaking plugin ids and
 		// executable paths - and POST an approval.
-		app.UseWhen(context => !ProtocolConstants.All.Any(path => context.Request.Path.StartsWithSegments(path)) &&
+		// The loopback listener grants trust without credentials, so it never answers with a CORS grant:
+		// the desktop UI is same-origin with it, and no other page may read or preflight it.
+		app.UseWhen(context => !LoopbackConnection.IsLoopbackListener(context) &&
+				!ProtocolConstants.All.Any(path => context.Request.Path.StartsWithSegments(path)) &&
 				!context.Request.Path.StartsWithSegments("/api/plugin-pairing") &&
 				// api/client-targets is excluded for exactly the reason api/plugin-pairing is: every
 				// action on it is gated on LoopbackConnection.IsTrusted and needs no credentials, so

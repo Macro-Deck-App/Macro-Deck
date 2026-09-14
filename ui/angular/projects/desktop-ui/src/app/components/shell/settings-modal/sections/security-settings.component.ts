@@ -59,6 +59,7 @@ export class SecuritySettingsComponent {
   private readonly settingsModal = inject(SettingsModalService);
 
   readonly currentUsername = this.auth.username;
+  readonly trusted = this.auth.trusted;
 
   readonly canSignOut = computed(() => this.auth.state() === 'authenticated' && !this.auth.trusted());
 
@@ -94,7 +95,7 @@ export class SecuritySettingsComponent {
     this.newUsername().trim().length > 0 && this.usernamePassword().length > 0 && !this.usernameSubmitting());
 
   readonly canSubmitPassword = computed(() =>
-    this.currentPassword().length > 0
+    (this.trusted() || this.currentPassword().length > 0)
     && this.newPassword().length >= MIN_PASSWORD_LENGTH
     && this.newPassword() === this.newPasswordConfirm()
     && !this.passwordSubmitting());
@@ -192,7 +193,9 @@ export class SecuritySettingsComponent {
     this.passwordError.set(null);
     this.passwordChanged.set(false);
     try {
-      const result = await this.auth.changePassword(this.currentPassword(), this.newPassword());
+      const result = this.trusted()
+        ? await this.auth.resetPassword(this.newPassword())
+        : await this.auth.changePassword(this.currentPassword(), this.newPassword());
       if (result.ok) {
         this.passwordChanged.set(true);
         this.currentPassword.set('');

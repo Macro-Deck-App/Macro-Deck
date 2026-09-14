@@ -42,6 +42,10 @@ export interface ChangeUsernameRequest {
   newUsername: string;
 }
 
+export interface ResetPasswordRequest {
+  newPassword: string;
+}
+
 export interface PairingCodeResponse {
   code: string;
   expiresAt: string;

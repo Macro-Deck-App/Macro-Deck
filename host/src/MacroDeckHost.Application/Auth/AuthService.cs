@@ -17,6 +17,7 @@ public class AuthService : IAuthService
 	private readonly IDeviceService _deviceService;
 	private readonly IDeviceEnrollmentStore _deviceEnrollments;
 	private readonly PairingCodeStore _pairingCodes;
+	private readonly AccessTokenCutoff _accessTokenCutoff;
 	private readonly IAppPreferenceService _appPreferences;
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger<AuthService> _logger;
@@ -29,6 +30,7 @@ public class AuthService : IAuthService
 		IDeviceService deviceService,
 		IDeviceEnrollmentStore deviceEnrollments,
 		PairingCodeStore pairingCodes,
+		AccessTokenCutoff accessTokenCutoff,
 		IAppPreferenceService appPreferences,
 		TimeProvider timeProvider,
 		ILogger<AuthService> logger)
@@ -40,6 +42,7 @@ public class AuthService : IAuthService
 		_deviceService = deviceService;
 		_deviceEnrollments = deviceEnrollments;
 		_pairingCodes = pairingCodes;
+		_accessTokenCutoff = accessTokenCutoff;
 		_appPreferences = appPreferences;
 		_timeProvider = timeProvider;
 		_logger = logger;
@@ -307,11 +310,31 @@ public class AuthService : IAuthService
 			return Result.Fail(AuthError.InvalidCredentials, "Current password is incorrect.");
 		}
 
+		await SetPassword(user, newPassword, UtcNow());
+
+		return Result.Ok<AuthError>();
+	}
+
+	public async Task<Result<AuthError>> ResetPassword(string newPassword)
+	{
+		if (newPassword.Length < AuthDefaults.MinPasswordLength)
+		{
+			return Result.Fail(AuthError.ValidationError,
+				$"Password must be at least {AuthDefaults.MinPasswordLength} characters long.");
+		}
+
+		var user = await _userRepository.GetSingle();
+		if (user is null)
+		{
+			return Result.Fail(AuthError.ValidationError, "No account exists yet.");
+		}
+
 		var now = UtcNow();
-		user.PasswordHash = _passwordHasher.Hash(newPassword);
-		user.UpdatedAt = now;
-		await _userRepository.Update(user);
-		await _refreshTokenRepository.RevokeAllForUser(user.Id, now);
+		_accessTokenCutoff.Set(now);
+		await SetPassword(user, newPassword, now);
+		_pairingCodes.Rotate(now);
+		_deviceEnrollments.Clear();
+		await _deviceService.EndAllSessions();
 
 		return Result.Ok<AuthError>();
 	}
@@ -337,6 +360,14 @@ public class AuthService : IAuthService
 		await _refreshTokenRepository.RevokeAllForUser(user.Id, now);
 
 		return Result.Ok<AuthError>();
+	}
+
+	private async Task SetPassword(UserEntity user, string newPassword, DateTime now)
+	{
+		user.PasswordHash = _passwordHasher.Hash(newPassword);
+		user.UpdatedAt = now;
+		await _userRepository.Update(user);
+		await _refreshTokenRepository.RevokeAllForUser(user.Id, now);
 	}
 
 	private async Task<(LoginResult Login, Guid RefreshTokenId)> IssueTokens(

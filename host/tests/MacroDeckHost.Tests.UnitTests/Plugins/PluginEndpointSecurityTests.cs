@@ -167,9 +167,6 @@ public class PluginEndpointSecurityTests
 			shape: FakeConnectionShape.Loopback,
 			extraHeaders: new Dictionary<string, string> { ["Origin"] = "https://evil.example" });
 
-		// A normal (non-plugin) admin route proves the permissive CORS policy is otherwise in force -
-		// the plugin path's absence of the header is a deliberate exclusion, not an accident of the
-		// test fixture.
 		var ordinaryResponse = await Send(HttpMethod.Get,
 			"/api/system/version",
 			shape: FakeConnectionShape.Loopback,
@@ -179,7 +176,7 @@ public class PluginEndpointSecurityTests
 		{
 			Assert.That(pluginResponse.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(pluginResponse.Headers.Contains("Access-Control-Allow-Origin"), Is.False);
-			Assert.That(ordinaryResponse.Headers.Contains("Access-Control-Allow-Origin"), Is.True);
+			Assert.That(ordinaryResponse.Headers.Contains("Access-Control-Allow-Origin"), Is.False);
 		});
 	}
 
@@ -204,9 +201,9 @@ public class PluginEndpointSecurityTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(pairingResponse.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(pairingResponse.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(pairingResponse.Headers.Contains("Access-Control-Allow-Origin"), Is.False);
-			Assert.That(ordinaryResponse.Headers.Contains("Access-Control-Allow-Origin"), Is.True);
+			Assert.That(ordinaryResponse.Headers.Contains("Access-Control-Allow-Origin"), Is.False);
 		});
 	}
 

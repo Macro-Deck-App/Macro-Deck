@@ -228,6 +228,15 @@ export class AuthService implements OnDestroy {
     }
   }
 
+  async resetPassword(newPassword: string): Promise<AuthResult> {
+    try {
+      await this.api.resetPassword({ newPassword });
+      return { ok: true };
+    } catch (err) {
+      return this.toAuthResult(err, this.localization.translateKey(AppStrings.Errors.Auth.ChangePasswordFailed));
+    }
+  }
+
   async changeUsername(currentPassword: string, newUsername: string): Promise<AuthResult> {
     try {
       await this.api.changeUsername({ currentPassword, newUsername });

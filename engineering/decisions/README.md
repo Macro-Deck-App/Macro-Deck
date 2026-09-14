@@ -24,6 +24,8 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0047 - Secrets at rest, encrypted backups, and a staged boot-time restore](0047-secrets-backups-and-restore.md)
 - [0054 - The Macro Deck Connect session is a host-owned refresh credential](0054-connect-session-is-a-host-owned-refresh-credential.md)
 - [0062 - UI realtime is a ticketed JSON WebSocket, and it never blocks on a provider](0062-ui-realtime-transport.md)
+- [0085 - The connect link is a binary record written as decimal digits](0085-compact-connect-link.md)
+- [0086 - The host proves its identity to the companion app](0086-host-identity-key.md)
 
 ## Decks, flows and content
 

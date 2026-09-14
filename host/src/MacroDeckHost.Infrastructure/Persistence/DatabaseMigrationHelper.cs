@@ -14,11 +14,29 @@ public static class DatabaseMigrationHelper
 		try
 		{
 			Migrate(paths.DatabasePath, paths.DatabaseMigrationsDirectory);
+			UseWriteAheadLog(paths.DatabasePath);
 		}
 		catch (Exception ex)
 		{
 			Log.Fatal(ex, "Database migration failed");
 			throw;
+		}
+	}
+
+	// WAL lets a commit proceed while other connections read; the mode persists in the file.
+	private static void UseWriteAheadLog(string databasePath)
+	{
+		using var connection = new SqliteConnection(new SqliteConnectionStringBuilder
+			{ DataSource = databasePath }.ToString());
+		connection.Open();
+
+		using var command = connection.CreateCommand();
+		command.CommandText = "PRAGMA journal_mode=WAL;";
+		var mode = command.ExecuteScalar() as string;
+
+		if (!string.Equals(mode, "wal", StringComparison.OrdinalIgnoreCase))
+		{
+			Log.Warning("The database could not switch to WAL and stays in journal mode {JournalMode}", mode);
 		}
 	}
 

@@ -7,13 +7,11 @@ public sealed record ConnectIdTokenClaims(
 	string Subject,
 	string DisplayName,
 	string? PictureUrl,
-	string? CreatorUsername,
-	IReadOnlyList<string> Roles);
+	string? CreatorUsername);
 
 public static class ConnectIdTokenReader
 {
-	private const string RoleClaim = "role";
-	private const string CreatorUsernameClaim = "macrodeck:creator-username";
+	private const string CreatorUsernameClaim = "preferred_username";
 
 	private static readonly TimeSpan _clockSkew = TimeSpan.FromMinutes(2);
 
@@ -67,12 +65,7 @@ public static class ConnectIdTokenReader
 		return new ConnectIdTokenClaims(token.Subject,
 			ReadClaim(token, "name") ?? token.Subject,
 			ReadClaim(token, "picture"),
-			ReadClaim(token, CreatorUsernameClaim),
-			[
-				.. token.Claims
-					.Where(claim => string.Equals(claim.Type, RoleClaim, StringComparison.Ordinal))
-					.Select(claim => claim.Value)
-			]);
+			ReadClaim(token, CreatorUsernameClaim));
 	}
 
 	private static bool IssuerMatches(string? issuer)

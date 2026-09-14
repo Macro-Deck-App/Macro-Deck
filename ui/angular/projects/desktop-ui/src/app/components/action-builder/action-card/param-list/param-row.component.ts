@@ -269,8 +269,8 @@ export class ParamRowComponent implements OnInit, OnChanges {
   get hasSlider(): boolean {
     return this.param.type === 'number'
       && !!this.param.showSlider
-      && this.param.min !== undefined
-      && this.param.max !== undefined;
+      && this.param.min != null
+      && this.param.max != null;
   }
 
   get isDynamic(): boolean {

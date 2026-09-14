@@ -56,6 +56,8 @@ public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
 
 public record ChangeUsernameRequest(string CurrentPassword, string NewUsername);
 
+public record ResetPasswordRequest(string NewPassword);
+
 [ApiController]
 [Route("api/auth")]
 public class AuthController : ControllerBase
@@ -350,6 +352,32 @@ public class AuthController : ControllerBase
 		if (!result.Success)
 		{
 			return AuthProblem(result.Error, result.ErrorMessage);
+		}
+
+		return NoContent();
+	}
+
+	[HttpPost("reset-password")]
+	[Authorize]
+	public async Task<IActionResult> ResetPassword(ResetPasswordRequest body)
+	{
+		// No current password is asked for, so only someone at this machine may do it: an admin token
+		// from the network is refused like setup is.
+		if (!LoopbackConnection.IsTrusted(HttpContext))
+		{
+			return Problem(statusCode: StatusCodes.Status403Forbidden,
+				title: "Password reset is only allowed from the desktop app.");
+		}
+
+		var result = await _authService.ResetPassword(body.NewPassword ?? string.Empty);
+		if (!result.Success)
+		{
+			return AuthProblem(result.Error, result.ErrorMessage);
+		}
+
+		if (await _authService.GetUsername() is { } username)
+		{
+			_loginThrottle.ClearUsername(username);
 		}
 
 		return NoContent();

@@ -456,6 +456,9 @@
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Variables du widget</value>
   </data>
+  <data name="Auth.ForgotPasswordHint" xml:space="preserve">
+    <value>Mot de passe oublié ? Réinitialise-le sur l'ordinateur où Macro Deck est lancé, dans Paramètres &gt; Sécurité.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Mot de passe</value>
   </data>
@@ -13283,6 +13286,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Settings.Security.PasswordsMismatch" xml:space="preserve">
     <value>Les mots de passe ne correspondent pas.</value>
+  </data>
+  <data name="Settings.Security.ResetPasswordAction" xml:space="preserve">
+    <value>Réinitialiser le mot de passe</value>
+  </data>
+  <data name="Settings.Security.ResetPasswordDescription" xml:space="preserve">
+    <value>Tu es sur l'ordinateur où Macro Deck est lancé, tu peux donc définir un nouveau mot de passe sans l'actuel. Toutes les sessions distantes seront déconnectées.</value>
   </data>
   <data name="Settings.Security.SignOutAction" xml:space="preserve">
     <value>Se déconnecter</value>

@@ -456,6 +456,9 @@
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Variabili del widget</value>
   </data>
+  <data name="Auth.ForgotPasswordHint" xml:space="preserve">
+    <value>Hai dimenticato la password? Reimpostala sul computer su cui è in esecuzione Macro Deck, in Impostazioni &gt; Sicurezza.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Password</value>
   </data>
@@ -13283,6 +13286,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Settings.Security.PasswordsMismatch" xml:space="preserve">
     <value>Le password non coincidono.</value>
+  </data>
+  <data name="Settings.Security.ResetPasswordAction" xml:space="preserve">
+    <value>Reimposta password</value>
+  </data>
+  <data name="Settings.Security.ResetPasswordDescription" xml:space="preserve">
+    <value>Sei sul computer su cui è in esecuzione Macro Deck, quindi puoi impostare una nuova password senza quella attuale. Tutte le sessioni remote verranno disconnesse.</value>
   </data>
   <data name="Settings.Security.SignOutAction" xml:space="preserve">
     <value>Disconnetti</value>

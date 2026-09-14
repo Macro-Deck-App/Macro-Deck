@@ -455,6 +455,9 @@
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Widget variables</value>
   </data>
+  <data name="Auth.ForgotPasswordHint" xml:space="preserve">
+    <value>Forgot your password? Reset it on the computer running Macro Deck, under Settings &gt; Security.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Password</value>
   </data>
@@ -13283,6 +13286,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Settings.Security.PasswordsMismatch" xml:space="preserve">
     <value>Passwords do not match.</value>
+  </data>
+  <data name="Settings.Security.ResetPasswordAction" xml:space="preserve">
+    <value>Reset password</value>
+  </data>
+  <data name="Settings.Security.ResetPasswordDescription" xml:space="preserve">
+    <value>You are on the computer running Macro Deck, so you can set a new password without the current one. This signs out every remote session.</value>
   </data>
   <data name="Settings.Security.SignOutAction" xml:space="preserve">
     <value>Sign out</value>

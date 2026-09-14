@@ -224,10 +224,10 @@ function parameterFormatError(param: ActionBlockParameter): string | null {
   }
 
   if (typeof value === 'number' && (param.type === 'number' || param.type === 'duration')) {
-    if (param.min !== undefined && value < param.min) {
+    if (param.min != null && value < param.min) {
       return `${param.label || param.name} must be at least ${param.min}`;
     }
-    if (param.max !== undefined && value > param.max) {
+    if (param.max != null && value > param.max) {
       return `${param.label || param.name} must be at most ${param.max}`;
     }
   }

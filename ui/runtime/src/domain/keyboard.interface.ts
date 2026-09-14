@@ -139,14 +139,7 @@ export function supportedKeyGroups(t: KeyboardTranslator): KeyGroup[] {
       { value: 'Backquote', label: '` Backquote' },
     ],
   },
-  {
-    label: t(G.Numpad),
-    keys: range([
-      'Numpad0', 'Numpad1', 'Numpad2', 'Numpad3', 'Numpad4',
-      'Numpad5', 'Numpad6', 'Numpad7', 'Numpad8', 'Numpad9',
-      'NumpadAdd', 'NumpadSubtract', 'NumpadMultiply', 'NumpadDivide', 'NumpadDecimal', 'NumpadEnter',
-    ]),
-  },
+  { label: t(G.Numpad), keys: range([...NUMPAD_KEY_NAMES]) },
   {
     label: t(G.Media),
     keys: [
@@ -162,6 +155,12 @@ export function supportedKeyGroups(t: KeyboardTranslator): KeyGroup[] {
   ];
 }
 
+const NUMPAD_KEY_NAMES = new Set([
+  'Numpad0', 'Numpad1', 'Numpad2', 'Numpad3', 'Numpad4',
+  'Numpad5', 'Numpad6', 'Numpad7', 'Numpad8', 'Numpad9',
+  'NumpadAdd', 'NumpadSubtract', 'NumpadMultiply', 'NumpadDivide', 'NumpadDecimal', 'NumpadEnter',
+]);
+
 const MEDIA_KEY_NAMES = new Set([
   'MediaPlayPause',
   'MediaStop',
@@ -176,6 +175,7 @@ export function keyFromEvent(event: KeyboardEvent): string {
   if (event.code === 'Space' || event.key === ' ') return 'Space';
   if (MEDIA_KEY_NAMES.has(event.code)) return event.code;
   if (MEDIA_KEY_NAMES.has(event.key)) return event.key;
+  if (NUMPAD_KEY_NAMES.has(event.code)) return event.code;
   if (event.key.length === 1) return event.key.toUpperCase();
   return event.key;
 }
