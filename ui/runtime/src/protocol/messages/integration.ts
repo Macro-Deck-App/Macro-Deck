@@ -109,3 +109,7 @@ export interface IntegrationIssuesChangedEvent {
   issueCount: number;
   severity: IntegrationIssueSeverity | null;
 }
+
+export interface IntegrationsChangedEvent {
+  integrationId: string;
+}

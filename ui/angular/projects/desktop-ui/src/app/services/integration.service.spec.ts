@@ -4,7 +4,7 @@ import { Observable, Subject } from 'rxjs';
 
 import { resolveLocalizedText } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
-import type { IntegrationIssuesChangedEvent, IpcIntegration } from '@macro-deck/runtime';
+import type { GetIntegrationsResponse, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegration } from '@macro-deck/runtime';
 import { IntegrationService } from './integration.service';
 
 describe('IntegrationService', () => {
@@ -171,3 +171,187 @@ function ipcIntegrationAsIntegration(dto: IpcIntegration) {
     providedCapabilities: dto.providedCapabilities ?? [],
   };
 }
+
+describe('IntegrationService catalogue refresh', () => {
+  let apiSpy: jasmine.SpyObj<ApiService>;
+  let issuesChanged: Subject<IntegrationIssuesChangedEvent>;
+  let integrationsChanged: Subject<IntegrationsChangedEvent>;
+  let service: IntegrationService;
+
+  const settle = () => new Promise(resolve => setTimeout(resolve));
+
+  function deferred<T>() {
+    let resolve!: (value: T) => void;
+    let reject!: (error: unknown) => void;
+    const promise = new Promise<T>((res, rej) => {
+      resolve = res;
+      reject = rej;
+    });
+    return { promise, resolve, reject };
+  }
+
+  function ipc(overrides: Partial<IpcIntegration> = {}): IpcIntegration {
+    return {
+      id: 'app.macro-deck.spotify',
+      name: 'Spotify',
+      version: '1.0.0',
+      isInternal: true,
+      enabled: true,
+      actionCount: 0,
+      variableCount: 0,
+      supportsConfigFlow: false,
+      allowsMultipleConfigurations: false,
+      configuredEntryCount: 0,
+      hasIcon: false,
+      issueCount: 0,
+      issueSeverity: null,
+      isInitialized: true,
+      variablesDependOnConfiguration: false,
+      ...overrides,
+    };
+  }
+
+  const response = (...integrations: IpcIntegration[]): GetIntegrationsResponse =>
+    ({ integrations }) as GetIntegrationsResponse;
+
+  beforeEach(() => {
+    issuesChanged = new Subject<IntegrationIssuesChangedEvent>();
+    integrationsChanged = new Subject<IntegrationsChangedEvent>();
+    apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['onNotification', 'getIntegrations']);
+    apiSpy.onNotification.and.callFake((name: string) => {
+      switch (name) {
+        case 'IntegrationIssuesChangedEvent':
+          return issuesChanged.asObservable() as Observable<never>;
+        case 'IntegrationsChangedEvent':
+          return integrationsChanged.asObservable() as Observable<never>;
+        default:
+          return new Subject<never>().asObservable();
+      }
+    });
+    spyOn(console, 'error');
+
+    TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: apiSpy }],
+    });
+    service = TestBed.inject(IntegrationService);
+  });
+
+  it('shows a plugin installed after the list was loaded', async () => {
+    apiSpy.getIntegrations.and.resolveTo(response(ipc()));
+    await service.loadIntegrations();
+
+    apiSpy.getIntegrations.and.resolveTo(response(ipc(), ipc({ id: 'com.example.repro', name: 'Repro', isInternal: false })));
+    integrationsChanged.next({ integrationId: 'com.example.repro' });
+    await settle();
+
+    expect(service.integrations().map(i => i.id)).toEqual(['app.macro-deck.spotify', 'com.example.repro']);
+  });
+
+  it('shows the new version and variable count after a plugin upgrade', async () => {
+    apiSpy.getIntegrations.and.resolveTo(response(ipc({ id: 'com.example.repro', version: '1.0.0', variableCount: 1 })));
+    await service.loadIntegrations();
+
+    apiSpy.getIntegrations.and.resolveTo(response(ipc({ id: 'com.example.repro', version: '1.0.1', variableCount: 2 })));
+    integrationsChanged.next({ integrationId: 'com.example.repro' });
+    await settle();
+
+    const repro = service.integrations().find(i => i.id === 'com.example.repro');
+    expect(repro?.version).toBe('1.0.1');
+    expect(repro?.variableCount).toBe(2);
+  });
+
+  it('refreshes without showing the loading state', async () => {
+    apiSpy.getIntegrations.and.resolveTo(response(ipc()));
+    await service.loadIntegrations();
+    const pending = deferred<GetIntegrationsResponse>();
+    apiSpy.getIntegrations.and.returnValue(pending.promise);
+
+    integrationsChanged.next({ integrationId: 'app.macro-deck.spotify' });
+    await settle();
+
+    expect(service.isLoading()).toBeFalse();
+    pending.resolve(response(ipc()));
+    await settle();
+  });
+
+  it('keeps the last good list when a refresh fails', async () => {
+    apiSpy.getIntegrations.and.resolveTo(response(ipc()));
+    await service.loadIntegrations();
+
+    apiSpy.getIntegrations.and.rejectWith(new Error('host restarting'));
+    integrationsChanged.next({ integrationId: 'app.macro-deck.spotify' });
+    await settle();
+
+    expect(service.integrations().map(i => i.id)).toEqual(['app.macro-deck.spotify']);
+    expect(service.loadError()).toBeNull();
+  });
+
+  it('applies the newer response when an older one resolves last', async () => {
+    const older = deferred<GetIntegrationsResponse>();
+    const newer = deferred<GetIntegrationsResponse>();
+    apiSpy.getIntegrations.and.returnValues(older.promise, newer.promise);
+
+    const explicitLoad = service.loadIntegrations();
+    integrationsChanged.next({ integrationId: 'com.example.repro' });
+    newer.resolve(response(ipc({ id: 'com.example.repro', version: '1.0.1' })));
+    await settle();
+    older.resolve(response(ipc({ id: 'com.example.repro', version: '1.0.0' })));
+    await explicitLoad;
+
+    expect(service.integrations().map(i => i.version)).toEqual(['1.0.1']);
+    expect(service.isLoading()).toBeFalse();
+    expect(service.loadError()).toBeNull();
+  });
+
+  it('keeps an issue update that arrives while a refresh is in flight', async () => {
+    apiSpy.getIntegrations.and.resolveTo(response(ipc()));
+    await service.loadIntegrations();
+    const pending = deferred<GetIntegrationsResponse>();
+    apiSpy.getIntegrations.and.returnValue(pending.promise);
+
+    integrationsChanged.next({ integrationId: 'app.macro-deck.spotify' });
+    issuesChanged.next({ integrationId: 'app.macro-deck.spotify', issues: [], issueCount: 2, severity: 'warning' });
+    pending.resolve(response(ipc({ issueCount: 0, issueSeverity: null })));
+    await settle();
+
+    const spotify = service.integrations().find(i => i.id === 'app.macro-deck.spotify');
+    expect(spotify?.issueCount).toBe(2);
+    expect(spotify?.issueSeverity).toBe('warning');
+  });
+
+  it('answers a burst of changes with one follow-up request that ends on the latest list', async () => {
+    apiSpy.getIntegrations.and.resolveTo(response(ipc()));
+    await service.loadIntegrations();
+    apiSpy.getIntegrations.calls.reset();
+    const first = deferred<GetIntegrationsResponse>();
+    apiSpy.getIntegrations.and.returnValues(first.promise, Promise.resolve(response(ipc({ version: '2.0.0' }))));
+
+    for (let i = 0; i < 5; i++) {
+      integrationsChanged.next({ integrationId: 'app.macro-deck.spotify' });
+    }
+    first.resolve(response(ipc({ version: '1.5.0' })));
+    await settle();
+    await settle();
+
+    expect(apiSpy.getIntegrations).toHaveBeenCalledTimes(2);
+    expect(service.integrations().map(i => i.version)).toEqual(['2.0.0']);
+  });
+
+  it('does not re-apply an issue update from a failed refresh on a later one', async () => {
+    apiSpy.getIntegrations.and.resolveTo(response(ipc()));
+    await service.loadIntegrations();
+    const failing = deferred<GetIntegrationsResponse>();
+    apiSpy.getIntegrations.and.returnValue(failing.promise);
+
+    integrationsChanged.next({ integrationId: 'app.macro-deck.spotify' });
+    issuesChanged.next({ integrationId: 'app.macro-deck.spotify', issues: [], issueCount: 3, severity: 'error' });
+    failing.reject(new Error('host restarting'));
+    await settle();
+
+    apiSpy.getIntegrations.and.resolveTo(response(ipc({ issueCount: 0, issueSeverity: null })));
+    integrationsChanged.next({ integrationId: 'app.macro-deck.spotify' });
+    await settle();
+
+    expect(service.integrations().find(i => i.id === 'app.macro-deck.spotify')?.issueCount).toBe(0);
+  });
+});

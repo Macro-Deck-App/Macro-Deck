@@ -783,6 +783,7 @@ export {
   type GetIntegrationsResponse,
   type IntegrationIssuesChangedEvent,
   type IntegrationIssueSeverity,
+  type IntegrationsChangedEvent,
   type IpcIntegration,
   type IpcIntegrationActionCapability,
   type IpcIntegrationIssue,
