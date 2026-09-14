@@ -11,4 +11,6 @@ public class SubmitConfigFlowStepRequest
 	public Dictionary<string, JsonElement> Values { get; set; } = new();
 
 	public List<string> ClearedSecretFields { get; set; } = new();
+
+	public int? StepIndex { get; set; }
 }

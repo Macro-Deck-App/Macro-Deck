@@ -45,6 +45,7 @@ export interface SubmitConfigFlowStepRequest {
   stepId: string;
   values: Record<string, unknown>;
   clearedSecretFields?: string[];
+  stepIndex?: number;
 }
 
 export interface SubmitConfigFlowStepResponse {
