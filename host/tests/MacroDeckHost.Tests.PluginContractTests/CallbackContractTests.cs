@@ -132,7 +132,7 @@ internal sealed class CallbackContractTests
 		_variables = new RemoteVariableApi(_hostInvoker);
 		_userVariables = new RemoteUserVariableApi(_hostInvoker);
 		_config = new RemoteIntegrationConfig(_hostInvoker);
-		_deck = new RemoteDeckNavigator(_hostInvoker, _stateCache);
+		_deck = new RemoteDeckNavigator(_hostInvoker, _stateCache, _state, Serilog.Core.Logger.None);
 		_scripts = new RemoteScriptApi(_hostInvoker, _stateCache);
 		_widgets = new RemoteWidgetApi(_hostInvoker, _state, _stateCache);
 		_events = new RemoteEventPublisher(_state, Serilog.Core.Logger.None);

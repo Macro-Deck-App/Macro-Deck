@@ -4,6 +4,7 @@ using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Plugin.Protocol.Versioning;
+using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.Paths;
@@ -111,6 +112,63 @@ public class HostStatePushTests
 
 		Assert.That(PushedApis(), Is.EqualTo(new[] { HostApis.Scripts }));
 	}
+
+	[Test]
+	public async Task A_client_moving_and_leaving_is_pushed_to_plugins_in_deck_state()
+	{
+		var clients = _host.Services.GetRequiredService<DeckClientTracker>();
+
+		clients.Publish(clients.Report("push-tab", null, "p1", "f1"));
+		var afterReport = await LatestDeckStateAsync(state => FolderOf(state) == "f1");
+
+		clients.Publish(clients.Report("push-tab", null, "p1", "f2"));
+		var afterMove = await LatestDeckStateAsync(state => FolderOf(state) == "f2");
+
+		clients.Publish(clients.Remove("push-tab"));
+		var afterLeave = await LatestDeckStateAsync(state => FolderOf(state) is null);
+
+		var revisions = DeckStates().Select(state => state.Revision).ToList();
+		Assert.Multiple(() =>
+		{
+			Assert.That(FolderOf(afterReport), Is.EqualTo("f1"));
+			Assert.That(FolderOf(afterMove), Is.EqualTo("f2"));
+			Assert.That(FolderOf(afterLeave), Is.Null);
+			Assert.That(afterMove.Revision, Is.GreaterThan(afterReport.Revision));
+			Assert.That(afterLeave.Revision, Is.GreaterThan(afterMove.Revision));
+			Assert.That(revisions, Is.Unique);
+		});
+	}
+
+	private static string? FolderOf(DeckStateDto state)
+		=> state.Clients.SingleOrDefault(client => client.ClientId == "push-tab")?.FolderId;
+
+	private async Task<DeckStateDto> LatestDeckStateAsync(Func<DeckStateDto, bool> reached)
+	{
+		var deadline = DateTime.UtcNow.AddSeconds(10);
+		while (true)
+		{
+			var latest = DeckStates().MaxBy(state => state.Revision);
+			if (latest is not null && reached(latest))
+			{
+				return latest;
+			}
+
+			if (DateTime.UtcNow > deadline)
+			{
+				Assert.Fail("The expected deck state was never pushed.");
+			}
+
+			await Task.Delay(20);
+		}
+	}
+
+	private List<DeckStateDto> DeckStates()
+		=> _connection.Sent
+			.Where(envelope => envelope.Type == MessageTypes.HostState)
+			.Select(envelope => envelope.Payload!.Value.Deserialize<HostStatePayload>(PluginProtocolJson.Options)!)
+			.Where(payload => payload.Api == HostApis.Deck && payload.Data is not null)
+			.Select(payload => payload.Data!.Value.Deserialize<DeckStateDto>(PluginProtocolJson.Options)!)
+			.ToList();
 
 	private List<string> PushedApis()
 		=> _connection.Sent

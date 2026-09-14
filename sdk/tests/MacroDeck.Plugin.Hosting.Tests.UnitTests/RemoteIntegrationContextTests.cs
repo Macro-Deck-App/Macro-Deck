@@ -6,6 +6,7 @@ using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
@@ -41,7 +42,7 @@ public class RemoteIntegrationContextTests
 		_context = new RemoteIntegrationContext(new RemoteVariableApi(_invoker),
 			new RemoteUserVariableApi(_invoker),
 			new RemoteIntegrationConfig(_invoker),
-			new RemoteDeckNavigator(_invoker, stateCache),
+			new RemoteDeckNavigator(_invoker, stateCache, new PluginConnectionState(), Serilog.Core.Logger.None),
 			new RemoteScriptApi(_invoker, stateCache),
 			new RemoteWidgetApi(_invoker, new PluginConnectionState(), stateCache),
 			new RemoteEventPublisher(new PluginConnectionState(), Serilog.Core.Logger.None),
@@ -448,7 +449,7 @@ public class RemoteIntegrationContextTests
 	{
 		var invoker = new RecordingHostInvoker();
 		var stateCache = new HostStateCache(new PluginConnectionState());
-		var deck = new RemoteDeckNavigator(invoker, stateCache);
+		var deck = new RemoteDeckNavigator(invoker, stateCache, new PluginConnectionState(), Serilog.Core.Logger.None);
 		var scripts = new RemoteScriptApi(invoker, stateCache);
 		var widgets = new RemoteWidgetApi(invoker, new PluginConnectionState(), stateCache);
 
@@ -555,5 +556,167 @@ public class RemoteIntegrationContextTests
 		public Task WaitForCallAsync() => _called.WaitAsync(TimeSpan.FromSeconds(5));
 
 		public void Dispose() => _called.Dispose();
+	}
+
+	private sealed record ClientWorld(
+		PluginConnectionState State,
+		HostStateCache Cache,
+		RemoteDeckNavigator Deck,
+		List<DeckClientChangedEventArgs> Changes)
+	{
+		public void Push(long revision, params DeckClientDto[] clients)
+			=> Cache.Apply(StatePush(HostApis.Deck, new DeckStateDto { Clients = clients, Revision = revision }));
+
+		public void Push(DeckStateDto state) => Cache.Apply(StatePush(HostApis.Deck, state));
+	}
+
+	private ClientWorld NewClientWorld()
+	{
+		var state = new PluginConnectionState();
+		var cache = new HostStateCache(state);
+		var deck = new RemoteDeckNavigator(_invoker, cache, state, Serilog.Core.Logger.None);
+		var changes = new List<DeckClientChangedEventArgs>();
+		deck.ClientChanged += (_, change) => changes.Add(change);
+		return new ClientWorld(state, cache, deck, changes);
+	}
+
+	private static DeckClientDto Client(string clientId, string folderId, string profileId = "p1")
+		=> new() { ClientId = clientId, ProfileId = profileId, FolderId = folderId };
+
+	[Test]
+	public void No_clients_are_listed_before_the_first_deck_push()
+		=> Assert.That(NewClientWorld().Deck.GetClients(), Is.Empty);
+
+	[Test]
+	public void A_deck_push_lists_its_clients_and_reports_each_as_newly_seen()
+	{
+		var world = NewClientWorld();
+
+		world.Push(1, Client("tab-1", "f1"), Client("tab-2", "f2"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(world.Deck.GetClients().Select(client => (client.ClientId, client.FolderId)),
+				Is.EquivalentTo(new[] { ("tab-1", "f1"), ("tab-2", "f2") }));
+			Assert.That(world.Changes.Select(change => change.Client.ClientId), Is.EquivalentTo(new[] { "tab-1", "tab-2" }));
+			Assert.That(world.Changes.All(change => change.PreviousFolderId is null && change.PreviousProfileId is null));
+		});
+	}
+
+	[Test]
+	public void A_later_push_reports_only_the_client_that_moved_with_its_previous_position()
+	{
+		var world = NewClientWorld();
+		world.Push(1, Client("tab-1", "f1"), Client("tab-2", "f2"));
+		world.Changes.Clear();
+
+		world.Push(2, Client("tab-1", "f3", "p2"), Client("tab-2", "f2"));
+
+		var move = world.Changes.Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(move.Client.ClientId, Is.EqualTo("tab-1"));
+			Assert.That(move.Client.FolderId, Is.EqualTo("f3"));
+			Assert.That(move.Client.ProfileId, Is.EqualTo("p2"));
+			Assert.That(move.PreviousFolderId, Is.EqualTo("f1"));
+			Assert.That(move.PreviousProfileId, Is.EqualTo("p1"));
+		});
+	}
+
+	[Test]
+	public void A_client_missing_from_a_later_push_is_no_longer_listed()
+	{
+		var world = NewClientWorld();
+		world.Push(1, Client("tab-1", "f1"), Client("tab-2", "f2"));
+
+		world.Push(2, Client("tab-2", "f2"));
+
+		Assert.That(world.Deck.GetClients().Select(client => client.ClientId), Is.EqualTo(new[] { "tab-2" }));
+	}
+
+	[Test]
+	public void A_push_older_than_the_last_applied_one_is_ignored()
+	{
+		var world = NewClientWorld();
+		world.Push(1, Client("tab-1", "f1"));
+		world.Push(new DeckStateDto
+		{
+			Folders = [new DeckFolder { Id = "fresh", Label = "Fresh" }],
+			Clients = [Client("tab-1", "f3")],
+			Revision = 3
+		});
+
+		world.Push(2, Client("tab-1", "f2"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(world.Deck.GetClients().Single().FolderId, Is.EqualTo("f3"));
+			Assert.That(world.Deck.GetFolders().Select(folder => folder.Id), Is.EqualTo(new[] { "fresh" }));
+			Assert.That(world.Changes.Select(change => change.Client.FolderId), Is.EqualTo(new[] { "f1", "f3" }));
+		});
+	}
+
+	[Test]
+	public void Pushes_without_a_revision_from_an_older_host_are_always_applied()
+	{
+		var world = NewClientWorld();
+
+		world.Push(0, Client("tab-1", "f1"));
+		world.Push(0, Client("tab-1", "f2"));
+
+		Assert.That(world.Deck.GetClients().Single().FolderId, Is.EqualTo("f2"));
+	}
+
+	[Test]
+	public void A_throwing_ClientChanged_handler_does_not_escape_and_later_pushes_still_apply()
+	{
+		var world = NewClientWorld();
+		world.Deck.ClientChanged += (_, _) => throw new InvalidOperationException("plugin bug");
+
+		Assert.DoesNotThrow(() => world.Push(1, Client("tab-1", "f1")));
+		world.Push(2, Client("tab-1", "f2"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(world.Deck.GetClients().Single().FolderId, Is.EqualTo("f2"));
+			Assert.That(world.Changes.Select(change => change.Client.FolderId), Is.EqualTo(new[] { "f1", "f2" }));
+		});
+	}
+
+	[Test]
+	public void A_new_session_forgets_the_old_hosts_clients_and_accepts_the_restarted_hosts_revisions()
+	{
+		var world = NewClientWorld();
+		world.Push(5, Client("old-tab", "f1"));
+
+		world.State.RaiseConnected(resumed: false);
+		var listedRightAfterConnect = world.Deck.GetClients();
+		world.Changes.Clear();
+		world.Push(new DeckStateDto
+		{
+			Folders = [new DeckFolder { Id = "new-folder", Label = "New" }],
+			Clients = [Client("new-tab", "new-folder")],
+			Revision = 1
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(listedRightAfterConnect, Is.Empty);
+			Assert.That(world.Deck.GetClients().Select(client => client.ClientId), Is.EqualTo(new[] { "new-tab" }));
+			Assert.That(world.Deck.GetFolders().Select(folder => folder.Id), Is.EqualTo(new[] { "new-folder" }));
+			Assert.That(world.Changes.Single().PreviousFolderId, Is.Null);
+		});
+	}
+
+	[Test]
+	public void A_resumed_session_keeps_its_clients_and_keeps_ignoring_older_pushes()
+	{
+		var world = NewClientWorld();
+		world.Push(5, Client("tab-1", "f1"));
+
+		world.State.RaiseConnected(resumed: true);
+		world.Push(1, Client("tab-1", "f2"));
+
+		Assert.That(world.Deck.GetClients().Single().FolderId, Is.EqualTo("f1"));
 	}
 }

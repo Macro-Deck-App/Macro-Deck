@@ -33,6 +33,7 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 	private readonly WidgetStateSubscriptionTracker _widgetStateSubscriptions;
 	private readonly LabelSubscriptionTracker _labelSubscriptions;
 	private readonly TimeProvider _timeProvider;
+	private readonly DeckClientTracker _deckClients;
 	private readonly ILogger _logger;
 
 	public DeviceSurfaceService(
@@ -46,6 +47,7 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		WidgetStateSubscriptionTracker widgetStateSubscriptions,
 		LabelSubscriptionTracker labelSubscriptions,
 		TimeProvider timeProvider,
+		DeckClientTracker deckClients,
 		ILogger logger)
 	{
 		_scopeFactory = scopeFactory;
@@ -58,6 +60,7 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		_widgetStateSubscriptions = widgetStateSubscriptions;
 		_labelSubscriptions = labelSubscriptions;
 		_timeProvider = timeProvider;
+		_deckClients = deckClients;
 		_logger = logger.ForContext<DeviceSurfaceService>();
 	}
 
@@ -143,6 +146,7 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 
 		string? previousFolderId;
 		DeviceSurfaceProjection projection;
+		DeckClientChange? clientChange;
 
 		await session.Gate.WaitAsync(cancellationToken);
 		try
@@ -155,11 +159,14 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 
 			projection = await ProjectAsync(session, cancellationToken);
 			await ApplyAsync(session, projection, cancellationToken);
+			clientChange = TrackLocked(session);
 		}
 		finally
 		{
 			session.Gate.Release();
 		}
+
+		_deckClients.Publish(clientChange);
 
 		if (string.Equals(previousFolderId, session.FolderId, StringComparison.Ordinal))
 		{
@@ -320,6 +327,19 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		session.Online = online;
 		if (!online)
 		{
+			DeckClientChange? clientChange;
+			await session.Gate.WaitAsync(cancellationToken);
+			try
+			{
+				clientChange = _deckClients.Remove(DeviceOrigin.For(deviceId));
+			}
+			finally
+			{
+				session.Gate.Release();
+			}
+
+			_deckClients.Publish(clientChange);
+
 			// A device that vanished mid-press must not leave a press open, and must not be handed a
 			// long press when it comes back.
 			if (session.Presses is { } presses)
@@ -404,16 +424,20 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 			return;
 		}
 
+		DeckClientChange? clientChange;
 		await session.Gate.WaitAsync(cancellationToken);
 		try
 		{
 			var projection = await ProjectAsync(session, cancellationToken);
 			await ApplyAsync(session, projection, cancellationToken, force);
+			clientChange = TrackLocked(session);
 		}
 		finally
 		{
 			session.Gate.Release();
 		}
+
+		_deckClients.Publish(clientChange);
 	}
 
 	private async Task<DeviceSurfaceProjection> ProjectAsync(
@@ -573,6 +597,15 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		}
 	}
 
+	// Called inside the session gate so a racing close or presence change is seen; published after it.
+	private DeckClientChange? TrackLocked(DeviceSurfaceSession session)
+	{
+		var clientId = DeviceOrigin.For(session.DeviceId);
+		return !session.Closed && session.Online && session.ProfileId is { } profileId && session.FolderId is { } folderId
+			? _deckClients.Report(clientId, session.DeviceId, profileId, folderId)
+			: _deckClients.Remove(clientId);
+	}
+
 	private IReadOnlyList<Folder> FoldersOf(string profileId) => _profiles.GetFoldersForProfile(profileId);
 
 	private async Task ReportFolderChanged(
@@ -646,16 +679,20 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		// Taken so the session is never disposed underneath a rebuild that is already inside the gate:
 		// disposing it there would fail that rebuild on its own Release, which NavigateAsync surfaces to
 		// its caller as an ObjectDisposedException.
+		DeckClientChange? clientChange;
 		await session.Gate.WaitAsync(CancellationToken.None);
 		try
 		{
 			session.Closed = true;
 			Unsubscribe(session);
+			clientChange = _deckClients.Remove(DeviceOrigin.For(session.DeviceId));
 		}
 		finally
 		{
 			session.Gate.Release();
 		}
+
+		_deckClients.Publish(clientChange);
 
 		if (session.Presses is { } presses)
 		{

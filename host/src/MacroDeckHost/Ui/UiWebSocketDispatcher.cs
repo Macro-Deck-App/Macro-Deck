@@ -339,6 +339,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		CancellationToken cancellationToken)
 	{
 		request.DeviceId = Guid.TryParse(_principal.FindFirst(AuthDefaults.DeviceClaim)?.Value, out var id) ? id : null;
+		request.RegisteredClientId = _registeredClientId;
 		return await _reportFolderChanged.Handle(request, cancellationToken);
 	}
 

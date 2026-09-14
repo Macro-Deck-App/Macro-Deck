@@ -60,6 +60,7 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 			new WidgetStateSubscriptionTracker(),
 			new LabelSubscriptionTracker(),
 			Time,
+			new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
 			Serilog.Core.Logger.None);
 	}
 

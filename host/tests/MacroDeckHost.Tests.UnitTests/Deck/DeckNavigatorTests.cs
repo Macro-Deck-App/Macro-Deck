@@ -37,7 +37,8 @@ public class DeckNavigatorTests
 			_folderCache,
 			_cache,
 			_profileRegistry,
-			() => _deviceSurfaces);
+			() => _deviceSurfaces,
+			new DeckClientTracker(Serilog.Core.Logger.None));
 	}
 
 	[TearDown]

@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using MacroDeckHost.Tests.UnitTests.Triggers;
@@ -21,7 +22,7 @@ public class DeviceConnectionTrackerTests
 	{
 		_bus = new RecordingEventBus();
 		_time = new ManualTimeProvider();
-		_tracker = new DeviceConnectionTracker(_bus, _time);
+		_tracker = new DeviceConnectionTracker(_bus, _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
 	}
 
 	private void AdvancePastLingerAndFlush()
@@ -276,5 +277,53 @@ public class DeviceConnectionTrackerTests
 			Assert.That(_bus.Published[0].Parameters["deviceName"], Is.EqualTo("Kitchen tablet"));
 			Assert.That(_tracker.OnlineDeviceConnectionCounts()[seeded], Is.EqualTo(1));
 		});
+	}
+
+	[Test]
+	public void A_client_leaves_the_deck_client_list_once_its_presence_lingers_out()
+	{
+		var deck = new DeckClientTracker(Serilog.Core.Logger.None);
+		var tracker = new DeviceConnectionTracker(_bus, _time, deck);
+		tracker.Register("conn-1", "client-a");
+		deck.Publish(deck.Report("client-a", null, "p1", "f1"));
+
+		tracker.Remove("conn-1");
+		_time.Advance(TimeSpan.FromSeconds(DeviceDefaults.PresenceLingerSeconds + 1));
+		tracker.FlushPendingDisconnects(_time.Now.UtcDateTime);
+
+		Assert.That(deck.Snapshot(), Is.Empty);
+	}
+
+	[Test]
+	public void A_reconnect_inside_the_linger_window_keeps_the_client_listed()
+	{
+		var deck = new DeckClientTracker(Serilog.Core.Logger.None);
+		var tracker = new DeviceConnectionTracker(_bus, _time, deck);
+		tracker.Register("conn-1", "client-a");
+		deck.Publish(deck.Report("client-a", null, "p1", "f1"));
+
+		tracker.Remove("conn-1");
+		tracker.Register("conn-2", "client-a");
+		_time.Advance(TimeSpan.FromSeconds(DeviceDefaults.PresenceLingerSeconds + 1));
+		tracker.FlushPendingDisconnects(_time.Now.UtcDateTime);
+
+		Assert.That(deck.Snapshot().Select(client => client.ClientId), Is.EqualTo(new[] { "client-a" }));
+	}
+
+	[Test]
+	public void A_device_leaves_the_deck_client_list_by_device_even_under_a_client_id_presence_never_saw()
+	{
+		var deck = new DeckClientTracker(Serilog.Core.Logger.None);
+		var tracker = new DeviceConnectionTracker(_bus, _time, deck);
+		var deviceId = Guid.NewGuid();
+		tracker.Attach("conn-1", deviceId, () => { });
+		tracker.Register("conn-1", "launch-1");
+		deck.Publish(deck.Report("launch-2", deviceId, "p1", "f1"));
+
+		tracker.Remove("conn-1");
+		_time.Advance(TimeSpan.FromSeconds(DeviceDefaults.PresenceLingerSeconds + 1));
+		tracker.FlushPendingDisconnects(_time.Now.UtcDateTime);
+
+		Assert.That(deck.Snapshot(), Is.Empty);
 	}
 }

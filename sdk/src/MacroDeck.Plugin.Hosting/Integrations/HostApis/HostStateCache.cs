@@ -22,9 +22,18 @@ namespace MacroDeck.Plugin.Hosting.Integrations.HostApis;
 /// not yet heard from the host behaves as if the host has nothing to offer yet, not as if it is broken.
 /// </para>
 /// </summary>
-internal sealed class HostStateCache(PluginConnectionState connectionState)
+internal sealed class HostStateCache
 {
 	private readonly ConcurrentDictionary<string, JsonElement?> _byApi = new(StringComparer.Ordinal);
+	private readonly PluginConnectionState _connectionState;
+	private readonly Lock _deckGate = new();
+	private long _lastDeckRevision;
+
+	public HostStateCache(PluginConnectionState connectionState)
+	{
+		_connectionState = connectionState;
+		connectionState.Connected += OnConnected;
+	}
 
 	/// <summary>
 	/// Raised after a <c>host.state</c> push for <see cref="HostApis.Config" /> is applied -
@@ -37,12 +46,20 @@ internal sealed class HostStateCache(PluginConnectionState connectionState)
 	/// </summary>
 	public event Action? ConfigChanged;
 
+	public event Action? DeckChanged;
+
 	/// <summary>Applies one <c>host.state</c> push, replacing whatever was cached for its API.</summary>
 	public void Apply(ProtocolEnvelope envelope)
 	{
 		var payload = envelope.Payload?.Deserialize<HostStatePayload>(PluginProtocolJson.Options);
 		if (payload?.Api is not { Length: > 0 } api)
 		{
+			return;
+		}
+
+		if (string.Equals(api, Protocol.Callbacks.HostApis.Deck, StringComparison.Ordinal))
+		{
+			ApplyDeck(payload.Data);
 			return;
 		}
 
@@ -68,7 +85,7 @@ internal sealed class HostStateCache(PluginConnectionState connectionState)
 	/// </summary>
 	public IReadOnlyList<WidgetTargetInfo> GetWidgets()
 	{
-		if (connectionState.NegotiatedVersion is >= 2)
+		if (_connectionState.NegotiatedVersion is >= 2)
 		{
 			return [.. GetList<WidgetTargetInfoDtoV2>(Protocol.Callbacks.HostApis.Widgets).Select(ToWidgetTargetInfo)];
 		}
@@ -119,6 +136,51 @@ internal sealed class HostStateCache(PluginConnectionState connectionState)
 		catch (JsonException)
 		{
 			return default;
+		}
+	}
+
+	private void ApplyDeck(JsonElement? data)
+	{
+		long revision;
+		try
+		{
+			revision = data?.Deserialize<DeckStateDto>(PluginProtocolJson.Options)?.Revision ?? 0;
+		}
+		catch (JsonException)
+		{
+			revision = 0;
+		}
+
+		lock (_deckGate)
+		{
+			// Revision 0 comes from a host that predates revisions, which has no push order to protect.
+			if (revision > 0)
+			{
+				if (revision <= _lastDeckRevision)
+				{
+					return;
+				}
+
+				_lastDeckRevision = revision;
+			}
+
+			_byApi[Protocol.Callbacks.HostApis.Deck] = data;
+		}
+
+		DeckChanged?.Invoke();
+	}
+
+	// A new session may face a restarted host, whose revisions count from 1 again.
+	private void OnConnected(object? sender, PluginConnectedEventArgs e)
+	{
+		if (e.Resumed)
+		{
+			return;
+		}
+
+		lock (_deckGate)
+		{
+			_lastDeckRevision = 0;
 		}
 	}
 }

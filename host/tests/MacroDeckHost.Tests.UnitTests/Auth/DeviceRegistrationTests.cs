@@ -23,7 +23,7 @@ public class DeviceRegistrationTests
 	private DeviceService CreateDeviceService()
 		=> new(_devices,
 			_tokens,
-			new DeviceConnectionTracker(new RecordingEventBus(), _time),
+			new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None)),
 			new RecordingUiTransport(),
 			new RecordingMediator(),
 			_time,

@@ -192,6 +192,13 @@ maps these to `IIntegrationContext`. Some synchronous-looking SDK state is serve
 `host.state` snapshot, so check [Capability parity](/reference/capability-parity/) before assuming
 in-process timing.
 
+The `deck` snapshot carries `folders`, `profiles`, `clients` and `revision`. Each entry in `clients` is one
+connected client with `clientId`, `deviceId` (absent for a client that is not a paired device), `profileId`
+and `folderId`. `revision` increases with every `deck` push within one host run and starts again when the
+host restarts; hosts that predate it omit both fields, which read as an empty list and 0. `deck` pushes can
+arrive out of order, so apply one only when its revision is higher than the last one applied in this
+session, always apply revision 0, and reset the last applied revision when a session is not resumed.
+
 A callback can return bytes: an icon from the `devices` api's `icon` operation, or a widget's rendered
 action icon from its `widget-icon` operation. These travel over `host.asset.*`, a host-to-plugin
 pipeline kept separate from the plugin-to-host `asset.*` types so those keep their major-1 direction.

@@ -1,3 +1,5 @@
+using System.Text.Json;
+using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -12,6 +14,7 @@ public class ReportFolderChangedRequestMessageHandlerTests
 	private RecordingEventBus _bus = null!;
 	private RecordingApplicationFocusCoordinator _coordinator = null!;
 	private FakeHostLockState _lockState = null!;
+	private DeckClientTracker _clients = null!;
 	private ReportFolderChangedRequestMessageHandler _handler = null!;
 
 	[SetUp]
@@ -21,7 +24,8 @@ public class ReportFolderChangedRequestMessageHandlerTests
 		_bus = new RecordingEventBus();
 		_coordinator = new RecordingApplicationFocusCoordinator();
 		_lockState = new FakeHostLockState();
-		_handler = new ReportFolderChangedRequestMessageHandler(_folderCache, _bus, _coordinator, _lockState);
+		_clients = new DeckClientTracker(Serilog.Core.Logger.None);
+		_handler = new ReportFolderChangedRequestMessageHandler(_folderCache, _bus, _coordinator, _lockState, _clients);
 	}
 
 	[Test]
@@ -172,5 +176,119 @@ public class ReportFolderChangedRequestMessageHandlerTests
 			CancellationToken.None);
 
 		Assert.That(_coordinator.FolderReports, Is.Empty);
+	}
+
+	[Test]
+	public async Task A_report_lists_the_registered_client_on_the_reported_folder()
+	{
+		var folder = _folderCache.AddFolder();
+
+		await _handler.Handle(new ReportFolderChangedRequest
+			{
+				FolderId = folder.Id.ToString(),
+				ClientId = "tab-1",
+				RegisteredClientId = "tab-1"
+			},
+			CancellationToken.None);
+
+		var client = _clients.Snapshot().Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(client.ClientId, Is.EqualTo("tab-1"));
+			Assert.That(client.FolderId, Is.EqualTo(folder.Id.ToString()));
+			Assert.That(client.ProfileId, Is.EqualTo(folder.ProfileId.ToString()));
+		});
+	}
+
+	[Test]
+	public async Task A_client_is_tracked_under_its_registered_id_while_the_event_keeps_the_sent_id()
+	{
+		var folder = _folderCache.AddFolder();
+
+		await _handler.Handle(new ReportFolderChangedRequest
+			{
+				FolderId = folder.Id.ToString(),
+				ClientId = "someone-else",
+				RegisteredClientId = "tab-1"
+			},
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_clients.Snapshot().Select(client => client.ClientId), Is.EqualTo(new[] { "tab-1" }));
+			Assert.That(_bus.Published.Single().Parameters["clientId"], Is.EqualTo("someone-else"));
+		});
+	}
+
+	[Test]
+	public async Task A_connection_that_never_registered_is_not_tracked()
+	{
+		var folder = _folderCache.AddFolder();
+
+		await _handler.Handle(new ReportFolderChangedRequest { FolderId = folder.Id.ToString(), ClientId = "tab-1" },
+			CancellationToken.None);
+
+		Assert.That(_clients.Snapshot(), Is.Empty);
+	}
+
+	[Test]
+	public async Task A_socket_cannot_pose_as_a_device_session()
+	{
+		var folder = _folderCache.AddFolder();
+
+		await _handler.Handle(new ReportFolderChangedRequest
+			{
+				FolderId = folder.Id.ToString(),
+				RegisteredClientId = DeviceOrigin.For(Guid.NewGuid())
+			},
+			CancellationToken.None);
+
+		Assert.That(_clients.Snapshot(), Is.Empty);
+	}
+
+	[Test]
+	public async Task A_client_is_tracked_even_when_the_locked_host_refuses_the_report()
+	{
+		var folder = _folderCache.AddFolder();
+		_lockState.IsLocked = true;
+
+		await _handler.Handle(new ReportFolderChangedRequest
+			{
+				FolderId = folder.Id.ToString(),
+				RegisteredClientId = "tab-1"
+			},
+			CancellationToken.None);
+
+		Assert.That(_clients.Snapshot().Single().FolderId, Is.EqualTo(folder.Id.ToString()));
+	}
+
+	[Test]
+	public async Task A_resync_is_tracked_without_an_occurrence()
+	{
+		var folder = _folderCache.AddFolder();
+
+		await _handler.Handle(new ReportFolderChangedRequest
+			{
+				FolderId = folder.Id.ToString(),
+				RegisteredClientId = "tab-1",
+				IsResync = true
+			},
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_clients.Snapshot(), Has.Count.EqualTo(1));
+			Assert.That(_bus.Published, Is.Empty);
+		});
+	}
+
+	[Test]
+	public void The_registered_client_id_cannot_be_set_from_the_payload()
+	{
+		var request = JsonSerializer.Deserialize<ReportFolderChangedRequest>(
+			"""{"folderId":"f","registeredClientId":"forged","RegisteredClientId":"forged"}""",
+			JsonSerializerOptions.Web);
+
+		Assert.That(request!.RegisteredClientId, Is.Null);
 	}
 }

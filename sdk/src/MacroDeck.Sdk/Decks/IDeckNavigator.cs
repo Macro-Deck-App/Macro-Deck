@@ -24,4 +24,21 @@ public interface IDeckNavigator
 
 	/// <summary>Returns profiles available for pickers.</summary>
 	IReadOnlyList<DeckProfile> GetProfiles();
+
+	/// <summary>
+	/// Where each connected client currently is. Empty on a host that does not report clients. A client
+	/// leaves the list when it disconnects or, for a paired device, goes offline.
+	/// </summary>
+	IReadOnlyList<DeckClient> GetClients() => [];
+
+	/// <summary>
+	/// Raised when a client is first seen or moves to another folder or profile, never for a client that
+	/// stays where it is. Not raised when a client leaves. In a plugin, handlers run on the connection's
+	/// receive loop and see coalesced state: keep them short.
+	/// </summary>
+	event EventHandler<DeckClientChangedEventArgs>? ClientChanged
+	{
+		add { }
+		remove { }
+	}
 }
