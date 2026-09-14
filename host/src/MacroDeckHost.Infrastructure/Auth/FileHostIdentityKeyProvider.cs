@@ -22,6 +22,7 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 	private const string P256Oid = "1.2.840.10045.3.1.7";
 	private const int FlagAttempts = 8;
 	private static readonly TimeSpan FlagRetryDelay = TimeSpan.FromMilliseconds(250);
+	private static readonly TimeSpan ShutdownWait = TimeSpan.FromSeconds(5);
 
 	private readonly SemaphoreSlim _loadGate = new(1, 1);
 	private readonly Lock _signGate = new();
@@ -36,6 +37,8 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 	private volatile LoadedKey? _loaded;
 	private DateTimeOffset _retryNotBefore = DateTimeOffset.MinValue;
 	private bool _failing;
+	private readonly CancellationTokenSource _shutdown = new();
+	private Task _recording = Task.CompletedTask;
 
 	public FileHostIdentityKeyProvider(IDataProtectionProvider dataProtectionProvider,
 		IMacroDeckPaths paths,
@@ -68,6 +71,19 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 
 	public void Dispose()
 	{
+		// The bookkeeping writes to the database, so a disposed host must not leave it still writing into
+		// its data directory.
+		_shutdown.Cancel();
+		try
+		{
+			_recording.Wait(ShutdownWait);
+		}
+		catch (AggregateException e)
+		{
+			_logger.Warning(e, "The host identity bookkeeping failed while the host stopped");
+		}
+
+		_shutdown.Dispose();
 		_loaded?.Key.Dispose();
 		_loadGate.Dispose();
 	}
@@ -237,14 +253,18 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 
 	// The key is usable as soon as its file is written: the flag and the notification are bookkeeping, and a
 	// database busy with other startup writers must not make the key unavailable.
-	private void RecordCreationInBackground(bool renewed) => _ = Task.Run(() => RecordCreation(renewed));
+	private void RecordCreationInBackground(bool renewed)
+	{
+		var cancellationToken = _shutdown.Token;
+		_recording = Task.Run(() => RecordCreation(renewed, cancellationToken));
+	}
 
-	private async Task RecordCreation(bool renewed)
+	private async Task RecordCreation(bool renewed, CancellationToken cancellationToken)
 	{
 		var announce = renewed;
 		if (!renewed)
 		{
-			if (await WasIssuedBefore() is not { } issued)
+			if (await WasIssuedBefore(cancellationToken) is not { } issued)
 			{
 				return;
 			}
@@ -255,44 +275,49 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 		if (announce)
 		{
 			_logger.Warning("A new host identity key was created; paired devices must scan the QR code again");
-			await RaiseRenewedNotification();
+			await RaiseRenewedNotification(cancellationToken);
 		}
 
 		await WithFlagRetry(async preferences =>
 				await preferences.SetValue(AppPreferenceService.HostIdentityIssuedKey, "true"),
-			"The host identity flag could not be saved; a later missing key would be recreated without a notification");
+			"The host identity flag could not be saved; a later missing key would be recreated without a notification",
+			cancellationToken);
 	}
 
 	// An unreadable flag counts as issued: a needless notification is cheaper than a silent loss of every pin.
 	// Null while the host is shutting down.
-	private async Task<bool?> WasIssuedBefore()
+	private async Task<bool?> WasIssuedBefore(CancellationToken cancellationToken)
 	{
 		var issued = true;
 		var completed = await WithFlagRetry(async preferences =>
 				issued = await preferences.GetByKey(AppPreferenceService.HostIdentityIssuedKey) is not null,
-			"The host identity flag could not be read; the new key is announced as a renewal");
+			"The host identity flag could not be read; the new key is announced as a renewal",
+			cancellationToken);
 		return completed ? issued : null;
 	}
 
 	// False when the host is shutting down: its services are gone, so retrying would only log noise.
-	private async Task<bool> WithFlagRetry(Func<IAppPreferenceRepository, Task> operation, string failureMessage)
+	private async Task<bool> WithFlagRetry(Func<IAppPreferenceRepository, Task> operation, string failureMessage,
+		CancellationToken cancellationToken)
 	{
 		for (var attempt = 1;; attempt++)
 		{
 			try
 			{
+				cancellationToken.ThrowIfCancellationRequested();
 				using var scope = _scopeFactory.CreateScope();
 				await operation(scope.ServiceProvider.GetRequiredService<IAppPreferenceRepository>());
 				return true;
 			}
-			catch (ObjectDisposedException)
+			catch (Exception e) when (e is ObjectDisposedException or OperationCanceledException)
 			{
 				_logger.Debug("The host is shutting down; the host identity flag is not recorded");
 				return false;
 			}
 			catch (Exception) when (attempt < FlagAttempts)
 			{
-				await Task.Delay(FlagRetryDelay * attempt, _timeProvider);
+				await Task.Delay(FlagRetryDelay * attempt, _timeProvider, cancellationToken)
+					.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
 			}
 			catch (Exception e)
 			{
@@ -302,16 +327,17 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 		}
 	}
 
-	private async Task RaiseRenewedNotification()
+	private async Task RaiseRenewedNotification(CancellationToken cancellationToken)
 	{
 		string? culture = null;
 		try
 		{
+			cancellationToken.ThrowIfCancellationRequested();
 			using var scope = _scopeFactory.CreateScope();
 			culture = (await scope.ServiceProvider.GetRequiredService<IAppPreferenceService>().GetLocalization())
 				.Culture;
 		}
-		catch (ObjectDisposedException)
+		catch (Exception e) when (e is ObjectDisposedException or OperationCanceledException)
 		{
 			_logger.Debug("The host is shutting down; the identity notification uses the default language");
 		}
