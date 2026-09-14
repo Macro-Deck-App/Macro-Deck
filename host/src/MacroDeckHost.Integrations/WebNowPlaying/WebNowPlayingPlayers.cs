@@ -77,7 +77,7 @@ internal sealed class WebNowPlayingPlayers
 					var player = WebNowPlayingProtocol.ApplyFields(
 						new WebNowPlayingPlayer { Id = message.Id, PortId = message.Id },
 						message.Data);
-					_pendingCovers.Remove((connection, message.Id), out var cover);
+					_pendingCovers.Remove((connection, unchecked((uint)message.Id)), out var cover);
 					_players[message.Id] = new Entry(player, connection, cover, ArtworkIdOf(cover));
 					return true;
 				}
@@ -118,9 +118,13 @@ internal sealed class WebNowPlayingPlayers
 
 		lock (_gate)
 		{
-			if (_players.TryGetValue(id, out var entry) && entry.Connection == connection)
+			// The cover header holds only the low 32 bits of the player id, and Chrome ids are larger than
+			// that, so a cover belongs to the player on this connection whose id matches in those bits.
+			var match = _players.FirstOrDefault(pair =>
+				pair.Value.Connection == connection && unchecked((uint)pair.Key) == id);
+			if (match.Value is { } entry)
 			{
-				_players[id] = entry with { Cover = cover, ArtworkId = ArtworkIdOf(cover) };
+				_players[match.Key] = entry with { Cover = cover, ArtworkId = ArtworkIdOf(cover) };
 				return true;
 			}
 
