@@ -164,6 +164,26 @@ public class FileHostIdentityKeyProviderTests
 		});
 	}
 
+	// A stopped host deletes or moves its data directory: bookkeeping still running would write into it.
+	[Test]
+	public async Task Disposing_waits_for_the_bookkeeping_and_nothing_is_written_afterwards()
+	{
+		var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		_preferences.ReadGate = gate.Task;
+		var provider = NewProvider();
+		await provider.GetPublicKey();
+		await _preferences.ReadEntered.Task.WaitAsync(TimeSpan.FromSeconds(10));
+
+		var disposed = Task.Run(provider.Dispose);
+		await Task.WhenAny(disposed, Task.Delay(TimeSpan.FromMilliseconds(200)));
+		Assert.That(disposed.IsCompleted, Is.False, "the flag read is still in flight");
+
+		gate.SetResult();
+		await disposed;
+
+		Assert.That(_preferences.Has("identity.issued"), Is.False);
+	}
+
 	[Test]
 	public async Task A_key_on_another_curve_is_treated_as_unreadable()
 	{
@@ -340,6 +360,10 @@ public class FileHostIdentityKeyProviderTests
 
 		public int FailingWrites { get; set; }
 
+		public Task ReadGate { get; set; } = Task.CompletedTask;
+
+		public TaskCompletionSource ReadEntered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
 		public bool Has(string key)
 		{
 			lock (Values)
@@ -348,8 +372,11 @@ public class FileHostIdentityKeyProviderTests
 			}
 		}
 
-		public Task<AppPreferenceEntity?> GetByKey(string key)
+		public async Task<AppPreferenceEntity?> GetByKey(string key)
 		{
+			ReadEntered.TrySetResult();
+			await ReadGate;
+
 			lock (Values)
 			{
 				if (FailingReads > 0)
@@ -358,9 +385,9 @@ public class FileHostIdentityKeyProviderTests
 					throw Locked();
 				}
 
-				return Task.FromResult(Values.TryGetValue(key, out var value)
+				return Values.TryGetValue(key, out var value)
 					? new AppPreferenceEntity { Key = key, Value = value }
-					: null);
+					: null;
 			}
 		}
 
