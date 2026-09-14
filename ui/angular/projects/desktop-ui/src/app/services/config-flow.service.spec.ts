@@ -151,6 +151,95 @@ describe('ConfigFlowService', () => {
     expect(service.message()).toBe('Cancel');
   });
 
+  const workspaceStep = { stepId: 'workspace', fields: [{ name: 'workspace', type: ActionParameterType.String, description: '', required: true }] };
+
+  it('goes back to the previous step with the values entered there', async () => {
+    submitResponses.push({ kind: 'Step', step: workspaceStep });
+    await service.start('spotify');
+    expect(service.canGoBack()).toBeFalse();
+    service.setValue('clientId', 'abc');
+    await service.submit();
+    expect(service.step()?.stepId).toBe('workspace');
+    expect(service.canGoBack()).toBeTrue();
+
+    service.setValue('workspace', 'w1');
+    service.back();
+
+    expect(service.step()?.stepId).toBe('credentials');
+    expect(service.values()).toEqual({ clientId: 'abc' });
+    expect(service.canGoBack()).toBeFalse();
+  });
+
+  it('resubmits the earlier step with the corrected values after going back', async () => {
+    submitResponses.push({ kind: 'Step', step: workspaceStep });
+    submitResponses.push({ kind: 'Step', step: workspaceStep });
+    await service.start('spotify');
+    service.setValue('clientId', 'abc');
+    await service.submit();
+    service.back();
+
+    service.setValue('clientId', 'xyz');
+    await service.submit();
+
+    expect(submitted.map(request => [request.stepId, request.stepIndex, request.values])).toEqual([
+      ['credentials', 0, { clientId: 'abc' }],
+      ['credentials', 0, { clientId: 'xyz' }],
+    ]);
+    expect(service.step()?.stepId).toBe('workspace');
+    expect(service.canGoBack()).toBeTrue();
+  });
+
+  it('keeps the history untouched when the resubmitted step comes back with an error', async () => {
+    submitResponses.push({ kind: 'Step', step: workspaceStep });
+    submitResponses.push({ kind: 'Step', step: { stepId: 'confirm', fields: [] } });
+    submitResponses.push({ kind: 'Error', step: workspaceStep, message: { $localized: { scope: 'macrodeck', key: 'Common.Cancel' } } });
+    await service.start('spotify');
+    await service.submit();
+    service.setValue('workspace', 'w1');
+    await service.submit();
+    service.back();
+
+    await service.submit();
+
+    expect(submitted[2].stepIndex).toBe(1);
+    expect(service.message()).toBe('Cancel');
+    expect(service.step()?.stepId).toBe('workspace');
+    expect(service.canGoBack()).toBeTrue();
+    service.back();
+    expect(service.step()?.stepId).toBe('credentials');
+  });
+
+  it('restores stored-secret markers when going back in an edit flow', async () => {
+    submitResponses.push({ kind: 'Step', step: workspaceStep });
+    await service.start('obs', { entryId: 'entry-a' });
+    service.clearStoredSecret('password');
+    await service.submit();
+
+    service.back();
+    expect(service.storedSecretFields().has('password')).toBeFalse();
+    expect(service.values()).toEqual({ host: 'studio.local' });
+
+    await service.submit();
+    expect(submitted[1].clearedSecretFields).toEqual(['password']);
+  });
+
+  it('lets the user go back to the step that started an authorization', async () => {
+    submitResponses.push({ kind: 'External', externalUrl: AUTH_URL, resumeStepId: 'authorize' });
+    submitResponses.push({ kind: 'Step', step: workspaceStep });
+    await service.start('spotify');
+    service.setValue('clientId', 'abc');
+    await service.submit();
+    notifications.next({ flowId: 'flow-1', success: true });
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(service.step()?.stepId).toBe('workspace');
+
+    service.back();
+
+    expect(service.step()?.stepId).toBe('credentials');
+    expect(service.values()).toEqual({ clientId: 'abc' });
+  });
+
   it('does not treat an empty array as satisfying a required MultiSelect field', () => {
     service.step.set({
       stepId: 'entities',

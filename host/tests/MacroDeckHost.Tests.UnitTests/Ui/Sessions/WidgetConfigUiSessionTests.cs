@@ -375,6 +375,7 @@ internal sealed class WidgetConfigUiSessionTests
 			string stepId,
 			IReadOnlyDictionary<string, JsonElement> values,
 			IReadOnlyCollection<string> clearedSecretFields,
+			int? stepIndex,
 			CancellationToken cancellationToken)
 			=> throw new InvalidOperationException("widget-config must never touch the config flow manager.");
 

@@ -117,6 +117,13 @@ private static ConfigFlowStep InstanceStep(IReadOnlyList<BotInstance> instances)
 Branch on `stepId`, and use an earlier step's answer to build the next one - here, the instances the
 server reported. The built-in SinusBot integration works exactly like this.
 
+The dialog offers a Back button once a step has been submitted, so `SubmitAsync` can arrive for an
+earlier step id than the one you returned last, with the values the user corrected. Do not assume
+steps arrive in order: dispatch on `stepId` and overwrite whatever state that step derives.
+When the user goes back, the host drops everything the steps after that one collected, so `input`
+and the saved entry only hold values from the path the user actually took. Flows that serve a
+config UI tree (`IUiConfigFlow`) get no Back button, because their steps live in the tree.
+
 ## Steps and fields
 
 ```csharp
