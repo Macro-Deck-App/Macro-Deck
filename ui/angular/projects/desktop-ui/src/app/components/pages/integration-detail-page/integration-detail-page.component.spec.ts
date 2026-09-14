@@ -4,7 +4,7 @@ import { By } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, EMPTY } from 'rxjs';
 
-import { ActionParameterType, CompatibilityFinding, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IntegrationIssuesChangedEvent, IpcIntegrationActionCapability, IpcIntegrationIssue, IpcIntegrationVariableCapability, PluginCompatibilityReport, Variable } from '@macro-deck/runtime';
+import { ActionParameterType, CompatibilityFinding, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationIssue, IpcIntegrationVariableCapability, PluginCompatibilityReport, Variable } from '@macro-deck/runtime';
 import { ApiService, ToastService, VariableService } from '@shared';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { Integration, IntegrationService } from '../../../services/integration.service';
@@ -18,6 +18,7 @@ describe('IntegrationDetailPageComponent', () => {
   const compatibilityReports = signal<PluginCompatibilityReport[]>([]);
   let entries: ConfigEntryDto[] = [];
   let issuesEvents: Subject<IntegrationIssuesChangedEvent>;
+  let integrationsEvents: Subject<IntegrationsChangedEvent>;
   let cultureEvents: Subject<unknown>;
   let getLocalization: jasmine.Spy;
   let getIntegrationIssues: jasmine.Spy;
@@ -157,6 +158,7 @@ describe('IntegrationDetailPageComponent', () => {
     routeIntegrationId = 'app.macro-deck.spotify';
     queryTab = null;
     issuesEvents = new Subject<IntegrationIssuesChangedEvent>();
+    integrationsEvents = new Subject<IntegrationsChangedEvent>();
     cultureEvents = new Subject<unknown>();
     getLocalization = jasmine.createSpy('getLocalization').and.resolveTo({
       culture: 'en',
@@ -214,6 +216,9 @@ describe('IntegrationDetailPageComponent', () => {
             onNotification: (name: string) => {
               if (name === 'LocalizationCultureChangedEvent') {
                 return cultureEvents.asObservable();
+              }
+              if (name === 'IntegrationsChangedEvent') {
+                return integrationsEvents.asObservable();
               }
               return name === 'IntegrationIssuesChangedEvent' ? issuesEvents.asObservable() : EMPTY;
             },
@@ -911,6 +916,79 @@ describe('IntegrationDetailPageComponent', () => {
       fixture.detectChanges();
 
       expect(fixture.nativeElement.querySelector('shared-config-flow-dialog')).not.toBeNull();
+      fixture.destroy();
+    });
+  });
+
+  describe('when the host announces an integration change', () => {
+    const settle = async (fixture: ComponentFixture<IntegrationDetailPageComponent>) => {
+      await new Promise(resolve => setTimeout(resolve));
+      await fixture.whenStable();
+      fixture.detectChanges();
+    };
+
+    const variableRows = (fixture: ComponentFixture<IntegrationDetailPageComponent>): string[] =>
+      Array.from(fixture.nativeElement.querySelectorAll('app-variable-capability-row') as NodeListOf<HTMLElement>)
+        .map(row => row.textContent ?? '');
+
+    async function openVariables(): Promise<ComponentFixture<IntegrationDetailPageComponent>> {
+      getIntegrationCapabilities.and.resolveTo(capabilitiesResponse({
+        variables: [variableCapability({ name: 'alpha' })],
+      }));
+      const fixture = await createFixture();
+      selectTab(fixture, 'variables');
+      await settle(fixture);
+      return fixture;
+    }
+
+    beforeEach(() => spyOn(console, 'error'));
+
+    it('reloads the shown integration and lists the variable its new version declares', async () => {
+      const fixture = await openVariables();
+
+      getIntegrationCapabilities.and.resolveTo(capabilitiesResponse({
+        variables: [variableCapability({ name: 'alpha' }), variableCapability({ name: 'beta' })],
+      }));
+      integrationsEvents.next({ integrationId: 'app.macro-deck.spotify' });
+      await settle(fixture);
+
+      const rows = variableRows(fixture);
+      expect(rows.length).toBe(2);
+      expect(rows.some(row => row.includes('beta'))).toBeTrue();
+      fixture.destroy();
+    });
+
+    it('keeps the variables listed while the reload is pending', async () => {
+      const fixture = await openVariables();
+
+      getIntegrationCapabilities.and.returnValue(new Promise(() => undefined));
+      integrationsEvents.next({ integrationId: 'app.macro-deck.spotify' });
+      await settle(fixture);
+
+      expect(variableRows(fixture).length).toBe(1);
+      fixture.destroy();
+    });
+
+    it('keeps the last good catalog without an error banner when the reload fails', async () => {
+      const fixture = await openVariables();
+
+      getIntegrationCapabilities.and.rejectWith(new Error('host restarting'));
+      integrationsEvents.next({ integrationId: 'app.macro-deck.spotify' });
+      await settle(fixture);
+
+      expect(variableRows(fixture).length).toBe(1);
+      expect(fixture.nativeElement.querySelector('shared-error-banner')).toBeNull();
+      fixture.destroy();
+    });
+
+    it('ignores a change to another integration', async () => {
+      const fixture = await openVariables();
+      const callsBefore = getIntegrationCapabilities.calls.count();
+
+      integrationsEvents.next({ integrationId: 'app.macro-deck.obs' });
+      await settle(fixture);
+
+      expect(getIntegrationCapabilities.calls.count()).toBe(callsBefore);
       fixture.destroy();
     });
   });

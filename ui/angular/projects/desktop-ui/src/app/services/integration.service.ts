@@ -1,5 +1,5 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { IntegrationIssueSeverity, IntegrationIssuesChangedEvent, IpcIntegration, IpcProvidedCapability, resolveLocalizedText } from '@macro-deck/runtime';
+import { IntegrationIssueSeverity, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegration, IpcProvidedCapability, resolveLocalizedText } from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
 
 export interface Integration {
@@ -34,6 +34,12 @@ export class IntegrationService {
   readonly loadError = signal<string | null>(null);
   readonly selectedIntegrationId = signal<string | null>(null);
 
+  private fetchSequence = 0;
+  private fetchesInFlight = 0;
+  private refreshRunning = false;
+  private refreshQueued = false;
+  private readonly issuesDuringFetch = new Map<string, IntegrationIssuesChangedEvent>();
+
   readonly selectedIntegration = computed(() => {
     const id = this.selectedIntegrationId();
     if (!id) return null;
@@ -50,14 +56,42 @@ export class IntegrationService {
 
   private subscribeToEvents(): void {
     this.api.onNotification<IntegrationIssuesChangedEvent>('IntegrationIssuesChangedEvent').subscribe(event => {
-      this.integrations.update(integrations =>
-        integrations.map(i =>
-          i.id === event.integrationId
-            ? { ...i, issueCount: event.issueCount, issueSeverity: event.severity }
-            : i
-        )
-      );
+      if (this.fetchesInFlight > 0) {
+        this.issuesDuringFetch.set(event.integrationId, event);
+      }
+      this.applyIssues(event);
     });
+
+    this.api.onNotification<IntegrationsChangedEvent>('IntegrationsChangedEvent').subscribe(() => {
+      void this.requestRefresh();
+    });
+  }
+
+  private async requestRefresh(): Promise<void> {
+    if (this.refreshRunning) {
+      this.refreshQueued = true;
+      return;
+    }
+
+    this.refreshRunning = true;
+    try {
+      do {
+        this.refreshQueued = false;
+        await this.fetchIntegrations().catch(error => console.error('Failed to refresh integrations:', error));
+      } while (this.refreshQueued);
+    } finally {
+      this.refreshRunning = false;
+    }
+  }
+
+  private applyIssues(event: IntegrationIssuesChangedEvent): void {
+    this.integrations.update(integrations =>
+      integrations.map(i =>
+        i.id === event.integrationId
+          ? { ...i, issueCount: event.issueCount, issueSeverity: event.severity }
+          : i
+      )
+    );
   }
 
   async loadIntegrations(): Promise<void> {
@@ -65,14 +99,39 @@ export class IntegrationService {
     this.loadError.set(null);
 
     try {
-      const response = await this.api.getIntegrations();
-      const integrations = (response.integrations || []).map(this.mapIntegration);
-      this.integrations.set(integrations);
+      await this.fetchIntegrations();
     } catch (error) {
       console.error('Failed to load integrations:', error);
       this.loadError.set('Failed to load integrations');
     } finally {
       this.isLoading.set(false);
+    }
+  }
+
+  // Latest started request wins; an issue event received mid-fetch is newer than what that fetch may
+  // have read, so it is re-applied on top of the response.
+  private async fetchIntegrations(): Promise<void> {
+    const sequence = ++this.fetchSequence;
+    this.fetchesInFlight++;
+    try {
+      const response = await this.api.getIntegrations();
+      if (sequence !== this.fetchSequence) {
+        return;
+      }
+      this.integrations.set((response.integrations || []).map(this.mapIntegration));
+      for (const event of this.issuesDuringFetch.values()) {
+        this.applyIssues(event);
+      }
+      this.issuesDuringFetch.clear();
+    } catch (error) {
+      if (sequence === this.fetchSequence) {
+        throw error;
+      }
+    } finally {
+      this.fetchesInFlight--;
+      if (this.fetchesInFlight === 0) {
+        this.issuesDuringFetch.clear();
+      }
     }
   }
 
