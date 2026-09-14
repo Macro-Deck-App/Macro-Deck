@@ -145,6 +145,58 @@ events that carry nothing:
 _events.Publish("connected");
 ```
 
+## Reading what is bound
+
+A hotkey plugin that wants to swallow a bound combo, or an integration that only subscribes upstream to
+what the user actually uses, can read the triggers bound to its own events instead of asking the user
+to enter the same values twice:
+
+```csharp
+public Task InitializeAsync(IIntegrationContext context)
+{
+	_events = context.Events;
+	_events.BindingsChanged -= ApplyBoundCombos;
+	_events.BindingsChanged += ApplyBoundCombos;
+	ApplyBoundCombos();
+	return Task.CompletedTask;
+}
+
+private void ApplyBoundCombos()
+{
+	var combos = _events.GetBindings()
+		.Where(binding => binding.EventId == "hotkey-pressed")
+		.Select(binding => binding.Parameters.GetValueOrDefault("combo"))
+		.Where(value => value is { Operator: "==", Value.ValueKind: JsonValueKind.Object })
+		.Select(value => value!.Value!.Value)
+		.ToList();
+
+	_hook.Swallow(combos);
+}
+```
+
+`InitializeAsync` runs again after a reconnect or a config change, on the same publisher, so remove the
+handler before adding it or it fires once per initialization. Remove it in `ShutdownAsync` as well, so a
+stopped integration stops reacting.
+
+Each `EventBinding` is one widget flow or one enabled automation triggered by one of your events. You
+see only your own events, never which widget or automation holds the trigger.
+
+| Member | Meaning |
+| --- | --- |
+| `EventId` | Provider-local event id, without the `integrationId::` prefix. |
+| `Parameters` | The configuration parameters the user set, by name. A parameter left empty is absent. |
+| `EventBindingValue.Value` | The value as the editor stored it: a scalar, an object for a `KeyboardCombo`, or a variable reference the host resolves only when it matches an occurrence. `null` for the state operators. |
+| `EventBindingValue.Operator` | `==`, `!=`, `>`, `<`, `>=`, `<=`, or one of `isEmpty`, `isNotEmpty`, `isAvailable`, `isNotAvailable`. |
+
+A trigger can also carry a filter the host evaluates on its own, so a value in `GetBindings()` does not
+guarantee the trigger fires for it.
+
+`BindingsChanged` fires on a thread-pool thread after the list changed for your integration, and only
+then: moving a widget or editing another plugin's trigger does not raise it. Out of process,
+`GetBindings()` serves the host's last `event-bindings` push, so it is empty until the first push
+arrives. Against a host that predates this API it stays empty and `BindingsChanged` never fires, so treat
+an empty list as "nothing bound", never as an error.
+
 ## Dynamic options
 
 ```csharp
@@ -200,7 +252,8 @@ Assert.That(published.Parameters!.Value.GetProperty("sceneName").GetString(), Is
 ```
 
 `FakeEventPublisher` serializes parameters exactly as the wire protocol does, and like the real one it
-never throws. `PluginTestHarness.Events` calls `describe` and `options` over the protocol. See
+never throws. `SetBindings(...)` replaces what `GetBindings()` returns and raises
+`BindingsChanged`, standing in for a user who binds or edits a trigger. `PluginTestHarness.Events` calls `describe` and `options` over the protocol. See
 [testing](/features/testing/).
 
 ## Over the plugin protocol
@@ -209,7 +262,10 @@ Events are one provider-shaped capability per plugin: `describe` returns the mer
 `IEventProvider` in the process, `options` routes to `IDynamicEventOptionsProvider`. The catalogue is
 snapshot-backed. Occurrences travel as the fire-and-forget
 [`event.publish`](/reference/websocket/#events-logs-and-state) message; the host qualifies the id with
-the authenticated plugin id. See [capability parity](/reference/capability-parity/).
+the authenticated plugin id. What the user bound arrives as the push-only
+[`host.state`](/reference/websocket/#host-callbacks) api `event-bindings`, scoped to the plugin's own
+events and sent on registration and whenever that list changes. See
+[capability parity](/reference/capability-parity/).
 
 ## See also
 

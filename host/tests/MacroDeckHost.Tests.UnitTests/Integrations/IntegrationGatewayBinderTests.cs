@@ -217,6 +217,7 @@ internal sealed class IntegrationGatewayBinderTests
 			new FakeWidgetIconInvalidator(),
 			new FakeUserVariableApi(),
 			new RecordingEventBus(),
+			new StubEventBindingTracker(),
 			new UserNotificationStore(),
 			gateway,
 			null!,
