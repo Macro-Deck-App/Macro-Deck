@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Cli.Manifests;
 using MacroDeck.Plugin.Cli.Scaffolding;
+using MacroDeck.Plugin.Packaging.Versioning;
 
 namespace MacroDeck.Plugin.Cli.Tests.UnitTests;
 
@@ -101,21 +102,33 @@ public class ScaffoldManifestWriterTests
 		});
 	}
 
+	[TestCase("3.0.0-beta.1", true)]
+	[TestCase("3.0.0-beta.6", true)]
+	[TestCase("3.0.0-rc.1", true)]
+	[TestCase("3.0.0", true)]
+	[TestCase("3.1.0", true)]
+	[TestCase("4.0.0", true)]
+	[TestCase("2.9.9", false)]
+	public void The_written_macro_deck_range_admits_3_0_prerelease_and_later_hosts(string hostVersion,
+		bool expected)
+	{
+		var json = ScaffoldManifestWriter.BuildManifestJson(TemplateManifestJson, CanonicalRequest());
+		using var document = JsonDocument.Parse(json);
+		var written = document.RootElement.GetProperty("compatibility").GetProperty("macroDeck").GetString();
+
+		Assert.That(SemanticVersionRange.TryParse(written, out var range), Is.True, written);
+		Assert.That(SemanticVersion.TryParse(hostVersion, out var host), Is.True);
+		Assert.That(range!.Satisfies(host!), Is.EqualTo(expected), $"'{written}' against host {hostVersion}");
+	}
+
 	[Test]
-	public void An_open_ended_macro_deck_compatibility_range_is_always_written()
+	public void No_protocol_compatibility_is_written()
 	{
 		var json = ScaffoldManifestWriter.BuildManifestJson(TemplateManifestJson, CanonicalRequest());
 		using var document = JsonDocument.Parse(json);
 		var compatibility = document.RootElement.GetProperty("compatibility");
 
-		Assert.Multiple(() =>
-		{
-			Assert.That(compatibility.GetProperty("macroDeck").GetString(), Is.EqualTo(">=3.0.0"));
-
-			// Deliberately not 'protocol': a fixed {minimum:1,maximum:1} range would get the scaffolded
-			// plugin rejected by a future protocol-2 host.
-			Assert.That(compatibility.TryGetProperty("protocol", out _), Is.False);
-		});
+		Assert.That(compatibility.TryGetProperty("protocol", out _), Is.False);
 	}
 
 	// b2

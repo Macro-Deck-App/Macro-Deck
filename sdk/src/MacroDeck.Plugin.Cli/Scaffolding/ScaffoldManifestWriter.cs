@@ -28,10 +28,9 @@ internal static class ScaffoldManifestWriter
 		SetIfPresent(root, "repository", request.Repository);
 		SetIfPresent(root, "homepage", request.Homepage);
 
-		// An open-ended lower bound, so no future host version is locked out. Deliberately not
-		// 'compatibility.protocol', which would pin {minimum:1,maximum:1} and get the plugin rejected by a
-		// future protocol-2 host.
-		root["compatibility"] = new JsonObject { ["macroDeck"] = ">=3.0.0" };
+		// The -0 bound admits 3.0.0 prerelease hosts, which plain SemVer ranks below 3.0.0. No protocol pin:
+		// {minimum:1,maximum:1} would get the plugin rejected by a future protocol-2 host.
+		root["compatibility"] = new JsonObject { ["macroDeck"] = ">=3.0.0-0" };
 
 		root["entrypoints"] = BuildEntrypoints(request);
 

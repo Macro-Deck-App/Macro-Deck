@@ -1,6 +1,7 @@
 using MacroDeck.Plugin.Cli.Manifests;
 using MacroDeck.Plugin.Cli.Scaffolding;
 using MacroDeck.Plugin.Packaging.Manifest;
+using MacroDeck.Plugin.Packaging.Versioning;
 
 namespace MacroDeck.Plugin.Cli.Tests.UnitTests;
 
@@ -229,7 +230,10 @@ public class PluginScaffolderTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(compatibility.GetProperty("macroDeck").GetString(), Is.EqualTo(">=3.0.0"));
+			Assert.That(SemanticVersionRange.TryParse(compatibility.GetProperty("macroDeck").GetString(), out var range),
+				Is.True);
+			Assert.That(SemanticVersion.TryParse("3.0.0-beta.6", out var betaHost), Is.True);
+			Assert.That(range!.Satisfies(betaHost!), Is.True);
 			Assert.That(compatibility.TryGetProperty("protocol", out _), Is.False);
 		});
 
