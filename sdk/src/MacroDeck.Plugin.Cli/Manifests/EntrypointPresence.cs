@@ -41,7 +41,8 @@ internal static class EntrypointPresence
 			.Where(pair => !presentEntryNames.Contains(Normalize(pair.Value.Executable)))
 			.OrderBy(pair => pair.Key, StringComparer.Ordinal)
 			.Select(pair => new CliDiagnostic("entrypoint-not-packed",
-				$"Entrypoint '{pair.Key}' declares '{pair.Value.Executable}', which is not in the {subjectNoun}."))
+				$"Entrypoint '{pair.Key}' declares '{pair.Value.Executable}', which is not in the {subjectNoun}." +
+				FoundInstead(pair.Value.Executable, presentEntryNames)))
 			.ToList();
 	}
 
@@ -60,11 +61,43 @@ internal static class EntrypointPresence
 			{
 				Severity = ManifestProblemSeverity.Error,
 				Code = "entrypoint-not-packed",
-				Message = $"Entrypoint '{pair.Key}' declares '{pair.Value.Executable}', which is not in the artifact.",
+				Message = $"Entrypoint '{pair.Key}' declares '{pair.Value.Executable}', which is not in the artifact." +
+					FoundInstead(pair.Value.Executable, presentEntryNames),
 				Pointer = $"/entrypoints/{EscapePointerSegment(pair.Key)}/executable",
 				Level = PluginManifestValidationLevel.Package
 			})
 			.ToList();
+	}
+
+	// Names the files beside the declared path that share its extension, so a renamed project whose
+	// executable no longer matches the manifest is recognisable from the message alone.
+	private static string FoundInstead(string executable, IReadOnlySet<string> presentEntryNames)
+	{
+		var declared = Normalize(executable);
+		var directory = DirectoryOf(declared);
+		var extension = Path.GetExtension(declared);
+
+		var candidates = presentEntryNames
+			.Where(name => DirectoryOf(name).Equals(directory, StringComparison.OrdinalIgnoreCase) &&
+				Path.GetExtension(name).Equals(extension, StringComparison.OrdinalIgnoreCase))
+			.Order(StringComparer.Ordinal)
+			.ToList();
+
+		if (candidates.Count == 0)
+		{
+			return string.Empty;
+		}
+
+		var listed = string.Join(", ", candidates.Take(5).Select(name => $"'{name}'"));
+		var more = candidates.Count > 5 ? $" and {candidates.Count - 5} more" : string.Empty;
+
+		return $" Found there instead: {listed}{more}.";
+	}
+
+	private static string DirectoryOf(string normalizedPath)
+	{
+		var separator = normalizedPath.LastIndexOf('/');
+		return separator < 0 ? string.Empty : normalizedPath[..separator];
 	}
 
 	private static string EscapePointerSegment(string segment) =>
