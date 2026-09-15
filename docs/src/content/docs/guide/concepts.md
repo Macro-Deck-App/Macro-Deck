@@ -95,6 +95,11 @@ sign in with your Macro Deck account under **Settings > Account**. A change to y
 can take up to a day to show up. If you were signed in before your Macro Deck version supported
 testers, sign out and in once.
 
+**Refresh** on the Store page fetches the latest catalog and opens a log of each step as it happens.
+Macro Deck also refreshes on its own about once an hour. While a refresh runs, the button says
+**Refreshing…** in every window, and pressing it opens the log of that refresh instead of starting a
+second one.
+
 ## Devices
 
 Every phone, tablet or browser that connects shows up in **Settings > Devices**. Choose there which

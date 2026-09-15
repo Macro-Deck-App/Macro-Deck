@@ -29,6 +29,7 @@ public class StoreController : ControllerBase
 	private readonly StoreRegistryOptions _options;
 	private readonly IMediator _mediator;
 	private readonly IStoreUninstallService _uninstallService;
+	private readonly IStoreRegistryRefreshTracker _refreshTracker;
 
 	public StoreController(IStoreCatalogQueryService catalogQuery,
 		IStoreRegistryRefresher refresher,
@@ -41,7 +42,8 @@ public class StoreController : ControllerBase
 		IMacroDeckPaths paths,
 		StoreRegistryOptions options,
 		IMediator mediator,
-		IStoreUninstallService uninstallService)
+		IStoreUninstallService uninstallService,
+		IStoreRegistryRefreshTracker refreshTracker)
 	{
 		_catalogQuery = catalogQuery;
 		_refresher = refresher;
@@ -55,6 +57,7 @@ public class StoreController : ControllerBase
 		_options = options;
 		_mediator = mediator;
 		_uninstallService = uninstallService;
+		_refreshTracker = refreshTracker;
 	}
 
 	[HttpGet("status")]
@@ -62,7 +65,8 @@ public class StoreController : ControllerBase
 		new()
 		{
 			Registry = StoreRegistryStatusBodyFactory.Create(_refresher.Status),
-			DeveloperMode = (await _preferences.GetDeveloper()).Enabled
+			DeveloperMode = (await _preferences.GetDeveloper()).Enabled,
+			RefreshRun = StoreRegistryRefreshRunBodyFactory.Create(_refreshTracker.Current)
 		};
 
 	[HttpPost("registry/refresh")]
@@ -82,9 +86,10 @@ public class StoreController : ControllerBase
 				? null
 				: new TransportError
 				{
-					Code = ToErrorCode(result.Error ?? RegistryRefreshError.NetworkFailure),
+					Code = StoreRegistryRefreshRunBodyFactory.ErrorCode(result.Error ?? RegistryRefreshError.NetworkFailure),
 					Message = result.ErrorMessage ?? "The registry could not be refreshed."
-				}
+				},
+			RefreshRun = StoreRegistryRefreshRunBodyFactory.Create(_refreshTracker.Current)
 		};
 	}
 
@@ -449,22 +454,6 @@ public class StoreController : ControllerBase
 		StoreCatalogError.RegistryUnavailable => "registry_unavailable",
 		StoreCatalogError.StoreDisabled => "store_disabled",
 		StoreCatalogError.NotFound => "not_found",
-		_ => "failed"
-	};
-
-	private static string ToErrorCode(RegistryRefreshError error) => error switch
-	{
-		RegistryRefreshError.Disabled => "disabled",
-		RegistryRefreshError.NetworkFailure => "network_failure",
-		RegistryRefreshError.Malformed => "malformed",
-		RegistryRefreshError.BudgetExceeded => "budget_exceeded",
-		RegistryRefreshError.SizeMismatch => "size_mismatch",
-		RegistryRefreshError.SequenceRollback => "sequence_rollback",
-		RegistryRefreshError.SignatureInvalid => "signature_invalid",
-		RegistryRefreshError.CertificateUntrusted => "certificate_untrusted",
-		RegistryRefreshError.SigningKeyRevoked => "signing_key_revoked",
-		RegistryRefreshError.SnapshotUnchanged => "snapshot_unchanged",
-		RegistryRefreshError.StorageFailure => "storage_failure",
 		_ => "failed"
 	};
 }

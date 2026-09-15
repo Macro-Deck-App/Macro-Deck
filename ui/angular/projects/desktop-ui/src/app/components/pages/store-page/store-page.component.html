@@ -7,10 +7,17 @@
       </div>
       <shared-button
         variant="secondary"
-        [loading]="catalog.registry()?.refreshing === true"
+        [attr.aria-busy]="catalog.refreshing()"
         (click)="onRefresh()">
-        <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
-        <span>{{ 'macrodeck.app:Store.Page.RefreshAction' | translate }}</span>
+        <span
+          class="icon icon-refresh icon-sm"
+          [class.store-refresh-icon-spinning]="catalog.refreshing()"
+          aria-hidden="true"></span>
+        @if (catalog.refreshing()) {
+          <span>{{ 'macrodeck.app:Store.RegistryRefresh.InProgressAction' | translate }}</span>
+        } @else {
+          <span>{{ 'macrodeck.app:Store.Page.RefreshAction' | translate }}</span>
+        }
       </shared-button>
     </div>
 
@@ -115,6 +122,10 @@
     </div>
   </div>
 </div>
+
+@if (refreshLogOpen()) {
+  <app-store-registry-refresh-modal [run]="refreshLogRun()" (closed)="refreshLogOpen.set(false)" />
+}
 
 @if (pendingUninstall()) {
   <shared-confirmation-modal

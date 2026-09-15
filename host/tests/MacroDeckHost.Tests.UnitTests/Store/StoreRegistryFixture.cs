@@ -59,6 +59,20 @@ internal sealed class StoreRegistryFixture
 
 	public HashSet<string> Missing { get; } = new(StringComparer.Ordinal);
 
+	public TaskCompletionSource? ManifestHold { get; set; }
+
+	public TaskCompletionSource ManifestRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+	public int ManifestRequests => _manifestRequests;
+
+	private int _manifestRequests;
+
+	private void RecordManifestRequest()
+	{
+		Interlocked.Increment(ref _manifestRequests);
+		ManifestRequested.TrySetResult();
+	}
+
 	public void AddPackage(string kind,
 		string id,
 		string version = "1.0.0",
@@ -257,8 +271,22 @@ internal sealed class StoreRegistryFixture
 				_fixture = fixture;
 			}
 
-			protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+			protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
 				CancellationToken cancellationToken)
+			{
+				if (request.RequestUri!.AbsolutePath.EndsWith("/registry-manifest.json", StringComparison.Ordinal))
+				{
+					_fixture.RecordManifestRequest();
+					if (_fixture.ManifestHold is { } hold)
+					{
+						await hold.Task.WaitAsync(cancellationToken);
+					}
+				}
+
+				return await Respond(request);
+			}
+
+			private Task<HttpResponseMessage> Respond(HttpRequestMessage request)
 			{
 				if (_fixture.Offline)
 				{

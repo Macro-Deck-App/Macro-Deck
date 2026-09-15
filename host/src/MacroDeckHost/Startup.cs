@@ -610,6 +610,7 @@ public class Startup
 		services.AddSingleton<IStoreArtifactDownloader, StoreArtifactDownloader>();
 		services.AddSingleton<IStoreUpdateState, StoreUpdateState>();
 		services.AddSingleton<IStoreUpdateDetector, StoreUpdateDetector>();
+		services.AddSingleton<IStoreRegistryRefreshTracker, StoreRegistryRefreshTracker>();
 		services.AddSingleton<IStoreRegistryRefresher, StoreRegistryRefresher>();
 		services.AddSingleton<IStoreInstallCoordinator, StoreInstallCoordinator>();
 		services.AddSingleton<IStoreInstallExecutor, StoreInstallExecutor>();
@@ -618,6 +619,7 @@ public class Startup
 		services.AddHostedService<StoreRegistryRefreshBackgroundService>();
 		services.AddHostedService<StoreOperationBackgroundService>();
 		services.AddHostedService<StoreOperationBroadcastBackgroundService>();
+		services.AddHostedService<StoreRegistryRefreshBroadcastBackgroundService>();
 
 		services.AddHttpClient(ConnectIdentityClient.HttpClientName, client => { })
 			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15));

@@ -8,5 +8,8 @@ public interface IStoreRegistryRefresher
 
 	Task<Result<RegistryRefreshError>> Refresh(CancellationToken cancellationToken = default);
 
+	Task<Result<RegistryRefreshError>> Refresh(StoreRegistryRefreshTrigger trigger,
+		CancellationToken cancellationToken = default);
+
 	Task LoadCachedRegistry(CancellationToken cancellationToken = default);
 }

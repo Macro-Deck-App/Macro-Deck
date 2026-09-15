@@ -1,5 +1,13 @@
 import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
-import { AppStrings, StoreCatalogItemBody, StoreCatalogSection, StoreExtensionKind, StoreRegistryStatusBody } from '@macro-deck/runtime';
+import {
+  AppStrings,
+  StoreCatalogItemBody,
+  StoreCatalogSection,
+  StoreExtensionKind,
+  StoreRegistryRefreshChangedEvent,
+  StoreRegistryRefreshRunBody,
+  StoreRegistryStatusBody,
+} from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
 
 export interface StoreCatalogQuery {
@@ -23,8 +31,10 @@ export class StoreCatalogService {
   readonly isLoading = signal(false);
   readonly isLoadingMore = signal(false);
   readonly loadError = signal<string | null>(null);
+  readonly refreshRun = signal<StoreRegistryRefreshRunBody | null>(null);
 
   readonly hasMore = computed(() => this.items().length < this.total());
+  readonly refreshing = computed(() => this.refreshRun()?.state === 'Running');
 
   // Null until a consumer has said what it wants to browse. A reload before that would have to guess
   // the query, and the guess - every kind, unsorted - is one the store never asks for.
@@ -45,12 +55,18 @@ export class StoreCatalogService {
         this.registry.set(event.registry);
       });
 
+    this.api.onNotification<StoreRegistryRefreshChangedEvent>('StoreRegistryRefreshChangedEvent')
+      .subscribe(event => {
+        this.applyRefreshRun(event.run);
+      });
+
     effect(() => {
       if (this.api.connectionStateSignal() === 'connected') {
         // untracked: reload() reads items() to size the refetch, and an effect that took a
         // dependency on the signal it goes on to write would retrigger itself forever.
         untracked(() => {
           void this.reload();
+          void this.syncRefreshRun();
         });
       }
     });
@@ -127,14 +143,39 @@ export class StoreCatalogService {
   }
 
   async refreshRegistry(): Promise<void> {
+    if (this.refreshing()) {
+      return;
+    }
+
     try {
       const response = await this.api.refreshStoreRegistry();
       this.registry.set(response.registry);
+      if (response.refreshRun) {
+        this.applyRefreshRun(response.refreshRun);
+      }
       if (response.success) {
         await this.reload();
       }
     } catch (error) {
       console.error('Failed to refresh the store registry:', error);
+    }
+  }
+
+  private async syncRefreshRun(): Promise<void> {
+    try {
+      const status = await this.api.getStoreStatus();
+      this.applyRefreshRun(status.refreshRun ?? null);
+    } catch (error) {
+      console.error('Failed to read the store registry refresh:', error);
+    }
+  }
+
+  // The status answer and the pushed events race each other, so an older snapshot of the same host
+  // process never replaces a newer one: a stale Running would leave the refresh button stuck forever.
+  private applyRefreshRun(run: StoreRegistryRefreshRunBody | null): void {
+    const held = this.refreshRun();
+    if (!run || !held || run.hostInstanceId !== held.hostInstanceId || run.revision >= held.revision) {
+      this.refreshRun.set(run);
     }
   }
 

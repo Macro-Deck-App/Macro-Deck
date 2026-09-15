@@ -51,7 +51,7 @@ public sealed class StoreRegistryRefreshBackgroundService : HostReadyBackgroundS
 	{
 		try
 		{
-			var result = await _refresher.Refresh(stoppingToken);
+			var result = await _refresher.Refresh(StoreRegistryRefreshTrigger.Scheduled, stoppingToken);
 			if (!result.Success)
 			{
 				_logger.Warning("Store registry refresh failed with {Error}: {Message}",
@@ -65,6 +65,10 @@ public sealed class StoreRegistryRefreshBackgroundService : HostReadyBackgroundS
 		catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
 		{
 			throw;
+		}
+		// The refresher stops on ApplicationStopping, which fires before stoppingToken is cancelled.
+		catch (OperationCanceledException)
+		{
 		}
 		catch (Exception ex)
 		{

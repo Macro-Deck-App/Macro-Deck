@@ -12,6 +12,7 @@ import { ConnectAccountService } from '../../../services/connect-account.service
 import { StoreCatalogService } from '../../../services/store-catalog.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
 import { storeUninstallErrorKey, storeUninstallMessageKey } from '../../../util/store-operation-display';
+import { StoreRegistryRefreshModalComponent } from './store-registry-refresh-modal.component';
 
 type KindFilter = 'all' | StoreExtensionKind;
 
@@ -36,6 +37,7 @@ const BEST_MATCH_SORT: StoreCatalogSection = 'all';
     InputComponent,
     SegmentedControlComponent,
     SelectComponent,
+    StoreRegistryRefreshModalComponent,
     StoreSectionComponent,
     TranslatePipe,
   ],
@@ -107,6 +109,17 @@ export class StorePageComponent implements OnInit {
     this.localization.translateKey(AppStrings.Store.Page.ResultCount, { count: this.catalog.total() }));
 
   protected readonly pendingUninstall = signal<StoreCatalogItemBody | null>(null);
+
+  protected readonly refreshLogOpen = signal(false);
+
+  // The run that was current when this window asked for a new refresh belongs to an earlier refresh,
+  // so the log shows nothing from it until the host has reported the new run.
+  private readonly supersededRunId = signal<string | null>(null);
+
+  protected readonly refreshLogRun = computed(() => {
+    const run = this.catalog.refreshRun();
+    return run && run.id === this.supersededRunId() ? null : run;
+  });
 
   protected readonly uninstallHeading = computed(() => this.localization.translateKey(AppStrings.Store.UninstallHeading));
 
@@ -185,6 +198,12 @@ export class StorePageComponent implements OnInit {
   }
 
   protected async onRefresh(): Promise<void> {
+    this.refreshLogOpen.set(true);
+    if (this.catalog.refreshing()) {
+      return;
+    }
+
+    this.supersededRunId.set(this.catalog.refreshRun()?.id ?? null);
     await this.catalog.refreshRegistry();
     if (!this.searching()) {
       await this.loadDiscovery();

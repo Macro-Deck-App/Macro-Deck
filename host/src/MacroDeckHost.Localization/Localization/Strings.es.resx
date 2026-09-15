@@ -14233,6 +14233,104 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Store.Queued" xml:space="preserve">
     <value>En cola</value>
   </data>
+  <data name="Store.RegistryRefresh.Error.BudgetExceeded" xml:space="preserve">
+    <value>El registro es más grande de lo que Macro Deck descarga.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.CertificateUntrusted" xml:space="preserve">
+    <value>El registro se firmó con un certificado en el que Macro Deck no confía.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.Disabled" xml:space="preserve">
+    <value>La Store está desactivada.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.Malformed" xml:space="preserve">
+    <value>El registro envió datos que Macro Deck no pudo leer.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.NetworkFailure" xml:space="preserve">
+    <value>No se pudo acceder al registro.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SequenceRollback" xml:space="preserve">
+    <value>El registro ofreció un catálogo más antiguo que el ya instalado.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SignatureInvalid" xml:space="preserve">
+    <value>La firma del registro no es válida.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SigningKeyRevoked" xml:space="preserve">
+    <value>El registro se firmó con una clave revocada.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SizeMismatch" xml:space="preserve">
+    <value>Un archivo del registro no tenía el tamaño declarado.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SnapshotUnchanged" xml:space="preserve">
+    <value>El catálogo no ha cambiado.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.StorageFailure" xml:space="preserve">
+    <value>No se pudo guardar el nuevo catálogo.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
+    <value>Algo salió mal inesperadamente.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
+    <value>Actualización del registro de la Store</value>
+  </data>
+  <data name="Store.RegistryRefresh.InProgressAction" xml:space="preserve">
+    <value>Actualizando…</value>
+  </data>
+  <data name="Store.RegistryRefresh.LogLabel" xml:space="preserve">
+    <value>Registro de la actualización</value>
+  </data>
+  <data name="Store.RegistryRefresh.Progress" xml:space="preserve">
+    <value>Archivos: {completed} de {total}</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Cancelled" xml:space="preserve">
+    <value>La actualización se canceló.</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Failed" xml:space="preserve">
+    <value>No se pudo actualizar el registro de la Store.</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Running" xml:space="preserve">
+    <value>Actualizando el registro de la Store…</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Succeeded" xml:space="preserve">
+    <value>El registro de la Store está actualizado.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Applied" xml:space="preserve">
+    <value>Catálogo actualizado a la versión {sequence}</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Cancelled" xml:space="preserve">
+    <value>Cancelado porque Macro Deck se está cerrando</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.DownloadingFiles.One" xml:space="preserve">
+    <value>Descargando {count} archivo</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.DownloadingFiles.Other" xml:space="preserve">
+    <value>Descargando {count} archivos</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Failed" xml:space="preserve">
+    <value>Error: {reason}</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.FetchingManifest" xml:space="preserve">
+    <value>Descargando el manifiesto del registro</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.FetchingSignature" xml:space="preserve">
+    <value>Descargando la firma del registro</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.ReadingCatalog" xml:space="preserve">
+    <value>Leyendo el catálogo</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Started" xml:space="preserve">
+    <value>Actualización iniciada</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.StartedScheduled" xml:space="preserve">
+    <value>Actualización automática iniciada</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.UpToDate" xml:space="preserve">
+    <value>Nada nuevo: el catálogo ya está en la versión {sequence}</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Verifying" xml:space="preserve">
+    <value>Verificando la firma</value>
+  </data>
   <data name="Store.RetryInstallation" xml:space="preserve">
     <value>Reintentar instalación</value>
   </data>

@@ -27,6 +27,8 @@ internal sealed class StoreRegistryRefresherTests
 	private ManualTimeProvider _time = null!;
 	private StoreCatalog _catalog = null!;
 	private JsonStoreRegistryStateStore _state = null!;
+	private StoreRegistryRefreshTracker _tracker = null!;
+	private StubHostApplicationLifetime _lifetime = null!;
 
 	[SetUp]
 	public void SetUp()
@@ -37,10 +39,16 @@ internal sealed class StoreRegistryRefresherTests
 		_time = new ManualTimeProvider { Now = _now };
 		_catalog = new StoreCatalog();
 		_state = new JsonStoreRegistryStateStore(_paths, Log.Logger);
+		_tracker = new StoreRegistryRefreshTracker(_time);
+		_lifetime = new StubHostApplicationLifetime();
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_lifetime.Dispose();
+		_paths.Cleanup();
+	}
 
 	private StoreRegistryRefresher Create(StoreRegistryFixture fixture, TimeSpan? maxSnapshotAge = null) =>
 		new(fixture.Build(),
@@ -55,6 +63,8 @@ internal sealed class StoreRegistryRefresherTests
 			_catalog,
 			_paths,
 			_time,
+			_tracker,
+			_lifetime,
 			Log.Logger);
 
 	private static StoreRegistryFixture Registry(long sequence = 1,
@@ -383,6 +393,152 @@ internal sealed class StoreRegistryRefresherTests
 		{
 			Assert.That(refresher.Status.HasCatalog, Is.True);
 			Assert.That(refresher.Status.Stale, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task Overlapping_refresh_requests_share_one_run_instead_of_refreshing_twice()
+	{
+		var fixture = Registry();
+		fixture.ManifestHold = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		using var refresher = Create(fixture);
+
+		var first = refresher.Refresh();
+		await fixture.ManifestRequested.Task.WaitAsync(TimeSpan.FromSeconds(10));
+		var second = refresher.Refresh(StoreRegistryRefreshTrigger.Scheduled);
+		var statusWhileRunning = refresher.Status;
+		var runWhileRunning = _tracker.Current!;
+		fixture.ManifestHold.SetResult();
+		var results = await Task.WhenAll(first, second);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.ManifestRequests, Is.EqualTo(1));
+			Assert.That(results.Select(result => result.Success), Is.All.True);
+			Assert.That(statusWhileRunning.Refreshing, Is.True);
+			Assert.That(runWhileRunning.State, Is.EqualTo(StoreRegistryRefreshRunState.Running));
+			Assert.That(runWhileRunning.Trigger, Is.EqualTo(StoreRegistryRefreshTrigger.Manual));
+			Assert.That(_tracker.Current!.Id, Is.EqualTo(runWhileRunning.Id));
+			Assert.That(_tracker.Current.State, Is.EqualTo(StoreRegistryRefreshRunState.Succeeded));
+			Assert.That(refresher.Status.Refreshing, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_caller_that_stops_waiting_does_not_cancel_the_refresh_others_are_waiting_for()
+	{
+		var fixture = Registry();
+		fixture.ManifestHold = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		using var refresher = Create(fixture);
+		using var leaving = new CancellationTokenSource();
+
+		var abandoned = refresher.Refresh(leaving.Token);
+		await fixture.ManifestRequested.Task.WaitAsync(TimeSpan.FromSeconds(10));
+		var waiting = refresher.Refresh();
+		await leaving.CancelAsync();
+		Assert.CatchAsync<OperationCanceledException>(async () => await abandoned);
+		fixture.ManifestHold.SetResult();
+		var result = await waiting;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(_catalog.Snapshot.Entries.Select(entry => entry.Id), Is.EquivalentTo(_seededIds));
+			Assert.That(_tracker.Current!.State, Is.EqualTo(StoreRegistryRefreshRunState.Succeeded));
+		});
+	}
+
+	[Test]
+	public async Task A_refresh_requested_after_the_previous_one_finished_fetches_the_registry_again()
+	{
+		var fixture = Registry();
+		using var refresher = Create(fixture);
+
+		await refresher.Refresh();
+		var firstRun = _tracker.Current!;
+		await refresher.Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.ManifestRequests, Is.EqualTo(2));
+			Assert.That(_tracker.Current!.Id, Is.Not.EqualTo(firstRun.Id));
+		});
+	}
+
+	[Test]
+	public async Task A_refresh_log_names_each_step_a_new_snapshot_goes_through_and_an_unchanged_one_skips()
+	{
+		using var refresher = Create(Registry());
+
+		await refresher.Refresh();
+		var applied = _tracker.Current!;
+		await refresher.Refresh();
+		var unchanged = _tracker.Current!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(applied.State, Is.EqualTo(StoreRegistryRefreshRunState.Succeeded));
+			Assert.That(applied.Entries.Select(entry => entry.Step), Is.EqualTo(new[]
+			{
+				StoreRegistryRefreshStep.Started,
+				StoreRegistryRefreshStep.FetchingManifest,
+				StoreRegistryRefreshStep.FetchingSignature,
+				StoreRegistryRefreshStep.DownloadingFiles,
+				StoreRegistryRefreshStep.Verifying,
+				StoreRegistryRefreshStep.ReadingCatalog,
+				StoreRegistryRefreshStep.Applied
+			}));
+			Assert.That(applied.FilesTotal, Is.GreaterThan(0));
+			Assert.That(applied.FilesCompleted, Is.EqualTo(applied.FilesTotal));
+			Assert.That(unchanged.State, Is.EqualTo(StoreRegistryRefreshRunState.Succeeded));
+			Assert.That(unchanged.Entries.Select(entry => entry.Step), Is.EqualTo(new[]
+			{
+				StoreRegistryRefreshStep.Started,
+				StoreRegistryRefreshStep.FetchingManifest,
+				StoreRegistryRefreshStep.FetchingSignature,
+				StoreRegistryRefreshStep.UpToDate
+			}));
+		});
+	}
+
+	[Test]
+	public async Task A_failed_refresh_ends_its_run_with_the_reason_and_the_status_every_session_should_show()
+	{
+		var fixture = Registry();
+		using var refresher = Create(fixture);
+		await refresher.Refresh();
+
+		fixture.Offline = true;
+		await refresher.Refresh();
+		var run = _tracker.Current!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(run.State, Is.EqualTo(StoreRegistryRefreshRunState.Failed));
+			Assert.That(run.Entries[^1].Step, Is.EqualTo(StoreRegistryRefreshStep.Failed));
+			Assert.That(run.Entries[^1].Error, Is.EqualTo(RegistryRefreshError.NetworkFailure));
+			Assert.That(run.Status!.LastError, Is.EqualTo(RegistryRefreshError.NetworkFailure));
+			Assert.That(run.Status.Stale, Is.True);
+			Assert.That(run.Status.Refreshing, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task Shutting_down_during_a_refresh_ends_the_run_as_cancelled()
+	{
+		var fixture = Registry();
+		fixture.ManifestHold = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var refresher = Create(fixture);
+
+		var pending = refresher.Refresh();
+		await fixture.ManifestRequested.Task.WaitAsync(TimeSpan.FromSeconds(10));
+
+		Assert.DoesNotThrow(refresher.Dispose);
+		Assert.CatchAsync<OperationCanceledException>(async () => await pending);
+		Assert.Multiple(() =>
+		{
+			Assert.That(_tracker.Current!.State, Is.EqualTo(StoreRegistryRefreshRunState.Cancelled));
+			Assert.That(_tracker.Current.Entries[^1].Step, Is.EqualTo(StoreRegistryRefreshStep.Cancelled));
 		});
 	}
 
