@@ -45,6 +45,7 @@ public class RestartAdbServerRequestMessageHandler
 			ServerStartedByMacroDeck = view.ServerStartedByMacroDeck,
 			UsbConnectionsEnabled = view.UsbConnectionsEnabled,
 			DefaultDeviceSerial = view.DefaultDeviceSerial,
+			StopServerOnExit = view.StopServerOnExit,
 			ActivePublicPort = view.ActivePublicPort,
 			DeviceSidePortCandidates = AdbUsbTunnelPorts.DeviceSideCandidates,
 			Devices = view.Devices,

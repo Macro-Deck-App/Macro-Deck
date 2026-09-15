@@ -12373,6 +12373,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.Adb.StatusHeading" xml:space="preserve">
     <value>Status</value>
   </data>
+  <data name="Settings.Adb.StopServerOnExitDescription" xml:space="preserve">
+    <value>Stoppt den ADB-Server, wenn Macro Deck beendet, neu gestartet oder aktualisiert wird, aber nur, wenn Macro Deck ihn gestartet hat. Andere Programme, die ADB nutzen, etwa Android Studio, verlieren dann ihre Verbindung.</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitLabel" xml:space="preserve">
+    <value>ADB-Server beim Beenden von Macro Deck stoppen</value>
+  </data>
   <data name="Settings.Adb.UncleanShutdown.One" xml:space="preserve">
     <value>Macro Deck wurde beim letzten Mal nicht ordnungsgemäß beendet. {count} verbleibende USB-Verbindung wurde bereinigt.</value>
     <comment>[plural]</comment>

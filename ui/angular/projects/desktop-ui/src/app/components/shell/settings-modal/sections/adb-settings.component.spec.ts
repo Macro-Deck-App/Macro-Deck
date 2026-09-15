@@ -38,6 +38,7 @@ describe('AdbSettingsComponent', () => {
     serverStartedByMacroDeck: false,
     usbConnectionsEnabled: true,
     defaultDeviceSerial: 'R58M12ABCDE',
+    stopServerOnExit: false,
     activePublicPort: 8193,
     deviceSidePortCandidates: [58193, 58194],
     devices: [device],
@@ -58,6 +59,7 @@ describe('AdbSettingsComponent', () => {
       executablePath: request.executablePath ?? null,
       usbConnectionsEnabled: request.usbConnectionsEnabled ?? resolved.usbConnectionsEnabled,
       defaultDeviceSerial: request.defaultDeviceSerial ?? null,
+      stopServerOnExit: request.stopServerOnExit ?? resolved.stopServerOnExit,
       success: true,
       error: null,
     }));
@@ -183,6 +185,31 @@ describe('AdbSettingsComponent', () => {
     await fixture.whenStable();
 
     expect(api.updateAdbSettings).toHaveBeenCalledOnceWith(jasmine.objectContaining({ enabled: true }));
+  });
+
+  it('turns on stopping the ADB server on exit, warning that other programs are affected', async () => {
+    const fixture = await create();
+
+    const row = Array.from(fixture.nativeElement.querySelectorAll('shared-settings-row') as NodeListOf<HTMLElement>)
+      .find(candidate => candidate.textContent!.includes('Stop ADB server when Macro Deck exits'))!;
+    expect(row.textContent).toContain('Android Studio');
+    const toggle = row.querySelector('shared-toggle-switch .ts-input') as HTMLInputElement;
+    expect(toggle.checked).toBeFalse();
+
+    toggle.click();
+    await fixture.whenStable();
+
+    expect(api.updateAdbSettings).toHaveBeenCalledOnceWith(jasmine.objectContaining({ stopServerOnExit: true }));
+  });
+
+  it('keeps the stored stop-on-exit choice when another setting is saved', async () => {
+    installApi({ stopServerOnExit: true });
+    const fixture = await create();
+
+    await fixture.componentInstance.setUsbConnectionsEnabled(false);
+
+    expect(api.updateAdbSettings)
+      .toHaveBeenCalledOnceWith(jasmine.objectContaining({ usbConnectionsEnabled: false, stopServerOnExit: true }));
   });
 
   it('never mentions reverse tunnels or forwarding in the USB connections copy', async () => {

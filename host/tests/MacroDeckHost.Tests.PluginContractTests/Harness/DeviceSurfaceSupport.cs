@@ -270,7 +270,8 @@ internal sealed class ContractAppPreferences : IAppPreferenceService
 	public Task<AdbSettings> SetAdb(bool? enabled,
 		string? executablePath,
 		bool? usbConnectionsEnabled,
-		string? defaultDeviceSerial) => throw new NotSupportedException();
+		string? defaultDeviceSerial,
+		bool? stopServerOnExit) => throw new NotSupportedException();
 
 	public Task<DeveloperSettings> GetDeveloper() => throw new NotSupportedException();
 

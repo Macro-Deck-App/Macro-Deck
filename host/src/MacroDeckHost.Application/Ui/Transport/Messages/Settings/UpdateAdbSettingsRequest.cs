@@ -9,4 +9,6 @@ public class UpdateAdbSettingsRequest
 	public bool? UsbConnectionsEnabled { get; set; }
 
 	public string? DefaultDeviceSerial { get; set; }
+
+	public bool? StopServerOnExit { get; set; }
 }
