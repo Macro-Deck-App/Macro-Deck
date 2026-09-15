@@ -50,8 +50,18 @@ internal sealed class StoreControllerTests
 			new StoreOperationCancellation(),
 			new StoreInstallConsent());
 
-		_controller = new StoreController(_catalogQuery,
-			new FakeStoreRegistryRefresher(),
+		_uninstallService = new FakeStoreUninstallService();
+		_controller = CreateController(new FakeStoreRegistryRefresher(),
+			new StoreRegistryRefreshTracker(TimeProvider.System));
+	}
+
+	[TearDown]
+	public void TearDown() => _paths.Cleanup();
+
+	private StoreController CreateController(IStoreRegistryRefresher refresher,
+		IStoreRegistryRefreshTracker refreshTracker) =>
+		new(_catalogQuery,
+			refresher,
 			_installCoordinator,
 			_tracker,
 			new FakeStoreUpdateDetector(),
@@ -61,17 +71,58 @@ internal sealed class StoreControllerTests
 			_paths,
 			StoreRegistryOptions.Default,
 			new RecordingMediator(),
-			_uninstallService = new FakeStoreUninstallService())
+			_uninstallService,
+			refreshTracker)
 		{
 			ControllerContext = new ControllerContext
 			{
 				HttpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext()
 			}
 		};
-	}
 
-	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	[Test]
+	public async Task A_refresh_requested_while_one_runs_joins_it_and_every_session_sees_the_same_run()
+	{
+		Directory.CreateDirectory(_paths.StoreRegistryDirectory);
+		Directory.CreateDirectory(_paths.StoreRegistryStagingDirectory);
+		var fixture = new StoreRegistryFixture { SignedAt = DateTimeOffset.UtcNow };
+		fixture.AddPackage("plugin", PluginId, "1.0.0", name: "Hue Bridge");
+		fixture.ManifestHold = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var refreshTracker = new StoreRegistryRefreshTracker(TimeProvider.System);
+		using var lifetime = new StubHostApplicationLifetime();
+		using var refresher = new StoreRegistryRefresher(fixture.Build(),
+			StoreRegistryOptions.Default with
+			{
+				BaseUrl = new Uri(StoreRegistryFixture.BaseUrl),
+				RootPublicKeyOverride = MacroDeck.Signing.TestSupport.TestPki.Root.PublicKey
+			},
+			new JsonStoreRegistryStateStore(_paths, Serilog.Core.Logger.None),
+			new StoreRegistryReader(Serilog.Core.Logger.None),
+			_catalog,
+			_paths,
+			TimeProvider.System,
+			refreshTracker,
+			lifetime,
+			Serilog.Core.Logger.None);
+		var controller = CreateController(refresher, refreshTracker);
+
+		var started = controller.RefreshRegistry(CancellationToken.None);
+		await fixture.ManifestRequested.Task.WaitAsync(TimeSpan.FromSeconds(10));
+		var joined = controller.RefreshRegistry(CancellationToken.None);
+		var status = await controller.GetStatus();
+		fixture.ManifestHold.SetResult();
+		var responses = await Task.WhenAll(started, joined);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.ManifestRequests, Is.EqualTo(1));
+			Assert.That(status.RefreshRun!.State, Is.EqualTo(StoreRegistryRefreshRunState.Running));
+			Assert.That(status.Registry.Refreshing, Is.True);
+			Assert.That(responses.Select(response => response.RefreshRun!.Id), Is.All.EqualTo(status.RefreshRun.Id));
+			Assert.That(responses.Select(response => response.Success), Is.All.True, responses[0].Error?.Message.ToString());
+			Assert.That(responses[0].RefreshRun!.State, Is.EqualTo(StoreRegistryRefreshRunState.Succeeded));
+		});
+	}
 
 	[Test]
 	public void An_uninitialised_registry_answers_registry_unavailable_not_an_empty_catalog()
@@ -363,6 +414,10 @@ internal sealed class FakeStoreRegistryRefresher : IStoreRegistryRefresher
 	public StoreRegistryStatus Status => StoreRegistryStatus.Unavailable;
 
 	public Task<Result<RegistryRefreshError>> Refresh(CancellationToken cancellationToken = default) =>
+		throw new NotSupportedException();
+
+	public Task<Result<RegistryRefreshError>> Refresh(StoreRegistryRefreshTrigger trigger,
+		CancellationToken cancellationToken = default) =>
 		throw new NotSupportedException();
 
 	public Task LoadCachedRegistry(CancellationToken cancellationToken = default) => Task.CompletedTask;

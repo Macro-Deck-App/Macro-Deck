@@ -2,7 +2,13 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Observable, Subject } from 'rxjs';
 
-import { GetStoreCatalogResponse, StoreCatalogItemBody, StoreRegistryStatusBody } from '@macro-deck/runtime';
+import {
+  GetStoreCatalogResponse,
+  GetStoreStatusResponse,
+  StoreCatalogItemBody,
+  StoreRegistryRefreshRunBody,
+  StoreRegistryStatusBody,
+} from '@macro-deck/runtime';
 import { ApiService } from '@shared';
 import { STORE_CATALOG_PAGE_SIZE, StoreCatalogQuery, StoreCatalogService } from './store-catalog.service';
 
@@ -28,6 +34,21 @@ function registry(overrides: Partial<StoreRegistryStatusBody> = {}): StoreRegist
   };
 }
 
+function refreshRun(overrides: Partial<StoreRegistryRefreshRunBody> = {}): StoreRegistryRefreshRunBody {
+  return {
+    hostInstanceId: 'host-a',
+    id: 'run-1',
+    revision: 1,
+    trigger: 'Manual',
+    state: 'Running',
+    startedAt: '2026-09-15T10:00:00Z',
+    filesCompleted: 0,
+    filesTotal: 0,
+    entries: [],
+    ...overrides,
+  };
+}
+
 const browse: StoreCatalogQuery = { kinds: ['Plugin', 'IconPack'], section: 'name' };
 
 describe('StoreCatalogService', () => {
@@ -40,8 +61,9 @@ describe('StoreCatalogService', () => {
     connectionState = signal<string>('disconnected');
     notifications = new Map();
     const apiSpy = jasmine.createSpyObj<ApiService>('ApiService', [
-      'onNotification', 'getStoreCatalog', 'refreshStoreRegistry',
+      'onNotification', 'getStoreCatalog', 'refreshStoreRegistry', 'getStoreStatus',
     ]);
+    apiSpy.getStoreStatus.and.resolveTo({ registry: registry(), developerMode: false, refreshRun: null });
     apiSpy.onNotification.and.callFake((method: string) => {
       let subject = notifications.get(method);
       if (!subject) {
@@ -199,5 +221,79 @@ describe('StoreCatalogService', () => {
     await service.load(browse);
 
     expect(service.registry()?.stale).toBeTrue();
+  });
+
+  describe('registry refresh', () => {
+    async function settle(): Promise<void> {
+      TestBed.tick();
+      for (let attempt = 0; attempt < 10; attempt++) {
+        await Promise.resolve();
+      }
+    }
+
+    function pushRun(run: StoreRegistryRefreshRunBody): void {
+      notifications.get('StoreRegistryRefreshChangedEvent')?.next({ run });
+    }
+
+    it('does not ask the host for a second refresh while one is running', async () => {
+      pushRun(refreshRun());
+
+      await service.refreshRegistry();
+
+      expect(service.refreshing()).toBeTrue();
+      expect(api.refreshStoreRegistry).not.toHaveBeenCalled();
+    });
+
+    it('shows a refresh another session started as soon as this one connects', async () => {
+      api.getStoreStatus.and.resolveTo({ registry: registry(), developerMode: false, refreshRun: refreshRun() });
+
+      connectionState.set('connected');
+      await settle();
+
+      expect(service.refreshing()).toBeTrue();
+    });
+
+    it('keeps a newer pushed result over an older status answer that arrives after it', async () => {
+      pushRun(refreshRun({ revision: 50 }));
+      let answer: (value: GetStoreStatusResponse) => void = () => undefined;
+      api.getStoreStatus.and.returnValue(new Promise<GetStoreStatusResponse>(resolve => {
+        answer = resolve;
+      }));
+      api.refreshStoreRegistry.and.resolveTo({ success: true, registry: registry() });
+
+      connectionState.set('connected');
+      await settle();
+      pushRun(refreshRun({ revision: 51, state: 'Succeeded' }));
+      answer({ registry: registry(), developerMode: false, refreshRun: refreshRun({ revision: 50 }) });
+      await settle();
+      await service.refreshRegistry();
+
+      expect(service.refreshRun()?.state).toBe('Succeeded');
+      expect(api.refreshStoreRegistry).toHaveBeenCalled();
+    });
+
+    it('lets go of a running refresh the restarted host no longer knows about', async () => {
+      pushRun(refreshRun({ revision: 50 }));
+
+      connectionState.set('connected');
+      await settle();
+
+      expect(service.refreshing()).toBeFalse();
+    });
+
+    it('takes a restarted host at its word even though its counter starts over', async () => {
+      pushRun(refreshRun({ revision: 50 }));
+      api.getStoreStatus.and.resolveTo({
+        registry: registry(),
+        developerMode: false,
+        refreshRun: refreshRun({ hostInstanceId: 'host-b', revision: 1, state: 'Succeeded' }),
+      });
+
+      connectionState.set('connected');
+      await settle();
+
+      expect(service.refreshRun()?.hostInstanceId).toBe('host-b');
+      expect(service.refreshing()).toBeFalse();
+    });
   });
 });
