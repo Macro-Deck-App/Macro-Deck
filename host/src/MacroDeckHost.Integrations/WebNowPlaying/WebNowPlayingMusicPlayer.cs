@@ -12,17 +12,12 @@ internal sealed class WebNowPlayingMusicPlayer(WebNowPlayingPlayers players) : I
 
 	private int _eventId;
 
+	// The extension drops its socket whenever the browser idles its worker, so no connection means
+	// nothing is playing, not an outage.
 	public Task<MusicPlayerState> GetStateAsync(CancellationToken cancellationToken = default)
-	{
-		if (!players.HasConnections)
-		{
-			return Task.FromResult(MusicPlayerState.Unavailable());
-		}
-
-		return Task.FromResult(players.Active() is { } active
+		=> Task.FromResult(players.Active() is { } active
 			? ToState(active)
 			: new MusicPlayerState { IsConnected = true, PlaybackState = PlaybackState.Stopped });
-	}
 
 	public Task<MusicPlayerArtwork?> GetArtworkAsync(string artworkId, CancellationToken cancellationToken = default)
 		=> Task.FromResult(players.Artwork(artworkId) is { } cover ? new MusicPlayerArtwork(cover, "image/png") : null);
