@@ -16301,6 +16301,18 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.Slider.Horizontal" xml:space="preserve">
     <value>Horizontal</value>
   </data>
+  <data name="Widgets.Slider.InteractionMode" xml:space="preserve">
+    <value>Modo de interacción</value>
+  </data>
+  <data name="Widgets.Slider.InteractionAbsolute" xml:space="preserve">
+    <value>Absoluto</value>
+  </data>
+  <data name="Widgets.Slider.InteractionRelative" xml:space="preserve">
+    <value>Relativo</value>
+  </data>
+  <data name="Widgets.Slider.InteractionModeDescription" xml:space="preserve">
+    <value>Absoluto salta a donde tocas. Relativo deja el valor donde está y lo mueve según lo que arrastres.</value>
+  </data>
   <data name="Widgets.Slider.LegacyActionBindingNotice" xml:space="preserve">
     <value>Este deslizador todavía tiene una acción vinculada de una versión anterior. Ya no se usa y se elimina la próxima vez que guardes.</value>
   </data>

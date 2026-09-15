@@ -39,6 +39,7 @@ export const UiComponentProperties = {
   Level: 'level',
   Step: 'step',
   LevelColor: 'levelColor',
+  Interaction: 'interaction',
   BorderStyle: 'borderStyle',
   BorderColor: 'borderColor',
   Corner: 'corner',

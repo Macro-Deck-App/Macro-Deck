@@ -250,6 +250,10 @@ public class ComponentProfileConformanceFixtureTests
 			Assert.That(bound.Properties.ContainsKey("direction"), Is.False);
 			Assert.That(empty.Properties["level"].GetDouble(), Is.Zero);
 
+			Assert.That(commitOnly.Properties["interaction"].GetString(),
+				Is.EqualTo(UiComponentSliderInteractions.Relative));
+			Assert.That(bound.Properties.ContainsKey("interaction"), Is.False);
+
 			// One step, to a primitive the frozen four already contain - a reader too old for the slider
 			// still shows the right level, and honestly cannot drag it.
 			Assert.That(bound.Fallback!.Type, Is.EqualTo(UiComponents.RangeBar));

@@ -237,6 +237,9 @@ internal static class SliderWidgetView
 			Key = "track",
 			Fill = true,
 			Direction = isVertical ? UiValue.Of(UiComponentDirections.Vertical) : UiValue.None<string>(),
+			Interaction = config.IsRelative
+				? UiValue.Of(UiComponentSliderInteractions.Relative)
+				: UiValue.None<string>(),
 			Level = level,
 			Step = StepValue(config, state),
 			LevelColor = UiValue.Optional(() => ColorValue(accent.Value)),

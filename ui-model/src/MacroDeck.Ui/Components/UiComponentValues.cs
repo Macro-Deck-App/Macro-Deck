@@ -450,6 +450,29 @@ public static class UiComponentButtonCorners
 	public static readonly IReadOnlyList<string> WellKnown = [Tile];
 }
 
+/// <summary>
+/// How a pointer on a <see cref="UiSlider" /> maps to its level, carried in
+/// <see cref="UiComponentProperties.Interaction" />.
+///
+/// <para>
+/// There is deliberately no value spelling absolute: absence already spells it, and a reader treats an
+/// unknown value as absent. <b>An older reader ignores the key and stays absolute</b>, which still draws and
+/// drives a working slider.
+/// </para>
+/// </summary>
+public static class UiComponentSliderInteractions
+{
+	/// <summary>
+	/// A press leaves the level where it is; the level then follows the pointer's travel from where the
+	/// press began, scaled so the full length of the box spans the full <c>0..1</c> range. See
+	/// <see cref="UiSlider" /> for the reader rules.
+	/// </summary>
+	public const string Relative = "relative";
+
+	/// <summary>The interactions this profile ships. A reader treats one it does not know as absent.</summary>
+	public static readonly IReadOnlyList<string> WellKnown = [Relative];
+}
+
 /// <summary>How a button's artwork fills its box.</summary>
 public static class UiComponentImageFits
 {

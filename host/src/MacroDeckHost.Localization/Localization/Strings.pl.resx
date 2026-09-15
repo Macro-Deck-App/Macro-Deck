@@ -16301,6 +16301,18 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Slider.Horizontal" xml:space="preserve">
     <value>Poziomo</value>
   </data>
+  <data name="Widgets.Slider.InteractionMode" xml:space="preserve">
+    <value>Tryb interakcji</value>
+  </data>
+  <data name="Widgets.Slider.InteractionAbsolute" xml:space="preserve">
+    <value>Bezwzględny</value>
+  </data>
+  <data name="Widgets.Slider.InteractionRelative" xml:space="preserve">
+    <value>Względny</value>
+  </data>
+  <data name="Widgets.Slider.InteractionModeDescription" xml:space="preserve">
+    <value>Tryb bezwzględny ustawia wartość w miejscu dotknięcia. Tryb względny pozostawia wartość i przesuwa ją o długość przeciągnięcia.</value>
+  </data>
   <data name="Widgets.Slider.LegacyActionBindingNotice" xml:space="preserve">
     <value>Ten suwak nadal zawiera powiązanie z akcją ze starszej wersji. Nie jest już używane i zostanie usunięte przy następnym zapisie.</value>
   </data>

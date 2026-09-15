@@ -12,6 +12,8 @@ public sealed record SliderWidgetData
 
 	public bool IsVertical { get; init; }
 
+	public bool IsRelative { get; init; }
+
 	public string? Color { get; init; }
 
 	public string? LabelColor { get; init; }
@@ -61,6 +63,7 @@ public sealed record SliderWidgetData
 		{
 			Label = Trimmed(ReadString(data, "label")),
 			IsVertical = string.Equals(ReadString(data, "orientation"), "vertical", StringComparison.Ordinal),
+			IsRelative = string.Equals(ReadString(data, "interaction"), "relative", StringComparison.Ordinal),
 			Color = WidgetColor.Normalize(ReadString(data, "color")),
 			LabelColor = WidgetColor.Normalize(ReadString(data, "labelColor")),
 			BackgroundColor = WidgetColor.Normalize(ReadString(data, "backgroundColor")),

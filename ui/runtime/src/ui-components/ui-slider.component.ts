@@ -1,6 +1,6 @@
 import { UiNode } from '../ui-framework/ui-node.interface';
-import { UiComponents } from './ui-component-types';
-import { emitsEvent, nodeNumber } from '../ui-framework/node-properties.util';
+import { UiComponents, UiComponentSliderInteractions } from './ui-component-types';
+import { emitsEvent, nodeNumber, nodeString } from '../ui-framework/node-properties.util';
 import { nodeClaimsValue } from '../ui-framework/node-gestures';
 import { UiComponentProperties } from './component-properties';
 import { nodeThicknessPx } from './style';
@@ -12,6 +12,7 @@ import {
   sliderThumbDiameterPx,
   sliderThumbOffsetPx,
   sliderThumbStrokePx,
+  snapSliderLevel,
 } from './bar';
 import { UiComponentEvents } from './component-events';
 import { nodeLength, resolveLength } from '../ui-framework/length';
@@ -44,6 +45,16 @@ export interface UiSliderState {
   pendingAdjustLevel: number | null;
   lastAdjustSentAt: number | null;
   lastSentLevel: number | null;
+  relative: boolean;
+  startLevel: number;
+  dragLevel: number;
+  lastPointerX: number;
+  lastPointerY: number;
+  levelMoved: boolean;
+}
+
+function sliderIsRelative(node: UiNode): boolean {
+  return nodeString(node, UiComponentProperties.Interaction) === UiComponentSliderInteractions.Relative;
 }
 
 function clearTimer(timer: ReturnType<typeof setTimeout> | null): null {
@@ -131,6 +142,53 @@ function applySliderLevel(element: HTMLElement, event: PointerEvent, ctx: UiComp
   queueSliderAdjust(ctx, node, level);
 }
 
+function startRelativeInteraction(event: PointerEvent, ctx: UiComponentContext<UiSliderState>): void {
+  const node = ctx.current();
+  const state = ctx.state;
+  const level = sliderDisplayLevel(node, state);
+  state.startLevel = level;
+  state.dragLevel = level;
+  state.levelMoved = false;
+  state.lastPointerX = event.clientX;
+  state.lastPointerY = event.clientY;
+  state.lastSentLevel = level;
+  state.lastAdjustSentAt = null;
+  state.interactionLevel = level;
+  paintSliderLevel(node, ctx);
+}
+
+function applyRelativeLevel(element: HTMLElement, event: PointerEvent, ctx: UiComponentContext<UiSliderState>): void {
+  const state = ctx.state;
+  if (!state.tapMoved) return;
+
+  const node = ctx.current();
+  const vertical = sliderIsVertical(node);
+  const rect = element.getBoundingClientRect();
+  const extent = vertical ? rect.height : rect.width;
+  const travel = vertical ? state.lastPointerY - event.clientY : event.clientX - state.lastPointerX;
+  state.lastPointerX = event.clientX;
+  state.lastPointerY = event.clientY;
+  if (extent <= 0) return;
+
+  state.dragLevel = snapSliderLevel(state.dragLevel + travel / extent);
+  const step = nodeNumber(node, UiComponentProperties.Step);
+  const level = snapSliderLevel(state.dragLevel, step);
+  if (!state.levelMoved && level === snapSliderLevel(state.startLevel, step)) return;
+
+  state.levelMoved = true;
+  state.interactionLevel = level;
+  paintSliderLevel(node, ctx);
+  queueSliderAdjust(ctx, node, level);
+}
+
+function releaseUnmovedInteraction(ctx: UiComponentContext<UiSliderState>): void {
+  const state = ctx.state;
+  state.pointerId = null;
+  state.lastSentLevel = null;
+  state.interactionLevel = null;
+  paintSliderLevel(ctx.current(), ctx);
+}
+
 function endSliderInteraction(commit: boolean, ctx: UiComponentContext<UiSliderState>): void {
   const node = ctx.current();
   const state = ctx.state;
@@ -209,6 +267,12 @@ export const uiSliderComponent: UiComponentDefinition<UiSliderState> = {
       pendingAdjustLevel: null,
       lastAdjustSentAt: null,
       lastSentLevel: null,
+      relative: false,
+      startLevel: 0,
+      dragLevel: 0,
+      lastPointerX: 0,
+      lastPointerY: 0,
+      levelMoved: false,
     };
   },
 
@@ -232,8 +296,11 @@ export const uiSliderComponent: UiComponentDefinition<UiSliderState> = {
       state.tapStartX = pointer.clientX;
       state.tapStartY = pointer.clientY;
       state.tapMoved = false;
-      state.settleTimer = clearTimer(state.settleTimer);
-      state.settledLevel = null;
+      state.relative = sliderIsRelative(node);
+      if (!state.relative) {
+        state.settleTimer = clearTimer(state.settleTimer);
+        state.settledLevel = null;
+      }
 
       try {
         // Capture is what keeps the moves arriving once the pointer leaves the box mid-drag. Where it
@@ -243,7 +310,8 @@ export const uiSliderComponent: UiComponentDefinition<UiSliderState> = {
         // See above.
       }
 
-      applySliderLevel(element, pointer, ctx);
+      if (state.relative) startRelativeInteraction(pointer, ctx);
+      else applySliderLevel(element, pointer, ctx);
     });
 
     element.addEventListener('pointermove', (event: Event) => {
@@ -253,7 +321,8 @@ export const uiSliderComponent: UiComponentDefinition<UiSliderState> = {
       if (Math.hypot(pointer.clientX - state.tapStartX, pointer.clientY - state.tapStartY) > SLIDER_TAP_SLOP_PX) {
         state.tapMoved = true;
       }
-      applySliderLevel(element, pointer, ctx);
+      if (state.relative) applyRelativeLevel(element, pointer, ctx);
+      else applySliderLevel(element, pointer, ctx);
     });
 
     element.addEventListener('pointerup', (event: Event) => {
@@ -261,16 +330,18 @@ export const uiSliderComponent: UiComponentDefinition<UiSliderState> = {
       if (state.pointerId === null || pointer.pointerId !== state.pointerId) return;
       event.preventDefault();
       event.stopPropagation();
-      endSliderInteraction(true, ctx);
+      if (state.relative && !state.levelMoved) releaseUnmovedInteraction(ctx);
+      else endSliderInteraction(true, ctx);
       trackSliderTap(ctx, !state.tapMoved);
     });
 
     element.addEventListener('pointercancel', (event: Event) => {
       const pointer = event as PointerEvent;
       if (state.pointerId === null || pointer.pointerId !== state.pointerId) return;
-      // A gesture the OS took over is not a value the user chose to land on, so it is dropped rather
-      // than committed - the pill reverts to the producer's level.
-      endSliderInteraction(false, ctx);
+      // A gesture the OS took over is not a value the user chose to land on, so a moved level is dropped
+      // rather than committed; an unmoved relative press keeps the level it was holding.
+      if (state.relative && !state.levelMoved) releaseUnmovedInteraction(ctx);
+      else endSliderInteraction(false, ctx);
       state.lastTapAt = null;
     });
   },

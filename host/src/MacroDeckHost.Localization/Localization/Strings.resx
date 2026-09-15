@@ -16302,6 +16302,18 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Slider.Horizontal" xml:space="preserve">
     <value>Horizontal</value>
   </data>
+  <data name="Widgets.Slider.InteractionMode" xml:space="preserve">
+    <value>Interaction mode</value>
+  </data>
+  <data name="Widgets.Slider.InteractionAbsolute" xml:space="preserve">
+    <value>Absolute</value>
+  </data>
+  <data name="Widgets.Slider.InteractionRelative" xml:space="preserve">
+    <value>Relative</value>
+  </data>
+  <data name="Widgets.Slider.InteractionModeDescription" xml:space="preserve">
+    <value>Absolute jumps to where you touch. Relative leaves the value in place and moves it by how far you drag.</value>
+  </data>
   <data name="Widgets.Slider.LegacyActionBindingNotice" xml:space="preserve">
     <value>This slider still carries an action binding from an older version. It is no longer used and is removed the next time you save.</value>
   </data>

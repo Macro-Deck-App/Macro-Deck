@@ -35,6 +35,7 @@ public class SliderWidgetConfigTests
 		showLabel = true,
 		showValue = true,
 		orientation = "horizontal",
+		interaction = "absolute",
 		color = "#111111",
 		labelColor = "#222222",
 		backgroundColor = "#333333",
@@ -54,6 +55,7 @@ public class SliderWidgetConfigTests
 		host.ById("showLabel").Change(false);
 		host.ById("showValue").Change(false);
 		host.ById("orientation").Change("vertical");
+		host.ById("interaction").Change("relative");
 		host.ById("color").Change("#444444");
 		host.ById("labelColor").Change("#555555");
 		host.ById("backgroundColor").Change("#666666");
@@ -73,6 +75,7 @@ public class SliderWidgetConfigTests
 			Assert.That(WidgetDataSchema.Validate(schema!, composed), Is.Empty);
 			Assert.That(composed.GetProperty("label").GetString(), Is.EqualTo("Master"));
 			Assert.That(composed.GetProperty("orientation").GetString(), Is.EqualTo("vertical"));
+			Assert.That(SliderWidgetData.Parse(composed).IsRelative, Is.True);
 			Assert.That(composed.GetProperty("min").GetDouble(), Is.EqualTo(-60));
 			Assert.That(composed.GetProperty("border").GetProperty("style").GetString(), Is.EqualTo("comet"));
 		});
@@ -454,6 +457,7 @@ public class SliderWidgetConfigTests
 			["showLabel"] = host.ById("showLabel").Flag(UiConfigProperties.Value),
 			["showValue"] = host.ById("showValue").Flag(UiConfigProperties.Value),
 			["orientation"] = host.ById("orientation").Text(UiConfigProperties.Value),
+			["interaction"] = host.ById("interaction").Text(UiConfigProperties.Value),
 			["color"] = host.ById("color").Text(UiConfigProperties.Value),
 			["labelColor"] = host.ById("labelColor").Text(UiConfigProperties.Value),
 			["backgroundColor"] = host.ById("backgroundColor").Text(UiConfigProperties.Value),

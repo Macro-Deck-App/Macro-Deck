@@ -66,6 +66,21 @@ Direction = UiComponentDirections.Vertical,
 `Direction` is the axis the level travels along, not the element's axis in its parent. Vertical runs
 bottom to top - up is more.
 
+## Relative drag
+
+```csharp
+Interaction = UiComponentSliderInteractions.Relative,
+```
+
+By default a press jumps the level to the pointer. With `Interaction` set to `relative`, a press leaves the
+level where it is, and the level then moves by how far the pointer travels: a travel of the whole box
+length spans the whole `0..1` range, in either direction, clamped at both ends. Use it where users nudge a
+value, such as a volume, and a jump to the touch point would throw it far off. A tap moves nothing and
+sends neither `adjust` nor `change`.
+
+A reader that predates `interaction` ignores it and keeps the absolute behaviour, so the slider still
+works, only without the grab.
+
 ## Colour and fallback
 
 ```csharp
@@ -83,6 +98,7 @@ A reader without `ui.slider` draws the fallback, here the same level as a read-o
 | `Step` (`step`) | fraction of the track | Continuous | The granularity the level snaps to. |
 | `LevelColor` (`levelColor`) | `#rrggbb` | The reader's own accent colour | The filled span's colour. |
 | `Direction` (`direction`) | `horizontal`, `vertical` | `horizontal` - unlike `ui.stack` | The axis the level travels along. |
+| `Interaction` (`interaction`) | `relative` | Absolute: the level jumps to the pointer | How a pointer maps to the level - see [Relative drag](#relative-drag). An unknown value reads as absent. |
 | `Thickness` (`thickness`) | length | Left to the reader | The drawn track's thickness on the cross axis. |
 
 `LevelColor` is a literal colour, not a theme role - see [Colours and text](/ui/concepts/theming/).
@@ -92,12 +108,13 @@ A reader without `ui.slider` draws the fallback, here the same level as a read-o
 | Event | Fires when | Payload |
 |---|---|---|
 | `adjust` (`UiComponentEvents.Adjust`) | An intermediate level while the user is still working the control | The level, a bare number |
-| `change` (`UiComponentEvents.Change`) | The interaction ended, sent once | The level, a bare number |
+| `change` (`UiComponentEvents.Change`) | The interaction ended, sent once - not for a relative tap, see [Reader behaviour](#reader-behaviour) | The level, a bare number |
 | `double-press` (`UiComponentEvents.DoublePress`) | A second tap completed shortly after the first, neither one a drag | None |
 
 Declare `double-press` for an action on a double tap, such as resetting to a home level. Each tap is still an
 ordinary interaction and sends its own `change` first, so the handler sees the level the second tap set and
-replaces it. A reader that predates `double-press` never sends it, and the taps stay plain level changes.
+replaces it. A reader that predates `double-press` never sends it, and the taps stay plain level changes. On a
+relative slider a tap moves nothing, so `double-press` arrives on its own.
 
 ## Children
 
@@ -125,6 +142,13 @@ or `Fill` if declared, otherwise its content extent. See [Sizing](/ui/concepts/s
 - **Double tap:** with `double-press` declared, a tap released within 400 ms of the previous one and starting
   within 24 px of it, neither moving more than a few pixels, sends `double-press` right after its `change`.
   A drag or a cancelled gesture in between starts over.
+- **Relative drag** (`interaction: relative`), overriding the input, rate-and-order and double-tap rules
+  above where they differ: a press paints and sends nothing. Within the few pixels of tap slop the level does
+  not move; past it, the level is the one at the press plus the pointer's travel along `direction` since the
+  press, divided by the box's measured length on that axis (up is more when vertical), clamped to `0..1` after
+  every move so reversing at an end moves back at once. `step` snaps as usual, and the level counts as moved
+  only once that snapped level differs from the snapped level at the press. An interaction whose level never
+  moved sends neither `adjust` nor `change`; one that moved sends `change` even if it ended where it began.
 - **Geometry is normative:** the track and thumb are implemented exactly; the fixtures in
   `ui-model/fixtures/component-profile/` resolve both at two sizes.
 

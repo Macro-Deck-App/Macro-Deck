@@ -32,6 +32,7 @@ internal static class SliderWidgetConfigView
 		// UiBinding<UiIconReference> at the generic level.
 		var icon = new UiState<UiIconReference>(ReadIcon(data)!);
 		var orientation = new UiState<string>(WidgetConfigJson.ReadString(data, "orientation") ?? "horizontal");
+		var interaction = new UiState<string>(WidgetConfigJson.ReadString(data, "interaction") ?? "absolute");
 		var color = new UiState<string>(WidgetConfigJson.ReadString(data, "color") ?? string.Empty);
 		var labelColor = new UiState<string>(WidgetConfigJson.ReadString(data, "labelColor") ?? string.Empty);
 		var backgroundColor =
@@ -167,6 +168,17 @@ internal static class SliderWidgetConfigView
 						Options = UiValue.Of<IReadOnlyList<UiOption>>([
 							UiOption.Of("horizontal", AppStrings.Widgets.Slider.Horizontal()),
 							UiOption.Of("vertical", AppStrings.Widgets.Slider.Vertical()),
+						]),
+					},
+					new UiChoiceInput
+					{
+						Key = "interaction",
+						Label = AppStrings.Widgets.Slider.InteractionMode(),
+						Description = AppStrings.Widgets.Slider.InteractionModeDescription(),
+						Binding = Bind.To(interaction),
+						Options = UiValue.Of<IReadOnlyList<UiOption>>([
+							UiOption.Of("absolute", AppStrings.Widgets.Slider.InteractionAbsolute()),
+							UiOption.Of("relative", AppStrings.Widgets.Slider.InteractionRelative()),
 						]),
 					},
 					// All three reset to unset rather than to a literal hex (issue #896): each one's real

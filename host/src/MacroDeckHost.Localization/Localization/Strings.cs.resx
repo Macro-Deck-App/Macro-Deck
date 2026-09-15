@@ -16301,6 +16301,18 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Slider.Horizontal" xml:space="preserve">
     <value>Vodorovně</value>
   </data>
+  <data name="Widgets.Slider.InteractionMode" xml:space="preserve">
+    <value>Režim ovládání</value>
+  </data>
+  <data name="Widgets.Slider.InteractionAbsolute" xml:space="preserve">
+    <value>Absolutní</value>
+  </data>
+  <data name="Widgets.Slider.InteractionRelative" xml:space="preserve">
+    <value>Relativní</value>
+  </data>
+  <data name="Widgets.Slider.InteractionModeDescription" xml:space="preserve">
+    <value>Absolutní režim nastaví hodnotu podle místa dotyku. Relativní režim hodnotu ponechá a posune ji o délku tažení.</value>
+  </data>
   <data name="Widgets.Slider.LegacyActionBindingNotice" xml:space="preserve">
     <value>Tento posuvník stále obsahuje vazbu na akci ze starší verze. Už se nepoužívá a při příštím uložení bude odstraněna.</value>
   </data>
