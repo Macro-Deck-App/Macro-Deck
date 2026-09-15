@@ -8,18 +8,6 @@ import {
 export const DEFAULT_OFF_STATE_ID = 'off';
 export const DEFAULT_ON_STATE_ID = 'on';
 
-export function defaultStateDefinitions(seed?: ActionButtonData): ButtonStateDefinition[] {
-  // `off` deliberately carries no background: seeding it from the single-state colour, while that
-  // colour also stayed on as the root fallback, is what made a background the user had moved away
-  // from reappear on the next save. It falls through to the reader's own accent instead. `on` keeps a
-  // colour of its own - a fresh default rather than anything carried over - so a button that has just
-  // gained states still reads as two visibly different ones.
-  return [
-    { id: DEFAULT_OFF_STATE_ID, label: 'Off', appearance: { label: seed?.label } },
-    { id: DEFAULT_ON_STATE_ID, label: 'On', appearance: { backgroundColor: '#ef4444', label: seed?.label } },
-  ];
-}
-
 export function createStateId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();

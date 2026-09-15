@@ -153,13 +153,9 @@ internal static class ActionButtonWidgetConfigView
 
 		// ---- mutation helpers ----------------------------------------------------------------------------
 
-		// The Off/On pair a button starts with the first time it enters state mode. "off" deliberately
-		// carries no background of its own and falls through to the reader's accent, while "on" gets a
-		// colour, so a button that has just gained states already reads as two visibly different faces.
-		// Both inherit the caption the button had, so gaining states never blanks its label.
 		List<ActionButtonStateEntry> DefaultStatePair()
 		{
-			JsonObject Appearance(string? background)
+			JsonObject Appearance(string background)
 			{
 				var appearance = new JsonObject();
 
@@ -168,18 +164,15 @@ internal static class ActionButtonWidgetConfigView
 					appearance["label"] = label.Value;
 				}
 
-				if (background is not null)
-				{
-					appearance["backgroundColor"] = background;
-				}
+				appearance["backgroundColor"] = background;
 
 				return appearance;
 			}
 
 			return
 			[
-				new ActionButtonStateEntry(ActionButtonStateModel.DefaultOffStateId, "Off", Appearance(null)),
-				new ActionButtonStateEntry(ActionButtonStateModel.DefaultOnStateId, "On", Appearance("#ef4444")),
+				new ActionButtonStateEntry(ActionButtonStateModel.DefaultOffStateId, "Off", Appearance("#ef4444")),
+				new ActionButtonStateEntry(ActionButtonStateModel.DefaultOnStateId, "On", Appearance("#16a34a")),
 			];
 		}
 

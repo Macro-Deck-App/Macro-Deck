@@ -1,31 +1,8 @@
 import { ActionButtonData, ButtonStateDefinition } from './widget.interface';
 import {
-  DEFAULT_OFF_STATE_ID,
-  DEFAULT_ON_STATE_ID,
   adoptProvidedStates,
-  defaultStateDefinitions,
   resolveActiveStateId,
 } from './button-state.util';
-
-describe('defaultStateDefinitions', () => {
-  it('yields an Off/On pair with distinct, reserved ids', () => {
-    const states = defaultStateDefinitions();
-
-    expect(states.map(s => s.id)).toEqual([DEFAULT_OFF_STATE_ID, DEFAULT_ON_STATE_ID]);
-    expect(states.map(s => s.label)).toEqual(['Off', 'On']);
-    expect(new Set(states.map(s => s.id)).size).toBe(2);
-  });
-
-  it('never carries a single-state background into the states it seeds', () => {
-    // Turning State Mode on used to copy the single-state colour into `off` while leaving it as the
-    // root fallback too, so a colour the user had moved away from came back on the next save. `on`
-    // keeps a default of its own, which was never carried over from the button.
-    const states = defaultStateDefinitions({ label: 'Play', backgroundColor: '#22c55e' });
-
-    expect(states.map(s => s.appearance?.backgroundColor)).toEqual([undefined, '#ef4444']);
-    expect(states.map(s => s.appearance?.label)).toEqual(['Play', 'Play']);
-  });
-});
 
 describe('adoptProvidedStates', () => {
   it('preserves each state\'s authored appearance by matching id across a label change', () => {
