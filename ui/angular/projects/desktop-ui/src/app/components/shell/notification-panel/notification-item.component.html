@@ -1,6 +1,6 @@
 <div class="ni-row">
   <span class="ni-severity {{ severityClass }}">
-    <span class="icon {{ severityIcon }} icon-sm"></span>
+    <span class="icon {{ severityIcon }} icon-md"></span>
   </span>
 
   <div class="ni-body">
@@ -27,26 +27,27 @@
 
     <div class="ni-actions">
       @for (item of actionList; track item.kind) {
-        <button type="button" class="ni-action" (click)="onAction($event, item)">
-          {{ labelFor(item) }}
-        </button>
+        <shared-button class="ni-action" variant="secondary" (click)="onAction($event, item)">
+          <span>{{ labelFor(item) }}</span>
+        </shared-button>
       }
       @if (notification.cancelKey) {
-        <button type="button" class="ni-action ni-cancel-action" (click)="onCancel($event)">
-          {{ commonStrings.Common.Cancel | translate }}
-        </button>
+        <shared-button class="ni-action ni-cancel-action" variant="danger-ghost" (click)="onCancel($event)">
+          <span>{{ commonStrings.Common.Cancel | translate }}</span>
+        </shared-button>
       }
     </div>
   </div>
 
   <!-- Running work has no dismiss: it goes away by finishing. Cancel above is how you stop it. -->
   @if (!notification.progress) {
-    <button
-      type="button"
+    <shared-button
       class="ni-dismiss"
-      [attr.aria-label]="appStrings.Shell.Notifications.Dismiss | translate"
+      variant="ghost"
+      iconOnly
+      [ariaLabel]="appStrings.Shell.Notifications.Dismiss | translate"
       (click)="onDismiss($event)">
-      <span class="icon icon-x icon-xs"></span>
-    </button>
+      <span class="icon icon-x icon-sm" aria-hidden="true"></span>
+    </shared-button>
   }
 </div>
