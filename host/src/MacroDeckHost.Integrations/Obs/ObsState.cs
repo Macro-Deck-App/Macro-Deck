@@ -10,6 +10,8 @@ internal sealed record ObsState
 
 	public string? PreviewScene { get; init; }
 
+	public string? CurrentProfile { get; init; }
+
 	public bool IsRecording { get; init; }
 
 	public bool RecordingPaused { get; init; }
@@ -55,6 +57,7 @@ internal sealed record ObsState
 		IsConnected = true,
 		CurrentScene = status.CurrentScene,
 		PreviewScene = status.PreviewScene,
+		CurrentProfile = status.CurrentProfile,
 		IsRecording = status.IsRecording,
 		RecordingPaused = status.RecordingPaused,
 		RecordingTimecode = status.RecordingTimecode,

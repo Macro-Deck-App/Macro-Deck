@@ -33,6 +33,8 @@ internal sealed class FakeObsClient : IObsClient
 
 	public IReadOnlyList<string> InputNames { get; set; } = [];
 
+	public IReadOnlyList<string> ProfileNames { get; set; } = [];
+
 	public IReadOnlyList<string> SourceNames { get; set; } = [];
 
 	public Dictionary<string, float> InputVolumes { get; } = new(StringComparer.Ordinal);
@@ -116,6 +118,10 @@ internal sealed class FakeObsClient : IObsClient
 	public void SetCurrentScene(string sceneName) => Calls.Add($"SetCurrentScene:{sceneName}");
 
 	public void SetPreviewScene(string sceneName) => Calls.Add($"SetPreviewScene:{sceneName}");
+
+	public IReadOnlyList<string> GetProfileNames() => ProfileNames;
+
+	public void SetCurrentProfile(string profileName) => Calls.Add($"SetCurrentProfile:{profileName}");
 
 	public void StartRecord() => Calls.Add("StartRecord");
 
