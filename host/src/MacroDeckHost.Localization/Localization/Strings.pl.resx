@@ -16283,6 +16283,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Wybierz ikonę</value>
   </data>
+  <data name="Widgets.Slider.CustomStep" xml:space="preserve">
+    <value>Własny krok</value>
+  </data>
+  <data name="Widgets.Slider.CustomStepDescription" xml:space="preserve">
+    <value>Używany jest własny krok zamiast kroku określonego przez zmienną.</value>
+  </data>
   <data name="Widgets.Slider.DefaultVariableDescription" xml:space="preserve">
     <value>Bez zmiennej używana jest własna zmienna widżetu slider_value.</value>
   </data>

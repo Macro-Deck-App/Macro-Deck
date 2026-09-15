@@ -16283,6 +16283,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Choisir une icône</value>
   </data>
+  <data name="Widgets.Slider.CustomStep" xml:space="preserve">
+    <value>Pas personnalisé</value>
+  </data>
+  <data name="Widgets.Slider.CustomStepDescription" xml:space="preserve">
+    <value>Utilise ton propre pas au lieu de celui fourni par la variable.</value>
+  </data>
   <data name="Widgets.Slider.DefaultVariableDescription" xml:space="preserve">
     <value>Sans variable, le curseur utilise sa propre variable de widget slider_value.</value>
   </data>

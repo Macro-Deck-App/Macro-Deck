@@ -16283,6 +16283,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Scegli icona</value>
   </data>
+  <data name="Widgets.Slider.CustomStep" xml:space="preserve">
+    <value>Passo personalizzato</value>
+  </data>
+  <data name="Widgets.Slider.CustomStepDescription" xml:space="preserve">
+    <value>Usa il tuo passo invece di quello fornito dalla variabile.</value>
+  </data>
   <data name="Widgets.Slider.DefaultVariableDescription" xml:space="preserve">
     <value>Senza variabile, lo slider usa la propria variabile del widget slider_value.</value>
   </data>

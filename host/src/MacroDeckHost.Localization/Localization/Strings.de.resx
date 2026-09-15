@@ -16281,6 +16281,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Symbol auswählen</value>
   </data>
+  <data name="Widgets.Slider.CustomStep" xml:space="preserve">
+    <value>Eigene Schrittweite</value>
+  </data>
+  <data name="Widgets.Slider.CustomStepDescription" xml:space="preserve">
+    <value>Verwendet deine eigene Schrittweite statt der von der Variable vorgegebenen.</value>
+  </data>
   <data name="Widgets.Slider.DefaultVariableDescription" xml:space="preserve">
     <value>Ohne Variable nutzt der Schieberegler seine eigene Widget-Variable slider_value.</value>
   </data>

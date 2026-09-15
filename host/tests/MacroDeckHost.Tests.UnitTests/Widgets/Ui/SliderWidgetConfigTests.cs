@@ -121,6 +121,133 @@ public class SliderWidgetConfigTests
 	}
 
 	[Test]
+	public void A_variable_declaring_its_own_step_offers_a_custom_step_toggle_that_reveals_step()
+	{
+		var registry = new VariableRegistry();
+		registry.Upsert(Variable(min: 0, max: 100, step: 1));
+
+		var host = Render(new { valueVariable = _boundVariable }, registry);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, "customStep"), Is.True);
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, "step"), Is.False);
+		});
+
+		host.ById("customStep").Change(true);
+
+		Assert.That(WidgetConfigTestSupport.IsVisible(host, "step"), Is.True);
+	}
+
+	[Test]
+	public void The_custom_step_toggle_is_absent_where_the_widget_step_already_applies()
+	{
+		var unbound = Render(new { }, new VariableRegistry());
+		var undeclared = Render(new { valueVariable = _boundVariable }, Registry());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(WidgetConfigTestSupport.IsVisible(unbound, "customStep"), Is.False);
+			Assert.That(WidgetConfigTestSupport.IsVisible(undeclared, "customStep"), Is.False);
+		});
+	}
+
+	[Test]
+	public void Turning_the_custom_step_on_starts_from_the_step_the_variable_declares()
+	{
+		var registry = new VariableRegistry();
+		registry.Upsert(Variable(min: 0, max: 1, step: 0.01));
+
+		var host = Render(new { valueVariable = _boundVariable, step = 1 }, registry);
+		host.ById("customStep").Change(true);
+
+		Assert.That(host.ById("step").Number(UiConfigProperties.Value), Is.EqualTo(0.01));
+	}
+
+	[Test]
+	public void A_stored_custom_step_is_offered_as_stored()
+	{
+		var registry = new VariableRegistry();
+		registry.Upsert(Variable(min: 0, max: 100, step: 1));
+
+		var host = Render(new { valueVariable = _boundVariable, customStep = true, step = 5 }, registry);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ById("customStep").Flag(UiConfigProperties.Value), Is.True);
+			Assert.That(host.ById("step").Number(UiConfigProperties.Value), Is.EqualTo(5));
+		});
+	}
+
+	[Test]
+	public void Picking_a_stepped_variable_then_turning_the_toggle_on_reveals_step()
+	{
+		var registry = new VariableRegistry();
+		registry.Upsert(Variable(_boundVariable, min: null, max: null, step: null));
+		registry.Upsert(Variable("stepped", min: 0, max: 100, step: 1));
+
+		var host = Render(new { valueVariable = _boundVariable, step = 5 }, registry);
+
+		host.ById("valueVariable").Change("stepped");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, "step"), Is.False);
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, "customStep"), Is.True);
+		});
+
+		host.ById("customStep").Change(true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, "step"), Is.True);
+			Assert.That(host.ById("step").Number(UiConfigProperties.Value), Is.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public void Switching_away_from_a_stepped_variable_offers_the_stored_step_not_the_variables()
+	{
+		var registry = new VariableRegistry();
+		registry.Upsert(Variable("stepped", min: 0, max: 1, step: 0.01));
+		registry.Upsert(Variable(_boundVariable, min: null, max: null, step: null));
+
+		var host = Render(new { valueVariable = "stepped", step = 5 }, registry);
+
+		host.ById("valueVariable").Change(_boundVariable);
+
+		Assert.That(host.ById("step").Number(UiConfigProperties.Value), Is.EqualTo(5));
+	}
+
+	[Test]
+	public void A_custom_step_still_validates_against_the_slider_schema()
+	{
+		var registry = new VariableRegistry();
+		registry.Upsert(Variable(min: null, max: null, step: 1));
+
+		var host = Render(new { valueVariable = _boundVariable }, registry);
+		host.ById("customStep").Change(true);
+		host.ById("step").Change(5);
+
+		var composed = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
+		{
+			["valueVariable"] = host.ById("valueVariable").Text(UiConfigProperties.Value),
+			["customStep"] = host.ById("customStep").Flag(UiConfigProperties.Value),
+			["step"] = host.ById("step").Number(UiConfigProperties.Value),
+		});
+		var provider = new WidgetDataSchemaProvider(new WidgetTypeRegistry(new RecordingMediator()));
+
+		Assert.That(provider.TryGet(WidgetTypeIds.Slider, out var schema), Is.True);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(WidgetDataSchema.Validate(schema!, composed), Is.Empty);
+			Assert.That(composed.GetProperty("customStep").GetBoolean(), Is.True);
+			Assert.That(composed.GetProperty("step").GetDouble(), Is.EqualTo(5));
+		});
+	}
+
+	[Test]
 	public void The_editor_offers_an_actions_list_limited_to_the_double_tap_trigger()
 	{
 		var host = Render(_stored, Registry());
@@ -278,10 +405,13 @@ public class SliderWidgetConfigTests
 	}
 
 	private static VariableEntity Variable(double? min, double? max, double? step)
+		=> Variable(_boundVariable, min, max, step);
+
+	private static VariableEntity Variable(string name, double? min, double? max, double? step)
 		=> new()
 		{
 			Id = Guid.NewGuid(),
-			Name = _boundVariable,
+			Name = name,
 			Scope = VariableScope.Global,
 			Type = VariableType.Numeric,
 			Classification = VariableClassification.User,

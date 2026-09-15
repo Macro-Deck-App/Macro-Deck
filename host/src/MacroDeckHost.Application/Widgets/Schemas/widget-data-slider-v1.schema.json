@@ -84,7 +84,11 @@
     },
     "step": {
       "type": ["number", "null"],
-      "description": "Grid granularity, used only where the bound variable declares no step of its own. See min for why the fallback is per field."
+      "description": "Grid granularity, used where the bound variable declares no step of its own, or wherever customStep is true. See min for why the fallback is per field."
+    },
+    "customStep": {
+      "type": ["boolean", "null"],
+      "description": "Makes step replace the step the bound variable declares. Absent, null or false keeps the variable's own step, which is how every slider stored before this key behaves."
     },
     "flows": {
       "anyOf": [

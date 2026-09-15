@@ -16283,6 +16283,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Elegir icono</value>
   </data>
+  <data name="Widgets.Slider.CustomStep" xml:space="preserve">
+    <value>Paso personalizado</value>
+  </data>
+  <data name="Widgets.Slider.CustomStepDescription" xml:space="preserve">
+    <value>Usa tu propio paso en lugar del que indica la variable.</value>
+  </data>
   <data name="Widgets.Slider.DefaultVariableDescription" xml:space="preserve">
     <value>Sin variable, el control deslizante usa su propia variable de widget slider_value.</value>
   </data>

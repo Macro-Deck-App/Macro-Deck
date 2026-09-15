@@ -130,7 +130,9 @@ The slider widget targets a writable numeric variable and nothing else: its rang
 variable's volatile attributes, its formatting from the semantic kind and unit, and a drag writes through
 the capability. The slider action contract and its per-widget action binding are removed. The widget keeps
 per-field range fallbacks, used only where the variable declares no volatile attribute of its own, because
-all-or-nothing would leave a numeric *user* variable's slider undraggable.
+all-or-nothing would leave a numeric *user* variable's slider undraggable. The step is the one bound a
+user may also override on purpose: a widget that opts into a custom step uses its own step over the
+declared one, so a 0-100 volume can move in fives.
 
 ## Consequences
 

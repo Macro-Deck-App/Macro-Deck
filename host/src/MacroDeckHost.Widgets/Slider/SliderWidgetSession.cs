@@ -25,10 +25,10 @@ namespace MacroDeckHost.Widgets.Slider;
 
 /// <summary>The session's one piece of live state: the range, the value and the attributes the track and
 /// its readout are drawn against, all read from the bound variable - its own volatile range where it
-/// declares one, and the widget config's Min/Max/Step per field where it does not. Everything the view
-/// shows - the level, the step, the value text - is a pure function of this, which is what makes a
-/// variable change or an interaction a <c>set-properties</c> patch rather than a structural
-/// reconcile.</summary>
+/// declares one, and the widget config's Min/Max/Step per field where it does not, or its Step wherever the
+/// widget opted into a usable custom step. Everything the view shows - the level, the step, the value
+/// text - is a pure function of this, which is what makes a variable change or an interaction a
+/// <c>set-properties</c> patch rather than a structural reconcile.</summary>
 internal sealed record SliderWidgetReadout(
 	bool Found,
 	double Min,
@@ -55,7 +55,8 @@ internal sealed record SliderVariableBinding(
 	IVariableChangeNotifier Notifier,
 	IServiceScopeFactory ScopeFactory,
 	Guid? WidgetId = null,
-	bool IsDefault = false);
+	bool IsDefault = false,
+	bool CustomStep = false);
 
 internal sealed record SliderDoublePressBinding(
 	Guid WidgetId,
@@ -718,7 +719,9 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 		// bad division inside an integration. A non-finite bound falls back exactly as an absent one does.
 		var min = Bound(entity?.Min, binding.Min);
 		var max = Bound(entity?.Max, binding.Max);
-		var step = Bound(entity?.Step, binding.Step);
+		var step = binding.CustomStep && binding.Step > 0 && binding.Step <= max - min
+			? binding.Step
+			: Bound(entity?.Step, binding.Step);
 
 		var parsed = entity is not null && binding.Variables.IsAvailable(entity.Id)
 			? ParseNumeric(entity.Value)
