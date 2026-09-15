@@ -4,12 +4,14 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  Injector,
   Input,
   Output,
   ViewChild,
   forwardRef,
+  inject,
 } from '@angular/core';
-import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR, NgControl, NgModel } from '@angular/forms';
 
 export type InputType = 'text' | 'number' | 'search' | 'email' | 'password' | 'url' | 'color';
 
@@ -93,6 +95,8 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit {
 
   @ViewChild('control') private controlRef?: ElementRef<HTMLInputElement | HTMLTextAreaElement>;
 
+  private readonly injector = inject(Injector);
+
   value: string | number = '';
 
   private modelValue: string | number = '';
@@ -137,8 +141,16 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit {
   }
 
   onBlur(): void {
-    if (this.type === 'number' && this.value !== this.modelValue) this.value = this.modelValue;
+    if (this.type === 'number') {
+      const model = this.boundModel();
+      if (this.value !== model) this.value = model;
+    }
     this.onTouched();
     this.blurred.emit();
+  }
+
+  private boundModel(): string | number {
+    const control = this.injector.get(NgControl, null, { self: true });
+    return control instanceof NgModel ? control.model ?? '' : this.modelValue;
   }
 }

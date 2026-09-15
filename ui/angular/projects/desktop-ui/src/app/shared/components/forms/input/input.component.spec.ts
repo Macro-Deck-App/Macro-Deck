@@ -1,6 +1,98 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
 import { InputComponent } from './input.component';
+
+@Component({
+  standalone: true,
+  imports: [FormsModule, InputComponent],
+  template: `<shared-input type="number" [ngModel]="model" (ngModelChange)="model = keep($event)" />`,
+})
+class NumberCallerComponent {
+  model: string | number = '';
+  keep: (typed: string | number) => string | number = typed => typed;
+}
+
+describe('InputComponent bound with ngModel', () => {
+  let fixture: ComponentFixture<NumberCallerComponent>;
+  let caller: NumberCallerComponent;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [NumberCallerComponent],
+      providers: [provideZonelessChangeDetection()],
+    });
+    fixture = TestBed.createComponent(NumberCallerComponent);
+    caller = fixture.componentInstance;
+  });
+
+  function box(): HTMLInputElement {
+    return fixture.nativeElement.querySelector('input');
+  }
+
+  async function settle(): Promise<void> {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    await fixture.whenStable();
+  }
+
+  async function type(text: string): Promise<void> {
+    box().value = text;
+    box().dispatchEvent(new Event('input'));
+    await settle();
+  }
+
+  async function leave(): Promise<void> {
+    box().dispatchEvent(new Event('blur'));
+    await settle();
+  }
+
+  it('keeps a typed number after leaving the box when the caller stores it as typed', async () => {
+    await settle();
+
+    await type('7');
+    await leave();
+
+    expect(box().value).toBe('7');
+    expect(caller.model).toBe('7');
+  });
+
+  it('brings an emptied box back to the value its caller kept', async () => {
+    caller.model = 3;
+    caller.keep = typed => (typed === '' ? caller.model : Number(typed));
+    await settle();
+
+    await type('');
+    await leave();
+
+    expect(box().value).toBe('3');
+  });
+
+  it('shows the number its caller normalised once typing is over', async () => {
+    caller.keep = typed => Number(typed);
+    await settle();
+
+    await type('1e3');
+    expect(box().value).toBe('1e3');
+
+    await leave();
+
+    expect(box().value).toBe('1000');
+  });
+
+  it('leaves an emptied box empty when its caller accepted the empty value', async () => {
+    caller.model = 14;
+    caller.keep = typed => (typed === '' ? '' : Number(typed));
+    await settle();
+
+    await type('');
+    await leave();
+
+    expect(box().value).toBe('');
+    expect<string | number>(caller.model).toBe('');
+  });
+});
 
 describe('InputComponent', () => {
   let fixture: ComponentFixture<InputComponent>;
