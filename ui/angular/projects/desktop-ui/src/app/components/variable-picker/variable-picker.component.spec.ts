@@ -1,8 +1,10 @@
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
 import { ApiService } from '@shared';
 import type { Variable } from '@macro-deck/runtime';
+import { VariableBrowserModalComponent } from '../variables/variable-browser-modal.component';
 import { VariablePickerComponent } from './variable-picker.component';
 
 function variable(overrides: Partial<Variable>): Variable {
@@ -52,6 +54,17 @@ describe('VariablePickerComponent', () => {
 
     expect(component.open()).toBeTrue();
     expect(fixture.nativeElement.querySelector('shared-variable-browser')).toBeTruthy();
+  });
+
+  it('asks the browser for writable variables only when the field accepts nothing else', async () => {
+    fixture.componentRef.setInput('writableOnly', true);
+    component.toggle();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const browser = fixture.debugElement.query(By.directive(VariableBrowserModalComponent));
+    expect(browser).toBeTruthy();
+    expect((browser.componentInstance as VariableBrowserModalComponent).writableOnlyState()).toBeTrue();
   });
 
   it('emits the canonical variable name on pick and closes', async () => {

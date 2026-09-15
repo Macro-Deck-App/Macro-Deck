@@ -141,8 +141,10 @@ public interface IVariableProvider
 	/// <para>
 	/// Must be side-effect free and must not enumerate the catalog to produce the number: a provider
 	/// that would have to walk its own resources to count them should leave this <c>null</c>, and the
-	/// host then shows what it has loaded so far instead of a total. Read whenever the catalog is
-	/// described, so it may change between reads as the underlying resources do.
+	/// host then shows what it has loaded so far instead of a total, or no count at all for a provider
+	/// that reports <see cref="SupportsSearch"/>, whose entries are only loaded as the user browses or
+	/// searches. Read whenever the catalog is described, so it may change between reads as the
+	/// underlying resources do.
 	/// </para>
 	/// </summary>
 	int? CatalogEntryCount => null;

@@ -4,7 +4,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
 import { ApiService } from '@shared';
-import type { Variable, VariableClassification } from '@macro-deck/runtime';
+import type {
+  DiscoverCatalogVariablesRequest,
+  Variable,
+  VariableCatalogNode,
+  VariableCatalogProvider,
+  VariableClassification,
+} from '@macro-deck/runtime';
+import { VariableCatalogService } from '../../services/variable-catalog.service';
+import { VariableCatalogIdInputComponent } from './variable-catalog-id-input.component';
 import { VariablesManagerComponent } from './variables-manager.component';
 
 function variable(
@@ -649,6 +657,284 @@ describe('VariablesManagerComponent', () => {
         .map(r => (r as { node: { name: string } }).node.name);
 
       expect(names).not.toContain('muted');
+    });
+  });
+
+  interface CatalogRowView {
+    kind: string;
+    depth?: number;
+    text?: string;
+    node?: VariableCatalogNode;
+  }
+
+  function catalogRows(): CatalogRowView[] {
+    return component.rows() as unknown as CatalogRowView[];
+  }
+
+  function api(): jasmine.SpyObj<ApiService> {
+    return TestBed.inject(ApiService) as unknown as jasmine.SpyObj<ApiService>;
+  }
+
+  async function settle(): Promise<void> {
+    for (let i = 0; i < 8; i++) {
+      fixture.detectChanges();
+      await fixture.whenStable();
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
+    fixture.detectChanges();
+  }
+
+  async function useProvider(provider: Partial<VariableCatalogProvider> & { integrationId: string }): Promise<void> {
+    api().getVariableCatalogProviders.and.resolveTo({
+      providers: [{ name: provider.integrationId, supportsSearch: false, supportsManualIds: false, ...provider }],
+    } as never);
+    await TestBed.inject(VariableCatalogService).loadProviders();
+  }
+
+  async function afterSearchDebounce(): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, 600));
+  }
+
+  function discoverCalls(): DiscoverCatalogVariablesRequest[] {
+    return api().discoverCatalogVariables.calls.allArgs().map(args => args[0] as DiscoverCatalogVariablesRequest);
+  }
+
+  describe('a searchable catalog of containers', () => {
+    const entityCount = 500;
+
+    function entity(i: number, extra: Partial<VariableCatalogNode> = {}): VariableCatalogNode {
+      return {
+        id: `entity/light.e${i}`,
+        name: `ha_light_e${i}`,
+        suggestedName: `ha_light_e${i}`,
+        displayName: null,
+        hasChildren: true,
+        ...extra,
+      } as VariableCatalogNode;
+    }
+
+    function children(parentId: string): VariableCatalogNode[] {
+      return [
+        { id: `${parentId}/state`, name: 'state', suggestedName: `${parentId}_state`, displayName: null, hasChildren: false, type: 'text' },
+        { id: `${parentId}/brightness`, name: 'brightness', suggestedName: `${parentId}_brightness`, displayName: null, hasChildren: false, type: 'numeric', canWrite: false },
+      ] as VariableCatalogNode[];
+    }
+
+    let roots: VariableCatalogNode[];
+    let searchResults: Record<string, VariableCatalogNode[]>;
+
+    beforeEach(async () => {
+      roots = Array.from({ length: entityCount }, (_, i) => entity(i));
+      searchResults = {};
+      api().discoverCatalogVariables.and.callFake(async (request: DiscoverCatalogVariablesRequest) => {
+        if (request.parentId) {
+          return { nodes: children(request.parentId), hasMore: false, available: true };
+        }
+        const list = request.search ? (searchResults[request.search] ?? []) : roots;
+        const start = request.cursor ? Number(request.cursor) : 0;
+        const nodes = list.slice(start, start + 200);
+        const hasMore = start + 200 < list.length;
+        return { nodes, hasMore, nextCursor: hasMore ? String(start + 200) : undefined, available: true };
+      });
+      await useProvider({ integrationId: 'ha', supportsSearch: true, supportsManualIds: true });
+      api().discoverCatalogVariables.calls.reset();
+      component.source = { kind: 'integration', integrationId: 'ha' };
+      await settle();
+    });
+
+    function expand(nodeId: string): void {
+      const row = catalogRows().find(r => r.kind === 'catalog-branch' && r.node?.id === nodeId);
+      expect(row).withContext(`${nodeId} is listed as a container`).toBeTruthy();
+      component.toggleCatalogBranch('ha', row!.node!);
+    }
+
+    it('asks only for the first root page and lists the containers without opening them', () => {
+      const calls = discoverCalls();
+
+      expect(calls.length).toBeGreaterThan(0);
+      expect(calls.every(call => call.parentId === undefined)).toBeTrue();
+      expect(calls.filter(call => !call.cursor).length).toBe(1);
+      expect(catalogRows().some(r => r.kind === 'catalog-branch')).toBeTrue();
+      expect(catalogRows().some(r => r.kind === 'catalog-leaf')).toBeFalse();
+    });
+
+    it('fetches a container\'s children once when it is opened and lists them beneath it', async () => {
+      expand('entity/light.e0');
+      await settle();
+
+      const childCalls = discoverCalls().filter(call => call.parentId === 'entity/light.e0');
+      const leaves = catalogRows().filter(r => r.kind === 'catalog-leaf');
+
+      expect(childCalls.length).toBe(1);
+      expect(childCalls[0].search).toBeUndefined();
+      expect(leaves.map(r => r.node!.id)).toEqual(['entity/light.e0/state', 'entity/light.e0/brightness']);
+      expect(leaves.every(r => r.depth === 1)).toBeTrue();
+    });
+
+    it('sends the search to the host without the vars. prefix and lists what the host matched', async () => {
+      searchResults['Kitchen'] = [entity(499)];
+
+      component.search.set('vars.Kitchen');
+      await afterSearchDebounce();
+      await settle();
+
+      const searched = discoverCalls().filter(call => call.search !== undefined);
+      const branches = catalogRows().filter(r => r.kind === 'catalog-branch');
+
+      expect(searched.map(call => call.search)).toContain('Kitchen');
+      expect(discoverCalls().some(call => call.parentId !== undefined)).toBeFalse();
+      expect(branches.map(r => r.node!.id)).toEqual(['entity/light.e499']);
+    });
+
+    it('opens a search result with a plain child request, not another search', async () => {
+      searchResults['e499'] = [entity(499)];
+      component.search.set('e499');
+      await afterSearchDebounce();
+      await settle();
+
+      expand('entity/light.e499');
+      await settle();
+
+      const childCall = discoverCalls().find(call => call.parentId === 'entity/light.e499');
+      expect(childCall).toBeTruthy();
+      expect(childCall!.search).toBeUndefined();
+      expect(catalogRows().filter(r => r.kind === 'catalog-leaf').length).toBe(2);
+    });
+
+    it('lists both a leaf and a container a search returned from different depths', async () => {
+      searchResults['mix'] = [
+        { id: 'entity/light.e3/brightness', name: 'brightness', suggestedName: 'ha_light_e3_brightness', displayName: null, hasChildren: false, type: 'numeric' } as VariableCatalogNode,
+        entity(4),
+      ];
+      component.search.set('mix');
+      await afterSearchDebounce();
+      await settle();
+
+      expect(catalogRows().find(r => r.kind === 'catalog-leaf')?.node?.id).toBe('entity/light.e3/brightness');
+      expect(catalogRows().find(r => r.kind === 'catalog-branch')?.node?.id).toBe('entity/light.e4');
+    });
+
+    it('still offers a container that is bindable in its own right', async () => {
+      roots = [entity(0, { type: 'numeric' })];
+      TestBed.inject(VariableCatalogService).invalidateIntegration('ha');
+      component.source = { kind: 'all' };
+      await settle();
+      component.source = { kind: 'integration', integrationId: 'ha' };
+      await settle();
+
+      const requested = spyOn(component.catalogBindRequested, 'emit');
+      const bind = fixture.debugElement.query(By.css('.vars-catalog-bind'));
+      expect(bind).withContext('the container row carries a bind action').not.toBeNull();
+      bind.triggerEventHandler('click', new MouseEvent('click'));
+
+      expect(requested).toHaveBeenCalledWith(jasmine.objectContaining({ integrationId: 'ha' }));
+    });
+
+    it('says an opened container has nothing usable when the filter removes all of its children', async () => {
+      component.writableOnly = true;
+      expand('entity/light.e0');
+      await settle();
+
+      const notes = catalogRows().filter(r => r.kind === 'catalog-note');
+      expect(notes.length).toBe(1);
+      expect(notes[0].text).toBe(component.notBindableLabel());
+    });
+
+    it('lists the children of the last container within the budget', async () => {
+      const branches = catalogRows().filter(r => r.kind === 'catalog-branch');
+      const last = branches[branches.length - 1];
+      expand(last.node!.id);
+      await settle();
+
+      expect(catalogRows().filter(r => r.kind === 'catalog-leaf' && r.depth === 1).length).toBe(2);
+    });
+
+    it('shows no unbound count for a searchable provider that reports none, and the reported one when it does', async () => {
+      expand('entity/light.e0');
+      await settle();
+      expect(component.unboundCount()).toBeNull();
+
+      await useProvider({ integrationId: 'ha', supportsSearch: true, supportsManualIds: true, unboundCount: 42 });
+      await settle();
+      expect(component.unboundCount()).toBe(42);
+    });
+
+    it('offers manual id entry with the picker\'s filters and picks what gets bound through it', async () => {
+      component.mode = 'pick';
+      component.writableOnly = true;
+      component.acceptedTypes = ['numeric'];
+      await settle();
+
+      const input = fixture.debugElement.query(By.directive(VariableCatalogIdInputComponent));
+      expect(input).withContext('manual id entry is offered for a catalog source').not.toBeNull();
+      const instance = input.componentInstance as VariableCatalogIdInputComponent;
+      expect(instance.writableOnly()).toBeTrue();
+      expect(instance.acceptedTypes()).toEqual(['numeric']);
+
+      const picked = spyOn(component.pick, 'emit');
+      const bound = variable('bound-1', 'integration', 'ha');
+      input.triggerEventHandler('bound', bound);
+
+      expect(picked).toHaveBeenCalledWith(bound);
+    });
+  });
+
+  describe('a catalog without search, nested like OBS', () => {
+    function leaf(id: string, name: string): VariableCatalogNode {
+      return { id, name, suggestedName: name, displayName: null, hasChildren: false, type: 'numeric' } as VariableCatalogNode;
+    }
+
+    function container(id: string): VariableCatalogNode {
+      return { id, name: id, displayName: null, hasChildren: true } as VariableCatalogNode;
+    }
+
+    let tree: Record<string, VariableCatalogNode[]>;
+
+    beforeEach(async () => {
+      tree = {
+        root: [container('conn')],
+        conn: [container('conn/input')],
+        'conn/input': [leaf('conn/input/volume', 'obs_mic_volume'), leaf('conn/input/balance', 'obs_mic_balance')],
+      };
+      api().discoverCatalogVariables.and.callFake(async (request: DiscoverCatalogVariablesRequest) => ({
+        nodes: tree[request.parentId ?? 'root'] ?? [],
+        hasMore: false,
+        available: true,
+      }));
+      await useProvider({ integrationId: 'obs2', supportsSearch: false, supportsManualIds: false });
+      api().discoverCatalogVariables.calls.reset();
+      component.source = { kind: 'integration', integrationId: 'obs2' };
+      await settle();
+    });
+
+    it('lists leaves below nested containers inline, without opening anything', () => {
+      const leaves = catalogRows().filter(r => r.kind === 'catalog-leaf').map(r => r.node!.id);
+
+      expect(leaves).toEqual(['conn/input/volume', 'conn/input/balance']);
+      expect(catalogRows().some(r => r.kind === 'catalog-branch')).toBeFalse();
+    });
+
+    it('narrows the nested leaves by the search box on the client', async () => {
+      component.search.set('balance');
+      await afterSearchDebounce();
+      await settle();
+
+      expect(catalogRows().filter(r => r.kind === 'catalog-leaf').map(r => r.node!.id)).toEqual(['conn/input/balance']);
+      expect(discoverCalls().every(call => call.search === undefined)).toBeTrue();
+    });
+
+    it('stops walking nested containers once the budget is full', async () => {
+      const many = (prefix: string) => Array.from({ length: 1000 }, (_, i) => leaf(`${prefix}/l${i}`, `${prefix}_l${i}`));
+      tree = { root: [container('c1'), container('c2'), container('c3')], c1: many('c1'), c2: many('c2'), c3: many('c3') };
+      await useProvider({ integrationId: 'obs3', supportsSearch: false, supportsManualIds: false });
+      api().discoverCatalogVariables.calls.reset();
+      component.source = { kind: 'integration', integrationId: 'obs3' };
+      await settle();
+
+      const leaves = catalogRows().filter(r => r.kind === 'catalog-leaf');
+      expect(leaves.length).toBeGreaterThan(0);
+      expect(leaves.length).toBeLessThanOrEqual(1000);
+      expect(discoverCalls().some(call => call.parentId === 'c2' || call.parentId === 'c3')).toBeFalse();
     });
   });
 });

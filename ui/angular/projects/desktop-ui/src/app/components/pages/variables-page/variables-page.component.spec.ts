@@ -134,6 +134,14 @@ describe('VariablesPageComponent', () => {
     expect(obsRailItems.length).toBe(1);
   });
 
+  it('shows no unbound count in the rail for a searchable catalog that reports no total', () => {
+    const haRailItem = Array.from(fixture.nativeElement.querySelectorAll('shared-rail-item') as NodeListOf<Element>)
+      .find(el => el.textContent?.includes('home-assistant'));
+
+    expect(haRailItem).withContext('Home Assistant has a rail entry').toBeTruthy();
+    expect(haRailItem!.textContent).not.toContain('(');
+  });
+
   it('starts with all variables selected and no filters applied', () => {
     expect(component.isAllSelected()).toBeTrue();
     expect(component.source()).toEqual({ kind: 'all' });
