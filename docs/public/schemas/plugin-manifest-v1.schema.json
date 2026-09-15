@@ -497,7 +497,7 @@
       "compatibility": {
         "sdk": ">=1.0.0,<2.0.0",
         "protocol": { "minimum": 1, "maximum": 1 },
-        "macroDeck": ">=3.0.0"
+        "macroDeck": ">=3.0.0-0"
       },
       "permissions": ["host:variables", "net:outbound"],
       "languages": ["en", "de", "zh-Hant-TW"],
