@@ -45,7 +45,8 @@ public record AdbSettings(
 	bool Enabled,
 	string? ExecutablePath,
 	bool UsbConnectionsEnabled,
-	string? DefaultDeviceSerial);
+	string? DefaultDeviceSerial,
+	bool StopServerOnExit = false);
 
 public record DeveloperSettings(bool Enabled);
 
@@ -105,7 +106,8 @@ public interface IAppPreferenceService
 	Task<AdbSettings> SetAdb(bool? enabled,
 		string? executablePath,
 		bool? usbConnectionsEnabled,
-		string? defaultDeviceSerial);
+		string? defaultDeviceSerial,
+		bool? stopServerOnExit);
 
 	Task<DeveloperSettings> GetDeveloper();
 

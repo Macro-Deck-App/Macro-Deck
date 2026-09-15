@@ -168,6 +168,49 @@ internal sealed class WidgetStateCompatibilityContractTests
 		});
 	}
 
+	[Test]
+	public async Task AccentColorField_RecoloursASliderOnBothWireShapes_AndClearingItByOrdinalRemovesIt()
+	{
+		var v1 = new Fixture("{}", negotiatedVersion: 1, type: WidgetTypeIds.Slider);
+		var v1Applied = await v1.InvokeV1(
+			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"accentColor":"#ef4444"},"state":{{SelectorCurrent}},"clearProperties":[]}""");
+
+		var v2 = new Fixture("""{"color":"#3b82f6"}""", negotiatedVersion: 2, type: WidgetTypeIds.Slider);
+		var v2Applied = await v2.InvokeV2(
+			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"accentColor":"#ef4444"},"stateIds":["{{WidgetStates.Current}}"],"clearProperties":[]}""");
+
+		var cleared = new Fixture("""{"color":"#3b82f6"}""", negotiatedVersion: 2, type: WidgetTypeIds.Slider);
+		var clearApplied = await cleared.InvokeV2(
+			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{},"stateIds":["{{WidgetStates.Current}}"],"clearProperties":[{{(int)WidgetAppearanceProperty.AccentColor}}]}""");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(v1Applied, Is.True);
+			Assert.That(v1.StoredString("color"), Is.EqualTo("#ef4444"));
+			Assert.That(v2Applied, Is.True);
+			Assert.That(v2.StoredString("color"), Is.EqualTo("#ef4444"));
+			Assert.That(clearApplied, Is.True);
+			Assert.That(cleared.StoredString("color"), Is.Null, "cleared back to the reader's theme accent");
+		});
+	}
+
+	[Test]
+	public async Task APatchFromAPluginThatPredatesAccentColor_LeavesASlidersColourAlone()
+	{
+		var fixture = new Fixture("""{"label":"Mic","color":"#3b82f6"}""", negotiatedVersion: 1,
+			type: WidgetTypeIds.Slider);
+
+		var applied = await fixture.InvokeV1(
+			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"label":"Mic Gain","backgroundColor":null,"borderColor":null},"state":{{SelectorCurrent}},"clearProperties":[]}""");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(applied, Is.True);
+			Assert.That(fixture.StoredString("label"), Is.EqualTo("Mic Gain"));
+			Assert.That(fixture.StoredString("color"), Is.EqualTo("#3b82f6"));
+		});
+	}
+
 	private static string ThreeStateData(string first, string second, string third, string active)
 		=> "{\"stateMode\":true,\"states\":[" +
 			$"{{\"id\":\"{first}\",\"label\":\"{Capitalize(first)}\",\"appearance\":{{}}}}," +
@@ -191,10 +234,10 @@ internal sealed class WidgetStateCompatibilityContractTests
 		private readonly PluginCallbackRouter _router;
 		private readonly RecordingWidgetService _widgetsService;
 
-		public Fixture(string data, int negotiatedVersion = 1)
+		public Fixture(string data, int negotiatedVersion = 1, string type = WidgetTypeIds.ActionButton)
 		{
 			var profileId = Guid.NewGuid();
-			Widget = new WidgetEntity { Id = WidgetGuid, Type = WidgetTypeIds.ActionButton, Data = data };
+			Widget = new WidgetEntity { Id = WidgetGuid, Type = type, Data = data };
 			var folder = new FolderEntity
 			{
 				Id = Guid.NewGuid(), ProfileId = profileId, Name = "Home", Order = 0, Widgets = [Widget]
@@ -275,6 +318,8 @@ internal sealed class WidgetStateCompatibilityContractTests
 		public string? StateLabel(string stateId) => Appearance(stateId)?["label"]?.GetValue<string>();
 
 		public string? StateColor(string stateId) => Appearance(stateId)?["backgroundColor"]?.GetValue<string>();
+
+		public string? StoredString(string key) => JsonNode.Parse(Widget.Data!)![key]?.GetValue<string>();
 
 		private JsonObject? Appearance(string stateId)
 			=> ((JsonObject)JsonNode.Parse(Widget.Data!)!)["states"]!.AsArray()

@@ -1,7 +1,10 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Widgets.HistoryGraph;
+using MacroDeckHost.Widgets.Slider;
 
 namespace MacroDeckHost.Tests.UnitTests.Widgets;
 
@@ -415,6 +418,68 @@ public class WidgetAppearanceJsonTests
 	}
 
 	[Test]
+	public void AccentColor_LandsWhereEachWidgetReadsItsColourFrom()
+	{
+		var slider = Parse("{}");
+		var graph = Parse("{}");
+		var patch = new WidgetAppearancePatch { AccentColor = "#ef4444" };
+
+		var sliderChanged = WidgetAppearanceJson.Apply(slider, WidgetTypeIds.Slider, patch, _offOnly);
+		var graphChanged = WidgetAppearanceJson.Apply(graph, WidgetTypeIds.HistoryGraph, patch, _offOnly);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(sliderChanged, Is.True);
+			Assert.That(graphChanged, Is.True);
+			Assert.That(SliderWidgetData.Parse(Element(slider)).Color, Is.EqualTo("#ef4444"));
+			Assert.That(HistoryGraphWidgetData.Parse(Element(graph)).AccentColor, Is.EqualTo("#ef4444"));
+		});
+	}
+
+	[Test]
+	public void AccentColor_IsDroppedByAnActionButton()
+	{
+		var data = Parse("""{"mode":"momentary"}""");
+
+		var changed = WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { AccentColor = "#ef4444" },
+			_offOnly);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed, Is.False);
+			Assert.That(data.ToJsonString(), Does.Not.Contain("#ef4444"));
+		});
+	}
+
+	[Test]
+	public void ClearingTheAccentColor_ReturnsEachWidgetToTheThemeAccentAndKeepsTheRest()
+	{
+		var slider = Parse("""{"color":"#ef4444","backgroundColor":"#111111"}""");
+		var graph = Parse("""{"accentColor":"#ef4444","title":"CPU"}""");
+
+		var sliderCleared = WidgetAppearanceJson.ClearProperty(slider,
+			WidgetTypeIds.Slider,
+			WidgetAppearanceProperty.AccentColor,
+			"off");
+		var graphCleared = WidgetAppearanceJson.ClearProperty(graph,
+			WidgetTypeIds.HistoryGraph,
+			WidgetAppearanceProperty.AccentColor,
+			"off");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(sliderCleared, Is.True);
+			Assert.That(graphCleared, Is.True);
+			Assert.That(SliderWidgetData.Parse(Element(slider)).Color, Is.Null);
+			Assert.That(slider["backgroundColor"]!.GetValue<string>(), Is.EqualTo("#111111"));
+			Assert.That(HistoryGraphWidgetData.Parse(Element(graph)).AccentColor, Is.Null);
+			Assert.That(graph["title"]!.GetValue<string>(), Is.EqualTo("CPU"));
+		});
+	}
+
+	[Test]
 	public void EmptyString_ClearsTheProperty()
 	{
 		var data = Parse("""{"mode":"momentary","label":"old"}""");
@@ -527,6 +592,8 @@ public class WidgetAppearanceJsonTests
 #pragma warning restore CS0618
 
 	private static JsonObject Parse(string json) => WidgetAppearanceJson.ParseDataBag(json);
+
+	private static JsonElement Element(JsonObject data) => JsonSerializer.SerializeToElement(data);
 
 	/// <summary>Looks up a state's appearance object by id in the current array shape.</summary>
 	private static JsonObject? Appearance(JsonObject data, string stateId)

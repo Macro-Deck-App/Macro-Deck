@@ -20,6 +20,8 @@ public class GetAdbSettingsResponse
 
 	public string? DefaultDeviceSerial { get; set; }
 
+	public bool StopServerOnExit { get; set; }
+
 	public int ActivePublicPort { get; set; }
 
 	public IReadOnlyList<int> DeviceSidePortCandidates { get; set; } = [];

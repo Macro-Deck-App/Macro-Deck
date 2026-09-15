@@ -29,6 +29,11 @@ public sealed class AdbManager : IAdbManager, IDisposable
 	private static readonly TimeSpan _shutdownTunnelPerDeviceTimeout = TimeSpan.FromMilliseconds(700);
 	private static readonly TimeSpan _shutdownTunnelTotalBudget = TimeSpan.FromMilliseconds(1200);
 	private static readonly TimeSpan _shutdownDrainBudget = TimeSpan.FromSeconds(1);
+	private static readonly TimeSpan _shutdownKillServerTimeout = TimeSpan.FromSeconds(1);
+
+	// adb prints this only when it launched the daemon itself; start-server also exits 0 for a server
+	// that was already running, so the exit code alone never proves Macro Deck owns it.
+	private const string DaemonStartedMarker = "daemon started successfully";
 
 	private static readonly TimeSpan _staleSweepPerDeviceTimeout = TimeSpan.FromMilliseconds(700);
 	private static readonly TimeSpan _staleSweepTotalBudget = TimeSpan.FromSeconds(2);
@@ -321,7 +326,7 @@ public sealed class AdbManager : IAdbManager, IDisposable
 				["start-server"],
 				_serverStartTimeout,
 				cancellationToken);
-			_serverStartedByMacroDeck = true;
+			_serverStartedByMacroDeck = StartedDaemon(startResult);
 
 			await ReconcileCoreAsync(cancellationToken);
 		}
@@ -367,7 +372,50 @@ public sealed class AdbManager : IAdbManager, IDisposable
 			_shutdownDrainBudget);
 		await _processRunner.DrainAsync(drainBudget);
 
+		await StopOwnedServerAsync(stopwatch);
+
 		_ownershipMarker.Delete();
+	}
+
+	private async Task StopOwnedServerAsync(Stopwatch stopwatch)
+	{
+		if (_currentSettings?.StopServerOnExit != true)
+		{
+			return;
+		}
+
+		var remaining = _shutdownCap - stopwatch.Elapsed;
+		if (remaining <= TimeSpan.Zero || !await _gate.WaitAsync(remaining))
+		{
+			_logger.Warning("Leaving the adb server running at exit: the shutdown budget ran out");
+			return;
+		}
+
+		try
+		{
+			var executablePath = Status.ResolvedExecutablePath;
+			remaining = _shutdownCap - stopwatch.Elapsed;
+			if (!_serverStartedByMacroDeck || executablePath is null || remaining <= TimeSpan.Zero)
+			{
+				_logger.Information(
+					"Leaving the adb server running at exit (started by Macro Deck: {Owned}, time left: {Remaining})",
+					_serverStartedByMacroDeck,
+					remaining);
+				return;
+			}
+
+			var timeout = Clamp(remaining, TimeSpan.Zero, _shutdownKillServerTimeout);
+			await _processRunner.RunAsync(executablePath, ["kill-server"], timeout, CancellationToken.None)
+				.WaitAsync(timeout);
+		}
+		catch (Exception ex)
+		{
+			_logger.Warning(ex, "Failed to stop the adb server during shutdown");
+		}
+		finally
+		{
+			_gate.Release();
+		}
 	}
 
 	internal async Task ProbePropertiesNowAsync(CancellationToken cancellationToken)
@@ -427,6 +475,7 @@ public sealed class AdbManager : IAdbManager, IDisposable
 		{
 			await ReleaseOwnedTunnelsAsync(cancellationToken);
 			_tunnelCoordinator.SetExecutablePath(null);
+			_serverStartedByMacroDeck = false;
 			SetSnapshot(AdbStatus.Disabled, []);
 			return;
 		}
@@ -483,16 +532,21 @@ public sealed class AdbManager : IAdbManager, IDisposable
 		var devicesResult
 			= await _processRunner.RunAsync(resolvedPath, ["devices", "-l"], _devicesListTimeout, cancellationToken);
 		var serverReachable = devicesResult is { Started: true, TimedOut: false, ExitCode: 0 };
+		if (serverReachable && StartedDaemon(devicesResult))
+		{
+			_serverStartedByMacroDeck = true;
+		}
 
 		if (!serverReachable)
 		{
+			_serverStartedByMacroDeck = false;
 			var startResult = await _processRunner.RunAsync(resolvedPath,
 				["start-server"],
 				_serverStartTimeout,
 				cancellationToken);
 			if (startResult is { Started: true, TimedOut: false, ExitCode: 0 })
 			{
-				_serverStartedByMacroDeck = true;
+				_serverStartedByMacroDeck = StartedDaemon(startResult);
 				devicesResult = await _processRunner.RunAsync(resolvedPath,
 					["devices", "-l"],
 					_devicesListTimeout,
@@ -808,6 +862,10 @@ public sealed class AdbManager : IAdbManager, IDisposable
 			_ => (AdbFailureCode.DeviceOffline, $"Device '{device.Serial}' is not currently reachable.")
 		};
 	}
+
+	private static bool StartedDaemon(AdbProcessResult result)
+		=> result.StandardError.Contains(DaemonStartedMarker, StringComparison.Ordinal) ||
+		   result.StandardOutput.Contains(DaemonStartedMarker, StringComparison.Ordinal);
 
 	private static TimeSpan Clamp(TimeSpan value, TimeSpan min, TimeSpan max)
 	{

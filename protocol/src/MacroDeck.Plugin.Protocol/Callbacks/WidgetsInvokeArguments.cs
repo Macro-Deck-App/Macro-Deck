@@ -86,6 +86,9 @@ public sealed record WidgetAppearancePatchDto
 	public string? BorderStyle { get; init; }
 
 	public string? BorderColor { get; init; }
+
+	/// <summary>Optional and additive: a host that predates it ignores the field.</summary>
+	public string? AccentColor { get; init; }
 }
 
 /// <summary>

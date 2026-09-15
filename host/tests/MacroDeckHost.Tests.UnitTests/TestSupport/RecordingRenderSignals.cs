@@ -24,6 +24,9 @@ internal sealed class RecordingRenderSignals : IWidgetRenderSignals
 
 	public IDisposable SubscribeDataChanged(string widgetId, Action<WidgetEntity> handler) => NoopDisposable.Instance;
 
+	public IDisposable SubscribeDataChanged(string widgetId, Func<WidgetEntity, bool> handler) =>
+		NoopDisposable.Instance;
+
 	public IDisposable SubscribeIconInvalidated(Action<Guid> handler) => NoopDisposable.Instance;
 
 	public IDisposable SubscribeWidgetIconChanged(string widgetId, Action handler) => NoopDisposable.Instance;

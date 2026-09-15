@@ -617,6 +617,9 @@ public class ActionButtonWidgetSessionTests
 			return new NoopSubscription();
 		}
 
+		public IDisposable SubscribeDataChanged(string widgetId, Func<WidgetEntity, bool> handler)
+			=> new NoopSubscription();
+
 		public IDisposable SubscribeWidgetIconChanged(string widgetId, Action handler)
 		{
 			_widgetIconChangedHandler = handler;

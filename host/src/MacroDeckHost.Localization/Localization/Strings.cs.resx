@@ -10688,6 +10688,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Widgets.Actions.PositionTop" xml:space="preserve">
     <value>Nahoře</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
+    <value>Změní zvýrazňující barvu posuvníku nebo grafu historie.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
+    <value>Nastavit zvýrazňující barvu</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetBackgroundColorDescription" xml:space="preserve">
     <value>Změní barvu pozadí widgetu.</value>
   </data>
@@ -12380,6 +12386,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Adb.StatusHeading" xml:space="preserve">
     <value>Stav</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitDescription" xml:space="preserve">
+    <value>Server ADB se zastaví při ukončení, restartu nebo aktualizaci Macro Deck, ale jen pokud jej spustil Macro Deck. Ostatní programy využívající ADB, například Android Studio, ztratí připojení.</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitLabel" xml:space="preserve">
+    <value>Zastavit server ADB při ukončení Macro Deck</value>
   </data>
   <data name="Settings.Adb.UncleanShutdown.One" xml:space="preserve">
     <value>Macro Deck se naposledy nevypnul správně. Bylo vyčištěno {count} zbývající USB připojení.</value>

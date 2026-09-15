@@ -55,4 +55,9 @@ usual.
 | No devices | Use a cable that carries data, not only power, and check that **USB debugging** is on. On Windows, some phones need the manufacturer's USB driver. |
 
 **Restart ADB server** affects other programs that use ADB on this computer, such as Android Studio.
-Macro Deck never stops the ADB server on its own.
+
+Macro Deck leaves the ADB server running when it exits, unless you turn on **Stop ADB server when
+Macro Deck exits** under **Status**. Macro Deck then stops the server when it exits, restarts or
+installs an update, but only a server Macro Deck started itself; one that was already running is left
+alone. Other programs using that server, such as Android Studio, lose their connection. If you turn
+off **Enable ADB** before quitting, the server keeps running.

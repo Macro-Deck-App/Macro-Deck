@@ -81,7 +81,8 @@ internal sealed class RemoteWidgetApi(
 			TextAlign = patch.TextAlign,
 			LabelPosition = patch.LabelPosition,
 			BorderStyle = patch.BorderStyle,
-			BorderColor = patch.BorderColor
+			BorderColor = patch.BorderColor,
+			AccentColor = patch.AccentColor
 		};
 
 	/// <summary>

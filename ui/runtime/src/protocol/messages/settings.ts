@@ -179,6 +179,7 @@ export interface GetAdbSettingsResponse {
   serverStartedByMacroDeck: boolean;
   usbConnectionsEnabled: boolean;
   defaultDeviceSerial: string | null;
+  stopServerOnExit: boolean;
   activePublicPort: number;
   deviceSidePortCandidates: number[];
   devices: AdbDevice[];
@@ -195,6 +196,7 @@ export interface UpdateAdbSettingsRequest {
   executablePath?: string;
   usbConnectionsEnabled?: boolean;
   defaultDeviceSerial?: string;
+  stopServerOnExit?: boolean;
 }
 
 export interface UpdateAdbSettingsResponse extends GetAdbSettingsResponse {

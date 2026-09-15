@@ -8,6 +8,7 @@ using MacroDeck.Ui.Runtime;
 using MacroDeck.Ui.Components;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.HostLocking;
+using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport;
@@ -17,6 +18,7 @@ using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
+using MacroDeckHost.Widgets.MusicPlayer;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeckHost.Widgets.Slider;
@@ -171,6 +173,10 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 
 	private UiView? _view;
 
+	private IDisposable? _dataSubscription;
+	private SliderWidgetData? _followedConfig;
+	private UiState<string?>? _accent;
+
 	/// <param name="isWidgetSurface">Whether this is the interactive Widget surface, as opposed to the
 	/// Preview surface, which never accepts interaction and never writes - though it still follows the
 	/// variable, so the editor's preview shows the real level.</param>
@@ -260,6 +266,38 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 		}
 	}
 
+	internal void FollowAccentColor(IWidgetRenderSignals signals,
+		string widgetId,
+		SliderWidgetData config,
+		UiState<string?> accent)
+	{
+		_followedConfig = config;
+		_accent = accent;
+		_dataSubscription = signals.SubscribeDataChanged(widgetId, OnDataChanged);
+	}
+
+	private bool OnDataChanged(WidgetEntity widget)
+	{
+		var updated = SliderWidgetData.Parse(MusicPlayerWidgetData.ParseData(widget.Data));
+
+		lock (_viewSync)
+		{
+			if (_lifetime.IsCancellationRequested)
+			{
+				return true;
+			}
+
+			if (_followedConfig! with { Color = updated.Color } != updated)
+			{
+				return false;
+			}
+
+			_followedConfig = updated;
+			_accent!.Set(updated.Color);
+			return true;
+		}
+	}
+
 	public UiTree BuildTree()
 	{
 		lock (_viewSync)
@@ -289,6 +327,8 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 
 	public async ValueTask DisposeAsync()
 	{
+		_dataSubscription?.Dispose();
+
 		if (_variable is not null)
 		{
 			_variable.Notifier.Changed -= OnVariableChanged;

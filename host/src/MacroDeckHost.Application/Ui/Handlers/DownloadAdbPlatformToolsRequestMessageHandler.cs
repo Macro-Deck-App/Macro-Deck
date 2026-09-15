@@ -38,7 +38,8 @@ public class DownloadAdbPlatformToolsRequestMessageHandler
 		var updated = await _preferences.SetAdb(current.Enabled,
 			result.Data,
 			current.UsbConnectionsEnabled,
-			current.DefaultDeviceSerial);
+			current.DefaultDeviceSerial,
+			current.StopServerOnExit);
 
 		await _adbManager.ApplySettingsAsync(cancellationToken);
 
@@ -65,6 +66,7 @@ public class DownloadAdbPlatformToolsRequestMessageHandler
 			ServerStartedByMacroDeck = view.ServerStartedByMacroDeck,
 			UsbConnectionsEnabled = view.UsbConnectionsEnabled,
 			DefaultDeviceSerial = view.DefaultDeviceSerial,
+			StopServerOnExit = view.StopServerOnExit,
 			ActivePublicPort = view.ActivePublicPort,
 			DeviceSidePortCandidates = AdbUsbTunnelPorts.DeviceSideCandidates,
 			Devices = view.Devices,
