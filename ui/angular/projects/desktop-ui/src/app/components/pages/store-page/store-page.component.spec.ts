@@ -11,6 +11,7 @@ import { SelectComponent } from '../../forms/select/select.component';
 import { StoreExtensionCardComponent } from '../../store/store-extension-card.component';
 import { StoreSectionComponent } from '../../store/store-section.component';
 import { StorePageComponent } from './store-page.component';
+import { StoreRegistryRefreshModalComponent } from './store-registry-refresh-modal.component';
 
 interface CatalogOptions {
   kinds?: string[];
@@ -100,8 +101,13 @@ describe('StorePageComponent', () => {
     notifications = new Map();
     api = jasmine.createSpyObj<ApiService>('ApiService', [
       'onNotification', 'getStoreCatalog', 'refreshStoreRegistry', 'getStoreOperations', 'installStoreExtension',
-      'retryStoreOperation', 'getStoreExtensionIconUrl', 'uninstallStoreExtension',
+      'retryStoreOperation', 'getStoreExtensionIconUrl', 'uninstallStoreExtension', 'getStoreStatus',
     ]);
+    api.getStoreStatus.and.resolveTo({
+      registry: { hasCatalog: true, sequence: 1, refreshing: false, stale: false },
+      developerMode: false,
+      refreshRun: null,
+    });
     api.onNotification.and.callFake((method: string) => {
       let subject = notifications.get(method);
       if (!subject) {
@@ -164,6 +170,74 @@ describe('StorePageComponent', () => {
   function chooseSort(value: string): void {
     (fixture.componentInstance as unknown as { onSortChange(value: string): void }).onSortChange(value);
   }
+
+  function refreshModalOpen(): boolean {
+    return fixture.debugElement.queryAll(By.directive(StoreRegistryRefreshModalComponent)).length > 0;
+  }
+
+  it('opens the refresh log and asks the host for exactly one refresh when Refresh is pressed', async () => {
+    await createFixture();
+    api.refreshStoreRegistry.and.resolveTo({
+      success: true,
+      registry: { hasCatalog: true, sequence: 2, refreshing: false, stale: false },
+    });
+
+    findButton(translate(AppStrings.Store.Page.RefreshAction))?.click();
+    await settle();
+
+    expect(refreshModalOpen()).toBeTrue();
+    expect(api.refreshStoreRegistry).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a refresh already under way and opens its log instead of starting another', async () => {
+    await createFixture();
+
+    push('StoreRegistryRefreshChangedEvent', {
+      run: {
+        hostInstanceId: 'host-a',
+        id: 'run-1',
+        revision: 1,
+        trigger: 'Scheduled',
+        state: 'Running',
+        startedAt: '2026-09-15T10:00:00Z',
+        filesCompleted: 0,
+        filesTotal: 0,
+        entries: [],
+      },
+    });
+    await settle();
+    findButton(translate(AppStrings.Store.RegistryRefresh.InProgressAction))?.click();
+    await settle();
+
+    expect(refreshModalOpen()).toBeTrue();
+    expect(api.refreshStoreRegistry).not.toHaveBeenCalled();
+  });
+
+  it('does not show the log of an earlier refresh when a new one is started', async () => {
+    await createFixture();
+    push('StoreRegistryRefreshChangedEvent', {
+      run: {
+        hostInstanceId: 'host-a',
+        id: 'earlier',
+        revision: 4,
+        trigger: 'Scheduled',
+        state: 'Succeeded',
+        startedAt: '2026-09-15T09:00:00Z',
+        filesCompleted: 0,
+        filesTotal: 0,
+        entries: [{ at: '2026-09-15T09:00:00Z', step: 'Started' }],
+      },
+    });
+    await settle();
+    api.refreshStoreRegistry.and.returnValue(new Promise(() => undefined));
+
+    findButton(translate(AppStrings.Store.Page.RefreshAction))?.click();
+    await settle();
+
+    const modal = fixture.debugElement.query(By.directive(StoreRegistryRefreshModalComponent))
+      .componentInstance as StoreRegistryRefreshModalComponent;
+    expect(modal.run()).toBeNull();
+  });
 
   it('renders one card per catalog result', async () => {
     await createFixture({ grid: items(3) });

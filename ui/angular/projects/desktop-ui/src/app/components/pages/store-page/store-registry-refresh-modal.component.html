@@ -1,0 +1,43 @@
+<shared-modal [heading]="heading()" size="medium" [showFooter]="false" (close)="onClose()">
+  <div
+    class="refresh-status"
+    [class.refresh-status-succeeded]="state() === 'Succeeded'"
+    [class.refresh-status-failed]="state() === 'Failed'"
+    role="status">
+    @if (state() === 'Running') {
+      <span class="refresh-spinner" aria-hidden="true"></span>
+    } @else if (state() === 'Succeeded') {
+      <span class="icon icon-check icon-sm" aria-hidden="true"></span>
+    } @else {
+      <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+    }
+    <span class="refresh-status-text">{{ stateText() }}</span>
+  </div>
+
+  @if (progress(); as current) {
+    <div
+      class="refresh-progress"
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-valuenow]="current.percent"
+      [attr.aria-valuetext]="current.text">
+      <div class="refresh-progress-fill" [style.width.%]="current.percent"></div>
+    </div>
+    <p class="refresh-progress-text">{{ current.text }}</p>
+  }
+
+  <ol class="refresh-log" [attr.aria-label]="logLabel()" aria-live="polite">
+    @for (line of lines(); track line.key) {
+      <li class="refresh-log-line" [class.refresh-log-line-failed]="line.failed">
+        <span class="refresh-log-time">{{ line.time }}</span>
+        <span class="refresh-log-message">
+          <span>{{ line.text }}</span>
+          @if (line.detail) {
+            <span class="refresh-log-detail">{{ line.detail }}</span>
+          }
+        </span>
+      </li>
+    }
+  </ol>
+</shared-modal>

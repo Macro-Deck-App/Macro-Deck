@@ -1,0 +1,93 @@
+.refresh-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-md);
+  color: var(--color-text-primary);
+}
+
+.refresh-status-succeeded .icon {
+  color: var(--color-success);
+}
+
+.refresh-status-failed .icon {
+  color: var(--color-danger);
+}
+
+.refresh-spinner {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-text-primary);
+  border-radius: 50%;
+  animation: ds-spin 0.8s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+.refresh-progress {
+  height: 4px;
+  margin-top: var(--space-3);
+  border-radius: 2px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.refresh-progress-fill {
+  height: 100%;
+  background: var(--color-text-primary);
+  transition: width 0.2s ease;
+}
+
+.refresh-progress-text {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.refresh-log {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) 0 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-height: 280px;
+  overflow-y: auto;
+  border-top: 1px solid var(--color-border);
+}
+
+.refresh-log-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+
+.refresh-log-line-failed {
+  color: var(--color-danger);
+}
+
+.refresh-log-time {
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.refresh-log-message {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.refresh-log-detail {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
