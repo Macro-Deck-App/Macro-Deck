@@ -148,6 +148,21 @@ Configuration inputs use `change` from `UiConfigEvents`. See the [component refe
 each component's geometry and semantics, and [Modal views](/ui/views/modal/) for `modal.complete`, the one
 event that is not a component interaction but the answer that ends a dialog.
 
+### Links
+
+A `UiLink` with an external `http` or `https` URL is opened by the host in the user's default browser,
+never inside the surface, whether or not the link declares `activate`. Declaring `activate` only tells your
+plugin that the link was followed: the event arrives in addition to the host opening the URL, so a handler
+must not open the URL itself. A link to the app's own origin, or to any other scheme, is not opened this
+way.
+
+:::caution[Behaviour change in hosts released after 3.0.0-beta.6]
+Up to 3.0.0-beta.6, the desktop app opened a link that declared `activate` only inside the integration setup
+dialog. Anywhere else the plugin received the event and nothing opened. If your handler opened the URL
+itself to work around that, remove that code: the host now opens it and the handler would open a second
+tab.
+:::
+
 ## See also
 
 - [State and bindings](/ui/concepts/state-and-bindings/)

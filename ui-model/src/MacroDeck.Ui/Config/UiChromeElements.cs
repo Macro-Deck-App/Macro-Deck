@@ -279,9 +279,16 @@ public sealed record UiCopyValue : UiLeaf
 /// link.
 ///
 /// <para>
-/// Raises <c>activate</c> rather than being navigated as an href, because the existing dialog opens a link
-/// through the shell's external-link service instead of inside the surface. A surface rendered outside a
-/// browser has no href to follow at all, so the event is the portable form.
+/// The host opens an external http or https <see cref="Url" /> in the user's default browser, never inside
+/// the surface, whether or not the link declares <c>activate</c>.
+/// Declare <c>activate</c> only to learn that the link was followed: the event is raised in addition to the
+/// host opening the URL, so a handler must not open the URL again.
+/// </para>
+///
+/// <para>
+/// Behaviour change in hosts released after 3.0.0-beta.6: before, a link that declared <c>activate</c> was
+/// opened by the host only inside the integration setup dialog; everywhere else only the event was raised. A
+/// handler that opened the URL itself to work around that now opens it a second time and should stop.
 /// </para>
 /// </summary>
 public sealed record UiLink : UiLeaf

@@ -7,7 +7,8 @@ A plugin ships as a compiled assembly, built against an SDK version and updated 
 controls, not Macro Deck. So the promise is: **a plugin compiled against an older SDK keeps loading and
 behaving the same against a newer host - no recompile, no behaviour change.** Every contract below is
 frozen while it is public and not marked `[Obsolete]`, and changes only through the process under
-[how contracts change](#how-contracts-change).
+[how contracts change](#how-contracts-change). The few deliberate exceptions to that promise are listed
+under [behaviour changes that moved no version](/ui/reference/compatibility/#behaviour-changes-that-moved-no-version).
 
 ## What is covered
 
