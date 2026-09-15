@@ -18,11 +18,12 @@ internal sealed class ConnectTestHarness : IAsyncDisposable
 		Persister = new ConnectTokenPersister(Store, Log.Logger);
 		// Parked like DelayHandler below: a session-service test must not have a device authorization poll
 		// spinning behind it.
+		SignInDelayHandler = (_, ct) => Task.Delay(Timeout.Infinite,
+			CancellationTokenSource.CreateLinkedTokenSource(ct, _parked.Token).Token);
 		Flow = new ConnectSignInFlow(Identity,
 			Time,
 			Log.Logger,
-			(_, ct) => Task.Delay(Timeout.Infinite,
-				CancellationTokenSource.CreateLinkedTokenSource(ct, _parked.Token).Token));
+			(span, ct) => SignInDelayHandler(span, ct));
 
 		// Parked by default: a test that cares about the retry schedule replaces this, everything else must
 		// not have a backoff loop spinning behind it.
@@ -51,6 +52,8 @@ internal sealed class ConnectTestHarness : IAsyncDisposable
 	public List<TimeSpan> Delays { get; } = [];
 
 	public Func<TimeSpan, CancellationToken, Task> DelayHandler { get; set; }
+
+	public Func<TimeSpan, CancellationToken, Task> SignInDelayHandler { get; set; }
 
 	public ConnectSessionService CreateService()
 	{

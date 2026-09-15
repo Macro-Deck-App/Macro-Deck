@@ -115,7 +115,7 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 				credential.CachedDisplayName ?? credential.Subject,
 				credential.CachedPictureUrl,
 				null,
-				[]),
+				credential.CachedRoles ?? []),
 			null,
 			null,
 			null));
@@ -314,6 +314,7 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 
 	private async Task ObserveSignIn()
 	{
+		var signingKeys = _identityClient.FetchSigningKeys(_lifetimeToken);
 		var outcome = await _signInFlow.WaitForOutcome(CancellationToken.None);
 
 		if (outcome.Result is not ConnectSignInResult.Completed)
@@ -348,12 +349,16 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 
 		var tokens = outcome.Tokens!;
 		var claims = outcome.Claims!;
+		// Never waited for: a granted sign-in must commit before a Cancel or sign-out can slip in.
+		var keys = signingKeys.IsCompletedSuccessfully ? signingKeys.Result : null;
+		var roles = await VerifiedRoles(tokens.IdToken, keys) ?? [];
 		var now = _timeProvider.GetUtcNow();
 		var credential = new ConnectCredential(tokens.RefreshToken,
 			claims.Subject,
 			claims.DisplayName,
 			claims.PictureUrl,
-			now);
+			now,
+			roles);
 
 		var persisting = _persister.EnqueueAndWaitAsync(credential);
 
@@ -371,7 +376,7 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 
 		Publish(new ConnectSessionSnapshot(ConnectAccountStatus.SignedIn,
 			ConnectConnectivity.Ok,
-			ToAccount(claims),
+			ToAccount(claims, roles),
 			null,
 			now,
 			null));
@@ -413,14 +418,30 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 
 		try
 		{
+			// Fetched before the token request: once the refresh token has rotated, nothing may wait on the
+			// network before the rotated credential is durable.
+			var signingKeys = await _identityClient.FetchSigningKeys(cancellationToken);
+
+			lock (_sync)
+			{
+				if (!ReferenceEquals(_credential, observed))
+				{
+					return new RefreshOutcome(RefreshResult.Rejected,
+						null,
+						"No Macro Deck Connect account is signed in.");
+				}
+			}
+
 			var response = await _identityClient.Refresh(observed.RefreshToken, cancellationToken);
 			var claims = ConnectIdTokenReader.Read(response.IdToken, null, _timeProvider);
+			var roles = await VerifiedRoles(response.IdToken, signingKeys) ?? observed.CachedRoles ?? [];
 			var now = _timeProvider.GetUtcNow();
 			var rotated = new ConnectCredential(response.RefreshToken,
 				claims.Subject,
 				claims.DisplayName,
 				claims.PictureUrl,
-				now);
+				now,
+				roles);
 
 			var persisting = _persister.EnqueueAndWaitAsync(rotated);
 
@@ -446,7 +467,7 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 
 			Publish(new ConnectSessionSnapshot(ConnectAccountStatus.SignedIn,
 				ConnectConnectivity.Ok,
-				ToAccount(claims),
+				ToAccount(claims, roles),
 				null,
 				now,
 				null));
@@ -679,8 +700,19 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 			left.Roles.SequenceEqual(right.Roles, StringComparer.Ordinal);
 	}
 
-	private static ConnectAccount ToAccount(ConnectIdTokenClaims claims)
-		=> new(claims.Subject, claims.DisplayName, claims.PictureUrl, claims.CreatorUsername, []);
+	private static ConnectAccount ToAccount(ConnectIdTokenClaims claims, IReadOnlyList<string> roles)
+		=> new(claims.Subject, claims.DisplayName, claims.PictureUrl, claims.CreatorUsername, roles);
+
+	private async Task<IReadOnlyList<string>?> VerifiedRoles(string idToken, string? signingKeys)
+	{
+		var roles = await ConnectIdTokenReader.ReadVerifiedRoles(idToken, signingKeys);
+		if (roles is null)
+		{
+			_logger.Warning("The Macro Deck Connect id token could not be verified; its roles were not applied");
+		}
+
+		return roles;
+	}
 
 	private static TimeSpan DefaultJitter(TimeSpan span)
 		=> span * (0.8 + (Random.Shared.NextDouble() * 0.4));

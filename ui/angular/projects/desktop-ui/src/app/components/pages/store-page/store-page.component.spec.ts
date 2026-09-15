@@ -1,11 +1,12 @@
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { WritableSignal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 
-import { AppStrings, GetStoreCatalogResponse, StoreCatalogItemBody } from '@macro-deck/runtime';
+import { AppStrings, GetConnectSessionResponse, GetStoreCatalogResponse, StoreCatalogItemBody } from '@macro-deck/runtime';
 import { ApiService, LocalizationService, SegmentedControlComponent, ToastService } from '@shared';
+import { ConnectAccountService } from '../../../services/connect-account.service';
 import { SelectComponent } from '../../forms/select/select.component';
 import { StoreExtensionCardComponent } from '../../store/store-extension-card.component';
 import { StoreSectionComponent } from '../../store/store-section.component';
@@ -50,6 +51,7 @@ describe('StorePageComponent', () => {
   let routerSpy: jasmine.SpyObj<Router>;
   let notifications: Map<string, Subject<unknown>>;
   let catalog: Catalog;
+  let account: { isSignedIn: WritableSignal<boolean>; session: WritableSignal<GetConnectSessionResponse | null> };
 
   function push(method: string, payload: unknown): void {
     notifications.get(method)?.next(payload);
@@ -130,12 +132,14 @@ describe('StorePageComponent', () => {
 
     routerSpy = jasmine.createSpyObj<Router>('Router', ['navigate']);
     routerSpy.navigate.and.resolveTo(true);
+    account = { isSignedIn: signal(false), session: signal(null) };
 
     TestBed.configureTestingModule({
       imports: [StorePageComponent],
       providers: [
         provideZonelessChangeDetection(),
         { provide: ApiService, useValue: api },
+        { provide: ConnectAccountService, useValue: account },
         { provide: Router, useValue: routerSpy },
         {
           provide: ActivatedRoute,
@@ -473,6 +477,66 @@ describe('StorePageComponent', () => {
       for (const cardInstall of cardInstalls) {
         expect(cardInstall.querySelector('shared-confirmation-modal')).toBeNull();
       }
+    });
+  });
+
+  describe('store tester access', () => {
+    async function sessionIs(status: GetConnectSessionResponse['status'], roles: string[]): Promise<void> {
+      account.session.set({
+        status,
+        connectivity: 'ok',
+        offlineSince: null,
+        account: {
+          subject: 'u1', displayName: 'Tester', avatarAvailable: false, avatarVersion: null, creatorUsername: null, roles,
+        },
+        lastSuccessfulRefreshUtc: null,
+        message: null,
+        signInFailure: null,
+        accountManagementUrl: '',
+      });
+      account.isSignedIn.set(status === 'signedIn');
+      await settle();
+    }
+
+    function pageIsInert(): boolean {
+      return (fixture.nativeElement.querySelector('.store-page') as HTMLElement).hasAttribute('inert');
+    }
+
+    function comingSoonShown(): boolean {
+      return fixture.nativeElement.querySelector('.store-coming-soon') !== null;
+    }
+
+    it('keeps the store behind the coming-soon overlay while signed out', async () => {
+      await createFixture();
+
+      expect(pageIsInert()).toBeTrue();
+      expect(comingSoonShown()).toBeTrue();
+    });
+
+    it('keeps the overlay for a signed-in account without the StoreTester role', async () => {
+      await createFixture();
+      await sessionIs('signedIn', ['SomethingElse']);
+
+      expect(pageIsInert()).toBeTrue();
+      expect(comingSoonShown()).toBeTrue();
+    });
+
+    for (const status of ['suspended', 'reauthenticationRequired'] as const) {
+      it(`keeps the overlay for a StoreTester account that is ${status}`, async () => {
+        await createFixture();
+        await sessionIs(status, ['StoreTester']);
+
+        expect(pageIsInert()).toBeTrue();
+        expect(comingSoonShown()).toBeTrue();
+      });
+    }
+
+    it('opens the store for a signed-in StoreTester account', async () => {
+      await createFixture();
+      await sessionIs('signedIn', ['StoreTester']);
+
+      expect(pageIsInert()).toBeFalse();
+      expect(comingSoonShown()).toBeFalse();
     });
   });
 });

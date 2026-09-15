@@ -89,8 +89,11 @@ Discord and more. Turn on the ones you use under **Integrations**.
 
 ![The Integrations page with ADB, Discord, Home Assistant, HTTP and Keyboard](../../../assets/guide/integrations.png)
 
-The **Store** for more plugins and icon packs is not available yet. Everything published there will
-be reviewed and signed first.
+The **Store** for more plugins and icon packs is not available to everyone yet. Everything published
+there will be reviewed and signed first. Members of the Store tester programme can already use it:
+sign in with your Macro Deck account under **Settings > Account**. A change to your tester access
+can take up to a day to show up. If you were signed in before your Macro Deck version supported
+testers, sign out and in once.
 
 ## Devices
 

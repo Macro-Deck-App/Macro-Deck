@@ -1,7 +1,4 @@
-<!-- Temporary: the store backend is not live yet, so the whole page sits behind a coming-soon
-     overlay and is held inert. Remove this overlay, the `inert` binding and the ComingSoon* strings
-     once the store goes live. -->
-<div class="store-page" [attr.inert]="''">
+<div class="store-page" [attr.inert]="storeUnlocked() ? null : ''">
   <div class="store-page-content">
     <div class="store-header">
       <div class="store-heading">
@@ -129,9 +126,11 @@
     (cancel)="cancelUninstall()" />
 }
 
-<div class="store-coming-soon">
-  <shared-empty-state
-    icon="store"
-    [heading]="'macrodeck.app:Store.Page.ComingSoonHeading' | translate"
-    [message]="'macrodeck.app:Store.Page.ComingSoonMessage' | translate" />
-</div>
+@if (!storeUnlocked()) {
+  <div class="store-coming-soon">
+    <shared-empty-state
+      icon="store"
+      [heading]="'macrodeck.app:Store.Page.ComingSoonHeading' | translate"
+      [message]="'macrodeck.app:Store.Page.ComingSoonMessage' | translate" />
+  </div>
+}
