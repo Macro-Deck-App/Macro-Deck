@@ -180,6 +180,22 @@ public class SliderWidgetViewTests
 		Assert.That(fraction, Is.Null);
 	}
 
+	[Test]
+	public void Relative_interaction_reaches_the_track_and_absolute_or_absent_leaves_the_key_out()
+	{
+		var relative = Render(new { interaction = "relative", valueVariable = "vol" }, _boundEvents);
+		var absolute = Render(new { interaction = "absolute", valueVariable = "vol" }, _boundEvents);
+		var absent = Render(new { valueVariable = "vol" }, _boundEvents);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(relative.ById("slider.track").Text("interaction"),
+				Is.EqualTo(UiComponentSliderInteractions.Relative));
+			Assert.That(absolute.ById("slider.track").HasProperty("interaction"), Is.False);
+			Assert.That(absent.ById("slider.track").HasProperty("interaction"), Is.False);
+		});
+	}
+
 	/// <summary>ADR 0081 removed the Slider's action binding, but stored widget data still carries the
 	/// block. Parsing has to read the variable binding out of such a document and ignore the leftover
 	/// rather than fail on it.</summary>

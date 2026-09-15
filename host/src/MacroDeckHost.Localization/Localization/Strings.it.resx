@@ -16232,6 +16232,18 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.Slider.Horizontal" xml:space="preserve">
     <value>Orizzontale</value>
   </data>
+  <data name="Widgets.Slider.InteractionMode" xml:space="preserve">
+    <value>Modalità di interazione</value>
+  </data>
+  <data name="Widgets.Slider.InteractionAbsolute" xml:space="preserve">
+    <value>Assoluta</value>
+  </data>
+  <data name="Widgets.Slider.InteractionRelative" xml:space="preserve">
+    <value>Relativa</value>
+  </data>
+  <data name="Widgets.Slider.InteractionModeDescription" xml:space="preserve">
+    <value>Assoluta salta dove tocchi. Relativa lascia il valore dov'è e lo sposta di quanto trascini.</value>
+  </data>
   <data name="Widgets.Slider.LegacyActionBindingNotice" xml:space="preserve">
     <value>Questo cursore contiene ancora un'azione associata da una versione precedente. Non viene più usata e verrà rimossa al prossimo salvataggio.</value>
   </data>

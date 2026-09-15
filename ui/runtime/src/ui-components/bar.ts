@@ -90,7 +90,11 @@ export function sliderLevelFromPointer(
   step?: number,
 ): number {
   if (extentPx <= 0) return 0;
-  const raw = clampUnit(vertical ? 1 - positionPx / extentPx : positionPx / extentPx);
+  return snapSliderLevel(vertical ? 1 - positionPx / extentPx : positionPx / extentPx, step);
+}
+
+export function snapSliderLevel(level: number, step?: number): number {
+  const raw = clampUnit(level);
   if (step === undefined || !(step > 0)) return raw;
   return clampUnit(Math.round(raw / step) * step);
 }

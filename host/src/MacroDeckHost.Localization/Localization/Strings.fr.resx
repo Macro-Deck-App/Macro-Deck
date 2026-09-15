@@ -16232,6 +16232,18 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.Slider.Horizontal" xml:space="preserve">
     <value>Horizontal</value>
   </data>
+  <data name="Widgets.Slider.InteractionMode" xml:space="preserve">
+    <value>Mode d'interaction</value>
+  </data>
+  <data name="Widgets.Slider.InteractionAbsolute" xml:space="preserve">
+    <value>Absolu</value>
+  </data>
+  <data name="Widgets.Slider.InteractionRelative" xml:space="preserve">
+    <value>Relatif</value>
+  </data>
+  <data name="Widgets.Slider.InteractionModeDescription" xml:space="preserve">
+    <value>Absolu saute là où tu touches. Relatif laisse la valeur en place et la déplace selon la distance que tu fais glisser.</value>
+  </data>
   <data name="Widgets.Slider.LegacyActionBindingNotice" xml:space="preserve">
     <value>Ce curseur contient encore une action liée héritée d'une version précédente. Elle n'est plus utilisée et sera supprimée au prochain enregistrement.</value>
   </data>

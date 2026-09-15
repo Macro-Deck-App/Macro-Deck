@@ -14,6 +14,10 @@
       "enum": ["horizontal", "vertical", null],
       "description": "Slider layout direction."
     },
+    "interaction": {
+      "enum": ["absolute", "relative", null],
+      "description": "How a drag maps to the value. 'absolute' (also when absent or null) jumps to the pointer; 'relative' leaves the value where it is on press and moves it by the pointer's travel, the full track length spanning the full range."
+    },
     "color": {
       "type": ["string", "null"],
       "description": "Color of the slider body/track (the fill is a lighter tint of it)."

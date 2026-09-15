@@ -84,6 +84,11 @@ export const UiComponentButtonCorners = { Tile: 'tile' } as const;
 export const UI_COMPONENT_BUTTON_CORNERS_WELL_KNOWN: readonly string[] =
   Object.values(UiComponentButtonCorners);
 
+export const UiComponentSliderInteractions = { Relative: 'relative' } as const;
+
+export const UI_COMPONENT_SLIDER_INTERACTIONS_WELL_KNOWN: readonly string[] =
+  Object.values(UiComponentSliderInteractions);
+
 export const UiComponentBorderStyles = {
   Static: 'static', Heartbeat: 'heartbeat', Breathing: 'breathing', Blink: 'blink',
   Comet: 'comet', Ants: 'ants', HueShift: 'hue-shift', Rgb: 'rgb',

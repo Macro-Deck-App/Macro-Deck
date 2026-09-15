@@ -16230,6 +16230,18 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Slider.Horizontal" xml:space="preserve">
     <value>Horizontal</value>
   </data>
+  <data name="Widgets.Slider.InteractionMode" xml:space="preserve">
+    <value>Interaktionsmodus</value>
+  </data>
+  <data name="Widgets.Slider.InteractionAbsolute" xml:space="preserve">
+    <value>Absolut</value>
+  </data>
+  <data name="Widgets.Slider.InteractionRelative" xml:space="preserve">
+    <value>Relativ</value>
+  </data>
+  <data name="Widgets.Slider.InteractionModeDescription" xml:space="preserve">
+    <value>Absolut springt dorthin, wo du tippst. Relativ lässt den Wert stehen und verschiebt ihn um die Strecke, die du ziehst.</value>
+  </data>
   <data name="Widgets.Slider.LegacyActionBindingNotice" xml:space="preserve">
     <value>Dieser Schieberegler enthält noch eine Aktionsbindung aus einer älteren Version. Sie wird nicht mehr verwendet und beim nächsten Speichern entfernt.</value>
   </data>

@@ -449,4 +449,229 @@ describe('ui.slider interaction', () => {
 
     expect(fillOf(rendered).style.width).toBe('0%');
   });
+
+  describe('relative interaction', () => {
+    function relativeNode(overrides: Record<string, unknown> = {}, events: string[] = ['adjust', 'change']): UiNode {
+      return sliderNode({ [Props.Interaction]: 'relative', ...overrides }, events);
+    }
+
+    function fillPercent(rendered: RenderedTree): number {
+      return parseFloat(fillOf(rendered).style.width);
+    }
+
+    function changes(rendered: RenderedTree): number[] {
+      return rendered.events.filter(e => e.name === 'change').map(e => e.data as number);
+    }
+
+    async function drag(rendered: RenderedTree, from: number, ...to: number[]): Promise<void> {
+      const surface = surfaceOf(rendered);
+      const rect = surface.getBoundingClientRect();
+      const y = rect.top + rect.height / 2;
+      down(surface, rect.left + from * rect.width, y);
+      for (const fraction of to) {
+        move(surface, rect.left + fraction * rect.width, y);
+      }
+      up(surface, rect.left + (to.length ? to[to.length - 1] : from) * rect.width, y);
+      await tick(rendered);
+    }
+
+    it('neither moves nor sends anything on a press away from the level', async () => {
+      const rendered = await renderTree(relativeNode({ [Props.Level]: 0.2 }), withBasis(200));
+      const surface = surfaceOf(rendered);
+      const rect = surface.getBoundingClientRect();
+
+      down(surface, rect.left + 0.9 * rect.width, rect.top + rect.height / 2);
+      await tick(rendered);
+
+      expect(rendered.events).toEqual([]);
+      expect(fillPercent(rendered)).toBeCloseTo(20, 3);
+    });
+
+    it('moves the level by the pointer travel from the press, snapped to the step', async () => {
+      const rendered = await renderTree(relativeNode({ [Props.Level]: 0.2, [Props.Step]: 0.05 }), withBasis(200));
+
+      await drag(rendered, 0.6, 0.9);
+
+      expect(changes(rendered).length).toBe(1);
+      expect(changes(rendered)[0]).toBeCloseTo(0.5, 3);
+      expect(rendered.events[rendered.events.length - 1].name).toBe('change');
+      expect(fillPercent(rendered)).toBeCloseTo(50, 3);
+    });
+
+    it('clamps at 0 and moves back up at once when the pointer reverses, even outside the box', async () => {
+      const rendered = await renderTree(relativeNode({ [Props.Level]: 0.2 }), withBasis(200));
+      const surface = surfaceOf(rendered);
+      const rect = surface.getBoundingClientRect();
+      const y = rect.top + rect.height / 2;
+
+      down(surface, rect.left + 0.5 * rect.width, y);
+      move(surface, rect.left - 0.5 * rect.width, y);
+      await tick(rendered);
+      expect(fillPercent(rendered)).toBeCloseTo(0, 3);
+
+      move(surface, rect.left - 0.4 * rect.width, y);
+      await tick(rendered);
+      expect(fillPercent(rendered)).toBeCloseTo(10, 3);
+    });
+
+    it('raises a vertical slider\'s level when the pointer moves up', async () => {
+      const rendered = await renderTree(
+        relativeNode({ [Props.Level]: 0.2, [Props.Direction]: 'vertical' }),
+        withBasis(200),
+      );
+      const surface = surfaceOf(rendered);
+      const rect = surface.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const middle = rect.top + rect.height / 2;
+
+      down(surface, x, middle);
+      move(surface, x, middle - 0.3 * rect.height);
+      up(surface, x, middle - 0.3 * rect.height);
+      await tick(rendered);
+
+      expect(changes(rendered)[0]).toBeCloseTo(0.5, 3);
+    });
+
+    it('spans exactly the full range over the full length of the box', async () => {
+      const rendered = await renderTree(relativeNode({ [Props.Level]: 0 }), withBasis(200));
+      const surface = surfaceOf(rendered);
+      const rect = surface.getBoundingClientRect();
+      const y = rect.top + rect.height / 2;
+
+      down(surface, rect.left + 0.25 * rect.width, y);
+      move(surface, rect.left + rect.width, y);
+      await tick(rendered);
+      expect(fillPercent(rendered)).toBeCloseTo(75, 3);
+
+      move(surface, rect.left + 1.25 * rect.width, y);
+      await tick(rendered);
+      expect(fillPercent(rendered)).toBeCloseTo(100, 3);
+    });
+
+    it('sends no change for a tap that wobbles within the tap slop', async () => {
+      const rendered = await renderTree(relativeNode({ [Props.Level]: 0.3 }), withBasis(200));
+      const surface = surfaceOf(rendered);
+      const rect = surface.getBoundingClientRect();
+      const x = rect.left + 0.8 * rect.width;
+      const y = rect.top + rect.height / 2;
+
+      down(surface, x, y);
+      move(surface, x + 3, y);
+      up(surface, x + 3, y);
+      await tick(rendered);
+
+      expect(rendered.events).toEqual([]);
+      expect(fillPercent(rendered)).toBeCloseTo(30, 3);
+    });
+
+    it('does not turn an off-grid level into a change when the pointer leaves the slop across the axis', async () => {
+      const rendered = await renderTree(relativeNode({ [Props.Level]: 0.23, [Props.Step]: 0.05 }), withBasis(200));
+      const surface = surfaceOf(rendered);
+      const rect = surface.getBoundingClientRect();
+      const x = rect.left + 0.5 * rect.width;
+      const y = rect.top + rect.height / 2;
+
+      down(surface, x, y);
+      move(surface, x, y + 20);
+      up(surface, x, y + 20);
+      await tick(rendered);
+
+      expect(rendered.events).toEqual([]);
+      expect(fillPercent(rendered)).toBeCloseTo(23, 3);
+    });
+
+    it('still sends a change when the drag comes back to where it began', async () => {
+      const rendered = await renderTree(relativeNode({ [Props.Level]: 0.2 }), withBasis(200));
+
+      await drag(rendered, 0.5, 0.8, 0.5);
+
+      expect(rendered.events.some(e => e.name === 'adjust' && Math.abs((e.data as number) - 0.5) < 1e-3)).toBeTrue();
+      expect(changes(rendered).length).toBe(1);
+      expect(changes(rendered)[0]).toBeCloseTo(0.2, 3);
+    });
+
+    it('continues from the level it landed on when grabbed again before the host answers', async () => {
+      const rendered = await renderTree(relativeNode({ [Props.Level]: 0.2 }, ['change']), withBasis(200));
+
+      await drag(rendered, 0.5, 0.9);
+      await updateTree(rendered, { root: relativeNode({ [Props.Level]: 0.2 }, ['change']) });
+      expect(fillPercent(rendered)).toBeCloseTo(60, 3);
+
+      await drag(rendered, 0.5, 0.6);
+
+      expect(changes(rendered).length).toBe(2);
+      expect(changes(rendered)[1]).toBeCloseTo(0.7, 3);
+    });
+
+    it('keeps the landed level through a tap in the settle window, and still gives it back on silence', async () => {
+      jasmine.clock().install();
+      try {
+        const rendered = await renderTree(relativeNode({ [Props.Level]: 0.2 }, ['change']), withBasis(200));
+
+        await drag(rendered, 0.5, 0.9);
+        expect(fillPercent(rendered)).toBeCloseTo(60, 3);
+
+        jasmine.clock().tick(300);
+        await drag(rendered, 0.3);
+
+        expect(changes(rendered).length).toBe(1);
+        expect(fillPercent(rendered)).toBeCloseTo(60, 3);
+
+        jasmine.clock().tick(800);
+        await tick(rendered);
+        expect(fillPercent(rendered)).toBeCloseTo(20, 3);
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
+
+    it('keeps the landed level when the OS cancels an unmoved press in the settle window', async () => {
+      const rendered = await renderTree(relativeNode({ [Props.Level]: 0.2 }, ['change']), withBasis(200));
+      await drag(rendered, 0.5, 0.9);
+
+      const surface = surfaceOf(rendered);
+      const rect = surface.getBoundingClientRect();
+      const x = rect.left + 0.3 * rect.width;
+      const y = rect.top + rect.height / 2;
+      down(surface, x, y);
+      surface.dispatchEvent(new PointerEvent('pointercancel', {
+        bubbles: true, cancelable: true, pointerId: POINTER_ID, clientX: x, clientY: y,
+      }));
+      await tick(rendered);
+
+      expect(changes(rendered).length).toBe(1);
+      expect(fillPercent(rendered)).toBeCloseTo(60, 3);
+    });
+
+    it('sends only double-press for two quick taps', async () => {
+      jasmine.clock().install();
+      jasmine.clock().mockDate(new Date(2026, 0, 1));
+      try {
+        const rendered = await renderTree(
+          relativeNode({ [Props.Level]: 0.3 }, ['adjust', 'change', 'double-press']),
+          withBasis(200),
+        );
+
+        await drag(rendered, 0.8);
+        jasmine.clock().tick(150);
+        await drag(rendered, 0.8);
+
+        expect(rendered.events.map(e => e.name)).toEqual(['double-press']);
+        expect(fillPercent(rendered)).toBeCloseTo(30, 3);
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
+
+    it('treats an unknown interaction as absolute', async () => {
+      const rendered = await renderTree(sliderNode({ [Props.Level]: 0.2, [Props.Interaction]: 'bogus' }), withBasis(200));
+      const surface = surfaceOf(rendered);
+      const rect = surface.getBoundingClientRect();
+
+      down(surface, rect.left + 0.6 * rect.width, rect.top + rect.height / 2);
+      await tick(rendered);
+
+      expect(rendered.events[0].data as number).toBeCloseTo(0.6, 3);
+    });
+  });
 });

@@ -505,6 +505,7 @@ export {
 export {
   UI_COMPONENT_BORDER_STYLES_WELL_KNOWN,
   UI_COMPONENT_BUTTON_CORNERS_WELL_KNOWN,
+  UI_COMPONENT_SLIDER_INTERACTIONS_WELL_KNOWN,
   UI_COMPONENT_IMAGE_TRANSITIONS_WELL_KNOWN,
   UI_COMPONENTS_WELL_KNOWN,
   UI_COMPONENT_SHAPES_WELL_KNOWN,
@@ -514,6 +515,7 @@ export {
   UiComponentAlignments,
   UiComponentBorderStyles,
   UiComponentButtonCorners,
+  UiComponentSliderInteractions,
   UiComponentDirections,
   UiComponentImageFits,
   UiComponentImageTransitions,

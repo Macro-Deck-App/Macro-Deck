@@ -161,6 +161,8 @@ allowed to *offer*, which no other fixture exercises:
 - `step` present on one slider and **absent** on another - absent, not `0`, for the reason `marker` is
   absent on a range bar. The two draw the same picture and land on different values;
 - both axes, including the `vertical` one, whose fill runs bottom to top;
+- `interaction` of `relative` on one slider and **absent** on the others - absent is absolute, and a
+  reader that spelled the default into the tree would pass a fixture containing only the first;
 - a `level` of exactly `0`, which is where a reader tends to paint a rounded stub one radius wide instead
   of nothing;
 - a one-step fallback to `ui.range-bar` carrying **both** colours - a reader too old to draw the
