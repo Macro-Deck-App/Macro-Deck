@@ -49,4 +49,6 @@ public interface IConnectIdentityClient
 	Task<ConnectTokenResponse> Refresh(string refreshToken, CancellationToken cancellationToken);
 
 	Task Revoke(string refreshToken, CancellationToken cancellationToken);
+
+	Task<string?> FetchSigningKeys(CancellationToken cancellationToken);
 }

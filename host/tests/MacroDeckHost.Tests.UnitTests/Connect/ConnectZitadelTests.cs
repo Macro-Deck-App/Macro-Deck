@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using MacroDeckHost.Application.Connect;
 using MacroDeckHost.Infrastructure.Connect;
@@ -76,7 +77,8 @@ public class ConnectZitadelTests
 			Assert.That(handler.Uris,
 				Is.EqualTo(new[] { "https://auth.macro-deck.app/oauth/v2/device_authorization" }));
 			Assert.That(handler.Bodies[0], Does.Contain("client_id=390578325090796895"));
-			Assert.That(handler.Bodies[0], Does.Contain("scope=openid+profile+offline_access"));
+			Assert.That(handler.Bodies[0],
+				Does.Contain("scope=openid+profile+offline_access+urn%3Azitadel%3Aiam%3Aorg%3Aproject%3Aroles"));
 		});
 	}
 
@@ -98,10 +100,113 @@ public class ConnectZitadelTests
 			ConnectIdTokenReader.Read(idToken, null, TimeProvider.System));
 	}
 
-	private static ConnectIdentityClient Client(StubHandler handler) => new(handler);
+	[Test]
+	public async Task A_role_is_taken_from_an_id_token_the_issuer_signed()
+	{
+		var idToken = ConnectJwt.Create("user-1", roles: ["StoreTester"], signingKey: ConnectJwt.IssuerKey);
+
+		var roles = await ConnectIdTokenReader.ReadVerifiedRoles(idToken, ConnectJwt.Jwks(ConnectJwt.IssuerKey));
+
+		Assert.That(roles, Is.EqualTo(new[] { "StoreTester" }));
+	}
+
+	[Test]
+	public async Task A_verified_id_token_without_the_roles_claim_grants_no_role()
+	{
+		var idToken = ConnectJwt.Create("user-1", signingKey: ConnectJwt.IssuerKey);
+
+		Assert.That(await ConnectIdTokenReader.ReadVerifiedRoles(idToken, ConnectJwt.Jwks(ConnectJwt.IssuerKey)),
+			Is.Empty);
+	}
+
+	[Test]
+	public async Task A_roles_claim_that_is_not_an_object_grants_no_role()
+	{
+		var idToken = ConnectJwt.Create("user-1", rolesClaim: new[] { "StoreTester" }, signingKey: ConnectJwt.IssuerKey);
+
+		Assert.That(await ConnectIdTokenReader.ReadVerifiedRoles(idToken, ConnectJwt.Jwks(ConnectJwt.IssuerKey)),
+			Is.Empty);
+	}
+
+	[TestCase("signed with a foreign key")]
+	[TestCase("unsigned")]
+	[TestCase("issued for another client")]
+	[TestCase("issued by another issuer")]
+	public async Task No_role_is_taken_from_an_id_token_that_does_not_verify(string flaw)
+	{
+		using var foreignKey = RSA.Create(2048);
+		var idToken = flaw switch
+		{
+			"signed with a foreign key" => ConnectJwt.Create("user-1", roles: ["StoreTester"], signingKey: foreignKey),
+			"unsigned" => ConnectJwt.Create("user-1", roles: ["StoreTester"], algorithm: "none"),
+			"issued for another client" => ConnectJwt.Create("user-1",
+				audiences: [ProjectId],
+				roles: ["StoreTester"],
+				signingKey: ConnectJwt.IssuerKey),
+			_ => ConnectJwt.Create("user-1",
+				issuer: "https://accounts.macro-deck.app",
+				roles: ["StoreTester"],
+				signingKey: ConnectJwt.IssuerKey)
+		};
+
+		Assert.That(await ConnectIdTokenReader.ReadVerifiedRoles(idToken, ConnectJwt.Jwks(ConnectJwt.IssuerKey)),
+			Is.Null);
+	}
+
+	[TestCase(null)]
+	[TestCase("<html>captive portal</html>")]
+	public async Task No_role_is_taken_without_usable_signing_keys(string? signingKeys)
+	{
+		var idToken = ConnectJwt.Create("user-1", roles: ["StoreTester"], signingKey: ConnectJwt.IssuerKey);
+
+		Assert.That(await ConnectIdTokenReader.ReadVerifiedRoles(idToken, signingKeys), Is.Null);
+	}
+
+	[Test]
+	public async Task The_signing_keys_are_fetched_from_the_issuer()
+	{
+		var jwks = ConnectJwt.Jwks(ConnectJwt.IssuerKey);
+		var handler = new StubHandler(HttpStatusCode.OK, jwks);
+		using var client = Client(handler);
+
+		var keys = await client.FetchSigningKeys(CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(keys, Is.EqualTo(jwks));
+			Assert.That(handler.Uris, Is.EqualTo(new[] { "https://auth.macro-deck.app/oauth/v2/keys" }));
+		});
+	}
+
+	[TestCase(HttpStatusCode.OK, "<html>captive portal</html>")]
+	[TestCase(HttpStatusCode.ServiceUnavailable, "")]
+	public async Task An_unusable_key_response_yields_no_signing_keys(HttpStatusCode status, string body)
+	{
+		using var client = Client(new StubHandler(status, body));
+
+		Assert.That(await client.FetchSigningKeys(CancellationToken.None), Is.Null);
+	}
+
+	[Test]
+	public async Task An_unreachable_key_endpoint_yields_no_signing_keys()
+	{
+		using var client = Client(new UnreachableHandler());
+
+		Assert.That(await client.FetchSigningKeys(CancellationToken.None), Is.Null);
+	}
+
+	private static ConnectIdentityClient Client(HttpMessageHandler handler) => new(handler);
 
 	private static string Error(string error, string description)
 		=> $$"""{"error":"{{error}}","error_description":"{{description}}"}""";
+
+	private sealed class UnreachableHandler : HttpMessageHandler
+	{
+		protected override Task<HttpResponseMessage> SendAsync(
+			HttpRequestMessage request,
+			CancellationToken cancellationToken)
+			=> throw new HttpRequestException("connection refused");
+	}
 
 	private sealed class StubHandler : HttpMessageHandler
 	{

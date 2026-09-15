@@ -81,9 +81,15 @@ that one policy, and neither needs a loopback-only exception any more. The web c
 rather than being shown an account it cannot act on. The state-change notification broadcast to
 clients carries no fields at all; clients re-read the session rather than trusting a payload.
 
-Identity claims are read from the ID token without validating its signature against JWKS. The token
-arrives over a direct TLS channel from the issuer's token endpoint, and it is used only to render a
-name and an avatar.
+Profile claims are read from the ID token without validating its signature against JWKS. The token
+arrives over a direct TLS channel from the issuer's token endpoint, and they are used only to render
+a name and an avatar. Project roles (`urn:zitadel:iam:org:project:roles`) decide something, so they
+are taken only from an ID token whose signature verifies against the issuer's JWKS. The keys are
+fetched before the token request, so that after a refresh-token rotation only a local check runs
+before the rotated credential is durable. A token that cannot be verified never fails a refresh or a
+sign-in; it only leaves the previously verified roles in place. Verified roles are cached with the
+credential (see `SecretServiceConnectCredentialStore`) and trusted from there at startup, at the same
+trust level as the refresh token beside them.
 
 Backups never carry the credential. It is removed from the database snapshot before the archive is
 written, and `connect.` preference keys are refused on restore.
@@ -111,7 +117,12 @@ written, and `connect.` preference keys are refused on restore.
   independently, and the second use is a reuse that revokes the authorization for both.
 - A restore comes back signed out, including a same-machine restore.
 - The moment a cloud feature makes an authorization decision from these claims rather than displaying
-  them, JWKS validation stops being optional.
+  them, JWKS validation stops being optional. Project roles are the first such claims, and they are
+  JWKS-verified.
+- Amended for Store testers: the Store page opens for a signed-in account with the `StoreTester`
+  project role. This is a presentation gate in the desktop UI, not host-side access control. A role
+  granted or revoked in ZITADEL shows up at the next sign-in or refresh, so within about a day, and a
+  session signed in before roles were requested keeps its old grant until it signs in again.
 - Sign-out revokes this installation's authorization only. Other installations keep their own.
 - An admin token is now enough to bind this installation to an account, from anywhere on the network.
   That is the point of the change, and it makes the admin credential the whole boundary; there is no

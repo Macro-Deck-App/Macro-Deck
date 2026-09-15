@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using MacroDeckHost.Application.Connect;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MacroDeckHost.Infrastructure.Connect;
 
@@ -155,6 +156,25 @@ public sealed class ConnectIdentityClient : IConnectIdentityClient, IDisposable
 		{
 			var body = await ReadBody(response, cancellationToken);
 			throw Classify(response, body);
+		}
+	}
+
+	public async Task<string?> FetchSigningKeys(CancellationToken cancellationToken)
+	{
+		try
+		{
+			using var response = await _http.GetAsync(ConnectEndpoints.KeysEndpoint, cancellationToken);
+			if (!response.IsSuccessStatusCode)
+			{
+				return null;
+			}
+
+			var body = await response.Content.ReadAsStringAsync(cancellationToken);
+			return new JsonWebKeySet(body).GetSigningKeys().Count > 0 ? body : null;
+		}
+		catch (Exception)
+		{
+			return null;
 		}
 	}
 

@@ -431,12 +431,153 @@ public class ConnectSessionServiceTests
 		});
 	}
 
-	private static async Task<ConnectCredential> SignedIn(ConnectTestHarness harness)
+	[Test]
+	public async Task A_role_granted_at_sign_in_reaches_the_account_and_survives_a_restart()
 	{
-		var credential = harness.Identity.SeedCredential(harness.Time.Now);
+		await using var harness = new ConnectTestHarness();
+		harness.Identity.Roles = ["StoreTester"];
+
+		await SignIn(harness);
+
+		var restarted = harness.CreateService();
+		await restarted.Initialize();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(harness.Service.Current.Account!.Roles, Is.EqualTo(new[] { "StoreTester" }));
+			Assert.That(harness.Store.Saved[^1].CachedRoles, Is.EqualTo(new[] { "StoreTester" }));
+			Assert.That(restarted.Current.Account!.Roles, Is.EqualTo(new[] { "StoreTester" }));
+			Assert.That(harness.Identity.RefreshCount, Is.Zero);
+		});
+	}
+
+	[Test]
+	public async Task A_role_granted_later_arrives_with_the_next_refresh()
+	{
+		await using var harness = new ConnectTestHarness();
+		await SignedIn(harness);
+		harness.Identity.Roles = ["StoreTester"];
+
+		await harness.Service.GetAccessToken();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(harness.Service.Current.Account!.Roles, Is.EqualTo(new[] { "StoreTester" }));
+			Assert.That(harness.Store.Saved[^1].CachedRoles, Is.EqualTo(new[] { "StoreTester" }));
+		});
+	}
+
+	[Test]
+	public async Task A_revoked_role_is_removed_from_the_account_and_the_stored_credential()
+	{
+		await using var harness = new ConnectTestHarness();
+		await SignedIn(harness, ["StoreTester"]);
+
+		await harness.Service.GetAccessToken();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(harness.Service.Current.Account!.Roles, Is.Empty);
+			Assert.That(harness.Store.Saved[^1].CachedRoles, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_refresh_whose_token_cannot_be_verified_still_rotates_and_keeps_the_known_roles()
+	{
+		await using var harness = new ConnectTestHarness();
+		await SignedIn(harness, ["StoreTester"]);
+		harness.Identity.SigningKeysUnavailable = true;
+
+		await harness.Service.GetAccessToken();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(harness.Store.SaveCount, Is.EqualTo(1));
+			Assert.That(harness.Store.Saved[^1].RefreshToken, Is.EqualTo(harness.Identity.CurrentRefreshToken));
+			Assert.That(harness.Store.Saved[^1].CachedRoles, Is.EqualTo(new[] { "StoreTester" }));
+			Assert.That(harness.Service.Current.Account!.Roles, Is.EqualTo(new[] { "StoreTester" }));
+		});
+	}
+
+	[Test]
+	public async Task A_sign_in_whose_token_cannot_be_verified_grants_no_role()
+	{
+		await using var harness = new ConnectTestHarness();
+		harness.Identity.Roles = ["StoreTester"];
+		harness.Identity.SigningKeysUnavailable = true;
+
+		await SignIn(harness);
+
+		Assert.That(harness.Service.Current.Account!.Roles, Is.Empty);
+	}
+
+	[Test]
+	public async Task A_granted_sign_in_does_not_wait_for_the_signing_keys()
+	{
+		await using var harness = new ConnectTestHarness();
+		harness.Identity.Roles = ["StoreTester"];
+		harness.Identity.SigningKeysGate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		await SignIn(harness);
+
+		Assert.That(harness.Service.Current.Account!.Roles, Is.Empty);
+	}
+
+	[Test]
+	public async Task A_declined_sign_in_does_not_wait_for_the_signing_keys()
+	{
+		await using var harness = new ConnectTestHarness();
+		harness.Identity.SigningKeysGate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		harness.SignInDelayHandler = (_, _) => Task.CompletedTask;
+		harness.Identity.PollResults.Enqueue(new ConnectDevicePollResult(ConnectDevicePollStatus.Denied));
+
+		await harness.Service.StartSignIn();
+
+		await ConnectTestHarness.WaitUntil(
+			() => harness.Service.Current.SignInFailure == ConnectSignInFailure.Denied,
+			"the declined sign-in was never reported");
+	}
+
+	[Test]
+	public async Task Signing_out_while_the_signing_keys_are_fetched_stays_signed_out()
+	{
+		await using var harness = new ConnectTestHarness();
+		await SignedIn(harness);
+		var keys = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		harness.Identity.SigningKeysGate = keys;
+
+		var pending = harness.Service.GetAccessToken();
+		await harness.Service.SignOut();
+		keys.SetResult();
+
+		Assert.ThrowsAsync<ConnectAuthRejectedException>(() => pending);
+		var stored = await harness.Store.Load();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(harness.Service.Current.Status, Is.EqualTo(ConnectAccountStatus.SignedOut));
+			Assert.That(harness.Identity.RefreshCount, Is.Zero);
+			Assert.That(stored, Is.Null);
+		});
+	}
+
+	private static async Task<ConnectCredential> SignedIn(ConnectTestHarness harness, string[]? cachedRoles = null)
+	{
+		var credential = harness.Identity.SeedCredential(harness.Time.Now) with { CachedRoles = cachedRoles };
 		harness.Store.Seed(credential);
 		await harness.Service.Initialize();
 
 		return credential;
+	}
+
+	private static async Task SignIn(ConnectTestHarness harness)
+	{
+		harness.SignInDelayHandler = (_, _) => Task.CompletedTask;
+		harness.Identity.PollResults.Enqueue(new ConnectDevicePollResult(ConnectDevicePollStatus.Success));
+
+		await harness.Service.StartSignIn();
+		await ConnectTestHarness.WaitUntil(() => harness.Service.Current.Status == ConnectAccountStatus.SignedIn,
+			"the sign-in never completed");
 	}
 }
