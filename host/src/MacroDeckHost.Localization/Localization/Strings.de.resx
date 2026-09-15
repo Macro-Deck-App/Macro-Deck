@@ -10686,6 +10686,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Widgets.Actions.PositionTop" xml:space="preserve">
     <value>Oben</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
+    <value>Ändert die Akzentfarbe eines Schiebereglers oder Verlaufsdiagramms.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
+    <value>Akzentfarbe festlegen</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetBackgroundColorDescription" xml:space="preserve">
     <value>Ändert die Hintergrundfarbe eines Widgets.</value>
   </data>

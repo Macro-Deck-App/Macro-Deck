@@ -194,6 +194,10 @@ What did **not** need a major:
   `host.invoke`/`host.result` traffic. Variable definition attributes, a `write` capability and a `set`
   operation *did* change a payload plugins already send, so the **capability** version moved from `1` to
   `2` while `ProtocolVersions.Current` stayed at `3`.
+- Widget appearance gained an accent colour: `WidgetAppearancePatch.AccentColor`,
+  `WidgetAppearanceProperty.AccentColor` and an optional `accentColor` field on the wire patch. An older
+  host ignores the field, so a patch carrying only it applies nothing there and `ApplyAsync` returns
+  `false`.
 - Localization moved the **UI model** major, not this one - see [the localization major](#the-localization-major).
 
 **Negotiation happens exactly once**, in `POST /api/plugins/sessions`:

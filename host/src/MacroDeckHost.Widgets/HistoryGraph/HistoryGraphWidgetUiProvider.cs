@@ -2,6 +2,7 @@ using System.Text.Json;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
+using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Widgets;
@@ -16,16 +17,19 @@ public sealed class HistoryGraphWidgetUiProvider : IBuiltInWidgetUiProvider
 	private readonly IVariableHistory _history;
 	private readonly IVariableChangeNotifier _notifier;
 	private readonly IWidgetSampleTextResolver _sampleText;
+	private readonly IWidgetRenderSignals _renderSignals;
 
 	public HistoryGraphWidgetUiProvider(VariableRegistry variables,
 		IVariableHistory history,
 		IVariableChangeNotifier notifier,
-		IWidgetSampleTextResolver sampleText)
+		IWidgetSampleTextResolver sampleText,
+		IWidgetRenderSignals renderSignals)
 	{
 		_variables = variables;
 		_history = history;
 		_notifier = notifier;
 		_sampleText = sampleText;
+		_renderSignals = renderSignals;
 	}
 
 	public string WidgetTypeId => WidgetTypeIds.HistoryGraph;
@@ -80,10 +84,19 @@ public sealed class HistoryGraphWidgetUiProvider : IBuiltInWidgetUiProvider
 			= new HistoryGraphViewStateResolver(config, _variables, VariableScopeWidgetId(request.Surface), window);
 
 		var state = new UiState<HistoryGraphViewState>(resolver.Resolve(window.Values));
+		var accent = new UiState<string?>(config.AccentColor);
 		var view = new UiView(request.Surface,
-			HistoryGraphWidgetView.Build(state, config, WidgetSafeArea.RadiusOf(request.Surface)));
+			HistoryGraphWidgetView.Build(state, config, WidgetSafeArea.RadiusOf(request.Surface), accent));
 
-		return new HistoryGraphWidgetSession(view, state, resolver, window, _notifier, config);
+		var session = new HistoryGraphWidgetSession(view, state, resolver, window, _notifier, config);
+
+		if (request.Surface.Kind == UiSurfaceKinds.Widget &&
+			Guid.TryParse(ReadStringAttribute(request.Surface, UiWidgetSurfaceAttributes.WidgetId), out var widgetId))
+		{
+			session.FollowAccentColor(_renderSignals, widgetId.ToString(), accent);
+		}
+
+		return session;
 	}
 
 	private static string? VariableScopeWidgetId(UiSurface surface)

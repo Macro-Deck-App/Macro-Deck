@@ -10688,6 +10688,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Widgets.Actions.PositionTop" xml:space="preserve">
     <value>Arriba</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
+    <value>Cambia el color de acento de un control deslizante o de un gráfico histórico.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
+    <value>Establecer color de acento</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetBackgroundColorDescription" xml:space="preserve">
     <value>Cambia el color de fondo de un widget.</value>
   </data>

@@ -10688,6 +10688,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Widgets.Actions.PositionTop" xml:space="preserve">
     <value>In alto</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
+    <value>Cambia il colore accento di un cursore o di un grafico cronologico.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
+    <value>Imposta colore accento</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetBackgroundColorDescription" xml:space="preserve">
     <value>Cambia il colore di sfondo di un widget.</value>
   </data>

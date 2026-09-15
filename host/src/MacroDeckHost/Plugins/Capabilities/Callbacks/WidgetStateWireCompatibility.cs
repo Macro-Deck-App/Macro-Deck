@@ -115,7 +115,8 @@ internal static class WidgetStateWireCompatibility
 			TextAlign = dto.TextAlign,
 			LabelPosition = dto.LabelPosition,
 			BorderStyle = dto.BorderStyle,
-			BorderColor = dto.BorderColor
+			BorderColor = dto.BorderColor,
+			AccentColor = dto.AccentColor
 		};
 
 	private static IReadOnlyCollection<WidgetAppearanceProperty> ToClearProperties(IReadOnlyCollection<int> wire)

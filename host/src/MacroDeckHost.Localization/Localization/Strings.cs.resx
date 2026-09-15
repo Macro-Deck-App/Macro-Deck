@@ -10688,6 +10688,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Widgets.Actions.PositionTop" xml:space="preserve">
     <value>Nahoře</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
+    <value>Změní zvýrazňující barvu posuvníku nebo grafu historie.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
+    <value>Nastavit zvýrazňující barvu</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetBackgroundColorDescription" xml:space="preserve">
     <value>Změní barvu pozadí widgetu.</value>
   </data>

@@ -10688,6 +10688,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Widgets.Actions.PositionTop" xml:space="preserve">
     <value>Na górze</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
+    <value>Zmienia kolor akcentu suwaka lub wykresu historii.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
+    <value>Ustaw kolor akcentu</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetBackgroundColorDescription" xml:space="preserve">
     <value>Zmienia kolor tła widżetu.</value>
   </data>

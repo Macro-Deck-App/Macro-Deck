@@ -10688,6 +10688,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Widgets.Actions.PositionTop" xml:space="preserve">
     <value>Haut</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
+    <value>Change la couleur d'accent d'un curseur ou d'un graphique d'historique.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
+    <value>Définir la couleur d'accent</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetBackgroundColorDescription" xml:space="preserve">
     <value>Change la couleur d'arrière-plan d'un widget.</value>
   </data>
