@@ -34,6 +34,7 @@ public partial class AppPreferenceService : IAppPreferenceService
 	public const string AdbExecutablePathKey = "adb.executablePath";
 	public const string AdbUsbConnectionsEnabledKey = "adb.usbConnectionsEnabled";
 	public const string AdbDefaultDeviceSerialKey = "adb.defaultDeviceSerial";
+	public const string AdbStopServerOnExitKey = "adb.stopServerOnExit";
 
 	public const string DeveloperModeKey = "developer.mode";
 
@@ -268,27 +269,32 @@ public partial class AppPreferenceService : IAppPreferenceService
 		var executablePath = (await _repository.GetByKey(AdbExecutablePathKey))?.Value;
 		var usbConnectionsEnabled = (await _repository.GetByKey(AdbUsbConnectionsEnabledKey))?.Value;
 		var defaultDeviceSerial = (await _repository.GetByKey(AdbDefaultDeviceSerialKey))?.Value;
+		var stopServerOnExit = (await _repository.GetByKey(AdbStopServerOnExitKey))?.Value;
 
 		return new AdbSettings(NormalizeAdbFlag(enabled),
 			NormalizeAdbExecutablePath(executablePath),
 			NormalizeAdbFlag(usbConnectionsEnabled, DefaultAdbUsbConnectionsEnabled),
-			NormalizeAdbDeviceSerial(defaultDeviceSerial));
+			NormalizeAdbDeviceSerial(defaultDeviceSerial),
+			NormalizeAdbFlag(stopServerOnExit));
 	}
 
 	public async Task<AdbSettings> SetAdb(bool? enabled,
 		string? executablePath,
 		bool? usbConnectionsEnabled,
-		string? defaultDeviceSerial)
+		string? defaultDeviceSerial,
+		bool? stopServerOnExit)
 	{
 		var resolved = new AdbSettings(NormalizeAdbFlag(enabled?.ToString()),
 			NormalizeAdbExecutablePath(executablePath),
 			NormalizeAdbFlag(usbConnectionsEnabled?.ToString(), DefaultAdbUsbConnectionsEnabled),
-			NormalizeAdbDeviceSerial(defaultDeviceSerial));
+			NormalizeAdbDeviceSerial(defaultDeviceSerial),
+			NormalizeAdbFlag(stopServerOnExit?.ToString()));
 
 		await _repository.SetValue(AdbEnabledKey, resolved.Enabled.ToString());
 		await _repository.SetValue(AdbExecutablePathKey, resolved.ExecutablePath ?? string.Empty);
 		await _repository.SetValue(AdbUsbConnectionsEnabledKey, resolved.UsbConnectionsEnabled.ToString());
 		await _repository.SetValue(AdbDefaultDeviceSerialKey, resolved.DefaultDeviceSerial ?? string.Empty);
+		await _repository.SetValue(AdbStopServerOnExitKey, resolved.StopServerOnExit.ToString());
 
 		return resolved;
 	}

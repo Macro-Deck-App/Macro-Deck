@@ -12375,6 +12375,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Adb.StatusHeading" xml:space="preserve">
     <value>Stav</value>
   </data>
+  <data name="Settings.Adb.StopServerOnExitDescription" xml:space="preserve">
+    <value>Server ADB se zastaví při ukončení, restartu nebo aktualizaci Macro Deck, ale jen pokud jej spustil Macro Deck. Ostatní programy využívající ADB, například Android Studio, ztratí připojení.</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitLabel" xml:space="preserve">
+    <value>Zastavit server ADB při ukončení Macro Deck</value>
+  </data>
   <data name="Settings.Adb.UncleanShutdown.One" xml:space="preserve">
     <value>Macro Deck se naposledy nevypnul správně. Bylo vyčištěno {count} zbývající USB připojení.</value>
     <comment>[plural][count:int]</comment>

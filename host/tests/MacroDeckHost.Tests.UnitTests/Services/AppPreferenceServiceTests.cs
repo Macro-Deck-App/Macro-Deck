@@ -307,6 +307,7 @@ public class AppPreferenceServiceTests
 			Assert.That(settings.ExecutablePath, Is.Null);
 			Assert.That(settings.UsbConnectionsEnabled, Is.True);
 			Assert.That(settings.DefaultDeviceSerial, Is.Null);
+			Assert.That(settings.StopServerOnExit, Is.False);
 		});
 	}
 
@@ -315,7 +316,7 @@ public class AppPreferenceServiceTests
 	{
 		var service = CreateService();
 
-		var applied = await service.SetAdb(true, "/usr/local/bin/adb", true, "R58M12ABCDE");
+		var applied = await service.SetAdb(true, "/usr/local/bin/adb", true, "R58M12ABCDE", true);
 		var reloaded = await service.GetAdb();
 
 		Assert.Multiple(() =>
@@ -328,6 +329,8 @@ public class AppPreferenceServiceTests
 			Assert.That(reloaded.ExecutablePath, Is.EqualTo("/usr/local/bin/adb"));
 			Assert.That(reloaded.UsbConnectionsEnabled, Is.True);
 			Assert.That(reloaded.DefaultDeviceSerial, Is.EqualTo("R58M12ABCDE"));
+			Assert.That(applied.StopServerOnExit, Is.True);
+			Assert.That(reloaded.StopServerOnExit, Is.True);
 		});
 	}
 
@@ -335,9 +338,9 @@ public class AppPreferenceServiceTests
 	public async Task SetAdb_falls_back_to_each_flags_own_default_and_treats_null_strings_as_unset()
 	{
 		var service = CreateService();
-		await service.SetAdb(true, "/usr/local/bin/adb", false, "R58M12ABCDE");
+		await service.SetAdb(true, "/usr/local/bin/adb", false, "R58M12ABCDE", null);
 
-		var applied = await service.SetAdb(null, null, null, null);
+		var applied = await service.SetAdb(null, null, null, null, null);
 
 		Assert.Multiple(() =>
 		{
@@ -355,7 +358,7 @@ public class AppPreferenceServiceTests
 	{
 		var service = CreateService();
 
-		var applied = await service.SetAdb(true, input, false, null);
+		var applied = await service.SetAdb(true, input, false, null, null);
 
 		Assert.That(applied.ExecutablePath, Is.EqualTo(expected));
 	}
@@ -365,7 +368,7 @@ public class AppPreferenceServiceTests
 	{
 		var service = CreateService();
 
-		var applied = await service.SetAdb(true, null, true, "  R58M12ABCDE  ");
+		var applied = await service.SetAdb(true, null, true, "  R58M12ABCDE  ", null);
 
 		Assert.That(applied.DefaultDeviceSerial, Is.EqualTo("R58M12ABCDE"));
 	}
@@ -376,7 +379,7 @@ public class AppPreferenceServiceTests
 		var service = CreateService();
 		var tooLong = new string('a', 129);
 
-		var applied = await service.SetAdb(true, null, true, tooLong);
+		var applied = await service.SetAdb(true, null, true, tooLong, null);
 
 		Assert.That(applied.DefaultDeviceSerial, Is.Null);
 	}
@@ -388,7 +391,7 @@ public class AppPreferenceServiceTests
 	{
 		var service = CreateService();
 
-		var applied = await service.SetAdb(true, null, true, serial);
+		var applied = await service.SetAdb(true, null, true, serial, null);
 
 		Assert.That(applied.DefaultDeviceSerial, Is.EqualTo(serial));
 	}
@@ -400,7 +403,7 @@ public class AppPreferenceServiceTests
 	{
 		var service = CreateService();
 
-		var applied = await service.SetAdb(true, null, true, serial);
+		var applied = await service.SetAdb(true, null, true, serial, null);
 
 		Assert.That(applied.DefaultDeviceSerial, Is.Null);
 	}

@@ -12375,6 +12375,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Settings.Adb.StatusHeading" xml:space="preserve">
     <value>Stato</value>
   </data>
+  <data name="Settings.Adb.StopServerOnExitDescription" xml:space="preserve">
+    <value>Arresta il server ADB quando Macro Deck si chiude, si riavvia o si aggiorna, ma solo se l'ha avviato Macro Deck. Gli altri programmi che usano ADB, come Android Studio, perdono la connessione.</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitLabel" xml:space="preserve">
+    <value>Arresta il server ADB alla chiusura di Macro Deck</value>
+  </data>
   <data name="Settings.Adb.UncleanShutdown.One" xml:space="preserve">
     <value>Macro Deck non si è chiuso correttamente l'ultima volta. {count} connessione USB residua è stata ripulita.</value>
     <comment>[plural][count:int]</comment>

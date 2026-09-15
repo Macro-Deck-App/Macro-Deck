@@ -43,7 +43,8 @@ public class UpdateAdbSettingsRequestMessageHandler
 		var updated = await _preferences.SetAdb(request.Enabled ?? current.Enabled,
 			request.ExecutablePath ?? current.ExecutablePath,
 			request.UsbConnectionsEnabled ?? current.UsbConnectionsEnabled,
-			request.DefaultDeviceSerial ?? current.DefaultDeviceSerial);
+			request.DefaultDeviceSerial ?? current.DefaultDeviceSerial,
+			request.StopServerOnExit ?? current.StopServerOnExit);
 
 		await _adbManager.ApplySettingsAsync(cancellationToken);
 
@@ -70,6 +71,7 @@ public class UpdateAdbSettingsRequestMessageHandler
 			ServerStartedByMacroDeck = view.ServerStartedByMacroDeck,
 			UsbConnectionsEnabled = view.UsbConnectionsEnabled,
 			DefaultDeviceSerial = view.DefaultDeviceSerial,
+			StopServerOnExit = view.StopServerOnExit,
 			ActivePublicPort = view.ActivePublicPort,
 			DeviceSidePortCandidates = AdbUsbTunnelPorts.DeviceSideCandidates,
 			Devices = view.Devices,

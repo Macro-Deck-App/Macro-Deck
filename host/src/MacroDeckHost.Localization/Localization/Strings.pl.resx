@@ -12375,6 +12375,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Settings.Adb.StatusHeading" xml:space="preserve">
     <value>Stan</value>
   </data>
+  <data name="Settings.Adb.StopServerOnExitDescription" xml:space="preserve">
+    <value>Serwer ADB zostanie zatrzymany przy zamknięciu, ponownym uruchomieniu lub aktualizacji Macro Deck, ale tylko jeśli uruchomił go Macro Deck. Inne programy korzystające z ADB, np. Android Studio, stracą połączenie.</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitLabel" xml:space="preserve">
+    <value>Zatrzymaj serwer ADB przy zamykaniu Macro Deck</value>
+  </data>
   <data name="Settings.Adb.UncleanShutdown.One" xml:space="preserve">
     <value>Macro Deck nie został poprawnie zamknięty poprzednim razem. Wyczyszczono {count} pozostałe połączenie USB.</value>
     <comment>[plural][count:int]</comment>
