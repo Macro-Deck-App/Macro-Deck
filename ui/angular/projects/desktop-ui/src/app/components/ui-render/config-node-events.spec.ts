@@ -81,9 +81,13 @@ describe('shared-ui-node event gating', () => {
     const rendered = await renderTree(root, null, [
       { provide: ExternalLinkService, useValue: { open: (url: string) => opened.push(url) } },
     ]);
+    // A click nothing cancels would really follow the link and open the Karma page in a new tab.
+    const keepKarmaInOneTab = (event: Event) => event.preventDefault();
+    window.addEventListener('click', keepKarmaInOneTab);
 
     const event = new MouseEvent('click', { bubbles: true, cancelable: true });
     (el(rendered).querySelector('a') as HTMLAnchorElement).dispatchEvent(event);
+    window.removeEventListener('click', keepKarmaInOneTab);
     await tick(rendered);
 
     expect(opened).toEqual([]);
