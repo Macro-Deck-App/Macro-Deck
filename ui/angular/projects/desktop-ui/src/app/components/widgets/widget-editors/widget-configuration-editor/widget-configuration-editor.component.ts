@@ -13,16 +13,19 @@ import {
   forwardRef,
   inject,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 
 import {
   applyConfigDraftEvent,
   composeConfigDraft,
+  emitsEvent,
   GridWidget,
   UiConfigEntryPoints,
   UiConfigEvents,
   UiConfigPrimitives,
+  UiConfigProperties,
   UiNode,
   UiNodeEvent,
   WidgetBorder,
@@ -49,6 +52,10 @@ const DRAFT_EVENT_NAMES: ReadonlySet<string> = new Set([
   UiConfigEvents.Add,
   UiConfigEvents.Remove,
 ]);
+
+const FOLLOW_CONFIRM_MS = 2000;
+
+type Draft = Record<string, unknown>;
 
 @Component({
   selector: 'app-widget-configuration-editor',
@@ -117,8 +124,14 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
 
   private seenTree = false;
   private treeGeneration = 0;
+  private previousRoot: UiNode | null = null;
 
   private treeDraft: WidgetData | null = null;
+
+  private builtIn = false;
+  private pendingFollow: { key: string; value: unknown } | null = null;
+  private followDeadline: ReturnType<typeof setTimeout> | undefined;
+  private followedSinceOpen = false;
 
   constructor() {
     effect(() => this.context.setRoot(this.root()));
@@ -142,14 +155,22 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
       if (generation !== this.treeGeneration) {
         this.treeGeneration = generation;
         this.seenTree = false;
+        // A replacement session is opened with the original widgetData, which a follow has outdated.
+        if (this.followedSinceOpen) {
+          untracked(() => this.reopen());
+          return;
+        }
       }
+
+      const previous = this.previousRoot;
+      this.previousRoot = root;
 
       if (!this.seenTree) {
         this.seenTree = true;
         return;
       }
 
-      this.applyDraft(composeConfigDraft(root, this.widget.data as unknown as Record<string, unknown>));
+      untracked(() => this.onRevision(previous, root));
     });
 
     const subscription = this.eventBus.events$.subscribe(event => this.onNodeEvent(event));
@@ -163,6 +184,7 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
   }
 
   ngOnDestroy(): void {
+    this.settleFollow();
     this.handle()?.close();
   }
 
@@ -176,7 +198,41 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
     // Reopening throws away tree-local state such as the open tab, so only a draft the tree did not
     // produce itself is worth it.
     if (deepEqual(this.widget.data, this.treeDraft)) return;
+    this.reopen();
+  }
 
+  followLiveData(): void {
+    const data = this.widget.data as unknown as Draft;
+    if (deepEqual(data, this.treeDraft)) return;
+
+    const key = this.pendingFollow ? null : singleChangedKey(this.treeDraft as Draft | null, data);
+    const root = this.root();
+    const field = key !== null && key in data && root && this.builtIn ? findColorField(root, key) : null;
+    if (!field) {
+      this.reopen();
+      return;
+    }
+
+    const value = data[field.id];
+    this.treeDraft = structuredClone(this.widget.data);
+    this.previewData.set({ ...this.widget.data });
+    this.followedSinceOpen = true;
+    if (deepEqual(field.properties?.[UiConfigProperties.Value], value)) return;
+
+    const follow = { key: field.id, value };
+    this.pendingFollow = follow;
+    // The host accepts an event before dispatching it and an ignored dispatch emits no revision,
+    // so a follow that never lands can only be noticed by its missing confirmation.
+    this.followDeadline = setTimeout(() => {
+      if (this.pendingFollow === follow) this.reopen();
+    }, FOLLOW_CONFIRM_MS);
+    this.handle()?.send({ nodeId: field.id, name: UiConfigEvents.Change, data: value });
+  }
+
+  private reopen(): void {
+    this.settleFollow();
+    this.followedSinceOpen = false;
+    this.previousRoot = null;
     this.handle()?.close();
     this.handle.set(null);
     // The next tree is a first tree again: it carries the provider's defaults for keys the draft never
@@ -186,12 +242,37 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
     void this.openSession();
   }
 
+  private onRevision(previous: UiNode | null, root: UiNode): void {
+    const data = this.widget.data as unknown as Draft;
+    const follow = this.pendingFollow;
+    if (!follow) {
+      this.applyDraft(composeConfigDraft(root, data));
+      return;
+    }
+
+    const composed = composeConfigDraft(root, data);
+    if (!deepEqual(composed[follow.key], follow.value)) {
+      this.reopen();
+      return;
+    }
+
+    this.settleFollow();
+    this.applyDraft(previous ? foldChanges(composeConfigDraft(previous, data), composed, data) : data);
+  }
+
+  private settleFollow(): void {
+    clearTimeout(this.followDeadline);
+    this.followDeadline = undefined;
+    this.pendingFollow = null;
+  }
+
   private async openSession(): Promise<void> {
     // Captured before the await: a draft read after the catalogue lookup could already be a later one.
     const widgetData = JSON.stringify(this.widget.data);
     this.treeDraft = structuredClone(this.widget.data);
 
     const info = await this.widgetTypes.infoFor(this.widget.type);
+    this.builtIn = info?.isBuiltIn === true;
     if (info && !info.supportsConfigUi) {
       this.noConfiguration.set(true);
       return;
@@ -237,4 +318,38 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
 
 function findRegion(root: UiNode | null, type: string): UiNode | null {
   return root?.children?.find(child => child.type === type) ?? null;
+}
+
+function singleChangedKey(before: Draft | null, after: Draft): string | null {
+  if (!before) return null;
+  const changed = [...new Set([...Object.keys(before), ...Object.keys(after)])]
+    .filter(key => !deepEqual(before[key], after[key]));
+  return changed.length === 1 ? changed[0] : null;
+}
+
+// Only colour inputs: every built-in top-level one binds its cell plainly, while other input types
+// include setters with side effects on other keys.
+function findColorField(node: UiNode, key: string): UiNode | null {
+  for (const child of [...(node.children ?? []), ...(node.fallback ? [node.fallback] : [])]) {
+    if (child.id === key) {
+      return child.type === UiConfigPrimitives.Color
+        && child.properties?.[UiConfigProperties.Transient] !== true
+        && emitsEvent(child, UiConfigEvents.Change) ? child : null;
+    }
+    if (child.type === UiConfigPrimitives.Object || child.type === UiConfigPrimitives.Array) continue;
+
+    const found = findColorField(child, key);
+    if (found) return found;
+  }
+  return null;
+}
+
+function foldChanges(before: Draft, after: Draft, data: Draft): Draft {
+  const result = { ...data };
+  for (const key of new Set([...Object.keys(before), ...Object.keys(after)])) {
+    if (deepEqual(before[key], after[key])) continue;
+    if (key in after) result[key] = after[key];
+    else delete result[key];
+  }
+  return result;
 }

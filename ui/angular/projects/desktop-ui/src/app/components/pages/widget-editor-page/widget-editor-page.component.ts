@@ -204,7 +204,7 @@ export class WidgetEditorPageComponent implements OnInit, OnDestroy, ConfirmsNav
 
   private adopt(live: GridWidget, data: WidgetData, keepDirty: boolean): void {
     const next = { ...live, data };
-    this.seedEditor(next);
+    this.seedEditor(next, !keepDirty);
 
     if (this.mode() === 'json' && !keepDirty) {
       this.jsonText.set(toEditorJson(next.type, next.data));
@@ -213,10 +213,15 @@ export class WidgetEditorPageComponent implements OnInit, OnDestroy, ConfirmsNav
     if (!keepDirty) this.markSaved();
   }
 
-  private seedEditor(next: GridWidget): void {
+  private seedEditor(next: GridWidget, followLive = false): void {
     this.widget.set(next);
     this.editorRef?.setInput('widget', next);
-    this.editorRef?.instance.reload?.();
+    const editor = this.editorRef?.instance;
+    if (followLive && editor?.followLiveData) {
+      editor.followLiveData();
+    } else {
+      editor?.reload?.();
+    }
     this.editorRef?.changeDetectorRef.detectChanges();
   }
 
