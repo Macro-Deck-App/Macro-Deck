@@ -22,6 +22,7 @@ export class WidgetIconDisplayControlComponent implements OnChanges {
   @Input() actionMode = false;
   @Input() aspectRatio = 1;
   @Input() previewBackground: string | undefined;
+  @Input() previewTint: string | undefined;
   @Input() iconUrl: string | null = null;
   @Input() resetActive = false;
 
@@ -95,6 +96,24 @@ export class WidgetIconDisplayControlComponent implements OnChanges {
 
   protected get previewStyle(): Record<string, string> {
     return iconDisplayStyle(this.current);
+  }
+
+  protected get tintStyle(): Record<string, string> {
+    const style = iconDisplayStyle(this.current);
+    const mask = `url("${(this.iconUrl ?? '').replace(/["\\]/g, '\\$&')}")`;
+    return {
+      transform: style['transform'],
+      opacity: style['opacity'],
+      'background-color': this.previewTint ?? '',
+      'mask-image': mask,
+      '-webkit-mask-image': mask,
+      'mask-size': style['object-fit'],
+      '-webkit-mask-size': style['object-fit'],
+      'mask-position': 'center',
+      '-webkit-mask-position': 'center',
+      'mask-repeat': 'no-repeat',
+      '-webkit-mask-repeat': 'no-repeat',
+    };
   }
 
   protected numberValue(field: NumericField): number | '' {

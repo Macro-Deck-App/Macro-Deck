@@ -299,7 +299,7 @@ public static class WidgetAppearanceJson
 		var rootHoldsIcon = data["icon"] is not null || data["iconId"] is not null || data["iconDisplay"] is not null;
 		var changed = migrated;
 
-		foreach (var key in new[] { "icon", "iconDisplay" })
+		foreach (var key in new[] { "icon", "iconDisplay", "iconColor" })
 		{
 			if (!firstAppearance.ContainsKey(key))
 			{

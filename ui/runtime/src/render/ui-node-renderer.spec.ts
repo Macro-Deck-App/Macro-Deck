@@ -150,6 +150,85 @@ describe('widget node renderer', () => {
     expect(image.getAttribute('src')).toBe('/api/ui/resources/abc');
   });
 
+  describe('artwork tint', () => {
+    const globals = globalThis as { CSS?: unknown };
+    let savedCss: unknown;
+    let savedComplete: PropertyDescriptor | undefined;
+    let savedNaturalWidth: PropertyDescriptor | undefined;
+    let loaded = false;
+
+    beforeEach(() => {
+      savedCss = globals.CSS;
+      savedComplete = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'complete');
+      savedNaturalWidth = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'naturalWidth');
+      loaded = false;
+      Object.defineProperty(HTMLImageElement.prototype, 'complete', { configurable: true, get: () => loaded });
+      Object.defineProperty(HTMLImageElement.prototype, 'naturalWidth', { configurable: true, get: () => (loaded ? 64 : 0) });
+      globals.CSS = { supports: () => true };
+    });
+
+    afterEach(() => {
+      if (savedCss === undefined) delete globals.CSS;
+      else globals.CSS = savedCss;
+      if (savedComplete) Object.defineProperty(HTMLImageElement.prototype, 'complete', savedComplete);
+      if (savedNaturalWidth) Object.defineProperty(HTMLImageElement.prototype, 'naturalWidth', savedNaturalWidth);
+    });
+
+    const artwork = () => container.querySelectorAll('.widget-button-artwork');
+    const image = () => container.querySelector('img.widget-button-artwork') as HTMLImageElement;
+    const tintLayer = () => container.querySelector('div.widget-button-artwork') as HTMLElement | null;
+
+    it('draws a loaded icon as a silhouette in the tint colour over the hidden image', () => {
+      loaded = true;
+      mount(node('ui.button', { source: { resourceId: 'abc' }, tint: '#4f8cff', opacity: 0.5 }));
+
+      expect(tintLayer()).not.toBeNull();
+      expect(tintLayer()!.style.backgroundColor).toBe('rgb(79, 140, 255)');
+      expect(tintLayer()!.style.getPropertyValue('mask-image')).toBe('url("/api/ui/resources/abc")');
+      expect(tintLayer()!.style.opacity).toBe('0.5');
+      expect(image().style.opacity).toBe('0');
+      expect(artwork()[1]).toBe(tintLayer()!);
+    });
+
+    it('keeps the untinted image until it has loaded, then tints it', () => {
+      mount(node('ui.button', { source: { resourceId: 'abc' }, tint: '#4f8cff' }));
+
+      expect(tintLayer()).toBeNull();
+      expect(image().style.opacity).toBe('1');
+
+      loaded = true;
+      image().dispatchEvent(new Event('load'));
+
+      expect(tintLayer()).not.toBeNull();
+      expect(image().style.opacity).toBe('0');
+    });
+
+    it('draws the image in its own colours where the engine cannot mask', () => {
+      loaded = true;
+      delete globals.CSS;
+      mount(node('ui.button', { source: { resourceId: 'abc' }, tint: '#4f8cff' }));
+
+      expect(tintLayer()).toBeNull();
+      expect(image().style.opacity).toBe('1');
+    });
+
+    it('drops the tint and restores the image when the tint goes away', () => {
+      loaded = true;
+      const handle = mount(node2('ui.button', { source: { resourceId: 'abc' }, tint: '#4f8cff' }));
+      handle.update(node2('ui.button', { source: { resourceId: 'abc' } }), { width: 120, height: 120 }, null);
+
+      expect(tintLayer()).toBeNull();
+      expect(image().style.opacity).toBe('1');
+    });
+
+    it('ignores a tint that is not a colour', () => {
+      loaded = true;
+      mount(node('ui.button', { source: { resourceId: 'abc' }, tint: 'blue; background: red' }));
+
+      expect(tintLayer()).toBeNull();
+    });
+  });
+
   it('answers a long press itself rather than letting the browser open its context menu', () => {
     // A tree mounted outside a deck - in a modal, in a folder view - owns its long press the same way
     // a tile does.

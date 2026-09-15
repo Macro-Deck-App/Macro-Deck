@@ -1,5 +1,6 @@
 import { UiNode } from '../ui-framework/ui-node.interface';
 import { layoutStackChildren } from '../ui-framework/layout';
+import { nodeHexColor } from '../ui-framework/length';
 import { UiComponentProperties } from './component-properties';
 import { nodeResource } from '../ui-framework/ui-resource';
 import {
@@ -76,16 +77,44 @@ export function paintStackLayout<TState>(node: UiNode, ctx: UiComponentContext<T
   ctx.pressTint(node);
 }
 
+function supportsMasks(): boolean {
+  return typeof CSS !== 'undefined' && typeof CSS.supports === 'function' &&
+    (CSS.supports('mask-image', 'url("x")') || CSS.supports('-webkit-mask-image', 'url("x")'));
+}
+
+function repaintOnLoad<TState>(image: HTMLImageElement, ctx: UiComponentContext<TState>): void {
+  const flagged = image as HTMLImageElement & { __mdTintRepaint?: boolean };
+  if (flagged.__mdTintRepaint === true) return;
+  flagged.__mdTintRepaint = true;
+  image.addEventListener('load', () => ctx.repaint());
+}
+
+function paintArtworkTint<TState>(node: UiNode, ctx: UiComponentContext<TState>, tint: string, src: string): void {
+  const layer = ctx.part('artwork-tint', 'div') as HTMLElement;
+  ctx.setClassName(layer, 'widget-button-artwork');
+  ctx.setAttribute(layer, 'aria-hidden', 'true');
+  ctx.setStyle(layer, 'background-color', tint);
+  ctx.setStyle(layer, 'mask-image', `url("${src.replace(/["\\]/g, '\\$&')}")`);
+  ctx.setStyle(layer, 'mask-size', buttonFit(node));
+  ctx.setStyle(layer, 'mask-position', 'center');
+  ctx.setStyle(layer, 'mask-repeat', 'no-repeat');
+  ctx.setStyle(layer, 'opacity', String(buttonOpacity(node)));
+  ctx.setStyle(layer, 'transform', buttonArtworkTransform(node));
+  ctx.setStyle(layer, 'filter', artworkFilter(node));
+}
+
 export function paintButtonArtwork<TState>(
   node: UiNode,
   ctx: UiComponentContext<TState>,
   state: StackButtonState,
 ): void {
   const artwork = ctx.host.resourceUrl(nodeResource(node, UiComponentProperties.Source));
+  const tint = supportsMasks() ? nodeHexColor(node, UiComponentProperties.Tint) ?? null : null;
 
   const repaintArtwork = () => {
     if (state.artwork.settled === null) {
       ctx.dropPart('artwork');
+      ctx.dropPart('artwork-tint');
     } else {
       const image = ctx.part('artwork', 'img') as HTMLImageElement;
       ctx.setClassName(image, 'widget-button-artwork');
@@ -99,10 +128,19 @@ export function paintButtonArtwork<TState>(
       // CSSOM entirely: the value becomes unreadable, and the fallback that stands in for the property
       // on the compatibility floor has nothing left to key off. Costs one attribute.
       ctx.setAttribute(image, 'data-object-fit', buttonFit(node));
-      ctx.setStyle(image, 'opacity', String(buttonOpacity(node)));
       ctx.setStyle(image, 'transform', buttonArtworkTransform(node));
       ctx.setStyle(image, 'filter', artworkFilter(node));
       setImageSource(image, state.artwork.settled);
+      // The mask fetch has no retry of its own, so it follows the image: until the image has loaded
+      // (and after every recovery reload) the untinted image stays visible instead of a blank mask.
+      const tinted = tint !== null && image.complete && image.naturalWidth > 0;
+      ctx.setStyle(image, 'opacity', tinted ? '0' : String(buttonOpacity(node)));
+      if (tinted) {
+        paintArtworkTint(node, ctx, tint, state.artwork.settled);
+      } else {
+        ctx.dropPart('artwork-tint');
+        if (tint !== null) repaintOnLoad(image, ctx);
+      }
     }
 
     if (state.artwork.incoming === null) {
@@ -126,7 +164,7 @@ export function paintButtonArtwork<TState>(
     }
   };
 
-  swapArtwork(state.artwork, artwork, artworkCrossfades(node), repaintArtwork);
+  swapArtwork(state.artwork, artwork, artworkCrossfades(node) && tint === null, repaintArtwork);
   repaintArtwork();
 
   const ring = ctx.isTreeRoot && ctx.host.ownsRootWidgetBorder?.() === true
