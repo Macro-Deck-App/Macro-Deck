@@ -79,7 +79,6 @@ export {
   createStateId,
   DEFAULT_OFF_STATE_ID,
   DEFAULT_ON_STATE_ID,
-  defaultStateDefinitions,
   findState,
   findStateIndex,
   isEffectiveMapping,

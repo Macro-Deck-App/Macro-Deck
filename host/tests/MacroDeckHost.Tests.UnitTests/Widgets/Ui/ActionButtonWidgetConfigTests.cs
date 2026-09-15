@@ -145,11 +145,8 @@ public class ActionButtonWidgetConfigTests
 		Assert.That(mapping.GetProperty("fallbackStateId").GetString(), Is.Not.EqualTo("on"));
 	}
 
-	// The first switch to multi state has to leave a button with two usable faces, not an empty list the
-	// user has to populate by hand. "off" carries no background of its own so it falls through to the
-	// reader's accent, and "on" carries one, so the pair reads as two visibly different faces.
 	[Test]
-	public void Turning_on_state_mode_seeds_an_Off_and_On_pair_when_the_button_has_no_states()
+	public void Turning_on_state_mode_seeds_a_red_Off_and_green_On_pair_when_the_button_has_no_states()
 	{
 		var host = Render(new { stateMode = false, label = "Mute" });
 
@@ -162,18 +159,26 @@ public class ActionButtonWidgetConfigTests
 			Assert.That(states.Select(Id), Is.EqualTo(new[] { "off", "on" }));
 			Assert.That(states.Select(s => s.GetProperty("label").GetString()), Is.EqualTo(new[] { "Off", "On" }));
 			Assert.That(host.ById("activeStateId").Text(UiConfigProperties.Value), Is.EqualTo("off"));
-
-			Assert.That(states[0].GetProperty("appearance").TryGetProperty("backgroundColor", out _),
-				Is.False,
-				"Off falls through to the reader's own accent rather than carrying a colour.");
-			Assert.That(states[1].GetProperty("appearance").GetProperty("backgroundColor").GetString(),
-				Is.Not.Null.And.Not.Empty);
+			Assert.That(states.Select(Background), Is.EqualTo(new[] { "#ef4444", "#16a34a" }));
 
 			// Both inherit the caption the button already had, so gaining states never blanks its label.
 			Assert.That(states.Select(s => s.GetProperty("appearance").GetProperty("label").GetString()),
 				Is.EqualTo(new[] { "Mute", "Mute" }));
 		});
 	}
+
+	[Test]
+	public void Turning_on_state_mode_seeds_red_Off_even_when_the_button_had_its_own_background()
+	{
+		var host = Render(new { stateMode = false, label = "Mute", backgroundColor = "#123456" });
+
+		host.ById("stateMode").Change(true);
+
+		Assert.That(ReadStates(host).Select(Background), Is.EqualTo(new[] { "#ef4444", "#16a34a" }));
+	}
+
+	private static string? Background(JsonElement state)
+		=> state.GetProperty("appearance").GetProperty("backgroundColor").GetString();
 
 	// Turning state mode off leaves the states dormant in the stored data rather than deleting them, so
 	// turning it back on must read them back instead of overwriting the user's work with the defaults.

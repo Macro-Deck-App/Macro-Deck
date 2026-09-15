@@ -331,9 +331,8 @@ public static partial class ActionButtonStateJson
 			return false;
 		}
 
-		// An empty stash restores the default pair rather than zero states, matching what the editor
-		// does: leaving a state-mode button with no states at all makes it unresolvable, so it would
-		// silently drop out of state mode entirely.
+		// An empty stash restores an Off/On pair rather than zero states: a state-mode button with no states
+		// is unresolvable, so it would silently drop out of state mode entirely.
 		if (backup["states"] is JsonArray states && states.Count > 0)
 		{
 			data["states"] = states.DeepClone();
