@@ -4,7 +4,9 @@
   [closeLabel]="appStrings.Shell.Notifications.Close | translate"
   (closed)="closed.emit()">
   @if (notificationCenter.hasDismissable()) {
-    <button sidePanelActions type="button" class="np-header-btn" (click)="onClearAll()">{{ appStrings.Shell.Notifications.ClearAll | translate }}</button>
+    <shared-button sidePanelActions class="np-header-btn" variant="ghost" size="compact" (click)="onClearAll()">
+      <span>{{ appStrings.Shell.Notifications.ClearAll | translate }}</span>
+    </shared-button>
   }
 
   <div class="np-body">

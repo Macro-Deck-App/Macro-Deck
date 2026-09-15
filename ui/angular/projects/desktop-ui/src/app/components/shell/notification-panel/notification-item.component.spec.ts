@@ -193,4 +193,43 @@ describe('NotificationItemComponent', () => {
     const time = fixture.nativeElement.querySelector('.ni-time') as HTMLElement;
     expect(time.textContent?.trim()).toBe('3h ago');
   });
+
+  describe('button size', () => {
+    let probe: HTMLElement;
+
+    beforeEach(() => {
+      probe = document.createElement('div');
+      probe.style.height = 'var(--control-height)';
+      document.body.appendChild(probe);
+    });
+
+    afterEach(() => probe.remove());
+
+    function heightOf(selector: string): number {
+      const button = fixture.nativeElement.querySelector(`${selector} button`) as HTMLElement;
+      return button.getBoundingClientRect().height;
+    }
+
+    it('renders action, cancel and dismiss at the regular control height', () => {
+      fixture.componentRef.setInput(
+        'notification',
+        notification({ action: { kind: 'OpenIntegration' }, cancelKey: 'batch-1' }),
+      );
+      fixture.detectChanges();
+      const controlHeight = probe.getBoundingClientRect().height;
+
+      expect(controlHeight).toBeGreaterThan(0);
+      expect(heightOf('.ni-action:not(.ni-cancel-action)')).toBeGreaterThanOrEqual(controlHeight);
+      expect(heightOf('.ni-cancel-action')).toBeGreaterThanOrEqual(controlHeight);
+      expect(heightOf('.ni-dismiss')).toBeGreaterThanOrEqual(controlHeight);
+    });
+
+    it('names the icon-only dismiss button for assistive technology', () => {
+      fixture.componentRef.setInput('notification', notification());
+      fixture.detectChanges();
+
+      const button = fixture.nativeElement.querySelector('.ni-dismiss button') as HTMLElement;
+      expect(button.getAttribute('aria-label')).toBe('Dismiss notification');
+    });
+  });
 });
