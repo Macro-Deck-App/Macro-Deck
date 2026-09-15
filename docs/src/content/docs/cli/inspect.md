@@ -36,7 +36,7 @@ Conflicts: (none declared)
 Icon packs: (none declared)
 
 Compatibility:
-  macroDeck: >=3.0.0
+  macroDeck: >=3.0.0-0
 
 Signature: (not signed)
 
@@ -88,7 +88,7 @@ macrodeck-plugin inspect --artifact com.example.my-plugin-1.0.0.macroDeckPlugin 
   "dependencies": [],
   "conflicts": [],
   "iconPacks": [],
-  "compatibility": { "sdk": null, "macroDeck": ">=3.0.0", "protocolMinimum": null, "protocolMaximum": null },
+  "compatibility": { "sdk": null, "macroDeck": ">=3.0.0-0", "protocolMinimum": null, "protocolMaximum": null },
   "signature": null,
   "entryCount": 346,
   "totalUncompressedBytes": 118565046,
