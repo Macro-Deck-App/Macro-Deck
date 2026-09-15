@@ -4,6 +4,7 @@ using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.HostLocking;
+using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Variables;
@@ -27,6 +28,7 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 	private readonly IWidgetTriggerService _triggerService;
 	private readonly IFolderCache _folderCache;
 	private readonly IUiTransport _uiTransport;
+	private readonly IWidgetRenderSignals _renderSignals;
 
 	public SliderWidgetUiProvider(IWidgetIconResources iconResources,
 		IHostLockState lockState,
@@ -37,8 +39,10 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 		IServiceScopeFactory scopeFactory,
 		IWidgetTriggerService triggerService,
 		IFolderCache folderCache,
-		IUiTransport uiTransport)
+		IUiTransport uiTransport,
+		IWidgetRenderSignals renderSignals)
 	{
+		_renderSignals = renderSignals;
 		_triggerService = triggerService;
 		_folderCache = folderCache;
 		_uiTransport = uiTransport;
@@ -145,15 +149,22 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 			doublePress,
 			label);
 
+		var accent = new UiState<string?>(config.Color);
 		var element = SliderWidgetView.Build(variable is null ? config : config with { ValueVariable = variable.Name },
 			state,
 			icon,
 			session.BuildEvents(),
 			WidgetSafeArea.RadiusOf(request.Surface),
-			label);
+			label,
+			accent);
 		var view = new UiView(request.Surface, element);
 
 		session.Attach(view);
+
+		if (isWidgetSurface && scopeWidgetId is { } followed)
+		{
+			session.FollowAccentColor(_renderSignals, followed.ToString(), config, accent);
+		}
 
 		return session;
 	}

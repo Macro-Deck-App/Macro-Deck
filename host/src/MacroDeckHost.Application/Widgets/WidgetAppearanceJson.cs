@@ -47,10 +47,12 @@ public static class WidgetAppearanceJson
 			return false;
 		}
 
-		return type switch
+		return (type, property) switch
 		{
-			WidgetTypeIds.ActionButton => ClearOnActionButton(data, property, stateId),
-			WidgetTypeIds.HistoryGraph => ClearOn(data, property, labelKey: "title"),
+			(WidgetTypeIds.Slider, WidgetAppearanceProperty.AccentColor) => Remove(data, "color"),
+			(WidgetTypeIds.HistoryGraph, WidgetAppearanceProperty.AccentColor) => Remove(data, "accentColor"),
+			(WidgetTypeIds.ActionButton, _) => ClearOnActionButton(data, property, stateId),
+			(WidgetTypeIds.HistoryGraph, _) => ClearOn(data, property, labelKey: "title"),
 			_ => ClearOn(data, property, labelKey: "label")
 		};
 	}
@@ -79,12 +81,13 @@ public static class WidgetAppearanceJson
 				WidgetAppearanceProperty.LabelColor,
 				WidgetAppearanceProperty.Icon,
 				WidgetAppearanceProperty.Border,
-				WidgetAppearanceProperty.BorderColor
+				WidgetAppearanceProperty.BorderColor,
+				WidgetAppearanceProperty.AccentColor
 			],
 			WidgetTypeIds.HistoryGraph =>
 			[
 				WidgetAppearanceProperty.Label, WidgetAppearanceProperty.Border,
-				WidgetAppearanceProperty.BorderColor
+				WidgetAppearanceProperty.BorderColor, WidgetAppearanceProperty.AccentColor
 			],
 			_ => [WidgetAppearanceProperty.Border, WidgetAppearanceProperty.BorderColor]
 		};
@@ -377,11 +380,14 @@ public static class WidgetAppearanceJson
 		changed |= SetIfPresent(data, "labelColor", patch.LabelColor);
 		changed |= SetIfPresent(data, "backgroundColor", patch.BackgroundColor);
 		changed |= SetIcon(data, patch.IconId);
+		changed |= SetIfPresent(data, "color", patch.AccentColor);
 		return changed | ApplyBorder(data, patch);
 	}
 
 	private static bool ApplyToHistoryGraph(JsonObject data, WidgetAppearancePatch patch)
-		=> SetIfPresent(data, "title", patch.Label) | ApplyBorder(data, patch);
+		=> SetIfPresent(data, "title", patch.Label) |
+			SetIfPresent(data, "accentColor", patch.AccentColor) |
+			ApplyBorder(data, patch);
 
 	private static bool ApplyLabelProperties(JsonObject target, WidgetAppearancePatch patch)
 	{

@@ -13,6 +13,7 @@ using MacroDeck.Ui.Testing;
 using MacroDeck.Ui.Components;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.MusicPlayer;
+using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
@@ -704,6 +705,58 @@ public class SliderWidgetSessionTests
 
 	private static IEnumerable<UiNode> Walk(UiNode node) => node.Children.SelectMany(Walk).Prepend(node);
 
+	[Test]
+	public async Task A_colour_only_save_recolours_the_track_in_place_without_losing_the_users_value()
+	{
+		var slider = Writable(min: 0, max: 100, step: 0, value: 50);
+		var signals = new WidgetRenderSignals();
+		var widgetId = Guid.NewGuid();
+		slider.Session.FollowAccentColor(signals, widgetId.ToString(), slider.Config, slider.Accent);
+
+		slider.Host.ById("slider.track").Raise(UiComponentEvents.Adjust, 0.7);
+		await slider.Host.SettleAsync();
+
+		var recoloured = signals.RaiseDataChanged(SavedSlider(widgetId, slider.Config with { Color = "#ef4444" }));
+		await slider.Host.SettleAsync();
+		var redTrack = slider.Host.ById("slider.track");
+		var redColour = redTrack.Text("levelColor");
+		var redLevel = redTrack.Number("level");
+
+		var reset = signals.RaiseDataChanged(SavedSlider(widgetId, slider.Config));
+		await slider.Host.SettleAsync();
+		var themed = slider.Host.ById("slider.track").HasProperty("levelColor");
+
+		var rangeChange = signals.RaiseDataChanged(SavedSlider(widgetId, slider.Config with { Max = 50 }));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(recoloured, Is.True, "a colour-only save must not reopen the session");
+			Assert.That(redColour, Is.EqualTo("#ef4444"));
+			Assert.That(redLevel, Is.EqualTo(0.7).Within(1e-9), "the value the user dragged to survives");
+			Assert.That(reset, Is.True);
+			Assert.That(themed, Is.False, "a reset goes back to the reader's theme accent");
+			Assert.That(rangeChange, Is.False, "anything but the colour still rebuilds the session");
+		});
+
+		await slider.DisposeAsync();
+	}
+
+	private static WidgetEntity SavedSlider(Guid widgetId, SliderWidgetData config)
+		=> new()
+		{
+			Id = widgetId,
+			Type = WidgetTypeIds.Slider,
+			Data = JsonSerializer.Serialize(new
+			{
+				valueVariable = config.ValueVariable,
+				showValue = config.ShowValue,
+				min = config.Min,
+				max = config.Max,
+				step = config.Step,
+				color = config.Color,
+			})
+		};
+
 	private static SliderWidgetUiProvider ProviderWith(VariableRegistry registry,
 		VariableChangeNotifier? notifier = null)
 	{
@@ -728,7 +781,8 @@ public class SliderWidgetSessionTests
 			scopeFactory,
 			new RecordingTriggerService(),
 			new StubFolderCache(),
-			new NullUiTransport());
+			new NullUiTransport(),
+			new RecordingRenderSignals());
 	}
 
 	private static SliderUnderTest Writable(
@@ -806,8 +860,12 @@ public class SliderWidgetSessionTests
 			VariableChangeNotifier notifier,
 			FakeTimeProvider timeProvider,
 			VariableEntity? entity,
-			RecordingTriggerService trigger)
+			RecordingTriggerService trigger,
+			SliderWidgetData config,
+			UiState<string?> accent)
 		{
+			Config = config;
+			Accent = accent;
 			Host = host;
 			Session = session;
 			Provider = provider;
@@ -819,6 +877,10 @@ public class SliderWidgetSessionTests
 		}
 
 		private readonly VariableEntity? _entity;
+
+		public SliderWidgetData Config { get; }
+
+		public UiState<string?> Accent { get; }
 
 		public UiTestHost Host { get; }
 
@@ -928,7 +990,8 @@ public class SliderWidgetSessionTests
 				Max = configMax,
 				Step = configStep
 			};
-			var element = SliderWidgetView.Build(config, state, icon: null, session.BuildEvents());
+			var accent = new UiState<string?>(config.Color);
+			var element = SliderWidgetView.Build(config, state, icon: null, session.BuildEvents(), accentColor: accent);
 			var view = new UiView(new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
 				element);
 
@@ -941,7 +1004,9 @@ public class SliderWidgetSessionTests
 				notifier,
 				timeProvider,
 				stored,
-				trigger);
+				trigger,
+				config,
+				accent);
 		}
 	}
 

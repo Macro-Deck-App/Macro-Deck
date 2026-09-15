@@ -71,6 +71,29 @@ describe('WidgetAppearanceActionFieldsComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Color');
   });
 
+  it('offers an accent color picker on a slider and history graph but not on a button', async () => {
+    options.getOptions.and.resolveTo({
+      options: [
+        { value: 'slider', metadata: { appearanceProperties: 'Label,BackgroundColor,AccentColor' } },
+        { value: 'graph', metadata: { appearanceProperties: 'Label,Border,BorderColor,AccentColor' } },
+        { value: 'button', metadata: { appearanceProperties: 'Label,BackgroundColor,LabelColor' } },
+      ],
+      allowsCustomValue: false,
+    });
+
+    const pickerShownFor = async (target: string): Promise<boolean> => {
+      fixture.componentRef.setInput('block', block('set-accent-color', target));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      return fixture.nativeElement.querySelector('shared-color-picker') !== null;
+    };
+
+    expect(await pickerShownFor('slider')).toBeTrue();
+    expect(await pickerShownFor('graph')).toBeTrue();
+    expect(await pickerShownFor('button')).toBeFalse();
+  });
+
   it('hides a known unsupported appearance setting instead of rendering a dead control', async () => {
     options.getOptions.and.resolveTo({
       options: [{ value: 'clock', metadata: { appearanceProperties: 'Border,BorderColor' } }],

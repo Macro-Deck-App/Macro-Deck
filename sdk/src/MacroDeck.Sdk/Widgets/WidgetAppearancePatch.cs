@@ -60,6 +60,15 @@ public sealed record WidgetAppearancePatch
 
 	public string? BorderColor { get; init; }
 
+	/// <summary>
+	/// The widget's highlight colour, as <c>#rrggbb</c>: a Slider's filled level and a History Graph's line
+	/// and fill. Other widget types have none and drop it. Clearing it with
+	/// <see cref="WidgetAppearanceProperty.AccentColor" /> returns the widget to the reader's theme accent.
+	/// A value that is not a colour is stored but drawn as the theme accent. A host that predates this
+	/// property ignores it.
+	/// </summary>
+	public string? AccentColor { get; init; }
+
 	public bool IsEmpty => Label is null &&
 		BackgroundColor is null &&
 		LabelColor is null &&
@@ -74,5 +83,6 @@ public sealed record WidgetAppearancePatch
 		TextAlign is null &&
 		LabelPosition is null &&
 		BorderStyle is null &&
-		BorderColor is null;
+		BorderColor is null &&
+		AccentColor is null;
 }

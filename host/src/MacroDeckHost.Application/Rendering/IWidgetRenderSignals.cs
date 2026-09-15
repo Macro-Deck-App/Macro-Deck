@@ -30,6 +30,10 @@ public interface IWidgetRenderSignals
 	/// already-updated entity - the same one the widget-updated notification carries.</summary>
 	IDisposable SubscribeDataChanged(string widgetId, Action<WidgetEntity> handler);
 
+	/// <summary>Like the other overload, for a session that can take only some changes on itself: the
+	/// handler answers whether it applied this one, and false leaves the widget to be rebuilt.</summary>
+	IDisposable SubscribeDataChanged(string widgetId, Func<WidgetEntity, bool> handler);
+
 	/// <summary>Subscribes to every icon invalidation - <see cref="RaiseIconInvalidated" /> is not keyed by
 	/// widget, since an icon id has no owning widget, so every open session sees every invalidation and
 	/// filters to the icon ids its own config actually references.</summary>
@@ -55,10 +59,10 @@ public interface IWidgetRenderSignals
 	void RaiseLabelChanged(LabelTextUpdatedEvent evt);
 
 	/// <summary>Raised when a widget's stored configuration was saved.</summary>
-	/// <returns>Whether an open session took the change on itself. False means nothing did - either the
-	/// widget has no session open, or the one it has built its configuration into its tree and cannot
-	/// re-read it - and the caller has to rebuild that widget's sessions for the new configuration to
-	/// reach a deck at all.</returns>
+	/// <returns>Whether the open sessions took the change on themselves. False means one did not - the
+	/// widget has no session open, the one it has built its configuration into its tree and cannot re-read
+	/// it, or a subscriber declined this particular change - and the caller has to rebuild that widget's
+	/// sessions for the new configuration to reach a deck at all.</returns>
 	bool RaiseDataChanged(WidgetEntity widget);
 
 	/// <summary>Raised the moment <c>IWidgetIconResources.Evict</c> forgets <paramref name="iconId" />'s
@@ -100,6 +104,9 @@ public sealed class WidgetRenderSignals : IWidgetRenderSignals
 	public IDisposable SubscribeDataChanged(string widgetId, Action<WidgetEntity> handler)
 		=> _data.Subscribe(widgetId, handler);
 
+	public IDisposable SubscribeDataChanged(string widgetId, Func<WidgetEntity, bool> handler)
+		=> _data.Subscribe(widgetId, handler);
+
 	public IDisposable SubscribeIconInvalidated(Action<Guid> handler)
 		=> _iconInvalidated.Subscribe(_unkeyed, handler);
 
@@ -130,9 +137,17 @@ public sealed class WidgetRenderSignals : IWidgetRenderSignals
 	private sealed class SignalRegistry<T>
 	{
 		private readonly object _lock = new();
-		private readonly Dictionary<string, List<Action<T>>> _byKey = new(StringComparer.Ordinal);
+		private readonly Dictionary<string, List<Func<T, bool>>> _byKey = new(StringComparer.Ordinal);
 
 		public IDisposable Subscribe(string key, Action<T> handler)
+			=> Subscribe(key,
+				value =>
+				{
+					handler(value);
+					return true;
+				});
+
+		public IDisposable Subscribe(string key, Func<T, bool> handler)
 		{
 			lock (_lock)
 			{
@@ -142,11 +157,11 @@ public sealed class WidgetRenderSignals : IWidgetRenderSignals
 			return new Subscription(this, key, handler);
 		}
 
-		/// <returns>Whether the key had a subscriber - the caller's only way to tell a change nobody is
-		/// listening for from one that has been taken care of.</returns>
+		/// <returns>Whether the key had a subscriber and every one of them took the value - the caller's only
+		/// way to tell a change that has been taken care of from one nobody (or not everybody) handled.</returns>
 		public bool Raise(string key, T value)
 		{
-			Action<T>[] handlers;
+			Func<T, bool>[] handlers;
 
 			lock (_lock)
 			{
@@ -158,15 +173,17 @@ public sealed class WidgetRenderSignals : IWidgetRenderSignals
 				handlers = list.ToArray();
 			}
 
+			var handled = handlers.Length > 0;
+
 			foreach (var handler in handlers)
 			{
-				handler(value);
+				handled &= handler(value);
 			}
 
-			return handlers.Length > 0;
+			return handled;
 		}
 
-		private void Remove(string key, Action<T> handler)
+		private void Remove(string key, Func<T, bool> handler)
 		{
 			lock (_lock)
 			{
@@ -188,9 +205,9 @@ public sealed class WidgetRenderSignals : IWidgetRenderSignals
 		{
 			private SignalRegistry<T>? _owner;
 			private readonly string _key;
-			private readonly Action<T> _handler;
+			private readonly Func<T, bool> _handler;
 
-			public Subscription(SignalRegistry<T> owner, string key, Action<T> handler)
+			public Subscription(SignalRegistry<T> owner, string key, Func<T, bool> handler)
 			{
 				_owner = owner;
 				_key = key;
