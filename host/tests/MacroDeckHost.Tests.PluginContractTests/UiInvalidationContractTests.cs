@@ -122,4 +122,85 @@ internal sealed class UiInvalidationContractTests : UiContractFixture
 			Has.Exactly(2).Items,
 			"The same death was reported a second time under a timeout code.");
 	}
+
+	[Test]
+	public async Task A_plugin_refreshing_its_catalogue_keeps_its_open_sessions_alive()
+	{
+		await OpenLiveSessionAsync();
+
+		var before = CurrentAdapter();
+		await SendStateUpdateFromPluginAsync(CapabilityKinds.Ui);
+		await WaitForUiAsync(() => CurrentAdapter() is { } current && !ReferenceEquals(current, before),
+			"The host never applied the refreshed catalogue.");
+		await SettleAsync();
+
+		Assert.That(UiTransport.MessagesFor<UiSessionInvalidatedEvent>("c1"),
+			Is.Empty,
+			"A routine catalogue refresh told the client its provider was gone.");
+	}
+
+	[Test]
+	public async Task A_plugin_committing_a_new_icon_keeps_its_open_sessions_alive()
+	{
+		await OpenLiveSessionAsync();
+
+		var before = CurrentAdapter();
+		var icon = new byte[64];
+		Random.Shared.NextBytes(icon);
+		await UploadAssetAsync(MacroDeck.Plugin.Protocol.Assets.AssetKinds.Icon, "image/png", icon);
+		await WaitForUiAsync(() => CurrentAdapter() is MacroDeck.Sdk.IIntegrationIconProvider current &&
+				!ReferenceEquals(current, before),
+			"The host never swapped in the adapter carrying the new icon.");
+		await SettleAsync();
+
+		Assert.That(UiTransport.MessagesFor<UiSessionInvalidatedEvent>("c1"),
+			Is.Empty,
+			"A new icon told the client its provider was gone.");
+	}
+
+	[Test]
+	public async Task Unregistering_a_plugin_invalidates_its_open_sessions_as_unavailable()
+	{
+		await OpenLiveSessionAsync();
+
+		await Registrar.UnregisterAsync(PluginId);
+		await WaitForUiAsync(() => UiTransport.MessagesFor<UiSessionInvalidatedEvent>("c1").Count == 1,
+			"A plugin that is gone left its client rendering a dead tree.");
+
+		Assert.That(UiTransport.MessagesFor<UiSessionInvalidatedEvent>("c1").Single().Code,
+			Is.EqualTo(UiSessionErrorCodes.ProviderUnavailable));
+	}
+
+	private async Task OpenLiveSessionAsync()
+	{
+		var handler = new TestUiCapabilityHandler
+		{
+			SessionMode = UiSessionModes.Shared,
+			OnSnapshotRequested = sessionId => Link.SendRawFromPluginAsync(UiWire.Snapshot(sessionId, TreeAtThree))
+		};
+
+		await ConnectAsync([handler],
+			[
+				new DeclaredCapability
+				{
+					Kind = CapabilityKinds.Ui,
+					LocalId = ProviderCapabilityId.LocalId,
+					VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
+				}
+			],
+			[CapabilityKinds.Ui]);
+
+		var ticket = await Broker.OpenAsync(PluginId,
+			new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Shared },
+			OwnerPrincipal,
+			CancellationToken.None);
+
+		Assert.That(Attach(ticket.SessionId, "c1").Accepted, Is.True);
+		await WaitForUiAsync(() => UiTransport.MessagesFor<UiSessionTreeUpdatedEvent>("c1").Count >= 1,
+			"The client never received a tree, so nothing proves it was live.");
+	}
+
+	private MacroDeck.Sdk.IIntegration? CurrentAdapter()
+		=> IntegrationRegistry.Integrations
+			.SingleOrDefault(candidate => string.Equals(candidate.Id, PluginId, StringComparison.Ordinal));
 }

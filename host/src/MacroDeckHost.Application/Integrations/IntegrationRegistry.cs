@@ -186,7 +186,7 @@ public class IntegrationRegistry : IIntegrationRegistry
 				_metadata[integration.Id] = metadata ?? MetadataFromAttribute(integration);
 
 				_logger.Information(
-					"Replacing integration '{IntegrationId}' ({IntegrationName} v{IntegrationVersion}) - plugin reconnected",
+					"Replacing integration '{IntegrationId}' ({IntegrationName} v{IntegrationVersion})",
 					integration.Id,
 					// A LocalizedText would be destructured into its parts by Serilog; a log line wants the
 					// diagnostic rendering instead.
