@@ -13,8 +13,8 @@ public class VolumeServiceWindowsTests
 		bool? muted = null;
 
 		Assert.That(service.IsSupported, Is.True);
-		Assert.DoesNotThrowAsync(async () => volume = await service.GetVolumeAsync());
-		Assert.DoesNotThrowAsync(async () => muted = await service.GetMuteAsync());
+		Assert.DoesNotThrowAsync(async () => volume = await service.GetVolumeAsync(AudioTarget.DefaultOutput));
+		Assert.DoesNotThrowAsync(async () => muted = await service.GetMuteAsync(AudioTarget.DefaultOutput));
 
 		TestContext.Out.WriteLine(volume is null && muted is null
 			? "No default audio endpoint."
@@ -42,8 +42,72 @@ public class VolumeServiceWindowsTests
 		Assert.Multiple(() =>
 		{
 			Assert.DoesNotThrow(() => service.Changed += handler);
-			Assert.DoesNotThrowAsync(() => service.GetVolumeAsync());
+			Assert.DoesNotThrowAsync(() => service.GetVolumeAsync(AudioTarget.DefaultOutput));
 			Assert.DoesNotThrow(() => service.Changed -= handler);
 		});
+	}
+
+	[Test]
+	public async Task Every_listed_device_has_an_id_and_a_name_and_can_be_read()
+	{
+		var service = VolumeServiceFactory.Create();
+
+		var devices = await service.GetDevicesAsync();
+		TestContext.Out.WriteLine(FormattableString.Invariant($"{devices.Count} active endpoint(s)."));
+
+		foreach (var device in devices)
+		{
+			var target = new AudioTarget(device.Flow, device.Id);
+			Assert.Multiple(() =>
+			{
+				Assert.That(device.Id, Is.Not.Empty);
+				Assert.That(device.Name, Is.Not.Empty);
+				Assert.DoesNotThrowAsync(() => service.GetVolumeAsync(target));
+				Assert.DoesNotThrowAsync(() => service.GetMuteAsync(target));
+			});
+		}
+	}
+
+	[Test]
+	public async Task A_device_id_that_does_not_exist_reads_as_unavailable()
+	{
+		var service = VolumeServiceFactory.Create();
+		var target = new AudioTarget(AudioFlow.Output, "{0.0.0.00000000}.{00000000-0000-0000-0000-000000000000}");
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(await service.GetVolumeAsync(target), Is.Null);
+			Assert.That(await service.SetVolumeAsync(target, 0.5f), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task Reading_the_microphone_keeps_the_default_output_listener_in_place()
+	{
+		var service = VolumeServiceFactory.Create();
+		var reading = await service.GetVolumeAsync(AudioTarget.DefaultOutput);
+		if (reading is null)
+		{
+			Assert.Ignore("No default output endpoint on this machine.");
+			return;
+		}
+
+		var original = reading.Value;
+
+		var changed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		Action handler = () => changed.TrySetResult();
+		service.Changed += handler;
+		try
+		{
+			await service.GetVolumeAsync(AudioTarget.DefaultInput);
+			await service.SetVolumeAsync(AudioTarget.DefaultOutput, original > 0.5f ? original - 0.01f : original + 0.01f);
+
+			Assert.That(async () => await changed.Task.WaitAsync(TimeSpan.FromSeconds(5)), Throws.Nothing);
+		}
+		finally
+		{
+			service.Changed -= handler;
+			await service.SetVolumeAsync(AudioTarget.DefaultOutput, original);
+		}
 	}
 }

@@ -404,6 +404,7 @@ public class Startup
 		services.AddSingleton<VariableRegistry>();
 		services.AddSingleton<IUserVariableStore, JsonUserVariableStore>();
 		services.AddSingleton<IVariableBindingStore, JsonVariableBindingStore>();
+		services.AddSingleton<IKnownAudioDeviceStore, JsonKnownAudioDeviceStore>();
 		services.AddSingleton<VariableBindingLookup>();
 		services.AddSingleton<VariableNameFactory>();
 		services.AddSingleton<VariableCatalogProviders>();

@@ -10,13 +10,18 @@ internal sealed class NullVolumeService : IVolumeService
 		remove { }
 	}
 
-	public Task<float?> GetVolumeAsync(CancellationToken cancellationToken = default)
+	public Task<IReadOnlyList<AudioDevice>> GetDevicesAsync(CancellationToken cancellationToken = default)
+		=> Task.FromResult<IReadOnlyList<AudioDevice>>([]);
+
+	public Task<float?> GetVolumeAsync(AudioTarget target, CancellationToken cancellationToken = default)
 		=> Task.FromResult<float?>(null);
 
-	public Task SetVolumeAsync(float level, CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task<bool> SetVolumeAsync(AudioTarget target, float level, CancellationToken cancellationToken = default)
+		=> Task.FromResult(false);
 
-	public Task<bool?> GetMuteAsync(CancellationToken cancellationToken = default)
+	public Task<bool?> GetMuteAsync(AudioTarget target, CancellationToken cancellationToken = default)
 		=> Task.FromResult<bool?>(null);
 
-	public Task SetMuteAsync(bool mute, CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task<bool> SetMuteAsync(AudioTarget target, bool mute, CancellationToken cancellationToken = default)
+		=> Task.FromResult(false);
 }

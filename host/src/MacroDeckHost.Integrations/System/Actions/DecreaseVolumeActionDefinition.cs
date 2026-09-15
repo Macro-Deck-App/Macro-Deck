@@ -5,13 +5,15 @@ using MacroDeck.Sdk.Actions;
 
 namespace MacroDeckHost.Integrations.System.Actions;
 
-internal sealed class DecreaseVolumeActionDefinition : IActionDefinition
+internal sealed class DecreaseVolumeActionDefinition : IDynamicOptionsActionDefinition
 {
 	private readonly IVolumeService _volume;
+	private readonly Func<AudioTarget, string?> _knownName;
 
-	public DecreaseVolumeActionDefinition(IVolumeService volume)
+	public DecreaseVolumeActionDefinition(IVolumeService volume, Func<AudioTarget, string?>? knownName = null)
 	{
 		_volume = volume;
+		_knownName = knownName ?? (_ => null);
 	}
 
 	public string Id => "decrease-volume";
@@ -25,33 +27,14 @@ internal sealed class DecreaseVolumeActionDefinition : IActionDefinition
 			50,
 			label: AppStrings.Integrations.System.Actions.VolumeAmount.Label(),
 			step: 1,
-			defaultValue: 5)
+			defaultValue: 5),
+		AudioDeviceParameter.Create()
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_volume);
+	public IActionExecutor CreateExecutor() => new VolumeStepExecutor(_volume, -1);
 
-	private sealed class Executor : IActionExecutor
-	{
-		private readonly IVolumeService _volume;
-
-		public Executor(IVolumeService volume)
-		{
-			_volume = volume;
-		}
-
-		public async Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
-		{
-			var amount = SystemActionValues.ReadDouble(context.Parameters, "amount", 5);
-			if (await _volume.GetVolumeAsync(context.CancellationToken) is not { } current)
-			{
-				return ActionResult.Failed(ActionErrorCodes.Unavailable,
-					AppStrings.Integrations.System.Errors.VolumeUnavailable());
-			}
-
-			var target = Math.Clamp(current - (float)(amount / 100), 0f, 1f);
-			await _volume.SetVolumeAsync(target, context.CancellationToken);
-
-			return ActionResult.Success();
-		}
-	}
+	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
+		CancellationToken cancellationToken)
+		=> AudioDeviceParameter.GetOptionsAsync(_volume, _knownName, context, cancellationToken);
 }
