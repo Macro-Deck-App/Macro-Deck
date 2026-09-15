@@ -38,6 +38,38 @@ internal sealed class ObsActionStatesTests
 	private static readonly string[] _recordingStateIds = ["not-recording", "recording", "paused", "unavailable"];
 
 	[Test]
+	public async Task SetProfile_FollowsAProfileSwitchMadeInObs()
+	{
+		var client = Running(new ObsStatus { CurrentProfile = "Streaming" });
+		using var connection = Connect(client);
+		var provider = (IStateProviderActionDefinition)Action("set-profile", connection);
+		var streaming = new Dictionary<string, object?> { [ProfileActionDefinition.ProfileParameter] = "Streaming" };
+
+		var before = await provider.GetActionStateAsync(streaming, default);
+		client.Status = new ObsStatus { CurrentProfile = "Recording" };
+		client.RaiseStateChanged();
+		var after = await provider.GetActionStateAsync(streaming, default);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(before!.ActiveStateId, Is.EqualTo("active"));
+			Assert.That(after!.ActiveStateId, Is.EqualTo("inactive"));
+			Assert.That(ObsVariables.Read(connection.State, "current_profile"), Is.EqualTo("Recording"));
+		});
+	}
+
+	[Test]
+	public async Task SetProfile_WithNoProfileChosenYet_HasNothingToSay()
+	{
+		using var connection = Connect(Running(new ObsStatus { CurrentProfile = "Streaming" }));
+		var provider = (IStateProviderActionDefinition)Action("set-profile", connection);
+
+		var snapshot = await provider.GetActionStateAsync(_noParameters, default);
+
+		Assert.That(snapshot, Is.Null);
+	}
+
+	[Test]
 	public async Task ToggleRecording_ReportsWhetherObsIsRecording()
 	{
 		using var connection = Connect(Running(new ObsStatus { IsRecording = true }));

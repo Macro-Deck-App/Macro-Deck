@@ -30,9 +30,13 @@ internal interface IObsClient
 
 	IReadOnlyList<string> GetSourceFilterNames(string sourceName);
 
+	IReadOnlyList<string> GetProfileNames();
+
 	void SetCurrentScene(string sceneName);
 
 	void SetPreviewScene(string sceneName);
+
+	void SetCurrentProfile(string profileName);
 
 	void StartRecord();
 
@@ -115,6 +119,8 @@ internal sealed record ObsStatus
 	public string? CurrentScene { get; init; }
 
 	public string? PreviewScene { get; init; }
+
+	public string? CurrentProfile { get; init; }
 
 	public bool IsRecording { get; init; }
 

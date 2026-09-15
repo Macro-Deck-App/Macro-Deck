@@ -26,6 +26,7 @@ internal sealed class ObsClient : IObsClient
 		_obs.ReplayBufferStateChanged += (_, _) => RaiseStateChanged();
 		_obs.VirtualcamStateChanged += (_, _) => RaiseStateChanged();
 		_obs.StudioModeStateChanged += (_, _) => RaiseStateChanged();
+		_obs.CurrentProfileChanged += (_, _) => RaiseStateChanged();
 
 		_obs.InputMuteStateChanged += (_, args) =>
 			InputMuteChanged?.Invoke(this, new ObsInputMuteChange(args.InputName, args.InputMuted));
@@ -63,7 +64,8 @@ internal sealed class ObsClient : IObsClient
 
 		status = status with
 		{
-			CurrentScene = Try(() => _obs.GetCurrentProgramScene(), status.CurrentScene)
+			CurrentScene = Try(() => _obs.GetCurrentProgramScene(), status.CurrentScene),
+			CurrentProfile = Try(() => _obs.GetProfileList().CurrentProfileName, status.CurrentProfile)
 		};
 
 		var record = Try(() => _obs.GetRecordStatus(), null);
@@ -156,9 +158,17 @@ internal sealed class ObsClient : IObsClient
 		return filters?.Select(f => f.Name).ToList() ?? [];
 	}
 
+	public IReadOnlyList<string> GetProfileNames()
+	{
+		var profiles = Try(() => _obs.GetProfileList(), null);
+		return profiles?.Profiles.ToList() ?? [];
+	}
+
 	public void SetCurrentScene(string sceneName) => _obs.SetCurrentProgramScene(sceneName);
 
 	public void SetPreviewScene(string sceneName) => _obs.SetCurrentPreviewScene(sceneName);
+
+	public void SetCurrentProfile(string profileName) => _obs.SetCurrentProfile(profileName);
 
 	public void StartRecord() => _obs.StartRecord();
 

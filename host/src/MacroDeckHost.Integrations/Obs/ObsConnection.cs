@@ -113,8 +113,11 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	public Task<IReadOnlyList<string>> GetSourceFilterNamesAsync(string sourceName)
 		=> QueryAsync(() => _client.GetSourceFilterNames(sourceName));
 
+	public Task<IReadOnlyList<string>> GetProfileNamesAsync() => QueryAsync(_client.GetProfileNames);
+
 	public Task<bool> SetSceneAsync(string sceneName) => RunAsync(() => _client.SetCurrentScene(sceneName));
 	public Task<bool> SetPreviewSceneAsync(string sceneName) => RunAsync(() => _client.SetPreviewScene(sceneName));
+	public Task<bool> SetProfileAsync(string profileName) => RunAsync(() => _client.SetCurrentProfile(profileName));
 	public Task<bool> StartRecordingAsync() => RunAsync(_client.StartRecord);
 	public Task<bool> StopRecordingAsync() => RunAsync(_client.StopRecord);
 	public Task<bool> ToggleRecordingAsync() => RunAsync(_client.ToggleRecord);
