@@ -76,6 +76,7 @@ internal sealed class CompanionDeviceRemovalTests
 				CancellationToken.None);
 		};
 
+		harness.RemoveDeviceRow(removed);
 		await harness.DeviceRegistry.RemoveDeviceAsync(removed, CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -130,6 +131,7 @@ internal sealed class CompanionDeviceRemovalTests
 			await harness.ReportAsync("connection-2", late);
 		};
 
+		harness.RemoveDeviceRow(removed);
 		await harness.DeviceRegistry.RemoveDeviceAsync(removed, CancellationToken.None);
 
 		Assert.Multiple(() =>
