@@ -44,3 +44,13 @@ See [ADR 0064](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineerin
 for why the vocabulary is organized as a registry over the `ui.*`/`macrodeck.*` namespaces rather than one
 flat list, and [The UI model](/ui/concepts/ui-model/#model-version-negotiation) for where negotiation
 sits in a session's lifecycle.
+
+## Behaviour changes that moved no version
+
+These change what an existing plugin observes without a new model version. Each is a deliberate
+exception to the [compatibility policy](/policies/compatibility/), listed here so you can check your plugin
+against it.
+
+| Change | Hosts | What an existing plugin sees |
+|---|---|---|
+| A `link` with an external `http` or `https` URL is opened by the host in the default browser on every surface, whether or not it declares `activate` | Released after 3.0.0-beta.6 | A link that declares `activate` still receives it exactly once, and is now opened by the host outside the integration setup dialog too. A handler that opened the URL itself opens a second tab; remove that code. See [Links](/ui/concepts/events/#links). |

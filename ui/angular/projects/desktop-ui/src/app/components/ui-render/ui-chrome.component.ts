@@ -5,9 +5,19 @@ import { ButtonComponent, LocalizationService, SegmentedControlComponent, Segmen
 import { CopyValueComponent } from '../copy-value/copy-value.component';
 import { UiRenderContext } from './ui-render-context';
 import { UiNodeComponent } from './ui-node.component';
+import { ExternalLinkService } from '../../services/external-link.service';
 
 const Primitives = UiConfigPrimitives;
 const Properties = UiConfigProperties;
+
+function isExternalUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url, window.location.href);
+    return (parsed.protocol === 'http:' || parsed.protocol === 'https:') && parsed.origin !== window.location.origin;
+  } catch {
+    return false;
+  }
+}
 
 @Component({
   selector: 'shared-ui-chrome',
@@ -89,6 +99,7 @@ const Properties = UiConfigProperties;
           target="_blank"
           rel="noopener noreferrer"
           (click)="onLinkClick($event)"
+          (auxclick)="onLinkClick($event)"
           >{{ label() ?? url() }}</a
         >
       }
@@ -157,6 +168,7 @@ export class UiChromeComponent {
   protected readonly types = Primitives;
   protected readonly context = inject(UiRenderContext);
   private readonly localization = inject(LocalizationService);
+  private readonly externalLinks = inject(ExternalLinkService);
 
   protected readonly children = computed(() => this.node().children ?? []);
   protected readonly title = computed(() => nodeText(this.node(), Properties.Title, this.localization));
@@ -202,10 +214,15 @@ export class UiChromeComponent {
   }
 
   protected onLinkClick(event: MouseEvent): void {
+    if (event.button !== 0 && event.button !== 1) return;
     const node = this.node();
-    if (!emitsEvent(node, UiConfigEvents.Activate)) return;
+    const url = this.url();
+    const external = isExternalUrl(url);
+    const activates = emitsEvent(node, UiConfigEvents.Activate);
+    if (!external && !activates) return;
     event.preventDefault();
-    this.context.emit(node, UiConfigEvents.Activate);
+    if (external) this.externalLinks.open(url);
+    if (activates) this.context.emit(node, UiConfigEvents.Activate);
   }
 
   protected readonly buttonIcon = computed(() => nodeString(this.node(), Properties.Icon));

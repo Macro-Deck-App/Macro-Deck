@@ -223,6 +223,10 @@ jobs:
       - name: Release feed script tests
         run: node --test ci/scripts/*.test.mjs
 
+      # jsdom resolves from the ui workspace install above; ui/bootstrapper has no install of its own.
+      - name: Bootstrapper link routing tests
+        run: node --test ui/bootstrapper/src/external-links.test.mjs
+
       # Production build doubles as the UI build/warnings gate, with budgets enforced.
       - name: Production build
         working-directory: ui/angular
