@@ -126,7 +126,8 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 				_variableNotifier,
 				_scopeFactory,
 				scopeWidgetId,
-				IsDefault: config.ValueVariable is null)
+				IsDefault: config.ValueVariable is null,
+				CustomStep: config.CustomStep)
 			: null;
 
 		var doublePress = isWidgetSurface && config.HasDoublePressFlow && scopeWidgetId is { } widgetId

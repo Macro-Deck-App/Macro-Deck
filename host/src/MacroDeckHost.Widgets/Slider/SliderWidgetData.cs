@@ -41,9 +41,12 @@ public sealed record SliderWidgetData
 	/// own. See <see cref="Min" /> for why the fallback is per field.</summary>
 	public double Max { get; init; } = 100;
 
-	/// <summary>Grid granularity, used only when the bound variable declares no step of its own. See
-	/// <see cref="Min" /> for why the fallback is per field.</summary>
+	/// <summary>Grid granularity, used when the bound variable declares no step of its own or when
+	/// <see cref="CustomStep" /> is set. See <see cref="Min" /> for why the fallback is per field.</summary>
 	public double Step { get; init; } = 1;
+
+	// Opt-in: every stored slider already carries a step that never overrode a declared one.
+	public bool CustomStep { get; init; }
 
 	public bool HasDoublePressFlow { get; init; }
 
@@ -68,6 +71,7 @@ public sealed record SliderWidgetData
 			Min = ReadDouble(data, "min") ?? 0,
 			Max = ReadDouble(data, "max") ?? 100,
 			Step = ReadDouble(data, "step") ?? 1,
+			CustomStep = ReadBool(data, "customStep") ?? false,
 			HasDoublePressFlow = HasFlowFor(data, WidgetTriggerTypes.DoublePress),
 		};
 	}

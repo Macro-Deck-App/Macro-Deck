@@ -323,6 +323,59 @@ public class SliderWidgetSessionTests
 		await slider.DisposeAsync();
 	}
 
+	[TestCase(5, 0.43, 45)]
+	[TestCase(15, 0.5, 45)]
+	public async Task A_custom_step_replaces_the_step_the_variable_declares(double widgetStep,
+		double level,
+		double written)
+	{
+		var slider = Writable(min: 0, max: 100, step: 1, value: 0, configStep: widgetStep, customStep: true);
+
+		slider.Host.ById("slider.track").Raise(UiComponentEvents.Change, level);
+		await slider.Host.SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(slider.Provider.Writes.Single(), Is.EqualTo(written).Within(1e-9));
+			Assert.That(slider.Host.ById("slider.track").Number("step"), Is.EqualTo(widgetStep / 100).Within(1e-9));
+		});
+
+		await slider.DisposeAsync();
+	}
+
+	[TestCase(0)]
+	[TestCase(-5)]
+	[TestCase(500)]
+	public async Task A_custom_step_that_cannot_form_a_grid_falls_back_to_the_step_the_variable_declares(
+		double widgetStep)
+	{
+		var slider = Writable(min: 0, max: 100, step: 1, value: 0, configStep: widgetStep, customStep: true);
+
+		slider.Host.ById("slider.track").Raise(UiComponentEvents.Change, 0.4321);
+		await slider.Host.SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(slider.Provider.Writes.Single(), Is.EqualTo(43).Within(1e-9));
+			Assert.That(slider.Host.ById("slider.track").Number("step"), Is.EqualTo(0.01).Within(1e-9));
+		});
+
+		await slider.DisposeAsync();
+	}
+
+	[Test]
+	public async Task Without_a_custom_step_the_step_the_variable_declares_still_wins()
+	{
+		var slider = Writable(min: 0, max: 100, step: 1, value: 0, configStep: 5);
+
+		slider.Host.ById("slider.track").Raise(UiComponentEvents.Change, 0.43);
+		await slider.Host.SettleAsync();
+
+		Assert.That(slider.Provider.Writes.Single(), Is.EqualTo(43).Within(1e-9));
+
+		await slider.DisposeAsync();
+	}
+
 	[Test]
 	public async Task A_slider_whose_variable_declares_no_write_capability_is_inert_on_drag()
 	{
@@ -741,7 +794,8 @@ public class SliderWidgetSessionTests
 		double configMin = 0,
 		double configMax = 100,
 		double configStep = 0,
-		bool doublePressFlow = false)
+		bool doublePressFlow = false,
+		bool customStep = false)
 		=> SliderUnderTest.Build(entity =>
 			{
 				entity.Classification = VariableClassification.Integration;
@@ -757,7 +811,8 @@ public class SliderWidgetSessionTests
 			configMax,
 			configStep,
 			locked,
-			doublePressFlow: doublePressFlow);
+			doublePressFlow: doublePressFlow,
+			customStep: customStep);
 
 	private static SliderUnderTest ReadOnlyIntegrationOwned(double min, double max, double step, string value)
 		=> SliderUnderTest.Build(entity =>
@@ -855,7 +910,8 @@ public class SliderWidgetSessionTests
 			double configStep,
 			bool locked = false,
 			string? bindingName = null,
-			bool doublePressFlow = false)
+			bool doublePressFlow = false,
+			bool customStep = false)
 		{
 			var registry = new VariableRegistry();
 			var provider = new RecordingVariableProvider(registry);
@@ -899,7 +955,8 @@ public class SliderWidgetSessionTests
 				configStep,
 				registry,
 				notifier,
-				scopeFactory);
+				scopeFactory,
+				CustomStep: customStep);
 			var state = new UiState<SliderWidgetReadout>(SliderWidgetReadout.Empty);
 
 			var trigger = new RecordingTriggerService();
@@ -926,7 +983,8 @@ public class SliderWidgetSessionTests
 				ShowValue = true,
 				Min = configMin,
 				Max = configMax,
-				Step = configStep
+				Step = configStep,
+				CustomStep = customStep
 			};
 			var element = SliderWidgetView.Build(config, state, icon: null, session.BuildEvents());
 			var view = new UiView(new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },

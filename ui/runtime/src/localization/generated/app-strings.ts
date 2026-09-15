@@ -6676,6 +6676,8 @@ export const AppStrings = {
 		Slider: {
 			ChangeIcon: 'macrodeck.app:Widgets.Slider.ChangeIcon',
 			ChooseIcon: 'macrodeck.app:Widgets.Slider.ChooseIcon',
+			CustomStep: 'macrodeck.app:Widgets.Slider.CustomStep',
+			CustomStepDescription: 'macrodeck.app:Widgets.Slider.CustomStepDescription',
 			DefaultVariableDescription: 'macrodeck.app:Widgets.Slider.DefaultVariableDescription',
 			Horizontal: 'macrodeck.app:Widgets.Slider.Horizontal',
 			LegacyActionBindingNotice: 'macrodeck.app:Widgets.Slider.LegacyActionBindingNotice',
@@ -12205,6 +12207,8 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Widgets.SamplePreview.WeatherLocation': 'Sample city',
 	'macrodeck.app:Widgets.Slider.ChangeIcon': 'Change icon',
 	'macrodeck.app:Widgets.Slider.ChooseIcon': 'Choose icon',
+	'macrodeck.app:Widgets.Slider.CustomStep': 'Custom step',
+	'macrodeck.app:Widgets.Slider.CustomStepDescription': 'Snap to your own step instead of the one the variable provides.',
 	'macrodeck.app:Widgets.Slider.DefaultVariableDescription': 'Without a variable, the slider uses its own widget variable slider_value.',
 	'macrodeck.app:Widgets.Slider.Horizontal': 'Horizontal',
 	'macrodeck.app:Widgets.Slider.LegacyActionBindingNotice': 'This slider still carries an action binding from an older version. It is no longer used and is removed the next time you save.',

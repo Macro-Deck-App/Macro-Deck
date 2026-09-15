@@ -195,6 +195,7 @@ export interface SliderData {
   min?: number;
   max?: number;
   step?: number;
+  customStep?: boolean;
 }
 
 export interface WeatherData {

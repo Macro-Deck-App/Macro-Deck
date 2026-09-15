@@ -239,6 +239,19 @@ public class SliderWidgetViewTests
 		});
 	}
 
+	[Test]
+	public void A_custom_step_is_off_unless_the_widget_stored_it_on()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(SliderWidgetData.Parse(JsonSerializer.SerializeToElement(new { step = 5 })).CustomStep,
+				Is.False);
+			Assert.That(SliderWidgetData.Parse(JsonSerializer.SerializeToElement(new { step = 5, customStep = true }))
+					.CustomStep,
+				Is.True);
+		});
+	}
+
 	private static object Action() => new { integrationId = "integration", actionId = "action" };
 
 	private static UiTestHost Render(object data, IReadOnlyList<UiEventHandler>? events = null)

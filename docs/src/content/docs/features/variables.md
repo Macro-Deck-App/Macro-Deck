@@ -137,6 +137,10 @@ public ValueTask<VariableWriteResult> SetValueAsync(string localId, object? valu
 `Min`, `Max` and `Step` come from the reading rather than the definition because they can change - a
 seek bar's maximum is the current track's length.
 
+`Step` is the slider's default grid, not a guarantee: a user can give a bound slider a custom step, so
+`SetValueAsync` may receive a value that is not a multiple of your step. It is always within `Min` and
+`Max`. Round or reject it the way your target needs.
+
 ## Variables that depend on configuration
 
 `Variables` may change with configuration. After the configuration changed, tell the host to read it

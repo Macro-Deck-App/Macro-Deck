@@ -16227,6 +16227,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Choose icon</value>
   </data>
+  <data name="Widgets.Slider.CustomStep" xml:space="preserve">
+    <value>Custom step</value>
+  </data>
+  <data name="Widgets.Slider.CustomStepDescription" xml:space="preserve">
+    <value>Snap to your own step instead of the one the variable provides.</value>
+  </data>
   <data name="Widgets.Slider.DefaultVariableDescription" xml:space="preserve">
     <value>Without a variable, the slider uses its own widget variable slider_value.</value>
   </data>
