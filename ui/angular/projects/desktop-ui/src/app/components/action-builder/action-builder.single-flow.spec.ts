@@ -67,6 +67,16 @@ describe('ActionBuilderComponent single-flow mode', () => {
     expect(component.triggerTabItems().map(item => item.label)).toEqual(['Double Tap']);
   });
 
+  it('shows a single fixed tab together with the event menu when events are offered', () => {
+    fixture.componentRef.setInput('triggerTabs', [{ triggerType: 'onDoublePress', label: 'Double Tap' }]);
+    fixture.componentRef.setInput('alwaysShowTabRow', true);
+    fixture.detectChanges();
+
+    expect(component.showTabRow()).toBeTrue();
+    expect(component.showAddEventTrigger()).toBeTrue();
+    expect(component.triggerTabItems().map(item => item.label)).toEqual(['Double Tap']);
+  });
+
   it('keeps the tab row when events are still offered', () => {
     fixture.componentRef.setInput('triggerTabs', SCRIPT_TABS);
     fixture.componentRef.setInput('allowEventTriggers', true);
