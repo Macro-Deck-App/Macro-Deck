@@ -217,6 +217,78 @@ internal sealed class HomeAssistantVariableCatalogTests
 	}
 
 	[Test]
+	public async Task Search_finds_an_entity_by_the_variable_name_a_user_sees()
+	{
+		var catalog = CatalogOf(State("light.office_lamp", "on", ("brightness", 200)),
+			State("light.kitchen", "on", ("brightness", 50)));
+		var provider = new HomeAssistantVariableCatalog(() => catalog);
+
+		var byEntityVariable = await provider.DiscoverAsync(new VariableCatalogQuery { Search = "ha_light_office" });
+		var byAttributeVariable =
+			await provider.DiscoverAsync(new VariableCatalogQuery { Search = "ha_light_office_lamp_brightness" });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(byEntityVariable.Items.Select(item => item.Id!), Is.EquivalentTo(["entity/light.office_lamp"]));
+			Assert.That(byAttributeVariable.Items.Select(item => item.Id!),
+				Is.EquivalentTo(["entity/light.office_lamp"]));
+		});
+	}
+
+	[Test]
+	public async Task A_plain_entity_id_typed_by_a_user_resolves_to_its_state_or_attribute()
+	{
+		var catalog = CatalogOf(State("light.office_lamp", "on", ("brightness", 200)));
+		var provider = new HomeAssistantVariableCatalog(() => catalog);
+
+		var state = await provider.ResolveAsync("light.office_lamp");
+		var brightness = await provider.ResolveAsync("light.office_lamp/brightness");
+		var container = await provider.ResolveAsync("entity/light.office_lamp");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(state?.Id, Is.EqualTo("entity/light.office_lamp/state"));
+			Assert.That(brightness?.Id, Is.EqualTo("entity/light.office_lamp/brightness"));
+			Assert.That(container?.Id, Is.EqualTo("entity/light.office_lamp"));
+			Assert.That(container?.IsContainer, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task A_typed_id_that_is_not_an_entity_does_not_resolve()
+	{
+		var catalog = CatalogOf(State("light.office_lamp", "on", ("brightness", 200)));
+		var provider = new HomeAssistantVariableCatalog(() => catalog);
+
+		var unknown = await provider.ResolveAsync("light.never_seen");
+		var withoutDomain = await provider.ResolveAsync("office_lamp");
+		var unknownAttribute = await provider.ResolveAsync("light.office_lamp/color_temp");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(unknown, Is.Null);
+			Assert.That(withoutDomain, Is.Null);
+			Assert.That(unknownAttribute, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task Reading_a_plain_entity_id_is_not_a_catalog_resource()
+	{
+		var catalog = CatalogOf(State("light.office_lamp", "on", ("brightness", 200)));
+		var provider = new HomeAssistantVariableCatalog(() => catalog);
+
+		var reading = await provider.ReadAsync("light.office_lamp");
+		var canonical = await provider.ReadAsync("entity/light.office_lamp/state");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(reading.Value, Is.Null);
+			Assert.That(canonical.Value, Is.EqualTo("on"));
+		});
+	}
+
+	[Test]
 	public async Task An_unknown_entity_does_not_resolve_but_a_known_unreachable_one_does()
 	{
 		// The catalog here stands in for what HomeAssistantConnection keeps: it is not cleared when the

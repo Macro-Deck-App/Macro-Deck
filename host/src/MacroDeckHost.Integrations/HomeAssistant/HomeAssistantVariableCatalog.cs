@@ -68,7 +68,7 @@ internal sealed class HomeAssistantVariableCatalog
 		string id,
 		CancellationToken cancellationToken = default)
 	{
-		if (ParseId(id) is not { } parsed)
+		if ((ParseId(id) ?? ParseEntityIdTypedByUser(id)) is not { } parsed)
 		{
 			return ValueTask.FromResult<VariableDefinition?>(null);
 		}
@@ -311,8 +311,32 @@ internal sealed class HomeAssistantVariableCatalog
 	}
 
 	private static bool Matches(HomeAssistantEntityState state, string search)
-		=> state.EntityId.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-			(state.FriendlyName is { Length: > 0 } name && name.Contains(search, StringComparison.OrdinalIgnoreCase));
+	{
+		if (state.EntityId.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+			(state.FriendlyName is { Length: > 0 } name && name.Contains(search, StringComparison.OrdinalIgnoreCase)))
+		{
+			return true;
+		}
+
+		var variableName = SuggestedEntityName(state.EntityId);
+		return variableName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+			search.StartsWith(variableName + "_", StringComparison.OrdinalIgnoreCase);
+	}
+
+	private static ParsedId? ParseEntityIdTypedByUser(string id)
+	{
+		if (id.StartsWith(EntityPrefix, StringComparison.Ordinal))
+		{
+			return null;
+		}
+
+		var slash = id.IndexOf('/', StringComparison.Ordinal);
+		var entityId = slash < 0 ? id : id[..slash];
+		var child = slash < 0 ? StateChild : id[(slash + 1)..];
+		return entityId.Contains('.', StringComparison.Ordinal) && child.Length > 0
+			? new ParsedId(entityId, child)
+			: null;
+	}
 
 	private static VariableDefinition EntityContainer(HomeAssistantEntityState state)
 		=> VariableDefinition.OnDemand(EntityPrefix + state.EntityId, VariableType.Text) with

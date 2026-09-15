@@ -22,6 +22,7 @@ import { UiRenderContext } from '../../ui-render/ui-render-context';
       <shared-variable-picker
         [variables]="pickerVariables()"
         [acceptedTypes]="variableTypes()"
+        [writableOnly]="writableOnly()"
         (pick)="valueChange.emit($event)" />
     }
   `,

@@ -24,6 +24,7 @@ import { EmptyStateComponent } from '../feedback/empty-state/empty-state.compone
 import { SelectComponent, SelectOption } from '../forms/select/select.component';
 import { VariableCatalogService } from '../../services/variable-catalog.service';
 import { IntegrationService } from '../../services/integration.service';
+import { VariableCatalogIdInputComponent } from './variable-catalog-id-input.component';
 
 interface CreateForm {
   rawName: string;
@@ -36,8 +37,10 @@ interface CreateForm {
 type VariableRow =
   | { kind: 'header'; key: string; label: string }
   | { kind: 'row'; key: string; variable: Variable }
-  | { kind: 'catalog-leaf'; key: string; integrationId: string; node: VariableCatalogNode }
-  | { kind: 'catalog-more'; key: string; integrationId: string; parentId: string | undefined };
+  | { kind: 'catalog-leaf'; key: string; integrationId: string; node: VariableCatalogNode; depth: number }
+  | { kind: 'catalog-branch'; key: string; integrationId: string; node: VariableCatalogNode; depth: number; expanded: boolean }
+  | { kind: 'catalog-note'; key: string; text: string; depth: number }
+  | { kind: 'catalog-more'; key: string; integrationId: string; parentId: string | undefined; depth: number };
 
 // Bound from the TS constant (`[style.height.px]`) rather than left to SCSS, so `itemSize` on the
 // viewport and the rendered row's actual height can never drift apart - the two live different
@@ -49,10 +52,16 @@ const ROW_HEIGHT = 68;
 
 const CATALOG_PAGE_LEAVES = 100;
 
+const CATALOG_INDENT_PX = 20;
+
+const CATALOG_QUERY_DEBOUNCE_MS = 250;
+
 interface CatalogRequest {
   integrationId: string;
   parentId: string | undefined;
+  search: string | undefined;
   more: boolean;
+  always: boolean;
 }
 
 const CLASSIFICATION_LABEL_KEYS: Record<VariableClassification, string> = {
@@ -77,6 +86,7 @@ const CLASSIFICATION_LABEL_KEYS: Record<VariableClassification, string> = {
     InputComponent,
     SelectComponent,
     TranslatePipe,
+    VariableCatalogIdInputComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './variables-manager.component.html',
@@ -291,7 +301,56 @@ export class VariablesManagerComponent implements OnInit {
 
   private readonly catalogBudget = signal(CATALOG_PAGE_LEAVES);
 
+  private readonly expandedCatalog = signal<ReadonlySet<string>>(new Set());
+
+  private readonly catalogQuery = signal('');
+
+  private readonly catalogQueryDebounce = effect(onCleanup => {
+    const query = this.search().trim().replace(/^vars\./i, '');
+    const timer = setTimeout(() => this.catalogQuery.set(query), CATALOG_QUERY_DEBOUNCE_MS);
+    onCleanup(() => clearTimeout(timer));
+  });
+
+  readonly catalogIndent = CATALOG_INDENT_PX;
+
+  readonly loadingLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Dynamic.Loading));
+  readonly notBindableLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Dynamic.NotBindable));
+  readonly bindActionLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Dynamic.BindAction));
+
+  readonly manualIdIntegrationId = computed<string | null>(() => {
+    const source = this.sourceState();
+    if (source.kind !== 'integration') {
+      return null;
+    }
+    const provider = this.variableCatalog.providersFor()().find(p => p.integrationId === source.integrationId);
+    return provider?.supportsManualIds ? source.integrationId : null;
+  });
+
+  readonly acceptedTypeList = computed(() => this.acceptedTypesState());
+  readonly writableOnlyValue = computed(() => this.writableOnlyState());
+
+  toggleCatalogBranch(integrationId: string, node: VariableCatalogNode): void {
+    const key = VariablesManagerComponent.branchKey(integrationId, node.id);
+    this.expandedCatalog.update(set => {
+      const next = new Set(set);
+      if (!next.delete(key)) {
+        next.add(key);
+      }
+      return next;
+    });
+  }
+
+  onManualBound(variable: Variable): void {
+    if (this.isPickMode()) {
+      this.selectVariable(variable);
+    }
+  }
+
   private readonly walk = computed<{ rows: VariableRow[]; frontier: CatalogRequest[] }>(() => {
+    this.variableCatalog.revision();
     const showHeaders = this.showGroupHeaders();
     const flat: VariableRow[] = [];
     const frontier: CatalogRequest[] = [];
@@ -359,14 +418,19 @@ export class VariablesManagerComponent implements OnInit {
     out: VariableRow[],
     frontier: CatalogRequest[],
   ): void {
-    if (this.countCatalogLeaves(out) >= this.catalogBudget()) {
+    if (this.searchesOnHost(integrationId)) {
+      this.appendSearchableCatalogRows(integrationId, out, frontier);
+      return;
+    }
+
+    if (this.countCatalogRows(out) >= this.catalogBudget()) {
       return;
     }
 
     // Not fetched yet: recorded for the walk to pick up rather than read, because reading is what
     // would fetch it, and a computed must not reach out on its own.
     if (!this.variableCatalog.isLoaded(integrationId, parentId, undefined)) {
-      frontier.push({ integrationId, parentId, more: false });
+      frontier.push({ integrationId, parentId, search: undefined, more: false, always: false });
       return;
     }
 
@@ -381,27 +445,104 @@ export class VariablesManagerComponent implements OnInit {
       }
 
       if (!node.boundVariableId && this.isCatalogBindable(node) && this.matchesSearch(node)) {
-        out.push({ kind: 'catalog-leaf', key: `cat:${node.id}`, integrationId, node });
+        out.push({ kind: 'catalog-leaf', key: `cat:${node.id}`, integrationId, node, depth: 0 });
       }
 
-      if (this.countCatalogLeaves(out) >= this.catalogBudget()) {
+      if (this.countCatalogRows(out) >= this.catalogBudget()) {
         return;
       }
     }
 
     if (page.hasMore) {
-      frontier.push({ integrationId, parentId, more: true });
+      frontier.push({ integrationId, parentId, search: undefined, more: true, always: false });
     }
   }
 
-  private countCatalogLeaves(rows: readonly VariableRow[]): number {
+  // The search goes only on root pages: a provider may answer a searched query from anywhere in its
+  // tree, so a searched child request would not return that node's children.
+  private appendSearchableCatalogRows(integrationId: string, out: VariableRow[], frontier: CatalogRequest[]): void {
+    const search = this.catalogQuery() || undefined;
+    if (!this.variableCatalog.isLoaded(integrationId, undefined, search)) {
+      frontier.push({ integrationId, parentId: undefined, search, more: false, always: false });
+      return;
+    }
+
+    const page = this.variableCatalog.pageFor(integrationId, undefined, search)();
+    if (!page.available) {
+      return;
+    }
+
+    for (const node of page.nodes) {
+      if (this.countCatalogRows(out) >= this.catalogBudget()) {
+        return;
+      }
+      if (node.hasChildren) {
+        this.appendCatalogBranch(integrationId, node, 0, out, frontier);
+      } else if (!node.boundVariableId && this.isCatalogBindable(node)) {
+        out.push({ kind: 'catalog-leaf', key: `cat:${node.id}`, integrationId, node, depth: 0 });
+      }
+    }
+
+    if (page.hasMore) {
+      frontier.push({ integrationId, parentId: undefined, search, more: true, always: false });
+    }
+  }
+
+  private appendCatalogBranch(
+    integrationId: string,
+    node: VariableCatalogNode,
+    depth: number,
+    out: VariableRow[],
+    frontier: CatalogRequest[],
+  ): void {
+    const key = VariablesManagerComponent.branchKey(integrationId, node.id);
+    const expanded = this.expandedCatalog().has(key);
+    out.push({ kind: 'catalog-branch', key: `branch:${key}`, integrationId, node, depth, expanded });
+    if (!expanded) {
+      return;
+    }
+
+    const childDepth = depth + 1;
+    if (!this.variableCatalog.isLoaded(integrationId, node.id, undefined)) {
+      frontier.push({ integrationId, parentId: node.id, search: undefined, more: false, always: true });
+      out.push({ kind: 'catalog-note', key: `loading:${key}`, text: this.loadingLabel(), depth: childDepth });
+      return;
+    }
+
+    const page = this.variableCatalog.pageFor(integrationId, node.id, undefined)();
+
+    const before = out.length;
+    for (const child of page.nodes) {
+      if (child.hasChildren) {
+        this.appendCatalogBranch(integrationId, child, childDepth, out, frontier);
+      } else if (!child.boundVariableId && this.isCatalogBindable(child)) {
+        out.push({ kind: 'catalog-leaf', key: `cat:${child.id}`, integrationId, node: child, depth: childDepth });
+      }
+    }
+
+    if (page.hasMore) {
+      out.push({ kind: 'catalog-more', key: `more:${key}`, integrationId, parentId: node.id, depth: childDepth });
+    } else if (out.length === before) {
+      out.push({ kind: 'catalog-note', key: `empty:${key}`, text: this.notBindableLabel(), depth: childDepth });
+    }
+  }
+
+  private countCatalogRows(rows: readonly VariableRow[]): number {
     let count = 0;
     for (const row of rows) {
-      if (row.kind === 'catalog-leaf') {
+      if ((row.kind === 'catalog-leaf' || row.kind === 'catalog-branch') && row.depth === 0) {
         count++;
       }
     }
     return count;
+  }
+
+  private searchesOnHost(integrationId: string): boolean {
+    return this.variableCatalog.providersFor()().find(p => p.integrationId === integrationId)?.supportsSearch === true;
+  }
+
+  private static branchKey(integrationId: string, nodeId: string): string {
+    return `${integrationId}::${nodeId}`;
   }
 
   catalogLabel(node: VariableCatalogNode): string {
@@ -447,19 +588,16 @@ export class VariablesManagerComponent implements OnInit {
 
   private readonly catalogLoader = effect(() => {
     const { rows, frontier } = this.walk();
-    if (frontier.length === 0) {
-      return;
-    }
-    const loaded = rows.reduce((n, r) => n + (r.kind === 'catalog-leaf' ? 1 : 0), 0);
-    if (loaded >= this.catalogBudget()) {
+    const next = frontier.find(request => request.always)
+      ?? (frontier.length > 0 && this.countCatalogRows(rows) < this.catalogBudget() ? frontier[0] : undefined);
+    if (!next) {
       return;
     }
 
-    const next = frontier[0];
     untracked(() => {
       void (next.more
-        ? this.variableCatalog.loadMore(next.integrationId, next.parentId, undefined)
-        : Promise.resolve(this.variableCatalog.pageFor(next.integrationId, next.parentId, undefined)()));
+        ? this.variableCatalog.loadMore(next.integrationId, next.parentId, next.search)
+        : Promise.resolve(this.variableCatalog.pageFor(next.integrationId, next.parentId, next.search)()));
     });
   });
 

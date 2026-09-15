@@ -69,6 +69,11 @@ example `system_audio_input_usb_mic_volume_percent`. An unplugged device keeps i
 read as unavailable until it is back. The volume actions can control the default output, the default
 input or one specific device.
 
+Some integrations, such as Home Assistant, offer far more values than they list up front. Pick the
+integration in the variable browser and search for an entity by name or variable name, then open it
+to see its state and attributes. If you know the entity id, for example `light.office_lamp` or
+`light.office_lamp/brightness`, type it under **Enter a resource ID** instead.
+
 ![The Variables page with the user variable deaths and system variables](../../../assets/guide/variables.png)
 
 ## Scripts and automations

@@ -35,6 +35,7 @@ import { VariableBrowserModalComponent } from '../variables/variable-browser-mod
         [heading]="pickHeading()"
         [variables]="variables"
         [acceptedTypes]="acceptedTypes"
+        [writableOnly]="writableOnly"
         [scopeLabel]="scopeLabelState()"
         [zIndex]="1100"
         (pick)="onPick($event)"
@@ -47,6 +48,8 @@ export class VariablePickerComponent {
   @Input() variables: Variable[] = [];
 
   @Input() acceptedTypes?: VariableType[];
+
+  @Input() writableOnly = false;
 
   private readonly scopeLabelOverride = signal<string | null>(null);
   @Input() set scopeLabel(value: string) { this.scopeLabelOverride.set(value); }
