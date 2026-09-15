@@ -27,6 +27,26 @@ class TestWidgetEditorComponent implements IWidgetEditorComponent {
   }
 }
 
+@Component({ selector: 'app-following-widget-editor', standalone: true, changeDetection: ChangeDetectionStrategy.Eager,
+ template: '' })
+class FollowingWidgetEditorComponent implements IWidgetEditorComponent {
+  @Input({ required: true }) widget!: GridWidget;
+  @Input() unsavedChanges = false;
+  @Output() save = new EventEmitter<Partial<WidgetData>>();
+  @Output() close = new EventEmitter<void>();
+
+  reloads = 0;
+  follows = 0;
+
+  reload(): void {
+    this.reloads++;
+  }
+
+  followLiveData(): void {
+    this.follows++;
+  }
+}
+
 @Component({ selector: 'app-deferred-widget-editor', standalone: true, changeDetection: ChangeDetectionStrategy.Eager,
  template: '' })
 class DeferredWidgetEditorComponent implements IWidgetEditorComponent {
@@ -625,6 +645,41 @@ describe('WidgetEditorPageComponent', () => {
       await fixture.whenStable();
 
       expect(editorDouble(fixture).reloads).toBe(reloadsAfterSave);
+    });
+
+    describe('with an editor that can follow live data in place', () => {
+      beforeEach(() => {
+        registryStub.getEditorComponent.and.returnValue(Promise.resolve(FollowingWidgetEditorComponent));
+      });
+
+      function followingDouble(fixture: ComponentFixture<WidgetEditorPageComponent>): FollowingWidgetEditorComponent {
+        return fixture.debugElement.query(By.directive(FollowingWidgetEditorComponent)).componentInstance;
+      }
+
+      it('lets the editor follow a change to a clean draft instead of reloading it, and stays clean', async () => {
+        const fixture = await createLoadedFixture();
+
+        push({ showDate: true });
+        await fixture.whenStable();
+        await new Promise(resolve => setTimeout(resolve, DIRTY_POLL_MS * 2));
+
+        expect(followingDouble(fixture).follows).toBe(1);
+        expect(followingDouble(fixture).reloads).toBe(0);
+        expect(fixture.componentInstance.hasUnsavedChanges()).toBeFalse();
+      });
+
+      it('still reloads the editor when the change is merged into a dirty draft', async () => {
+        const fixture = await createLoadedFixture();
+        editData(fixture);
+        await new Promise(resolve => setTimeout(resolve, DIRTY_POLL_MS * 2));
+
+        push({ showSeconds: false });
+        await fixture.whenStable();
+
+        expect(followingDouble(fixture).follows).toBe(0);
+        expect(followingDouble(fixture).reloads).toBe(1);
+        expect(fixture.componentInstance.hasUnsavedChanges()).toBeTrue();
+      });
     });
 
     it('shows the pushed values when the editor is reopened', async () => {

@@ -35,6 +35,7 @@ export interface IWidgetEditorComponent {
    * `widget` directly on every render has nothing to rebuild and omits it.
    */
   reload?: () => void;
+  followLiveData?: () => void;
   unsavedChanges?: boolean;
 }
 
