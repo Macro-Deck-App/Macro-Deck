@@ -57,6 +57,12 @@ visible instead by turning off **Lock clients when this computer is locked** in
 Only one Macro Deck can run on a computer at a time. If it is already running, starting it again
 does not open a second copy. Look for the running Macro Deck in the system tray or menu bar.
 
+## Plugins show up as dotnet in Task Manager
+
+Most plugins run on the .NET runtime that comes with Macro Deck, so Task Manager and Activity Monitor
+list them as `dotnet` or ".NET Host" rather than by the plugin's name. This is expected; ending
+Macro Deck ends them too.
+
 ## Installing on Linux
 
 - **The stable APT suite is empty:** there is no stable release of Macro Deck 3 yet. Use the beta

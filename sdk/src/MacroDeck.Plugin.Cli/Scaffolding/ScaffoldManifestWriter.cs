@@ -59,15 +59,15 @@ internal static class ScaffoldManifestWriter
 				continue;
 			}
 
-			// No 'runtime' property: absent means self-contained, and the schema then forbids a '.dll'
-			// executable for a self-contained entrypoint - see
-			// PluginManifestReader.ValidateEntrypointRuntimes. The build config this writer's sibling
-			// produces always publishes self-contained, so this holds for every platform selected here.
-			var executable = rid.StartsWith("win-", StringComparison.Ordinal)
-				? $"runtimes/{rid}/{request.ProjectName}.exe"
-				: $"runtimes/{rid}/{request.ProjectName}";
-
-			entrypoints[rid] = new JsonObject { ["executable"] = executable };
+			entrypoints[rid] = new JsonObject
+			{
+				["executable"] = $"runtimes/{rid}/{request.ProjectName}.dll",
+				["runtime"] = new JsonObject
+				{
+					["kind"] = "FrameworkDependent",
+					["dotnetVersion"] = PluginScaffoldDefaults.DotnetVersion
+				}
+			};
 		}
 
 		return entrypoints;

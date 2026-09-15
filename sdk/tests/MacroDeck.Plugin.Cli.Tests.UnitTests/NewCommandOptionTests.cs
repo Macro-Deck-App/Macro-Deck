@@ -67,16 +67,13 @@ public class NewCommandOptionTests
 			var keys = entrypoints.EnumerateObject().Select(p => p.Name).ToList();
 			Assert.That(keys, Is.EquivalentTo(new List<string> { "win-x64", "osx-arm64", "linux-x64" }));
 
-			Assert.That(entrypoints.GetProperty("win-x64").GetProperty("executable").GetString(),
-				Is.EqualTo("runtimes/win-x64/SpotifyController.exe"));
-			Assert.That(entrypoints.GetProperty("osx-arm64").GetProperty("executable").GetString(),
-				Is.EqualTo("runtimes/osx-arm64/SpotifyController"));
-			Assert.That(entrypoints.GetProperty("linux-x64").GetProperty("executable").GetString(),
-				Is.EqualTo("runtimes/linux-x64/SpotifyController"));
-
 			foreach (var property in entrypoints.EnumerateObject())
 			{
-				Assert.That(property.Value.TryGetProperty("runtime", out _), Is.False);
+				Assert.That(property.Value.GetProperty("executable").GetString(),
+					Is.EqualTo($"runtimes/{property.Name}/SpotifyController.dll"));
+				var runtime = property.Value.GetProperty("runtime");
+				Assert.That(runtime.GetProperty("kind").GetString(), Is.EqualTo("FrameworkDependent"));
+				Assert.That(runtime.GetProperty("dotnetVersion").GetString(), Is.EqualTo("10.0"));
 			}
 		});
 	}
@@ -261,7 +258,7 @@ public class NewCommandOptionTests
 			using var manifest = ReadManifest(_output);
 			Assert.That(manifest.RootElement.GetProperty("entrypoints").GetProperty("win-x64")
 					.GetProperty("executable").GetString(),
-				Is.EqualTo("runtimes/win-x64/SpotifyCtl.exe"));
+				Is.EqualTo("runtimes/win-x64/SpotifyCtl.dll"));
 		});
 	}
 

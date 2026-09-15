@@ -134,9 +134,18 @@ SpotifyController/
   "version": "1.0.0",
   "description": "A Macro Deck plugin.",
   "entrypoints": {
-    "win-x64": { "executable": "runtimes/win-x64/SpotifyController.exe" },
-    "osx-arm64": { "executable": "runtimes/osx-arm64/SpotifyController" },
-    "linux-x64": { "executable": "runtimes/linux-x64/SpotifyController" }
+    "win-x64": {
+      "executable": "runtimes/win-x64/SpotifyController.dll",
+      "runtime": { "kind": "FrameworkDependent", "dotnetVersion": "10.0" }
+    },
+    "osx-arm64": {
+      "executable": "runtimes/osx-arm64/SpotifyController.dll",
+      "runtime": { "kind": "FrameworkDependent", "dotnetVersion": "10.0" }
+    },
+    "linux-x64": {
+      "executable": "runtimes/linux-x64/SpotifyController.dll",
+      "runtime": { "kind": "FrameworkDependent", "dotnetVersion": "10.0" }
+    }
   },
   "publisher": { "name": "Example Publisher" },
   "license": "MIT",
@@ -151,8 +160,11 @@ SpotifyController/
 - `version` always starts at `1.0.0`.
 - `compatibility.macroDeck` is `>=3.0.0-0`, so the plugin installs on 3.0.0 prerelease hosts as well as
   3.0.0 and later. See the [version range grammar](/reference/manifest/#version-range-grammar).
-- Entrypoints use the `runtimes/<rid>/` layout, which keeps identically named macOS and Linux executables
-  apart in one multi-platform package.
+- Entrypoints use the `runtimes/<rid>/` layout, which keeps each platform's native assets apart in one
+  multi-platform package.
+- Entrypoints are framework-dependent `.dll`s on .NET 10: Macro Deck runs them on the .NET runtime it
+  ships, so the package carries no runtime of its own. See
+  [Runtime](/reference/manifest/#runtime) for when to switch to self-contained.
 
 ### macrodeck-build.json
 
@@ -165,8 +177,8 @@ The build recipe `build` reads. The manifest describes what a plugin is; this fi
     "win-x64": {
       "executable": "dotnet",
       "arguments": ["publish", "SpotifyController.csproj", "-c", "Release",
-                    "-r", "win-x64", "--self-contained", "true",
-                    "-o", "bin/publish/win-x64"],
+                    "-r", "win-x64", "--self-contained", "false",
+                    "-p:UseAppHost=false", "-o", "bin/publish/win-x64"],
       "output": "bin/publish/win-x64"
     }
   }
@@ -179,8 +191,12 @@ The build recipe `build` reads. The manifest describes what a plugin is; this fi
   package - see [`build`](/cli/build/#staging-layout).
 - `output`, `workingDirectory` and `include` must stay inside the project directory.
 - Nothing here is .NET-specific: any toolchain can be described the same way.
-- Generated targets publish **self-contained** Release builds. An entrypoint with no `runtime` block must
-  not be a `.dll`.
+- Generated targets publish **framework-dependent** Release builds, one per runtime identifier so each
+  carries only that platform's native assets. For the generated plugin that is well under 1 MB
+  compressed per platform, against about 43 MB self-contained.
+- To publish self-contained instead, set `--self-contained true`, drop `-p:UseAppHost=false`, and point
+  the entrypoint at the native executable with no `runtime` block: an entrypoint without one must not
+  be a `.dll`.
 
 ## Exit codes
 

@@ -25,7 +25,7 @@ MyPlugin/
 ├── NuGet.config                 nuget.org plus an empty local-feed/
 ├── src/MyPlugin/
 │   ├── manifest.json
-│   ├── macrodeck-build.json     one self-contained publish per platform
+│   ├── macrodeck-build.json     one framework-dependent publish per platform
 │   ├── MyPlugin.csproj
 │   ├── Program.cs               CreatePlugin, logging, localization, one integration
 │   ├── PluginIntegration.cs     IPluginIntegration with one action

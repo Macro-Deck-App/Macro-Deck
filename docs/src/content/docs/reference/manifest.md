@@ -128,6 +128,37 @@ The `runtimes/<rid>/` layout that `build` and `pack` expect is described once, i
 shared rule (`entrypoint-layout-invalid`). `build` treats the entrypoint keys as the list of platforms to
 build (or one with `--rid`) and fails when a declared entrypoint is missing from the output.
 
+### Runtime
+
+**Prefer `FrameworkDependent` with `dotnetVersion` `"10.0"`** for a .NET plugin; it is what
+[`new`](/cli/new/#macrodeck-buildjson) generates. Packaged Macro Deck ships a .NET runtime
+(`Microsoft.NETCore.App` and `Microsoft.AspNetCore.App` 10.0, the patch its own release was built and
+tested on) and runs the host itself on it, so a framework-dependent plugin carries no runtime: about
+0.7 MB compressed per platform for the template plugin, against about 43 MB self-contained.
+
+The host launches a framework-dependent entrypoint with `dotnet <executable>` and picks the runtime as
+follows:
+
+1. The bundled runtime, when it has every framework the plugin's `<Name>.runtimeconfig.json` (beside the
+   `.dll`) asks for, under that file's roll-forward policy. Without a readable runtimeconfig the
+   requirement is `Microsoft.NETCore.App` at `dotnetVersion`.
+2. Otherwise a system-installed `dotnet` that has them, for example for `Microsoft.WindowsDesktop.App` or
+   another .NET major. Installed runtimes are read once per host process; restart Macro Deck after
+   installing one.
+3. A system `dotnet` whose runtimes could not be listed is launched anyway; when nothing satisfies the
+   requirement the plugin stays stopped (see
+   [troubleshooting](/guides/troubleshooting/#a-framework-dependent-plugin-reports-a-missing-runtime)).
+
+Later Macro Deck releases add a new .NET major beside the existing one instead of replacing it, and do
+not roll a plugin forward onto a major it did not ask for.
+
+**Stay self-contained** (omit `runtime`) when the plugin needs a runtime Macro Deck does not ship, pins a
+specific runtime patch, or is not .NET at all. Self-contained entrypoints are launched directly.
+
+An `osx-x64` framework-dependent entrypoint that an `osx-arm64` host falls back to (see
+[below](#runtime-identifier-resolution)) runs on the bundled arm64 runtime: managed code works, x64-only
+native libraries do not load. Declare `osx-arm64` for a framework-dependent plugin.
+
 ### Runtime identifier resolution
 
 | Host RID | Uses |
