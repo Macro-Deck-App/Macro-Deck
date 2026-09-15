@@ -26,7 +26,7 @@ What `macrodeck-plugin new` generates:
   },
   "publisher": { "name": "Example Publisher" },
   "license": "MIT",
-  "compatibility": { "macroDeck": ">=3.0.0" },
+  "compatibility": { "macroDeck": ">=3.0.0-0" },
   "repository": "https://github.com/example/hue-lights",
   "homepage": "https://example.com/hue-lights"
 }
@@ -281,7 +281,7 @@ see [signature](#signature), [Publishing to the Store](/guides/publishing/) and
 "compatibility": {
   "sdk": ">=1.0.0,<2.0.0",
   "protocol": { "minimum": 1, "maximum": 1 },
-  "macroDeck": ">=3.0.0"
+  "macroDeck": ">=3.0.0-0"
 }
 ```
 
@@ -308,6 +308,9 @@ Used by `compatibility.sdk`, `compatibility.macroDeck` and every `versionRange`:
 
 - Comparators: `=`, `>`, `>=`, `<`, `<=`. **No caret, tilde, `||` or wildcard.**
 - Plain SemVer 2.0 precedence: `>=1.0.0` is not satisfied by `1.0.0-beta.1`.
+- To accept prereleases of the lower bound, end it with `-0`, the lowest prerelease of any version:
+  `>=3.0.0-0` is satisfied by `3.0.0-beta.1`, `3.0.0-rc.1`, `3.0.0` and everything after. This is what
+  [`macrodeck-plugin new`](/cli/new/) writes for `compatibility.macroDeck`.
 - Whitespace around comparators and commas is trimmed: `">= 1.0.0, < 2.0.0"` is accepted.
 
 ## Dependencies

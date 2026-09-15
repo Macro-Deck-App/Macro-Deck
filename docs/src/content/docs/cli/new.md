@@ -149,6 +149,7 @@ SpotifyController/
   },
   "publisher": { "name": "Example Publisher" },
   "license": "MIT",
+  "compatibility": { "macroDeck": ">=3.0.0-0" },
   "repository": "https://github.com/example/spotify-controller"
 }
 ```
@@ -157,6 +158,8 @@ SpotifyController/
   the exception: `MIT` is a deliberate default.
 - `publisher` carries only `name`; set its `id`, `email` and `url` by hand.
 - `version` always starts at `1.0.0`.
+- `compatibility.macroDeck` is `>=3.0.0-0`, so the plugin installs on 3.0.0 prerelease hosts as well as
+  3.0.0 and later. See the [version range grammar](/reference/manifest/#version-range-grammar).
 - Entrypoints use the `runtimes/<rid>/` layout, which keeps each platform's native assets apart in one
   multi-platform package.
 - Entrypoints are framework-dependent `.dll`s on .NET 10: Macro Deck runs them on the .NET runtime it
