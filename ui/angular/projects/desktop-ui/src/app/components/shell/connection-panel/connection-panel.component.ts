@@ -13,7 +13,7 @@ import {
 import { toDataURL } from 'qrcode';
 
 import { AppStrings, ConnectionEndpoint, GetConnectionInfoResponse, PairingCodeResponse } from '@macro-deck/runtime';
-import { ApiService, LocalizationService, TranslatePipe, LocalizationKey } from '@shared';
+import { ApiService, LocalizationService, SidePanelComponent, TranslatePipe, LocalizationKey } from '@shared';
 import { ExternalLinkService } from '../../../services/external-link.service';
 
 interface AddressGroup {
@@ -26,7 +26,7 @@ const PAIRING_POLL_SECONDS = 5;
 @Component({
   selector: 'app-connection-panel',
   standalone: true,
-  imports: [TranslatePipe],
+  imports: [SidePanelComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './connection-panel.component.html',
   styleUrls: ['./connection-panel.component.scss'],

@@ -1,0 +1,121 @@
+@use '../../../../../styles/index' as ds;
+
+:host {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.sp-scrim {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-scrim);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-slow);
+}
+
+.sp-scrim-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+// Slides by its inset, never a transform: a transform becomes the containing block of fixed-position
+// modals rendered inline in the content and traps them.
+.sp-panel {
+  --sp-offset: calc(-1 * var(--side-panel-width, 20rem));
+
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: var(--sp-offset);
+  width: var(--side-panel-width, 20rem);
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-secondary);
+  border-inline-end: 1px solid var(--color-border);
+  pointer-events: auto;
+  visibility: hidden;
+  transition:
+    inset-inline-start var(--transition-slow),
+    inset-inline-end var(--transition-slow),
+    visibility 0s var(--transition-slow);
+}
+
+.sp-panel-end {
+  inset-inline-start: auto;
+  inset-inline-end: var(--sp-offset);
+  border-inline-end: none;
+  border-inline-start: 1px solid var(--color-border);
+}
+
+.sp-panel-open {
+  --sp-offset: 0px;
+
+  visibility: visible;
+  box-shadow: var(--shadow-lg);
+  transition:
+    inset-inline-start var(--transition-slow),
+    inset-inline-end var(--transition-slow),
+    visibility 0s;
+}
+
+.sp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  padding: var(--space-3) var(--space-3) var(--space-2);
+}
+
+.sp-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.sp-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.sp-close {
+  @include ds.flex-center;
+
+  width: var(--control-height-compact);
+  height: var(--control-height-compact);
+  border: none;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+
+  &:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+}
+
+.sp-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+// None rather than a zero duration: the closed state delays visibility until the slide has finished,
+// and zeroing only the duration would leave that delay behind.
+@media (prefers-reduced-motion: reduce) {
+  .sp-panel,
+  .sp-panel-open,
+  .sp-scrim {
+    transition: none;
+  }
+}
