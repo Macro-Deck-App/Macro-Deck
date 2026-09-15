@@ -10721,6 +10721,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Widgets.Actions.SetIconDisplayName" xml:space="preserve">
     <value>Ustaw wyświetlanie ikony</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorDescription" xml:space="preserve">
+    <value>Zmienia kolor, w jakim rysowana jest ikona widżetu.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorName" xml:space="preserve">
+    <value>Ustaw kolor ikony</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetIconName" xml:space="preserve">
     <value>Ustaw ikonę</value>
   </data>

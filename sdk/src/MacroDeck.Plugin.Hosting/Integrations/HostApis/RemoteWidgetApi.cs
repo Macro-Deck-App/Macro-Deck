@@ -75,6 +75,7 @@ internal sealed class RemoteWidgetApi(
 			IconOffsetX = patch.IconOffsetX,
 			IconOffsetY = patch.IconOffsetY,
 			IconOpacity = patch.IconOpacity,
+			IconColor = patch.IconColor,
 			FontFaceId = patch.FontFaceId,
 			FontSize = patch.FontSize,
 			TextAlign = patch.TextAlign,

@@ -10721,6 +10721,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Widgets.Actions.SetIconDisplayName" xml:space="preserve">
     <value>Définir l'affichage de l'icône</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorDescription" xml:space="preserve">
+    <value>Change la couleur dans laquelle l'icône d'un widget est dessinée.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorName" xml:space="preserve">
+    <value>Définir la couleur de l'icône</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetIconName" xml:space="preserve">
     <value>Définir l'icône</value>
   </data>

@@ -10719,6 +10719,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Widgets.Actions.SetIconDisplayName" xml:space="preserve">
     <value>Symbolanzeige festlegen</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorDescription" xml:space="preserve">
+    <value>Ändert die Farbe, in der das Symbol eines Widgets gezeichnet wird.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorName" xml:space="preserve">
+    <value>Symbolfarbe festlegen</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetIconName" xml:space="preserve">
     <value>Symbol festlegen</value>
   </data>

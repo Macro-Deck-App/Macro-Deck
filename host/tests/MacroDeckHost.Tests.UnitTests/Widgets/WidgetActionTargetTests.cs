@@ -271,7 +271,46 @@ public class WidgetActionTargetTests
 		Assert.That(color.SupportsReset, Is.True);
 	}
 
+	[Test]
+	public async Task RealColor_OnSetIconColor_SetsTheIconColor()
+	{
+		await Execute("set-icon-color",
+			new Dictionary<string, object>
+			{
+				["widget"] = _selfWidget,
+				["color"] = "#ef4444"
+			},
+			ownerWidgetId: _selfWidget);
+
+		var request = _widgets.Applied.Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(request.Patch.IconColor, Is.EqualTo("#ef4444"));
+			Assert.That(request.ClearProperties, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task ResetSentinel_OnSetIconColor_ClearsTheIconColor()
+	{
+		await Execute("set-icon-color",
+			new Dictionary<string, object>
+			{
+				["widget"] = _selfWidget,
+				["color"] = WidgetAppearanceValues.Reset
+			},
+			ownerWidgetId: _selfWidget);
+
+		var request = _widgets.Applied.Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(request.Patch.IsEmpty, Is.True);
+			Assert.That(request.ClearProperties, Is.EqualTo(new[] { WidgetAppearanceProperty.IconColor }));
+		});
+	}
+
 	[TestCase("set-label-color")]
+	[TestCase("set-icon-color")]
 	[TestCase("set-border")]
 	public void OtherWidgetColorParameters_SupportReset(string actionId)
 	{

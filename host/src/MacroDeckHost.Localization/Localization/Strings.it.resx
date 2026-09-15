@@ -10721,6 +10721,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Widgets.Actions.SetIconDisplayName" xml:space="preserve">
     <value>Imposta visualizzazione icona</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorDescription" xml:space="preserve">
+    <value>Cambia il colore con cui viene disegnata l'icona di un widget.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorName" xml:space="preserve">
+    <value>Imposta colore dell'icona</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetIconName" xml:space="preserve">
     <value>Imposta icona</value>
   </data>

@@ -110,6 +110,7 @@ internal static class WidgetStateWireCompatibility
 			IconOffsetX = dto.IconOffsetX,
 			IconOffsetY = dto.IconOffsetY,
 			IconOpacity = dto.IconOpacity,
+			IconColor = dto.IconColor,
 			FontFaceId = dto.FontFaceId,
 			FontSize = dto.FontSize,
 			TextAlign = dto.TextAlign,

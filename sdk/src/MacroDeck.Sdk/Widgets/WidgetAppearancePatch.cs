@@ -40,6 +40,13 @@ public sealed record WidgetAppearancePatch
 	public double? IconOpacity { get; init; }
 
 	/// <summary>
+	/// The colour an action button draws its icon in, as <c>#rrggbb</c>: every pixel of the icon takes
+	/// the colour and keeps its own transparency. An empty string returns the icon to its own colours.
+	/// Artwork from an icon provider is never tinted. A host that predates this property ignores it.
+	/// </summary>
+	public string? IconColor { get; init; }
+
+	/// <summary>
 	/// Stable id of the label's font face, in the host's face-catalog id format. A style that does not
 	/// exist for the chosen family is simply not offered - this never carries a family name alone, so
 	/// there is nothing here that could silently resolve to the wrong weight or style.
@@ -69,6 +76,7 @@ public sealed record WidgetAppearancePatch
 		IconOffsetX is null &&
 		IconOffsetY is null &&
 		IconOpacity is null &&
+		IconColor is null &&
 		FontFaceId is null &&
 		FontSize is null &&
 		TextAlign is null &&

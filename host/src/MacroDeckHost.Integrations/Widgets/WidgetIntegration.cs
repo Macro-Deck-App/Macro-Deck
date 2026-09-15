@@ -50,6 +50,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			SetLabelColor(),
 			SetIcon(),
 			SetIconDisplay(),
+			SetIconColor(),
 			SetFont(),
 			SetBorder(),
 			new SetButtonStateActionDefinition(() => _widgets),
@@ -127,6 +128,26 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			},
 			context => WidgetActionParameters.IsReset(context, "color")
 				? [WidgetAppearanceProperty.LabelColor]
+				: []);
+
+	private WidgetAppearanceActionDefinition SetIconColor()
+		=> new("set-icon-color",
+			AppStrings.Integrations.Widgets.Actions.SetIconColorName(),
+			AppStrings.Integrations.Widgets.Actions.SetIconColorDescription(),
+			[
+				ActionParameter.Color("color",
+					label: AppStrings.Integrations.Widgets.Actions.ColorLabel(),
+					supportsReset: true)
+			],
+			() => _widgets,
+			context => new WidgetAppearancePatch
+			{
+				IconColor = WidgetActionParameters.IsReset(context, "color")
+					? null
+					: WidgetActionParameters.ReadOptional(context, "color")
+			},
+			context => WidgetActionParameters.IsReset(context, "color")
+				? [WidgetAppearanceProperty.IconColor]
 				: []);
 
 	private WidgetAppearanceActionDefinition SetIcon()
