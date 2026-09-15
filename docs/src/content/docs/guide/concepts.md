@@ -41,6 +41,9 @@ What a widget does, and when. The **Scenes** button runs **Change Folder to** on
 | Short Press | Switch OBS scene |
 | Long Press | Start the stream |
 | Double Tap | Mute all audio |
+| Event | Turn the mic slider's accent red when OBS reports **Streaming Started** |
+
+Every widget with actions, sliders included, can add event triggers next to its press triggers.
 
 Actions run top to bottom. **If / Else**, **Repeat** and **Wait** build longer flows, for example:
 *mute the mic, wait 3 seconds, switch the scene*. **Run** tries them out right away.
@@ -74,8 +77,8 @@ input or one specific device.
 ## Scripts and automations
 
 - **Script:** actions you reuse, for example *Go live* used by three buttons.
-- **Automation:** actions that run on an event instead of a press. **Evening stream** switches the
-  deck to the **Streaming** profile every day at 18:00:
+- **Automation:** actions that run on an event without belonging to a widget. **Evening stream**
+  switches the deck to the **Streaming** profile every day at 18:00:
 
 ![The automation Evening stream: the event Schedule - Daily At 18:00 runs Change Profile to Streaming](../../../assets/guide/automation.png)
 

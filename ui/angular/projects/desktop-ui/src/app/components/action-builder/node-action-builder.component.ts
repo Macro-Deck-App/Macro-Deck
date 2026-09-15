@@ -28,7 +28,6 @@ import { TOGGLE_TRIGGER_TYPE, fixedTriggerTabsFor } from './default-action-defs'
       [previewScopeStates]="previewScopeStates()"
       [showToggleTriggers]="showToggleTriggers()"
       [triggerTabs]="fixedTriggerTabs()"
-      [allowEventTriggers]="!fixedTriggerTabs()"
       [alwaysShowTabRow]="!!fixedTriggerTabs()"
       [allowRun]="canRun()"
       [unsavedChanges]="unsavedChanges()"

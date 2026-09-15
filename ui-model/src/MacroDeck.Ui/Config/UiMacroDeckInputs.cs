@@ -25,7 +25,9 @@ namespace MacroDeck.Ui.Config;
 public sealed record UiActionsListEditor : UiInput<JsonElement>
 {
 	/// <summary>Which trigger tabs the editor offers. Absent lets the renderer decide from the surface,
-	/// which is what a widget wants.</summary>
+	/// which is what a widget wants. Event triggers are offered alongside these tabs either way; the host
+	/// runs a widget's event flows only when the editor is bound to the top-level <c>flows</c> key of its
+	/// stored configuration.</summary>
 	public UiValue<IReadOnlyList<string>> Triggers { get; init; }
 
 	/// <summary>Whether the flows may be run from the editor. A widget's own actions can be; a template

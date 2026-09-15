@@ -251,7 +251,7 @@ public class SliderWidgetConfigTests
 	}
 
 	[Test]
-	public void The_editor_offers_an_actions_list_limited_to_the_double_tap_trigger()
+	public void The_editor_offers_double_tap_as_its_only_trigger_tab()
 	{
 		var host = Render(_stored, Registry());
 
@@ -339,6 +339,34 @@ public class SliderWidgetConfigTests
 			events.EnumerateArray().Any(name => name.GetString() == UiComponentEvents.DoublePress);
 
 		Assert.That(declared, Is.EqualTo(expected));
+	}
+
+	[Test]
+	public void A_stored_event_trigger_flow_reaches_the_editor_unchanged()
+	{
+		const string eventFlow =
+			"""{"triggerId":"evt1","triggerType":"onEvent","event":{"providerId":"macro-deck","eventId":"variable-changed"},"children":[{"type":"action"}]}""";
+		var host = Render(new { flows = $"[{eventFlow}]" }, Registry());
+
+		var value = host.SingleByType(UiConfigPrimitives.ActionsListEditor).Property(UiConfigProperties.Value);
+		var flow = value!.Value.EnumerateArray().Single();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(flow.GetProperty("triggerType").GetString(), Is.EqualTo(WidgetTriggerTypes.Event));
+			Assert.That(flow.GetProperty("event").GetProperty("eventId").GetString(), Is.EqualTo("variable-changed"));
+		});
+	}
+
+	[Test]
+	public void An_event_trigger_flow_alone_does_not_make_the_slider_wait_for_a_double_tap()
+	{
+		var data = JsonSerializer.SerializeToElement(new
+		{
+			flows = """[{"triggerId":"evt1","triggerType":"onEvent","event":{"providerId":"macro-deck","eventId":"variable-changed"},"children":[{"type":"action"}]}]""",
+		});
+
+		Assert.That(SliderWidgetData.Parse(data).HasDoublePressFlow, Is.False);
 	}
 
 	[TestCase("""[{"triggerType":"onDoublePress","children":[{"type":"action"}]}]""", true)]
