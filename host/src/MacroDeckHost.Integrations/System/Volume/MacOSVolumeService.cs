@@ -9,15 +9,22 @@ namespace MacroDeckHost.Integrations.System.Volume;
 internal sealed class MacOsVolumeService : IVolumeService
 {
 	private const string CoreAudioLibrary = "/System/Library/Frameworks/CoreAudio.framework/CoreAudio";
+	private const string CoreFoundationLibrary = "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation";
 
 	private const uint SystemObject = 1;
 	private const uint UnknownDevice = 0;
 
 	private const uint DefaultOutputDeviceSelector = 0x644F7574; // 'dOut'
+	private const uint DefaultInputDeviceSelector = 0x64496E20; // 'dIn '
+	private const uint DevicesSelector = 0x64657623; // 'dev#'
+	private const uint DeviceUidSelector = 0x75696420; // 'uid '
+	private const uint NameSelector = 0x6C6E616D; // 'lnam'
+	private const uint StreamsSelector = 0x73746D23; // 'stm#'
 	private const uint VolumeScalarSelector = 0x766F6C6D; // 'volm'
 	private const uint MuteSelector = 0x6D757465; // 'mute'
 	private const uint GlobalScope = 0x676C6F62; // 'glob'
 	private const uint OutputScope = 0x6F757470; // 'outp'
+	private const uint InputScope = 0x696E7074; // 'inpt'
 
 	private const uint MainElement = 0;
 
@@ -76,23 +83,21 @@ internal sealed class MacOsVolumeService : IVolumeService
 		}
 	}
 
-	public Task<float?> GetVolumeAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(ReadVolume());
+	public Task<IReadOnlyList<AudioDevice>> GetDevicesAsync(CancellationToken cancellationToken = default)
+		=> Task.FromResult<IReadOnlyList<AudioDevice>>(ListDevices());
 
-	public Task SetVolumeAsync(float level, CancellationToken cancellationToken = default)
-	{
-		WriteVolume(Math.Clamp(level, 0f, 1f));
-		return Task.CompletedTask;
-	}
+	public Task<float?> GetVolumeAsync(AudioTarget target, CancellationToken cancellationToken = default)
+		=> Task.FromResult(Resolve(target) is { } device ? ReadVolume(device, Scope(target.Flow)) : null);
 
-	public Task<bool?> GetMuteAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(ReadMute());
+	public Task<bool> SetVolumeAsync(AudioTarget target, float level, CancellationToken cancellationToken = default)
+		=> Task.FromResult(Resolve(target) is { } device &&
+			WriteVolume(device, Scope(target.Flow), Math.Clamp(level, 0f, 1f)));
 
-	public Task SetMuteAsync(bool mute, CancellationToken cancellationToken = default)
-	{
-		_ = TryWriteMute(mute);
-		return Task.CompletedTask;
-	}
+	public Task<bool?> GetMuteAsync(AudioTarget target, CancellationToken cancellationToken = default)
+		=> Task.FromResult(Resolve(target) is { } device ? ReadMute(device, Scope(target.Flow)) : null);
+
+	public Task<bool> SetMuteAsync(AudioTarget target, bool mute, CancellationToken cancellationToken = default)
+		=> Task.FromResult(Resolve(target) is { } device && TryWriteMute(device, Scope(target.Flow), mute));
 
 	private void Arm()
 	{
@@ -102,7 +107,7 @@ internal sealed class MacOsVolumeService : IVolumeService
 
 		var address = new AudioObjectPropertyAddress(DefaultOutputDeviceSelector, GlobalScope, MainElement);
 		_ = AudioObjectAddPropertyListener(SystemObject, ref address, _listenerPointer, _token);
-		ListenTo(ReadDefaultOutputDevice() ?? UnknownDevice);
+		ListenTo(ReadDefaultDevice(AudioFlow.Output) ?? UnknownDevice);
 	}
 
 	private void Disarm()
@@ -121,7 +126,7 @@ internal sealed class MacOsVolumeService : IVolumeService
 		{
 			if (_armed)
 			{
-				ListenTo(ReadDefaultOutputDevice() ?? UnknownDevice);
+				ListenTo(ReadDefaultDevice(AudioFlow.Output) ?? UnknownDevice);
 			}
 		}
 	}
@@ -179,14 +184,101 @@ internal sealed class MacOsVolumeService : IVolumeService
 		return 0;
 	}
 
-	private static float? ReadVolume()
+	private static List<AudioDevice> ListDevices()
 	{
-		if (ReadDefaultOutputDevice() is not { } device)
+		var defaultOutput = ReadDefaultDevice(AudioFlow.Output);
+		var defaultInput = ReadDefaultDevice(AudioFlow.Input);
+		var devices = new List<AudioDevice>();
+
+		foreach (var device in ReadDeviceIds())
+		{
+			if (ReadString(device, DeviceUidSelector) is not { Length: > 0 } uid)
+			{
+				continue;
+			}
+
+			var name = ReadString(device, NameSelector) ?? uid;
+			if (HasStreams(device, OutputScope))
+			{
+				devices.Add(new AudioDevice(uid, name, AudioFlow.Output, device == defaultOutput));
+			}
+
+			if (HasStreams(device, InputScope))
+			{
+				devices.Add(new AudioDevice(uid, name, AudioFlow.Input, device == defaultInput));
+			}
+		}
+
+		return devices;
+	}
+
+	private static uint? Resolve(AudioTarget target)
+	{
+		if (target.DeviceId is null)
+		{
+			return ReadDefaultDevice(target.Flow);
+		}
+
+		var scope = Scope(target.Flow);
+		foreach (var device in ReadDeviceIds())
+		{
+			if (HasStreams(device, scope) && ReadString(device, DeviceUidSelector) == target.DeviceId)
+			{
+				return device;
+			}
+		}
+
+		return null;
+	}
+
+	private static uint Scope(AudioFlow flow) => flow == AudioFlow.Output ? OutputScope : InputScope;
+
+	private static uint[] ReadDeviceIds()
+	{
+		var address = new AudioObjectPropertyAddress(DevicesSelector, GlobalScope, MainElement);
+		if (AudioObjectGetPropertyDataSize(SystemObject, ref address, 0, IntPtr.Zero, out var size) != 0 || size == 0)
+		{
+			return [];
+		}
+
+		var ids = new uint[size / sizeof(uint)];
+		return AudioObjectGetPropertyData(SystemObject, ref address, 0, IntPtr.Zero, ref size, ids) == 0
+			? ids[..(int)(size / sizeof(uint))]
+			: [];
+	}
+
+	private static bool HasStreams(uint device, uint scope)
+	{
+		var address = new AudioObjectPropertyAddress(StreamsSelector, scope, MainElement);
+		return AudioObjectGetPropertyDataSize(device, ref address, 0, IntPtr.Zero, out var size) == 0 && size > 0;
+	}
+
+	private static string? ReadString(uint device, uint selector)
+	{
+		var address = new AudioObjectPropertyAddress(selector, GlobalScope, MainElement);
+		var size = (uint)IntPtr.Size;
+		if (AudioObjectGetPropertyData(device, ref address, 0, IntPtr.Zero, ref size, out IntPtr text) != 0 ||
+			text == IntPtr.Zero)
 		{
 			return null;
 		}
 
-		if (TryReadFloat(device, VolumeScalarSelector, MainElement, out var main))
+		try
+		{
+			var length = CFStringGetLength(text);
+			var buffer = new char[length];
+			CFStringGetCharacters(text, new CFRange(0, length), buffer);
+			return new string(buffer);
+		}
+		finally
+		{
+			CFRelease(text);
+		}
+	}
+
+	private static float? ReadVolume(uint device, uint scope)
+	{
+		if (TryReadFloat(device, scope, MainElement, out var main))
 		{
 			return Math.Clamp(main, 0f, 1f);
 		}
@@ -195,7 +287,7 @@ internal sealed class MacOsVolumeService : IVolumeService
 		var channels = 0;
 		foreach (var element in _stereoElements)
 		{
-			if (TryReadFloat(device, VolumeScalarSelector, element, out var channel))
+			if (TryReadFloat(device, scope, element, out var channel))
 			{
 				sum += channel;
 				channels++;
@@ -205,32 +297,25 @@ internal sealed class MacOsVolumeService : IVolumeService
 		return channels == 0 ? null : Math.Clamp(sum / channels, 0f, 1f);
 	}
 
-	private static void WriteVolume(float level)
+	private static bool WriteVolume(uint device, uint scope, float level)
 	{
-		if (ReadDefaultOutputDevice() is not { } device)
+		if (TryWriteFloat(device, scope, MainElement, level))
 		{
-			return;
+			return true;
 		}
 
-		if (TryWriteFloat(device, VolumeScalarSelector, MainElement, level))
-		{
-			return;
-		}
-
+		var written = false;
 		foreach (var element in _stereoElements)
 		{
-			_ = TryWriteFloat(device, VolumeScalarSelector, element, level);
+			written |= TryWriteFloat(device, scope, element, level);
 		}
+
+		return written;
 	}
 
-	private static bool? ReadMute()
+	private static bool? ReadMute(uint device, uint scope)
 	{
-		if (ReadDefaultOutputDevice() is not { } device)
-		{
-			return null;
-		}
-
-		var address = new AudioObjectPropertyAddress(MuteSelector, OutputScope, MainElement);
+		var address = new AudioObjectPropertyAddress(MuteSelector, scope, MainElement);
 		if (!HasProperty(device, ref address))
 		{
 			return null;
@@ -242,14 +327,9 @@ internal sealed class MacOsVolumeService : IVolumeService
 			: null;
 	}
 
-	private static bool TryWriteMute(bool mute)
+	private static bool TryWriteMute(uint device, uint scope, bool mute)
 	{
-		if (ReadDefaultOutputDevice() is not { } device)
-		{
-			return false;
-		}
-
-		var address = new AudioObjectPropertyAddress(MuteSelector, OutputScope, MainElement);
+		var address = new AudioObjectPropertyAddress(MuteSelector, scope, MainElement);
 		if (!IsSettable(device, ref address))
 		{
 			return false;
@@ -259,18 +339,19 @@ internal sealed class MacOsVolumeService : IVolumeService
 		return AudioObjectSetPropertyData(device, ref address, 0, IntPtr.Zero, (uint)sizeof(uint), ref value) == 0;
 	}
 
-	private static uint? ReadDefaultOutputDevice()
+	private static uint? ReadDefaultDevice(AudioFlow flow)
 	{
-		var address = new AudioObjectPropertyAddress(DefaultOutputDeviceSelector, GlobalScope, MainElement);
+		var selector = flow == AudioFlow.Output ? DefaultOutputDeviceSelector : DefaultInputDeviceSelector;
+		var address = new AudioObjectPropertyAddress(selector, GlobalScope, MainElement);
 		var size = (uint)sizeof(uint);
 		var status = AudioObjectGetPropertyData(SystemObject, ref address, 0, IntPtr.Zero, ref size, out uint device);
 		return status == 0 && device != UnknownDevice ? device : null;
 	}
 
-	private static bool TryReadFloat(uint device, uint selector, uint element, out float value)
+	private static bool TryReadFloat(uint device, uint scope, uint element, out float value)
 	{
 		value = 0f;
-		var address = new AudioObjectPropertyAddress(selector, OutputScope, element);
+		var address = new AudioObjectPropertyAddress(VolumeScalarSelector, scope, element);
 		if (!HasProperty(device, ref address))
 		{
 			return false;
@@ -280,9 +361,9 @@ internal sealed class MacOsVolumeService : IVolumeService
 		return AudioObjectGetPropertyData(device, ref address, 0, IntPtr.Zero, ref size, out value) == 0;
 	}
 
-	private static bool TryWriteFloat(uint device, uint selector, uint element, float value)
+	private static bool TryWriteFloat(uint device, uint scope, uint element, float value)
 	{
-		var address = new AudioObjectPropertyAddress(selector, OutputScope, element);
+		var address = new AudioObjectPropertyAddress(VolumeScalarSelector, scope, element);
 		if (!IsSettable(device, ref address))
 		{
 			return false;
@@ -317,6 +398,14 @@ internal sealed class MacOsVolumeService : IVolumeService
 		IntPtr clientData);
 
 	[DllImport(CoreAudioLibrary)]
+	private static extern int AudioObjectGetPropertyDataSize(
+		uint objectId,
+		ref AudioObjectPropertyAddress address,
+		uint qualifierDataSize,
+		IntPtr qualifierData,
+		out uint dataSize);
+
+	[DllImport(CoreAudioLibrary)]
 	private static extern int AudioObjectGetPropertyData(
 		uint objectId,
 		ref AudioObjectPropertyAddress address,
@@ -333,6 +422,24 @@ internal sealed class MacOsVolumeService : IVolumeService
 		IntPtr qualifierData,
 		ref uint dataSize,
 		out float data);
+
+	[DllImport(CoreAudioLibrary)]
+	private static extern int AudioObjectGetPropertyData(
+		uint objectId,
+		ref AudioObjectPropertyAddress address,
+		uint qualifierDataSize,
+		IntPtr qualifierData,
+		ref uint dataSize,
+		out IntPtr data);
+
+	[DllImport(CoreAudioLibrary)]
+	private static extern int AudioObjectGetPropertyData(
+		uint objectId,
+		ref AudioObjectPropertyAddress address,
+		uint qualifierDataSize,
+		IntPtr qualifierData,
+		ref uint dataSize,
+		[Out] uint[] data);
 
 	[DllImport(CoreAudioLibrary)]
 	private static extern int AudioObjectSetPropertyData(
@@ -360,6 +467,28 @@ internal sealed class MacOsVolumeService : IVolumeService
 		uint objectId,
 		ref AudioObjectPropertyAddress address,
 		out byte settable);
+
+	[DllImport(CoreFoundationLibrary)]
+	private static extern nint CFStringGetLength(IntPtr text);
+
+	[DllImport(CoreFoundationLibrary, CharSet = CharSet.Unicode)]
+	private static extern void CFStringGetCharacters(IntPtr text, CFRange range, [Out] char[] buffer);
+
+	[DllImport(CoreFoundationLibrary)]
+	private static extern void CFRelease(IntPtr value);
+
+	[StructLayout(LayoutKind.Sequential)]
+	private readonly struct CFRange
+	{
+		public readonly nint Location;
+		public readonly nint Length;
+
+		public CFRange(nint location, nint length)
+		{
+			Location = location;
+			Length = length;
+		}
+	}
 
 	[StructLayout(LayoutKind.Sequential)]
 	private struct AudioObjectPropertyAddress

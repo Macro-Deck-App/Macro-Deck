@@ -8345,7 +8345,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Studiomodus aktiv</value>
   </data>
   <data name="Integrations.System.Actions.DecreaseVolume.Description" xml:space="preserve">
-    <value>Verringert die Systemlautstärke der Ausgabe.</value>
+    <value>Verringert die Lautstärke des gewählten Audiogeräts.</value>
   </data>
   <data name="Integrations.System.Actions.DecreaseVolume.Name" xml:space="preserve">
     <value>Lautstärke verringern</value>
@@ -8360,7 +8360,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Ruhezustand</value>
   </data>
   <data name="Integrations.System.Actions.IncreaseVolume.Description" xml:space="preserve">
-    <value>Erhöht die Systemlautstärke der Ausgabe.</value>
+    <value>Erhöht die Lautstärke des gewählten Audiogeräts.</value>
   </data>
   <data name="Integrations.System.Actions.IncreaseVolume.Name" xml:space="preserve">
     <value>Lautstärke erhöhen</value>
@@ -8423,7 +8423,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Computer sperren</value>
   </data>
   <data name="Integrations.System.Actions.MuteVolume.Description" xml:space="preserve">
-    <value>Schaltet die Stummschaltung der Systemausgabe um.</value>
+    <value>Schaltet die Stummschaltung des gewählten Audiogeräts um.</value>
   </data>
   <data name="Integrations.System.Actions.MuteVolume.MutedLabel" xml:space="preserve">
     <value>Stumm</value>
@@ -8519,7 +8519,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Titel</value>
   </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
-    <value>Setzt die Systemlautstärke der Ausgabe auf einen bestimmten Wert.</value>
+    <value>Setzt die Lautstärke des gewählten Audiogeräts auf einen bestimmten Wert.</value>
   </data>
   <data name="Integrations.System.Actions.SetVolume.LevelLabel" xml:space="preserve">
     <value>Lautstärke (%)</value>
@@ -8547,6 +8547,30 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.System.Actions.VolumeAmount.Label" xml:space="preserve">
     <value>Menge (%)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.Label" xml:space="preserve">
+    <value>Audiogerät</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.Description" xml:space="preserve">
+    <value>Das Audiogerät, das die Aktion steuert.</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.DefaultOutput" xml:space="preserve">
+    <value>Standard-Ausgabegerät</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.DefaultInput" xml:space="preserve">
+    <value>Standard-Eingabegerät</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.OutputOption" xml:space="preserve">
+    <value>{device} (Ausgabe)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.InputOption" xml:space="preserve">
+    <value>{device} (Eingabe)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.UnavailableOption" xml:space="preserve">
+    <value>{device} (nicht verfügbar)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.UnknownUnavailableOption" xml:space="preserve">
+    <value>Nicht verfügbares Gerät</value>
   </data>
   <data name="Integrations.System.Actions.WorkingDirectoryLabel" xml:space="preserve">
     <value>Arbeitsverzeichnis</value>
@@ -8668,6 +8692,24 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.System.Variables.Muted" xml:space="preserve">
     <value>Stummgeschaltet</value>
+  </data>
+  <data name="Integrations.System.Variables.InputVolume" xml:space="preserve">
+    <value>Eingabelautstärke</value>
+  </data>
+  <data name="Integrations.System.Variables.InputMuted" xml:space="preserve">
+    <value>Eingabe stummgeschaltet</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceOutputVolume" xml:space="preserve">
+    <value>{device}: Lautstärke (Ausgabe)</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceOutputMuted" xml:space="preserve">
+    <value>{device}: stummgeschaltet (Ausgabe)</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceInputVolume" xml:space="preserve">
+    <value>{device}: Lautstärke (Eingabe)</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceInputMuted" xml:space="preserve">
+    <value>{device}: stummgeschaltet (Eingabe)</value>
   </data>
   <data name="Integrations.System.Variables.CpuUsage" xml:space="preserve">
     <value>CPU-Auslastung</value>

@@ -53,6 +53,8 @@ public sealed class IntegrationInitializer
 	private readonly DeviceProviderHost _deviceProviders;
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
+	private readonly IKnownAudioDeviceStore? _knownAudioDevices;
+	private readonly IVariablePollingInvalidationSignal? _pollingInvalidation;
 
 	private readonly ConcurrentDictionary<string, byte> _attempted = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, IntegrationEventPublisher> _eventPublishers = new(StringComparer.Ordinal);
@@ -78,8 +80,12 @@ public sealed class IntegrationInitializer
 		ScreenSaverProviderHost screenSaverProviders,
 		DeviceProviderHost deviceProviders,
 		TimeProvider timeProvider,
-		ILogger logger)
+		ILogger logger,
+		IKnownAudioDeviceStore? knownAudioDevices = null,
+		IVariablePollingInvalidationSignal? pollingInvalidation = null)
 	{
+		_knownAudioDevices = knownAudioDevices;
+		_pollingInvalidation = pollingInvalidation;
 		_serviceScopeFactory = serviceScopeFactory;
 		_deckNavigator = deckNavigator;
 		_scriptApi = scriptApi;
@@ -106,7 +112,13 @@ public sealed class IntegrationInitializer
 	public IReadOnlySet<string> AttemptedIds => _attempted.Keys.ToHashSet(StringComparer.Ordinal);
 
 	public void BindGateways(IIntegration integration)
-		=> IntegrationGatewayBinder.Bind(integration, _adbGateway, _companionGateway, _bindingStore, _refreshSignal);
+		=> IntegrationGatewayBinder.Bind(integration,
+			_adbGateway,
+			_companionGateway,
+			_bindingStore,
+			_refreshSignal,
+			_knownAudioDevices,
+			_pollingInvalidation);
 
 	public async Task<IntegrationInitializationOutcome> InitializeAsync(
 		IIntegration integration,

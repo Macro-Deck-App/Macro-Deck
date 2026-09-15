@@ -64,6 +64,11 @@ Values you can show and use anywhere:
 
 Show one in a label with `{{ vars.deaths }}`, like the **Deaths: 3** button above.
 
+Every speaker and microphone gets its own volume and mute variable, named after the device, for
+example `system_audio_input_usb_mic_volume_percent`. An unplugged device keeps its variables; they
+read as unavailable until it is back. The volume actions can control the default output, the default
+input or one specific device.
+
 ![The Variables page with the user variable deaths and system variables](../../../assets/guide/variables.png)
 
 ## Scripts and automations

@@ -6,11 +6,13 @@ public interface IVolumeService
 
 	event Action? Changed;
 
-	Task<float?> GetVolumeAsync(CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<AudioDevice>> GetDevicesAsync(CancellationToken cancellationToken = default);
 
-	Task SetVolumeAsync(float level, CancellationToken cancellationToken = default);
+	Task<float?> GetVolumeAsync(AudioTarget target, CancellationToken cancellationToken = default);
 
-	Task<bool?> GetMuteAsync(CancellationToken cancellationToken = default);
+	Task<bool> SetVolumeAsync(AudioTarget target, float level, CancellationToken cancellationToken = default);
 
-	Task SetMuteAsync(bool mute, CancellationToken cancellationToken = default);
+	Task<bool?> GetMuteAsync(AudioTarget target, CancellationToken cancellationToken = default);
+
+	Task<bool> SetMuteAsync(AudioTarget target, bool mute, CancellationToken cancellationToken = default);
 }

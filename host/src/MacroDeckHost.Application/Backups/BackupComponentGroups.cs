@@ -43,7 +43,11 @@ public static class BackupComponentGroups
 		// bound to a catalog variable would otherwise come back permanently unbound.
 		new(BackupComponentGroup.Variables,
 			[],
-			[File("data/user-variables.json"), File("data/dynamic-variable-bindings.json")],
+			[
+				File("data/user-variables.json"),
+				File("data/dynamic-variable-bindings.json"),
+				File("data/system-audio-devices.json")
+			],
 			[]),
 		new(BackupComponentGroup.Integrations,
 			[],
