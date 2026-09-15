@@ -55,7 +55,8 @@ public class WidgetSamplePreviewTests
 		var provider = new HistoryGraphWidgetUiProvider(new VariableRegistry(),
 			new UnusedVariableHistory(),
 			new VariableChangeNotifier(),
-			TestLocalization.SampleText);
+			TestLocalization.SampleText,
+			new MacroDeckHost.Application.Rendering.WidgetRenderSignals());
 
 		var sample = await Tree(provider, sample: true);
 		var live = await Tree(provider, sample: false);
@@ -108,7 +109,8 @@ public class WidgetSamplePreviewTests
 			scopeFactory,
 			new SliderWidgetSessionTests.RecordingTriggerService(),
 			new StubFolderCache(),
-			new SliderWidgetSessionTests.NullUiTransport());
+			new SliderWidgetSessionTests.NullUiTransport(),
+			new MacroDeckHost.Application.Rendering.WidgetRenderSignals());
 
 		var sample = await Tree(provider, sample: true);
 

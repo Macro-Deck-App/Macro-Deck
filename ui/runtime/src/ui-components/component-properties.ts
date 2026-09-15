@@ -26,6 +26,7 @@ export const UiComponentProperties = {
   Opacity: 'opacity',
   Brightness: 'brightness',
   Saturation: 'saturation',
+  Tint: 'tint',
   Start: 'start',
   End: 'end',
   StartColor: 'startColor',

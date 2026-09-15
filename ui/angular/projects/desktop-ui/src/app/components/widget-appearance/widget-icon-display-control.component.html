@@ -12,7 +12,11 @@
         (pointerup)="onPointerUp($event)"
         (pointercancel)="onPointerUp($event)"
         (wheel)="onWheel($event)">
-        <img class="idc-image" [src]="iconUrl" [style]="previewStyle" alt="" draggable="false" />
+        @if (previewTint) {
+          <div class="idc-image idc-tint" [style]="tintStyle"></div>
+        } @else {
+          <img class="idc-image" [src]="iconUrl" [style]="previewStyle" alt="" draggable="false" />
+        }
       </div>
       <p class="idc-hint">{{ dragHint }}</p>
     </div>

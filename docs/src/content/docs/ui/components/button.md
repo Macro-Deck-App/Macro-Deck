@@ -58,6 +58,11 @@ BorderColor = "#ff3b30",
 The artwork fills the whole box behind the children, so swapping the face is a property patch rather than
 a rebuilt subtree. `hue-shift` and `rgb` rings cycle their own colours and ignore `BorderColor`.
 
+`Tint = "#4f8cff"` draws the artwork as a silhouette in that colour: every pixel keeps its own
+transparency, so a white icon on a transparent background becomes a blue icon, while an image without
+transparency becomes a solid rectangle. A reader that does not know `tint` draws the artwork in its own
+colours, and so does one whose engine cannot mask. Tint is unrelated to the press feedback.
+
 ## Filling the tile
 
 ```csharp
@@ -87,6 +92,7 @@ tile.
 | `Opacity` (`opacity`) | `0..1` | Fully opaque | How opaque the artwork is drawn. |
 | `Brightness` (`brightness`) | `0..2` | `1` | Multiplies the artwork's luminance. |
 | `Saturation` (`saturation`) | `0..2` | `1` | Multiplies the artwork's saturation. |
+| `Tint` (`tint`) | `#rrggbb` | The artwork's own colours | Draws the artwork in this colour, keeping each pixel's transparency. |
 | `BorderStyle` (`borderStyle`) | `static`, `heartbeat`, `breathing`, `blink`, `comet`, `ants`, `hue-shift`, `rgb` | No ring - no value spells "off" | How the ring is drawn. |
 | `BorderColor` (`borderColor`) | `#rrggbb` | The style's own colour | The ring's tint, ignored by `hue-shift` and `rgb`. |
 | `Corner` (`corner`) | `tile` | `0.12` of the button's own height | How round the button's own corners are. |

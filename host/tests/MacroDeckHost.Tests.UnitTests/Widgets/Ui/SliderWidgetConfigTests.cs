@@ -237,7 +237,8 @@ public class SliderWidgetConfigTests
 			new ServiceCollection().BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(),
 			new SliderWidgetSessionTests.RecordingTriggerService(),
 			new StubFolderCache(),
-			new SliderWidgetSessionTests.NullUiTransport());
+			new SliderWidgetSessionTests.NullUiTransport(),
+			new MacroDeckHost.Application.Rendering.WidgetRenderSignals());
 
 	[Test]
 	public async Task A_config_surface_naming_a_different_widget_type_is_declined()

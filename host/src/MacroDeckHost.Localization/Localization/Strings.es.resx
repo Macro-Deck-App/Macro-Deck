@@ -10688,6 +10688,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Widgets.Actions.PositionTop" xml:space="preserve">
     <value>Arriba</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
+    <value>Cambia el color de acento de un control deslizante o de un gráfico histórico.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
+    <value>Establecer color de acento</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetBackgroundColorDescription" xml:space="preserve">
     <value>Cambia el color de fondo de un widget.</value>
   </data>
@@ -12374,6 +12380,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Settings.Adb.StatusHeading" xml:space="preserve">
     <value>Estado</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitDescription" xml:space="preserve">
+    <value>Detiene el servidor ADB cuando Macro Deck se cierra, se reinicia o se actualiza, pero solo si lo inició Macro Deck. Otros programas que usan ADB, como Android Studio, pierden la conexión.</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitLabel" xml:space="preserve">
+    <value>Detener el servidor ADB al cerrar Macro Deck</value>
   </data>
   <data name="Settings.Adb.UncleanShutdown.One" xml:space="preserve">
     <value>Macro Deck no se cerró correctamente la última vez. Se limpió {count} conexión USB restante.</value>
@@ -15552,6 +15564,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Widgets.Editor.Icon" xml:space="preserve">
     <value>Icono</value>
+  </data>
+  <data name="Widgets.Editor.IconColor" xml:space="preserve">
+    <value>Color del icono</value>
   </data>
   <data name="Widgets.Editor.IconDisplay" xml:space="preserve">
     <value>Visualización del icono</value>

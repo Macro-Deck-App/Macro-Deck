@@ -141,11 +141,17 @@ export function parseWidgetData(type: WidgetType, json: string | undefined): Wid
             }
             const first = buttonData.states[0];
             if (first.appearance?.icon === undefined) {
-              first.appearance = { ...first.appearance, icon: buttonData.icon, iconDisplay: buttonData.iconDisplay };
+              first.appearance = {
+                ...first.appearance,
+                icon: buttonData.icon,
+                iconDisplay: buttonData.iconDisplay,
+                iconColor: buttonData.iconColor,
+              };
             }
           }
           delete buttonData.icon;
           delete buttonData.iconDisplay;
+          delete buttonData.iconColor;
         } else {
           // states[0]'s icon -> root; the rest of states[0] (and every other state) is dormant
           // state-mode config the user may come back to, so it is preserved untouched. The icon
@@ -160,10 +166,14 @@ export function parseWidgetData(type: WidgetType, json: string | undefined): Wid
             if (first?.appearance?.iconDisplay !== undefined) {
               buttonData.iconDisplay = first.appearance.iconDisplay;
             }
+            if (first?.appearance?.iconColor !== undefined) {
+              buttonData.iconColor = first.appearance.iconColor;
+            }
           }
           if (first?.appearance) {
             delete first.appearance.icon;
             delete first.appearance.iconDisplay;
+            delete first.appearance.iconColor;
           }
         }
 

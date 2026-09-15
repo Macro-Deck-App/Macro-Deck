@@ -39,10 +39,13 @@ internal static class HistoryGraphWidgetView
 
 	public static UiElement Build(UiState<HistoryGraphViewState> state,
 		HistoryGraphWidgetData config,
-		int cornerRadius = WidgetSafeArea.DefaultCornerRadius)
+		int cornerRadius = WidgetSafeArea.DefaultCornerRadius,
+		UiState<string?>? accentColor = null)
 	{
 		ArgumentNullException.ThrowIfNull(state);
 		ArgumentNullException.ThrowIfNull(config);
+
+		var accent = accentColor ?? new UiState<string?>(config.AccentColor);
 
 		// The graph itself stays edge to edge - it is the tile's background, not its content - so the
 		// clearance applies to the labels laid over it. See ADR 0064.
@@ -55,7 +58,7 @@ internal static class HistoryGraphWidgetView
 		return new UiLayer
 		{
 			Key = "historyGraph",
-			Children = [Chart(state, config), Labels(state, config, safeArea), value],
+			Children = [Chart(state, accent), Labels(state, config, safeArea), value],
 
 			// An older reader that cannot layer draws the card's substance - the value - rather than a
 			// placeholder: the labels and the chart are context for a number, not the point of the widget.
@@ -63,12 +66,12 @@ internal static class HistoryGraphWidgetView
 		};
 	}
 
-	private static UiChart Chart(UiState<HistoryGraphViewState> state, HistoryGraphWidgetData config)
+	private static UiChart Chart(UiState<HistoryGraphViewState> state, UiState<string?> accent)
 		=> new()
 		{
 			Key = "chart",
 			Points = UiValue.From(() => state.Value.Points),
-			Color = config.AccentColor is { } accent ? UiValue.Of(accent) : UiValue.None<string>(),
+			Color = UiValue.Optional(() => accent.Value is { } color ? UiValue.Of(color) : UiValue.None<string>()),
 			PlotTop = ChartTop,
 			Thickness = _lineThickness,
 

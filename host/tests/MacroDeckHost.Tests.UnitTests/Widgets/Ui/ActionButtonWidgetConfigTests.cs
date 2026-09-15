@@ -47,6 +47,7 @@ public class ActionButtonWidgetConfigTests
 		host.ById("icon").Change(new { type = "icon-pack", reference = "bolt" });
 		host.ById("iconDisplay")
 			.Change(new { fit = "cover", zoom = 150d, offsetX = 10d, offsetY = -10d, opacity = 80d });
+		host.ById("iconColor").Change("#333333");
 		host.ById("border.style").Change("comet");
 		host.ById("border.color").Change("#00ff00");
 
@@ -65,8 +66,52 @@ public class ActionButtonWidgetConfigTests
 			Assert.That(composed.GetProperty("backgroundColor").GetString(), Is.EqualTo("#222222"));
 			Assert.That(composed.GetProperty("icon").GetProperty("reference").GetString(), Is.EqualTo("bolt"));
 			Assert.That(composed.GetProperty("iconDisplay").GetProperty("zoom").GetDouble(), Is.EqualTo(150));
+			Assert.That(composed.GetProperty("iconColor").GetString(), Is.EqualTo("#333333"));
 			Assert.That(composed.GetProperty("border").GetProperty("style").GetString(), Is.EqualTo("comet"));
 			Assert.That(composed.GetProperty("border").GetProperty("color").GetString(), Is.EqualTo("#00ff00"));
+		});
+	}
+
+	[Test]
+	public void Icon_colour_is_offered_only_once_an_icon_is_set()
+	{
+		var host = Render(new { });
+
+		Assert.That(host.FindById("iconColor"), Is.Null);
+
+		host.ById("icon").Change(new { type = "icon-pack", reference = "bolt" });
+
+		Assert.That(host.FindById("iconColor"), Is.Not.Null);
+	}
+
+	[Test]
+	public void The_icon_display_preview_draws_the_icon_in_the_chosen_colour()
+	{
+		var host = Render(new { });
+
+		host.ById("icon").Change(new { type = "icon-pack", reference = "bolt" });
+		host.ById("iconColor").Change("#ff00ff");
+
+		Assert.That(host.ById("iconDisplay").Text(UiConfigProperties.Tint), Is.EqualTo("#ff00ff"));
+	}
+
+	[Test]
+	public void A_state_icon_colour_is_stored_on_that_state_only()
+	{
+		var host = Render(_twoStates);
+
+		host.ById("activeStateId").Change("on");
+		host.ById("states.on.appearance.icon").Change(new { type = "icon-pack", reference = "bolt" });
+		host.ById("states.on.appearance.iconColor").Change("#ff00ff");
+
+		var states = ReadStates(host);
+		var on = states.First(s => Id(s) == "on");
+		var off = states.First(s => Id(s) == "off");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(on.GetProperty("appearance").GetProperty("iconColor").GetString(), Is.EqualTo("#ff00ff"));
+			Assert.That(off.TryGetProperty("appearance", out _), Is.False);
 		});
 	}
 
@@ -730,7 +775,7 @@ public class ActionButtonWidgetConfigTests
 			{
 				"label", "fontFaceId", "fontSize", "textAlign", "labelPosition", "labelColor", "backgroundColor",
 				"icon",
-				"iconDisplay", "border",
+				"iconDisplay", "iconColor", "border",
 			}),
 			"Only real schema keys should appear in the draft - no heading or tab contributed one.");
 	}
@@ -1153,6 +1198,7 @@ public class ActionButtonWidgetConfigTests
 			["backgroundColor"] = host.ById("backgroundColor").Text(UiConfigProperties.Value),
 			["icon"] = host.ById("icon").Property(UiConfigProperties.Value),
 			["iconDisplay"] = host.FindById("iconDisplay")?.Property(UiConfigProperties.Value),
+			["iconColor"] = host.FindById("iconColor")?.Text(UiConfigProperties.Value),
 			["border"] = new Dictionary<string, object?>
 			{
 				["style"] = host.ById("border.style").Text(UiConfigProperties.Value),

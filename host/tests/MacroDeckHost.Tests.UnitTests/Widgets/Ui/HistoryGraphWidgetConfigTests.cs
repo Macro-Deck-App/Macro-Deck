@@ -186,7 +186,8 @@ public class HistoryGraphWidgetConfigTests
 		var provider = new HistoryGraphWidgetUiProvider(new MacroDeckHost.Application.Variables.VariableRegistry(),
 			new NullVariableHistory(),
 			new MacroDeckHost.Application.Variables.VariableChangeNotifier(),
-			new PassThroughSampleText());
+			new PassThroughSampleText(),
+			new MacroDeckHost.Application.Rendering.WidgetRenderSignals());
 
 		var surface = ConfigSurface(WidgetTypeIds.Clock, "{}");
 

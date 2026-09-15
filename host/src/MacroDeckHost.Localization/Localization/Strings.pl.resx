@@ -10688,6 +10688,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Widgets.Actions.PositionTop" xml:space="preserve">
     <value>Na górze</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
+    <value>Zmienia kolor akcentu suwaka lub wykresu historii.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
+    <value>Ustaw kolor akcentu</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetBackgroundColorDescription" xml:space="preserve">
     <value>Zmienia kolor tła widżetu.</value>
   </data>
@@ -12374,6 +12380,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Settings.Adb.StatusHeading" xml:space="preserve">
     <value>Stan</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitDescription" xml:space="preserve">
+    <value>Serwer ADB zostanie zatrzymany przy zamknięciu, ponownym uruchomieniu lub aktualizacji Macro Deck, ale tylko jeśli uruchomił go Macro Deck. Inne programy korzystające z ADB, np. Android Studio, stracą połączenie.</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitLabel" xml:space="preserve">
+    <value>Zatrzymaj serwer ADB przy zamykaniu Macro Deck</value>
   </data>
   <data name="Settings.Adb.UncleanShutdown.One" xml:space="preserve">
     <value>Macro Deck nie został poprawnie zamknięty poprzednim razem. Wyczyszczono {count} pozostałe połączenie USB.</value>
@@ -15552,6 +15564,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Widgets.Editor.Icon" xml:space="preserve">
     <value>Ikona</value>
+  </data>
+  <data name="Widgets.Editor.IconColor" xml:space="preserve">
+    <value>Kolor ikony</value>
   </data>
   <data name="Widgets.Editor.IconDisplay" xml:space="preserve">
     <value>Wyświetlanie ikony</value>

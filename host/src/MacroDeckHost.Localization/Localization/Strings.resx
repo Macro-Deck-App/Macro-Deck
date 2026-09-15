@@ -10688,6 +10688,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Widgets.Actions.PositionTop" xml:space="preserve">
     <value>Top</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
+    <value>Changes the accent color of a slider or history graph.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
+    <value>Set Accent Color</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetBackgroundColorDescription" xml:space="preserve">
     <value>Changes a widget's background color.</value>
   </data>
@@ -12374,6 +12380,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Settings.Adb.StatusHeading" xml:space="preserve">
     <value>Status</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitDescription" xml:space="preserve">
+    <value>Stops the ADB server when Macro Deck exits, restarts or updates, but only if Macro Deck started it. Other programs using ADB, such as Android Studio, lose their connection.</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitLabel" xml:space="preserve">
+    <value>Stop ADB server when Macro Deck exits</value>
   </data>
   <data name="Settings.Adb.UncleanShutdown.One" xml:space="preserve">
     <value>Macro Deck did not shut down cleanly last time. {count} leftover USB connection was cleaned up.</value>
@@ -15552,6 +15564,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.Editor.Icon" xml:space="preserve">
     <value>Icon</value>
+  </data>
+  <data name="Widgets.Editor.IconColor" xml:space="preserve">
+    <value>Icon Color</value>
   </data>
   <data name="Widgets.Editor.IconDisplay" xml:space="preserve">
     <value>Icon Display</value>

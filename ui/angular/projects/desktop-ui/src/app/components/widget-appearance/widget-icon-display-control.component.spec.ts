@@ -18,6 +18,7 @@ function createFixture(inputs: Partial<{
   aspectRatio: number;
   iconUrl: string | null;
   resetActive: boolean;
+  previewTint: string;
 }> = {}): Handle {
   const apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['onNotification']);
   apiSpy.onNotification.and.callFake(() => new Subject());
@@ -33,6 +34,7 @@ function createFixture(inputs: Partial<{
   if (inputs.actionMode !== undefined) fixture.componentRef.setInput('actionMode', inputs.actionMode);
   if (inputs.aspectRatio !== undefined) fixture.componentRef.setInput('aspectRatio', inputs.aspectRatio);
   if (inputs.resetActive !== undefined) fixture.componentRef.setInput('resetActive', inputs.resetActive);
+  if (inputs.previewTint !== undefined) fixture.componentRef.setInput('previewTint', inputs.previewTint);
 
   const changes: WidgetIconDisplay[] = [];
   let resets = 0;
@@ -55,6 +57,24 @@ function drag(fixture: ComponentFixture<WidgetIconDisplayControlComponent>, dx: 
 }
 
 describe('WidgetIconDisplayControlComponent editor mode', () => {
+  it('previews the icon in the icon colour with the same framing', () => {
+    const { fixture } = createFixture({ previewTint: '#ef4444', display: { opacity: 50, fit: 'cover' } });
+    const tint = fixture.nativeElement.querySelector('.idc-tint') as HTMLElement;
+
+    expect(fixture.nativeElement.querySelector('img.idc-image')).toBeNull();
+    expect(tint.style.backgroundColor).toBe('rgb(239, 68, 68)');
+    expect(tint.style.getPropertyValue('mask-image') || tint.style.getPropertyValue('-webkit-mask-image'))
+      .toContain('https://host.invalid/icon');
+    expect(tint.style.opacity).toBe('0.5');
+  });
+
+  it('shows the icon in its own colours without an icon colour', () => {
+    const { fixture } = createFixture();
+
+    expect(fixture.nativeElement.querySelector('.idc-tint')).toBeNull();
+    expect(fixture.nativeElement.querySelector('img.idc-image')).not.toBeNull();
+  });
+
   it('shows the defaults for a button with no stored framing', () => {
     const { fixture } = createFixture();
     const image = fixture.nativeElement.querySelector('.idc-image') as HTMLImageElement;

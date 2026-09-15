@@ -135,6 +135,12 @@ public static class UiComponentProperties
 	/// normative result.</summary>
 	public const string Saturation = "saturation";
 
+	/// <summary>A button's artwork drawn as a silhouette in this colour, as <c>#rrggbb</c>: every pixel
+	/// takes the colour and keeps its own alpha, so a transparent icon is recoloured and an opaque image
+	/// becomes a solid rectangle. Absent means the artwork's own colours, which is also what a reader that
+	/// does not implement the key draws. Unrelated to the press feedback tint.</summary>
+	public const string Tint = "tint";
+
 	/// <summary>Where a range bar's filled span begins, as a fraction of the track.</summary>
 	public const string Start = "start";
 
@@ -292,7 +298,7 @@ public static class UiComponentProperties
 	[
 		Events, MainSize, Fill, Direction, Justify, Align, Gap, Padding, Background, Text, Size, MinSize,
 		Weight, Role, Color, MaxLines, Wrap, FontFace, Source, Transition, Fit, Zoom, OffsetX, OffsetY,
-		Opacity, Brightness, Saturation, Start, End, StartColor, EndColor, Marker, Thickness, Value,
+		Opacity, Brightness, Saturation, Tint, Start, End, StartColor, EndColor, Marker, Thickness, Value,
 		Format, Seconds, Level, Step, LevelColor, Interaction, BorderStyle, BorderColor, Corner, Points, PlotTop,
 		Digits, Answer, Placeholder, Rotation, OriginX, OriginY, Shape, CornerRadius, StrokeColor,
 		StrokeWidth, Path, Icon, Columns, Rows, ColumnSpan, RowSpan, StartAngle, EndAngle, On, Selected,

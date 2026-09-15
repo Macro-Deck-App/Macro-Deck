@@ -922,6 +922,10 @@ public sealed record UiButton : UiComponentContainer
 	/// states the normative result. Absent means <c>1</c>.</summary>
 	public UiValue<double> Saturation { get; init; }
 
+	/// <summary>The artwork recoloured, as <c>#rrggbb</c> - see <see cref="UiComponentProperties.Tint" />,
+	/// which states the normative result. Absent means the artwork's own colours.</summary>
+	public UiValue<string> Tint { get; init; }
+
 	/// <summary>How the ring is drawn - see <see cref="UiComponentBorderStyles" />. Absent means no
 	/// ring.</summary>
 	public UiValue<string> BorderStyle { get; init; }
@@ -959,6 +963,7 @@ public sealed record UiButton : UiComponentContainer
 		properties.Set(UiComponentProperties.Opacity, Opacity);
 		properties.Set(UiComponentProperties.Brightness, Brightness);
 		properties.Set(UiComponentProperties.Saturation, Saturation);
+		properties.Set(UiComponentProperties.Tint, Tint);
 		properties.Set(UiComponentProperties.BorderStyle, BorderStyle);
 		properties.Set(UiComponentProperties.BorderColor, BorderColor);
 		properties.Set(UiComponentProperties.Corner, Corner);

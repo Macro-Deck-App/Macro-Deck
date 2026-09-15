@@ -262,6 +262,7 @@ public class UiConfigVocabularyTests
 							Icon = new UiIconReference("icon-pack", "logo"),
 							AspectRatio = 1.5,
 							Background = "#101010",
+							Tint = "#ef4444",
 						}),
 						Configure(new UiStateMappingEditorInput
 						{

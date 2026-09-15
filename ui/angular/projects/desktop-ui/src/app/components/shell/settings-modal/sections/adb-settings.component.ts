@@ -67,6 +67,8 @@ export class AdbSettingsComponent {
   readonly serverReachable = signal(false);
   readonly restarting = signal(false);
   readonly restartPromptOpen = signal(false);
+  readonly stopServerOnExit = signal(false);
+  readonly stopServerOnExitBusy = signal(false);
 
   readonly usbConnectionsEnabled = signal(false);
   readonly usbBusy = signal(false);
@@ -133,6 +135,19 @@ export class AdbSettingsComponent {
       await this.updateSettings({ usbConnectionsEnabled: value });
     } finally {
       this.usbBusy.set(false);
+    }
+  }
+
+  async setStopServerOnExit(value: boolean): Promise<void> {
+    if (!this.loaded() || this.stopServerOnExitBusy()) {
+      return;
+    }
+    this.stopServerOnExitBusy.set(true);
+    this.stopServerOnExit.set(value);
+    try {
+      await this.updateSettings({ stopServerOnExit: value });
+    } finally {
+      this.stopServerOnExitBusy.set(false);
     }
   }
 
@@ -268,6 +283,7 @@ export class AdbSettingsComponent {
       executablePath: this.executablePath() ?? undefined,
       usbConnectionsEnabled: this.usbConnectionsEnabled(),
       defaultDeviceSerial: this.defaultDeviceSerial() ?? undefined,
+      stopServerOnExit: this.stopServerOnExit(),
       ...patch,
     };
     try {
@@ -302,6 +318,7 @@ export class AdbSettingsComponent {
     this.pathDraft.set(state.executablePath ?? '');
     this.adbVersion.set(state.adbVersion);
     this.serverReachable.set(state.serverReachable);
+    this.stopServerOnExit.set(state.stopServerOnExit);
     this.usbConnectionsEnabled.set(state.usbConnectionsEnabled);
     this.devices.set(state.devices);
     this.defaultDeviceSerial.set(state.defaultDeviceSerial);

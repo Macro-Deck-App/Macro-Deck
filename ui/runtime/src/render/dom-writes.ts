@@ -8,6 +8,10 @@ const PREFIXED_AT_FLOOR: { [property: string]: string } = {
   'transform': '-webkit-transform',
   'transform-origin': '-webkit-transform-origin',
   'filter': '-webkit-filter',
+  'mask-image': '-webkit-mask-image',
+  'mask-size': '-webkit-mask-size',
+  'mask-position': '-webkit-mask-position',
+  'mask-repeat': '-webkit-mask-repeat',
 };
 
 function styleCacheOf(element: HTMLElement | SVGElement): StyleCache {

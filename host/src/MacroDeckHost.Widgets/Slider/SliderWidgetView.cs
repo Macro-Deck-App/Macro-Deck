@@ -24,15 +24,17 @@ internal static class SliderWidgetView
 		UiResource? icon,
 		IReadOnlyList<UiEventHandler> sliderEvents,
 		int cornerRadius = WidgetSafeArea.DefaultCornerRadius,
-		SliderLabelBinding? label = null)
+		SliderLabelBinding? label = null,
+		UiState<string?>? accentColor = null)
 	{
 		ArgumentNullException.ThrowIfNull(config);
 		ArgumentNullException.ThrowIfNull(state);
 		ArgumentNullException.ThrowIfNull(sliderEvents);
 
+		var accent = accentColor ?? new UiState<string?>(config.Color);
 		var children = config.IsVertical
-			? BuildVerticalChildren(config, state, icon, sliderEvents, label)
-			: BuildHorizontalChildren(config, state, icon, sliderEvents, label);
+			? BuildVerticalChildren(config, state, icon, sliderEvents, label, accent)
+			: BuildHorizontalChildren(config, state, icon, sliderEvents, label, accent);
 
 		return new UiStack
 		{
@@ -73,7 +75,8 @@ internal static class SliderWidgetView
 		UiState<SliderWidgetReadout> state,
 		UiResource? icon,
 		IReadOnlyList<UiEventHandler> sliderEvents,
-		SliderLabelBinding? label)
+		SliderLabelBinding? label,
+		UiState<string?> accent)
 	{
 		var hasLead = HasLead(config, icon);
 		var hasValue = config.ShowValue;
@@ -107,7 +110,7 @@ internal static class SliderWidgetView
 			});
 		}
 
-		children.Add(Track(config, state, sliderEvents, isVertical: false));
+		children.Add(Track(config, state, sliderEvents, accent, isVertical: false));
 
 		return children;
 	}
@@ -117,7 +120,8 @@ internal static class SliderWidgetView
 		UiState<SliderWidgetReadout> state,
 		UiResource? icon,
 		IReadOnlyList<UiEventHandler> sliderEvents,
-		SliderLabelBinding? label)
+		SliderLabelBinding? label,
+		UiState<string?> accent)
 	{
 		var children = new List<UiElement>();
 
@@ -133,7 +137,7 @@ internal static class SliderWidgetView
 			});
 		}
 
-		children.Add(Track(config, state, sliderEvents, isVertical: true));
+		children.Add(Track(config, state, sliderEvents, accent, isVertical: true));
 
 		if (config.ShowValue)
 		{
@@ -219,13 +223,14 @@ internal static class SliderWidgetView
 		SliderWidgetData config,
 		UiState<SliderWidgetReadout> state,
 		IReadOnlyList<UiEventHandler> sliderEvents,
+		UiState<string?> accent,
 		bool isVertical)
 	{
 		// Thin enough that the thumb reads as a knob sitting on a track: the thumb is 1.5x the thickness
 		// across, so a heavier track would swallow it.
 		var thickness = isVertical ? UiSize.FromBasis(0.11, 0.35) : UiSize.FromBasis(0.09, 0.4);
 		var level = LevelValue(config, state);
-		var fallbackColor = config.Color ?? _defaultAccent;
+		var fallbackColor = UiValue.From(() => accent.Value ?? _defaultAccent);
 
 		return new UiSlider
 		{
@@ -237,7 +242,7 @@ internal static class SliderWidgetView
 				: UiValue.None<string>(),
 			Level = level,
 			Step = StepValue(config, state),
-			LevelColor = ColorValue(config.Color),
+			LevelColor = UiValue.Optional(() => ColorValue(accent.Value)),
 			Thickness = thickness,
 			Events = sliderEvents,
 			Fallback = new UiRangeBar

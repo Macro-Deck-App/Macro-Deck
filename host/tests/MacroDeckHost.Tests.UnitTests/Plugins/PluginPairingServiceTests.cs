@@ -53,7 +53,8 @@ public class PluginPairingServiceTests
 		public Task<AdbSettings> SetAdb(bool? enabled,
 			string? executablePath,
 			bool? usbConnectionsEnabled,
-			string? defaultDeviceSerial)
+			string? defaultDeviceSerial,
+			bool? stopServerOnExit)
 			=> throw new NotSupportedException();
 
 		public Task<OnboardingSettings> GetOnboarding() => throw new NotSupportedException();
