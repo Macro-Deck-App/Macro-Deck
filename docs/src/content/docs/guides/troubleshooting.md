@@ -427,10 +427,22 @@ See [logging](/features/logging/).
 
 ### A framework-dependent plugin reports a missing runtime
 
-No `dotnet` muxer (searched in `DOTNET_ROOT`, then `PATH`, then well-known locations), or no installed
-`Microsoft.NETCore.App` with the entrypoint's `dotnetVersion` major and at least its minor. A higher major
-never satisfies a lower one. Install the matching runtime; the plugin stays stopped instead of burning
-restart budget.
+Packaged Macro Deck ships .NET 10 (`Microsoft.NETCore.App` and `Microsoft.AspNetCore.App`), so this means
+the plugin needs something that runtime lacks: another .NET major, or a framework such as
+`Microsoft.WindowsDesktop.App` named in its `<Name>.runtimeconfig.json`. Macro Deck then looks for a
+system `dotnet` (in `DOTNET_ROOT`, then `PATH`, then well-known locations) that has it, and found none. A
+higher major never satisfies a lower one unless the runtimeconfig allows rolling forward. A host run from
+source (`dotnet run`) has no bundled runtime and relies on the system search alone.
+
+Install the matching runtime, then restart Macro Deck: installed runtimes are read once per host
+process. Until then the plugin stays stopped instead of burning restart budget. The selection rule is in
+the [manifest reference](/reference/manifest/#runtime).
+
+### A plugin shows up as dotnet in the process list
+
+Framework-dependent plugins run as the .NET muxer, so Task Manager shows them as `dotnet` or ".NET Host"
+and Activity Monitor as `dotnet`, not under the plugin's name. Tell them apart by PID or by the command
+line, which ends in the plugin's `.dll`. Self-contained plugins keep their own executable name.
 
 ## Signing and install trust
 

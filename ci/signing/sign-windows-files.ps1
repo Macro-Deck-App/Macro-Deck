@@ -22,7 +22,8 @@ $cert = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new(
 	$env:WINDOWS_SIGN_CERT_PFX_FILE, $password)
 
 # Matches exactly the single-file host launcher (MacroDeckHost.exe or
-# MacroDeckHostDevelopment.exe); every other assembly is bundled inside it.
+# MacroDeckHostDevelopment.exe); the host's own assemblies are bundled inside
+# it, and the bundled .NET runtime under runtime\ is already signed by Microsoft.
 $files = Get-ChildItem -Path $Directory -File |
 	Where-Object { $_.Name -match '^(MacroDeckHost.*\.(exe|dll)|MacroDeck\.Sdk\.dll)$' }
 

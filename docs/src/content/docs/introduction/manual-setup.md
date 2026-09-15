@@ -69,9 +69,18 @@ MyPlugin/
   "description": "What the plugin does.",
   "icon": "Assets/icon.svg",
   "entrypoints": {
-    "win-x64": { "executable": "runtimes/win-x64/MyPlugin.exe" },
-    "osx-arm64": { "executable": "runtimes/osx-arm64/MyPlugin" },
-    "linux-x64": { "executable": "runtimes/linux-x64/MyPlugin" }
+    "win-x64": {
+      "executable": "runtimes/win-x64/MyPlugin.dll",
+      "runtime": { "kind": "FrameworkDependent", "dotnetVersion": "10.0" }
+    },
+    "osx-arm64": {
+      "executable": "runtimes/osx-arm64/MyPlugin.dll",
+      "runtime": { "kind": "FrameworkDependent", "dotnetVersion": "10.0" }
+    },
+    "linux-x64": {
+      "executable": "runtimes/linux-x64/MyPlugin.dll",
+      "runtime": { "kind": "FrameworkDependent", "dotnetVersion": "10.0" }
+    }
   }
 }
 ```
@@ -85,7 +94,9 @@ MyPlugin/
 | `entrypoints` | One entry per runtime identifier you have tested; `executable` is relative to the package root. |
 
 Identity lives only here - the hosting builder has no `WithId`, `WithName` or `WithVersion`. The
-`runtimes/<rid>/` paths are where [`build`](/cli/build/) stages each self-contained publish. Before
+`runtimes/<rid>/` paths are where [`build`](/cli/build/) stages each platform's publish. The entrypoints
+are framework-dependent: Macro Deck runs them on the .NET runtime it ships, so the package stays small
+(see [Runtime](/reference/manifest/#runtime), including when to publish self-contained instead). Before
 publishing you also need `publisher`, `license`, `repository` and `compatibility`; `build` warns about
 each one that is missing. Every field is in the [manifest reference](/reference/manifest/).
 
@@ -140,19 +151,22 @@ in the constructor without I/O. Connect to devices or services in `InitializeAsy
     "win-x64": {
       "executable": "dotnet",
       "arguments": ["publish", "MyPlugin.csproj", "-c", "Release", "-r", "win-x64",
-                    "--self-contained", "true", "-o", "bin/publish/win-x64"],
+                    "--self-contained", "false", "-p:UseAppHost=false",
+                    "-o", "bin/publish/win-x64"],
       "output": "bin/publish/win-x64"
     },
     "osx-arm64": {
       "executable": "dotnet",
       "arguments": ["publish", "MyPlugin.csproj", "-c", "Release", "-r", "osx-arm64",
-                    "--self-contained", "true", "-o", "bin/publish/osx-arm64"],
+                    "--self-contained", "false", "-p:UseAppHost=false",
+                    "-o", "bin/publish/osx-arm64"],
       "output": "bin/publish/osx-arm64"
     },
     "linux-x64": {
       "executable": "dotnet",
       "arguments": ["publish", "MyPlugin.csproj", "-c", "Release", "-r", "linux-x64",
-                    "--self-contained", "true", "-o", "bin/publish/linux-x64"],
+                    "--self-contained", "false", "-p:UseAppHost=false",
+                    "-o", "bin/publish/linux-x64"],
       "output": "bin/publish/linux-x64"
     }
   }
@@ -160,6 +174,8 @@ in the constructor without I/O. Connect to devices or services in `InitializeAsy
 ```
 
 A manifest platform without a target fails the build. The format is in [`build`](/cli/build/).
+`-r <rid>` keeps each publish to that platform's native assets; `-p:UseAppHost=false` skips the native
+launcher a framework-dependent entrypoint does not use.
 
 ## Services and configuration
 

@@ -12,7 +12,7 @@ import {
   signal,
 } from '@angular/core';
 
-import { AppStrings, ConfigFlowStepDto, Strings, UiConfigEvents, UiConfigProperties, emitsEvent, nodeString, nodeText, resolveLocalizedText } from '@macro-deck/runtime';
+import { AppStrings, ConfigFlowStepDto, Strings, UiConfigEvents, UiConfigProperties, emitsEvent, nodeText, resolveLocalizedText } from '@macro-deck/runtime';
 import { ButtonComponent, LocalizationService, LocalizedTextPipe, ModalComponent, ToggleSwitchComponent, TranslatePipe, dismissModal } from '@shared';
 import type { ActionParameterDef, UiNode, UiNodeEvent } from '@macro-deck/runtime';
 import { isFieldVisible } from '../../domain/parameter-visibility.util';
@@ -261,12 +261,6 @@ export class ConfigFlowDialogComponent implements OnChanges {
       return;
     }
 
-    if (event.name === UiConfigEvents.Activate) {
-      const url = this.root && nodeString(findNode(this.root, event.nodeId), UiConfigProperties.Url);
-      if (url) this.externalLinks.open(url);
-      return;
-    }
-
     if (!this.root || event.nodeId !== this.root.id) return;
 
     switch (event.name) {
@@ -291,13 +285,4 @@ export class ConfigFlowDialogComponent implements OnChanges {
       this.closed.emit(completed);
     });
   }
-}
-
-function findNode(node: UiNode, id: string): UiNode | undefined {
-  if (node.id === id) return node;
-  for (const child of node.children ?? []) {
-    const found = findNode(child, id);
-    if (found) return found;
-  }
-  return node.fallback ? findNode(node.fallback, id) : undefined;
 }

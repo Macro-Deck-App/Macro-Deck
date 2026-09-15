@@ -124,6 +124,14 @@ async fn startup(app: AppHandle) {
     updater::spawn_periodic_check(app);
 }
 
+// The opener's own link script cancels target=_blank clicks and invokes a command no capability
+// grants, so links went nowhere; external-links.js routes them to open_external instead.
+fn opener_plugin<R: tauri::Runtime>() -> impl tauri::plugin::Plugin<R> {
+    tauri_plugin_opener::Builder::new()
+        .open_js_links_on_click(false)
+        .build()
+}
+
 fn main() {
     // A relaunch races the instance that started it: the single-instance lock is only released once
     // that process is gone, and claiming it too early makes this instance forward its argv to a
@@ -138,7 +146,7 @@ fn main() {
             opened_files::queue(app, opened_files::paths_from_args(argv.into_iter()));
         }))
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_opener::init())
+        .plugin(opener_plugin())
         .plugin(
             tauri_plugin_updater::Builder::new()
                 // Compares against the baked release version rather than
@@ -252,4 +260,16 @@ fn main() {
             RunEvent::Reopen { .. } => window::show_main_window(app),
             _ => {}
         });
+}
+
+#[cfg(test)]
+mod tests {
+    use tauri::plugin::Plugin;
+
+    #[test]
+    fn opener_plugin_injects_no_link_script_that_would_swallow_external_links() {
+        let plugin = super::opener_plugin::<tauri::Wry>();
+
+        assert!(plugin.initialization_script().is_none());
+    }
 }

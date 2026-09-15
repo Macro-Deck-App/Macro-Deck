@@ -344,6 +344,42 @@ public class PluginBuilderTests
 	}
 
 	[Test]
+	public async Task A_missing_entrypoint_names_the_executable_the_build_produced_instead()
+	{
+		var rids = ManifestFixtures.PickForeignRids(1);
+		var rid = rids[0];
+		var project = BuildFixtures.WriteProject(rids);
+		var renamed = rid.StartsWith("win-", StringComparison.Ordinal) ? "Renamed.exe" : "Renamed";
+
+		try
+		{
+			// A project file renamed after scaffolding: the build succeeds, but its executable carries the
+			// new project name while the manifest still declares the old one.
+			var runner = new FakePluginBuildRunner
+			{
+				OnRun = (_, _, _) =>
+				{
+					var output = Path.Combine(project, BuildFixtures.OutputDirectory(rid));
+					Directory.CreateDirectory(output);
+					File.WriteAllText(Path.Combine(output, renamed), "renamed executable");
+				}
+			};
+
+			var result = await BuildAsync(project, runner);
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(result.FailureReason, Is.EqualTo(PluginBuildFailureReason.EntrypointMissing));
+				Assert.That(result.FailureDetail, Does.Contain($"runtimes/{rid}/{renamed}"));
+			});
+		}
+		finally
+		{
+			Delete(project);
+		}
+	}
+
+	[Test]
 	public async Task Building_one_runtime_identifier_does_not_fail_because_the_others_were_not_built()
 	{
 		var rids = ManifestFixtures.PickForeignRids(3);

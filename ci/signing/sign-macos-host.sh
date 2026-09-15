@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Signs the single-file host launcher (the only Mach-O binary in the staged
-# host-publish directory - it carries the .NET runtime and the third-party
-# natives inside it) before the Tauri bundler copies it into the .app. The
-# bundler only signs binaries it knows about, so nested host binaries must
-# already carry a hardened-runtime signature for notarization to pass.
+# Signs the single-file host launcher and every Mach-O binary of the bundled
+# .NET runtime under runtime/ (the dotnet muxer, hostfxr and the shared
+# framework dylibs) in the staged host-publish directory before the Tauri
+# bundler copies it into the .app. The bundler only signs binaries it knows
+# about, so nested host binaries must already carry a hardened-runtime
+# signature for notarization to pass.
 #
 # Usage: sign-macos-host.sh <host-publish-dir> <entitlements.plist>
 # Env:   APPLE_SIGNING_IDENTITY - codesign identity; skips signing when unset.

@@ -5,15 +5,13 @@
         <OutputType Condition="'$(RuntimeIdentifier)' == 'win-x64'">WinExe</OutputType>
     </PropertyGroup>
 
-    <!-- macOS codesign treats every managed assembly next to the app as an unsigned nested code
-         object and fails the .app signature (issue #316); folding them into one launcher leaves a
-         single Mach-O to sign. Scoped to a RuntimeIdentifier so the packaging shape only reaches the
-         RID publishes CI and stage-host.sh run; plain `dotnet build`/`dotnet test` never pass a RID
-         and must keep their framework-dependent output. Trimming stays off because integration
-         discovery reflects over the host assemblies. -->
+    <!-- Packaged builds are one framework-dependent launcher that only ever uses the runtime staged in runtime/ next to it.
+         Plain build/test pass no RID and stay framework-dependent on the machine's dotnet. -->
     <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
         <PublishSingleFile>true</PublishSingleFile>
-        <SelfContained>true</SelfContained>
+        <SelfContained>false</SelfContained>
+        <AppHostRelativeDotNet>runtime</AppHostRelativeDotNet>
+        <AppHostDotNetSearch>AppRelative</AppHostDotNetSearch>
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
         <PublishTrimmed>false</PublishTrimmed>
     </PropertyGroup>

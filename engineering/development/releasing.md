@@ -12,7 +12,7 @@ Release artifacts always use the Production build identity. Beta is derived from
 
 ## What the workflow does
 
-The build workflow tests every platform, builds the Angular UI, publishes the self-contained host for all three runtime identifiers, packages the Tauri application on the target operating systems, signs where credentials are available, runs the end-to-end suite against a production host staged from the same revision, and packs the NuGet package family. It publishes nothing itself; everything it produces is a workflow artifact.
+The build workflow tests every platform, builds the Angular UI, publishes the framework-dependent single-file host for all three runtime identifiers together with a bundled .NET runtime in its `runtime/` folder (the official ASP.NET Core runtime archives, resolved from Microsoft's release metadata at the runtime patch the SDK compiled against and checksum-verified, see [`ci/scripts/stage-dotnet-runtime.sh`](../../ci/scripts/stage-dotnet-runtime.sh)), packages the Tauri application on the target operating systems, signs where credentials are available, runs the end-to-end suite against a production host staged from the same revision, and packs the NuGet package family. It publishes nothing itself; everything it produces is a workflow artifact.
 
 Publishing then happens in one order, because each step depends on the one before it:
 

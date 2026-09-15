@@ -1,6 +1,8 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Cli.Manifests;
 using MacroDeck.Plugin.Cli.Scaffolding;
+using MacroDeck.Plugin.Packaging.Manifest;
+using MacroDeck.Plugin.Packaging.Versioning;
 
 namespace MacroDeck.Plugin.Cli.Tests.UnitTests;
 
@@ -101,21 +103,33 @@ public class ScaffoldManifestWriterTests
 		});
 	}
 
+	[TestCase("3.0.0-beta.1", true)]
+	[TestCase("3.0.0-beta.6", true)]
+	[TestCase("3.0.0-rc.1", true)]
+	[TestCase("3.0.0", true)]
+	[TestCase("3.1.0", true)]
+	[TestCase("4.0.0", true)]
+	[TestCase("2.9.9", false)]
+	public void The_written_macro_deck_range_admits_3_0_prerelease_and_later_hosts(string hostVersion,
+		bool expected)
+	{
+		var json = ScaffoldManifestWriter.BuildManifestJson(TemplateManifestJson, CanonicalRequest());
+		using var document = JsonDocument.Parse(json);
+		var written = document.RootElement.GetProperty("compatibility").GetProperty("macroDeck").GetString();
+
+		Assert.That(SemanticVersionRange.TryParse(written, out var range), Is.True, written);
+		Assert.That(SemanticVersion.TryParse(hostVersion, out var host), Is.True);
+		Assert.That(range!.Satisfies(host!), Is.EqualTo(expected), $"'{written}' against host {hostVersion}");
+	}
+
 	[Test]
-	public void An_open_ended_macro_deck_compatibility_range_is_always_written()
+	public void No_protocol_compatibility_is_written()
 	{
 		var json = ScaffoldManifestWriter.BuildManifestJson(TemplateManifestJson, CanonicalRequest());
 		using var document = JsonDocument.Parse(json);
 		var compatibility = document.RootElement.GetProperty("compatibility");
 
-		Assert.Multiple(() =>
-		{
-			Assert.That(compatibility.GetProperty("macroDeck").GetString(), Is.EqualTo(">=3.0.0"));
-
-			// Deliberately not 'protocol': a fixed {minimum:1,maximum:1} range would get the scaffolded
-			// plugin rejected by a future protocol-2 host.
-			Assert.That(compatibility.TryGetProperty("protocol", out _), Is.False);
-		});
+		Assert.That(compatibility.TryGetProperty("protocol", out _), Is.False);
 	}
 
 	// b2
@@ -162,7 +176,7 @@ public class ScaffoldManifestWriterTests
 
 		var entrypoints = document.RootElement.GetProperty("entrypoints");
 		Assert.That(entrypoints.GetProperty("win-x64").GetProperty("executable").GetString(),
-			Is.EqualTo("runtimes/win-x64/SpotifyCtl.exe"));
+			Is.EqualTo("runtimes/win-x64/SpotifyCtl.dll"));
 	}
 
 	// c1
@@ -182,37 +196,44 @@ public class ScaffoldManifestWriterTests
 
 	// c2 + c3
 	[Test]
-	public void Canonical_entrypoints_are_distinct_prefixed_and_carry_no_runtime_or_dll()
+	public void Every_entrypoint_is_a_framework_dependent_dll_under_its_own_rid_slot()
 	{
-		var json = ScaffoldManifestWriter.BuildManifestJson(TemplateManifestJson, CanonicalRequest());
+		var request = CanonicalRequest(platforms: PluginScaffoldDefaults.KnownPlatforms);
+		var json = ScaffoldManifestWriter.BuildManifestJson(TemplateManifestJson, request);
 		using var document = JsonDocument.Parse(json);
 		var entrypoints = document.RootElement.GetProperty("entrypoints");
 
-		var executables = new List<string>();
+		Assert.That(entrypoints.EnumerateObject().Select(p => p.Name),
+			Is.EquivalentTo(PluginScaffoldDefaults.KnownPlatforms));
 
 		foreach (var property in entrypoints.EnumerateObject())
 		{
 			var entrypoint = property.Value;
-			var executable = entrypoint.GetProperty("executable").GetString()!;
-			executables.Add(executable);
+			Assert.That(entrypoint.GetProperty("executable").GetString(),
+				Is.EqualTo($"runtimes/{property.Name}/SpotifyController.dll"));
 
-			Assert.That(entrypoint.TryGetProperty("runtime", out _), Is.False);
-			Assert.That(executable.EndsWith(".dll", StringComparison.OrdinalIgnoreCase), Is.False);
-			Assert.That(executable, Does.Not.EndsWith(".sh"));
-			Assert.That(executable, Does.Not.EndsWith(".bat"));
-			Assert.That(executable, Does.Not.EndsWith(".cmd"));
-			Assert.That(executable, Does.Not.EndsWith(".ps1"));
-			Assert.That(executable, Does.Not.EndsWith(".command"));
-			Assert.That(executable, Does.StartWith($"runtimes/{property.Name}/"));
+			var runtime = entrypoint.GetProperty("runtime");
+			Assert.That(runtime.GetProperty("kind").GetString(), Is.EqualTo("FrameworkDependent"));
+			Assert.That(runtime.GetProperty("dotnetVersion").GetString(), Is.EqualTo("10.0"));
 		}
+	}
 
-		Assert.That(executables, Is.Unique);
-		Assert.That(entrypoints.GetProperty("win-x64").GetProperty("executable").GetString(),
-			Does.EndWith(".exe"));
-		Assert.That(entrypoints.GetProperty("osx-arm64").GetProperty("executable").GetString(),
-			Does.Not.Contain("."));
-		Assert.That(entrypoints.GetProperty("linux-x64").GetProperty("executable").GetString(),
-			Does.Not.Contain("."));
+	[Test]
+	public void The_host_manifest_reader_accepts_every_entrypoint_as_framework_dependent_on_dotnet_10()
+	{
+		var request = CanonicalRequest(platforms: PluginScaffoldDefaults.KnownPlatforms);
+		var json = ScaffoldManifestWriter.BuildManifestJson(TemplateManifestJson, request);
+
+		var result = new PluginManifestReader().ReadFromJson(json, null, "com.example.spotify", "1.0.0");
+
+		Assert.That(result.Success, Is.True, result.ErrorMessage);
+		Assert.That(result.Manifest!.Entrypoints.Keys, Is.EquivalentTo(PluginScaffoldDefaults.KnownPlatforms));
+
+		foreach (var (_, entrypoint) in result.Manifest.Entrypoints)
+		{
+			Assert.That(entrypoint.Runtime?.Kind, Is.EqualTo(PluginEntrypointRuntimeKind.FrameworkDependent));
+			Assert.That(entrypoint.Runtime?.DotnetVersion, Is.EqualTo("10.0"));
+		}
 	}
 
 	[Test]

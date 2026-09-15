@@ -49,6 +49,7 @@ function makeFlowStub(step: ConfigFlowStepDto | null) {
     submit: async () => {},
     start: async () => {},
     reset: () => {},
+    sendTreeEvent: jasmine.createSpy('sendTreeEvent'),
   };
 }
 
@@ -222,6 +223,28 @@ describe('ConfigFlowDialogComponent', () => {
 
     expect(openedLinks).toEqual(['https://developer.spotify.com/dashboard']);
     expect(event.defaultPrevented).toBeTrue();
+  });
+
+  it('opens a link node in the config tree exactly once and still forwards its activate', async () => {
+    const root: UiNode = {
+      id: 'flow',
+      type: 'flow',
+      children: [
+        {
+          id: 'docs',
+          type: 'link',
+          properties: { label: 'Open dashboard', url: 'https://developer.example.com', events: ['activate'] },
+        },
+      ],
+    };
+    const { fixture, flow } = await renderWithRoot(stepWith([], { fields: [] }), root);
+
+    const anchor = fixture.nativeElement.querySelector('[data-node-id="docs"] a') as HTMLAnchorElement;
+    anchor.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    await fixture.whenStable();
+
+    expect(openedLinks).toEqual(['https://developer.example.com']);
+    expect(flow.sendTreeEvent).toHaveBeenCalledWith({ nodeId: 'docs', name: 'activate' });
   });
 
   it('renders no link container when the step has no links', async () => {

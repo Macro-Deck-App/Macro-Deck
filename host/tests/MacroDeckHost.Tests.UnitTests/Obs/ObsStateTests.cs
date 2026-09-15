@@ -143,6 +143,18 @@ internal sealed class ObsStateTests
 		});
 	}
 
+	[Test]
+	public void CurrentProfile_IsThePolledProfileAndUnavailableWhileDisconnected()
+	{
+		var state = ObsState.FromStatus(new ObsStatus { CurrentProfile = "Streaming" }, null, _start);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ObsVariables.Read(state, "current_profile"), Is.EqualTo("Streaming"));
+			Assert.That(ObsVariables.Read(ObsState.Disconnected, "current_profile"), Is.Null);
+		});
+	}
+
 	private static ObsStatus Streaming(long bytesSent) => new() { IsStreaming = true, StreamBytes = bytesSent };
 
 	private static ObsStatus Recording(long bytes) => new() { IsRecording = true, RecordBytes = bytes };

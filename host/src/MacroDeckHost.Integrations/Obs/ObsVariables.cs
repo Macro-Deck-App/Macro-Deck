@@ -27,7 +27,8 @@ internal static class ObsVariables
 		new("dropped_frames", VariableType.Numeric, 0, TimeSpan.FromSeconds(1)),
 		new("dropped_frames_percent", VariableType.Numeric, 1, TimeSpan.FromSeconds(1)),
 		new("skipped_frames", VariableType.Numeric, 0, TimeSpan.FromSeconds(1)),
-		new("skipped_frames_percent", VariableType.Numeric, 1, TimeSpan.FromSeconds(1))
+		new("skipped_frames_percent", VariableType.Numeric, 1, TimeSpan.FromSeconds(1)),
+		new("current_profile", VariableType.Text, null, TimeSpan.FromSeconds(1))
 	];
 
 	public static IReadOnlyList<VariableDefinition> Templates { get; } =
@@ -74,6 +75,7 @@ internal static class ObsVariables
 		"dropped_frames_percent" => AppStrings.Integrations.Obs.Variables.DroppedFramesPercent(),
 		"skipped_frames" => AppStrings.Integrations.Obs.Variables.SkippedFrames(),
 		"skipped_frames_percent" => AppStrings.Integrations.Obs.Variables.SkippedFramesPercent(),
+		"current_profile" => AppStrings.Integrations.Obs.Variables.CurrentProfile(),
 		_ => default
 	};
 
@@ -132,6 +134,7 @@ internal static class ObsVariables
 		"is_connected" => state.IsConnected,
 		"current_scene" => state.CurrentScene,
 		"preview_scene" => state.PreviewScene,
+		"current_profile" => state.CurrentProfile,
 		"is_recording" => state.IsRecording,
 		"recording_paused" => state.RecordingPaused,
 		"recording_timecode" => state.RecordingTimecode,
