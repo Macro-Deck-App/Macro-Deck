@@ -16,6 +16,7 @@
 skills-lock.json
 graphify-out
 wiki-vault
+/.cache/
 
 # Visual Studio Code
 .vscode/*

@@ -446,11 +446,9 @@ fn macos_ships_the_adaptive_app_icon_and_an_icns_fallback() {
 }
 
 #[test]
-fn host_publish_is_single_file() {
-    // Regression guard for issue #316: notarization requires a hardened-runtime signature
-    // on every Mach-O in the bundle, so the publish output must be a single launcher that
-    // the CI pre-sign step covers in one pass instead of hundreds of loose runtime dylibs.
-    // Trimming stays off because integration discovery reflects over the host assemblies.
+fn host_publish_is_a_single_file_launcher_on_the_staged_runtime() {
+    // Issue #316: every Mach-O needs a hardened-runtime signature, so the host is one launcher
+    // pinned to the signed runtime/ beside it. Trimming stays off: integrations are reflected.
     let project = repository_file("host/src/MacroDeckHost/MacroDeckHost.csproj");
     assert!(
         project.contains("Condition=\"'$(RuntimeIdentifier)' != ''\""),
@@ -458,7 +456,9 @@ fn host_publish_is_single_file() {
     );
     for property in [
         "<PublishSingleFile>true</PublishSingleFile>",
-        "<SelfContained>true</SelfContained>",
+        "<SelfContained>false</SelfContained>",
+        "<AppHostRelativeDotNet>runtime</AppHostRelativeDotNet>",
+        "<AppHostDotNetSearch>AppRelative</AppHostDotNetSearch>",
         "<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>",
         "<PublishTrimmed>false</PublishTrimmed>",
     ] {
@@ -539,6 +539,34 @@ fn host_lock_verifies_the_probe_instead_of_sleeping() {
         !script.contains("FileOpen $2 \"${Directory}\\$1\" w"),
         "host-lock.nsh must never open a probed file for write: \"w\" truncates it, destroying \
          the very file the installer is about to replace"
+    );
+}
+
+#[test]
+fn host_lock_probes_the_runtime_subtree() {
+    // Plugin processes run the bundled host\runtime\dotnet.exe and map its files, so a plugin
+    // still being torn down holds files below runtime\ that a top-level-only probe never sees.
+    let script = repository_file("ui/bootstrapper/installer/host-lock.nsh");
+    assert!(
+        script.contains("!macro MacroDeckProbeTreeWritable Directory Subdirectory"),
+        "host-lock.nsh must define a recursive probe for a subtree of the host directory"
+    );
+    assert!(
+        script.contains("!insertmacro MacroDeckProbeTreeWritable \"${Directory}\" \"runtime\""),
+        "MacroDeckStopProcessAndWait must probe the runtime subtree of the host directory"
+    );
+    assert!(
+        script.contains("FileOpen $2 \"${Directory}\\$3\\$1\" a"),
+        "the runtime probe must open each file for append (read/write, no truncation)"
+    );
+    assert!(
+        script.contains("StrCpy $MacroDeckLockedFile \"$3\\$1\""),
+        "the runtime probe must report the locked file relative to the host directory"
+    );
+    assert!(
+        repository_file("ui/bootstrapper/installer/tests/Invoke-InstallerTests.ps1")
+            .contains("Invoke-Scenario 'RuntimeSubtreeLocked'"),
+        "the installer tests must exercise a lock below runtime\\ against a real process"
     );
 }
 

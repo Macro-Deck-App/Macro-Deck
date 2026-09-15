@@ -974,8 +974,10 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 		if (candidateEntrypoint.Runtime?.Kind == PluginEntrypointRuntimeKind.FrameworkDependent)
 		{
-			var muxer = _muxerLocator.Locate();
-			if (muxer is null)
+			var manifestRequirement = DotnetFrameworkRequirement.ForNetCoreApp(candidateEntrypoint.Runtime.DotnetVersion!);
+			var requirements = PluginRuntimeConfigReader.TryRead(executablePath) ?? [manifestRequirement];
+			var selection = _muxerLocator.Locate(requirements);
+			if (selection is null)
 			{
 				const string message = "No dotnet runtime was found to launch this framework-dependent plugin.";
 
@@ -993,12 +995,12 @@ public sealed class PluginSupervisor : IPluginSupervisor
 				return PluginSupervisorResult.Fail(PluginSupervisorError.DotnetRuntimeMissing, message);
 			}
 
-			if (muxer.InstalledRuntimeVersions.Count > 0 &&
-				!DotnetMuxerLocator.IsRuntimeSatisfied(candidateEntrypoint.Runtime.DotnetVersion!,
-					muxer.InstalledRuntimeVersions))
+			if (selection.UnmetRequirement is { } unmet)
 			{
-				var message =
-					$"No installed dotnet runtime satisfies the required version {candidateEntrypoint.Runtime.DotnetVersion}.";
+				var required = unmet.Name == DotnetFrameworkRequirement.NetCoreAppFramework
+					? unmet.Version.ToString(2)
+					: $"{unmet.Name} {unmet.Version}";
+				var message = $"No installed dotnet runtime satisfies the required version {required}.";
 
 				await entry.Gate.WaitAsync(ct);
 				try
@@ -1014,7 +1016,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 				return PluginSupervisorResult.Fail(PluginSupervisorError.DotnetRuntimeMissing, message);
 			}
 
-			launchExecutablePath = muxer.ExecutablePath;
+			launchExecutablePath = selection.Muxer.ExecutablePath;
 			launchArguments = [executablePath, .. candidateEntrypoint.Arguments ?? []];
 		}
 

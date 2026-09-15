@@ -494,15 +494,27 @@ internal sealed class FakePluginSupervisor : IPluginSupervisor
 
 internal sealed class FakeDotnetMuxerLocator : IDotnetMuxerLocator
 {
-	public DotnetMuxer? Muxer { get; set; } = new()
+	public DotnetMuxerSelection? Selection { get; set; } = new()
 	{
-		ExecutablePath = OperatingSystem.IsWindows() ? @"C:\dotnet\dotnet.exe" : "/usr/share/dotnet/dotnet",
-		InstalledRuntimeVersions = [new Version(10, 0, 0)]
+		Muxer = new DotnetMuxer
+		{
+			ExecutablePath = OperatingSystem.IsWindows() ? @"C:\dotnet\dotnet.exe" : "/usr/share/dotnet/dotnet",
+			InstalledFrameworks = new Dictionary<string, IReadOnlyList<Version>>
+			{
+				[DotnetFrameworkRequirement.NetCoreAppFramework] = [new Version(10, 0, 0)]
+			}
+		}
 	};
+
+	public List<IReadOnlyList<DotnetFrameworkRequirement>> Requests { get; } = [];
 
 	public int InvalidateCount { get; private set; }
 
-	public DotnetMuxer? Locate() => Muxer;
+	public DotnetMuxerSelection? Locate(IReadOnlyList<DotnetFrameworkRequirement> requirements)
+	{
+		Requests.Add(requirements);
+		return Selection;
+	}
 
 	public void Invalidate() => InvalidateCount++;
 }

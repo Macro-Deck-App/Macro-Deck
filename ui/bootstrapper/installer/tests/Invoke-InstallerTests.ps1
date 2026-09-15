@@ -533,6 +533,33 @@ Invoke-Scenario 'TopLevelOnly' {
     }
 }
 
+Invoke-Scenario 'RuntimeSubtreeLocked' {
+    $dir = New-ScenarioDir 'RuntimeSubtreeLocked'
+    $runtimeDir = Join-Path $dir 'runtime\shared\x'
+    New-Item -ItemType Directory -Force -Path $runtimeDir | Out-Null
+    Set-Content -LiteralPath (Join-Path $dir 'top-level-file.txt') -Value 'writable' -NoNewline
+    $lockFile = Join-Path $runtimeDir 'coreclr.dll'
+    Set-Content -LiteralPath $lockFile -Value 'stub' -NoNewline
+    $holder = Start-FileHolder -Path $lockFile -HoldSeconds 120
+    try {
+        Wait-UntilLocked -Path $lockFile
+        $log = Join-Path $script:LogsDir 'RuntimeSubtreeLocked.log'
+        $fields = Invoke-HostLockHarness -HarnessExe $script:HostLockHarnessShortExe `
+            -ProcessName 'MacroDeckHostNotRunning.exe' -Directory $dir -Scope '1' -LogPath $log
+        Assert-Field $fields 'result' '2'
+        Assert-Field $fields 'locked' 'runtime\shared\x\coreclr.dll'
+    } finally {
+        Stop-ProcessSafely $holder
+    }
+
+    $holder.WaitForExit(5000) | Out-Null
+    $log = Join-Path $script:LogsDir 'RuntimeSubtreeReleased.log'
+    $fields = Invoke-HostLockHarness -HarnessExe $script:HostLockHarnessNormalExe `
+        -ProcessName 'MacroDeckHostNotRunning.exe' -Directory $dir -Scope '1' -LogPath $log
+    Assert-Field $fields 'result' '0'
+    Assert-Field $fields 'locked' ''
+}
+
 Invoke-Scenario 'InPlaceUpgrade' {
     Assert ($script:CompileStatus['mini-upgrade.nsi (v1)'] -eq $true) 'mini-upgrade v1 did not compile'
     Assert ($script:CompileStatus['mini-upgrade.nsi (v2)'] -eq $true) 'mini-upgrade v2 did not compile'

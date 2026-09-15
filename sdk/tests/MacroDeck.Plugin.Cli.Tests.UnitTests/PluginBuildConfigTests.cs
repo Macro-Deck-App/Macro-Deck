@@ -55,19 +55,25 @@ public class PluginBuildConfigTests
 			Assert.That(target.GetProperty("executable").GetString(), Is.EqualTo("dotnet"));
 
 			var arguments = target.GetProperty("arguments").EnumerateArray().Select(a => a.GetString()).ToList();
-			Assert.That(arguments, Does.Contain("publish"));
-			Assert.That(arguments, Does.Contain("-c"));
-			Assert.That(arguments, Does.Contain("Release"));
-			Assert.That(arguments, Does.Contain("-r"));
-			Assert.That(arguments, Does.Contain(property.Name));
-			Assert.That(arguments, Does.Contain("--self-contained"));
-
-			// -r and the rid are two separate elements, never one "-r <rid>" string.
-			var ridIndex = arguments.IndexOf("-r");
-			Assert.That(arguments[ridIndex + 1], Is.EqualTo(property.Name));
+			var expectedOutput = $"bin/publish/{property.Name}";
+			Assert.That(arguments,
+				Is.EqualTo(new List<string>
+				{
+					"publish",
+					"SpotifyController.csproj",
+					"-c",
+					"Release",
+					"-r",
+					property.Name,
+					"--self-contained",
+					"false",
+					"-p:UseAppHost=false",
+					"-o",
+					expectedOutput
+				}));
 
 			var output = target.GetProperty("output").GetString()!;
-			Assert.That(output, Is.EqualTo(arguments[arguments.IndexOf("-o") + 1]));
+			Assert.That(output, Is.EqualTo(expectedOutput));
 			outputs.Add(output);
 
 			var propertyNames = target.EnumerateObject().Select(p => p.Name).ToList();

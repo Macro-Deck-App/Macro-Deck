@@ -7,9 +7,9 @@ namespace MacroDeck.Plugin.Cli.Scaffolding;
 /// Builds <c>macrodeck-build.json</c>, the developer build configuration <c>macrodeck-plugin build</c>
 /// (#617) reads: structured <c>executable</c> + <c>arguments</c>, never an opaque shell command string, and
 /// nothing .NET-specific about the shape - a Rust plugin's own build config would carry the same three
-/// properties per target with a different <c>executable</c>. Publishes self-contained per RID because the
-/// manifest schema forbids a <c>.dll</c> executable without a <c>runtime</c> block, and framework-dependent
-/// output is RID-agnostic, which would leave nothing to separate the <c>runtimes/&lt;rid&gt;/</c> layout by.
+/// properties per target with a different <c>executable</c>. Publishes framework-dependent, because the host
+/// ships the .NET runtime plugins run on, but still per RID so each <c>runtimes/&lt;rid&gt;/</c> slot carries
+/// only that RID's native assets.
 /// </summary>
 internal static class PluginBuildConfig
 {
@@ -38,7 +38,8 @@ internal static class PluginBuildConfig
 					"-r",
 					rid,
 					"--self-contained",
-					"true",
+					"false",
+					"-p:UseAppHost=false",
 					"-o",
 					output),
 				["output"] = output
