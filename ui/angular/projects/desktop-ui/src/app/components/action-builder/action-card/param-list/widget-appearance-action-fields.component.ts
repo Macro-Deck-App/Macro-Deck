@@ -12,7 +12,7 @@ import { WidgetIconControlComponent } from '../../../widget-appearance/widget-ic
 import { WidgetIconDisplayControlComponent } from '../../../widget-appearance/widget-icon-display-control.component';
 import { ActionFlowStore } from '../../services/action-flow.store';
 
-type AppearanceKind = 'label' | 'background' | 'labelColor' | 'accentColor' | 'icon' | 'iconDisplay' | 'font' | 'border';
+type AppearanceKind = 'label' | 'background' | 'labelColor' | 'accentColor' | 'icon' | 'iconDisplay' | 'iconColor' | 'font' | 'border';
 
 @Component({
   selector: 'shared-widget-appearance-action-fields',
@@ -39,6 +39,10 @@ type AppearanceKind = 'label' | 'background' | 'labelColor' | 'accentColor' | 'i
             [resetValue]="resetValue" (ngModelChange)="write('color', $event)" /></div>
         }
         @case ('accentColor') {
+          <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate }}</label><shared-color-picker [ngModel]="stringValue('color')"
+            [resetValue]="resetValue" (ngModelChange)="write('color', $event)" /></div>
+        }
+        @case ('iconColor') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate }}</label><shared-color-picker [ngModel]="stringValue('color')"
             [resetValue]="resetValue" (ngModelChange)="write('color', $event)" /></div>
         }
@@ -214,6 +218,7 @@ export class WidgetAppearanceActionFieldsComponent implements OnInit, OnChanges 
       case 'set-accent-color': return 'accentColor';
       case 'set-icon': return 'icon';
       case 'set-icon-display': return 'iconDisplay';
+      case 'set-icon-color': return 'iconColor';
       case 'set-font': return 'font';
       case 'set-border': return 'border';
       default: return 'label';
@@ -227,6 +232,7 @@ export class WidgetAppearanceActionFieldsComponent implements OnInit, OnChanges 
       case 'accentColor': return 'AccentColor';
       case 'icon': return 'Icon';
       case 'iconDisplay': return 'IconDisplay';
+      case 'iconColor': return 'IconColor';
       case 'font': return 'Font';
       case 'border': return 'Border';
       default: return 'Label';

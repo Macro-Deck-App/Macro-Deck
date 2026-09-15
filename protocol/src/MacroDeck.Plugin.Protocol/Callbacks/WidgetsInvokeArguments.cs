@@ -73,6 +73,8 @@ public sealed record WidgetAppearancePatchDto
 
 	public double? IconOpacity { get; init; }
 
+	public string? IconColor { get; init; }
+
 	public string? FontFaceId { get; init; }
 
 	public double? FontSize { get; init; }

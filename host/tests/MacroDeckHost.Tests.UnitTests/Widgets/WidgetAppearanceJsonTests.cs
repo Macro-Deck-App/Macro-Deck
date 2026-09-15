@@ -238,6 +238,120 @@ public class WidgetAppearanceJsonTests
 	}
 
 	[Test]
+	public void MomentaryButton_WritesTheIconColorFlat()
+	{
+		var data = Parse("""{"mode":"momentary","icon":{"type":"icon-pack","reference":"i"}}""");
+
+		var changed = WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { IconColor = "#ef4444" },
+			["off"]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed, Is.True);
+			Assert.That(data["iconColor"]!.GetValue<string>(), Is.EqualTo("#ef4444"));
+			Assert.That(data["states"], Is.Null);
+		});
+	}
+
+	[Test]
+	public void ToggleButton_WritesTheIconColorOntoTheSelectedStateOnly()
+	{
+		var data = Parse(
+			"""{"stateMode":true,"iconColor":"#00ff00","states":[{"id":"off","label":"Off","appearance":{}},{"id":"on","label":"On","appearance":{}}]}""");
+
+		var changed = WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { IconColor = "#ef4444" },
+			["on"]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed, Is.True);
+			Assert.That(Appearance(data, "on")!["iconColor"]!.GetValue<string>(), Is.EqualTo("#ef4444"));
+			Assert.That(Appearance(data, "off")!["iconColor"], Is.Null);
+			Assert.That(data["iconColor"]!.GetValue<string>(), Is.EqualTo("#00ff00"));
+		});
+	}
+
+	[Test]
+	public void MomentaryButton_ColoringTheIcon_HoistsTheLegacyIconWithIt()
+	{
+		var data = Parse("""{"states":[{"id":"off","label":"Off","appearance":{"iconId":"icon-old"}}]}""");
+
+		WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { IconColor = "#ef4444" },
+			["off"]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(data["icon"]!["reference"]!.GetValue<string>(), Is.EqualTo("icon-old"));
+			Assert.That(data["iconColor"]!.GetValue<string>(), Is.EqualTo("#ef4444"));
+			Assert.That(Appearance(data, "off")!.ContainsKey("iconId"), Is.False);
+		});
+	}
+
+	[Test]
+	public void IconColor_IsDroppedForATypeThatDoesNotRenderIt()
+	{
+		var data = Parse("""{"iconId":"icon-1"}""");
+
+		var changed = WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.Slider,
+			new WidgetAppearancePatch { IconColor = "#ef4444" },
+			["off"]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed, Is.False);
+			Assert.That(data["iconColor"], Is.Null);
+		});
+	}
+
+	[Test]
+	public void EmptyIconColor_ClearsIt()
+	{
+		var data = Parse("""{"mode":"momentary","iconId":"i","iconColor":"#ef4444"}""");
+
+		WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { IconColor = string.Empty },
+			["off"]);
+
+		Assert.That(data["iconColor"], Is.Null);
+	}
+
+	[Test]
+	public void ClearingTheIconColor_RemovesItFromTheStateOrTheRootAndTheLegacyCopy()
+	{
+		var toggle = Parse(
+			"""{"stateMode":true,"states":[{"id":"off","label":"Off","appearance":{"iconColor":"#111111"}},{"id":"on","label":"On","appearance":{"iconColor":"#222222"}}]}""");
+		var momentary = Parse(
+			"""{"iconColor":"#333333","states":[{"id":"off","label":"Off","appearance":{"iconColor":"#444444"}}]}""");
+
+		var toggleCleared = WidgetAppearanceJson.ClearProperty(toggle,
+			WidgetTypeIds.ActionButton,
+			WidgetAppearanceProperty.IconColor,
+			"on");
+		var momentaryCleared = WidgetAppearanceJson.ClearProperty(momentary,
+			WidgetTypeIds.ActionButton,
+			WidgetAppearanceProperty.IconColor,
+			"off");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(toggleCleared, Is.True);
+			Assert.That(Appearance(toggle, "on")!.ContainsKey("iconColor"), Is.False);
+			Assert.That(Appearance(toggle, "off")!["iconColor"]!.GetValue<string>(), Is.EqualTo("#111111"));
+			Assert.That(momentaryCleared, Is.True);
+			Assert.That(momentary.ContainsKey("iconColor"), Is.False);
+			Assert.That(Appearance(momentary, "off")!.ContainsKey("iconColor"), Is.False);
+		});
+	}
+
+	[Test]
 	public void NoMode_DefaultsToMomentaryBehaviour()
 	{
 		var data = Parse("{}");

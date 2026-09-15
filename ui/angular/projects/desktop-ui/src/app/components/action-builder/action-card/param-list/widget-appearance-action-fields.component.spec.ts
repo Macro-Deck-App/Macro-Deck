@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 
 import { ActionBlock, WIDGET_APPEARANCE_RESET } from '@macro-deck/runtime';
 import { ApiService, IconImageService } from '@shared';
+import { ColorPickerComponent } from '../../../forms/color-picker/color-picker.component';
 import { WidgetFontAppearanceControlComponent } from '../../../widget-appearance/widget-font-appearance-control.component';
 import { WidgetIconDisplayControlComponent } from '../../../widget-appearance/widget-icon-display-control.component';
 import { ActionOptionsService } from '../../../../services/action-options.service';
@@ -169,6 +170,38 @@ describe('WidgetAppearanceActionFieldsComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('shared-widget-icon-control')).not.toBeNull();
+  });
+
+  it('offers a resettable colour for Set Icon Color and writes the picked colour', async () => {
+    options.getOptions.and.resolveTo({
+      options: [{ value: 'button', metadata: { appearanceProperties: 'Icon,IconDisplay,IconColor' } }],
+      allowsCustomValue: false,
+    });
+    fixture.componentRef.setInput('block', block('set-icon-color', 'button'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const picker = fixture.debugElement.query(By.directive(ColorPickerComponent));
+    expect(picker).not.toBeNull();
+    expect((picker.componentInstance as ColorPickerComponent).resetValue()).toBe(WIDGET_APPEARANCE_RESET);
+
+    picker.triggerEventHandler('ngModelChange', '#ef4444');
+    expect(updateParam.calls.mostRecent().args).toEqual(['action-1', 'color', '#ef4444']);
+  });
+
+  it('hides Set Icon Color for a widget that cannot colour an icon', async () => {
+    options.getOptions.and.resolveTo({
+      options: [{ value: 'slider', metadata: { appearanceProperties: 'Icon,Border,BorderColor' } }],
+      allowsCustomValue: false,
+    });
+    fixture.componentRef.setInput('block', block('set-icon-color', 'slider'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.debugElement.query(By.directive(ColorPickerComponent))).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('does not support this appearance setting');
   });
 
   it('offers the framing controls for a widget that renders a framed icon', async () => {

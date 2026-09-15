@@ -70,6 +70,7 @@ public static class WidgetAppearanceJson
 				WidgetAppearanceProperty.LabelColor,
 				WidgetAppearanceProperty.Icon,
 				WidgetAppearanceProperty.IconDisplay,
+				WidgetAppearanceProperty.IconColor,
 				WidgetAppearanceProperty.Font,
 				WidgetAppearanceProperty.Border,
 				WidgetAppearanceProperty.BorderColor
@@ -236,6 +237,7 @@ public static class WidgetAppearanceJson
 			var changed = ApplyLabelProperties(stateObject, patch);
 			changed |= SetIcon(stateObject, patch.IconId);
 			changed |= ApplyIconDisplay(stateObject, patch);
+			changed |= SetIfPresent(stateObject, "iconColor", patch.IconColor);
 			changed |= ApplyBorder(stateObject, patch);
 			return changed;
 		}
@@ -243,13 +245,14 @@ public static class WidgetAppearanceJson
 		var flatChanged = ApplyLabelProperties(data, patch);
 		flatChanged |= ApplyBorder(data, patch);
 
-		if (patch.IconId is not null || HasIconDisplay(patch))
+		if (patch.IconId is not null || HasIconDisplay(patch) || patch.IconColor is not null)
 		{
 			flatChanged |= HoistLegacyMomentaryIcon(data);
 		}
 
 		flatChanged |= SetIcon(data, patch.IconId);
 		flatChanged |= ApplyIconDisplay(data, patch);
+		flatChanged |= SetIfPresent(data, "iconColor", patch.IconColor);
 
 		return flatChanged;
 	}
@@ -335,7 +338,8 @@ public static class WidgetAppearanceJson
 
 		var changed = ClearOn(data, property, labelKey: "label");
 
-		if (property is WidgetAppearanceProperty.Icon or WidgetAppearanceProperty.IconDisplay &&
+		if (property is WidgetAppearanceProperty.Icon or WidgetAppearanceProperty.IconDisplay
+				or WidgetAppearanceProperty.IconColor &&
 			data["states"] is JsonArray states &&
 			states.OfType<JsonObject>().FirstOrDefault()?["appearance"] is JsonObject firstAppearance)
 		{
@@ -353,6 +357,7 @@ public static class WidgetAppearanceJson
 			WidgetAppearanceProperty.LabelColor => Remove(target, "labelColor"),
 			WidgetAppearanceProperty.Icon => Remove(target, "icon", "iconId"),
 			WidgetAppearanceProperty.IconDisplay => Remove(target, "iconDisplay"),
+			WidgetAppearanceProperty.IconColor => Remove(target, "iconColor"),
 			WidgetAppearanceProperty.Font => Remove(target,
 				"fontFaceId",
 				"fontSize",

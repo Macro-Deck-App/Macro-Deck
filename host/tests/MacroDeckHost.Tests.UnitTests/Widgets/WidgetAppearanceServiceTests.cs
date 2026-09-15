@@ -421,6 +421,10 @@ public class WidgetAppearanceServiceTests
 				Does.Contain(WidgetAppearanceProperty.Font).And.Contain(WidgetAppearanceProperty.Icon));
 			Assert.That(button.Service.GetWidgets().Single().AppearanceProperties,
 				Does.Contain(WidgetAppearanceProperty.IconDisplay));
+			Assert.That(button.Service.GetWidgets().Single().AppearanceProperties,
+				Does.Contain(WidgetAppearanceProperty.IconColor));
+			Assert.That(slider.Service.GetWidgets().Single().AppearanceProperties,
+				Does.Not.Contain(WidgetAppearanceProperty.IconColor));
 			Assert.That(slider.Service.GetWidgets().Single().AppearanceProperties,
 				Does.Contain(WidgetAppearanceProperty.Icon).And.Not.Contain(WidgetAppearanceProperty.IconDisplay));
 			Assert.That(clock.Service.GetWidgets().Single().AppearanceProperties,

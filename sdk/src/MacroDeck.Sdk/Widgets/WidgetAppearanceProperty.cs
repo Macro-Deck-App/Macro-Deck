@@ -30,5 +30,11 @@ public enum WidgetAppearanceProperty
 	/// The highlight colour of a Slider or History Graph - see <see cref="WidgetAppearancePatch.AccentColor" />.
 	/// Clearing it returns the widget to the reader's theme accent.
 	/// </summary>
-	AccentColor = 8
+	AccentColor = 8,
+
+	/// <summary>
+	/// The colour an action button draws its icon in - see <see cref="WidgetAppearancePatch.IconColor" />.
+	/// Clearing it returns the icon to its own colours.
+	/// </summary>
+	IconColor = 9
 }

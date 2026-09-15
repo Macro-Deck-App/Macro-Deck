@@ -10769,6 +10769,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Widgets.Actions.SetIconDisplayName" xml:space="preserve">
     <value>Set Icon Display</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorDescription" xml:space="preserve">
+    <value>Changes the color a widget's icon is drawn in.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorName" xml:space="preserve">
+    <value>Set Icon Color</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetIconName" xml:space="preserve">
     <value>Set Icon</value>
   </data>
