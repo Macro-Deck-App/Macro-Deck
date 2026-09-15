@@ -1,4 +1,4 @@
-import { computed, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, computed, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 
@@ -9,6 +9,17 @@ import { RestartNoticeService, SettingsModalService, UpdateModalService, UpdateS
 import { NotificationPanelComponent } from './notification-panel.component';
 import { LIBRARY_CONTENT_TYPES } from '../../../domain/library-content-type';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
+
+@Component({
+  standalone: true,
+  imports: [NotificationPanelComponent],
+  template: `
+    <div style="position: fixed; top: 0; left: 0; width: 1000px; height: 400px">
+      <app-notification-panel [isOpen]="true" />
+    </div>
+  `,
+})
+class WideNotificationHostComponent {}
 
 describe('NotificationPanelComponent', () => {
   let fixture: ComponentFixture<NotificationPanelComponent>;
@@ -97,10 +108,22 @@ describe('NotificationPanelComponent', () => {
   });
 
   it('stays mounted while closed so the shell can animate it shut', () => {
-    const panel = fixture.nativeElement.querySelector('.np-panel') as HTMLElement;
+    const panel = fixture.nativeElement.querySelector('.sp-panel') as HTMLElement;
     expect(panel).not.toBeNull();
-    expect(panel.classList).not.toContain('np-panel-open');
+    expect(panel.classList).not.toContain('sp-panel-open');
     expect(panel.hasAttribute('inert')).toBeTrue();
+  });
+
+  it('opens 40rem wide when there is room for it', async () => {
+    const host = TestBed.createComponent(WideNotificationHostComponent);
+    host.detectChanges();
+    await host.whenStable();
+
+    const panel = host.nativeElement.querySelector('.sp-panel') as HTMLElement;
+    panel.getAnimations().forEach(animation => animation.finish());
+    const rootFontSizePx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+
+    expect(panel.getBoundingClientRect().width).toBeCloseTo(40 * rootFontSizePx, 0);
   });
 
   it('shows the empty state when there is nothing to report', async () => {
@@ -157,7 +180,7 @@ describe('NotificationPanelComponent', () => {
     const closedSpy = jasmine.createSpy('closed');
     fixture.componentInstance.closed.subscribe(closedSpy);
 
-    (fixture.nativeElement.querySelector('.np-close') as HTMLButtonElement).click();
+    (fixture.nativeElement.querySelector('.sp-close') as HTMLButtonElement).click();
 
     expect(closedSpy).toHaveBeenCalled();
   });

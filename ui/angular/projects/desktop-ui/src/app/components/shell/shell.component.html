@@ -15,7 +15,6 @@
       (itemAction)="onNavAction($event)">
     </app-sidebar>
 
-    <!-- Always mounted, like the connection panel: it animates its own width open and shut. -->
     <app-notification-panel
       [isOpen]="navService.isNotificationPanelOpen()"
       (closed)="navService.closeNotificationPanel()">
@@ -25,7 +24,6 @@
       <router-outlet></router-outlet>
     </main>
 
-    <!-- Always mounted: it animates its own width, so removing it would skip the closing animation. -->
     <app-connection-panel
       [isOpen]="navService.isConnectionPanelOpen()"
       (closed)="navService.closeConnectionPanel()">

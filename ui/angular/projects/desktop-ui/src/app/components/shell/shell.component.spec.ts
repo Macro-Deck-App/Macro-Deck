@@ -173,4 +173,14 @@ describe('ShellComponent', () => {
     expect(navigationService.isSidebarCollapsed()).toBeTrue();
     expect(fixture.debugElement.query(By.css('.shell > app-footer-bar'))).toBeTruthy();
   });
+
+  it('keeps the side panels inside the positioned content row, so their scrim never dims the statusbar or footer', () => {
+    const content = fixture.debugElement.query(By.css('.shell-content')).nativeElement as HTMLElement;
+
+    expect(getComputedStyle(content).position).toBe('relative');
+    expect(content.querySelector('app-notification-panel')).not.toBeNull();
+    expect(content.querySelector('app-connection-panel')).not.toBeNull();
+    expect(content.querySelector('app-statusbar')).toBeNull();
+    expect(content.querySelector('app-footer-bar')).toBeNull();
+  });
 });

@@ -1,0 +1,24 @@
+<div class="sp-scrim" [class.sp-scrim-visible]="isOpen()" aria-hidden="true" (click)="closed.emit()"></div>
+
+<aside
+  #panel
+  class="sp-panel"
+  [class.sp-panel-end]="edge() === 'end'"
+  [class.sp-panel-open]="isOpen()"
+  [attr.inert]="isOpen() ? null : ''"
+  role="complementary"
+  [attr.aria-label]="heading()">
+  <header class="sp-header">
+    <span class="sp-title">{{ heading() }}</span>
+    <div class="sp-header-actions">
+      <ng-content select="[sidePanelActions]" />
+      <button type="button" class="sp-close" [attr.aria-label]="closeLabel()" (click)="closed.emit()">
+        <span class="icon icon-x icon-sm" aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="sp-body">
+    <ng-content />
+  </div>
+</aside>
