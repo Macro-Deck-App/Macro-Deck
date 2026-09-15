@@ -195,6 +195,10 @@ public static class UiConfigProperties
 	/// <summary>The background an icon-display input frames its preview against.</summary>
 	public const string Background = "background";
 
+	/// <summary>The colour an icon-display input draws its icon in, keeping the icon's own transparency, as
+	/// <c>#rrggbb</c>. Absent means the icon's own colours.</summary>
+	public const string Tint = "tint";
+
 	/// <summary>The states a state-mapping editor's rules and fallback may pick.</summary>
 	public const string States = "states";
 
@@ -234,7 +238,7 @@ public static class UiConfigProperties
 		CacheSeconds, FilterDebounceMs, FileExtensions, Language, AutoPrefixHttps, Title, StepId, State,
 		CanSubmit, Direction, Text, Url, DefaultExpanded, ClearOnCollapse, Severity, For, Triggers, CanRun,
 		IntegrationId, VariableTypes, WritableOnly, Capability, ConfigurationEntries, Segmented, Cards, Icon,
-		AspectRatio, Background, States, FalseLabel, TrueLabel, RowWeight, Wrap, HideLabel,
+		AspectRatio, Background, Tint, States, FalseLabel, TrueLabel, RowWeight, Wrap, HideLabel,
 		Reorderable,
 	];
 }

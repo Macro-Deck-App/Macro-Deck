@@ -50,7 +50,7 @@ public class UiComponentVocabularyTests
 	[
 		"events", "mainSize", "fill", "direction", "justify", "align", "gap", "padding", "background",
 		"text", "size", "minSize", "weight", "role", "color", "maxLines", "wrap", "fontFace", "source",
-		"transition", "fit", "zoom", "offsetX", "offsetY", "opacity", "brightness", "saturation", "start",
+		"transition", "fit", "zoom", "offsetX", "offsetY", "opacity", "brightness", "saturation", "tint", "start",
 		"end", "startColor", "endColor", "marker", "thickness", "value", "format", "seconds", "level",
 		"step", "levelColor", "borderStyle", "borderColor", "corner", "points", "plotTop", "digits",
 		"answer", "placeholder", "rotation", "originX", "originY", "shape", "cornerRadius", "strokeColor",
@@ -417,6 +417,7 @@ public class UiComponentVocabularyTests
 					OffsetX = 0.08,
 					OffsetY = -0.05,
 					Opacity = 0.85,
+					Tint = "#f5c542",
 					BorderStyle = UiComponentBorderStyles.Static,
 					BorderColor = "#4f8cff",
 					Corner = UiComponentButtonCorners.Tile,

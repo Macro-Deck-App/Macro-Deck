@@ -15553,6 +15553,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.Editor.Icon" xml:space="preserve">
     <value>Icône</value>
   </data>
+  <data name="Widgets.Editor.IconColor" xml:space="preserve">
+    <value>Couleur de l'icône</value>
+  </data>
   <data name="Widgets.Editor.IconDisplay" xml:space="preserve">
     <value>Affichage de l'icône</value>
   </data>

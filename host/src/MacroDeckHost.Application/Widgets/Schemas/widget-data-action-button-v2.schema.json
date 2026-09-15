@@ -32,6 +32,10 @@
       "$ref": "#/$defs/iconDisplay",
       "description": "stateMode off only: framing (fit, zoom, position, opacity) of the root iconId. stateMode on uses each state's own iconDisplay and never falls back to this one."
     },
+    "iconColor": {
+      "type": ["string", "null"],
+      "description": "stateMode off only: the colour the root icon is drawn in, every pixel keeping its own transparency. Unset draws the icon's own colours. stateMode on uses each state's own iconColor and never falls back to this one."
+    },
     "backgroundColor": {
       "type": ["string", "null"],
       "description": "Button background color. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own background color is unset - it is not a duplicate of the per-state color."
@@ -274,6 +278,10 @@
           "$ref": "#/$defs/iconDisplay",
           "description": "Per-state icon framing."
         },
+        "iconColor": {
+          "type": ["string", "null"],
+          "description": "Per-state icon colour, every pixel keeping its own transparency. Unset draws the icon's own colours."
+        },
         "backgroundColor": {
           "type": ["string", "null"],
           "description": "Background color for this state."
@@ -322,7 +330,7 @@
         },
         "appearance": {
           "$ref": "#/$defs/buttonState",
-          "description": "This state's appearance overrides. A field left out falls back to the root field of the same name - except icon and iconDisplay, which never cascade."
+          "description": "This state's appearance overrides. A field left out falls back to the root field of the same name - except icon, iconDisplay and iconColor, which never cascade."
         }
       },
       "required": ["id", "label"]

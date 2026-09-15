@@ -220,6 +220,72 @@ public class ActionButtonWidgetViewTests
 	}
 
 	[Test]
+	public void A_root_icon_colour_tints_the_icon_and_no_colour_leaves_it_untinted()
+	{
+		var icons = new Dictionary<WidgetIconReference, UiResource> { [WidgetIconReference.IconPack("icon-a")] = Icon() };
+		var tinted = Render(new { iconId = "icon-a", iconColor = "#FF8800" }, icons: icons);
+		var untinted = Render(new { iconId = "icon-a" }, icons: icons);
+		var reset = Render(new { iconId = "icon-a", iconColor = "" }, icons: icons);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(tinted.ById("actionButton").Text("tint"), Is.EqualTo("#ff8800"));
+			Assert.That(untinted.ById("actionButton").HasProperty("tint"), Is.False);
+			Assert.That(reset.ById("actionButton").HasProperty("tint"), Is.False);
+		});
+	}
+
+	[Test]
+	public void Each_state_draws_its_own_icon_colour_and_never_the_roots()
+	{
+		var data = new
+		{
+			stateMode = true,
+			iconColor = "#00ff00",
+			states = new object[]
+			{
+				new { id = "off", label = "Off", appearance = new { iconId = "icon-a", iconColor = "#ff0000" } },
+				new { id = "on", label = "On", appearance = new { iconId = "icon-a" } },
+			},
+		};
+		var icons = new Dictionary<WidgetIconReference, UiResource> { [WidgetIconReference.IconPack("icon-a")] = Icon() };
+
+		var off = Render(data, icons: icons, activeStateId: "off");
+		var on = Render(data, icons: icons, activeStateId: "on");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(off.ById("actionButton").Text("tint"), Is.EqualTo("#ff0000"));
+			Assert.That(on.ById("actionButton").HasProperty("tint"), Is.False);
+		});
+	}
+
+	[Test]
+	public void Artwork_from_an_active_icon_provider_is_never_tinted()
+	{
+		var host = Render(new { iconId = "icon-a", iconColor = "#ff0000" },
+			icons: new Dictionary<WidgetIconReference, UiResource>
+				{ [WidgetIconReference.IconPack("icon-a")] = Icon() },
+			iconProvider: WidgetIconResolution.Active(new UiResource { ResourceId = "provider-1" }));
+		var button = host.ById("actionButton");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(button.Property("source")!.Value.GetProperty("resourceId").GetString(),
+				Is.EqualTo("provider-1"));
+			Assert.That(button.HasProperty("tint"), Is.False);
+		});
+	}
+
+	[Test]
+	public void The_legacy_image_face_is_never_tinted()
+	{
+		var host = Render(new { iconColor = "#ff0000" }, imageResource: new UiResource { ResourceId = "legacy-image-1" });
+
+		Assert.That(host.ById("actionButton").HasProperty("tint"), Is.False);
+	}
+
+	[Test]
 	public void Label_position_and_text_align_are_independent_axes()
 	{
 		var bottomLeft = Render(new { labelPosition = "bottom", textAlign = "left" });
@@ -288,11 +354,12 @@ public class ActionButtonWidgetViewTests
 	private static UiTestHost Render(object data,
 		IReadOnlyDictionary<WidgetIconReference, UiResource>? icons = null,
 		UiResource? imageResource = null,
-		WidgetIconResolution? iconProvider = null)
+		WidgetIconResolution? iconProvider = null,
+		string? activeStateId = null)
 	{
 		var config = ActionButtonWidgetData.Parse(JsonSerializer.SerializeToElement(data));
 		var configState = new UiState<ActionButtonWidgetData>(config);
-		var activeState = new UiState<string?>(config.InitialStateId);
+		var activeState = new UiState<string?>(activeStateId ?? config.InitialStateId);
 		var labelText = new UiState<string?>(config.Resolve(activeState.Peek()).Label);
 		var element = ActionButtonWidgetView.Build(configState,
 			activeState,

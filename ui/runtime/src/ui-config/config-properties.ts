@@ -54,6 +54,7 @@ export const UiConfigProperties = {
   Icon: 'icon',
   AspectRatio: 'aspectRatio',
   Background: 'background',
+  Tint: 'tint',
   States: 'states',
   FalseLabel: 'falseLabel',
   TrueLabel: 'trueLabel',

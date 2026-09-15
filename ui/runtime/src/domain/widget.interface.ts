@@ -86,6 +86,7 @@ export interface ButtonState {
   iconId?: string;
   icon?: WidgetIconRef;
   iconDisplay?: WidgetIconDisplay;
+  iconColor?: string;
   backgroundColor?: string;
   label?: string;
   labelPosition?: 'top' | 'center' | 'bottom';
@@ -150,6 +151,7 @@ export interface ActionButtonData {
   iconId?: string;
   icon?: WidgetIconRef;
   iconDisplay?: WidgetIconDisplay;
+  iconColor?: string;
 
   stateMode?: boolean;
   // A press steps to the next state unless this is explicitly false, and never while a provider or a

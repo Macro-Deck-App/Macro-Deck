@@ -235,6 +235,7 @@ export class UiInputComponent {
   );
   protected readonly iconDisplayAspectRatio = computed(() => nodeNumber(this.node(), Properties.AspectRatio) ?? 1);
   protected readonly iconDisplayBackground = computed(() => nodeString(this.node(), Properties.Background));
+  protected readonly iconDisplayTint = computed(() => nodeString(this.node(), Properties.Tint) || undefined);
   protected readonly iconDisplayIconUrl = computed(
     () => this.iconImage.getIconUrl(iconPackReferenceOf(this.iconDisplayIcon()), 128),
   );

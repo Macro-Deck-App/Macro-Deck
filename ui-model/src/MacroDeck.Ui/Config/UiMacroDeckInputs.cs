@@ -159,6 +159,10 @@ public sealed record UiIconDisplayInput : UiInput<UiIconDisplay>
 	/// </summary>
 	public UiValue<string> Background { get; init; }
 
+	/// <summary>The colour the preview draws the icon in, keeping its transparency, so it matches a tinted
+	/// button on the deck. Absent or empty means the icon's own colours.</summary>
+	public UiValue<string> Tint { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiConfigPrimitives.IconDisplay;
 
@@ -172,6 +176,7 @@ public sealed record UiIconDisplayInput : UiInput<UiIconDisplay>
 		properties.Set(UiConfigProperties.Icon, Icon);
 		properties.Set(UiConfigProperties.AspectRatio, AspectRatio);
 		properties.Set(UiConfigProperties.Background, Background);
+		properties.Set(UiConfigProperties.Tint, Tint);
 	}
 }
 
