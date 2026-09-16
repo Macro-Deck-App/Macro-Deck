@@ -13,6 +13,11 @@ public sealed record StoreRegistryOptions
 
 	public TimeSpan DownloadTimeout { get; init; } = TimeSpan.FromMinutes(10);
 
+	// The origin caches every registry path on its own for up to 300 s, so right after a publish the snapshot
+	// and its files can disagree until those entries expire. The waits add up to more than that.
+	public IReadOnlyList<TimeSpan> UpdateRaceRetryDelays { get; init; } =
+		[TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(210)];
+
 	// A validly signed snapshot stays valid forever, so an origin that simply stops updating can
 	// suppress revocations and security releases indefinitely without failing any signature check.
 	// Snapshots older than this are reported stale even when every signature verifies.

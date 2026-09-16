@@ -14343,6 +14343,14 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Store.RegistryRefresh.Step.Verifying" xml:space="preserve">
     <value>Verifica della firma</value>
   </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.One" xml:space="preserve">
+    <value>Il registro è in aggiornamento. Nuovo tentativo tra {count} secondo</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.Other" xml:space="preserve">
+    <value>Il registro è in aggiornamento. Nuovo tentativo tra {count} secondi</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.RetryInstallation" xml:space="preserve">
     <value>Riprova l'installazione</value>
   </data>

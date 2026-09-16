@@ -23,7 +23,6 @@ internal sealed class StoreRegistryRefreshBackgroundServiceTests
 		using var service = new StoreRegistryRefreshBackgroundService(lifetime,
 			refresher,
 			StoreRegistryOptions.Default,
-			new RecordingMediator(),
 			time,
 			logger);
 

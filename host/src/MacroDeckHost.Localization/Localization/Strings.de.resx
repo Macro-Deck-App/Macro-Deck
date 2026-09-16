@@ -14341,6 +14341,14 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Store.RegistryRefresh.Step.Verifying" xml:space="preserve">
     <value>Signatur wird geprüft</value>
   </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.One" xml:space="preserve">
+    <value>Die Registry wird gerade aktualisiert. Neuer Versuch in {count} Sekunde</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.Other" xml:space="preserve">
+    <value>Die Registry wird gerade aktualisiert. Neuer Versuch in {count} Sekunden</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.RetryInstallation" xml:space="preserve">
     <value>Installation erneut versuchen</value>
   </data>

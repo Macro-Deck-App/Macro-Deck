@@ -133,7 +133,7 @@ describe('StorePageComponent', () => {
       }
     });
     api.getStoreOperations.and.resolveTo({ operations: [] });
-    api.getStoreExtensionIconUrl.and.returnValue('');
+    api.getStoreExtensionIconUrl.and.callFake((_kind, _id, sha256) => (sha256 ? `icon-${sha256}` : ''));
     Object.defineProperty(api, 'connectionStateSignal', { value: signal('connected') });
 
     routerSpy = jasmine.createSpyObj<Router>('Router', ['navigate']);
@@ -243,6 +243,15 @@ describe('StorePageComponent', () => {
     await createFixture({ grid: items(3) });
 
     expect(cardCount()).toBe(3);
+  });
+
+  it('loads a card icon by the digest of the icon the catalog currently lists', async () => {
+    await createFixture({ grid: [item('p1', { hasIcon: true, iconSha256: 'icon-digest' })] });
+
+    const sources = fixture.debugElement.queryAll(By.directive(StoreExtensionCardComponent))
+      .flatMap(card => Array.from<HTMLImageElement>((card.nativeElement as HTMLElement).querySelectorAll('img')))
+      .map(img => img.getAttribute('src'));
+    expect(sources).toContain('icon-icon-digest');
   });
 
   it('drives the host search call from the search box', async () => {

@@ -39,12 +39,14 @@ export interface StoreCatalogItemBody {
   unsupportedReason?: string | null;
   trust: StoreExtensionTrust;
   hasIcon: boolean;
+  iconSha256?: string | null;
   activeOperationId?: string | null;
 }
 
 export interface StoreScreenshotBody {
   index: number;
   caption?: string | null;
+  sha256?: string | null;
 }
 
 export interface StoreVersionHistoryBody {
@@ -110,7 +112,8 @@ export type StoreRegistryRefreshStep =
   | 'ReadingCatalog'
   | 'Applied'
   | 'Failed'
-  | 'Cancelled';
+  | 'Cancelled'
+  | 'WaitingForRegistryUpdate';
 
 export interface StoreRegistryRefreshLogEntryBody {
   at: string;

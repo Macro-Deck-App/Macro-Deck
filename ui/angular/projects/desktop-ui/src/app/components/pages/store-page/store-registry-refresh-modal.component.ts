@@ -34,6 +34,7 @@ const STEP_KEYS: Record<StoreRegistryRefreshStep, string> = {
   Applied: AppStrings.Store.RegistryRefresh.Step.Applied,
   Failed: AppStrings.Store.RegistryRefresh.Step.Failed,
   Cancelled: AppStrings.Store.RegistryRefresh.Step.Cancelled,
+  WaitingForRegistryUpdate: AppStrings.Store.RegistryRefresh.Step.WaitingForRegistryUpdate,
 };
 
 const ERROR_KEYS: Record<string, string> = {

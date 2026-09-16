@@ -68,6 +68,19 @@ describe('StoreRegistryRefreshModalComponent', () => {
     expect(progress?.getAttribute('aria-valuenow')).toBe('25');
   });
 
+  it('says the registry is being updated and how long until the next try', () => {
+    show(run({
+      entries: [
+        { at: '2026-09-15T10:00:00Z', step: 'Started' },
+        { at: '2026-09-15T10:00:02Z', step: 'DownloadingFiles', count: 12 },
+        { at: '2026-09-15T10:00:03Z', step: 'WaitingForRegistryUpdate', count: 30 },
+      ],
+    }));
+
+    expect(text()).toContain(translate(AppStrings.Store.RegistryRefresh.Step.WaitingForRegistryUpdate, { count: 30 }));
+    expect(text()).toContain(translate(AppStrings.Store.RegistryRefresh.State.Running));
+  });
+
   it('says in words why a refresh failed and keeps the host detail beside it', () => {
     show(run({
       state: 'Failed',

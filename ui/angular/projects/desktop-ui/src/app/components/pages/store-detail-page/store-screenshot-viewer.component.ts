@@ -31,7 +31,7 @@ export class StoreScreenshotViewerComponent {
 
   protected readonly currentUrl = computed(() => {
     const screenshot = this.current();
-    return screenshot ? this.api.getStoreScreenshotUrl(this.kind(), this.extensionId(), screenshot.index) : '';
+    return screenshot ? this.api.getStoreScreenshotUrl(this.kind(), this.extensionId(), screenshot.index, screenshot.sha256) : '';
   });
 
   protected readonly currentCaption = computed(() => this.current()?.caption ?? '');

@@ -57,6 +57,12 @@ public sealed class StoreRegistryRefreshTracker : IStoreRegistryRefreshTracker
 				return;
 			}
 
+			if (reached == StoreRegistryRefreshStep.WaitingForRegistryUpdate)
+			{
+				_lastProgressAt = DateTimeOffset.MinValue;
+				run = run with { FilesCompleted = 0, FilesTotal = 0 };
+			}
+
 			Publish(run with
 			{
 				Entries =

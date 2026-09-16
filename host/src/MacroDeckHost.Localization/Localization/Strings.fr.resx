@@ -14343,6 +14343,14 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Store.RegistryRefresh.Step.Verifying" xml:space="preserve">
     <value>Vérification de la signature</value>
   </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.One" xml:space="preserve">
+    <value>Le registre est en cours de mise à jour. Nouvel essai dans {count} seconde</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.Other" xml:space="preserve">
+    <value>Le registre est en cours de mise à jour. Nouvel essai dans {count} secondes</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.RetryInstallation" xml:space="preserve">
     <value>Réessayer l'installation</value>
   </data>
