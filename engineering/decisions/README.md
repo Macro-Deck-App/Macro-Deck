@@ -47,6 +47,7 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0042 - Signing is one shared library anchored to a pinned root, and the Portal signs Store artifacts](0042-plugin-signing-and-trusted-publishing.md)
 - [0044 - The host enforces trust as a verdict, and the Store adds the signed registry chain](0044-plugin-and-store-trust-enforcement.md)
 - [0088 - Plugins run on the .NET runtime bundled with the host](0088-plugins-run-on-the-host-bundled-dotnet-runtime.md)
+- [0089 - A development build can temporarily take over an installed plugin](0089-a-development-build-can-temporarily-take-over-an-installed-plugin.md)
 
 ## Macro Deck UI
 

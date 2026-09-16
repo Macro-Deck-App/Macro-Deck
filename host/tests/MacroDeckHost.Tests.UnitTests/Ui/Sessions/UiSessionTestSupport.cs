@@ -580,6 +580,9 @@ internal sealed class ReplayablePluginSessionRegistry : IPluginSessionRegistry
 	public Task<bool> TerminateForPlugin(string pluginId, int closeCode, string reason)
 		=> _inner.TerminateForPlugin(pluginId, closeCode, reason);
 
+	public Task<bool> TerminateManagedForPlugin(string pluginId, int closeCode, string reason)
+		=> _inner.TerminateManagedForPlugin(pluginId, closeCode, reason);
+
 	public IReadOnlyList<PluginSessionSnapshot> Snapshot() => _inner.Snapshot();
 
 	public void SetPaused(string sessionId, bool paused) => _inner.SetPaused(sessionId, paused);

@@ -18,7 +18,7 @@
       <span class="header-publisher">{{ 'macrodeck.app:Store.Page.ByPublisher' | translate:{ publisher: extension().publisher } }}</span>
     }
     <shared-store-state-badge [state]="extension().installState" />
-    <app-store-trust-badge [kind]="extension().kind" [trust]="extension().trust" />
+    <app-store-trust-badge [kind]="extension().kind" [trust]="extension().trust" [pluginId]="extension().id" />
   </div>
 </div>
 

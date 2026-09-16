@@ -71,6 +71,12 @@ internal sealed class PluginConnectionHostedService(
 	private PluginPairingAttempt? _pairingAttempt;
 	private PluginRegistrationException? _pairingFailure;
 
+	private bool _credentialsFromStore;
+
+	// Set only once a re-pairing succeeded, so a rejected stored credential raises at most one prompt
+	// per process; a mid-poll blip still resumes _pairingAttempt.
+	private bool _rePairedAfterRejection;
+
 	/// <summary>
 	/// Starts connecting and returns. It deliberately does not wait for the first connection: a plugin
 	/// launched before the host, or during a host restart, should come up and keep trying rather than
@@ -222,7 +228,17 @@ internal sealed class PluginConnectionHostedService(
 
 		if (!resuming)
 		{
-			_session = await OpenSessionAsync(credentials, cancellationToken);
+			try
+			{
+				_session = await OpenSessionAsync(credentials, cancellationToken);
+			}
+			catch (PluginRegistrationException exception) when (CanRePairAfterRejection(exception, descriptor.Pairing))
+			{
+				credentials = await ResolveCredentialsAsync(descriptor.Pairing, cancellationToken, ignoreStored: true);
+				_rePairedAfterRejection = true;
+				_session = await OpenSessionAsync(credentials, cancellationToken);
+			}
+
 			dispatcher.ResetIdempotency();
 		}
 
@@ -347,11 +363,26 @@ internal sealed class PluginConnectionHostedService(
 		Sdk = sdkUsage
 	};
 
+	private bool CanRePairAfterRejection(
+		PluginRegistrationException exception,
+		PluginPairingDescriptor? pairingDescriptor)
+		=> exception.StatusCode == HttpStatusCode.Unauthorized &&
+			_credentialsFromStore &&
+			!_everConnected &&
+			!_rePairedAfterRejection &&
+			registrationMode.Mode != PluginRegistrationMode.Managed &&
+			string.IsNullOrEmpty(_options.EnrollmentToken) &&
+			_options.PairingEnabled &&
+			credentialStore.CanSave &&
+			pairingDescriptor is { Supported: true };
+
 	private async Task<PluginCredentials> ResolveCredentialsAsync(
 		PluginPairingDescriptor? pairingDescriptor,
-		CancellationToken cancellationToken)
+		CancellationToken cancellationToken,
+		bool ignoreStored = false)
 	{
-		var stored = await credentialStore.LoadAsync(cancellationToken);
+		var stored = ignoreStored ? null : await credentialStore.LoadAsync(cancellationToken);
+		_credentialsFromStore = stored is not null;
 
 		if (stored is not null)
 		{

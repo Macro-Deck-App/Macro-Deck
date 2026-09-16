@@ -12,4 +12,11 @@ public static class ProtocolErrorReasons
 	/// pairing, and session creation for a plugin holding a development credential.
 	/// </summary>
 	public const string DeveloperModeDisabled = "developer_mode_disabled";
+
+	/// <summary>
+	/// Refines <see cref="ProtocolErrorCodes.PluginAlreadyRegistered" /> on enrolment with a Developer
+	/// token: the id belongs to a plugin Macro Deck has installed. Interactive pairing with Developer Mode
+	/// on can take that plugin over temporarily instead; retrying the enrolment never helps.
+	/// </summary>
+	public const string PluginInstalled = "plugin_installed";
 }

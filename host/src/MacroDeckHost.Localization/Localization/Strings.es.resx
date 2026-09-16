@@ -1695,6 +1695,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Developer.ManagedPlugins.UnmanagedReason" xml:space="preserve">
     <value>Este complemento se inicia y se detiene por sí mismo. Macro Deck solo observa su sesión, así que no se puede iniciar, detener ni reiniciar desde aquí.</value>
   </data>
+  <data name="Developer.ManagedPlugins.TakenOverBadge" xml:space="preserve">
+    <value>Compilación de desarrollo activa</value>
+  </data>
+  <data name="Developer.ManagedPlugins.TakenOverReason" xml:space="preserve">
+    <value>Una compilación de desarrollo ha sustituido este complemento, así que no se puede iniciar ni reiniciar desde aquí. Revoca la compilación de desarrollo en esta página para volver a iniciar la versión instalada.</value>
+  </data>
   <data name="Developer.NoActionsAvailableHeading" xml:space="preserve">
     <value>No hay acciones disponibles</value>
   </data>
@@ -1962,6 +1968,13 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>{name} pierde su credencial y se desconecta de inmediato. Tiene que emparejarse de nuevo para reconectarse.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Developer.Tokens.EndTakeoverConfirmMessage" xml:space="preserve">
+    <value>{name} pierde su credencial y se desconecta de inmediato. La versión instalada del complemento se vuelve a iniciar.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Developer.Tokens.TakeoverBadge" xml:space="preserve">
+    <value>Reemplaza el complemento instalado</value>
+  </data>
   <data name="Developer.Tokens.RevokePluginFailed" xml:space="preserve">
     <value>No se pudo revocar el complemento</value>
   </data>
@@ -2118,6 +2131,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Dialogs.PluginPairing.ReplacesWarning" xml:space="preserve">
     <value>Ya hay un complemento emparejado con este ID de paquete. Aprobar reemplaza su registro: la credencial existente deja de funcionar y se desconecta de inmediato.</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverConfirmLabel" xml:space="preserve">
+    <value>Entiendo que una compilación de desarrollo no verificada reemplaza el complemento instalado y obtiene su configuración y sus credenciales guardadas</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverWarning" xml:space="preserve">
+    <value>Este ID de paquete pertenece a un complemento instalado. Si apruebas, una compilación de desarrollo no verificada lo reemplaza: el complemento instalado se detiene y la compilación de desarrollo obtiene su configuración y sus credenciales guardadas. La versión instalada se vuelve a iniciar cuando termina la sustitución.</value>
   </data>
   <data name="Dialogs.PluginPairing.ReportedByRequester" xml:space="preserve">
     <value>Informado por el programa solicitante</value>
@@ -2644,6 +2663,15 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Errors.Plugins.ReplaceCredentialConfirmationRequired" xml:space="preserve">
     <value>Aprobar esta solicitud reemplaza la credencial de un complemento existente. Confirma el reemplazo primero.</value>
+  </data>
+  <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
+    <value>Una compilación de desarrollo ha sustituido este complemento. Termina la sustitución antes de instalarlo o actualizarlo.</value>
+  </data>
+  <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
+    <value>Una compilación de desarrollo ha sustituido este complemento. La versión instalada se vuelve a iniciar cuando termina la sustitución.</value>
+  </data>
+  <data name="Errors.Plugins.TakeoverConfirmationRequired" xml:space="preserve">
+    <value>Aprobar esta solicitud permite que una compilación de desarrollo sustituya un complemento instalado. Confirma la sustitución primero.</value>
   </data>
   <data name="Errors.Plugins.SessionNotFound" xml:space="preserve">
     <value>No existe ninguna sesión activa con ese id.</value>
@@ -11614,6 +11642,13 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Notifications.PluginPairingRequestedMessage" xml:space="preserve">
     <value>{name} espera tu aprobación en Macro Deck.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
+    <value>Una compilación de desarrollo quiere sustituir un complemento</value>
+  </data>
+  <data name="Notifications.PluginTakeoverRequestedMessage" xml:space="preserve">
+    <value>{name} quiere reemplazar un complemento instalado y espera tu aprobación en Macro Deck.</value>
     <comment>[name:string]</comment>
   </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">

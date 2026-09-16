@@ -448,6 +448,7 @@ public class Startup
 		// survive across requests; everything backed by the database is scoped, like the rest of the
 		// app's repositories/services.
 		services.AddSingleton<IPluginLaunchTokenService, PluginLaunchTokenService>();
+		services.AddSingleton<IPluginTakeoverRegistry, PluginTakeoverRegistry>();
 		services.AddSingleton<IPluginSessionRegistry, PluginSessionRegistry>();
 		services.AddSingleton<IPluginSessionTokenIssuer, JwtPluginSessionTokenIssuer>();
 		// A singleton for the same reason as the registry above: a compatibility verdict, and the record

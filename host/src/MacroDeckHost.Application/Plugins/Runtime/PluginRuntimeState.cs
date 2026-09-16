@@ -29,5 +29,6 @@ public enum PluginStopReason
 	ManualRestart,
 	Crash,
 	HealthFailure,
-	LaunchFailure
+	LaunchFailure,
+	DevelopmentTakeover
 }

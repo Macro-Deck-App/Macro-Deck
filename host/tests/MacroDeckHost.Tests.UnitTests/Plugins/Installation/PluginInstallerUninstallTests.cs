@@ -13,6 +13,7 @@ using MacroDeckHost.Infrastructure.Plugins.Installation;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using MacroDeckHost.Application.Plugins.Runtime;
 
 namespace MacroDeckHost.Tests.UnitTests.Plugins.Installation;
 
@@ -70,6 +71,7 @@ internal sealed class PluginInstallerUninstallTests
 			_sessionRegistry,
 			forgetter,
 			_catalog,
+			new PluginTakeoverRegistry(),
 			TimeProvider.System));
 		services.AddSingleton<IPluginTrustRecordRepository, InMemoryPluginTrustRecordRepository>();
 		services.AddSingleton<IPluginTrustBaseline, FakePluginTrustBaseline>();
@@ -88,6 +90,7 @@ internal sealed class PluginInstallerUninstallTests
 			_supervisor,
 			_integrationRegistrar,
 			_sessionRegistry,
+			new PluginTakeoverRegistry(),
 			provider.GetRequiredService<IServiceScopeFactory>(),
 			options,
 			TimeProvider.System,

@@ -10,6 +10,7 @@ using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Plugins.Installation;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
+using MacroDeckHost.Application.Plugins.Runtime;
 
 namespace MacroDeckHost.Tests.UnitTests.Plugins.Installation;
 
@@ -71,6 +72,7 @@ internal sealed class PluginInstallerEnrollmentClaimTests
 			_supervisor,
 			_integrationRegistrar,
 			_sessionRegistry,
+			new PluginTakeoverRegistry(),
 			provider.GetRequiredService<IServiceScopeFactory>(),
 			options,
 			TimeProvider.System,

@@ -58,6 +58,12 @@ internal sealed class PluginPairingClient(IHttpClientFactory httpClientFactory)
 			throw DeveloperModeDisabled(response.StatusCode);
 		}
 
+		await ProtocolHttpHelpers.ThrowIfAlreadyRegisteredAsync(response,
+			pluginId,
+			$"The host already has a plugin registered as '{pluginId}' and cannot pair it again. Remove " +
+			"that registration in Macro Deck, or restore this plugin's stored credentials.",
+			cancellationToken);
+
 		await ProtocolHttpHelpers.EnsureSuccessAsync(response, "start pairing", cancellationToken);
 
 		return await ProtocolHttpHelpers.ReadAsync<PluginPairingResponse>(response, cancellationToken);

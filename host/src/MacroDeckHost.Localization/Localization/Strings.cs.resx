@@ -1695,6 +1695,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Developer.ManagedPlugins.UnmanagedReason" xml:space="preserve">
     <value>Tento plugin se spouští a zastavuje sám. Macro Deck jen sleduje jeho relaci, takže ho odsud nelze spustit, zastavit ani restartovat.</value>
   </data>
+  <data name="Developer.ManagedPlugins.TakenOverBadge" xml:space="preserve">
+    <value>Vývojové sestavení aktivní</value>
+  </data>
+  <data name="Developer.ManagedPlugins.TakenOverReason" xml:space="preserve">
+    <value>Tento plugin převzalo vývojové sestavení, proto ho odsud nelze spustit ani restartovat. Po odvolání vývojového sestavení na této stránce se nainstalovaná verze znovu spustí.</value>
+  </data>
   <data name="Developer.NoActionsAvailableHeading" xml:space="preserve">
     <value>Žádné dostupné akce</value>
   </data>
@@ -1962,6 +1968,13 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>{name} ztratí přihlašovací údaj a okamžitě se odpojí. Pro opětovné připojení se musí spárovat znovu.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Developer.Tokens.EndTakeoverConfirmMessage" xml:space="preserve">
+    <value>{name} ztratí přihlašovací údaj a okamžitě se odpojí. Nainstalovaná verze pluginu se znovu spustí.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Developer.Tokens.TakeoverBadge" xml:space="preserve">
+    <value>Nahrazuje nainstalovaný plugin</value>
+  </data>
   <data name="Developer.Tokens.RevokePluginFailed" xml:space="preserve">
     <value>Plugin se nepodařilo odvolat</value>
   </data>
@@ -2118,6 +2131,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Dialogs.PluginPairing.ReplacesWarning" xml:space="preserve">
     <value>Pro toto ID balíčku je již spárovaný plugin. Schválením nahradíte jeho registraci – stávající přihlašovací údaj přestane fungovat a plugin se okamžitě odpojí.</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverConfirmLabel" xml:space="preserve">
+    <value>Rozumím, že neověřené vývojové sestavení nahradí nainstalovaný plugin a získá jeho nastavení a uložené přihlašovací údaje</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverWarning" xml:space="preserve">
+    <value>Toto ID balíčku patří nainstalovanému pluginu. Po schválení ho nahradí neověřené vývojové sestavení: nainstalovaný plugin se zastaví a vývojové sestavení získá jeho nastavení a uložené přihlašovací údaje. Nainstalovaná verze se znovu spustí po ukončení převzetí.</value>
   </data>
   <data name="Dialogs.PluginPairing.ReportedByRequester" xml:space="preserve">
     <value>Nahlásil žádající program</value>
@@ -2644,6 +2663,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Errors.Plugins.ReplaceCredentialConfirmationRequired" xml:space="preserve">
     <value>Schválením této žádosti dojde k nahrazení přihlašovacích údajů existujícího pluginu. Nejprve je nutné nahrazení potvrdit.</value>
+  </data>
+  <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
+    <value>Tento plugin převzalo vývojové sestavení. Před instalací nebo aktualizací je nutné převzetí ukončit.</value>
+  </data>
+  <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
+    <value>Tento plugin převzalo vývojové sestavení. Nainstalovaná verze se znovu spustí po ukončení převzetí.</value>
+  </data>
+  <data name="Errors.Plugins.TakeoverConfirmationRequired" xml:space="preserve">
+    <value>Schválením této žádosti převezme vývojové sestavení nainstalovaný plugin. Nejprve je nutné převzetí potvrdit.</value>
   </data>
   <data name="Errors.Plugins.SessionNotFound" xml:space="preserve">
     <value>Aktivní relace s tímto ID neexistuje.</value>
@@ -11614,6 +11642,13 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Notifications.PluginPairingRequestedMessage" xml:space="preserve">
     <value>Plugin {name} čeká na schválení v Macro Decku.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
+    <value>Vývojové sestavení žádá o převzetí pluginu</value>
+  </data>
+  <data name="Notifications.PluginTakeoverRequestedMessage" xml:space="preserve">
+    <value>Plugin {name} chce nahradit nainstalovaný plugin a čeká na schválení v Macro Decku.</value>
     <comment>[name:string]</comment>
   </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">

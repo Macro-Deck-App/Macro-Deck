@@ -23,7 +23,12 @@
           <span class="card-meta-separator" aria-hidden="true">·</span>
         }
         <span class="card-meta-text">{{ kindLabel() }}</span>
-        @if (trustLabel(); as label) {
+        @if (takenOver()) {
+          <span class="takeover-chip">
+            <span class="icon icon-alert-triangle icon-xs" aria-hidden="true"></span>
+            {{ takenOverLabel() }}
+          </span>
+        } @else if (trustLabel(); as label) {
           <span class="verified-chip">
             <span class="icon icon-check icon-xs" aria-hidden="true"></span>
             {{ label }}

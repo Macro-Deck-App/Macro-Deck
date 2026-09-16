@@ -458,6 +458,10 @@ internal sealed class FakePluginSupervisor : IPluginSupervisor
 
 	public List<string> ForgetCalls { get; } = [];
 
+	public List<string> SuspendCalls { get; } = [];
+
+	public Func<string, Task>? OnSuspend { get; set; }
+
 	public IReadOnlyList<PluginRuntimeSnapshot> Snapshot() => SnapshotToReturn;
 
 	public Task<PluginSupervisorResult> Start(string pluginId, CancellationToken cancellationToken = default)
@@ -490,6 +494,12 @@ internal sealed class FakePluginSupervisor : IPluginSupervisor
 	}
 
 	public Task Reconcile(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+	public Task SuspendForTakeover(string pluginId, CancellationToken cancellationToken = default)
+	{
+		SuspendCalls.Add(pluginId);
+		return OnSuspend?.Invoke(pluginId) ?? Task.CompletedTask;
+	}
 }
 
 internal sealed class FakeDotnetMuxerLocator : IDotnetMuxerLocator

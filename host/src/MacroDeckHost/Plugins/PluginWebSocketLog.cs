@@ -52,6 +52,17 @@ internal static class PluginWebSocketLog
 			"Plugin '{PluginId}' sent a log.publish batch that could not be ingested.",
 			pluginId);
 
+	public static void ManagedSessionRefusedDuringTakeover(ILogger logger, string pluginId)
+		=> logger.Information(
+			"Refused a managed session for plugin '{PluginId}': a development build has taken over that id.",
+			pluginId);
+
+	public static void RegistrationSessionRefusedForInstalledPlugin(ILogger logger, string pluginId)
+		=> logger.Information(
+			"Refused a registration-authenticated session for plugin '{PluginId}': the id is installed and " +
+			"no development takeover is active.",
+			pluginId);
+
 	public static void RegistrationSessionRefusedForLiveLaunch(ILogger logger, string pluginId)
 		=> logger.Warning(
 			"Refused a registration-authenticated session for plugin '{PluginId}': the supervisor has a live " +

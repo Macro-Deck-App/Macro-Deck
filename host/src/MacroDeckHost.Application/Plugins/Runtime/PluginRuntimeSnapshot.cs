@@ -40,5 +40,7 @@ public sealed record PluginRuntimeSnapshot
 
 	public string? LastError { get; init; }
 
+	public bool TakenOverByDevelopmentBuild { get; init; }
+
 	public IReadOnlyList<string> BootstrapOutput { get; init; } = [];
 }

@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { AppStrings, StoreExtensionDetailBody, StoreOperationBody, StoreVersionHistoryBody } from '@macro-deck/runtime';
 import { ApiService, LocalizationService, ToastService } from '@shared';
+import { PluginRuntimeService } from '../../../services/plugin-runtime.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
 import { StoreDetailPageComponent } from './store-detail-page.component';
 import { Observable, Subject } from 'rxjs';
@@ -112,6 +113,7 @@ describe('StoreDetailPageComponent', () => {
         provideZonelessChangeDetection(),
         { provide: ApiService, useValue: api },
         { provide: StoreOperationService, useValue: operationsSpy },
+        { provide: PluginRuntimeService, useValue: { plugins: signal([]) } },
         { provide: Router, useValue: routerSpy },
         {
           provide: ActivatedRoute,

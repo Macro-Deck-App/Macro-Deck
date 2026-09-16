@@ -17,6 +17,7 @@ export interface PendingPluginPairingRequest {
   existingRegistrationOrigin: string | null;
   existingRegistrationCreatedAt: string | null;
   arrivedOnPublicListener: boolean;
+  takesOverInstalledPlugin?: boolean;
 }
 
 export interface GetPluginPairingRequestsResponse {
@@ -25,6 +26,7 @@ export interface GetPluginPairingRequestsResponse {
 
 export interface ApprovePluginPairingRequestRequest {
   replaceExistingRegistration: boolean;
+  takeOverInstalledPlugin: boolean;
 }
 
 export interface PluginPairingActionResponse extends ResultResponse {}
@@ -35,6 +37,7 @@ export interface PairedPlugin {
   createdAt: string;
   lastSeenAt: string | null;
   online: boolean;
+  takesOverInstalledPlugin?: boolean;
 }
 
 export interface GetPairedPluginsResponse {

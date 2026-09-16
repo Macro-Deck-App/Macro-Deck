@@ -37,6 +37,7 @@ public class PluginRegistrationServiceTests
 				logRateLimiter,
 				logIngestor),
 			_catalog,
+			new PluginTakeoverRegistry(),
 			_time);
 
 		_accessTokenId = Guid.NewGuid();
@@ -259,13 +260,37 @@ public class PluginRegistrationServiceTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Succeeded, Is.False);
-			Assert.That(result.Error, Is.EqualTo(PluginRegistrationError.AlreadyRegistered));
+			Assert.That(result.Error, Is.EqualTo(PluginRegistrationError.PluginInstalled));
 		});
 	}
 
 	[Test]
-	public async Task An_installed_id_and_an_already_enrolled_id_are_refused_indistinguishably()
+	public async Task An_installed_id_is_registered_only_when_the_caller_explicitly_allows_it()
 	{
+		_catalog.Plugins.Add(InstalledWith("com.example.installed", "1.0.0"));
+
+		var refused = await _service.Register("com.example.installed",
+			"Example",
+			accessTokenId: null,
+			PluginRegistrationOrigins.Pairing);
+		var allowed = await _service.Register("com.example.installed",
+			"Example",
+			accessTokenId: null,
+			PluginRegistrationOrigins.Pairing,
+			allowInstalledId: true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(refused.Error, Is.EqualTo(PluginRegistrationError.PluginInstalled));
+			Assert.That(allowed.Succeeded, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task An_installed_id_is_refused_for_a_different_reason_than_an_already_enrolled_one()
+	{
+		// Telling them apart is no oracle: only loopback callers reach enrolment, and loopback is admin,
+		// which can already list installed plugins. The developer needs to know which fix applies.
 		_catalog.Plugins.Add(InstalledWith("com.example.installed", "1.0.0"));
 		await _service.Register("com.example.enrolled",
 			"Example",
@@ -285,9 +310,8 @@ public class PluginRegistrationServiceTests
 		{
 			Assert.That(installedResult.Succeeded, Is.False);
 			Assert.That(enrolledResult.Succeeded, Is.False);
-			Assert.That(installedResult.Error, Is.EqualTo(enrolledResult.Error));
-			Assert.That(installedResult.ErrorDetail, Is.EqualTo(enrolledResult.ErrorDetail));
-			Assert.That(installedResult.ErrorDetail, Is.Null);
+			Assert.That(installedResult.Error, Is.EqualTo(PluginRegistrationError.PluginInstalled));
+			Assert.That(enrolledResult.Error, Is.EqualTo(PluginRegistrationError.AlreadyRegistered));
 		});
 	}
 

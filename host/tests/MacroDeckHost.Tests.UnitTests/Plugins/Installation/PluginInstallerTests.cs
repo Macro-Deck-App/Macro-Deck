@@ -13,6 +13,7 @@ using MacroDeckHost.Infrastructure.Plugins.Installation;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using MacroDeckHost.Application.Plugins.Runtime;
 
 namespace MacroDeckHost.Tests.UnitTests.Plugins.Installation;
 
@@ -70,6 +71,7 @@ internal sealed class PluginInstallerTests
 			sessionRegistry,
 			forgetter,
 			_catalog,
+			new PluginTakeoverRegistry(),
 			TimeProvider.System));
 		var provider = services.BuildServiceProvider();
 
@@ -86,6 +88,7 @@ internal sealed class PluginInstallerTests
 			_supervisor,
 			_integrationRegistrar,
 			sessionRegistry,
+			new PluginTakeoverRegistry(),
 			provider.GetRequiredService<IServiceScopeFactory>(),
 			options,
 			TimeProvider.System,

@@ -112,6 +112,7 @@ listener is verified by the host and shown as such.
 | A live request already exists for this plugin id | `429` - the visible request is never replaced |
 | Global pending-request cap reached | `429` with `Retry-After` |
 | Identity already registered | `409` `PLUGIN_ALREADY_REGISTERED` |
+| Plugin id is installed in Macro Deck | `201`; approval needs a separate takeover confirmation ([below](#taking-over-an-installed-plugin)) |
 | Creation and redemption | Each separately rate-limited |
 
 ### 2. Poll
@@ -163,6 +164,21 @@ development credential**, with a confirmation separate from a plain approval. Re
 the secret in place and terminates the plugin's live sessions, so the old and new secret never both
 authenticate. This is the supported recovery for a missing local credential.
 
+### Taking over an installed plugin
+
+If Macro Deck has a plugin with the requested id installed, the prompt warns that the unverified build
+gets that plugin's settings and stored credentials, and asks for a **takeover** confirmation separate
+from the approval. On redemption the host stops the installed instance and does not start it again
+while the takeover lasts. It refuses the installed plugin's launch token and refuses to install or
+update the plugin. The development session is never reported as trusted, and the installed plugin's
+trust tier is not touched.
+
+The takeover is memory-only. It ends when the registration is revoked (**Paired plugins** on the
+Developer page, or uninstall), when Developer Mode is switched off, or when Macro Deck restarts. The
+development credential then stops working and the installed version starts again. A registration
+session for an installed id is admitted only while its takeover is active. Developer-token enrolment
+never starts a takeover. Background: [ADR 0089](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0089-a-development-build-can-temporarily-take-over-an-installed-plugin.md).
+
 ### Where the secret is stored
 
 `<state>/<pluginId>/credentials.json`, same file for both self-registering paths.
@@ -205,6 +221,12 @@ discards a persisted secret automatically.
   reconnect backoff, and pairs as soon as Developer Mode is enabled, with no restart.
 - If the host does not report the field, the SDK must attempt the request; that refusal stays fatal,
   because every refused attempt counts against a rate limit shared by all plugins.
+- If the session exchange rejects a stored credential (`401`) before this process has ever connected,
+  it pairs once and overwrites the stored credential on success. It does this only with pairing
+  enabled, no enrollment token and a credential store that can save. A rejected or expired prompt
+  leaves the old file in place, and a second rejection is fatal. A credential revoked while the
+  process is connected stays fatal, with no new prompt. SDKs that predate this treat every such `401`
+  as fatal.
 
 | Option | Environment variable | Default |
 | --- | --- | --- |
@@ -244,7 +266,9 @@ Content-Type: application/json
   is what lets automated runs skip the prompt.
 - Minting a token is an admin operation the desktop app performs against `api/plugin-tokens`. Not a
   plugin-facing endpoint; the CLI has no command for it.
-- An identity that is already registered answers `409` `PLUGIN_ALREADY_REGISTERED`.
+- An identity that is already registered answers `409` `PLUGIN_ALREADY_REGISTERED`. An id Macro Deck
+  has installed adds `details.reason: "plugin_installed"`: enrolment has no human confirmation, so it
+  never takes over an installed plugin. Use interactive pairing for that.
 
 ## Discovery
 
@@ -392,7 +416,7 @@ restarting Macro Deck. Stored credentials survive either way. Full schemas:
 | --- | --- |
 | Launch bootstrap token | 2 minutes while unused; irrelevant once acquired |
 | Pairing request | Host-advertised `expiresAt`; memory-only, discarded on host restart |
-| Per-plugin secret | No expiry. Revoked on uninstall or by `DELETE /api/plugins/registration/{pluginId}`. A secret from a Developer token also stops working when that token expires or is revoked; a paired secret has no such dependency |
+| Per-plugin secret | No expiry. Revoked on uninstall or by `DELETE /api/plugins/registration/{pluginId}`. A secret from a Developer token also stops working when that token expires or is revoked; a paired secret has no such dependency. A secret that took over an installed plugin is revoked when the takeover ends |
 | Developer token | Optional expiry, none by default. Expiry or revocation stops every registration it minted from opening a new session |
 | Session token | 15 minutes |
 | Session resume window | 60 seconds after the socket drops |
@@ -459,10 +483,11 @@ follows the same rule. `403` reuses `UNAUTHENTICATED`: the wire vocabulary has n
 
 | Code | HTTP / close | Meaning | What the SDK does |
 | --- | --- | --- | --- |
-| `UNAUTHENTICATED` | `401` | Any credential failure | Fatal on the REST handshake |
+| `UNAUTHENTICATED` | `401` | Any credential failure | Fatal on the REST handshake, except one re-pair when a stored credential is rejected before the process first connected |
 | `UNAUTHENTICATED` | `403` | Non-loopback or browser caller, or a token naming a different session | Fatal |
 | `UNAUTHENTICATED` + `reason: developer_mode_disabled` | `403` | Developer Mode off (pairing, registration, development-credential session) | Reports Developer Mode as the cause; for pairing, waits and retries if the descriptor reported it |
-| `PLUGIN_ALREADY_REGISTERED` | `409` | Identity already registered | Reports it, retries on backoff |
+| `PLUGIN_ALREADY_REGISTERED` | `409` | Identity already registered | Fatal on pairing and enrolment |
+| `PLUGIN_ALREADY_REGISTERED` + `reason: plugin_installed` | `409` | Developer-token enrolment for an id installed in Macro Deck | Fatal; points to interactive pairing with Developer Mode, or uninstalling |
 | `PROTOCOL_VERSION_UNSUPPORTED` | `422`, close `4001` | No common version; `details.supportedMinimum`/`supportedMaximum` on `422` | Fatal |
 | `RATE_LIMITED` | `429` + `Retry-After`, `details.retryAfterSeconds` | Too many attempts | Retries on backoff |
 | `SESSION_EXPIRED` | close `4002` | Session gone or session id mismatch | Drops the cached session, opens a new one |

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { StoreExtensionKind, StoreExtensionTrust } from '@macro-deck/runtime';
+import { AppStrings, StoreExtensionKind, StoreExtensionTrust } from '@macro-deck/runtime';
 import { LocalizationService } from '@shared';
+import { PluginRuntimeService } from '../../../services/plugin-runtime.service';
 import { storeTrustLabelKey } from '../../../util/store-operation-display';
 
 @Component({
@@ -8,7 +9,12 @@ import { storeTrustLabelKey } from '../../../util/store-operation-display';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (label(); as text) {
+    @if (takenOver()) {
+      <span class="takeover-badge">
+        <span class="icon icon-alert-triangle icon-xs" aria-hidden="true"></span>
+        {{ takenOverLabel() }}
+      </span>
+    } @else if (label(); as text) {
       <span class="trust-badge">
         <span class="icon icon-check icon-xs" aria-hidden="true"></span>
         {{ text }}
@@ -20,8 +26,19 @@ import { storeTrustLabelKey } from '../../../util/store-operation-display';
 export class StoreTrustBadgeComponent {
   readonly kind = input.required<StoreExtensionKind>();
   readonly trust = input.required<StoreExtensionTrust | string>();
+  readonly pluginId = input<string | null>(null);
 
   private readonly localization = inject(LocalizationService);
+  private readonly runtime = inject(PluginRuntimeService);
+
+  protected readonly takenOver = computed(() => {
+    const pluginId = this.pluginId();
+    return this.kind() === 'Plugin' && pluginId !== null &&
+      this.runtime.plugins().some(plugin => plugin.pluginId === pluginId && plugin.takenOverByDevelopmentBuild === true);
+  });
+
+  protected readonly takenOverLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Developer.ManagedPlugins.TakenOverBadge));
 
   protected readonly label = computed(() => {
     const key = storeTrustLabelKey(this.kind(), this.trust());

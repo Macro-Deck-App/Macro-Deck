@@ -1,6 +1,7 @@
 import { WritableSignal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PendingPluginPairingRequest } from '@macro-deck/runtime';
+import { LocalizationService } from '@shared';
 import { PluginPairingService } from '../../../services/plugin-pairing.service';
 import { PluginPairingDialogComponent } from './plugin-pairing-dialog.component';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
@@ -68,6 +69,19 @@ describe('PluginPairingDialogComponent', () => {
     return fixture.nativeElement.querySelector('input[type="checkbox"]');
   }
 
+  function checkboxes(): HTMLInputElement[] {
+    return Array.from(fixture.nativeElement.querySelectorAll('input[type="checkbox"]'));
+  }
+
+  function takeoverWarning(): string {
+    return TestBed.inject(LocalizationService).translateKey('macrodeck.app:Dialogs.PluginPairing.TakeoverWarning');
+  }
+
+  async function tick(): Promise<void> {
+    fixture.detectChanges();
+    await fixture.whenStable();
+  }
+
   it('renders nothing when there is no current request', async () => {
     configure(null);
     fixture = await create();
@@ -102,7 +116,7 @@ describe('PluginPairingDialogComponent', () => {
       approveButton().click();
       await fixture.whenStable();
 
-      expect(pairingSpy.approve).toHaveBeenCalledWith('r1', false);
+      expect(pairingSpy.approve).toHaveBeenCalledWith('r1', false, false);
     });
   });
 
@@ -129,7 +143,69 @@ describe('PluginPairingDialogComponent', () => {
       approveButton().click();
       await fixture.whenStable();
 
-      expect(pairingSpy.approve).toHaveBeenCalledWith('r1', true);
+      expect(pairingSpy.approve).toHaveBeenCalledWith('r1', true, false);
+    });
+  });
+
+  describe('taking over an installed plugin', () => {
+    it('warns, keeps Approve disabled until the takeover is confirmed, then approves the takeover', async () => {
+      configure(request({ takesOverInstalledPlugin: true }));
+      fixture = await create();
+
+      expect(text()).toContain(takeoverWarning());
+      expect(checkboxes().length).toBe(1);
+      expect(approveButton().disabled).toBeTrue();
+
+      checkbox()!.click();
+      await tick();
+      expect(approveButton().disabled).toBeFalse();
+
+      approveButton().click();
+      await fixture.whenStable();
+
+      expect(pairingSpy.approve).toHaveBeenCalledWith('r1', false, true);
+    });
+
+    it('needs both confirmations when the request also replaces a registration', async () => {
+      configure(request({ takesOverInstalledPlugin: true, replacesExistingRegistration: true }));
+      fixture = await create();
+
+      const [replaceBox, takeoverBox] = checkboxes();
+      expect(checkboxes().length).toBe(2);
+
+      replaceBox.click();
+      await tick();
+      expect(approveButton().disabled).toBeTrue();
+
+      takeoverBox.click();
+      await tick();
+      expect(approveButton().disabled).toBeFalse();
+
+      approveButton().click();
+      await fixture.whenStable();
+
+      expect(pairingSpy.approve).toHaveBeenCalledWith('r1', true, true);
+    });
+
+    it('does not carry a confirmation over to the next request', async () => {
+      configure(request({ takesOverInstalledPlugin: true }));
+      fixture = await create();
+
+      checkbox()!.click();
+      await tick();
+      expect(approveButton().disabled).toBeFalse();
+
+      currentSignal.set(request({ requestId: 'r2', takesOverInstalledPlugin: true }));
+      await tick();
+
+      expect(approveButton().disabled).toBeTrue();
+    });
+
+    it('shows no takeover warning for an ordinary request', async () => {
+      configure(request());
+      fixture = await create();
+
+      expect(text()).not.toContain(takeoverWarning());
     });
   });
 

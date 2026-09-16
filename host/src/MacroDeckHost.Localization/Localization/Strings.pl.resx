@@ -1695,6 +1695,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Developer.ManagedPlugins.UnmanagedReason" xml:space="preserve">
     <value>Ta wtyczka uruchamia się i zatrzymuje samodzielnie. Macro Deck jedynie obserwuje jej sesję, więc nie można jej stąd uruchomić, zatrzymać ani ponownie uruchomić.</value>
   </data>
+  <data name="Developer.ManagedPlugins.TakenOverBadge" xml:space="preserve">
+    <value>Kompilacja deweloperska aktywna</value>
+  </data>
+  <data name="Developer.ManagedPlugins.TakenOverReason" xml:space="preserve">
+    <value>Kompilacja deweloperska przejęła tę wtyczkę, więc nie można jej stąd uruchomić ani ponownie uruchomić. Odwołaj kompilację deweloperską na tej stronie, aby ponownie uruchomić zainstalowaną wersję.</value>
+  </data>
   <data name="Developer.NoActionsAvailableHeading" xml:space="preserve">
     <value>Brak dostępnych akcji</value>
   </data>
@@ -1962,6 +1968,13 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>{name} traci swoje dane uwierzytelniające i zostaje natychmiast rozłączona. Aby połączyć się ponownie, musi sparować się od nowa.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Developer.Tokens.EndTakeoverConfirmMessage" xml:space="preserve">
+    <value>{name} traci swoje dane uwierzytelniające i zostaje natychmiast rozłączona. Zainstalowana wersja wtyczki uruchomi się ponownie.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Developer.Tokens.TakeoverBadge" xml:space="preserve">
+    <value>Zastępuje zainstalowaną wtyczkę</value>
+  </data>
   <data name="Developer.Tokens.RevokePluginFailed" xml:space="preserve">
     <value>Nie można odwołać wtyczki</value>
   </data>
@@ -2118,6 +2131,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Dialogs.PluginPairing.ReplacesWarning" xml:space="preserve">
     <value>Wtyczka jest już sparowana dla tego identyfikatora pakietu. Zatwierdzenie zastąpi jej rejestrację - istniejące poświadczenie przestanie działać, a wtyczka zostanie natychmiast rozłączona.</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverConfirmLabel" xml:space="preserve">
+    <value>Rozumiem, że niezweryfikowana kompilacja deweloperska zastąpi zainstalowaną wtyczkę i otrzyma jej ustawienia oraz zapisane dane uwierzytelniające</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverWarning" xml:space="preserve">
+    <value>Ten identyfikator pakietu należy do zainstalowanej wtyczki. Po zatwierdzeniu zastąpi ją niezweryfikowana kompilacja deweloperska: zainstalowana wtyczka zostanie zatrzymana, a kompilacja deweloperska otrzyma jej ustawienia i zapisane dane uwierzytelniające. Zainstalowana wersja uruchomi się ponownie po zakończeniu przejęcia.</value>
   </data>
   <data name="Dialogs.PluginPairing.ReportedByRequester" xml:space="preserve">
     <value>Zgłoszone przez żądający program</value>
@@ -2644,6 +2663,15 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Errors.Plugins.ReplaceCredentialConfirmationRequired" xml:space="preserve">
     <value>Zatwierdzenie tej prośby zastąpi dane uwierzytelniające istniejącej wtyczki. Najpierw potwierdź zastąpienie.</value>
+  </data>
+  <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
+    <value>Kompilacja deweloperska przejęła tę wtyczkę. Przed instalacją lub aktualizacją zakończ przejęcie.</value>
+  </data>
+  <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
+    <value>Kompilacja deweloperska przejęła tę wtyczkę. Zainstalowana wersja uruchomi się ponownie po zakończeniu przejęcia.</value>
+  </data>
+  <data name="Errors.Plugins.TakeoverConfirmationRequired" xml:space="preserve">
+    <value>Zatwierdzenie tej prośby pozwoli kompilacji deweloperskiej przejąć zainstalowaną wtyczkę. Najpierw potwierdź przejęcie.</value>
   </data>
   <data name="Errors.Plugins.SessionNotFound" xml:space="preserve">
     <value>Nie istnieje aktywna sesja o tym identyfikatorze.</value>
@@ -11614,6 +11642,13 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Notifications.PluginPairingRequestedMessage" xml:space="preserve">
     <value>Wtyczka {name} czeka na zatwierdzenie w Macro Decku.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
+    <value>Kompilacja deweloperska chce przejąć wtyczkę</value>
+  </data>
+  <data name="Notifications.PluginTakeoverRequestedMessage" xml:space="preserve">
+    <value>Wtyczka {name} chce zastąpić zainstalowaną wtyczkę i czeka na zatwierdzenie w Macro Decku.</value>
     <comment>[name:string]</comment>
   </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">

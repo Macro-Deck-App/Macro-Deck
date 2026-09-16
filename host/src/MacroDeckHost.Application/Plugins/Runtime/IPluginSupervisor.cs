@@ -18,7 +18,9 @@ public enum PluginSupervisorError
 	/// <summary>The installed plugin no longer verifies at the trust tier it was admitted at. Terminal for
 	/// the process lifetime: no process is spawned, and the automatic reconcile loop does not retry it.
 	/// Only an explicit Start/Restart re-evaluates it.</summary>
-	IntegrityFailed
+	IntegrityFailed,
+
+	TakenOverByDevelopmentBuild
 }
 
 public sealed record PluginSupervisorResult(bool Success, PluginSupervisorError? Error = null, string? Message = null)
@@ -50,4 +52,6 @@ public interface IPluginSupervisor
 	Task Forget(string pluginId, CancellationToken cancellationToken = default);
 
 	Task Reconcile(CancellationToken cancellationToken = default);
+
+	Task SuspendForTakeover(string pluginId, CancellationToken cancellationToken = default);
 }

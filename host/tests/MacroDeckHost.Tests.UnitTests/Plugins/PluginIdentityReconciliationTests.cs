@@ -37,6 +37,7 @@ public class PluginIdentityReconciliationTests
 				logRateLimiter,
 				logIngestor),
 			_catalog,
+			new PluginTakeoverRegistry(),
 			_time);
 
 		_reconciler = new PluginIdentityReconciler(_registrations,

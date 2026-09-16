@@ -31,6 +31,9 @@
               <span class="managed-plugins-badges">
                 <span class="managed-plugins-badge state-{{ plugin.state }}">{{ plugin.state }}</span>
                 <span class="managed-plugins-badge health-{{ plugin.health }}">{{ plugin.health }}</span>
+                @if (plugin.takenOverByDevelopmentBuild) {
+                  <span class="managed-plugins-badge taken-over">{{ 'macrodeck.app:Developer.ManagedPlugins.TakenOverBadge' | translate }}</span>
+                }
               </span>
             </div>
 

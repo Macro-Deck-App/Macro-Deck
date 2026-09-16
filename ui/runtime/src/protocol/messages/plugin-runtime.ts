@@ -12,7 +12,8 @@ export type PluginRuntimeStopReason =
   | 'manual_restart'
   | 'crash'
   | 'health_failure'
-  | 'launch_failure';
+  | 'launch_failure'
+  | 'development_takeover';
 
 export interface PluginRuntimeInfo {
   pluginId: string;
@@ -34,11 +35,14 @@ export interface PluginRuntimeInfo {
   nextRestartAt?: string | null;
   lastError?: string | null;
   bootstrapOutput: string[];
+  takenOverByDevelopmentBuild?: boolean;
 }
 
 export interface GetPluginRuntimeResponse {
   plugins: PluginRuntimeInfo[];
 }
+
+export const PLUGIN_RUNTIME_ERROR_TAKEN_OVER_BY_DEVELOPMENT_BUILD = 'taken_over_by_development_build';
 
 export interface PluginRuntimeOperationResponse extends ResultResponse {
   error?: ApiError;

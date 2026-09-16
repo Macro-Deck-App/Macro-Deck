@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Ui.Transport.Messages;
+using MacroDeckHost.Localization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MacroDeckHost.Api.Controllers;
@@ -23,7 +24,8 @@ public record PluginRuntimeSnapshotBody(
 	int RestartCount,
 	DateTimeOffset? NextRestartAt,
 	string? LastError,
-	IReadOnlyList<string> BootstrapOutput);
+	IReadOnlyList<string> BootstrapOutput,
+	bool TakenOverByDevelopmentBuild);
 
 public record GetPluginRuntimeResponse(IReadOnlyList<PluginRuntimeSnapshotBody> Plugins);
 
@@ -61,7 +63,12 @@ public class PluginRuntimeController : ControllerBase
 			? new PluginRuntimeActionResponse(true, null)
 			: new PluginRuntimeActionResponse(false,
 				new TransportError
-					{ Code = ToErrorCode(result.Error!.Value), Message = result.Message ?? string.Empty });
+				{
+					Code = ToErrorCode(result.Error!.Value),
+					Message = result.Error == PluginSupervisorError.TakenOverByDevelopmentBuild
+						? AppStrings.Errors.Plugins.TakenOverByDevelopmentBuild()
+						: result.Message ?? string.Empty
+				});
 
 	private static string ToErrorCode(PluginSupervisorError error) => error switch
 	{
@@ -73,6 +80,7 @@ public class PluginRuntimeController : ControllerBase
 		PluginSupervisorError.SelfRegistering => "self_registering",
 		PluginSupervisorError.LaunchFailed => "launch_failed",
 		PluginSupervisorError.IntegrityFailed => "integrity_failed",
+		PluginSupervisorError.TakenOverByDevelopmentBuild => "taken_over_by_development_build",
 		_ => "failed"
 	};
 
@@ -94,7 +102,8 @@ public class PluginRuntimeController : ControllerBase
 		snapshot.RestartCount,
 		snapshot.NextRestartAt,
 		snapshot.LastError,
-		snapshot.BootstrapOutput);
+		snapshot.BootstrapOutput,
+		snapshot.TakenOverByDevelopmentBuild);
 
 	private static string ToWireState(PluginRuntimeState state) => state switch
 	{
@@ -128,6 +137,7 @@ public class PluginRuntimeController : ControllerBase
 		PluginStopReason.Crash => "crash",
 		PluginStopReason.HealthFailure => "health_failure",
 		PluginStopReason.LaunchFailure => "launch_failure",
+		PluginStopReason.DevelopmentTakeover => "development_takeover",
 		_ => "none"
 	};
 }

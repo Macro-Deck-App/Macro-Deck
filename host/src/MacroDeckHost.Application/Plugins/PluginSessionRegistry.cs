@@ -139,6 +139,8 @@ public interface IPluginSessionRegistry
 
 	Task<bool> TerminateForPlugin(string pluginId, int closeCode, string reason);
 
+	Task<bool> TerminateManagedForPlugin(string pluginId, int closeCode, string reason);
+
 	IReadOnlyList<PluginSessionSnapshot> Snapshot();
 
 	void SetPaused(string sessionId, bool paused);
@@ -458,6 +460,11 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 
 	public Task<bool> TerminateForPlugin(string pluginId, int closeCode, string reason)
 		=> TerminateCore(record => record.PluginId == pluginId, closeCode, reason);
+
+	public Task<bool> TerminateManagedForPlugin(string pluginId, int closeCode, string reason)
+		=> TerminateCore(record => record.PluginId == pluginId && record.Origin == PluginSessionOrigin.Managed,
+			closeCode,
+			reason);
 
 	public IReadOnlyList<PluginSessionSnapshot> Snapshot()
 	{

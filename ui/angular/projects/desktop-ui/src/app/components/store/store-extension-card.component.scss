@@ -104,6 +104,18 @@
   }
 }
 
+.takeover-chip {
+  @include ds.chip;
+  flex-shrink: 0;
+  margin-inline-start: var(--space-1);
+  color: var(--color-warning);
+  background-color: var(--color-warning-muted);
+
+  .icon {
+    background-color: var(--color-warning);
+  }
+}
+
 .card-description {
   margin: 0;
   font-size: var(--text-sm);

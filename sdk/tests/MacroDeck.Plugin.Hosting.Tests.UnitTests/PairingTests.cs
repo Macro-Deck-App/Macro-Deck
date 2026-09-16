@@ -1,3 +1,4 @@
+using System.Net.WebSockets;
 using System.Security.Cryptography;
 using System.Text;
 using MacroDeck.Plugin.Hosting.Credentials;
@@ -5,6 +6,7 @@ using MacroDeck.Plugin.Hosting.Tests.UnitTests.Support;
 using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol;
 using MacroDeck.Plugin.Protocol.Auth;
+using MacroDeck.Plugin.Protocol.Errors;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MacroDeck.Plugin.Testing;
@@ -70,6 +72,26 @@ public class PairingTests
 		=> new FilePluginCredentialStore(Options.Create(new PluginHostOptions { StateDirectory = _stateDirectory }),
 			new PluginMetadata { Id = "com.example.test", Name = "Test Plugin", Version = "1.0.0" },
 			Serilog.Core.Logger.None).LoadAsync();
+
+	private static readonly string StaleSecret = new('x', PluginAuthDefaults.MinPluginSecretLength);
+
+	private static readonly string PairedSecret = new('p', PluginAuthDefaults.MinPluginSecretLength);
+
+	private Task SaveStoredCredentialsAsync(string secret)
+		=> new FilePluginCredentialStore(Options.Create(new PluginHostOptions { StateDirectory = _stateDirectory }),
+			new PluginMetadata { Id = "com.example.test", Name = "Test Plugin", Version = "1.0.0" },
+			Serilog.Core.Logger.None).SaveAsync(new PluginCredentials("com.example.test", _host.Url, secret));
+
+	private sealed class ReadOnlyCredentialStore(PluginCredentials credentials) : IPluginCredentialStore
+	{
+		public bool CanSave => false;
+
+		public Task<PluginCredentials?> LoadAsync(CancellationToken cancellationToken = default)
+			=> Task.FromResult<PluginCredentials?>(credentials);
+
+		public Task SaveAsync(PluginCredentials credentials, CancellationToken cancellationToken = default)
+			=> throw new NotSupportedException();
+	}
 
 	private static async Task<PluginConnectionStatus> WaitForFaultAsync(PluginApplication plugin)
 	{
@@ -185,6 +207,115 @@ public class PairingTests
 	}
 
 	[Test]
+	public async Task A_stored_credential_rejected_before_connecting_pairs_once_and_replaces_it()
+	{
+		await SaveStoredCredentialsAsync(StaleSecret);
+		_host.RejectedSecrets[StaleSecret] = true;
+		_host.PairingApproveAfterPolls = 1;
+
+		await using var plugin = Builder().Build();
+		await plugin.StartAsync();
+
+		await _host.ConnectedAsync().WaitAsync(TimeSpan.FromSeconds(10));
+		var stored = await LoadStoredCredentialsAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_host.PairingCreates, Has.Count.EqualTo(1));
+			Assert.That(stored!.Secret, Is.EqualTo(PairedSecret));
+		});
+	}
+
+	[Test]
+	public async Task A_rejected_re_pairing_prompt_keeps_the_stored_credential()
+	{
+		await SaveStoredCredentialsAsync(StaleSecret);
+		_host.RejectedSecrets[StaleSecret] = true;
+		_host.PairingRejected = true;
+
+		await using var plugin = Builder().Build();
+		await plugin.StartAsync();
+
+		var status = await WaitForFaultAsync(plugin);
+		var stored = await LoadStoredCredentialsAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(status, Is.EqualTo(PluginConnectionStatus.Faulted));
+			Assert.That(_host.PairingCreates, Has.Count.EqualTo(1));
+			Assert.That(stored!.Secret, Is.EqualTo(StaleSecret));
+		});
+	}
+
+	[Test]
+	public async Task A_credential_rejected_again_after_re_pairing_faults_without_a_second_prompt()
+	{
+		await SaveStoredCredentialsAsync(StaleSecret);
+		_host.RejectedSecrets[StaleSecret] = true;
+		_host.RejectedSecrets[PairedSecret] = true;
+		_host.PairingApproveAfterPolls = 1;
+
+		await using var plugin = Builder().Build();
+		await plugin.StartAsync();
+
+		var status = await WaitForFaultAsync(plugin);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(status, Is.EqualTo(PluginConnectionStatus.Faulted));
+			Assert.That(_host.PairingCreates, Has.Count.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task A_custom_credential_store_that_cannot_save_keeps_a_rejected_credential_fatal()
+	{
+		_host.RejectedSecrets[StaleSecret] = true;
+		_host.PairingApproveAfterPolls = 1;
+
+		var builder = Builder();
+		builder.Services.AddSingleton<IPluginCredentialStore>(
+			new ReadOnlyCredentialStore(new PluginCredentials("com.example.test", _host.Url, StaleSecret)));
+
+		await using var plugin = builder.Build();
+		await plugin.StartAsync();
+
+		var status = await WaitForFaultAsync(plugin);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(status, Is.EqualTo(PluginConnectionStatus.Faulted));
+			Assert.That(_host.PairingCreates, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_credential_revoked_after_the_plugin_connected_faults_without_a_prompt()
+	{
+		await SaveStoredCredentialsAsync(StaleSecret);
+		_host.PairingApproveAfterPolls = 1;
+
+		await using var plugin = Builder().Build();
+		await plugin.StartAsync();
+
+		var socket = await _host.ConnectedAsync().WaitAsync(TimeSpan.FromSeconds(10));
+		await _host.WelcomedAsync();
+
+		_host.RejectedSecrets[StaleSecret] = true;
+		await socket.CloseOutputAsync((WebSocketCloseStatus)ProtocolCloseCodes.SessionExpired,
+			"expired",
+			CancellationToken.None);
+
+		var status = await WaitForFaultAsync(plugin);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(status, Is.EqualTo(PluginConnectionStatus.Faulted));
+			Assert.That(_host.PairingCreates, Is.Empty);
+		});
+	}
+
+	[Test]
 	public async Task An_enrollment_token_wins_over_pairing_and_sends_no_pairing_requests()
 	{
 		// Never approved: a plugin that tried pairing before the token would hang here until the test
@@ -269,6 +400,68 @@ public class PairingTests
 			Assert.That(_host.Requests.Count(request
 					=> request.Method == HttpMethod.Post.Method && request.Path == ProtocolConstants.PairingPath),
 				Is.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_installed_refusal_faults_once_and_names_the_installed_plugin()
+	{
+		_host.AlreadyRegisteredReason = "plugin_installed";
+
+		await using var plugin = Builder().Build();
+		await plugin.StartAsync();
+
+		var status = await WaitForFaultAsync(plugin);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(status, Is.EqualTo(PluginConnectionStatus.Faulted));
+			Assert.That(_host.Requests.Count(request
+					=> request.Method == HttpMethod.Post.Method && request.Path == ProtocolConstants.PairingPath),
+				Is.EqualTo(1));
+			Assert.That(plugin.Services.GetRequiredService<PluginConnectionState>().FaultReason,
+				Does.Contain("'com.example.test' installed"));
+		});
+	}
+
+	[Test]
+	public async Task An_already_registered_refusal_from_an_older_host_also_faults_once()
+	{
+		_host.AlreadyRegisteredReason = string.Empty;
+
+		await using var plugin = Builder().Build();
+		await plugin.StartAsync();
+
+		var status = await WaitForFaultAsync(plugin);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(status, Is.EqualTo(PluginConnectionStatus.Faulted));
+			Assert.That(_host.Requests.Count(request
+					=> request.Method == HttpMethod.Post.Method && request.Path == ProtocolConstants.PairingPath),
+				Is.EqualTo(1));
+			Assert.That(plugin.Services.GetRequiredService<PluginConnectionState>().FaultReason,
+				Does.Contain("already has a plugin registered"));
+		});
+	}
+
+	[Test]
+	public async Task Enrolling_an_id_the_host_has_installed_faults_once_instead_of_retrying()
+	{
+		_host.AlreadyRegisteredReason = "plugin_installed";
+
+		await using var plugin = Builder(enrollmentToken: "enrollment-token").Build();
+		await plugin.StartAsync();
+
+		var status = await WaitForFaultAsync(plugin);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(status, Is.EqualTo(PluginConnectionStatus.Faulted));
+			Assert.That(_host.Registrations, Has.Count.EqualTo(0));
+			Assert.That(_host.EnrollmentTokens, Has.Count.EqualTo(1));
+			Assert.That(plugin.Services.GetRequiredService<PluginConnectionState>().FaultReason,
+				Does.Contain("installed"));
 		});
 	}
 

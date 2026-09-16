@@ -93,6 +93,9 @@ revoking one registration affects only that one.
   an unsupported host as fatal rather than retryable, so its reconnect loop cannot re-prompt forever.
   Developer Mode being off is the exception: the host refuses *before* a request exists, so nothing was
   put in front of a person and the SDK retries on its ordinary backoff.
+- Amended by [ADR 0089](0089-a-development-build-can-temporarily-take-over-an-installed-plugin.md):
+  pairing for an installed id is allowed with a separate takeover confirmation, and one approval can
+  then expose that plugin's stored secrets, beyond the residual exposure accepted below.
 - Credentials land at `<state>/<pluginId>/credentials.json` with owner-only Unix permissions, relying on
   the per-user profile ACL on Windows, and are **not encrypted at rest**.
 - A plugin process must run on the same machine as the host, and credential rotation for a managed

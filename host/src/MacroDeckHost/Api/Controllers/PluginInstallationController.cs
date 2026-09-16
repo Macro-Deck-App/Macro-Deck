@@ -4,6 +4,7 @@ using MacroDeckHost.Api.Support;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Plugins.Installation;
 using MacroDeckHost.Application.Plugins.Runtime;
+using MacroDeckHost.Localization;
 using MacroDeckHost.Application.Plugins.Trust;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using Microsoft.AspNetCore.Mvc;
@@ -273,11 +274,17 @@ public class PluginInstallationController : ControllerBase
 
 		var error = result.Success
 			? null
-			: new TransportError
-			{
-				Code = ToErrorCode(result.Error ?? PluginInstallError.Failed),
-				Message = result.ErrorMessage ?? string.Empty
-			};
+			: result.BlockedByDevelopmentTakeover
+				? new TransportError
+				{
+					Code = "install_blocked_by_takeover",
+					Message = AppStrings.Errors.Plugins.InstallBlockedByTakeover()
+				}
+				: new TransportError
+				{
+					Code = ToErrorCode(result.Error ?? PluginInstallError.Failed),
+					Message = result.ErrorMessage ?? string.Empty
+				};
 
 		return new PluginInstallActionResponse(result.Success,
 			result.PluginId,

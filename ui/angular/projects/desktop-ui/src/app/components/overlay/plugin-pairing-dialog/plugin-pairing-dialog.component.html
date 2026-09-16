@@ -70,6 +70,22 @@
         </div>
       }
 
+      @if (request.takesOverInstalledPlugin) {
+        <div class="plugin-pairing-danger plugin-pairing-takeover">
+          <span class="icon icon-alert-triangle icon-sm"></span>
+          <div class="plugin-pairing-danger-body">
+            <p>
+              {{ 'macrodeck.app:Dialogs.PluginPairing.TakeoverWarning' | translate }}
+            </p>
+            <shared-checkbox
+              name="takeoverConfirmed"
+              [label]="'macrodeck.app:Dialogs.PluginPairing.TakeoverConfirmLabel' | translate"
+              [ngModel]="takeoverConfirmed()"
+              (ngModelChange)="takeoverConfirmed.set($event)" />
+          </div>
+        </div>
+      }
+
       @if (errorMessage(); as error) {
         <p class="plugin-pairing-error">{{ error }}</p>
       }
