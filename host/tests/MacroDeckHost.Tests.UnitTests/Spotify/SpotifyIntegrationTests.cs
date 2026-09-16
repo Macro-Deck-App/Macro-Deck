@@ -203,8 +203,53 @@ public class SpotifyIntegrationTests
 		await integration.ShutdownAsync().WaitAsync(TimeSpan.FromSeconds(5));
 	}
 
+	[Test]
+	public async Task Podcast_playback_fills_the_track_variables_and_bounds_the_position()
+	{
+		var integration = new SpotifyIntegration(new FakeSpotifyOAuthClient(), new PodcastTransport());
+		await integration.InitializeAsync(new SpotifyContextStub(new SpotifyConfigStub()));
+		await WaitForPublishedEpisodeAsync(integration);
+
+		var title = await integration.ReadAsync("spotify-current-track-name");
+		var artist = await integration.ReadAsync("spotify-current-artist");
+		var album = await integration.ReadAsync("spotify-current-album");
+		var duration = await integration.ReadAsync("spotify-track-duration");
+		var progress = await integration.ReadAsync("spotify-progress-percentage");
+		var position = await integration.ReadAsync("spotify-current-position");
+		var url = await integration.ReadAsync("spotify-current-track-url");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(title.Value, Is.EqualTo("Some Episode"));
+			Assert.That(artist.Value, Is.EqualTo("The Show"));
+			Assert.That(album.Value, Is.EqualTo("The Show"));
+			Assert.That(duration.Value, Is.EqualTo(300));
+			Assert.That(progress.Value, Is.EqualTo(20));
+			Assert.That(position.Max, Is.EqualTo(300));
+			Assert.That(url.Value, Is.EqualTo("https://open.spotify.com/episode/episode-1"));
+		});
+
+		await integration.ShutdownAsync();
+	}
+
 	private static SpotifyIntegration NewIntegration()
 		=> new(new FakeSpotifyOAuthClient(), new IdleTransport());
+
+	private static async Task WaitForPublishedEpisodeAsync(SpotifyIntegration integration)
+	{
+		var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+		while (DateTime.UtcNow < deadline)
+		{
+			if ((await integration.ReadAsync("spotify-current-track-name")).Value is not null)
+			{
+				return;
+			}
+
+			await Task.Delay(1);
+		}
+
+		Assert.Fail("the Spotify poll never published the playing episode");
+	}
 
 	private static async Task WaitForRequestCountAsync(IdleTransport transport, int expected)
 	{
@@ -215,6 +260,60 @@ public class SpotifyIntegrationTests
 		}
 
 		Assert.That(transport.RequestCount, Is.GreaterThanOrEqualTo(expected));
+	}
+
+	private sealed class PodcastTransport : IHTTPClient
+	{
+		private const string WithoutEpisodeOptIn =
+			"""
+			{
+			  "device": { "id": "dev-1", "is_active": true, "name": "Desk", "type": "Computer",
+			    "volume_percent": 55 },
+			  "repeat_state": "off",
+			  "shuffle_state": false,
+			  "progress_ms": 60000,
+			  "is_playing": true,
+			  "currently_playing_type": "episode",
+			  "item": null
+			}
+			""";
+
+		private const string WithEpisodeOptIn =
+			"""
+			{
+			  "device": { "id": "dev-1", "is_active": true, "name": "Desk", "type": "Computer",
+			    "volume_percent": 55 },
+			  "repeat_state": "off",
+			  "shuffle_state": false,
+			  "progress_ms": 60000,
+			  "is_playing": true,
+			  "currently_playing_type": "episode",
+			  "item": { "type": "episode", "id": "episode-1", "uri": "spotify:episode:episode-1",
+			    "name": "Some Episode", "duration_ms": 300000, "show": { "name": "The Show" }, "images": [],
+			    "external_urls": { "spotify": "https://open.spotify.com/episode/episode-1" } }
+			}
+			""";
+
+		public Task<IResponse> DoRequest(IRequest request, CancellationToken cancel)
+		{
+			var asksForEpisodes = request.Parameters.TryGetValue("additional_types", out var types) &&
+				types.Contains("episode", StringComparison.Ordinal);
+
+			return Task.FromResult<IResponse>(new Response(new Dictionary<string, string>())
+			{
+				StatusCode = HttpStatusCode.OK,
+				ContentType = "application/json",
+				Body = asksForEpisodes ? WithEpisodeOptIn : WithoutEpisodeOptIn
+			});
+		}
+
+		public void SetRequestTimeout(TimeSpan timeout)
+		{
+		}
+
+		public void Dispose()
+		{
+		}
 	}
 
 	private sealed class IdleTransport : IHTTPClient
