@@ -6058,7 +6058,7 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>Invia in background (best-effort, non per i giochi)</value>
   </data>
   <data name="Integrations.Keyboard.Config.TargetModeDescription" xml:space="preserve">
-    <value>Come recapitare la pressione dei tasti quando è impostata un'applicazione di destinazione. "Porta in primo piano, poi invia" funziona per i giochi; "in background" no.</value>
+    <value>Come recapitare la pressione dei tasti quando è impostata un'applicazione di destinazione. Solo con l'app in primo piano salta silenziosamente la pressione finché non lo è. Il recapito in background è a massimo impegno e su alcune piattaforme non può trasmettere i tasti modificatori. Solo portare prima l'app in primo piano funziona con i giochi.</value>
   </data>
   <data name="Integrations.Keyboard.Config.TargetModeFocusSendOption" xml:space="preserve">
     <value>Porta l'app in primo piano, poi invia (funziona per i giochi)</value>
@@ -6077,6 +6077,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Integrations.Keyboard.Config.TargetProcessPlaceholder" xml:space="preserve">
     <value>Qualsiasi (finestra in primo piano)</value>
+  </data>
+  <data name="Integrations.Keyboard.Errors.BackgroundModifiersUnsupported" xml:space="preserve">
+    <value>Le combinazioni con tasti modificatori non possono essere recapitate a un'applicazione in background su questa piattaforma. Porta prima in primo piano l'applicazione di destinazione oppure svuota il campo dell'applicazione di destinazione per inviare la pressione a livello di sistema.</value>
   </data>
   <data name="Integrations.Keyboard.Errors.SequenceCouldNotBeRead" xml:space="preserve">
     <value>La sequenza di tasti non può essere letta.</value>

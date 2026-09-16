@@ -6058,7 +6058,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Send in background (best-effort, not games)</value>
   </data>
   <data name="Integrations.Keyboard.Config.TargetModeDescription" xml:space="preserve">
-    <value>How to deliver the keystroke when a target application is set. "Focus, then send" works for games; "background" does not.</value>
+    <value>How to deliver the keystroke when a target application is set. Only when focused skips the keystroke silently while the app is not focused. Background delivery is best effort and on some platforms cannot carry modifier keys. Focusing the app first is the only mode that works for games.</value>
   </data>
   <data name="Integrations.Keyboard.Config.TargetModeFocusSendOption" xml:space="preserve">
     <value>Focus the app, then send (works for games)</value>
@@ -6077,6 +6077,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Keyboard.Config.TargetProcessPlaceholder" xml:space="preserve">
     <value>Any (focused window)</value>
+  </data>
+  <data name="Integrations.Keyboard.Errors.BackgroundModifiersUnsupported" xml:space="preserve">
+    <value>Modifier combinations cannot be delivered to a background application on this platform. Focus the target application first, or clear the target application to send the keystroke system-wide.</value>
   </data>
   <data name="Integrations.Keyboard.Errors.SequenceCouldNotBeRead" xml:space="preserve">
     <value>The key sequence could not be read.</value>

@@ -75,6 +75,12 @@ internal sealed class PressKeyActionDefinition : IActionDefinition
 			}
 
 			using var session = sessionValue;
+			if (KeyboardBackgroundDelivery.ModifiersCannotBeDelivered(_input, target, modifiers, key))
+			{
+				return KeyboardActionValues.SessionUnavailableResult(
+					KeyboardSessionUnavailableReason.BackgroundModifiersUnsupported);
+			}
+
 			await session.PressComboAsync(modifiers, key, repeat, repeatDelay, context.CancellationToken)
 				.ConfigureAwait(false);
 

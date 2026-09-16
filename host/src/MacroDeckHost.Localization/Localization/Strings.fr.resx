@@ -6058,7 +6058,7 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Envoyer en arrière-plan (au mieux, pas pour les jeux)</value>
   </data>
   <data name="Integrations.Keyboard.Config.TargetModeDescription" xml:space="preserve">
-    <value>Comment délivrer la frappe lorsqu'une application cible est définie. "Mettre au premier plan, puis envoyer" fonctionne pour les jeux ; "arrière-plan" ne fonctionne pas.</value>
+    <value>Comment transmettre la frappe lorsqu'une application cible est définie. Uniquement au premier plan ignore silencieusement la frappe tant que l'application ne l'est pas. La transmission en arrière-plan se fait au mieux et ne peut pas transmettre les touches de modification sur certaines plateformes. Seul le passage au premier plan fonctionne avec les jeux.</value>
   </data>
   <data name="Integrations.Keyboard.Config.TargetModeFocusSendOption" xml:space="preserve">
     <value>Mettre l'application au premier plan, puis envoyer (fonctionne pour les jeux)</value>
@@ -6077,6 +6077,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.Keyboard.Config.TargetProcessPlaceholder" xml:space="preserve">
     <value>N'importe laquelle (fenêtre active)</value>
+  </data>
+  <data name="Integrations.Keyboard.Errors.BackgroundModifiersUnsupported" xml:space="preserve">
+    <value>Les combinaisons avec touches de modification ne peuvent pas être transmises à une application en arrière-plan sur cette plateforme. Mets d'abord l'application cible au premier plan, ou laisse le champ d'application cible vide pour envoyer la frappe à l'échelle du système.</value>
   </data>
   <data name="Integrations.Keyboard.Errors.SequenceCouldNotBeRead" xml:space="preserve">
     <value>La séquence de touches n'a pas pu être lue.</value>

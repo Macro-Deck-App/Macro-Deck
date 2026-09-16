@@ -6056,7 +6056,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Im Hintergrund senden (nach bestem Bemühen, nicht für Spiele)</value>
   </data>
   <data name="Integrations.Keyboard.Config.TargetModeDescription" xml:space="preserve">
-    <value>Wie der Tastendruck zugestellt wird, wenn eine Zielanwendung festgelegt ist. "Fokussieren, dann senden" funktioniert bei Spielen; "Hintergrund" nicht.</value>
+    <value>Wie der Tastendruck zugestellt wird, wenn eine Zielanwendung festgelegt ist. Nur bei fokussierter App überspringt den Tastendruck stillschweigend, solange sie nicht fokussiert ist. Die Zustellung im Hintergrund erfolgt nach bestem Bemühen und kann auf manchen Plattformen keine Modifikatortasten übertragen. Nur das Fokussieren der App zuerst funktioniert bei Spielen.</value>
   </data>
   <data name="Integrations.Keyboard.Config.TargetModeFocusSendOption" xml:space="preserve">
     <value>App fokussieren, dann senden (funktioniert bei Spielen)</value>
@@ -6075,6 +6075,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Keyboard.Config.TargetProcessPlaceholder" xml:space="preserve">
     <value>Beliebig (fokussiertes Fenster)</value>
+  </data>
+  <data name="Integrations.Keyboard.Errors.BackgroundModifiersUnsupported" xml:space="preserve">
+    <value>Modifikator-Kombinationen können auf dieser Plattform nicht an eine Anwendung im Hintergrund zugestellt werden. Fokussiere zuerst die Zielanwendung oder leere das Feld Zielanwendung, um den Tastendruck systemweit zu senden.</value>
   </data>
   <data name="Integrations.Keyboard.Errors.SequenceCouldNotBeRead" xml:space="preserve">
     <value>Die Tastenfolge konnte nicht gelesen werden.</value>

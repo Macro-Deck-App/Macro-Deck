@@ -83,6 +83,9 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 
 	public bool SupportsBackgroundSend => _display != IntPtr.Zero;
 
+	public KeyModifier BackgroundModifiers
+		=> KeyModifier.Control | KeyModifier.Shift | KeyModifier.Alt | KeyModifier.Meta;
+
 	public string? GetForegroundProcessName()
 	{
 		if (_display == IntPtr.Zero)

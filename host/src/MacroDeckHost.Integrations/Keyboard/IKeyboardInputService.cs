@@ -8,7 +8,9 @@ public enum KeyboardSessionUnavailableReason
 
 	FocusFailed,
 
-	Unsupported
+	Unsupported,
+
+	BackgroundModifiersUnsupported
 }
 
 public readonly struct KeyboardSessionResult
@@ -35,6 +37,8 @@ public interface IKeyboardInputService
 	bool RequiresPermission { get; }
 
 	bool HasPermission { get; }
+
+	KeyModifier BackgroundModifiers { get; }
 
 	Task RequestPermissionAsync(CancellationToken cancellationToken = default);
 

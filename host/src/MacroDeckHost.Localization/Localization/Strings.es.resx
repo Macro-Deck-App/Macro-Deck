@@ -6058,7 +6058,7 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>Enviar en segundo plano (mejor esfuerzo, no válido para juegos)</value>
   </data>
   <data name="Integrations.Keyboard.Config.TargetModeDescription" xml:space="preserve">
-    <value>Cómo entregar la pulsación de tecla cuando se ha establecido una aplicación de destino. "Enfocar y luego enviar" funciona con juegos; "segundo plano" no.</value>
+    <value>Cómo entregar la pulsación cuando hay una aplicación de destino configurada. Solo con la app enfocada omite la pulsación en silencio mientras no lo esté. La entrega en segundo plano es de mejor esfuerzo y en algunas plataformas no puede transmitir teclas modificadoras. Solo enfocar la app primero funciona con los juegos.</value>
   </data>
   <data name="Integrations.Keyboard.Config.TargetModeFocusSendOption" xml:space="preserve">
     <value>Enfocar la app y luego enviar (funciona con juegos)</value>
@@ -6077,6 +6077,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Integrations.Keyboard.Config.TargetProcessPlaceholder" xml:space="preserve">
     <value>Cualquiera (ventana con el foco)</value>
+  </data>
+  <data name="Integrations.Keyboard.Errors.BackgroundModifiersUnsupported" xml:space="preserve">
+    <value>Las combinaciones con teclas modificadoras no se pueden entregar a una aplicación en segundo plano en esta plataforma. Enfoca primero la aplicación de destino o deja vacío el campo de aplicación de destino para enviar la pulsación a todo el sistema.</value>
   </data>
   <data name="Integrations.Keyboard.Errors.SequenceCouldNotBeRead" xml:space="preserve">
     <value>No se pudo leer la secuencia de teclas.</value>

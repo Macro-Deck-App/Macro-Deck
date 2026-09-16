@@ -68,6 +68,9 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 
 	public bool SupportsBackgroundSend => OperatingSystem.IsMacOS();
 
+	public KeyModifier BackgroundModifiers
+		=> KeyModifier.Control | KeyModifier.Shift | KeyModifier.Alt | KeyModifier.Meta;
+
 	public string? GetForegroundProcessName()
 	{
 		var pid = MacOsWindows.GetForegroundOwnerPid();

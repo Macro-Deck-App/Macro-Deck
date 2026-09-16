@@ -15,6 +15,10 @@ internal sealed class FakeKeyboardInputProvider : IKeyboardInputProvider
 	// Targeting (issue #34): configurable so target-mode behaviour can be asserted.
 	public bool SupportsWindowTargeting { get; set; }
 	public bool SupportsBackgroundSend { get; set; }
+
+	public KeyModifier BackgroundModifiers { get; set; }
+		= KeyModifier.Control | KeyModifier.Shift | KeyModifier.Alt | KeyModifier.Meta;
+
 	public string? ForegroundProcessName { get; set; }
 	public FakeTargetWindow? Target { get; set; }
 	public string? ResolvedProcess { get; private set; }
