@@ -23,6 +23,20 @@ pub(crate) const CHECK_INTERVAL_SECS: u64 = 6 * 60 * 60;
 
 pub(crate) const MIN_CHECK_GAP_SECS: u64 = 15 * 60;
 
+pub(crate) const AUTO_INSTALL_DELAY_SECS: u64 = 60;
+
+// How late a countdown may be claimed. Anything later means the machine slept
+// through the deadline, and the user gets a fresh countdown instead of a restart.
+pub(crate) const AUTO_INSTALL_GRACE_SECS: u64 = 5;
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub(crate) enum AutoInstallTick {
+    Wait,
+    Exit,
+    Rearm(u64),
+    Claim,
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub(crate) enum CheckTrigger {
     Startup,
@@ -165,6 +179,7 @@ pub(crate) struct UpdateSnapshot {
     pub(crate) failure: Option<UpdateFailure>,
     pub(crate) progress: Option<DownloadProgress>,
     pub(crate) last_checked_at: Option<u64>,
+    pub(crate) auto_install_at: Option<u64>,
 }
 
 pub(crate) struct UpdateState {
@@ -188,6 +203,8 @@ pub(crate) struct UpdateState {
     signalled_version: Option<String>,
     pub(crate) last_check_at: Option<u64>,
     pub(crate) last_tick_at: u64,
+    auto_install_at: Option<u64>,
+    postponed_version: Option<String>,
 }
 
 impl UpdateState {
@@ -221,6 +238,8 @@ impl UpdateState {
             signalled_version: None,
             last_check_at: None,
             last_tick_at: 0,
+            auto_install_at: None,
+            postponed_version: None,
         }
     }
 
@@ -274,6 +293,7 @@ impl UpdateState {
         partial_check: Option<String>,
     ) {
         self.last_check_at = Some(now);
+        self.auto_install_at = None;
         self.phase = UpdatePhase::Available;
         self.version = Some(version);
         self.notes = notes;
@@ -289,6 +309,7 @@ impl UpdateState {
 
     pub(crate) fn record_up_to_date(&mut self, now: u64, partial_check: Option<String>) {
         self.last_check_at = Some(now);
+        self.auto_install_at = None;
         self.phase = UpdatePhase::UpToDate;
         self.version = None;
         self.notes = None;
@@ -300,6 +321,7 @@ impl UpdateState {
 
     pub(crate) fn record_check_failed(&mut self, now: u64, error: String) {
         self.last_check_at = Some(now);
+        self.auto_install_at = None;
         self.phase = UpdatePhase::Failed;
         self.error = Some(error);
         self.failure = Some(UpdateFailure::Check);
@@ -316,6 +338,7 @@ impl UpdateState {
             return false;
         }
         self.phase = UpdatePhase::Downloading;
+        self.auto_install_at = None;
         self.progress = None;
         self.error = None;
         self.failure = None;
@@ -348,6 +371,7 @@ impl UpdateState {
             return false;
         }
         self.phase = UpdatePhase::Installing;
+        self.auto_install_at = None;
         true
     }
 
@@ -357,13 +381,85 @@ impl UpdateState {
     // show the user, not just a quiet retry point.
     pub(crate) fn record_install_failed(&mut self, error: String) {
         self.phase = UpdatePhase::Failed;
+        self.auto_install_at = None;
         self.error = Some(error);
         self.failure = Some(UpdateFailure::Install);
     }
 
     pub(crate) fn record_cancelled(&mut self) {
         self.phase = UpdatePhase::Available;
+        self.auto_install_at = None;
         self.progress = None;
+    }
+
+    pub(crate) fn skips_automatic_check(&self, automatic: bool, has_parked_download: bool) -> bool {
+        automatic && has_parked_download && self.phase == UpdatePhase::Downloaded
+    }
+
+    pub(crate) fn schedule_auto_install(&mut self, now: u64) -> Option<u64> {
+        if self.phase != UpdatePhase::Downloaded {
+            return None;
+        }
+        if self.version.is_some() && self.postponed_version == self.version {
+            return None;
+        }
+        let deadline = now + AUTO_INSTALL_DELAY_SECS;
+        self.auto_install_at = Some(deadline);
+        Some(deadline)
+    }
+
+    pub(crate) fn postpone_auto_install(&mut self) -> bool {
+        if self.auto_install_at.take().is_none() {
+            return false;
+        }
+        self.postponed_version = self.version.clone();
+        true
+    }
+
+    pub(crate) fn cancel_auto_install(&mut self) -> bool {
+        self.auto_install_at.take().is_some()
+    }
+
+    // Only while the manual check that parked this state is still running: an
+    // install claimed in the meantime must not be turned back into a countdown.
+    pub(crate) fn restore_downloaded(&mut self, now: u64, partial_check: Option<String>) -> bool {
+        if self.phase != UpdatePhase::Checking {
+            return false;
+        }
+        self.last_check_at = Some(now);
+        self.phase = UpdatePhase::Downloaded;
+        self.partial_check = partial_check;
+        self.error = None;
+        self.failure = None;
+        true
+    }
+
+    // Claim moves to Installing under the caller's lock, so a manual install and
+    // the countdown can never both take the parked download.
+    pub(crate) fn auto_install_tick(
+        &mut self,
+        now: u64,
+        token: u64,
+        automatic: bool,
+    ) -> AutoInstallTick {
+        if self.auto_install_at != Some(token) {
+            return AutoInstallTick::Exit;
+        }
+        if !automatic {
+            self.auto_install_at = None;
+            return AutoInstallTick::Exit;
+        }
+        if self.phase != UpdatePhase::Downloaded || now < token {
+            return AutoInstallTick::Wait;
+        }
+        if now > token + AUTO_INSTALL_GRACE_SECS {
+            let deadline = now + AUTO_INSTALL_DELAY_SECS;
+            self.auto_install_at = Some(deadline);
+            return AutoInstallTick::Rearm(deadline);
+        }
+        self.auto_install_at = None;
+        self.phase = UpdatePhase::Installing;
+        AutoInstallTick::Claim
     }
 
     pub(crate) fn take_availability_signal(&self) -> Option<String> {
@@ -396,6 +492,7 @@ impl UpdateState {
             failure: self.failure,
             progress: self.progress.clone(),
             last_checked_at: self.last_check_at,
+            auto_install_at: self.auto_install_at,
         }
     }
 }
@@ -774,5 +871,226 @@ mod tests {
         state.record_available(2, "3.1.0".to_string(), None, None, None);
 
         assert!(state.progress.is_none());
+    }
+
+    fn downloaded_state(version: &str) -> UpdateState {
+        let mut state = idle_state();
+        state.record_available(1, version.to_string(), None, None, None);
+        assert!(state.try_begin_download());
+        state.record_downloaded();
+        state
+    }
+
+    #[test]
+    fn a_finished_download_schedules_the_install_after_the_countdown() {
+        let mut state = downloaded_state("3.1.0");
+
+        let deadline = state.schedule_auto_install(100);
+
+        assert_eq!(deadline, Some(100 + AUTO_INSTALL_DELAY_SECS));
+        assert_eq!(state.snapshot().auto_install_at, deadline);
+    }
+
+    #[test]
+    fn nothing_is_scheduled_before_the_download_finished() {
+        let mut state = idle_state();
+        state.record_available(1, "3.1.0".to_string(), None, None, None);
+
+        assert_eq!(state.schedule_auto_install(100), None);
+        assert!(state.try_begin_download());
+        assert_eq!(state.schedule_auto_install(100), None);
+    }
+
+    #[test]
+    fn the_countdown_waits_until_the_deadline_and_then_claims_the_install_once() {
+        let mut state = downloaded_state("3.1.0");
+        let token = state.schedule_auto_install(100).unwrap();
+
+        assert_eq!(
+            state.auto_install_tick(token - 1, token, true),
+            AutoInstallTick::Wait
+        );
+        assert_eq!(
+            state.auto_install_tick(token, token, true),
+            AutoInstallTick::Claim
+        );
+        assert_eq!(state.phase, UpdatePhase::Installing);
+        assert_eq!(state.snapshot().auto_install_at, None);
+        assert_eq!(
+            state.auto_install_tick(token + 1, token, true),
+            AutoInstallTick::Exit
+        );
+    }
+
+    #[test]
+    fn not_now_stops_the_countdown_and_is_not_offered_again_for_that_version() {
+        let mut state = downloaded_state("3.1.0");
+        let token = state.schedule_auto_install(100).unwrap();
+
+        assert!(state.postpone_auto_install());
+
+        assert_eq!(
+            state.auto_install_tick(token, token, true),
+            AutoInstallTick::Exit
+        );
+        assert_eq!(state.phase, UpdatePhase::Downloaded);
+        assert_eq!(state.schedule_auto_install(200), None);
+    }
+
+    #[test]
+    fn a_newer_version_is_scheduled_again_after_an_older_one_was_postponed() {
+        let mut state = downloaded_state("3.1.0");
+        state.schedule_auto_install(100).unwrap();
+        assert!(state.postpone_auto_install());
+
+        state.record_available(150, "3.2.0".to_string(), None, None, None);
+        assert!(state.try_begin_download());
+        state.record_downloaded();
+
+        assert!(state.schedule_auto_install(200).is_some());
+    }
+
+    #[test]
+    fn not_now_after_the_install_was_claimed_has_no_effect() {
+        let mut state = downloaded_state("3.1.0");
+        let token = state.schedule_auto_install(100).unwrap();
+        assert_eq!(
+            state.auto_install_tick(token, token, true),
+            AutoInstallTick::Claim
+        );
+
+        assert!(!state.postpone_auto_install());
+        assert_eq!(state.phase, UpdatePhase::Installing);
+    }
+
+    #[test]
+    fn a_manual_install_during_the_countdown_leaves_nothing_for_the_timer() {
+        let mut state = downloaded_state("3.1.0");
+        let token = state.schedule_auto_install(100).unwrap();
+
+        assert!(state.try_begin_install());
+
+        assert_eq!(
+            state.auto_install_tick(token, token, true),
+            AutoInstallTick::Exit
+        );
+    }
+
+    #[test]
+    fn leaving_automatic_mode_during_the_countdown_cancels_it_and_keeps_the_download() {
+        let mut state = downloaded_state("3.1.0");
+        let token = state.schedule_auto_install(100).unwrap();
+
+        assert_eq!(
+            state.auto_install_tick(token, token, false),
+            AutoInstallTick::Exit
+        );
+
+        assert_eq!(state.phase, UpdatePhase::Downloaded);
+        assert_eq!(state.snapshot().auto_install_at, None);
+        assert!(state.schedule_auto_install(200).is_some());
+    }
+
+    #[test]
+    fn sleeping_through_the_deadline_starts_a_fresh_countdown_instead_of_installing() {
+        let mut state = downloaded_state("3.1.0");
+        let token = state.schedule_auto_install(100).unwrap();
+        let woke_at = token + AUTO_INSTALL_GRACE_SECS + 1_000;
+
+        let tick = state.auto_install_tick(woke_at, token, true);
+
+        let new_token = woke_at + AUTO_INSTALL_DELAY_SECS;
+        assert_eq!(tick, AutoInstallTick::Rearm(new_token));
+        assert_eq!(state.phase, UpdatePhase::Downloaded);
+        assert_eq!(
+            state.auto_install_tick(woke_at + 1, new_token, true),
+            AutoInstallTick::Wait
+        );
+        assert_eq!(
+            state.auto_install_tick(new_token, new_token, true),
+            AutoInstallTick::Claim
+        );
+    }
+
+    #[test]
+    fn a_manual_check_in_progress_holds_the_countdown_without_installing() {
+        let mut state = downloaded_state("3.1.0");
+        let token = state.schedule_auto_install(100).unwrap();
+        assert!(state.try_begin_check());
+
+        assert_eq!(
+            state.auto_install_tick(token, token, true),
+            AutoInstallTick::Wait
+        );
+    }
+
+    #[test]
+    fn a_manual_recheck_of_a_parked_download_returns_to_downloaded_with_a_new_countdown() {
+        let mut state = downloaded_state("3.1.0");
+        let old_token = state.schedule_auto_install(100).unwrap();
+        assert!(state.try_begin_check());
+
+        assert!(state.restore_downloaded(300, None));
+        let new_token = state.schedule_auto_install(300).unwrap();
+
+        assert_eq!(state.phase, UpdatePhase::Downloaded);
+        assert_eq!(
+            state.auto_install_tick(old_token, old_token, true),
+            AutoInstallTick::Exit
+        );
+        assert_eq!(
+            state.auto_install_tick(new_token, new_token, true),
+            AutoInstallTick::Claim
+        );
+    }
+
+    #[test]
+    fn a_restore_never_overrides_an_install_claimed_during_the_check() {
+        let mut state = downloaded_state("3.1.0");
+        assert!(state.try_begin_check());
+        assert!(state.try_begin_install());
+
+        assert!(!state.restore_downloaded(300, None));
+        assert_eq!(state.phase, UpdatePhase::Installing);
+    }
+
+    #[test]
+    fn a_failed_or_newer_check_ends_the_countdown() {
+        let mut failed = downloaded_state("3.1.0");
+        let token = failed.schedule_auto_install(100).unwrap();
+        failed.record_check_failed(120, "offline".to_string());
+        assert_eq!(
+            failed.auto_install_tick(token, token, true),
+            AutoInstallTick::Exit
+        );
+
+        let mut newer = downloaded_state("3.1.0");
+        let token = newer.schedule_auto_install(100).unwrap();
+        newer.record_available(120, "3.2.0".to_string(), None, None, None);
+        assert_eq!(
+            newer.auto_install_tick(token, token, true),
+            AutoInstallTick::Exit
+        );
+    }
+
+    #[test]
+    fn automatic_checks_pause_only_while_a_parked_download_waits_in_automatic_mode() {
+        let state = downloaded_state("3.1.0");
+
+        assert!(state.skips_automatic_check(true, true));
+        assert!(!state.skips_automatic_check(false, true));
+        assert!(!state.skips_automatic_check(true, false));
+        assert!(!idle_state().skips_automatic_check(true, true));
+    }
+
+    #[test]
+    fn the_snapshot_serializes_the_countdown_deadline_as_camel_case() {
+        let mut state = downloaded_state("3.1.0");
+        let value = serde_json::to_value(state.snapshot()).unwrap();
+        assert!(value["autoInstallAt"].is_null());
+
+        state.schedule_auto_install(100);
+        let value = serde_json::to_value(state.snapshot()).unwrap();
+        assert_eq!(value["autoInstallAt"], 100 + AUTO_INSTALL_DELAY_SECS);
     }
 }

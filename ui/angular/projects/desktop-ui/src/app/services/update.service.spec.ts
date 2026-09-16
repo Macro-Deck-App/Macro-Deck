@@ -20,6 +20,7 @@ function makeState(overrides: Partial<ShellUpdateState> = {}): ShellUpdateState 
     failure: null,
     progress: null,
     lastCheckedAt: null,
+    autoInstallAt: null,
     ...overrides,
   };
 }

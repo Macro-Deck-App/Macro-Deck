@@ -1,0 +1,29 @@
+<shared-modal
+  [heading]="heading()"
+  [maxWidth]="'900px'"
+  [style.--modal-height]="'min(88vh, 60rem)'"
+  (close)="onModalClose()">
+  <div class="whats-new-modal">
+    @if (releaseDate(); as date) {
+      <p class="whats-new-modal__meta">{{ appStrings.Settings.Update.ReleasedOn | translate:{ date } }}</p>
+    }
+    <div class="whats-new-modal__changelog">
+      @if (hasChangelog()) {
+        @for (section of sections(); track $index) {
+          <shared-store-markdown
+            class="whats-new-modal__notes-section"
+            [class.whats-new-modal__notes-section--category]="section[0].kind === 'heading'"
+            [blocks]="section" />
+        }
+      } @else {
+        <p class="whats-new-modal__meta">{{ appStrings.Update.Details.NoChangelog | translate }}</p>
+      }
+    </div>
+  </div>
+
+  <div modal-footer class="whats-new-modal__actions">
+    <shared-button variant="primary" (click)="close()">
+      {{ appStrings.Update.WhatsNew.CloseAction | translate }}
+    </shared-button>
+  </div>
+</shared-modal>

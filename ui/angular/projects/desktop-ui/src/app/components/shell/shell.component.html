@@ -37,7 +37,9 @@
     <app-settings-modal></app-settings-modal>
   }
 
-  @if (updateModal.isOpen()) {
+  @if (postUpdateChangelog.isOpen()) {
+    <app-whats-new-modal></app-whats-new-modal>
+  } @else if (updateModal.isOpen()) {
     <app-update-modal></app-update-modal>
   }
 </div>

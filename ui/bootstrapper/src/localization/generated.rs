@@ -61,7 +61,6 @@ pub mod keys {
     pub const UPDATE_CONFIRM_DOWNLOAD: &str = "Bootstrapper.Update.ConfirmDownload";
     pub const UPDATE_DOWNLOAD_AND_INSTALL: &str = "Bootstrapper.Update.DownloadAndInstall";
     pub const UPDATE_DOWNLOAD_FAILED: &str = "Bootstrapper.Update.DownloadFailed";
-    pub const UPDATE_DOWNLOADED: &str = "Bootstrapper.Update.Downloaded";
     pub const UPDATE_EXTERNAL_AVAILABLE: &str = "Bootstrapper.Update.ExternalAvailable";
     pub const UPDATE_HOST_STOP_FAILED: &str = "Bootstrapper.Update.HostStopFailed";
     pub const UPDATE_INSTALL_FAILED: &str = "Bootstrapper.Update.InstallFailed";
@@ -72,7 +71,6 @@ pub mod keys {
     pub const UPDATE_NOT_INSTALLED: &str = "Bootstrapper.Update.NotInstalled";
     pub const UPDATE_OPEN_DOWNLOAD_PAGE: &str = "Bootstrapper.Update.OpenDownloadPage";
     pub const UPDATE_PARTIAL_CHECK_FAILED: &str = "Bootstrapper.Update.PartialCheckFailed";
-    pub const UPDATE_RESTART_NOW: &str = "Bootstrapper.Update.RestartNow";
 }
 
 /// Culture to its templates, sorted by key.
@@ -129,7 +127,6 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.ConfirmDownload", "Macro Deck {version} je k dispozici.\n\nStáhnout a nainstalovat nyní?"),
         ("Bootstrapper.Update.DownloadAndInstall", "Stáhnout a nainstalovat"),
         ("Bootstrapper.Update.DownloadFailed", "Nepodařilo se stáhnout aktualizaci: {error}"),
-        ("Bootstrapper.Update.Downloaded", "Macro Deck {version} byl stažen.\n\nRestartujte Macro Deck, abyste nainstalovali aktualizaci."),
         ("Bootstrapper.Update.ExternalAvailable", "Je k dispozici Macro Deck {version}.\n\nStáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB nebo RPM. Macro Deck bude nadále běžet."),
         ("Bootstrapper.Update.HostStopFailed", "Hostitele Macro Deck se nepodařilo zastavit, takže aktualizace nebyla nainstalována. Macro Deck úplně ukončete a zkuste to znovu."),
         ("Bootstrapper.Update.InstallFailed", "Nepodařilo se nainstalovat aktualizaci: {error}"),
@@ -141,7 +138,6 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.OpenDownloadPage", "Otevřít stránku ke stažení"),
         ("Bootstrapper.Update.PartialCheckFailed.One", "Nepodařilo se zkontrolovat kanál aktualizací {names}."),
         ("Bootstrapper.Update.PartialCheckFailed.Other", "Nepodařilo se zkontrolovat kanály aktualizací {names}."),
-        ("Bootstrapper.Update.RestartNow", "Restartovat nyní"),
     ]),
     ("de", &[
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck konnte nicht verschoben werden"),
@@ -194,7 +190,6 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.ConfirmDownload", "Macro Deck {version} ist verfügbar.\n\nMöchtest du es jetzt herunterladen und installieren?"),
         ("Bootstrapper.Update.DownloadAndInstall", "Herunterladen & installieren"),
         ("Bootstrapper.Update.DownloadFailed", "Das Update konnte nicht heruntergeladen werden: {error}"),
-        ("Bootstrapper.Update.Downloaded", "Macro Deck {version} wurde heruntergeladen.\n\nStarte Macro Deck neu, um das Update zu installieren."),
         ("Bootstrapper.Update.ExternalAvailable", "Macro Deck {version} ist verfügbar.\n\nLade es von der Macro-Deck-Website herunter und aktualisiere deine installierte AppImage-, DEB- oder RPM-Version. Macro Deck läuft währenddessen weiter."),
         ("Bootstrapper.Update.HostStopFailed", "Der Macro-Deck-Host konnte nicht beendet werden, daher wurde das Update nicht installiert. Beende Macro Deck vollständig und versuche es erneut."),
         ("Bootstrapper.Update.InstallFailed", "Das Update konnte nicht installiert werden: {error}"),
@@ -206,7 +201,6 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.OpenDownloadPage", "Downloadseite öffnen"),
         ("Bootstrapper.Update.PartialCheckFailed.One", "Der Update-Feed {names} konnte nicht geprüft werden."),
         ("Bootstrapper.Update.PartialCheckFailed.Other", "Die Update-Feeds {names} konnten nicht geprüft werden."),
-        ("Bootstrapper.Update.RestartNow", "Jetzt neu starten"),
     ]),
     ("en", &[
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck could not be moved"),
@@ -259,7 +253,6 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.ConfirmDownload", "Macro Deck {version} is available.\n\nDo you want to download and install it now?"),
         ("Bootstrapper.Update.DownloadAndInstall", "Download & install"),
         ("Bootstrapper.Update.DownloadFailed", "Could not download the update: {error}"),
-        ("Bootstrapper.Update.Downloaded", "Macro Deck {version} has been downloaded.\n\nRestart Macro Deck to install the update."),
         ("Bootstrapper.Update.ExternalAvailable", "Macro Deck {version} is available.\n\nDownload it from the Macro Deck website and update the AppImage, DEB or RPM you installed. Macro Deck will keep running."),
         ("Bootstrapper.Update.HostStopFailed", "The Macro Deck host could not be stopped, so the update was not installed. Quit Macro Deck completely and try again."),
         ("Bootstrapper.Update.InstallFailed", "Could not install the update: {error}"),
@@ -271,7 +264,6 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.OpenDownloadPage", "Open download page"),
         ("Bootstrapper.Update.PartialCheckFailed.One", "Could not check the {names} update feed."),
         ("Bootstrapper.Update.PartialCheckFailed.Other", "Could not check the {names} update feeds."),
-        ("Bootstrapper.Update.RestartNow", "Restart now"),
     ]),
     ("es", &[
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "No se pudo mover Macro Deck"),
@@ -324,7 +316,6 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.ConfirmDownload", "Macro Deck {version} está disponible.\n\n¿Quieres descargarlo e instalarlo ahora?"),
         ("Bootstrapper.Update.DownloadAndInstall", "Descargar e instalar"),
         ("Bootstrapper.Update.DownloadFailed", "No se pudo descargar la actualización: {error}"),
-        ("Bootstrapper.Update.Downloaded", "Se ha descargado Macro Deck {version}.\n\nReinicia Macro Deck para instalar la actualización."),
         ("Bootstrapper.Update.ExternalAvailable", "Macro Deck {version} está disponible.\n\nDescárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM que instalaste. Macro Deck seguirá funcionando."),
         ("Bootstrapper.Update.HostStopFailed", "No se pudo detener el host de Macro Deck, por lo que la actualización no se instaló. Cierra Macro Deck por completo e inténtalo de nuevo."),
         ("Bootstrapper.Update.InstallFailed", "No se pudo instalar la actualización: {error}"),
@@ -336,7 +327,6 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.OpenDownloadPage", "Abrir página de descarga"),
         ("Bootstrapper.Update.PartialCheckFailed.One", "No se pudo comprobar el feed de actualizaciones de {names}."),
         ("Bootstrapper.Update.PartialCheckFailed.Other", "No se pudieron comprobar los feeds de actualizaciones de {names}."),
-        ("Bootstrapper.Update.RestartNow", "Reiniciar ahora"),
     ]),
     ("fr", &[
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck n'a pas pu être déplacé"),
@@ -389,7 +379,6 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.ConfirmDownload", "Macro Deck {version} est disponible.\n\nVeux-tu le télécharger et l'installer maintenant ?"),
         ("Bootstrapper.Update.DownloadAndInstall", "Télécharger et installer"),
         ("Bootstrapper.Update.DownloadFailed", "Impossible de télécharger la mise à jour: {error}"),
-        ("Bootstrapper.Update.Downloaded", "Macro Deck {version} a été téléchargé.\n\nRedémarre Macro Deck pour installer la mise à jour."),
         ("Bootstrapper.Update.ExternalAvailable", "Macro Deck {version} est disponible.\n\nTélécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le DEB ou le RPM que tu as installé. Macro Deck continuera de fonctionner."),
         ("Bootstrapper.Update.HostStopFailed", "L'hôte Macro Deck n'a pas pu être arrêté, la mise à jour n'a donc pas été installée. Quitte complètement Macro Deck et réessaie."),
         ("Bootstrapper.Update.InstallFailed", "Impossible d'installer la mise à jour: {error}"),
@@ -401,7 +390,6 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.OpenDownloadPage", "Ouvrir la page de téléchargement"),
         ("Bootstrapper.Update.PartialCheckFailed.One", "Impossible de vérifier le flux de mise à jour de {names}."),
         ("Bootstrapper.Update.PartialCheckFailed.Other", "Impossible de vérifier les flux de mise à jour de {names}."),
-        ("Bootstrapper.Update.RestartNow", "Redémarrer maintenant"),
     ]),
     ("it", &[
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Impossibile spostare Macro Deck"),
@@ -454,7 +442,6 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.ConfirmDownload", "Macro Deck {version} è disponibile.\n\nVuoi scaricarlo e installarlo ora?"),
         ("Bootstrapper.Update.DownloadAndInstall", "Scarica e installa"),
         ("Bootstrapper.Update.DownloadFailed", "Impossibile scaricare l'aggiornamento: {error}"),
-        ("Bootstrapper.Update.Downloaded", "Macro Deck {version} è stato scaricato.\n\nRiavvia Macro Deck per installare l'aggiornamento."),
         ("Bootstrapper.Update.ExternalAvailable", "Macro Deck {version} è disponibile.\n\nScaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai installato. Macro Deck continuerà a funzionare."),
         ("Bootstrapper.Update.HostStopFailed", "Non è stato possibile arrestare l'host di Macro Deck, quindi l'aggiornamento non è stato installato. Chiudi completamente Macro Deck e riprova."),
         ("Bootstrapper.Update.InstallFailed", "Impossibile installare l'aggiornamento: {error}"),
@@ -466,7 +453,6 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.OpenDownloadPage", "Apri pagina di download"),
         ("Bootstrapper.Update.PartialCheckFailed.One", "Impossibile controllare il feed di aggiornamento di {names}."),
         ("Bootstrapper.Update.PartialCheckFailed.Other", "Impossibile controllare i feed di aggiornamento di {names}."),
-        ("Bootstrapper.Update.RestartNow", "Riavvia ora"),
     ]),
     ("pl", &[
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Nie udało się przenieść Macro Deck"),
@@ -519,7 +505,6 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.ConfirmDownload", "Macro Deck {version} jest dostępny.\n\nPobrać i zainstalować teraz?"),
         ("Bootstrapper.Update.DownloadAndInstall", "Pobierz i zainstaluj"),
         ("Bootstrapper.Update.DownloadFailed", "Nie udało się pobrać aktualizacji: {error}"),
-        ("Bootstrapper.Update.Downloaded", "Pobrano Macro Deck {version}.\n\nUruchom Macro Deck ponownie, aby zainstalować aktualizację."),
         ("Bootstrapper.Update.ExternalAvailable", "Dostępny jest Macro Deck {version}.\n\nPobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB lub RPM. Macro Deck będzie działał dalej."),
         ("Bootstrapper.Update.HostStopFailed", "Nie udało się zatrzymać hosta Macro Deck, więc aktualizacja nie została zainstalowana. Zamknij Macro Deck całkowicie i spróbuj ponownie."),
         ("Bootstrapper.Update.InstallFailed", "Nie udało się zainstalować aktualizacji: {error}"),
@@ -531,6 +516,5 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.OpenDownloadPage", "Otwórz stronę pobierania"),
         ("Bootstrapper.Update.PartialCheckFailed.One", "Nie można sprawdzić kanału aktualizacji {names}."),
         ("Bootstrapper.Update.PartialCheckFailed.Other", "Nie można sprawdzić kanałów aktualizacji {names}."),
-        ("Bootstrapper.Update.RestartNow", "Uruchom ponownie teraz"),
     ]),
 ];

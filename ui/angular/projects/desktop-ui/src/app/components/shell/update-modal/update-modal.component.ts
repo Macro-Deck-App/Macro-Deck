@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ViewChild, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { AppStrings } from '@macro-deck/runtime';
 import { ButtonComponent, LocalizationService, ModalComponent, TranslatePipe, dismissModal } from '@shared';
 import { StoreMarkdownComponent } from '../../store/store-markdown.component';
@@ -21,6 +21,24 @@ export class UpdateModalComponent {
   protected readonly appStrings = AppStrings;
 
   @ViewChild(ModalComponent) private readonly modal?: ModalComponent;
+
+  private readonly now = signal(Date.now());
+
+  constructor() {
+    const timer = setInterval(() => this.now.set(Date.now()), 1000);
+    inject(DestroyRef).onDestroy(() => clearInterval(timer));
+  }
+
+  protected readonly countingDown = computed(() => this.updates.autoInstallAt() !== null);
+
+  protected readonly countdownStatus = computed(() => {
+    const autoInstallAt = this.updates.autoInstallAt();
+    if (autoInstallAt === null) {
+      return null;
+    }
+    const count = Math.max(0, Math.ceil((autoInstallAt * 1000 - this.now()) / 1000));
+    return this.localization.translateKey(AppStrings.Update.Details.AutoInstallCountdown, { count });
+  });
 
   protected readonly heading = computed(() => this.localization.translateKey(AppStrings.Settings.Update.SoftwareUpdateLabel));
 
@@ -90,10 +108,18 @@ export class UpdateModalComponent {
   }
 
   later(): void {
+    this.postponeIfCountingDown();
     dismissModal(this.modal, () => this.modalService.close());
   }
 
   onModalClose(): void {
+    this.postponeIfCountingDown();
     this.modalService.close();
+  }
+
+  private postponeIfCountingDown(): void {
+    if (this.countingDown()) {
+      void this.updates.postponeAutomaticInstall();
+    }
   }
 }

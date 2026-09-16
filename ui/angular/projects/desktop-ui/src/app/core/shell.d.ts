@@ -40,6 +40,9 @@ declare global {
       getUpdateState?: () => Promise<ShellUpdateState>;
       requestUpdateCheck?: () => Promise<void>;
       cancelUpdateDownload?: () => Promise<void>;
+      postponeAutomaticInstall?: () => Promise<boolean>;
+      getPostUpdateChangelog?: () => Promise<ShellPostUpdateChangelog | null>;
+      dismissPostUpdateChangelog?: () => Promise<void>;
       onUpdateState?: (callback: (state: ShellUpdateState) => void) => Promise<() => void>;
       getHideDockIcon?: () => Promise<ShellDockIconStatus>;
       setHideDockIcon?: (enabled: boolean) => Promise<ShellDockIconStatus>;
@@ -130,5 +133,12 @@ declare global {
     failure: 'check' | 'install' | null;
     progress: ShellUpdateProgress | null;
     lastCheckedAt: number | null;
+    autoInstallAt: number | null;
+  }
+
+  interface ShellPostUpdateChangelog {
+    version: string;
+    notes: string;
+    publishedAt: string | null;
   }
 }

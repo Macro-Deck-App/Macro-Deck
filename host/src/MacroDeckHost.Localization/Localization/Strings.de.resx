@@ -971,11 +971,6 @@ Möchtest du es jetzt herunterladen und installieren?</value>
   <data name="Bootstrapper.Update.DownloadFailed" xml:space="preserve">
     <value>Das Update konnte nicht heruntergeladen werden: {error}</value>
   </data>
-  <data name="Bootstrapper.Update.Downloaded" xml:space="preserve">
-    <value>Macro Deck {version} wurde heruntergeladen.
-
-Starte Macro Deck neu, um das Update zu installieren.</value>
-  </data>
   <data name="Bootstrapper.Update.ExternalAvailable" xml:space="preserve">
     <value>Macro Deck {version} ist verfügbar.
 
@@ -1012,9 +1007,6 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Bootstrapper.Update.PartialCheckFailed.Other" xml:space="preserve">
     <value>Die Update-Feeds {names} konnten nicht geprüft werden.</value>
     <comment>[plural]</comment>
-  </data>
-  <data name="Bootstrapper.Update.RestartNow" xml:space="preserve">
-    <value>Jetzt neu starten</value>
   </data>
   <data name="ClientTargets.CarThing.Configure.Description" xml:space="preserve">
     <value>Macro Deck legt in das Verzeichnis, das das Gerät ohnehin ausliefert, eine Seite, die auf den Client zeigt. Passe die Werte an, wenn deine Firmware sie woanders ablegt.</value>
@@ -13685,7 +13677,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Automatisch</value>
   </data>
   <data name="Settings.Update.ModeAutomaticDescription" xml:space="preserve">
-    <value>Macro Deck lädt Updates im Hintergrund herunter und bittet dich anschließend um einen Neustart, um sie zu installieren.</value>
+    <value>Macro Deck lädt Updates selbst herunter und installiert sie. Vor dem Neustart läuft ein kurzer Countdown, in dem du ihn verschieben kannst.</value>
   </data>
   <data name="Settings.Update.ModeChangeFailed" xml:space="preserve">
     <value>Ändern der Update-Einstellung fehlgeschlagen. Bitte versuche es erneut.</value>
@@ -14754,6 +14746,24 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Update.Details.LaterAction" xml:space="preserve">
     <value>Später</value>
+  </data>
+  <data name="Update.Details.InstallNowAction" xml:space="preserve">
+    <value>Jetzt installieren</value>
+  </data>
+  <data name="Update.Details.AutoInstallCountdown.One" xml:space="preserve">
+    <value>Macro Deck startet in {count} Sekunde neu, um dieses Update zu installieren.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Update.Details.AutoInstallCountdown.Other" xml:space="preserve">
+    <value>Macro Deck startet in {count} Sekunden neu, um dieses Update zu installieren.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Update.WhatsNew.Heading" xml:space="preserve">
+    <value>Neu in Macro Deck {version}</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Update.WhatsNew.CloseAction" xml:space="preserve">
+    <value>Alles klar</value>
   </data>
   <data name="Variables.AllVariablesHeading" xml:space="preserve">
     <value>Alle Variablen</value>

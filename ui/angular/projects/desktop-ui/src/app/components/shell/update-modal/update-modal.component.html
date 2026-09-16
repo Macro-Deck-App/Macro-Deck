@@ -49,7 +49,11 @@
         </div>
       }
       @case ('downloaded') {
-        <p class="update-modal__status">{{ appStrings.Update.Details.ReadyStatus | translate }}</p>
+        @if (countdownStatus(); as countdown) {
+          <p class="update-modal__status" role="timer">{{ countdown }}</p>
+        } @else {
+          <p class="update-modal__status">{{ appStrings.Update.Details.ReadyStatus | translate }}</p>
+        }
       }
       @case ('installing') {
         <p class="update-modal__status">{{ appStrings.Update.Details.ReadyStatus | translate }}</p>
@@ -68,33 +72,42 @@
   </div>
 
   <div modal-footer class="update-modal__actions">
-    @switch (updates.phase()) {
-      @case ('downloading') {
-        <shared-button variant="secondary" (click)="cancelDownload()">
-          {{ appStrings.Update.Details.CancelDownloadAction | translate }}
-        </shared-button>
-      }
-      @case ('failed') {
-        <shared-button variant="secondary" (click)="later()">
-          {{ appStrings.Update.Details.LaterAction | translate }}
-        </shared-button>
-        <shared-button variant="primary" (click)="retry()">
-          {{ appStrings.Settings.Update.TryAgainAction | translate }}
-        </shared-button>
-      }
-      @default {
-        <shared-button variant="secondary" (click)="later()">
-          {{ appStrings.Update.Details.LaterAction | translate }}
-        </shared-button>
-        @if (updates.canInstall() && !updates.aptManaged()) {
-          @if (updates.externalDownload()) {
-            <shared-button variant="primary" (click)="openDownloadPage()">
-              {{ appStrings.Settings.Update.OpenDownloadPageAction | translate }}
-            </shared-button>
-          } @else {
-            <shared-button variant="primary" [disabled]="updates.isDownloading()" (click)="install()">
-              {{ appStrings.Settings.Update.DownloadInstallAction | translate }}
-            </shared-button>
+    @if (countingDown()) {
+      <shared-button variant="secondary" (click)="later()">
+        {{ appStrings.Settings.Update.NotNowAction | translate }}
+      </shared-button>
+      <shared-button variant="primary" [disabled]="updates.isDownloading()" (click)="install()">
+        {{ appStrings.Update.Details.InstallNowAction | translate }}
+      </shared-button>
+    } @else {
+      @switch (updates.phase()) {
+        @case ('downloading') {
+          <shared-button variant="secondary" (click)="cancelDownload()">
+            {{ appStrings.Update.Details.CancelDownloadAction | translate }}
+          </shared-button>
+        }
+        @case ('failed') {
+          <shared-button variant="secondary" (click)="later()">
+            {{ appStrings.Update.Details.LaterAction | translate }}
+          </shared-button>
+          <shared-button variant="primary" (click)="retry()">
+            {{ appStrings.Settings.Update.TryAgainAction | translate }}
+          </shared-button>
+        }
+        @default {
+          <shared-button variant="secondary" (click)="later()">
+            {{ appStrings.Update.Details.LaterAction | translate }}
+          </shared-button>
+          @if (updates.canInstall() && !updates.aptManaged()) {
+            @if (updates.externalDownload()) {
+              <shared-button variant="primary" (click)="openDownloadPage()">
+                {{ appStrings.Settings.Update.OpenDownloadPageAction | translate }}
+              </shared-button>
+            } @else {
+              <shared-button variant="primary" [disabled]="updates.isDownloading()" (click)="install()">
+                {{ appStrings.Settings.Update.DownloadInstallAction | translate }}
+              </shared-button>
+            }
           }
         }
       }

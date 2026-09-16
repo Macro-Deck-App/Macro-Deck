@@ -3,7 +3,7 @@
 // periodic check. What that check does with a newer release is decided by the
 // user's update mode (issue #715, see update_mode.rs): off never contacts the
 // feed at all, notify-only asks before downloading, and automatic downloads
-// first and asks only before installing (the previous, sole behaviour).
+// and then installs after a countdown the user can postpone.
 // Before installing, the host is shut down via POST
 // /api/host/shutdown?reason=update so the installer can replace the host
 // binaries.
@@ -54,10 +54,11 @@ use crate::host;
 use crate::install_state;
 use crate::localization::{self, keys};
 use crate::logging;
+use crate::post_update_changelog;
 use crate::update_channel::{self, UpdateChannel};
 use crate::update_mode::{self, UpdateMode};
 use crate::update_state::{
-    self, CheckTrigger, DownloadProgress, UpdatePhase, UpdateSnapshot, UpdateState,
+    self, AutoInstallTick, CheckTrigger, DownloadProgress, UpdatePhase, UpdateSnapshot, UpdateState,
 };
 
 const RELEASE_VERSION: &str = env!("MACRODECK_RELEASE_VERSION");
@@ -183,7 +184,7 @@ fn disables_stanza(field: &str) -> bool {
 pub(crate) enum CheckAction {
     ExternalNotify,
     ConfirmThenInstall,
-    DownloadThenConfirm,
+    DownloadThenInstall,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -203,7 +204,7 @@ pub(crate) fn periodic_action(mode: UpdateMode, strategy: UpdateInstallStrategy)
             PeriodicAction::Check(CheckAction::ConfirmThenInstall)
         }
         (UpdateMode::Automatic, UpdateInstallStrategy::InApp) => {
-            PeriodicAction::Check(CheckAction::DownloadThenConfirm)
+            PeriodicAction::Check(CheckAction::DownloadThenInstall)
         }
     }
 }
@@ -606,6 +607,11 @@ fn take_matching_pending_download(resolved_version: &str) -> Option<PendingDownl
     )
 }
 
+fn pending_download_version() -> Option<String> {
+    let slot = PENDING_DOWNLOAD.lock().unwrap_or_else(|e| e.into_inner());
+    slot.as_ref().map(|pending| pending.version.clone())
+}
+
 fn clear_pending_download() {
     let mut slot = PENDING_DOWNLOAD.lock().unwrap_or_else(|e| e.into_inner());
     *slot = None;
@@ -733,24 +739,35 @@ pub fn spawn_periodic_check(app: AppHandle) {
 // mode+strategy decision the periodic tick always used, so Startup, Periodic,
 // Wake and Reconnect can never diverge in what they do about a found update.
 pub(crate) async fn run_check(app: &AppHandle, trigger: CheckTrigger) {
+    let mode = update_mode::current(app);
     let action = if trigger == CheckTrigger::Manual {
         None
     } else {
-        match periodic_action(update_mode::current(app), install_strategy()) {
+        match periodic_action(mode, install_strategy()) {
             PeriodicAction::Skip => return,
             PeriodicAction::Check(action) => Some(action),
         }
     };
 
-    {
+    let parked_version = pending_download_version();
+    let was_parked = {
         let mut guard = lock_state(app);
         if !guard.supported {
             return;
         }
+        if action.is_some()
+            && guard.skips_automatic_check(mode == UpdateMode::Automatic, parked_version.is_some())
+        {
+            return;
+        }
+        let was_parked = guard.phase == UpdatePhase::Downloaded
+            && parked_version.is_some()
+            && parked_version == guard.version;
         if !guard.try_begin_check() {
             return;
         }
-    }
+        was_parked
+    };
     emit_state_and_report(app).await;
 
     let now = now_secs();
@@ -761,6 +778,10 @@ pub(crate) async fn run_check(app: &AppHandle, trigger: CheckTrigger) {
             partial_check,
         }) => {
             let version = update.version.clone();
+            if was_parked && parked_version.as_deref() == Some(version.as_str()) {
+                restore_parked_download(app, now, partial_check);
+                return;
+            }
             let notes = update.body.clone();
             let published_at = published_date(&update);
             // A parked automatic download only ever matters for the version
@@ -786,6 +807,7 @@ pub(crate) async fn run_check(app: &AppHandle, trigger: CheckTrigger) {
             update: None,
             partial_check,
         }) => {
+            clear_pending_download();
             {
                 let mut guard = lock_state(app);
                 guard.channel = channel;
@@ -799,6 +821,10 @@ pub(crate) async fn run_check(app: &AppHandle, trigger: CheckTrigger) {
             // for this platform/channel is handled inside `resolve_update` and
             // never reaches here.
             logging::warn(&format!("[updater] check failed: {error}"));
+            if was_parked {
+                restore_parked_download(app, now, None);
+                return;
+            }
             {
                 let mut guard = lock_state(app);
                 guard.record_check_failed(now, error);
@@ -817,6 +843,16 @@ async fn report_and_signal(app: &AppHandle) -> bool {
     report_availability(app, &snapshot).await
 }
 
+// Only the webview is told: the host already announced this download, and
+// reporting it again would raise its notification a second time.
+fn restore_parked_download(app: &AppHandle, now: u64, partial_check: Option<String>) {
+    if !lock_state(app).restore_downloaded(now, partial_check) {
+        return;
+    }
+    emit_state(app);
+    arm_auto_install(app);
+}
+
 async fn run_action(app: &AppHandle, action: CheckAction, update: Update, reported: bool) {
     match action {
         CheckAction::ExternalNotify => {
@@ -829,10 +865,8 @@ async fn run_action(app: &AppHandle, action: CheckAction, update: Update, report
                 confirm_then_download_and_install(app, update).await;
             }
         }
-        // Automatic always downloads on its own, host report or not - only
-        // the post-download notification channel depends on it.
-        CheckAction::DownloadThenConfirm => {
-            download_and_prompt_install(app, update, reported).await;
+        CheckAction::DownloadThenInstall => {
+            download_then_install(app, update).await;
         }
     }
 }
@@ -864,12 +898,131 @@ pub fn request_update_check(app: AppHandle) {
 }
 
 #[tauri::command]
+pub fn postpone_automatic_install(app: AppHandle) -> bool {
+    let postponed = lock_state(&app).postpone_auto_install();
+    if postponed {
+        logging::info("[updater] automatic install postponed until the next start");
+        emit_state(&app);
+    }
+    postponed
+}
+
+pub fn update_mode_changed(app: &AppHandle, mode: UpdateMode) {
+    if mode == UpdateMode::Automatic {
+        if pending_download_version().is_some() {
+            arm_auto_install(app);
+        }
+    } else if lock_state(app).cancel_auto_install() {
+        emit_state(app);
+    }
+}
+
+fn arm_auto_install(app: &AppHandle) {
+    if update_mode::current(app) != UpdateMode::Automatic {
+        return;
+    }
+    let Some(token) = lock_state(app).schedule_auto_install(now_secs()) else {
+        return;
+    };
+    emit_state(app);
+    let app = app.clone();
+    tauri::async_runtime::spawn(async move { run_auto_install_countdown(app, token).await });
+}
+
+async fn run_auto_install_countdown(app: AppHandle, mut token: u64) {
+    loop {
+        tokio::time::sleep(Duration::from_secs(1)).await;
+        let automatic = update_mode::current(&app) == UpdateMode::Automatic;
+        let tick = lock_state(&app).auto_install_tick(now_secs(), token, automatic);
+        match tick {
+            AutoInstallTick::Wait => {}
+            AutoInstallTick::Exit => {
+                if !automatic {
+                    emit_state(&app);
+                }
+                return;
+            }
+            AutoInstallTick::Rearm(next) => {
+                token = next;
+                emit_state(&app);
+            }
+            AutoInstallTick::Claim => {
+                install_claimed(&app).await;
+                return;
+            }
+        }
+    }
+}
+
+async fn install_claimed(app: &AppHandle) {
+    let known_version = lock_state(app).version.clone();
+    let pending = known_version
+        .as_deref()
+        .and_then(take_matching_pending_download);
+    emit_state_and_report(app).await;
+    let Some(pending) = pending else {
+        let message = localization::t_args(
+            keys::UPDATE_INSTALL_FAILED,
+            &[("error", &localization::t(keys::UPDATE_NO_UPDATE_AVAILABLE))],
+        );
+        lock_state(app).record_install_failed(message);
+        emit_state_and_report(app).await;
+        return;
+    };
+    if let Err(error) = perform_install(app, pending.update, pending.bytes).await {
+        logging::error(&format!("[updater] automatic install failed: {error}"));
+    }
+}
+
+#[tauri::command]
 pub async fn install_update(app: AppHandle) -> Result<(), String> {
     let result = run_install(&app).await;
     if let Err(error) = &result {
         logging::error(&format!("[updater] install failed: {error}"));
     }
     result
+}
+
+enum ParkedInstall {
+    Started(Box<PendingDownload>),
+    Busy,
+    NotParked,
+}
+
+// The parked bytes are only taken once the install slot is won, under the state
+// lock, so losing a race against the countdown never throws the download away.
+fn begin_parked_install(app: &AppHandle, version: &str) -> ParkedInstall {
+    let mut guard = lock_state(app);
+    if pending_download_version().as_deref() != Some(version) {
+        return ParkedInstall::NotParked;
+    }
+    if !guard.try_begin_install() {
+        return ParkedInstall::Busy;
+    }
+    match take_matching_pending_download(version) {
+        Some(pending) => ParkedInstall::Started(Box::new(pending)),
+        None => {
+            guard.record_install_failed(localization::t_args(
+                keys::UPDATE_INSTALL_FAILED,
+                &[("error", &localization::t(keys::UPDATE_NO_UPDATE_AVAILABLE))],
+            ));
+            ParkedInstall::Busy
+        }
+    }
+}
+
+async fn install_parked(app: &AppHandle, version: &str) -> Option<Result<(), String>> {
+    match begin_parked_install(app, version) {
+        ParkedInstall::Started(pending) => {
+            emit_state_and_report(app).await;
+            Some(perform_install(app, pending.update, pending.bytes).await)
+        }
+        ParkedInstall::Busy => {
+            emit_state(app);
+            Some(Err(localization::t(keys::UPDATE_ALREADY_IN_PROGRESS)))
+        }
+        ParkedInstall::NotParked => None,
+    }
 }
 
 // Shared tail of `run_install`'s two paths (a reused pending download and a
@@ -902,11 +1055,10 @@ async fn run_install(app: &AppHandle) -> Result<(), String> {
     // Without this, installing an already-downloaded update failed offline
     // (issue #249).
     let known_version = lock_state(app).version.clone();
-    if let Some(pending) = known_version
-        .as_deref()
-        .and_then(take_matching_pending_download)
-    {
-        return install_downloaded(app, pending.update, pending.bytes).await;
+    if let Some(version) = known_version {
+        if let Some(result) = install_parked(app, &version).await {
+            return result;
+        }
     }
 
     let resolved = resolve_update(app)
@@ -916,47 +1068,47 @@ async fn run_install(app: &AppHandle) -> Result<(), String> {
         .update
         .ok_or_else(|| localization::t(keys::UPDATE_NO_UPDATE_AVAILABLE))?;
 
-    let (update, bytes) = match take_matching_pending_download(&update.version) {
-        Some(pending) => (pending.update, pending.bytes),
-        None => {
-            {
-                let mut guard = lock_state(app);
-                if !guard.try_begin_download() {
-                    return Err(localization::t(keys::UPDATE_ALREADY_IN_PROGRESS));
-                }
+    if let Some(result) = install_parked(app, &update.version).await {
+        return result;
+    }
+    let (update, bytes) = {
+        {
+            let mut guard = lock_state(app);
+            if !guard.try_begin_download() {
+                return Err(localization::t(keys::UPDATE_ALREADY_IN_PROGRESS));
             }
-            emit_state_and_report(app).await;
-            match download_with_progress(app, &update).await {
-                Ok(bytes) => {
-                    {
-                        let mut guard = lock_state(app);
-                        guard.record_downloaded();
-                    }
-                    emit_state_and_report(app).await;
-                    (update, bytes)
+        }
+        emit_state_and_report(app).await;
+        match download_with_progress(app, &update).await {
+            Ok(bytes) => {
+                {
+                    let mut guard = lock_state(app);
+                    guard.record_downloaded();
                 }
-                Err(DownloadOutcome::Cancelled) => {
-                    let snapshot = {
-                        let mut guard = lock_state(app);
-                        guard.record_cancelled();
-                        guard.snapshot()
-                    };
-                    emit_state(app);
-                    host::report_cancelled(app, &snapshot).await;
-                    clear_pending_download();
-                    // Cancelling is the user's own doing, not a failure - it
-                    // must not be surfaced as an install error.
-                    return Ok(());
+                emit_state_and_report(app).await;
+                (update, bytes)
+            }
+            Err(DownloadOutcome::Cancelled) => {
+                let snapshot = {
+                    let mut guard = lock_state(app);
+                    guard.record_cancelled();
+                    guard.snapshot()
+                };
+                emit_state(app);
+                host::report_cancelled(app, &snapshot).await;
+                clear_pending_download();
+                // Cancelling is the user's own doing, not a failure - it
+                // must not be surfaced as an install error.
+                return Ok(());
+            }
+            Err(DownloadOutcome::Failed(error)) => {
+                {
+                    let mut guard = lock_state(app);
+                    guard.record_install_failed(error.clone());
                 }
-                Err(DownloadOutcome::Failed(error)) => {
-                    {
-                        let mut guard = lock_state(app);
-                        guard.record_install_failed(error.clone());
-                    }
-                    emit_state_and_report(app).await;
-                    clear_pending_download();
-                    return Err(error);
-                }
+                emit_state_and_report(app).await;
+                clear_pending_download();
+                return Err(error);
             }
         }
     };
@@ -964,7 +1116,7 @@ async fn run_install(app: &AppHandle) -> Result<(), String> {
     install_downloaded(app, update, bytes).await
 }
 
-async fn download_and_prompt_install(app: &AppHandle, update: Update, reported: bool) {
+async fn download_then_install(app: &AppHandle, update: Update) {
     {
         let mut guard = lock_state(app);
         if !guard.try_begin_download() {
@@ -998,43 +1150,13 @@ async fn download_and_prompt_install(app: &AppHandle, update: Update, reported: 
         }
     };
 
+    park_pending_download(update.version.clone(), update, bytes);
     {
         let mut guard = lock_state(app);
         guard.record_downloaded();
     }
     emit_state_and_report(app).await;
-
-    if reported {
-        // The host (and through it, the desktop UI) already knows a download
-        // finished; installing now happens through install_update, driven by
-        // the user from within the app rather than a blocking native dialog.
-        // Parked here (rather than always, up front) so the bytes are never
-        // resident twice at once - the alternative branch below consumes
-        // `bytes` directly instead of a clone of it.
-        park_pending_download(update.version.clone(), update, bytes);
-        return;
-    }
-
-    let restart_now = app
-        .dialog()
-        .message(localization::t_args(
-            keys::UPDATE_DOWNLOADED,
-            &[("version", &update.version)],
-        ))
-        .title(localization::t(keys::UPDATE_AVAILABLE_TITLE))
-        .buttons(MessageDialogButtons::OkCancelCustom(
-            localization::t(keys::UPDATE_RESTART_NOW),
-            localization::t(keys::UPDATE_LATER),
-        ))
-        .blocking_show();
-    if !restart_now {
-        park_pending_download(update.version.clone(), update, bytes);
-        return;
-    }
-
-    if let Err(error) = install_downloaded(app, update, bytes).await {
-        logging::error(&format!("[updater] install failed: {error}"));
-    }
+    arm_auto_install(app);
 }
 
 async fn confirm_then_download_and_install(app: &AppHandle, update: Update) {
@@ -1156,9 +1278,18 @@ async fn perform_install(app: &AppHandle, update: Update, bytes: Vec<u8>) -> Res
     // the exit handler must not try to stop the host a second time. Marking it
     // earlier would leave the flag set on the error path above.
     crate::mark_quitting(app);
+    // Written before install: on Windows the plugin exits the process as soon
+    // as the installer is launched, so there is no later point to do it.
+    post_update_changelog::remember(
+        app,
+        &update.version,
+        update.body.as_deref(),
+        published_date(&update).as_deref(),
+    );
     match update.install(bytes) {
         Ok(()) => app.restart(),
         Err(error) => {
+            post_update_changelog::forget(app);
             let message = localization::t_args(
                 keys::UPDATE_INSTALL_FAILED,
                 &[("error", &error.to_string())],
@@ -1203,6 +1334,7 @@ mod tests {
             failure: None,
             progress: None,
             last_checked_at: None,
+            auto_install_at: None,
         }
     }
 
@@ -1835,11 +1967,10 @@ mod tests {
     }
 
     #[test]
-    fn automatic_downloads_then_confirms_in_app() {
-        // Today's behavior, preserved.
+    fn automatic_downloads_then_installs_in_app() {
         assert_eq!(
             periodic_action(UpdateMode::Automatic, UpdateInstallStrategy::InApp),
-            PeriodicAction::Check(CheckAction::DownloadThenConfirm)
+            PeriodicAction::Check(CheckAction::DownloadThenInstall)
         );
     }
 

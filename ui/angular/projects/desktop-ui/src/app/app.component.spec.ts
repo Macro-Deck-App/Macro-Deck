@@ -169,6 +169,7 @@ describe('AppComponent (desktop-ui) - splash status during an update install (is
       failure: null,
       progress: null,
       lastCheckedAt: null,
+      autoInstallAt: null,
       ...overrides,
     };
   }

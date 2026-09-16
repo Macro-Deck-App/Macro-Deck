@@ -972,11 +972,6 @@ Pobrać i zainstalować teraz?</value>
   <data name="Bootstrapper.Update.DownloadFailed" xml:space="preserve">
     <value>Nie udało się pobrać aktualizacji: {error}</value>
   </data>
-  <data name="Bootstrapper.Update.Downloaded" xml:space="preserve">
-    <value>Pobrano Macro Deck {version}.
-
-Uruchom Macro Deck ponownie, aby zainstalować aktualizację.</value>
-  </data>
   <data name="Bootstrapper.Update.ExternalAvailable" xml:space="preserve">
     <value>Dostępny jest Macro Deck {version}.
 
@@ -1013,9 +1008,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Bootstrapper.Update.PartialCheckFailed.Other" xml:space="preserve">
     <value>Nie można sprawdzić kanałów aktualizacji {names}.</value>
     <comment>[plural]</comment>
-  </data>
-  <data name="Bootstrapper.Update.RestartNow" xml:space="preserve">
-    <value>Uruchom ponownie teraz</value>
   </data>
   <data name="ClientTargets.CarThing.Configure.Description" xml:space="preserve">
     <value>Macro Deck umieszcza w katalogu obsługiwanym już przez urządzenie stronę wskazującą na klienta. Jeśli oprogramowanie przechowuje je gdzie indziej, należy dostosować te wartości.</value>
@@ -13687,7 +13679,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Automatyczne</value>
   </data>
   <data name="Settings.Update.ModeAutomaticDescription" xml:space="preserve">
-    <value>Macro Deck pobiera aktualizacje w tle, a następnie prosi o ponowne uruchomienie, aby je zainstalować.</value>
+    <value>Macro Deck samodzielnie pobiera i instaluje aktualizacje. Przed ponownym uruchomieniem krótkie odliczanie pozwala je odłożyć.</value>
   </data>
   <data name="Settings.Update.ModeChangeFailed" xml:space="preserve">
     <value>Nie udało się zmienić ustawienia aktualizacji. Spróbuj ponownie.</value>
@@ -14756,6 +14748,24 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Update.Details.LaterAction" xml:space="preserve">
     <value>Później</value>
+  </data>
+  <data name="Update.Details.InstallNowAction" xml:space="preserve">
+    <value>Zainstaluj teraz</value>
+  </data>
+  <data name="Update.Details.AutoInstallCountdown.One" xml:space="preserve">
+    <value>Macro Deck uruchomi się ponownie za {count} sekundę, aby zainstalować tę aktualizację.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Update.Details.AutoInstallCountdown.Other" xml:space="preserve">
+    <value>Macro Deck uruchomi się ponownie za {count} s, aby zainstalować tę aktualizację.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Update.WhatsNew.Heading" xml:space="preserve">
+    <value>Co nowego w Macro Deck {version}</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Update.WhatsNew.CloseAction" xml:space="preserve">
+    <value>Rozumiem</value>
   </data>
   <data name="Variables.AllVariablesHeading" xml:space="preserve">
     <value>Wszystkie zmienne</value>
