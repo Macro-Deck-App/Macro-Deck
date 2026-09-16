@@ -1,12 +1,14 @@
 using System.Net.WebSockets;
 using MacroDeck.Plugin.Protocol;
 using MacroDeck.Plugin.Protocol.Auth;
+using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeckHost.Api.Plugins;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Plugins;
+using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Auth;
 using MacroDeckHost.Plugins;
@@ -28,6 +30,8 @@ public class PluginSessionsController : ControllerBase
 	private readonly LoginThrottle _throttle;
 	private readonly IMediator _mediator;
 	private readonly IAppPreferenceService _preferences;
+	private readonly IPluginTakeoverRegistry _takeovers;
+	private readonly IPluginInstallationCatalog _catalog;
 	private readonly ILogger _logger;
 
 	public PluginSessionsController(
@@ -37,6 +41,8 @@ public class PluginSessionsController : ControllerBase
 		[FromKeyedServices("plugin")] LoginThrottle throttle,
 		IMediator mediator,
 		IAppPreferenceService preferences,
+		IPluginTakeoverRegistry takeovers,
+		IPluginInstallationCatalog catalog,
 		ILogger logger)
 	{
 		_launchTokenService = launchTokenService;
@@ -45,6 +51,8 @@ public class PluginSessionsController : ControllerBase
 		_throttle = throttle;
 		_mediator = mediator;
 		_preferences = preferences;
+		_takeovers = takeovers;
+		_catalog = catalog;
 		_logger = logger.ForContext<PluginSessionsController>();
 	}
 
@@ -78,16 +86,30 @@ public class PluginSessionsController : ControllerBase
 
 		string? launchId = null;
 		PluginSessionIdentity? identity = null;
+		var refusedValidCredential = false;
+		var recheckAdmission = false;
 
 		if (_launchTokenService.TryAcquire(pluginId, secret, out var launch))
 		{
-			launchId = launch!.LaunchId;
-			identity = new PluginSessionIdentity
+			// During a takeover the development build holds the id alone. Refusing the launch token here,
+			// whatever the supervisor's timing, is what keeps a stray managed process from replacing it.
+			if (_takeovers.IsActive(pluginId))
 			{
-				PluginId = launch.PluginId,
-				DisplayName = launch.DisplayName,
-				Origin = PluginSessionOrigin.Managed
-			};
+				_launchTokenService.Release(launch!.LaunchId);
+				PluginWebSocketLog.ManagedSessionRefusedDuringTakeover(_logger, pluginId);
+				refusedValidCredential = true;
+			}
+			else
+			{
+				launchId = launch!.LaunchId;
+				recheckAdmission = true;
+				identity = new PluginSessionIdentity
+				{
+					PluginId = launch.PluginId,
+					DisplayName = launch.DisplayName,
+					Origin = PluginSessionOrigin.Managed
+				};
+			}
 		}
 		else
 		{
@@ -106,12 +128,19 @@ public class PluginSessionsController : ControllerBase
 						StatusCodes.Status403Forbidden);
 				}
 
-				if (_launchTokenService.HasActiveLaunch(pluginId))
+				var installed = IsInstalled(pluginId);
+				if (installed && !_takeovers.IsActive(pluginId))
+				{
+					PluginWebSocketLog.RegistrationSessionRefusedForInstalledPlugin(_logger, pluginId);
+					refusedValidCredential = true;
+				}
+				else if (!installed && _launchTokenService.HasActiveLaunch(pluginId))
 				{
 					PluginWebSocketLog.RegistrationSessionRefusedForLiveLaunch(_logger, pluginId);
 				}
 				else
 				{
+					recheckAdmission = installed;
 					identity = new PluginSessionIdentity
 					{
 						PluginId = registration.PluginId,
@@ -125,7 +154,11 @@ public class PluginSessionsController : ControllerBase
 
 		if (identity is null)
 		{
-			_throttle.RegisterFailure(throttleKey);
+			if (!refusedValidCredential)
+			{
+				_throttle.RegisterFailure(throttleKey);
+			}
+
 			return PluginProtocolHttp.Error(PluginErrors.Unauthenticated(), StatusCodes.Status401Unauthorized);
 		}
 
@@ -164,6 +197,21 @@ public class PluginSessionsController : ControllerBase
 				StatusCodes.Status400BadRequest);
 		}
 
+		// The admission checks above ran before the insert. A takeover that began or ended in between is
+		// caught here, and only the session just created is closed, never another one for the id.
+		if (recheckAdmission && !await StillAdmitted(identity, pluginId, secret))
+		{
+			if (launchId is not null)
+			{
+				_launchTokenService.Release(launchId);
+			}
+
+			await _sessionService.Close(result.Response!.SessionId,
+				ProtocolCloseCodes.AuthenticationFailed,
+				"The plugin id is no longer available to this session.");
+			return PluginProtocolHttp.Error(PluginErrors.Unauthenticated(), StatusCodes.Status401Unauthorized);
+		}
+
 		_throttle.RegisterSuccess(throttleKey);
 
 		if (launchId is not null)
@@ -176,6 +224,21 @@ public class PluginSessionsController : ControllerBase
 
 		return PluginProtocolHttp.Json(result.Response, StatusCodes.Status201Created);
 	}
+
+	private async Task<bool> StillAdmitted(PluginSessionIdentity identity, string pluginId, string secret)
+	{
+		if (identity.Origin == PluginSessionOrigin.Managed)
+		{
+			return !_takeovers.IsActive(pluginId);
+		}
+
+		return _takeovers.IsActive(pluginId) &&
+			await _registrationService.Authenticate(pluginId, secret) is not null;
+	}
+
+	private bool IsInstalled(string pluginId)
+		=> _catalog.Discover().Any(plugin =>
+			string.Equals(plugin.PluginId, pluginId, StringComparison.Ordinal) && plugin.Versions.Count > 0);
 
 	[HttpDelete("{sessionId}")]
 	[AllowAnonymous]

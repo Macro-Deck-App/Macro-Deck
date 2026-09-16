@@ -1,7 +1,7 @@
 import { WritableSignal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PairedPlugin, PluginRuntimeInfo } from '@macro-deck/runtime';
-import { ToastService } from '@shared';
+import { LocalizationService, ToastService } from '@shared';
 import { DeveloperModeService } from '../../../../../../services/developer-mode.service';
 import { PluginPairingService } from '../../../../../../services/plugin-pairing.service';
 import { PluginRuntimeService } from '../../../../../../services/plugin-runtime.service';
@@ -128,6 +128,44 @@ describe('PairedPluginsSectionComponent', () => {
       await fixture.componentInstance.confirmRevokePaired();
 
       expect(toastSpy).toHaveBeenCalledWith('Could not reach the host.', { variant: 'error' });
+    });
+
+    it('marks a registration that takes over an installed plugin', async () => {
+      configure([], [pairedPlugin('p1', { takesOverInstalledPlugin: true }), pairedPlugin('p2')]);
+      fixture = await create();
+
+      const badges = fixture.nativeElement.querySelectorAll('.plugin-tokens-takeover-badge');
+      expect(badges.length).toBe(1);
+      expect(badges[0].textContent.trim())
+        .toBe(TestBed.inject(LocalizationService).translateKey('macrodeck.app:Developer.Tokens.TakeoverBadge'));
+    });
+
+    it('asks to end the takeover when revoking a takeover registration', async () => {
+      configure([], [pairedPlugin('p1', { displayName: 'Example Tools', takesOverInstalledPlugin: true })]);
+      fixture = await create();
+
+      fixture.componentInstance.requestRevokePaired(fixture.componentInstance.pairedPlugins()[0]);
+      fixture.detectChanges();
+
+      const localization = TestBed.inject(LocalizationService);
+      const modalText = fixture.nativeElement.querySelector('shared-confirmation-modal').textContent as string;
+      expect(modalText).toContain(
+        localization.translateKey('macrodeck.app:Developer.Tokens.EndTakeoverConfirmMessage', { name: 'Example Tools' }));
+    });
+
+    it('uses the ordinary revoke message for a registration that takes nothing over', async () => {
+      configure([], [pairedPlugin('p1', { displayName: 'Example Tools' })]);
+      fixture = await create();
+
+      fixture.componentInstance.requestRevokePaired(fixture.componentInstance.pairedPlugins()[0]);
+      fixture.detectChanges();
+
+      const localization = TestBed.inject(LocalizationService);
+      const modalText = fixture.nativeElement.querySelector('shared-confirmation-modal').textContent as string;
+      expect(modalText).toContain(
+        localization.translateKey('macrodeck.app:Developer.Tokens.RevokePluginConfirmMessage', { name: 'Example Tools' }));
+      expect(modalText).not.toContain(
+        localization.translateKey('macrodeck.app:Developer.Tokens.EndTakeoverConfirmMessage', { name: 'Example Tools' }));
     });
 
     it('stays hidden with no error state when the pairing endpoints are unavailable on this transport', async () => {

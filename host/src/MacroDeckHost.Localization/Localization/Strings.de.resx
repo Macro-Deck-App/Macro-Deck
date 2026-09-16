@@ -1694,6 +1694,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Developer.ManagedPlugins.UnmanagedReason" xml:space="preserve">
     <value>Dieses Plugin startet und stoppt sich selbst. Macro Deck beobachtet nur dessen Sitzung, daher kann es hier nicht gestartet, gestoppt oder neu gestartet werden.</value>
   </data>
+  <data name="Developer.ManagedPlugins.TakenOverBadge" xml:space="preserve">
+    <value>Entwicklungs-Build aktiv</value>
+  </data>
+  <data name="Developer.ManagedPlugins.TakenOverReason" xml:space="preserve">
+    <value>Ein Entwicklungs-Build hat dieses Plugin übernommen, daher kann es hier nicht gestartet oder neu gestartet werden. Widerrufe den Entwicklungs-Build auf dieser Seite, um die installierte Version wieder zu starten.</value>
+  </data>
   <data name="Developer.NoActionsAvailableHeading" xml:space="preserve">
     <value>Keine Aktionen verfügbar</value>
   </data>
@@ -1961,6 +1967,13 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>{name} verliert seine Zugangsdaten und wird sofort getrennt. Es muss sich erneut koppeln, um wieder zu verbinden.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Developer.Tokens.EndTakeoverConfirmMessage" xml:space="preserve">
+    <value>{name} verliert seine Zugangsdaten und wird sofort getrennt. Die installierte Version des Plugins startet wieder.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Developer.Tokens.TakeoverBadge" xml:space="preserve">
+    <value>Ersetzt installiertes Plugin</value>
+  </data>
   <data name="Developer.Tokens.RevokePluginFailed" xml:space="preserve">
     <value>Das Plugin konnte nicht widerrufen werden</value>
   </data>
@@ -2117,6 +2130,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Dialogs.PluginPairing.ReplacesWarning" xml:space="preserve">
     <value>Für diese Paket-ID ist bereits ein Plugin gekoppelt. Eine Genehmigung ersetzt dessen Registrierung - die bestehenden Zugangsdaten funktionieren dann nicht mehr, und die Verbindung wird sofort getrennt.</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverConfirmLabel" xml:space="preserve">
+    <value>Mir ist bewusst, dass ein nicht überprüfter Entwicklungs-Build das installierte Plugin ersetzt und dessen Einstellungen und gespeicherte Zugangsdaten erhält</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverWarning" xml:space="preserve">
+    <value>Diese Paket-ID gehört zu einem installierten Plugin. Wenn du zustimmst, ersetzt ein nicht überprüfter Entwicklungs-Build es: das installierte Plugin wird gestoppt, und der Entwicklungs-Build erhält dessen Einstellungen und gespeicherte Zugangsdaten. Die installierte Version startet wieder, sobald die Übernahme endet.</value>
   </data>
   <data name="Dialogs.PluginPairing.ReportedByRequester" xml:space="preserve">
     <value>Vom anfragenden Programm angegeben</value>
@@ -2643,6 +2662,15 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Errors.Plugins.ReplaceCredentialConfirmationRequired" xml:space="preserve">
     <value>Das Bestätigen dieser Anfrage ersetzt die vorhandenen Zugangsdaten eines Plugins. Bestätige zuerst den Ersatz.</value>
+  </data>
+  <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
+    <value>Ein Entwicklungs-Build hat dieses Plugin übernommen. Beende die Übernahme, bevor du es installierst oder aktualisierst.</value>
+  </data>
+  <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
+    <value>Ein Entwicklungs-Build hat dieses Plugin übernommen. Die installierte Version startet wieder, sobald die Übernahme endet.</value>
+  </data>
+  <data name="Errors.Plugins.TakeoverConfirmationRequired" xml:space="preserve">
+    <value>Das Bestätigen dieser Anfrage lässt einen Entwicklungs-Build ein installiertes Plugin übernehmen. Bestätige zuerst die Übernahme.</value>
   </data>
   <data name="Errors.Plugins.SessionNotFound" xml:space="preserve">
     <value>Es existiert keine aktive Sitzung mit dieser ID.</value>
@@ -11612,6 +11640,13 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Notifications.PluginPairingRequestedMessage" xml:space="preserve">
     <value>{name} wartet in Macro Deck auf deine Freigabe.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
+    <value>Ein Entwicklungs-Build möchte ein Plugin übernehmen</value>
+  </data>
+  <data name="Notifications.PluginTakeoverRequestedMessage" xml:space="preserve">
+    <value>{name} möchte ein installiertes Plugin ersetzen und wartet in Macro Deck auf deine Freigabe.</value>
     <comment>[name:string]</comment>
   </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">

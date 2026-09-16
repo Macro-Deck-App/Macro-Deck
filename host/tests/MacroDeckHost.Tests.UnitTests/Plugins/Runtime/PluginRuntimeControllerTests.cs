@@ -36,6 +36,31 @@ internal sealed class PluginRuntimeControllerTests
 		});
 	}
 
+	[Test]
+	public void A_plugin_stopped_for_a_takeover_reports_it_on_the_wire()
+	{
+		var supervisor = new FakePluginSupervisor();
+		supervisor.SnapshotToReturn.Add(new PluginRuntimeSnapshot
+		{
+			PluginId = "com.example.plugin",
+			DisplayName = "Example",
+			Version = "1.0.0",
+			State = PluginRuntimeState.Stopped,
+			Health = PluginHealthState.Unknown,
+			Managed = true,
+			LastStopReason = PluginStopReason.DevelopmentTakeover,
+			TakenOverByDevelopmentBuild = true
+		});
+
+		var body = new PluginRuntimeController(supervisor).GetAll().Plugins.Single();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(body.LastStopReason, Is.EqualTo("development_takeover"));
+			Assert.That(body.TakenOverByDevelopmentBuild, Is.True);
+		});
+	}
+
 	[TestCase(PluginSupervisorError.NotInstalled, "not_installed")]
 	[TestCase(PluginSupervisorError.ManifestInvalid, "manifest_invalid")]
 	[TestCase(PluginSupervisorError.NoEntrypointForRuntime, "no_entrypoint")]
@@ -43,6 +68,7 @@ internal sealed class PluginRuntimeControllerTests
 	[TestCase(PluginSupervisorError.NotRunning, "not_running")]
 	[TestCase(PluginSupervisorError.SelfRegistering, "self_registering")]
 	[TestCase(PluginSupervisorError.LaunchFailed, "launch_failed")]
+	[TestCase(PluginSupervisorError.TakenOverByDevelopmentBuild, "taken_over_by_development_build")]
 	public async Task Start_maps_every_supervisor_error_to_the_matching_transport_error_code(
 		PluginSupervisorError error,
 		string expectedCode)

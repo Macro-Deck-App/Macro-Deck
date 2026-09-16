@@ -10,7 +10,8 @@ namespace MacroDeckHost.Application.Plugins;
 public enum PluginRegistrationError
 {
 	InvalidPluginId,
-	AlreadyRegistered
+	AlreadyRegistered,
+	PluginInstalled
 }
 
 public sealed record PluginRegistrationResult
@@ -34,7 +35,11 @@ public sealed record PluginRegistrationResult
 
 public interface IPluginRegistrationService
 {
-	Task<PluginRegistrationResult> Register(string pluginId, string displayName, Guid? accessTokenId, string origin);
+	Task<PluginRegistrationResult> Register(string pluginId,
+		string displayName,
+		Guid? accessTokenId,
+		string origin,
+		bool allowInstalledId = false);
 
 	Task<PluginRegistrationResult> ReplaceSecret(string pluginId,
 		string displayName,
@@ -53,6 +58,7 @@ public class PluginRegistrationService : IPluginRegistrationService
 	private readonly IPluginSessionRegistry _sessionRegistry;
 	private readonly IPluginIdentityForgetter _forgetter;
 	private readonly IPluginInstallationCatalog _catalog;
+	private readonly IPluginTakeoverRegistry _takeovers;
 	private readonly TimeProvider _timeProvider;
 
 	public PluginRegistrationService(
@@ -61,6 +67,7 @@ public class PluginRegistrationService : IPluginRegistrationService
 		IPluginSessionRegistry sessionRegistry,
 		IPluginIdentityForgetter forgetter,
 		IPluginInstallationCatalog catalog,
+		IPluginTakeoverRegistry takeovers,
 		TimeProvider timeProvider)
 	{
 		_registrationRepository = registrationRepository;
@@ -68,23 +75,26 @@ public class PluginRegistrationService : IPluginRegistrationService
 		_sessionRegistry = sessionRegistry;
 		_forgetter = forgetter;
 		_catalog = catalog;
+		_takeovers = takeovers;
 		_timeProvider = timeProvider;
 	}
 
 	public async Task<PluginRegistrationResult> Register(string pluginId,
 		string displayName,
 		Guid? accessTokenId,
-		string origin)
+		string origin,
+		bool allowInstalledId = false)
 	{
 		if (!PluginId.TryValidate(pluginId, out var validationError))
 		{
 			return PluginRegistrationResult.Fail(PluginRegistrationError.InvalidPluginId, validationError);
 		}
 
-		if (_catalog.Discover().Any(plugin =>
-			string.Equals(plugin.PluginId, pluginId, StringComparison.Ordinal) && plugin.Versions.Count > 0))
+		if (!allowInstalledId &&
+			_catalog.Discover().Any(plugin =>
+				string.Equals(plugin.PluginId, pluginId, StringComparison.Ordinal) && plugin.Versions.Count > 0))
 		{
-			return PluginRegistrationResult.Fail(PluginRegistrationError.AlreadyRegistered);
+			return PluginRegistrationResult.Fail(PluginRegistrationError.PluginInstalled);
 		}
 
 		var existing = await _registrationRepository.GetByPluginId(pluginId);
@@ -231,6 +241,10 @@ public class PluginRegistrationService : IPluginRegistrationService
 		await _sessionRegistry.TerminateForPlugin(pluginId,
 			ProtocolCloseCodes.AuthenticationFailed,
 			"Plugin registration revoked.");
+
+		// After the terminate, never before: ending the takeover first would let reconcile relaunch the
+		// installed plugin, and the id-only terminate above would then close that fresh managed session.
+		_takeovers.Finish(pluginId);
 
 		// A genuine, host-initiated "this plugin id is gone" signal - unlike an ordinary session end or
 		// reconnect, a plugin cannot trigger this itself. Doing this on session end instead would let a

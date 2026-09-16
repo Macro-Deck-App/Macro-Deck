@@ -222,7 +222,8 @@ curl -s http://127.0.0.1:<plugin-port>/_macrodeck/diagnostics  # status, faultRe
 | `health` 200, `ready` 503 | No session. Read `diagnostics.status` and `faultReason`; check the host runs, the URL is loopback and the credential belongs to this host. An unreachable host is retried with backoff, not a startup error. |
 | "No stored credential and no enrollment token" | Headless path only: token exported in the same shell, exact name `MACRO_DECK_PLUGIN_ENROLLMENT_TOKEN`, mode `SelfRegistering` with the loopback host URL, working directory the project. |
 | Already registered (`409`) | See [below](#registration-is-refused-as-already-registered). |
-| WebSocket closes with `4000` (`SESSION_REPLACED`) | One live session per plugin id: stop the installed instance or the other debug run. |
+| WebSocket closes with `4000` (`SESSION_REPLACED`) | One live session per plugin id: stop the other debug run. |
+| Plugin is already installed in Macro Deck | Approve the takeover in the prompt: see [Debug an installed plugin](#debug-an-installed-plugin). |
 | Installed plugin reported unhealthy | Remove every listener override; check the manifest's `health.path` (default `/_macrodeck/health`) and timeouts. |
 | Manifest not found | The SDK reads `manifest.json` from the content root: keep it at the project root and copy it to output (below). Don't override the profile's working directory with an absolute path. |
 | Breakpoint in `InitializeAsync` never hits | Check `ready` and `diagnostics`: the process may still be reconnecting. |
@@ -242,6 +243,35 @@ More symptoms, including rejected or expired pairing and `429`: [Troubleshooting
 The host knows this plugin id, but your `credentials.json` is gone (deleted state directory, fresh clone).
 Run again with Developer Mode on and approve **replace the development credential** in the prompt. The
 host rotates in the new secret and ends the old sessions; no manual revocation.
+
+If the refusal says the plugin is installed (`details.reason: "plugin_installed"`), the build enrolled
+with a Developer token. That headless path never takes over an installed plugin. Unset
+`MACRO_DECK_PLUGIN_ENROLLMENT_TOKEN` and pair interactively with Developer Mode on (see
+[Debug an installed plugin](#debug-an-installed-plugin)), or uninstall the plugin first.
+
+### Debug an installed plugin
+
+Run the development build as usual, with Developer Mode on. If Macro Deck already has a plugin with the
+same id installed, the prompt asks you to approve the pairing **and** to confirm that the build takes
+over the installed plugin. Read the warning: your unverified build gets the installed plugin's settings
+and stored credentials.
+
+While the takeover lasts:
+
+- the installed copy is stopped, and Macro Deck does not start it again;
+- installing or updating the plugin is refused;
+- the build is listed under **Paired plugins** on the Developer page and shown as unverified;
+- the Store shows the plugin as running a development build instead of verified.
+
+The takeover ends, and the installed copy starts again, when you revoke the build under **Paired
+plugins**, switch Developer Mode off, uninstall the plugin, or restart Macro Deck. Nothing about it is
+saved. Uninstalling during a takeover can fail on Windows while the installed copy is still shutting
+down; try again after a minute.
+
+The next debug run after a takeover ended asks again by itself: when the host rejects the stored
+credential before the plugin has connected, the SDK pairs once and replaces `credentials.json`. Builds
+on an older SDK stop with an authentication error instead. Delete
+`.macrodeck-dev-state/<plugin-id>/credentials.json` and run again.
 
 ### If credentials leak
 

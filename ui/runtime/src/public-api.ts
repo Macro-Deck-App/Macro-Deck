@@ -912,6 +912,7 @@ export {
   type PluginPairingClientInfo,
 } from './protocol/messages/plugin-pairing';
 export {
+  PLUGIN_RUNTIME_ERROR_TAKEN_OVER_BY_DEVELOPMENT_BUILD,
   type GetPluginRuntimeResponse,
   type PluginRuntimeHealth,
   type PluginRuntimeInfo,

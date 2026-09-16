@@ -151,6 +151,7 @@ internal sealed class PluginSupervisorTests
 			_launchTokenService,
 			_listenerState,
 			_trustEvaluator,
+			new PluginTakeoverRegistry(),
 			services.GetRequiredService<IServiceScopeFactory>(),
 			_time,
 			_options,

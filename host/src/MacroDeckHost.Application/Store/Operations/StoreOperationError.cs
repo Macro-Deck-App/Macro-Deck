@@ -21,5 +21,6 @@ public enum StoreOperationError
 	MalformedPackage,
 	InstallFailed,
 	Interrupted,
-	Cancelled
+	Cancelled,
+	InstallBlockedByTakeover
 }

@@ -47,12 +47,14 @@ public sealed class PluginPairingSystemNotificationHandler : INotificationHandle
 		}
 
 		var culture = await ActiveLocalization.Culture(_scopeFactory);
-		var title = _localization.Resolve(AppStrings.Notifications.PluginPairingRequested(), culture) ??
-			notification.DisplayName;
-		var message = _localization.Resolve(
-				AppStrings.Notifications.PluginPairingRequestedMessage(name: notification.DisplayName),
-				culture) ??
-			notification.DisplayName;
+		var title = _localization.Resolve(notification.TakesOverInstalledPlugin
+				? AppStrings.Notifications.PluginTakeoverRequested()
+				: AppStrings.Notifications.PluginPairingRequested(),
+			culture) ?? notification.DisplayName;
+		var message = _localization.Resolve(notification.TakesOverInstalledPlugin
+				? AppStrings.Notifications.PluginTakeoverRequestedMessage(name: notification.DisplayName)
+				: AppStrings.Notifications.PluginPairingRequestedMessage(name: notification.DisplayName),
+			culture) ?? notification.DisplayName;
 
 		_ = Task.Run(async () =>
 			{

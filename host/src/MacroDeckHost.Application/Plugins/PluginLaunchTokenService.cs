@@ -17,6 +17,8 @@ public interface IPluginLaunchTokenService
 
 	void Discard(string launchId);
 
+	void DiscardForPlugin(string pluginId);
+
 	bool HasActiveLaunch(string pluginId);
 }
 
@@ -138,6 +140,17 @@ public class PluginLaunchTokenService : IPluginLaunchTokenService
 		if (_byLaunchId.TryRemove(launchId, out var entry))
 		{
 			_byHash.TryRemove(entry.TokenHash, out _);
+		}
+	}
+
+	public void DiscardForPlugin(string pluginId)
+	{
+		foreach (var (launchId, entry) in _byLaunchId)
+		{
+			if (string.Equals(entry.PluginId, pluginId, StringComparison.Ordinal))
+			{
+				Discard(launchId);
+			}
 		}
 	}
 

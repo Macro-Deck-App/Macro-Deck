@@ -1694,6 +1694,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Developer.ManagedPlugins.UnmanagedReason" xml:space="preserve">
     <value>This plugin starts and stops itself. Macro Deck only observes its session, so it cannot be started, stopped or restarted from here.</value>
   </data>
+  <data name="Developer.ManagedPlugins.TakenOverBadge" xml:space="preserve">
+    <value>Development build active</value>
+  </data>
+  <data name="Developer.ManagedPlugins.TakenOverReason" xml:space="preserve">
+    <value>A development build has taken over this plugin, so it cannot be started or restarted from here. Revoke the development build on this page to start the installed version again.</value>
+  </data>
   <data name="Developer.NoActionsAvailableHeading" xml:space="preserve">
     <value>No actions available</value>
   </data>
@@ -1961,6 +1967,13 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>{name} loses its credential and is disconnected immediately. It has to pair again to reconnect.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Developer.Tokens.EndTakeoverConfirmMessage" xml:space="preserve">
+    <value>{name} loses its credential and is disconnected immediately. The installed version of the plugin starts again.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Developer.Tokens.TakeoverBadge" xml:space="preserve">
+    <value>Replaces installed plugin</value>
+  </data>
   <data name="Developer.Tokens.RevokePluginFailed" xml:space="preserve">
     <value>Could not revoke the plugin</value>
   </data>
@@ -2117,6 +2130,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Dialogs.PluginPairing.ReplacesWarning" xml:space="preserve">
     <value>A plugin is already paired for this package ID. Approving replaces its registration - the existing credential stops working and it is disconnected immediately.</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverConfirmLabel" xml:space="preserve">
+    <value>I understand that an unverified development build replaces the installed plugin and gets its settings and stored credentials</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverWarning" xml:space="preserve">
+    <value>This package ID belongs to an installed plugin. Approving lets an unverified development build replace it: the installed plugin stops, and the development build gets its settings and stored credentials. The installed version starts again when the takeover ends.</value>
   </data>
   <data name="Dialogs.PluginPairing.ReportedByRequester" xml:space="preserve">
     <value>Reported by the requesting program</value>
@@ -2643,6 +2662,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Errors.Plugins.ReplaceCredentialConfirmationRequired" xml:space="preserve">
     <value>Approving this request replaces an existing plugin's credential. Confirm the replacement first.</value>
+  </data>
+  <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
+    <value>A development build has taken over this plugin. End the takeover before installing or updating it.</value>
+  </data>
+  <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
+    <value>A development build has taken over this plugin. The installed version starts again when the takeover ends.</value>
+  </data>
+  <data name="Errors.Plugins.TakeoverConfirmationRequired" xml:space="preserve">
+    <value>Approving this request lets a development build take over an installed plugin. Confirm the takeover first.</value>
   </data>
   <data name="Errors.Plugins.SessionNotFound" xml:space="preserve">
     <value>No live session with that id exists.</value>
@@ -11614,6 +11642,13 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Notifications.PluginPairingRequestedMessage" xml:space="preserve">
     <value>{name} is waiting for your approval in Macro Deck.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
+    <value>A development build wants to take over a plugin</value>
+  </data>
+  <data name="Notifications.PluginTakeoverRequestedMessage" xml:space="preserve">
+    <value>{name} wants to replace an installed plugin and is waiting for your approval in Macro Deck.</value>
     <comment>[name:string]</comment>
   </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">

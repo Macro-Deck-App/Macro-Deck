@@ -7,6 +7,7 @@ import { Observable, Subject } from 'rxjs';
 import { AppStrings, GetConnectSessionResponse, GetStoreCatalogResponse, StoreCatalogItemBody } from '@macro-deck/runtime';
 import { ApiService, LocalizationService, SegmentedControlComponent, ToastService } from '@shared';
 import { ConnectAccountService } from '../../../services/connect-account.service';
+import { PluginRuntimeService } from '../../../services/plugin-runtime.service';
 import { SelectComponent } from '../../forms/select/select.component';
 import { StoreExtensionCardComponent } from '../../store/store-extension-card.component';
 import { StoreSectionComponent } from '../../store/store-section.component';
@@ -146,6 +147,7 @@ describe('StorePageComponent', () => {
         provideZonelessChangeDetection(),
         { provide: ApiService, useValue: api },
         { provide: ConnectAccountService, useValue: account },
+        { provide: PluginRuntimeService, useValue: { plugins: signal([]) } },
         { provide: Router, useValue: routerSpy },
         {
           provide: ActivatedRoute,

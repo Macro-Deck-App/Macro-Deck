@@ -1695,6 +1695,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Developer.ManagedPlugins.UnmanagedReason" xml:space="preserve">
     <value>Questo plugin si avvia e si arresta da solo. Macro Deck si limita a osservarne la sessione, quindi non può essere avviato, arrestato o riavviato da qui.</value>
   </data>
+  <data name="Developer.ManagedPlugins.TakenOverBadge" xml:space="preserve">
+    <value>Build di sviluppo attiva</value>
+  </data>
+  <data name="Developer.ManagedPlugins.TakenOverReason" xml:space="preserve">
+    <value>Una build di sviluppo ha preso il controllo di questo plugin, quindi non può essere avviato o riavviato da qui. Revoca la build di sviluppo in questa pagina per riavviare la versione installata.</value>
+  </data>
   <data name="Developer.NoActionsAvailableHeading" xml:space="preserve">
     <value>Nessuna azione disponibile</value>
   </data>
@@ -1962,6 +1968,13 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>{name} perde la propria credenziale e viene disconnesso immediatamente. Dovrà abbinarsi di nuovo per riconnettersi.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Developer.Tokens.EndTakeoverConfirmMessage" xml:space="preserve">
+    <value>{name} perde la propria credenziale e viene disconnesso immediatamente. La versione installata del plugin si riavvia.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Developer.Tokens.TakeoverBadge" xml:space="preserve">
+    <value>Sostituisce il plugin installato</value>
+  </data>
   <data name="Developer.Tokens.RevokePluginFailed" xml:space="preserve">
     <value>Impossibile revocare il plugin</value>
   </data>
@@ -2118,6 +2131,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Dialogs.PluginPairing.ReplacesWarning" xml:space="preserve">
     <value>È già abbinato un plugin per questo ID pacchetto. Approvando si sostituisce la sua registrazione: la credenziale esistente smette di funzionare e viene disconnessa immediatamente.</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverConfirmLabel" xml:space="preserve">
+    <value>Ho capito che una build di sviluppo non verificata sostituisce il plugin installato e ne ottiene le impostazioni e le credenziali salvate</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverWarning" xml:space="preserve">
+    <value>Questo ID pacchetto appartiene a un plugin installato. Se approvi, una build di sviluppo non verificata lo sostituisce: il plugin installato si arresta e la build di sviluppo ottiene le sue impostazioni e le credenziali salvate. La versione installata si riavvia quando la presa di controllo termina.</value>
   </data>
   <data name="Dialogs.PluginPairing.ReportedByRequester" xml:space="preserve">
     <value>Indicato dal programma richiedente</value>
@@ -2644,6 +2663,15 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Errors.Plugins.ReplaceCredentialConfirmationRequired" xml:space="preserve">
     <value>Approvando questa richiesta si sostituisce la credenziale di un plugin esistente. Conferma prima la sostituzione.</value>
+  </data>
+  <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
+    <value>Una build di sviluppo ha preso il controllo di questo plugin. Termina la presa di controllo prima di installarlo o aggiornarlo.</value>
+  </data>
+  <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
+    <value>Una build di sviluppo ha preso il controllo di questo plugin. La versione installata si riavvia quando la presa di controllo termina.</value>
+  </data>
+  <data name="Errors.Plugins.TakeoverConfirmationRequired" xml:space="preserve">
+    <value>Approvando questa richiesta una build di sviluppo prende il controllo di un plugin installato. Conferma prima la presa di controllo.</value>
   </data>
   <data name="Errors.Plugins.SessionNotFound" xml:space="preserve">
     <value>Non esiste alcuna sessione attiva con quell'id.</value>
@@ -11614,6 +11642,13 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Notifications.PluginPairingRequestedMessage" xml:space="preserve">
     <value>{name} attende la tua approvazione in Macro Deck.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
+    <value>Una build di sviluppo vuole prendere il controllo di un plugin</value>
+  </data>
+  <data name="Notifications.PluginTakeoverRequestedMessage" xml:space="preserve">
+    <value>{name} vuole sostituire un plugin installato e attende la tua approvazione in Macro Deck.</value>
     <comment>[name:string]</comment>
   </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">

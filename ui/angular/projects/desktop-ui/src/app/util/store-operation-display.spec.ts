@@ -68,6 +68,10 @@ describe('storeOperationErrorKey', () => {
     expect(storeOperationErrorKey('SignatureInvalid')).toBe(AppStrings.Store.Error.SignatureUnverifiable);
   });
 
+  it('says a development build takeover is why an install or update was refused', () => {
+    expect(storeOperationErrorKey('InstallBlockedByTakeover')).toBe(AppStrings.Errors.Plugins.InstallBlockedByTakeover);
+  });
+
   it('falls back to a plain sentence for a code this build does not know', () => {
     expect(storeOperationErrorKey('SomethingAddedLater')).toBe(AppStrings.Store.Error.Failed);
     expect(storeOperationErrorKey(undefined)).toBe(AppStrings.Store.Error.Failed);

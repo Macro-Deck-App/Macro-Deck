@@ -171,8 +171,21 @@ describe('PluginPairingService', () => {
       const result = await service.approve('r1', true);
 
       expect(result).toBeTrue();
-      expect(api.approvePluginPairingRequest).toHaveBeenCalledWith('r1', { replaceExistingRegistration: true });
+      expect(api.approvePluginPairingRequest).toHaveBeenCalledWith(
+        'r1', { replaceExistingRegistration: true, takeOverInstalledPlugin: false });
       expect(service.pendingRequests()).toEqual([]);
+    });
+
+    it('sends the takeover confirmation in the approve body', async () => {
+      api.getPluginPairingRequests.and.resolveTo({ requests: [request('r1', { takesOverInstalledPlugin: true })] });
+      connectionState.set('connected');
+      await service.load();
+      api.approvePluginPairingRequest.and.resolveTo({ success: true });
+
+      await service.approve('r1', false, true);
+
+      expect(api.approvePluginPairingRequest).toHaveBeenCalledWith(
+        'r1', { replaceExistingRegistration: false, takeOverInstalledPlugin: true });
     });
 
     it('leaves the cache untouched on failure', async () => {

@@ -124,6 +124,8 @@ export function storeOperationErrorKey(code: string | null | undefined): string 
       return AppStrings.Store.Error.Interrupted;
     case 'Cancelled':
       return AppStrings.Store.Error.Cancelled;
+    case 'InstallBlockedByTakeover':
+      return AppStrings.Errors.Plugins.InstallBlockedByTakeover;
     default:
       return AppStrings.Store.Error.Failed;
   }

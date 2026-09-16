@@ -138,6 +138,9 @@ one that can still report what happened.
   documented contract the Portal is expected to call it with.
 - A hung or crashing plugin cannot restart indefinitely without reaching a terminal failed state, and
   self-registering development plugins remain independent of process supervision.
+- Amended by [ADR 0089](0089-a-development-build-can-temporarily-take-over-an-installed-plugin.md):
+  while a development build takes over an installed id, the supervisor keeps the managed instance
+  stopped in memory, as a deliberate stop, without writing its persisted desired state.
 - A host that is killed rather than stopped no longer leaves managed plugin processes running
   indefinitely. Where the platform can bind a child's lifetime to the host's, the orphan never exists;
   otherwise the plugin stops itself once it sees its host is gone, and anything still left is reaped on

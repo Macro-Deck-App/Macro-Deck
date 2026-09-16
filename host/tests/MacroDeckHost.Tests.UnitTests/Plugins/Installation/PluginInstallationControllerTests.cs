@@ -1,7 +1,10 @@
+using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeckHost.Api.Controllers;
 using MacroDeckHost.Application.Plugins.Installation;
 using MacroDeckHost.Application.Plugins.Trust;
+using MacroDeckHost.Localization;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.AspNetCore.Http;
 
 namespace MacroDeckHost.Tests.UnitTests.Plugins.Installation;
@@ -106,6 +109,27 @@ internal sealed class PluginInstallationControllerTests
 			Assert.That(byDefault?.KeepData, Is.True);
 			Assert.That(whenAsked?.KeepData, Is.False);
 			Assert.That(byDefault?.Force, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_refusal_during_a_takeover_has_its_own_code_and_a_localized_message()
+	{
+		var installer = new FakePluginInstaller
+		{
+			ResultToReturn = PluginInstallResult.Fail(PluginInstallError.Failed, "diagnostic", "com.example.plugin") with
+			{
+				BlockedByDevelopmentTakeover = true
+			}
+		};
+
+		var response = await Inspect(installer);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Error!.Code, Is.EqualTo("install_blocked_by_takeover"));
+			Assert.That(TestLocalization.Resolve(response.Error.Message),
+				Is.EqualTo(TestLocalization.Resolve(AppStrings.Errors.Plugins.InstallBlockedByTakeover())));
 		});
 	}
 

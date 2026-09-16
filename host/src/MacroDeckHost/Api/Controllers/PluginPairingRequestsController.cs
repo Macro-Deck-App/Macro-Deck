@@ -21,11 +21,14 @@ public sealed record PluginPairingRequestBody(
 	bool ReplacesExistingRegistration,
 	string? ExistingRegistrationOrigin,
 	DateTime? ExistingRegistrationCreatedAt,
-	bool ArrivedOnPublicListener);
+	bool ArrivedOnPublicListener,
+	bool TakesOverInstalledPlugin);
 
 public sealed record GetPluginPairingRequestsResponse(IReadOnlyList<PluginPairingRequestBody> Requests);
 
-public sealed record ApprovePluginPairingRequestBody(bool ReplaceExistingRegistration);
+public sealed record ApprovePluginPairingRequestBody(
+	bool ReplaceExistingRegistration,
+	bool TakeOverInstalledPlugin = false);
 
 public sealed record PluginPairingActionResponse(bool Success, TransportError? Error);
 
@@ -34,7 +37,8 @@ public sealed record PluginPairedRegistrationBody(
 	string DisplayName,
 	DateTime CreatedAt,
 	DateTime? LastSeenAt,
-	bool Online);
+	bool Online,
+	bool TakesOverInstalledPlugin);
 
 public sealed record GetPluginPairedRegistrationsResponse(IReadOnlyList<PluginPairedRegistrationBody> Registrations);
 
@@ -91,7 +95,8 @@ public class PluginPairingRequestsController : ControllerBase
 				item.ReplacesExistingRegistration,
 				item.ExistingRegistrationOrigin,
 				item.ExistingRegistrationCreatedAt,
-				item.ArrivedOnPublicListener))
+				item.ArrivedOnPublicListener,
+				item.TakesOverInstalledPlugin))
 			.ToList()));
 	}
 
@@ -105,18 +110,27 @@ public class PluginPairingRequestsController : ControllerBase
 			return rejection!;
 		}
 
-		var result = await _pairingService.Approve(requestId, body.ReplaceExistingRegistration);
+		var result = await _pairingService.Approve(requestId,
+			body.ReplaceExistingRegistration,
+			body.TakeOverInstalledPlugin);
 		if (!result.Succeeded)
 		{
 			return Ok(new PluginPairingActionResponse(false,
-				result.Error == PluginPairingApproveError.ReplacementNotConfirmed
-					? new TransportError
+				result.Error switch
+				{
+					PluginPairingApproveError.ReplacementNotConfirmed => new TransportError
 					{
 						Code = "replacement_not_confirmed",
 						Message = AppStrings.Errors.Plugins.ReplaceCredentialConfirmationRequired()
-					}
-					: new TransportError
-						{ Code = "not_found", Message = AppStrings.Errors.Plugins.PairingRequestNotFound() }));
+					},
+					PluginPairingApproveError.TakeoverNotConfirmed => new TransportError
+					{
+						Code = "takeover_not_confirmed",
+						Message = AppStrings.Errors.Plugins.TakeoverConfirmationRequired()
+					},
+					_ => new TransportError
+						{ Code = "not_found", Message = AppStrings.Errors.Plugins.PairingRequestNotFound() }
+				}));
 		}
 
 		await _mediator.Publish(new PluginPairingRequestsChangedNotification(), cancellationToken);
@@ -159,7 +173,8 @@ public class PluginPairingRequestsController : ControllerBase
 					registration.DisplayName,
 					registration.CreatedAt,
 					registration.LastSeenAt,
-					registration.Online))
+					registration.Online,
+					registration.TakesOverInstalledPlugin))
 			.ToList()));
 	}
 
@@ -175,6 +190,7 @@ public class PluginPairingRequestsController : ControllerBase
 		await _mediator.Publish(new PluginTokensChangedNotification(), cancellationToken);
 		await _mediator.Publish(new PluginSessionsChangedNotification(), cancellationToken);
 		await _mediator.Publish(new PluginPairingRequestsChangedNotification(), cancellationToken);
+		await _mediator.Publish(new PluginRuntimeChangedNotification(), cancellationToken);
 
 		return NoContent();
 	}

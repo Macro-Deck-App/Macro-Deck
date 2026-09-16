@@ -14,8 +14,10 @@ public class PluginRegistrationRepository : IPluginRegistrationRepository
 		_context = context;
 	}
 
+	// Untracked on purpose: Reactivate, RotateSecret and Revoke write through ExecuteUpdate, which bypasses
+	// the change tracker, so a tracked read in the same scope would still return the row from before.
 	public Task<PluginRegistrationEntity?> GetByPluginId(string pluginId)
-		=> _context.PluginRegistrations.FirstOrDefaultAsync(r => r.PluginId == pluginId);
+		=> _context.PluginRegistrations.AsNoTracking().FirstOrDefaultAsync(r => r.PluginId == pluginId);
 
 	public async Task<IReadOnlyList<PluginRegistrationEntity>> GetByAccessTokenId(Guid accessTokenId)
 		=> await _context.PluginRegistrations.Where(r => r.AccessTokenId == accessTokenId).ToListAsync();

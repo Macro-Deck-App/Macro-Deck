@@ -45,6 +45,9 @@ internal sealed class EmptyPluginSupervisor : IPluginSupervisor
 		=> throw new NotSupportedException();
 
 	public Task Reconcile(CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+	public Task SuspendForTakeover(string pluginId, CancellationToken cancellationToken = default)
+		=> throw new NotSupportedException();
 }
 
 internal sealed class EmptyInstallationCatalog : IPluginInstallationCatalog

@@ -235,7 +235,10 @@ revoked registration, an unknown or expired Developer token and a missing header
 - the `X-MacroDeck-Plugin-Id` and `X-MacroDeck-Plugin-Secret` headers are present and spelled correctly;
 - a self-registered secret file was not deleted;
 - the registration was not revoked;
-- a managed launch token is used within two minutes; otherwise it needs a fresh launch.
+- a managed launch token is used within two minutes; otherwise it needs a fresh launch;
+- a development build that took over an installed plugin lost its credential when the takeover ended.
+  Current SDKs pair again once by themselves; on an older SDK delete
+  `.macrodeck-dev-state/<plugin-id>/credentials.json` and run again.
 
 ### `UNAUTHENTICATED` with HTTP 403
 
@@ -255,7 +258,13 @@ Developer token or paired - not a plugin Macro Deck installed and launches. Such
 A plugin is already registered with this identity.
 ```
 
-A registration exists, but this machine or directory lost its `credentials.json`. Reuse the stored secret,
+If `details.reason` is `plugin_installed`, Macro Deck has a plugin with this id installed and the build
+enrolled with a Developer token. Only that headless path is refused: nobody confirms a takeover there.
+Unset the token and run the build with Developer Mode on, so the prompt can ask you to take over the
+installed plugin (see [Debug an installed plugin](/guides/debugging/#debug-an-installed-plugin)), or
+uninstall the plugin first.
+
+Otherwise a registration exists, but this machine or directory lost its `credentials.json`. Reuse the stored secret,
 or run the plugin with Developer Mode on and let the pairing prompt **replace the development credential**
 (it rotates the secret and ends the old session) - see
 [Interactive pairing](/reference/authentication/#self-registering-interactive-pairing) and

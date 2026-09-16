@@ -1695,6 +1695,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Developer.ManagedPlugins.UnmanagedReason" xml:space="preserve">
     <value>Cette extension se démarre et s'arrête elle-même. Macro Deck se contente d'observer sa session, elle ne peut donc pas être démarrée, arrêtée ou redémarrée depuis ici.</value>
   </data>
+  <data name="Developer.ManagedPlugins.TakenOverBadge" xml:space="preserve">
+    <value>Build de développement active</value>
+  </data>
+  <data name="Developer.ManagedPlugins.TakenOverReason" xml:space="preserve">
+    <value>Une build de développement a pris le contrôle de cette extension, elle ne peut donc pas être démarrée ou redémarrée depuis ici. Révoque la build de développement sur cette page pour redémarrer la version installée.</value>
+  </data>
   <data name="Developer.NoActionsAvailableHeading" xml:space="preserve">
     <value>Aucune action disponible</value>
   </data>
@@ -1962,6 +1968,13 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>{name} perd son identifiant et est déconnectée immédiatement. Elle doit s'associer à nouveau pour se reconnecter.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Developer.Tokens.EndTakeoverConfirmMessage" xml:space="preserve">
+    <value>{name} perd son identifiant et est déconnectée immédiatement. La version installée de l'extension redémarre.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Developer.Tokens.TakeoverBadge" xml:space="preserve">
+    <value>Remplace l'extension installée</value>
+  </data>
   <data name="Developer.Tokens.RevokePluginFailed" xml:space="preserve">
     <value>Impossible de révoquer l'extension</value>
   </data>
@@ -2118,6 +2131,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Dialogs.PluginPairing.ReplacesWarning" xml:space="preserve">
     <value>Une extension est déjà associée à cet ID de package. Approuver remplace son enregistrement: l'identifiant existant cesse de fonctionner et elle est déconnectée immédiatement.</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverConfirmLabel" xml:space="preserve">
+    <value>Je comprends qu'une build de développement non vérifiée remplace l'extension installée et obtient ses paramètres et ses identifiants enregistrés</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverWarning" xml:space="preserve">
+    <value>Cet ID de package appartient à une extension installée. Si tu approuves, une build de développement non vérifiée la remplace: l'extension installée s'arrête et la build de développement obtient ses paramètres et ses identifiants enregistrés. La version installée redémarre à la fin de la prise de contrôle.</value>
   </data>
   <data name="Dialogs.PluginPairing.ReportedByRequester" xml:space="preserve">
     <value>Signalé par le programme demandeur</value>
@@ -2644,6 +2663,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Errors.Plugins.ReplaceCredentialConfirmationRequired" xml:space="preserve">
     <value>Approuver cette demande remplace les identifiants d'une extension existante. Confirme d'abord le remplacement.</value>
+  </data>
+  <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
+    <value>Une build de développement a pris le contrôle de cette extension. Termine la prise de contrôle avant de l'installer ou de la mettre à jour.</value>
+  </data>
+  <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
+    <value>Une build de développement a pris le contrôle de cette extension. La version installée redémarre à la fin de la prise de contrôle.</value>
+  </data>
+  <data name="Errors.Plugins.TakeoverConfirmationRequired" xml:space="preserve">
+    <value>Approuver cette demande permet à une build de développement de prendre le contrôle d'une extension installée. Confirme d'abord la prise de contrôle.</value>
   </data>
   <data name="Errors.Plugins.SessionNotFound" xml:space="preserve">
     <value>Aucune session active avec cet identifiant n'existe.</value>
@@ -11614,6 +11642,13 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Notifications.PluginPairingRequestedMessage" xml:space="preserve">
     <value>{name} attend ton approbation dans Macro Deck.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
+    <value>Une build de développement veut prendre le contrôle d'une extension</value>
+  </data>
+  <data name="Notifications.PluginTakeoverRequestedMessage" xml:space="preserve">
+    <value>{name} veut remplacer une extension installée et attend ton approbation dans Macro Deck.</value>
     <comment>[name:string]</comment>
   </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">

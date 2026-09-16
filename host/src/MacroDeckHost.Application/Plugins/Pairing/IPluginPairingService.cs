@@ -25,8 +25,10 @@ public sealed record PluginPairingCreateOutcome
 
 	public PluginPairingRequestRecord? Record { get; init; }
 
-	public static PluginPairingCreateOutcome Success(PluginPairingRequestRecord record)
-		=> new() { Succeeded = true, Record = record };
+	public bool TakesOverInstalledPlugin { get; init; }
+
+	public static PluginPairingCreateOutcome Success(PluginPairingRequestRecord record, bool takesOverInstalledPlugin)
+		=> new() { Succeeded = true, Record = record, TakesOverInstalledPlugin = takesOverInstalledPlugin };
 
 	public static PluginPairingCreateOutcome Fail(PluginPairingCreateError error, string? detail = null)
 		=> new() { Succeeded = false, Error = error, ErrorDetail = detail };
@@ -44,13 +46,16 @@ public sealed record PluginPairingPendingItem(
 	bool ReplacesExistingRegistration,
 	string? ExistingRegistrationOrigin,
 	DateTime? ExistingRegistrationCreatedAt,
-	bool ArrivedOnPublicListener);
+	bool ArrivedOnPublicListener,
+	bool TakesOverInstalledPlugin);
 
 public enum PluginPairingApproveError
 {
 	NotFound,
 
-	ReplacementNotConfirmed
+	ReplacementNotConfirmed,
+
+	TakeoverNotConfirmed
 }
 
 public sealed record PluginPairingApproveOutcome
@@ -84,7 +89,8 @@ public sealed record PluginPairedRegistration(
 	string DisplayName,
 	DateTime CreatedAt,
 	DateTime? LastSeenAt,
-	bool Online);
+	bool Online,
+	bool TakesOverInstalledPlugin);
 
 public interface IPluginPairingService
 {
@@ -99,7 +105,9 @@ public interface IPluginPairingService
 
 	Task<IReadOnlyList<PluginPairingPendingItem>> Pending();
 
-	Task<PluginPairingApproveOutcome> Approve(string requestId, bool replaceExistingRegistration);
+	Task<PluginPairingApproveOutcome> Approve(string requestId,
+		bool replaceExistingRegistration,
+		bool takeOverInstalledPlugin = false);
 
 	bool Reject(string requestId);
 

@@ -109,6 +109,12 @@
 }
 
 // Runtime state badges (PluginRuntimeState wire values).
+.managed-plugins-badge.taken-over {
+  background-color: var(--color-warning-muted);
+  color: var(--color-warning);
+  text-transform: none;
+}
+
 .managed-plugins-badge.state-stopped {
   background-color: var(--color-bg-tertiary);
   color: var(--color-text-muted);

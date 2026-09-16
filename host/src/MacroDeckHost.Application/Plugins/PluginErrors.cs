@@ -63,6 +63,18 @@ public static class PluginErrors
 		Retryable = false
 	};
 
+	// Keeps the already-registered code so older SDKs still recognise it; only the reason is new.
+	public static ProtocolError PluginInstalled() => new()
+	{
+		Code = ProtocolErrorCodes.PluginAlreadyRegistered,
+		Message = ProtocolErrorMessages.For(ProtocolErrorCodes.PluginAlreadyRegistered),
+		Details = ProtocolDiagnostics.Redact(new Dictionary<string, string>
+		{
+			["reason"] = ProtocolErrorReasons.PluginInstalled
+		}),
+		Retryable = false
+	};
+
 	public static ProtocolError VersionUnsupported(ProtocolVersionRange hostRange) => new()
 	{
 		Code = ProtocolErrorCodes.ProtocolVersionUnsupported,

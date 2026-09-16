@@ -36,6 +36,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 	private readonly IPluginLaunchTokenService _launchTokenService;
 	private readonly IHostListenerState _hostListenerState;
 	private readonly IPluginTrustEvaluator _trustEvaluator;
+	private readonly IPluginTakeoverRegistry _takeovers;
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly TimeProvider _timeProvider;
 	private readonly PluginSupervisorOptions _options;
@@ -57,6 +58,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		IPluginLaunchTokenService launchTokenService,
 		IHostListenerState hostListenerState,
 		IPluginTrustEvaluator trustEvaluator,
+		IPluginTakeoverRegistry takeovers,
 		IServiceScopeFactory scopeFactory,
 		TimeProvider timeProvider,
 		PluginSupervisorOptions options,
@@ -73,6 +75,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		_launchTokenService = launchTokenService;
 		_hostListenerState = hostListenerState;
 		_trustEvaluator = trustEvaluator;
+		_takeovers = takeovers;
 		_scopeFactory = scopeFactory;
 		_timeProvider = timeProvider;
 		_options = options;
@@ -126,6 +129,11 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			if (!TryResolveInstalled(pluginId, out var installed))
 			{
 				return NotSupervisable(pluginId);
+			}
+
+			if (_takeovers.IsActive(pluginId))
+			{
+				return TakenOver();
 			}
 
 			var entry = GetOrCreateEntry(pluginId);
@@ -242,6 +250,11 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			if (!TryResolveInstalled(pluginId, out var installed))
 			{
 				return NotSupervisable(pluginId);
+			}
+
+			if (_takeovers.IsActive(pluginId))
+			{
+				return TakenOver();
 			}
 
 			var entry = GetOrCreateEntry(pluginId);
@@ -396,6 +409,62 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 	}
 
+	public async Task SuspendForTakeover(string pluginId, CancellationToken cancellationToken = default)
+	{
+		// A token minted before AttemptLaunch stored entry.LaunchId is only reachable by plugin id.
+		_launchTokenService.DiscardForPlugin(pluginId);
+
+		PluginRuntimeEntry? entry;
+		lock (_entriesLock)
+		{
+			_entries.TryGetValue(pluginId, out entry);
+		}
+
+		IPluginProcess? process = null;
+		string? launchId = null;
+
+		if (entry is not null)
+		{
+			await entry.Gate.WaitAsync(cancellationToken);
+			try
+			{
+				launchId = entry.LaunchId;
+				process = entry.Process;
+				if (process is not null)
+				{
+					entry.PendingIntent = PluginStopReason.DevelopmentTakeover;
+					entry.State = PluginRuntimeState.Stopping;
+				}
+				else if (entry.State is PluginRuntimeState.Starting
+					or PluginRuntimeState.Running
+					or PluginRuntimeState.Backoff)
+				{
+					MarkStoppedForTakeoverLocked(entry);
+				}
+			}
+			finally
+			{
+				entry.Gate.Release();
+			}
+		}
+
+		if (launchId is not null)
+		{
+			_launchTokenService.Discard(launchId);
+		}
+
+		await EndManagedSessions(pluginId);
+
+		// The graceful wait can take the manifest's full shutdown budget, far longer than a pairing
+		// redemption may block, so only the exit accounting runs on after this returns.
+		if (entry is not null && process is not null)
+		{
+			_ = AwaitExitInBackground(entry, process, launchId);
+		}
+
+		await PublishRuntimeChanged(cancellationToken);
+	}
+
 	private async Task ReconcileEntry(PluginRuntimeEntry entry,
 		InstalledPlugin? installed,
 		bool wantsStarted,
@@ -406,7 +475,10 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		switch (entry.State)
 		{
 			case PluginRuntimeState.Stopped:
-				if (wantsStarted && installed?.ActiveVersion is not null && !entry.IntegrityFailed)
+				if (wantsStarted &&
+					installed?.ActiveVersion is not null &&
+					!entry.IntegrityFailed &&
+					!_takeovers.IsActive(entry.PluginId))
 				{
 					await AttemptLaunch(entry, installed, allowStartupGraceRetry: true, ct);
 				}
@@ -414,7 +486,19 @@ public sealed class PluginSupervisor : IPluginSupervisor
 				break;
 
 			case PluginRuntimeState.Backoff:
-				if (installed?.ActiveVersion is null)
+				if (_takeovers.IsActive(entry.PluginId))
+				{
+					await entry.Gate.WaitAsync(ct);
+					try
+					{
+						MarkStoppedForTakeoverLocked(entry);
+					}
+					finally
+					{
+						entry.Gate.Release();
+					}
+				}
+				else if (installed?.ActiveVersion is null)
 				{
 					await entry.Gate.WaitAsync(ct);
 					try
@@ -432,6 +516,10 @@ public sealed class PluginSupervisor : IPluginSupervisor
 					await AttemptLaunch(entry, installed, allowStartupGraceRetry: true, ct);
 				}
 
+				break;
+
+			case PluginRuntimeState.Starting or PluginRuntimeState.Running when _takeovers.IsActive(entry.PluginId):
+				await StopLiveInstanceForTakeover(entry, ct);
 				break;
 
 			case PluginRuntimeState.Starting:
@@ -588,6 +676,106 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 	}
 
+	private async Task StopLiveInstanceForTakeover(PluginRuntimeEntry entry, CancellationToken ct)
+	{
+		IPluginProcess? doomed;
+		string? doomedLaunchId;
+
+		await entry.Gate.WaitAsync(ct);
+		try
+		{
+			doomed = entry.PendingIntent == PluginStopReason.None ? entry.Process : null;
+			doomedLaunchId = entry.LaunchId;
+			if (doomed is not null)
+			{
+				entry.PendingIntent = PluginStopReason.DevelopmentTakeover;
+				entry.State = PluginRuntimeState.Stopping;
+			}
+			else if (entry.Process is null)
+			{
+				MarkStoppedForTakeoverLocked(entry);
+			}
+		}
+		finally
+		{
+			entry.Gate.Release();
+		}
+
+		if (doomed is not null)
+		{
+			_ = TerminateForTakeoverInBackground(entry, doomed, doomedLaunchId);
+		}
+	}
+
+	private async Task TerminateForTakeoverInBackground(PluginRuntimeEntry entry, IPluginProcess process, string? launchId)
+	{
+		try
+		{
+			if (launchId is not null)
+			{
+				_launchTokenService.Discard(launchId);
+			}
+
+			await EndManagedSessions(entry.PluginId);
+			await AwaitExitThenFinalize(entry, process, launchId, CancellationToken.None);
+		}
+		catch (Exception ex)
+		{
+			PluginInfrastructureLog.BackgroundTerminationFailed(_logger, entry.PluginId, ex);
+		}
+	}
+
+	private async Task AwaitExitInBackground(PluginRuntimeEntry entry, IPluginProcess process, string? launchId)
+	{
+		try
+		{
+			await AwaitExitThenFinalize(entry, process, launchId, CancellationToken.None);
+		}
+		catch (Exception ex)
+		{
+			PluginInfrastructureLog.BackgroundTerminationFailed(_logger, entry.PluginId, ex);
+		}
+	}
+
+	// Origin-filtered on purpose: during a takeover the id's development session must survive this.
+	private async Task EndManagedSessions(string pluginId)
+	{
+		var hasManagedSession = _sessionRegistry.Snapshot()
+			.Any(session => session.Origin == PluginSessionOrigin.Managed &&
+				string.Equals(session.PluginId, pluginId, StringComparison.Ordinal));
+
+		if (hasManagedSession)
+		{
+			try
+			{
+				await _sessionRegistry.SendToPlugin(pluginId, BuildGoodbyeEnvelope());
+			}
+			catch (Exception ex)
+			{
+				PluginInfrastructureLog.GoodbyeSendFailed(_logger, pluginId, ex);
+			}
+		}
+
+		try
+		{
+			await _sessionRegistry.TerminateManagedForPlugin(pluginId,
+				ProtocolCloseCodes.SupervisorShutdown,
+				"The supervisor is stopping this plugin.");
+		}
+		catch (Exception ex)
+		{
+			PluginInfrastructureLog.SessionCloseFailed(_logger, pluginId, ex);
+		}
+	}
+
+	private static void MarkStoppedForTakeoverLocked(PluginRuntimeEntry entry)
+	{
+		entry.State = PluginRuntimeState.Stopped;
+		entry.Health = PluginHealthState.Unknown;
+		entry.NextRestartAt = null;
+		entry.LastStopReason = PluginStopReason.DevelopmentTakeover;
+	}
+
 	private async Task TerminateInBackground(PluginRuntimeEntry entry,
 		IPluginProcess process,
 		string? launchId,
@@ -711,6 +899,14 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			PluginInfrastructureLog.SessionCloseFailed(_logger, entry.PluginId, ex);
 		}
 
+		await AwaitExitThenFinalize(entry, process, launchId, ct);
+	}
+
+	private async Task AwaitExitThenFinalize(PluginRuntimeEntry entry,
+		IPluginProcess process,
+		string? launchId,
+		CancellationToken ct)
+	{
 		var grace = entry.GracefulShutdownTimeout ?? _options.GracefulShutdownTimeout;
 
 		if (!process.HasExited)
@@ -723,7 +919,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			await process.KillTree(ct);
 			// Deliberately not on the shutdown token: during host shutdown it is already cancelled, and a
 			// zero length wait here would skip FinalizeExit and lose the exit accounting entirely.
-			await Task.WhenAny(process.Exited, Task.Delay(_postKillWait, _timeProvider));
+			await Task.WhenAny(process.Exited, Task.Delay(_postKillWait, _timeProvider, CancellationToken.None));
 		}
 
 		if (!process.HasExited)
@@ -783,6 +979,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 				case PluginStopReason.HostShutdown:
 				case PluginStopReason.Update:
 				case PluginStopReason.ManualRestart:
+				case PluginStopReason.DevelopmentTakeover:
 					entry.State = PluginRuntimeState.Stopped;
 					entry.Health = PluginHealthState.Unknown;
 					entry.NextRestartAt = null;
@@ -897,6 +1094,11 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		if (installed.ActiveVersion is not { } activeVersion)
 		{
 			return PluginSupervisorResult.Fail(PluginSupervisorError.NotInstalled);
+		}
+
+		if (_takeovers.IsActive(installed.PluginId))
+		{
+			return TakenOver();
 		}
 
 		var manifestResult
@@ -1071,6 +1273,26 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			return PluginSupervisorResult.Fail(PluginSupervisorError.LaunchFailed, ex.Message);
 		}
 
+		var abortedForTakeover = false;
+		await entry.Gate.WaitAsync(ct);
+		try
+		{
+			if (_takeovers.IsActive(entry.PluginId))
+			{
+				MarkStoppedForTakeoverLocked(entry);
+				abortedForTakeover = true;
+			}
+		}
+		finally
+		{
+			entry.Gate.Release();
+		}
+
+		if (abortedForTakeover)
+		{
+			return TakenOver();
+		}
+
 		var launchId = Guid.CreateVersion7().ToString();
 		// Uses this call's own local `manifest`, never entry.DisplayName/entry.Version: the gate that
 		// wrote those was released above, AttemptLaunch is reentrant, and reading entry.* here would
@@ -1141,12 +1363,22 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			StartedAt = process.StartedAt
 		});
 
+		bool takenOverAfterStart;
 		await entry.Gate.WaitAsync(ct);
 		try
 		{
 			entry.Process = process;
 			entry.LaunchId = launchId;
 			entry.HealthPort = healthPort;
+
+			// Under the same gate that publishes entry.Process, so a suspend either sees this process
+			// or this check sees its takeover.
+			takenOverAfterStart = _takeovers.IsActive(entry.PluginId);
+			if (takenOverAfterStart)
+			{
+				entry.PendingIntent = PluginStopReason.DevelopmentTakeover;
+				entry.State = PluginRuntimeState.Stopping;
+			}
 		}
 		finally
 		{
@@ -1154,6 +1386,12 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 
 		_ = WatchForExit(entry, process, launchId);
+
+		if (takenOverAfterStart)
+		{
+			_ = TerminateForTakeoverInBackground(entry, process, launchId);
+			return TakenOver();
+		}
 
 		return PluginSupervisorResult.Ok();
 	}
@@ -1210,6 +1448,10 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 	}
 
+	private static PluginSupervisorResult TakenOver()
+		=> PluginSupervisorResult.Fail(PluginSupervisorError.TakenOverByDevelopmentBuild,
+			"A development build has taken over this plugin id; it resumes when the takeover ends.");
+
 	private PluginSupervisorResult NotSupervisable(string pluginId)
 	{
 		var selfRegistering = _sessionRegistry.Snapshot()
@@ -1259,7 +1501,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 	}
 
-	private static PluginRuntimeSnapshot BuildSnapshot(PluginRuntimeEntry entry, bool managed) => new()
+	private PluginRuntimeSnapshot BuildSnapshot(PluginRuntimeEntry entry, bool managed) => new()
 	{
 		PluginId = entry.PluginId,
 		DisplayName = string.IsNullOrEmpty(entry.DisplayName) ? entry.PluginId : entry.DisplayName,
@@ -1279,6 +1521,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		RestartCount = entry.RestartCount,
 		NextRestartAt = entry.NextRestartAt,
 		LastError = entry.LastError,
+		TakenOverByDevelopmentBuild = managed && _takeovers.IsActive(entry.PluginId),
 		BootstrapOutput = entry.Process?.BootstrapOutput ?? entry.LastBootstrapOutput
 	};
 
@@ -1301,7 +1544,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			a.ConsecutiveHealthFailures == b.ConsecutiveHealthFailures &&
 			a.RestartCount == b.RestartCount &&
 			a.NextRestartAt == b.NextRestartAt &&
-			a.LastError == b.LastError;
+			a.LastError == b.LastError &&
+			a.TakenOverByDevelopmentBuild == b.TakenOverByDevelopmentBuild;
 
 	private async Task<PluginTrustGateDecision> EvaluateTrustGate(string pluginId,
 		string version,

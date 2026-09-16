@@ -151,6 +151,7 @@ internal sealed class FakeInstallSupervisorSnapshotTests
 			new PluginLaunchTokenService(_time, _sessions),
 			listenerState,
 			new FakePluginTrustEvaluator(),
+			new PluginTakeoverRegistry(),
 			services.GetRequiredService<IServiceScopeFactory>(),
 			_time,
 			new PluginSupervisorOptions
