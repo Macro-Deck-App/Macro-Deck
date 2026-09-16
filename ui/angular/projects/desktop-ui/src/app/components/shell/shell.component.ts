@@ -4,6 +4,7 @@ import { RouterOutlet } from '@angular/router';
 import { SharedStoreProgressComponent } from '../store/shared-store-progress.component';
 import {
   NavigationService,
+  PostUpdateChangelogService,
   SIDEBAR_COLLAPSED_WIDTH,
   SettingsModalService,
   UpdateModalService,
@@ -13,6 +14,7 @@ import { StatusbarComponent } from './statusbar/statusbar.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { SettingsModalComponent } from './settings-modal/settings-modal.component';
 import { UpdateModalComponent } from './update-modal/update-modal.component';
+import { WhatsNewModalComponent } from './whats-new-modal/whats-new-modal.component';
 import { ConnectionPanelComponent } from './connection-panel/connection-panel.component';
 import { NotificationPanelComponent } from './notification-panel/notification-panel.component';
 import { FooterBarComponent } from './footer-bar/footer-bar.component';
@@ -26,6 +28,7 @@ import { FooterBarComponent } from './footer-bar/footer-bar.component';
     SidebarComponent,
     SettingsModalComponent,
     UpdateModalComponent,
+    WhatsNewModalComponent,
     ConnectionPanelComponent,
     NotificationPanelComponent,
     FooterBarComponent,
@@ -39,6 +42,7 @@ export class ShellComponent implements AfterViewInit {
   protected readonly navService = inject(NavigationService);
   protected readonly settingsModal = inject(SettingsModalService);
   protected readonly updateModal = inject(UpdateModalService);
+  protected readonly postUpdateChangelog = inject(PostUpdateChangelogService);
 
   protected readonly collapsedSidebarWidthCss = `${SIDEBAR_COLLAPSED_WIDTH}px`;
 
@@ -50,6 +54,7 @@ export class ShellComponent implements AfterViewInit {
 
   constructor() {
     inject(DestroyRef).onDestroy(() => this.resizeObserver?.disconnect());
+    void this.postUpdateChangelog.load();
   }
 
   protected readonly activeNavAction = computed(() => {

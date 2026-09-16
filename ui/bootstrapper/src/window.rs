@@ -143,6 +143,8 @@ pub fn create_main_window(app: &AppHandle) {
             .permission("allow-set-update-channel")
             .permission("allow-get-update-mode")
             .permission("allow-set-update-mode")
+            .permission("allow-get-post-update-changelog")
+            .permission("allow-dismiss-post-update-changelog")
             .permission("allow-get-hide-dock-icon")
             .permission("allow-set-hide-dock-icon")
             .permission("core:event:allow-listen")
@@ -161,7 +163,8 @@ pub fn create_main_window(app: &AppHandle) {
             .remote(origin.clone())
             .window(MAIN_WINDOW)
             .platforms([Target::Windows, Target::MacOS])
-            .permission("allow-install-update");
+            .permission("allow-install-update")
+            .permission("allow-postpone-automatic-install");
         if let Err(error) = app.add_capability(in_app_update) {
             logging::error(&format!(
                 "[window] could not register in-app-update IPC capability for {origin}: {error}"

@@ -1,7 +1,7 @@
 // Bootstrapper-owned preference for whether and how the periodic check acts on
 // a new release (issue #715): off skips the feed entirely, notify-only asks
-// before downloading, and automatic keeps the previous behaviour of
-// downloading first and asking only before installing. The preference has to
+// before downloading, and automatic downloads and installs after a countdown
+// the user can postpone. The preference has to
 // live here rather than on the host: it must be readable before the host is
 // up, and it decides whether the feed is contacted at all.
 //
@@ -117,6 +117,7 @@ pub fn get_update_mode(app: AppHandle) -> UpdateModeStatus {
 pub fn set_update_mode(app: AppHandle, mode: String) -> Result<UpdateModeStatus, String> {
     let parsed = parse_stored(&mode).ok_or_else(|| format!("unknown update mode: {mode}"))?;
     set(&app, parsed)?;
+    updater::update_mode_changed(&app, parsed);
     Ok(UpdateModeStatus::for_mode(parsed))
 }
 

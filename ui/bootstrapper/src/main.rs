@@ -17,6 +17,7 @@ mod logging;
 mod menu;
 mod notifications;
 mod opened_files;
+mod post_update_changelog;
 mod redact;
 mod update_channel;
 mod update_mode;
@@ -177,7 +178,10 @@ fn main() {
             update_channel::get_update_channel,
             update_channel::set_update_channel,
             update_mode::get_update_mode,
-            update_mode::set_update_mode
+            update_mode::set_update_mode,
+            updater::postpone_automatic_install,
+            post_update_changelog::get_post_update_changelog,
+            post_update_changelog::dismiss_post_update_changelog
         ])
         .on_menu_event(menu::handle_event)
         .on_page_load(|webview, payload| {

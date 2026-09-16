@@ -26,6 +26,8 @@
     "allow-set-update-channel",
     "allow-get-update-mode",
     "allow-set-update-mode",
+    "allow-get-post-update-changelog",
+    "allow-dismiss-post-update-changelog",
     "allow-get-hide-dock-icon",
     "allow-set-hide-dock-icon",
     "core:event:allow-listen",

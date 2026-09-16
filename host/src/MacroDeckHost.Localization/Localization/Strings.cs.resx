@@ -972,11 +972,6 @@ Stáhnout a nainstalovat nyní?</value>
   <data name="Bootstrapper.Update.DownloadFailed" xml:space="preserve">
     <value>Nepodařilo se stáhnout aktualizaci: {error}</value>
   </data>
-  <data name="Bootstrapper.Update.Downloaded" xml:space="preserve">
-    <value>Macro Deck {version} byl stažen.
-
-Restartujte Macro Deck, abyste nainstalovali aktualizaci.</value>
-  </data>
   <data name="Bootstrapper.Update.ExternalAvailable" xml:space="preserve">
     <value>Je k dispozici Macro Deck {version}.
 
@@ -1013,9 +1008,6 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Bootstrapper.Update.PartialCheckFailed.Other" xml:space="preserve">
     <value>Nepodařilo se zkontrolovat kanály aktualizací {names}.</value>
     <comment>[plural]</comment>
-  </data>
-  <data name="Bootstrapper.Update.RestartNow" xml:space="preserve">
-    <value>Restartovat nyní</value>
   </data>
   <data name="ClientTargets.CarThing.Configure.Description" xml:space="preserve">
     <value>Macro Deck umístí do adresáře, který zařízení už obsluhuje, stránku odkazující na klienta. Pokud je firmware ukládá jinam, je potřeba hodnoty upravit.</value>
@@ -13687,7 +13679,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Automaticky</value>
   </data>
   <data name="Settings.Update.ModeAutomaticDescription" xml:space="preserve">
-    <value>Macro Deck stahuje aktualizace na pozadí a poté vyzve k restartu, aby je nainstaloval.</value>
+    <value>Macro Deck stahuje a instaluje aktualizace automaticky. Před restartem běží krátké odpočítávání, během kterého lze restart odložit.</value>
   </data>
   <data name="Settings.Update.ModeChangeFailed" xml:space="preserve">
     <value>Nastavení aktualizací se nepodařilo změnit. Zkuste to prosím znovu.</value>
@@ -14756,6 +14748,24 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Update.Details.LaterAction" xml:space="preserve">
     <value>Později</value>
+  </data>
+  <data name="Update.Details.InstallNowAction" xml:space="preserve">
+    <value>Nainstalovat nyní</value>
+  </data>
+  <data name="Update.Details.AutoInstallCountdown.One" xml:space="preserve">
+    <value>Macro Deck se za {count} sekundu restartuje a nainstaluje tuto aktualizaci.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Update.Details.AutoInstallCountdown.Other" xml:space="preserve">
+    <value>Macro Deck se za {count} s restartuje a nainstaluje tuto aktualizaci.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Update.WhatsNew.Heading" xml:space="preserve">
+    <value>Co je nového v Macro Deck {version}</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Update.WhatsNew.CloseAction" xml:space="preserve">
+    <value>Rozumím</value>
   </data>
   <data name="Variables.AllVariablesHeading" xml:space="preserve">
     <value>Všechny proměnné</value>

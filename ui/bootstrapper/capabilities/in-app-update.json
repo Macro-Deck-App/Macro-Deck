@@ -5,5 +5,5 @@
   "windows": ["main"],
   "local": true,
   "platforms": ["windows", "macOS"],
-  "permissions": ["allow-install-update"]
+  "permissions": ["allow-install-update", "allow-postpone-automatic-install"]
 }

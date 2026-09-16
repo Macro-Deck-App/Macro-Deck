@@ -131,6 +131,15 @@
     cancelUpdateDownload: function () {
       return invoke('cancel_update_download');
     },
+    postponeAutomaticInstall: function () {
+      return invoke('postpone_automatic_install');
+    },
+    getPostUpdateChangelog: function () {
+      return invoke('get_post_update_changelog');
+    },
+    dismissPostUpdateChangelog: function () {
+      return invoke('dismiss_post_update_changelog');
+    },
     onUpdateState: function (callback) {
       return listen('update-state', callback);
     },

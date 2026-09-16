@@ -5,6 +5,7 @@ export * from './menu-action.service';
 export * from './navigation.service';
 export * from './restart-notice.service';
 export * from './settings-modal.service';
+export * from './post-update-changelog.service';
 export * from './update-modal.service';
 export * from './update.service';
 export * from './widget-schema.service';
