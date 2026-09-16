@@ -10,9 +10,10 @@ import {
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 
-import { AppStrings, ConfigFlowStepDto, Strings, UiConfigEvents, UiConfigProperties, emitsEvent, nodeText, resolveLocalizedText } from '@macro-deck/runtime';
+import { AppStrings, ConfigFlowStepDto, Strings, UiConfigEvents, UiConfigProperties, nodeBoolean, nodeText, resolveLocalizedText } from '@macro-deck/runtime';
 import { ButtonComponent, LocalizationService, LocalizedTextPipe, ModalComponent, ToggleSwitchComponent, TranslatePipe, dismissModal } from '@shared';
 import type { ActionParameterDef, UiNode, UiNodeEvent } from '@macro-deck/runtime';
 import { isFieldVisible } from '../../domain/parameter-visibility.util';
@@ -63,6 +64,9 @@ const COPY_FALLBACK_Z_INDEX = 1100;
           }
         </div>
       } @else if (root; as node) {
+        @if (flow.message()) {
+          <div class="cfd-banner">{{ flow.message() }}</div>
+        }
         <shared-ui-tree [root]="node" (nodeEvent)="onTreeEvent($event)" />
       } @else if (flow.step(); as step) {
         @if (step.description) {
@@ -158,7 +162,7 @@ const COPY_FALLBACK_Z_INDEX = 1100;
           <shared-button variant="secondary" (click)="onClose()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
           <shared-button
             variant="primary"
-            [disabled]="!flow.canSubmit() || flow.submitting()"
+            [disabled]="!canContinue() || flow.submitting()"
             [loading]="flow.submitting()"
             (click)="onSubmit()">
             {{ submitLabel }}
@@ -185,6 +189,7 @@ export class ConfigFlowDialogComponent implements OnChanges {
   @Output() closed = new EventEmitter<boolean>();
 
   @ViewChild(ModalComponent) private modal?: ModalComponent;
+  private readonly tree = viewChild(UiTreeComponent);
 
   private readonly advancedOpened = signal(false);
 
@@ -248,9 +253,33 @@ export class ConfigFlowDialogComponent implements OnChanges {
     return !!step.description || !!step.values?.length || !!step.instructions?.length;
   }
 
+  protected canContinue(): boolean {
+    if (!this.root) return this.flow.canSubmit();
+    return nodeBoolean(this.root, UiConfigProperties.CanSubmit) ?? this.flow.canSubmitWith(this.shownValues());
+  }
+
   async onSubmit(): Promise<void> {
-    if (this.root && !emitsEvent(this.root, UiConfigEvents.Submit)) return;
+    if (this.root) {
+      const current = this.flow.values();
+      for (const [name, value] of Object.entries(this.shownValues())) {
+        if (value !== current[name]) this.flow.setValue(name, value);
+      }
+    }
     await this.flow.submit();
+  }
+
+  // Read from the renderer, not from the flow: a keystroke reaches the tree's overlay before any
+  // change event or plugin patch reaches the flow's values.
+  private shownValues(): Record<string, unknown> {
+    const step = this.flow.step();
+    const tree = this.tree();
+    const values = { ...this.flow.values() };
+    if (!step || !tree) return values;
+    for (const field of [...step.fields, ...(step.advancedFields ?? [])]) {
+      const value = tree.renderedValue(field.name);
+      if (value !== undefined) values[field.name] = value;
+    }
+    return values;
   }
 
   protected onTreeEvent(event: UiNodeEvent): void {

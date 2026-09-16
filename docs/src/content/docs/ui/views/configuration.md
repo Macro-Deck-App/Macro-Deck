@@ -106,6 +106,19 @@ keeps secret encryption, OAuth and entry replacement unchanged
   are secret.
 - **Name top-level inputs after their fields.** A top-level input's node id is the field key it submits.
 
+For a config flow, Macro Deck draws the dialog's Continue and Cancel buttons itself, so the tree needs no
+submit control of its own:
+
+- **Continue submits what the tree shows.** When the user presses it, the current value of each input whose
+  id is a declared field name is sent to `SubmitAsync`, including a value the user typed and one you patched
+  in. Inputs whose id is not a declared field name are not picked up this way.
+- **`UiFlow.CanSubmit` gates Continue when you set it.** Leave it unset and Continue is enabled once every
+  visible required declared field has a value in the tree. Either way, a `ConfigFlowResult.Error` from
+  `SubmitAsync` is shown in the dialog.
+- **The tree is not seeded from the stored entry.** On a reconfigure your flow is not handed the existing
+  values, so the tree shows - and Continue submits - whatever you built it with. Seed it from your own live
+  configuration if a reconfigure should start from the current values.
+
 ## From a config flow
 
 ```csharp
