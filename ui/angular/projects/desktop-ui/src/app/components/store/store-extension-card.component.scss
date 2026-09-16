@@ -92,6 +92,19 @@
   @include ds.truncate;
 }
 
+.card-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.card-rating-value {
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-secondary);
+}
+
 .verified-chip {
   @include ds.chip;
   flex-shrink: 0;

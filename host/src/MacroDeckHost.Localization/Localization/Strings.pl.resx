@@ -17072,4 +17072,197 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Companion.Errors.ScreenshotFailed" xml:space="preserve">
     <value>Urządzenie Companion nie mogło wykonać zrzutu ekranu.</value>
   </data>
+  <data name="Store.Reviews.Heading" xml:space="preserve">
+    <value>Oceny i recenzje</value>
+  </data>
+  <data name="Store.Reviews.StarsLabel" xml:space="preserve">
+    <value>Ocena {rating} na 5</value>
+    <comment>[rating:string] Accessible label of a read-only star rating; rating is already formatted for the locale.</comment>
+  </data>
+  <data name="Store.Reviews.RatingCount.One" xml:space="preserve">
+    <value>{count} ocena</value>
+    <comment>[plural][count:int] Number of ratings a Store item has.</comment>
+  </data>
+  <data name="Store.Reviews.RatingCount.Other" xml:space="preserve">
+    <value>Liczba ocen: {count}</value>
+    <comment>[plural][count:int] Number of ratings a Store item has.</comment>
+  </data>
+  <data name="Store.Reviews.StarCount.One" xml:space="preserve">
+    <value>{count} gwiazdka</value>
+    <comment>[plural][count:int] A star rating value, used for the rating picker, the filter and the distribution bars.</comment>
+  </data>
+  <data name="Store.Reviews.StarCount.Other" xml:space="preserve">
+    <value>Gwiazdki: {count}</value>
+    <comment>[plural][count:int] A star rating value, used for the rating picker, the filter and the distribution bars.</comment>
+  </data>
+  <data name="Store.Reviews.DistributionLabel" xml:space="preserve">
+    <value>Rozkład ocen</value>
+  </data>
+  <data name="Store.Reviews.SortLabel" xml:space="preserve">
+    <value>Sortowanie</value>
+  </data>
+  <data name="Store.Reviews.SortNewest" xml:space="preserve">
+    <value>Najnowsze</value>
+  </data>
+  <data name="Store.Reviews.SortOldest" xml:space="preserve">
+    <value>Najstarsze</value>
+  </data>
+  <data name="Store.Reviews.FilterLabel" xml:space="preserve">
+    <value>Ocena</value>
+  </data>
+  <data name="Store.Reviews.FilterAll" xml:space="preserve">
+    <value>Wszystkie oceny</value>
+  </data>
+  <data name="Store.Reviews.Empty" xml:space="preserve">
+    <value>Brak recenzji.</value>
+  </data>
+  <data name="Store.Reviews.EmptyFiltered" xml:space="preserve">
+    <value>Brak recenzji pasujących do tego filtru.</value>
+  </data>
+  <data name="Store.Reviews.LoadMoreAction" xml:space="preserve">
+    <value>Wczytaj więcej recenzji</value>
+  </data>
+  <data name="Store.Reviews.LoadFailed" xml:space="preserve">
+    <value>Nie udało się wczytać recenzji.</value>
+  </data>
+  <data name="Store.Reviews.Edited" xml:space="preserve">
+    <value>Edytowano</value>
+  </data>
+  <data name="Store.Reviews.ComposeHeading" xml:space="preserve">
+    <value>Własna recenzja</value>
+  </data>
+  <data name="Store.Reviews.SignInPrompt" xml:space="preserve">
+    <value>Aby ocenić i zrecenzować ten element, należy zalogować się przez Macro Deck Connect.</value>
+  </data>
+  <data name="Store.Reviews.Suspended" xml:space="preserve">
+    <value>Konto Macro Deck Connect jest zawieszone, więc ocenianie i recenzowanie jest niedostępne.</value>
+  </data>
+  <data name="Store.Reviews.NotEntitled" xml:space="preserve">
+    <value>Przed oceną należy zainstalować ten element. Można oceniać tylko pobrane elementy.</value>
+  </data>
+  <data name="Store.Reviews.Unavailable" xml:space="preserve">
+    <value>Ocenianie jest teraz niedostępne.</value>
+  </data>
+  <data name="Store.Reviews.ModeratedNotice" xml:space="preserve">
+    <value>Recenzja została wstrzymana przez moderatora. Podczas moderacji nie można jej edytować ani usunąć.</value>
+  </data>
+  <data name="Store.Reviews.ModerationReasonHeading" xml:space="preserve">
+    <value>Powód moderatora</value>
+  </data>
+  <data name="Store.Reviews.RatingFieldLabel" xml:space="preserve">
+    <value>Własna ocena</value>
+  </data>
+  <data name="Store.Reviews.TitleFieldLabel" xml:space="preserve">
+    <value>Tytuł (opcjonalnie)</value>
+  </data>
+  <data name="Store.Reviews.BodyFieldLabel" xml:space="preserve">
+    <value>Recenzja (opcjonalnie)</value>
+  </data>
+  <data name="Store.Reviews.BodyCounter" xml:space="preserve">
+    <value>{length} / {max}</value>
+    <comment>[length:int][max:int] Characters used in the review text out of the maximum.</comment>
+  </data>
+  <data name="Store.Reviews.UpdateAction" xml:space="preserve">
+    <value>Zaktualizuj recenzję</value>
+  </data>
+  <data name="Store.Reviews.DeleteAction" xml:space="preserve">
+    <value>Usuń recenzję</value>
+  </data>
+  <data name="Store.Reviews.DeleteHeading" xml:space="preserve">
+    <value>Usunąć recenzję?</value>
+  </data>
+  <data name="Store.Reviews.DeleteMessage" xml:space="preserve">
+    <value>Ocena i recenzja zostaną usunięte z tego elementu.</value>
+  </data>
+  <data name="Store.Reviews.Saved" xml:space="preserve">
+    <value>Recenzja została zapisana.</value>
+  </data>
+  <data name="Store.Reviews.Deleted" xml:space="preserve">
+    <value>Recenzja została usunięta.</value>
+  </data>
+  <data name="Store.Reviews.WritePrompt" xml:space="preserve">
+    <value>Recenzja pomoże innym w wyborze.</value>
+  </data>
+  <data name="Store.Reviews.WriteAction" xml:space="preserve">
+    <value>Napisz recenzję</value>
+  </data>
+  <data name="Store.Reviews.EditAction" xml:space="preserve">
+    <value>Edytuj recenzję</value>
+  </data>
+  <data name="Store.Reviews.WriteHeading" xml:space="preserve">
+    <value>Napisz recenzję</value>
+  </data>
+  <data name="Store.Reviews.EditHeading" xml:space="preserve">
+    <value>Edytuj własną recenzję</value>
+  </data>
+  <data name="Store.Reviews.IssueHint" xml:space="preserve">
+    <value>Coś nie działa? Twórca często szybciej to naprawi, jeśli najpierw zostanie zgłoszony problem na GitHubie.</value>
+  </data>
+  <data name="Store.Reviews.IssueAction" xml:space="preserve">
+    <value>Zgłoś problem na GitHubie</value>
+  </data>
+  <data name="Store.Reviews.Validation.RatingRequired" xml:space="preserve">
+    <value>Wybierz ocenę od 1 do 5 gwiazdek.</value>
+  </data>
+  <data name="Store.Reviews.Validation.TitleTooLong" xml:space="preserve">
+    <value>Tytuł może mieć najwyżej 120 znaków.</value>
+  </data>
+  <data name="Store.Reviews.Validation.TitleSingleLine" xml:space="preserve">
+    <value>Tytuł musi mieścić się w jednym wierszu.</value>
+  </data>
+  <data name="Store.Reviews.Validation.BodyLength" xml:space="preserve">
+    <value>Recenzja musi mieć od 3 do 2000 znaków.</value>
+  </data>
+  <data name="Store.Reviews.Error.SignInRequired" xml:space="preserve">
+    <value>Aby kontynuować, należy ponownie zalogować się przez Macro Deck Connect.</value>
+  </data>
+  <data name="Store.Reviews.Error.DownloadRequired" xml:space="preserve">
+    <value>Przed oceną należy zainstalować ten element.</value>
+  </data>
+  <data name="Store.Reviews.Error.AccountSuspended" xml:space="preserve">
+    <value>Konto Macro Deck Connect jest zawieszone.</value>
+  </data>
+  <data name="Store.Reviews.Error.Forbidden" xml:space="preserve">
+    <value>Brak uprawnień do zmiany tej recenzji.</value>
+  </data>
+  <data name="Store.Reviews.Error.Moderated" xml:space="preserve">
+    <value>Nie można zapisać tej recenzji, ponieważ została zmieniona lub wstrzymana przez moderatora. Wczytaj ją ponownie.</value>
+  </data>
+  <data name="Store.Reviews.Error.Gone" xml:space="preserve">
+    <value>Ten element nie jest już dostępny w Store, więc nie można go ocenić.</value>
+  </data>
+  <data name="Store.Reviews.Error.Cooldown" xml:space="preserve">
+    <value>Recenzja była niedawno zmieniana. Spróbuj ponownie później.</value>
+  </data>
+  <data name="Store.Reviews.Error.CooldownSeconds.One" xml:space="preserve">
+    <value>Recenzja była niedawno zmieniana. Spróbuj ponownie za {count} sekundę.</value>
+    <comment>[plural][count:int] The review was changed too recently; count is the wait in seconds.</comment>
+  </data>
+  <data name="Store.Reviews.Error.CooldownSeconds.Other" xml:space="preserve">
+    <value>Recenzja była niedawno zmieniana. Pozostały czas oczekiwania w sekundach: {count}.</value>
+    <comment>[plural][count:int] The review was changed too recently; count is the wait in seconds.</comment>
+  </data>
+  <data name="Store.Reviews.Error.RetryLater" xml:space="preserve">
+    <value>Oceny są teraz przeciążone. Spróbuj ponownie później.</value>
+  </data>
+  <data name="Store.Reviews.Error.RetryLaterSeconds.One" xml:space="preserve">
+    <value>Oceny są teraz przeciążone. Spróbuj ponownie za {count} sekundę.</value>
+    <comment>[plural][count:int] Ratings are temporarily busy; count is the wait in seconds.</comment>
+  </data>
+  <data name="Store.Reviews.Error.RetryLaterSeconds.Other" xml:space="preserve">
+    <value>Oceny są teraz przeciążone. Pozostały czas oczekiwania w sekundach: {count}.</value>
+    <comment>[plural][count:int] Ratings are temporarily busy; count is the wait in seconds.</comment>
+  </data>
+  <data name="Store.Reviews.Error.Validation" xml:space="preserve">
+    <value>Sprawdź recenzję i spróbuj ponownie.</value>
+  </data>
+  <data name="Store.Reviews.Error.InvalidTitle" xml:space="preserve">
+    <value>Tytuł musi mieścić się w jednym wierszu i mieć najwyżej 120 znaków.</value>
+  </data>
+  <data name="Store.Reviews.Error.NotFound" xml:space="preserve">
+    <value>Brak recenzji do zmiany.</value>
+  </data>
+  <data name="Store.Reviews.Error.PlatformUnavailable" xml:space="preserve">
+    <value>Nie udało się połączyć z ocenami. Spróbuj ponownie później.</value>
+  </data>
 </root>

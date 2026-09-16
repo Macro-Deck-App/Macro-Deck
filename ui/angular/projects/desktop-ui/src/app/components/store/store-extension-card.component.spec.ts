@@ -1,10 +1,11 @@
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { AppStrings, PluginRuntimeInfo, StoreCatalogItemBody } from '@macro-deck/runtime';
+import { AppStrings, PluginRuntimeInfo, StoreCatalogItemBody, StoreRatingSummaryBody } from '@macro-deck/runtime';
 import { LocalizationService } from '@shared';
 import { DeveloperModeService } from '../../services/developer-mode.service';
 import { PluginRuntimeService } from '../../services/plugin-runtime.service';
+import { StoreRatingsService } from '../../services/store-ratings.service';
 import { StoreExtensionCardComponent } from './store-extension-card.component';
 import { provideLocalizationTesting } from '../../../testing/localization-test-support';
 
@@ -86,5 +87,65 @@ describe('StoreExtensionCardComponent trust chip', () => {
     setup({ kind: 'IconPack', trust: 'RegistryAuthenticated' }, [runtime('com.acme.deck-tools', true)]);
 
     expect(metaText()).not.toContain(translate('macrodeck.app:Developer.ManagedPlugins.TakenOverBadge'));
+  });
+});
+
+describe('StoreExtensionCardComponent rating', () => {
+  let fixture: ComponentFixture<StoreExtensionCardComponent>;
+
+  beforeEach(() => {
+    for (const key of Object.keys(localStorage).filter(key => key.startsWith('md.localization.'))) {
+      localStorage.removeItem(key);
+    }
+  });
+
+  function setup(ratings: Map<string, StoreRatingSummaryBody>): void {
+    TestBed.configureTestingModule({
+      imports: [StoreExtensionCardComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        ...provideLocalizationTesting(),
+        { provide: PluginRuntimeService, useValue: { plugins: signal([]) } },
+        { provide: StoreRatingsService, useValue: { ratings: signal<ReadonlyMap<string, StoreRatingSummaryBody>>(ratings) } },
+      ],
+    });
+
+    fixture = TestBed.createComponent(StoreExtensionCardComponent);
+    fixture.componentRef.setInput('item', {
+      kind: 'Plugin',
+      id: 'com.acme.deck-tools',
+      name: 'Deck Tools',
+      latestVersion: '1.0.0',
+      installState: 'NotInstalled',
+      trust: 'RegistryAuthenticated',
+      hasIcon: false,
+    } satisfies StoreCatalogItemBody);
+    fixture.detectChanges();
+  }
+
+  function meta(): HTMLElement {
+    return (fixture.nativeElement as HTMLElement).querySelector('.card-meta')!;
+  }
+
+  it('shows the stars, the rating and the rating count when the item has ratings', () => {
+    setup(new Map([['com.acme.deck-tools', { rating: 4.5, ratingCount: 12 }]]));
+    const localization = TestBed.inject(LocalizationService);
+
+    expect(meta().querySelector('shared-store-rating-stars')).not.toBeNull();
+    expect(meta().textContent).toContain(localization.translateKey(AppStrings.Store.Reviews.RatingCount, { count: 12 }));
+    const formatted = new Intl.NumberFormat(localization.culture(), { minimumFractionDigits: 1 }).format(4.5);
+    expect(meta().textContent).toContain(formatted);
+    expect(meta().querySelector('[role="img"]')?.getAttribute('aria-label'))
+      .toBe(localization.translateKey(AppStrings.Store.Reviews.StarsLabel, { rating: formatted }));
+  });
+
+  it('shows no rating when the item has no ratings or none are known', () => {
+    setup(new Map([['com.acme.deck-tools', { rating: null, ratingCount: 0 }]]));
+    expect(meta().querySelector('shared-store-rating-stars')).toBeNull();
+
+    TestBed.resetTestingModule();
+    setup(new Map());
+    expect(meta().querySelector('shared-store-rating-stars')).toBeNull();
   });
 });

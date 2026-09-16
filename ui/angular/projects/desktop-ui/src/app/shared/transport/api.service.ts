@@ -255,6 +255,13 @@ import {
   StoreCatalogSection,
   StoreExtensionKind,
   StoreOperationActionResponse,
+  GetStoreRatingsResponse,
+  GetStoreRatingResponse,
+  GetStoreReviewsResponse,
+  GetStoreOwnReviewResponse,
+  PutStoreOwnReviewRequest,
+  StoreOwnReviewWriteResponse,
+  StoreReviewSortOrder,
   SubmitConfigFlowStepRequest,
   SubmitConfigFlowStepResponse,
   TerminatePluginSessionResponse,
@@ -948,6 +955,56 @@ export class ApiService {
 
   uninstallStoreExtension(kind: StoreExtensionKind, id: string): Promise<UninstallStoreExtensionResponse> {
     return this.http('POST', '/api/store/uninstall', { kind, id });
+  }
+
+  getStoreRatings(packageIds: readonly string[]): Promise<GetStoreRatingsResponse> {
+    const ids = packageIds.map(id => encodeURIComponent(id)).join(',');
+    return this.http('GET', `/api/store/ratings?ids=${ids}`);
+  }
+
+  getStoreRating(kind: StoreExtensionKind, packageId: string): Promise<GetStoreRatingResponse> {
+    return this.http('GET', `${this.storeReviewsPath(kind, packageId)}/rating`);
+  }
+
+  getStoreReviews(kind: StoreExtensionKind, packageId: string, options: {
+    page: number;
+    pageSize: number;
+    sort: StoreReviewSortOrder;
+    rating?: number | null;
+  }): Promise<GetStoreReviewsResponse> {
+    const query = new URLSearchParams({
+      page: String(options.page),
+      pageSize: String(options.pageSize),
+      sort: options.sort,
+    });
+    if (options.rating) {
+      query.set('rating', String(options.rating));
+    }
+    return this.http('GET', `${this.storeReviewsPath(kind, packageId)}/reviews?${query}`);
+  }
+
+  getOwnStoreReview(kind: StoreExtensionKind, packageId: string): Promise<GetStoreOwnReviewResponse> {
+    return this.http('GET', `${this.storeReviewsPath(kind, packageId)}/reviews/me`);
+  }
+
+  putOwnStoreReview(
+    kind: StoreExtensionKind,
+    packageId: string,
+    request: PutStoreOwnReviewRequest,
+  ): Promise<StoreOwnReviewWriteResponse> {
+    return this.http('PUT', `${this.storeReviewsPath(kind, packageId)}/reviews/me`, request);
+  }
+
+  deleteOwnStoreReview(kind: StoreExtensionKind, packageId: string): Promise<StoreOwnReviewWriteResponse> {
+    return this.http('DELETE', `${this.storeReviewsPath(kind, packageId)}/reviews/me`);
+  }
+
+  getStoreReviewAvatarUrl(hostRelativePath: string): string {
+    return `${this.baseUrl}${hostRelativePath}`;
+  }
+
+  private storeReviewsPath(kind: StoreExtensionKind, packageId: string): string {
+    return `/api/store/catalog/${encodeURIComponent(kind)}/${encodeURIComponent(packageId)}`;
   }
 
   getStoreExtensionIconUrl(kind: StoreExtensionKind, packageId: string, sha256?: string | null): string {

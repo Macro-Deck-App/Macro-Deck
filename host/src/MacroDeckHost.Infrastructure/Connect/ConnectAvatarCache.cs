@@ -14,8 +14,6 @@ public sealed partial class ConnectAvatarCache : IConnectAvatarCache, IDisposabl
 
 	internal const int MaxAvatarBytes = 1024 * 1024;
 
-	private static readonly Uri _issuer = new(ConnectEndpoints.Issuer);
-
 	// SVG is refused on purpose: the host serves the file from its own origin.
 	private static readonly Dictionary<string, string> _extensions = new(StringComparer.OrdinalIgnoreCase)
 	{
@@ -328,14 +326,7 @@ public sealed partial class ConnectAvatarCache : IConnectAvatarCache, IDisposabl
 	private string? TrustedPictureUrl()
 		=> _sessionService.Current.Account?.PictureUrl is { } url && IsTrusted(url) ? url : null;
 
-	// The host fetches with its own network position, so only the issuer's public asset route is allowed.
-	private static bool IsTrusted(string? pictureUrl)
-		=> Uri.TryCreate(pictureUrl, UriKind.Absolute, out var uri) &&
-			uri.Scheme == Uri.UriSchemeHttps &&
-			string.Equals(uri.Host, _issuer.Host, StringComparison.OrdinalIgnoreCase) &&
-			uri.IsDefaultPort &&
-			uri.UserInfo.Length == 0 &&
-			uri.AbsolutePath.StartsWith("/assets/", StringComparison.Ordinal);
+	private static bool IsTrusted(string? pictureUrl) => ConnectAssetUrls.IsTrusted(pictureUrl);
 
 	private static string Hash(byte[] value)
 		=> Convert.ToHexStringLower(SHA256.HashData(value))[..16];

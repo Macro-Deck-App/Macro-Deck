@@ -109,6 +109,13 @@ Macro Deck also refreshes on its own about once an hour. While a refresh runs, t
 second one. If the store registry is being updated while a refresh runs, the log says so and Macro Deck
 tries again a few times over about five minutes before it reports a failure.
 
+Store items show their star rating, and an item's page lists its **Ratings and reviews**. Anyone can
+read them. To rate or review an item yourself, sign in with Macro Deck Connect under
+**Settings > Account** and install the item first: only items you have installed can be rated. When
+you sign in, and whenever you install something while signed in, Macro Deck records your installed
+Store items for your account so you can rate them. If ratings cannot be reached, the Store keeps
+working without them.
+
 ## Devices
 
 Every phone, tablet or browser that connects shows up in **Settings > Devices**. Choose there which

@@ -2,10 +2,23 @@ namespace MacroDeckHost.Application.Store;
 
 public sealed record StoreRegistryOptions
 {
+	public static readonly Uri OfficialBaseUrl =
+		new("https://raw.githubusercontent.com/Macro-Deck-App/Macro-Deck-Store-Registry/main/");
+
+	public static readonly string OfficialOrigin = OfficialBaseUrl.GetLeftPart(UriPartial.Path);
+
 	public static readonly StoreRegistryOptions Default = new();
 
-	public Uri BaseUrl { get; init; } =
-		new("https://raw.githubusercontent.com/Macro-Deck-App/Macro-Deck-Store-Registry/main/");
+	public Uri BaseUrl { get; init; } = OfficialBaseUrl;
+
+	public string Origin => BaseUrl.GetLeftPart(UriPartial.Path);
+
+	public bool IsOfficialRegistry => IsOfficial(Origin);
+
+	public static bool IsOfficial(string? origin) =>
+		origin is not null &&
+		Uri.TryCreate(origin, UriKind.Absolute, out var uri) &&
+		string.Equals(uri.GetLeftPart(UriPartial.Path), OfficialOrigin, StringComparison.OrdinalIgnoreCase);
 
 	public TimeSpan RefreshInterval { get; init; } = TimeSpan.FromHours(1);
 

@@ -70,6 +70,14 @@ Account services are never on the critical path. The host starts, renders the si
 cached profile data, and refreshes in the background; an unreachable Identity marks the session
 offline and changes nothing else. See [ADR 0054](decisions/0054-connect-session-is-a-host-owned-refresh-credential.md).
 
+Store ratings, reviews and review entitlements come from the Macro Deck Platform API, and only for
+packages from the official registry. The host is the only Platform client: it attaches the Connect
+token, and it claims the entitlements for installed official packages whenever the account signs in
+and after each install. The desktop UI reads ratings through the host's REST API, separately from
+the catalog, so an unreachable Platform hides ratings without affecting browsing or installing. A
+development build can point the host at another Platform with `MACRO_DECK_PLATFORM_URL` (https, or
+http on loopback only); production builds ignore it.
+
 ## Background work
 
 Long-running work belongs in hosted services or integration-owned lifecycle components. It must support cancellation, avoid unbounded polling, isolate provider failures, and release resources during shutdown.

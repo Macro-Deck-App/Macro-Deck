@@ -34,6 +34,13 @@
             {{ label }}
           </span>
         }
+        @if (rating(); as rating) {
+          <span class="card-rating">
+            <shared-store-rating-stars [rating]="rating.value" />
+            <span class="card-rating-value" aria-hidden="true">{{ rating.text }}</span>
+            <span class="card-meta-text">{{ rating.count }}</span>
+          </span>
+        }
       </div>
     </div>
   </div>

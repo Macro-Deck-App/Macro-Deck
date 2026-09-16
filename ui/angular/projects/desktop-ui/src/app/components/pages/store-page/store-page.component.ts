@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -11,6 +11,7 @@ import { StoreSectionComponent } from '../../store/store-section.component';
 import { ConnectAccountService } from '../../../services/connect-account.service';
 import { StoreCatalogService } from '../../../services/store-catalog.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
+import { StoreRatingsService } from '../../../services/store-ratings.service';
 import { storeUninstallErrorKey, storeUninstallMessageKey } from '../../../util/store-operation-display';
 import { StoreRegistryRefreshModalComponent } from './store-registry-refresh-modal.component';
 
@@ -54,6 +55,7 @@ export class StorePageComponent implements OnInit {
   private readonly account = inject(ConnectAccountService);
   protected readonly catalog = inject(StoreCatalogService);
   protected readonly operations = inject(StoreOperationService);
+  private readonly ratings = inject(StoreRatingsService);
 
   protected readonly search = signal('');
   protected readonly kind = signal<KindFilter>('all');
@@ -141,6 +143,12 @@ export class StorePageComponent implements OnInit {
       : this.localization.translateKey(AppStrings.Store.Page.AllSectionHeading));
 
   constructor() {
+    effect(() => {
+      const ids = [...this.featuredItems(), ...this.freshItems(), ...this.catalog.items()].map(item => item.id);
+      this.ratings.ratings();
+      untracked(() => void this.ratings.ensure(ids));
+    });
+
     // catalog.items() reloads on this event through StoreCatalogService, but the discovery rows are
     // this page's own snapshot, filled only by loadDiscovery() - so without this they go stale after
     // any install/uninstall and disagree with the grid on install state. Skipped while a search is

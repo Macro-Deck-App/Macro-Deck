@@ -52,6 +52,8 @@
               </div>
             }
 
+            <app-store-reviews-section class="overview-block" [kind]="extension.kind" [id]="extension.id" [repository]="extension.repository ?? null" />
+
             @if (historyModalOpen()) {
               <app-store-version-history-modal
                 [history]="extension.history"

@@ -1,0 +1,339 @@
+@use '../../../styles/index' as ds;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.reviews-heading {
+  @include ds.section-label;
+  margin: 0;
+}
+
+.reviews-subheading {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.reviews-summary {
+  @include ds.card($padding: var(--space-4));
+  display: flex;
+  gap: var(--space-5);
+  align-items: center;
+
+  @include ds.breakpoint-down('md') {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.reviews-aggregate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 7rem;
+}
+
+.reviews-aggregate-value {
+  font-size: calc(var(--text-xl) * 1.5);
+  font-weight: var(--font-semibold);
+  line-height: 1;
+  color: var(--color-text-primary);
+}
+
+.reviews-aggregate-count,
+.reviews-distribution-count,
+.reviews-counter,
+.review-meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.reviews-distribution {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.reviews-distribution-row {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr) 2.5rem;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.reviews-distribution-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.reviews-distribution-bar {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background-color: var(--color-bg-tertiary);
+  overflow: hidden;
+}
+
+.reviews-distribution-fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  background-color: var(--color-warning);
+}
+
+.reviews-compose {
+  @include ds.card($padding: var(--space-4));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.reviews-compose-text,
+.reviews-moderation-reason {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.reviews-moderated {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background-color: var(--color-warning-muted);
+}
+
+.reviews-moderation-reason-heading {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.reviews-moderation-reason,
+.review-body {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.reviews-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.reviews-field,
+.reviews-control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.reviews-label {
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--color-text-secondary);
+}
+
+.reviews-star-picker {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+
+.reviews-star-option {
+  @include ds.flex-center;
+  padding: var(--space-1);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-border-light);
+  cursor: pointer;
+
+  &.is-lit {
+    color: var(--color-warning);
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+}
+
+.reviews-counter {
+  align-self: flex-end;
+}
+
+.reviews-star-glyph {
+  display: block;
+  width: 26px;
+  height: 26px;
+  fill: currentColor;
+}
+
+.reviews-distribution-star {
+  display: block;
+  width: 11px;
+  height: 11px;
+  fill: currentColor;
+}
+
+.reviews-issue-hint {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background-color: var(--color-accent-muted);
+}
+
+.reviews-issue-link {
+  font-size: var(--text-sm);
+  color: var(--color-accent);
+}
+
+.reviews-editor-spacer {
+  flex: 1;
+}
+
+.reviews-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.reviews-field-error,
+.reviews-write-error {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+}
+
+.reviews-write-status {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-success);
+}
+
+.reviews-compose-actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.reviews-list-header {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+
+  .reviews-control {
+    min-width: 10rem;
+  }
+}
+
+.reviews-empty {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.reviews-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-block-end: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.review-own-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.review-own-content {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.review--own {
+  padding-block-end: 0;
+  border-bottom: none;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.review-identity {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.review-author {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  @include ds.truncate;
+}
+
+.review-meta {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.review-title {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.review-body {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.reviews-load-more {
+  display: flex;
+  justify-content: center;
+}

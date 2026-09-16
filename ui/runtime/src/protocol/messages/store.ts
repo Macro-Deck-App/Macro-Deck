@@ -211,3 +211,98 @@ export interface StoreOperationChangedEvent {
 export interface StoreUpdatesChangedEvent {
   updates: StoreAvailableUpdateBody[];
 }
+
+export interface StoreRatingSummaryBody {
+  rating?: number | null;
+  ratingCount: number;
+}
+
+export interface GetStoreRatingsResponse {
+  available: boolean;
+  ratings: Record<string, StoreRatingSummaryBody>;
+}
+
+export interface StoreRatingBucketBody {
+  stars: number;
+  count: number;
+}
+
+export interface GetStoreRatingResponse {
+  available: boolean;
+  rating?: number | null;
+  ratingCount: number;
+  distribution: StoreRatingBucketBody[];
+}
+
+// title and body are third-party text: render with interpolation only, never markdown or innerHTML.
+export interface StoreReviewBody {
+  id: string;
+  rating: number;
+  title?: string | null;
+  body?: string | null;
+  authorDisplayName: string;
+  authorAvatarUrl?: string | null;
+  createdAt: string;
+  isEdited: boolean;
+  downloadedBeforeReview: boolean;
+}
+
+export type StoreReviewSortOrder = 'Newest' | 'Oldest';
+
+export interface GetStoreReviewsResponse {
+  available: boolean;
+  items: StoreReviewBody[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  reviewCount: number;
+}
+
+export type StoreReviewComposeState = 'SignedOut' | 'NotEntitled' | 'Entitled' | 'Unavailable';
+
+export interface StoreOwnReviewBody {
+  rating: number;
+  title?: string | null;
+  body?: string | null;
+  visibility: string;
+  moderationReason?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  isEdited: boolean;
+}
+
+export interface GetStoreOwnReviewResponse {
+  state: StoreReviewComposeState;
+  review?: StoreOwnReviewBody | null;
+}
+
+export interface PutStoreOwnReviewRequest {
+  rating: number;
+  title?: string | null;
+  body?: string | null;
+}
+
+export type StoreReviewWriteErrorCode =
+  | 'sign_in_required'
+  | 'download_required'
+  | 'account_suspended'
+  | 'forbidden'
+  | 'moderated'
+  | 'gone'
+  | 'cooldown'
+  | 'retry_later'
+  | 'validation'
+  | 'not_found'
+  | 'platform_unavailable';
+
+export interface StoreReviewWriteError {
+  code: StoreReviewWriteErrorCode;
+  field?: 'Rating' | 'Title' | 'Body' | null;
+  retryAfterSeconds?: number | null;
+}
+
+export interface StoreOwnReviewWriteResponse {
+  success: boolean;
+  review?: StoreOwnReviewBody | null;
+  error?: StoreReviewWriteError | null;
+}

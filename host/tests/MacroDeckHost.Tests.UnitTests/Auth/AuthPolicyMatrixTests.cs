@@ -462,6 +462,23 @@ public class AuthPolicyMatrixTests
 	}
 
 	[Test]
+	public async Task Store_ratings_and_the_signed_in_accounts_review_are_admin_only()
+	{
+		const string review = "/api/store/catalog/Plugin/com.acme.hue/reviews/me";
+		var responses = new[]
+		{
+			await Send(HttpMethod.Get, "/api/store/ratings?ids=com.acme.hue", _clientToken),
+			await Send(HttpMethod.Get, "/api/store/catalog/Plugin/com.acme.hue/reviews", _clientToken),
+			await Send(HttpMethod.Get, review, _clientToken),
+			await SendJson(HttpMethod.Put, review, new { rating = 5 }, _clientToken),
+			await Send(HttpMethod.Delete, review, _clientToken),
+			await Send(HttpMethod.Get, "/api/store/review-avatars?src=x", _clientToken)
+		};
+
+		Assert.That(responses.Select(response => response.StatusCode), Is.All.EqualTo(HttpStatusCode.Forbidden));
+	}
+
+	[Test]
 	public async Task The_onboarding_state_is_admin_only()
 	{
 		var get = await Send(HttpMethod.Get, "/api/settings/onboarding", _clientToken);

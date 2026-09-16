@@ -67,6 +67,7 @@ using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Application.Store;
 using MacroDeckHost.Application.Store.Installation;
 using MacroDeckHost.Application.Store.Operations;
+using MacroDeckHost.Application.Store.Reviews;
 using MacroDeckHost.Application.Store.Updates;
 using MacroDeckHost.Infrastructure.Store;
 using MacroDeckHost.Infrastructure.Adb;
@@ -646,6 +647,19 @@ public class Startup
 		services.AddSingleton<IConnectAvatarCache, ConnectAvatarCache>();
 		services.AddHostedService<ConnectSessionBackgroundService>();
 		services.AddHostedService<Connect.ConnectSessionNotifier>();
+
+		services.AddSingleton(StorePlatformOptions.Resolve(BuildConfig.Channel,
+			Environment.GetEnvironmentVariable(StorePlatformOptions.BaseUrlEnvironmentVariable)));
+		services.AddHttpClient(StorePlatformClient.HttpClientName)
+			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
+		services.AddHttpClient(StoreReviewAvatarProxy.HttpClientName)
+			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15))
+			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
+		services.AddSingleton<IStorePlatformClient, StorePlatformClient>();
+		services.AddSingleton<IStoreReviewAvatarProxy, StoreReviewAvatarProxy>();
+		services.AddSingleton<IStoreOfficialPackages, StoreOfficialPackages>();
+		services.AddSingleton<IStoreReviewService, StoreReviewService>();
+		services.AddHostedService<StoreEntitlementSyncBackgroundService>();
 
 		services.AddScoped<ISecretRepository, SecretRepository>();
 		services.AddScoped<ISecretService, SecretService>();

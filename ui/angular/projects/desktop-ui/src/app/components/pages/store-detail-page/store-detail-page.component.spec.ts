@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { AppStrings, StoreExtensionDetailBody, StoreOperationBody, StoreVersionHistoryBody } from '@macro-deck/runtime';
 import { ApiService, LocalizationService, ToastService } from '@shared';
+import { ConnectAccountService } from '../../../services/connect-account.service';
 import { PluginRuntimeService } from '../../../services/plugin-runtime.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
 import { StoreDetailPageComponent } from './store-detail-page.component';
@@ -79,7 +80,11 @@ describe('StoreDetailPageComponent', () => {
     notifications = new Map();
     api = jasmine.createSpyObj<ApiService>('ApiService', [
       'getStoreExtension', 'getStoreExtensionIconUrl', 'getStoreScreenshotUrl', 'getStoreStatus', 'onNotification',
+      'getStoreRating', 'getStoreReviews', 'getOwnStoreReview',
     ]);
+    api.getStoreRating.and.resolveTo({ available: false, rating: null, ratingCount: 0, distribution: [] });
+    api.getStoreReviews.and.resolveTo({ available: false, items: [], page: 1, pageSize: 20, totalCount: 0, reviewCount: 0 });
+    api.getOwnStoreReview.and.resolveTo({ state: 'SignedOut', review: null });
     Object.defineProperty(api, 'connectionStateSignal', { value: signal('disconnected') });
     api.getStoreStatus.and.resolveTo({
       developerMode: false,
@@ -115,6 +120,7 @@ describe('StoreDetailPageComponent', () => {
         { provide: ApiService, useValue: api },
         { provide: StoreOperationService, useValue: operationsSpy },
         { provide: PluginRuntimeService, useValue: { plugins: signal([]) } },
+        { provide: ConnectAccountService, useValue: { session: signal(null) } },
         { provide: Router, useValue: routerSpy },
         {
           provide: ActivatedRoute,
