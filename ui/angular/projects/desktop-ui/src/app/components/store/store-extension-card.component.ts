@@ -28,7 +28,7 @@ export class StoreExtensionCardComponent {
 
   protected readonly iconUrl = computed(() => {
     const item = this.item();
-    return item.hasIcon ? this.api.getStoreExtensionIconUrl(item.kind, item.id) : null;
+    return item.hasIcon ? this.api.getStoreExtensionIconUrl(item.kind, item.id, item.iconSha256) : null;
   });
 
   // A missing icon 404s legitimately (the extension never published one) - the flag just tracks

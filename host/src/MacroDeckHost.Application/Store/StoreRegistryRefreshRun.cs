@@ -30,7 +30,8 @@ public enum StoreRegistryRefreshStep
 	ReadingCatalog,
 	Applied,
 	Failed,
-	Cancelled
+	Cancelled,
+	WaitingForRegistryUpdate
 }
 
 public sealed record StoreRegistryRefreshLogEntry

@@ -5857,6 +5857,7 @@ export const AppStrings = {
 				StartedScheduled: 'macrodeck.app:Store.RegistryRefresh.Step.StartedScheduled',
 				UpToDate: 'macrodeck.app:Store.RegistryRefresh.Step.UpToDate',
 				Verifying: 'macrodeck.app:Store.RegistryRefresh.Step.Verifying',
+				WaitingForRegistryUpdate: 'macrodeck.app:Store.RegistryRefresh.Step.WaitingForRegistryUpdate',
 			},
 		},
 		State: {
@@ -11661,6 +11662,8 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Store.RegistryRefresh.Step.StartedScheduled': 'Automatic refresh started',
 	'macrodeck.app:Store.RegistryRefresh.Step.UpToDate': 'Nothing new: the catalog is already at version {sequence}',
 	'macrodeck.app:Store.RegistryRefresh.Step.Verifying': 'Verifying the signature',
+	'macrodeck.app:Store.RegistryRefresh.Step.WaitingForRegistryUpdate.One': 'The registry is being updated. Trying again in {count} second',
+	'macrodeck.app:Store.RegistryRefresh.Step.WaitingForRegistryUpdate.Other': 'The registry is being updated. Trying again in {count} seconds',
 	'macrodeck.app:Store.RetryInstallation': 'Retry installation',
 	'macrodeck.app:Store.State.Installed': 'Installed',
 	'macrodeck.app:Store.State.NotInstalled': 'Not installed',

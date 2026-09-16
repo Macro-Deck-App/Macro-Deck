@@ -14343,6 +14343,14 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.RegistryRefresh.Step.Verifying" xml:space="preserve">
     <value>Ověřování podpisu</value>
   </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.One" xml:space="preserve">
+    <value>Registr se právě aktualizuje. Další pokus za {count} s</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.Other" xml:space="preserve">
+    <value>Registr se právě aktualizuje. Další pokus za {count} s</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.RetryInstallation" xml:space="preserve">
     <value>Zkusit instalaci znovu</value>
   </data>

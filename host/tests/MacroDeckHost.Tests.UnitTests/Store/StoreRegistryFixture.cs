@@ -239,12 +239,22 @@ internal sealed class StoreRegistryFixture
 			served.Remove(missing);
 		}
 
+		BuiltTree = served;
 		return new FixtureHttpClientFactory(served, this);
 	}
 
 	public DateTimeOffset SignedAt { get; set; } = DateTimeOffset.UnixEpoch;
 
 	public bool Offline { get; set; }
+
+	public Func<string, HttpResponseMessage?>? ServeOverride { get; set; }
+
+	public IReadOnlyDictionary<string, byte[]> BuiltTree { get; private set; } = new Dictionary<string, byte[]>();
+
+	public static HttpResponseMessage Serve(IReadOnlyDictionary<string, byte[]> tree, string relative) =>
+		tree.TryGetValue(relative, out var body)
+			? new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(body) }
+			: new HttpResponseMessage(HttpStatusCode.NotFound) { Content = new ByteArrayContent([]) };
 
 	private sealed class FixtureHttpClientFactory : IHttpClientFactory
 	{
@@ -302,9 +312,12 @@ internal sealed class StoreRegistryFixture
 					? path[prefix.Length..]
 					: path.TrimStart('/');
 
-				return Task.FromResult(_served.TryGetValue(relative, out var body)
-					? new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(body) }
-					: new HttpResponseMessage(HttpStatusCode.NotFound) { Content = new ByteArrayContent([]) });
+				if (_fixture.ServeOverride?.Invoke(relative) is { } overridden)
+				{
+					return Task.FromResult(overridden);
+				}
+
+				return Task.FromResult(Serve(_served, relative));
 			}
 		}
 	}

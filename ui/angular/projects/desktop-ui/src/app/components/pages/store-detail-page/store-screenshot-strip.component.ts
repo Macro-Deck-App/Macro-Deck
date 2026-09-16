@@ -23,7 +23,7 @@ export class StoreScreenshotStripComponent {
   private triggerElement: HTMLElement | null = null;
 
   protected thumbnailUrl(screenshot: StoreScreenshotBody): string {
-    return this.api.getStoreScreenshotUrl(this.kind(), this.extensionId(), screenshot.index);
+    return this.api.getStoreScreenshotUrl(this.kind(), this.extensionId(), screenshot.index, screenshot.sha256);
   }
 
   protected thumbnailAriaLabel(screenshot: StoreScreenshotBody, index: number): string {

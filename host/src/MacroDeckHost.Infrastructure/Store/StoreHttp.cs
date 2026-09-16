@@ -14,6 +14,8 @@ internal sealed record StoreFetch
 
 	public bool SizeMismatch { get; init; }
 
+	public int? StatusCode { get; init; }
+
 	public static StoreFetch Ok(byte[] content) => new()
 	{
 		Success = true,
@@ -21,11 +23,12 @@ internal sealed record StoreFetch
 		Sha256 = Convert.ToHexStringLower(SHA256.HashData(content))
 	};
 
-	public static StoreFetch Fail(string message, bool sizeMismatch = false) => new()
+	public static StoreFetch Fail(string message, bool sizeMismatch = false, int? statusCode = null) => new()
 	{
 		Success = false,
 		FailureMessage = message,
-		SizeMismatch = sizeMismatch
+		SizeMismatch = sizeMismatch,
+		StatusCode = statusCode
 	};
 }
 
@@ -71,7 +74,8 @@ internal static class StoreHttp
 		{
 			if (!response.IsSuccessStatusCode)
 			{
-				return StoreFetch.Fail($"'{url}' answered {(int)response.StatusCode}.");
+				return StoreFetch.Fail($"'{url}' answered {(int)response.StatusCode}.",
+					statusCode: (int)response.StatusCode);
 			}
 
 			var limit = expectedSize is > 0 ? Math.Min(expectedSize.Value, maxBytes) : maxBytes;

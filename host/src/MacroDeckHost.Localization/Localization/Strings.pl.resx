@@ -14343,6 +14343,14 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.RegistryRefresh.Step.Verifying" xml:space="preserve">
     <value>Weryfikowanie podpisu</value>
   </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.One" xml:space="preserve">
+    <value>Rejestr jest właśnie aktualizowany. Ponowna próba za {count} s</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.Other" xml:space="preserve">
+    <value>Rejestr jest właśnie aktualizowany. Ponowna próba za {count} s</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.RetryInstallation" xml:space="preserve">
     <value>Ponów instalację</value>
   </data>

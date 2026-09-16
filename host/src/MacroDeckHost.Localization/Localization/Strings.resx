@@ -14343,6 +14343,14 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.RegistryRefresh.Step.Verifying" xml:space="preserve">
     <value>Verifying the signature</value>
   </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.One" xml:space="preserve">
+    <value>The registry is being updated. Trying again in {count} second</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.Other" xml:space="preserve">
+    <value>The registry is being updated. Trying again in {count} seconds</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.RetryInstallation" xml:space="preserve">
     <value>Retry installation</value>
   </data>
