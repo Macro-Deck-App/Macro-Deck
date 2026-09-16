@@ -98,7 +98,7 @@ internal sealed class ObsVariableRefreshRequestTests
 		public IIntegrationConfig Config { get; } = new SingleEntryConfig();
 		public IVariableApi Variables { get; } = new NoOpVariableApi();
 		public IEventPublisher Events { get; } = new NoOpEventPublisher();
-		public IUserVariableApi UserVariables => throw new NotSupportedException();
+		public IUserVariableApi UserVariables => null!;
 		public IDeckNavigator Deck => throw new NotSupportedException();
 		public IScriptApi Scripts => throw new NotSupportedException();
 		public IWidgetApi Widgets => throw new NotSupportedException();

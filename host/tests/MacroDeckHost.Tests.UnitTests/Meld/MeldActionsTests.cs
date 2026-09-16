@@ -6,6 +6,8 @@ using MacroDeckHost.Tests.UnitTests.System;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Variables;
+using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;
+using VariableClassification = MacroDeckHost.Domain.Enums.VariableClassification;
 
 namespace MacroDeckHost.Tests.UnitTests.Meld;
 
@@ -236,21 +238,26 @@ internal sealed class MeldActionsTests
 	public async Task GetLayerVisibility_writes_a_boolean_creating_the_variable()
 	{
 		using var connection = await ConnectedAsync();
-		var variables = new RecordingVariableApi();
+		using var targets = new ActionVariableTargets(MeldIntegration.IntegrationId);
 		var action = new GetLayerVisibilityActionDefinition(() => connection,
-			new VariableApiAccessor { Current = variables });
+			new VariableApiAccessor
+			{
+				Current = targets.IntegrationVariables,
+				UserVariables = targets.UserVariables
+			});
 
 		await action.CreateExecutor()
 			.ExecuteAsync(Context([
 				(MeldActionParameters.Layer, "layer1"), (MeldActionParameters.Variable, "layer_visible")
 			]));
 
-		var handle = await variables.GetByNameAsync("layer_visible");
-		Assert.Multiple(() =>
+		var variable = await targets.Find("layer_visible");
+		Assert.Multiple(async () =>
 		{
-			Assert.That(handle, Is.Not.Null);
-			Assert.That(handle!.Value, Is.EqualTo(true));
-			Assert.That(handle.Type, Is.EqualTo(VariableType.Boolean));
+			Assert.That(variable, Is.Not.Null);
+			Assert.That(await targets.ValueOf("layer_visible"), Is.EqualTo(true));
+			Assert.That(variable!.Type, Is.EqualTo(DomainVariableType.Boolean));
+			Assert.That(variable.Classification, Is.EqualTo(VariableClassification.User));
 		});
 	}
 
@@ -296,21 +303,26 @@ internal sealed class MeldActionsTests
 	public async Task GetEffectState_writes_a_boolean_creating_the_variable()
 	{
 		using var connection = await ConnectedAsync();
-		var variables = new RecordingVariableApi();
+		using var targets = new ActionVariableTargets(MeldIntegration.IntegrationId);
 		var action = new GetEffectStateActionDefinition(() => connection,
-			new VariableApiAccessor { Current = variables });
+			new VariableApiAccessor
+			{
+				Current = targets.IntegrationVariables,
+				UserVariables = targets.UserVariables
+			});
 
 		await action.CreateExecutor()
 			.ExecuteAsync(Context([
 				(MeldActionParameters.Effect, "effect1"), (MeldActionParameters.Variable, "effect_enabled")
 			]));
 
-		var handle = await variables.GetByNameAsync("effect_enabled");
-		Assert.Multiple(() =>
+		var variable = await targets.Find("effect_enabled");
+		Assert.Multiple(async () =>
 		{
-			Assert.That(handle, Is.Not.Null);
-			Assert.That(handle!.Value, Is.EqualTo(false));
-			Assert.That(handle.Type, Is.EqualTo(VariableType.Boolean));
+			Assert.That(variable, Is.Not.Null);
+			Assert.That(await targets.ValueOf("effect_enabled"), Is.EqualTo(false));
+			Assert.That(variable!.Type, Is.EqualTo(DomainVariableType.Boolean));
+			Assert.That(variable.Classification, Is.EqualTo(VariableClassification.User));
 		});
 	}
 
@@ -318,21 +330,26 @@ internal sealed class MeldActionsTests
 	public async Task GetTrackMute_writes_a_boolean_creating_the_variable()
 	{
 		using var connection = await ConnectedAsync();
-		var variables = new RecordingVariableApi();
+		using var targets = new ActionVariableTargets(MeldIntegration.IntegrationId);
 		var action = new GetTrackMuteActionDefinition(() => connection,
-			new VariableApiAccessor { Current = variables });
+			new VariableApiAccessor
+			{
+				Current = targets.IntegrationVariables,
+				UserVariables = targets.UserVariables
+			});
 
 		await action.CreateExecutor()
 			.ExecuteAsync(Context([
 				(MeldActionParameters.Track, "track1"), (MeldActionParameters.Variable, "track_muted")
 			]));
 
-		var handle = await variables.GetByNameAsync("track_muted");
-		Assert.Multiple(() =>
+		var variable = await targets.Find("track_muted");
+		Assert.Multiple(async () =>
 		{
-			Assert.That(handle, Is.Not.Null);
-			Assert.That(handle!.Value, Is.EqualTo(false));
-			Assert.That(handle.Type, Is.EqualTo(VariableType.Boolean));
+			Assert.That(variable, Is.Not.Null);
+			Assert.That(await targets.ValueOf("track_muted"), Is.EqualTo(false));
+			Assert.That(variable!.Type, Is.EqualTo(DomainVariableType.Boolean));
+			Assert.That(variable.Classification, Is.EqualTo(VariableClassification.User));
 		});
 	}
 
@@ -348,21 +365,26 @@ internal sealed class MeldActionsTests
 			FakeQWebChannelClient.Parse("false"));
 		await WaitForAsync(() => connection.TryGetGain("track1", out _), "the gain to be cached");
 
-		var variables = new RecordingVariableApi();
+		using var targets = new ActionVariableTargets(MeldIntegration.IntegrationId);
 		var action = new GetTrackVolumeActionDefinition(() => connection,
-			new VariableApiAccessor { Current = variables });
+			new VariableApiAccessor
+			{
+				Current = targets.IntegrationVariables,
+				UserVariables = targets.UserVariables
+			});
 
 		await action.CreateExecutor()
 			.ExecuteAsync(Context([
 				(MeldActionParameters.Track, "track1"), (MeldActionParameters.Variable, "track_volume")
 			]));
 
-		var handle = await variables.GetByNameAsync("track_volume");
-		Assert.Multiple(() =>
+		var variable = await targets.Find("track_volume");
+		Assert.Multiple(async () =>
 		{
-			Assert.That(handle, Is.Not.Null);
-			Assert.That(handle!.Value, Is.EqualTo(50d));
-			Assert.That(handle.Type, Is.EqualTo(VariableType.Numeric));
+			Assert.That(variable, Is.Not.Null);
+			Assert.That(await targets.ValueOf("track_volume"), Is.EqualTo(50m));
+			Assert.That(variable!.Type, Is.EqualTo(DomainVariableType.Numeric));
+			Assert.That(variable.Classification, Is.EqualTo(VariableClassification.User));
 		});
 	}
 

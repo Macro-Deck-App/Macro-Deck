@@ -1,6 +1,7 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.StreamlabsDesktop.Actions;
@@ -47,9 +48,10 @@ internal sealed class GetAudioStateActionDefinition : IDynamicOptionsActionDefin
 			],
 			label: AppStrings.Integrations.StreamlabsDesktop.Actions.ReadLabel(),
 			defaultValue: StateVolume),
-		ActionParameter.Text(StreamlabsActionValues.VariableParameter,
+		ActionParameter.Autocomplete(StreamlabsActionValues.VariableParameter,
 			label: AppStrings.Integrations.StreamlabsDesktop.Params.SaveToVariableLabel(),
 			description: AppStrings.Integrations.StreamlabsDesktop.Params.SaveToVariableDescription(),
+			optionsSourceId: VariableOptionsSourceIds.UserVariables,
 			required: true)
 	];
 
@@ -109,6 +111,7 @@ internal sealed class GetAudioStateActionDefinition : IDynamicOptionsActionDefin
 			return await StreamlabsVariableWriter
 				.WriteAsync(_variables,
 					variable,
+					context.OwnerWidgetId,
 					muted ? VariableType.Boolean : VariableType.Numeric,
 					value)
 				.ConfigureAwait(false)

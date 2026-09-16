@@ -2,6 +2,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 using Serilog;
 
@@ -39,9 +40,10 @@ internal sealed class GetParameterActionDefinition : IActionDefinition
 			description: AppStrings.Integrations.Voicemeeter.Actions.GetParameter.ParameterDescription(),
 			placeholder: "Strip[0].Gain",
 			required: true),
-		ActionParameter.Text(VariableParameter,
+		ActionParameter.Autocomplete(VariableParameter,
 			label: AppStrings.Integrations.Voicemeeter.Actions.GetParameter.VariableLabel(),
 			description: AppStrings.Integrations.Voicemeeter.Actions.GetParameter.VariableDescription(),
+			optionsSourceId: VariableOptionsSourceIds.UserVariables,
 			required: true),
 		ActionParameter.Choice(TypeParameter,
 			options:
@@ -117,7 +119,11 @@ internal sealed class GetParameterActionDefinition : IActionDefinition
 						AppStrings.Integrations.Voicemeeter.Errors.ParameterNotReturned());
 				}
 
-				await VoicemeeterVariableWriter.WriteAsync(_variables, variable, VariableType.Text, text);
+				await VoicemeeterVariableWriter.WriteAsync(_variables,
+					variable,
+					context.OwnerWidgetId,
+					VariableType.Text,
+					text);
 				return ActionResult.Success();
 			}
 
@@ -132,6 +138,7 @@ internal sealed class GetParameterActionDefinition : IActionDefinition
 			{
 				await VoicemeeterVariableWriter.WriteAsync(_variables,
 					variable,
+					context.OwnerWidgetId,
 					VariableType.Boolean,
 					value > 0.5f);
 				return ActionResult.Success();
@@ -139,6 +146,7 @@ internal sealed class GetParameterActionDefinition : IActionDefinition
 
 			await VoicemeeterVariableWriter.WriteAsync(_variables,
 				variable,
+				context.OwnerWidgetId,
 				VariableType.Numeric,
 				Math.Round(value, 2));
 

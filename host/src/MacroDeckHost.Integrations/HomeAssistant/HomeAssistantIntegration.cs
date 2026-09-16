@@ -146,6 +146,7 @@ public sealed class HomeAssistantIntegration
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
 		_variableAccessor.Current = context.Variables;
+		_variableAccessor.UserVariables = context.UserVariables;
 		_events = new HomeAssistantEventEmitter(context.Events);
 		_config = context.Config;
 

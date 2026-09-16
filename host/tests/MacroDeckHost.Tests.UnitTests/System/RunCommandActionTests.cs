@@ -1,4 +1,7 @@
+using MacroDeckHost.Domain.Enums;
+using MacroDeckHost.Integrations.System;
 using MacroDeckHost.Integrations.System.Actions;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
 
 namespace MacroDeckHost.Tests.UnitTests.System;
@@ -33,8 +36,12 @@ public class RunCommandActionTests
 	[Test]
 	public async Task RunCommand_captures_stdout_into_a_new_variable()
 	{
-		var api = new RecordingVariableApi();
-		var action = new RunCommandActionDefinition(new VariableApiAccessor { Current = api });
+		using var targets = new ActionVariableTargets(SystemIntegration.IntegrationId);
+		var action = new RunCommandActionDefinition(new VariableApiAccessor
+		{
+			Current = targets.IntegrationVariables,
+			UserVariables = targets.UserVariables
+		});
 
 		await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
 		{
@@ -47,12 +54,13 @@ public class RunCommandActionTests
 			}
 		});
 
-		var handle = await api.GetByNameAsync("result");
-		Assert.That(handle, Is.Not.Null);
-		Assert.Multiple(() =>
+		var variable = await targets.Find("result");
+		Assert.That(variable, Is.Not.Null);
+		Assert.Multiple(async () =>
 		{
-			Assert.That(api.CreateCount, Is.EqualTo(1));
-			Assert.That(handle!.Value?.ToString()?.Trim(), Is.EqualTo("hello"));
+			Assert.That(variable!.Classification, Is.EqualTo(VariableClassification.User));
+			Assert.That((await targets.Service.GetAll()).Count(v => v.Name == "result"), Is.EqualTo(1));
+			Assert.That((await targets.ValueOf("result"))?.ToString()?.Trim(), Is.EqualTo("hello"));
 		});
 	}
 

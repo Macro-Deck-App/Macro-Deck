@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -27,8 +28,9 @@ internal sealed class GetLayerVisibilityActionDefinition : IDynamicOptionsAction
 		ActionParameter.DynamicChoice(MeldActionParameters.Layer,
 			label: AppStrings.Integrations.Meld.Parameters.Layer(),
 			required: true),
-		ActionParameter.Text(MeldActionParameters.Variable,
+		ActionParameter.Autocomplete(MeldActionParameters.Variable,
 			label: AppStrings.Integrations.Meld.Parameters.SaveToVariable(),
+			optionsSourceId: VariableOptionsSourceIds.UserVariables,
 			required: true)
 	];
 
@@ -80,7 +82,7 @@ internal sealed class GetLayerVisibilityActionDefinition : IDynamicOptionsAction
 			}
 
 			var written = await MeldVariableWriter
-				.WriteAsync(_variables, variable, VariableType.Boolean, target!.Visible)
+				.WriteAsync(_variables, variable, context.OwnerWidgetId, VariableType.Boolean, target!.Visible)
 				.ConfigureAwait(false);
 			return written
 				? ActionResult.Success()

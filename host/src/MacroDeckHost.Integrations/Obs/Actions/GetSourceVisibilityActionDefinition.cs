@@ -2,6 +2,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 using Serilog;
 
@@ -42,9 +43,10 @@ internal sealed class GetSourceVisibilityActionDefinition : IDynamicOptionsActio
 		ActionParameter.DynamicChoice(SourceParameter,
 			label: AppStrings.Integrations.Obs.Params.Source(),
 			required: true),
-		ActionParameter.Text(VariableParameter,
+		ActionParameter.Autocomplete(VariableParameter,
 			label: AppStrings.Integrations.Obs.Params.SaveToVariable(),
 			description: AppStrings.Integrations.Obs.Actions.GetSourceVisibility.VariableDescription(),
+			optionsSourceId: VariableOptionsSourceIds.UserVariables,
 			required: true)
 	];
 
@@ -133,7 +135,11 @@ internal sealed class GetSourceVisibilityActionDefinition : IDynamicOptionsActio
 			}
 
 			var written =
-				await ObsVariableWriter.WriteAsync(_variables, variable, VariableType.Boolean, visible.Value);
+				await ObsVariableWriter.WriteAsync(_variables,
+					variable,
+					context.OwnerWidgetId,
+					VariableType.Boolean,
+					visible.Value);
 
 			return written
 				? ActionResult.Success()

@@ -15,7 +15,8 @@ internal static class CompanionActions
 	private const string Landscape = "landscape";
 
 	public static IReadOnlyList<IActionDefinition> Create(CompanionTargetResolver resolver,
-		Func<IVariableApi?> variables) =>
+		Func<IVariableApi?> variables,
+		Func<IUserVariableApi?> userVariables) =>
 	[
 		new CompanionAction("set-brightness",
 			AppStrings.Integrations.Companion.Actions.SetBrightness.Name(),
@@ -82,7 +83,7 @@ internal static class CompanionActions
 			resolver,
 			_ => new CompanionCommand(CompanionCommand.Focus),
 			CompanionCapabilities.Focus),
-		new TakeScreenshotAction(resolver, variables)
+		new TakeScreenshotAction(resolver, variables, userVariables)
 	];
 
 	private static int? ReadPercent(object? raw)

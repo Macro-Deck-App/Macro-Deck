@@ -149,7 +149,11 @@ internal sealed class SendRequestActionDefinition : IActionDefinition
 			if (outcome.Failure is { } failure)
 			{
 				await HttpResponseCapture
-					.ApplyTransportFailureAsync(_variables, captures, outcome.DurationMs, _logger)
+					.ApplyTransportFailureAsync(_variables,
+						captures,
+						outcome.DurationMs,
+						_logger,
+						context.OwnerWidgetId)
 					.ConfigureAwait(false);
 
 				var (code, message) = HttpFailureMessages.ForFailure(failure);
@@ -160,7 +164,7 @@ internal sealed class SendRequestActionDefinition : IActionDefinition
 			var statusExpected = expectedStatus.Matches(response.StatusCode);
 
 			await HttpResponseCapture
-				.ApplyAsync(_variables, captures, response, statusExpected, _logger)
+				.ApplyAsync(_variables, captures, response, statusExpected, _logger, context.OwnerWidgetId)
 				.ConfigureAwait(false);
 
 			if (!statusExpected)

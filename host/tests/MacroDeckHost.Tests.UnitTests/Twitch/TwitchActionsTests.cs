@@ -334,65 +334,77 @@ internal sealed class TwitchActionsTests
 	[Test]
 	public async Task A_clip_writes_its_edit_url_into_the_named_variable()
 	{
-		var variables = new RecordingVariableApi();
-		var actions = TwitchActions.Create(() => _accounts, () => variables, InstantDelay);
+		using var targets = new ActionVariableTargets(TwitchIntegration.IntegrationId);
+		var actions = TwitchActions.Create(() => _accounts,
+			() => targets.IntegrationVariables,
+			InstantDelay,
+			userVariables: () => targets.UserVariables);
 		_first.ClipEditUrl = "https://clips.twitch.tv/edit/abc";
 
 		await Run("create-clip", actions, ("targetVariable", "last_clip"));
 
-		Assert.Multiple(() =>
+		Assert.Multiple(async () =>
 		{
 			Assert.That(_first.Calls, Does.Contain("clip:False"));
-			Assert.That(variables.Written["last_clip"], Is.EqualTo("https://clips.twitch.tv/edit/abc"));
+			Assert.That(await targets.ValueOf("last_clip"), Is.EqualTo("https://clips.twitch.tv/edit/abc"));
 		});
 	}
 
 	[Test]
 	public async Task A_clip_without_a_target_variable_writes_nothing()
 	{
-		var variables = new RecordingVariableApi();
-		var actions = TwitchActions.Create(() => _accounts, () => variables, InstantDelay);
+		using var targets = new ActionVariableTargets(TwitchIntegration.IntegrationId);
+		var actions = TwitchActions.Create(() => _accounts,
+			() => targets.IntegrationVariables,
+			InstantDelay,
+			userVariables: () => targets.UserVariables);
 
 		await Run("create-clip", actions);
 
-		Assert.Multiple(() =>
+		Assert.Multiple(async () =>
 		{
 			Assert.That(_first.Calls, Does.Contain("clip:False"));
-			Assert.That(variables.Written, Is.Empty);
+			Assert.That(await targets.Service.GetAll(), Is.Empty);
 		});
 	}
 
 	[Test]
 	public async Task A_clip_confirmed_on_the_third_poll_succeeds_and_writes_the_variable()
 	{
-		var variables = new RecordingVariableApi();
-		var actions = TwitchActions.Create(() => _accounts, () => variables, InstantDelay);
+		using var targets = new ActionVariableTargets(TwitchIntegration.IntegrationId);
+		var actions = TwitchActions.Create(() => _accounts,
+			() => targets.IntegrationVariables,
+			InstantDelay,
+			userVariables: () => targets.UserVariables);
 		_first.ClipConfirmedAfterPolls = 3;
 
 		var result = await Run("create-clip", actions, ("targetVariable", "last_clip"));
 
-		Assert.Multiple(() =>
+		Assert.Multiple(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(_first.ClipPollCount, Is.EqualTo(3));
-			Assert.That(variables.Written["last_clip"], Is.EqualTo(_first.ClipEditUrl));
+			Assert.That(await targets.ValueOf("last_clip"), Is.EqualTo(_first.ClipEditUrl));
 		});
 	}
 
 	[Test]
 	public async Task A_clip_that_never_confirms_is_CLIP_NOT_CONFIRMED_and_writes_nothing()
 	{
-		var variables = new RecordingVariableApi();
-		var actions = TwitchActions.Create(() => _accounts, () => variables, InstantDelay);
+		using var targets = new ActionVariableTargets(TwitchIntegration.IntegrationId);
+		var actions = TwitchActions.Create(() => _accounts,
+			() => targets.IntegrationVariables,
+			InstantDelay,
+			userVariables: () => targets.UserVariables);
 		_first.ClipConfirmedAfterPolls = int.MaxValue;
 
 		var result = await Run("create-clip", actions, ("targetVariable", "last_clip"));
 
-		Assert.Multiple(() =>
+		Assert.Multiple(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(result.ErrorCode, Is.EqualTo("CLIP_NOT_CONFIRMED"));
-			Assert.That(variables.Written, Is.Empty);
+			Assert.That(await targets.Service.GetAll(), Is.Empty);
 		});
 	}
 
@@ -424,17 +436,20 @@ internal sealed class TwitchActionsTests
 	[Test]
 	public async Task A_clip_whose_every_confirmation_poll_fails_is_a_provider_error()
 	{
-		var variables = new RecordingVariableApi();
-		var actions = TwitchActions.Create(() => _accounts, () => variables, InstantDelay);
+		using var targets = new ActionVariableTargets(TwitchIntegration.IntegrationId);
+		var actions = TwitchActions.Create(() => _accounts,
+			() => targets.IntegrationVariables,
+			InstantDelay,
+			userVariables: () => targets.UserVariables);
 		_first.FailingReads.Add("getClips");
 
 		var result = await Run("create-clip", actions, ("targetVariable", "last_clip"));
 
-		Assert.Multiple(() =>
+		Assert.Multiple(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.ProviderError));
-			Assert.That(variables.Written, Is.Empty);
+			Assert.That(await targets.Service.GetAll(), Is.Empty);
 		});
 	}
 

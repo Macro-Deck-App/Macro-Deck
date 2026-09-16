@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -27,8 +28,9 @@ internal sealed class GetEffectStateActionDefinition : IDynamicOptionsActionDefi
 		ActionParameter.DynamicChoice(MeldActionParameters.Effect,
 			label: AppStrings.Integrations.Meld.Parameters.Effect(),
 			required: true),
-		ActionParameter.Text(MeldActionParameters.Variable,
+		ActionParameter.Autocomplete(MeldActionParameters.Variable,
 			label: AppStrings.Integrations.Meld.Parameters.SaveToVariable(),
+			optionsSourceId: VariableOptionsSourceIds.UserVariables,
 			required: true)
 	];
 
@@ -80,7 +82,7 @@ internal sealed class GetEffectStateActionDefinition : IDynamicOptionsActionDefi
 			}
 
 			var written = await MeldVariableWriter
-				.WriteAsync(_variables, variable, VariableType.Boolean, target!.Enabled)
+				.WriteAsync(_variables, variable, context.OwnerWidgetId, VariableType.Boolean, target!.Enabled)
 				.ConfigureAwait(false);
 			return written
 				? ActionResult.Success()

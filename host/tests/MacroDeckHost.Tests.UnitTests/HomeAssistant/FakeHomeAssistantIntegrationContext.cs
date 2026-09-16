@@ -25,7 +25,7 @@ internal sealed class FakeHomeAssistantIntegrationContext : IIntegrationContext
 
 	public IVariableApi Variables { get; } = new NoOpVariableApi();
 
-	public IUserVariableApi UserVariables => throw new NotSupportedException();
+	public IUserVariableApi UserVariables => null!;
 
 	public IDeckNavigator Deck => throw new NotSupportedException();
 

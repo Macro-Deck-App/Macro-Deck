@@ -75,8 +75,9 @@ internal sealed class CompanionHarness
 			Interfaces,
 			HostNames,
 			new LoggerConfiguration().WriteTo.Sink(Sink).CreateLogger());
+		UserVariables = new UserVariableWriter(ScopeFactory);
 		Context = new IntegrationContext(VariableApi,
-			null!,
+			UserVariables,
 			new IntegrationConfig(IntegrationId, ScopeFactory),
 			null!,
 			null!,
@@ -112,6 +113,7 @@ internal sealed class CompanionHarness
 	public FakeTimeProvider Time { get; } = new();
 	public CompanionCommandRequests Requests { get; }
 	public RecordingVariableApi VariableApi { get; } = new();
+	public UserVariableWriter UserVariables { get; }
 	public CompanionDeviceRegistry DeviceRegistry { get; }
 	public IntegrationContext Context { get; }
 

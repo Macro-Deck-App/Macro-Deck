@@ -1,9 +1,11 @@
 using System.Diagnostics;
+using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Variables;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.System.Actions;
@@ -50,9 +52,10 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 		ActionParameter.Toggle("showWindow",
 			label: AppStrings.Integrations.System.Actions.RunCommand.ShowWindowLabel(),
 			defaultValue: false),
-		ActionParameter.Text("outputVariable",
+		ActionParameter.Autocomplete("outputVariable",
 			label: AppStrings.Integrations.System.Actions.RunCommand.OutputVariableLabel(),
-			description: AppStrings.Integrations.System.Actions.RunCommand.OutputVariableDescription()),
+			description: AppStrings.Integrations.System.Actions.RunCommand.OutputVariableDescription(),
+			optionsSourceId: VariableOptionsSourceIds.UserVariables),
 		ActionParameter.Number("timeout",
 			label: AppStrings.Integrations.System.Actions.RunCommand.TimeoutLabel(),
 			min: 0,
@@ -200,7 +203,13 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 
 				if (capture)
 				{
-					await WriteOutputAsync(outputVariable, output);
+					await ActionVariableTarget.WriteAsync(_variables.UserVariables,
+						_variables.Current,
+						outputVariable!,
+						context.OwnerWidgetId,
+						VariableType.Text,
+						output,
+						_logger);
 				}
 
 				if (!string.IsNullOrEmpty(error))
@@ -235,20 +244,6 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 				return ActionResult.Failed(ActionErrorCodes.ProviderError,
 					AppStrings.Integrations.System.Errors.CommandCouldNotRun());
 			}
-		}
-
-		private async Task WriteOutputAsync(string variableName, string output)
-		{
-			var api = _variables.Current;
-			if (api is null)
-			{
-				_logger.Warning("Cannot write command output: variable API unavailable");
-				return;
-			}
-
-			var handle = await api.GetByNameAsync(variableName) ??
-				await api.CreateAsync(variableName, VariableType.Text);
-			await api.SetValueAsync(handle.Id, output);
 		}
 
 		private static void TryKill(Process? process)

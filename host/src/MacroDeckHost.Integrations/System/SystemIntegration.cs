@@ -315,6 +315,7 @@ public sealed class SystemIntegration
 		await StopAudioDiscoveryAsync();
 
 		_variableAccessor.Current = context.Variables;
+		_variableAccessor.UserVariables = context.UserVariables;
 
 		_volume.Changed -= OnVolumeChanged;
 		_volume.Changed += OnVolumeChanged;

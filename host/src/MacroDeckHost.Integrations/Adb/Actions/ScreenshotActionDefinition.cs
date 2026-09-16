@@ -1,9 +1,11 @@
 using System.Security;
+using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Variables;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Adb.Actions;
@@ -36,9 +38,10 @@ internal sealed class ScreenshotActionDefinition : IActionDefinition
 			label: AppStrings.Integrations.Adb.Actions.ScreenshotFolderLabel(),
 			description: AppStrings.Integrations.Adb.Actions.ScreenshotFolderDescription(),
 			required: true),
-		ActionParameter.Text("fileNameVariable",
+		ActionParameter.Autocomplete("fileNameVariable",
 			label: AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableLabel(),
-			description: AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableDescription())
+			description: AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableDescription(),
+			optionsSourceId: VariableOptionsSourceIds.UserVariables)
 	];
 
 	public IActionExecutor CreateExecutor() => new Executor(_resolveGateway, _health, _variables);
@@ -111,30 +114,16 @@ internal sealed class ScreenshotActionDefinition : IActionDefinition
 			var fileNameVariable = AdbActionValues.ReadString(context.Parameters, "fileNameVariable");
 			if (!string.IsNullOrWhiteSpace(fileNameVariable))
 			{
-				await WriteVariableAsync(_variables.Current, fileNameVariable, path);
+				await ActionVariableTarget.WriteAsync(_variables.UserVariables,
+					_variables.Current,
+					fileNameVariable,
+					context.OwnerWidgetId,
+					VariableType.Text,
+					path,
+					_logger);
 			}
 
 			return ActionResult.Success();
-		}
-
-		private static async Task WriteVariableAsync(IVariableApi? api, string variableName, string path)
-		{
-			if (api is null)
-			{
-				_logger.Warning("Cannot write the screenshot path: variable API unavailable");
-				return;
-			}
-
-			try
-			{
-				var handle = await api.GetByNameAsync(variableName) ??
-					await api.CreateAsync(variableName, VariableType.Text);
-				await api.SetValueAsync(handle.Id, path);
-			}
-			catch (Exception ex)
-			{
-				_logger.Warning(ex, "Could not write the screenshot path to '{Variable}'", variableName);
-			}
 		}
 	}
 }

@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Integrations.Http.Client;
 using MacroDeckHost.Integrations.Http.JsonPath;
 using MacroDeckHost.Localization;
@@ -41,8 +42,9 @@ internal sealed class GetJsonValueActionDefinition : IActionDefinition
 			label: AppStrings.Integrations.Http.Actions.GetJsonValuePathLabel(),
 			description: AppStrings.Integrations.Http.Actions.GetJsonValuePathDescription(),
 			defaultValue: "$"),
-		ActionParameter.Text(VariableParameter,
+		ActionParameter.Autocomplete(VariableParameter,
 			label: AppStrings.Integrations.Http.Params.SaveToVariableLabel(),
+			optionsSourceId: VariableOptionsSourceIds.UserVariables,
 			required: true)
 	];
 
@@ -101,7 +103,7 @@ internal sealed class GetJsonValueActionDefinition : IActionDefinition
 			}
 
 			var written = await HttpVariableWriter
-				.WriteAsync(_variables, variableName, type, value)
+				.WriteAsync(_variables, variableName, context.OwnerWidgetId, type, value)
 				.ConfigureAwait(false);
 
 			return written

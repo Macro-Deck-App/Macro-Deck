@@ -75,6 +75,7 @@ public sealed class AdbIntegration
 	{
 		_variables = context.Variables;
 		_variableAccessor.Current = context.Variables;
+		_variableAccessor.UserVariables = context.UserVariables;
 		_eventEmitter = new AdbEventEmitter(context.Events);
 
 		if (_gateway is { } gateway)
@@ -99,6 +100,7 @@ public sealed class AdbIntegration
 		_eventEmitter = null;
 		_variables = null;
 		_variableAccessor.Current = null;
+		_variableAccessor.UserVariables = null;
 		IsInitialized = false;
 		return Task.CompletedTask;
 	}
