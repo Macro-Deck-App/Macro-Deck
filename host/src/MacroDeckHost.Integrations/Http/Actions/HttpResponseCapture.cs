@@ -21,7 +21,8 @@ internal static class HttpResponseCapture
 		IReadOnlyDictionary<string, string> captures,
 		HttpResponseSnapshot response,
 		bool statusExpected,
-		ILogger logger)
+		ILogger logger,
+		string? ownerWidgetId = null)
 	{
 		foreach (var (name, selector) in captures)
 		{
@@ -36,7 +37,7 @@ internal static class HttpResponseCapture
 				continue;
 			}
 
-			await HttpVariableWriter.WriteAsync(accessor, name, type, value).ConfigureAwait(false);
+			await HttpVariableWriter.WriteAsync(accessor, name, ownerWidgetId, type, value).ConfigureAwait(false);
 		}
 	}
 
@@ -44,7 +45,8 @@ internal static class HttpResponseCapture
 		HttpVariableAccessor accessor,
 		IReadOnlyDictionary<string, string> captures,
 		long durationMs,
-		ILogger logger)
+		ILogger logger,
+		string? ownerWidgetId = null)
 	{
 		foreach (var (name, selector) in captures)
 		{
@@ -62,7 +64,7 @@ internal static class HttpResponseCapture
 				continue;
 			}
 
-			await HttpVariableWriter.WriteAsync(accessor, name, type, value).ConfigureAwait(false);
+			await HttpVariableWriter.WriteAsync(accessor, name, ownerWidgetId, type, value).ConfigureAwait(false);
 		}
 	}
 

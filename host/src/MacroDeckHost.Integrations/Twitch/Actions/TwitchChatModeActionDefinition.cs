@@ -16,12 +16,13 @@ internal sealed class TwitchChatModeActionDefinition : TwitchActionDefinition, I
 	public TwitchChatModeActionDefinition(
 		Func<TwitchAccountManager> accounts,
 		Func<IVariableApi?> variables,
+		Func<IUserVariableApi?> userVariables,
 		string id,
 		LocalizedText name,
 		LocalizedText description,
 		IReadOnlyList<ActionParameter> parameters,
 		Func<TwitchActionScope, Task> execute)
-		: base(accounts, variables, id, name, description, parameters, execute)
+		: base(accounts, variables, userVariables, id, name, description, parameters, execute)
 	{
 	}
 

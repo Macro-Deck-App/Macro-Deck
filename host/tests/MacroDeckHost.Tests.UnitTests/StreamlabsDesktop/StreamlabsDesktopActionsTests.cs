@@ -4,7 +4,7 @@ using MacroDeckHost.Integrations.StreamlabsDesktop.Actions;
 using MacroDeckHost.Integrations.StreamlabsDesktop.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
-using MacroDeck.Sdk.Variables;
+using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;
 
 namespace MacroDeckHost.Tests.UnitTests.StreamlabsDesktop;
 
@@ -37,18 +37,23 @@ public class StreamlabsDesktopActionsTests
 	private readonly List<StreamlabsDesktopConnection> _connections = [];
 
 	private VariableApiAccessor _variables = null!;
-	private RecordingVariableApi _variableApi = null!;
+	private ActionVariableTargets _targets = null!;
 
 	[SetUp]
 	public void SetUp()
 	{
-		_variableApi = new RecordingVariableApi();
-		_variables = new VariableApiAccessor { Current = _variableApi };
+		_targets = new ActionVariableTargets(StreamlabsDesktopIntegration.IntegrationId);
+		_variables = new VariableApiAccessor
+		{
+			Current = _targets.IntegrationVariables,
+			UserVariables = _targets.UserVariables
+		};
 	}
 
 	[TearDown]
 	public void TearDown()
 	{
+		_targets.Dispose();
 		foreach (var connection in _connections)
 		{
 			connection.Dispose();
@@ -291,11 +296,11 @@ public class StreamlabsDesktopActionsTests
 			["variable"] = "mic_volume"
 		}));
 
-		Assert.Multiple(() =>
+		Assert.Multiple(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
-			Assert.That(_variableApi.Created["mic_volume"], Is.EqualTo(VariableType.Numeric));
-			Assert.That(_variableApi.Values["mic_volume"], Is.EqualTo(80d).Within(0.01d));
+			Assert.That((await _targets.Find("mic_volume"))!.Type, Is.EqualTo(DomainVariableType.Numeric));
+			Assert.That(await _targets.ValueOf("mic_volume"), Is.EqualTo(80m).Within(0.01m));
 		});
 	}
 
@@ -315,10 +320,10 @@ public class StreamlabsDesktopActionsTests
 			["variable"] = "mic_muted"
 		}));
 
-		Assert.Multiple(() =>
+		Assert.Multiple(async () =>
 		{
-			Assert.That(_variableApi.Created["mic_muted"], Is.EqualTo(VariableType.Boolean));
-			Assert.That(_variableApi.Values["mic_muted"], Is.EqualTo(true));
+			Assert.That((await _targets.Find("mic_muted"))!.Type, Is.EqualTo(DomainVariableType.Boolean));
+			Assert.That(await _targets.ValueOf("mic_muted"), Is.EqualTo(true));
 		});
 	}
 
@@ -334,10 +339,10 @@ public class StreamlabsDesktopActionsTests
 			["variable"] = "cam_visible"
 		}));
 
-		Assert.Multiple(() =>
+		Assert.Multiple(async () =>
 		{
-			Assert.That(_variableApi.Created["cam_visible"], Is.EqualTo(VariableType.Boolean));
-			Assert.That(_variableApi.Values["cam_visible"], Is.EqualTo(true));
+			Assert.That((await _targets.Find("cam_visible"))!.Type, Is.EqualTo(DomainVariableType.Boolean));
+			Assert.That(await _targets.ValueOf("cam_visible"), Is.EqualTo(true));
 		});
 	}
 
@@ -521,43 +526,5 @@ public class StreamlabsDesktopActionsTests
 
 		Assert.That(connection.State.IsConnected, Is.True, "the fake session never connected");
 		return connection;
-	}
-
-	private sealed class RecordingVariableApi : IVariableApi
-	{
-		public Dictionary<string, VariableType> Created { get; } = new(StringComparer.Ordinal);
-
-		public Dictionary<string, object?> Values { get; } = new(StringComparer.Ordinal);
-
-		private readonly Dictionary<Guid, string> _names = [];
-
-		public Task<IReadOnlyList<VariableHandle>> GetAllAsync()
-			=> Task.FromResult<IReadOnlyList<VariableHandle>>([]);
-
-		public Task<VariableHandle?> GetByNameAsync(string name) => Task.FromResult<VariableHandle?>(null);
-
-		public Task<VariableHandle> CreateAsync(
-			string name,
-			VariableType type,
-			object? initialValue = null,
-			int? decimalPlaces = null,
-			string? definitionId = null)
-		{
-			var id = Guid.NewGuid();
-			Created[name] = type;
-			_names[id] = name;
-			return Task.FromResult(new VariableHandle(id, name, type, initialValue, decimalPlaces)
-			{
-				DefinitionId = definitionId
-			});
-		}
-
-		public Task SetValueAsync(Guid variableId, object? value)
-		{
-			Values[_names[variableId]] = value;
-			return Task.CompletedTask;
-		}
-
-		public Task DeleteAsync(Guid variableId) => Task.CompletedTask;
 	}
 }

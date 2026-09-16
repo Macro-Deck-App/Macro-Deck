@@ -2,6 +2,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 using Serilog;
 
@@ -42,9 +43,10 @@ internal sealed class GetSourceFilterStateActionDefinition : IDynamicOptionsActi
 		ActionParameter.DynamicChoice(FilterParameter,
 			label: AppStrings.Integrations.Obs.Params.Filter(),
 			required: true),
-		ActionParameter.Text(VariableParameter,
+		ActionParameter.Autocomplete(VariableParameter,
 			label: AppStrings.Integrations.Obs.Params.SaveToVariable(),
 			description: AppStrings.Integrations.Obs.Actions.GetFilterState.VariableDescription(),
+			optionsSourceId: VariableOptionsSourceIds.UserVariables,
 			required: true)
 	];
 
@@ -132,7 +134,11 @@ internal sealed class GetSourceFilterStateActionDefinition : IDynamicOptionsActi
 					AppStrings.Integrations.Obs.Errors.FilterNotFound(filter: filter, source: source));
 			}
 
-			var written = await ObsVariableWriter.WriteAsync(_variables, variable, VariableType.Boolean, enabled.Value);
+			var written = await ObsVariableWriter.WriteAsync(_variables,
+				variable,
+				context.OwnerWidgetId,
+				VariableType.Boolean,
+				enabled.Value);
 
 			return written
 				? ActionResult.Success()

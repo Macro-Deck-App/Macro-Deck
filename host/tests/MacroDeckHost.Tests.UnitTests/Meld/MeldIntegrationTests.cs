@@ -293,7 +293,7 @@ internal sealed class MeldIntegrationTests
 
 		public IVariableApi Variables { get; } = new NullVariableApi();
 
-		public IUserVariableApi UserVariables => throw new NotSupportedException();
+		public IUserVariableApi UserVariables => null!;
 
 		public IDeckNavigator Deck => throw new NotSupportedException();
 

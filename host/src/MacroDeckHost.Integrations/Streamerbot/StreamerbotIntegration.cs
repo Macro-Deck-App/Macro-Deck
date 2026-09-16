@@ -111,6 +111,7 @@ public sealed class StreamerbotIntegration
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
 		_variableAccessor.Current = context.Variables;
+		_variableAccessor.UserVariables = context.UserVariables;
 		_events = new StreamerbotEventEmitter(context.Events);
 		await ConnectFromConfig(context);
 		IsInitialized = true;

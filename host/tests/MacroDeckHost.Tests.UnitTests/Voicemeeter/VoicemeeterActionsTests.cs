@@ -379,8 +379,12 @@ internal sealed class VoicemeeterActionsTests
 	{
 		Connected();
 		_remote.UserSets("Strip[0].Comp", 3.25f);
-		var variables = new RecordingVariableApi();
-		var accessor = new VoicemeeterVariableAccessor { Current = variables };
+		using var targets = new ActionVariableTargets(VoicemeeterIntegration.IntegrationId);
+		var accessor = new VoicemeeterVariableAccessor
+		{
+			Current = targets.IntegrationVariables,
+			UserVariables = targets.UserVariables
+		};
 
 		await Run(new GetParameterActionDefinition(() => _connection, accessor),
 			new Dictionary<string, object>
@@ -390,12 +394,7 @@ internal sealed class VoicemeeterActionsTests
 				["type"] = "number"
 			});
 
-		var handle = await variables.GetByNameAsync("comp_amount");
-		Assert.Multiple(() =>
-		{
-			Assert.That(handle, Is.Not.Null);
-			Assert.That(handle!.Value, Is.EqualTo(3.25d));
-		});
+		Assert.That(await targets.ValueOf("comp_amount"), Is.EqualTo(3.25m));
 	}
 
 	[Test]

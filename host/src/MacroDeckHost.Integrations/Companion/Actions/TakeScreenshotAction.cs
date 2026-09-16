@@ -3,7 +3,9 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
+using MacroDeckHost.Integrations.Variables;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Companion.Actions;
@@ -18,11 +20,16 @@ internal sealed class TakeScreenshotAction : IDynamicOptionsActionDefinition
 
 	private readonly CompanionTargetResolver _resolver;
 	private readonly Func<IVariableApi?> _variables;
+	private readonly Func<IUserVariableApi?> _userVariables;
 
-	public TakeScreenshotAction(CompanionTargetResolver resolver, Func<IVariableApi?> variables)
+	public TakeScreenshotAction(
+		CompanionTargetResolver resolver,
+		Func<IVariableApi?> variables,
+		Func<IUserVariableApi?> userVariables)
 	{
 		_resolver = resolver;
 		_variables = variables;
+		_userVariables = userVariables;
 	}
 
 	public string Id => "take-screenshot";
@@ -48,12 +55,13 @@ internal sealed class TakeScreenshotAction : IDynamicOptionsActionDefinition
 			label: AppStrings.Integrations.Adb.Actions.ScreenshotFolderLabel(),
 			description: AppStrings.Integrations.Adb.Actions.ScreenshotFolderDescription(),
 			required: true),
-		ActionParameter.Text(FileNameVariableParameter,
+		ActionParameter.Autocomplete(FileNameVariableParameter,
 			label: AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableLabel(),
-			description: AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableDescription())
+			description: AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableDescription(),
+			optionsSourceId: VariableOptionsSourceIds.UserVariables)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _variables);
+	public IActionExecutor CreateExecutor() => new Executor(_resolver, _variables, _userVariables);
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -67,11 +75,16 @@ internal sealed class TakeScreenshotAction : IDynamicOptionsActionDefinition
 
 		private readonly CompanionTargetResolver _resolver;
 		private readonly Func<IVariableApi?> _variables;
+		private readonly Func<IUserVariableApi?> _userVariables;
 
-		public Executor(CompanionTargetResolver resolver, Func<IVariableApi?> variables)
+		public Executor(
+			CompanionTargetResolver resolver,
+			Func<IVariableApi?> variables,
+			Func<IUserVariableApi?> userVariables)
 		{
 			_resolver = resolver;
 			_variables = variables;
+			_userVariables = userVariables;
 		}
 
 		public async Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
@@ -139,30 +152,16 @@ internal sealed class TakeScreenshotAction : IDynamicOptionsActionDefinition
 			if (context.Parameters.GetValueOrDefault(FileNameVariableParameter) is string variableName &&
 				!string.IsNullOrWhiteSpace(variableName))
 			{
-				await WriteVariableAsync(_variables(), variableName, path);
+				await ActionVariableTarget.WriteAsync(_userVariables(),
+					_variables(),
+					variableName,
+					context.OwnerWidgetId,
+					VariableType.Text,
+					path,
+					_logger);
 			}
 
 			return ActionResult.Success();
-		}
-
-		private static async Task WriteVariableAsync(IVariableApi? api, string variableName, string path)
-		{
-			if (api is null)
-			{
-				_logger.Warning("Cannot write the screenshot path: variable API unavailable");
-				return;
-			}
-
-			try
-			{
-				var handle = await api.GetByNameAsync(variableName) ??
-					await api.CreateAsync(variableName, VariableType.Text);
-				await api.SetValueAsync(handle.Id, path);
-			}
-			catch (Exception ex)
-			{
-				_logger.Warning(ex, "Could not write the screenshot path to '{Variable}'", variableName);
-			}
 		}
 	}
 }

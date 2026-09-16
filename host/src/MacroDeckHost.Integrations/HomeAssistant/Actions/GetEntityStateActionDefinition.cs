@@ -2,6 +2,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 using Serilog;
 
@@ -39,9 +40,10 @@ internal sealed class GetEntityStateActionDefinition : IDynamicOptionsActionDefi
 			label: AppStrings.Integrations.HomeAssistant.Actions.GetEntityState.AttributeLabel(),
 			description: AppStrings.Integrations.HomeAssistant.Actions.GetEntityState.AttributeDescription(),
 			placeholder: AppStrings.Integrations.HomeAssistant.Actions.GetEntityState.AttributePlaceholder()),
-		ActionParameter.Text(VariableParameterName,
+		ActionParameter.Autocomplete(VariableParameterName,
 			label: AppStrings.Integrations.HomeAssistant.Actions.GetEntityState.VariableLabel(),
 			description: AppStrings.Integrations.HomeAssistant.Actions.GetEntityState.VariableDescription(),
+			optionsSourceId: VariableOptionsSourceIds.UserVariables,
 			required: true)
 	];
 
@@ -122,7 +124,11 @@ internal sealed class GetEntityStateActionDefinition : IDynamicOptionsActionDefi
 						attribute: attribute));
 			}
 
-			await HomeAssistantVariableWriter.WriteAsync(_variables, target, VariableType.Text, value);
+			await HomeAssistantVariableWriter.WriteAsync(_variables,
+				target,
+				context.OwnerWidgetId,
+				VariableType.Text,
+				value);
 
 			return ActionResult.Success();
 		}

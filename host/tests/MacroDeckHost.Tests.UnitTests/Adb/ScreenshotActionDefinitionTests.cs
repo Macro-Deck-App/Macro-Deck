@@ -1,5 +1,6 @@
 using MacroDeckHost.Integrations.Adb;
 using MacroDeckHost.Integrations.Adb.Actions;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
 
 namespace MacroDeckHost.Tests.UnitTests.Adb;
@@ -9,7 +10,7 @@ internal sealed class ScreenshotActionDefinitionTests
 {
 	private FakeAdbGateway _gateway = null!;
 	private AdbHealthTracker _health = null!;
-	private RecordingVariableApi _api = null!;
+	private ActionVariableTargets _targets = null!;
 	private VariableApiAccessor _variables = null!;
 	private ScreenshotActionDefinition _action = null!;
 	private string _folder = null!;
@@ -19,8 +20,12 @@ internal sealed class ScreenshotActionDefinitionTests
 	{
 		_gateway = new FakeAdbGateway();
 		_health = new AdbHealthTracker();
-		_api = new RecordingVariableApi();
-		_variables = new VariableApiAccessor { Current = _api };
+		_targets = new ActionVariableTargets(AdbIntegration.IntegrationId);
+		_variables = new VariableApiAccessor
+		{
+			Current = _targets.IntegrationVariables,
+			UserVariables = _targets.UserVariables
+		};
 		_action = new ScreenshotActionDefinition(() => _gateway, _health, _variables);
 		_folder = Path.Combine(Path.GetTempPath(), "adb-screenshot-tests-" + Guid.NewGuid().ToString("N"));
 	}
@@ -28,6 +33,7 @@ internal sealed class ScreenshotActionDefinitionTests
 	[TearDown]
 	public void TearDown()
 	{
+		_targets.Dispose();
 		if (Directory.Exists(_folder))
 		{
 			Directory.Delete(_folder, recursive: true);
@@ -76,13 +82,13 @@ internal sealed class ScreenshotActionDefinitionTests
 		await _action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
 		{
 			["folder"] = _folder,
-			["fileNameVariable"] = "screenshotPath"
+			["fileNameVariable"] = "screenshot_path"
 		}));
 
-		var handle = await _api.GetByNameAsync("screenshotPath");
+		var value = await _targets.ValueOf("screenshot_path");
 
-		Assert.That(handle, Is.Not.Null);
-		Assert.That((string)handle!.Value!, Does.StartWith(_folder));
+		Assert.That(value, Is.Not.Null);
+		Assert.That((string)value!, Does.StartWith(_folder));
 	}
 
 	[Test]
@@ -90,7 +96,7 @@ internal sealed class ScreenshotActionDefinitionTests
 	{
 		await _action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object> { ["folder"] = _folder }));
 
-		Assert.That(_api.CreateCount, Is.EqualTo(0));
+		Assert.That(await _targets.Service.GetAll(), Is.Empty);
 	}
 
 	[Test]

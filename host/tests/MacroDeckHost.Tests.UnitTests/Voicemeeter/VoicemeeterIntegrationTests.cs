@@ -494,7 +494,7 @@ internal sealed class VoicemeeterIntegrationTests
 	{
 		public IVariableApi Variables { get; } = new RecordingVariableApi();
 
-		public IUserVariableApi UserVariables => throw new NotSupportedException();
+		public IUserVariableApi UserVariables => null!;
 
 		public IIntegrationConfig Config => throw new NotSupportedException();
 

@@ -1,6 +1,8 @@
 using System.Text.Json;
+using MacroDeckHost.Integrations.Http;
 using MacroDeckHost.Integrations.Http.Actions;
 using MacroDeckHost.Integrations.Http.Client;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Serilog;
 using Serilog.Core;
 
@@ -9,15 +11,22 @@ namespace MacroDeckHost.Tests.UnitTests.Http;
 [TestFixture]
 internal sealed class HttpResponseCaptureTests
 {
-	private RecordingVariableApi _variables = null!;
+	private ActionVariableTargets _targets = null!;
 	private HttpVariableAccessor _accessor = null!;
 
 	[SetUp]
 	public void SetUp()
 	{
-		_variables = new RecordingVariableApi();
-		_accessor = new HttpVariableAccessor { Current = _variables };
+		_targets = new ActionVariableTargets(HttpIntegration.IntegrationId);
+		_accessor = new HttpVariableAccessor
+		{
+			Current = _targets.IntegrationVariables,
+			UserVariables = _targets.UserVariables
+		};
 	}
+
+	[TearDown]
+	public void TearDown() => _targets.Dispose();
 
 	[Test]
 	public async Task Every_reserved_token_resolves_to_its_documented_type_and_value()
@@ -34,13 +43,13 @@ internal sealed class HttpResponseCaptureTests
 
 		await HttpResponseCapture.ApplyAsync(_accessor, captures, response, statusExpected: true, SilentLogger());
 
-		Assert.Multiple(() =>
+		Assert.Multiple(async () =>
 		{
-			Assert.That(_variables.Written["status"], Is.EqualTo(201d));
-			Assert.That(_variables.Written["ok"], Is.EqualTo(true));
-			Assert.That(_variables.Written["dur"], Is.EqualTo(123d));
-			Assert.That(_variables.Written["body"], Is.EqualTo("{}"));
-			Assert.That(_variables.Written["trunc"], Is.EqualTo(true));
+			Assert.That(await _targets.ValueOf("status"), Is.EqualTo(201m));
+			Assert.That(await _targets.ValueOf("ok"), Is.EqualTo(true));
+			Assert.That(await _targets.ValueOf("dur"), Is.EqualTo(123m));
+			Assert.That(await _targets.ValueOf("body"), Is.EqualTo("{}"));
+			Assert.That(await _targets.ValueOf("trunc"), Is.EqualTo(true));
 		});
 	}
 
@@ -60,7 +69,7 @@ internal sealed class HttpResponseCaptureTests
 			SilentLogger());
 
 		var expected = JsonSerializer.Serialize(response.Headers);
-		Assert.That(_variables.Written["h"], Is.EqualTo(expected));
+		Assert.That(await _targets.ValueOf("h"), Is.EqualTo(expected));
 	}
 
 	[Test]
@@ -77,7 +86,7 @@ internal sealed class HttpResponseCaptureTests
 			statusExpected: true,
 			SilentLogger());
 
-		Assert.That(_variables.Written["ct"], Is.EqualTo("application/json"));
+		Assert.That(await _targets.ValueOf("ct"), Is.EqualTo("application/json"));
 	}
 
 	[Test]
@@ -92,7 +101,7 @@ internal sealed class HttpResponseCaptureTests
 			statusExpected: true,
 			SilentLogger());
 
-		Assert.That(_variables.Written, Does.Not.ContainKey("v"));
+		Assert.That(await _targets.Find("v"), Is.Null);
 	}
 
 	[TestCase("num", 7d)]
@@ -110,7 +119,7 @@ internal sealed class HttpResponseCaptureTests
 			statusExpected: true,
 			SilentLogger());
 
-		Assert.That(_variables.Written["v"], Is.EqualTo(expectedValue));
+		Assert.That(await _targets.ValueOf("v"), Is.EqualTo(expectedValue));
 	}
 
 	[Test]
@@ -124,7 +133,7 @@ internal sealed class HttpResponseCaptureTests
 			statusExpected: true,
 			SilentLogger());
 
-		Assert.That(_variables.Written, Does.Not.ContainKey("v"));
+		Assert.That(await _targets.Find("v"), Is.Null);
 	}
 
 	[Test]
@@ -138,10 +147,10 @@ internal sealed class HttpResponseCaptureTests
 			statusExpected: true,
 			SilentLogger());
 
-		Assert.Multiple(() =>
+		Assert.Multiple(async () =>
 		{
-			Assert.That(_variables.Written["status"], Is.EqualTo(200d));
-			Assert.That(_variables.Written["body"], Is.EqualTo("not json at all"));
+			Assert.That(await _targets.ValueOf("status"), Is.EqualTo(200m));
+			Assert.That(await _targets.ValueOf("body"), Is.EqualTo("not json at all"));
 		});
 	}
 
@@ -159,13 +168,13 @@ internal sealed class HttpResponseCaptureTests
 
 		await HttpResponseCapture.ApplyTransportFailureAsync(_accessor, captures, durationMs: 55, SilentLogger());
 
-		Assert.Multiple(() =>
+		Assert.Multiple(async () =>
 		{
-			Assert.That(_variables.Written["status"], Is.EqualTo(0d));
-			Assert.That(_variables.Written["ok"], Is.EqualTo(false));
-			Assert.That(_variables.Written["dur"], Is.EqualTo(55d));
-			Assert.That(_variables.Written["body"], Is.EqualTo(string.Empty));
-			Assert.That(_variables.Written, Does.Not.ContainKey("path"));
+			Assert.That(await _targets.ValueOf("status"), Is.EqualTo(0m));
+			Assert.That(await _targets.ValueOf("ok"), Is.EqualTo(false));
+			Assert.That(await _targets.ValueOf("dur"), Is.EqualTo(55m));
+			Assert.That(await _targets.ValueOf("body"), Is.EqualTo(string.Empty));
+			Assert.That(await _targets.Find("path"), Is.Null);
 		});
 	}
 

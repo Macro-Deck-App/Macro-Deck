@@ -37,6 +37,7 @@ public sealed class TwitchIntegration
 	private readonly TwitchAccountManager _accounts;
 
 	private IVariableApi? _variables;
+	private IUserVariableApi? _userVariables;
 
 	public TwitchIntegration()
 		: this(new TwitchAccountManager(() => new TwitchOAuthClient(), _logger))
@@ -46,7 +47,7 @@ public sealed class TwitchIntegration
 	internal TwitchIntegration(TwitchAccountManager accounts)
 	{
 		_accounts = accounts;
-		Actions = TwitchActions.Create(() => _accounts, () => _variables);
+		Actions = TwitchActions.Create(() => _accounts, () => _variables, userVariables: () => _userVariables);
 	}
 
 	public string Id => IntegrationId;
@@ -97,6 +98,7 @@ public sealed class TwitchIntegration
 		// Captured so an action built in the constructor can write its result variable later;
 		// ActionExecutionContext deliberately exposes no variable API.
 		_variables = context.Variables;
+		_userVariables = context.UserVariables;
 
 		await _accounts.ReloadAsync(context.Config, new TwitchEventEmitter(context.Events));
 		_accounts.StartAll();

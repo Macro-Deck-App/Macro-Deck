@@ -6,6 +6,7 @@ using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Api.Controllers;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Companion.Actions;
 using MacroDeckHost.Localization;
@@ -13,6 +14,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.Mvc;
 using ActionResult = MacroDeck.Sdk.Actions.ActionResult;
+using VariableClassification = MacroDeckHost.Domain.Enums.VariableClassification;
+using VariableScope = MacroDeckHost.Domain.Enums.VariableScope;
 
 namespace MacroDeckHost.Tests.UnitTests.Companion;
 
@@ -103,7 +106,7 @@ internal sealed class CompanionDeviceControlTests
 		var result = await running.WaitAsync(TimeSpan.FromSeconds(5));
 
 		var file = Directory.GetFiles(_folder).Single();
-		var variable = await harness.VariableApi.GetByNameAsync(PathVariable);
+		var variable = await harness.Variables.Resolve(PathVariable, VariableScope.Global, null);
 		Assert.Multiple(() =>
 		{
 			Assert.That(command.Command, Is.EqualTo("screenshot"));
@@ -113,7 +116,8 @@ internal sealed class CompanionDeviceControlTests
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(Path.GetFileName(file), Does.Match(@"^companion-screenshot-\d{8}-\d{6}-\d{3}\.png$"));
 			Assert.That(File.ReadAllBytes(file), Is.EqualTo(_png));
-			Assert.That(variable?.Value, Is.EqualTo(file));
+			Assert.That(variable?.Classification, Is.EqualTo(VariableClassification.User));
+			Assert.That(VariableValueSerializer.Deserialize(variable!.Type, variable.Value), Is.EqualTo(file));
 		});
 	}
 

@@ -1,6 +1,9 @@
+using MacroDeckHost.Integrations.Http;
 using MacroDeckHost.Integrations.Http.Actions;
 using MacroDeckHost.Integrations.Http.Client;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
+using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;
 
 namespace MacroDeckHost.Tests.UnitTests.Http;
 
@@ -8,17 +11,24 @@ namespace MacroDeckHost.Tests.UnitTests.Http;
 internal sealed class SendRequestActionTests
 {
 	private FakeHttpRequestClient _client = null!;
-	private RecordingVariableApi _variables = null!;
+	private ActionVariableTargets _targets = null!;
 	private IActionExecutor _executor = null!;
 
 	[SetUp]
 	public void SetUp()
 	{
 		_client = new FakeHttpRequestClient();
-		_variables = new RecordingVariableApi();
-		var accessor = new HttpVariableAccessor { Current = _variables };
+		_targets = new ActionVariableTargets(HttpIntegration.IntegrationId);
+		var accessor = new HttpVariableAccessor
+		{
+			Current = _targets.IntegrationVariables,
+			UserVariables = _targets.UserVariables
+		};
 		_executor = new SendRequestActionDefinition(_client, accessor).CreateExecutor();
 	}
+
+	[TearDown]
+	public void TearDown() => _targets.Dispose();
 
 	[Test]
 	public async Task A_200_response_with_the_default_2xx_expectation_succeeds()
@@ -79,11 +89,11 @@ internal sealed class SendRequestActionTests
 	{
 		_client.Enqueue(Succeeded(200));
 		await Execute(Parameters(("url", "https://example.invalid/"), ("captures", Captures(("code", "$status")))));
-		Assert.That(_variables.Written["code"], Is.EqualTo(200d));
+		Assert.That(await _targets.ValueOf("code"), Is.EqualTo(200m));
 
 		_client.Enqueue(Succeeded(404));
 		await Execute(Parameters(("url", "https://example.invalid/"), ("captures", Captures(("code", "$status")))));
-		Assert.That(_variables.Written["code"], Is.EqualTo(404d));
+		Assert.That(await _targets.ValueOf("code"), Is.EqualTo(404m));
 	}
 
 	[Test]
@@ -121,10 +131,10 @@ internal sealed class SendRequestActionTests
 		var result = await Execute(Parameters(("url", "https://example.invalid/"),
 			("captures", Captures(("missing", "$.nonexistent")))));
 
-		Assert.Multiple(() =>
+		Assert.Multiple(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
-			Assert.That(_variables.Written, Does.Not.ContainKey("missing"));
+			Assert.That(await _targets.Find("missing"), Is.Null);
 		});
 	}
 
@@ -145,7 +155,7 @@ internal sealed class SendRequestActionTests
 	public async Task A_variable_the_host_refuses_does_not_fail_the_request()
 	{
 		_client.Enqueue(Succeeded(200));
-		_variables.FailWrites = true;
+		await _targets.CreateUserVariable("status", DomainVariableType.Boolean, false);
 
 		var result = await Execute(Parameters(("url", "https://example.invalid/"),
 			("captures", Captures(("status", "$status")))));

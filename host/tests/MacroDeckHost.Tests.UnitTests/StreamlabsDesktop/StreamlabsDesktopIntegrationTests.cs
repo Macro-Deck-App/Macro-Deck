@@ -188,7 +188,7 @@ public class StreamlabsDesktopIntegrationTests
 
 		public IVariableApi Variables { get; } = new NullVariableApi();
 
-		public IUserVariableApi UserVariables => throw new NotSupportedException();
+		public IUserVariableApi UserVariables => null!;
 
 		public IDeckNavigator Deck => throw new NotSupportedException();
 		public IScriptApi Scripts => throw new NotSupportedException();

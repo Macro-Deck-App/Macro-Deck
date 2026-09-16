@@ -1,6 +1,9 @@
+using MacroDeckHost.Integrations.Http;
 using MacroDeckHost.Integrations.Http.Actions;
 using MacroDeckHost.Integrations.Http.Client;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
+using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;
 
 namespace MacroDeckHost.Tests.UnitTests.Http;
 
@@ -8,17 +11,24 @@ namespace MacroDeckHost.Tests.UnitTests.Http;
 internal sealed class GetJsonValueActionTests
 {
 	private FakeHttpRequestClient _client = null!;
-	private RecordingVariableApi _variables = null!;
+	private ActionVariableTargets _targets = null!;
 	private IActionExecutor _executor = null!;
 
 	[SetUp]
 	public void SetUp()
 	{
 		_client = new FakeHttpRequestClient();
-		_variables = new RecordingVariableApi();
-		var accessor = new HttpVariableAccessor { Current = _variables };
+		_targets = new ActionVariableTargets(HttpIntegration.IntegrationId);
+		var accessor = new HttpVariableAccessor
+		{
+			Current = _targets.IntegrationVariables,
+			UserVariables = _targets.UserVariables
+		};
 		_executor = new GetJsonValueActionDefinition(_client, accessor).CreateExecutor();
 	}
+
+	[TearDown]
+	public void TearDown() => _targets.Dispose();
 
 	[Test]
 	public async Task The_happy_path_writes_the_target_variable_with_the_right_type()
@@ -29,10 +39,10 @@ internal sealed class GetJsonValueActionTests
 			("path", "$.name"),
 			("variable", "target")));
 
-		Assert.Multiple(() =>
+		Assert.Multiple(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
-			Assert.That(_variables.Written["target"], Is.EqualTo("Ada"));
+			Assert.That(await _targets.ValueOf("target"), Is.EqualTo("Ada"));
 		});
 	}
 
@@ -45,11 +55,11 @@ internal sealed class GetJsonValueActionTests
 			("path", "$.missing"),
 			("variable", "target")));
 
-		Assert.Multiple(() =>
+		Assert.Multiple(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.NotFound));
-			Assert.That(_variables.Written, Does.Not.ContainKey("target"));
+			Assert.That(await _targets.Find("target"), Is.Null);
 		});
 	}
 
@@ -98,7 +108,7 @@ internal sealed class GetJsonValueActionTests
 	public async Task A_variable_the_host_refuses_fails_the_action()
 	{
 		_client.Enqueue(Succeeded(200, """{"name":"Ada"}"""));
-		_variables.FailWrites = true;
+		await _targets.CreateUserVariable("target", DomainVariableType.Boolean, false);
 
 		var result = await Execute(Parameters(("url", "https://example.invalid/"),
 			("path", "$.name"),

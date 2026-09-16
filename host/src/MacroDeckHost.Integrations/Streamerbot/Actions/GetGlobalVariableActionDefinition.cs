@@ -3,6 +3,7 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Localization;
+using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 using Serilog;
 
@@ -41,9 +42,10 @@ internal sealed class GetGlobalVariableActionDefinition : IActionDefinition
 			label: AppStrings.Integrations.Streamerbot.Actions.PersistedLabel(),
 			description: AppStrings.Integrations.Streamerbot.Actions.PersistedDescription(),
 			defaultValue: true),
-		ActionParameter.Text(TargetParameterName,
+		ActionParameter.Autocomplete(TargetParameterName,
 			label: AppStrings.Integrations.Streamerbot.Actions.SaveToVariableLabel(),
 			description: AppStrings.Integrations.Streamerbot.Actions.SaveToVariableDescription(),
+			optionsSourceId: VariableOptionsSourceIds.UserVariables,
 			required: true)
 	];
 
@@ -108,7 +110,7 @@ internal sealed class GetGlobalVariableActionDefinition : IActionDefinition
 			}
 
 			var (type, converted) = Convert(element);
-			await StreamerbotVariableWriter.WriteAsync(_variables, target, type, converted);
+			await StreamerbotVariableWriter.WriteAsync(_variables, target, context.OwnerWidgetId, type, converted);
 
 			return ActionResult.Success();
 		}

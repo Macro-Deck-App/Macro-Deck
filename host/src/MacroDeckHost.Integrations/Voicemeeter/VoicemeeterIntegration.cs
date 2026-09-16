@@ -78,6 +78,7 @@ public sealed class VoicemeeterIntegration
 	public Task InitializeAsync(IIntegrationContext context)
 	{
 		_variableAccessor.Current = context.Variables;
+		_variableAccessor.UserVariables = context.UserVariables;
 
 		_connection = new VoicemeeterConnection(_remoteFactory(),
 			new VoicemeeterEventEmitter(context.Events),

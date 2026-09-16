@@ -606,7 +606,12 @@ internal sealed class HomeAssistantActionsTests
 		await ConnectAsync(
 			"""[{ "entity_id": "sensor.temp", "state": "21.5", "attributes": { "unit_of_measurement": "C" } }]""");
 
-		var accessor = new HomeAssistantVariableAccessor { Current = new RecordingVariableApi() };
+		using var targets = new ActionVariableTargets(HomeAssistantIntegration.IntegrationId);
+		var accessor = new HomeAssistantVariableAccessor
+		{
+			Current = targets.IntegrationVariables,
+			UserVariables = targets.UserVariables
+		};
 		var definition = new GetEntityStateActionDefinition(() => _connection, accessor);
 		var result = await definition.CreateExecutor()
 			.ExecuteAsync(new ActionExecutionContext
@@ -614,10 +619,10 @@ internal sealed class HomeAssistantActionsTests
 				Parameters = new Dictionary<string, object> { ["entity"] = "sensor.temp", ["variable"] = "temp" }
 			});
 
-		Assert.Multiple(() =>
+		Assert.Multiple(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
-			Assert.That(((RecordingVariableApi)accessor.Current!).Written["temp"], Is.EqualTo("21.5"));
+			Assert.That(await targets.ValueOf("temp"), Is.EqualTo("21.5"));
 		});
 	}
 
@@ -627,7 +632,12 @@ internal sealed class HomeAssistantActionsTests
 		await ConnectAsync(
 			"""[{ "entity_id": "sensor.temp", "state": "21.5", "attributes": { "unit_of_measurement": "C" } }]""");
 
-		var accessor = new HomeAssistantVariableAccessor { Current = new RecordingVariableApi() };
+		using var targets = new ActionVariableTargets(HomeAssistantIntegration.IntegrationId);
+		var accessor = new HomeAssistantVariableAccessor
+		{
+			Current = targets.IntegrationVariables,
+			UserVariables = targets.UserVariables
+		};
 		var definition = new GetEntityStateActionDefinition(() => _connection, accessor);
 		await definition.CreateExecutor()
 			.ExecuteAsync(new ActionExecutionContext
@@ -638,7 +648,7 @@ internal sealed class HomeAssistantActionsTests
 				}
 			});
 
-		Assert.That(((RecordingVariableApi)accessor.Current!).Written["unit"], Is.EqualTo("C"));
+		Assert.That(await targets.ValueOf("unit"), Is.EqualTo("C"));
 	}
 
 	[Test]

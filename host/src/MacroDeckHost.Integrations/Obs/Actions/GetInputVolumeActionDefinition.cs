@@ -2,6 +2,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 using Serilog;
 
@@ -38,9 +39,10 @@ internal sealed class GetInputVolumeActionDefinition : IDynamicOptionsActionDefi
 		ActionParameter.DynamicChoice(InputParameter,
 			label: AppStrings.Integrations.Obs.Params.Input(),
 			required: true),
-		ActionParameter.Text(VariableParameter,
+		ActionParameter.Autocomplete(VariableParameter,
 			label: AppStrings.Integrations.Obs.Params.SaveToVariable(),
 			description: AppStrings.Integrations.Obs.Actions.GetInputVolume.VariableDescription(),
+			optionsSourceId: VariableOptionsSourceIds.UserVariables,
 			required: true)
 	];
 
@@ -112,6 +114,7 @@ internal sealed class GetInputVolumeActionDefinition : IDynamicOptionsActionDefi
 
 			var written = await ObsVariableWriter.WriteAsync(_variables,
 				variable,
+				context.OwnerWidgetId,
 				VariableType.Numeric,
 				Math.Round(percent.Value));
 

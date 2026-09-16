@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -371,9 +372,11 @@ internal static class TwitchActions
 	public static IReadOnlyList<IActionDefinition> Create(
 		Func<TwitchAccountManager> accounts,
 		Func<IVariableApi?> variables,
-		Func<TimeSpan, CancellationToken, Task>? delay = null)
+		Func<TimeSpan, CancellationToken, Task>? delay = null,
+		Func<IUserVariableApi?>? userVariables = null)
 	{
 		var wait = delay ?? Task.Delay;
+		var users = userVariables ?? (() => null);
 
 		TwitchActionDefinition Action(
 			string id,
@@ -381,7 +384,7 @@ internal static class TwitchActions
 			LocalizedText description,
 			IReadOnlyList<ActionParameter> parameters,
 			Func<TwitchActionScope, Task> execute)
-			=> new(accounts, variables, id, name, description, parameters, execute);
+			=> new(accounts, variables, users, id, name, description, parameters, execute);
 
 		TwitchChatModeActionDefinition ChatMode(
 			string id,
@@ -389,7 +392,7 @@ internal static class TwitchActions
 			LocalizedText description,
 			IReadOnlyList<ActionParameter> parameters,
 			Func<TwitchActionScope, Task> execute)
-			=> new(accounts, variables, id, name, description, parameters, execute);
+			=> new(accounts, variables, users, id, name, description, parameters, execute);
 
 		TwitchActionDefinition ResultAction(
 			string id,
@@ -397,7 +400,7 @@ internal static class TwitchActions
 			LocalizedText description,
 			IReadOnlyList<ActionParameter> parameters,
 			Func<TwitchActionScope, Task<ActionResult>> execute)
-			=> new(accounts, variables, id, name, description, parameters, execute);
+			=> new(accounts, variables, users, id, name, description, parameters, execute);
 
 		return
 		[
@@ -615,9 +618,10 @@ internal static class TwitchActions
 					ActionParameter.Toggle("hasDelay",
 						label: Strings.CreateClip.HasDelayLabel(),
 						description: Strings.CreateClip.HasDelayDescription()),
-					ActionParameter.Text("targetVariable",
+					ActionParameter.Autocomplete("targetVariable",
 						label: Strings.CreateClip.TargetVariableLabel(),
-						description: Strings.CreateClip.TargetVariableDescription())
+						description: Strings.CreateClip.TargetVariableDescription(),
+						optionsSourceId: VariableOptionsSourceIds.UserVariables)
 				],
 				async scope =>
 				{
@@ -660,8 +664,10 @@ internal static class TwitchActions
 					{
 						if (TwitchActionValues.ReadText(scope.Parameters, "targetVariable") is { } variable)
 						{
-							await TwitchVariableWriter.WriteAsync(scope.Variables,
+							await TwitchVariableWriter.WriteAsync(scope.UserVariables,
+								scope.Variables,
 								variable,
+								scope.OwnerWidgetId,
 								VariableType.Text,
 								created.EditUrl);
 						}

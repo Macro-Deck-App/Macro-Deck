@@ -648,7 +648,7 @@ public class SystemIntegrationTests
 	{
 		public IVariableApi Variables { get; } = variables;
 
-		public IUserVariableApi UserVariables => throw new NotSupportedException();
+		public IUserVariableApi UserVariables => null!;
 
 		public IIntegrationConfig Config => throw new NotSupportedException();
 

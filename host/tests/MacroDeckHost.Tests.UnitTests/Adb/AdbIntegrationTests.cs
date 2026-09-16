@@ -311,7 +311,7 @@ internal sealed class AdbIntegrationTests
 	{
 		public IVariableApi Variables { get; init; } = new RecordingVariableApi();
 
-		public IUserVariableApi UserVariables => throw new NotSupportedException();
+		public IUserVariableApi UserVariables => null!;
 
 		public IIntegrationConfig Config => throw new NotSupportedException();
 

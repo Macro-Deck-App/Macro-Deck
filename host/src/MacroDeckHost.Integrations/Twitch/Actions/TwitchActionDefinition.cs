@@ -12,7 +12,9 @@ internal sealed record TwitchActionScope(
 	TwitchAccountConnection Connection,
 	IReadOnlyDictionary<string, object> Parameters,
 	IVariableApi? Variables,
-	CancellationToken CancellationToken)
+	CancellationToken CancellationToken,
+	IUserVariableApi? UserVariables = null,
+	string? OwnerWidgetId = null)
 {
 	public ITwitchHelixClient Helix => Connection.Helix;
 
@@ -28,11 +30,13 @@ internal class TwitchActionDefinition : IDynamicOptionsActionDefinition
 
 	private readonly Func<TwitchAccountManager> _accounts;
 	private readonly Func<IVariableApi?> _variables;
+	private readonly Func<IUserVariableApi?> _userVariables;
 	private readonly Func<TwitchActionScope, Task<ActionResult>> _execute;
 
 	public TwitchActionDefinition(
 		Func<TwitchAccountManager> accounts,
 		Func<IVariableApi?> variables,
+		Func<IUserVariableApi?> userVariables,
 		string id,
 		LocalizedText name,
 		LocalizedText description,
@@ -40,6 +44,7 @@ internal class TwitchActionDefinition : IDynamicOptionsActionDefinition
 		Func<TwitchActionScope, Task> execute)
 		: this(accounts,
 			variables,
+			userVariables,
 			id,
 			name,
 			description,
@@ -55,6 +60,7 @@ internal class TwitchActionDefinition : IDynamicOptionsActionDefinition
 	public TwitchActionDefinition(
 		Func<TwitchAccountManager> accounts,
 		Func<IVariableApi?> variables,
+		Func<IUserVariableApi?> userVariables,
 		string id,
 		LocalizedText name,
 		LocalizedText description,
@@ -63,6 +69,7 @@ internal class TwitchActionDefinition : IDynamicOptionsActionDefinition
 	{
 		_accounts = accounts;
 		_variables = variables;
+		_userVariables = userVariables;
 		Id = id;
 		Name = name;
 		Description = description;
@@ -155,7 +162,9 @@ internal class TwitchActionDefinition : IDynamicOptionsActionDefinition
 				return await _definition._execute(new TwitchActionScope(connection,
 					context.Parameters,
 					_definition._variables(),
-					context.CancellationToken));
+					context.CancellationToken,
+					_definition._userVariables(),
+					context.OwnerWidgetId));
 			}
 			catch (TwitchScopeException)
 			{

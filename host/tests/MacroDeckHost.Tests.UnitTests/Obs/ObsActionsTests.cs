@@ -5,6 +5,7 @@ using MacroDeckHost.Tests.UnitTests.System;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Variables;
+using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;
 
 namespace MacroDeckHost.Tests.UnitTests.Obs;
 
@@ -357,8 +358,12 @@ internal sealed class ObsActionsTests
 	{
 		var (connection, client) = ConnectedConnection();
 		client.InputVolumes["Mic/Aux"] = 0.5f;
-		var variables = new RecordingVariableApi();
-		var accessor = new VariableApiAccessor { Current = variables };
+		using var targets = new ActionVariableTargets(ObsIntegration.IntegrationId);
+		var accessor = new VariableApiAccessor
+		{
+			Current = targets.IntegrationVariables,
+			UserVariables = targets.UserVariables
+		};
 		using (connection)
 		{
 			var action = new GetInputVolumeActionDefinition(() => connection, accessor);
@@ -370,12 +375,12 @@ internal sealed class ObsActionsTests
 			}));
 		}
 
-		var handle = await variables.GetByNameAsync("mic_volume");
-		Assert.Multiple(() =>
+		var variable = await targets.Find("mic_volume");
+		Assert.Multiple(async () =>
 		{
-			Assert.That(handle, Is.Not.Null);
-			Assert.That(handle!.Value, Is.EqualTo(50d));
-			Assert.That(handle.Type, Is.EqualTo(VariableType.Numeric));
+			Assert.That(variable, Is.Not.Null);
+			Assert.That(await targets.ValueOf("mic_volume"), Is.EqualTo(50m));
+			Assert.That(variable!.Type, Is.EqualTo(DomainVariableType.Numeric));
 		});
 	}
 
@@ -384,8 +389,12 @@ internal sealed class ObsActionsTests
 	{
 		var (connection, client) = ConnectedConnection();
 		client.FilterStates["Webcam::Blur"] = true;
-		var variables = new RecordingVariableApi();
-		var accessor = new VariableApiAccessor { Current = variables };
+		using var targets = new ActionVariableTargets(ObsIntegration.IntegrationId);
+		var accessor = new VariableApiAccessor
+		{
+			Current = targets.IntegrationVariables,
+			UserVariables = targets.UserVariables
+		};
 		using (connection)
 		{
 			var action = new GetSourceFilterStateActionDefinition(() => connection, accessor);
@@ -398,12 +407,12 @@ internal sealed class ObsActionsTests
 			}));
 		}
 
-		var handle = await variables.GetByNameAsync("blur_enabled");
-		Assert.Multiple(() =>
+		var variable = await targets.Find("blur_enabled");
+		Assert.Multiple(async () =>
 		{
-			Assert.That(handle, Is.Not.Null);
-			Assert.That(handle!.Value, Is.EqualTo(true));
-			Assert.That(handle.Type, Is.EqualTo(VariableType.Boolean));
+			Assert.That(variable, Is.Not.Null);
+			Assert.That(await targets.ValueOf("blur_enabled"), Is.EqualTo(true));
+			Assert.That(variable!.Type, Is.EqualTo(DomainVariableType.Boolean));
 		});
 	}
 
@@ -473,8 +482,12 @@ internal sealed class ObsActionsTests
 	[Test]
 	public async Task GetInputMute_WritesMuteStateToVariable_AndReusesSameVariableAcrossRuns()
 	{
-		var variables = new RecordingVariableApi();
-		var accessor = new VariableApiAccessor { Current = variables };
+		using var targets = new ActionVariableTargets(ObsIntegration.IntegrationId);
+		var accessor = new VariableApiAccessor
+		{
+			Current = targets.IntegrationVariables,
+			UserVariables = targets.UserVariables
+		};
 
 		var (mutedConnection, mutedClient) = ConnectedConnection();
 		mutedClient.MutedInputs["Mic Aux"] = true;
@@ -502,15 +515,14 @@ internal sealed class ObsActionsTests
 			}));
 		}
 
-		var handle = await variables.GetByNameAsync("obs_mic_muted");
-		Assert.Multiple(() =>
+		var all = await targets.Service.GetAll();
+		Assert.Multiple(async () =>
 		{
 			Assert.That(mutedResult.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(unmutedResult.Status, Is.EqualTo(ActionResultStatus.Succeeded));
-			Assert.That(handle, Is.Not.Null);
-			Assert.That(handle!.Type, Is.EqualTo(VariableType.Boolean));
-			Assert.That(handle.Value, Is.EqualTo(false));
-			Assert.That(variables.CreateCount, Is.EqualTo(1));
+			Assert.That(all.Count(v => v.Name == "obs_mic_muted"), Is.EqualTo(1));
+			Assert.That((await targets.Find("obs_mic_muted"))!.Type, Is.EqualTo(DomainVariableType.Boolean));
+			Assert.That(await targets.ValueOf("obs_mic_muted"), Is.EqualTo(false));
 		});
 	}
 
@@ -701,8 +713,12 @@ internal sealed class ObsActionsTests
 		var (connection, client) = ConnectedConnection();
 		client.VisibleSources["Gameplay:Webcam"] = true;
 		client.VisibleSources["Just Chatting:Webcam"] = false;
-		var variables = new RecordingVariableApi();
-		var accessor = new VariableApiAccessor { Current = variables };
+		using var targets = new ActionVariableTargets(ObsIntegration.IntegrationId);
+		var accessor = new VariableApiAccessor
+		{
+			Current = targets.IntegrationVariables,
+			UserVariables = targets.UserVariables
+		};
 		using (connection)
 		{
 			var action = new GetSourceVisibilityActionDefinition(() => connection, accessor);
@@ -721,17 +737,12 @@ internal sealed class ObsActionsTests
 				[GetSourceVisibilityActionDefinition.VariableParameter] = "cam_visible_gameplay"
 			}));
 
-			var chattingHandle = await variables.GetByNameAsync("cam_visible");
-			var gameplayHandle = await variables.GetByNameAsync("cam_visible_gameplay");
-
-			Assert.Multiple(() =>
+			Assert.Multiple(async () =>
 			{
 				Assert.That(chattingResult.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 				Assert.That(gameplayResult.Status, Is.EqualTo(ActionResultStatus.Succeeded));
-				Assert.That(chattingHandle, Is.Not.Null);
-				Assert.That(chattingHandle!.Value, Is.EqualTo(false));
-				Assert.That(gameplayHandle, Is.Not.Null);
-				Assert.That(gameplayHandle!.Value, Is.EqualTo(true));
+				Assert.That(await targets.ValueOf("cam_visible"), Is.EqualTo(false));
+				Assert.That(await targets.ValueOf("cam_visible_gameplay"), Is.EqualTo(true));
 			});
 		}
 	}
@@ -744,8 +755,12 @@ internal sealed class ObsActionsTests
 		// value the polled state provider's own cached read would still be serving.
 		var (connection, client) = ConnectedConnection();
 		client.MutedInputs["Mic Aux"] = true;
-		var variables = new RecordingVariableApi();
-		var accessor = new VariableApiAccessor { Current = variables };
+		using var targets = new ActionVariableTargets(ObsIntegration.IntegrationId);
+		var accessor = new VariableApiAccessor
+		{
+			Current = targets.IntegrationVariables,
+			UserVariables = targets.UserVariables
+		};
 		using (connection)
 		{
 			var action = new GetInputMuteActionDefinition(() => connection, accessor);
@@ -765,12 +780,12 @@ internal sealed class ObsActionsTests
 				[GetInputMuteActionDefinition.VariableParameter] = "obs_mic_muted"
 			}));
 
-			var handle = await variables.GetByNameAsync("obs_mic_muted");
+			var value = await targets.ValueOf("obs_mic_muted");
 			Assert.Multiple(() =>
 			{
 				Assert.That(firstResult.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 				Assert.That(secondResult.Status, Is.EqualTo(ActionResultStatus.Succeeded));
-				Assert.That(handle!.Value,
+				Assert.That(value,
 					Is.EqualTo(false),
 					"the explicit getter must report the current state, never one cached from a second ago");
 			});
@@ -782,8 +797,12 @@ internal sealed class ObsActionsTests
 	{
 		var (connection, client) = ConnectedConnection();
 		client.VisibleSources["Gameplay:Webcam"] = true;
-		var variables = new RecordingVariableApi();
-		var accessor = new VariableApiAccessor { Current = variables };
+		using var targets = new ActionVariableTargets(ObsIntegration.IntegrationId);
+		var accessor = new VariableApiAccessor
+		{
+			Current = targets.IntegrationVariables,
+			UserVariables = targets.UserVariables
+		};
 		using (connection)
 		{
 			var action = new GetSourceVisibilityActionDefinition(() => connection, accessor);
@@ -805,12 +824,12 @@ internal sealed class ObsActionsTests
 				[GetSourceVisibilityActionDefinition.VariableParameter] = "cam_visible"
 			}));
 
-			var handle = await variables.GetByNameAsync("cam_visible");
+			var value = await targets.ValueOf("cam_visible");
 			Assert.Multiple(() =>
 			{
 				Assert.That(firstResult.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 				Assert.That(secondResult.Status, Is.EqualTo(ActionResultStatus.Succeeded));
-				Assert.That(handle!.Value,
+				Assert.That(value,
 					Is.EqualTo(false),
 					"the explicit getter must report the current state, never one cached from a second ago");
 			});

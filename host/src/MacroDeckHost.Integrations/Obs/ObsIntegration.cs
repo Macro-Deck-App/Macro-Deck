@@ -124,6 +124,7 @@ public sealed class ObsIntegration
 	{
 		_context = context;
 		_variableAccessor.Current = context.Variables;
+		_variableAccessor.UserVariables = context.UserVariables;
 		await ReloadConfigurationsAsync();
 		IsInitialized = true;
 	}
@@ -142,6 +143,7 @@ public sealed class ObsIntegration
 
 			_context = null;
 			_variableAccessor.Current = null;
+			_variableAccessor.UserVariables = null;
 			IsInitialized = false;
 		}
 		finally
