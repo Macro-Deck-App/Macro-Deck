@@ -352,11 +352,11 @@ internal sealed class YtmDesktopMusicPlayerTests
 	}
 
 	[Test]
-	public void A_disconnected_catalog_read_throws_rather_than_returning_nothing()
+	public async Task A_disconnected_catalog_read_throws_rather_than_returning_nothing()
 	{
 		_player.Disconnect();
 
-		Assert.ThatAsync(() =>
+		await Assert.ThatAsync(() =>
 				_player.GetCatalogAsync("entry", MusicPlayerCatalogItemKind.Playlist, null, CancellationToken.None),
 			Throws.InstanceOf<InvalidOperationException>());
 	}

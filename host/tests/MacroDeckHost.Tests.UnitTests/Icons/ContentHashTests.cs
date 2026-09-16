@@ -61,7 +61,7 @@ public class ContentHashTests
 		{
 			Assert.That(source.Value, Is.EqualTo(_abcHash));
 			Assert.That(master.Value, Is.EqualTo(_abcHash));
-			Assert.That(typeof(SourceContentHash), Is.Not.EqualTo(typeof(MasterContentHash)));
+			Assert.That(source.GetType(), Is.Not.EqualTo(master.GetType()));
 		});
 	}
 

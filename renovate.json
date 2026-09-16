@@ -94,6 +94,45 @@
       "groupName": "skiasharp"
     },
     {
+      "description": "SkiaSharp 4 is a deliberate, separately verified migration and not a drive-by bump. Svg.Skia 5.2.0 onwards requires it, so both ceilings have to move together.",
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "SkiaSharp**"
+      ],
+      "allowedVersions": "<4.0.0"
+    },
+    {
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "Svg.Skia"
+      ],
+      "allowedVersions": "<5.2.0"
+    },
+    {
+      "description": "Microsoft.OpenApi 3 breaks the Microsoft.AspNetCore.OpenApi XML comment source generator, which emits code against the 2.x assembly. Lift this when ASP.NET Core itself ships against 3.",
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "Microsoft.OpenApi"
+      ],
+      "allowedVersions": "<3.0.0"
+    },
+    {
+      "description": "ImageSharp 4 enforces a build time license key for direct dependencies, which every contributor and CI job would have to supply. Held until that trade is decided (see PR 808).",
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "SixLabors.ImageSharp"
+      ],
+      "allowedVersions": "<4.0.0"
+    },
+    {
       "matchManagers": [
         "nuget"
       ],

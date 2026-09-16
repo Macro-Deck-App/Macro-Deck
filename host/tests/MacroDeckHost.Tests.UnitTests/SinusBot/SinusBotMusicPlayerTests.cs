@@ -389,12 +389,12 @@ internal sealed class SinusBotMusicPlayerTests
 	}
 
 	[Test]
-	public void GetCatalogAsync_WhenApiFails_Throws()
+	public async Task GetCatalogAsync_WhenApiFails_Throws()
 	{
 		var client = new FakeSinusBotClient { FilesException = new SinusBotApiException("boom") };
 		var player = Connect(client);
 
-		Assert.ThatAsync(() => player.GetCatalogAsync("inst-1",
+		await Assert.ThatAsync(() => player.GetCatalogAsync("inst-1",
 				MusicPlayerCatalogItemKind.Track,
 				null,
 				CancellationToken.None),
@@ -402,11 +402,11 @@ internal sealed class SinusBotMusicPlayerTests
 	}
 
 	[Test]
-	public void GetCatalogAsync_WhenNotConnected_Throws()
+	public async Task GetCatalogAsync_WhenNotConnected_Throws()
 	{
 		var player = new SinusBotMusicPlayer();
 
-		Assert.ThatAsync(() => player.GetCatalogAsync("inst-1",
+		await Assert.ThatAsync(() => player.GetCatalogAsync("inst-1",
 				MusicPlayerCatalogItemKind.Track,
 				null,
 				CancellationToken.None),
