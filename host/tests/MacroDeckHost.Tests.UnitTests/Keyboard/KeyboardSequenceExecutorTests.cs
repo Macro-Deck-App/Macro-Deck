@@ -102,6 +102,54 @@ public class KeyboardSequenceExecutorTests
 	}
 
 	[Test]
+	public async Task A_background_sequence_needing_modifiers_the_platform_cannot_deliver_runs_no_step()
+	{
+		_input.BackgroundModifiers = KeyModifier.None;
+		var sequence = new KeyboardSequence
+		{
+			Steps =
+			[
+				new TextStep { Text = "Hello World" },
+				new KeyComboStep { Modifiers = ["Ctrl"], Key = "C" }
+			]
+		};
+
+		var unavailable = await _executor.ExecuteAsync(sequence,
+			new KeyboardTarget("code", KeyboardTargetMode.Background));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(unavailable,
+				Is.EqualTo(KeyboardSessionUnavailableReason.BackgroundModifiersUnsupported));
+			Assert.That(_input.Calls, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_background_sequence_without_modifier_combos_still_runs()
+	{
+		_input.BackgroundModifiers = KeyModifier.None;
+		var sequence = new KeyboardSequence
+		{
+			Steps =
+			[
+				new TextStep { Text = "Hello World" },
+				new KeyDownStep { Key = "W" },
+				new KeyUpStep { Key = "W" }
+			]
+		};
+
+		var unavailable = await _executor.ExecuteAsync(sequence,
+			new KeyboardTarget("code", KeyboardTargetMode.Background));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(unavailable, Is.Null);
+			Assert.That(_input.Calls, Is.EqualTo(new[] { "text:Hello World", "down:None+W", "up:None+W" }));
+		});
+	}
+
+	[Test]
 	public async Task Opens_the_session_once_with_the_requested_target()
 	{
 		var sequence = new KeyboardSequence { Steps = [new KeyComboStep { Key = "Enter" }] };

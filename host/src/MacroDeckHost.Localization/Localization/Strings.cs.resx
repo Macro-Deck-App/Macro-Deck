@@ -6058,7 +6058,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Odeslat na pozadí (bez záruky, nevhodné pro hry)</value>
   </data>
   <data name="Integrations.Keyboard.Config.TargetModeDescription" xml:space="preserve">
-    <value>Jak doručit stisk klávesy, když je nastavena cílová aplikace. "Zaměřit, pak odeslat" funguje pro hry; "na pozadí" ne.</value>
+    <value>Jak se stisk klávesy doručí, když je nastavena cílová aplikace. Doručení pouze při zaměřené aplikaci stisk tiše přeskočí, dokud zaměřená není. Doručení na pozadí probíhá podle nejlepších možností a na některých platformách nedokáže přenést modifikační klávesy. U her funguje jedině přepnutí aplikace do popředí.</value>
   </data>
   <data name="Integrations.Keyboard.Config.TargetModeFocusSendOption" xml:space="preserve">
     <value>Zaměřit aplikaci, pak odeslat (funguje pro hry)</value>
@@ -6077,6 +6077,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Keyboard.Config.TargetProcessPlaceholder" xml:space="preserve">
     <value>Libovolná (zaměřené okno)</value>
+  </data>
+  <data name="Integrations.Keyboard.Errors.BackgroundModifiersUnsupported" xml:space="preserve">
+    <value>Kombinace s modifikačními klávesami nelze na této platformě doručit aplikaci na pozadí. Je potřeba nejprve přepnout cílovou aplikaci do popředí, nebo pole s cílovou aplikací vyprázdnit a odeslat stisk klávesy systémově.</value>
   </data>
   <data name="Integrations.Keyboard.Errors.SequenceCouldNotBeRead" xml:space="preserve">
     <value>Sekvenci kláves se nepodařilo přečíst.</value>

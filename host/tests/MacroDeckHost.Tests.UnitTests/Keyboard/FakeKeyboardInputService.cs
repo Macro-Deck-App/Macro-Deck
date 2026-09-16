@@ -10,6 +10,9 @@ internal sealed class FakeKeyboardInputService : IKeyboardInputService
 	public bool RequiresPermission { get; set; }
 	public bool HasPermission { get; set; } = true;
 
+	public KeyModifier BackgroundModifiers { get; set; }
+		= KeyModifier.Control | KeyModifier.Shift | KeyModifier.Alt | KeyModifier.Meta;
+
 	// Targeting (issue #34): when set, OpenSessionAsync yields no session (target not honoured).
 	public bool OpenSessionReturnsNull { get; set; }
 

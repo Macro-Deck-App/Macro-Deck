@@ -80,6 +80,9 @@ internal static class KeyboardActionValues
 			AppStrings.Integrations.Keyboard.Errors.TargetApplicationNotFound()),
 		KeyboardSessionUnavailableReason.FocusFailed => ActionResult.Failed(ActionErrorCodes.PermissionDenied,
 			AppStrings.Integrations.Keyboard.Errors.TargetApplicationFocusFailed()),
+		KeyboardSessionUnavailableReason.BackgroundModifiersUnsupported => ActionResult.Failed(
+			ActionErrorCodes.Unavailable,
+			AppStrings.Integrations.Keyboard.Errors.BackgroundModifiersUnsupported()),
 		_ => ActionResult.Failed(ActionErrorCodes.Unavailable,
 			AppStrings.Integrations.Keyboard.Errors.TargetingModeNotSupported())
 	};

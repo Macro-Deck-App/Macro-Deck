@@ -49,6 +49,10 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 
 	public bool SupportsBackgroundSend => OperatingSystem.IsWindows();
 
+	// A posted message never updates the target thread's keyboard state, which is where GetKeyState and
+	// every framework built on it read Ctrl, Shift, Alt and Win from.
+	public KeyModifier BackgroundModifiers => KeyModifier.None;
+
 	public string? GetForegroundProcessName()
 	{
 		var window = Win32Windows.GetForegroundWindow();

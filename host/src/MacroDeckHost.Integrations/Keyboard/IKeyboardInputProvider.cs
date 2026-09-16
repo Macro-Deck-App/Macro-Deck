@@ -22,6 +22,8 @@ public interface IKeyboardInputProvider
 
 	bool SupportsBackgroundSend { get; }
 
+	KeyModifier BackgroundModifiers { get; }
+
 	string? GetForegroundProcessName();
 
 	IKeyboardTargetWindow? ResolveTarget(string processName);

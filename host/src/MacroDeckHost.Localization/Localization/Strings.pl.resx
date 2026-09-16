@@ -6058,7 +6058,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Wyślij w tle (bez gwarancji, nie dla gier)</value>
   </data>
   <data name="Integrations.Keyboard.Config.TargetModeDescription" xml:space="preserve">
-    <value>Sposób dostarczenia naciśnięcia klawisza, gdy ustawiono aplikację docelową. "Aktywuj, a potem wyślij" działa w grach; "w tle" nie.</value>
+    <value>Sposób dostarczenia naciśnięcia klawisza, gdy ustawiono aplikację docelową. Dostarczanie tylko przy aktywnej aplikacji po cichu pomija naciśnięcie, dopóki nie jest ona aktywna. Dostarczanie w tle działa w miarę możliwości i na niektórych platformach nie przenosi klawiszy modyfikujących. W grach działa wyłącznie wcześniejsze aktywowanie aplikacji.</value>
   </data>
   <data name="Integrations.Keyboard.Config.TargetModeFocusSendOption" xml:space="preserve">
     <value>Aktywuj aplikację, a potem wyślij (działa w grach)</value>
@@ -6077,6 +6077,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Keyboard.Config.TargetProcessPlaceholder" xml:space="preserve">
     <value>Dowolna (aktywne okno)</value>
+  </data>
+  <data name="Integrations.Keyboard.Errors.BackgroundModifiersUnsupported" xml:space="preserve">
+    <value>Kombinacji z klawiszami modyfikującymi nie można dostarczyć do aplikacji działającej w tle na tej platformie. Należy najpierw aktywować aplikację docelową albo wyczyścić pole aplikacji docelowej, aby wysłać naciśnięcie klawisza w całym systemie.</value>
   </data>
   <data name="Integrations.Keyboard.Errors.SequenceCouldNotBeRead" xml:space="preserve">
     <value>Nie można odczytać sekwencji klawiszy.</value>

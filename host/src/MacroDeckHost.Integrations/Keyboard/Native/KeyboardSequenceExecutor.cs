@@ -39,6 +39,11 @@ public sealed class KeyboardSequenceExecutor : IKeyboardSequenceExecutor
 
 		using var session = sessionValue;
 
+		if (ModifiersCannotBeDelivered(sequence, target))
+		{
+			return KeyboardSessionUnavailableReason.BackgroundModifiersUnsupported;
+		}
+
 		var repeat = Math.Clamp(sequence.Repeat <= 0 ? 1 : sequence.Repeat, 1, MaxSequenceRepeat);
 		var repeatDelay = Math.Clamp(sequence.RepeatDelayMs, 0, MaxDelayMs);
 
@@ -111,6 +116,26 @@ public sealed class KeyboardSequenceExecutor : IKeyboardSequenceExecutor
 		var repeat = Math.Clamp(combo.Repeat <= 0 ? 1 : combo.Repeat, 1, MaxStepRepeat);
 		var repeatDelay = Math.Clamp(combo.RepeatDelayMs, 0, MaxDelayMs);
 		await session.PressComboAsync(modifiers, key, repeat, repeatDelay, cancellationToken).ConfigureAwait(false);
+	}
+
+	private bool ModifiersCannotBeDelivered(KeyboardSequence sequence, KeyboardTarget target)
+	{
+		foreach (var step in sequence.Steps)
+		{
+			if (step is not KeyComboStep combo)
+			{
+				continue;
+			}
+
+			var modifiers = _layout.ResolveModifiers(combo.Modifiers);
+			_layout.TryResolveKey(combo.Key, out var key);
+			if (KeyboardBackgroundDelivery.ModifiersCannotBeDelivered(_input, target, modifiers, key))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private (KeyModifier Modifiers, KeyCode Key) Resolve(IReadOnlyList<string> modifierNames, string keyName)

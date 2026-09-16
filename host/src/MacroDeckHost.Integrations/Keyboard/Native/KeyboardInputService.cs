@@ -26,6 +26,8 @@ public sealed class KeyboardInputService : IKeyboardInputService
 
 	public bool HasPermission => _provider.HasPermission;
 
+	public KeyModifier BackgroundModifiers => _provider.BackgroundModifiers;
+
 	private Emitter GlobalEmitter => new(_provider.KeyDown, _provider.KeyUp, _provider.TypeUnicode);
 
 	public Task RequestPermissionAsync(CancellationToken cancellationToken = default)

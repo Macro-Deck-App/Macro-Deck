@@ -37,6 +37,8 @@ public sealed class NullKeyboardInputProvider : IKeyboardInputProvider
 
 	public bool SupportsBackgroundSend => false;
 
+	public KeyModifier BackgroundModifiers => KeyModifier.None;
+
 	public string? GetForegroundProcessName() => null;
 
 	public IKeyboardTargetWindow? ResolveTarget(string processName) => null;
