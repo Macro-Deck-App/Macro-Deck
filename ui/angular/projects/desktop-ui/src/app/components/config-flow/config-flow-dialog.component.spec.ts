@@ -33,6 +33,8 @@ function makeFlowStub(step: ConfigFlowStepDto | null) {
     fieldErrors: signal<Record<string, string>>({}),
     storedSecretFields,
     canSubmit: signal(true),
+    canSubmitWith: (current: Record<string, unknown>) => (step?.fields ?? []).every(field =>
+      !(field as { required?: boolean }).required || ![undefined, null, ''].includes(current[(field as { name: string }).name] as never)),
     canGoBack: signal(false),
     back: () => { backCalls++; },
     setValue: (name: string, value: unknown) => {
@@ -46,7 +48,7 @@ function makeFlowStub(step: ConfigFlowStepDto | null) {
         return next;
       });
     },
-    submit: async () => {},
+    submit: jasmine.createSpy('submit').and.resolveTo(),
     start: async () => {},
     reset: () => {},
     sendTreeEvent: jasmine.createSpy('sendTreeEvent'),
@@ -131,14 +133,15 @@ describe('ConfigFlowDialogComponent', () => {
           id: 'step',
           type: 'step',
           children: [
-            { id: 'clientId', type: 'string', properties: { label: 'Client ID', literalOnly: true } },
+            { id: 'clientId', type: 'string', properties: { label: 'Client ID', literalOnly: true, events: ['change'] } },
             { id: 'note', type: 'prose', properties: { text: 'Use the app you registered.' } },
           ],
         },
       ],
     };
 
-    const { fixture, flow } = await renderWithRoot(stepWith([], { fields: [] }), root, false);
+    const clientId = { name: 'clientId', type: 'string', label: 'Client ID', required: true } as never;
+    const { fixture } = await renderWithRoot(stepWith([], { fields: [clientId] }), root, false);
     const host = fixture.nativeElement as HTMLElement;
 
     expect(host.querySelectorAll('shared-config-field').length).toBe(0);
@@ -155,7 +158,9 @@ describe('ConfigFlowDialogComponent', () => {
     expect(continueButton).toBeTruthy();
     expect(continueButton.querySelector('button')?.disabled).toBeTrue();
 
-    flow.canSubmit = signal(true);
+    const input = host.querySelector('[data-node-id="clientId"] input') as HTMLInputElement;
+    input.value = 'my-client';
+    input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -375,5 +380,164 @@ describe('ConfigFlowDialogComponent', () => {
     expect(label).not.toBeNull();
     expect(label.textContent).toBe('Configuration');
     expect(fixture.nativeElement.querySelector('.cfd-config-separator')).not.toBeNull();
+  });
+  describe('Continue on a config tree', () => {
+    const locationField = { name: 'location', type: 'string', label: 'Location name', required: true } as never;
+
+    function fixtureTree(value: unknown = 'Berlin, Germany', rootProperties: Record<string, unknown> = {}): UiNode {
+      return {
+        id: 'setup',
+        type: 'flow',
+        properties: { stepId: 'location', title: 'Sample location', ...rootProperties },
+        children: [
+          {
+            id: 'setup.location',
+            type: 'step',
+            children: [
+              { id: 'location', type: 'string', properties: { label: 'Location name', required: true, value, events: ['change'] } },
+            ],
+          },
+        ],
+      };
+    }
+
+    function continueButton(fixture: ComponentFixture<ConfigFlowDialogComponent>): HTMLButtonElement {
+      const host = Array.from(fixture.nativeElement.querySelectorAll('shared-button') as NodeListOf<HTMLElement>)
+        .find(b => b.textContent?.trim() === 'Continue')!;
+      return host.querySelector('button')!;
+    }
+
+    async function pressContinue(fixture: ComponentFixture<ConfigFlowDialogComponent>): Promise<void> {
+      continueButton(fixture).click();
+      await fixture.whenStable();
+    }
+
+    it('submits a tree whose root declares no events', async () => {
+      const { fixture, flow } = await renderWithRoot(stepWith([], { stepId: 'location', fields: [locationField] }), fixtureTree(), false);
+
+      expect(continueButton(fixture).disabled).toBeFalse();
+      await pressContinue(fixture);
+
+      expect(flow.submit).toHaveBeenCalledTimes(1);
+    });
+
+    it('submits the value the tree shows, not the value the flow was seeded with', async () => {
+      const { fixture, flow } = await renderWithRoot(stepWith([], { stepId: 'location', fields: [locationField] }), fixtureTree());
+      flow.values.set({ location: 'Berlin' });
+      let submitted: unknown;
+      flow.submit.and.callFake(async () => { submitted = flow.values()['location']; });
+
+      await pressContinue(fixture);
+
+      expect(submitted).toBe('Berlin, Germany');
+    });
+
+    it('submits what the user typed into the tree', async () => {
+      const root = fixtureTree();
+      root.children![0].children![0].properties!['literalOnly'] = true;
+      const { fixture, flow } = await renderWithRoot(stepWith([], { stepId: 'location', fields: [locationField] }), root);
+      const input = fixture.nativeElement.querySelector('[data-node-id="location"] input') as HTMLInputElement;
+      input.value = 'Munich';
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      let submitted: unknown;
+      flow.submit.and.callFake(async () => { submitted = flow.values()['location']; });
+      await pressContinue(fixture);
+
+      expect(flow.submit).toHaveBeenCalledTimes(1);
+      expect(submitted).toBe('Munich');
+    });
+
+    it('adopts no tree value that is not a declared field', async () => {
+      const root = fixtureTree();
+      root.children![0].children!.push({ id: 'extra', type: 'string', properties: { value: 'stray', events: ['change'] } });
+      const { fixture, flow } = await renderWithRoot(stepWith([], { stepId: 'location', fields: [locationField] }), root);
+
+      await pressContinue(fixture);
+
+      expect('extra' in flow.values()).toBeFalse();
+    });
+
+    it('keeps the value of a declared field the tree does not render', async () => {
+      const token = { name: 'token', type: 'secret', label: 'Token' } as never;
+      const { fixture, flow } = await renderWithRoot(stepWith([], { stepId: 'location', fields: [locationField, token] }), fixtureTree());
+      flow.values.set({ token: 'kept' });
+
+      await pressContinue(fixture);
+
+      expect(flow.values()['token']).toBe('kept');
+    });
+
+    it('keeps Continue disabled while a required field is empty in the tree', async () => {
+      const { fixture, flow } = await renderWithRoot(stepWith([], { stepId: 'location', fields: [locationField] }), fixtureTree(''));
+      flow.values.set({ location: 'Berlin' });
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(continueButton(fixture).disabled).toBeTrue();
+    });
+
+    it('enables Continue when the tree fills a required field the flow has no value for', async () => {
+      const { fixture } = await renderWithRoot(stepWith([], { stepId: 'location', fields: [locationField] }), fixtureTree('Berlin, Germany'));
+
+      expect(continueButton(fixture).disabled).toBeFalse();
+    });
+
+    it('lets the root canSubmit decide when the tree sets it', async () => {
+      const { fixture } = await renderWithRoot(
+        stepWith([], { stepId: 'location', fields: [locationField] }),
+        fixtureTree('Berlin, Germany', { canSubmit: false }),
+      );
+      expect(continueButton(fixture).disabled).toBeTrue();
+
+      fixture.componentRef.setInput('root', fixtureTree('', { canSubmit: true }));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(continueButton(fixture).disabled).toBeFalse();
+    });
+
+    it('still submits once when the root declares submit', async () => {
+      const { fixture, flow } = await renderWithRoot(
+        stepWith([], { stepId: 'location', fields: [locationField] }),
+        fixtureTree('Berlin, Germany', { events: ['submit', 'cancel'] }),
+      );
+
+      await pressContinue(fixture);
+
+      expect(flow.submit).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows the message a failed submit returned', async () => {
+      const { fixture, flow } = await renderWithRoot(stepWith([], { stepId: 'location', fields: [locationField] }), fixtureTree());
+      flow.submit.and.callFake(async () => flow.message.set('Enter a location name.'));
+
+      await pressContinue(fixture);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(fixture.nativeElement.querySelector('.cfd-banner')?.textContent).toContain('Enter a location name.');
+    });
+  });
+
+  it('keeps gating and submitting declared fields through the flow when there is no tree', async () => {
+    const fixture = await renderWith(stepWith([]));
+    const flow = TestBed.inject(ConfigFlowService) as unknown as ReturnType<typeof makeFlowStub>;
+    const button = (): HTMLButtonElement => Array.from(fixture.nativeElement.querySelectorAll('shared-button') as NodeListOf<HTMLElement>)
+      .find(b => b.textContent?.trim() === 'Continue')!.querySelector('button')!;
+
+    flow.canSubmit.set(false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(button().disabled).toBeTrue();
+
+    flow.canSubmit.set(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    button().click();
+    await fixture.whenStable();
+
+    expect(flow.submit).toHaveBeenCalledTimes(1);
   });
 });

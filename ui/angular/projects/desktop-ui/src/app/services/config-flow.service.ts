@@ -43,10 +43,11 @@ export class ConfigFlowService {
 
   readonly canGoBack = computed(() => this.history().length > 0);
 
-  readonly canSubmit = computed(() => {
+  readonly canSubmit = computed(() => this.canSubmitWith(this.values()));
+
+  canSubmitWith(values: Record<string, unknown>): boolean {
     const step = this.step();
     if (!step) return false;
-    const values = this.values();
     const siblings = [...step.fields, ...(step.advancedFields ?? [])];
     return step.fields.every(field => {
       if (!field.required || !isFieldVisible(field, siblings, values)) return true;
@@ -55,7 +56,7 @@ export class ConfigFlowService {
       if (Array.isArray(value)) return value.length > 0;
       return value !== undefined && value !== null && value !== '';
     });
-  });
+  }
 
   async start(integrationId: string, options?: { title?: string; entryId?: string }): Promise<void> {
     this.reset();

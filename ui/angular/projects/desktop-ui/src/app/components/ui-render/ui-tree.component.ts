@@ -40,4 +40,8 @@ export class UiTreeComponent {
     const subscription = this.context.events$.subscribe(event => this.nodeEvent.emit(event));
     inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
   }
+
+  renderedValue(nodeId: string): unknown {
+    return this.context.renderedValue(nodeId);
+  }
 }
